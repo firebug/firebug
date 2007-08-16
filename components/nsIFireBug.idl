@@ -1,0 +1,126 @@
+/* See license.txt for terms of usage */
+
+#include "nsISupports.idl"
+
+interface jsdIStackFrame;
+interface jsdIScript;
+interface jsdIValue;
+interface nsIDOMWindow;
+
+[scriptable, uuid(c329fbb0-cb7d-11da-a94d-0800200c9a66)]
+interface nsIFireBugDebugger : nsISupports
+{
+  boolean supportsWindow(in nsIDOMWindow window);
+
+  void onLock(in boolean state);
+
+  unsigned long onBreak(in jsdIStackFrame frame);
+  unsigned long onHalt(in jsdIStackFrame frame);
+  void onCall(in jsdIStackFrame frame);
+  void onError(in jsdIStackFrame frame);
+  void onResume();
+
+  void onToggleBreakpoint(in string url, in unsigned long lineNo, in boolean isSet);
+  void onToggleBreakpointCondition(in string url, in unsigned long lineNo, in boolean isSet);
+  void onToggleBreakpointDisabled(in string url, in unsigned long lineNo, in boolean disabled);
+  void onToggleErrorBreakpoint(in string url, in unsigned long lineNo, in boolean isSet);
+  void onToggleMonitor(in string url, in unsigned long lineNo, in boolean isSet);
+};
+
+[scriptable, uuid(35acfa60-d2a0-11da-a94d-0800200c9a66)]
+interface nsIFireBugBreakpointCallback : nsISupports
+{
+    void call(in string url, in unsigned long lineNo, in unsigned long startLineNo, 
+        in boolean disabled, in string condition);
+};
+
+[scriptable, uuid(61df57e0-4b77-11db-b0de-0800200c9a66)]
+interface nsIFireBugClient : nsISupports
+{
+    void enable();
+    void disable();
+};
+
+[scriptable, uuid(F71F61B2-CB37-11DA-9B41-B622A1EF5492)]
+interface nsIFireBug : nsISupports
+{
+    const unsigned long STEP_OVER = 1;
+    const unsigned long STEP_INTO = 2;
+    const unsigned long STEP_OUT = 3;
+    
+    readonly attribute nsIDOMWindow lastErrorWindow;
+
+    readonly attribute boolean enabled;
+    boolean countContext(in boolean on);
+
+    void registerClient(in nsIFireBugClient client);
+    void unregisterClient(in nsIFireBugClient client);
+    
+    void registerDebugger(in nsIFireBugDebugger debugger);
+    void unregisterDebugger(in nsIFireBugDebugger debugger);
+
+    /*
+     * Lock the debugger so that only one client at a time can use it.
+     */
+    readonly attribute boolean locked;
+    void lockDebugger();
+    void unlockDebugger();
+
+    /**
+     * Halts execution immediately and calls debugger.onHalt().
+     */
+    void halt(in nsIFireBugDebugger debugger);
+    
+    /**
+     * Starts stepping when the debugger resumes execution.
+     */
+    void step(in unsigned long stepMode, in jsdIStackFrame startFrame);
+    
+    /**
+     * Runs until execution hits a particular line when the debugger resumes execution.
+     */
+    void runUntil(in string url, in unsigned long lineNo, in jsdIStackFrame startFrame);
+    
+    void setBreakpoint(in string url, in unsigned long lineNo);
+    void clearBreakpoint(in string url, in unsigned long lineNo);
+    void clearAllBreakpoints(in PRUint32 count, [array, size_is(count)] in string urls);
+
+    void enableBreakpoint(in string url, in unsigned long lineNo);
+    void disableBreakpoint(in string url, in unsigned long lineNo);
+	boolean isBreakpointDisabled(in string url, in unsigned long lineNo);
+
+	boolean hasBreakpoint(in jsdIScript script);
+    void enumerateBreakpoints(in string url, in nsIFireBugBreakpointCallback cb);
+
+	string getBreakpointCondition(in string url, in unsigned long lineNo);
+    void setBreakpointCondition(in string url, in unsigned long lineNo, in string condition);
+
+    void setErrorBreakpoint(in string url, in unsigned long lineNo);
+    void clearErrorBreakpoint(in string url, in unsigned long lineNo);
+	boolean hasErrorBreakpoint(in string url, in unsigned long lineNo);
+    void enumerateErrorBreakpoints(in string url, in nsIFireBugBreakpointCallback cb);
+
+    /**
+     * Report all calls to the function through the "onCall" callback.
+     */
+	void monitor(in jsdIScript script, in nsIFireBugDebugger debugger);
+	void unmonitor(in jsdIScript script);
+	boolean isMonitored(in jsdIScript script);
+    void enumerateMonitors(in string url, in nsIFireBugBreakpointCallback cb);
+
+    readonly attribute boolean profiling;
+    
+    /**
+     * Start profiling, or continue profiling if this has already been called.
+     * Nested calls are allowed, but each call must be matched with a call to
+     * stopProfiling.
+     */
+	void startProfiling();
+
+    /**
+     * Returns the number of milliseconds since profiling began, or -1 if
+     * there are still more nested profilers active.
+     */
+	long stopProfiling();
+};
+
