@@ -1,0 +1,6 @@
+content firebug jar:chrome/firebug.jar!/content/firebug/ xpcnativewrappers=no
+skin	firebug	classic/1.0	jar:chrome/firebug.jar!/skin/classic/
+locale	firebug	en-US		jar:chrome/firebug.jar!/locale/en-US/
+
+overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
