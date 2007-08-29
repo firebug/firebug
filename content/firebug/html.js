@@ -1152,7 +1152,9 @@ function getNodeTag(node, expandAll)
 {
     if (node instanceof Element)
     {
-        if (node.firebugIgnore)
+        if (node instanceof HTMLAppletElement)
+            return Firebug.HTMLPanel.EmptyElement.tag;
+        else if (node.firebugIgnore)
             return null;
         else if (isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -1275,6 +1277,8 @@ function isEmptyElement(element)
 
 function isWhitespaceText(node)
 {
+    if (node instanceof HTMLAppletElement)
+        return false;
     return node.nodeType == 3 && isWhitespace(node.nodeValue);
 }
 

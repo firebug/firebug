@@ -1,0 +1,65 @@
+<?xml version="1.0"?> 
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
+
+<!DOCTYPE dialog SYSTEM "chrome://firebug/locale/editors.dtd">
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        class="windowDialog"
+        windowtype="Firebug:ExternalEditors"
+        id="firebug-external-editors"
+        width="600" height="300"
+        title="Firebug Editors"
+        onload="gEditorManager.init();"
+        onunload="gEditorManager.uninit();"
+        persist="screenX screenY width height">
+
+  <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
+  <script type="application/x-javascript" src="chrome://firebug/content/editors.js"/>
+  
+  <vbox flex="1" class="contentPane">
+    <label id="actionsIntro" control="editorsList">
+      &editors.Description;
+    </label>
+    <separator class="thin"/>
+    <tree id="editorsList" flex="1" seltype="single"
+          lastSelected="0" persist="lastSelected"
+          onselect="gEditorManager.onSelectionChanged();"
+          ondblclick="gEditorManager.changeEditorHandler();">
+      <treecols>
+        <treecol id="editorName" ignoreincolumnpicker="true" fiex="1"
+                  persist="width"
+                  label="&editors.NameColumn;"/>
+        <splitter class="tree-splitter" />
+        <treecol id="editorExecutable" flex="1"
+                  persist="width"
+                  label="&editors.ExecutableColumn;"/>                
+        <splitter class="tree-splitter" />
+        <treecol id="editorParams" flex="1"
+                  persist="width"
+                  label="&editors.ParamsColumn;"/>                
+      </treecols>
+      <treechildren/>
+    </tree>
+  </vbox>
+  <separator class="thin"/>
+  <hbox>
+    <hbox flex="1" class="actionButtons">
+      <button id="addEditor" icon="add"
+              label="&add.label;"
+              oncommand="gEditorManager.addEditorHandler();"/>
+      <button id="removeEditor" icon="remove"
+              label="&remove.label;"
+              oncommand="gEditorManager.removeEditorHandler();"/>
+      <button id="changeEditor"
+              label="&change.label;"
+              oncommand="gEditorManager.changeEditorHandler();"/>
+      <spacer flex="1"/>
+      <button oncommand="close();" icon="close"
+              label="&close.label;"/>
+    </hbox>
+    <resizer dir="bottomright"/>
+  </hbox>
+        
+</window>

@@ -17,6 +17,8 @@
     
     <commandset id="mainCommandSet">
         <command id="cmd_openFirebugPermissions" oncommand="Firebug.openPermissions()"/>
+        <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
+        <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
         
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>

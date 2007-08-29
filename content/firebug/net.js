@@ -38,12 +38,18 @@ const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_DOCUMENT_URI = nsIChannel.LOAD_DOCUMENT_URI;
 
 const ACCESS_READ = nsICache.ACCESS_READ;
+const STORE_ANYWHERE = nsICache.STORE_ANYWHERE;
+
+const NS_ERROR_CACHE_KEY_NOT_FOUND = 0x804B003D;
+const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
+
 
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
 const maxPendingCheck = 200;
+const maxQueueRequests = 50;
 
 const mimeExtensionMap =
 {
@@ -120,6 +126,8 @@ const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
 const layoutInterval = 300;
 const phaseInterval = 1000;
 const indentWidth = 18;
+
+var cacheSession = null;
 
 // ************************************************************************************************
 
@@ -970,7 +978,11 @@ function NetProgress(context)
                 panel.updateFile(file);
         }
         else
+        {
+            if (queue.length/2 >= maxQueueRequests)
+                queue.splice(0, 2);
             queue.push(handler, args);
+        }
     };
     
     this.flush = function()
@@ -1037,7 +1049,8 @@ NetProgress.prototype =
             file.startTime = file.endTime = time;
             //file.fromCache = true;
             //file.loaded = true;
-            file.category = category;
+            if (category && !file.category)
+                file.category = category;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             
             this.awaitFile(request, file);
@@ -1313,7 +1326,8 @@ NetProgress.prototype =
         if (topic == "http-on-modify-request")
         {
             var webProgress = getRequestWebProgress(request, this);
-            this.post(requestedFile, [request, now(), webProgress]);
+            var category = getRequestCategory(request);
+            this.post(requestedFile, [request, now(), webProgress, category]);
         }
         else
         {
@@ -1333,7 +1347,10 @@ NetProgress.prototype =
                 this.post(respondedTopWindow, [request, now(), progress]);
         }
         else if (flag & STATE_STOP && flag & STATE_IS_REQUEST)
-            this.post(stopFile, [request, now()]);
+        {
+        	if (this.getRequestFile(request))
+                this.post(stopFile, [request, now()]);
+        }
     },
     
     onProgressChange : function(progress, request, current, max, total, maxTotal)
@@ -1433,26 +1450,33 @@ function unmonitorContext(context)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
+function initCacheSession()
+{
+	if (!cacheSession)
+	{
+    	var cacheService = CacheService.getService(nsICacheService);
+    	cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
+    	cacheSession.doomEntriesIfExpired = false;
+    }
+}
+
 function waitForCacheCompletion(request, file, netProgress)
 {
     try
     {
-        var cacheService = CacheService.getService(nsICacheService);
-
-        var session = cacheService.createSession("HTTP", 0, true);
-        session.doomEntriesIfExpired = false;
-
-        session.asyncOpenCacheEntry(file.href, ACCESS_READ, {
-            onCacheEntryAvailable: function(descriptor, accessGranted, status)
-            {
-                if (descriptor)
-                    netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
-            }
-        });
+    	initCacheSession();
+        var descriptor = cacheSession.openCacheEntry(file.href, ACCESS_READ, false);
+        if (descriptor)
+            netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
     }
     catch (exc)
     {
-        netProgress.post(cacheEntryReady, [request, file, -1]);
+        if (exc.result != NS_ERROR_CACHE_WAIT_FOR_VALIDATION
+        	&& exc.result != NS_ERROR_CACHE_KEY_NOT_FOUND)
+        {
+        	ERROR(exc);
+        	netProgress.post(cacheEntryReady, [request, file, -1]);
+        }
     }        
 }
 
@@ -1464,12 +1488,8 @@ function getFileSizeFromCache(file, netProgress)
     {
         try
         {
-            var cacheService = CacheService.getService(nsICacheService);
-
-            var session = cacheService.createSession("HTTP", 0, true);
-            session.doomEntriesIfExpired = false;
-
-            session.asyncOpenCacheEntry(file.href, ACCESS_READ, {
+			initCacheSession();
+            cacheSession.asyncOpenCacheEntry(file.href, ACCESS_READ, {
                 onCacheEntryAvailable: function(descriptor, accessGranted, status)
                 {
                     if (descriptor)
@@ -1482,6 +1502,7 @@ function getFileSizeFromCache(file, netProgress)
         }
         catch (exc)
         {
+        	ERROR(exc);
         }        
     });
 }
@@ -1501,18 +1522,18 @@ function getHttpHeaders(request, file)
         // Disable temporarily
         if (!file.responseHeaders && Firebug.collectHttpHeaders)
         {
-            var request = [], response = [];
+            var requestHeaders = [], responseHeaders = [];
 
             http.visitRequestHeaders({
                 visitHeader: function(name, value)
                 {
-                    request.push({name: name, value: value});
+                    requestHeaders.push({name: name, value: value});
                 }
             });
             http.visitResponseHeaders({
                 visitHeader: function(name, value)
                 {
-                    response.push({name: name, value: value});
+                    responseHeaders.push({name: name, value: value});
                 }
             });
 
@@ -1552,6 +1573,19 @@ function getRequestWebProgress(request, netProgress)
     try
     {
         return QI(request.loadGroup.groupObserver, nsIWebProgress);
+    }
+    catch (exc) {}
+}
+
+function getRequestCategory(request)
+{
+    try
+    {
+        if (request.notificationCallbacks)
+        {
+            if (request.notificationCallbacks instanceof XMLHttpRequest)
+                return "xhr";
+        }
     }
     catch (exc) {}
 }

@@ -265,7 +265,7 @@ Firebug.Editor = extend(Firebug.Module,
         var container = getAncestorByClass(relative, "insertInto");
         if (container)
         {
-            var relative = getChildByClass(container, "insertBefore");
+            relative = getChildByClass(container, "insertBefore");
             if (relative)
                 this.insertRow(relative, "before");
         }

@@ -15,7 +15,10 @@ const nsISupports = CI("nsISupports");
 const PCMAP_SOURCETEXT = jsdIScript.PCMAP_SOURCETEXT;
 
 const RETURN_CONTINUE = jsdIExecutionHook.RETURN_CONTINUE;
+const RETURN_CONTINUE_THROW = jsdIExecutionHook.RETURN_CONTINUE_THROW;
 const RETURN_ABORT = jsdIExecutionHook.RETURN_ABORT;
+
+const TYPE_THROW = jsdIExecutionHook.TYPE_THROW;
 
 const STEP_OVER = nsIFireBug.STEP_OVER;
 const STEP_INTO = nsIFireBug.STEP_INTO;
@@ -35,6 +38,10 @@ const evalScriptPost =
 
 const evalScriptPreWithThis =  "(function() {" + evalScriptPre + "return ";
 const evalScriptPostWithThis = evalScriptPost + "; }).apply(__scope__.thisValue)";
+
+// ************************************************************************************************
+
+var listeners = [];
 
 // ************************************************************************************************
 
@@ -117,7 +124,7 @@ Firebug.Debugger = extend(Firebug.Module,
         debugger;
     },
     
-    stop: function(context, frame)
+    stop: function(context, frame, type, rv)
     {
         if (context.stopped)
             return RETURN_CONTINUE;
@@ -135,6 +142,15 @@ Firebug.Debugger = extend(Firebug.Module,
         
         context.debugFrame = frame;
         context.stopped = true;
+        
+        const hookReturn = dispatch2(listeners,"onStop",[context,type,rv]);
+        if ( hookReturn && hookReturn >= 0 )
+        {
+            delete context.stopped;
+            delete context.debugFrame;
+            delete context;
+            return hookReturn;
+        }
 
         executionContext.scriptsEnabled = false;
 
@@ -144,11 +160,11 @@ Firebug.Debugger = extend(Firebug.Module,
         // the new event loop is nested.  It seems that the networking system
         // can't communicate with the nested loop.
         cacheAllScripts(context);
-        
+		
         try
         {
             // We will pause here until resume is called
-            jsd.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
+            fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
         }
         catch (exc)
         {
@@ -158,6 +174,8 @@ Firebug.Debugger = extend(Firebug.Module,
         executionContext.scriptsEnabled = true;
 
         this.stopDebugging(context);
+        
+        dispatch(listeners,"onResume",[context]);
         
         if (context.aborted)
         {
@@ -178,7 +196,7 @@ Firebug.Debugger = extend(Firebug.Module,
         delete context.currentFrame;
         delete context;
 
-        jsd.exitNestedEventLoop();
+        fbs.exitNestedEventLoop();
     },
     
     abort: function(context)
@@ -216,6 +234,13 @@ Firebug.Debugger = extend(Firebug.Module,
         fbs.step(STEP_OUT, context.debugFrame);
         this.resume(context);
     },
+    
+    suspend: function(context)
+    {
+        if (context.stopped)
+            return;
+        fbs.suspend();
+    },
 
     runUntil: function(context, url, lineNo)
     {
@@ -231,7 +256,7 @@ Firebug.Debugger = extend(Firebug.Module,
     
     setBreakpoint: function(url, lineNo)
     {
-        fbs.setBreakpoint(url, lineNo);
+        fbs.setBreakpoint(url, lineNo, null);
     },
 
     clearBreakpoint: function(url, lineNo)
@@ -373,12 +398,24 @@ Firebug.Debugger = extend(Firebug.Module,
         this.syncCommands(context);
         this.syncListeners(context);
         context.chrome.syncSidePanels();
-        Firebug.showBar(true);
         
-        var panel = context.chrome.selectPanel("script");
-        panel.select(context.debugFrame);
-        
-        context.chrome.focus();
+        if (!context.hideDebuggerUI || (Firebug.tabBrowser.selectedBrowser && Firebug.tabBrowser.selectedBrowser.showFirebug))
+        {
+            Firebug.showBar(true);
+            
+            var panel = context.chrome.selectPanel("script");
+            panel.select(context.debugFrame);
+            context.chrome.focus();
+        } else {
+            // XXXmax: workaround for Firebug hang in selectPanel("script")
+            // when stopping in top-level frame // investigate later
+            context.chrome.updateViewOnShowHook = function()
+            {
+                var panel = context.chrome.selectPanel("script");
+                panel.select(context.debugFrame);
+                context.chrome.focus();
+            };
+        }
     },
     
     stopDebugging: function(context)
@@ -386,7 +423,7 @@ Firebug.Debugger = extend(Firebug.Module,
         try
         {
             fbs.unlockDebugger();
-
+                        
             // If the user reloads the page while the debugger is stopped, then
             // the current context will be destroyed just before 
             if (context)
@@ -394,6 +431,11 @@ Firebug.Debugger = extend(Firebug.Module,
                 var chrome = context.chrome;
                 if (!chrome)
                     chrome = FirebugChrome;
+                if ( chrome.updateViewOnShowHook )
+                {
+                    delete chrome.updateViewOnShowHook;
+                    return;
+                }
 
                 this.syncCommands(context);
                 this.syncListeners(context);
@@ -504,7 +546,7 @@ Firebug.Debugger = extend(Firebug.Module,
         }
     },
 
-    onBreak: function(frame)
+    onBreak: function(frame, type)
     {
         var context = this.breakContext;
         delete this.breakContext;
@@ -514,7 +556,7 @@ Firebug.Debugger = extend(Firebug.Module,
         if (!context)
             return RETURN_CONTINUE;
 
-        return this.stop(context, frame);
+        return this.stop(context, frame, type);
     },
 
     onHalt: function(frame)
@@ -528,6 +570,21 @@ Firebug.Debugger = extend(Firebug.Module,
         return RETURN_CONTINUE;
     },
 
+    onThrow: function(frame,rv)
+    {
+        var context = this.breakContext;
+        delete this.breakContext;
+        
+        if (!context)
+            context = getFrameContext(frame);
+        if (!context)
+            return RETURN_CONTINUE_THROW;
+            
+        if (dispatch2(listeners,"onThrow",[context, frame, rv]))
+            return this.stop(context, frame, TYPE_THROW, rv);
+        return RETURN_CONTINUE_THROW;
+    },
+
     onCall: function(frame)
     {
         var context = this.breakContext;
@@ -538,19 +595,39 @@ Firebug.Debugger = extend(Firebug.Module,
         if (!context)
             return RETURN_CONTINUE;
 
-        var frame = getStackFrame(frame, context);
+        frame = getStackFrame(frame, context);
         Firebug.Console.log(frame, context);
     },
 
-    onError: function(frame)
+    onError: function(frame,error)
     {
         var context = this.breakContext;
         delete this.breakContext;
         
         Firebug.errorStackTrace = getStackTrace(frame, context);
+        var hookReturn = dispatch2(listeners,"onError",[context, frame, error]);
+        if (hookReturn)
+        	return hookReturn;
+        return -2; /* let firebug service decide to break or not */
     },
 
-    onToggleBreakpoint: function(url, lineNo, isSet)
+    onEvalScript: function(url, lineNo, script)
+    {
+	},
+
+    onTopLevelScript: function(url, lineNo, script)
+    {
+        var context = this.breakContext;
+        delete this.breakContext;
+        
+        if (!context)
+            context = getFrameContext(frame);
+        if (!context)
+            return;
+        dispatch(listeners,"onTopLevelScript",[context, url, lineNo, script]);
+    },
+
+    onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
@@ -565,42 +642,16 @@ Firebug.Debugger = extend(Firebug.Module,
                 {
                     var row = sourceBox.childNodes[lineNo-1];
                     row.setAttribute("breakpoint", isSet);
-                    row.removeAttribute("disabledBreakpoint");
+                    if (isSet && props)
+                    {
+                    	row.setAttribute("condition", props.condition ? true : false);
+                    	row.setAttribute("disabledBreakpoint", props.disabled);
+                    } else
+                    {
+                    	row.removeAttribute("condition");
+                    	row.removeAttribute("disabledBreakpoint");
+                    }
                 }
-            }
-        }
-    },
-
-    onToggleBreakpointCondition: function(url, lineNo, isSet)
-    {
-        for (var i = 0; i < TabWatcher.contexts.length; ++i)
-        {
-            var panel = TabWatcher.contexts[i].getPanel("script", true);
-            if (panel)
-            {
-                panel.context.invalidatePanels("breakpoints");
-
-                url = normalizeURL(url);
-                var sourceBox = panel.sourceBoxes[url];
-                if (sourceBox)
-                    sourceBox.childNodes[lineNo-1].setAttribute("condition", isSet);
-            }
-        }
-    },
-
-    onToggleBreakpointDisabled: function(url, lineNo, disabled)
-    {
-        for (var i = 0; i < TabWatcher.contexts.length; ++i)
-        {
-            var panel = TabWatcher.contexts[i].getPanel("script", true);
-            if (panel)
-            {
-                panel.context.invalidatePanels("breakpoints");
-
-                url = normalizeURL(url);
-                var sourceBox = panel.sourceBoxes[url];
-                if (sourceBox)
-                    sourceBox.childNodes[lineNo-1].setAttribute("disabledBreakpoint", disabled);
             }
         }
     },
@@ -680,6 +731,12 @@ Firebug.Debugger = extend(Firebug.Module,
     showPanel: function(browser, panel)
     {
         var chrome =  browser.chrome;
+        if (chrome.updateViewOnShowHook)
+        {
+            const hook = chrome.updateViewOnShowHook;
+            delete chrome.updateViewOnShowHook;
+            hook();
+        }
         var isDebugger = panel && panel.name == "script";
         var debuggerButtons = chrome.$("fbDebuggerButtons");
         collapse(debuggerButtons, !isDebugger);
@@ -690,7 +747,18 @@ Firebug.Debugger = extend(Firebug.Module,
         var sourceFile = getScriptFileByHref(url, context);
         if (sourceFile)
             return new SourceLink(sourceFile.href, 0, "js");
+    },
+    
+    addListener: function(listener)
+    {
+        listeners.push(listener);
+    },
+    
+    removeListener: function(listener)
+    {
+        remove(listeners, listener);
     }
+
 });
 
 // ************************************************************************************************
@@ -829,7 +897,7 @@ ScriptPanel.prototype = extend(Firebug.Panel,
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(this.location.href, lineNo);
         else
-            fbs.setBreakpoint(this.location.href, lineNo);
+            fbs.setBreakpoint(this.location.href, lineNo, null);
     },
     
     toggleDisableBreakpoint: function(lineNo)
@@ -1491,13 +1559,12 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         for (var url in this.context.sourceFileMap)
         {
-            fbs.enumerateBreakpoints(url, {call: function(url, line, startLine, disabled, condition)
+            fbs.enumerateBreakpoints(url, {call: function(url, line, startLine, props)
             {
                 var name = guessFunctionName(url, startLine-1, context);
                 var source = context.sourceCache.getLine(url, line);
-                var disabled = fbs.isBreakpointDisabled(url, line);
                 breakpoints.push({name : name, href: url, lineNumber: line,
-                    checked: !disabled, sourceLine: source});
+                    checked: !props.disabled, sourceLine: source});
             }});
 
             fbs.enumerateErrorBreakpoints(url, {call: function(url, line, startLine)
@@ -1591,6 +1658,30 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         return items;
     }   
 });
+
+Firebug.DebuggerListener = 
+{
+	onStop: function(context, type, rv)
+	{
+	},
+	
+	onResume: function(context)
+	{
+	},
+
+	onThrow: function(context, frame, rv)
+	{
+		return false; /* continue throw */
+	},
+
+	onError: function(context, frame, error)
+	{
+	},
+	
+	onTopLevelScript: function(context, frame, before)
+	{
+	}
+};
 
 // ************************************************************************************************
 // Local Helpers
@@ -1741,8 +1832,8 @@ function getCallingFrame(frame)
     }
     catch (exc)
     {
-        return null;
     }
+    return null;
 }
 
 function getFrameWindow(frame)

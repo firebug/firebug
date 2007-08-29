@@ -131,6 +131,14 @@
                                       option="shadeBoxModel"/>
                         </menupopup>
                     </menu>
+
+                    <menuseparator/>
+                    <menu label="&firebug.OpenWith;">
+                        <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                        	<menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+                        </menupopup>
+                     </menu>
+
                 </menupopup>
             </menu>
             <menu id="windowMenu" />
@@ -141,7 +149,7 @@
                     <menuitem label="&firebug.KeyShortcuts;" oncommand="Firebug.visitWebsite('keyboard')"/>
                     <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
                     <menuseparator/>
-                    
+                                        
                     <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
                 </menupopup>
             </menu>

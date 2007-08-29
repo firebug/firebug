@@ -115,23 +115,15 @@ top.TabWatcher =
             return;
         }
 
-        if (uri)
+        var context = this.getContextByWindow(win);
+        if (!context && uri)
         {
-            if (Firebug.disabledAlways)
-            {
-                // Check if the whitelist makes an exception
-                if (!this.owner.isURIAllowed(uri))
-                    return this.watchContext(win, null);
-            }
-            else
-            {
-                // Check if the blacklist says no
-                if (this.owner.isURIDenied(uri))
-                    return this.watchContext(win, null);
-            }
+        	if (!this.owner.enableContext(win,uri))
+        	{ 
+                return this.watchContext(win, null);
+	        }
         }
         
-        var context = this.getContextByWindow(win);
         if (!context)
         {
             var browser = this.getBrowserByWindow(win);            
@@ -147,9 +139,9 @@ top.TabWatcher =
             
             context = this.owner.createTabContext(win, browser, browser.chrome, persistedState);
             contexts.push(context);
-            
+
             this.dispatch("initContext", [context]);
-            
+
             win.addEventListener("pagehide", onUnloadTopWindow, true);
             win.addEventListener("pageshow", onLoadWindowContent, true);
             win.addEventListener("DOMContentLoaded", onLoadWindowContent, true);
@@ -427,8 +419,8 @@ var FrameProgressListener = extend(BaseProgressListener,
                 // "unload" is dispatched to the document, but onLocationChange is not called
                 // again, so we have to call watchTopWindow here
                 var win = progress.DOMWindow;
-                if (win.parent == win && win.location.href == "about:blank")
-                    TabWatcher.watchTopWindow(win, null);
+                //if (win.parent == win && win.location.href == "about:blank")
+                //    TabWatcher.watchTopWindow(win, null);
 
                 TabWatcher.watchWindow(win);
             }

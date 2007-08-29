@@ -10,9 +10,13 @@ const nsIPrefBranch2 = CI("nsIPrefBranch2");
 const nsIPermissionManager = CI("nsIPermissionManager");
 const nsIFireBugClient = CI("nsIFireBugClient");
 const nsISupports = CI("nsISupports");
+const nsIFile = CI("nsIFile");
+const nsILocalFile = CI("nsILocalFile");
+const nsISafeOutputStream = CI("nsISafeOutputStream");
 
 const PrefService = CC("@mozilla.org/preferences-service;1");
 const PermManager = CC("@mozilla.org/permissionmanager;1");
+const DirService = 	CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
@@ -29,6 +33,7 @@ const pm = PermManager.getService(nsIPermissionManager);
 
 const DENY_ACTION = nsIPermissionManager.DENY_ACTION;
 const ALLOW_ACTION = nsIPermissionManager.ALLOW_ACTION;
+const NS_OS_TEMP_DIR = "TmpD"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
@@ -78,9 +83,12 @@ const prefNames =
 // Globals
 
 var modules = [];
+var extensions = [];
 var panelTypes = [];
 var reps = [];
 var defaultRep = null;
+var editors = [];
+var externalEditors = [];
 
 var panelTypeMap = {};
 var optionUpdateMap = {};
@@ -88,6 +96,8 @@ var optionUpdateMap = {};
 var deadWindows = [];
 var deadWindowTimeout = 0;
 var clearContextTimeout = 0;
+var temporaryFiles = [];
+var temporaryDirectory = null;
 
 // ************************************************************************************************
 
@@ -109,6 +119,7 @@ top.Firebug =
         for (var i = 0; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(prefNames[i]);
 
+        this.loadExternalEditors();
         prefs.addObserver(prefDomain, this, false);
 
         dispatch(modules, "initialize");
@@ -150,6 +161,7 @@ top.Firebug =
         dispatch(modules, "shutdown");
 
         this.closeDeadWindows();
+        this.deleteTemporaryFiles();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -193,6 +205,14 @@ top.Firebug =
             TabWatcher.addListener(arguments[i]);
     },
 
+    registerExtension: function()
+    {
+        extensions.push.apply(extensions, arguments);
+        
+        for (var i = 0; i < arguments.length; ++i)
+            TabWatcher.addListener(arguments[i]);
+    },
+
     registerPanel: function()
     {
         panelTypes.push.apply(panelTypes, arguments);
@@ -209,6 +229,11 @@ top.Firebug =
     setDefaultRep: function(rep)
     {
         defaultRep = rep;
+    },
+
+    registerEditor: function()
+    {
+        editors.push.apply(editors, arguments);
     },
     
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -340,10 +365,60 @@ top.Firebug =
             else
                 this.enableAlways();
         }
+        if (name.substr(0, 15) == "externalEditors")
+        {
+        	this.loadExternalEditors();
+        }
 
         delete optionUpdateMap[name];
     },
     
+    loadExternalEditors: function()
+    {
+    	const prefName = "externalEditors";
+    	const editorPrefNames = ["label", "executable", "cmdline", "image"];
+
+    	externalEditors = [];
+    	var list = this.getPref(prefName).split(",");
+    	for (var i = 0; i < list.length; ++i)
+    	{
+    		var editorId = list[i];
+    		if ( !editorId || editorId == "")
+    			continue;
+    		var item = { id: editorId };
+			for( var j = 0; j < editorPrefNames.length; ++j )
+			{
+				try {
+					item[editorPrefNames[j]] = this.getPref(prefName+"."+editorId+"."+editorPrefNames[j]);
+				}
+				catch(exc)
+				{
+				}
+			}
+    		if ( item.label && item.executable )
+    		{
+    			if (!item.image)
+    				item.image = getIconURLForFile(item.executable);
+    			externalEditors.push(item);
+    		}
+    	}
+    },
+
+    get registeredEditors()
+    {
+    	var newArray = [];
+    	if ( editors.length > 0 )
+    	{
+    		newArray.push.apply(newArray, editors);
+    		if ( externalEditors.length > 0 )
+    			newArray.push("-");
+    	}
+   		if ( externalEditors.length > 0 )
+    		newArray.push.apply(newArray, externalEditors);
+    		
+    	return newArray;
+    },
+   
     openPermissions: function()
     {
         var params = {
@@ -355,6 +430,167 @@ top.Firebug =
 
         openWindow("Browser:Permissions", "chrome://browser/content/preferences/permissions.xul",
             "", params);
+    },
+
+    openEditors: function()
+    {
+    	var args = {
+    		FBL: FBL,
+    		prefName: prefDomain + ".externalEditors"
+    	};
+        openWindow("Firebug:ExternalEditors", "chrome://firebug/content/editors.xul", "", args);
+    },
+    
+    openInEditor: function(context, editorId)
+    {
+    	try {
+    	if (!editorId)
+    		return;
+    		
+    	var location;
+    	if (context)
+    	{
+    		var panel = context.chrome.getSelectedPanel();
+    		if (panel)
+    		{
+    			location = panel.location;
+    			if (!location && panel.name == "html")
+    				location = context.window.document.location;
+    			if ( location instanceof SourceFile || location instanceof CSSStyleSheet )
+    				location = location.href;
+    		}
+    	}
+    	if (!location)
+    	{
+    		if (tabBrowser.currentURI)
+    			location = tabBrowser.currentURI.asciiSpec;
+    	}
+    	if (!location)
+    		return;
+    	location = location.toString();
+    	if (isSystemURL(location))
+    		return;
+    	
+    	var list = extendArray(editors, externalEditors);
+    	var editor = null;
+    	for( var i = 0; i < list.length; ++i )
+    	{
+    		if (editorId == list[i].id)
+    		{
+    			editor = list[i];
+    			break;
+    		}
+    	}
+    	if (editor)
+    	{
+    		if (editor.handler)
+    		{
+    			editor.handler(location);
+    			return;
+    		}
+    		var args = [];
+    		var localFile = null;
+    		var targetAdded = false;
+    		if (editor.cmdline)
+    		{
+    			args = editor.cmdline.split(" ");
+	    		for( var i = 0; i < args.length; ++i )
+	    		{
+	    			if ( args[i] == "%url" )
+	    			{
+	    				args[i] = location;
+	    				targetAdded = true;
+	    			}
+	    			else if ( args[i] == "%file" )
+	    			{
+	    				if (!localFile)
+	    					localFile = this.getLocalSourceFile(context, location);
+	    				args[i] = localFile;
+	    				targetAdded = true;
+	    			}
+	    		}
+	    	}
+    		if (!targetAdded)
+    		{
+				localFile = this.getLocalSourceFile(context, location);
+				if (!localFile)
+					return;
+    			args.push(localFile);
+    		}
+    		FBL.launchProgram(editor.executable, args);
+    	}
+    	}catch(exc) { ERROR(exc); }
+    },
+    
+    getLocalSourceFile: function(context, href)
+    {
+    	if ( isLocalURL(href) )
+    		return href;
+    	var data;
+    	if (context)
+    	{
+    		data = context.sourceCache.loadText(href);
+    	} else
+    	{
+    		var ctx = { browser: tabBrowser.selectedBrowser, window: tabBrowser.selectedBrowser.contentWindow };
+    		data = new SourceCache(ctx).loadText(href);
+    	}
+    	if (!data)
+    		return;
+    	if (!temporaryDirectory)
+    	{
+    		var tmpDir = DirService.getFile(NS_OS_TEMP_DIR, {});
+    		tmpDir.append("fbtmp");
+    		tmpDir.createUnique(nsIFile.DIRECTORY_TYPE, 0775);
+    		temporaryDirectory = tmpDir;
+    	}
+    	
+    	var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "").replace(/[^0-9a-zA-Z\/.]/g, "_");
+    	if ( !/\.[\w]{1,5}$/.test(lpath) )
+    	{
+    		if ( lpath.charAt(lpath.length-1) == '/' )
+    			lpath += "index";
+    		lpath += ".html";
+    	}
+    	if ( getPlatformName() == "WINNT" )
+    		lpath = lpath.replace(/\//g, "\\");
+    	var file = QI(temporaryDirectory.clone(), nsILocalFile);
+    	file.appendRelativePath(lpath);
+    	if (!file.exists())
+    		file.create(nsIFile.NORMAL_FILE_TYPE, 664);
+    	temporaryFiles.push(file.path);
+
+    	var stream = CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
+    	stream.init(file, 0x04 | 0x08 | 0x20, 664, 0); // write, create, truncate
+    	stream.write(data, data.length);
+    	if (stream instanceof nsISafeOutputStream)
+    		stream.finish();
+    	else
+    		stream.close();
+    	
+    	return file.path;
+    },
+    
+    deleteTemporaryFiles: function()
+    {
+    	try {
+    		var file = CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+	    	for( var i = 0; i < temporaryFiles.length; ++i)
+	    	{
+	    		file.initWithPath(temporaryFiles[i]);
+	    		if (file.exists())
+	    			file.remove(false);
+	    	}
+    	}
+    	catch(exc)
+    	{
+    	}
+    	try {
+    		if (temporaryDirectory && temporaryDirectory.exists())
+    			temporaryDirectory.remove(true);
+    	} catch(exc)
+    	{
+    	}
     },
                 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
@@ -690,6 +926,28 @@ top.Firebug =
                 || (uri.scheme == "file" && this.disabledFile));
     },
     
+    enableContext: function(win, uri)
+    {
+    	if ( dispatch2(extensions, "acceptContext", [win, uri]) )
+    		return true;
+	   	if ( dispatch2(extensions, "declineContext", [win, uri]) )
+    		return false;
+    		
+		if (this.disabledAlways)
+		{
+			// Check if the whitelist makes an exception
+			if (!this.isURIAllowed(uri))
+			    return false;
+		}
+		else
+		{
+			// Check if the blacklist says no
+			if (this.isURIDenied(uri))
+			    return false;
+		}
+		return true;
+    },
+    
     createTabContext: function(win, browser, chrome, state)
     {
         return new Firebug.TabContext(win, browser, chrome, state);
@@ -863,6 +1121,21 @@ Firebug.Module =
     getObjectByURL: function(context, url)
     {
     }
+};
+
+// ************************************************************************************************
+
+Firebug.Extension = 
+{
+	acceptContext: function(win,uri)
+	{
+		return false;
+	},
+
+	declineContext: function(win,uri)
+	{
+		return false;
+	}
 };
 
 // ************************************************************************************************

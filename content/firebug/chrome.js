@@ -26,8 +26,8 @@ const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
 // ************************************************************************************************
 // Globals
 
-var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, panelStatus,
-    panelStatusSeparator;
+var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationSeparator,
+	panelStatus, panelStatusSeparator;
 
 var waitingPanelBarCount = 2;
 
@@ -848,6 +848,32 @@ top.FirebugChrome =
             return false;
     },
 
+    onEditorsShowing: function(popup)
+    {
+    	var editors = Firebug.registeredEditors;
+    	if ( editors.length > 0 )
+    	{
+    		var lastChild = popup.lastChild;
+    		FBL.eraseNode(popup);
+    		var disabled = (!FirebugContext);
+    		for( var i = 0; i < editors.length; ++i )
+    		{
+    			if (editors[i] == "-")
+    			{
+    				FBL.createMenuItem(popup, "-");
+    				continue;
+    			}
+    			var item = {label: editors[i].label, image: editors[i].image,
+    							nol10n: true, disabled: disabled };
+    			var menuitem = FBL.createMenuItem(popup, item);
+    			menuitem.setAttribute("command", "cmd_openInEditor");
+    			menuitem.value = editors[i].id;
+    		}
+   			FBL.createMenuItem(popup, "-");
+   			popup.appendChild(lastChild);
+    	}
+    },
+    
     getInspectMenuItems: function(object)
     {
         var items = [];
@@ -1210,4 +1236,5 @@ function dddx()
 {
     Firebug.Console.logFormatted(arguments);
 }
+
 

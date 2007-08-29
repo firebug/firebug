@@ -1313,10 +1313,10 @@ this.createMenu = function(popup, label)
     return menuPopup;
 };
 
-this.createMenuItem = function(popup, item)
+this.createMenuItem = function(popup, item, before)
 {
     if (typeof(item) == "string" && item.indexOf("-") == 0)
-        return this.createMenuSeparator(popup);
+        return this.createMenuSeparator(popup, before);
     
     var menuitem = popup.ownerDocument.createElement("menuitem");
 
@@ -1337,7 +1337,10 @@ this.createMenuItem = function(popup, item)
     if (item.command)
         menuitem.addEventListener("command", item.command, false);
 
-    popup.appendChild(menuitem);
+    if (before)
+        popup.insertBefore(menuitem, before);
+    else
+        popup.appendChild(menuitem);
     return menuitem;
 };
 
@@ -1354,13 +1357,16 @@ this.createMenuHeader = function(popup, item)
     return header;
 };
 
-this.createMenuSeparator = function(popup)
+this.createMenuSeparator = function(popup, before)
 {
     if (!popup.firstChild)
         return;
 
     var menuitem = popup.ownerDocument.createElement("menuseparator");
-    popup.appendChild(menuitem);
+    if (before)
+        popup.insertBefore(menuitem, before);
+    else
+        popup.appendChild(menuitem);
     return menuitem;
 };
 
@@ -1902,6 +1908,20 @@ this.dispatch = function(listeners, name, args)
     }
 };
 
+this.dispatch2 = function(listeners, name, args)
+{
+	for (var i = 0; i < listeners.length; ++i)
+	{
+		var listener = listeners[i];
+		if (name in listener)
+		{
+			var result = listener[name].apply(listener, args);
+			if ( result )
+				return result;
+		}
+	}
+};
+
 // ************************************************************************************************
 // DOM Events
 
@@ -2084,6 +2104,14 @@ this.isSystemURL = function(url)
         return false;
 };
 
+this.isLocalURL = function(url)
+{
+    if (url.substr(0, 5) == "file:")
+        return true;
+    else
+        return false;
+};
+
 this.getDomain = function(url)
 {
     var m = /[^:]+:\/{1,3}([^\/]+)/.exec(url);
@@ -2230,6 +2258,49 @@ this.readPostText = function(url, context)
          }
      }
 };
+
+// ************************************************************************************************
+// Programs
+
+this.launchProgram = function(exePath, args)
+{
+	try {
+		var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+		if (this.getPlatformName() == "Darwin")
+		{
+			args = this.extendArray(["-a", exePath], args);
+			exePath = "/usr/bin/open";
+		}
+		file.initWithPath(exePath);
+		if (!file.exists())
+			return false;
+		var process = this.CCIN("@mozilla.org/process/util;1", "nsIProcess");
+		process.init(file);
+		process.run(false, args, args.length, {});
+		return true;
+	}
+	catch(exc)
+	{
+		this.ERROR(exc);
+	}
+	return false;
+};
+
+this.getIconURLForFile = function(path)
+{
+	const ios = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+	const fph = ios.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+	try {
+		var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+		file.initWithPath(path);
+		return "moz-icon://" + fph.getURLSpecFromFile(file) + "?size=16";  
+	}
+	catch(exc)
+	{
+		this.ERROR(exc);
+	}
+	return null;
+}
 
 // ************************************************************************************************
 
@@ -4352,7 +4423,7 @@ const invisibleTags = this.invisibleTags =
     "style": 1,
     "script": 1,
     "noscript": 1,
-    "br": 1,   
+    "br": 1   
 };
 
 // ************************************************************************************************

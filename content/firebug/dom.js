@@ -21,7 +21,12 @@ const ignoreVars =
     // trying to access them causes browser freeze
     "java": 1,
     "sun": 1,
-    "Packages": 1
+    "Packages": 1,
+    "JavaArray": 1,
+    "JavaMember": 1,
+    "JavaObject": 1,
+    "JavaClass": 1,
+    "JavaPackage": 1
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 

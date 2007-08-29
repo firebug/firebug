@@ -1,6 +1,7 @@
 
 // Global
-pref("extensions.firebug.disabledAlways", true);
+pref("extensions.firebug.disabledAlways", false);
+pref("extensions.firebug.allowSystemPages", false);
 pref("extensions.firebug.disabledFile", true);
 pref("extensions.firebug.defaultPanelName", "html");
 pref("extensions.firebug.throttleMessages", true);
@@ -37,6 +38,15 @@ pref("extensions.firebug.showComputedStyle", false);
 
 // Script
 pref("extensions.firebug.breakOnErrors", false);
+pref("extensions.firebug.breakOnTopLevel", false);
+pref("extensions.firebug.useDebugAdapter", false);
+pref("extensions.firebug.showEvalSources", true);
+pref("extensions.firebug.showAllSourceFiles", false);
+pref("extensions.firebug.useLastLineForEvalName", false);
+pref("extensions.firebug.useFirstLineForEvalName", false);
+
+// Stack
+pref("extensions.firebug.omitObjectPathStack", false);
 
 // DOM
 pref("extensions.firebug.showUserProps", true);
@@ -53,3 +63,29 @@ pref("extensions.firebug.showRulers", true);
 pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.disableNetMonitor", false);
 pref("extensions.firebug.collectHttpHeaders", true);
+
+// External Editors
+pref("extensions.firebug.externalEditors", "");
+
+// Trace  /*@explore*/
+pref("extensions.firebug.DBG_FBS_SCRIPTINFO", false);// firebug-service trace scriptinfo(huge) /*@explore*/
+pref("extensions.firebug.DBG_FBS_FF_START", false); // firebug-service trace from FF start(huge) /*@explore*/
+pref("extensions.firebug.DBG_FBS_CREATION", false); // firebug-service script creation           /*@explore*/
+pref("extensions.firebug.DBG_FBS_BP", false);       // firebug-service breakpoints               /*@explore*/
+pref("extensions.firebug.DBG_FBS_ERRORS", false);   // firebug-service errors                    /*@explore*/
+pref("extensions.firebug.DBG_FBS_STEP", false);     // firebug-service stepping                  /*@explore*/
+pref("extensions.firebug.DBG_BP", false); 			// debugger.js and firebug-services.js; lots of output   /*@explore*/
+pref("extensions.firebug.DBG_TOPLEVEL", false); 	// top level jsd scripts                     /*@explore*/
+pref("extensions.firebug.DBG_STACK", false);  		// call stack, mostly debugger.js            /*@explore*/
+pref("extensions.firebug.DBG_UI_LOOP", false); 		// debugger.js                               /*@explore*/
+pref("extensions.firebug.DBG_ERRORS", true);  		// error.js                                  /*@explore*/
+pref("extensions.firebug.DBG_EVENTS", false);  		// debugger.js for event handlers, need more /*@explore*/
+pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon functions          /*@explore*/
+pref("extensions.firebug.DBG_EVAL", false);    		// debugger.js and firebug-service.js        /*@explore*/
+pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                               /*@explore*/
+pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/
+pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/ 
+pref("extensions.firebug.DBG_NET", false);        	// net.js                                    /*@explore*/
+pref("extensions.firebug.DBG_SHOW_SYSTEM", false);  // isSystemURL return false always.          /*@explore*/
+pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
+pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/

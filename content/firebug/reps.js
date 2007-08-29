@@ -191,7 +191,8 @@ this.Func = domplate(Firebug.Rep,
 
     getContextMenuItems: function(fn, target, context, script)
     {
-        var script = script ? script : findScriptForFunction(fn);
+        if (!script)
+			script = findScriptForFunction(fn);
         if (!script)
             return;
 
@@ -219,7 +220,7 @@ this.jsdScript = domplate(Firebug.Rep,
     
     monitor: function(fn, script, monitored)
     {
-        var fn = script.functionObject.getWrappedValue();
+        fn = script.functionObject.getWrappedValue();
         return FirebugReps.Func.monitor(fn, script, monitored);
     },
     
