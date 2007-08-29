@@ -1,0 +1,272 @@
+/* See license.txt for terms of usage */
+
+html {
+    background-color: -moz-dialog;
+}
+
+body {
+    margin: 0;
+    overflow: hidden;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-size: 11px;
+}
+
+h1 {
+    font-size: 17px;
+    border-bottom: 1px solid threedlightshadow;
+}
+
+a {
+    color: #0000ff;
+}
+
+pre {
+    margin: 0;
+    font: inherit;
+}
+
+/************************************************************************************************/
+
+.jumpHighlight {
+    background-color: cyan;
+}
+
+/************************************************************************************************/
+
+.collapsed,
+[collapsed="true"] {
+    display: none;
+}
+
+.obscured {
+    left: -999999px !important;
+}
+
+.measureBox {
+    position: absolute;
+    visibility: hidden;
+    top: 0;
+    left: 0;
+    white-space: nowrap;
+}
+
+/************************************************************************************************/
+
+.panelNode {
+    display: none;
+    overflow: auto;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    background-color: #FFFFFF;
+    color: #000000;
+}
+
+.panelNode[active="true"] {
+    display: block;
+}
+
+.pluginBrowser {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    margin: 0;
+    border: none;
+}
+
+/************************************************************************************************/
+
+.dialogBox {
+    position: relative;
+    margin: 4em auto;
+    border: 1px solid threedshadow;
+    -moz-border-radius: 10px;
+    padding: 20px 30px 30px 90px;
+    background: -moz-field url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
+    color: -moz-fieldText;
+    font: message-box;
+    min-width: 13em;
+    max-width: 48em;
+}
+
+.dialogCaption {
+    font-size: 130%;
+}
+
+.dialogRow {
+    margin: 8px 0;
+    font-size: 13px;
+}
+
+.dialogLink:hover {
+    text-decoration: underline;
+}
+
+.disabledCaption {
+    display: none;
+}
+
+.cantDisplayPage > .dialogCaption {
+    display: block;
+}
+
+.cantDisplayPage > .dialogRow {
+    display: none;
+}
+
+/************************************************************************************************/
+
+#trialBox {
+    z-index: 2147483647;
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: -moz-dialog;
+}
+
+/************************************************************************************************/
+
+.inlineEditor,
+.fixedWidthEditor {
+    z-index: 2147483647;
+    position: absolute;
+}
+
+.inlineEditor {
+    margin-left: -6px;
+    margin-top: -3px;
+}
+
+.textEditorInner,
+.fixedWidthEditor {
+    margin: 0 0 0 0 !important;
+    padding: 0;
+    border: none !important;
+    font: inherit;
+    text-decoration: inherit;    
+    background-color: #FFFFFF;
+}
+
+.fixedWidthEditor {
+    border-top: 1px solid #888888 !important;
+    border-bottom: 1px solid #888888 !important;
+}
+
+.textEditorInner {
+    position: relative;
+    top: -7px;
+    left: -5px;
+}
+
+.textEditorInner1 {
+    padding-left: 11px;
+    background: url(textEditorBorders.png) repeat-y;
+}
+
+.textEditorInner2 {
+    position: relative;
+    padding-right: 2px;
+    background: url(textEditorBorders.png) repeat-y 100% 0;
+}
+
+.textEditorTop1 {
+    background: url(textEditorCorners.png) no-repeat 100% 0;
+    margin-left: 11px;
+    height: 10px;
+}
+
+.textEditorTop2 {
+    position: relative;
+    left: -11px;
+    width: 11px;
+    height: 10px;
+    background: url(textEditorCorners.png) no-repeat;
+}
+
+.textEditorBottom1 {
+    position: relative;
+    background: url(textEditorCorners.png) no-repeat 100% 100%;
+    margin-left: 11px;
+    height: 12px;
+}
+
+.textEditorBottom2 {
+    position: relative;
+    left: -11px;
+    width: 11px;
+    height: 12px;
+    background: url(textEditorCorners.png) no-repeat 0 100%;
+}
+
+/************************************************************************************************/
+
+.infoTip {
+    z-index: 2147483647;
+    position: fixed;
+    padding: 2px 3px;
+    border: 1px solid #CBE087;
+    background: LightYellow;
+    font-family: Monaco, monospace;
+    color: #000000;
+    display: none;
+    white-space: nowrap;
+}
+
+.infoTip[active="true"] {
+    display: block;
+}
+
+.infoTipLoading {
+    width: 16px;
+    height: 16px;
+    background: url(chrome://firebug/skin/loading_16.gif) no-repeat; 
+}
+
+.infoTipImageBox {
+    min-width: 100px;
+    text-align: center;
+}
+
+.infoTipCaption {
+    font: message-box;
+}
+
+.infoTipLoading > .infoTipImage,
+.infoTipLoading > .infoTipCaption {
+    display: none;
+}
+
+/************************************************************************************************/
+
+h1.groupHeader {
+    padding: 2px 4px;
+    margin: 0 0 4px 0;
+    border-top: 1px solid #CCCCCC;
+    border-bottom: 1px solid #CCCCCC;
+    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    font-size: inherit;
+}
+
+/************************************************************************************************/
+
+.fullPanelEditor {
+    z-index: 2147483647;
+    position: fixed;
+    left: 0 !important;
+    top: 0 !important;
+    right: 0 !important;
+    bottom: 0 !important;
+    width: auto !important;
+    height: auto !important;
+    margin: 0;
+    border: none;
+    padding-left: 8px;
+    font-family: Monaco, monospace;
+    font-size: Inherit;
+}

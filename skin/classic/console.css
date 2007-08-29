@@ -1,0 +1,541 @@
+/* See license.txt for terms of usage */
+
+.panelNode-console {
+    overflow-x: hidden;
+}
+
+.objectLink:hover {
+    cursor: pointer;
+    text-decoration: underline;
+}
+
+.logRow {
+    position: relative;
+    margin: 0;
+    border-bottom: 1px solid #D7D7D7;
+    padding: 2px 4px 1px 6px;
+    background-color: #FFFFFF;
+}
+
+.logGroup {
+    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    padding: 0;
+    border: none;
+}
+
+.logGroupBody {
+    display: none;
+    margin-left: 16px;
+    border-left: 1px solid #D7D7D7;
+    border-top: 1px solid #D7D7D7;
+    background: #FFFFFF;
+}
+
+.logGroup > .logRow {
+    background-color: transparent !important;
+    font-weight: bold;
+}
+
+.logGroup.opened > .logRow {
+    border-bottom: none;
+}
+
+.logGroup.opened > .logGroupBody {
+    display: block;
+}
+
+/*****************************************************************************************/
+
+.logRow-command > .objectBox-text {
+    font-family: Monaco, monospace;
+    color: #0000FF;
+    white-space: -moz-pre-wrap;
+}
+
+.logRow-info,
+.logRow-warn,
+.logRow-error,
+.logRow-assert,
+.logRow-warningMessage,
+.logRow-errorMessage {
+    padding-left: 22px;
+    background-repeat: no-repeat;
+    background-position: 4px 2px;
+}
+
+.logRow-assert,
+.logRow-warningMessage,
+.logRow-errorMessage {
+    padding-top: 0;
+    padding-bottom: 0;
+}
+
+.logRow-info,
+.logRow-info .objectLink-sourceLink {
+    background-color: #FFFFFF;
+}
+
+.logRow-warn,
+.logRow-warningMessage,
+.logRow-warn .objectLink-sourceLink,
+.logRow-warningMessage .objectLink-sourceLink {
+    background-color: cyan;
+}
+
+.logRow-error,
+.logRow-assert,
+.logRow-errorMessage,
+.logRow-error .objectLink-sourceLink,
+.logRow-errorMessage .objectLink-sourceLink {
+    background-color: LightYellow;
+}
+
+.logRow-error,
+.logRow-assert,
+.logRow-errorMessage {
+    color: #FF0000;
+}
+
+.logRow-info {
+    background-image: url(chrome://firebug/skin/infoIcon.png);
+}
+
+.logRow-warn,
+.logRow-warningMessage {
+    background-image: url(chrome://firebug/skin/warningIcon.png);
+}
+
+.logRow-error,
+.logRow-assert,
+.logRow-errorMessage {
+    background-image: url(chrome://firebug/skin/errorIcon.png);
+}
+
+/*****************************************************************************************/
+
+.objectBox-string,
+.objectBox-text,
+.objectBox-number,
+.objectLink-element,
+.objectLink-textNode,
+.objectLink-function,
+.objectBox-stackTrace,
+.objectLink-profile {
+    font-family: Monaco, monospace;
+}
+
+.objectBox-string,
+.objectBox-text,
+.objectLink-textNode {
+    white-space: -moz-pre-wrap;
+}
+
+.objectBox-number,
+.objectLink-styleRule,
+.objectLink-element {
+    color: #000088;
+}
+
+.objectBox-string,
+.objectLink-textNode {
+    color: #FF0000;
+}
+
+.objectLink-function,
+.objectBox-stackTrace,
+.objectLink-profile  {
+    color: DarkGreen;
+}
+
+.objectBox-null,
+.objectBox-undefined {
+    padding: 0 2px;
+    outline: 1px solid #666666;
+    background-color: #888888;
+    color: #FFFFFF;
+}
+
+.objectBox-exception {
+    padding: 0 2px 0 18px;
+    background: url(chrome://firebug/skin/errorIcon-sm.png) no-repeat 0 0;
+    color: red;
+}
+
+.objectLink-sourceLink {
+    position: absolute;
+    right: 4px;
+    top: 2px;
+    padding-left: 8px;
+    font-family: Lucida Grande, sans-serif;
+    font-weight: bold;
+    color: #0000FF;
+}
+
+/************************************************************************************************/
+
+.errorTitle {
+    margin-top: 0px;
+    margin-bottom: 1px;
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.errorTrace {
+    margin-left: 17px;
+}
+
+.errorSourceBox {
+    margin: 2px 0;
+}
+
+.errorSource-none {
+    display: none;
+}
+
+.errorSource-syntax > .errorBreak {
+    visibility: hidden;
+}
+
+.errorSource {
+    cursor: pointer;
+    font-family: Monaco, monospace;
+    color: DarkGreen;
+}
+
+.errorSource:hover {
+    text-decoration: underline;
+}
+
+.errorBreak {
+    cursor: pointer;
+    display: none;
+    margin: 0 6px 0 0;
+    width: 13px;
+    height: 14px;
+    vertical-align: bottom;
+    background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
+    -moz-opacity: 0.1;
+}
+
+.hasBreakSwitch .errorBreak {
+    display: inline;
+}
+
+.breakForError .errorBreak {
+    -moz-opacity: 1;
+}
+
+.assertDescription {
+    margin: 0;
+}
+
+/************************************************************************************************/
+
+.logRow-profile > .logRow > .objectBox-text {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    color: #000000;
+}
+
+.logRow-profile > .logRow > .objectBox-text:last-child {
+    color: #555555;
+    font-style: italic;
+}
+
+.logRow-profile.opened > .logRow {
+    padding-bottom: 4px;
+}
+
+.profilerRunning > .logRow {
+    background: transparent url(chrome://firebug/skin/loading_16.gif) no-repeat 2px 0 !important;
+    padding-left: 22px !important;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.profileTable {
+    border-bottom: 1px solid #D7D7D7;
+    padding: 0 0 4px 0;
+}
+
+.profileTable td {
+    padding: 1px 4px 0 4px;
+}
+
+.headerCell {
+    cursor: pointer;
+    -moz-user-select: none;
+    border-bottom: 1px solid #9C9C9C;
+    padding: 0 !important;
+    font-weight: bold;
+    background: #BBBBBB url(chrome://firebug/skin/tableHeader.gif) repeat-x;
+}
+
+.headerCellBox {
+    padding: 2px 4px;
+    border-left: 1px solid #D9D9D9;
+    border-right: 1px solid #9C9C9C;
+}
+
+.headerCell:hover:active {
+    background: #959595 url(chrome://firebug/skin/tableHeaderActive.gif) repeat-x;
+}
+
+.headerSorted {
+    background: #7D93B2 url(chrome://firebug/skin/tableHeaderSorted.gif) repeat-x;
+}
+
+.headerSorted > .headerCellBox {
+    border-right-color: #6B7C93;
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
+}
+
+.headerSorted.sortedAscending > .headerCellBox {
+    background-image: url(chrome://firebug/skin/arrowUp.png);
+}
+
+.headerSorted:hover:active {
+    background: #536B90 url(chrome://firebug/skin/tableHeaderSortedActive.gif) repeat-x;
+}
+
+.linkCell {
+    text-align: right;
+}
+
+.linkCell > .objectLink-sourceLink {
+    position: static;
+}
+
+/*****************************************************************************************/
+
+.logRow-stackTrace {
+    padding-top: 0;    
+    background: #F8F8F8;
+}
+
+.logRow-stackTrace > .objectBox-stackFrame {
+    position: relative;
+    padding-top: 2px;
+}
+
+/************************************************************************************************/
+
+.objectLink-object {
+    font-family: Lucida Grande, sans-serif;
+    font-weight: bold;
+    color: DarkGreen;
+    white-space: -moz-pre-wrap;
+}
+
+.objectPropValue {
+    font-weight: normal;
+    font-style: italic;
+    color: #555555;
+}
+
+/************************************************************************************************/
+
+.selectorTag,
+.selectorId,
+.selectorClass {
+    font-family: Monaco, monospace;
+    font-weight: normal;
+}
+
+.selectorTag {
+    color: #0000FF;
+}
+
+.selectorId {
+    color: DarkBlue;
+}
+
+.selectorClass {
+    color: red;
+}
+
+.selectorHidden > .selectorTag {
+    color: #5F82D9;
+}
+
+.selectorHidden > .selectorId {
+    color: #888888;
+}
+
+.selectorHidden > .selectorClass {
+    color: #D86060;
+}
+
+.selectorValue {
+    font-family: Lucida Grande, sans-serif;
+    font-style: italic;
+    color: #555555;
+}
+
+/*****************************************************************************************/
+
+.panelNode.searching .logRow {
+    display: none;
+}
+
+.logRow.matched {
+    display: block !important;
+}
+
+.logRow.matching {
+    position: absolute;
+    left: -1000px;
+    top: -1000px;
+    max-width: 0;
+    max-height: 0;
+    overflow: hidden;
+}
+
+/*****************************************************************************************/
+
+.arrayLeftBracket,
+.arrayRightBracket,
+.arrayComma {
+    font-family: Monaco, monospace;
+}
+
+.arrayLeftBracket,
+.arrayRightBracket {
+    font-weight: bold;
+}
+
+.arrayLeftBracket {
+    margin-right: 4px;
+}
+
+.arrayRightBracket {
+    margin-left: 4px;
+}
+
+/*****************************************************************************************/
+
+.logRow-dir {
+    padding: 0;
+}
+
+/************************************************************************************************/
+
+.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-spy > .spyHead > .spyTitle,
+.logGroup > .logRow {
+    cursor: pointer;
+    padding-left: 18px;
+    background-repeat: no-repeat;
+    background-position: 3px 3px;
+}
+
+.logRow-errorMessage > .hasTwisty > .errorTitle {
+    background-position: 2px 3px;
+}
+
+.logRow-errorMessage > .hasTwisty > .errorTitle:hover,
+.logRow-spy > .spyHead > .spyTitle:hover,
+.logGroup > .logRow:hover {
+    text-decoration: underline;
+}
+
+/*****************************************************************************************/
+
+.logRow-spy {
+    padding: 2px 0 1px 0;
+}
+
+.logRow-spy,
+.logRow-spy .objectLink-sourceLink {
+    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+}
+
+.logRow-spy.opened {
+    padding-bottom: 4px;
+    border-bottom: none;    
+}
+
+.spyTitle {
+    padding-top: 1px;
+    color: #000000;
+    font-weight: bold;
+}
+
+.spyTitle:hover {
+    color: blue;
+    text-decoration: none !important;
+}
+
+.spyTitle:hover > .spyURI {
+    text-decoration: underline !important;
+}
+
+.spyTime {
+    color: #555555;
+    font-style: italic;
+}
+
+.spyErrorCode {
+    display: none;
+}
+
+.error .spyErrorCode {
+    margin-left: 4px;
+    display: inline;
+    font-weight: bold;
+    font-style: italic;
+}
+
+.spyIcon {
+    margin-right: 6px;
+    width: 16px;
+    height: 16px;
+    vertical-align: middle;
+    background: transparent no-repeat 0 0;
+}
+
+.logRow-spy.loading > .spyHead > .spyTitle > .spyIcon {
+    background-image: url(chrome://firebug/skin/loading_16.gif);
+}
+
+.logRow-spy.loaded:not(.error) > .spyHead > .spyTitle > .spyIcon {
+    width: 0;
+    margin: 0;
+}
+
+.logRow-spy.error > .spyHead > .spyTitle > .spyIcon {
+    background-image: url(chrome://firebug/skin/errorIcon-sm.png);
+    background-position: 2px 2px;
+}
+
+.logRow-spy > .spyHead > .netInfoBody {
+    display: none;
+}
+
+.logRow-spy.opened > .spyHead > .netInfoBody {
+    margin-top: 10px;
+    display: block;
+}
+
+.logRow-spy.error .spyTitle {
+    color: red;
+}
+
+.logRow-spy.loading .spyResponseText {
+    font-style: italic;
+    color: #888888;
+}
+
+/************************************************************************************************/
+
+.caption {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-weight: bold;
+    color:  #444444;
+}
+
+.warning {
+    padding: 10px;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-weight: bold;
+    color:  #888888;
+}

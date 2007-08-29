@@ -1,0 +1,161 @@
+/* See license.txt for terms of usage */
+
+.panelNode-html {
+    -moz-box-sizing: padding-box;
+    padding: 4px 0 0 2px;
+}
+
+.nodeBox {
+    position: relative;
+    font-family: Monaco, monospace;
+    padding-left: 13px;
+}
+
+.twisty {
+    position: absolute;
+    left: 2px;
+    top: 4px;
+    width: 12px;
+    height: 14px;
+}
+
+.nodeChildBox {
+    margin-left: 12px;
+    display: none;
+}
+
+.nodeLabel,
+.nodeCloseLabel {
+    margin: -2px 2px 0 2px;
+    border: 2px solid transparent;
+    -moz-border-radius: 3px;
+    padding: 0 2px;
+    color: #000088;
+}
+
+.nodeCloseLabel {
+    display: none;
+}
+
+.nodeTag {
+    cursor: pointer;
+    color: blue;
+}
+
+.nodeValue {
+    color: #FF0000;
+    font-weight: normal;
+}
+
+.nodeText,
+.nodeComment {
+    margin: 0 2px;
+    vertical-align: top;
+}
+
+.nodeText {
+    color: #333333;
+}
+
+.nodeComment {
+    color: DarkGreen;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.nodeBox.highlightOpen > .nodeLabel {
+    background-color: #EEEEEE;
+}
+
+.nodeBox.highlightOpen > .nodeCloseLabel,
+.nodeBox.highlightOpen > .nodeChildBox,
+.nodeBox.open > .nodeCloseLabel,
+.nodeBox.open > .nodeChildBox {
+    display: block;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.nodeBox.selected > .nodeLabel > .nodeLabelBox,
+.nodeBox.selected > .nodeLabel {
+    border-color: Highlight;
+    background-color: Highlight;
+    color: HighlightText !important;
+}
+
+.nodeBox.selected > .nodeLabel > .nodeLabelBox,
+.nodeBox.selected > .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.selected > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
+.nodeBox.selected > .nodeLabel > .nodeLabelBox > .nodeText {
+    color: inherit !important;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.nodeBox.highlighted > .nodeLabel {
+    border-color: Highlight !important;
+    background-color: cyan !important;
+    color: #000000 !important;
+}
+
+.nodeBox.highlighted > .nodeLabel > .nodeLabelBox,
+.nodeBox.highlighted > .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.highlighted > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
+.nodeBox.highlighted > .nodeLabel > .nodeLabelBox > .nodeText {
+    color: #000000 !important;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox,
+.nodeBox.nodeHidden > .nodeCloseLabel,
+.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox > .nodeText {
+    color: #888888;
+}
+
+.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.nodeHidden > .nodeCloseLabel > .nodeCloseLabelBox > .nodeTag {
+    color: #5F82D9;
+}
+
+.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue {
+    color: #D86060;
+}
+
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox,
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeText {
+    color: SkyBlue !important;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.nodeBox.mutated > .nodeLabel,
+.nodeAttr.mutated,
+.nodeValue.mutated,
+.nodeText.mutated,
+.nodeBox.mutated > .nodeText {
+    background-color: #EFFF79;
+    color: #FF0000 !important;
+}
+
+.nodeBox.selected.mutated > .nodeLabel,
+.nodeBox.selected.mutated > .nodeLabel > .nodeLabelBox,
+.nodeBox.selected > .nodeLabel > .nodeLabelBox > .nodeAttr.mutated > .nodeValue,
+.nodeBox.selected > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue.mutated,
+.nodeBox.selected > .nodeLabel > .nodeLabelBox > .nodeText.mutated {
+    background-color: #EFFF79;
+    border-color: #EFFF79;
+    color: #FF0000 !important;
+}
+
+/************************************************************************************************/
+
+.logRow-dirxml {
+    padding-left: 0;
+}
+
+.soloElement > .nodeBox  {
+    padding-left: 0;
+}

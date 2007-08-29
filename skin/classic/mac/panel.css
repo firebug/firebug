@@ -1,0 +1,90 @@
+/* See license.txt for terms of usage */
+
+html {
+    background-color: #f3f3f3;
+}
+
+body {
+    border-top: 1px solid #BBB9BA;
+}
+
+/************************************************************************************************/
+/* Twisties */
+
+.twisty,
+.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-spy > .spyHead > .spyTitle,
+.logGroup > .logRow,
+.memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.hasHeaders .netHrefLabel {
+    background-image: url(chrome://firebug/skin/mac/twistyClosed.png);
+    background-repeat: no-repeat;
+    background-position: 2px 3px;
+}
+
+.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.logRow-spy.opened > .spyHead > .spyTitle,
+.logGroup.opened > .logRow,
+.memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
+.nodeBox.highlightOpen > .nodeLabel > .twisty,
+.nodeBox.open > .nodeLabel > .twisty,
+.netRow.opened > .netCol > .netHrefLabel {
+    background-image: url(chrome://firebug/skin/mac/twistyOpen.png);
+}
+
+.memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.hasHeaders .netHrefLabel {
+    background-position: 2px 2px;
+}
+
+.twisty {
+    background-position: 2px 1px;
+}
+
+/************************************************************************************************/
+/* HTML panel */
+
+.nodeBox.selected > .nodeLabel > .nodeLabelBox,
+.nodeBox.selected > .nodeLabel {
+    border-color: #3875d7;
+    background-color: #3875d7;
+    color: #FFFFFF !important;
+}
+
+.nodeBox.highlighted > .nodeLabel {
+    border-color: #3875d7 !important;
+}
+
+/************************************************************************************************/
+/* Layout panel */
+
+.layoutBox.editing,
+.layoutBox.highlighted {
+    background-color: #3875d7;
+}
+
+.layoutBox.editing,
+.layoutBox.editing > .layoutCaption,
+.layoutBox.editing > .layoutLabel,
+.layoutBox.highlighted,
+.layoutBox.highlighted > .layoutCaption,
+.layoutBox.highlighted > .layoutLabel {
+    color: #FFFFFF;
+}
+
+/************************************************************************************************/
+/* DOM panel */
+
+.closeButton {
+    width: 16px;
+    height: 16px;
+    background: url(chrome://firebug/skin/mac/close.png) no-repeat 0 0;
+}
+
+.closeButton:hover {
+    background-image: url(chrome://firebug/skin/mac/closeHover.png);
+}
+
+.closeButton:hover:active {
+    background-image: url(chrome://firebug/skin/mac/closeActive.png);
+}

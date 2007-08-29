@@ -1,0 +1,187 @@
+/* See license.txt for terms of usage */
+
+#inspector-button {
+  list-style-image: url(chrome://firebug/skin/inspect.png);
+}
+
+#inspector-button[disabled="true"] {
+  list-style-image: url(chrome://firebug/skin/inspectDisabled.png);
+}
+
+toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
+    list-style-image: url(chrome://firebug/skin/inspectSmall.png);
+    width: 16px;
+    height: 16px;    
+}
+
+#firebug-button {
+  list-style-image: url(chrome://firebug/skin/firebug24.png);
+}
+
+toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+    width: 16px;
+    height: 16px;
+}
+
+/********************************************************************************************/
+
+#fbLocationSeparator,
+#fbStatusSeparator {
+    min-height: 11px;
+}
+
+#fbCommandArow {
+    margin: 2px 0 2px 7px;
+    font-family: Monaco, monospace;
+    color: #0000FF;
+}
+
+#fbCommandLine {
+    -moz-appearance: none;
+    margin: 2px 0 0 0;
+    padding: 0 4px;
+    height: 0;
+    border: none;
+    font-family: Monaco, monospace;
+}
+
+#fbLargeCommandLine {
+    margin: 0;
+    font-family: Monaco, monospace;
+}
+
+#fbCommandLine > .textbox-input-box > .textbox-textarea {
+    overflow: hidden;
+}
+
+/********************************************************************************************/
+
+#fbStatusBar {
+    cursor: pointer;
+}
+
+#fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/okIcon-sm.png);
+}
+
+#fbStatusText {
+    cursor: pointer;
+    color: red;
+    font-weight: bold;
+}
+
+#fbStatusBar[errors] #fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/errorIcon-sm.png);
+}
+
+#fbStatusBar[disabled="true"] #fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/disabledIcon.png);
+}
+
+/********************************************************************************************/
+
+#fbToolbar {
+    padding-left: 4px;
+}
+
+#fbToolbarInner {
+    overflow: hidden;
+}
+
+#fbSearchBox {
+    margin-left: 0;
+    margin-right: 6px;
+    width: 158px;
+}
+
+#fbCommandBox {
+    border-top: 1px solid #CCCCCC;
+    background-color: #FFFFFF;
+}
+/********************************************************************************************/
+
+.toolbar-image-button {
+    -moz-appearance: none;
+    margin: 0 2px;
+    border: none;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.toolbar-image-button > .toolbarbutton-icon {
+    padding: 0 !important;
+}
+
+.toolbar-image-button > .toolbarbutton-text {
+    display: none;
+}
+
+/************************************************************************************************/
+
+#fbDebuggerButtons {
+    margin-right: 2px;
+}
+
+#fbContinueButton,
+#fbStepOverButton,
+#fbStepIntoButton,
+#fbStepOutButton {
+    -moz-image-region: rect(auto,auto,auto,auto) !important;
+}
+
+#fbContinueButton {
+    list-style-image: url(chrome://firebug/skin/continue.png);
+}
+
+#fbContinueButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/continueActive.png);
+}
+
+#fbContinueButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/continueDisabled.png) !important;
+}
+
+#fbStepOverButton {
+    list-style-image: url(chrome://firebug/skin/stepOver.png);
+}
+
+#fbStepOverButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/stepOverActive.png);
+}
+
+#fbStepOverButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/stepOverDisabled.png) !important;
+}
+
+#fbStepIntoButton {
+    list-style-image: url(chrome://firebug/skin/stepInto.png);
+}
+
+#fbStepIntoButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/stepIntoActive.png);
+}
+
+#fbStepIntoButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/stepIntoDisabled.png) !important;
+}
+
+#fbStepOutButton {
+    list-style-image: url(chrome://firebug/skin/stepOut.png);
+}
+
+#fbStepOutButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/stepOutActive.png);
+}
+
+#fbStepOutButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/stepOutDisabled.png) !important;
+}
+
+#fbBreakOnErrors {
+    list-style-image: url(chrome://firebug/skin/breakErrors.png);
+}
+
+#fbBreakOnErrors[checked="true"] {
+    list-style-image: url(chrome://firebug/skin/breakErrorsOn.png);
+}

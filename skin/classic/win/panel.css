@@ -1,0 +1,48 @@
+/**************************************************************************************************
+//   Copyright (C) Joe Hewitt.                                                All Rights Reserved.
+// ***********************************************************************************************/
+
+/************************************************************************************************/
+/* Twisties */
+
+.twisty,
+.logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-spy > .spyHead > .spyTitle,
+.logGroup > .logRow,
+.memberRow.hasChildren > .memberLabelCell > .memberLabel,
+.hasHeaders .netHrefLabel {
+    background-image: url(chrome://firebug/skin/win/twistyClosed.png);
+    background-repeat: no-repeat;
+    background-position: 2px 2px;
+}
+
+.logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.logRow-spy.opened > .spyHead > .spyTitle,
+.logGroup.opened > .logRow,
+.memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
+.nodeBox.highlightOpen > .nodeLabel > .twisty,
+.nodeBox.open > .nodeLabel > .twisty,
+.netRow.opened > .netCol > .netHrefLabel {
+    background-image: url(chrome://firebug/skin/win/twistyOpen.png);
+}
+
+.twisty {
+    background-position: 2px 0;
+}
+
+/************************************************************************************************/
+/* DOM panel */
+
+.closeButton {
+    width: 16px;
+    height: 16px;
+    background: url(chrome://firebug/skin/win/close.png) no-repeat 0 0;
+}
+
+.closeButton:hover {
+    background-image: url(chrome://firebug/skin/win/closeHover.png);
+}
+
+.closeButton:hover:active {
+    background-image: url(chrome://firebug/skin/win/closeActive.png);
+}

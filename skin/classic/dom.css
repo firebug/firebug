@@ -1,0 +1,121 @@
+/* See license.txt for terms of usage */
+
+.panelNode-dom {
+    overflow-x: hidden !important;
+}
+
+.domTable {
+    width: 100%;
+}
+
+.memberLabelCell {
+    padding: 2px 0 2px 0;
+    vertical-align: top;
+}
+
+.memberValueCell {
+    padding: 1px 0 1px 25px;
+    display: block;
+    overflow: hidden;
+}
+
+.memberLabel {
+    cursor: default;
+    -moz-user-select:  none;
+    overflow: hidden;
+    position: absolute;
+    padding-left: 18px;
+    max-width: 30%;
+    white-space: nowrap;
+    background-color: #FFFFFF;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.memberRow.hasChildren > .memberLabelCell > .memberLabel:hover {
+    cursor: pointer;
+    color: blue;
+    text-decoration: underline;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.userLabel {
+    color: #000000;
+    font-weight: bold;
+}
+
+.userClassLabel {
+    color: #E90000;
+    font-weight: bold;
+}
+
+.userFunctionLabel {
+    color: #025E2A;
+    font-weight: bold;
+}
+
+.domLabel {
+    color: #000000;
+}
+
+.domFunctionLabel {
+    color: #025E2A;
+}
+
+.ordinalLabel {
+    color: SlateBlue;
+    font-weight: bold;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchEditCell {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 1px solid #BEBEBE;
+    color: #666666;
+}
+
+.editor-watchNewRow,
+.editor-memberRow {
+    font-family: Monaco, monospace !important;
+}
+
+.editor-memberRow {
+    padding: 1px 0 !important;
+}
+
+.editor-watchRow {
+    padding-bottom: 0 !important;
+}
+
+.watchRow > .memberLabelCell {
+    font-family: Monaco, monospace;
+    padding-top: 1px;
+    padding-bottom: 1px;
+}
+
+.watchRow > .memberLabelCell > .memberLabel {
+    background-color: transparent;
+}
+
+.watchRow > .memberValueCell {
+    padding-top: 2px;
+    padding-bottom: 2px;
+}
+
+.watchRow > .memberLabelCell,
+.watchRow > .memberValueCell {
+    background-color: #F5F5F5;
+    border-bottom: 1px solid #BEBEBE;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.watchToolbox {
+    z-index: 2147483647;
+    position: absolute;
+    right: 0;
+    padding: 1px 2px;
+}

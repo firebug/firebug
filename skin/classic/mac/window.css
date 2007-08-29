@@ -1,0 +1,11 @@
+/* See license.txt for terms of usage */
+
+#fbToolbar {
+    padding-top: 3px;
+    padding-bottom: 2px;
+}
+
+#fbCommandToggleSmall,
+#fbCommandToggleLarge {
+    width: 48px;
+}

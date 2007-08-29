@@ -1,0 +1,280 @@
+/**************************************************************************************************
+//   Copyright (C) Joe Hewitt.                                                All Rights Reserved.
+// ***********************************************************************************************/
+
+#fbFirebugMenu {
+    margin: 0 4px 0 0;
+    padding: 0 0 0 4px;
+    list-style-image: url(chrome://firebug/skin/firebug.png);
+    -moz-opacity: 0.8;
+}
+
+#fbFirebugMenu:hover,
+#fbFirebugMenu[open="true"] {
+    -moz-opacity: 1.0;
+}
+
+#fbFirebugMenu > .toolbarbutton-text,
+#fbFirebugMenu > .toolbarbutton-menu-dropmarker {
+    display: none;
+}
+
+.toolbar-text-button,
+.toolbar-text-menubutton {
+    padding: 3px 6px;
+}
+
+.toolbar-text-button[checked="true"] {
+    padding: 3px 6px !important;
+}
+
+.toolbar-text-button > .toolbarbutton-icon,
+.toolbar-text-menubutton > .toolbarbutton-icon {
+    display: none;
+}
+
+.toolbar-text-menubutton:hover:active,
+.toolbar-text-menubutton[open="true"] {
+    padding: 4px 5px 2px 7px;
+}
+
+.toolbarbutton-menu-dropmarker {
+    margin-left: 3px;
+}
+
+/************************************************************************************************/
+
+.toolbarbutton-iconic {
+    -moz-appearance: none;
+    padding: 0 !important;
+    border: none !important;
+    background: transparent !important;
+}
+
+.toolbarbutton-iconic > .toolbarbutton-icon {
+    padding: 0;
+}
+
+#fbDebuggerButtons {
+    margin-top: 1px;
+}
+
+#fbCloseButton {
+    margin: 0 4px 0 0;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url("chrome://firebug/skin/win/close.png");
+}
+
+#fbCloseButton:hover {
+    list-style-image: url("chrome://firebug/skin/win/closeHover.png");
+}
+
+#fbCloseButton:hover:active {
+    list-style-image: url("chrome://firebug/skin/win/closeActive.png");
+}
+
+#fbDetachButton {
+    margin: 0;
+    -moz-image-region: rect(auto, auto, auto, auto);
+    list-style-image: url(chrome://firebug/skin/win/detach.png);
+}
+
+#fbDetachButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/detachHover.png);
+}
+
+#fbDetachButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/detachActive.png);
+}
+
+#fbCommandToggleSmall {
+    list-style-image: url(chrome://firebug/skin/win/detach.png);
+}
+
+#fbCommandToggleSmall:hover {
+    list-style-image: url(chrome://firebug/skin/win/detachHover.png);
+}
+
+#fbCommandToggleSmall:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/detachActive.png);
+}
+
+#fbCommandToggleLarge {
+    list-style-image: url(chrome://firebug/skin/win/min.png);
+}
+
+#fbCommandToggleLarge:hover {
+    list-style-image: url(chrome://firebug/skin/win/minHover.png);
+}
+
+#fbCommandToggleLarge:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/minActive.png);
+}
+
+/************************************************************************************************/
+
+#fbLargeCommandLine {
+    -moz-appearance: none;
+    border: none;
+    border-top: 1px solid;
+    -moz-border-top-colors: threedshadow;
+    padding: 2px 0 0 2px;
+}
+
+#fbCommandToolbar {
+    border-top: 1px solid threedshadow;
+}
+
+#fbContentSplitter {
+    border-top: 1px solid !important;
+    -moz-border-top-colors: threedShadow !important;
+    border-bottom: 1px solid !important;
+    -moz-border-bottom-colors: #EEEEEE !important;
+    min-height: 3px;
+    max-height: 3px;
+    background-color: #FFFFFF;
+}
+
+#fbToolbar {
+    padding-bottom: 1px;
+    border-bottom: none;
+}
+
+#fbSearchBox {
+    -moz-appearance: none;
+    margin: 0 6px 1px 2px;
+    border: 1px solid;
+    -moz-border-top-colors: #96969D !important;
+    -moz-border-right-colors: #96969D !important;
+    -moz-border-bottom-colors: #96969D !important;
+    -moz-border-left-colors: #96969D !important;
+    padding: 2px 0 1px 3px;
+    background: -moz-field;
+    font: icon;
+    font-size: 11px;
+}
+
+#fbSearchBox[disabled="true"] {
+    opacity: 0.5;
+}
+
+#fbSearchBox > .autocomplete-textbox-container > .autocomplete-icon {
+    list-style-image: url(chrome://firebug/skin/win/search.png);
+}
+
+/************************************************************************************************/
+
+.panelTabBox {
+    background: url(chrome://firebug/skin/win/tabBg.png) repeat-x top;
+    border-bottom: 1px solid threedshadow;
+    padding: 0 4px;
+    overflow: hidden;
+}
+
+panelTab {
+    margin: 0 0 1px 0;
+    border: none;
+    font-weight: bold;
+    color: #565656;
+    font-size: 11px;
+}
+
+panelTab[selected="true"] {
+    color: inherit;
+}
+
+.panelTab-left {
+    width: 8px;
+}
+
+.panelTab-text {
+    margin: 0;
+    padding: 3px 1px 4px 1px;
+}
+
+.panelTab-right {
+    width: 8px;
+}
+
+panelTab:hover > .panelTab-left {
+    background: url(chrome://firebug/skin/win/tabLeftHover.png) no-repeat bottom;
+}
+
+panelTab:hover > .panelTab-text {
+    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
+}
+
+panelTab:hover > .panelTab-right {
+    background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat bottom;
+}
+
+panelTab[selected="true"] > .panelTab-left {
+    background: url(chrome://firebug/skin/win/tabLeft.png) no-repeat bottom;
+}
+
+panelTab[selected="true"] > .panelTab-text {
+    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
+}
+
+panelTab[selected="true"] > .panelTab-right {
+    background: url(chrome://firebug/skin/win/tabRight.png) no-repeat bottom;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.panelOptionsButton {
+    -moz-appearance: none;
+    border: none;
+}
+
+.panelOptionsButton,
+.panelOptionsButton:hover:active,
+.panelOptionsButton[open="true"] {
+    margin: 2px;
+    padding: 0 6px; 
+}
+
+.panelOptionsButton:hover {
+    cursor: pointer;
+}
+
+.panelOptionsButton:hover > .toolbarbutton-text {
+    color: blue;
+    text-decoration: underline;
+}
+
+.panelOptionsButton[open="true"] > .toolbarbutton-text {
+    color: red;
+    text-decoration: underline;
+}
+
+/************************************************************************************************/
+
+#fbPanelStatus {
+    margin: 0 5px 0 0;
+    overflow: hidden;
+}
+
+.panelStatusSeparator {
+    margin: 0;
+    color: graytext;
+}
+
+.panelStatusLabel {
+    cursor: pointer;
+    margin: 0;
+    padding: 0 4px;
+}
+
+.panelStatusLabel:hover {
+    color: blue;
+}
+
+.panelStatusLabel[selected="true"] {
+    font-weight: bold;
+}
+
+.menuHeader {
+    margin: 2px 6px;
+    font-weight: bold;
+}

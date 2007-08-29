@@ -1,0 +1,83 @@
+/* See license.txt for terms of usage */
+
+.panelNode-css {
+    overflow-x: hidden;
+}
+
+.cssRule {
+    position: relative;
+    margin: 3px 0 4px 0;
+    padding: 3px 0 4px 6px;
+    font-family: Monaco, monospace;
+    color: #000000;
+}
+
+.cssHead {
+    padding-right: 150px;
+}
+
+.cssProp {
+    padding-left: 2em;
+}
+
+.cssPropName {
+    color: DarkGreen;
+}
+
+.cssPropValue {
+    margin-left: 8px;
+    color: DarkBlue;
+}
+
+.cssOverridden {
+    text-decoration: line-through;
+}
+
+.cssInheritedRule {
+}
+
+.cssInheritLabel {
+    margin-right: 0.25em;
+    font-weight: bold;
+}
+
+.cssRule .objectLink-sourceLink {
+    top: 0;
+}
+
+.cssProp:hover {
+    background: url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
+}
+
+.cssProp.disabledStyle {
+    background: url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
+    -moz-opacity: 1;
+    color: #CCCCCC;
+}
+
+.cssProp.disabledStyle > .cssPropName,
+.cssProp.disabledStyle > .cssPropValue {
+    color: inherit;
+}
+
+.cssPropValue.editing + .cssSemi,
+.inlineExpander + .cssSemi {
+    display: none;
+}
+
+.cssPropValue.editing {
+    white-space: nowrap;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.stylePropName {
+    font-weight: bold;
+    padding: 0 4px 4px 4px;
+    width: 50%;
+}
+
+.stylePropValue {
+    width: 50%;
+}
+
