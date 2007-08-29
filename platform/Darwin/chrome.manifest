@@ -1,0 +1,3 @@
+override chrome://firebug-os/skin/firebug.css jar:../../chrome/firebug.jar!/skin/classic/mac/firebug.css
+override chrome://firebug-os/skin/panel.css jar:../../chrome/firebug.jar!/skin/classic/mac/panel.css
+override chrome://firebug-os/skin/window.css jar:../../chrome/firebug.jar!/skin/classic/mac/window.css
