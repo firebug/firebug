@@ -1,0 +1,158 @@
+<?xml version="1.0"?> 
+
+<?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
+<?xul-overlay href="chrome://browser/content/baseMenuOverlay.xul"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
+<?xml-stylesheet href="chrome://firebug/skin/window.css"?>
+
+<!DOCTYPE window [
+<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
+%firebugDTD;
+<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
+%browserDTD;
+]>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        id="firebug"
+        title="Firebug"
+        width="600" height="400"
+        persist="screenX,screenY,width,height">
+
+    <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+
+    <stringbundleset id="stringbundleset"/>     
+    <commandset id="baseMenuCommandSet"/>
+    <keyset id="baseMenuKeyset"/>
+    
+    <commandset id="mainCommandSet">
+        <command id="cmd_undo" 
+                 oncommand="goDoCommand('cmd_undo')"
+                 disabled="true"/>
+        <command id="cmd_redo" 
+                 oncommand="goDoCommand('cmd_redo')"
+                 disabled="true"/>
+        <command id="cmd_cut" 
+                 oncommand="goDoCommand('cmd_cut')"
+                 disabled="true"/>
+        <command id="cmd_copy" 
+                 oncommand="goDoCommand('cmd_copy')"
+                 disabled="true"/>
+        <command id="cmd_paste" 
+                 oncommand="goDoCommand('cmd_paste')"
+                 disabled="true"/>
+        <command id="cmd_delete"
+                 oncommand="goDoCommand('cmd_delete')"
+                 valueDefault="&deleteCmd.label;"
+                 disabled="true"/>
+        <command id="cmd_selectAll"
+                 oncommand="goDoCommand('cmd_selectAll')"
+                 disabled="true"/>
+        <command id="cmd_closeWindow" oncommand="window.close()"/>
+        <command id="cmd_reload" oncommand="FirebugChrome.reload()"/>
+        <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
+        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()"/>
+    </commandset>
+    
+    <keyset id="mainKeyset">
+        <key id="key_undo"
+             key="&undoCmd.key;"
+             modifiers="accel"/>
+        <key id="key_redo" key="&undoCmd.key;" modifiers="accel,shift"/>
+        <key id="key_cut"
+             key="&cutCmd.key;"
+             modifiers="accel"/>
+        <key id="key_copy"
+             key="&copyCmd.key;"
+             modifiers="accel"/>
+        <key id="key_paste"
+             key="&pasteCmd.key;"
+             modifiers="accel"/>
+        <key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
+        <key id="key_selectAll" key="&selectAllCmd.key;" modifiers="accel"/>
+        <key key="&reloadCmd.commandkey;" command="cmd_reload" modifiers="accel" id="key_reload"/>
+        <key key="&reloadCmd.commandkey;" command="cmd_reload" modifiers="accel,shift"/>
+        <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
+    </keyset>
+    
+    <broadcasterset id="mainBroadcasterSet"/>
+    
+    <popupset id="mainPopupSet"/>
+
+    <toolbox id="fbToolbox">
+        <menubar>
+            <menu id="file-menu" label="&fileMenu.label;"
+                  accesskey="&fileMenu.accesskey;">
+                <menupopup onpopupshowing="FirebugChrome.onOptionsShowing(this)">
+                    <menuitem label="&firebug.DisableFirebug;" type="checkbox"
+                              oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>
+                    <menuitem type="checkbox"
+                              oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
+                    <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
+                    <menuseparator/>
+
+                    <menuitem id="menu_closeWindow" command="cmd_closeWindow" key="key_closeWindow"
+                              label="&firebug.Close;"/>
+                </menupopup>
+            </menu>
+            <menu id="view-menu" label="&firebug.View;">
+                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                    <menuitem id="menu_toggleOrient" command="cmd_toggleOrient" type="checkbox" 
+                              label="&firebug.Vertical;" persist="checked"/>
+                    <menuseparator/>
+
+                    <menuitem id="menu_reload" command="cmd_reload" key="key_reload"
+                              label="&reloadCmd.label;" accesskey="reloadCmd.accesskey"/>
+                    <menuseparator/>
+
+                    <menu label="&firebug.TextSize;">
+                        <menupopup>
+                            <menuitem label="&firebug.IncreaseTextSize;" oncommand="Firebug.increaseTextSize(1)"/>
+                            <menuitem label="&firebug.DecreaseTextSize;" oncommand="Firebug.increaseTextSize(-1)"/>
+                            <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
+                        </menupopup>
+                    </menu>
+
+                    <menu label="&firebug.Options;">
+                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                            <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
+                                       oncommand="FirebugChrome.onToggleOption(this)"
+                                       option="openInWindow"/>
+
+                            <menuitem type="checkbox" label="&firebug.ShowTooltips;"
+                                       oncommand="FirebugChrome.onToggleOption(this)"
+                                       option="showInfoTips"/>
+
+                            <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
+                                      oncommand="FirebugChrome.onToggleOption(this)"
+                                      option="shadeBoxModel"/>
+                        </menupopup>
+                    </menu>
+                </menupopup>
+            </menu>
+            <menu id="windowMenu" />
+            <menu id="window-menu" label="&firebug.Help;">
+                <menupopup>
+                    <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
+                    <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
+                    <menuitem label="&firebug.KeyShortcuts;" oncommand="Firebug.visitWebsite('keyboard')"/>
+                    <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
+                    <menuseparator/>
+                    
+                    <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
+                </menupopup>
+            </menu>
+        </menubar>
+        
+        <toolbar id="fbToolbar"/>
+    </toolbox>
+    	
+    <vbox id="fbContentBox" flex="1">
+        <box id="fbPanelBox" flex="1"/>
+        <hbox id="fbCommandBox"/>
+    </vbox>
+    
+</window>

@@ -1,0 +1,51 @@
+/* See license.txt for terms of usage */
+
+@import "chrome://firebug/skin/firebug.css";
+@import "chrome://firebug-os/skin/firebug.css";
+
+#fbContentBox {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#initializer");
+    height: 270px;
+}
+
+#fbCommandLine {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#commandLine");
+}
+
+#fbLargeCommandLine {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#largeCommandLine");
+}
+
+#fbSearchBox {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#searchBox");
+}
+
+panelBar {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBar");
+    -moz-box-orient: vertical;
+}
+
+panelTab {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelTab");
+}
+
+panelStatus {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
+}
+
+#fbLocationList {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelFileList");
+}
+
+#fbStatusText {
+    visibility: collapse;
+}
+
+#fbStatusBar[errors] #fbStatusText {
+    visibility: visible;
+}
+
+#fbToolbar[moz-collapsed="true"] {
+    /* Prevent full-screen from hiding toolbar */
+    visibility: visible;
+}

@@ -1,0 +1,670 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE window [
+<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
+%firebugDTD;
+]>
+
+<bindings xmlns="http://www.mozilla.org/xbl"
+    xmlns:xbl="http://www.mozilla.org/xbl"
+    xmlns:xul="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+<binding id="initializer">
+    <implementation>
+        <destructor><![CDATA[
+           FirebugChrome.shutdown(); 
+        ]]></destructor>
+    </implementation>
+</binding>
+
+<binding id="panelBar">
+    <content>
+        <xul:hbox anonid="tabBox" class="panelTabBox" collapsed="true">
+            <children includes="panelTab"/>/>
+            <xul:spacer flex="1"/>
+            <children/>
+            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;">
+                <xul:menupopup anonid="optionsPopup"/>
+            </xul:toolbarbutton>
+        </xul:hbox>
+        <xul:deck anonid="deck" flex="1">
+            <xul:browser anonid="browser"
+                     xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"/>
+        </xul:deck>
+    </content>
+    
+    <implementation>
+        <constructor><![CDATA[
+            this.tabBox = document.getAnonymousElementByAttribute(this, "anonid", "tabBox");
+            this.optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "optionsPopup");
+            this.deck = document.getAnonymousElementByAttribute(this, "anonid", "deck");
+            this.browser = document.getAnonymousElementByAttribute(this, "anonid", "browser");
+            this.tabMap = {};
+            
+            // We initialize Firebug from here instead of from the onload event because
+            // we need to make sure it is initialized before the browser starts loading
+            // the home page
+            FirebugChrome.panelBarReady(this);
+        ]]></constructor>
+
+        <method name="createTab">
+            <parameter name="panelType"/>
+            <body><![CDATA[
+            var tab = document.createElement("panelTab");
+            tab.panelType = panelType;
+            
+            var title = panelType.prototype.title
+                ? panelType.prototype.title
+                : FBL.$STR("Panel-"+panelType.prototype.name);
+            
+            tab.setAttribute("label", title);
+
+            return this.tabMap[panelType.prototype.name] = tab;
+            ]]></body>
+        </method>
+        
+        <method name="addTab">
+            <parameter name="panelType"/>
+            <body><![CDATA[
+            var tab = this.createTab(panelType);
+            this.appendChild(tab);
+            ]]></body>
+        </method>
+        
+        <method name="updatePanels">
+            <parameter name="panelTypes"/>
+            <body><![CDATA[
+                this.tabMap = {};
+
+                // Replace tabs at the same position if type has changed
+                var i = 0;
+                var tab = this.firstChild;
+                for (; i < panelTypes.length && tab; tab = tab.nextSibling)
+                {
+                    var panelType = panelTypes[i++];
+                    if (tab.panelType.prototype.name != panelType.prototype.name)
+                    {
+                        var newTab = this.createTab(panelType);
+                        this.replaceChild(newTab, tab);
+                        tab = newTab;
+                    }
+                    else
+                        this.tabMap[panelType.prototype.name] = tab;
+                }
+                
+                // Remove old tabs after the last panel
+                while (tab)
+                {
+                    var nextTab = tab.nextSibling;
+                    this.removeChild(tab);
+                    tab = nextTab;
+                }
+                
+                // Insert new tabs after the last old tab
+                for (; i < panelTypes.length; ++i)
+                {
+                    var panelType = panelTypes[i];
+                    var newTab = this.createTab(panelType);
+                    this.appendChild(newTab);
+                }
+            ]]></body>
+        </method>
+
+        <method name="selectTab">
+            <parameter name="tab"/>
+            <body><![CDATA[
+                var panelName = tab ? tab.panelType.prototype.name : null;
+                if (panelName && !tab.panelType.prototype.parentPanel)
+                    Firebug.setPref("defaultPanelName", panelName);
+                
+                this.selectPanel(panelName);
+            ]]></body>
+        </method>
+                
+        <method name="selectPanel">
+            <parameter name="panelName"/>
+            <parameter name="forceUpdate"/>
+            <parameter name="noRefresh"/>
+            <body><![CDATA[
+                var tab = panelName ? this.tabMap[panelName] : null;
+                var panelType = tab ? tab.panelType : null;                
+
+                var panel = FirebugContext ? FirebugContext.getPanel(panelName) : null;
+                
+                if (panel && panel == this.selectedPanel && !forceUpdate)
+                    return panel;
+
+                if (!panel)
+                    this.tabBox.setAttribute("collapsed", "true");
+                else
+                    this.tabBox.removeAttribute("collapsed");
+                
+                if (this.selectedTab)
+                    this.selectedTab.removeAttribute("selected");
+
+                var oldPanel = this.selectedPanel;
+                if (oldPanel)
+                {
+                    oldPanel.visible = false;
+                    oldPanel.hide();
+                    oldPanel.panelNode.removeAttribute("active");
+                }
+                
+                this.selectedTab = tab;
+                this.selectedPanel = panel;
+
+                if (tab)
+                    tab.setAttribute("selected", "true");
+                
+                if (panel)
+                {
+                    panel.visible = true;
+                    panel.panelBrowser = panel.browser ? panel.browser : this.browser;
+                    panel.panelBrowser.currentPanel = panel;
+                }
+                
+                if (!panel || panel.panelBrowser != this.browser)
+                    this.browser.currentPanel = null;
+                
+                var ev = document.createEvent("Events");
+                ev.initEvent("selectingPanel", true, false);
+                this.dispatchEvent(ev);
+
+                if (panel)
+                {
+                    var sel = this.browser.contentWindow.getSelection();
+                    if (sel)
+                        sel.removeAllRanges();
+                    
+                    panel.panelNode.setAttribute("active", true);
+
+                    var state = Firebug.getPanelState(panel);
+                    panel.show(state);
+                    
+                    if (!noRefresh && panel.needsRefresh)
+                    {
+                        delete panel.needsRefresh;
+                        panel.refresh();
+                    }
+                    
+                    if (panel.browser)
+                    {
+                        if (panel.browser.parentNode != this.deck)
+                            this.deck.appendChild(panel.browser);
+                        
+                        this.deck.selectedPanel = panel.browser;
+                    }
+                    else
+                        this.deck.selectedPanel = this.browser;
+                }
+
+                var ev = document.createEvent("Events");
+                ev.initEvent("selectPanel", true, false);
+                this.dispatchEvent(ev);
+                
+                return panel;
+            ]]></body>
+        </method>
+    </implementation>
+
+    <handlers>
+    	<handler event="popupshowing"><![CDATA[
+    	    if (!this.selectedPanel)
+    	        return;
+    	    
+            var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
+            if (menu)
+            {
+                for (var i = 0; i < menu.length; ++i)
+                    FBL.createMenuItem(this.optionsPopup, menu[i]);
+            }
+        ]]></handler>
+
+    	<handler event="popuphidden"><![CDATA[
+    	    FBL.eraseNode(this.optionsPopup);
+        ]]></handler>
+
+    	<handler event="mousedown" button="0"><![CDATA[
+    	    var tab = event.target;
+    	    for (; tab && !tab.panelType; tab = tab.parentNode);
+    	    
+    	    if (tab)
+    	    {
+    	        // Select after a timeout to increase teh snappy
+	            setTimeout(FBL.bindFixed(function()
+	            {
+	                this.selectTab(tab);
+	            }, this));
+    	    }
+        ]]></handler>
+    </handlers>
+</binding>
+
+<binding id="panelTab" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
+    <content>
+        <xul:image class="panelTab-left"/>
+        <xul:label class="panelTab-text" crop="right" flex="1"
+                   xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle"/>
+        <xul:image class="panelTab-right"/>
+    </content>
+</binding>
+
+<binding id="panelStatus">
+    <implementation>
+        <method name="addItem">
+            <parameter name="label"/>
+            <parameter name="object"/>
+            <parameter name="rep"/>
+            <parameter name="separator"/>
+            <body><![CDATA[
+                if (this.firstChild)
+                {
+                    var sep = document.createElement("label");
+                    sep.setAttribute("class", "panelStatusSeparator");
+                    sep.setAttribute("value", separator);
+                    this.appendChild(sep);
+                }
+                
+                var item = document.createElement("label");
+                item.setAttribute("class", "panelStatusLabel");
+                item.setAttribute("value", label);
+                item.repObject = object;
+                item.rep = rep;
+                this.appendChild(item);
+                return item;
+            ]]></body>
+        </method>
+
+        <method name="clear">
+            <parameter name="tab"/>
+            <body><![CDATA[
+                while (this.lastChild)
+                    this.removeChild(this.lastChild);
+            ]]></body>
+        </method>
+
+        <method name="getItemByObject">
+            <parameter name="object"/>
+            <body><![CDATA[
+                for (var item = this.lastChild; item; item = item.previousSibling)
+                {
+                    if (item.rep)
+                    {
+                        var itemObject = item.rep.getRealObject(item.repObject, FirebugContext);
+                        if (itemObject == object)
+                            return item;
+                    }
+                }
+            ]]></body>
+        </method>
+
+        <method name="selectObject">
+            <parameter name="object"/>
+            <body><![CDATA[
+                var item = this.getItemByObject(object);
+                this.selectItem(item);
+            ]]></body>
+        </method>
+
+        <method name="selectItem">
+            <parameter name="item"/>
+            <body><![CDATA[
+                if (this.selectedItem)
+                    this.selectedItem.removeAttribute("selected");
+                
+                this.selectedItem = item;
+                
+                if (item)
+                    item.setAttribute("selected", "true");
+            ]]></body>
+        </method>
+    </implementation>
+
+    <handlers>
+    	<handler event="mousedown" button="0"><![CDATA[
+            var object = Firebug.getRepObject(event.target);
+    	    if (object)
+    	    {
+    	        var rep = Firebug.getRep(object);
+    	        object = rep.getRealObject(object, FirebugContext);
+    	        if (object)
+    	        {
+    	            this.selectObject(object);
+                    FirebugContext.chrome.select(object, null, null, true);
+    	        }
+    	    }
+        ]]></handler>
+
+    	<handler event="mouseover"><![CDATA[
+            var object = Firebug.getRepObject(event.target);
+    	    if (object)
+    	    {
+    	        var rep = Firebug.getRep(object);
+    	        object = rep.getRealObject(object, FirebugContext);
+    	        if (object)
+                    Firebug.Inspector.highlightObject(object, FirebugContext);
+    	    }
+        ]]></handler>
+
+    	<handler event="mouseout"><![CDATA[
+	        Firebug.Inspector.highlightObject(null);
+        ]]></handler>
+    </handlers>
+</binding>
+
+<binding id="panelFileList" display="xul:menu">
+    <content popup="_child">
+        <xul:label class="toolbarbutton-text"
+             xbl:inherits="value=label,tooltip=labeltooltip,contextmenu=labelcontextmenu"/>
+        <xul:image class="toolbarbutton-menu-dropmarker"/>
+        <xul:menupopup anonid="popup" position="after_start"/>
+    </content>
+        
+    <resources>
+        <stylesheet src="chrome://global/skin/toolbarbutton.css"/>
+    </resources>
+
+    <implementation>
+        <constructor><![CDATA[
+            this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
+            this._closed = true;
+        ]]></constructor>
+
+        <property name="location">
+            <getter><![CDATA[
+                return this.getAttribute("location");
+            ]]></getter>
+
+            <setter><![CDATA[
+        	    var panel = FirebugContext.chrome.getSelectedPanel();
+                var location = panel.getObjectLocation(val);
+                var fileName = FBL.getFileName(location);
+                this.repObject = val;
+                this.setAttribute("label", fileName);
+                this.setAttribute("location", val);
+            ]]></setter>
+        </property>
+        
+        <method name="showPopup">
+            <body><![CDATA[
+                this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
+            ]]></body>
+        </method>
+
+        <method name="selectObject">
+            <parameter name="object"/>
+            <body><![CDATA[
+                this.repObject = object;
+                
+                var ev = document.createEvent("Events");
+                ev.initEvent("selectObject", true, false);
+                this.dispatchEvent(ev);
+            ]]></body>
+        </method>
+
+        <method name="enterActiveItem">
+            <body><![CDATA[
+                for (var child = this.popup.firstChild; child; child = child.nextSibling)
+                {
+                    if (child.getAttribute("_moz-menuactive") == "true")
+                    {
+                        this.location = child.repObject;
+                        this.selectObject(child.repObject);
+                        this.popup.hidePopup();
+                    }
+                }
+            ]]></body>
+        </method>
+
+        <method name="filterList">
+            <parameter name="substring"/>
+            <body><![CDATA[
+                var firstMatch = null;
+                var groupMatchCount = 0;
+                for (var child = this.popup.lastChild; child; child = child.previousSibling)
+                {
+                    if (child.localName == "menuitem")
+                    {
+                        var label = child.getAttribute("label").toLowerCase();
+                        child._searchMatch = label.indexOf(substring) != -1;
+                        if (child._searchMatch)
+                        {
+                            firstMatch = child;
+                            ++groupMatchCount;
+                        }
+                    }
+                    else
+                    {
+                        child._searchMatch = !!groupMatchCount;
+                        groupMatchCount = 0;
+                    }
+                }
+
+                if (firstMatch)
+                {
+                    for (var child = this.popup.firstChild; child; child = child.nextSibling)
+                    {
+                        child.hidden = !child._searchMatch;
+                        child.removeAttribute("_moz-menuactive");
+                    }
+
+                    firstMatch.setAttribute("_moz-menuactive", "true");
+                }
+            ]]></body>
+        </method>
+   
+        <method name="onKeyPress">
+            <parameter name="event"/>
+            <body><![CDATA[
+                if (event.keyCode == 13) // Return
+                    this.enterActiveItem();
+                else if (event.keyCode == 8) // Backspace
+                {
+                    this.searchString = this.searchString.substr(0, this.searchString.length-2);
+                    this.filterList(this.searchString);
+                }
+                else if (event.charCode)
+                {
+                    this.searchString += String.fromCharCode(event.charCode).toLowerCase();
+                    this.filterList(this.searchString);
+                }
+                else
+                    return;
+                
+                FBL.cancelEvent(event);
+            ]]></body>
+        </method>
+    </implementation>
+
+    <handlers>
+    	<handler event="popupshowing"><![CDATA[
+    	    if (this.popup.firstChild)
+    	        return false;
+    	    
+    	    var panel = FirebugContext.chrome.getSelectedPanel();
+    	    var objects = panel.getLocationList();
+    	    if (!objects)
+    	        return false;
+    	    
+    	    var groupNames = [];
+    	    var groups = {};
+    	    
+    	    for (var i = 0; i < objects.length; ++i)
+    	    {
+    	        var object = objects[i];
+    	        var url = panel.getObjectLocation(object);
+    	        var splitName = FBL.splitURLBase(url);
+
+    	        var entry = {object: object, fileName: splitName.name};
+    	        
+    	        if (splitName.path in groups)
+    	            groups[splitName.path].push(entry);
+    	        else
+    	        {
+                    groups[splitName.path] = [entry];
+                    groupNames.push(splitName.path);
+    	        }
+    	    }
+    	    
+    	    groupNames.sort();
+    	    
+            for (var i = 0; i < groupNames.length; ++i)
+            {
+                var path = groupNames[i];
+                var urls = groups[path];
+                urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
+                
+                FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
+                
+        	    for (var j = 0; j < urls.length; ++j)
+        	    {
+    	            var menuInfo = {label: urls[j].fileName, nol10n: true};
+    	            if (urls[j].object == panel.location)
+    	            {
+    	                menuInfo.type = "checkbox";
+    	                menuInfo.checked = true;
+    	            }
+    	            
+        	        var menuItem = FBL.createMenuItem(this.popup, menuInfo);
+        	        menuItem.repObject = urls[j].object;
+        	    }
+            }
+            
+        ]]></handler>
+
+    	<handler event="popupshown"><![CDATA[
+    	    // Weird, but this gets fired when the user clicks on a menuitem,
+    	    // which hiding the buttons again and resulting in jitters - let's avoid that.
+    	    if (!this._closed)
+    	        return;
+    	    
+    	    // XXXjoe There is a bug in the <xul:autoscrollbox> code which,
+    	    // for reasons I don't grasp yet, never hides the scroll buttons
+    	    // after the first them they are shown - so we must do it ourselves
+            var scrollbox = document.getAnonymousElementByAttribute(
+                this.popup, "class", "popup-internal-box");
+
+            scrollbox["_scrollButtonUp"].collapsed = true;
+            scrollbox["_scrollButtonDown"].collapsed = true;
+
+    	    this._closed = false;
+
+            this.searchString = "";
+            this.onkeypress = FBL.bind(this.onKeyPress, this);
+    	    window.addEventListener("keypress", this.onkeypress, true);
+        ]]></handler>
+
+    	<handler event="popuphidden"><![CDATA[
+    	    window.removeEventListener("keypress", this.onkeypress, true);
+            delete this.onkeypress;
+            delete this.searchString;
+
+    	    FBL.eraseNode(this.popup);
+    	    this._closed = true;
+        ]]></handler>
+
+    	<handler event="command"><![CDATA[
+    	    var object = event.originalTarget.repObject;
+    	    
+    	    // Select after a timeout to increase teh snappy
+    	    setTimeout(FBL.bindFixed(function()
+    	    {
+    	        this.selectObject(object);
+    	    }, this));
+        ]]></handler>
+    </handlers>
+</binding>
+
+<binding id="searchBox" extends="chrome://global/content/bindings/autocomplete.xml#autocomplete">
+    <handlers>
+    	<handler event="keypress"><![CDATA[
+            if (event.keyCode == 13)
+            {
+                if (FBL.isControl(event))
+    	            Firebug.Search.enter(FirebugContext);
+    	        else
+        	        Firebug.Search.update(FirebugContext, true);
+            }
+            else if (event.keyCode == 27)
+	            Firebug.Search.cancel(FirebugContext);
+	        else
+	            return;
+
+            FBL.cancelEvent(event);
+        ]]></handler>
+
+    	<handler event="input"><![CDATA[
+    	    Firebug.Search.update(FirebugContext);
+        ]]></handler>
+    </handlers>
+</binding>
+
+<binding id="commandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
+    <handlers>
+    	<handler event="input"><![CDATA[
+    	    Firebug.CommandLine.update(FirebugContext);
+        ]]></handler>
+
+    	<handler event="overflow"><![CDATA[
+    	    if (window.Firebug)
+    	        Firebug.CommandLine.checkOverflow(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_TAB"><![CDATA[
+    	    Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
+            event.preventDefault();
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_RETURN" modifiers="" preventdefault="true"><![CDATA[
+	        Firebug.CommandLine.enter(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enterMenu(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_RETURN" modifiers="shift" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enterInspect(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_UP" preventdefault="true"><![CDATA[
+	        Firebug.CommandLine.cycleCommandHistory(FirebugContext, -1);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_DOWN" preventdefault="true"><![CDATA[
+	        Firebug.CommandLine.cycleCommandHistory(FirebugContext, 1);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
+	        Firebug.CommandLine.cancel(FirebugContext);
+        ]]></handler>
+    </handlers>
+</binding>
+
+<binding id="largeCommandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
+    <handlers>
+    	<handler event="input"><![CDATA[
+    	    Firebug.CommandLine.update(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_TAB"><![CDATA[
+    	    var input = document.getAnonymousElementByAttribute(this, "anonid", "input");
+    	    FBL.insertTextIntoElement(input, Firebug.Editor.tabCharacter);
+            event.preventDefault();
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enter(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_RETURN" modifiers="control" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enter(FirebugContext);
+        ]]></handler>
+
+    	<handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
+	        Firebug.CommandLine.cancel(FirebugContext);
+        ]]></handler>
+    </handlers>
+</binding>
+
+</bindings>

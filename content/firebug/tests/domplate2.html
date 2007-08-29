@@ -1,0 +1,91 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<script src="debug.js"></script>
+<script src="../domplate.js"></script>
+<script>
+
+function runTest()
+{
+	var people = [
+	{firstName: 'Bob', lastName: 'Jones'},
+	{firstName: 'Fred', lastName: 'Smith'},
+	{firstName: 'Hugo', lastName: 'Britos'},
+	{firstName: 'Bob', lastName: 'Jones'},
+	{firstName: 'Fred', lastName: 'Smith'},
+	{firstName: 'Hugo', lastName: 'Britos'},
+	{firstName: 'Bob', lastName: 'Jones'},
+	{firstName: 'Fred', lastName: 'Smith'},
+	{firstName: 'Hugo', lastName: 'Britos'},
+	{firstName: 'Bob', lastName: 'Jones'},
+	{firstName: 'Fred', lastName: 'Smith'},
+	{firstName: 'Hugo', lastName: 'Britos'},
+	{firstName: 'Bob', lastName: 'Jones'},
+	{firstName: 'Fred', lastName: 'Smith'},
+	{firstName: 'Hugo', lastName: 'Britos'},
+	{firstName: 'Bob', lastName: 'Jones'},
+	{firstName: 'Fred', lastName: 'Smith'},
+	{firstName: 'Hugo', lastName: 'Britos'},
+	];
+
+	var args = {
+		url: 'http://foo.com',
+		place: 'Jersey',
+		greetingClass: 'greeting',
+		peeps: people
+	};
+
+	templates.uno.tag.insertAfter(args, $("first"));
+}
+
+var templates = {};
+domplate.context(templates, function() {
+
+this.filterPlace = function(place)
+{
+	return '(' + place + ')';
+};
+
+this.zero = domplate({
+	foo: 42
+});
+
+this.uno = domplate(this.zero,
+{
+	tag:
+		DIV({class: 'blue', onclick: "$onClick"},
+			A({href: '$url', class: '$greetingClass'}, "Hello"),
+			FOR('peep', '$peeps',
+				DIV({name: '$peep.firstName', _myName: '$peep.firstName "The Dumbass" $peep.lastName'},
+					'I am $peep.firstName $peep.lastName from $place|filterPlace\\.'
+				),
+				SPAN("Roar.")
+			)
+		),
+
+	name: "uno",
+	
+	onClick: function(event)
+	{
+		ddd("you just clicked", this.name, event.target, event.currentTarget)
+	}
+});
+
+with (this.uno) { alert(foo); }
+
+});
+
+window.addEventListener("load", runTest, false);
+
+</script>
+
+</head>
+
+<body>
+	<div id="first">===</div>
+	<div id="last">---</div>
+</body>
+</html>

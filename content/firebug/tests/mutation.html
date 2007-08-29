@@ -1,0 +1,86 @@
+<html>
+<head>
+
+<script>
+
+function $(id) { return document.getElementById(id); }
+
+function mutateText()
+{
+    var turtle = document.getElementById("turtle");
+    turtle.firstChild.nodeValue = "Mutant Turtle";
+}
+
+function changeAttr()
+{
+    var turtle = document.getElementById("turtle");
+    turtle.href = "http://teenagemutantninjaturtles.com";
+}
+
+function insertAttr()
+{
+    var turtle = document.getElementById("turtle");
+    turtle.setAttribute("foo", "bar");
+}
+
+function removeAttr()
+{
+    var turtle = document.getElementById("turtle");
+    turtle.removeAttribute("href");
+}
+
+function insertElement()
+{
+    var elt = document.createElement("div");
+    elt.innerHTML = "inserted";
+    $("receiver").insertBefore(elt, $("receiver").firstChild);
+}
+
+function appendElement()
+{
+    var elt = document.createElement("div");
+    elt.innerHTML = "appended";
+    $("receiver").appendChild(elt);
+}
+
+function removeElement()
+{
+    $("receiver").removeChild($("receiver").lastChild);
+}
+
+function replaceHTML()
+{
+    $("receiver").innerHTML = "<div>Yo!</div>";
+}
+
+function replaceText()
+{
+    $("receiver").innerHTML = "New Text";
+}
+
+</script>
+
+<style type="text/css">@import "styles.css";</style>
+
+</head>
+
+<body>
+    
+    <a id="turtle" href="http://joehewitt.com">Turtle</a>
+    <button onclick="mutateText()">Mutate Text</button>
+
+    <button onclick="changeAttr()">Change Attribute</button>
+    <button onclick="insertAttr()">Insert Attribute</button>
+    <button onclick="removeAttr()">Remove Attribute</button>
+
+    <button onclick="insertElement()">Insert Element</button>
+    <button onclick="appendElement()">Append Element</button>
+    <button onclick="removeElement()">Remove Element</button>
+    <button onclick="replaceHTML()">Replace HTML</button>
+    <button onclick="replaceText()">Replace Text</button>
+    
+    <div id="receiver">
+        ----
+    </div>
+</body>
+</html>

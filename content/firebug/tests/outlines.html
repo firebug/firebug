@@ -1,0 +1,62 @@
+<?xml version="1.0"?>
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<style type="text/css">
+
+.highlighterEdge {
+    z-index: 65535;
+    position: absolute;
+    background-color: blue;
+    -moz-opacity: 0.5;
+}
+
+.highlighted {
+    background-color: yellow;
+}
+
+</style>
+
+<script src="../outlines.js"></script>
+
+<script>
+
+function $(id) { return document.getElementById(id); }
+
+function runTests()
+{
+    window.onmouseover = function(event)
+    {
+        var t = event.target.nodeType == 1 ? event.target : event.target.parentNode;
+        highlight(t);
+    }
+}
+    
+</script>
+</head>
+
+<body onload="runTests()">
+
+    <div style="margin: 2px; padding: 3px; border: 1px solid gray;">
+        <div>Hello</div>
+        <div id="box1" style="margin: 3px; padding: 4px;">Hello! Blah blah blah<br>blah <span id="box2">woopdee</span> eh.</div>
+    </div>
+
+    <table cellpadding="4" cellspacing="4">
+        <tr>
+            <td>Uno</td>
+            <td>Dos</td>
+        </tr>
+        <tr>
+            <td>Uno</td>
+            <td id="cell1">Dos</td>
+        </tr>
+    </table>
+    
+</body>
+</html>

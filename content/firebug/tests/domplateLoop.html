@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+<script src="debug.js"></script>
+<script src="../domplate.js"></script>
+<script>
+
+function runTest()
+{
+	var people = [
+	{firstName: 'Bob', lastName: 'Jones', buds: ['A', 'B', 'C']},
+	{firstName: 'Fred', lastName: 'Smith', buds: ['A', 'B', 'C']},
+	{firstName: 'Hugo', lastName: 'Britos', buds: ['A', 'B', 'C']}
+	];
+
+	var args = {
+		peeps: people,
+		sections: [1,2],
+		blah: "yay!"
+	};
+		
+	PEOPLE.insertAfter(args, $("first"));
+}
+
+var DUDE =
+    DIV(
+		DIV({_firstName: '$who.firstName'}, 'I am $who.firstName $who.lastName'),
+		FOR('bud', '$who.buds',
+		    SPAN("($bud) ")
+		)
+    );
+
+var PEOPLE =
+	DIV(
+		FOR('peep', '$peeps',
+		    TAG(DUDE, {who: "$peep"})
+		),
+		"---",
+		FOR('section', '$sections',
+            H1("DUDE"),
+    		FOR('peep', '$peeps',
+    	        TAG(DUDE, {who: "$peep"})
+    		)
+		),
+		P({id: "dude", _blah: "$blah"}, "Got object?")
+	);
+
+window.addEventListener("load", runTest, false);
+
+function formatCaption(text)
+{
+	return "(" + text + ")"
+}
+
+</script>
+
+</head>
+
+<body>
+	<div id="first">===</div>
+	<div id="last">---</div>
+</body>
+</html>
