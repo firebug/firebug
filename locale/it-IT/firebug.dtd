@@ -1,0 +1,48 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Chiudi">
+<!ENTITY firebug.View "Visualizza">
+<!ENTITY firebug.Help "?">
+<!ENTITY firebug.Vertical "Pannelli verticale">
+<!ENTITY firebug.Run "Esegui">
+<!ENTITY firebug.Copy "Copia">
+<!ENTITY firebug.CopyBookmarklet "Copia lo script come bookmarklet">
+<!ENTITY firebug.Options "Opzioni">
+<!ENTITY firebug.TextSize "Dimensione testo">
+<!ENTITY firebug.IncreaseTextSize "Aumenta">
+<!ENTITY firebug.DecreaseTextSize "Diminuisci">
+<!ENTITY firebug.NormalTextSize "Normale">
+<!ENTITY firebug.ShowTooltips "Mostra tooltip di anteprima">
+<!ENTITY firebug.ShadeBoxModel "Sfuma il box model">
+<!ENTITY firebug.Website "Visita il sito web">
+<!ENTITY firebug.Documentation "Documentazione...">
+<!ENTITY firebug.KeyShortcuts "Scorciatoie da tastiera">
+<!ENTITY firebug.Forums "Gruppo di discussione...">
+<!ENTITY firebug.Donate "Effettua una donazione...">
+<!ENTITY firebug.AlwaysOpenInWindow "Apri sempre in nuova finestra">
+<!ENTITY firebug.ShowFirebug "Apri Firebug">
+<!ENTITY firebug.DetachFirebug "Apri Firebug in nuova finestra">
+<!ENTITY firebug.CloseFirebug "Chiudi">
+<!ENTITY firebug.DisableFirebug "Disattiva Firebug">
+<!ENTITY firebug.AllowedSites "Siti con permesso...">
+<!ENTITY firebug.CommandLine "Riga di comando">
+<!ENTITY firebug.Search "Cerca">
+<!ENTITY firebug.Continue "Continua (F5)">
+<!ENTITY firebug.StepOver "Salta (F10)">
+<!ENTITY firebug.StepInto "Entra (F11)">
+<!ENTITY firebug.StepOut "Esci">
+<!ENTITY firebug.BreakOnErrors "Interrompi in caso di errori">
+<!ENTITY firebug.Inspect "Analizza">
+<!ENTITY firebug.InspectElement "Analizza elemento">
+<!ENTITY firebug.InspectTooltip "Seleziona un elemento nella pagina da analizzare">
+<!ENTITY firebug.Edit "Modifica">
+<!ENTITY firebug.EditHTMLTooltip "Modifica HTML">
+<!ENTITY firebug.EditCSSTooltip "Modifica foglio di stile">
+<!ENTITY firebug.Profile "Profilo">
+<!ENTITY firebug.ProfileScript "Profilo JavaScript">
+<!ENTITY firebug.ProfileTooltip "Tempo di esecuzione JavaScript">
+<!ENTITY firebug.Clear "Svuota">
+<!ENTITY firebug.ClearConsole "Svuota console">
+<!ENTITY firebug.ClearTooltip "Svuota la console">
+<!ENTITY firebug.All "Tutto">
+<!ENTITY firebug.Images "Immagini">
+<!ENTITY firebug.Flash "Flash">

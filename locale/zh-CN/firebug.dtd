@@ -1,0 +1,48 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "关闭">
+<!ENTITY firebug.View "查看">
+<!ENTITY firebug.Help "帮助">
+<!ENTITY firebug.Vertical "垂直显示窗格">
+<!ENTITY firebug.Run "运行">
+<!ENTITY firebug.Copy "复制">
+<!ENTITY firebug.CopyBookmarklet "script 另存为 bookmarklet。">
+<!ENTITY firebug.Options "选项">
+<!ENTITY firebug.TextSize "文字尺寸">
+<!ENTITY firebug.IncreaseTextSize "放大文字尺寸">
+<!ENTITY firebug.DecreaseTextSize "缩小文字尺寸">
+<!ENTITY firebug.NormalTextSize "正常文字大小">
+<!ENTITY firebug.ShowTooltips "显示预览工具提示">
+<!ENTITY firebug.ShadeBoxModel "给 Box Model 上色">
+<!ENTITY firebug.Website "Firebug 网站...">
+<!ENTITY firebug.Documentation "文档...">
+<!ENTITY firebug.KeyShortcuts "键盘快捷键...">
+<!ENTITY firebug.Forums "讨论组...">
+<!ENTITY firebug.Donate "捐赠...">
+<!ENTITY firebug.AlwaysOpenInWindow "总是在新窗口中打开">
+<!ENTITY firebug.ShowFirebug "打开 Firebug">
+<!ENTITY firebug.DetachFirebug "在新窗口中打开 Firebug">
+<!ENTITY firebug.CloseFirebug "关闭 Firebug">
+<!ENTITY firebug.DisableFirebug "禁用 Firebug">
+<!ENTITY firebug.AllowedSites "允许的站点...">
+<!ENTITY firebug.CommandLine "命令行">
+<!ENTITY firebug.Search "查找">
+<!ENTITY firebug.Continue "继续 (F5)">
+<!ENTITY firebug.StepOver "逐程序运行 (F10)">
+<!ENTITY firebug.StepInto "逐句运行 (F11)">
+<!ENTITY firebug.StepOut "跳出语句运行">
+<!ENTITY firebug.BreakOnErrors "发生错误时中断">
+<!ENTITY firebug.Inspect "检查">
+<!ENTITY firebug.InspectElement "检查元素">
+<!ENTITY firebug.InspectTooltip "在页面内点击要检查的元素">
+<!ENTITY firebug.Edit "编辑">
+<!ENTITY firebug.EditHTMLTooltip "编辑其 HTML">
+<!ENTITY firebug.EditCSSTooltip "编辑其样式表">
+<!ENTITY firebug.Profile "记录">
+<!ENTITY firebug.ProfileScript "记录 JavaScript">
+<!ENTITY firebug.ProfileTooltip "记录 JavaScript 执行时间">
+<!ENTITY firebug.Clear "清除">
+<!ENTITY firebug.ClearConsole "清空控制台">
+<!ENTITY firebug.ClearTooltip "清空当前控制台">
+<!ENTITY firebug.All "全部">
+<!ENTITY firebug.Images "图片">
+<!ENTITY firebug.Flash "Flash">

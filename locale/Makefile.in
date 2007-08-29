@@ -1,0 +1,25 @@
+# See license.txt for terms of usage
+
+DEPTH = ../../..
+topsrcdir = @top_srcdir@
+srcdir = @srcdir@
+VPATH = @srcdir@
+
+include $(DEPTH)/config/autoconf.mk
+
+MODULE = firebug
+
+XPI_NAME               = firebug
+INSTALL_EXTENSION_ID   = firebug@software.joehewitt.com
+XPI_PKGNAME            = firebug
+USE_EXTENSION_MANIFEST = 1
+
+DEFINES += -DAB_CD=$(AB_CD)
+
+include $(topsrcdir)/config/rules.mk
+
+ifneq (en-US,$(AB_CD))
+libs realchrome::
+	@echo "Comparing $(AB_CD) to en-US"
+	@$(PERL) $(topsrcdir)/toolkit/locales/compare-locales.pl $(srcdir)/en-US $(srcdir)/$(AB_CD)
+endif

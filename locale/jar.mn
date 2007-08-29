@@ -1,0 +1,6 @@
+#filter substitution
+
+firebug.jar:
+% locale firebug @AB_CD@ %@AB_CD@/
+  @AB_CD@/firebug.dtd        (@AB_CD/firebug.dtd)
+  @AB_CD@/firebug.properties (@AB_CD/firebug.properties)

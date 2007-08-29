@@ -1,0 +1,56 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "閉じる">
+<!ENTITY firebug.View "表示">
+<!ENTITY firebug.Help "ヘルプ">
+<!ENTITY firebug.Vertical "左右に並べて表示">
+<!ENTITY firebug.Run "実行">
+<!ENTITY firebug.Copy "コピー">
+<!ENTITY firebug.CopyBookmarklet "スクリプトをブックマークレットとしてコピー。">
+
+<!ENTITY firebug.Options "オプション">
+<!ENTITY firebug.TextSize "文字サイズ">
+<!ENTITY firebug.IncreaseTextSize "大きく">
+<!ENTITY firebug.DecreaseTextSize "小さく">
+<!ENTITY firebug.NormalTextSize "標準">
+<!ENTITY firebug.ShowTooltips "ツールチップのプレビューを表示">
+<!ENTITY firebug.ShadeBoxModel "ボックスモデルに影を表示">
+<!ENTITY firebug.Website "Firebug のウェブサイト...">
+<!ENTITY firebug.Documentation "ドキュメント...">
+<!ENTITY firebug.KeyShortcuts "キーボード ショートカット...">
+<!ENTITY firebug.Forums "フォーラム...">
+<!ENTITY firebug.Donate "寄付...">
+<!ENTITY firebug.AlwaysOpenInWindow "常に新しいウィンドウで開く">
+
+<!ENTITY firebug.ShowFirebug "Firebug を開く">
+<!ENTITY firebug.DetachFirebug "Firebug を新しいウィンドウで開く">
+<!ENTITY firebug.CloseFirebug "Firebug を閉じる">
+<!ENTITY firebug.DisableFirebug "Firebug を無効">
+<!ENTITY firebug.AllowedSites "許可するサイト...">
+<!ENTITY firebug.CommandLine "コマンドライン">
+<!ENTITY firebug.Search "検索">
+
+<!ENTITY firebug.Continue "再開 (F8)">
+<!ENTITY firebug.StepOver "スッテプ オーバー (F10)">
+<!ENTITY firebug.StepInto "ステップ イン (F11)">
+<!ENTITY firebug.StepOut "ステップ アウト">
+<!ENTITY firebug.BreakOnErrors "エラー発生時に停止">
+
+<!ENTITY firebug.Inspect "調査">
+<!ENTITY firebug.InspectElement "要素を調査">
+<!ENTITY firebug.InspectTooltip "ページ内の調べたい要素をクリックしてください">
+
+<!ENTITY firebug.Edit "編集">
+<!ENTITY firebug.EditHTMLTooltip "この HTML を編集します">
+<!ENTITY firebug.EditCSSTooltip "このスタイルシートを編集します">
+
+<!ENTITY firebug.Profile "プロファイル">
+<!ENTITY firebug.ProfileScript "JavaScript のプロファイル">
+<!ENTITY firebug.ProfileTooltip "プロファイルの実行時間">
+
+<!ENTITY firebug.Clear "消去">
+<!ENTITY firebug.ClearConsole "コンソールを消去">
+<!ENTITY firebug.ClearTooltip "コンソールを消去します">
+
+<!ENTITY firebug.All "すべて">
+<!ENTITY firebug.Images "画像">
+<!ENTITY firebug.Flash "Flash">
