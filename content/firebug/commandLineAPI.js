@@ -15,18 +15,9 @@ function FirebugCommandLineAPI(context)
         return FBL.getElementsBySelector(baseWindow.document, selector);
     };
     
-    this.$x = function(xpath, contextNode)
+    this.$x = function(xpath)
     {
-        var doc = baseWindow.document;
-        if (contextNode)
-            doc = contextNode.ownerDocument;
-        return FBL.getElementsByXPath(doc, xpath, contextNode);
-    };
-
-    this.$X = function(xpath, contextNode)
-    {
-        var got = this.$x(xpath, contextNode);
-        return got instanceof Array ? got[0] : got;
+        return FBL.getElementsByXPath(baseWindow.document, xpath);
     };
 
     this.cd = function(object)

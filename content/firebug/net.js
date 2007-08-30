@@ -175,7 +175,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
             monitorContext(context);
     },
     
-    reattachContext: function(context)
+    reattachContext: function(browser, context)
     {
         var chrome = context ? context.chrome : FirebugChrome;
         this.syncFilterButtons(chrome);
@@ -376,7 +376,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     getHref: function(file)
     {
-        if (file.status && file.status != 200 && file.status != 304)
+        if (file.status && file.status != 200)
             return getFileName(file.href) + " (" + file.status + ")";
         else
             return getFileName(file.href);
@@ -863,7 +863,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     
     updateTimeline: function(rightNow)
     {
-        var rootFile = this.context.netProgress.rootFile;
+        var rootFile = this.context.netProgress.rootFile; // XXXjjb never read?
         var tbody = this.table.firstChild;
 
         // XXXjoe Don't update rows whose phase is done and layed out already
@@ -975,7 +975,10 @@ function NetProgress(context)
         {
             var file = handler.apply(this, args);
             if (file)
-                panel.updateFile(file);
+			{
+                 panel.updateFile(file);
+				return file;				
+			}
         }
         else
         {
@@ -983,12 +986,21 @@ function NetProgress(context)
                 queue.splice(0, 2);
             queue.push(handler, args);
         }
+                                                                                                                       /*@explore*/
+		if (FBTrace.DBG_NET)                                                                                           /*@explore*/
+			FBTrace.dumpProperties( " net.post.args "+(panel?" applied":"queued @"+(queue.length-2)), args);           /*@explore*/
     };
     
     this.flush = function()
     {
         for (var i = 0; i < queue.length; i += 2)
         {
+			if (FBTrace.DBG_NET)                                                                                       /*@explore*/
+			{                                                                                                          /*@explore*/
+				FBTrace.dumpProperties("net.flush handler("+i+")", queue[i]);                                          /*@explore*/
+				FBTrace.dumpProperties("net.flush args ", queue[i+1]);                                                 /*@explore*/
+			}                                                                                                          /*@explore*/
+			                                                                                                           /*@explore*/
             var file = queue[i].apply(this, queue[i+1]);
             if (file)
                 panel.updateFile(file);
@@ -1034,12 +1046,15 @@ NetProgress.prototype =
     respondedTopWindow: function(request, time, webProgress)
     {
         this.requestedFile(request, time, webProgress);
+		var win = webProgress ? safeGetWindow(webProgress) : null; 
+        this.requestedFile(request, time, win);
         return this.respondedFile(request, time);
     },
     
-    requestedFile: function(request, time, webProgress, category)
+    requestedFile: function(request, time, win, category) // XXXjjb 3rd arg was webProgress, pulled safeGetWindow up
     {
         var win = webProgress ? safeGetWindow(webProgress) : null;
+        // XXXjjb to allow spy to pass win.  var win = webProgress ? safeGetWindow(webProgress) : null;
         var file = this.getRequestFile(request, win);
         if (file)
         {

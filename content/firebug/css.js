@@ -161,7 +161,7 @@ const styleGroups =
 
 function CSSStyleSheetPanel() {}
 
-CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
+CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
     template: domplate(
     {
@@ -503,6 +503,8 @@ CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
         this.onClick = bind(this.onClick, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
+        this.initializeSourceBoxes();
+        
     },
     
     destroy: function(state)
@@ -548,8 +550,8 @@ CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
             return 1;
         else if (object instanceof CSSStyleRule)
             return 2;
-        else if (object instanceof SourceLink && object.type == "css")
-            return 1;
+        else if (object instanceof SourceLink && object.type == "css" && reCSS.test(object.href))
+            return 2;
         else
             return 0;
     },
@@ -581,12 +583,31 @@ CSSStyleSheetPanel.prototype = extend(Firebug.Panel,
         }
         else if (object instanceof SourceLink)
         {
-            var styleSheet = getStyleSheetByHref(object.href, this.context);
-            this.navigate(styleSheet);
-
-            var rule = this.getRuleByLine(styleSheet, object.line);
-            if (rule)
-                this.highlightRule(rule);                
+            try 
+            {
+                clearNode(this.panelNode);  // replace rendered stylesheets
+                this.showSourceFile(object, function(sourceLink, sourceBox) 
+                {
+                    if (FBTrace.DBG_CSS)                                                                               /*@explore*/
+                        FBTrace.sysout("css.Decorator href="+sourceLink.href+" lineNo="+sourceLink.line+"\n");         /*@explore*/
+                    if (sourceBox.sourceRow)
+                        sourceBox.sourceRow.removeAttribute("exeLine");
+                        
+                    var lineNo = sourceLink.line;
+                    if (lineNo)
+                    {
+                        sourceBox.sourceRow = sourceBox.childNodes[lineNo-1];
+                        if (sourceBox.sourceRow)
+                        {
+                            sourceBox.sourceRow.setAttribute("exeLine", "true");
+                            scrollIntoCenterView(sourceBox.sourceRow, sourceBox);  // I don't know why this does not work.
+                        }
+                    }
+                });
+            }
+            catch(exc) {
+                FBTrace.dumpProperties("css.upDateSelection FAILS", exc);
+            }             
         }
     },
     
@@ -1053,6 +1074,9 @@ CSSElementPanel.prototype = extend(CSSStyleSheetPanel.prototype,
 
     updateSelection: function(element)
     {
+        if ( !(element instanceof Element) ) // html supports SourceLink
+            return;  
+            
         if (sothinkInstalled)
         {
             FirebugReps.Warning.tag.replace({object: "SothinkWarning"}, this.panelNode);

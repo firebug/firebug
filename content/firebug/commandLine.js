@@ -11,15 +11,17 @@ const commandPrefix = ">>>";
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
 
-const evalScript = "with (__scope__.vars) { with (__scope__.api) { with (__scope__.userVars) { with (window) {" +
+// XXXjjb FF3  needs win.__scope__ because we eval in sandbox
+
+const evalScript = "with (win.__scope__.vars) { with (win.__scope__.api) { with (win.__scope__.userVars) { with (win) {" +
     "try {" +
-        "__scope__.callback(eval(__scope__.expr));" +
+        "win.__scope__.callback(eval(win.__scope__.expr));" +
     "} catch (exc) {" +
-        "__scope__.callback(exc, true);" +
+        "win.__scope__.callback(exc, true);" +
     "}" +
 "}}}}";
 
-const evalScriptWithThis =  "(function() { " + evalScript + " }).apply(__scope__.thisValue);";
+const evalScriptWithThis =  "(function() { " + evalScript + " }).apply(win.__scope__.thisValue);";
 
 // ************************************************************************************************
 // GLobals
@@ -75,17 +77,25 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             try
             {
-                injectScript(scriptToEval, win);
-                iterateWindows(win, function(win) { delete win.__scope__; });
-                
-                if (threw)
-                    throw result;
+                FBL.evalInTo(win, scriptToEval);
             }
             catch (exc)
             {
-                iterateWindows(win, function(win) { delete win.__scope__; });
-                throw exc;
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo FAILS:",exc);        /*@explore*/
             }
+            try 
+            {
+                 iterateWindows(win, function(win) { delete win.__scope__; });
+            }
+            catch (exc)
+            {
+           }   
+            if (threw) 
+            {
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate evaluation threw:",exc);          /*@explore*/
+                throw result;
+            }
+                    
         }
 
         context.invalidatePanels("dom", "watches", "domSide");

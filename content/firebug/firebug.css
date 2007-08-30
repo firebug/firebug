@@ -33,6 +33,10 @@ panelStatus {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
 }
 
+#fbCallstack {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
+}
+
 #fbLocationList {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelFileList");
 }

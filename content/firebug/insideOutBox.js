@@ -189,10 +189,19 @@ InsideOutBox.prototype =
         var rootObject = this.rootObject;
         if (!rootObject)
             this.rootObject = this.getRootNode(object);
+        else                                                                                                           /*@explore*/
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+            {                                                                                                          /*@explore*/
+                FBTrace.sysout("Root already set:");                                                                   /*@explore*/
+                this.getRootNode(object);                                                                              /*@explore*/
+            }                                                                                                          /*@explore*/
 
         // Get or create all of the boxes for the target and its ancestors
         var objectBox = this.createObjectBoxes(object, this.rootObject);
-
+        
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+            FBTrace.sysout("\n----\ninsideOutBox.createObjectBox for object="+object+" got objectBox="+objectBox+"\n");/*@explore*/
+                                                                                                                       /*@explore*/
         if (!objectBox)
             return null;
         else if (object == this.rootObject)
@@ -206,6 +215,8 @@ InsideOutBox.prototype =
      */
     createObjectBoxes: function(object, rootObject)
     {
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+            FBTrace.sysout("\n----\ninsideOutBox.createObjectBoxes for object="+object+"\n");                          /*@explore*/
         if (!object)
             return null;
     
@@ -222,21 +233,32 @@ InsideOutBox.prototype =
                 this.rootObjectBox = this.view.createObjectBox(object, true);
                 this.box.appendChild(this.rootObjectBox);
             }
-
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+") rootObjectBox: "             /*@explore*/
+				                            +this.rootObjectBox+"\n\n");                                               /*@explore*/
             return this.rootObjectBox;
         }
         else
         {
             var parentNode = this.view.getParentObject(object);
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+"\n"); /*@explore*/
+
             var parentObjectBox = this.createObjectBoxes(parentNode, rootObject);
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+" parentObjectBox: "+parentObjectBox+"\n"); /*@explore*/
             if (!parentObjectBox)
                 return null;
         
             var parentChildBox = this.getChildObjectBox(parentObjectBox);
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+" parentChildBox: "+parentChildBox+"\n"); /*@explore*/
             if (!parentChildBox)
                 return null;
         
             var childObjectBox = this.findChildObjectBox(parentChildBox, object);
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+" childObjectBox: "+childObjectBox+"\n"+(childObjectBox?"\n":"")); /*@explore*/
             return childObjectBox
                 ? childObjectBox
                 : this.populateChildBox(object, parentChildBox);
@@ -311,6 +333,8 @@ InsideOutBox.prototype =
             return null;
 
         var parentObjectBox = nodeChildBox.parentNode;
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+                FBTrace.sysout("insideOutBox.populateChildBox("+repObject+") parentObjectBox.populated "+parentObjectBox.populated+"\n"); /*@explore*/
         if (parentObjectBox.populated)
             return this.findChildObjectBox(nodeChildBox, repObject);
         
@@ -355,6 +379,8 @@ InsideOutBox.prototype =
     
         if (targetBox)
             parentObjectBox.populated = true;
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+                FBTrace.sysout("insideOutBox.populateChildBox("+repObject+") targetBox "+targetBox+"\n");              /*@explore*/
 
         return targetBox;
     },
@@ -374,6 +400,8 @@ InsideOutBox.prototype =
     {
         for (var childBox = parentNodeBox.firstChild; childBox; childBox = childBox.nextSibling)
         {
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout("insideOutBox.findChildObjectBox childBox.repObject: "+childBox.repObject +" repObject: "+repObject+"\n"); /*@explore*/
             if (childBox.repObject == repObject)
                 return childBox;
         }    
@@ -381,9 +409,15 @@ InsideOutBox.prototype =
 
     getRootNode: function(node)
     {
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+            FBTrace.sysout("insideOutBox.getRootNode for ");                                                           /*@explore*/
         while (1)
         {
+            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+                FBTrace.sysout(node);                                                                                  /*@explore*/
             var parentNode = this.view.getParentObject(node);
+            if (FBTrace.DBG_HTML && !parentNode)                                                                       /*@explore*/
+                FBTrace.sysout("\n");                                                                                  /*@explore*/
             if (!parentNode)
                 return node;
             else

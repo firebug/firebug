@@ -1,4 +1,4 @@
-/* See license.txt for terms of usage */
+8/29/2007/* See license.txt for terms of usage */
  
 FBL.ns(function() { with (FBL) {
 
@@ -250,9 +250,12 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!chrome)
             chrome = FirebugChrome;
 
-        for (var i = 0; i < this.keyListeners.length; ++i)
-            chrome.keyIgnore(this.keyListeners[i]);
-        delete this.keyListeners;
+        if (this.keyListeners)  // XXXjjb for some reason this is null some times...
+        {
+            for (var i = 0; i < this.keyListeners.length; ++i)
+                chrome.keyIgnore(this.keyListeners[i]);
+            delete this.keyListeners;   
+        }
         
         iterateWindows(win, bind(function(subWin)
         {
@@ -449,9 +452,18 @@ FrameHighlighter.prototype =
         if (needsAppend)
         {
             attachStyles(context, body);
-
             for (var edge in nodes)
-                body.appendChild(nodes[edge]);
+            {
+                try 
+                {
+                    body.appendChild(nodes[edge]);
+                }
+                catch(exc)
+                {
+                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
+                        FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);                     /*@explore*/
+                }
+            }
         }
     },
     

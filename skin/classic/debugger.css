@@ -67,6 +67,12 @@
     background-color: lightgoldenrodyellow;
 }
 
+.sourceRow[executable="true"] > .sourceLine {
+    content: "-";
+    color: #4AA02C;  /* Spring Green */
+    font-weight: bold;
+}
+
 .sourceRow[exeLine="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/exe.png);
     color: #000000;
@@ -272,3 +278,12 @@
     border-top: none !important;
 }
  
+.panelNode-callstack  .objectLink-sourceLink {
+    display: none;
+}
+
+.panelNode-callstack {
+    margin-left: 4px;
+    overflow: auto;
+}
+

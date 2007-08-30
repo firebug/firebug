@@ -68,11 +68,11 @@ Firebug.Profiler = extend(Firebug.Module,
         {
             if (script.callCount)
             {
-                url = normalizeURL(script.fileName);
-                if (url in sourceFileMap)
+                var sourceLink = FBL.getSourceForScript(script, context);
+                if (sourceLink && sourceLink.href in sourceFileMap) 
                 {
                     var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,
-                        script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime);
+                        script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime, sourceLink);
                     calls.push(call);
                     
                     totalCalls += script.callCount;
@@ -292,8 +292,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     
     getSourceLink: function(call)
     {
-        var url = normalizeURL(call.script.fileName);
-        return new SourceLink(url, call.script.baseLineNumber, "js");
+        return call.sourceLink;
     },
 
     roundTime: function(ms)
@@ -331,7 +330,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTime, maxTime)
+function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTime, maxTime, sourceLink)
 {
     this.script = script;
     this.context = context;
@@ -340,6 +339,7 @@ function ProfileCall(script, context, callCount, totalTime, totalOwnTime, minTim
     this.totalOwnTime = totalOwnTime;
     this.minTime = minTime;
     this.maxTime = maxTime;
+    this.sourceLink = sourceLink;
 }
 
 // ************************************************************************************************

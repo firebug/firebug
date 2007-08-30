@@ -46,6 +46,7 @@
         
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(FirebugContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
+        <command id="cmd_breakOnTopLevel" oncommand="Firebug.togglePref('breakOnTopLevel')"/>
     </commandset>
     
     <keyset id="mainKeyset">
@@ -145,7 +146,7 @@
             <panelStatus id="fbPanelStatus" flex="1"
                          tooltip="fbTooltip" contextmenu="fbContextMenu"/>
         
-             <hbox id="fbDebuggerButtons">
+             <hbox id="fbDebuggerButtons" minwidth="126">
                  <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
                                 tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
                  <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"

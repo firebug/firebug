@@ -380,7 +380,7 @@
                 var location = panel.getObjectLocation(val);
                 var fileName = FBL.getFileName(location);
                 this.repObject = val;
-                this.setAttribute("label", fileName);
+                this.setAttribute("label", FBL.cropString(fileName, 60));
                 this.setAttribute("location", val);
             ]]></setter>
         </property>

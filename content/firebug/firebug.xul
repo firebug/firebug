@@ -21,6 +21,7 @@
         persist="screenX,screenY,width,height">
 
     <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
 
@@ -148,6 +149,7 @@
                     <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
                     <menuitem label="&firebug.KeyShortcuts;" oncommand="Firebug.visitWebsite('keyboard')"/>
                     <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
+                    <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
                     <menuseparator/>
                                         
                     <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>

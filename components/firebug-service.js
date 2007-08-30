@@ -1009,7 +1009,6 @@ FirebugService.prototype =
 			}
 			catch (exc)
 			{
-				ERROR("firebug-service: no nsIFireBugURLProvider\n"); 
 				return RETURN_CONTINUE;
 			}
 	         
@@ -1052,13 +1051,13 @@ FirebugService.prototype =
 	{
    		try 
 		{
-			var result_url = callback(frame, result_url);
-	        if (!result_url)
+			var url = callback(frame);
+	        if (!url)
 	        {
 	        	ERROR("firebug-service: debuggr callback for url failed \n");
 	        	return;
 	        }
-			return result_url;
+			return url;
 		} 
 		catch(exc)
 		{
@@ -1308,7 +1307,7 @@ FirebugService.prototype =
 			var scriptInfos = this.scriptInfoArrayByURL[url];
 			for (var i = 0; i < scriptInfos.length; i++)
 			{
-				ddd(i+"/"+scriptInfos.length+": "+this.formatScriptInfo(scriptInfos[i])+"\n");
+				ddd(i+"/"+scriptInfos.length+": "+formatScriptInfo(scriptInfos[i])+"\n");
 			}
 		}
 	},

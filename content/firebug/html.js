@@ -183,6 +183,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // is only bad for performance
         if (attrName == "curpos")
             return;
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+            FBTrace.sysout("\nhtml.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+"\n");   /*@explore*/
         
         this.markChange();
 
@@ -275,12 +277,19 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     },
     
     mutateNode: function(target, parent, nextSibling, removal)
-    {
+    { 
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+			FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");           /*@explore*/
+                                                                                                                       /*@explore*/
         this.markChange();
 
         var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
             ? this.ioBox.createObjectBox(parent)
             : this.ioBox.findObjectBox(parent);
+            
+        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
+            FBTrace.sysout("html.mutateNode parent:"+parent+" parentNodeBox:"+parentNodeBox+"\n");                     /*@explore*/
+                                                                                                                       /*@explore*/
         if (!parentNodeBox)
             return;
 
@@ -373,6 +382,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     
     createObjectBox: function(object, isRoot)
     {
+        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+object+","+isRoot+")\n");                         /*@explore*/
         var tag = getNodeTag(object);
         if (tag)
             return tag.replace({object: object}, this.document);
@@ -387,10 +397,24 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             return null;
 
         var parentNode = node ? node.parentNode : null;
-        if (parentNode && parentNode.nodeType == 9)
-            return parentNode.defaultView.frameElement;
-        else
-            return parentNode;
+        if (parentNode)
+            if (parentNode.nodeType == 9)
+            {
+                if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");                  /*@explore*/
+                return parentNode.defaultView.frameElement;
+            }
+            else
+                return parentNode;
+        else 
+            if (node && node.nodeType == 9) // document type 
+            {
+                var embeddingFrame = node.defaultView.frameElement;
+                if (embeddingFrame)
+                    return embeddingFrame.parentNode;
+                else
+                    return null;  // top level has no parent 
+            }
+                  
     },
 
     getChildObject: function(node, index, previousSibling)
@@ -468,7 +492,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         
         this.context.delay(function()
         {
-            this.mutateNode(target, parent, nextSibling, removal);
+            try 
+            {
+                 this.mutateNode(target, parent, nextSibling, removal);
+            }
+            catch (exc)
+            {
+                FBTrace.dumpProperties("html.onMutateNode FAILS:", exc);
+            }
         }, this);
     },
 
@@ -597,6 +628,20 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     
     watchWindow: function(win)
     {
+        if (this.context.window && this.context.window != win) // then I guess we are an embedded window
+        {
+            var htmlPanel = this;
+            iterateWindows(this.context.window, function(subwin)
+            {
+                if (win == subwin)
+                {
+                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
+                        FBTrace.sysout("html.watchWindow found subwin.location.href="+win.location.href+"\n");         /*@explore*/
+                    htmlPanel.mutateDocumentEmbedded(win, false);
+                }   
+            });
+            
+        }
         if (this.context.attachedMutation)
         {
             var doc = win.document;
@@ -609,6 +654,20 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     
     unwatchWindow: function(win)
     {
+        if (this.context.window && this.context.window != win) // then I guess we are an embedded window
+        {
+            var htmlPanel = this;
+            iterateWindows(this.context.window, function(subwin)
+            {
+                if (win == subwin)
+                {
+                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
+                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+win.location.href+"\n");       /*@explore*/
+                    htmlPanel.mutateDocumentEmbedded(win, true);
+                }   
+            });
+            
+        }
         var doc = win.document;
         doc.removeEventListener("DOMAttrModified", this.onMutateAttr, false);
         doc.removeEventListener("DOMCharacterDataModified", this.onMutateText, false);
@@ -616,10 +675,21 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         doc.removeEventListener("DOMNodeRemoved", this.onMutateNode, false);
     },
     
+    mutateDocumentEmbedded: function(win, remove)
+    {
+        // document.documentElement    Returns the Element that is a direct child of document. For HTML documents, this normally the HTML element.
+        var target = win.document.documentElement;
+        var parent = win.frameElement;
+        var nextSibling = findNextSibling(target);
+        this.mutateNode(target, parent, nextSibling, remove); 
+    },
+
     supportsObject: function(object)
     {
         if (object instanceof Element || object instanceof Text || object instanceof CDATASection)
             return 1;
+        else if (object instanceof SourceLink && object.type == "css" && !reCSS.test(object.href))
+            return 2;
         else
             return 0;
     },
@@ -641,7 +711,45 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     
     updateSelection: function(object)
     {
-        if (Firebug.Inspector.inspecting)
+        if (this.ioBox.sourceRow)
+            this.ioBox.sourceRow.removeAttribute("exeLine");
+
+        if (object instanceof SourceLink) // && object.type == "css"
+         {
+             var sourceLink = object;
+             var stylesheet = getStyleSheetByHref(sourceLink.href, this.context);
+             if (stylesheet)
+             {
+                var ownerNode = stylesheet.ownerNode;
+                if (FBTrace.DBG_CSS)                                                                                   /*@explore*/
+                        FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+stylesheet.ownerNode         /*@explore*/
+							              +" href:"+sourceLink.href+"\n");                                             /*@explore*/
+                if (ownerNode)
+                {
+                    var objectbox = this.ioBox.select(ownerNode, true, true, this.noScrollIntoView);
+                    
+                    // XXXjjb seems like this could be bad for errors at the end of long files
+                    //
+                    var sourceRow = FBL.getElementByClass(objectbox, "sourceRow");
+                    for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
+                    {
+                        if (!sourceRow) break;
+                        sourceRow = FBL.getNextByClass(sourceRow,  "sourceRow");
+                    }
+                    if (FBTrace.DBG_CSS)                                                                               /*@explore*/
+                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line                   /*@explore*/
+							              +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined")+"\n");            /*@explore*/
+                    if (sourceRow) 
+                    {
+                        this.ioBox.sourceRow = sourceRow;
+                        this.ioBox.sourceRow.setAttribute("exeLine", "true");
+                        scrollIntoCenterView(sourceRow);
+                        this.ioBox.selectObjectBox(sourceRow, false);  // sourceRow isn't an objectBox, but the function should work anyway...
+                    }
+                }
+            }
+        }
+        else if (Firebug.Inspector.inspecting)
             this.ioBox.highlight(object);
         else
             this.ioBox.select(object, true, false, this.noScrollIntoView);
@@ -1232,16 +1340,6 @@ function isContainerElement(element)
         case "iframe":
         case "frame":
             return true;
-        case "object":
-            var type = element.getAttribute("type");
-            switch (type)
-            {
-              case "text/html":
-              case "text/xhtml":
-              case "application/xhtml":
-                  return true;
-            }
-            return false;
         case "link":
             return element.getAttribute("rel") == "stylesheet";
     }

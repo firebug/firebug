@@ -13,6 +13,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
         var doc = this.context.chrome.window.document;
         this.browser = doc.createElement("browser");
         this.browser.addEventListener("DOMContentLoaded", this.browserReady, false);
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.createBrowser DOMContentLoaded addEventListener\n");        /*@explore*/
         this.browser.className = "pluginBrowser";
         this.browser.setAttribute("src", this.url);
     },
@@ -29,6 +30,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
     browserReady: function()
     {
         this.browser.removeEventListener("DOMContentLoaded", this.browserReady, false);
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.browserReady DOMContentLoaded addEventListener\n");         /*@explore*/         
         this.innerPanel = this.browser.contentWindow.FirebugPanel;
         if (this.visible)
         {

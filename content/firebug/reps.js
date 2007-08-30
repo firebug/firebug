@@ -171,7 +171,7 @@ this.Func = domplate(Firebug.Rep,
     
     inspectObject: function(fn, context)
     {
-        var sourceLink = findSourceForFunction(fn);
+        var sourceLink = findSourceForFunction(fn, context);
         if (sourceLink)
             context.chrome.select(sourceLink);
     },
@@ -192,7 +192,7 @@ this.Func = domplate(Firebug.Rep,
     getContextMenuItems: function(fn, target, context, script)
     {
         if (!script)
-			script = findScriptForFunction(fn);
+            script = findScriptForFunction(fn);
         if (!script)
             return;
 
@@ -236,7 +236,7 @@ this.jsdScript = domplate(Firebug.Rep,
     
     inspectObject: function(script, context)
     {
-        var sourceLink = getSourceForScript(script);
+        var sourceLink = getSourceForScript(script, context);
         if (sourceLink)
             context.chrome.select(sourceLink);
     },
@@ -350,8 +350,21 @@ this.Arr = domplate(Firebug.Rep,
 
     supportsObject: function(object)
     {
-        return "length" in object && typeof(object.length) == "number";
+        // return "length" in object && typeof(object.length) == "number";
+        // XXXjjb Joe review (revision 39) Maybe only a url for the license...
+        return this.isArray(object);
     },
+    
+    // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
+    isArray: function(obj) { // frames lose type, so test constructor string
+        if (obj && obj.constructor && 
+                   obj.constructor.toString().indexOf('Array') > -1) {
+            return true;
+        } else {
+            return ((typeof obj == 'object') || (typeof obj == 'function')) && obj.constructor == Array;
+        }
+    },
+    // END Yahoo BSD SOURCE See license below.
     
     getTitle: function(object, context)
     {
@@ -974,6 +987,13 @@ this.SourceLink = domplate(Firebug.Rep,
             var stylesheet = getStyleSheetByHref(sourceLink.href, context);
             if (stylesheet)
             {
+                var ownerNode = stylesheet.ownerNode;
+                if (ownerNode)
+                {
+                    context.chrome.select(sourceLink, "html");
+                    return;
+                }
+    
                 var panel = context.getPanel("stylesheet");
                 if (panel && panel.getRuleByLine(stylesheet, sourceLink.line))
                     return context.chrome.select(sourceLink);
@@ -1038,11 +1058,11 @@ this.SourceFile = domplate(this.SourceLink,
 
 // ************************************************************************************************
 
-this.StackFrame = domplate(Firebug.Rep,
-{
-    tag:
-        OBJECTBLOCK(
-            A({class: "objectLink", _repObject: "$object.fn"}, "$object|getCallName"),
+this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the stack does not have correct line numbers
+{    
+    tag:  
+        OBJECTBLOCK(  
+            A({class: "objectLink", _repObject: "$object"}, "$object|getCallName"),
             "(",
             FOR("arg", "$object|argIterator",
                 TAG("$arg.tag", {object: "$arg.value"}),
@@ -1092,7 +1112,20 @@ this.StackFrame = domplate(Firebug.Rep,
     supportsObject: function(object)
     {
         return object instanceof StackFrame;
-    }    
+    },
+    
+    inspectObject: function(stackFrame, context)
+    {
+        var sourceLink = new SourceLink(stackFrame.href, stackFrame.lineNo, "js");
+        context.chrome.select(sourceLink);
+    },
+    
+    getTooltip: function(stackFrame, context)
+    {
+        return $STRF("Line", [stackFrame.href, stackFrame.lineNo]);
+    },
+    
+        
 });
 
 // ************************************************************************************************
@@ -1122,16 +1155,18 @@ this.jsdStackFrame = domplate(Firebug.Rep,
     
     supportsObject: function(object)
     {
-        return object instanceof jsdIStackFrame;
+        return (object instanceof jsdIStackFrame) && (object.isValid);
     },
         
     getTitle: function(frame, context)
-    {
+    { 
+        if (!frame.isValid) return "(invalid frame)"; // XXXjjb avoid frame.script == null
         return getFunctionName(frame.script, context);
     },
 
     getTooltip: function(frame, context)
     {
+        if (!frame.isValid) return "(invalid frame)";  // XXXjjb avoid frame.script == null
         return $STRF("Line", [frame.script.fileName, frame.line]);
     },
 
@@ -1169,7 +1204,9 @@ this.ErrorMessage = domplate(Firebug.Rep,
     getLastErrorStackTrace: function()
     {
         var trace = Firebug.errorStackTrace;
+        if (FBTrace.DBG_STACK && trace) Firebug.errorStackTrace.destroy();                                             /*@explore*/
         Firebug.errorStackTrace = null;
+        if (FBTrace.DBG_STACK) FBTrace.sysout("reps.getLastErrorStackTrace cleared errorStackTrace\n");                /*@explore*/
         return trace;
     },
 
@@ -1420,3 +1457,39 @@ Firebug.setDefaultRep(this.Obj);
 }});
 
 // ************************************************************************************************
+/*
+ * The following is http://developer.yahoo.com/yui/license.txt and applies to only code labeled "Yahoo BSD Source"
+ * in only this file reps.js.  John J. Barton June 2007.
+ * 
+Software License Agreement (BSD License)
+
+Copyright (c) 2006, Yahoo! Inc.
+All rights reserved.
+
+Redistribution and use of this software in source and binary forms, with or without modification, are
+permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above
+  copyright notice, this list of conditions and the
+  following disclaimer.
+
+* Redistributions in binary form must reproduce the above
+  copyright notice, this list of conditions and the
+  following disclaimer in the documentation and/or other
+  materials provided with the distribution.
+
+* Neither the name of Yahoo! Inc. nor the names of its
+  contributors may be used to endorse or promote products
+  derived from this software without specific prior
+  written permission of Yahoo! Inc.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
+WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
+PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
+ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR
+TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
+ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * /
+ */

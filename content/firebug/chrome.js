@@ -27,7 +27,7 @@ const negativeZoomFactors = [1, 0.95, 0.8, 0.7, 0.5, 0.2, 0.1];
 // Globals
 
 var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, locationSeparator,
-	panelStatus, panelStatusSeparator;
+    panelStatus, panelStatusSeparator;
 
 var waitingPanelBarCount = 2;
 
@@ -51,18 +51,37 @@ top.FirebugChrome =
 
     panelBarReady: function(panelBar)
     {
-        // Wait until all panelBar bindings are ready before initializing
-        if (--waitingPanelBarCount == 0)
-            this.initialize();
+        try 
+        {
+            // Wait until all panelBar bindings are ready before initializing
+            if (--waitingPanelBarCount == 0)
+                this.initialize();
+        }
+        catch (exc)
+        {
+            FBTrace.dumpProperties("chrome.panelBarReady FAILS", exc);
+        }
+        
     },
     
     initialize: function()
     {
-        if (!externalMode)
-        {
-            FBL.initialize();
+        var detachArgs = window.arguments[0];
+        
+        if (!detachArgs) 
+            detachArgs = {};
+            
+        if (FBTrace.DBG_INITIALIZE) FBTrace.dumpProperties("chrome.initialize w/detachArgs=", detachArgs);             /*@explore*/
+                                                                                                                       /*@explore*/
+        if (detachArgs.FBL)
+            top.FBL = detachArgs.FBL;
+        else 
+            FBL.initialize();           
+
+        if (detachArgs.Firebug)
+            Firebug = detachArgs.Firebug;
+        else
             Firebug.initialize();
-        }
         
         panelBox = $("fbPanelBox");
         panelSplitter = $("fbPanelSplitter");
@@ -85,15 +104,13 @@ top.FirebugChrome =
      * Called when the UI is ready to be initialized, once the panel browsers are loaded.
      */
     initializeUI: function()
-    {
-        if (externalMode)
+    { 
+    try { 
+        var detachArgs = window.arguments[0];
+        if (detachArgs)
         {
-            var detachArgs = window.arguments[0];
-
-            top.FBL = detachArgs.FBL;            
-            Firebug = detachArgs.Firebug;
-            FirebugContext = detachArgs.context;
-            externalBrowser = detachArgs.browser;
+            FirebugContext = detachArgs.context ? detachArgs.context : FirebugContext;
+            externalBrowser = detachArgs.browser;// else undefined
         }
 
         this.applyTextSize(Firebug.textSize);
@@ -134,11 +151,17 @@ top.FirebugChrome =
         if (externalMode)
             this.attachBrowser(externalBrowser, FirebugContext);
         else
-            Firebug.initializeUI();        
+            Firebug.initializeUI(detachArgs);       
+        } catch (exc) {
+            FBTrace.dumpProperties("chrome.initializeUI fails", exc);
+        }
+         
     },
     
     shutdown: function()
-    {        
+    {   
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("chrome.shutdown entered\n");                                       /*@explore*/
+                                                                                                                       /*@explore*/
         var doc1 = panelBar1.browser.contentDocument;
         doc1.removeEventListener("mouseover", onPanelMouseOver, false);
         doc1.removeEventListener("mouseout", onPanelMouseOut, false);
@@ -175,8 +198,12 @@ top.FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
-    attachBrowser: function(browser, context)
+    attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and externalMode == true
     {
+        if (FBTrace.DBG_INITIALIZE)                                                                                    /*@explore*/
+            FBTrace.sysout("chrome.attachBrowser with externalMode="+externalMode+" context="+context                  /*@explore*/
+				               +" context==FirebugContext: "+(context==FirebugContext)+"\n");                          /*@explore*/
+                                                                                                                       /*@explore*/
         if (externalMode)
         {
             browser.detached = true;
@@ -224,14 +251,14 @@ top.FirebugChrome =
     
     getCurrentBrowser: function()
     {
-        return externalMode ? externalBrowser : Firebug.tabBrowser.selectedBrowser
+        return externalBrowser ? externalBrowser : Firebug.tabBrowser.selectedBrowser
     },
     
     getCurrentURI: function()
     {
         try
         {
-            if (externalMode)
+            if (externalBrowser)
                 return externalBrowser.currentURI;
             else
                 return Firebug.tabBrowser.currentURI;
@@ -382,14 +409,14 @@ top.FirebugChrome =
         {
             FirebugContext = context;
             
-            if (externalMode || browser.showFirebug)
+            if (externalBrowser || browser.showFirebug)
                 this.syncPanel();
         }
     },
     
     showLoadedContext: function(context)
     {
-        if (externalMode || context.browser.showFirebug)
+        if (externalBrowser || context.browser.showFirebug)
             this.syncPanel();
     },
 
@@ -410,6 +437,8 @@ top.FirebugChrome =
     
     syncPanel: function()    
     {
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.syncPanel FirebugContext="+FirebugContext+"\n");               /*@explore*/
+                                                                                                                       /*@explore*/
         panelStatus.clear();
 
         if (FirebugContext)
@@ -432,17 +461,19 @@ top.FirebugChrome =
             if (uri)
             {
                 var host = getURIHost(uri);
-                var cantDisplayPage = this.getCurrentBrowser().isSystemPage;
+                var isSystemPage = this.getCurrentBrowser().isSystemPage;
 
                 var caption;
-                if (!host || cantDisplayPage || Firebug.disabledAlways)
+                if (isSystemPage && !Firebug.allowSystemPages)
+                    caption = FBL.$STR("IsSystemPage");
+                else if (!host || isSystemPage || Firebug.disabledAlways)
                     caption = FBL.$STR("DisabledHeader");
                 else
                     caption = FBL.$STRF("DisabledForSiteHeader", [host]);
 
                 disabledHead.firstChild.nodeValue = caption;
 
-                if (cantDisplayPage)
+                if (isSystemPage && !Firebug.allowSystemPages)
                 {
                     FBL.setClass(disabledBox, "cantDisplayPage");
                     disabledCaption.firstChild.nodeValue = FBL.$STR("CantDisplayCaption");
@@ -464,7 +495,7 @@ top.FirebugChrome =
             panelBar1.selectPanel(null, true);
         }
         
-        if (externalMode)
+        if (externalBrowser)
             this.syncTitle();
     },
 
@@ -483,7 +514,7 @@ top.FirebugChrome =
         {
             var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
             sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
-
+// FF3: if the next line is commented out, Fbug allows FF to paint page when HTML with DOMside panels are up, else not.
             panelBar2.selectPanel(sidePanelName);
         }
         else
@@ -774,6 +805,9 @@ top.FirebugChrome =
         var target = document.popupNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
         
+        if (!panel)
+            return false;
+        
         FBL.eraseNode(popup);
 
         if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled"))
@@ -850,28 +884,28 @@ top.FirebugChrome =
 
     onEditorsShowing: function(popup)
     {
-    	var editors = Firebug.registeredEditors;
-    	if ( editors.length > 0 )
-    	{
-    		var lastChild = popup.lastChild;
-    		FBL.eraseNode(popup);
-    		var disabled = (!FirebugContext);
-    		for( var i = 0; i < editors.length; ++i )
-    		{
-    			if (editors[i] == "-")
-    			{
-    				FBL.createMenuItem(popup, "-");
-    				continue;
-    			}
-    			var item = {label: editors[i].label, image: editors[i].image,
-    							nol10n: true, disabled: disabled };
-    			var menuitem = FBL.createMenuItem(popup, item);
-    			menuitem.setAttribute("command", "cmd_openInEditor");
-    			menuitem.value = editors[i].id;
-    		}
-   			FBL.createMenuItem(popup, "-");
-   			popup.appendChild(lastChild);
-    	}
+        var editors = Firebug.registeredEditors;
+        if ( editors.length > 0 )
+        {
+            var lastChild = popup.lastChild;
+            FBL.eraseNode(popup);
+            var disabled = (!FirebugContext);
+            for( var i = 0; i < editors.length; ++i )
+            {
+                if (editors[i] == "-")
+                {
+                    FBL.createMenuItem(popup, "-");
+                    continue;
+                }
+                var item = {label: editors[i].label, image: editors[i].image,
+                                nol10n: true, disabled: disabled };
+                var menuitem = FBL.createMenuItem(popup, item);
+                menuitem.setAttribute("command", "cmd_openInEditor");
+                menuitem.value = editors[i].id;
+            }
+            FBL.createMenuItem(popup, "-");
+            popup.appendChild(lastChild);
+        }
     },
     
     getInspectMenuItems: function(object)
@@ -981,7 +1015,7 @@ function getBestPanelName(object, context, panelName)
         if (!panelType.prototype.parentPanel)
         {
             var level = panelSupportsObject(panelType, object);
-            if (!bestLevel || (level && level < bestLevel))
+            if (!bestLevel || (level && (level < bestLevel) ))  // XXXjjb I do not understand why this works
             {
                 bestLevel = level;
                 bestPanel = panelType;
@@ -1044,6 +1078,7 @@ function onSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
+    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
 
     if (FirebugContext)
     {
@@ -1067,6 +1102,7 @@ function onSelectingPanel(event)
 function onSelectedSidePanel(event)
 {
     var sidePanel = panelBar2.selectedPanel;
+    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.onSelectedSidePanel="+sidePanel+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
     if (FirebugContext)
     {
         var panelName = FirebugContext.panelName;

@@ -40,6 +40,27 @@ top.SourceCache.prototype =
         if (url in this.cache)
             return this.cache[url];
         
+        var d = FBL.reDataURL.exec(url);
+        if (d) 
+        {
+            var src = url.substring(FBL.reDataURL.lastIndex); 
+            var data = decodeURIComponent(src);
+            var lines = data.split(/\r\n|\r|\n/);
+            this.cache[url] = lines;
+            
+            return lines;
+        }
+        
+        var j = FBL.reJavascript.exec(url);
+        if (j) 
+        {
+            var src = url.substring(FBL.reJavascript.lastIndex);
+            var lines = src.split(/\r\n|\r|\n/);
+            this.cache[url] = lines;
+            
+            return lines;
+        }
+        
         var charset = this.context.window.document.characterSet;
         
         var ioService = IOService.getService(nsIIOService);
@@ -52,6 +73,9 @@ top.SourceCache.prototype =
         }
         catch (exc)
         {
+            if (FBTrace.DBG_CACHE)                                                                                     /*@explore*/
+				FBTrace.dumpProperties("sourceCache for window="+this.context.window.location.href+" FAILS:", this.cache); /*@explore*/
+            ERROR("sourceCache.load fails newChannel for url="+url+ " cause:"+exc+"\n");
             return;
         }
 
@@ -60,8 +84,11 @@ top.SourceCache.prototype =
             if (channel instanceof nsIUploadChannel)
             {
                 var postData = getPostStream(this.context);
-                var uploadChannel = QI(channel, nsIUploadChannel);
-                uploadChannel.setUploadStream(postData, "", -1);
+                if (postData)
+                {
+                    var uploadChannel = QI(channel, nsIUploadChannel);
+                    uploadChannel.setUploadStream(postData, "", -1);
+                }
             }
             
             if (channel instanceof nsICachingChannel)
@@ -78,6 +105,14 @@ top.SourceCache.prototype =
         }
         catch (exc)
         {
+            
+            if (FBL.reChrome.test(url))  // chrome urls cannot be read with this code.
+                return;
+            var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";            /*@explore*/
+            var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";                /*@explore*/
+            FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n"); /*@explore*/
+            FBTrace.dumpProperties("sourceCache.load fails channel.open for url="+url+ " cause:", exc);                /*@explore*/
+            FBTrace.dumpProperties("sourceCache.load fails channel=", channel);                                        /*@explore*/
             return;
         }
         
@@ -86,7 +121,6 @@ top.SourceCache.prototype =
             var data = readFromStream(stream, charset);
             var lines = data.split(/\r\n|\r|\n/);
             this.cache[url] = lines;
-            
             return lines;
         }
         catch (exc)
@@ -114,6 +148,8 @@ top.SourceCache.prototype =
     
     store: function(url, text)
     {
+        if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
+			FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
         var lines = splitLines(text);
         return this.cache[url] = lines;
     },
@@ -191,11 +227,15 @@ function getPostStream(context)
         var descriptor = QI(webNav, CI("nsIWebPageDescriptor")).currentDescriptor;
         var entry = QI(descriptor, CI("nsISHEntry"));
         
-        // Seek to the beginning, or it will probably start reading at the end
-        var postStream = QI(entry.postData, CI("nsISeekableStream"));
-        postStream.seek(0, 0);
+        if (entry.postData)
+        {
+            // Seek to the beginning, or it will probably start reading at the end
+            var postStream = QI(entry.postData, CI("nsISeekableStream"));
+            postStream.seek(0, 0);
         
-        return postStream;
+            return postStream;
+        }
+
      }
      catch (exc)
      {
