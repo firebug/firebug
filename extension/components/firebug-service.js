@@ -94,6 +94,7 @@ const COMPONENTS_FILTERS = [
 	new RegExp("^(file:/.*/)extensions/firebug@software\\.joehewitt\\.com/components/.*\\.js$"),
 	new RegExp("^(file:/.*/extensions/)\\w+@mozilla\\.org/components/.*\\.js$"),
 	new RegExp("^(file:/.*/components/)ns[A-Z].*\\.js$"),
+	new RegExp("^(file:/.*/components/)firebug-service\\.js$"),
 	new RegExp("^(file:/.*/Contents/MacOS/extensions/.*/components/).*\\.js$")
 	];
 
@@ -115,7 +116,6 @@ var clients = [];
 var debuggers = [];
 var netDebuggers = [];
 var scriptListeners = [];
-var scriptMap = {}; // XXXremove
 
 var stepMode = 0;
 var stepFrame;
@@ -743,7 +743,9 @@ FirebugService.prototype =
     {
         if (!enabledDebugger)
             return;
-        
+		
+		this.unhookScripts();
+		this.unhookTopLevel();
         timer.init({observe: function()
         {
             enabledDebugger = false;
@@ -1328,7 +1330,7 @@ FirebugService.prototype =
                 if (debuggr.supportsWindow(win))
                     return debuggr;
             }
-            catch (exc) { /* ERROR("firebug-service findDebugger: "+exc)*/}
+            catch (exc) {  ERROR("firebug-service findDebugger: "+exc);}
         }
     },
 
@@ -1739,6 +1741,7 @@ FirebugService.prototype =
     unhookTopLevel: function()
     {
         jsd.topLevelHook = null;
+		if (fbs.DBG_STEP) ddd("unset topLevelHook\n");                                                                 /*@explore*/
     },
   
     hookInterrupts: function()
@@ -1774,7 +1777,8 @@ FirebugService.prototype =
         jsd.enumerateScripts({enumerateScript: function(script)
         {
 			var url = script.fileName;
-			fbs.registerTopLevelScript(script, url, "enumerated");  
+			if ( !isSystemURL(url) )
+				fbs.registerTopLevelScript(script, url, "enumerated");  
         }});
     },
 
@@ -1871,11 +1875,11 @@ function isSystemURL(url)
 		if ( url.substr(0,filter.length) == filter )
 			return true;
 	}
-	for( i = 0; i < COMPONENTS_FILTERS.length; ++i )
+	for( var i = 0; i < COMPONENTS_FILTERS.length; ++i )
 	{
 		if ( COMPONENTS_FILTERS[i].test(url) )
 		{
-			const match = COMPONENTS_FILTERS[i].exec(url);
+			var match = COMPONENTS_FILTERS[i].exec(url);
 			urlFilters.push(match[1]);
 			return true;
 		}

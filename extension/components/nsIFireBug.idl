@@ -196,6 +196,8 @@ interface nsIFireBug : nsISupports
     void unmonitor(in jsdIScript script);
     boolean isMonitored(in jsdIScript script);
     void enumerateMonitors(in string url, in nsIFireBugBreakpointCallback cb);
+    
+    void enumerateScripts(out unsigned long length, [retval, array, size_is(length)] out jsdIScript scripts);
 
     readonly attribute boolean profiling;
     

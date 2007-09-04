@@ -1579,15 +1579,17 @@ function getRequestWebProgress(request, netProgress)
                     }
                 });
             }
+			// XXXjjb Joe review: code above sets bypass, so this stmt should be in if (gives exceptions otherwise)
+	        if (!bypass)
+    	        return request.notificationCallbacks.getInterface(nsIWebProgress);
         }
-        if (!bypass)
-            return request.notificationCallbacks.getInterface(nsIWebProgress);
     }
     catch (exc) {}
 
     try
     {
-        return QI(request.loadGroup.groupObserver, nsIWebProgress);
+		if (request.loadGroup && request.loadGroup.groupObserver)
+        	return QI(request.loadGroup.groupObserver, nsIWebProgress);
     }
     catch (exc) {}
 }
