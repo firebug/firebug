@@ -744,8 +744,6 @@ FirebugService.prototype =
         if (!enabledDebugger)
             return;
 		
-		this.unhookScripts();
-		this.unhookTopLevel();
         timer.init({observe: function()
         {
             enabledDebugger = false;
@@ -1115,6 +1113,7 @@ FirebugService.prototype =
 
     onScriptCreated: function(script)
     {
+		if(!fbs) return;
         try
         {
 			var fileName = script.fileName;
@@ -1159,6 +1158,7 @@ FirebugService.prototype =
 
     onScriptDestroyed: function(script)
     {
+		if(!fbs) return;
 		var scriptTag = script.tag;
 		if (fbs.DBG_CREATION) ddd("onScriptDestroyed tag:"+scriptTag+"\n"+getStackDump()+"\n");                        /*@explore*/
 			
@@ -1716,6 +1716,7 @@ FirebugService.prototype =
     {
         function topLevelHook(frame, type)
         {
+			if(!fbs) return;
 			if (fbs.DBG_STEP) dumpToFileWithStack("topLevel type="+(type==0?"TOPLEVEL_START":"TOPLEVEL_END"), frame);  /*@explore*/
         	if ( isSystemURL(frame.script.fileName) )
         		return;
