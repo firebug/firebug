@@ -1045,7 +1045,6 @@ NetProgress.prototype =
     
     respondedTopWindow: function(request, time, webProgress)
     {
-        this.requestedFile(request, time, webProgress);
 		var win = webProgress ? safeGetWindow(webProgress) : null; 
         this.requestedFile(request, time, win);
         return this.respondedFile(request, time);
@@ -1053,7 +1052,6 @@ NetProgress.prototype =
     
     requestedFile: function(request, time, win, category) // XXXjjb 3rd arg was webProgress, pulled safeGetWindow up
     {
-        var win = webProgress ? safeGetWindow(webProgress) : null;
         // XXXjjb to allow spy to pass win.  var win = webProgress ? safeGetWindow(webProgress) : null;
         var file = this.getRequestFile(request, win);
         if (file)
@@ -1070,9 +1068,12 @@ NetProgress.prototype =
             
             this.awaitFile(request, file);
             this.extendPhase(file);
-            
+ 
+            if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile file", file);                               /*@explore*/
             return file;
         }
+		else                                                                                                           /*@explore*/
+			if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
     },
     
     respondedFile: function(request, time)
@@ -1139,11 +1140,12 @@ NetProgress.prototype =
             this.arriveFile(file, request);
             this.endLoad(file);
 
-            if (file.size == -1)
-                getFileSizeFromCache(file, this);
+            getCacheEntry(file, this);
             
             return file;
         }
+		else                                                                                                           /*@explore*/
+			if (FBTrace.DBG_NET) FBTrace.dumpProperties("stopfile no file for request=", request);                     /*@explore*/
     },
 
     cacheEntryReady: function(request, file, size)
@@ -1171,7 +1173,7 @@ NetProgress.prototype =
         var index = this.requests.indexOf(request);
         if (index == -1)
         {
-            var file = this.requestMap[request.name];
+            var file = this.requestMap[name];
             if (file)
                 return file;
 
@@ -1190,13 +1192,13 @@ NetProgress.prototype =
             }
 
             if (!this.rootFile)
-                this.rootFile = file;
+                this.rootFile = file;  // don't set file.previousFile
             else
                 file.previousFile = this.files[this.files.length-1];
 
             file.request = request;
             file.index = this.files.length;
-            this.requestMap[request.name] = file;
+            this.requestMap[name] = file;
             this.requests.push(request);
             this.files.push(file);
             
@@ -1214,6 +1216,7 @@ NetProgress.prototype =
             if (index == -1)
             {
                 var doc = new NetDocument(win);
+                var doc = new NetDocument(win);  // XXXjjb arg ignored
                 if (win.parent != win)
                     doc.parent = this.getRequestDocument(win.parent);
 
@@ -1265,6 +1268,9 @@ NetProgress.prototype =
 
     arriveFile: function(file, request)
     {
+		if (FBTrace.DBG_NET)                                                                                           /*@explore*/
+			FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");  /*@explore*/
+			                                                                                                           /*@explore*/
         delete this.requestMap[file.href];
 
         var index = this.pending.indexOf(file);
@@ -1342,7 +1348,8 @@ NetProgress.prototype =
         {
             var webProgress = getRequestWebProgress(request, this);
             var category = getRequestCategory(request);
-            this.post(requestedFile, [request, now(), webProgress, category]);
+			var win = webProgress ? safeGetWindow(webProgress) : null;
+            this.post(requestedFile, [request, now(), win, category]);
         }
         else
         {
@@ -1416,6 +1423,11 @@ function NetFile(href, document)
 {
     this.href = href;
     this.document = document
+	                                                                                                                   /*@explore*/
+	if (FBTrace.DBG_NET) {                                                                                             /*@explore*/
+		this.uid = FBL.getUniqueId();                                                                                  /*@explore*/
+		FBTrace.dumpProperties("NetFile", this);                                                                       /*@explore*/
+	}                                                                                                                  /*@explore*/
 }
 
 NetFile.prototype = 
@@ -1495,7 +1507,7 @@ function waitForCacheCompletion(request, file, netProgress)
     }        
 }
 
-function getFileSizeFromCache(file, netProgress)
+function getCacheEntry(file, netProgress)
 {
     // Pause first because this is usually called from stopFile, at which point
     // the file's cache entry is locked
@@ -1509,7 +1521,31 @@ function getFileSizeFromCache(file, netProgress)
                 {
                     if (descriptor)
                     {
-                        file.size = descriptor.dataSize;
+                        if(file.size == -1)
+                        {
+                            file.size = descriptor.dataSize;
+                        }
+                        if(descriptor.lastModified && descriptor.lastFetched &&
+                            descriptor.lastModified < Math.floor(file.startTime/1000)) {
+                            file.fromCache = true;
+                        }
+                        file.cacheEntry = [
+                          { name: "Last Modified",
+                            value: getDateFromSeconds(descriptor.lastModified)
+                          },
+                          { name: "Last Fetched",
+                            value: getDateFromSeconds(descriptor.lastFetched)
+                          },
+                          { name: "Data Size",
+                            value: descriptor.dataSize
+                          },
+                          { name: "Fetch Count",
+                            value: descriptor.fetchCount
+                          },
+                          { name: "Device",
+                            value: descriptor.deviceID
+                          }
+                        ]; 						
                         netProgress.update(file);
                     }
                 }
@@ -1521,6 +1557,13 @@ function getFileSizeFromCache(file, netProgress)
         }        
     });
 }
+
+function getDateFromSeconds(s)
+{
+    var d = new Date();
+    d.setTime(s*1000);
+    return d;
+} 
 
 function getHttpHeaders(request, file)
 {
@@ -1552,8 +1595,8 @@ function getHttpHeaders(request, file)
                 }
             });
 
-            file.requestHeaders = request;
-            file.responseHeaders = response;
+            file.requestHeaders = requestHeaders;
+            file.responseHeaders = responseHeaders;
         }
     }
     catch (exc)
@@ -1717,6 +1760,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                     view: "Response",
                     $collapsed: "$file|hideResponse"},
                     $STR("Response")
+                ),
+                A({class: "netInfoCacheTab netInfoTab", onclick: "$onClickTab",
+                   view: "Cache",
+                   $collapsed: "$file|hideCache"},
+                   "Cache" // todo: Localization 
                 )
             ),
             TABLE({class: "netInfoParamsText netInfoText netInfoParamsTable",
@@ -1743,7 +1791,12 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             ),
             DIV({class: "netInfoResponseText netInfoText"}, 
                 $STR("Loading")
-            )            
+            ),
+            DIV({class: "netInfoCacheText netInfoText"},
+                TABLE({class: "netInfoCacheTable", cellpadding: 0, cellspacing: 0},
+                    TBODY()
+                ) 
+            )
         ),
     
     headerDataTag:
@@ -1769,6 +1822,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
         return file.category in binaryFileCategories;
     },
     
+    hideCache: function(file)
+    {
+        return !file.cacheEntry || file.category=="image";
+    }, 
+	
     onClickTab: function(event)
     {
         this.selectTab(event.currentTarget);
@@ -1809,6 +1867,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
     
     updateInfo: function(netInfoBox, file, context)
     {
+		if (FBTrace.DBG_NET) FBTrace.dumpProperties("updateInfo file", file);                                          /*@explore*/
+			                                                                                                           /*@explore*/
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
         {
@@ -1842,7 +1902,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 netInfoBox.postPresented  = true;
 
                 var text = getPostText(file, context);
-                if (text)
+                if (text != undefined)
                 {
                     if (isURLEncodedFile(file, text))
                     {
@@ -1881,6 +1941,16 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                     insertWrappedText(text, responseTextBox);
             }
         }
+		
+        if (hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
+        {
+            netInfoBox.cachePresented = true;
+
+            var responseTextBox = getChildByClass(netInfoBox, "netInfoCacheText");
+            if(file.cacheEntry) {
+              this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
+            }
+        } 
     },
     
     insertHeaderRows: function(netInfoBox, headers, tableName, rowName)

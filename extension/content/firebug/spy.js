@@ -66,6 +66,9 @@ Firebug.Spy = extend(Firebug.Module,
     {
         if (win)
         {
+			var uri = win.location.href; // don't attach spy to chrome 
+			if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+				return;
             for( var i = 0; i < contexts.length; ++i )
             {
             	if ( (contexts[i].context == context) && (contexts[i].win == win) )
