@@ -170,7 +170,7 @@ interface nsIFireBug : nsISupports
      */
      void suspend();
 
-    void setBreakpoint(in string url, in unsigned long lineNo, in nsIFireBugBreakpointProperties props);
+    boolean setBreakpoint(in string url, in unsigned long lineNo, in nsIFireBugBreakpointProperties props);
     void clearBreakpoint(in string url, in unsigned long lineNo);
     void clearAllBreakpoints(in PRUint32 count, [array, size_is(count)] in string urls);
 

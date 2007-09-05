@@ -510,8 +510,7 @@ FirebugService.prototype =
                 {
                     var bp = urlBreakpoints[i];
                     if (bp.type & BP_NORMAL)
-                        cb.call(url, bp.lineNo, bp.startLineNo, bp.disabled & BP_NORMAL,
-                            bp.condition);
+                        cb.call(url, bp.lineNo, bp.startLineNo, getBreakpointProperties(bp));
                 }
             }
         }
@@ -565,7 +564,7 @@ FirebugService.prototype =
             {
                 var bp = errorBreakpoints[i];
                 if (bp.href == url)
-                    cb.call(bp.href, bp.lineNo, bp.startLineNo, false, "");
+                    cb.call(bp.href, bp.lineNo, bp.startLineNo, null);
             }
         }
         else
@@ -573,7 +572,7 @@ FirebugService.prototype =
             for (var i = 0; i < errorBreakpoints.length; ++i)
             {
                 var bp = errorBreakpoints[i];
-                cb.call(bp.href, bp.lineNo, bp.startLineNo, false, "");
+                cb.call(bp.href, bp.lineNo, bp.startLineNo, null);
             }
         }
     },
@@ -624,7 +623,7 @@ FirebugService.prototype =
                 {
                     var bp = urlBreakpoints[i];
                     if (bp.type & BP_MONITOR)
-                        cb.call(url, bp.lineNo, bp.startLineNo, false, "");
+                        cb.call(url, bp.lineNo, bp.startLineNo, null);
                 }
             }
         }
@@ -1487,7 +1486,7 @@ FirebugService.prototype =
 			{
 				if (fbs.DBG_BP) ddd("recordBreakpoint onNextReloadOnly lineNo="+lineNo                                 /*@explore*/
 					                +" using pcmap="+pcmap+" pc="+pc+"\n");                                            /*@explore*/
-				var bp = this.recordBreakpoint(type | BP_ONRELOAD, url, lineNo, debuggr, null, props);  // mark for next reload
+				bp = this.recordBreakpoint(type | BP_ONRELOAD, url, lineNo, debuggr, null, props);  // mark for next reload
 			} 
         }
 
@@ -1500,7 +1499,7 @@ FirebugService.prototype =
   		if (!urlBreakpoints)
         	breakpoints[url] = urlBreakpoints = [];
 
-		bp = {type: type, href: url, lineNo: lineNo, disabled: 0,
+		var bp = {type: type, href: url, lineNo: lineNo, disabled: 0,
             startLineNo: functionDeclarationLine, debuggr: debuggr,
             condition: "", onTrue: true, hitCount: -1, hit: 0};
 		if (props)

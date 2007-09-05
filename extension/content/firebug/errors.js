@@ -90,6 +90,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     
     observe: function(object)
     {
+		if(typeof(FBTrace) == "undefined") return;
         try
         {
 			if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
