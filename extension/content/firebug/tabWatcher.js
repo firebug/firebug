@@ -115,22 +115,8 @@ top.TabWatcher =
             return;
         }
 
-        // XXXms: check for Aptana side effects ?
-        if (Firebug.disabledAlways)
-        {
-            // Check if the whitelist makes an exception
-            if (!this.owner.isURIAllowed(uri))
-                return this.watchContext(win, null);
-        }
-        else
-        {
-            // Check if the blacklist says no
-            if (this.owner.isURIDenied(uri))
-                return this.watchContext(win, null);
-        }
-
         var context = this.getContextByWindow(win);
-        if (!context && uri)
+        if (!context)
         {
             if (!this.owner.enableContext(win,uri))
             { 
