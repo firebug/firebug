@@ -767,7 +767,7 @@ FirebugService.prototype =
 		{ 
 	        var debuggr = this.findDebugger(frame);
         	if (debuggr)
-            	return this.breakIntoDebugger(debuggr, frame);
+            	return this.breakIntoDebugger(debuggr, frame, type);
         } 
         catch(exc) 
         {
@@ -1716,7 +1716,8 @@ FirebugService.prototype =
         function topLevelHook(frame, type)
         {
 			if(!fbs) return;
-			if (fbs.DBG_STEP) dumpToFileWithStack("topLevel type="+(type==0?"TOPLEVEL_START":"TOPLEVEL_END"), frame);  /*@explore*/
+			if (fbs.DBG_STEP)                                                                                          /*@explore*/
+				dumpToFileWithStack("topLevel type="+(type==TYPE_TOPLEVEL_START?"TOPLEVEL_START":"TOPLEVEL_END"), frame); /*@explore*/
         	if ( isSystemURL(frame.script.fileName) )
         		return;
 
@@ -1725,8 +1726,9 @@ FirebugService.prototype =
                 case TYPE_TOPLEVEL_START:
                 {
                 	var debuggr = fbs.findDebugger(frame);
-                	if (debuggr)
-                		debuggr.onTopLevelScript(null, 0, frame.script);
+					// XXXms: unused code ?
+                	//if (debuggr)
+                	//	debuggr.onTopLevelScript(null, 0, frame.script);
 					break;
                 }
                 case TYPE_TOPLEVEL_END:
@@ -1734,14 +1736,16 @@ FirebugService.prototype =
             }
         }
 
-		if (fbs.DBG_STEP) ddd("set topLevelHook\n");                                                                   /*@explore*/
-        jsd.topLevelHook = { onCall: topLevelHook };
+		// XXXms - not sure if we need topLevelHook any more as we use BP at pc=0 for every top-level script
+		//if (fbs.DBG_STEP) ddd("set topLevelHook\n");                                                                   /*@explore*/
+        //jsd.topLevelHook = { onCall: topLevelHook };
     },
      
     unhookTopLevel: function()
     {
-        jsd.topLevelHook = null;
-		if (fbs.DBG_STEP) ddd("unset topLevelHook\n");                                                                 /*@explore*/
+		// XXXms - not sure if we need topLevelHook any more as we use BP at pc=0 for every top-level script
+        //jsd.topLevelHook = null;
+		//if (fbs.DBG_STEP) ddd("unset topLevelHook\n");                                                                 /*@explore*/
     },
   
     hookInterrupts: function()

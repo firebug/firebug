@@ -36,6 +36,8 @@ Firebug.Console = extend(Firebug.Module,
     {
         if (!context)
             context = FirebugContext;
+        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
+
 
         if (noThrottle)
         {

@@ -690,11 +690,6 @@ Firebug.Debugger = extend(Firebug.Module,
         var context = this.breakContext;
         delete this.breakContext;
         
-        if (!context)
-            context = getFrameContext(frame);
-        if (!context)
-            return;
-
         // caller should ensure (script.fileName == url)
         var sourceFile = context.sourceFileMap[script.fileName];   
         if (sourceFile)     
@@ -702,7 +697,6 @@ Firebug.Debugger = extend(Firebug.Module,
         if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
             FBTrace.sysout("debugger.onTopLevelScript sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/     
 
-        dispatch(listeners,"onTopLevelScript",[context, url, lineNo, script]);
     },
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
@@ -846,6 +840,8 @@ Firebug.Debugger = extend(Firebug.Module,
             
             sourceFile.addToLineTable(script, script.baseLineNumber, false);
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevel sourcefile="+sourceFile.toString()+"\n"); /*@explore*/
+            
+            dispatch(listeners,"onTopLevel",[context, frame]);
 
             return script.fileName;
         }
@@ -2092,7 +2088,7 @@ Firebug.DebuggerListener =
     {
     },
     
-    onTopLevelScript: function(context, frame, before)
+    onTopLevel: function(context, frame)
     {
     }
 };
