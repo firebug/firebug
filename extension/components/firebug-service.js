@@ -847,7 +847,8 @@ FirebugService.prototype =
 			if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
 			                          +scriptTag+" topLevelScriptTag\n");                                              /*@explore*/
     		delete this.topLevelScriptTag[scriptTag];
-    		return this.onEvalBreak(frame, type, val);
+    		this.onEvalBreak(frame, type, val);
+			var checkBP = true;
     	}
     	if (scriptTag in fbs.eventLevelScriptTag)
     	{
@@ -856,7 +857,7 @@ FirebugService.prototype =
 			delete this.eventLevelScriptTag[scriptTag];
     		return this.onEventScriptBreak(frame, type, val);
     	}
-        if (disabledCount || monitorCount || conditionCount || runningUntil)
+        if (checkBP || disabledCount || monitorCount || conditionCount || runningUntil)
         {
 			if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
 				 +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
@@ -999,7 +1000,7 @@ FirebugService.prototype =
 	        if (!debuggr)
 	        {
 	        	if (fbs.DBG_BP) ddd("firebug-service: no debuggr for frame.fileName="+script.fileName+"\n");           /*@explore*/
-	        	return RETURN_CONTINUE;
+	        	return;
 	        }
 	        
 			try
@@ -1008,7 +1009,7 @@ FirebugService.prototype =
 			}
 			catch (exc)
 			{
-				return RETURN_CONTINUE;
+				return;
 			}
 	         
        		if (!frame.callingFrame) 
@@ -1024,7 +1025,6 @@ FirebugService.prototype =
 				{                                                                                                      /*@explore*/
 					if (fbs.DBG_CREATION) ddd("onEvalBreak: no url returned from debugger side");                      /*@explore*/
 				}                                                                                                      /*@explore*/
-				return RETURN_CONTINUE;	 // top_level
 			}
        		else
        		{	
@@ -1036,14 +1036,12 @@ FirebugService.prototype =
             		this.registerEvalLevelScript(script, leveledScriptURL, "eval-level", 1);           			
 					this.drainEvalScriptStack(leveledScriptURL, frame, script, debuggr);
 				}
-       			return RETURN_CONTINUE;
        		}
         } 
 		catch (exc) 
 		{
 			ERROR("onEvalBreak failed: "+exc);
 		}
-		return RETURN_CONTINUE;
 	}, 
 	
 	getURLFromDebugger: function(callback, frame) 
