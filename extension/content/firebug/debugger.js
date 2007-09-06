@@ -808,6 +808,7 @@ Firebug.Debugger = extend(Firebug.Module,
             if (FBTrace.DBG_SOURCEFILES)                                                                               /*@explore*/
                 FBTrace.sysout("debugger.onEventScript sourcefile="+sourceFile.toString()+"\n");                       /*@explore*/
             
+            dispatch(listeners,"onEventScript",[context, frame, url]);
             return url;
         }
         catch(exc) 
@@ -841,8 +842,7 @@ Firebug.Debugger = extend(Firebug.Module,
             sourceFile.addToLineTable(script, script.baseLineNumber, false);
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevel sourcefile="+sourceFile.toString()+"\n"); /*@explore*/
             
-            dispatch(listeners,"onTopLevel",[context, frame]);
-
+            dispatch(listeners,"onTopLevel",[context, frame, script.fileName]);
             return script.fileName;
         }
         catch(exc) 
@@ -870,6 +870,7 @@ Firebug.Debugger = extend(Firebug.Module,
                 FBTrace.sysout( traceToString(FBL.getStackTrace(frame, context))+"\n" );                               /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
+            dispatch(listeners,"onEval",[context, frame, sourceFile.href]);
             return sourceFile.href;
         }
         catch(exc) 
@@ -2088,7 +2089,15 @@ Firebug.DebuggerListener =
     {
     },
     
-    onTopLevel: function(context, frame)
+    onEventScript: function(context, frame, url)
+    {
+    },
+
+    onTopLevel: function(context, frame, url)
+    {
+    },
+
+    onEval: function(context, frame, url)
     {
     }
 };
