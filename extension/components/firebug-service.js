@@ -2128,7 +2128,7 @@ function dumpProperties(title, obj)                                             
 	for (p in obj)                                                                                                     /*@explore*/
 		lines.push("["+p+"]="+obj[p]);                                                                                 /*@explore*/
 	ddd(lines.join("\n"));                                                                                             /*@explore*/
-}
+}                                                                                                                      /*@explore*/
 
 function getExecutionStopNameFromType(type)                                                                            /*@explore*/
 {                                                                                                                      /*@explore*/

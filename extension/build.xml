@@ -37,7 +37,7 @@
 	</target>
 	
 	<!-- Incremental Build Targets -->
-	<target name="incremental" depends="copy-to-extensions, adjust-chrome-manifests" />
+	<target name="incremental" depends="version, expand-templates, copy-to-extensions, adjust-chrome-manifests" />
 	<target name="copy-to-extensions" depends="clean-reg, clean-xpti" 
 		description="Incremental Development">
 		<copy todir="${install.dir}extensions/firebug@software.joehewitt.com" >
@@ -171,9 +171,10 @@
 	</target>
 	
 
-	<target name="unexplore" depends="clean-unexplore, copy-to-unexplore">		
+	<target name="unexplore" depends="version, expand-templates, clean-unexplore, copy-to-unexplore">		
 		<replaceregexp match=".*/\*@explore\*/.*\n" replace="" flags="g">
 		    <fileset dir="${unexplore.dir}" includes="**/*.js"/>
+			<fileset dir="${unexplore.dir}" includes="**/*.xul"/>
 		</replaceregexp>
 		<echo message="update VERSION in ${unexplore.dir}/branch.properties"/>
 	</target>
@@ -217,7 +218,7 @@
 	<target name="version" description="Compute version number">
 		<tstamp/>
 		<property name="build_dir" location="./build" />		
-		<property name="VERSION"  value="1.1${BRANCH}${RELEASE}${TRUNK}"/>
+		<property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
 		<property name="UPDATEPATH" value="${update.path}" />
 		<mkdir dir="${build_dir}/dist" />
 		<property name="dist_dir" location="${build_dir}/dist" />

@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.1.0b1</em:version>
+    <em:version>@VERSION@</em:version>
     <em:type>2</em:type>
    
     <!-- Firefox -->
@@ -33,6 +33,6 @@
     <em:contributor>Aptana IDE integration: Max Stepanov</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>http://fireclipse.xucia.com/files/fireclipse/update.rdf</em:updateURL>
+    <em:updateURL>@UPDATEPATH@/update.rdf</em:updateURL>
   </Description>      
 </RDF>
