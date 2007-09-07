@@ -25,10 +25,11 @@
 	<property name="src_dir" location="." />
 	<property name="build_dir" location="./build" />
 	<property name="dist_dir" location="./dist" /> 
-	<property name="unexplore.dir" location="../eval" /> <!-- relative to branches/firebug1.1 should be branches/eval -->
+	<property name="unexplore.dir" location="../eval" />
+	<!-- relative to branches/firebug1.1 should be branches/eval -->
+
 	<property name="excludes" value="**/.*, **/*.jar, **/*.db" />
 	<property name="components_dir" location="${src_dir}/components" />
-
 	
 	<!-- Targets -->
 	<target name="clean">
@@ -93,50 +94,45 @@
 	<!-- Distribution XPI Targets -->
 	<target name="createChromeJAR">
 		<mkdir dir="${build_dir}" />
-		<zip destfile="${build_dir}/${ant.project.name}.jar" update="true"
-			basedir="${src_dir}"
-			includes="content/**, locale/**, skin/**"
-			excludes="${excludes}"
-		/>
+		<zip destfile="${build_dir}/${ant.project.name}.jar" update="true" basedir="${src_dir}"
+includes="content/**, locale/**, skin/**" excludes="${excludes}"
+/>
 	</target>
-	
 	<target name="createPlatformJARs">
 		<mkdir dir="${build_dir}/Darwin" />
 		<mkdir dir="${build_dir}/Linux" />
 		<mkdir dir="${build_dir}/linux-gnu" />
 		<mkdir dir="${build_dir}/WINNT" />
-		<zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true"
-			basedir="${src_dir}/platform/Darwin"
-			includes="skin/**"
-			excludes="${excludes}"
-		/>
+		<zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true" basedir="${src_dir}/platform/Darwin" includes="skin/**"
+excludes="${excludes}" />
 		<zip destfile="${build_dir}/Linux/${ant.project.name}.jar" update="true"
-			basedir="${src_dir}/platform/Linux"
-			includes="skin/**"
-			excludes="${excludes}"
-		/>
+basedir="${src_dir}/platform/Linux"
+includes="skin/**"
+excludes="${excludes}"
+/>
 		<zip destfile="${build_dir}/linux-gnu/${ant.project.name}.jar" update="true"
-			basedir="${src_dir}/platform/linux-gnu"
-			includes="skin/**"
-			excludes="${excludes}"
-		/>
+basedir="${src_dir}/platform/linux-gnu"
+includes="skin/**"
+excludes="${excludes}"
+/>
 		<zip destfile="${build_dir}/WINNT/${ant.project.name}.jar" update="true"
-			basedir="${src_dir}/platform/WINNT"
-			includes="skin/**"
-			excludes="${excludes}"
-		/>
+basedir="${src_dir}/platform/WINNT"
+includes="skin/**"
+excludes="${excludes}"
+/>
 	</target>
-	
-	<target name="zipIntoXPI" depends="clean, createChromeJAR, createPlatformJARs">
+	<target name="zipIntoXPI" depends="clean, createChromeJAR">
 		<mkdir dir="${dist_dir}" />
 		<zip destfile="${dist_dir}/${ant.project.name}.xpi" update="true">
 			<zipfileset dir="${build_dir}" includes="${ant.project.name}.jar" prefix="chrome" />
 			<zipfileset dir="${src_dir}" includes="icons/**" prefix="chrome" excludes="${excludes}" />
 			<zipfileset dir="${src_dir}/platform" includes="**" prefix="platform" excludes="${excludes}, **/skin/**" />
+			<!--
 			<zipfileset dir="${build_dir}/Darwin" includes="${ant.project.name}.jar" prefix="platform/Darwin/chrome" />
 			<zipfileset dir="${build_dir}/Linux" includes="${ant.project.name}.jar" prefix="platform/Linux/chrome" />
 			<zipfileset dir="${build_dir}/linux-gnu" includes="${ant.project.name}.jar" prefix="platform/linux-gnu/chrome" />
 			<zipfileset dir="${build_dir}/WINNT" includes="${ant.project.name}.jar" prefix="platform/WINNT/chrome" />
+			-->
 			<zipfileset dir="${src_dir}/components" includes="*.js" prefix="components" />
 			<zipfileset dir="${src_dir}/components" includes="*.xpt" prefix="components" />
 			<zipfileset dir="${src_dir}/defaults" includes="**" prefix="defaults" excludes="${excludes}" />
