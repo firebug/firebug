@@ -1148,9 +1148,6 @@ FirebugService.prototype =
         {
 			ERROR("onScriptCreated failed: "+exc);
 		}
-		// XXXms: verify this
-        //if (!isSystemURL(url))
-        //    dispatch(scriptListeners,"onScriptCreated",[script]);
     },
 
     onScriptDestroyed: function(script)
@@ -1169,10 +1166,8 @@ FirebugService.prototype =
         }    
 		delete this.nestedScriptStack[scriptTag];
         delete this.eventLevelScriptTag[scriptTag];
-
-		// XXXms: verify this
-        //if (url && !isSystemURL(url))
-        //    dispatch(scriptListeners,"onScriptDestroyed",[script]);
+		
+		dispatch(scriptListeners,"onScriptDestroyed",[script]);
     },
 
 	resetBreakpoints: function(scriptInfo) 
@@ -1245,6 +1240,7 @@ FirebugService.prototype =
 		
 		if (fbs.DBG_CREATION) ddd("registerTopLevelScript: "+formatScriptInfo(scriptInfo) +"\n");                      /*@explore*/
 		
+		dispatch(scriptListeners,"onScriptCreated",[script, url, script.baseLineNumber]);
 		return scriptInfo;
 	},
 	
@@ -1271,6 +1267,7 @@ FirebugService.prototype =
 		
 		if (fbs.DBG_CREATION) ddd("registerEvalLevelScript: "+formatScriptInfo(scriptInfo) +"\n");                     /*@explore*/
 		
+		dispatch(scriptListeners,"onScriptCreated",[script, url, evalLineNumber]);
 		return scriptInfo;
 	},
 	
@@ -1285,6 +1282,7 @@ FirebugService.prototype =
 		this.resetBreakpoints(scriptInfo);
 		
 		if (fbs.DBG_CREATION) ddd( "registerEventLevelScript: "+formatScriptInfo(scriptInfo) +"\n");                   /*@explore*/
+		dispatch(scriptListeners,"onScriptCreated",[script, url, script.baseLineNumber]);
 		return scriptInfo;
 	},
 

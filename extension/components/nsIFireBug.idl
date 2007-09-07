@@ -218,6 +218,6 @@ interface nsIFireBug : nsISupports
 [scriptable, uuid(d00466f8-e616-4b81-9aa0-a8581c51209c)]
 interface nsIFireBugScriptListener : nsISupports
 {
-    void onScriptCreated(in jsdIScript script);
+    void onScriptCreated(in jsdIScript script, in string url, in unsigned long lineNo);
     void onScriptDestroyed(in jsdIScript script);
 };
