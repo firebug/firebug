@@ -412,6 +412,10 @@ function onHTTPSpyLoad(spy)
         netProgress.post(netProgress.stopFile,
                 [spy.request.channel, now, spy.postText, spy.responseText]);
 
+    if (FBL.DBG_NET)                                                                                                   /*@explore*/
+        FBL.sysout("onHTTPSpyLoad netProgress:"+netProgress+" responseTime="+responseTime                              /*@explore*/
+                                       +" spy.responseText "+spy.responseText.length +"bytes\n");                      /*@explore*/
+
     if (spy.logRow)
     {
         updateLogRow(spy, responseTime);

@@ -1939,6 +1939,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 
                 if (text)
                     insertWrappedText(text, responseTextBox);
+                else
+                    insertWrappedText("", responseTextBox);
             }
         }
 		
