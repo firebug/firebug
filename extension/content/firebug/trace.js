@@ -34,6 +34,7 @@ this.dumpToPanel = false;
 this.dumpProperties = function(header, obj) 
 {
 	try {
+		var noThrottle = true;
 		this.sysout(header+" sees object with typeof: \'"+typeof(obj)+"\'; object contains:\n");
 		if (obj instanceof Array)
 		{	
