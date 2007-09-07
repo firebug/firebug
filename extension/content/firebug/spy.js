@@ -37,15 +37,15 @@ const httpObserver =
                     var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
                     if (xhrRequest)
                     {
-                    	var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
-                    	for( var i = 0; i < contexts.length; ++i )
-                    	{
-                    		if (contexts[i].win == win)
-                    		{
-		                        requestStarted(xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);                    			
-		                        return;
-                    		}
-                    	}
+                        var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
+                        for( var i = 0; i < contexts.length; ++i )
+                        {
+                            if (contexts[i].win == win)
+                            {
+                                requestStarted(xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);                              
+                                return;
+                            }
+                        }
                     }
                 }
             }
@@ -66,17 +66,17 @@ Firebug.Spy = extend(Firebug.Module,
     {
         if (win)
         {
-			var uri = win.location.href; // don't attach spy to chrome 
-			if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
-				return;
+            var uri = win.location.href; // don't attach spy to chrome 
+            if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+                return;
             for( var i = 0; i < contexts.length; ++i )
             {
-            	if ( (contexts[i].context == context) && (contexts[i].win == win) )
-            		return;
+                if ( (contexts[i].context == context) && (contexts[i].win == win) )
+                    return;
             }
             if ( contexts.length == 0 )
             {
-            	observerService.addObserver(httpObserver, "http-on-modify-request", false);
+                observerService.addObserver(httpObserver, "http-on-modify-request", false);
             }
             contexts.push({ context: context, win: win });
         }
@@ -88,15 +88,15 @@ Firebug.Spy = extend(Firebug.Module,
         {
             for( var i = 0; i < contexts.length; ++i )
             {
-            	if ( (contexts[i].context == context) && (contexts[i].win == win) )
-            	{
-            		contexts.splice(i, 1);
-		            if ( contexts.length == 0 )
-		            {
-		            	observerService.removeObserver(httpObserver, "http-on-modify-request", false);
-		            }
-            		return;
-            	} 
+                if ( (contexts[i].context == context) && (contexts[i].win == win) )
+                {
+                    contexts.splice(i, 1);
+                    if ( contexts.length == 0 )
+                    {
+                        observerService.removeObserver(httpObserver, "http-on-modify-request", false);
+                    }
+                    return;
+                } 
             }
         }
     },

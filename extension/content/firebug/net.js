@@ -975,10 +975,10 @@ function NetProgress(context)
         {
             var file = handler.apply(this, args);
             if (file)
-			{
+            {
                  panel.updateFile(file);
-				return file;				
-			}
+                return file;                
+            }
         }
         else
         {
@@ -987,20 +987,20 @@ function NetProgress(context)
             queue.push(handler, args);
         }
                                                                                                                        /*@explore*/
-		if (FBTrace.DBG_NET)                                                                                           /*@explore*/
-			FBTrace.dumpProperties( " net.post.args "+(panel?" applied":"queued @"+(queue.length-2)), args);           /*@explore*/
+        if (FBTrace.DBG_NET)                                                                                           /*@explore*/
+            FBTrace.dumpProperties( " net.post.args "+(panel?" applied":"queued @"+(queue.length-2)), args);           /*@explore*/
     };
     
     this.flush = function()
     {
         for (var i = 0; i < queue.length; i += 2)
         {
-			if (FBTrace.DBG_NET)                                                                                       /*@explore*/
-			{                                                                                                          /*@explore*/
-				FBTrace.dumpProperties("net.flush handler("+i+")", queue[i]);                                          /*@explore*/
-				FBTrace.dumpProperties("net.flush args ", queue[i+1]);                                                 /*@explore*/
-			}                                                                                                          /*@explore*/
-			                                                                                                           /*@explore*/
+            if (FBTrace.DBG_NET)                                                                                       /*@explore*/
+            {                                                                                                          /*@explore*/
+                FBTrace.dumpProperties("net.flush handler("+i+")", queue[i]);                                          /*@explore*/
+                FBTrace.dumpProperties("net.flush args ", queue[i+1]);                                                 /*@explore*/
+            }                                                                                                          /*@explore*/
+                                                                                                                       /*@explore*/
             var file = queue[i].apply(this, queue[i+1]);
             if (file)
                 panel.updateFile(file);
@@ -1045,7 +1045,7 @@ NetProgress.prototype =
     
     respondedTopWindow: function(request, time, webProgress)
     {
-		var win = webProgress ? safeGetWindow(webProgress) : null; 
+        var win = webProgress ? safeGetWindow(webProgress) : null; 
         this.requestedFile(request, time, win);
         return this.respondedFile(request, time);
     },
@@ -1072,8 +1072,8 @@ NetProgress.prototype =
             if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile file", file);                               /*@explore*/
             return file;
         }
-		else                                                                                                           /*@explore*/
-			if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
+        else                                                                                                           /*@explore*/
+            if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
     },
     
     respondedFile: function(request, time)
@@ -1144,8 +1144,8 @@ NetProgress.prototype =
             
             return file;
         }
-		else                                                                                                           /*@explore*/
-			if (FBTrace.DBG_NET) FBTrace.dumpProperties("stopfile no file for request=", request);                     /*@explore*/
+        else                                                                                                           /*@explore*/
+            if (FBTrace.DBG_NET) FBTrace.dumpProperties("stopfile no file for request=", request);                     /*@explore*/
     },
 
     cacheEntryReady: function(request, file, size)
@@ -1268,9 +1268,9 @@ NetProgress.prototype =
 
     arriveFile: function(file, request)
     {
-		if (FBTrace.DBG_NET)                                                                                           /*@explore*/
-			FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");  /*@explore*/
-			                                                                                                           /*@explore*/
+        if (FBTrace.DBG_NET)                                                                                           /*@explore*/
+            FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");  /*@explore*/
+                                                                                                                       /*@explore*/
         delete this.requestMap[file.href];
 
         var index = this.pending.indexOf(file);
@@ -1348,7 +1348,7 @@ NetProgress.prototype =
         {
             var webProgress = getRequestWebProgress(request, this);
             var category = getRequestCategory(request);
-			var win = webProgress ? safeGetWindow(webProgress) : null;
+            var win = webProgress ? safeGetWindow(webProgress) : null;
             this.post(requestedFile, [request, now(), win, category]);
         }
         else
@@ -1370,7 +1370,7 @@ NetProgress.prototype =
         }
         else if (flag & STATE_STOP && flag & STATE_IS_REQUEST)
         {
-        	if (this.getRequestFile(request))
+            if (this.getRequestFile(request))
                 this.post(stopFile, [request, now()]);
         }
     },
@@ -1423,11 +1423,11 @@ function NetFile(href, document)
 {
     this.href = href;
     this.document = document
-	                                                                                                                   /*@explore*/
-	if (FBTrace.DBG_NET) {                                                                                             /*@explore*/
-		this.uid = FBL.getUniqueId();                                                                                  /*@explore*/
-		FBTrace.dumpProperties("NetFile", this);                                                                       /*@explore*/
-	}                                                                                                                  /*@explore*/
+                                                                                                                       /*@explore*/
+    if (FBTrace.DBG_NET) {                                                                                             /*@explore*/
+        this.uid = FBL.getUniqueId();                                                                                  /*@explore*/
+        FBTrace.dumpProperties("NetFile", this);                                                                       /*@explore*/
+    }                                                                                                                  /*@explore*/
 }
 
 NetFile.prototype = 
@@ -1479,11 +1479,11 @@ function unmonitorContext(context)
 
 function initCacheSession()
 {
-	if (!cacheSession)
-	{
-    	var cacheService = CacheService.getService(nsICacheService);
-    	cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
-    	cacheSession.doomEntriesIfExpired = false;
+    if (!cacheSession)
+    {
+        var cacheService = CacheService.getService(nsICacheService);
+        cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
+        cacheSession.doomEntriesIfExpired = false;
     }
 }
 
@@ -1491,7 +1491,7 @@ function waitForCacheCompletion(request, file, netProgress)
 {
     try
     {
-    	initCacheSession();
+        initCacheSession();
         var descriptor = cacheSession.openCacheEntry(file.href, ACCESS_READ, false);
         if (descriptor)
             netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
@@ -1499,10 +1499,10 @@ function waitForCacheCompletion(request, file, netProgress)
     catch (exc)
     {
         if (exc.result != NS_ERROR_CACHE_WAIT_FOR_VALIDATION
-        	&& exc.result != NS_ERROR_CACHE_KEY_NOT_FOUND)
+            && exc.result != NS_ERROR_CACHE_KEY_NOT_FOUND)
         {
-        	ERROR(exc);
-        	netProgress.post(cacheEntryReady, [request, file, -1]);
+            ERROR(exc);
+            netProgress.post(cacheEntryReady, [request, file, -1]);
         }
     }        
 }
@@ -1515,7 +1515,7 @@ function getCacheEntry(file, netProgress)
     {
         try
         {
-			initCacheSession();
+            initCacheSession();
             cacheSession.asyncOpenCacheEntry(file.href, ACCESS_READ, {
                 onCacheEntryAvailable: function(descriptor, accessGranted, status)
                 {
@@ -1545,7 +1545,7 @@ function getCacheEntry(file, netProgress)
                           { name: "Device",
                             value: descriptor.deviceID
                           }
-                        ]; 						
+                        ];                      
                         netProgress.update(file);
                     }
                 }
@@ -1553,7 +1553,7 @@ function getCacheEntry(file, netProgress)
         }
         catch (exc)
         {
-        	ERROR(exc);
+            ERROR(exc);
         }        
     });
 }
@@ -1622,17 +1622,17 @@ function getRequestWebProgress(request, netProgress)
                     }
                 });
             }
-			// XXXjjb Joe review: code above sets bypass, so this stmt should be in if (gives exceptions otherwise)
-	        if (!bypass)
-    	        return request.notificationCallbacks.getInterface(nsIWebProgress);
+            // XXXjjb Joe review: code above sets bypass, so this stmt should be in if (gives exceptions otherwise)
+            if (!bypass)
+                return request.notificationCallbacks.getInterface(nsIWebProgress);
         }
     }
     catch (exc) {}
 
     try
     {
-		if (request.loadGroup && request.loadGroup.groupObserver)
-        	return QI(request.loadGroup.groupObserver, nsIWebProgress);
+        if (request.loadGroup && request.loadGroup.groupObserver)
+            return QI(request.loadGroup.groupObserver, nsIWebProgress);
     }
     catch (exc) {}
 }
@@ -1826,7 +1826,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
     {
         return !file.cacheEntry || file.category=="image";
     }, 
-	
+    
     onClickTab: function(event)
     {
         this.selectTab(event.currentTarget);
@@ -1867,8 +1867,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
     
     updateInfo: function(netInfoBox, file, context)
     {
-		if (FBTrace.DBG_NET) FBTrace.dumpProperties("updateInfo file", file);                                          /*@explore*/
-			                                                                                                           /*@explore*/
+        if (FBTrace.DBG_NET) FBTrace.dumpProperties("updateInfo file", file);                                          /*@explore*/
+                                                                                                                       /*@explore*/
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
         {
@@ -1943,7 +1943,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                     insertWrappedText("", responseTextBox);
             }
         }
-		
+        
         if (hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
         {
             netInfoBox.cachePresented = true;
