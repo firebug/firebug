@@ -1,0 +1,113 @@
+Most Wanted
+===========
+
+* Save Scripts as Bookmarklet, Greasemonkey, or Command Line Helper
+* Jump to files in external editor
+* CSS Explorer
+* Plugins
+    * Custom tabs
+    * Console toolbar buttons/menus
+    * Custom tags
+    * Net response text formatters (json, xml, wddx)
+    * HTML source filters
+    * JavaScript source line maps
+* Quicksilver-like search
+* Save CSS changes back to file
+* Web services command line
+* Unit testing
+
+Plans
+====================================================================================================
+        
+* General
+    * Remember sidebar width and orientation separately for each tab
+    * Remember Script tab sidebar width differently while debugger is stopped or not stopped
+    * Support traditional key shortcuts while focused (ctrl-f, escape to close, etc...)
+        
+* Smart command line
+    * URL loading
+    * Regular expressions
+    * CSS selector
+    * cut, copy, paste commands
+
+* Console
+    * Show errors for files that failed to load (400 or 500 HTTP codes)
+    * Option to not clear the log upon reload, but insert reload separator
+    * Show number of unread messages in tab
+    * Insert blinking bar at the bottom of console when new rows are inserted while scrolled up
+
+* Console Customization
+    * Populate toolbar with buttons created by page through console API
+    * "New Shell" command to open editor in new side panel tab
+
+* Debugger
+    * Search should search through all scripts at once (optionally)
+    * Parse function and show all variables in scope, and try to get those outside closure
+    * Add "Globals" item to Watch panel which shows only user-defined props of top
+    * Preserve view information when moving up and down stack frames
+    * Show error in tooltip when breaking for error
+    * Selection failure warning - show non-modal alert with "unable to find X" message
+    * Show popup with error message when breaking for an error
+    * Show value in question for "foo has no properties" or "foo is not a function" errors
+        * Extract all symbols from expression in message, not just the whole expression
+    * Call stack panel
+    * Better tooltip for stack frames
+        * name(arg, arg)
+        * file.ext (line 100)
+    * Hook eval() to debug store eval'ed scripts
+    * Option to break on mutation events (global or per element)
+    * Guess function name of getters/setters
+    
+* Execution monitoring
+    * Log each top-level function that is called, click to expand full execution tree
+        * Expand one level at a time, or expand all context menu
+    * Infinite loop buster
+        * Show execution path, but stop every N lines
+
+* HTML Panel
+    * Context menu for Script/Style/Link should contain "Inspect Script" or "Inspect CSS"
+    * Search should dig into iframes
+    * Allow drag and drop to move nodes around
+    * Scroll into View should scroll smoothly towards element, blink red, then animate box out
+
+* CSS Panel
+    * Search should search through all stylesheets at once (optionally)
+    * Save changes in memory and re-apply them after a reload
+    * Toolbar button for disabling the entire stylesheet, or all stylesheets
+    * Highlight properties that have been edited by user
+    * Element side panel
+    * Colors/Images side panel
+    * Classes side panel
+
+* CSS Explorer
+    * Catalogue of CSS entities - ids, classes, attributes, colors, images, fonts
+
+* DOM Panel
+    * Option to copy objects as a JSON serialization (with max-depth)
+
+* Net Panel
+    * Support plugins for formatting response text (json, wddx, xml, etc...)
+    * Save File As... menu item
+
+* Extra tabs
+    * Colors
+    * Cookies
+    * Local Storage
+    * Validation
+
+Visual Breakdown
+====================================================================================================
+
+1. Hide all elements outside current
+2. Hide all elements inside current
+3. Hide all elements except current
+4. Hide current
+
+* Toggle backgrounds images on/off
+* Toggle backgrounds colors on/off
+* Toggle images on/off
+* Toggle text on/off
+
+* Show only background images
+* Show only images
+* Show only text
