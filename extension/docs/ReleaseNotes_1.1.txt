@@ -54,15 +54,23 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
    ShowExternalErrors=Show External Errors
 
 == Net panel ==
-cache tab for Net panel contributed by Kyle Scholz
+* Cache tab for Net panel contributed by Kyle Scholz
+
+== XHR  ==
+* Spy was redesigned to avoid wrapping of XMLHttpRequest object that had caused many issues
+  An observer for http-on-modify-request events is used
+  ** Internal: spy.js
   
 === Bug Fixes ===
+    ** Issue 8: using PrivilegeManager.enablePrivilege doesn't work for XHRs
+    ** Issue 27: codebrowser does not work, when there is an Java Applet on the page
     ** Issue 69: incorrect enabled on new tabs
     ** Issue 234: console.log displays string objects as arrays
     ** Issue 230 CSS Errors reported on wrong or non-existent line numbers
     ** Issue 181 Net->XHR Response tab shows "Loading..." not response text.
     ** Issue 239 Fix for Frame refresh bug: http://groups.google.com/group/firebug/browse_thread/thread/c69e49b9815b2540
     ** throw exception if firebugService cannot be loaded on startup (_CC[cname] error message).   http://groups.google.com/group/firebug/browse_thread/thread/c795b72931f2bd34/8fa8dca3c012c4f7
+    ** Issue 249: Fix for Net monitor memory leaks
    
 === General ===
 * Supports Firefox 3
