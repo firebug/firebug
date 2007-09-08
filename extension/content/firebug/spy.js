@@ -310,15 +310,15 @@ XMLHttpRequestSpy.prototype =
         this.onreadystatechange = this.request.onreadystatechange;
 
         this.request.onreadystatechange = this.onReadyStateChange;    
-        //this.request.addEventListener("load", this.onLoad, true);
-        //this.request.addEventListener("error", this.onError, true);
+        this.request.addEventListener("load", this.onLoad, true);
+        this.request.addEventListener("error", this.onError, true);
     },
 
     detach: function()
     {
         this.request.onreadystatechange = this.onreadystatechange;
-        //try { this.request.removeEventListener("load", this.onLoad, true); } catch (e) {}
-        //try { this.request.removeEventListener("error", this.onError, true); } catch (e) {}
+        try { this.request.removeEventListener("load", this.onLoad, true); } catch (e) {}
+        try { this.request.removeEventListener("error", this.onError, true); } catch (e) {}
 
         this.onreadystatechange = null;
         this.onLoad = null;
