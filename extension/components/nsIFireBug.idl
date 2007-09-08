@@ -45,7 +45,7 @@ interface nsIFireBugDebugger : nsISupports
     /**
      * Called when jsd signals onError and the showStackTrace option is set.
      */
-    void onError(in jsdIStackFrame frame, in nsIFireBugError error);
+    long onError(in jsdIStackFrame frame, in nsIFireBugError error);
      
     /**
      * A script created by an eval is created;
