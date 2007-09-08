@@ -151,7 +151,7 @@ excludes="${excludes}"
 		     </condition>
 		</fail>
 		<delete includeEmptyDirs="true">
-			<fileset dir="${unexplore.dir}" includes="**/*" />
+			<fileset dir="${unexplore.dir}" includes="**/*" excludes="**/.svn"/>
 		</delete>
 	</target>
 
@@ -162,6 +162,7 @@ excludes="${excludes}"
 				<exclude name="build/**"/>
 				<exclude name="dist/**"/>
 				<exclude name="lite/**"/>
+				<exclude name="**/.svn"/>
 			</fileset>
 		</copy>
 	</target>
