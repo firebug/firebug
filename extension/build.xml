@@ -7,20 +7,46 @@
 
 <project name="firebug" default="createBranchXPI">
 
-	<!--
+
+	<!-- Setting properties -->
+	<target name="local-check">
+		<available file="${basedir}/local.properties" 
+           property="local.properties.available"/>
+	</target>
+
+    <target name="properties-local" 
+          if="local.properties.available" 
+          depends="local-check">
+      <echo message="Loading local properties file"/>
+      <property file="local.properties"/>
+    </target>
+
+	<target name="no-properties-local"
+			unless="local.properties.available" 
+        	depends="local-check">
+      	<echo message="No local properties file, setting defaults"/>
+		<property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
+		<property name="xpidl.exe" value="OperatingSystemPathTo:xpidl.exe"/>
+		<property name="update.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
+    </target>
+
+	<target name="version" depends="properties-local" description="Compute version number">
+		<tstamp/>
+		<property name="build_dir" location="./build" />		
+		<property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
+		<property name="UPDATEPATH" value="${update.path}" />
+		<mkdir dir="${build_dir}/dist" />
+		<property name="dist_dir" location="${build_dir}/dist" />
+		<property name="FIREBUG-XPI" value="firebug-${VERSION}.xpi"/>
+	</target>
+
+	<!-- eg
 		RELEASE=.88
 		BRANCH=eval
 		TRUNK=.1.05
 		-->
 	<property file="branch.properties" />
-	
-	<!-- update.path is URL to update.rdf -->
-	<!--
-	install.dir=C:/Documents and Settings/John J. Barton/Application Data/Mozilla/Firefox/Profiles/fireclipse/
-	xpidl.exe=C:/bartonjj/projects/fireclipse/xpidl.exe
-	fbug.branch=fbugBranchesExplore
-	-->
-	<property file="local.properties"/>
+
 	<!-- Project directories -->
 	<property name="src_dir" location="." />
 	<property name="build_dir" location="./build" />
@@ -37,6 +63,32 @@
 		<delete dir="${dist_dir}" />
 	</target>
 	
+	<!-- Expand templates -->
+	<target name="expand-templates" depends="version" description="Fill in version info">
+		<copy file="${src_dir}/install.rdf.tpl.xml"
+               tofile="install.rdf"
+               overwrite="true">
+               <filterchain>
+                       <replacetokens>
+                            <token key="VERSION" value="${VERSION}"/>
+							<token key="UPDATEPATH" value="${update.path}"/>
+                      		<token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
+                       </replacetokens>
+               </filterchain>        
+		</copy>
+		<copy file="${src_dir}/update.rdf.tpl.xml"
+               tofile="update.rdf"
+               overwrite="true">
+               <filterchain>
+                       <replacetokens>
+                            <token key="VERSION" value="${VERSION}"/>
+							<token key="UPDATEPATH" value="${update.path}"/>
+                      		<token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
+                       </replacetokens>
+               </filterchain>        
+		</copy>
+		
+	</target>
 	<!-- Incremental Build Targets -->
 	<target name="incremental" depends="version, expand-templates, copy-to-extensions, adjust-chrome-manifests" />
 	<target name="copy-to-extensions" depends="clean-reg, clean-xpti" 
@@ -49,6 +101,7 @@
 			</fileset>
 		</copy>
 	</target>
+
 	<target name="adjust-chrome-manifests">
 		<!-- Adjust chrome.manifest for direct read not jar files -->
 		<replaceregexp match="jar:chrome/firebug\.jar!/" replace="" flags="g">
@@ -95,32 +148,33 @@
 	<target name="createChromeJAR">
 		<mkdir dir="${build_dir}" />
 		<zip destfile="${build_dir}/${ant.project.name}.jar" update="true" basedir="${src_dir}"
-includes="content/**, locale/**, skin/**" excludes="${excludes}"
-/>
+			includes="content/**, locale/**, skin/**" excludes="${excludes}"/>
 	</target>
+
 	<target name="createPlatformJARs">
 		<mkdir dir="${build_dir}/Darwin" />
 		<mkdir dir="${build_dir}/Linux" />
 		<mkdir dir="${build_dir}/linux-gnu" />
 		<mkdir dir="${build_dir}/WINNT" />
-		<zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true" basedir="${src_dir}/platform/Darwin" includes="skin/**"
-excludes="${excludes}" />
+		<zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true" 
+			basedir="${src_dir}/platform/Darwin" includes="skin/**" excludes="${excludes}" />
 		<zip destfile="${build_dir}/Linux/${ant.project.name}.jar" update="true"
-basedir="${src_dir}/platform/Linux"
-includes="skin/**"
-excludes="${excludes}"
-/>
+			basedir="${src_dir}/platform/Linux"
+			includes="skin/**"
+			excludes="${excludes}"
+		/>
 		<zip destfile="${build_dir}/linux-gnu/${ant.project.name}.jar" update="true"
-basedir="${src_dir}/platform/linux-gnu"
-includes="skin/**"
-excludes="${excludes}"
-/>
+			basedir="${src_dir}/platform/linux-gnu"
+			includes="skin/**"
+			excludes="${excludes}"
+		/>
 		<zip destfile="${build_dir}/WINNT/${ant.project.name}.jar" update="true"
-basedir="${src_dir}/platform/WINNT"
-includes="skin/**"
-excludes="${excludes}"
-/>
+			basedir="${src_dir}/platform/WINNT"
+			includes="skin/**"
+			excludes="${excludes}"
+		/>
 	</target>
+
 	<target name="zipIntoXPI" depends="clean, createChromeJAR">
 		<mkdir dir="${dist_dir}" />
 		<zip destfile="${dist_dir}/${ant.project.name}.xpi" update="true">
@@ -139,6 +193,16 @@ excludes="${excludes}"
 			<zipfileset dir="${src_dir}" includes="install.rdf, *.manifest" />
 		</zip>
 	</target>
+	
+	<target name="createDistributionXPI" depends="zipIntoXPI" >
+		<copy file="${dist_dir}/${ant.project.name}.xpi" tofile="${dist_dir}/${ant.project.name}.xpi.zip" />
+	</target>
+
+	<target name="createBranchXPI" depends="version, expand-templates, zipIntoXPI" >
+		<move file="${dist_dir}/firebug.xpi" tofile="${dist_dir}/${FIREBUG-XPI}"/>
+		<copy file="update.rdf" tofile="${dist_dir}/update.rdf" />
+	</target>
+	
 
 	<!-- Trace Removal Targets: copy this dir to ../eval, strip lines with /*@explore*/ -->
 	<target name="clean-unexplore" 
@@ -176,51 +240,7 @@ excludes="${excludes}"
 		<echo message="update VERSION in ${unexplore.dir}/branch.properties"/>
 	</target>
 
-	<target name="createDistributionXPI" depends="zipIntoXPI" >
-		<copy file="${dist_dir}/${ant.project.name}.xpi" tofile="${dist_dir}/${ant.project.name}.xpi.zip" />
-	</target>
 
-	<target name="createBranchXPI" depends="version, expand-templates, zipIntoXPI" >
-		<move file="${dist_dir}/firebug.xpi" tofile="${dist_dir}/${FIREBUG-XPI}"/>
-		<copy file="update.rdf" tofile="${dist_dir}/update.rdf" />
-	</target>
-	
-
-	<target name="expand-templates" depends="version" description="Fill in version info">
-		<copy file="${src_dir}/install.rdf.tpl.xml"
-               tofile="install.rdf"
-               overwrite="true">
-               <filterchain>
-                       <replacetokens>
-                            <token key="VERSION" value="${VERSION}"/>
-							<token key="UPDATEPATH" value="${update.path}"/>
-                      		<token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
-                       </replacetokens>
-               </filterchain>        
-		</copy>
-		<copy file="${src_dir}/update.rdf.tpl.xml"
-               tofile="update.rdf"
-               overwrite="true">
-               <filterchain>
-                       <replacetokens>
-                            <token key="VERSION" value="${VERSION}"/>
-							<token key="UPDATEPATH" value="${update.path}"/>
-                      		<token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
-                       </replacetokens>
-               </filterchain>        
-		</copy>
-		
-	</target>
-
-	<target name="version" description="Compute version number">
-		<tstamp/>
-		<property name="build_dir" location="./build" />		
-		<property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
-		<property name="UPDATEPATH" value="${update.path}" />
-		<mkdir dir="${build_dir}/dist" />
-		<property name="dist_dir" location="${build_dir}/dist" />
-		<property name="FIREBUG-XPI" value="firebug-${VERSION}.xpi"/>
-	</target>
 
 
 </project>
