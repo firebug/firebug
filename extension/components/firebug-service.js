@@ -107,8 +107,7 @@ var contextCount = 0;
 
 var urlFilters = [
 	'chrome://',
-	'XStringBundle',
-	'javascript: eval(__firebugTemp__)'
+	'XStringBundle'
 	];
 
 
@@ -163,6 +162,7 @@ function FirebugService()
 
     this.showStackTrace = prefs.getBoolPref("extensions.firebug.showStackTrace");
     this.breakOnErrors = prefs.getBoolPref("extensions.firebug.breakOnErrors");
+	this.showEvalSources = prefs.getBoolPref("extensions.firebug.showEvalSources");
 	
 	try {                                                                                                              /*@explore*/
 		  // CREATION and BP generate a huge trace                                                                     /*@explore*/
@@ -798,7 +798,9 @@ FirebugService.prototype =
     },
     
     onDebug: function(frame, type, rv)
-    {
+    { 
+		if (fbs.DBG_ERRORS)                                                                                               /*@explore*/
+			ddd("fbs.onDebug fileName="+frame.script.fileName+"\n");                                                      /*@explore*/
     	if ( isSystemURL(frame.script.fileName) )
     		return RETURN_CONTINUE;        
     	try 
@@ -808,7 +810,7 @@ FirebugService.prototype =
 				ddd("fbs.onDebug "+(debuggr?"found debuggr with ":" NO debuggr with ")+ "reportNextError="                /*@explore*/
 				                 +reportNextError+" breakOnNextError="+breakOnNextError+"\n");                            /*@explore*/
 				if (!debuggr)                                                                                             /*@explore*/
-					this.diagnoseFindDebugger(frame);                                                                      /*@explore*/
+					this.diagnoseFindDebugger(frame);                                                                     /*@explore*/
 			}                                                                                                             /*@explore*/
 	        
 	        if (reportNextError)
@@ -938,7 +940,7 @@ FirebugService.prototype =
             reportNextError = true;
             var theNeed = this.needToBreakForError(fileName, lineNo);
 			if (fbs.DBG_ERRORS)                                                                                        /*@explore*/
-				ddd("fbs.onError needToBreakForError="+theNeed+"\n");                                                  /*@explore*/
+				ddd("fbs.onError needToBreakForError="+theNeed+"; in any case we will drop in to onDebug\n");                                                  /*@explore*/
             return false; // Drop into onDebug
         }
         else
@@ -985,7 +987,7 @@ FirebugService.prototype =
 	{ 
 		try 
 		{
-			// In onScriptHook we found a no-name script, set a bp in PC=0, and a flag. 
+			// In onScriptCreated we found a no-name script, set a bp in PC=0, and a flag. 
 			// onBreakpoint saw the flag, cleared the flag, and sent us here.
 			// Start by undoing our damage
 			var script = frame.script;
@@ -1123,7 +1125,7 @@ FirebugService.prototype =
 		        ddd("onScriptCreated name: \'"+script.functionName+"\'\n"+script.functionSource+"\n");                 /*@explore*/
            	}                                                                                                          /*@explore*/
 
-			if (!script.functionName) 
+			if (fbs.showEvalSources && !script.functionName) 
 	        { 	
 	        	// top or eval-level
 	    		// We need to detect eval() and grab its source. For that we need a stack frame.
@@ -2039,6 +2041,8 @@ var FirebugPrefsObserver =
             fbs.showStackTrace =  prefs.getBoolPref("extensions.firebug.showStackTrace");
         else if (data == "extensions.firebug.breakOnErrors")
             fbs.breakOnErrors =  prefs.getBoolPref("extensions.firebug.breakOnErrors");
+		else if (data == "extensions.firebug.showEvalSources")
+            fbs.showEvalSources =  prefs.getBoolPref("extensions.firebug.showEvalSources");
 		else if (data == "extensions.firebug.DBG_FBS_CREATION")
 			fbs.DBG_CREATION = prefs.getBoolPref("extensions.firebug.DBG_FBS_CREATION");
 		else if (data == "extensions.firebug.DBG_FBS_BP")
@@ -2080,8 +2084,10 @@ function ERROR(text)
 
 function ddd(text)
 {
-    ERROR(text);
-	dumpToFile(text);                                                                                                  /*@explore*/
+    if (true)      /* in the traced version we dump to file */														/*@explore*/
+		dumpToFile(text);     																						/*@explore*/
+	else      		/* but in the untraced version 'else' will be removed and we dump to log */						/*@explore*/
+		ERROR(text);
 }
 
 function dumpit(text)

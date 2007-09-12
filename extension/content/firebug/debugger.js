@@ -623,9 +623,10 @@ Firebug.Debugger = extend(Firebug.Module,
     {
         var context = this.breakContext;
         delete this.breakContext;
-        
+      
         if (!context)
             context = getFrameContext(frame);
+		if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onThrow context:"+(context?"defined":"undefined")+"\n"); /*@explore*/
         if (!context)
             return RETURN_CONTINUE_THROW;
             
