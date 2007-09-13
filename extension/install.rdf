@@ -30,7 +30,7 @@
     <em:description>Web Development Evolved</em:description>
     <em:creator>Joe Hewitt</em:creator>
     <em:contributor>1.1 enhancements: John J. Barton</em:contributor>
-    <em:contributor>Aptana IDE integration: Max Stepanov</em:contributor>
+    <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>http://fireclipse.xucia.com/files/fireclipse/update.rdf</em:updateURL>

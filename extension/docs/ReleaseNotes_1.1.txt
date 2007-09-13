@@ -37,8 +37,11 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 * "better" debugging icons,
   The original icons made no sense to me so I invent some similar colored ones that I like better.
 
-=== Console, Errors ===
+=== External Edtiors ===
+ * External editors configuration, "Open With Editor" menu
+ * Aptana IDE editor integration
 
+=== Console, Errors ===
 * CSS errors report against source lines,
   CSS error used to report against CSS: but errors cause the CSS to be ignored so the erroneous 
   CSS was not even visible.
