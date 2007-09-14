@@ -64,7 +64,14 @@
 	</target>
 	
 	<!-- Expand templates -->
-	<target name="expand-templates" depends="version" description="Fill in version info">
+	<target name="template-dependency" description="test tpl files">
+		<uptodate property="install.expansion.notRequired" srcfile="${src_dir}/install.rdf.tpl.xml" targetfile="install.rdf" />
+		<uptodate property="update.expansion.notRequired" srcfile="${src_dir}/update.rdf.tpl.xml" targetfile="update.rdf" />
+	</target>
+
+	<target name="expand-templates" depends="expand-install-template, expand-update-template" description="Fill in version info">
+	</target>
+	<target name="expand-install-template" depends="template-dependency, version" unless="install.expansion.notRequired" >
 		<copy file="${src_dir}/install.rdf.tpl.xml"
                tofile="install.rdf"
                overwrite="true">
@@ -76,6 +83,9 @@
                        </replacetokens>
                </filterchain>        
 		</copy>
+	</target>
+
+	<target name="expand-update-template" depends="template-dependency, version" unless="update.expansion.notRequired" >
 		<copy file="${src_dir}/update.rdf.tpl.xml"
                tofile="update.rdf"
                overwrite="true">
@@ -87,8 +97,8 @@
                        </replacetokens>
                </filterchain>        
 		</copy>
-		
 	</target>
+
 	<!-- Incremental Build Targets -->
 	<target name="incremental" depends="version, expand-templates, copy-to-extensions, adjust-chrome-manifests" />
 	<target name="copy-to-extensions" depends="clean-reg, clean-xpti" 
