@@ -17,7 +17,6 @@ pref("extensions.firebug.showJSErrors", true);
 pref("extensions.firebug.showJSWarnings", false);
 pref("extensions.firebug.showCSSErrors", false);
 pref("extensions.firebug.showXMLErrors", false);
-pref("extensions.firebug.showWebErrors", true);
 pref("extensions.firebug.showChromeErrors", false);
 pref("extensions.firebug.showChromeMessages", false);
 pref("extensions.firebug.showExternalErrors", false);
@@ -84,7 +83,7 @@ pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon fu
 pref("extensions.firebug.DBG_EVAL", false);    		// debugger.js and firebug-service.js        /*@explore*/
 pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                               /*@explore*/
 pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/
-pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/ 
+pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
 pref("extensions.firebug.DBG_NET", false);        	// net.js                                    /*@explore*/
 pref("extensions.firebug.DBG_SHOW_SYSTEM", false);  // isSystemURL return false always.          /*@explore*/
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/

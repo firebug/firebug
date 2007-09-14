@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-  
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -18,7 +18,7 @@ const PrefService = CC("@mozilla.org/preferences-service;1");
 const PermManager = CC("@mozilla.org/permissionmanager;1");
 const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const contentBox = $("fbContentBox");
 const contentSplitter = $("fbContentSplitter");
@@ -26,7 +26,7 @@ const toggleCommand = $("cmd_toggleFirebug");
 const detachCommand = $("cmd_toggleDetachFirebug");
 const tabBrowser = $("content");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const prefs = PrefService.getService(nsIPrefBranch2);
 const pm = PermManager.getService(nsIPermissionManager);
@@ -35,9 +35,9 @@ const DENY_ACTION = nsIPermissionManager.DENY_ACTION;
 const ALLOW_ACTION = nsIPermissionManager.ALLOW_ACTION;
 const NS_OS_TEMP_DIR = "TmpD"
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const firebugURLs = 
+const firebugURLs =
 {
     main: "http://www.getfirebug.com",
     docs: "http://www.getfirebug.com/docs.html",
@@ -54,37 +54,37 @@ const prefNames =
     "disabledAlways", "disabledFile", "allowSystemPages",
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
-    
+
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
-    "showWebErrors", "showChromeErrors", "showChromeMessages", "showExternalErrors",
+    "showChromeErrors", "showChromeMessages", "showExternalErrors",
     "showXMLHttpRequests",  "showStackTrace",
-    
+
     // HTML
     "showFullTextNodes", "showCommentNodes", "showWhitespaceNodes",
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
-    
+
     // CSS
     "showComputedStyle",
-    
+
     // Script
-    "breakOnErrors",    
+    "breakOnErrors",
     "breakOnTopLevel",
     "useDebugAdapter",
     "showEvalSources",
     "showAllSourceFiles",
     "useLastLineForEvalName",
     "useFirstLineForEvalName",
-    
+
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
-    
+
     // Layout
     "showLayoutAdjacent", "showRulers",
-    
+
     // Net
     "netFilterCategory", "disableNetMonitor", "collectHttpHeaders",
-    
+
     // Stack
     "omitObjectPathStack"
 ];
@@ -116,16 +116,16 @@ var temporaryDirectory = null;
 top.Firebug =
 {
     version: "1.1a.dev",
-    
+
     module: modules,
     panelTypes: panelTypes,
     reps: reps,
 
     tabBrowser: tabBrowser,
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
-    
+
     initialize: function()
     {
         for (var i = 0; i < prefNames.length; ++i)
@@ -134,9 +134,9 @@ top.Firebug =
         this.loadExternalEditors();
         prefs.addObserver(prefDomain, this, false);
 
-        var basePrefNames = prefNames.length;       
-        dispatch(modules, "initialize", [prefDomain, prefNames]); 
- 
+        var basePrefNames = prefNames.length;
+        dispatch(modules, "initialize", [prefDomain, prefNames]);
+
         for (var i = basePrefNames; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(prefNames[i]);
 
@@ -152,8 +152,8 @@ top.Firebug =
             dispatch(modules, "enable");
     },
 
-    /** 
-     * Called when the UI is ready to be initialized, once the panel browsers are loaded, 
+    /**
+     * Called when the UI is ready to be initialized, once the panel browsers are loaded,
      * but before any contexts are created.
      */
     initializeUI: function(detachArgs)
@@ -172,9 +172,9 @@ top.Firebug =
 
         dispatch(modules, "initializeUI", [detachArgs]);
     },
-        
+
     shutdown: function()
-    {        
+    {
         TabWatcher.destroy();
 
         // TabWatcher will destroy all contexts, potentially disabling the client - but if
@@ -194,15 +194,15 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("firebug.shutdown exited\n");                                       /*@explore*/
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Dead Windows
-    
+
     killWindow: function(browser, chrome)
     {
         deadWindows.push({browser: browser, chrome: chrome});
         deadWindowTimeout = setTimeout(function() { Firebug.closeDeadWindows(); }, 30);
     },
-    
+
     rescueWindow: function(browser)
     {
         for (var i = 0; i < deadWindows.length; ++i)
@@ -214,23 +214,23 @@ top.Firebug =
             }
         }
     },
-    
+
     closeDeadWindows: function()
     {
         for (var i = 0; i < deadWindows.length; ++i)
             deadWindows[i].chrome.close();
-            
+
         deadWindows = [];
         deadWindowTimeout = 0;
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Registration
-    
+
     registerModule: function()
     {
         modules.push.apply(modules, arguments);
-        
+
         for (var i = 0; i < arguments.length; ++i)
             TabWatcher.addListener(arguments[i]);
                                                                                                                        /*@explore*/
@@ -240,7 +240,7 @@ top.Firebug =
     registerExtension: function()
     {
         extensions.push.apply(extensions, arguments);
-        
+
         for (var i = 0; i < arguments.length; ++i)
             TabWatcher.addListener(arguments[i]);
     },
@@ -271,15 +271,15 @@ top.Firebug =
     {
         editors.push.apply(editors, arguments);
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Disabling
-    
+
     enableAlways: function()
     {
         TabWatcher.activate();
     },
-    
+
     disableAlways: function()
     {
         var currentSelected = TabWatcher.deactivate();
@@ -292,7 +292,7 @@ top.Firebug =
             }
         }
     },
-    
+
     disableSite: function(disable)
     {
         var ioService = CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
@@ -338,9 +338,9 @@ top.Firebug =
             TabWatcher.watchBrowser(tabBrowser.selectedBrowser);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Options
-    
+
     togglePref: function(name)
     {
         this.setPref(name, !this[name]);
@@ -390,12 +390,12 @@ top.Firebug =
         // Prevent infinite recursion due to pref observer
         if (name in optionUpdateMap)
             return;
-        
+
         optionUpdateMap[name] = 1;
         this[name] = value;
-        
+
         dispatch(modules, "updateOption", [name, value]);
-        
+
         FirebugChrome.updateOption(name, value);
 
         if (TabWatcher.contexts)
@@ -424,7 +424,7 @@ top.Firebug =
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
     },
-    
+
     loadExternalEditors: function()
     {
         const prefName = "externalEditors";
@@ -467,10 +467,10 @@ top.Firebug =
         }
         if ( externalEditors.length > 0 )
             newArray.push.apply(newArray, externalEditors);
-            
+
         return newArray;
     },
-   
+
     openPermissions: function()
     {
         var params = {
@@ -492,13 +492,13 @@ top.Firebug =
         };
         openWindow("Firebug:ExternalEditors", "chrome://firebug/content/editors.xul", "", args);
     },
-    
+
     openInEditor: function(context, editorId)
     {
         try {
         if (!editorId)
             return;
-            
+
         var location;
         if (context)
         {
@@ -522,7 +522,7 @@ top.Firebug =
         location = location.toString();
         if (isSystemURL(location))
             return;
-        
+
         var list = extendArray(editors, externalEditors);
         var editor = null;
         for( var i = 0; i < list.length; ++i )
@@ -573,7 +573,7 @@ top.Firebug =
         }
         }catch(exc) { ERROR(exc); }
     },
-    
+
     getLocalSourceFile: function(context, href)
     {
         if ( isLocalURL(href) )
@@ -596,7 +596,7 @@ top.Firebug =
             tmpDir.createUnique(nsIFile.DIRECTORY_TYPE, 0775);
             temporaryDirectory = tmpDir;
         }
-        
+
         var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "").replace(/[^0-9a-zA-Z\/.]/g, "_");
         if ( !/\.[\w]{1,5}$/.test(lpath) )
         {
@@ -619,10 +619,10 @@ top.Firebug =
             stream.finish();
         else
             stream.close();
-        
+
         return file.path;
     },
-    
+
     deleteTemporaryFiles: function()
     {
         try {
@@ -644,15 +644,15 @@ top.Firebug =
         {
         }
     },
-                
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
-    
+
     showBar: function(show)
     {
         var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
         browser.showFirebug = show;
-        
+
         var shouldShow = show && !browser.detached;
         contentBox.setAttribute("collapsed", !shouldShow);
         contentSplitter.setAttribute("collapsed", !shouldShow);
@@ -664,7 +664,7 @@ top.Firebug =
     {
         if (Firebug.openInWindow)
             return this.toggleDetachBar(true);
-        
+
         var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
         if (!browser.chrome)
             return;
@@ -672,27 +672,27 @@ top.Firebug =
         var toggleOff = forceOpen == undefined ? !contentBox.collapsed : !forceOpen;
         if (toggleOff == contentBox.collapsed)
             return;
-        
+
         if (panelName)
             browser.chrome.selectPanel(panelName);
-        
+
         if (browser.detached)
             browser.chrome.focus();
         else
         {
-            
+
             if (toggleOff)
                 browser.chrome.hidePanel();
             else
                 browser.chrome.syncPanel();
-            
+
             this.showBar(!toggleOff);
         }
     },
 
     toggleDetachBar: function(forceOpen)
     {
-        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;  
+        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
         if (!forceOpen && browser.detached)
         {
             browser.chrome.close();
@@ -701,10 +701,10 @@ top.Firebug =
         else
             this.detachBar();
     },
-    
+
     detachBar: function()
     {
-        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;  
+        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
         if (!browser.chrome)
             return;
 
@@ -714,9 +714,9 @@ top.Firebug =
         {
             if (FirebugContext)
                 FirebugContext.detached = true;
-            
+
             browser.detached = true;
-            
+
             var args = {
                     FBL: FBL,
                     Firebug: this,
@@ -730,7 +730,7 @@ top.Firebug =
             this.syncBar();
         }
     },
-    
+
     syncBar: function()
     {
         this.showBar(tabBrowser.selectedBrowser && tabBrowser.selectedBrowser.showFirebug);
@@ -750,9 +750,9 @@ top.Firebug =
             this.toggleBar();
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
-        
+
     getPanelType: function(panelName)
     {
         return panelTypeMap[panelName];
@@ -768,7 +768,7 @@ top.Firebug =
             if (!panelType.prototype.parentPanel)
                 resultTypes.push(panelType);
         }
-        
+
         if (context.panelTypes)
         {
             for (var i = 0; i < context.panelTypes.length; ++i)
@@ -778,24 +778,24 @@ top.Firebug =
                     resultTypes.push(panelType);
             }
         }
-            
+
         return resultTypes;
     },
-    
+
     getSidePanelTypes: function(context, mainPanel)
     {
         if (!mainPanel)
             return [];
-        
+
         var resultTypes = [];
-        
+
         for (var i = 0; i < panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
             if (panelType.prototype.parentPanel == mainPanel.name)
                 resultTypes.push(panelType);
         }
-        
+
         if (context.panelTypes)
         {
             for (var i = 0; i < context.panelTypes.length; ++i)
@@ -805,12 +805,12 @@ top.Firebug =
                     resultTypes.push(panelType);
             }
         }
-        
+
         resultTypes.sort(function(a, b)
         {
             return a.prototype.order < b.prototype.order ? -1 : 1;
         });
-        
+
         return resultTypes;
     },
 
@@ -828,18 +828,18 @@ top.Firebug =
     {
         dispatch(modules, "showPanel", [browser, panel]);
     },
-    
+
     showSidePanel: function(browser, panel)
     {
         dispatch(modules, "showSidePanel", [browser, panel]);
     },
-    
+
     reattachContext: function(browser, context)
     {
         dispatch(modules, "reattachContext", [browser, context]);
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // URL mapping
 
     getObjectByURL: function(context, url)
@@ -852,9 +852,9 @@ top.Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Reps
-    
+
     getRep: function(object)
     {
         var type = typeof(object);
@@ -868,7 +868,7 @@ top.Firebug =
             }
             catch (exc) {}
         }
-        
+
         return defaultRep;
     },
 
@@ -887,7 +887,7 @@ top.Firebug =
                 else
                     return child.repObject;
             }
-        }    
+        }
     },
 
     getRepNode: function(node)
@@ -896,7 +896,7 @@ top.Firebug =
         {
             if (child.repObject)
                 return child;
-        }    
+        }
     },
 
     getElementByRepObject: function(element, object)
@@ -905,7 +905,7 @@ top.Firebug =
         {
             if (child.repObject == object)
                 return child;
-        }    
+        }
     },
 
     /**
@@ -920,14 +920,14 @@ top.Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     visitWebsite: function(which)
     {
         openNewTab(firebugURLs[which]);
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsISupports
 
     QueryInterface : function(iid)
@@ -940,7 +940,7 @@ top.Firebug =
         throw Components.results.NS_NOINTERFACE;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIPrefObserver
 
     observe: function(subject, topic, data)
@@ -951,29 +951,29 @@ top.Firebug =
         this.updatePref(name, value);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugClient
 
     enable: function()
     {
         dispatch(modules, "enable");
     },
-    
+
     disable: function()
     {
         dispatch(modules, "disable");
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Owner
-    
+
     isURIAllowed: function(uri)
     {
-        return uri && 
+        return uri &&
             (pm.testPermission(uri, "firebug") == ALLOW_ACTION
                 || (uri.scheme == "file" && !this.disabledFile));
     },
-    
+
     isURIDenied: function(uri)
     {
         if (!uri)  // null or undefined is denied
@@ -982,14 +982,14 @@ top.Firebug =
             (pm.testPermission(uri, "firebug") == DENY_ACTION
                 || (uri.scheme == "file" && this.disabledFile));
     },
-    
+
     enableContext: function(win, uri)
     {
         if ( dispatch2(extensions, "acceptContext", [win, uri]) )
             return true;
         if ( dispatch2(extensions, "declineContext", [win, uri]) )
             return false;
-            
+
         if (this.disabledAlways)
         {
             // Check if the whitelist makes an exception
@@ -1004,12 +1004,12 @@ top.Firebug =
         }
         return true;
     },
-    
+
     createTabContext: function(win, browser, chrome, state)
     {
         return new Firebug.TabContext(win, browser, chrome, state);
     },
-    
+
     destroyTabContext: function(browser, context)
     {
         if (context)
@@ -1028,7 +1028,7 @@ top.Firebug =
                         Firebug.showContext(browser, null);
                     }
                 }, 100);
-                
+
                 browser.chrome.clearPanels();
             }
 
@@ -1039,7 +1039,7 @@ top.Firebug =
             this.killWindow(browser, browser.chrome);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
 
     initContext: function(context)
@@ -1048,7 +1048,7 @@ top.Firebug =
         if (context.browser.sidePanelNames)
             context.sidePanelNames = context.browser.sidePanelNames;
     },
-    
+
     showContext: function(browser, context)
     {
         if (clearContextTimeout)
@@ -1067,19 +1067,19 @@ top.Firebug =
 
         this.syncBar();
     },
-    
+
     watchWindow: function(context, win)
     {
         // XXXjoe Move this to Firebug.Console
         if (!win.console)
             win.console = new FirebugConsole(context, win);
 
-        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/ 
-        {                                                                                                              /*@explore*/ 
-            if (win.console)                                                                                           /*@explore*/ 
-                FBTrace.sysout("firebug.watchWindow created win.console for uid = "+win.__firebug__uid+"\n");          /*@explore*/ 
+        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
+        {                                                                                                              /*@explore*/
+            if (win.console)                                                                                           /*@explore*/
+                FBTrace.sysout("firebug.watchWindow created win.console for uid = "+win.__firebug__uid+"\n");          /*@explore*/
             else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow failed to create win.console for uid = "+win.__firebug__uid+"\n"); /*@explore*/ 
+                FBTrace.sysout("firebug.watchWindow failed to create win.console for uid = "+win.__firebug__uid+"\n"); /*@explore*/
         }                                                                                                              /*@explore*/
                                                                                                                        /*@explore*/
         for (var panelName in context.panelMap)
@@ -1088,7 +1088,7 @@ top.Firebug =
             panel.watchWindow(win);
         }
     },
-    
+
     unwatchWindow: function(context, win)
     {
         // XXXjoe Move this to Firebug.Console
@@ -1100,16 +1100,16 @@ top.Firebug =
             panel.unwatchWindow(win);
         }
     },
-    
+
     loadedContext: function(context)
     {
         context.browser.chrome.showLoadedContext(context);
-    }    
+    }
 };
 
 // ************************************************************************************************
 
-Firebug.Module = 
+Firebug.Module =
 {
     /**
      * Called when the window is opened.
@@ -1117,38 +1117,38 @@ Firebug.Module =
     initialize: function()
     {
     },
-    
+
     /**
-     * Called when the UI is ready for context creation. 
-     * Used by chromebug; normally FrameProgressListener events trigger UI synchronization, 
+     * Called when the UI is ready for context creation.
+     * Used by chromebug; normally FrameProgressListener events trigger UI synchronization,
      * this event allows sync without progress events.
      */
     initializeUI: function(detachArgs)
     {
     },
-    
+
     /**
      * Called when the window is closed.
      */
     shutdown: function()
     {
-    
+
     },
-    
+
     /**
      * Called when a new context is created but before the page is loaded.
      */
     initContext: function(context)
     {
     },
-    
+
     /**
      * Called after a context is detached to a separate window;
      */
     reattachContext: function(browser, context)
     {
     },
-    
+
     /**
      * Called when a context is destroyed.
      */
@@ -1180,7 +1180,7 @@ Firebug.Module =
     loadedContext: function(context)
     {
     },
-    
+
     showPanel: function(browser, panel)
     {
     },
@@ -1189,12 +1189,12 @@ Firebug.Module =
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     updateOption: function(name, value)
     {
     },
-    
+
     getObjectByURL: function(context, url)
     {
     }
@@ -1202,7 +1202,7 @@ Firebug.Module =
 
 // ************************************************************************************************
 
-Firebug.Extension = 
+Firebug.Extension =
 {
     acceptContext: function(win,uri)
     {
@@ -1217,13 +1217,13 @@ Firebug.Extension =
 
 // ************************************************************************************************
 
-Firebug.Panel = 
+Firebug.Panel =
 {
     searchable: false,
     editable: true,
     order: 2147483647,
     statusSeparator: "<",
-    
+
     initialize: function(context, doc)
     {
         this.context = context;
@@ -1231,18 +1231,18 @@ Firebug.Panel =
 
         this.panelNode = doc.createElement("div");
         this.panelNode.ownerPanel = this;
-        
+
         setClass(this.panelNode, "panelNode panelNode-"+this.name);
         doc.body.appendChild(this.panelNode);
 
         this.initializeNode(this.panelNode);
     },
-    
+
     destroy: function(state)
     {
         if (this.panelNode)
             delete this.panelNode.ownerPanel;
-        
+
         this.destroyNode();
     },
 
@@ -1250,7 +1250,7 @@ Firebug.Panel =
     {
         this.lastScrollTop = this.panelNode.scrollTop;
     },
-    
+
     reattach: function(doc)
     {
         this.document = doc;
@@ -1261,18 +1261,18 @@ Firebug.Panel =
             this.panelNode.scrollTop = this.lastScrollTop;
             delete this.lastScrollTop;
         }
-    },    
+    },
 
-    // Called after module.initialize; addEventListener-s here 
+    // Called after module.initialize; addEventListener-s here
     initializeNode: function(myPanelNode)
     {
     },
-    
+
     // removeEventListener-s here.
     destroyNode: function()
     {
     },
-    
+
     show: function(state)
     {
     },
@@ -1284,16 +1284,16 @@ Firebug.Panel =
     watchWindow: function(win)
     {
     },
-    
+
     unwatchWindow: function(win)
     {
     },
-    
+
     updateOption: function(name, value)
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     /**
      * Returns a number indicating the view's ability to inspect the object.
@@ -1304,17 +1304,17 @@ Firebug.Panel =
     {
         return 0;
     },
-    
+
     navigate: function(object)
     {
         if (!object)
             object = this.getDefaultLocation();
-        
+
         if (object != this.location)
         {
             this.location = object;
             this.updateLocation(object);
-            
+
             // XXXjoe This is kind of cheating, but, feh.
             this.context.chrome.onPanelNavigate(object, this);
         }
@@ -1323,18 +1323,18 @@ Firebug.Panel =
     updateLocation: function(object)
     {
     },
-    
+
     select: function(object, forceUpdate)
     {
         if (!object)
             object = this.getDefaultSelection();
-        
+
         if (forceUpdate || object != this.selection)
         {
             this.previousSelection = this.selection;
             this.selection = object;
             this.updateSelection(object);
-            
+
             // XXXjoe This is kind of cheating, but, feh.
             this.context.chrome.onPanelSelect(object, this);
         }
@@ -1343,12 +1343,12 @@ Firebug.Panel =
     updateSelection: function(object)
     {
     },
-    
+
     refresh: function()
     {
-        
+
     },
-    
+
     markChange: function(skipSelf)
     {
         if (this.dependents)
@@ -1366,8 +1366,8 @@ Firebug.Panel =
                 this.context.invalidatePanels.apply(this.context, this.dependents);
         }
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     startInspecting: function()
     {
@@ -1377,13 +1377,13 @@ Firebug.Panel =
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     search: function(text)
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // An array of objects that answer to getObjectLocation.
     // Only shown if panel.location defined and supportsObject true
@@ -1391,35 +1391,35 @@ Firebug.Panel =
     {
         return null;
     },
-    
+
     // Called when "Options" clicked. Return array of
     // {label: 'name', nol10n: true,  type: "checkbox", checked: <value>, command:function to set <value>}
     getOptionsMenuItems: function()
     {
         return null;
     },
-    
+
     getContextMenuItems: function(object, target)
     {
         return [];
     },
-    
+
     getEditor: function(target, value)
     {
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getDefaultLocation: function(context)
     {
         return null;
     },
-    
+
     getDefaultSelection: function(context)
     {
         return null;
     },
-    
+
     browseObject: function(object)
     {
     },
@@ -1433,12 +1433,12 @@ Firebug.Panel =
     {
         return Firebug.getRepObject(target);
     },
-    
+
     showInfoTip: function(infoTip, x, y)
     {
-        
+
     },
-    
+
     getObjectPath: function(object)
     {
         return null;
@@ -1447,7 +1447,7 @@ Firebug.Panel =
     getObjectLocation: function(object)
     {
         return "";
-    }    
+    }
 };
 
 // ************************************************************************************************
@@ -1455,34 +1455,34 @@ Firebug.Panel =
 Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can be extended.
 
 Firebug.SourceBoxPanel = extend(Firebug.Panel,
-{    
+{
     initializeSourceBoxes: function()
     {
         this.sourceBoxes = {};
         this.anonSourceBoxes = [];
     },
-    
+
     showSourceBox: function(sourceBox)
     {
         if (this.selectedSourceBox)
             collapse(this.selectedSourceBox, true);
-        
+
         this.selectedSourceBox = sourceBox;
         delete this.currentSearch;
-        
+
         if (sourceBox)
         {
-            this.updateSourceBox(sourceBox); 
+            this.updateSourceBox(sourceBox);
             collapse(sourceBox, false);
         }
     },
-    
-    updateSourceBox: function(sourceBox) 
+
+    updateSourceBox: function(sourceBox)
     {
         // called just before box is shown
-        this.panelNode.appendChild(sourceBox);  
+        this.panelNode.appendChild(sourceBox);
     },
-    
+
     createSourceBox: function(sourceFile, sourceBoxDecorator)  // decorator(sourceFile, sourceBox)
     {
         var lines = loadScriptLines(sourceFile, this.context);
@@ -1521,12 +1521,12 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         return sourceBox;
     },
-    
+
     getSourceBoxBySourceFile: function(sourceFile)
     {
         if (!sourceFile.text)
             return this.getSourceBoxByURL(sourceFile.href);
-        
+
         for (var i = 0; i < this.anonSourceBoxes.length; ++i)
         {
             var sourceBox = this.anonSourceBoxes[i];
@@ -1540,7 +1540,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         // if this.sourceBoxes is undefined, you need to call initializeSourceBoxes in your panel.initialize()
         return url ? this.sourceBoxes[url] : null;
     },
-    
+
     showSourceFile: function(sourceFile, sourceBoxDecorator)
     {
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
@@ -1549,11 +1549,11 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         this.showSourceBox(sourceBox);
     },
-    
+
 });
 
 function loadScriptLines(sourceFile, context)
-{    
+{
     if (sourceFile.text)
         return splitLines(sourceFile.text);
     else
@@ -1569,10 +1569,10 @@ function appendScriptLines(lines, min, max, maxLineNoChars, panelNode)
 // ************************************************************************************************
 
 Firebug.Rep = domplate(
-{        
+{
     className: "",
     inspectable: true,
-    
+
     supportsObject: function(object, type)
     {
         return false;
@@ -1582,29 +1582,29 @@ Firebug.Rep = domplate(
     {
         context.chrome.select(object);
     },
-    
+
     browseObject: function(object, context)
     {
     },
-    
+
     persistObject: function(object, context)
     {
     },
-    
+
     getRealObject: function(object, context)
     {
         return object;
     },
-    
+
     getTitle: function(object)
-    {        
+    {
         var label = safeToString(object);
 
         var re = /\[object (.*?)\]/;
         var m = re.exec(label);
         return m ? m[1] : label;
     },
-    
+
     getTooltip: function(object)
     {
         return null;
@@ -1614,20 +1614,20 @@ Firebug.Rep = domplate(
     {
         return [];
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Convenience for domplates
-    
+
     STR: function(name)
     {
         return $STR(name);
     },
-    
+
     cropString: function(text)
     {
         return cropString(text);
     },
-    
+
     toLowerCase: function(text)
     {
         return text.toLowerCase();
@@ -1636,9 +1636,9 @@ Firebug.Rep = domplate(
     plural: function(n)
     {
         return n == 1 ? "" : "s";
-    }    
+    }
 });
 
 // ************************************************************************************************
-    
+
 }});

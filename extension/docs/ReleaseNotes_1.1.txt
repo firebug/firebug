@@ -7,32 +7,32 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
   This is esp. important for Web 2.0 script-inclusion as in dojo.loader.
   Implementation of http://www.almaden.ibm.com/u/bartonjj/fireclipse/test/DynLoadTest/WebContent/DynamicJavascriptErrors.htm
   ** Script panel option "Show eval() source": turn false to hide the eval() buffers (there can be many).
-  ** Script panel option "UseLastLineForEvalName": set to ask Firebug to use the last 
+  ** Script panel option "UseLastLineForEvalName": set to ask Firebug to use the last
      line of eval() buffer for the name of the buffer:
      //@ sourceURL=<url>
   ** support profiling of eval() scripts
   ** Internal: mostly firebug-service.js, some debugger.js (where the Script panel is implemented)
   **           also created nsIFirebugWithEval.idl extending nsIFirebug.idl
-       
+
 * browser-generated event handler debugging,
-  Firefox generates event handler code that is normally invisible to programmers. 1.1 shows these 
+  Firefox generates event handler code that is normally invisible to programmers. 1.1 shows these
   handlers in the Script panel and they can be breakpointed etc.
   ** Internal: as eval() debugging.
 
 * executable lines marked with green line numbers,
-  ** Internal: lib.js 
+  ** Internal: lib.js
 
 * Stack side panel on "Script" panel for callstack,
   This is visible when you BreakOnAllErrors or breakpoint and stop the debugger.
   Stack side panel option: Omit Toolbar Stack, causes the toolbar to stop showing the stack (ie because it will be long).
   ** Internal: debugger.js but the implementation was done by refactoring code.
-  
+
 * ScriptPanel->Options->Break On Top Level, like break on next
-  When set the next top level script will halt the debugger like a breakpoint.  
+  When set the next top level script will halt the debugger like a breakpoint.
   Should be similar to the oft-requested Break on Next.
   ** Internal: mostly firebug-service.js, some debugger.js, also changed component interface (.idl and .xpt file)
 
-* limit filenames on locationList (script files) to 60 chars to avoid spilling UI 
+* limit filenames on locationList (script files) to 60 chars to avoid spilling UI
 
 * "better" debugging icons,
   The original icons made no sense to me so I invent some similar colored ones that I like better.
@@ -43,15 +43,14 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 === Console, Errors ===
 * CSS errors report against source lines,
-  CSS error used to report against CSS: but errors cause the CSS to be ignored so the erroneous 
+  CSS error used to report against CSS: but errors cause the CSS to be ignored so the erroneous
   CSS was not even visible.
-  
+
 * BreakOnError puts error text in StatusBar
-  BreakOnError halts the debugger but the console has not been updated yet. So you know there 
+  BreakOnError halts the debugger but the console has not been updated yet. So you know there
   is an error and even where it is but not the message.  This fix puts the error in red in the StatusBar.
-  
+
 * New Console options
-   ShowWebErrors=Show All Web Errors
    ShowChromeErrors=Show Chrome Errors
    ShowChromeMessages=Show Chrome Messages
    ShowExternalErrors=Show External Errors
@@ -63,7 +62,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 * Spy was redesigned to avoid wrapping of XMLHttpRequest object that had caused many issues
   An observer for http-on-modify-request events is used
   ** Internal: spy.js
-  
+
 === Bug Fixes ===
     ** Issue 8: using PrivilegeManager.enablePrivilege doesn't work for XHRs
     ** Issue 27: codebrowser does not work, when there is an Java Applet on the page
@@ -74,16 +73,16 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     ** Issue 239 Fix for Frame refresh bug: http://groups.google.com/group/firebug/browse_thread/thread/c69e49b9815b2540
     ** throw exception if firebugService cannot be loaded on startup (_CC[cname] error message).   http://groups.google.com/group/firebug/browse_thread/thread/c795b72931f2bd34/8fa8dca3c012c4f7
     ** Issue 249: Fix for Net monitor memory leaks
-   
+
 === General ===
 * Supports Firefox 3
   !Incomplete: HTML + DOM side panel still breaks browser repainting.
   Internal: evalInSandBox introduced.
-   
-* Internal firebug debug output 
+
+* Internal firebug debug output
   Add trace.js for internal Fbug debugging. Add tracePanel.js to control tracing.
   This code is only on branches/explore
-  
+
 * support for Chromebug extension
   Some changes in initialization code, esp in chrome.js
- 
+

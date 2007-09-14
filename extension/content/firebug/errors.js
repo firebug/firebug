@@ -283,7 +283,7 @@ function categoryFilter(url, category, isWarning)
             isChrome = true;
     }
 
-    if ((isChrome && !Firebug.showChromeErrors) || (!isChrome && !Firebug.showWebErrors))
+    if ((isChrome && !Firebug.showChromeErrors))
         return false;
 
     return true;
