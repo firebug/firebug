@@ -37,19 +37,19 @@ Firebug.CommandLine = extend(Firebug.Module,
     // Used externally to detect command line stack frames
     evalScript: evalScript,
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     evaluate: function(expr, context, userVars, thisValue)
     {
         if (!context)
             return;
-        
-        var result = null;    
+
+        var result = null;
         var threw = false;
 
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context);
-        
+
         var scope =
         {
             api: context.commandLineAPI,
@@ -57,9 +57,9 @@ Firebug.CommandLine = extend(Firebug.Module,
             userVars: userVars ? userVars : {},
             thisValue: thisValue
         };
-        
+
         var scriptToEval = thisValue ? evalScriptWithThis : evalScript;
-        
+
         if (context.stopped)
         {
             result = Firebug.Debugger.evaluate(expr, context, scope);
@@ -67,10 +67,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         else
         {
             var win = context.baseWindow ? context.baseWindow : context.window;
-            var fullScope = extend(scope, 
+            var fullScope = extend(scope,
             {
                 expr: expr,
-                callback: function(value, exc) { result = value; threw = exc; }
+                callback: function(value, hadException) { result = value; threw = hadException; }
             });
 
             iterateWindows(win, function(win) { win.__scope__ = fullScope; });
@@ -82,24 +82,27 @@ Firebug.CommandLine = extend(Firebug.Module,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo FAILS:",exc);        /*@explore*/
+				result = new FBL.ErrorMessage("commandLing.evaluate FAILS: "+exc, "command line failure",0, 0, "js", context, null);
             }
-            try 
+            try
             {
                  iterateWindows(win, function(win) { delete win.__scope__; });
             }
             catch (exc)
             {
-           }   
-            if (threw) 
-            {
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate evaluation threw:",exc);          /*@explore*/
-                throw result;
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate iterateWindows to delete FAILS:", exc);          /*@explore*/
+				throw exc;
             }
-                    
+			if (threw)
+            {
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate evaluation threw:", result);          /*@explore*/
+				result = new FBL.ErrorMessage(result.message, "command line",0, 0, "js", context, null);
+				if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate ErrorMessage result:", result);          /*@explore*/
+            }
         }
 
         context.invalidatePanels("dom", "watches", "domSide");
-        
+
         return result;
     },
 
@@ -124,7 +127,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             var shortExpr = cropString(stripNewLines(expr), 100);
             Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
         }
-        
+
         var result = this.evaluate(expr, context);
         if (typeof(result)  != "undefined")
             Firebug.Console.log(result, context);
@@ -170,14 +173,14 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (command)
             this.enter(context, command);
     },
-    
+
     copyBookmarklet: function(context)
     {
         var commandLine = getCommandLine(context);
         var expr = "javascript: " + stripNewLines(commandLine.value);
         copyToClipboard(expr);
     },
-    
+
     focus: function(context)
     {
         if (context.detached)
@@ -197,21 +200,21 @@ Firebug.CommandLine = extend(Firebug.Module,
         commandLine.value = context.commandLineText = "";
         this.autoCompleter.reset();
     },
-    
+
     cancel: function(context)
     {
         var commandLine = getCommandLine(context);
         if (!this.autoCompleter.revert(commandLine))
             this.clear(context);
     },
-    
+
     update: function(context)
     {
         var commandLine = getCommandLine(context);
         context.commandLineText = commandLine.value;
         this.autoCompleter.reset();
     },
-        
+
     complete: function(context, reverse)
     {
         var commandLine = getCommandLine(context);
@@ -223,7 +226,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (FirebugContext && FirebugContext.panelName != "console")
             return;
-        
+
         var chrome = FirebugContext ? FirebugContext.chrome : FirebugChrome;
         chrome.$("fbCommandBox").collapsed = multiLine;
         chrome.$("fbPanelSplitter").collapsed = !multiLine;
@@ -239,7 +242,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         else
             commandLineSmall.value = stripNewLines(commandLineLarge.value);
     },
-    
+
     toggleMultiLine: function(forceLarge)
     {
         var large = forceLarge || !Firebug.largeCommandLine;
@@ -251,7 +254,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (!context)
             return;
-        
+
         var commandLine = getCommandLine(context);
         if (commandLine.value.indexOf("\n") >= 0)
         {
@@ -262,7 +265,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     appendToHistory: function(command, unique)
     {
@@ -304,14 +307,14 @@ Firebug.CommandLine = extend(Firebug.Module,
         commandLine.inputField.setSelectionRange(command.length, command.length);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
-    
+
     initialize: function()
     {
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
             autoCompleteEval, false, true);
-        
+
         if (Firebug.largeCommandLine)
             this.setMultiLine(true);
     },
@@ -326,7 +329,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     showPanel: function(browser, panel)
     {
         var chrome = browser.chrome;
-        
+
         var isConsole = panel && panel.name == "console";
         if (Firebug.largeCommandLine)
         {
@@ -340,12 +343,12 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         else
             collapse(chrome.$("fbCommandBox"), !isConsole);
-        
+
         var value = panel ? panel.context.commandLineText : null;
         var commandLine = getCommandLine(browser);
         commandLine.value = value ? value : "";
     },
-    
+
     updateOption: function(name, value)
     {
         if (name == "largeCommandLine")
@@ -361,7 +364,7 @@ function getExpressionOffset(command, offset)
     // XXXjoe This is kind of a poor-man's JavaScript parser - trying
     // to find the start of the expression that the cursor is inside.
     // Not 100% fool proof, but hey...
-    
+
     var bracketCount = 0;
 
     var start = command.length-1;
@@ -380,7 +383,7 @@ function getExpressionOffset(command, offset)
         else if (reCloseBracket.test(c))
             ++bracketCount;
     }
-    
+
     return start + 1;
 }
 
@@ -390,7 +393,7 @@ function getDot(expr, offset)
     if (lastDot == -1)
         return null;
     else
-        return {start: lastDot+1, end: expr.length-1}; 
+        return {start: lastDot+1, end: expr.length-1};
 }
 
 function autoCompleteEval(preExpr, expr, postExpr, context)
@@ -426,7 +429,7 @@ function injectScript(script, win)
     win.location = "javascript: " + script;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function getInspectorVars(context)
 {
@@ -460,7 +463,7 @@ function getIndent(line)
 function cleanIndentation(text)
 {
     var lines = splitLines(text);
-    
+
     var minIndent = -1;
     for (var i = 0; i < lines.length; ++i)
     {

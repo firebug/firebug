@@ -4775,16 +4775,8 @@ this.evalInTo = function(win, text)
     }
     catch(exc)
     {
-        FBTrace.dumpProperties("evalInSandBox FAILS sandbox uri="+win.location.href+" and text=\n"+text+"\n", exc);
-        try
-        {
-            var evaledText = eval(text);
-            FBTrace.dumpProperties("\n\n eval(text)=", evaledText);
-        }
-        catch (evalExc)
-        {
-            FBTrace.dumpProperties("eval(text) also FAILS", exc);
-        }
+        if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("evalInSandBox FAILS sandbox uri="+win.location.href+" and text=\n"+text+"\n", exc); /*@explore*/
+		throw "Components.utils.Sandbox evalInSandbox FAILS "+exc;
     }
 }
 
