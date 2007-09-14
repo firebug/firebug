@@ -649,7 +649,7 @@ Firebug.Debugger = extend(Firebug.Module,
         Firebug.Console.log(frame, context);
     },
 
-    onError: function(frame,error)
+    onError: function(frame, error)
     {
         var context = this.breakContext;
         delete this.breakContext;
@@ -658,7 +658,7 @@ Firebug.Debugger = extend(Firebug.Module,
         {
             Firebug.errorStackTrace = getStackTrace(frame, context);
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
-            Firebug.Errors.showMessageOnStatusBar(error.message);
+            Firebug.Errors.showMessageOnStatusBar(error);
         }
         catch (exc) {
             ERROR("debugger.onError getStackTrace FAILED: "+exc+"\n");

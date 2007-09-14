@@ -52,12 +52,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             this.showCount(context.errorCount);
     },
 
-    showMessageOnStatusBar: function(errorLabel)
+    showMessageOnStatusBar: function(error)
     {
         if (statusBar)
             statusBar.setAttribute("errors", "true");
-        if (statusText)  // sometimes this is undefined..how?
-            statusText.setAttribute("value", errorLabel);
+        if (statusText && Firebug.breakOnErrors &&  !(error.flags & nsIScriptError.WARNING_FLAG))  // sometimes this is undefined..how?
+            statusText.setAttribute("value", error.message);
+		else
+			statusText.setAttribute("value", "");
     },
 
     showCount: function(errorCount)
