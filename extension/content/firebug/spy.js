@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -20,11 +20,11 @@ const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverServ
 // ************************************************************************************************
 
 var contexts = [];
-const httpObserver = 
+const httpObserver =
 {
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIObserver
-    
+
     observe: function(request, topic, data)
     {
         request = QI(request, nsIHttpChannel);
@@ -42,7 +42,7 @@ const httpObserver =
                         {
                             if (contexts[i].win == win)
                             {
-                                requestStarted(xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);                              
+                                requestStarted(xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
                                 return;
                             }
                         }
@@ -66,7 +66,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         if (win)
         {
-            var uri = win.location.href; // don't attach spy to chrome 
+            var uri = win.location.href; // don't attach spy to chrome
             if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
                 return;
             for( var i = 0; i < contexts.length; ++i )
@@ -81,7 +81,7 @@ Firebug.Spy = extend(Firebug.Module,
             contexts.push({ context: context, win: win });
         }
     },
-    
+
     detachSpy: function(context, win)
     {
         if (win)
@@ -96,14 +96,14 @@ Firebug.Spy = extend(Firebug.Module,
                         observerService.removeObserver(httpObserver, "http-on-modify-request", false);
                     }
                     return;
-                } 
+                }
             }
         }
     },
-        
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
-    
+
     initContext: function(context)
     {
         context.spies = [];
@@ -111,7 +111,7 @@ Firebug.Spy = extend(Firebug.Module,
         if (!Firebug.disableNetMonitor)
             this.attachSpy(context, context.window);
     },
-    
+
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
@@ -123,16 +123,16 @@ Firebug.Spy = extend(Firebug.Module,
 
         delete context.spies;
     },
-    
+
     watchWindow: function(context, win)
     {
         if (!Firebug.disableNetMonitor)
             this.attachSpy(context, win);
     },
-    
+
     unwatchWindow: function(context, win)
     {
-        try {        
+        try {
             if (!Firebug.disableNetMonitor)
                 this.detachSpy(context, win);
         } catch (ex) {
@@ -141,7 +141,7 @@ Firebug.Spy = extend(Firebug.Module,
             ERROR(ex);
         }
     },
-    
+
     updateOption: function(name, value)
     {
         if (name == "showXMLHttpRequests")
@@ -157,12 +157,12 @@ Firebug.Spy = extend(Firebug.Module,
             }
         }
     },
-    
+
     addListener: function(listener)
     {
         listeners.push(listener);
     },
-    
+
     removeListener: function(listener)
     {
         remove(listeners, listener);
@@ -183,7 +183,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             ),
             TAG(FirebugReps.SourceLink.tag, {object: "$object.sourceLink"})
         ),
-    
+
     getCaption: function(spy)
     {
         return spy.method.toUpperCase() + " " + this.getURL(spy);
@@ -193,7 +193,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     {
         return spy.request.channel ? spy.request.channel.name : spy.url;
     },
-    
+
     onToggleBody: function(event)
     {
         var target = event.currentTarget;
@@ -210,43 +210,43 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             }
         }
     },
-        
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     copyURL: function(spy)
     {
         copyToClipboard(this.getURL(spy));
     },
-    
+
     copyParams: function(spy)
     {
         var text = spy.postText;
         if (!text)
             return;
-        
+
         var lines = text.split("\n");
         var params = parseURLEncodedText(lines[lines.length-1]);
-        
+
         var args = [];
         for (var i = 0; i < params.length; ++i)
             args.push(escape(params[i].name)+"="+escape(params[i].value));
-        
+
         var url = this.getURL(spy);
         url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
         copyToClipboard(url);
     },
-    
+
     copyResponse: function(spy)
     {
         copyToClipboard(spy.request.responseText);
     },
-    
+
     openInTab: function(spy)
     {
         openNewTab(this.getURL(spy));
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     supportsObject: function(object)
     {
@@ -271,7 +271,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         var items = [
             {label: "CopyLocation", command: bindFixed(this.copyURL, this, spy) }
         ];
-        
+
         if (spy.postText)
         {
             items.push(
@@ -284,7 +284,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             "-",
             {label: "OpenInTab", command: bindFixed(this.openInTab, this, spy) }
         );
-        
+
         return items;
     }
 });
@@ -309,7 +309,7 @@ XMLHttpRequestSpy.prototype =
 
         this.onreadystatechange = this.request.onreadystatechange;
 
-        this.request.onreadystatechange = this.onReadyStateChange;    
+        this.request.onreadystatechange = this.onReadyStateChange;
         this.request.addEventListener("load", this.onLoad, true);
         this.request.addEventListener("error", this.onError, true);
     },
@@ -326,12 +326,12 @@ XMLHttpRequestSpy.prototype =
     }
 };
 
-Firebug.XHRSpyListener = 
+Firebug.XHRSpyListener =
 {
     onStart: function(context, spy)
     {
     },
-    
+
     onLoad: function(context, spy)
     {
     }
@@ -343,27 +343,27 @@ function requestStarted(request, context, method, url)
 {
     var spy = new XMLHttpRequestSpy(request, context);
     context.spies.push(spy);
-    
+
     spy.method = method;
     spy.url = url;
-    
+
     if ( method == "POST" )
         spy.postText = getPostText(request, context);
 
     spy.urlParams = parseURLParams(spy.url);
     spy.sourceLink = getStackSourceLink();
-    
+
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
-    
+
     dispatch(listeners,"onStart",[context, spy]);
-    
+
     if (Firebug.showXMLHttpRequests)
     {
         spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
         setClass(spy.logRow, "loading");
     }
-    
+
     spy.attach();
     spy.sendTime = new Date().getTime();
 }
@@ -423,7 +423,7 @@ function onHTTPSpyLoad(spy)
     }
 
     spy.detach();
-    
+
     if (spy.context.spies)
         remove(spy.context.spies, spy);
 }
@@ -431,7 +431,7 @@ function onHTTPSpyLoad(spy)
 function onHTTPSpyError(spy)
 {
     var now = new Date().getTime();
-    
+
     var netProgress = spy.context.netProgress;
     if (netProgress)
         netProgress.post(netProgress.stopFile, [spy.request.channel, now]);
@@ -466,25 +466,25 @@ function updateLogRow(spy, responseTime)
             errorBox.textContent = spy.request.status;
         }
     }
-    catch (exc) {}    
+    catch (exc) {}
 }
 
 function updateHttpSpyInfo(spy)
 {
     if (!spy.logRow || !hasClass(spy.logRow, "opened"))
         return;
-    
+
     var template = Firebug.NetMonitor.NetInfoBody;
 
     if (!spy.params)
         spy.params = parseURLParams(spy.url+"");
-    
+
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
 
     if (!spy.responseHeaders && spy.loaded)
         spy.responseHeaders = getResponseHeaders(spy);
-    
+
     var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
     if (!netInfoBox)
     {
@@ -496,7 +496,7 @@ function updateHttpSpyInfo(spy)
         template.updateInfo(netInfoBox, spy, spy.context);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function getRequestHeaders(spy)
 {
@@ -510,16 +510,16 @@ function getRequestHeaders(spy)
             {
                 headers.push({name: name, value: value});
             }
-        });            
-    }    
-    
+        });
+    }
+
     return headers;
 }
 
 function getResponseHeaders(spy)
 {
     var headers = [];
-    
+
     try
     {
         if (spy.request.channel instanceof nsIHttpChannel)
@@ -530,14 +530,14 @@ function getResponseHeaders(spy)
                 {
                     headers.push({name: name, value: value});
                 }
-            });            
-        }    
+            });
+        }
     }
     catch (exc)
     {
-        
+
     }
-    
+
     return headers;
 }
 
@@ -567,5 +567,5 @@ Firebug.registerModule(Firebug.Spy);
 Firebug.registerRep(Firebug.Spy.XHR);
 
 // ************************************************************************************************
-    
+
 }});

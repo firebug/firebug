@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 
@@ -16,7 +16,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>
-    
+
     <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/sourceCache.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>
@@ -41,35 +41,35 @@
     <script type="application/x-javascript" src="chrome://firebug/content/dom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/net.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/profiler.js"/>
-    <script type="application/x-javascript" src="chrome://firebug/content/errors.js"/>    
+    <script type="application/x-javascript" src="chrome://firebug/content/errors.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/spy.js"/>
 
     <script type="application/x-javascript" src="chrome://firebug/content/consoleAPI.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/commandLineAPI.js"/>
-    
+
     <script type="application/x-javascript" src="chrome://firebug/content/tracePanel.js"/> <!-- /*@explore*/ -->
 
     <!-- Extend Firefox menus -->
-    
+
     <commandset id="mainCommandSet">
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
     </commandset>
-    
+
     <keyset id="mainKeyset">
         <key id="key_toggleFirebug" keycode="VK_F12"
                 command="cmd_toggleFirebug"/>
         <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel"
                 command="cmd_detachFirebug"/>
     </keyset>
-    
+
         <popup id="contentAreaContextMenu">
                 <menuseparator/>
                 <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
                     oncommand="Firebug.showBar(true); FirebugChrome.select(document.popupNode);"/>
         </popup>
-        
+
         <menupopup id="menu_viewPopup">
         <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"
             label="&firebug.Firebug;" type="checkbox"
@@ -102,12 +102,12 @@
 
                 <menuitem id="menu_inspectElement" label="&firebug.InspectElement;"
                           command="cmd_toggleInspecting" key="key_toggleInspecting"/>
-                <menuitem label="&firebug.ProfileScript;" 
+                <menuitem label="&firebug.ProfileScript;"
                           command="cmd_toggleProfiling" key="key_toggleProfiling"/>
                  <menuitem label="&firebug.ClearConsole;"
                            command="cmd_clearConsole" key="key_clearConsole"/>
                 <menuseparator/>
-                
+
                 <menuitem id="menu_focusCommandLine" label="&firebug.CommandLine;"
                         command="cmd_focusCommandLine" key="key_focusCommandLine"/>
                 <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"
@@ -180,7 +180,7 @@
                             <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
                             <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
                             <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
-                            <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/> 
+                            <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
                             <menuseparator/>
                             <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
                         </menupopup>
@@ -198,7 +198,7 @@
             <hbox id="fbCommandBox"/>
         </vbox>
     </vbox>
-    
+
     <!-- Extend Firefox status bar -->
 
     <statusbar id="status-bar">
@@ -207,7 +207,7 @@
             <image id="fbStatusIcon"/>
             <label id="fbStatusText"/>
         </statusbarpanel>
-    
+
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
             <menuitem label="&firebug.DisableFirebug;" type="checkbox"
                       oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>

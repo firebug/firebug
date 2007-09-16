@@ -157,7 +157,7 @@ Firebug.TabContext.prototype =
         {
             var panel = this.panelMap[panelName];
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-				FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");           /*@explore*/
+                FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");           /*@explore*/
             if (panel.invalid)
             {
                 var doc = this.chrome.getPanelDocument(panelType);

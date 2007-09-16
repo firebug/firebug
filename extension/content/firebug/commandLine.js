@@ -82,7 +82,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo FAILS:",exc);        /*@explore*/
-				result = new FBL.ErrorMessage("commandLing.evaluate FAILS: "+exc, "command line failure",0, 0, "js", context, null);
+                result = new FBL.ErrorMessage("commandLing.evaluate FAILS: "+exc, "command line failure",0, 0, "js", context, null);
             }
             try
             {
@@ -91,13 +91,13 @@ Firebug.CommandLine = extend(Firebug.Module,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate iterateWindows to delete FAILS:", exc);          /*@explore*/
-				throw exc;
+                throw exc;
             }
-			if (threw)
+            if (threw)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate evaluation threw:", result);          /*@explore*/
-				result = new FBL.ErrorMessage(result.message, "command line",0, 0, "js", context, null);
-				if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate ErrorMessage result:", result);          /*@explore*/
+                result = new FBL.ErrorMessage(result.message, "command line",0, 0, "js", context, null);
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate ErrorMessage result:", result);          /*@explore*/
             }
         }
 

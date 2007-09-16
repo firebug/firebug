@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
- 
+
 /**
  * Creates a tree based on objects provided by a separate "view" object.
  *
@@ -23,7 +23,7 @@ top.InsideOutBox = function(view, box)
     box.addEventListener("mousedown", this.onMouseDown, false);
 };
 
-InsideOutBox.prototype = 
+InsideOutBox.prototype =
 {
     destroy: function()
     {
@@ -42,7 +42,7 @@ InsideOutBox.prototype =
         var firstChild = this.view.getChildObject(object, 0);
         if (firstChild)
             object = firstChild;
-    
+
         var objectBox = this.createObjectBox(object);
         this.openObjectBox(objectBox);
         return objectBox;
@@ -87,12 +87,12 @@ InsideOutBox.prototype =
         if (this.highlightedObjectBox)
         {
             removeClass(this.highlightedObjectBox, "highlighted");
-    
+
             var highlightedBox = this.getParentObjectBox(this.highlightedObjectBox);
             for (; highlightedBox; highlightedBox = this.getParentObjectBox(highlightedBox))
                 removeClass(highlightedBox, "highlightOpen");
         }
-    
+
         this.highlightedObjectBox = objectBox;
 
         if (objectBox)
@@ -109,17 +109,17 @@ InsideOutBox.prototype =
 
     selectObjectBox: function(objectBox, forceOpen)
     {
-        var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;    
+        var isSelected = this.selectedObjectBox && objectBox == this.selectedObjectBox;
         if (!isSelected)
         {
             removeClass(this.selectedObjectBox, "selected");
-    
+
             this.selectedObjectBox = objectBox;
-        
+
             if (objectBox)
             {
                 setClass(objectBox, "selected");
-            
+
                 // Force it open the first time it is selected
                 if (forceOpen)
                     this.toggleObjectBox(objectBox, true);
@@ -143,7 +143,7 @@ InsideOutBox.prototype =
         var nodeChildBox = this.getChildObjectBox(objectBox);
         if (!nodeChildBox)
             return;
-        
+
         if (!objectBox.populated)
         {
             var firstChild = this.view.getChildObject(objectBox.repObject, 0);
@@ -152,12 +152,12 @@ InsideOutBox.prototype =
 
         setClass(objectBox, "open");
     },
-    
+
     contractObjectBox: function(objectBox)
     {
         removeClass(objectBox, "open");
     },
-    
+
     toggleObjectBox: function(objectBox, forceOpen)
     {
         var isOpen = hasClass(objectBox, "open");
@@ -172,12 +172,12 @@ InsideOutBox.prototype =
     {
         return findNext(objectBox, isVisibleTarget, false, this.box);
     },
-    
+
     getPreviousObjectBox: function(objectBox)
     {
         return findPrevious(objectBox, isVisibleTarget, true, this.box);
     },
-    
+
     /**
      * Creates all of the boxes for an object, its ancestors, and siblings.
      */
@@ -198,7 +198,7 @@ InsideOutBox.prototype =
 
         // Get or create all of the boxes for the target and its ancestors
         var objectBox = this.createObjectBoxes(object, this.rootObject);
-        
+
         if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
             FBTrace.sysout("\n----\ninsideOutBox.createObjectBox for object="+object+" got objectBox="+objectBox+"\n");/*@explore*/
                                                                                                                        /*@explore*/
@@ -219,7 +219,7 @@ InsideOutBox.prototype =
             FBTrace.sysout("\n----\ninsideOutBox.createObjectBoxes for object="+object+"\n");                          /*@explore*/
         if (!object)
             return null;
-    
+
         if (object == rootObject)
         {
             if (!this.rootObjectBox || this.rootObjectBox.repObject != rootObject)
@@ -235,7 +235,7 @@ InsideOutBox.prototype =
             }
             if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
                 FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+") rootObjectBox: "             /*@explore*/
-				                            +this.rootObjectBox+"\n\n");                                               /*@explore*/
+                                            +this.rootObjectBox+"\n\n");                                               /*@explore*/
             return this.rootObjectBox;
         }
         else
@@ -249,13 +249,13 @@ InsideOutBox.prototype =
                 FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+" parentObjectBox: "+parentObjectBox+"\n"); /*@explore*/
             if (!parentObjectBox)
                 return null;
-        
+
             var parentChildBox = this.getChildObjectBox(parentObjectBox);
             if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
                 FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+" parentChildBox: "+parentChildBox+"\n"); /*@explore*/
             if (!parentChildBox)
                 return null;
-        
+
             var childObjectBox = this.findChildObjectBox(parentChildBox, object);
             if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
                 FBTrace.sysout("insideOutBox.createObjectBoxes("+object+","+rootObject+"):parentNode: "+parentNode+" childObjectBox: "+childObjectBox+"\n"+(childObjectBox?"\n":"")); /*@explore*/
@@ -269,7 +269,7 @@ InsideOutBox.prototype =
     {
         if (!object)
             return null;
-    
+
         if (object == this.rootObject)
             return this.rootObjectBox;
         else
@@ -278,22 +278,22 @@ InsideOutBox.prototype =
             var parentObjectBox = this.findObjectBox(parentNode);
             if (!parentObjectBox)
                 return null;
-        
+
             var parentChildBox = this.getChildObjectBox(parentObjectBox);
             if (!parentChildBox)
                 return null;
-        
+
             return this.findChildObjectBox(parentChildBox, object);
         }
     },
 
     appendChildBox: function(parentNodeBox, repObject)
     {
-        var childBox = this.getChildObjectBox(parentNodeBox);    
+        var childBox = this.getChildObjectBox(parentNodeBox);
         var objectBox = this.findChildObjectBox(childBox, repObject);
         if (objectBox)
             return objectBox;
-    
+
         objectBox = this.view.createObjectBox(repObject);
         if (objectBox)
         {
@@ -305,11 +305,11 @@ InsideOutBox.prototype =
 
     insertChildBoxBefore: function(parentNodeBox, repObject, nextSibling)
     {
-        var childBox = this.getChildObjectBox(parentNodeBox);    
+        var childBox = this.getChildObjectBox(parentNodeBox);
         var objectBox = this.findChildObjectBox(childBox, repObject);
         if (objectBox)
             return objectBox;
-    
+
         objectBox = this.view.createObjectBox(repObject);
         if (objectBox)
         {
@@ -328,7 +328,7 @@ InsideOutBox.prototype =
     },
 
     populateChildBox: function(repObject, nodeChildBox)
-    {    
+    {
         if (!repObject)
             return null;
 
@@ -337,13 +337,13 @@ InsideOutBox.prototype =
                 FBTrace.sysout("insideOutBox.populateChildBox("+repObject+") parentObjectBox.populated "+parentObjectBox.populated+"\n"); /*@explore*/
         if (parentObjectBox.populated)
             return this.findChildObjectBox(nodeChildBox, repObject);
-        
+
         var lastSiblingBox = this.getChildObjectBox(nodeChildBox);
         var siblingBox = nodeChildBox.firstChild;
         var targetBox = null;
 
         var view = this.view;
-    
+
         var targetSibling = null;
         var parentNode = view.getParentObject(repObject);
         for (var i = 0; 1; ++i)
@@ -351,11 +351,11 @@ InsideOutBox.prototype =
             targetSibling = view.getChildObject(parentNode, i, targetSibling);
             if (!targetSibling)
                 break;
-        
+
             // Check if we need to start appending, or continue to insert before
             if (lastSiblingBox && lastSiblingBox.repObject == targetSibling)
                 lastSiblingBox = null;
-        
+
             if (!siblingBox || siblingBox.repObject != targetSibling)
             {
                 var newBox = view.createObjectBox(targetSibling);
@@ -366,7 +366,7 @@ InsideOutBox.prototype =
                     else
                         nodeChildBox.appendChild(newBox);
                 }
-            
+
                 siblingBox = newBox;
             }
 
@@ -376,7 +376,7 @@ InsideOutBox.prototype =
             if (siblingBox && siblingBox.repObject == targetSibling)
                 siblingBox = siblingBox.nextSibling;
         }
-    
+
         if (targetBox)
             parentObjectBox.populated = true;
         if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
@@ -404,7 +404,7 @@ InsideOutBox.prototype =
                 FBTrace.sysout("insideOutBox.findChildObjectBox childBox.repObject: "+childBox.repObject +" repObject: "+repObject+"\n"); /*@explore*/
             if (childBox.repObject == repObject)
                 return childBox;
-        }    
+        }
     },
 
     getRootNode: function(node)

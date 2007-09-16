@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -17,7 +17,7 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.value = text;
         this.update(context);
     },
-    
+
     enter: function(context)
     {
         var panel = context.chrome.getSelectedPanel();
@@ -26,21 +26,21 @@ Firebug.Search = extend(Firebug.Module,
 
         var searchBox = context.chrome.$("fbSearchBox");
         var value = searchBox.value;
-        
+
         panel.search(value, true);
     },
-    
+
     cancel: function(context)
     {
         this.search("", context);
     },
-    
+
     clear: function(context)
     {
         var searchBox = context.chrome.$("fbSearchBox");
         searchBox.value = "";
     },
-    
+
     focus: function(context)
     {
         if (context.detached)
@@ -52,7 +52,7 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.focus();
         searchBox.select();
     },
-    
+
     update: function(context, immediate)
     {
         var panel = context.chrome.getSelectedPanel();
@@ -78,7 +78,7 @@ Firebug.Search = extend(Firebug.Module,
             var found = panel.search(value);
             if (!found && value)
                 beep();
-            
+
             panel.searchText = value;
         }
         else
@@ -106,23 +106,23 @@ Firebug.Search = extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
-    
+
     enable: function()
     {
         var searchBox = FirebugChrome.$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = false;
     },
-    
+
     disable: function()
     {
         var searchBox = FirebugChrome.$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = true;
     },
-        
+
     showPanel: function(browser, panel)
     {
         var chrome = browser.chrome;
@@ -137,5 +137,5 @@ Firebug.Search = extend(Firebug.Module,
 Firebug.registerModule(Firebug.Search);
 
 // ************************************************************************************************
-    
+
 }});

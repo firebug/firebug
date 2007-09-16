@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 // ************************************************************************************************
 // Constants
 
@@ -12,26 +12,26 @@ const names = ["label", "executable", "cmdline", "image"];
 var gEditorManager =
 {
     _tree : null,
-    _data : [],     
+    _data : [],
     _removeButton : null,
     _changeButton : null,
-    
+
     init: function()
     {
         var args = window.arguments[0];
         this._FBL = args.FBL;
         this._prefName = args.prefName;
-        
-        (this._removeButton = document.getElementById("removeEditor")).disabled = true;    
+
+        (this._removeButton = document.getElementById("removeEditor")).disabled = true;
         (this._changeButton = document.getElementById("changeEditor")).disabled = true;
-        
+
         this._tree = document.getElementById("editorsList");
-        
+
         this._treeView =
         {
             data: this._data,
             selection: null,
-            
+
             get rowCount() { return this.data.length; },
             getCellText: function(row, column)
             {
@@ -58,22 +58,22 @@ var gEditorManager =
             getCellProperties: function(row,column,props) {},
             getColumnProperties: function(colid,column,props) {}
         };
-        
+
         this._load();
         this._tree.view = this._treeView;
     },
-    
+
     uninit: function()
     {
     },
-    
+
     onSelectionChanged: function()
     {
-        var selection = this._tree.view.selection; 
+        var selection = this._tree.view.selection;
         this._removeButton.disabled = (selection.count != 1);
         this._changeButton.disabled = (selection.count != 1);
     },
-    
+
     addEditorHandler: function()
     {
         var item = { label: "", executable: null, cmdline: "" };
@@ -83,10 +83,10 @@ var gEditorManager =
         {
             item.id = item.label.replace(/\W/g, "_");
             this._saveItem(item);
-            
+
             this._loadItem(item);
             this._data.push(item);
-            this._tree.view = this._treeView;       
+            this._tree.view = this._treeView;
 
             var editors = [];
             try {
@@ -105,15 +105,15 @@ var gEditorManager =
             prefs.setCharPref(this._prefName, editors.join(","));
         }
     },
-    
+
     removeEditorHandler: function()
     {
-        var selection = this._tree.view.selection; 
+        var selection = this._tree.view.selection;
         if (selection.count < 1)
             return;
         var item = this._data[selection.currentIndex];
         this._data.splice(selection.currentIndex, 1);
-        this._tree.view = this._treeView;       
+        this._tree.view = this._treeView;
 
         try {
             var editors = prefs.getCharPref(this._prefName).split(",");
@@ -126,10 +126,10 @@ var gEditorManager =
             this._FBL.ERROR(exc);
         }
     },
-    
+
     changeEditorHandler: function()
     {
-        var selection = this._tree.view.selection; 
+        var selection = this._tree.view.selection;
         if (selection.count != 1)
             return;
         var item = this._data[selection.currentIndex];
@@ -140,9 +140,9 @@ var gEditorManager =
             this._saveItem(item);
         }
         this._loadItem(item);
-        this._tree.view = this._treeView;       
+        this._tree.view = this._treeView;
     },
-    
+
     _loadItem: function(item)
     {
         const prefName = this._prefName;
@@ -177,7 +177,7 @@ var gEditorManager =
             {}
         }
     },
-    
+
     _load: function()
     {
         try {
@@ -197,7 +197,7 @@ var gEditorManager =
             this._FBL.ERROR(exc);
         }
     }
-    
+
 };
 
 // ************************************************************************************************

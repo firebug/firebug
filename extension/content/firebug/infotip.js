@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -16,7 +16,7 @@ Firebug.InfoTip = extend(Firebug.Module,
     tags: domplate(
     {
         infoTipTag: DIV({class: "infoTip"}),
-        
+
         colorTag:
             DIV({style: "background: $rgbValue; width: 100px; height: 40px"}, "&nbsp;"),
 
@@ -34,7 +34,7 @@ Firebug.InfoTip = extend(Firebug.Module,
             var bgImg = img.nextSibling;
             if (!bgImg)
                 return; // Sometimes gets called after element is dead
-            
+
             var caption = bgImg.nextSibling;
             var innerBox = img.parentNode;
 
@@ -87,13 +87,13 @@ Firebug.InfoTip = extend(Firebug.Module,
                     }
                 }
             }
-                        
+
             caption.innerHTML = $STRF("Dimensions", [w, h]);
-            
+
             removeClass(innerBox, "infoTipLoading");
         }
     }),
-    
+
     initializeBrowser: function(browser)
     {
         browser.onInfoTipMouseOut = bind(this.onMouseOut, this, browser);
@@ -102,7 +102,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         var doc = browser.contentDocument;
         if (!doc)
             return;
-        
+
         doc.addEventListener("mouseover", browser.onInfoTipMouseMove, true);
         doc.addEventListener("mouseout", browser.onInfoTipMouseOut, true);
         doc.addEventListener("mousemove", browser.onInfoTipMouseMove, true);
@@ -124,15 +124,15 @@ Firebug.InfoTip = extend(Firebug.Module,
             delete browser.onInfoTipMouseMove;
         }
     },
-    
+
     showInfoTip: function(infoTip, panel, target, x, y)
     {
         if (!Firebug.showInfoTips)
             return;
-                
+
         var scrollParent = getOverflowParent(target);
         var scrollX = x + (scrollParent ? scrollParent.scrollLeft : 0);
-        
+
         if (panel.showInfoTip(infoTip, target, scrollX, y))
         {
             var htmlElt = infoTip.ownerDocument.documentElement;
@@ -160,13 +160,13 @@ Firebug.InfoTip = extend(Firebug.Module,
                 infoTip.style.top = (y+infoTipMargin) + "px";
                 infoTip.style.bottom = "auto";
             }
-            
+
             infoTip.setAttribute("active", "true");
         }
         else
             this.hideInfoTip(infoTip);
     },
-    
+
     hideInfoTip: function(infoTip)
     {
         if (infoTip)
@@ -178,7 +178,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         if (!event.relatedTarget)
             this.hideInfoTip(browser.infoTip);
     },
-    
+
     onMouseMove: function(event, browser)
     {
         if (browser.currentPanel)
@@ -190,32 +190,32 @@ Firebug.InfoTip = extend(Firebug.Module,
             this.hideInfoTip(browser.infoTip);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-    
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     populateColorInfoTip: function(infoTip, color)
     {
         this.tags.colorTag.replace({rgbValue: color}, infoTip);
         return true;
     },
-    
+
     populateImageInfoTip: function(infoTip, url, repeat)
     {
         if (!repeat)
             repeat = "no-repeat";
-        
+
         this.tags.imgTag.replace({urlValue: url, repeat: repeat}, infoTip);
 
         return true;
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
     disable: function()
     {
         // XXXjoe For each browser, call uninitializeBrowser
     },
-    
+
     showPanel: function(browser, panel)
     {
         if (panel)
@@ -227,7 +227,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         }
 
     },
-    
+
     showSidePanel: function(browser, panel)
     {
         this.showPanel(browser, panel);
@@ -239,5 +239,5 @@ Firebug.InfoTip = extend(Firebug.Module,
 Firebug.registerModule(Firebug.InfoTip);
 
 // ************************************************************************************************
-    
+
 }});

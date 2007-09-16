@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -7,16 +7,16 @@ FBL.ns(function() { with (FBL) {
 
 const jsdIStackFrame = CI("jsdIStackFrame");
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const insertSliceSize = 18;
 const insertInterval = 40;
 
-const ignoreVars = 
+const ignoreVars =
 {
     "__firebug__": 1,
     "eval": 1,
-    
+
     // We are forced to ignore Java-related variables, because
     // trying to access them causes browser freeze
     "java": 1,
@@ -29,11 +29,11 @@ const ignoreVars =
     "JavaPackage": 1
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const RowTag = 
-    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren", 
-        level: "$member.level"}, 
+const RowTag =
+    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
+        level: "$member.level"},
         TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px"},
             DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
         ),
@@ -42,7 +42,7 @@ const RowTag =
         )
     );
 
-const WatchRowTag = 
+const WatchRowTag =
     TR({class: "watchNewRow", level: 0},
         TD({class: "watchEditCell", colspan: 2},
             DIV({class: "watchEditBox"},
@@ -92,7 +92,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         return getMembers(object, level);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onClick: function(event)
     {
@@ -106,7 +106,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
         }
-        else 
+        else
         {
             var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
@@ -124,7 +124,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                         panel.setPropertyValue(row, !rowValue);
                     else
                         panel.editProperty(row);
-                    
+
                     cancelEvent(event);
                 }
             }
@@ -188,7 +188,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             }
 
             var value = row.lastChild.firstChild.repObject;
-            var members = getMembers(value, level+1);            
+            var members = getMembers(value, level+1);
 
             var rowTag = this.rowTag;
             var lastRow = row;
@@ -219,7 +219,7 @@ const ToolboxPlate = domplate(
         DIV({class: "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
             IMG({class: "watchDeleteButton closeButton", src: "blank.gif"})
         ),
-    
+
     onClick: function(event)
     {
         var toolbox = event.currentTarget;
@@ -234,15 +234,15 @@ function DOMBasePanel() {}
 DOMBasePanel.prototype = extend(Firebug.Panel,
 {
     tag: DirTablePlate.tableTag,
-    
+
     rebuild: function(update, scrollTop)
     {
         var members = getMembers(this.selection);
         expandMembers(members, this.toggles, 0, 0);
-        
+
         this.showMembers(members, update, scrollTop);
     },
-    
+
     showMembers: function(members, update, scrollTop)
     {
         // If we are still in the midst of inserting rows, cancel all pending
@@ -253,10 +253,10 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 this.context.clearTimeout(this.timeouts[i]);
             delete this.timeouts;
         }
-        
+
         if (!members.length)
             return this.showEmptyMembers();
-        
+
         var panelNode = this.panelNode;
         var priorScrollTop = scrollTop == undefined ? panelNode.scrollTop : scrollTop;
 
@@ -264,9 +264,9 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         // offscreen and swap it in when it's done
         var offscreen = update && panelNode.firstChild;
         var dest = offscreen ? this.document : panelNode;
-        
+
         var table = this.tag.replace({domPanel: this, toggles: this.toggles}, dest);
-        var tbody = table.lastChild;            
+        var tbody = table.lastChild;
         var rowTag = DirTablePlate.rowTag;
 
         // Insert the first slice immediately
@@ -274,18 +274,18 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         rowTag.insertRows({members: slice}, tbody.lastChild);
 
         var timeouts = [];
-        
+
         var delay = 0;
         while (members.length)
         {
             timeouts.push(this.context.setTimeout(function(slice)
             {
                 rowTag.insertRows({members: slice}, tbody.lastChild);
-                
+
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                     panelNode.scrollTop = priorScrollTop;
             }, delay, members.splice(0, insertSliceSize)));
-            
+
             delay += insertInterval;
         }
 
@@ -309,15 +309,15 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 panelNode.scrollTop = scrollTop == undefined ? 0 : scrollTop;
             }, delay));
         }
-        
+
         this.timeouts = [];
     },
-    
+
     showEmptyMembers: function()
     {
         FirebugReps.Warning.tag.replace({object: "NoMembersWarning"}, this.panelNode);
     },
-    
+
     findPathObject: function(object)
     {
         var pathIndex = -1;
@@ -326,10 +326,10 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             if (this.getPathObject(i) == object)
                 return i;
         }
-        
+
         return -1;
     },
-    
+
     getPathObject: function(index)
     {
         var object = this.objectPath[index];
@@ -344,7 +344,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         var object = getRowOwnerObject(row);
         return object ? object : this.selection;
     },
-    
+
     getRowPropertyValue: function(row)
     {
         var object = this.getRowObject(row);
@@ -358,13 +358,13 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 return object[propName];
         }
     },
-    
+
     copyProperty: function(row)
     {
         var value = this.getRowPropertyValue(row);
         copyToClipboard(value);
     },
-    
+
     editProperty: function(row, editValue)
     {
         if (hasClass(row, "watchNewRow"))
@@ -393,11 +393,11 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                     editValue = "this." + getRowName(row);
             }
 
-            
+
             Firebug.Editor.startEditing(row, editValue);
         }
     },
-    
+
     deleteProperty: function(row)
     {
         if (hasClass(row, "watchRow"))
@@ -407,7 +407,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             var object = getRowOwnerObject(row);
             if (!object)
                 object = this.selection;
-            
+
             if (object)
             {
                 var name = getRowName(row);
@@ -425,7 +425,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             }
         }
     },
-    
+
     setPropertyValue: function(row, value)
     {
         var name = getRowName(row);
@@ -455,7 +455,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             }
         }
         else if (this.context.stopped)
-        {            
+        {
             try
             {
                 Firebug.CommandLine.evaluate(name+"="+value, this.context);
@@ -477,21 +477,21 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         this.rebuild(true);
         this.markChange();
     },
-    
+
     highlightRow: function(row)
     {
         if (this.highlightedRow)
             cancelClassTimed(this.highlightedRow, "jumpHighlight", this.context);
 
         this.highlightedRow = row;
-        
+
         if (row)
             setClassTimed(row, "jumpHighlight", this.context);
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
-    
+
     initialize: function()
     {
         this.objectPath = [];
@@ -499,10 +499,10 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         this.viewPath = [];
         this.pathIndex = -1;
         this.toggles = {};
-        
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
-    
+
     destroy: function(state)
     {
         var view = this.viewPath[this.pathIndex];
@@ -514,10 +514,10 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         state.propertyPath = this.propertyPath;
         if (this.propertyPath.length > 0 && !this.propertyPath[1])
             state.firstSelection = persistObject(this.getPathObject(1), this.context);
-            
+
         Firebug.Panel.destroy.apply(this, arguments);
     },
-    
+
     show: function(state)
     {
         if (this.context.loaded && !this.selection)
@@ -527,12 +527,12 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 this.select(null);
                 return;
             }
-            
+
             this.viewPath = state.viewPath;
             this.propertyPath = state.propertyPath;
 
             var selectObject = defaultObject = this.getDefaultSelection();
-            
+
             if (state.firstSelection)
             {
                 var restored = state.firstSelection(this.context);
@@ -541,7 +541,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                     selectObject = restored;
                     this.objectPath = [defaultObject, restored];
                 }
-                else                    
+                else
                     this.objectPath = [defaultObject];
             }
             else
@@ -554,7 +554,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                     var name = this.propertyPath[i];
                     if (!name)
                         continue;
-                    
+
                     var object = selectObject;
                     try
                     {
@@ -584,11 +584,11 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             var selection = state.pathIndex <= this.objectPath.length-1
                 ? this.getPathObject(state.pathIndex)
                 : this.getPathObject(this.objectPath.length-1);
-            
+
             this.select(selection);
         }
     },
-    
+
     hide: function()
     {
         var view = this.viewPath[this.pathIndex];
@@ -600,7 +600,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
     {
         if (object == null)
             return 1000;
-        
+
         if (typeof(object) == "undefined")
             return 1000;
         else if (object instanceof SourceLink)
@@ -608,7 +608,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         else
             return 100;
     },
-    
+
     refresh: function()
     {
         this.rebuild(true);
@@ -619,7 +619,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         var previousIndex = this.pathIndex;
         var previousView = previousIndex == -1 ? null : this.viewPath[previousIndex];
 
-        var newPath = this.pathToAppend;        
+        var newPath = this.pathToAppend;
         delete this.pathToAppend;
 
         var pathIndex = this.findPathObject(object);
@@ -635,7 +635,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 {
                     if (this.panelNode.scrollTop)
                         previousView.scrollTop = this.panelNode.scrollTop;
-                    
+
                     this.objectPath.splice(previousIndex+1);
                     this.propertyPath.splice(previousIndex+1);
                     this.viewPath.splice(previousIndex+1);
@@ -647,7 +647,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                     var name = newPath[i];
                     var object = value;
                     value = value[name];
-                    
+
                     ++this.pathIndex;
                     this.objectPath.push(new Property(object, name));
                     this.propertyPath.push(name);
@@ -683,7 +683,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         }
         else
         {
-            this.pathIndex = pathIndex;            
+            this.pathIndex = pathIndex;
 
             var view = this.viewPath[pathIndex];
             this.toggles = view.toggles;
@@ -691,12 +691,12 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             // Persist the current scroll location
             if (previousView && this.panelNode.scrollTop)
                 previousView.scrollTop = this.panelNode.scrollTop;
-            
+
             this.rebuild(false, view.scrollTop);
         }
 
     },
-        
+
     getObjectPath: function(object)
     {
         return this.objectPath;
@@ -706,7 +706,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
     {
         return this.context.window;
     },
-    
+
     updateOption: function(name, value)
     {
         const optionMap = {showUserProps: 1, showUserFuncs: 1, showDOMProps: 1,
@@ -714,7 +714,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         if (name in optionMap)
             this.rebuild(true);
     },
-    
+
     getOptionsMenuItems: function()
     {
         return [
@@ -733,7 +733,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         var row = getAncestorByClass(target, "memberRow");
 
         var items = [];
-        
+
         if (row)
         {
             var rowName = getRowName(row);
@@ -752,13 +752,13 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                         command: bindFixed(this.copyProperty, this, row) }
                 );
             }
-            
+
             items.push(
                 "-",
                 {label: isWatch ? "EditWatch" : (isStackFrame ? "EditVariable" : "EditProperty"),
                     command: bindFixed(this.editProperty, this, row) }
             );
-            
+
             if (isWatch || (!isStackFrame && !isDOMMember(rowObject, rowName)))
             {
                 items.push(
@@ -767,20 +767,20 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 );
             }
         }
-        
+
         items.push(
             "-",
             {label: "Refresh", command: bindFixed(this.rebuild, this, true) }
         );
-        
+
         return items;
     },
-    
+
     getEditor: function(target, value)
     {
         if (!this.editor)
             this.editor = new DOMEditor(this.document);
-            
+
         return this.editor;
     }
 });
@@ -797,28 +797,28 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
     {
         if (!target)
             target = row.lastChild.firstChild;
-        
+
         if (!target || !target.repObject)
             return;
-        
+
         this.pathToAppend = getPath(row);
 
         // If the object is inside an array, look up its index
         var valueBox = row.lastChild.firstChild;
         if (hasClass(valueBox, "objectBox-array"))
         {
-            var arrayIndex = FirebugReps.Arr.getItemIndex(target);                
+            var arrayIndex = FirebugReps.Arr.getItemIndex(target);
             this.pathToAppend.push(arrayIndex);
         }
-        
+
         // Make sure we get a fresh status path for the object, since otherwise
         // it might find the object in the existing path and not refresh it
         this.context.chrome.clearStatusPath();
-        
+
         this.select(target.repObject, true);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onClick: function(event)
     {
@@ -833,31 +833,31 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
             }
         }
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
-    
+
     name: "dom",
     searchable: true,
     statusSeparator: ">",
-    
+
     initialize: function()
     {
         this.onClick = bind(this.onClick, this);
-        
+
         DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
-    
+
     initializeNode: function(oldPanelNode)
     {
         this.panelNode.addEventListener("click", this.onClick, false);
     },
-    
+
     destroyNode: function()
     {
         this.panelNode.removeEventListener("click", this.onClick, false);
     },
-    
+
     search: function(text, visit)
     {
         if (!text)
@@ -866,7 +866,7 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
             this.highlightRow(null);
             return false;
         }
-        
+
         if (visit && this.currentSearch && this.currentSearch.currentNode)
         {
             Firebug.Search.clear(this.context);
@@ -901,7 +901,7 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
                     sel.addRange(this.currentSearch.range);
 
                     scrollIntoCenterView(row, this.panelNode);
-                    
+
                     this.highlightRow(row);
                 }
                 return true;
@@ -909,7 +909,7 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
             else
                 return false;
         }
-    }    
+    }
 });
 
 // ************************************************************************************************
@@ -918,11 +918,11 @@ function DOMSidePanel() {}
 
 DOMSidePanel.prototype = extend(DOMBasePanel.prototype,
 {
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
-    
+
     name: "domSide",
-    parentPanel: "html"    
+    parentPanel: "html"
 });
 
 // ************************************************************************************************
@@ -947,7 +947,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
     {
         if (!this.watches)
             this.watches = [];
-        
+
         this.watches.splice(0, 0, expression);
         this.rebuild(true);
     },
@@ -961,14 +961,14 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
         if (index != -1)
             this.watches.splice(index, 1);
     },
-    
+
     editNewWatch: function(value)
     {
         var watchNewRow = getElementByClass(this.panelNode, "watchNewRow");
         if (watchNewRow)
             this.editProperty(watchNewRow, value);
     },
-    
+
     setWatchValue: function(row, value)
     {
         var rowIndex = getWatchRowIndex(row);
@@ -987,8 +987,8 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
             this.showToolbox(null);
         }, this));
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     showToolbox: function(row)
     {
@@ -997,7 +997,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
         {
             if (hasClass(row, "editing"))
                 return;
-            
+
             toolbox.watchRow = row;
 
             var offset = getClientOffset(row);
@@ -1011,7 +1011,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
                 toolbox.parentNode.removeChild(toolbox);
         }
     },
-    
+
     getToolbox: function()
     {
         if (!this.toolbox)
@@ -1019,9 +1019,9 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
 
         return this.toolbox;
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     onMouseDown: function(event)
     {
         var watchNewRow = getAncestorByClass(event.target, "watchNewRow");
@@ -1043,28 +1043,28 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
     {
         if (isAncestor(event.relatedTarget, this.getToolbox()))
             return;
-        
+
         var watchRow = getAncestorByClass(event.relatedTarget, "watchRow");
         if (!watchRow)
             this.showToolbox(null);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
-    
+
     name: "watches",
     order: 0,
     parentPanel: "script",
-    
+
     initialize: function()
     {
         this.onMouseDown = bind(this.onMouseDown, this);
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
-        
+
         DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
-    
+
     destroy: function(state)
     {
         state.watches = this.watches;
@@ -1077,37 +1077,37 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
         if (state)
             this.watches = state.watches;
     },
-    
+
     initializeNode: function(oldPanelNode)
     {
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
     },
-    
+
     destroyNode: function()
     {
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
     },
-    
+
     refresh: function()
     {
         this.rebuild(true);
     },
-    
+
     updateSelection: function(object)
     {
         var frame = this.context.currentFrame;
-        
+
         var newFrame = frame && frame.script != this.lastScript;
         if (newFrame)
         {
             this.toggles = {};
             this.lastScript = frame.script;
         }
-        
+
         var members = [];
 
         if (this.watches)
@@ -1132,7 +1132,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
                 addMember("watch", members, expr, value, 0);
             }
         }
-        
+
         if (frame)
         {
             var thisVar = frame.thisValue.getWrappedValue();
@@ -1179,7 +1179,7 @@ function DOMEditor(doc)
     this.input = this.box;
 
     this.tabNavigation = false;
-    this.tabCompletion = true;            
+    this.tabCompletion = true;
     this.completeAsYouType = false;
     this.fixedWidth = true;
 
@@ -1190,15 +1190,15 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag: INPUT({class: "fixedWidthEditor", type: "text",
                 oninput: "$onInput", onkeypress: "$onKeyPress"}),
-    
+
     endEditing: function(target, value, cancel)
     {
         // XXXjoe Kind of hackish - fix me
         delete this.panel.context.thisValue;
-        
+
         if (cancel || value == "")
             return;
-        
+
         var row = getAncestorByClass(target, "memberRow");
         if (!row)
             this.panel.addWatch(value);
@@ -1206,7 +1206,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             this.panel.setWatchValue(row, value);
         else
             this.panel.setPropertyValue(row, value);
-    }    
+    }
 });
 
 // ************************************************************************************************
@@ -1216,19 +1216,19 @@ function getMembers(object, level)
 {
     if (!level)
         level = 0;
-                
+
     var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
         domProps = [], domFuncs = [], domConstants = [];
-    
+
     try
     {
-        var domMembers = getDOMMembers(object);        
+        var domMembers = getDOMMembers(object);
 
         for (var name in object)
         {
             if (name in ignoreVars)
                 continue;
-            
+
             var val;
             try
             {
@@ -1253,7 +1253,7 @@ function getMembers(object, level)
                 else
                     addMember("userFunction", userFuncs, name, val, level);
             }
-            else 
+            else
             {
                 if (name in domMembers)
                     addMember("dom", domProps, name, val, level, domMembers[name]);
@@ -1275,15 +1275,15 @@ function getMembers(object, level)
     function sortOrder(a, b) { return a.order > b.order ? 1 : -1; }
 
     var members = [];
-    
+
     members.push.apply(members, ordinals);
-    
+
     if (Firebug.showUserProps)
     {
         userProps.sort(sortName);
         members.push.apply(members, userProps);
     }
-    
+
     if (Firebug.showUserFuncs)
     {
         userClasses.sort(sortName);
@@ -1292,16 +1292,16 @@ function getMembers(object, level)
         userFuncs.sort(sortName);
         members.push.apply(members, userFuncs);
     }
-    
+
     if (Firebug.showDOMProps)
     {
         domProps.sort(sortOrder);
-        members.push.apply(members, domProps);            
+        members.push.apply(members, domProps);
     }
-    
+
     if (Firebug.showDOMFuncs)
     {
-        domFuncs.sort(sortName);            
+        domFuncs.sort(sortName);
         members.push.apply(members, domFuncs);
     }
 
@@ -1314,19 +1314,19 @@ function getMembers(object, level)
 function expandMembers(members, toggles, offset, level)
 {
     var expanded = 0;
-    
+
     for (var i = offset; i < members.length; ++i)
     {
         var member = members[i];
         if (member.level > level)
             break;
-        
+
         if (member.name in toggles)
         {
             member.open = "opened";
 
             var newMembers = getMembers(member.value, level+1);
-                        
+
             var args = [i+1, 0];
             args.push.apply(args, newMembers);
             members.splice.apply(members, args);
@@ -1335,11 +1335,11 @@ function expandMembers(members, toggles, offset, level)
             i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1);
         }
     }
-    
+
     return expanded;
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function isClassFunction(fn)
 {
@@ -1365,7 +1365,7 @@ function addMember(type, props, name, value, level, order)
 {
     var valueType = typeof(value);
     var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
-        (valueType == "function" || (valueType == "object" && value != null)        
+        (valueType == "function" || (valueType == "object" && value != null)
         || (valueType == "string" && value.length > Firebug.stringCropLength));
 
     var rep = Firebug.getRep(value);
@@ -1382,15 +1382,15 @@ function addMember(type, props, name, value, level, order)
         indent: level*16,
         hasChildren: hasChildren,
         tag: tag
-    });    
+    });
 }
 
 function getWatchRowIndex(row)
 {
     var index = -1;
     for (; row && hasClass(row, "watchRow"); row = row.previousSibling)
-        ++index; 
-    return index;   
+        ++index;
+    return index;
 }
 
 function getRowName(row)
@@ -1417,7 +1417,7 @@ function getParentRow(row)
     {
         if (parseInt(row.getAttribute("level")) == level)
             return row;
-    }    
+    }
 }
 
 function getPath(row)
@@ -1447,5 +1447,5 @@ Firebug.registerPanel(DOMSidePanel);
 Firebug.registerPanel(WatchPanel);
 
 // ************************************************************************************************
-    
+
 }});

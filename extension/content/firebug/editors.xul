@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
@@ -17,7 +17,7 @@
 
   <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
   <script type="application/x-javascript" src="chrome://firebug/content/editors.js"/>
-  
+
   <vbox flex="1" class="contentPane">
     <label id="actionsIntro" control="editorsList">
       &editors.Description;
@@ -34,11 +34,11 @@
         <splitter class="tree-splitter" />
         <treecol id="editorExecutable" flex="1"
                   persist="width"
-                  label="&editors.ExecutableColumn;"/>                
+                  label="&editors.ExecutableColumn;"/>
         <splitter class="tree-splitter" />
         <treecol id="editorParams" flex="1"
                   persist="width"
-                  label="&editors.ParamsColumn;"/>                
+                  label="&editors.ParamsColumn;"/>
       </treecols>
       <treechildren/>
     </tree>
@@ -61,5 +61,5 @@
     </hbox>
     <resizer dir="bottomright"/>
   </hbox>
-        
+
 </window>

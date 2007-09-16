@@ -58,8 +58,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             statusBar.setAttribute("errors", "true");
         if (statusText && Firebug.breakOnErrors &&  !(error.flags & nsIScriptError.WARNING_FLAG))  // sometimes this is undefined..how?
             statusText.setAttribute("value", error.message);
-		else
-			statusText.setAttribute("value", "");
+        else
+            statusText.setAttribute("value", "");
     },
 
     showCount: function(errorCount)
@@ -120,25 +120,25 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         }
                     }
                 }
-				if (!context)
-				{
-					var messageURI = object.sourceName;
-					if (messageURI in FirebugContext.allURIs)
-						context = FirebugContext;
-					else
-					{
-						TabWatcher.iterateContexts( function(trial_context)
-						{
-							if (messageURI in trial_context)
-								context = trial_context;
-						});
-						if (FBTrace.DBG_ERRORS)                                                                          /*@explore*/
-							FBTrace.sysout("errors.observe set context by iteration to "+context+"\n");                  /*@explore*/
-					}
-				}
+                if (!context)
+                {
+                    var messageURI = object.sourceName;
+                    if (messageURI in FirebugContext.allURIs)
+                        context = FirebugContext;
+                    else
+                    {
+                        TabWatcher.iterateContexts( function(trial_context)
+                        {
+                            if (messageURI in trial_context)
+                                context = trial_context;
+                        });
+                        if (FBTrace.DBG_ERRORS)                                                                          /*@explore*/
+                            FBTrace.sysout("errors.observe set context by iteration to "+context+"\n");                  /*@explore*/
+                    }
+                }
 
                 if (FBTrace.DBG_ERRORS)                                                                                  /*@explore*/
-                	FBTrace.sysout("errors.observe categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning)+"\n");           /*@explore*/
+                    FBTrace.sysout("errors.observe categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning)+"\n");           /*@explore*/
 
                 if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
                     return;
@@ -151,7 +151,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 {
                     context.errorMap[msgId] += 1;
                     if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
-	                    FBTrace.sysout("errors.observe duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
+                        FBTrace.sysout("errors.observe duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
                     return;
                 }
 

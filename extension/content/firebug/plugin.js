@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -17,7 +17,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
         this.browser.className = "pluginBrowser";
         this.browser.setAttribute("src", this.url);
     },
-    
+
     destroyBrowser: function()
     {
         if (this.browser)
@@ -26,11 +26,11 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
             delete this.browser;
         }
     },
-    
+
     browserReady: function()
     {
         this.browser.removeEventListener("DOMContentLoaded", this.browserReady, false);
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.browserReady DOMContentLoaded addEventListener\n");         /*@explore*/         
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.browserReady DOMContentLoaded addEventListener\n");         /*@explore*/
         this.innerPanel = this.browser.contentWindow.FirebugPanel;
         if (this.visible)
         {
@@ -38,34 +38,34 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
             this.updateSelection(this.selection);
         }
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
-    
+
     initialize: function()
     {
         this.browserReady = bindFixed(this.browserReady, this);
         Firebug.Panel.initialize.apply(this, arguments);
     },
-    
+
     destroy: function(state)
     {
         this.destroyBrowser();
         Firebug.Panel.destroy.apply(this, arguments);
     },
-    
+
     reattach: function(doc)
     {
-        this.destroyBrowser();        
+        this.destroyBrowser();
         this.createBrowser();
     },
-    
+
     show: function(state)
     {
         if (!this.browser)
             this.createBrowser();
     },
-    
+
     hide: function()
     {
     },
@@ -77,15 +77,15 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
         else
             return 0;
     },
-    
+
     updateSelection: function(object)
     {
         if (!this.innerPanel)
             return;
-        
+
         innerCall(this.innerPanel, "select", [object]);
     },
-        
+
     getObjectPath: function(object)
     {
     },
@@ -93,11 +93,11 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
     getDefaultSelection: function()
     {
     },
-    
+
     updateOption: function(name, value)
     {
     },
-    
+
     getOptionsMenuItems: function()
     {
     },
@@ -105,7 +105,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
     getContextMenuItems: function(object, target)
     {
     },
-    
+
     getEditor: function(target, value)
     {
     }
@@ -126,5 +126,5 @@ function innerCall(innerPanel, name, args)
 }
 
 // ************************************************************************************************
-    
+
 }});

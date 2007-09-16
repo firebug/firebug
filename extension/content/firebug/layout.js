@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -12,7 +12,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     {
         tag:
             DIV({class: "outerLayoutBox"},
-                DIV({class: "offsetLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode"}, 
+                DIV({class: "offsetLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode"},
                     DIV({class: "layoutEdgeTop layoutEdge"}),
                     DIV({class: "layoutEdgeRight layoutEdge"}),
                     DIV({class: "layoutEdgeBottom layoutEdge"}),
@@ -33,7 +33,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
                     DIV({class: "layoutCaption"}, '$outerLabel'),
 
-                    DIV({class: "marginLayoutBox layoutBox editGroup"}, 
+                    DIV({class: "marginLayoutBox layoutBox editGroup"},
                         DIV({class: "layoutCaption"}, $STR("LayoutMargin")),
                         DIV({class: "layoutLabelTop layoutLabel v$marginTop"},
                             SPAN({class: "editable"}, '$marginTop')
@@ -48,7 +48,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                             SPAN({class: "editable"}, '$marginLeft')
                         ),
 
-                        DIV({class: "borderLayoutBox layoutBox editGroup"}, 
+                        DIV({class: "borderLayoutBox layoutBox editGroup"},
                             DIV({class: "layoutCaption"}, $STR("LayoutBorder")),
                             DIV({class: "layoutLabelTop layoutLabel v$borderTop"},
                                 SPAN({class: "editable"}, '$borderTop')
@@ -96,31 +96,31 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             return getVerticalText(n);
         }
     }),
-        
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
-    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     onMouseOver: function(event)
     {
         var layoutBox = getAncestorByClass(event.target, "layoutBox");
         var boxFrame = layoutBox ? getBoxFrame(layoutBox) : null;
-        
+
         if (this.highlightedBox)
             removeClass(this.highlightedBox, "highlighted");
 
         this.highlightedBox = layoutBox;
-        
+
         if (layoutBox)
             setClass(layoutBox, "highlighted");
 
         Firebug.Inspector.highlightObject(this.selection, this.context, "boxModel", boxFrame);
     },
-    
+
     onMouseOut: function(event)
     {
         var nextTarget = event.relatedTarget;
         if (nextTarget && getAncestorByClass(nextTarget, "layoutBox"))
             return;
-        
+
         if (this.highlightedBox)
             removeClass(this.highlightedBox, "highlighted");
 
@@ -128,33 +128,33 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
         Firebug.Inspector.highlightObject(null, null, "boxModel");
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
-    
+
     name: "layout",
     parentPanel: "html",
-    
+
     initialize: function()
     {
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
-        
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
-    
+
     initializeNode: function(oldPanelNode)
     {
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
     },
-    
+
     destroyNode: function()
     {
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
     },
-    
+
     supportsObject: function(object)
     {
         return object instanceof Element ? 1 : 0;
@@ -164,7 +164,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     {
         this.updateSelection(this.selection);
     },
-    
+
     updateSelection: function(element)
     {
         var view = element ? element.ownerDocument.defaultView : null;
@@ -185,7 +185,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             - (args.paddingLeft+args.paddingRight+args.borderLeft+args.borderRight);
         args.height = element.offsetHeight
             - (args.paddingTop+args.paddingBottom+args.borderTop+args.borderBottom);
-        
+
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = 0;
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
 
@@ -204,7 +204,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             var parentStyle = isElement(element.parentNode)
                 ? view.getComputedStyle(element.parentNode, "")
                 : null;
-            
+
             if (parentStyle)
             {
                 var display = style.getPropertyCSSValue("display").cssText;
@@ -280,7 +280,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
         this.template.tag.replace(args, this.panelNode);
     },
-    
+
     updateOption: function(name, value)
     {
         if (name == "showAdjacentLayout")
@@ -288,21 +288,21 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             this.updateSelection(this.selection);
         }
     },
-    
+
     getOptionsMenuItems: function()
     {
         return [
             optionMenu("ShowRulers", "showRulers"),
         ];
     },
-    
+
     getEditor: function(target, value)
     {
         if (!this.editor)
             this.editor = new LayoutEditor(this.document);
-        
+
         return this.editor;
-    } 
+    }
 });
 
 // ************************************************************************************************
@@ -311,7 +311,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 function LayoutEditor(doc)
 {
     this.initializeInline(doc);
-    
+
     this.noWrap = false;
     this.numeric = true;
 }
@@ -322,13 +322,13 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     {
         if (!this.panel.selection.style)
             return;
-        
+
         var labelBox = getAncestorByClass(target, "layoutLabel");
         var layoutBox = getLayoutBox(labelBox);
-        
+
         var boxFrame = getBoxFrame(layoutBox);
         var boxEdge = getBoxEdge(labelBox);
-        
+
         var styleName;
         if (boxFrame == "content" || boxFrame == "offset")
             styleName = boxEdge.toLowerCase();
@@ -336,10 +336,10 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             styleName = boxFrame+boxEdge+"Width";
         else
             styleName = boxFrame+boxEdge;
-        
-        var intValue = value ? value : 0;        
+
+        var intValue = value ? value : 0;
         this.panel.selection.style[styleName] = intValue + "px";
-        
+
         if (Firebug.Inspector.highlightedElement == this.panel.selection)
         {
             var boxFrame = this.highlightedBox ? getBoxFrame(this.highlightedBox) : null;
@@ -356,12 +356,12 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         else if (!value)
             setClass(target.parentNode, "v0");
     },
-    
+
     endEditing: function(target, value, cancel)
     {
         // Don't remove groups
         return false;
-    }    
+    }
 });
 
 // ************************************************************************************************
@@ -397,7 +397,7 @@ function getVerticalText(n)
     var text = [];
     for (var i = 0; i < n.length; ++i)
         text.push(n[i]);
-    return text.join("<br>");    
+    return text.join("<br>");
 }
 
 // ************************************************************************************************
@@ -405,5 +405,5 @@ function getVerticalText(n)
 Firebug.registerPanel(LayoutPanel);
 
 // ************************************************************************************************
-    
+
 }});

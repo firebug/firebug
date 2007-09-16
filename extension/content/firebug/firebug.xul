@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 <?xul-overlay href="chrome://browser/content/baseMenuOverlay.xul"?>
@@ -25,24 +25,24 @@
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
 
-    <stringbundleset id="stringbundleset"/>     
+    <stringbundleset id="stringbundleset"/>
     <commandset id="baseMenuCommandSet"/>
     <keyset id="baseMenuKeyset"/>
-    
+
     <commandset id="mainCommandSet">
-        <command id="cmd_undo" 
+        <command id="cmd_undo"
                  oncommand="goDoCommand('cmd_undo')"
                  disabled="true"/>
-        <command id="cmd_redo" 
+        <command id="cmd_redo"
                  oncommand="goDoCommand('cmd_redo')"
                  disabled="true"/>
-        <command id="cmd_cut" 
+        <command id="cmd_cut"
                  oncommand="goDoCommand('cmd_cut')"
                  disabled="true"/>
-        <command id="cmd_copy" 
+        <command id="cmd_copy"
                  oncommand="goDoCommand('cmd_copy')"
                  disabled="true"/>
-        <command id="cmd_paste" 
+        <command id="cmd_paste"
                  oncommand="goDoCommand('cmd_paste')"
                  disabled="true"/>
         <command id="cmd_delete"
@@ -57,7 +57,7 @@
         <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
         <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()"/>
     </commandset>
-    
+
     <keyset id="mainKeyset">
         <key id="key_undo"
              key="&undoCmd.key;"
@@ -78,9 +78,9 @@
         <key key="&reloadCmd.commandkey;" command="cmd_reload" modifiers="accel,shift"/>
         <key id="key_closeWindow" key="w" command="cmd_closeWindow" modifiers="accel"/>
     </keyset>
-    
+
     <broadcasterset id="mainBroadcasterSet"/>
-    
+
     <popupset id="mainPopupSet"/>
 
     <toolbox id="fbToolbox">
@@ -101,7 +101,7 @@
             </menu>
             <menu id="view-menu" label="&firebug.View;">
                 <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                    <menuitem id="menu_toggleOrient" command="cmd_toggleOrient" type="checkbox" 
+                    <menuitem id="menu_toggleOrient" command="cmd_toggleOrient" type="checkbox"
                               label="&firebug.Vertical;" persist="checked"/>
                     <menuseparator/>
 
@@ -136,7 +136,7 @@
                     <menuseparator/>
                     <menu label="&firebug.OpenWith;">
                         <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                        	<menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+                            <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
                         </menupopup>
                      </menu>
 
@@ -151,18 +151,18 @@
                     <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
                     <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
                     <menuseparator/>
-                                        
+
                     <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
                 </menupopup>
             </menu>
         </menubar>
-        
+
         <toolbar id="fbToolbar"/>
     </toolbox>
-    	
+
     <vbox id="fbContentBox" flex="1">
         <box id="fbPanelBox" flex="1"/>
         <hbox id="fbCommandBox"/>
     </vbox>
-    
+
 </window>

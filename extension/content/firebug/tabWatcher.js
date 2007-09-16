@@ -487,23 +487,23 @@ var FrameProgressListener = extend(BaseProgressListener,
                 // again, so we have to call watchTopWindow here
                 //if (win.parent == win && win.location.href == "about:blank")
                 //    TabWatcher.watchTopWindow(win, null);
-				// XXXms check this
+                // XXXms check this
                 if (win.parent == win && (win.location.href == "about:blank" ))//  || safeURI == "about:document-onload-blocker"))
                 {
                     TabWatcher.watchWindow(win);
-					return;  // new one under our thumb
-				}
+                    return;  // new one under our thumb
+                }
             }
         }
 
         // Later I discovered that XHTML documents don't dispatch the dummy requests, so this
         // is our best shot here at hooking them.
         if (flag & STATE_IS_DOCUMENT && flag & STATE_TRANSFERRING)
-		{
-			TabWatcher.watchWindow(progress.DOMWindow);
-			return;
-		}
-		
+        {
+            TabWatcher.watchWindow(progress.DOMWindow);
+            return;
+        }
+
     }
 });
 
@@ -518,28 +518,28 @@ function onUnloadTopWindow(event)
 
 function onLoadWindowContent(event)
 {
-	if (FBTrace.DBG_WINDOWS)                                                                                           /*@explore*/
-		FBTrace.sysout("tabWatcher.onLoadWindowContent event.type="+event.type+"\n");                                  /*@explore*/
+    if (FBTrace.DBG_WINDOWS)                                                                                           /*@explore*/
+        FBTrace.sysout("tabWatcher.onLoadWindowContent event.type="+event.type+"\n");                                  /*@explore*/
                                                                                                                        /*@explore*/
     var win = event.currentTarget;
     try
     {
         win.removeEventListener("pageshow", onLoadWindowContent, true);
-		if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.onLoadWindowContent  pageshow removeEventListener\n");  /*@explore*/
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.onLoadWindowContent  pageshow removeEventListener\n");  /*@explore*/
     }
     catch (exc) {}
 
     try
     {
         win.removeEventListener("DOMContentLoaded", onLoadWindowContent, true);
- 		if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.onLoadWindowContent  DOMContentLoaded removeEventListener\n"); /*@explore*/
+         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.onLoadWindowContent  DOMContentLoaded removeEventListener\n"); /*@explore*/
     }
     catch (exc) {}
 
-	// Signal that we got the onLoadWindowContent event. This prevents the FrameProgressListener from sending it.
-	var context = TabWatcher.getContextByWindow(win);
-	if (context)
-		context.onLoadWindowContent = true;
+    // Signal that we got the onLoadWindowContent event. This prevents the FrameProgressListener from sending it.
+    var context = TabWatcher.getContextByWindow(win);
+    if (context)
+        context.onLoadWindowContent = true;
 
     // Calling this after a timeout because I'm finding some cases where calling
     // it here causes freezeup when this results in loading a script file. This fixes that.
@@ -554,8 +554,8 @@ function onUnloadWindow(event)
     var win = event.currentTarget;
     var eventType = (win.parent == win) ? "pagehide" : "unload";
     win.removeEventListener(eventType, onUnloadWindow, false);
-	if (FBTrace.DBG_INITIALIZE)                                                                                        /*@explore*/
-		FBTrace.sysout("tabWatcher.onUnloadWindow "+win.location.href +" removeEventListener: "+ eventType+"\n");      /*@explore*/
+    if (FBTrace.DBG_INITIALIZE)                                                                                        /*@explore*/
+        FBTrace.sysout("tabWatcher.onUnloadWindow "+win.location.href +" removeEventListener: "+ eventType+"\n");      /*@explore*/
     TabWatcher.unwatchWindow(win);
 }
 
@@ -589,26 +589,26 @@ function safeGetURI(browser)
 }
 
 function getStateDescription(flag) {
-	var state = "";
-	if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START ";
-	else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state += "STATE_REDIRECTING ";
-	else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state += "STATE_TRANSFERRING ";
-	else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state += "STATE_NEGOTIATING ";
-	else if (flag & nsIWebProgressListener.STATE_STOP) state += "STATE_STOP ";
+    var state = "";
+    if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START ";
+    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state += "STATE_REDIRECTING ";
+    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state += "STATE_TRANSFERRING ";
+    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state += "STATE_NEGOTIATING ";
+    else if (flag & nsIWebProgressListener.STATE_STOP) state += "STATE_STOP ";
 
-	if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state += "STATE_IS_REQUEST ";
-	if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state += "STATE_IS_DOCUMENT ";
-	if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state += "STATE_IS_NETWORK ";
-	if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state += "STATE_IS_WINDOW ";
-	if (flag & nsIWebProgressListener.STATE_RESTORING) state += "STATE_RESTORING ";
-	if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state += "STATE_IS_INSECURE ";
-	if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state += "STATE_IS_BROKEN ";
-	if (flag & nsIWebProgressListener.STATE_IS_SECURE) state += "STATE_IS_SECURE ";
-	if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state += "STATE_SECURE_HIGH ";
-	if (flag & nsIWebProgressListener.STATE_SECURE_MED) state += "STATE_SECURE_MED ";
-	if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW ";
+    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state += "STATE_IS_REQUEST ";
+    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state += "STATE_IS_DOCUMENT ";
+    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state += "STATE_IS_NETWORK ";
+    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state += "STATE_IS_WINDOW ";
+    if (flag & nsIWebProgressListener.STATE_RESTORING) state += "STATE_RESTORING ";
+    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state += "STATE_IS_INSECURE ";
+    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state += "STATE_IS_BROKEN ";
+    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state += "STATE_IS_SECURE ";
+    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state += "STATE_SECURE_HIGH ";
+    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state += "STATE_SECURE_MED ";
+    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW ";
 
-	return state;
+    return state;
 }
 
 // ************************************************************************************************

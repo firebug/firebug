@@ -1,13 +1,13 @@
 /* See license.txt for terms of usage */
- 
+
 function FirebugConsole(context, win)
 {
     this.firebug = Firebug.version;
-    
+
     // We store these functions as closures so that they can access the context privately,
     // because it would be insecure to store context as a property of window.console and
     // and therefore expose it to web pages.
-    
+
     this.log = function()
     {
         logFormatted(arguments, "log");
@@ -17,17 +17,17 @@ function FirebugConsole(context, win)
     {
         logFormatted(arguments, "debug", true);
     };
-    
+
     this.info = function()
     {
         logFormatted(arguments, "info", true);
     };
-    
+
     this.warn = function()
     {
         logFormatted(arguments, "warn", true);
     };
-    
+
     this.error = function()
     {
         Firebug.Errors.increaseCount(context);
@@ -51,7 +51,7 @@ function FirebugConsole(context, win)
             o = o.document.documentElement;
         else if (o instanceof Document)
             o = o.documentElement;
-        
+
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
     };
 
@@ -66,28 +66,28 @@ function FirebugConsole(context, win)
         var sourceLink = FBL.getStackSourceLink(Components.stack);
         Firebug.Console.openGroup(arguments, null, "group", null, false, sourceLink);
     };
-    
+
     this.groupEnd = function()
     {
         Firebug.Console.closeGroup(context);
     };
-    
+
     this.time = function(name, reset)
     {
         if (!name)
             return;
-        
+
         var time = new Date().getTime();
-        
+
         if (!context.timeCounters)
             context.timeCounters = {};
 
         if (!reset && name in context.timeCounters)
             return;
-        
+
         context.timeCounters[name] = time;
     };
-    
+
     this.timeEnd = function(name)
     {
         var time = new Date().getTime();
@@ -102,11 +102,11 @@ function FirebugConsole(context, win)
             var label = name + ": " + diff + "ms";
 
             logFormatted([label], null, true);
-            
+
             delete context.timeCounters[name];
         }
     };
-    
+
     this.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);
@@ -115,7 +115,7 @@ function FirebugConsole(context, win)
     this.profileEnd = function()
     {
         Firebug.Profiler.stopProfiling(context);
-    };       
+    };
 
     this.count = function(key)
     {
@@ -124,21 +124,21 @@ function FirebugConsole(context, win)
         {
             if (!context.frameCounters)
                 context.frameCounters = {};
-            
+
             if (key != undefined)
                 frameId += key;
-                        
+
             var frameCounter = context.frameCounters[frameId];
             if (!frameCounter)
             {
                 var logRow = logFormatted(["0"], null, true, true);
-                
+
                 frameCounter = {logRow: logRow, count: 1};
                 context.frameCounters[frameId] = frameCounter;
             }
             else
                 ++frameCounter.count;
-                
+
             var label = key == undefined
                 ? frameCounter.count
                 : key + " " + frameCounter.count;
@@ -146,7 +146,7 @@ function FirebugConsole(context, win)
             frameCounter.logRow.firstChild.firstChild.nodeValue = label;
         }
     };
-    
+
 /*
     this.addTab = function(url, title, parentPanel)
     {
@@ -159,18 +159,18 @@ function FirebugConsole(context, win)
     };
 */
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-    
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     function logFormatted(args, className, linkToSource, noThrottle)
     {
         var sourceLink = linkToSource ? FBL.getStackSourceLink(Components.stack) : null;
         return Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
     }
-    
+
     function logAssert(args, description)
     {
         Firebug.Errors.increaseCount(context);
-    
+
         if (!args || !args.length)
             args = [FBL.$STR("Assertion")];
 

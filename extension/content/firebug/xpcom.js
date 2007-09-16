@@ -22,7 +22,7 @@ this.CI = function(ifaceName)
 
 this.CCSV = function(cName, ifaceName)
 {
-    return _CC[cName].getService(_CI[ifaceName]);        
+    return _CC[cName].getService(_CI[ifaceName]);
 };
 
 this.CCIN = function(cName, ifaceName)

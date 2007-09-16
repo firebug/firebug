@@ -12,7 +12,7 @@
 <binding id="initializer">
     <implementation>
         <destructor><![CDATA[
-           FirebugChrome.shutdown(); 
+           FirebugChrome.shutdown();
         ]]></destructor>
     </implementation>
 </binding>
@@ -32,7 +32,7 @@
                      xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"/>
         </xul:deck>
     </content>
-    
+
     <implementation>
         <constructor><![CDATA[
             this.tabBox = document.getAnonymousElementByAttribute(this, "anonid", "tabBox");
@@ -40,7 +40,7 @@
             this.deck = document.getAnonymousElementByAttribute(this, "anonid", "deck");
             this.browser = document.getAnonymousElementByAttribute(this, "anonid", "browser");
             this.tabMap = {};
-            
+
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
@@ -52,17 +52,17 @@
             <body><![CDATA[
             var tab = document.createElement("panelTab");
             tab.panelType = panelType;
-            
+
             var title = panelType.prototype.title
                 ? panelType.prototype.title
                 : FBL.$STR("Panel-"+panelType.prototype.name);
-            
+
             tab.setAttribute("label", title);
 
             return this.tabMap[panelType.prototype.name] = tab;
             ]]></body>
         </method>
-        
+
         <method name="addTab">
             <parameter name="panelType"/>
             <body><![CDATA[
@@ -70,7 +70,7 @@
             this.appendChild(tab);
             ]]></body>
         </method>
-        
+
         <method name="updatePanels">
             <parameter name="panelTypes"/>
             <body><![CDATA[
@@ -91,7 +91,7 @@
                     else
                         this.tabMap[panelType.prototype.name] = tab;
                 }
-                
+
                 // Remove old tabs after the last panel
                 while (tab)
                 {
@@ -99,7 +99,7 @@
                     this.removeChild(tab);
                     tab = nextTab;
                 }
-                
+
                 // Insert new tabs after the last old tab
                 for (; i < panelTypes.length; ++i)
                 {
@@ -116,21 +116,21 @@
                 var panelName = tab ? tab.panelType.prototype.name : null;
                 if (panelName && !tab.panelType.prototype.parentPanel)
                     Firebug.setPref("defaultPanelName", panelName);
-                
+
                 this.selectPanel(panelName);
             ]]></body>
         </method>
-                
+
         <method name="selectPanel">
             <parameter name="panelName"/>
             <parameter name="forceUpdate"/>
             <parameter name="noRefresh"/>
             <body><![CDATA[
                 var tab = panelName ? this.tabMap[panelName] : null;
-                var panelType = tab ? tab.panelType : null;                
+                var panelType = tab ? tab.panelType : null;
 
                 var panel = FirebugContext ? FirebugContext.getPanel(panelName) : null;
-                
+
                 if (panel && panel == this.selectedPanel && !forceUpdate)
                     return panel;
 
@@ -138,7 +138,7 @@
                     this.tabBox.setAttribute("collapsed", "true");
                 else
                     this.tabBox.removeAttribute("collapsed");
-                
+
                 if (this.selectedTab)
                     this.selectedTab.removeAttribute("selected");
 
@@ -149,23 +149,23 @@
                     oldPanel.hide();
                     oldPanel.panelNode.removeAttribute("active");
                 }
-                
+
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
 
                 if (tab)
                     tab.setAttribute("selected", "true");
-                
+
                 if (panel)
                 {
                     panel.visible = true;
                     panel.panelBrowser = panel.browser ? panel.browser : this.browser;
                     panel.panelBrowser.currentPanel = panel;
                 }
-                
+
                 if (!panel || panel.panelBrowser != this.browser)
                     this.browser.currentPanel = null;
-                
+
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectingPanel", true, false);
                 this.dispatchEvent(ev);
@@ -175,23 +175,23 @@
                     var sel = this.browser.contentWindow.getSelection();
                     if (sel)
                         sel.removeAllRanges();
-                    
+
                     panel.panelNode.setAttribute("active", true);
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
-                    
+
                     if (!noRefresh && panel.needsRefresh)
                     {
                         delete panel.needsRefresh;
                         panel.refresh();
                     }
-                    
+
                     if (panel.browser)
                     {
                         if (panel.browser.parentNode != this.deck)
                             this.deck.appendChild(panel.browser);
-                        
+
                         this.deck.selectedPanel = panel.browser;
                     }
                     else
@@ -201,17 +201,17 @@
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectPanel", true, false);
                 this.dispatchEvent(ev);
-                
+
                 return panel;
             ]]></body>
         </method>
     </implementation>
 
     <handlers>
-    	<handler event="popupshowing"><![CDATA[
-    	    if (!this.selectedPanel)
-    	        return;
-    	    
+        <handler event="popupshowing"><![CDATA[
+            if (!this.selectedPanel)
+                return;
+
             var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
             if (menu)
             {
@@ -220,22 +220,22 @@
             }
         ]]></handler>
 
-    	<handler event="popuphidden"><![CDATA[
-    	    FBL.eraseNode(this.optionsPopup);
+        <handler event="popuphidden"><![CDATA[
+            FBL.eraseNode(this.optionsPopup);
         ]]></handler>
 
-    	<handler event="mousedown" button="0"><![CDATA[
-    	    var tab = event.target;
-    	    for (; tab && !tab.panelType; tab = tab.parentNode);
-    	    
-    	    if (tab)
-    	    {
-    	        // Select after a timeout to increase teh snappy
-	            setTimeout(FBL.bindFixed(function()
-	            {
-	                this.selectTab(tab);
-	            }, this));
-    	    }
+        <handler event="mousedown" button="0"><![CDATA[
+            var tab = event.target;
+            for (; tab && !tab.panelType; tab = tab.parentNode);
+
+            if (tab)
+            {
+                // Select after a timeout to increase teh snappy
+                setTimeout(FBL.bindFixed(function()
+                {
+                    this.selectTab(tab);
+                }, this));
+            }
         ]]></handler>
     </handlers>
 </binding>
@@ -264,7 +264,7 @@
                     sep.setAttribute("value", separator);
                     this.appendChild(sep);
                 }
-                
+
                 var item = document.createElement("label");
                 item.setAttribute("class", "panelStatusLabel");
                 item.setAttribute("value", label);
@@ -311,9 +311,9 @@
             <body><![CDATA[
                 if (this.selectedItem)
                     this.selectedItem.removeAttribute("selected");
-                
+
                 this.selectedItem = item;
-                
+
                 if (item)
                     item.setAttribute("selected", "true");
             ]]></body>
@@ -321,33 +321,33 @@
     </implementation>
 
     <handlers>
-    	<handler event="mousedown" button="0"><![CDATA[
+        <handler event="mousedown" button="0"><![CDATA[
             var object = Firebug.getRepObject(event.target);
-    	    if (object)
-    	    {
-    	        var rep = Firebug.getRep(object);
-    	        object = rep.getRealObject(object, FirebugContext);
-    	        if (object)
-    	        {
-    	            this.selectObject(object);
+            if (object)
+            {
+                var rep = Firebug.getRep(object);
+                object = rep.getRealObject(object, FirebugContext);
+                if (object)
+                {
+                    this.selectObject(object);
                     FirebugContext.chrome.select(object, null, null, true);
-    	        }
-    	    }
+                }
+            }
         ]]></handler>
 
-    	<handler event="mouseover"><![CDATA[
+        <handler event="mouseover"><![CDATA[
             var object = Firebug.getRepObject(event.target);
-    	    if (object)
-    	    {
-    	        var rep = Firebug.getRep(object);
-    	        object = rep.getRealObject(object, FirebugContext);
-    	        if (object)
+            if (object)
+            {
+                var rep = Firebug.getRep(object);
+                object = rep.getRealObject(object, FirebugContext);
+                if (object)
                     Firebug.Inspector.highlightObject(object, FirebugContext);
-    	    }
+            }
         ]]></handler>
 
-    	<handler event="mouseout"><![CDATA[
-	        Firebug.Inspector.highlightObject(null);
+        <handler event="mouseout"><![CDATA[
+            Firebug.Inspector.highlightObject(null);
         ]]></handler>
     </handlers>
 </binding>
@@ -359,7 +359,7 @@
         <xul:image class="toolbarbutton-menu-dropmarker"/>
         <xul:menupopup anonid="popup" position="after_start"/>
     </content>
-        
+
     <resources>
         <stylesheet src="chrome://global/skin/toolbarbutton.css"/>
     </resources>
@@ -376,7 +376,7 @@
             ]]></getter>
 
             <setter><![CDATA[
-        	    var panel = FirebugContext.chrome.getSelectedPanel();
+                var panel = FirebugContext.chrome.getSelectedPanel();
                 var location = panel.getObjectLocation(val);
                 var fileName = FBL.getFileName(location);
                 this.repObject = val;
@@ -384,7 +384,7 @@
                 this.setAttribute("location", val);
             ]]></setter>
         </property>
-        
+
         <method name="showPopup">
             <body><![CDATA[
                 this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
@@ -395,7 +395,7 @@
             <parameter name="object"/>
             <body><![CDATA[
                 this.repObject = object;
-                
+
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectObject", true, false);
                 this.dispatchEvent(ev);
@@ -452,7 +452,7 @@
                 }
             ]]></body>
         </method>
-   
+
         <method name="onKeyPress">
             <parameter name="event"/>
             <body><![CDATA[
@@ -470,199 +470,199 @@
                 }
                 else
                     return;
-                
+
                 FBL.cancelEvent(event);
             ]]></body>
         </method>
     </implementation>
 
     <handlers>
-    	<handler event="popupshowing"><![CDATA[
-    	    if (this.popup.firstChild)
-    	        return false;
-    	    
-    	    var panel = FirebugContext.chrome.getSelectedPanel();
-    	    var objects = panel.getLocationList();
-    	    if (!objects)
-    	        return false;
-    	    
-    	    var groupNames = [];
-    	    var groups = {};
-    	    
-    	    for (var i = 0; i < objects.length; ++i)
-    	    {
-    	        var object = objects[i];
-    	        var url = panel.getObjectLocation(object);
-    	        var splitName = FBL.splitURLBase(url);
+        <handler event="popupshowing"><![CDATA[
+            if (this.popup.firstChild)
+                return false;
 
-    	        var entry = {object: object, fileName: splitName.name};
-    	        
-    	        if (splitName.path in groups)
-    	            groups[splitName.path].push(entry);
-    	        else
-    	        {
+            var panel = FirebugContext.chrome.getSelectedPanel();
+            var objects = panel.getLocationList();
+            if (!objects)
+                return false;
+
+            var groupNames = [];
+            var groups = {};
+
+            for (var i = 0; i < objects.length; ++i)
+            {
+                var object = objects[i];
+                var url = panel.getObjectLocation(object);
+                var splitName = FBL.splitURLBase(url);
+
+                var entry = {object: object, fileName: splitName.name};
+
+                if (splitName.path in groups)
+                    groups[splitName.path].push(entry);
+                else
+                {
                     groups[splitName.path] = [entry];
                     groupNames.push(splitName.path);
-    	        }
-    	    }
-    	    
-    	    groupNames.sort();
-    	    
+                }
+            }
+
+            groupNames.sort();
+
             for (var i = 0; i < groupNames.length; ++i)
             {
                 var path = groupNames[i];
                 var urls = groups[path];
                 urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
-                
+
                 FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
-                
-        	    for (var j = 0; j < urls.length; ++j)
-        	    {
-    	            var menuInfo = {label: urls[j].fileName, nol10n: true};
-    	            if (urls[j].object == panel.location)
-    	            {
-    	                menuInfo.type = "checkbox";
-    	                menuInfo.checked = true;
-    	            }
-    	            
-        	        var menuItem = FBL.createMenuItem(this.popup, menuInfo);
-        	        menuItem.repObject = urls[j].object;
-        	    }
+
+                for (var j = 0; j < urls.length; ++j)
+                {
+                    var menuInfo = {label: urls[j].fileName, nol10n: true};
+                    if (urls[j].object == panel.location)
+                    {
+                        menuInfo.type = "checkbox";
+                        menuInfo.checked = true;
+                    }
+
+                    var menuItem = FBL.createMenuItem(this.popup, menuInfo);
+                    menuItem.repObject = urls[j].object;
+                }
             }
-            
+
         ]]></handler>
 
-    	<handler event="popupshown"><![CDATA[
-    	    // Weird, but this gets fired when the user clicks on a menuitem,
-    	    // which hiding the buttons again and resulting in jitters - let's avoid that.
-    	    if (!this._closed)
-    	        return;
-    	    
-    	    // XXXjoe There is a bug in the <xul:autoscrollbox> code which,
-    	    // for reasons I don't grasp yet, never hides the scroll buttons
-    	    // after the first them they are shown - so we must do it ourselves
+        <handler event="popupshown"><![CDATA[
+            // Weird, but this gets fired when the user clicks on a menuitem,
+            // which hiding the buttons again and resulting in jitters - let's avoid that.
+            if (!this._closed)
+                return;
+
+            // XXXjoe There is a bug in the <xul:autoscrollbox> code which,
+            // for reasons I don't grasp yet, never hides the scroll buttons
+            // after the first them they are shown - so we must do it ourselves
             var scrollbox = document.getAnonymousElementByAttribute(
                 this.popup, "class", "popup-internal-box");
 
             scrollbox["_scrollButtonUp"].collapsed = true;
             scrollbox["_scrollButtonDown"].collapsed = true;
 
-    	    this._closed = false;
+            this._closed = false;
 
             this.searchString = "";
             this.onkeypress = FBL.bind(this.onKeyPress, this);
-    	    window.addEventListener("keypress", this.onkeypress, true);
+            window.addEventListener("keypress", this.onkeypress, true);
         ]]></handler>
 
-    	<handler event="popuphidden"><![CDATA[
-    	    window.removeEventListener("keypress", this.onkeypress, true);
+        <handler event="popuphidden"><![CDATA[
+            window.removeEventListener("keypress", this.onkeypress, true);
             delete this.onkeypress;
             delete this.searchString;
 
-    	    FBL.eraseNode(this.popup);
-    	    this._closed = true;
+            FBL.eraseNode(this.popup);
+            this._closed = true;
         ]]></handler>
 
-    	<handler event="command"><![CDATA[
-    	    var object = event.originalTarget.repObject;
-    	    
-    	    // Select after a timeout to increase teh snappy
-    	    setTimeout(FBL.bindFixed(function()
-    	    {
-    	        this.selectObject(object);
-    	    }, this));
+        <handler event="command"><![CDATA[
+            var object = event.originalTarget.repObject;
+
+            // Select after a timeout to increase teh snappy
+            setTimeout(FBL.bindFixed(function()
+            {
+                this.selectObject(object);
+            }, this));
         ]]></handler>
     </handlers>
 </binding>
 
 <binding id="searchBox" extends="chrome://global/content/bindings/autocomplete.xml#autocomplete">
     <handlers>
-    	<handler event="keypress"><![CDATA[
+        <handler event="keypress"><![CDATA[
             if (event.keyCode == 13)
             {
                 if (FBL.isControl(event))
-    	            Firebug.Search.enter(FirebugContext);
-    	        else
-        	        Firebug.Search.update(FirebugContext, true);
+                    Firebug.Search.enter(FirebugContext);
+                else
+                    Firebug.Search.update(FirebugContext, true);
             }
             else if (event.keyCode == 27)
-	            Firebug.Search.cancel(FirebugContext);
-	        else
-	            return;
+                Firebug.Search.cancel(FirebugContext);
+            else
+                return;
 
             FBL.cancelEvent(event);
         ]]></handler>
 
-    	<handler event="input"><![CDATA[
-    	    Firebug.Search.update(FirebugContext);
+        <handler event="input"><![CDATA[
+            Firebug.Search.update(FirebugContext);
         ]]></handler>
     </handlers>
 </binding>
 
 <binding id="commandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
     <handlers>
-    	<handler event="input"><![CDATA[
-    	    Firebug.CommandLine.update(FirebugContext);
+        <handler event="input"><![CDATA[
+            Firebug.CommandLine.update(FirebugContext);
         ]]></handler>
 
-    	<handler event="overflow"><![CDATA[
-    	    if (window.Firebug)
-    	        Firebug.CommandLine.checkOverflow(FirebugContext);
+        <handler event="overflow"><![CDATA[
+            if (window.Firebug)
+                Firebug.CommandLine.checkOverflow(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_TAB"><![CDATA[
-    	    Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
+        <handler event="keypress" keycode="VK_TAB"><![CDATA[
+            Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
             event.preventDefault();
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_RETURN" modifiers="" preventdefault="true"><![CDATA[
-	        Firebug.CommandLine.enter(FirebugContext);
+        <handler event="keypress" keycode="VK_RETURN" modifiers="" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.enter(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
+        <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
             Firebug.CommandLine.enterMenu(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_RETURN" modifiers="shift" preventdefault="true"><![CDATA[
+        <handler event="keypress" keycode="VK_RETURN" modifiers="shift" preventdefault="true"><![CDATA[
             Firebug.CommandLine.enterInspect(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_UP" preventdefault="true"><![CDATA[
-	        Firebug.CommandLine.cycleCommandHistory(FirebugContext, -1);
+        <handler event="keypress" keycode="VK_UP" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.cycleCommandHistory(FirebugContext, -1);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_DOWN" preventdefault="true"><![CDATA[
-	        Firebug.CommandLine.cycleCommandHistory(FirebugContext, 1);
+        <handler event="keypress" keycode="VK_DOWN" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.cycleCommandHistory(FirebugContext, 1);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
-	        Firebug.CommandLine.cancel(FirebugContext);
+        <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.cancel(FirebugContext);
         ]]></handler>
     </handlers>
 </binding>
 
 <binding id="largeCommandLine" extends="chrome://global/content/bindings/textbox.xml#textarea">
     <handlers>
-    	<handler event="input"><![CDATA[
-    	    Firebug.CommandLine.update(FirebugContext);
+        <handler event="input"><![CDATA[
+            Firebug.CommandLine.update(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_TAB"><![CDATA[
-    	    var input = document.getAnonymousElementByAttribute(this, "anonid", "input");
-    	    FBL.insertTextIntoElement(input, Firebug.Editor.tabCharacter);
+        <handler event="keypress" keycode="VK_TAB"><![CDATA[
+            var input = document.getAnonymousElementByAttribute(this, "anonid", "input");
+            FBL.insertTextIntoElement(input, Firebug.Editor.tabCharacter);
             event.preventDefault();
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
+        <handler event="keypress" keycode="VK_RETURN" modifiers="meta" preventdefault="true"><![CDATA[
             Firebug.CommandLine.enter(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_RETURN" modifiers="control" preventdefault="true"><![CDATA[
+        <handler event="keypress" keycode="VK_RETURN" modifiers="control" preventdefault="true"><![CDATA[
             Firebug.CommandLine.enter(FirebugContext);
         ]]></handler>
 
-    	<handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
-	        Firebug.CommandLine.cancel(FirebugContext);
+        <handler event="keypress" keycode="VK_ESCAPE" preventdefault="true"><![CDATA[
+            Firebug.CommandLine.cancel(FirebugContext);
         ]]></handler>
     </handlers>
 </binding>

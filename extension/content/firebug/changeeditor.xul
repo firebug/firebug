@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://global/skin/"?>
 <?xml-stylesheet href="chrome://mozapps/content/preferences/preferences.css" type="text/css"?>
@@ -17,61 +17,61 @@
 
   <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
   <script><![CDATA[
-  	
-  	var item;
-  	
-  	function onLoad()
-  	{
-  	   item = window.arguments[0];
-  	   
-  	   document.getElementById("name").value = item.label;
-  	   if ( item.executable )
-  	   {
-			try {
-				var file = XPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
-				file.initWithPath(item.executable);
-				document.getElementById("executable").file = file;
-			}
-			catch(exc) {}
-  	   }
-  	   if ( item.cmdline )
-  	      document.getElementById("cmdline").value = item.cmdline;
-  	   onChange();
-  	}
 
-  	function onAccept()
-  	{
-  		item.label = document.getElementById("name").value;
-  		var file = document.getElementById("executable").file;
-  		item.executable = "";
-  		if (file)
-  			item.executable = file.path;
-  		item.cmdline = document.getElementById("cmdline").value;
-  		window.arguments[1].saveChanges = true;
-  	}
-  	
-  	function onChange()
-  	{
-  		document.documentElement.getButton("accept")
-  			.disabled = !( document.getElementById("name").value && document.getElementById("executable").file);
-  	}
+      var item;
 
-  	function onBrowse()
-  	{
-  		const nsIFilePicker = XPCOMUtils.CI("nsIFilePicker");
-		var picker = XPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
-		picker.init(window, "", nsIFilePicker.modeOpen);
-		picker.appendFilters(nsIFilePicker.filterApps);
-		if ( picker.show() == nsIFilePicker.returnOK && picker.file )
-		{
-		  var execField = document.getElementById("executable");
-		  execField.file = picker.file;
-		  onChange();
-		  return true;
-		}
-		return false;
-  	}
-  	
+      function onLoad()
+      {
+         item = window.arguments[0];
+
+         document.getElementById("name").value = item.label;
+         if ( item.executable )
+         {
+            try {
+                var file = XPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+                file.initWithPath(item.executable);
+                document.getElementById("executable").file = file;
+            }
+            catch(exc) {}
+         }
+         if ( item.cmdline )
+            document.getElementById("cmdline").value = item.cmdline;
+         onChange();
+      }
+
+      function onAccept()
+      {
+          item.label = document.getElementById("name").value;
+          var file = document.getElementById("executable").file;
+          item.executable = "";
+          if (file)
+              item.executable = file.path;
+          item.cmdline = document.getElementById("cmdline").value;
+          window.arguments[1].saveChanges = true;
+      }
+
+      function onChange()
+      {
+          document.documentElement.getButton("accept")
+              .disabled = !( document.getElementById("name").value && document.getElementById("executable").file);
+      }
+
+      function onBrowse()
+      {
+          const nsIFilePicker = XPCOMUtils.CI("nsIFilePicker");
+        var picker = XPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
+        picker.init(window, "", nsIFilePicker.modeOpen);
+        picker.appendFilters(nsIFilePicker.filterApps);
+        if ( picker.show() == nsIFilePicker.returnOK && picker.file )
+        {
+          var execField = document.getElementById("executable");
+          execField.file = picker.file;
+          onChange();
+          return true;
+        }
+        return false;
+      }
+
   ]]></script>
 
   <vbox flex="1">
@@ -84,7 +84,7 @@
          <label control="executable" align="baseline">&changeEditor.Executable;</label>
          <filefield id="executable" flex="1"/>
          <button oncommand="onBrowse();" label="&browse.label;"/>
-         
+
       </hbox>
       <separator class="thin"/>
       <hbox align="center">
@@ -92,5 +92,5 @@
           <textbox id="cmdline" flex="1" oninput="onChange()"/>
       </hbox>
   </vbox>
-        
+
 </dialog>

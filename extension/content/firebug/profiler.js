@@ -1,11 +1,11 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 
 Firebug.Profiler = extend(Firebug.Module,
-{        
+{
     toggleProfiling: function(context)
     {
         if (fbs.profiling)
@@ -19,11 +19,11 @@ Firebug.Profiler = extend(Firebug.Module,
         fbs.startProfiling();
 
         context.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
-        
+
         var isCustomMessage = !!title;
         if (!isCustomMessage)
             title = $STR("ProfilerStarted");
-            
+
         context.profileRow = this.logProfileRow(context, title);
         context.profileRow.customMessage = isCustomMessage ;
     },
@@ -42,42 +42,42 @@ Firebug.Profiler = extend(Firebug.Module,
             this.logProfileReport(context)
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     logProfileRow: function(context, title)
     {
         var row = Firebug.Console.openGroup(title, context, "profile",
             Firebug.Profiler.ProfileCaption, true, null, true);
         setClass(row, "profilerRunning");
-        
+
         Firebug.Console.closeGroup(context, true);
-        
-        return row;        
+
+        return row;
     },
-    
+
     logProfileReport: function(context)
     {
         var calls = [];
         var totalCalls = 0;
         var totalTime = 0;
-        
+
         updateScriptFiles(context);
         var sourceFileMap = context.sourceFileMap;
-        
+
         jsd.enumerateScripts({enumerateScript: function(script)
         {
             if (script.callCount)
             {
                 var sourceLink = FBL.getSourceForScript(script, context);
-                if (sourceLink && sourceLink.href in sourceFileMap) 
+                if (sourceLink && sourceLink.href in sourceFileMap)
                 {
                     var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,
                         script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime, sourceLink);
                     calls.push(call);
-                    
+
                     totalCalls += script.callCount;
                     totalTime += script.totalOwnExecutionTime;
-                    
+
                     script.clearProfileData();
                 }
             }
@@ -85,23 +85,23 @@ Firebug.Profiler = extend(Firebug.Module,
 
         for (var i = 0; i < calls.length; ++i)
             calls[i].percent = Math.round((calls[i].totalOwnTime/totalTime) * 100 * 100) / 100;
-        
+
         calls.sort(function(a, b)
         {
            return a.totalOwnTime < b.totalOwnTime ? 1 : -1;
         });
 
         totalTime = Math.round(totalTime * 1000) / 1000;
-        
+
         var groupRow = context.profileRow && context.profileRow.ownerDocument
             ? context.profileRow
             : this.logProfileRow(context, "");
         delete context.profileRow;
 
         removeClass(groupRow, "profilerRunning");
-        
+
         if (totalCalls > 0)
-        {            
+        {
             var captionBox = getElementByClass(groupRow, "profileCaption");
             if (!groupRow.customMessage)
                 captionBox.textContent = $STR("Profile");
@@ -191,20 +191,20 @@ Firebug.Profiler.ProfileTable = domplate(
         var header = getAncestorByClass(event.target, "headerCell");
         if (!header)
             return;
-        
+
         var numerical = !hasClass(header, "alphaValue");
-        
+
         var colIndex = 0;
         for (header = header.previousSibling; header; header = header.previousSibling)
             ++colIndex;
-        
+
         this.sort(table, colIndex, numerical);
     },
-    
+
     sort: function(table, colIndex, numerical)
     {
         var tbody = table.lastChild;
-                    
+
         var values = [];
         for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
         {
@@ -212,7 +212,7 @@ Firebug.Profiler.ProfileTable = domplate(
             var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
             values.push({row: row, value: value});
         }
-        
+
         values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
 
         var headerRow = tbody.firstChild;
@@ -228,7 +228,7 @@ Firebug.Profiler.ProfileTable = domplate(
             setClass(header, "sortedAscending");
 
             header.sorted = -1;
-            
+
             for (var i = 0; i < values.length; ++i)
                 tbody.appendChild(values[i].row);
         }
@@ -238,7 +238,7 @@ Firebug.Profiler.ProfileTable = domplate(
             setClass(header, "sortedDescending");
 
             header.sorted = 1;
-            
+
             for (var i = values.length-1; i >= 0; --i)
                 tbody.appendChild(values[i].row);
         }
@@ -261,7 +261,7 @@ Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
 
 Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 {
-    tag: 
+    tag:
         TR(
             TD(
                 FirebugReps.OBJECTLINK("$object|getCallName")
@@ -278,18 +278,18 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
             )
         ),
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getCallName: function(call)
     {
         return getFunctionName(call.script, call.context);
     },
-    
+
     avgTime: function(call)
     {
         return call.totalTime / call.callCount;
     },
-    
+
     getSourceLink: function(call)
     {
         return call.sourceLink;
@@ -299,8 +299,8 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     {
         return Math.round(ms * 1000) / 1000;
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     className: "profile",
 
@@ -308,19 +308,19 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     {
         return object instanceof ProfileCall;
     },
-    
+
     inspectObject: function(call, context)
     {
         var sourceLink = this.getSourceLink(call);
         context.chrome.select(sourceLink);
     },
-    
+
     getTooltip: function(call)
     {
         var fn = call.script.functionObject.getWrappedValue();
         return FirebugReps.Func.getTooltip(fn);
     },
-    
+
     getContextMenuItems: function(call, target, context)
     {
         var fn = call.script.functionObject.getWrappedValue();
@@ -348,5 +348,5 @@ Firebug.registerModule(Firebug.Profiler);
 Firebug.registerRep(Firebug.Profiler.ProfileCall);
 
 // ************************************************************************************************
-    
+
 }});

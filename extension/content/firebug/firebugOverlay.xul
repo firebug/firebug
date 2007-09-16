@@ -1,4 +1,4 @@
-<?xml version="1.0"?> 
+<?xml version="1.0"?>
 
 <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
 
@@ -11,15 +11,15 @@
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
-    <stringbundleset id="stringbundleset"> 
+    <stringbundleset id="stringbundleset">
         <stringbundle id="strings_firebug" src="chrome://firebug/locale/firebug.properties"/>
     </stringbundleset>
-    
+
     <commandset id="mainCommandSet">
         <command id="cmd_openFirebugPermissions" oncommand="Firebug.openPermissions()"/>
         <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
         <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
-        
+
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
 
@@ -43,12 +43,12 @@
         <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
         <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
-        
+
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(FirebugContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
         <command id="cmd_breakOnTopLevel" oncommand="Firebug.togglePref('breakOnTopLevel')"/>
     </commandset>
-    
+
     <keyset id="mainKeyset">
         <key id="key_reenterCommand" key="e" modifiers="control,shift"
                 command="cmd_reenterCommand"/>
@@ -78,18 +78,18 @@
         <key id="key_previousFirebugTab" key="`" modifiers="control"
                 command="cmd_previousFirebugTab"/>
     </keyset>
-        
+
     <popupset id="mainPopupSet">
-		<popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
-	    	<menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
-		</popup>
-		<tooltip id="fbTooltip" onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
-	</popupset>
+        <popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
+            <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
+        </popup>
+        <tooltip id="fbTooltip" onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
+    </popupset>
 
     <!-- Main UI -->
-        
+
     <toolbar id="fbToolbar" align="center">
-        <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">            
+        <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">
             <toolbarbutton label="&firebug.Inspect;" class="toolbar-text-button"
                            tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting"/>
 
@@ -114,7 +114,7 @@
                 <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
                 <toolbarseparator/>
-                <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button" 
+                <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
                                group="firebugNetFilter" checked="true"
                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'all')"/>
                 <toolbarbutton id="fbNetFilter-html" label="HTML" type="radio" class="toolbar-text-button"
@@ -145,7 +145,7 @@
             <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
             <panelStatus id="fbPanelStatus" flex="1"
                          tooltip="fbTooltip" contextmenu="fbContextMenu"/>
-        
+
              <hbox id="fbDebuggerButtons" minwidth="126">
                  <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
                                 tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
@@ -156,7 +156,7 @@
                  <toolbarbutton id="fbStepOutButton" command="cmd_stepOut"
                                 tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
              </hbox>
-            
+
              <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1"/>
         </hbox>
     </toolbar>
@@ -171,12 +171,12 @@
             <vbox id="fbLargeCommandBox">
                 <textbox id="fbLargeCommandLine" multiline="true" flex="1"/>
                 <hbox id="fbCommandToolbar">
-                    <toolbarbutton label="&firebug.Run;" class="toolbar-text-button" 
+                    <toolbarbutton label="&firebug.Run;" class="toolbar-text-button"
                                    oncommand="Firebug.CommandLine.enter(FirebugContext)"/>
-                    <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button" 
+                    <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                  oncommand="Firebug.CommandLine.clear(FirebugContext)"/>
-                    <toolbarbutton label="&firebug.Copy;" class="toolbar-text-button" 
-                                   tooltiptext="&firebug.CopyBookmarklet;"    
+                    <toolbarbutton label="&firebug.Copy;" class="toolbar-text-button"
+                                   tooltiptext="&firebug.CopyBookmarklet;"
                                    oncommand="Firebug.CommandLine.copyBookmarklet(FirebugContext)"/>
                     <toolbarspacer flex="1"/>
                     <toolbarbutton id="fbCommandToggleLarge" class="toolbarbutton-iconic"
@@ -184,8 +184,8 @@
                 </hbox>
             </vbox>
         </deck>
-    </box>        
-    
+    </box>
+
     <hbox id="fbCommandBox">
         <label id="fbCommandArow" value=">>>"/>
         <textbox id="fbCommandLine" multiline="true" flex="1"/>

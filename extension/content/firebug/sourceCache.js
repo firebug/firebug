@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
-    
+
 // ************************************************************************************************
 // Constants
 
@@ -34,35 +34,35 @@ top.SourceCache.prototype =
         var lines = this.load(url);
         return lines ? lines.join("\n") : null;
     },
-    
+
     load: function(url)
     {
         if (url in this.cache)
             return this.cache[url];
-        
+
         var d = FBL.reDataURL.exec(url);
-        if (d) 
+        if (d)
         {
-            var src = url.substring(FBL.reDataURL.lastIndex); 
+            var src = url.substring(FBL.reDataURL.lastIndex);
             var data = decodeURIComponent(src);
             var lines = data.split(/\r\n|\r|\n/);
             this.cache[url] = lines;
-            
+
             return lines;
         }
-        
+
         var j = FBL.reJavascript.exec(url);
-        if (j) 
+        if (j)
         {
             var src = url.substring(FBL.reJavascript.lastIndex);
             var lines = src.split(/\r\n|\r|\n/);
             this.cache[url] = lines;
-            
+
             return lines;
         }
-        
+
         var charset = this.context.window.document.characterSet;
-        
+
         var ioService = IOService.getService(nsIIOService);
 
         var channel;
@@ -74,7 +74,7 @@ top.SourceCache.prototype =
         catch (exc)
         {
             if (FBTrace.DBG_CACHE)                                                                                     /*@explore*/
-				FBTrace.dumpProperties("sourceCache for window="+this.context.window.location.href+" FAILS:", this.cache); /*@explore*/
+                FBTrace.dumpProperties("sourceCache for window="+this.context.window.location.href+" FAILS:", this.cache); /*@explore*/
             ERROR("sourceCache.load fails newChannel for url="+url+ " cause:"+exc+"\n");
             return;
         }
@@ -90,14 +90,14 @@ top.SourceCache.prototype =
                     uploadChannel.setUploadStream(postData, "", -1);
                 }
             }
-            
+
             if (channel instanceof nsICachingChannel)
             {
                 var cacheChannel = QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
             }
         }
-        
+
         var stream;
         try
         {
@@ -105,7 +105,7 @@ top.SourceCache.prototype =
         }
         catch (exc)
         {
-            
+
             if (FBL.reChrome.test(url))  // chrome urls cannot be read with this code.
                 return;
             var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";            /*@explore*/
@@ -115,7 +115,7 @@ top.SourceCache.prototype =
             FBTrace.dumpProperties("sourceCache.load fails channel=", channel);                                        /*@explore*/
             return;
         }
-        
+
         try
         {
             var data = readFromStream(stream, charset);
@@ -128,7 +128,7 @@ top.SourceCache.prototype =
             stream.close();
         }
     },
-    
+
     loadAsync: function(url, cb)
     {
         if (url in this.cache)
@@ -143,22 +143,22 @@ top.SourceCache.prototype =
         channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
         var listener = new StreamListener(url, this, cb);
-        channel.asyncOpen(listener, null);            
-    }, 
-    
+        channel.asyncOpen(listener, null);
+    },
+
     store: function(url, text)
     {
         if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
-			FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
+            FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
         var lines = splitLines(text);
         return this.cache[url] = lines;
     },
-    
+
     invalidate: function(url)
     {
         delete this.cache[url];
     },
-    
+
     getLine: function(url, lineNo)
     {
         var lines = this.load(url);
@@ -172,13 +172,13 @@ top.SourceCache.prototype =
         else
         {
             function loader(lines, url)
-            {      
+            {
                 cb(lines[lineNo-1], url, lineNo);
             }
 
             this.loadAsync(url, loader);
         }
-    }    
+    }
 };
 
 // ************************************************************************************************
@@ -200,7 +200,7 @@ StreamListener.prototype =
     onStopRequest: function(request, context, status)
     {
         this.done = true;
-        
+
         if (status != NS_BINDING_ABORTED)
         {
             var data = this.data.join("");
@@ -226,13 +226,13 @@ function getPostStream(context)
         var webNav = context.browser.webNavigation;
         var descriptor = QI(webNav, CI("nsIWebPageDescriptor")).currentDescriptor;
         var entry = QI(descriptor, CI("nsISHEntry"));
-        
+
         if (entry.postData)
         {
             // Seek to the beginning, or it will probably start reading at the end
             var postStream = QI(entry.postData, CI("nsISeekableStream"));
             postStream.seek(0, 0);
-        
+
             return postStream;
         }
 
@@ -257,5 +257,5 @@ function getCacheKey(context)
 }
 
 // ************************************************************************************************
-    
+
 }});

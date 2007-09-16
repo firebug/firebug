@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
- 
+
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
@@ -36,7 +36,7 @@ Firebug.Editor = extend(Firebug.Module,
     startEditing: function(target, value, editor)
     {
         this.stopEditing();
-        
+
         if (hasClass(target, "insertBefore") || hasClass(target, "insertAfter"))
             return;
 
@@ -44,15 +44,15 @@ Firebug.Editor = extend(Firebug.Module,
         if (!panel.editable)
             return;
 
-        defaultValue = target.getAttribute("defaultValue");        
+        defaultValue = target.getAttribute("defaultValue");
         if (value == undefined)
         {
             value = target.textContent;
             if (value == defaultValue)
                 value = "";
         }
-        
-        originalValue = previousValue = value;        
+
+        originalValue = previousValue = value;
 
         invalidEditor = false;
         currentTarget = target;
@@ -73,7 +73,7 @@ Firebug.Editor = extend(Firebug.Module,
         setClass(target, "editing");
         if (currentGroup)
             setClass(currentGroup, "editing");
-                
+
         currentEditor.show(target, currentPanel, value, targetSize);
         currentEditor.beginEditing(target, value);
 
@@ -87,7 +87,7 @@ Firebug.Editor = extend(Firebug.Module,
 
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;
-        
+
         this.detachListeners(currentEditor, currentPanel.context);
 
         removeClass(currentPanel.panelNode, "editing");
@@ -98,7 +98,7 @@ Firebug.Editor = extend(Firebug.Module,
         var value = currentEditor.getValue();
         if (value == defaultValue)
             value = "";
-        
+
         var removeGroup = currentEditor.endEditing(currentTarget, value, cancel);
 
         try
@@ -135,7 +135,7 @@ Firebug.Editor = extend(Firebug.Module,
         currentEditor = null;
         originalValue = null;
         invalidEditor = false;
-        
+
         return value;
     },
 
@@ -150,9 +150,9 @@ Firebug.Editor = extend(Firebug.Module,
             clearTimeout(this.saveTimeout);
 
         invalidEditor = true;
-        
+
         currentEditor.layout();
-        
+
         if (saveNow)
             this.save();
         else
@@ -161,7 +161,7 @@ Firebug.Editor = extend(Firebug.Module,
             this.saveTimeout = context.setTimeout(bindFixed(this.save, this), saveTimeout);
         }
     },
-    
+
     save: function(value)
     {
         if (!invalidEditor)
@@ -173,8 +173,8 @@ Firebug.Editor = extend(Firebug.Module,
         try
         {
             currentEditor.saveEdit(currentTarget, value, previousValue);
-                
-            previousValue = value;            
+
+            previousValue = value;
             invalidEditor = false;
         }
         catch (exc)
@@ -194,7 +194,7 @@ Firebug.Editor = extend(Firebug.Module,
         else
             this.startEditing(element, undefined, currentEditor);
     },
-    
+
     tabNextEditor: function()
     {
         if (!currentTarget)
@@ -230,11 +230,11 @@ Firebug.Editor = extend(Firebug.Module,
 
         this.setEditTarget(prevEditable);
     },
-    
+
     insertRow: function(relative, insertWhere)
     {
         var value = this.stopEditing();
-        
+
         if (!relative)
             relative = currentTarget;
 
@@ -243,7 +243,7 @@ Firebug.Editor = extend(Firebug.Module,
             group = relative;
 
         currentPanel = Firebug.getElementPanel(group);
-        
+
         currentEditor = currentPanel.getEditor(group, value);
         if (!currentEditor)
             currentEditor = getDefaultEditor(currentPanel);
@@ -251,7 +251,7 @@ Firebug.Editor = extend(Firebug.Module,
         currentGroup = currentEditor.insertNewRow(group, insertWhere);
         if (!currentGroup)
             return;
-        
+
         var editable = hasClass(currentGroup, "editable")
             ? currentGroup
             : getNextByClass(currentGroup, "editable");
@@ -271,7 +271,7 @@ Firebug.Editor = extend(Firebug.Module,
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     attachListeners: function(editor, context)
     {
@@ -325,12 +325,12 @@ Firebug.Editor = extend(Firebug.Module,
             }
         }
     },
-        
+
     detachListeners: function(editor, context)
     {
         if (!this.listeners)
             return;
-     
+
         var win = currentTarget.ownerDocument.defaultView;
         win.removeEventListener("resize", this.onResize, true);
         win.removeEventListener("blur", this.onBlur, true);
@@ -344,21 +344,21 @@ Firebug.Editor = extend(Firebug.Module,
 
         delete this.listeners;
     },
-    
+
     onResize: function(event)
     {
         currentEditor.layout(true);
     },
-                
+
     onBlur: function(event)
     {
         if (currentEditor.enterOnBlur && isAncestor(event.target, currentEditor.box))
             this.stopEditing();
     },
-                
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
-    
+
     initialize: function()
     {
         this.onResize = bindFixed(this.onResize, this);
@@ -374,7 +374,7 @@ Firebug.Editor = extend(Firebug.Module,
     {
         this.stopEditing();
     },
-    
+
     showPanel: function(browser, panel)
     {
         this.stopEditing();
@@ -389,33 +389,33 @@ Firebug.BaseEditor =
     getValue: function()
     {
     },
-    
+
     setValue: function(value)
     {
     },
-    
+
     show: function(target, panel, value, textSize, targetSize)
     {
     },
-    
+
     hide: function()
     {
     },
-    
+
     layout: function(forceAll)
     {
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     beginEditing: function(target, value)
     {
     },
-    
+
     saveEdit: function(target, value, previousValue)
     {
     },
-    
+
     endEditing: function(target, value, cancel)
     {
         // Remove empty groups by default
@@ -425,9 +425,9 @@ Firebug.BaseEditor =
     insertNewRow: function(target, insertWhere)
     {
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     startMeasuring: function(target)
     {
         if (!this.measureBox)
@@ -435,11 +435,11 @@ Firebug.BaseEditor =
             this.measureBox = target.ownerDocument.createElement("span");
             this.measureBox.className = "measureBox";
         }
-        
+
         copyTextStyles(target, this.measureBox);
         target.ownerDocument.body.appendChild(this.measureBox);
     },
-    
+
     measureText: function(value)
     {
         this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
@@ -449,7 +449,7 @@ Firebug.BaseEditor =
     stopMeasuring: function()
     {
         this.measureBox.parentNode.removeChild(this.measureBox);
-    }    
+    }
 };
 
 // ************************************************************************************************
@@ -462,7 +462,7 @@ Firebug.InlineEditor = function(doc)
 
 Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 {
-    tag: 
+    tag:
         DIV({class: "inlineEditor"},
             DIV({class: "textEditorTop1"},
                 DIV({class: "textEditorTop2"})
@@ -478,12 +478,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             )
         ),
 
-    expanderTag: IMG({class: "inlineExpander", src: "blank.gif"}),    
-    
+    expanderTag: IMG({class: "inlineExpander", src: "blank.gif"}),
+
     enterOnBlur: true,
     outerMargin: 8,
     shadowExpand: 7,
-    
+
     initialize: function()
     {
         this.fixedWidth = false;
@@ -495,12 +495,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         this.noWrap = true;
         this.numeric = false;
     },
-    
+
     destroy: function()
     {
         this.destroyInput();
     },
-    
+
     initializeInline: function(doc)
     {
         this.box = this.tag.replace({}, doc, this);
@@ -508,23 +508,23 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         this.expander = this.expanderTag.replace({}, doc, this);
         this.initialize();
     },
-    
+
     destroyInput: function()
     {
         // XXXjoe Need to remove input/keypress handlers to avoid leaks
     },
-    
+
     getValue: function()
     {
         return this.input.value;
     },
-    
+
     setValue: function(value)
     {
         // It's only a one-line editor, so new lines shouldn't be allowed
         return this.input.value = stripNewLines(value);
     },
-    
+
     show: function(target, panel, value, targetSize)
     {
         this.target = target;
@@ -532,13 +532,13 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         this.targetSize = targetSize;
         this.targetOffset = getClientOffset(target);
-        
+
         this.originalClassName = this.box.className;
-        
+
         var classNames = target.className.split(" ");
         for (var i = 0; i < classNames.length; ++i)
             setClass(this.box, "editor-" + classNames[i]);
-        
+
         // Make the editor match the target's font style
         copyTextStyles(target, this.box);
 
@@ -550,7 +550,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         {
             this.startMeasuring(target);
             this.textSize = this.measureText(value);
-            
+
             // Correct the height of the box to make the funky CSS drop-shadow line up
             var parent = this.input.parentNode;
             if (hasClass(parent, "textEditorInner2"))
@@ -580,7 +580,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         scrollIntoCenterView(this.box, null, true);
     },
-    
+
     hide: function()
     {
         this.box.className = this.originalClassName;
@@ -594,17 +594,17 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             if (this.expander.parentNode)
                 this.expander.parentNode.removeChild(this.expander);
         }
-        
+
         if (this.box.parentNode)
         {
             try { this.input.setSelectionRange(0, 0); } catch (exc) {}
             this.box.parentNode.removeChild(this.box);
         }
-        
+
         delete this.target;
         delete this.panel;
     },
-    
+
     layout: function(forceAll)
     {
         if (!this.fixedWidth)
@@ -612,20 +612,20 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
         if (forceAll)
             this.targetOffset = getClientOffset(this.expander);
-        
+
         this.updateLayout(false, forceAll);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     beginEditing: function(target, value)
     {
     },
-    
+
     saveEdit: function(target, value, previousValue)
     {
     },
-    
+
     endEditing: function(target, value, cancel)
     {
         // Remove empty groups by default
@@ -640,18 +640,18 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         return false;
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     getAutoCompleteRange: function(value, offset)
     {
     },
-    
+
     getAutoCompleteList: function(preExpr, expr, postExpr)
     {
     },
-        
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getAutoCompleter: function()
     {
@@ -661,10 +661,10 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 bind(this.getAutoCompleteRange, this), bind(this.getAutoCompleteList, this),
                 true, false);
         }
-        
+
         return this.autoCompleter;
     },
-    
+
     completeValue: function(amt)
     {
         if (this.getAutoCompleter().complete(currentPanel.context, this.input, true, amt < 0))
@@ -672,7 +672,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         else
             this.incrementValue(amt);
     },
-    
+
     incrementValue: function(amt)
     {
         var value = this.input.value;
@@ -698,13 +698,13 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.input.setSelectionRange(start, end);
 
             Firebug.Editor.update(true);
-            
+
             return true;
         }
         else
             return false;
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onKeyPress: function(event)
@@ -737,9 +737,9 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     {
         this.updateLayout(false, false, 3);
     },
-    
+
     onInput: function()
-    {   
+    {
         if (this.ignoreNextInput)
         {
             this.ignoreNextInput = false;
@@ -749,12 +749,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.getAutoCompleter().complete(currentPanel.context, this.input, false);
         else
             this.getAutoCompleter().reset();
-        
+
         Firebug.Editor.update();
     },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
-    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     updateLayout: function(initial, forceAll, extraWidth)
     {
         if (this.fixedWidth)
@@ -799,12 +799,12 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 // Make the input one character wider than the text value so that
                 // typing does not ever cause the textbox to scroll
                 var charWidth = this.textSize.width / Math.max(this.input.value.length, 1);
-                
+
                 // Sometimes we need to make the editor a little wider, specifically when
                 // an overflow happens, otherwise it will scroll off some text on the left
                 if (extraWidth)
                     charWidth *= extraWidth;
-                
+
                 var inputWidth = approxTextWidth + charWidth;
 
                 if (initial)
@@ -821,7 +821,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.expander.style.width = approxTextWidth + "px";
             this.expander.style.height = (this.textSize.height-3) + "px";
         }
-        
+
         if (forceAll)
             scrollIntoCenterView(this.box, null, true);
     }
@@ -842,7 +842,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
     var preParsed = null;
     var preExpr = null;
     var postExpr = null;
-    
+
     this.revert = function(textBox)
     {
         if (originalOffset != -1)
@@ -859,7 +859,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             return false;
         }
     };
-    
+
     this.reset = function()
     {
         candidates = null;
@@ -869,19 +869,19 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         lastOffset = 0;
         exprOffset = 0;
     };
-    
+
     this.complete = function(context, textBox, cycle, reverse)
     {
         var value = lastValue = textBox.value;
         var offset = textBox.selectionStart;
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
-        
+
         if (!candidates || !cycle || offset != lastOffset)
         {
             originalOffset = offset;
             originalValue = value;
-            
+
             // Find the part of the string that will be parsed
             var parseStart = getExprOffset ? getExprOffset(value, offset, context) : 0;
             preParsed = value.substr(0, parseStart);
@@ -891,10 +891,10 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             var range = getRange ? getRange(parsed, offset-parseStart, context) : null;
             if (!range)
                 range = {start: 0, end: parsed.length-1 };
-        
+
             var expr = parsed.substr(range.start, range.end-range.start+1);
             preExpr = parsed.substr(0, range.start);
-            postExpr = parsed.substr(range.end+1);            
+            postExpr = parsed.substr(range.end+1);
             exprOffset = parseStart + range.start;
 
             if (!cycle)
@@ -912,12 +912,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     return;
                 }
             }
-            
+
             lastExpr = expr;
             lastOffset = offset;
 
             var searchExpr;
-            
+
             // Check if the cursor is at the very right edge of the expression, or
             // somewhere in the middle of it
             if (expr && offset != parseStart+range.end+1)
@@ -937,7 +937,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     return;
                 }
             }
-            
+
             var values = evaluator(preExpr, expr, postExpr, context);
             if (!values)
                 return;
@@ -997,7 +997,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 // Nothing found, so there's nothing to complete to
                 if (searchIndex == -1)
                     return this.reset();
-                
+
                 expr = searchExpr;
                 candidates = cloneArray(values);
                 lastIndex = searchIndex;
@@ -1009,7 +1009,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 lastIndex = -1;
             }
         }
-        
+
         if (cycle)
         {
             expr = lastExpr;
@@ -1027,14 +1027,14 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
         var completion = candidates[lastIndex];
         var preCompletion = expr.substr(0, offset-exprOffset);
         var postCompletion = completion.substr(offset-exprOffset);
-        
+
         textBox.value = preParsed + preExpr + preCompletion + postCompletion + postExpr;
         var offsetEnd = preParsed.length + preExpr.length + completion.length;
         if (selectMode)
             textBox.setSelectionRange(offset, offsetEnd);
         else
             textBox.setSelectionRange(offsetEnd, offsetEnd);
-        
+
         return true;
     };
 };
@@ -1065,7 +1065,7 @@ function getOutsider(element, group, stepper)
         while (isAncestor(next, group) || hasClass(next, "insertBefore")
             || hasClass(next, "insertAfter"));
     }
-    
+
     return next;
 }
 
@@ -1103,5 +1103,5 @@ function insertTab()
 Firebug.registerModule(Firebug.Editor);
 
 // ************************************************************************************************
-    
+
 }});

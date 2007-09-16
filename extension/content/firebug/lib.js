@@ -2334,8 +2334,8 @@ this.getFileExtension = function(url)
 this.isSystemURL = function(url)
 {
     if (FBTrace.DBG_SHOW_SYSTEM) return false;                                                                         /*@explore*/
-	if (!url) return true;
-	if (url.length == 0) return true; // spec for about:blank
+    if (!url) return true;
+    if (url.length == 0) return true; // spec for about:blank
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 17) == "chrome://firebug/")
@@ -4811,7 +4811,7 @@ this.evalInTo = function(win, text)
     catch(exc)
     {
         if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("evalInSandBox FAILS sandbox uri="+win.location.href+" and text=\n"+text+"\n", exc); /*@explore*/
-		throw "Components.utils.Sandbox evalInSandbox FAILS "+exc;
+        throw "Components.utils.Sandbox evalInSandbox FAILS "+exc;
     }
 }
 
