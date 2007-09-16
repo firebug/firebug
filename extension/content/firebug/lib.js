@@ -2121,6 +2121,8 @@ this.dispatch = function(listeners, name, args)
 
 this.dispatch2 = function(listeners, name, args)
 {
+    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
+
     for (var i = 0; i < listeners.length; ++i)
     {
         var listener = listeners[i];
@@ -2332,6 +2334,8 @@ this.getFileExtension = function(url)
 this.isSystemURL = function(url)
 {
     if (FBTrace.DBG_SHOW_SYSTEM) return false;                                                                         /*@explore*/
+	if (!url) return true;
+	if (url.length == 0) return true; // spec for about:blank
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 17) == "chrome://firebug/")
@@ -2343,6 +2347,37 @@ this.isSystemURL = function(url)
     else
         return false;
 };
+
+this.isSystemPage = function(win)  // TODO combine with isSystemURL
+{
+    try
+    {
+        var doc = win.document;
+        if (!doc)
+            return false;
+
+         // Detect network error pages like 404
+        if (doc.documentURI.indexOf("about:blank") == 0)
+            return true;
+
+        // Detect network error pages like 404
+        if (doc.documentURI.indexOf("about:neterror") == 0)
+            return true;
+
+        // Detect pages for pretty printed XML
+        return (doc.styleSheets.length && doc.styleSheets[0].href
+                == "chrome://global/content/xml/XMLPrettyPrint.css")
+            || (doc.styleSheets.length > 1 && doc.styleSheets[1].href
+                == "chrome://browser/skin/feeds/subscribe.css");
+    }
+    catch (exc)
+    {
+        // Sometimes documents just aren't ready to be manipulated here, but don't let that
+        // gum up the works
+        ERROR("tabWatcher.isSystemPage document not ready:"+ exc);
+        return false;
+    }
+}
 
 this.isLocalURL = function(url)
 {

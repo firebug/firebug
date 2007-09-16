@@ -92,19 +92,18 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     observe: function(object)
     {
-        if(typeof(FBTrace) == "undefined") return;
+        if(typeof(FBTrace) == "undefined") return;  /*@explore*/
         try
         {
             if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
                 FBTrace.dumpProperties("errors.observe "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
             if (object instanceof nsIScriptError)
             {
-                var context = FirebugContext;
-
                 var category = getBaseCategory(object.category);
                 var isWarning = object.flags & WARNING_FLAG;
                 var isJSError = category == "js" && !isWarning;
 
+                var context = FirebugContext;
                 if (isJSError)
                 {
                     var isSyntaxError = object.sourceLine != null;
@@ -121,6 +120,25 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         }
                     }
                 }
+				if (!context)
+				{
+					var messageURI = object.sourceName;
+					if (messageURI in FirebugContext.allURIs)
+						context = FirebugContext;
+					else
+					{
+						TabWatcher.iterateContexts( function(trial_context)
+						{
+							if (messageURI in trial_context)
+								context = trial_context;
+						});
+						if (FBTrace.DBG_ERRORS)                                                                          /*@explore*/
+							FBTrace.sysout("errors.observe set context by iteration to "+context+"\n");                  /*@explore*/
+					}
+				}
+
+                if (FBTrace.DBG_ERRORS)                                                                                  /*@explore*/
+                	FBTrace.sysout("errors.observe categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning)+"\n");           /*@explore*/
 
                 if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
                     return;
@@ -132,6 +150,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (context.errorMap && msgId in context.errorMap)
                 {
                     context.errorMap[msgId] += 1;
+                    if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
+	                    FBTrace.sysout("errors.observe duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
                     return;
                 }
 
@@ -161,13 +181,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
                         if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
                             FBTrace.dumpProperties("errors.observe trace frames:", trace.frames);                          /*@explore*/
-                    }
-                    else
-                    {
-                        // There was no trace, but one was requested. Therefore fbs never called
-                        // debuggr.onError() because the error was for a different window.
-                        if (Firebug.showStackTrace && isJSError)
-                            return;
                     }
                 }
                 Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.

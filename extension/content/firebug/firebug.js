@@ -978,6 +978,8 @@ top.Firebug =
     {
         if (!uri)  // null or undefined is denied
             return true;
+		if (isSystemURL(uri.spec) && !Firebug.allowSystemPages)
+			return true;
         return uri &&
             (pm.testPermission(uri, "firebug") == DENY_ACTION
                 || (uri.scheme == "file" && this.disabledFile));
