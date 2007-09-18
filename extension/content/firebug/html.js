@@ -714,7 +714,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exeLine");
 
-        if (object instanceof SourceLink) // && object.type == "css"
+        if (object instanceof SourceLink) // && object.type == "css" and !reCSS(object.href) by supports
          {
              var sourceLink = object;
              var stylesheet = getStyleSheetByHref(sourceLink.href, this.context);
@@ -730,7 +730,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
                     // XXXjjb seems like this could be bad for errors at the end of long files
                     //
-                    var sourceRow = FBL.getElementByClass(objectbox, "sourceRow");
+                    var sourceRow = FBL.getElementByClass(objectbox, "sourceRow"); // first source row in style
                     for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
                     {
                         if (!sourceRow) break;
@@ -1305,7 +1305,7 @@ function isSourceElement(element)
 {
     var tag = element.localName.toLowerCase();
     return tag == "script" || tag == "link" || tag == "style"
-        || (tag == "link" && element.getAttribute("rel") == "stylesheet");
+        || (tag == "link" && element.getAttribute("rel") == "stylesheet"); // XXXjjb link || (link && rel)??
 }
 
 function getSourceHref(element)
@@ -1358,19 +1358,22 @@ function isPureText(element)
 
 function isEmptyElement(element)
 {
-    if (Firebug.showWhitespaceNodes)
-    {
+	// XXXjjb the commented code causes issues 48, 240, and 244. I think the lines should be deleted.
+	// If the DOM has whitespace children, then the element is not empty even if
+	// we decide not to show the whitespace in the UI.
+//    if (Firebug.showWhitespaceNodes)
+//    {
         return !element.firstChild;
-    }
-    else
-    {
-        for (var child = element.firstChild; child; child = child.nextSibling)
-        {
-            if (!isWhitespaceText(child))
-                return false;
-        }
-    }
-    return true;
+//    }
+//    else
+//    {
+//        for (var child = element.firstChild; child; child = child.nextSibling)
+//        {
+//            if (!isWhitespaceText(child))
+//                return false;
+//        }
+//    }
+//    return true;
 }
 
 function isWhitespaceText(node)
