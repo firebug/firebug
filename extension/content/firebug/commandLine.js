@@ -82,7 +82,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo FAILS:",exc);        /*@explore*/
-                result = new FBL.ErrorMessage("commandLing.evaluate FAILS: "+exc, "command line failure",0, 0, "js", context, null);
+                result = new FBL.ErrorMessage("commandLine.evaluate FAILS: "+exc, "command line failure",0, 0, "js", context, null);
             }
             try
             {
