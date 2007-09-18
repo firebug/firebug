@@ -190,6 +190,9 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.Editor.stopEditing();
         else
         {
+			if (!this.location)
+				return;
+
             var styleSheet = this.location.editStyleSheet
                 ? this.location.editStyleSheet.sheet
                 : this.location;
