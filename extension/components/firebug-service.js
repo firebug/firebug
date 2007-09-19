@@ -1113,6 +1113,10 @@ FirebugService.prototype =
     onScriptCreated: function(script)
     {
 		if(!fbs) return;
+
+		if (!fbs.showEvalSources)
+			return;  // some stuff will not work, incl. eval buffers will not show.
+			
         try
         {
 			var fileName = script.fileName;
@@ -1125,7 +1129,7 @@ FirebugService.prototype =
 		        ddd("onScriptCreated name: \'"+script.functionName+"\'\n"+script.functionSource+"\n");                 /*@explore*/
            	}                                                                                                          /*@explore*/
 
-			if (fbs.showEvalSources && !script.functionName)
+			if (!script.functionName)
 	        {
 	        	// top or eval-level
 	    		// We need to detect eval() and grab its source. For that we need a stack frame.
