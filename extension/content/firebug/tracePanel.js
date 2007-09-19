@@ -19,23 +19,24 @@ Firebug.TraceModule = extend(Firebug.Console,
     // These will appear as options in FBTrace panel, with the DBG_ removed.
         // Also add extension.firebug.BP etc to defaults/preferences/chromebug.js if you want persistence.
     DBG_BP: false, 			// debugger.js and firebug-services.js; lots of output
-    DBG_TOPLEVEL: false, 		// firebug-service
-    DBG_STACK: false,  		// call stack, mostly debugger.js
-    DBG_UI_LOOP: false, 		// debugger.js
+    DBG_CSS: false,             // CSS panel or css stuff
+    DBG_CACHE: false,   		// sourceCache
     DBG_ERRORS: false,  		// error.js
     DBG_EVENTS: false,  		// debugger.js for event handlers, need more
-    DBG_FUNCTION_NAMES: false,  // heuristics for anon functions
     DBG_EVAL: false,    		// debugger.js and firebug-service.js
-    DBG_CACHE: false,   		// sourceCache
-    DBG_HTML: false,            // HTML panel
-    DBG_CSS: false,             // CSS panel or css stuff
-    DBG_SOURCEFILES: false, 	// debugger and sourceCache
-    DBG_WINDOWS: false,    	// tabWatcher, dispatch events; very useful for understand modules/panels
-    DBG_NET: false,        	// net.js
-    DBG_SHOW_SYSTEM: false,    // isSystemURL return false always.
+    DBG_FUNCTION_NAMES: false,  // heuristics for anon functions
     DBG_INITIALIZE: false,		// registry (modules panels); initialize FB
+    DBG_HTML: false,            // HTML panel
+    DBG_LINETABLE: false,       // lib.js creating line tables.
+    DBG_NET: false,        	// net.js
     DBG_OPTIONS: true,
+    DBG_SHOW_SYSTEM: false,    // isSystemURL return false always.
+    DBG_SOURCEFILES: false, 	// debugger and sourceCache
+    DBG_STACK: false,  		// call stack, mostly debugger.js
+    DBG_TOPLEVEL: false, 		// firebug-service
     DBG_TRACE: false,
+    DBG_UI_LOOP: false, 		// debugger.js
+    DBG_WINDOWS: false,    	// tabWatcher, dispatch events; very useful for understand modules/panels
     DBG_FBS_CREATION: false, // firebug-service script creation
     DBG_FBS_STEP: false,     // firebug-service stepping
     DBG_FBS_BP: false, // firebug-service breakpoints
