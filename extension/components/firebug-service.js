@@ -350,6 +350,9 @@ FirebugService.prototype =
         stepFrame = startFrame;
         stepFrameCount = countFrames(startFrame);
         stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
+                                                                                                                       /*@explore*/
+        if (fbs.DBG_STEP) ddd("step stepMode = "+getPropertyName(nsIFireBug, stepMode)                                 /*@explore*/
+                 +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+"\n");                         /*@explore*/
     },
 
 	suspend: function()
@@ -1613,6 +1616,7 @@ FirebugService.prototype =
 
         // Execution resumes now. Check if the user requested stepping and if so
         // install the necessary hooks
+        hookFrameCount = countFrames(frame);
         this.startStepping();
 
         return returned;
@@ -1628,8 +1632,6 @@ FirebugService.prototype =
     {
         if (!stepMode && !runningUntil)
             return;
-
-        hookFrameCount = stepFrameCount;
 
      	if (fbs.DBG_STEP) ddd("startStepping stepMode = "+getPropertyName(nsIFireBug, stepMode)                        /*@explore*/
 			     +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");                           /*@explore*/
