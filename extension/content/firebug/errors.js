@@ -120,22 +120,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         }
                     }
                 }
-                if (!context)
-                {
-                    var messageURI = object.sourceName;
-                    if (FirebugContext && messageURI in FirebugContext.allURIs)
-                        context = FirebugContext;
-                    else
-                    {
-                        TabWatcher.iterateContexts( function(trial_context)
-                        {
-                            if (messageURI in trial_context.allURIs)
-                                context = trial_context;
-                        });
-                        if (FBTrace.DBG_ERRORS)                                                                          /*@explore*/
-                            FBTrace.sysout("errors.observe set context by iteration to "+context+"\n");                  /*@explore*/
-                    }
-                }
 
                 if (FBTrace.DBG_ERRORS)                                                                                  /*@explore*/
                     FBTrace.sysout("errors.observe categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning)+"\n");           /*@explore*/
