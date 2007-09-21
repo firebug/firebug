@@ -1119,7 +1119,7 @@ FirebugService.prototype =
 
 		if (!fbs.showEvalSources)
 			return;  // some stuff will not work, incl. eval buffers will not show.
-			
+
         try
         {
 			var fileName = script.fileName;
@@ -2157,11 +2157,12 @@ function getDumpStream()
 {
 	try
 	{
-		var path = "c:\\download\\tmp\\firebug.txt";  // I welcome your corrections.
-		var file = CC("@mozilla.org/file/local;1").createInstance(CI("nsILocalFile"));
-		file.initWithPath(path);
-		if ( !file.exists())
-			file.create(CI("nsIFile").NORMAL_FILE_TYPE, 664 );
+		// OS tmp (e.g., /tmp on linux, C:\Documents and Settings\your userid\Local Settings\Temp on windows)
+		var file = Components.classes["@mozilla.org/file/directory_service;1"]
+			.getService(Components.interfaces.nsIProperties)
+			.get("TmpD", Components.interfaces.nsIFile);
+		file.append("firebug-service-dump.txt");
+		file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
 		var stream = CC("@mozilla.org/network/file-output-stream;1").createInstance(CI("nsIFileOutputStream"));
 		stream.init(file, 0x04 | 0x08 | 0x20, 664, 0); // write, create, truncate
 		return stream;
