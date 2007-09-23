@@ -1914,7 +1914,7 @@ this.updateScriptFiles = function(context, reload)
                 url = this.normalizeURL(url ? url : win.location.href);
                 addFile(url);
                 if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                    FBTrace.sysout("updateScriptFiles script tag#"+i+" adding "+url+" to context="+context.uid+"\n");  /*@explore*/
+                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+" adding "+url+" to context="+context.uid+"\n");  /*@explore*/
             }
         }, this));
 

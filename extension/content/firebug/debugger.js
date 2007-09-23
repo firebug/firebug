@@ -702,7 +702,7 @@ Firebug.Debugger = extend(Firebug.Module,
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onToggleBreakpoint lineNo:"+lineNo+"\n");                         /*@explore*/
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onToggleBreakpoint: "+lineNo+"@"+url+"\n");                         /*@explore*/
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
             var panel = TabWatcher.contexts[i].getPanel("script", true);
@@ -830,11 +830,12 @@ Firebug.Debugger = extend(Firebug.Module,
                 context.sourceFileMap = {};
 
             var script = frame.script;
+			var url = normalizeURL(script.fileName);
 
-            if (script.fileName in context.sourceFileMap)
-                var sourceFile = context.sourceFileMap[script.fileName];
+            if (url in context.sourceFileMap)
+                var sourceFile = context.sourceFileMap[url];
             else
-                var sourceFile = new FBL.SourceFile(script.fileName, context);
+                var sourceFile = new FBL.SourceFile(url, context);
 
             sourceFile.tag = script.tag;
 
@@ -843,7 +844,7 @@ Firebug.Debugger = extend(Firebug.Module,
             sourceFile.addToLineTable(script, script.baseLineNumber, false);
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevel sourcefile="+sourceFile.toString()+"\n"); /*@explore*/
 
-            dispatch(listeners,"onTopLevel",[context, frame, script.fileName]);
+            dispatch(listeners,"onTopLevel",[context, frame, script.fileName]);  // XXXjjb script.fileName or URL?
             return script.fileName;
         }
         catch(exc)
