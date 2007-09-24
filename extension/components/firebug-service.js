@@ -1117,14 +1117,17 @@ FirebugService.prototype =
     {
 		if(!fbs) return;
 
-		if (!fbs.showEvalSources)
-			return;  // some stuff will not work, incl. eval buffers will not show.
-
         try
         {
 			var fileName = script.fileName;
 			if (!fileName || isSystemURL(fileName))
 				return;
+
+            if (!fbs.showEvalSources)
+            {
+                dispatch(scriptListeners,"onScriptCreated",[script, fileName, script.baseLineNumber]);
+                return;  // some stuff will not work, incl. eval buffers will not show.
+            }
 
            	if (fbs.DBG_CREATION) {                                                                                    /*@explore*/
            		ddd("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
