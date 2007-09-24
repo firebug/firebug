@@ -2387,6 +2387,17 @@ this.isLocalURL = function(url)
         return false;
 };
 
+this.getLocalPath = function(url)
+{
+    if (this.isLocalURL(url))
+    {
+        var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+        var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+        var file = fileHandler.getFileFromURLSpec(url);
+        return file.path;
+    }
+};
+
 this.getDomain = function(url)
 {
     var m = /[^:]+:\/{1,3}([^\/]+)/.exec(url);
@@ -2563,12 +2574,12 @@ this.launchProgram = function(exePath, args)
 
 this.getIconURLForFile = function(path)
 {
-    const ios = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-    const fph = ios.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
     try {
         var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
         file.initWithPath(path);
-        return "moz-icon://" + fph.getURLSpecFromFile(file) + "?size=16";
+        return "moz-icon://" + fileHandler.getURLSpecFromFile(file) + "?size=16";
     }
     catch(exc)
     {
@@ -4820,10 +4831,10 @@ this.evalInTo = function(win, text)
 
 this.ERROR = function(exc)
 {
-	if (FBTrace)                                              /*@explore*/
-		FBTrace.dumpProperties("lib.ERROR exception:", exc);  /*@explore*/
-	else                                                      /*@explore*/
-	    ddd("FIREBUG WARNING: " + exc);
+    if (FBTrace)                                              /*@explore*/
+        FBTrace.dumpProperties("lib.ERROR exception:", exc);  /*@explore*/
+    else                                                      /*@explore*/
+        ddd("FIREBUG WARNING: " + exc);
 }
 
 // ************************************************************************************************

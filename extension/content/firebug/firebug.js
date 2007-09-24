@@ -577,7 +577,7 @@ top.Firebug =
     getLocalSourceFile: function(context, href)
     {
         if ( isLocalURL(href) )
-            return href;
+            return getLocalPath(href);
         var data;
         if (context)
         {
