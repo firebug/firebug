@@ -2335,7 +2335,7 @@ this.isSystemURL = function(url)
 {
     if (FBTrace.DBG_SHOW_SYSTEM) return false;                                                                         /*@explore*/
     if (!url) return true;
-    if (url.length == 0) return true; // spec for about:blank
+    if (url.length == 0) return false; // spec for about:blank
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 17) == "chrome://firebug/")
@@ -2357,8 +2357,8 @@ this.isSystemPage = function(win)  // TODO combine with isSystemURL
             return false;
 
          // Detect network error pages like 404
-        if (doc.documentURI.indexOf("about:blank") == 0)
-            return true;
+        //if (doc.documentURI.indexOf("about:blank") == 0)
+        //    return true;
 
         // Detect network error pages like 404
         if (doc.documentURI.indexOf("about:neterror") == 0)
@@ -4820,8 +4820,10 @@ this.evalInTo = function(win, text)
 
 this.ERROR = function(exc)
 {
-    ddd("FIREBUG WARNING: " + exc);
-    //throw "FIREBUG ERROR: "+exc;
+	if (FBTrace)                                              /*@explore*/
+		FBTrace.dumpProperties("lib.ERROR exception:", exc);  /*@explore*/
+	else                                                      /*@explore*/
+	    ddd("FIREBUG WARNING: " + exc);
 }
 
 // ************************************************************************************************

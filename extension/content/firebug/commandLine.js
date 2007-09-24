@@ -82,7 +82,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo FAILS:",exc);        /*@explore*/
-                result = new FBL.ErrorMessage("commandLine.evaluate FAILS: "+exc, "command line failure",0, 0, "js", context, null);
+                result = new FBL.ErrorMessage("commandLine.evaluate FAILS: "+exc, scriptToEval,0, 0, "js", context, null);
             }
             try
             {
@@ -96,7 +96,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (threw)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate evaluation threw:", result);          /*@explore*/
-                result = new FBL.ErrorMessage(result.message, "command line",0, 0, "js", context, null);
+                result = new FBL.ErrorMessage(result, scriptToEval, 0, 0, "js", context, null);
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate ErrorMessage result:", result);          /*@explore*/
             }
         }

@@ -93,6 +93,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     observe: function(object)
     {
         if(typeof(FBTrace) == "undefined") return;  /*@explore*/
+        var context = FirebugContext;
         try
         {
             if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
@@ -103,7 +104,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 var isWarning = object.flags & WARNING_FLAG;
                 var isJSError = category == "js" && !isWarning;
 
-                var context = FirebugContext;
                 if (isJSError)
                 {
                     var isSyntaxError = object.sourceLine != null;
