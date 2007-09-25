@@ -2162,10 +2162,13 @@ function getDumpStream()
 	{
 		// OS tmp (e.g., /tmp on linux, C:\Documents and Settings\your userid\Local Settings\Temp on windows)
 		var file = Components.classes["@mozilla.org/file/directory_service;1"]
-			.getService(Components.interfaces.nsIProperties)
-			.get("TmpD", Components.interfaces.nsIFile);
+			.getService(CI("nsIProperties"))
+			.get("TmpD", CI("nsIFile"));
+		file.append("fbug");
+        if ( !file.exists() )
+            file.create(CI("nsIFile").DIRECTORY_TYPE, 0776);
 		file.append("firebug-service-dump.txt");
-		file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+		file.createUnique(CI("nsIFile").NORMAL_FILE_TYPE, 0666);
 		var stream = CC("@mozilla.org/network/file-output-stream;1").createInstance(CI("nsIFileOutputStream"));
 		stream.init(file, 0x04 | 0x08 | 0x20, 664, 0); // write, create, truncate
 		return stream;
