@@ -38,6 +38,7 @@ var disabledBox = null;
 var disabledHead = null;
 var disabledCaption = null;
 var enableSiteLink = null;
+var enableSystemPagesLink = null;
 var enableAlwaysLink = null;
 
 // ************************************************************************************************
@@ -121,6 +122,7 @@ top.FirebugChrome =
         disabledCaption = doc1.getElementById("disabledCaption");
         enableAlwaysLink = doc1.getElementById("enableAlwaysLink");
         enableSiteLink = doc1.getElementById("enableSiteLink");
+		enableSystemPagesLink = doc1.getElementById("enableSystemPagesLink");
 
         doc1.addEventListener("mouseover", onPanelMouseOver, false);
         doc1.addEventListener("mouseout", onPanelMouseOut, false);
@@ -140,6 +142,7 @@ top.FirebugChrome =
         var win1 = panelBar1.browser.contentWindow;
         win1.enableAlways = bindFixed(Firebug.setPref, Firebug, "disabledAlways", false);
         win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
+		win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
 
         for (var i = 0; i < Firebug.panelTypes.length; ++i)
         {
@@ -461,34 +464,31 @@ top.FirebugChrome =
             if (uri)
             {
                 var host = getURIHost(uri);
-                var isSystemPage = this.getCurrentBrowser().isSystemPage;
-
+                var isSystemPage = FBL.isSystemURL(uri.spec);
+				if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.syncPanel host="+host+" isSystemPage="+isSystemPage+"\n");               /*@explore*/
                 var caption;
-                if (isSystemPage && !Firebug.allowSystemPages)
-                    caption = FBL.$STR("IsSystemPage");
-                else if (!host || isSystemPage || Firebug.disabledAlways)
-                    caption = FBL.$STR("DisabledHeader");
+				if (Firebug.disabledAlways)
+				{
+					caption = FBL.$STR("DisabledHeader");
+					enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
+				}
+                else if (isSystemPage && !Firebug.allowSystemPages)
+				{
+					caption = FBL.$STR("IsSystemPage");
+					enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
+				}
+                else if (!host)
+				{
+					caption = FBL.$STR("DisabledForFiles");
+					enableSiteLink.firstChild.nodeValue = FBL.$STR("EnableForFiles");
+				}
                 else
-                    caption = FBL.$STRF("DisabledForSiteHeader", [host]);
+				{
+					 caption = FBL.$STRF("DisabledForSiteHeader", [host]);
+					 enableSiteLink.firstChild.nodeValue = FBL.$STRF("EnableForSite", [host]);
+				}
 
                 disabledHead.firstChild.nodeValue = caption;
-
-                if (isSystemPage && !Firebug.allowSystemPages)
-                {
-                    FBL.setClass(disabledBox, "cantDisplayPage");
-                    disabledCaption.firstChild.nodeValue = FBL.$STR("CantDisplayCaption");
-                }
-                else
-                {
-                    FBL.removeClass(disabledBox, "cantDisplayPage");
-
-                    enableAlwaysLink.firstChild.nodeValue = Firebug.disabledAlways
-                        ? FBL.$STR("EnableAlways") : "";
-                    enableSiteLink.firstChild.nodeValue = host
-                        ? FBL.$STRF("EnableForSite", [host])
-                        : FBL.$STR("EnableForFiles");
-                }
-
                 disabledBox.removeAttribute("collapsed");
             }
 

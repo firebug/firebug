@@ -293,6 +293,12 @@ top.Firebug =
         }
     },
 
+	disableSystemPages: function(disable)
+	{
+		this.setPref("allowSystemPages", !disable);
+		this.disableCurrent(disable);
+	},
+
     disableSite: function(disable)
     {
         var ioService = CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
@@ -321,7 +327,11 @@ top.Firebug =
                     pm.add(uri, "firebug", ALLOW_ACTION);
             }
         }
+		this.disableCurrent(disable);
+	},
 
+	disableCurrent: function(disable)
+	{
         if (!tabBrowser)
             return; // externalBrowser
 
@@ -335,7 +345,11 @@ top.Firebug =
             }
         }
         else
-            TabWatcher.watchBrowser(tabBrowser.selectedBrowser);
+		{
+			TabWatcher.activate();
+			TabWatcher.watchBrowser(tabBrowser.selectedBrowser);
+		}
+
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
