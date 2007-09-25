@@ -67,7 +67,8 @@ top.FirebugChrome =
 
     initialize: function()
     {
-        var detachArgs = window.arguments[0];
+		if (window.arguments)
+        	var detachArgs = window.arguments[0];
 
         if (!detachArgs)
             detachArgs = {};
@@ -107,7 +108,9 @@ top.FirebugChrome =
     initializeUI: function()
     {
     try {
-        var detachArgs = window.arguments[0];
+		if (window.arguments)
+        	var detachArgs = window.arguments[0];
+
         if (detachArgs)
         {
             FirebugContext = detachArgs.context ? detachArgs.context : FirebugContext;
