@@ -20,7 +20,7 @@
 <binding id="panelBar">
     <content>
         <xul:hbox anonid="tabBox" class="panelTabBox" collapsed="true">
-            <children includes="panelTab"/>/>
+            <children includes="panelTab"/>
             <xul:spacer flex="1"/>
             <children/>
             <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;">
