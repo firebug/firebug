@@ -7,7 +7,7 @@
     <em:id>firebug@software.joehewitt.com</em:id>
     <em:version>@VERSION@</em:version>
     <em:type>2</em:type>
-   
+
     <!-- Firefox -->
     <em:targetApplication>
       <Description>
@@ -17,7 +17,7 @@
       </Description>
     </em:targetApplication>
 
-    <!-- Flock -->   
+    <!-- Flock -->
     <em:targetApplication>
       <Description>
         <em:id>{a463f10c-3994-11da-9945-000d60ca027b}</em:id>
@@ -27,12 +27,16 @@
     </em:targetApplication>
 
     <em:name>Firebug</em:name>
-    <em:description>Web Development Evolved</em:description>
+    <em:description>Web Development Evolved. (See http://fireclipse.xucia.com for updates)</em:description>
     <em:creator>Joe Hewitt</em:creator>
     <em:contributor>1.1 enhancements: John J. Barton</em:contributor>
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>@UPDATEPATH@/update.rdf</em:updateURL>
-  </Description>      
+	<em:updateKey>MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDPEatrJf0ma6N/2ceHQC7HRTl4QZQiZUY69eGmbqzE6CVmd3TH/wBtX
+	8t0/8wmkn5S9jn6ND2lf7fmc/LocSqEXb7uHnmVpLmrOjkGZ8yzPaBfkgfAhf6EElCMEzabX8kPPMfPBwDgYn9z14wYL7dPG9L/0W
+	fcZ3cnIisLcrk3sQIDAQAB</em:updateKey>
+
+  </Description>
 </RDF>
