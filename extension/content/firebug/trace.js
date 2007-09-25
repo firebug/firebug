@@ -71,6 +71,13 @@ this.dumpProperties = function(header, obj)
 
             for (var p in obj)
             {
+				if (p.match("QueryInterface"))
+				{
+					if (this.dumpInterfaces(obj))
+						continue;
+					else
+						this.sysout("dumpInterfaces found NONE\n");
+				}
                 try
                 {
                     this.sysout("["+p+"]="+obj[p]+";\n");
@@ -86,6 +93,25 @@ this.dumpProperties = function(header, obj)
     {
         this.dumpStack("dumpProperties failed:"+exc+" trying with header="+header);
     }
+},
+
+this.dumpInterfaces = function(obj)
+{
+	var found = false;
+	// could try for classInfo
+	for(iface in Components.interfaces)
+	{
+		if (obj instanceof Components.interfaces[iface])
+		{
+			found = true;
+			for (p in Components.interfaces[iface])
+			{
+				this.sysout("["+iface+"."+p+"]="+obj[p]+";\n");
+			}
+		}
+
+	}
+	return found;
 },
 
 this.consoleOut = function(text)
