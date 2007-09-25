@@ -64,13 +64,18 @@
                 command="cmd_detachFirebug"/>
     </keyset>
 
-        <popup id="contentAreaContextMenu">
-                <menuseparator/>
-                <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
+    <popup id="contentAreaContextMenu">
+        <menu label="&firebug.OpenWith;" insertbefore="context-viewsource">
+            <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+            </menupopup>
+	</menu>
+        <menuseparator/>
+        <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
                     oncommand="Firebug.showBar(true); FirebugChrome.select(document.popupNode);"/>
-        </popup>
+    </popup>
 
-        <menupopup id="menu_viewPopup">
+    <menupopup id="menu_viewPopup">
         <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"
             label="&firebug.Firebug;" type="checkbox"
             key="key_toggleFirebug" command="cmd_toggleFirebug"/>
