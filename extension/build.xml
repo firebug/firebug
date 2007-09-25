@@ -1,7 +1,7 @@
 <?xml version="1.0" ?>
 
 <!-- This Ant build file was contributed by Paul McLanahan.  pmclanahan@gmail.com.
-	Added template and version numbers johnjbarton@johnjbarton.com 
+	Added template and version numbers johnjbarton@johnjbarton.com
 	Added unexplore targets to strip trace for distribution version.
 -->
 
@@ -10,19 +10,19 @@
 
 	<!-- Setting properties -->
 	<target name="local-check">
-		<available file="${basedir}/local.properties" 
+		<available file="${basedir}/local.properties"
            property="local.properties.available"/>
 	</target>
 
-    <target name="properties-local" 
-          if="local.properties.available" 
+    <target name="properties-local"
+          if="local.properties.available"
           depends="local-check">
       <echo message="Loading local properties file"/>
       <property file="local.properties"/>
     </target>
 
 	<target name="no-properties-local"
-			unless="local.properties.available" 
+			unless="local.properties.available"
         	depends="local-check">
       	<echo message="No local properties file, setting defaults"/>
 		<property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
@@ -32,7 +32,7 @@
 
 	<target name="version" depends="properties-local, no-properties-local" description="Compute version number">
 		<tstamp/>
-		<property name="build_dir" location="./build" />		
+		<property name="build_dir" location="./build" />
 		<property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
 		<property name="UPDATEPATH" value="${update.path}" />
 		<mkdir dir="${build_dir}/dist" />
@@ -50,23 +50,27 @@
 	<!-- Project directories -->
 	<property name="src_dir" location="." />
 	<property name="build_dir" location="./build" />
-	<property name="dist_dir" location="./dist" /> 
+	<property name="dist_dir" location="./dist" />
 	<property name="unexplore.dir" location="../eval" />
 	<!-- relative to branches/firebug1.1 should be branches/eval -->
 
 	<property name="excludes" value="**/.*, **/*.jar, **/*.db" />
 	<property name="components_dir" location="${src_dir}/components" />
-	
+
 	<!-- Targets -->
 	<target name="clean">
 		<delete dir="${build_dir}" />
 		<delete dir="${dist_dir}" />
 	</target>
-	
+
 	<!-- Expand templates -->
 	<target name="template-dependency" description="test tpl files">
-		<uptodate property="install.expansion.notRequired" srcfile="${src_dir}/install.rdf.tpl.xml" targetfile="install.rdf" />
-		<uptodate property="update.expansion.notRequired" srcfile="${src_dir}/update.rdf.tpl.xml" targetfile="update.rdf" />
+		<uptodate property="install.expansion.notRequired" targetfile="install.rdf">
+			<srcfiles dir="${src_dir}" includes="install.rdf.tpl.xml, branch.properties"/>
+		</uptodate>
+		<uptodate property="update.expansion.notRequired" targetfile="update.rdf">
+			<srcfiles dir="${src_dir}" includes="install.rdf.tpl.xml, branch.properties"/>
+		</uptodate>
 	</target>
 
 	<target name="expand-templates" depends="expand-install-template, expand-update-template" description="Fill in version info">
@@ -81,7 +85,7 @@
 							<token key="UPDATEPATH" value="${update.path}"/>
                       		<token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
-               </filterchain>        
+               </filterchain>
 		</copy>
 	</target>
 
@@ -95,13 +99,13 @@
 							<token key="UPDATEPATH" value="${update.path}"/>
                       		<token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
-               </filterchain>        
+               </filterchain>
 		</copy>
 	</target>
 
 	<!-- Incremental Build Targets -->
 	<target name="incremental" depends="version, expand-templates, copy-to-extensions, adjust-chrome-manifests" />
-	<target name="copy-to-extensions" depends="clean-reg, clean-xpti" 
+	<target name="copy-to-extensions" depends="clean-reg, clean-xpti"
 		description="Incremental Development">
 		<copy todir="${install.dir}extensions/firebug@software.joehewitt.com" >
 			<fileset dir=".">
@@ -118,11 +122,11 @@
 		    <fileset dir="${install.dir}extensions/firebug@software.joehewitt.com" includes="**/chrome.manifest"/>
 		</replaceregexp>
 	</target>
-	
+
 	<target name="firebug-service" description="Check compreg.dat when service changes">
 		<uptodate property="deleteCompreg.notRequired" srcfile="./components/firebug-service.js" targetfile="${install.dir}/compreg.dat" />
 	</target>
-	<target name="clean-reg" depends="firebug-service" unless="deleteCompreg.notRequired" 
+	<target name="clean-reg" depends="firebug-service" unless="deleteCompreg.notRequired"
 		description="Delete compreg.dat to reload service" >
 		<delete file="${install.dir}/compreg.dat"/>
 	</target>
@@ -131,20 +135,20 @@
 	<target name="idl" description="test idl">
 		<uptodate property="xpidl.notRequired" srcfile="./components/nsIFireBug.idl" targetfile="./components/nsIFireBug.xpt" />
 	</target>
-	
+
 	<target name="xpt" depends="idl" description="compile idl" unless="xpidl.notRequired">
 		<exec dir="./components" executable="${xpidl.exe}"><arg  line="-v -m typelib nsIFireBug.idl"/></exec>
 	</target>
-	
+
 	<target name="xpti" depends="xpt" description="Check xpti.dat to when .xpt changes">
 		<uptodate property="deleteXPTI.notRequired" srcfile="./components/nsIFireBug.xpt" targetfile="${install.dir}/xpti.dat" />
 	</target>
-	
-	<target name="clean-xpti" depends="xpti" unless="deleteXPTI.notRequired" 
+
+	<target name="clean-xpti" depends="xpti" unless="deleteXPTI.notRequired"
 		description="Delete xpti.dat to reload xpt" >
 			<delete file="${install.dir}/xpti.dat"/>
 	</target>
-	
+
 	<target name="copy-xpt" depends="xpt">
 		<copy todir="./components">
 			<fileset dir="firebug">
@@ -153,7 +157,7 @@
 			</fileset>
 		</copy>
 	</target>
-	
+
 	<!-- Distribution XPI Targets -->
 	<target name="createChromeJAR">
 		<mkdir dir="${build_dir}" />
@@ -166,7 +170,7 @@
 		<mkdir dir="${build_dir}/Linux" />
 		<mkdir dir="${build_dir}/linux-gnu" />
 		<mkdir dir="${build_dir}/WINNT" />
-		<zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true" 
+		<zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true"
 			basedir="${src_dir}/platform/Darwin" includes="skin/**" excludes="${excludes}" />
 		<zip destfile="${build_dir}/Linux/${ant.project.name}.jar" update="true"
 			basedir="${src_dir}/platform/Linux"
@@ -208,7 +212,7 @@
 			<zipfileset dir="${build_dir}" includes="*.manifest" />
 		</zip>
 	</target>
-	
+
 	<target name="createDistributionXPI" depends="zipIntoXPI" >
 		<copy file="${dist_dir}/${ant.project.name}.xpi" tofile="${dist_dir}/${ant.project.name}.xpi.zip" />
 	</target>
@@ -217,10 +221,10 @@
 		<move file="${dist_dir}/firebug.xpi" tofile="${dist_dir}/${FIREBUG-XPI}"/>
 		<copy file="update.rdf" tofile="${dist_dir}/update.rdf" />
 	</target>
-	
+
 
 	<!-- Trace Removal Targets: copy this dir to ../eval, strip lines with /*@explore*/ -->
-	<target name="clean-unexplore" 
+	<target name="clean-unexplore"
 		description="Delete contents of unexplore directory" >
 		<fail>
 	    	<condition>
@@ -234,7 +238,7 @@
 		</delete>
 	</target>
 
-	<target name="copy-to-unexplore" depends="xpt" 
+	<target name="copy-to-unexplore" depends="xpt"
 		description="copy to clean out tracing code before xpi">
 		<copy todir="${unexplore.dir}" >
 			<fileset dir=".">
@@ -245,9 +249,9 @@
 			</fileset>
 		</copy>
 	</target>
-	
 
-	<target name="unexplore" depends="version, expand-templates, clean-unexplore, copy-to-unexplore">		
+
+	<target name="unexplore" depends="version, expand-templates, clean-unexplore, copy-to-unexplore">
 		<replaceregexp match=".*/\*@explore\*/.*\n" replace="" flags="g">
 		    <fileset dir="${unexplore.dir}" includes="**/*.js"/>
 			<fileset dir="${unexplore.dir}" includes="**/*.xul"/>
@@ -255,14 +259,14 @@
 		<echo message="update VERSION in ${unexplore.dir}/branch.properties"/>
 	</target>
 
-	<target name="createAptanaJAR" if="aptana">		
+	<target name="createAptanaJAR" if="aptana">
 		<echo message="Create aptanadebugger.jar"/>
 		<mkdir dir="${build_dir}" />
 		<zip destfile="${build_dir}/aptanadebugger.jar" update="true" basedir="${src_dir}/aptanadebugger/"
 			includes="content/**, locale/**, skin/**" excludes="${excludes}"/>
 	</target>
 
-	<target name="integrateAptana" if="aptana">		
+	<target name="integrateAptana" if="aptana">
 		<echo message="Integrate AptanaDebugger"/>
 		<concat destfile="${build_dir}/chrome.manifest" force="yes">
 		    <fileset file="${src_dir}/chrome.manifest"/>
