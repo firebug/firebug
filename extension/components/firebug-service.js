@@ -826,7 +826,8 @@ FirebugService.prototype =
 						return hookReturn;
 					else if (hookReturn==-1)
 						breakOnNextError = true;
-					//debuggr = this.reFindDebugger(frame, debuggr); //XXXnew
+                    if (breakOnNextError)
+                        debuggr = this.reFindDebugger(frame, debuggr);
 				}
 	        }
 
