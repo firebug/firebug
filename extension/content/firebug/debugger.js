@@ -1098,11 +1098,18 @@ Firebug.Debugger = extend(Firebug.Module,
                 return src;
             }
             else
-                return frame.script.functionSource+" /* !eval("+evalThis+")) */";
+	    {
+                var source;
+		if(evalExpr == "function(p,a,c,k,e,r")
+		    source = "/packer/ JS compressor detected";
+	        else
+		    source = frame.script.functionSource;
+		return source+" /* !eval("+evalThis+")) */";
+	    }
         }
         else
         {
-            return frame.script.functionSource;
+            return frame.script.functionSource; // XXXms - possible crash on OSX
         }
     },
 
