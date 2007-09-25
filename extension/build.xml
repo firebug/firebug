@@ -185,10 +185,14 @@
 		/>
 	</target>
 
-	<target name="zipIntoXPI" depends="clean, createChromeJAR">
+	<target name="zipIntoXPI" depends="clean, createChromeJAR, createAptanaJAR">
 		<mkdir dir="${dist_dir}" />
+		<copy todir="${build_dir}">
+		    <fileset dir="${src_dir}" includes="*.manifest"/>
+		</copy>
+		<antcall target="integrateAptana"/>
 		<zip destfile="${dist_dir}/${ant.project.name}.xpi" update="true">
-			<zipfileset dir="${build_dir}" includes="${ant.project.name}.jar" prefix="chrome" />
+			<zipfileset dir="${build_dir}" includes="*.jar" prefix="chrome" />
 			<zipfileset dir="${src_dir}" includes="icons/**" prefix="chrome" excludes="${excludes}" />
 			<zipfileset dir="${src_dir}/platform" includes="**" prefix="platform" excludes="${excludes}, **/skin/**" />
 			<!--
@@ -200,7 +204,8 @@
 			<zipfileset dir="${src_dir}/components" includes="*.js" prefix="components" />
 			<zipfileset dir="${src_dir}/components" includes="*.xpt" prefix="components" />
 			<zipfileset dir="${src_dir}/defaults" includes="**" prefix="defaults" excludes="${excludes}" />
-			<zipfileset dir="${src_dir}" includes="install.rdf, *.manifest" />
+			<zipfileset dir="${src_dir}" includes="install.rdf" />
+			<zipfileset dir="${build_dir}" includes="*.manifest" />
 		</zip>
 	</target>
 	
@@ -250,7 +255,20 @@
 		<echo message="update VERSION in ${unexplore.dir}/branch.properties"/>
 	</target>
 
+	<target name="createAptanaJAR" if="aptana">		
+		<echo message="Create aptanadebugger.jar"/>
+		<mkdir dir="${build_dir}" />
+		<zip destfile="${build_dir}/aptanadebugger.jar" update="true" basedir="${src_dir}/aptanadebugger/"
+			includes="content/**, locale/**, skin/**" excludes="${excludes}"/>
+	</target>
 
+	<target name="integrateAptana" if="aptana">		
+		<echo message="Integrate AptanaDebugger"/>
+		<concat destfile="${build_dir}/chrome.manifest" force="yes">
+		    <fileset file="${src_dir}/chrome.manifest"/>
+			<fileset file="${src_dir}/aptanadebugger/chrome.manifest"/>
+		</concat>
+	</target>
 
 
 </project>
