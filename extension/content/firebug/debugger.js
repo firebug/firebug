@@ -1763,7 +1763,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         return [
             optionMenu("BreakOnAllErrors", "breakOnErrors"),
-            optionMenu("BreakOnTopLevel", "breakOnTopLevel"),
+            // wait 1.2 optionMenu("BreakOnTopLevel", "breakOnTopLevel"),
             optionMenu("ShowEvalSources", "showEvalSources"),
             optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
