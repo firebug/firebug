@@ -56,6 +56,7 @@
 
 	<property name="excludes" value="**/.*, **/*.jar, **/*.db" />
 	<property name="components_dir" location="${src_dir}/components" />
+	<available file="${src_dir}/aptanadebugger" property="aptanadebugger"/>
 
 	<!-- Targets -->
 	<target name="clean">
@@ -259,14 +260,14 @@
 		<echo message="update VERSION in ${unexplore.dir}/branch.properties"/>
 	</target>
 
-	<target name="createAptanaJAR" if="aptana">
+	<target name="createAptanaJAR" if="aptanadebugger">
 		<echo message="Create aptanadebugger.jar"/>
 		<mkdir dir="${build_dir}" />
 		<zip destfile="${build_dir}/aptanadebugger.jar" update="true" basedir="${src_dir}/aptanadebugger/"
 			includes="content/**, locale/**, skin/**" excludes="${excludes}"/>
 	</target>
 
-	<target name="integrateAptana" if="aptana">
+	<target name="integrateAptana" if="aptanadebugger">
 		<echo message="Integrate AptanaDebugger"/>
 		<concat destfile="${build_dir}/chrome.manifest" force="yes">
 		    <fileset file="${src_dir}/chrome.manifest"/>
