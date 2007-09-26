@@ -3,7 +3,7 @@
 function FirebugConsole(context, win)
 {
     this.firebug = Firebug.version;
-	this.formatted = true;  // default should be false, but legacy was true.
+	this.formatted = false;  // default should be false, but legacy was true.
 
     // We store these functions as closures so that they can access the context privately,
     // because it would be insecure to store context as a property of window.console and
