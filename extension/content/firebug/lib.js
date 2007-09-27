@@ -233,6 +233,7 @@ this.getRandomInt = function(min, max) {
 this.createStyleSheet = function(doc, url)
 {
     var link = doc.createElementNS("http://www.w3.org/1999/xhtml", "link");
+    link.setAttribute("charset","utf-8");
     link.firebugIgnore = true;
     link.setAttribute("rel", "stylesheet");
     link.setAttribute("type", "text/css");
@@ -2505,7 +2506,7 @@ this.parseURLEncodedText = function(text)
 // ************************************************************************************************
 // Network
 
-this.readFromStream = function(stream, charset)
+this.readFromScriptableStream = function(stream, charset)
 {
     var sis = this.CCSV("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
     sis.init(stream);
@@ -2521,6 +2522,28 @@ this.readFromStream = function(stream, charset)
 
     var text = segments.join("");
     return this.convertToUnicode(text, charset);
+};
+
+this.readFromStream = function(stream, charset)
+{
+	try
+    {
+    	var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+        sis.setInputStream(stream);
+
+        var segments = [];
+        for (var count = stream.available(); count; count = stream.available())
+        	segments.push(sis.readBytes(count));
+
+        sis.close();
+		var text = segments.join("");
+        return this.convertToUnicode(text, charset);
+     }
+     catch(exc)
+ 	 {
+ 	 	if (FBTrace.DBG_ERRORS) 														/*@explore*/
+			FBTrace.dumpProperties("lib.readFromStream FAILS", exc);					/*@explore*/
+ 	 }
 };
 
 this.readPostText = function(url, context)

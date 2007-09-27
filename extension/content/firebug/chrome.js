@@ -1023,7 +1023,7 @@ function getBestPanelName(object, context, panelName)
                 bestLevel = level;
                 bestPanel = panelType;
             }
-            if (FBtrace.DBG_PANELS) 																													 /*@explore*/
+            if (FBTrace.DBG_PANELS) 																													 /*@explore*/
                 FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType+" level: "+level+" bestPanel: "+bestPanel+" bestLevel: "+bestLevel+"\n"); /*@explore*/
         }
     }
