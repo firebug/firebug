@@ -29,7 +29,8 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_HTML: false,            // HTML panel
     DBG_LINETABLE: false,       // lib.js creating line tables.
     DBG_NET: false,        	// net.js
-    DBG_OPTIONS: true,
+    DBG_OPTIONS: false,
+    DBG_PANELS: false, // panel selection.
     DBG_SHOW_SYSTEM: false,    // isSystemURL return false always.
     DBG_SOURCEFILES: false, 	// debugger and sourceCache
     DBG_STACK: false,  		// call stack, mostly debugger.js

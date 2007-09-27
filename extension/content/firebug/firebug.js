@@ -293,11 +293,11 @@ top.Firebug =
         }
     },
 
-	disableSystemPages: function(disable)
-	{
-		this.setPref("allowSystemPages", !disable);
-		this.disableCurrent(disable);
-	},
+    disableSystemPages: function(disable)
+    {
+        this.setPref("allowSystemPages", !disable);
+        this.disableCurrent(disable);
+    },
 
     disableSite: function(disable)
     {
@@ -327,11 +327,11 @@ top.Firebug =
                     pm.add(uri, "firebug", ALLOW_ACTION);
             }
         }
-		this.disableCurrent(disable);
-	},
+        this.disableCurrent(disable);
+    },
 
-	disableCurrent: function(disable)
-	{
+    disableCurrent: function(disable)
+    {
         if (!tabBrowser)
             return; // externalBrowser
 
@@ -345,10 +345,10 @@ top.Firebug =
             }
         }
         else
-		{
-			TabWatcher.activate();
-			TabWatcher.watchBrowser(tabBrowser.selectedBrowser);
-		}
+        {
+            TabWatcher.activate();
+            TabWatcher.watchBrowser(tabBrowser.selectedBrowser);
+        }
 
     },
 
@@ -1528,7 +1528,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             min += scriptBlockSize;
         } while (max < lines.length);
 
-        this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
+        this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);  // XXXjjb TODO addLineTables here
 
         if (sourceFile.text)
             this.anonSourceBoxes.push(sourceBox);

@@ -67,8 +67,8 @@ top.FirebugChrome =
 
     initialize: function()
     {
-		if (window.arguments)
-        	var detachArgs = window.arguments[0];
+    if (window.arguments)
+          var detachArgs = window.arguments[0];
 
         if (!detachArgs)
             detachArgs = {};
@@ -108,8 +108,8 @@ top.FirebugChrome =
     initializeUI: function()
     {
     try {
-		if (window.arguments)
-        	var detachArgs = window.arguments[0];
+        if (window.arguments)
+            var detachArgs = window.arguments[0];
 
         if (detachArgs)
         {
@@ -125,7 +125,7 @@ top.FirebugChrome =
         disabledCaption = doc1.getElementById("disabledCaption");
         enableAlwaysLink = doc1.getElementById("enableAlwaysLink");
         enableSiteLink = doc1.getElementById("enableSiteLink");
-		enableSystemPagesLink = doc1.getElementById("enableSystemPagesLink");
+        enableSystemPagesLink = doc1.getElementById("enableSystemPagesLink");
 
         doc1.addEventListener("mouseover", onPanelMouseOver, false);
         doc1.addEventListener("mouseout", onPanelMouseOut, false);
@@ -145,7 +145,7 @@ top.FirebugChrome =
         var win1 = panelBar1.browser.contentWindow;
         win1.enableAlways = bindFixed(Firebug.setPref, Firebug, "disabledAlways", false);
         win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
-		win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
+        win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
 
         for (var i = 0; i < Firebug.panelTypes.length; ++i)
         {
@@ -443,7 +443,7 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.syncPanel FirebugContext="+FirebugContext+"\n");               /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+FirebugContext+"\n");               /*@explore*/
                                                                                                                        /*@explore*/
         panelStatus.clear();
 
@@ -468,28 +468,28 @@ top.FirebugChrome =
             {
                 var host = getURIHost(uri);
                 var isSystemPage = FBL.isSystemURL(uri.spec);
-				if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.syncPanel host="+host+" isSystemPage="+isSystemPage+"\n");               /*@explore*/
+                if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel host="+host+" isSystemPage="+isSystemPage+"\n");               /*@explore*/
                 var caption;
-				if (Firebug.disabledAlways)
-				{
-					caption = FBL.$STR("DisabledHeader");
-					enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
-				}
+                if (Firebug.disabledAlways)
+                {
+                  caption = FBL.$STR("DisabledHeader");
+                  enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
+                }
                 else if (isSystemPage && !Firebug.allowSystemPages)
-				{
-					caption = FBL.$STR("IsSystemPage");
-					enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
-				}
+                {
+                  caption = FBL.$STR("IsSystemPage");
+                  enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
+                }
                 else if (!host)
-				{
-					caption = FBL.$STR("DisabledForFiles");
-					enableSiteLink.firstChild.nodeValue = FBL.$STR("EnableForFiles");
-				}
+                {
+                  caption = FBL.$STR("DisabledForFiles");
+                  enableSiteLink.firstChild.nodeValue = FBL.$STR("EnableForFiles");
+                }
                 else
-				{
-					 caption = FBL.$STRF("DisabledForSiteHeader", [host]);
-					 enableSiteLink.firstChild.nodeValue = FBL.$STRF("EnableForSite", [host]);
-				}
+                {
+                   caption = FBL.$STRF("DisabledForSiteHeader", [host]);
+                   enableSiteLink.firstChild.nodeValue = FBL.$STRF("EnableForSite", [host]);
+                }
 
                 disabledHead.firstChild.nodeValue = caption;
                 disabledBox.removeAttribute("collapsed");
@@ -1023,6 +1023,8 @@ function getBestPanelName(object, context, panelName)
                 bestLevel = level;
                 bestPanel = panelType;
             }
+            if (FBtrace.DBG_PANELS) 																													 /*@explore*/
+                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType+" level: "+level+" bestPanel: "+bestPanel+" bestLevel: "+bestLevel+"\n"); /*@explore*/
         }
     }
 
@@ -1081,7 +1083,7 @@ function onSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
-    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
+    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
 
     if (FirebugContext)
     {
@@ -1105,7 +1107,7 @@ function onSelectingPanel(event)
 function onSelectedSidePanel(event)
 {
     var sidePanel = panelBar2.selectedPanel;
-    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("chrome.onSelectedSidePanel="+sidePanel+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
+    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel="+sidePanel+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
     if (FirebugContext)
     {
         var panelName = FirebugContext.panelName;

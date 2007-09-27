@@ -81,6 +81,7 @@ pref("extensions.firebug.DBG_ERRORS", true);  		// error.js                     
 pref("extensions.firebug.DBG_EVENTS", false);  		// debugger.js for event handlers, need more /*@explore*/
 pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon functions          /*@explore*/
 pref("extensions.firebug.DBG_EVAL", false);    		// debugger.js and firebug-service.js        /*@explore*/
+pref("extensions.firebug.DBG_PANELS", false);  		// panel selection                           /*@explore*/
 pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                               /*@explore*/
 pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/
 pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/

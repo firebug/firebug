@@ -272,7 +272,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("Console.panel show\n");                                               /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show\n");                                               /*@explore*/
         var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
         collapse(consoleButtons, false);
         if (this.wasScrolledToBottom)
@@ -281,7 +281,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 
     hide: function()
     {
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/
         var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
         collapse(consoleButtons, true);
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
