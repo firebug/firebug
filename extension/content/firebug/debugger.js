@@ -702,7 +702,7 @@ Firebug.Debugger = extend(Firebug.Module,
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onToggleBreakpoint: "+lineNo+"@"+url+"\n");                         /*@explore*/
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length+"\n");                         /*@explore*/
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
             var panel = TabWatcher.contexts[i].getPanel("script", true);
@@ -728,6 +728,9 @@ Firebug.Debugger = extend(Firebug.Module,
                         row.removeAttribute("disabledBreakpoint");
                     }
                 }
+                else
+                    if (FBTrace.DBG_BP) 										 													  /*@explore*/
+                        FBTrace.dumpProperties("debugger.onToggleBreakPoint no find sourcebox, sourceBoxes[url]", panel.sourceBoxes); /*@explore*/
             }
         }
     },

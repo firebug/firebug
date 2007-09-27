@@ -606,7 +606,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         else if (object instanceof SourceLink)
             return 0;
         else
-            return 100;
+            return 1; // just agree to support everything but not agressively.
     },
 
     refresh: function()

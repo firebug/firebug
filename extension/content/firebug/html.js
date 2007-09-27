@@ -293,7 +293,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (!parentNodeBox)
             return;
 
-        if (!Firebug.showWhitespaceNodes && isWhitespaceText(target))
+        if (!Firebug.showWhitespaceNodes && this.isWhitespaceText(target))
             return;
 
         var newParentTag = getNodeTag(parent);
@@ -382,7 +382,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     createObjectBox: function(object, isRoot)
     {
-        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+object+","+isRoot+")\n");                         /*@explore*/
+        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+(object.tagName?object.tagName:object)+", isRoot:"+(isRoot?"true":"false")+")\n");                         /*@explore*/
         var tag = getNodeTag(object);
         if (tag)
             return tag.replace({object: object}, this.document);
@@ -393,7 +393,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (node instanceof SourceText)
             return node.owner;
 
-        if (this.rootElement && node == this.rootElement)
+        if (this.rootElement && node == this.rootElement)  // this.rootElement is never set
             return null;
 
         var parentNode = node ? node.parentNode : null;
@@ -419,14 +419,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     getChildObject: function(node, index, previousSibling)
     {
-        if (isSourceElement(node))
+        if (this.isSourceElement(node))
         {
             if (index == 0)
                 return this.getElementSourceText(node);
         }
         else if (previousSibling)
         {
-            return findNextSibling(previousSibling);
+            return this.findNextSibling(previousSibling);
         }
         else
         {
@@ -439,7 +439,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 var childIndex = 0;
                 for (var child = node.firstChild; child; child = child.nextSibling)
                 {
-                    if (!isWhitespaceText(child) && childIndex++ == index)
+                    if (!this.isWhitespaceText(child) && childIndex++ == index)
                         return child;
                 }
             }
@@ -447,6 +447,34 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         return null;
     },
+
+	isWhitespaceText: function(node)
+	{
+	    if (node instanceof HTMLAppletElement)
+	        return false;
+	    return node.nodeType == 3 && isWhitespace(node.nodeValue);
+	},
+
+	findNextSibling: function (node)
+	{
+	    if (Firebug.showWhitespaceNodes)
+	        return node.nextSibling;
+	    else
+	    {
+	        for (var child = node.nextSibling; child; child = child.nextSibling)
+	        {
+	            if (!this.isWhitespaceText(child))
+	                return child;
+	        }
+	    }
+	},
+
+	isSourceElement: function(element)
+	{
+	    var tag = element.localName.toLowerCase();
+	    return tag == "script" || tag == "link" || tag == "style"
+	        || (tag == "link" && element.getAttribute("rel") == "stylesheet");
+	},
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Events
@@ -488,7 +516,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         var parent = event.relatedNode;
         var removal = event.type == "DOMNodeRemoved";
-        var nextSibling = removal ? null : findNextSibling(target);
+        var nextSibling = removal ? null : this.findNextSibling(target);
 
         this.context.delay(function()
         {
@@ -680,14 +708,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // document.documentElement    Returns the Element that is a direct child of document. For HTML documents, this normally the HTML element.
         var target = win.document.documentElement;
         var parent = win.frameElement;
-        var nextSibling = findNextSibling(target);
+        var nextSibling = this.findNextSibling(target);
         this.mutateNode(target, parent, nextSibling, remove);
     },
 
     supportsObject: function(object)
     {
         if (object instanceof Element || object instanceof Text || object instanceof CDATASection)
-            return 1;
+            return 2;
         else if (object instanceof SourceLink && object.type == "css" && !reCSS.test(object.href))
             return 2;
         else
@@ -958,7 +986,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             var nodes = [];
             for (var child = node.firstChild; child; child = child.nextSibling)
             {
-                if (child.nodeType != 3 || !isWhitespaceText(child))
+                if (child.nodeType != 3 || !this.isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1339,6 +1367,8 @@ function isContainerElement(element)
         case "style":
         case "iframe":
         case "frame":
+		case "tabbrowser":
+		case "browser":
             return true;
         case "link":
             return element.getAttribute("rel") == "stylesheet";
@@ -1354,6 +1384,14 @@ function isPureText(element)
             return false;
     }
     return true;
+}
+
+// Duplicate of HTMLPanel.isWhitespaceText
+function isWhitespaceText(node)
+{
+    if (node instanceof HTMLAppletElement)
+        return false;
+    return node.nodeType == 3 && isWhitespace(node.nodeValue);
 }
 
 function isEmptyElement(element)
@@ -1469,7 +1507,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
         {
             if (node.nodeType == 3)
             {
-                if (isSourceElement(node.parentNode))
+                if (this.isSourceElement(node.parentNode))
                     continue;
 
                 var m = re.exec(node.nodeValue);
