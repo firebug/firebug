@@ -4836,7 +4836,7 @@ const invisibleTags = this.invisibleTags =
 
 this.evalInTo = function(win, text)
 {
-    var sandbox = new Components.utils.Sandbox(win.location.href);
+    var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
     try
     {
         sandbox.win = win;
