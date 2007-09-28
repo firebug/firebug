@@ -54,12 +54,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     showMessageOnStatusBar: function(error)
     {
-        if (statusBar)
-            statusBar.setAttribute("errors", "true");
-        if (statusText && Firebug.breakOnErrors &&  !(error.flags & nsIScriptError.WARNING_FLAG))  // sometimes this is undefined..how?
+        if (statusText && statusBar && Firebug.breakOnErrors && error.message &&  !(error.flags & nsIScriptError.WARNING_FLAG))  // sometimes statusText is undefined..how?
+        {
             statusText.setAttribute("value", error.message);
-        else
-            statusText.setAttribute("value", "");
+            statusBar.setAttribute("errors", "true");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.showMessageOnStatusBar error.message:"+error.message+"\n"); /*@explore*/
+        }
     },
 
     showCount: function(errorCount)
