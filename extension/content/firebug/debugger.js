@@ -1452,7 +1452,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var lineNo = 1;
         while( lineNode = this.getLineNode(lineNo) )
         {
-            if (sourceFile.isLineExecutable(lineNo))
+            if (sourceFile.isInExecutableTable(lineNo))
                 lineNode.setAttribute("executable", "true");
             else
                 lineNode.removeAttribute("executable");

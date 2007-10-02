@@ -286,7 +286,7 @@ function categoryFilter(url, category, isWarning)
     return true;
 }
 
-function domainFilter(url)
+function domainFilter(url)  // never called?
 {
     if (Firebug.showExternalErrors)
         return true;

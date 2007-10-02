@@ -21,6 +21,7 @@ function FirebugConsole(context, win)
 
     this.info = function()
     {
+		// if formatted, then arguments should n+1 for n objects.
         logFormatted(this.formatted, arguments, "info", true);
     };
 

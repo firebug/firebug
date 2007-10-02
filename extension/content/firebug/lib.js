@@ -2899,7 +2899,7 @@ this.SourceFile.prototype =
                 var pcFromLine = script.lineToPc(scriptLineNo, pcmap_type);                                            /*@explore*/
                 var lineFromPC = script.pcToLine(pcFromLine, pcmap_type);                                              /*@explore*/
                                                                                                                        /*@explore*/
-                if (this.isLineExecutable(mapLineNo))                                                                  /*@explore*/
+                if (this.isInExecutableTable(mapLineNo))                                                                  /*@explore*/
                     FBTrace.sysout("SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo]+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+pcmap_type+"\n"); /*@explore*/
                 else                                                                                                   /*@explore*/
                     FBTrace.sysout("SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
@@ -2908,7 +2908,7 @@ this.SourceFile.prototype =
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/
     },
 
-    isLineExecutable: function(lineNo)
+    isInExecutableTable: function(lineNo)
     {
         return this.lineMap[lineNo];
     }
