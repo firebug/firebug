@@ -34,9 +34,9 @@ interface nsIFireBugBreakpointProperties : nsISupports
 interface nsIFireBugDebugger : nsISupports
 {
     boolean supportsWindow(in nsIDOMWindow window);
-    
+
     void onLock(in boolean state);
-    
+
     unsigned long onBreak(in jsdIStackFrame frame, in unsigned long type);
     unsigned long onHalt(in jsdIStackFrame frame);
     unsigned long onThrow(in jsdIStackFrame frame, inout jsdIValue rv);
@@ -46,7 +46,7 @@ interface nsIFireBugDebugger : nsISupports
      * Called when jsd signals onError and the showStackTrace option is set.
      */
     long onError(in jsdIStackFrame frame, in nsIFireBugError error);
-     
+
     /**
      * A script created by an eval is created;
      *   url is eval-level script url,
@@ -54,7 +54,7 @@ interface nsIFireBugDebugger : nsISupports
      *   script is jsd object for script with fileName and baseLineNumber of old
      */
     void onEvalScript(in string url, in unsigned long lineNo, in jsdIScript script);
-        
+
     /**
      * A script created by compiling top-level is created;
      *   url is top-level script url from onTopLevel
@@ -62,7 +62,7 @@ interface nsIFireBugDebugger : nsISupports
      *   script is jsd object for script with fileName and baseLineNumber of old
      */
     void onTopLevelScript(in string url, in unsigned long lineNo, in jsdIScript script);
-        
+
     /**
      * Breakpoints changes notification callbacks
      */
@@ -96,6 +96,14 @@ interface nsIFireBugURLProvider : nsISupports
      */
     string onEventScript(in jsdIStackFrame frame);
 
+    /**
+     * Called when a new Function() is created dynamically.
+     * in frame from interrupt hook right after Function() call
+     * in script created by Function() call
+     * out file name to bind to all scripts from this eventLevel
+     */
+    string onFunctionConstructor(in jsdIStackFrame frame, in jsdIScript script);
+
 };
 
 [scriptable, uuid(35acfa60-d2a0-11da-a94d-0800200c9a66)]
@@ -125,7 +133,7 @@ interface nsIFireBug : nsISupports
     const unsigned long STEP_OVER = 1;
     const unsigned long STEP_INTO = 2;
     const unsigned long STEP_OUT = 3;
-    
+
     readonly attribute nsIDOMWindow lastErrorWindow;
 
     readonly attribute boolean enabled;
@@ -133,7 +141,7 @@ interface nsIFireBug : nsISupports
 
     void registerClient(in nsIFireBugClient client);
     void unregisterClient(in nsIFireBugClient client);
-    
+
     void registerDebugger(in nsIFireBugDebugger debugger);
     void unregisterDebugger(in nsIFireBugDebugger debugger);
 
@@ -143,7 +151,7 @@ interface nsIFireBug : nsISupports
     readonly attribute boolean locked;
     void lockDebugger();
     void unlockDebugger();
-    
+
     /**
      * JSD wrappers
      */
@@ -154,17 +162,17 @@ interface nsIFireBug : nsISupports
      * Halts execution immediately and calls debugger.onHalt().
      */
     void halt(in nsIFireBugDebugger debugger);
-    
+
     /**
      * Starts stepping when the debugger resumes execution.
      */
     void step(in unsigned long stepMode, in jsdIStackFrame startFrame);
-    
+
     /**
      * Runs until execution hits a particular line when the debugger resumes execution.
      */
     void runUntil(in string url, in unsigned long lineNo, in jsdIStackFrame startFrame);
-    
+
     /**
      * Suspend execution on the next statement
      */
@@ -177,10 +185,10 @@ interface nsIFireBug : nsISupports
     void enableBreakpoint(in string url, in unsigned long lineNo);
     void disableBreakpoint(in string url, in unsigned long lineNo);
     boolean isBreakpointDisabled(in string url, in unsigned long lineNo);
-    
+
     boolean hasBreakpoint(in jsdIScript script);
     void enumerateBreakpoints(in string url, in nsIFireBugBreakpointCallback cb);
-    
+
     string getBreakpointCondition(in string url, in unsigned long lineNo);
     void setBreakpointCondition(in string url, in unsigned long lineNo, in string condition);
 
@@ -196,11 +204,11 @@ interface nsIFireBug : nsISupports
     void unmonitor(in jsdIScript script);
     boolean isMonitored(in jsdIScript script);
     void enumerateMonitors(in string url, in nsIFireBugBreakpointCallback cb);
-    
+
     void enumerateScripts(out unsigned long length, [retval, array, size_is(length)] out jsdIScript scripts);
 
     readonly attribute boolean profiling;
-    
+
     /**
      * Start profiling, or continue profiling if this has already been called.
      * Nested calls are allowed, but each call must be matched with a call to

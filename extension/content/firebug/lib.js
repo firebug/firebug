@@ -1457,7 +1457,14 @@ this.getStackFrame = function(frame, context)
             {
                 if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame event frame\n");                              /*@explore*/
                 var url = context.eventSourceURLByTag[frame.script.tag];
-                var lineNo = FBL.getLineAtPCForEvent(frame, context);
+                var lineNo = FBL.getLineAtPC(frame, context);
+                return new this.StackFrame(context, fn, frame.script, url, lineNo, args);
+            }
+            else if (context.functionCtorSourceURLByTag && frame.script.tag in context.functionCtorSourceURLByTag)
+            {
+                if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame Function Ctor frame\n");                              /*@explore*/
+                var url = context.functionCtorSourceURLByTag[frame.script.tag];
+                var lineNo = FBL.getLineAtPC(frame, context);
                 return new this.StackFrame(context, fn, frame.script, url, lineNo, args);
             }
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame toplevel function frame\n");                      /*@explore*/
@@ -1501,17 +1508,26 @@ this.getSourceLinkAtPCForEvaled = function(frame, context)
     return new this.SourceLink(url, lineNo, "js");
 }
 
-this.getLineAtPCForEvent = function(frame, context)
+this.getLineAtPC = function(frame, context)
 {
     var lineNo = frame.script.pcToLine(frame.pc, PCMAP_PRETTYPRINT);
-    if (FBTrace.DBG_BP) FBTrace.sysout("getLineAtPCforEvent pc="+frame.pc+" line="+lineNo+"\n");                       /*@explore*/
+    if (lineNo > 1) lineNo = lineNo - 1;
+    if (FBTrace.DBG_BP)   																										/*@explore*/
+    { 																															/*@explore*/
+        var l = 0;  																								  			/*@explore*/
+        var pc = frame.script.lineToPc(l, PCMAP_PRETTYPRINT); 																	/*@explore*/
+        FBTrace.sysout("lib.getLineAtPC line "+l+" has PC="+pc);																/*@explore*/
+        FBTrace.sysout("lib.getLineAtPC pc has line="+frame.script.pcToLine(pc, PCMAP_PRETTYPRINT)+"\n");						/*@explore*/
+        FBTrace.sysout("lib.getLineAtPC pc="+frame.pc+" line="+lineNo+"\n");                       								/*@explore*/
+    } 																															/*@explore*/
+
     return lineNo;
 }
 
 this.getSourceLinkAtPCForEvent = function(frame, context)
-{
+{  //DEAD code?
     var url = context.eventSourceURLByTag[frame.script.tag];
-    var lineNo = FBL.getLineAtPCForEvent(frame, context);
+    var lineNo = FBL.getLineAtPC(frame, context);
     return new this.SourceLink(url, lineNo, "js");
 }
 
@@ -1655,6 +1671,10 @@ this.findScript = function(url, line)
             {
                 foundScript = script;
             }
+            else if (context && context.functionCtorSourceURLByTag && context.functionCtorSourceURLByTag[script.tag] == url)
+            {
+                foundScript = script;
+            }
         }
     }});
 
@@ -1693,6 +1713,11 @@ this.getSourceForScript = function(script, context)
     else if (context.eventSourceURLByTag && script.tag in context.eventSourceURLByTag)
     {
         var url = context.eventSourceURLByTag[script.tag];
+        return new this.SourceLink(url, 1, "js");
+    }
+    else if (context.functionCtorSourceURLByTag && script.tag in context.functionCtorSourceURLByTag)
+    {
+        var url = context.functionCtorSourceURLByTag[script.tag];
         return new this.SourceLink(url, 1, "js");
     }
     return script
@@ -2526,24 +2551,24 @@ this.readFromScriptableStream = function(stream, charset)
 
 this.readFromStream = function(stream, charset)
 {
-	try
+    try
     {
-    	var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+        var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
         sis.setInputStream(stream);
 
         var segments = [];
         for (var count = stream.available(); count; count = stream.available())
-        	segments.push(sis.readBytes(count));
+            segments.push(sis.readBytes(count));
 
         sis.close();
-		var text = segments.join("");
+        var text = segments.join("");
         return this.convertToUnicode(text, charset);
      }
      catch(exc)
- 	 {
- 	 	if (FBTrace.DBG_ERRORS) 														/*@explore*/
-			FBTrace.dumpProperties("lib.readFromStream FAILS", exc);					/*@explore*/
- 	 }
+      {
+          if (FBTrace.DBG_ERRORS) 														/*@explore*/
+            FBTrace.dumpProperties("lib.readFromStream FAILS", exc);					/*@explore*/
+      }
 };
 
 this.readPostText = function(url, context)

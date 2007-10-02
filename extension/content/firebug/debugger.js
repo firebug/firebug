@@ -36,6 +36,7 @@ const reLineNumber = /^[^\\]?#(\d*)$/;
 const reEval =  /\s*eval\s*\(([^)]*)\)/m;        // eval ( $1 )
 const reHTM = /\.[hH][tT][mM]/;
 const reURIinComment = /\/\/@\ssourceURL=\s*(.*)\s*$/m;
+const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 
 const evalScriptPre =
     "with (__scope__.vars) { with (__scope__.api) { with (__scope__.userVars) { with (window) {";
@@ -658,7 +659,8 @@ Firebug.Debugger = extend(Firebug.Module,
         {
             Firebug.errorStackTrace = getStackTrace(frame, context);
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
-            Firebug.Errors.showMessageOnStatusBar(error);
+            if (Firebug.breakOnErrors)
+                Firebug.Errors.showMessageOnStatusBar(error);
         }
         catch (exc) {
             ERROR("debugger.onError getStackTrace FAILED: "+exc+"\n");
@@ -857,6 +859,43 @@ Firebug.Debugger = extend(Firebug.Module,
         }
     },
 
+    onFunctionConstructor: function(frame, ctor_script)
+    {
+       try
+        {
+            var context = this.breakContext;
+            delete this.breakContext;
+
+            var sourceFile = this.createSourceFileForFunctionConstructor(frame, ctor_script, context);
+            sourceFile.addToLineTable(ctor_script, 0, sourceFile.source);
+
+            if (context.functionCtorSourceURLByTag == undefined)
+            {
+                context.functionCtorSourceURLByTag = {};
+                context.functionCtorSourceFilesByURL = {};
+            }
+
+            context.functionCtorSourceURLByTag[ctor_script.tag] = sourceFile.href;
+            context.functionCtorSourceFilesByURL[sourceFile.href] = sourceFile;
+
+            if (FBTrace.DBG_EVAL)                                                                                      /*@explore*/
+            {                                                                                                          /*@explore*/
+                FBTrace.sysout("debugger.onFunctionConstructor tag="+ctor_script.tag+" url="+sourceFile.href+"\n");                            /*@explore*/
+                FBTrace.sysout( traceToString(FBL.getStackTrace(frame, context))+"\n" );                               /*@explore*/
+            }                                                                                                          /*@explore*/
+                                                                                                                       /*@explore*/
+            dispatch(listeners,"onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
+            return sourceFile.href;
+        }
+        catch(exc)
+        {
+            ERROR("debugger.onFunctionConstructor failed: "+exc);
+            if (FBTrace.DBG_EVAL) FBTrace.dumpProperties("debugger.onFunctionConstructor failed: ",exc);                              /*@explore*/
+            return null;
+        }
+
+    },
+
     onEval: function(frame)
     {
         try
@@ -887,6 +926,55 @@ Firebug.Debugger = extend(Firebug.Module,
 
     },
 
+    createSourceFileForFunctionConstructor: function(caller_frame, ctor_script, context)
+    {
+        var ctor_expr = null; // this.getConstructorExpression(caller_frame, context);
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForFunctionConstructor ctor_expr:"+ctor_expr+"\n");                     /*@explore*/
+        if (ctor_expr)
+            var source  = this.getEvalBody(caller_frame, "lib.createSourceFileForFunctionConstructor ctor_expr", 1, ctor_expr);
+        else
+            var source = ctor_script.functionSource;
+
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");                     /*@explore*/
+
+        var bufferURL = this.getDataURLForScript(ctor_script, source);
+        var sourceFile = new FBL.SourceFile(bufferURL, context);
+        sourceFile.source = source;
+
+        sourceFile.evalExpression = ctor_expr;
+        sourceFile.tag = ctor_script.tag;
+
+        context.sourceCache.store(sourceFile.href, sourceFile.source);
+        return sourceFile;
+    },
+
+    getConstructorExpression: function(caller_frame, context)
+    {
+        // We believe we are just after the ctor call.
+        var decompiled_lineno = getLineAtPC(caller_frame, context);
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("debugger.getConstructoreExpression decompiled_lineno:"+decompiled_lineno+"\n");
+
+        var decompiled_lines = splitLines(caller_frame.script.functionSource);  // TODO place in sourceCache?
+        if (FBTrace.DBG_EVAL) FBTrace.dumpProperties("debugger.getConstructoreExpression decompiled_lines:",decompiled_lines);
+
+        var candidate_line = decompiled_lines[decompiled_lineno - 1]; // zero origin
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("debugger.getConstructoreExpression candidate_line:"+candidate_line+"\n");
+
+        if (candidate_line && candidate_line != null)
+            {
+                var m = reFunction.exec(candidate_line);
+                if (m)
+                    var arguments =  m[1];     // TODO Lame: need to count parens, with escapes and quotes
+            }
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("debugger.getConstructoreExpression arguments:"+arguments+"\n");
+        if (arguments) // need to break down commas and get last arg.
+        {
+                var lastComma = arguments.lastIndexOf(',');
+                return arguments.substring(lastComma+1);  // if -1 then 0
+        }
+        return null;
+    },
+
 // Called by debugger.onEval() to store eval() source.
 // The frame has the blank-function-name script and it is not the top frame.
 // The frame.script.fileName is given by spidermonkey as file of the first eval().
@@ -898,75 +986,75 @@ Firebug.Debugger = extend(Firebug.Module,
     {
         var eval_expr = this.getEvalExpression(frame, context);
         if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForEval eval_expr:"+eval_expr+"\n");                     /*@explore*/
-        var eval_body  = this.getEvalBody(frame, "lib.createSourceFileForEval.getEvalBody", 1, eval_expr);
-        if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForEval eval_body:"+eval_body+"\n");                     /*@explore*/
+        var source  = this.getEvalBody(frame, "lib.createSourceFileForEval.getEvalBody", 1, eval_expr);
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForEval source:"+source+"\n");                     /*@explore*/
 
         if (Firebug.useDebugAdapter)
-            var sourceFile = this.getSourceFileFromDebugAdapter(context, frame, eval_body);
+            var sourceFile = this.getSourceFileFromDebugAdapter(context, frame, source);
         else if (Firebug.useLastLineForEvalName)
-            var sourceFile = this.getSourceFileFromLastLine(context, frame, eval_body)
+            var sourceFile = this.getSourceFileFromLastLine(context, frame, source)
         else if (Firebug.useFirstLineForEvalName)
-            var sourceFile = this.getSourceFileFromFirstSourceLine(context, frame, eval_body)
+            var sourceFile = this.getSourceFileFromFirstSourceLine(context, frame, source)
 
         if (sourceFile == undefined)
         {
-            var evalURL = this.getDataURLForScript(frame.script, eval_body);
+            var evalURL = this.getDataURLForScript(frame.script, source);
             var sourceFile = new FBL.SourceFile(evalURL, context);
-            sourceFile.eval_body = eval_body;
+            sourceFile.source = source;
         }
 
         sourceFile.evalExpression = eval_expr;
         sourceFile.tag = frame.script.tag;
 
-        context.sourceCache.store(sourceFile.href, sourceFile.eval_body);
+        context.sourceCache.store(sourceFile.href, sourceFile.source);
 
-        delete sourceFile.eval_body;
+        delete sourceFile.source;
         return sourceFile;
     },
 
-    getSourceFileFromLastLine: function(context, frame, eval_body)
+    getSourceFileFromLastLine: function(context, frame, source)
     {
         var lastLineLength = 0;
-        var endLastLine = eval_body.length - 1;
+        var endLastLine = source.length - 1;
         while(lastLineLength < 3) // skip newlines at end of buffer
         {
-            var lastNewline = eval_body.lastIndexOf('\n', endLastLine);
+            var lastNewline = source.lastIndexOf('\n', endLastLine);
             if (lastNewline < 0)
             {
-                var lastNewLine = eval_body.lastIndexOf('\r', endLastLine);
+                var lastNewLine = source.lastIndexOf('\r', endLastLine);
                 if (lastNewLine < 0)
                     return;
             }
-            lastLineLength = eval_body.length - lastNewline;
+            lastLineLength = source.length - lastNewline;
             endLastLine = lastNewline - 1;
         }
-        var lastLines = eval_body.slice(lastNewline + 1);
-        return this.getSourceFileFromSourceLine(lastLines, eval_body, context);
+        var lastLines = source.slice(lastNewline + 1);
+        return this.getSourceFileFromSourceLine(lastLines, source, context);
     },
 
-    getSourceFileFromFirstSourceLine: function(context, frame, eval_body)
+    getSourceFileFromFirstSourceLine: function(context, frame, source)
     {
-        var firstLine = eval_body.substr(0, 256);  // guard against giants
-        return this.getSourceFileFromSourceLine(firstLine, eval_body, context);
+        var firstLine = source.substr(0, 256);  // guard against giants
+        return this.getSourceFileFromSourceLine(firstLine, source, context);
     },
 
-    getSourceFileFromSourceLine: function(line, eval_body, context)
+    getSourceFileFromSourceLine: function(line, source, context)
     {
         var m = reURIinComment.exec(line);
         if (m)
         {
             var sourceFile = new FBL.SourceFile(m[1], context);
-            sourceFile.eval_body = eval_body;
+            sourceFile.source = source;
         }
         return sourceFile;
     },
 
-    getSourceFileFromDebugAdapter: function(context, frame, eval_body)
+    getSourceFileFromDebugAdapter: function(context, frame, source)
     {
         var evalBufferInfo =
             {
                 sourceURL: frame.script.fileName,
-                source: eval_body,
+                source: source,
                 baseLineNumber: frame.script.baseLineNumber,
                 invisible: false
             };
@@ -996,7 +1084,7 @@ Firebug.Debugger = extend(Firebug.Module,
                 FBTrace.dumpProperties("\ndebugger.createSourceFileForEval after evalBufferInfo after:", evalBufferInfo); /*@explore*/
                                                                                                                        /*@explore*/
             var sourceFile = new FBL.SourceFile(evalBufferInfo.sourceURL, context);
-            sourceFile.eval_body = evalBufferInfo.source;
+            sourceFile.source = evalBufferInfo.source;
 
             if (evalBufferInfo.invisible)
                 sourceFile.invisible = evalBufferInfo.invisible;
@@ -1116,16 +1204,16 @@ Firebug.Debugger = extend(Firebug.Module,
         }
     },
 
-    getDataURLForScript: function(script, eval_body)
+    getDataURLForScript: function(script, source)
     {
-        if (!eval_body)
+        if (!source)
             return "eval."+script.tag;
 
         // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
         var uri = "data:text/javascript;";
         uri += "fileName="+encodeURIComponent(script.fileName) + ";";
         uri += "baseLineNumber="+encodeURIComponent(script.baseLineNumber) + ","
-        uri += encodeURIComponent(eval_body);
+        uri += encodeURIComponent(source);
 
         return uri;
     },
@@ -1248,7 +1336,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 if (!frame.script.functionName && frame.callingFrame)  // eval-level
                 {
-                    if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame eval-level\n");                              /*@explore*/
+                    if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame eval-level tag="+frame.script.tag+"\n");                              /*@explore*/
                     this.executionFile = getSourceFileForEval(frame.script, this.context);
                     this.executionLineNo = frame.line - frame.script.baseLineNumber + 1;
                 }
@@ -1256,23 +1344,32 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 {
                     if (this.context.evalSourceURLByTag && (frame.script.tag  in this.context.evalSourceURLByTag) ) // eval-script
                     {
-                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame evalSource\n");                          /*@explore*/
+                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame evalSource tag="+frame.script.tag+"\n");                          /*@explore*/
                         var url = this.context.evalSourceURLByTag[frame.script.tag];
                         this.executionFile = this.context.evalSourceFilesByURL[url];
                         this.executionLineNo = getLineAtPCForEvaled(frame, this.context);
                     }
                     else if (this.context.eventSourceURLByTag && (frame.script.tag  in this.context.eventSourceURLByTag) ) // event-script
                     {
-                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame eventSource\n");                         /*@explore*/
+                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame eventSource tag="+frame.script.tag+"\n");                         /*@explore*/
                         var url = this.context.eventSourceURLByTag[frame.script.tag];
                         if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame eventSource url="+url+"\n");             /*@explore*/
                         this.executionFile = this.context.eventSourceFilesByURL[url];
                         if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame exefile="+this.executionFile+"\n");      /*@explore*/
-                        this.executionLineNo = getLineAtPCForEvent(frame, this.context);
+                        this.executionLineNo = getLineAtPC(frame, this.context);
+                    }
+                    else if (this.context.functionCtorSourceURLByTag && (frame.script.tag in this.context.functionCtorSourceURLByTag))
+                    {
+                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame functionCtorSource tag="+frame.script.tag+"\n");                         /*@explore*/
+                        var url = this.context.functionCtorSourceURLByTag[frame.script.tag];
+                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame functionCtorSource url="+url+"\n");             /*@explore*/
+                        this.executionFile = this.context.functionCtorSourceFilesByURL[url];
+                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame exefile="+this.executionFile+"\n");      /*@explore*/
+                        this.executionLineNo = getLineAtPC(frame, this.context);
                     }
                     else // top-level or top-level script
                     {
-                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame top\n");                                 /*@explore*/
+                        if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame top tag="+frame.script.tag+"\n");                                 /*@explore*/
                         var url = normalizeURL(frame.script.fileName);
                         this.executionFile = getScriptFileByHref(url, this.context);
                         this.executionLineNo = frame.line;
@@ -2111,7 +2208,10 @@ Firebug.DebuggerListener =
 
     onEval: function(context, frame, url)
     {
-    }
+    },
+    onFunctionConstructor: function(context, frame, ctor_script, url)
+    {
+    },
 };
 
 // ************************************************************************************************
