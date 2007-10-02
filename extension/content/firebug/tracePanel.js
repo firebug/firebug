@@ -68,13 +68,6 @@ Firebug.TraceModule = extend(Firebug.Console,
             if (m)
                 FBTrace[p] = Firebug.getPref(p); // set to 'true' to turn on all traces;
         }
-
-        var trace_startup = Firebug.getPref("DBG_FBS_FF_START");
-        if (!trace_startup)
-        {
-            Firebug.setPref("DBG_FBS_CREATION", false);
-            Firebug.setPref("DBG_FBS_BP", false);
-        }
     },
 
     initContext: function(context)
