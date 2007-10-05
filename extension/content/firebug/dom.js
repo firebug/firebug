@@ -1146,7 +1146,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
             {
                 var prop = listValue.value[i];
                 var name = prop.name.getWrappedValue();
-                if (name in ignoreVars)
+                if (ignoreVars[name] == 1)
                     continue;
 
                 var value = prop.value.getWrappedValue();
@@ -1226,7 +1226,7 @@ function getMembers(object, level)
 
         for (var name in object)
         {
-            if (name in ignoreVars)
+            if (ignoreVars[name] == 1)
                 continue;
 
             var val;
