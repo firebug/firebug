@@ -352,7 +352,14 @@ this.Arr = domplate(Firebug.Rep,
     {
         // return "length" in object && typeof(object.length) == "number";
         // XXXjjb Joe review (revision 39) Maybe only a url for the license...
-        return this.isArray(object);
+        if (this.isArray(object)) return true;
+        if ("length" in object && typeof(object.length) == "number")
+        {
+            var names = 0;
+            for (name in object)
+                return false;
+            return true; // arguments have .length but do not respond to object property enumeration
+        }
     },
 
     // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
