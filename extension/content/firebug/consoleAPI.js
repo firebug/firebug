@@ -3,7 +3,6 @@
 function FirebugConsole(context, win)
 {
     this.firebug = Firebug.version;
-	this.formatted = false;  // default should be false, but legacy was true.
 
     // We store these functions as closures so that they can access the context privately,
     // because it would be insecure to store context as a property of window.console and
@@ -11,29 +10,28 @@ function FirebugConsole(context, win)
 
     this.log = function()
     {
-        logFormatted(this.formatted, arguments, "log");
+        logFormatted(arguments, "log");
     };
 
     this.debug = function()
     {
-        logFormatted(this.formatted, arguments, "debug", true);
+        logFormatted(arguments, "debug", true);
     };
 
     this.info = function()
     {
-		// if formatted, then arguments should n+1 for n objects.
-        logFormatted(this.formatted, arguments, "info", true);
+        logFormatted(arguments, "info", true);
     };
 
     this.warn = function()
     {
-        logFormatted(this.formatted, arguments, "warn", true);
+        logFormatted(arguments, "warn", true);
     };
 
     this.error = function()
     {
         Firebug.Errors.increaseCount(context);
-        logFormatted(this.formatted, arguments, "error", true);
+        logFormatted(arguments, "error", true);
     };
 
     this.assert = function(x)
@@ -103,7 +101,7 @@ function FirebugConsole(context, win)
             var diff = time - timeCounter;
             var label = name + ": " + diff + "ms";
 
-            logFormatted(this.formatted, [label], null, true);
+            logFormatted([label], null, true);
 
             delete context.timeCounters[name];
         }
@@ -133,7 +131,7 @@ function FirebugConsole(context, win)
             var frameCounter = context.frameCounters[frameId];
             if (!frameCounter)
             {
-                var logRow = logFormatted(this.formatted, ["0"], null, true, true);
+                var logRow = logFormatted(["0"], null, true, true);
 
                 frameCounter = {logRow: logRow, count: 1};
                 context.frameCounters[frameId] = frameCounter;
@@ -163,18 +161,10 @@ function FirebugConsole(context, win)
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    function logFormatted(formatted, args, className, linkToSource, noThrottle)
+    function logFormatted(args, className, linkToSource, noThrottle)
     {
         var sourceLink = linkToSource ? FBL.getStackSourceLink(Components.stack) : null;
-		if (formatted)
-	        return Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
-		else
-		{
-			var argArray = [];
-			argArray[0] = "%s";
-			argArray[1] = args[0];
-			return Firebug.Console.logFormatted(argArray, context, className, noThrottle, sourceLink);
-		}
+        return Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
     }
 
     function logAssert(args, description)

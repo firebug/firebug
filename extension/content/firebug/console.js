@@ -201,6 +201,21 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         }
 
         var parts = parseFormat(format);
+		for (var i= 0; i < parts.length; i++)
+		{
+			var part = parts[i];
+            if (part && typeof(part) == "object")
+            {
+				if (++objIndex > objects.length)  // then too few parameters for format, assume unformatted.
+				{
+					format = "";
+            		objIndex = -1;
+					parts = parseFormat(format);
+					break;
+				}
+            }
+
+		}
         for (var i = 0; i < parts.length; ++i)
         {
             var part = parts[i];
