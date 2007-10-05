@@ -201,18 +201,18 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         }
 
         var parts = parseFormat(format);
-		for (var i= 0; i < parts.length; i++)
-		{
-			var part = parts[i];
+        for (var i= 0; i < parts.length; i++)
+        {
+            var part = parts[i];
             if (part && typeof(part) == "object")
             {
-				if (++objIndex > objects.length)  // then too few parameters for format, assume unformatted.
-				{
-					format = "";
-            		objIndex = -1;
-					parts = parseFormat(format);
-					break;
-				}
+                if (++objIndex > objects.length)  // then too few parameters for format, assume unformatted.
+                {
+                    format = "";
+                    objIndex = -1;
+                    parts.length = 0;
+                    break;
+                }
             }
 
 		}
@@ -413,6 +413,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 function parseFormat(format)
 {
     var parts = [];
+    if (format.length <= 0)
+        return parts;
 
     var reg = /((^%|.%)(\d+)?(\.)([a-zA-Z]))|((^%|.%)([a-zA-Z]))/;
     for (var m = reg.exec(format); m; m = reg.exec(format))
