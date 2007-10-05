@@ -480,6 +480,10 @@ Firebug.Debugger = extend(Firebug.Module,
 
                 this.syncCommands(context);
                 this.syncListeners(context);
+
+				if (FirebugContext && !FirebugContext.panelName) // XXXjjb all I know is that syncSidePanels() needs this set
+					FirebugContext.panelName = "script";
+
                 chrome.syncSidePanels();
 
                 var panel = context.getPanel("script", true);
