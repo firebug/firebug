@@ -443,7 +443,7 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+FirebugContext+"\n");               /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.dumpStack("chrome.syncPanel FirebugContext="+FirebugContext+"\n");               /*@explore*/
                                                                                                                        /*@explore*/
         panelStatus.clear();
 
@@ -475,10 +475,15 @@ top.FirebugChrome =
                   caption = FBL.$STR("DisabledHeader");
                   enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
                 }
-                else if (isSystemPage && !Firebug.allowSystemPages)
+				enableSystemPagesLink.firstChild.nodeValue = "";
+				enableSiteLink.firstChild.nodeValue ="";
+                if (isSystemPage)
                 {
-                  caption = FBL.$STR("IsSystemPage");
-                  enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
+					if (!Firebug.allowSystemPages)
+					{
+						caption = FBL.$STR("IsSystemPage");
+	                    enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
+					}
                 }
                 else if (!host)
                 {
