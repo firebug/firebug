@@ -69,7 +69,7 @@
             <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                 <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
             </menupopup>
-	</menu>
+    </menu>
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
                     oncommand="Firebug.showBar(true); FirebugChrome.select(document.popupNode);"/>
@@ -144,8 +144,6 @@
                             <menuitem type="checkbox"
                                       oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
                             <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
-                            <menuitem label="&firebug.AllowSystemPages;" type="checkbox"
-                                      oncommand="FirebugChrome.onToggleOption(this)"  option="allowSystemPages"/>
                             <menuseparator/>
 
                             <menu label="&firebug.OpenWith;">

@@ -2374,7 +2374,7 @@ this.isSystemURL = function(url)
         return false;
 };
 
-this.isSystemPage = function(win)  // TODO combine with isSystemURL
+this.isSystemPage = function(win)
 {
     try
     {
@@ -2382,19 +2382,14 @@ this.isSystemPage = function(win)  // TODO combine with isSystemURL
         if (!doc)
             return false;
 
-
-        if (doc.documentURI.indexOf("about:blank") == 0)
-            return true;
-
-        // Detect network error pages like 404
-        if (doc.documentURI.indexOf("about:neterror") == 0)
-            return true;
-
         // Detect pages for pretty printed XML
-        return (doc.styleSheets.length && doc.styleSheets[0].href
+        if ((doc.styleSheets.length && doc.styleSheets[0].href
                 == "chrome://global/content/xml/XMLPrettyPrint.css")
             || (doc.styleSheets.length > 1 && doc.styleSheets[1].href
-                == "chrome://browser/skin/feeds/subscribe.css");
+                == "chrome://browser/skin/feeds/subscribe.css"))
+            return true;
+
+        return FBL.isSystemURL(win.location.href);
     }
     catch (exc)
     {

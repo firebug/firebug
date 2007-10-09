@@ -472,28 +472,25 @@ top.FirebugChrome =
                 var caption;
                 if (Firebug.disabledAlways)
                 {
-                  caption = FBL.$STR("DisabledHeader");
-                  enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
+                    caption = FBL.$STR("DisabledHeader");
+                    enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
                 }
-				enableSystemPagesLink.firstChild.nodeValue = "";
-				enableSiteLink.firstChild.nodeValue ="";
+                enableSystemPagesLink.firstChild.nodeValue = "";
+                enableSiteLink.firstChild.nodeValue ="";
                 if (isSystemPage)
                 {
-					if (!Firebug.allowSystemPages)
-					{
-						caption = FBL.$STR("IsSystemPage");
-	                    enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
-					}
+                    caption = FBL.$STR("IsSystemPage");
+                    enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
                 }
                 else if (!host)
                 {
-                  caption = FBL.$STR("DisabledForFiles");
-                  enableSiteLink.firstChild.nodeValue = FBL.$STR("EnableForFiles");
+                    caption = FBL.$STR("DisabledForFiles");
+                    enableSiteLink.firstChild.nodeValue = FBL.$STR("EnableForFiles");
                 }
                 else
                 {
-                   caption = FBL.$STRF("DisabledForSiteHeader", [host]);
-                   enableSiteLink.firstChild.nodeValue = FBL.$STRF("EnableForSite", [host]);
+                    caption = FBL.$STRF("DisabledForSiteHeader", [host]);
+                    enableSiteLink.firstChild.nodeValue = FBL.$STRF("EnableForSite", [host]);
                 }
 
                 disabledHead.firstChild.nodeValue = caption;
@@ -769,7 +766,12 @@ top.FirebugChrome =
                         var uri = this.getCurrentURI();
                         if (uri)
                         {
-                            if (!getURIHost(uri))
+                            if (isSystemURL(uri.spec))
+                            {
+                                checked = !Firebug.allowSystemPages;
+                                child.setAttribute("label", FBL.$STR("DisableForSystemPages"));
+                            }
+                            else if (!getURIHost(uri))
                             {
                                 checked = Firebug.disabledFile;
                                 child.setAttribute("label", FBL.$STR("DisableForFiles"));

@@ -10,6 +10,7 @@ const nsIWebProgressListener = CI("nsIWebProgressListener");
 const nsIWebProgress = CI("nsIWebProgress");
 const nsISupportsWeakReference = CI("nsISupportsWeakReference");
 const nsISupports = CI("nsISupports");
+const nsIURI = CI("nsIURI");
 
 const NOTIFY_STATE_DOCUMENT = nsIWebProgress.NOTIFY_STATE_DOCUMENT;
 
@@ -104,6 +105,8 @@ top.TabWatcher =
      */
     watchTopWindow: function(win, uri)
     {
+        if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
+            FBTrace.sysout("tabWatcher.watchTopWindow uri="+(typeof(uri) == nsIURI?uri.spec:uri)+"\n");                          /*@explore*/
         if (tabBrowser.selectedBrowser.cancelNextLoad)
         {
             // We need to cancel this load and try again after a delay... this is used
@@ -260,6 +263,7 @@ top.TabWatcher =
      */
     watchBrowser: function(browser)
     {
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("tabWatcher.watchBrowser for URI:"+safeGetURI(browser)+"\n");  /*@explore*/
         this.watchTopWindow(browser.contentWindow, safeGetURI(browser));
     },
 
@@ -439,16 +443,16 @@ var BaseProgressListener =
 
 var TabProgressListener = extend(BaseProgressListener,
 {
-    onLocationChange: function(progress, request, location)
+    onLocationChange: function(progress, request, uri)
     {
         // Only watch windows that are their own parent - e.g. not frames
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("TabProgressListener.onLocationChange to location="                                     /*@explore*/
-                                          +(location?location.href:"null location")+"\n");                             /*@explore*/
+                FBTrace.sysout("TabProgressListener.onLocationChange to uri="                                     /*@explore*/
+                                          +(uri?uri.href:"null location")+"\n");                             /*@explore*/
                                                                                                                        /*@explore*/
-            TabWatcher.watchTopWindow(progress.DOMWindow, location);
+            TabWatcher.watchTopWindow(progress.DOMWindow, uri);
         }
     },
 
@@ -471,26 +475,26 @@ var FrameProgressListener = extend(BaseProgressListener,
     {
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
                 FBTrace.sysout("FrameProgressListener "+getStateDescription(flag)+" uid="                              /*@explore*/
-                             +progress.DOMWindow.__firebug__uid+" uri="+safeGetName(request)+"\n");                    /*@explore*/
+                             +progress.DOMWindow.__firebug__uid+" request.name="+safeGetName(request)+"\n");                    /*@explore*/
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
         {
             // We need to get the hook in as soon as the new DOMWindow is created, but before
             // it starts executing any scripts in the page.  After lengthy analysis, it seems
             // that the start of these "dummy" requests is the only state that works.
 
-            var safeURI = safeGetName(request);
-            if (safeURI && ((safeURI == dummyURI) || safeURI == "about:document-onload-blocker") )
+            var safeName = safeGetName(request);
+            if (safeName && ((safeName == dummyURI) || safeName == "about:document-onload-blocker") )
             {
                 var win = progress.DOMWindow;
                 // Another weird edge case here - when opening a new tab with about:blank,
                 // "unload" is dispatched to the document, but onLocationChange is not called
                 // again, so we have to call watchTopWindow here
                 //if (win.parent == win && win.location.href == "about:blank")
-                //    TabWatcher.watchTopWindow(win, null);
+                //    TabWatcher.watchTopWindow(win, win.location);
                 // XXXms check this
-                if (win.parent == win && (win.location.href == "about:blank" ))//  || safeURI == "about:document-onload-blocker"))
+                if (win.parent == win && (win.location.href == "about:blank" ))//  || safeName == "about:document-onload-blocker"))
                 {
-                    TabWatcher.watchWindow(win);
+                    TabWatcher.watchTopWindow(win, win.location.href);
                     return;  // new one under our thumb
                 }
             }
@@ -545,7 +549,15 @@ function onLoadWindowContent(event)
     // it here causes freezeup when this results in loading a script file. This fixes that.
     setTimeout(function()
     {
-        TabWatcher.watchLoadedTopWindow(win);
+        try
+        {
+            TabWatcher.watchLoadedTopWindow(win);
+        }
+        catch(exc)
+        {
+            ERROR(exc);
+        }
+
     });
 }
 
