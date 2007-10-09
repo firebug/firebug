@@ -2560,10 +2560,10 @@ this.readFromStream = function(stream, charset)
         return this.convertToUnicode(text, charset);
      }
      catch(exc)
-      {
-          if (FBTrace.DBG_ERRORS) 														/*@explore*/
-            FBTrace.dumpProperties("lib.readFromStream FAILS", exc);					/*@explore*/
-      }
+     {
+        if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
+            FBTrace.dumpProperties("lib.readFromStream FAILS", exc);                    /*@explore*/
+     }
 };
 
 this.readPostText = function(url, context)
@@ -2595,12 +2595,12 @@ this.launchProgram = function(exePath, args)
 {
     try {
         var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
-        if (this.getPlatformName() == "Darwin")
+        file.initWithPath(exePath);
+        if (this.getPlatformName() == "Darwin" && file.isDirectory())
         {
             args = this.extendArray(["-a", exePath], args);
-            exePath = "/usr/bin/open";
+            file.initWithPath("/usr/bin/open");
         }
-        file.initWithPath(exePath);
         if (!file.exists())
             return false;
         var process = this.CCIN("@mozilla.org/process/util;1", "nsIProcess");
@@ -2622,6 +2622,11 @@ this.getIconURLForFile = function(path)
     try {
         var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
         file.initWithPath(path);
+        if ((this.getPlatformName() == "Darwin") && !file.isDirectory() && (path.indexOf(".app/") != -1))
+        {
+            path = path.substr(0,path.lastIndexOf(".app/")+4);
+            file.initWithPath(path);
+        }
         return "moz-icon://" + fileHandler.getURLSpecFromFile(file) + "?size=16";
     }
     catch(exc)

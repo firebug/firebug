@@ -149,10 +149,10 @@
              <hbox id="fbDebuggerButtons" minwidth="126">
                  <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
                                 tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
-                 <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"
-                                tooltiptext="&firebug.StepOver;" class="toolbar-image-button"/>
                  <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
                                 tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
+                 <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"
+                                tooltiptext="&firebug.StepOver;" class="toolbar-image-button"/>
                  <toolbarbutton id="fbStepOutButton" command="cmd_stepOut"
                                 tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
              </hbox>

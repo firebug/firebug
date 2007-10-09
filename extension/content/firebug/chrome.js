@@ -981,6 +981,13 @@ top.FirebugChrome =
         }
 
         return false;
+    },
+
+    openAboutDialog: function()
+    {
+        var extensionManager = CCSV("@mozilla.org/extensions/manager;1", "nsIExtensionManager");
+        openDialog("chrome://mozapps/content/extensions/about.xul", "",
+            "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
     }
 };
 
@@ -1030,7 +1037,7 @@ function getBestPanelName(object, context, panelName)
                 bestLevel = level;
                 bestPanel = panelType;
             }
-            if (FBTrace.DBG_PANELS) 																													 /*@explore*/
+            if (FBTrace.DBG_PANELS)                                                                                                                      /*@explore*/
                 FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType+" level: "+level+" bestPanel: "+bestPanel+" bestLevel: "+bestLevel+"\n"); /*@explore*/
         }
     }

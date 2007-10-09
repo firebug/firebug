@@ -20,6 +20,7 @@
 <!ENTITY  firebug.Forums                "Discussion Group...">
 <!ENTITY  firebug.Issues                "Issue Tracker...">
 <!ENTITY  firebug.Donate                "Contribute...">
+<!ENTITY  firebug.About                 "About...">
 <!ENTITY  firebug.AlwaysOpenInWindow    "Always Open in New Window">
 
 <!ENTITY  firebug.ShowFirebug           "Open Firebug">

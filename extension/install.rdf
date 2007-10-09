@@ -33,7 +33,7 @@
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>https://fireclipse.xucia.com/files/fireclipse/update.rdf</em:updateURL>
+    <em:updateURL>http://fireclipse.xucia.com/files/fireclipse/update.rdf</em:updateURL>
 	<em:updateKey>
 		MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDA6eg5lT8wHTQsSn+ml+Njwm8p3iCgPAHM
 		xfqGlZl6Zg70mLzZo0Drna6gyHfqSuQ4BfWvQ1fIxIdH5tHGIsXpY9R7igHt2Rv3CGRDbIm3
