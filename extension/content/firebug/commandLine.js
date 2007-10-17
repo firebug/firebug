@@ -77,14 +77,33 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             try
             {
-				var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-		        sandbox.__win__ = win;
-				Components.utils.evalInSandbox(scriptToEval, sandbox);
+                if (!context.sandboxes)
+                    context.sandboxes = [];
+
+                var sandbox = null;
+                for (var why = 0; why < context.sandboxes.length; why++)
+                {
+                    if (context.sandboxes[why].__win__ == win)
+                    {
+                        sandbox = context.sandboxes[why];
+                        break;
+                    }
+                }
+
+                if(!sandbox)
+                {
+                    sandbox = new Components.utils.Sandbox(win); // Use DOM Window
+                    sandbox.__win__ = win;
+                    context.sandboxes.push(sandbox);
+                }
+
+                Components.utils.evalInSandbox(scriptToEval, sandbox);
             }
             catch (exc)
             {
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo FAILS:",exc);        /*@explore*/
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FBL.evalInTo win:", win);        /*@explore*/
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILS:",exc);        /*@explore*/
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate sandbox:", sandbox);        /*@explore*/
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate sandbox.__win__.__scope__:", sandbox.__win__.__scope__);        /*@explore*/
                 result = new FBL.ErrorMessage("commandLine.evaluate FAILS: "+exc, scriptToEval,0, 0, "js", context, null);
             }
             try

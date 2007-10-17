@@ -766,7 +766,7 @@ top.FirebugChrome =
                         var uri = this.getCurrentURI();
                         if (uri)
                         {
-                            if (isSystemURL(uri.spec))
+                            if (FBL.isSystemURL(uri.spec))
                             {
                                 checked = !Firebug.allowSystemPages;
                                 child.setAttribute("label", FBL.$STR("DisableForSystemPages"));

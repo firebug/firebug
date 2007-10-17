@@ -449,8 +449,8 @@ var TabProgressListener = extend(BaseProgressListener,
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("TabProgressListener.onLocationChange to uri="                                     /*@explore*/
-                                          +(uri?uri.href:"null location")+"\n");                             /*@explore*/
+                FBTrace.sysout("TabProgressListener.onLocationChange to uri=\'"                                        /*@explore*/
+                                          +(uri?uri.spec:"null location")+"\'\n");                                     /*@explore*/
                                                                                                                        /*@explore*/
             TabWatcher.watchTopWindow(progress.DOMWindow, uri);
         }

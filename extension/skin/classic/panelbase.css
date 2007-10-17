@@ -149,7 +149,7 @@ pre {
     padding: 0;
     border: none !important;
     font: inherit;
-    text-decoration: inherit;    
+    text-decoration: inherit;
     background-color: #FFFFFF;
 }
 
@@ -225,7 +225,7 @@ pre {
 .infoTipLoading {
     width: 16px;
     height: 16px;
-    background: url(chrome://firebug/skin/loading_16.gif) no-repeat; 
+    background: url(chrome://firebug/skin/loading_16.gif) no-repeat;
 }
 
 .infoTipImageBox {
@@ -262,8 +262,8 @@ h1.groupHeader {
     top: 0 !important;
     right: 0 !important;
     bottom: 0 !important;
-    width: auto !important;
-    height: auto !important;
+    width: 100% !important;
+    height: 100% !important;
     margin: 0;
     border: none;
     padding-left: 8px;

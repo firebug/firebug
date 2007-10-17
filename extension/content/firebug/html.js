@@ -419,7 +419,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     getChildObject: function(node, index, previousSibling)
     {
-        if (this.isSourceElement(node))
+        if (isSourceElement(node))
         {
             if (index == 0)
                 return this.getElementSourceText(node);
@@ -448,33 +448,33 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         return null;
     },
 
-	isWhitespaceText: function(node)
-	{
-	    if (node instanceof HTMLAppletElement)
-	        return false;
-	    return node.nodeType == 3 && isWhitespace(node.nodeValue);
-	},
+    isWhitespaceText: function(node)
+    {
+        if (node instanceof HTMLAppletElement)
+            return false;
+        return node.nodeType == 3 && isWhitespace(node.nodeValue);
+    },
 
-	findNextSibling: function (node)
-	{
-	    if (Firebug.showWhitespaceNodes)
-	        return node.nextSibling;
-	    else
-	    {
-	        for (var child = node.nextSibling; child; child = child.nextSibling)
-	        {
-	            if (!this.isWhitespaceText(child))
-	                return child;
-	        }
-	    }
-	},
+    findNextSibling: function (node)
+    {
+        if (Firebug.showWhitespaceNodes)
+            return node.nextSibling;
+        else
+        {
+            for (var child = node.nextSibling; child; child = child.nextSibling)
+            {
+                if (!this.isWhitespaceText(child))
+                    return child;
+            }
+        }
+    },
 
-	isSourceElement: function(element)
-	{
-	    var tag = element.localName.toLowerCase();
-	    return tag == "script" || tag == "link" || tag == "style"
-	        || (tag == "link" && element.getAttribute("rel") == "stylesheet");
-	},
+    isSourceElement: function(element)
+    {
+        var tag = element.localName.toLowerCase();
+        return tag == "script" || tag == "link" || tag == "style"
+            || (tag == "link" && element.getAttribute("rel") == "stylesheet");
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Events
@@ -1329,13 +1329,6 @@ function getNodeBoxTag(nodeBox)
         return Firebug.HTMLPanel.EmptyElement.tag;
 }
 
-function isSourceElement(element)
-{
-    var tag = element.localName.toLowerCase();
-    return tag == "script" || tag == "link" || tag == "style"
-        || (tag == "link" && element.getAttribute("rel") == "stylesheet"); // XXXjjb link || (link && rel)??
-}
-
 function getSourceHref(element)
 {
     var tag = element.localName.toLowerCase();
@@ -1367,8 +1360,8 @@ function isContainerElement(element)
         case "style":
         case "iframe":
         case "frame":
-		case "tabbrowser":
-		case "browser":
+        case "tabbrowser":
+        case "browser":
             return true;
         case "link":
             return element.getAttribute("rel") == "stylesheet";
@@ -1386,7 +1379,7 @@ function isPureText(element)
     return true;
 }
 
-// Duplicate of HTMLPanel.isWhitespaceText
+// Duplicate of HTMLPanel.prototype isWhitespaceText
 function isWhitespaceText(node)
 {
     if (node instanceof HTMLAppletElement)
@@ -1394,11 +1387,20 @@ function isWhitespaceText(node)
     return node.nodeType == 3 && isWhitespace(node.nodeValue);
 }
 
+// Duplicate of HTMLPanel.prototype TODO: create a namespace for all of these functions so
+// they can be called outside of this file.
+function isSourceElement(element)
+{
+    var tag = element.localName.toLowerCase();
+    return tag == "script" || tag == "link" || tag == "style"
+        || (tag == "link" && element.getAttribute("rel") == "stylesheet");
+}
+
 function isEmptyElement(element)
 {
-	// XXXjjb the commented code causes issues 48, 240, and 244. I think the lines should be deleted.
-	// If the DOM has whitespace children, then the element is not empty even if
-	// we decide not to show the whitespace in the UI.
+    // XXXjjb the commented code causes issues 48, 240, and 244. I think the lines should be deleted.
+    // If the DOM has whitespace children, then the element is not empty even if
+    // we decide not to show the whitespace in the UI.
 //    if (Firebug.showWhitespaceNodes)
 //    {
         return !element.firstChild;
@@ -1454,6 +1456,7 @@ function getTextElementTextBox(nodeBox)
     return getChildByClass(nodeLabelBox, "nodeText");
 }
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function NodeSearch(text, doc, panelNode, ioBox)
@@ -1507,7 +1510,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
         {
             if (node.nodeType == 3)
             {
-                if (this.isSourceElement(node.parentNode))
+                if (isSourceElement(node.parentNode))
                     continue;
 
                 var m = re.exec(node.nodeValue);

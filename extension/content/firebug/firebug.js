@@ -988,12 +988,12 @@ top.Firebug =
     {
         if (!uri)  // null or undefined is denied
             return false;
-        var url  =  uri.spec ? uri.spec : uri;
+        var url  = (uri instanceof nsIURI) ? uri.spec : uri.toString();
         if (FBL.isLocalURL(url) && !this.disabledFile)
             return true;
         if (isSystemURL(url) && Firebug.allowSystemPages)
             return true;
-        if (uri.spec)
+        if (uri instanceof nsIURI)
         {
                if (pm.testPermission(uri, "firebug") == ALLOW_ACTION)
                 return true;
@@ -1005,10 +1005,10 @@ top.Firebug =
     {
         if (!uri)  // null or undefined is denied
             return true;
-        var url  =  uri.spec ? uri.spec : uri;
+        var url  = (uri instanceof nsIURI) ? uri.spec : uri.toString();
         if (isSystemURL(url) && !Firebug.allowSystemPages)
             return true;
-        if (uri.spec)
+        if (uri instanceof nsIURI)
         {
             if (pm.testPermission(uri, "firebug") == DENY_ACTION)
                 return true;
@@ -1021,7 +1021,7 @@ top.Firebug =
     enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
     {
         if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
-                FBTrace.sysout("enableContext URI:"+(uri.spec?".spec:"+uri.spec:uri)+"\n");                               				/*@explore*/
+                FBTrace.dumpProperties("enableContext URI:",uri);                             				/*@explore*/
         if ( dispatch2(extensions, "acceptContext", [win, uri]) )
             return true;
         if ( dispatch2(extensions, "declineContext", [win, uri]) )

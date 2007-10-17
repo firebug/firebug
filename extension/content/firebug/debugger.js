@@ -2276,7 +2276,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
                 FBTrace.dumpProperties("debugger.callstackPanel.showStackFrame  uid="+this.uid+" frame:", frame);      /*@explore*/
                                                                                                                        /*@explore*/
             FBL.setClass(this.panelNode, "objectBox-stackTrace");
-            trace = FBL.getStackTrace(frame, this.context).reverse();
+            trace = FBL.getStackTrace(frame, this.context);
             if (FBTrace.DBG_STACK)                                                                                     /*@explore*/
                 FBTrace.dumpProperties("debugger.callstackPanel.showStackFrame trace:", trace);                        /*@explore*/
                                                                                                                        /*@explore*/
