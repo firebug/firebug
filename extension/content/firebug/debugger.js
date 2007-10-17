@@ -481,8 +481,8 @@ Firebug.Debugger = extend(Firebug.Module,
                 this.syncCommands(context);
                 this.syncListeners(context);
 
-				if (FirebugContext && !FirebugContext.panelName) // XXXjjb all I know is that syncSidePanels() needs this set
-					FirebugContext.panelName = "script";
+                if (FirebugContext && !FirebugContext.panelName) // XXXjjb all I know is that syncSidePanels() needs this set
+                    FirebugContext.panelName = "script";
 
                 chrome.syncSidePanels();
 
@@ -734,9 +734,11 @@ Firebug.Debugger = extend(Firebug.Module,
                         row.removeAttribute("disabledBreakpoint");
                     }
                 }
-                else
+                else // trace on else
+                {
                     if (FBTrace.DBG_BP) 										 													  /*@explore*/
                         FBTrace.dumpProperties("debugger.onToggleBreakPoint no find sourcebox, sourceBoxes[url]", panel.sourceBoxes); /*@explore*/
+                }
             }
         }
     },

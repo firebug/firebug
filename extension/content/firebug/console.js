@@ -201,12 +201,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         }
 
         var parts = parseFormat(format);
+        var trialIndex = objIndex;
         for (var i= 0; i < parts.length; i++)
         {
             var part = parts[i];
             if (part && typeof(part) == "object")
             {
-                if (++objIndex > objects.length)  // then too few parameters for format, assume unformatted.
+                if (++trialIndex > objects.length)  // then too few parameters for format, assume unformatted.
                 {
                     format = "";
                     objIndex = -1;
@@ -215,7 +216,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
                 }
             }
 
-		}
+        }
         for (var i = 0; i < parts.length; ++i)
         {
             var part = parts[i];
