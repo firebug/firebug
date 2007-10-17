@@ -1441,11 +1441,9 @@ this.getStackFrame = function(frame, context)
     {
         if (frame.script.functionName) // normal js
         {
-            // This causes leak of script objects ??
-            //var fn = frame.script.functionObject.getWrappedValue();
-            //var args = this.getFunctionArgValues(fn, frame);
-            var fn = null;
-            var args = null;
+            // XXXjjb At one time I thought this causes leak of script objects, but small test case is ok now.
+            var fn = frame.script.functionObject.getWrappedValue();
+            var args = this.getFunctionArgValues(fn, frame);
             if (context.evalSourceURLByTag && frame.script.tag in context.evalSourceURLByTag)
             {
                 if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame evaled function frame\n");                    /*@explore*/
@@ -2362,6 +2360,11 @@ this.isSystemURL = function(url)
     if (FBTrace.DBG_SHOW_SYSTEM) return false;                                                                         /*@explore*/
     if (!url) return true;
     if (url.length == 0) return true; // spec for about:blank
+    if (!url.substr)
+    {
+        FBTrace.dumpStack("isSystemURL not a string url:"+url);  // need to find why /*@explore*/
+        return ture;
+    }
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 17) == "chrome://firebug/")
@@ -4859,13 +4862,18 @@ const invisibleTags = this.invisibleTags =
  // ************************************************************************************************
 // Script injection
 
-this.evalInTo = function(win, text)
+this.evalInTo = function(win, text, context)
 {
-    var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
+    if (!context.sandbox)
+    {
+        var sandbox = new Components.utils.Sandbox(win); // Use DOM Window principle
+        context.sandbox = sandbox;
+        sandbox.win = win;
+    }
+
     try
     {
-        sandbox.win = win;
-        Components.utils.evalInSandbox(text, sandbox);
+        Components.utils.evalInSandbox(text, context.sandbox);
     }
     catch(exc)
     {
