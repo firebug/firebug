@@ -73,6 +73,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     ** Issue 239 Fix for Frame refresh bug: http://groups.google.com/group/firebug/browse_thread/thread/c69e49b9815b2540
     ** throw exception if firebugService cannot be loaded on startup (_CC[cname] error message).   http://groups.google.com/group/firebug/browse_thread/thread/c795b72931f2bd34/8fa8dca3c012c4f7
     ** Issue 249: Fix for Net monitor memory leaks
+    ** Issue 342: debugger breaks on disabled breakpoints
 
 === General ===
 * Supports Firefox 3

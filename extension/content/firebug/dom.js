@@ -1226,7 +1226,7 @@ function getMembers(object, level)
 
         for (var name in object)
         {
-            if (ignoreVars[name] == 1)
+            if (ignoreVars[name] == 1)  // javascript.options.strict says ignoreVars is undefined.
                 continue;
 
             var val;

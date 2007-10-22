@@ -1032,13 +1032,13 @@ function getBestPanelName(object, context, panelName)
         if (!panelType.prototype.parentPanel)
         {
             var level = panelSupportsObject(panelType, object);
-            if (!bestLevel || (level && (level < bestLevel) ))  // XXXjjb I do not understand why this works
+            if (!bestLevel || (level && (level > bestLevel) ))
             {
                 bestLevel = level;
                 bestPanel = panelType;
             }
             if (FBTrace.DBG_PANELS)                                                                                                                      /*@explore*/
-                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType+" level: "+level+" bestPanel: "+bestPanel+" bestLevel: "+bestLevel+"\n"); /*@explore*/
+                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType.prototype.name+" level: "+level+" bestPanel: "+ (bestPanel ? bestPanel.prototype.name : "null")+" bestLevel: "+bestLevel+"\n"); /*@explore*/
         }
     }
 

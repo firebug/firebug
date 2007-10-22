@@ -116,11 +116,13 @@ var temporaryDirectory = null;
 
 top.Firebug =
 {
-    version: "1.1a.dev",
+    version: "1.1",
 
     module: modules,
     panelTypes: panelTypes,
     reps: reps,
+
+    stringCropLength: 80,
 
     tabBrowser: tabBrowser,
 
