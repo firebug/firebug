@@ -67,8 +67,8 @@ top.FirebugChrome =
 
     initialize: function()
     {
-    if (window.arguments)
-          var detachArgs = window.arguments[0];
+        if (window.arguments)
+            var detachArgs = window.arguments[0];
 
         if (!detachArgs)
             detachArgs = {};

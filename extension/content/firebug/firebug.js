@@ -87,7 +87,7 @@ const prefNames =
     "netFilterCategory", "disableNetMonitor", "collectHttpHeaders",
 
     // Stack
-    "omitObjectPathStack"
+    "omitObjectPathStack", "filterSystemURLs",
 ];
 
 const scriptBlockSize = 20;

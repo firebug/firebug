@@ -39,7 +39,7 @@ Firebug.Console = extend(Firebug.Module,
         if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
 
 
-        if (noThrottle)
+        if (noThrottle || !context)
         {
             var panel = this.getPanel(context);
             return panel.append(appender, objects, className, rep, sourceLink, noRow);
