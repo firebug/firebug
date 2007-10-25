@@ -96,10 +96,10 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         var context = FirebugContext;
         try
         {
-            if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
-                FBTrace.dumpProperties("errors.observe "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
             if (object instanceof nsIScriptError)
             {
+                if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
+                    FBTrace.dumpProperties("errors.observe "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
                 var category = getBaseCategory(object.category);
                 var isWarning = object.flags & WARNING_FLAG;
                 var isJSError = category == "js" && !isWarning;
@@ -118,8 +118,33 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                             if (!context)
                                 return;
                         }
+                        if (object.errorMessage)
+                            FBTrace.sysout("errors.observe object.errorMessage: "+object.errorMessage+"\n");
                     }
                 }
+
+               if (object.flags & object.exceptionFlag)
+               {
+                    if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe is exception\n");
+                    var thrownAndNotCaught = /uncaught exception/;
+                    if (thrownAndNotCaught.test(object.errorMessage))
+                    {
+                        if (FBTrace.DBG_ERRORS) FBTrace.sysout("uncaught exception matches "+thrownAndNotCaught+"\n");
+                        if (context.thrownStackTrace)
+                        {
+                            Firebug.errorStackTrace = context.thrownStackTrace;
+                            var isUncaughtException = true;
+                            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("errors.observe trace.frames", context.thrownStackTrace.frames);
+                        }
+                        else
+                        {
+                             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe NO context.thrownStackTrace\n");
+                        }
+                    }
+                    else
+                        if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
+                }
+
 
                 if (FBTrace.DBG_ERRORS)                                                                                  /*@explore*/
                     FBTrace.sysout("errors.observe categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning)+"\n");           /*@explore*/
@@ -151,7 +176,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 var lineNumber = object.lineNumber;
 
 
-                if (Firebug.showStackTrace && isJSError)
+                if (Firebug.showStackTrace && (isJSError || isUncaughtException) )
                 {
                     var trace = Firebug.errorStackTrace;
                     if (trace)
@@ -164,10 +189,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         }
                         var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
                         if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-                            FBTrace.dumpProperties("errors.observe trace frames:", trace.frames);                          /*@explore*/
+                            FBTrace.dumpProperties("errors.observe showStackTrace trace frames:", trace.frames);                          /*@explore*/
                     }
                 }
                 Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
+                context.thrownStackTrace = null;
 
                 var error = new ErrorMessage(object.errorMessage, sourceName,
                         lineNumber, object.sourceLine, category, context, trace);
@@ -178,14 +204,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             else if (Firebug.showChromeMessages)
             {
                 if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
-                    FBTrace.dumpProperties("errors.observe showChromeMessages message:", object.message);             /*@explore*/
+                    FBTrace.dumpProperties("errors.observe showChromeMessages message:", object);             /*@explore*/
                 // Must be an nsIConsoleMessage
                 Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
             }
             else
             {
                 if (FBTrace.DBG_ERRORS)                                                                                /*@explore*/
-                    FBTrace.dumpProperties("errors.observe dropped:", object.message);                                 /*@explore*/
+                    FBTrace.dumpProperties("errors.observe dropped:", object);                                 /*@explore*/
             }
         }
         catch (exc)

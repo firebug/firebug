@@ -57,7 +57,7 @@ InsideOutBox.prototype =
 
     select: function(object, makeBoxVisible, forceOpen, noScrollIntoView)
     {
-		if (FBTrace.DBG_HTML) FBTrace.dumpProperties("insideOutBox.select object:", object);                     /*@explore*/
+        if (FBTrace.DBG_HTML) FBTrace.dumpProperties("insideOutBox.select object:", object);                     /*@explore*/
         var objectBox = this.createObjectBox(object);
         this.selectObjectBox(objectBox, forceOpen);
         if (makeBoxVisible)
@@ -414,10 +414,10 @@ InsideOutBox.prototype =
         while (1)
         {
             if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
-                FBTrace.sysout(node.localName);                                                                        /*@explore*/
+                FBTrace.sysout(node.localName+" < ");                                                                        /*@explore*/
             var parentNode = this.view.getParentObject(node);
             if (FBTrace.DBG_HTML)                                													   /*@explore*/
-				FBTrace.sysout((parentNode?" (parent="+parentNode.localName+")":" (null parentNode)"+"\n"));                                 /*@explore*/
+                FBTrace.sysout((parentNode?" (parent="+parentNode.localName+")":" (null parentNode)"+"\n"));                                 /*@explore*/
 
             if (!parentNode)
                 return node;
@@ -466,10 +466,10 @@ function isVisibleTarget(node)
 
 function formatNode(object)
 {
-	if (object)
-		return (object.localName ? object.localName : object);
-	else
-		return "(null object)";
+    if (object)
+        return (object.localName ? object.localName : object);
+    else
+        return "(null object)";
 }
 
 }});

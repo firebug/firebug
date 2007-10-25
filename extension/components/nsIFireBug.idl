@@ -113,6 +113,12 @@ interface nsIFireBugBreakpointCallback : nsISupports
       in nsIFireBugBreakpointProperties props);
 };
 
+[scriptable, uuid(7ec9185a-36bb-46b7-9ad9-d6ec6b257b90)]
+interface nsIFireBugScriptInfoCallback : nsISupports
+{
+    void call(in string url, in jsdIScript script, in unsigned long trueBaseLineNumber, in string typename);
+};
+
 [scriptable, uuid(61df57e0-4b77-11db-b0de-0800200c9a66)]
 interface nsIFireBugClient : nsISupports
 {
@@ -206,6 +212,7 @@ interface nsIFireBug : nsISupports
     void enumerateMonitors(in string url, in nsIFireBugBreakpointCallback cb);
 
     void enumerateScripts(out unsigned long length, [retval, array, size_is(length)] out jsdIScript scripts);
+    void enumerateScriptInfos(in string url, in nsIFireBugScriptInfoCallback cb);
 
     readonly attribute boolean profiling;
 
