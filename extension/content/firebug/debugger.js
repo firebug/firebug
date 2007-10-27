@@ -643,7 +643,7 @@ Firebug.Debugger = extend(Firebug.Module,
             if (!isCatch)
             {
                 context.thrownStackTrace = getStackTrace(frame, context);
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onThrow reset context.thrownStackTrace", context.thrownStackTrace);
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onThrow reset context.thrownStackTrace", context.thrownStackTrace.frames);
             }
             else
                 if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onThrow isCatch\n");
@@ -670,7 +670,7 @@ Firebug.Debugger = extend(Firebug.Module,
                 for (var i = 1; i < trace.length; i++)
                 {
                     var preFrameSig = trace[i].signature();
-                    if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.isCatchFromPreviousThrow "+curFrameSig+"=="+preFrameSig+"\n");
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_STACK) FBTrace.sysout("debugger.isCatchFromPreviousThrow "+curFrameSig+"=="+preFrameSig+"\n");
                     if (curFrameSig == preFrameSig)
                     {
                         return true;  // catch from previous throw (or do we need to compare whole stack?
@@ -955,7 +955,7 @@ Firebug.Debugger = extend(Firebug.Module,
             var sourceFile = this.createSourceFileForEval(frame, context);
             FBL.setSourceFileForEvalIntoContext(context, frame.script.tag, sourceFile);
 
-            sourceFile.addToLineTable(frame.script, 1, false);
+            //sourceFile.addToLineTable(frame.script, 1, false);
 
             if (FBTrace.DBG_EVAL)                                                                                      /*@explore*/
             {                                                                                                          /*@explore*/
@@ -1659,6 +1659,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onContextMenu = bind(this.onContextMenu, this);
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
+        this.setLineBreakpoints = bind(setLineBreakpoints, this);
 
         Firebug.Panel.initialize.apply(this, arguments);
     },
@@ -1812,7 +1813,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(sourceFile)
     {
-        this.showSourceFile(sourceFile, setLineBreakpoints);
+        this.showSourceFile(sourceFile, this.setLineBreakpoints);
     },
 
     updateSelection: function(object)
@@ -1998,7 +1999,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.conditionEditor = new ConditionEditor(this.document);
 
         return this.conditionEditor;
-    }
+    },
+
 });
 
 // ************************************************************************************************
@@ -2451,7 +2453,8 @@ function setLineBreakpoints(sourceFile, sourceBox)
         if (script.isValid)
             sourceFile.addToLineTable(script, baseLineNumber, sourceLines);
     }});
-
+    if (!this.setExecutableLines)
+        FBTrace.dumpStack("setLineBreakpoints no this.setExecutableLines\n");
     this.setExecutableLines(sourceBox);
 }
 

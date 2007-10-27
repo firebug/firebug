@@ -89,3 +89,4 @@ pref("extensions.firebug.DBG_NET", false);        	// net.js                    
 pref("extensions.firebug.DBG_SHOW_SYSTEM", false);  // isSystemURL return false always.          /*@explore*/
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/
+pref("extensions.firebug.DBG_FLUSH_EVERY_LINE", false); // /*@explore*/

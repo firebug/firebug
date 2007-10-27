@@ -168,6 +168,7 @@ function FirebugService()
     this.breakOnErrors = prefs.getBoolPref("extensions.firebug.breakOnErrors");
     this.showEvalSources = prefs.getBoolPref("extensions.firebug.showEvalSources");
     this.filterSystemURLs = prefs.getBoolPref("extensions.firebug.filterSystemURLs");  // may not be exposed to users
+    this.DBG_FLUSH_EVERY_LINE = prefs.getBoolPref("extensions.firebug.DBG_FLUSH_EVERY_LINE");
 
     try {                                                                                                              /*@explore*/
           // CREATION and BP generate a huge trace                                                                     /*@explore*/
@@ -1185,8 +1186,8 @@ FirebugService.prototype =
         // frame is after Function() constructor call return, in source of caller.
         for (tag in this.nestedScriptStack) {
             var nestedScript = this.nestedScriptStack[tag];ddd("tag drain "+tag+" nestedScript.isValid:"+nestedScript.isValid+"\n");
-            if (nestedScript.functionName != "anonymous") // One case of an extension script triggers our handler, we try to avoid it here.
-                break;
+            //if (nestedScript.functionName != "anonymous") //
+            //    continue;
 ddd("now find\n")
             var debuggr = this.findDebugger(frame);
             if (debuggr)
@@ -1937,7 +1938,7 @@ ddd("findDebugger among "+debuggers.length+"\n");
 function handleTrackingScriptsInterrupt(frame, type, rv)
 {
     try
-    {ddd("handleTrackingScriptsInterrupt ");
+    {dumpToFileWithStack("handleTrackingScriptsInterrupt "+(frame.callingFrame?"haveCaller":"top")+" \n", frame);
         // We are not interested in Function() calls at top- or eval-level, since they don't seem to have an important use case and FF2 crashes
         if (frame.callingFrame && !isFilteredURL(frame.script.fileName) )
         {
@@ -1959,7 +1960,7 @@ function handleTrackingScriptsInterrupt(frame, type, rv)
 function handleTrappingErrorsInterrupt(frame, type, rv)
 {
     try
-    {ddd("handleTrappingErrorsInterrupt");
+    {ddd("handleTrappingErrorsInterrupt\n");
         if ( isFilteredURL(frame.script.fileName) )
         {
             var frameLineId = frame.script.fileName + frame.line;
@@ -2265,6 +2266,8 @@ var FirebugPrefsObserver =
             fbs.DBG_STEP = prefs.getBoolPref("extensions.firebug.DBG_FBS_STEP");
         else if (data == "extensions.firebug.DBG_FBS_FF_START")
             fbs.DBG_FBS_FF_START = prefs.getBoolPref("extensions.firebug.DBG_FBS_FF_START");
+        else if (data == "extensions.firebug.DBG_FLUSH_EVERY_LINE")
+            fbs.DBG_FLUSH_EVERY_LINE = prefs.getBoolPref("extensions.firebug.DBG_FLUSH_EVERY_LINE");
         else if (data == "extensions.firebug.DBG_FBS_SCRIPTINFO")
         {
             fbs.DBG_FBS_SCRIPTINFO = prefs.getBoolPref("extensions.firebug.DBG_FBS_SCRIPTINFO");
@@ -2395,7 +2398,7 @@ function dumpToFile(text)
 {
     if (!dumpStream) dumpStream = getDumpStream();
     dumpStream.write(text, text.length);
-    //dumpStream.flush();  // If FF crashes you need to run with flush on every line
+    if (fbs.DBG_FLUSH_EVERY_LINE) dumpStream.flush();  // If FF crashes you need to run with flush on every line
 }
 
 function flushDebugStream()
@@ -2414,5 +2417,5 @@ function dumpToFileWithStack(text, frame)
     }
     text += "-------------------------------------\n";
     dumpStream.write(text, text.length);
-    dumpStream.flush();
+    if (fbs.DBG_FLUSH_EVERY_LINE) dumpStream.flush();
 }

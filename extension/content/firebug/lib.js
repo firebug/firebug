@@ -1991,6 +1991,8 @@ this.addSourceFilesByURL = function(sourceFiles, sourceFilesByURL)
 {
     for (url in sourceFilesByURL)
     {
+        if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
+            FBTrace.sysout("addSourceFilesByURL Firebug.showAllSourceFiles:"+Firebug.showAllSourceFiles+" trying "+url+"\n");  /*@explore*/
         if (Firebug.showAllSourceFiles || this.showThisSourceFile(url))
         {
             var sourceFile = sourceFilesByURL[url];

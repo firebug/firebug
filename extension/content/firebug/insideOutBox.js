@@ -187,15 +187,15 @@ InsideOutBox.prototype =
         if (!object)
             return null;
 
-        var rootObject = this.rootObject;
-        if (!rootObject)
+       // var rootObject = this.rootObject;
+       // if (!rootObject)
             this.rootObject = this.getRootNode(object);
-        else                                                                                                           /*@explore*/
-            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
-            {                                                                                                          /*@explore*/
-                FBTrace.sysout("Root already set:");                                                                   /*@explore*/
-                this.getRootNode(object);                                                                              /*@explore*/
-            }                                                                                                          /*@explore*/
+      //  else                                                                                                           /*@explore*/
+      //      if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+      //      {                                                                                                          /*@explore*/
+      //          FBTrace.sysout("Root already set:");                                                                   /*@explore*/
+      //          this.getRootNode(object);                                                                              /*@explore*/
+      //      }                                                                                                          /*@explore*/
 
         // Get or create all of the boxes for the target and its ancestors
         var objectBox = this.createObjectBoxes(object, this.rootObject);
