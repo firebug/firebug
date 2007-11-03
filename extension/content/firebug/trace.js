@@ -7,26 +7,14 @@ try {
 (function() {
 
 const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces["nsIConsoleService"]);
-
+FBTrace.avoidRecursion = false;
 
 this.initializeTrace = function(context)
 {
-    if (FBTrace.dumpToPanel && context)
-    {
-        FBTrace.sysout = function(msg) {
-            var noThrottle = true;
-            Firebug.TraceModule.log(msg, context, "info", FirebugReps.Text, noThrottle);
-        }
-        dump("trace.initializeTrace Set to panel\n");
-    }
-    else
-    {
         FBTrace.sysout = function(msg)
         {
             dump(msg);
         }
-        dump("trace.initializeTrace Set to stdout for context="+context+"\n");
-    }
 }
 this.dumpToPanel = false;
 
@@ -35,11 +23,16 @@ this.dumpProperties = function(header, obj)
 {
     try {
         var noThrottle = true;
-        this.sysout(header+" sees object with typeof: \'"+typeof(obj)+"\'; object contains:\n");
+        header += " sees object with typeof: \'"+typeof(obj)+"\'; object contains:\n";
+        if (FBTrace.dumpToPanel && FirebugContext)
+            Firebug.TraceModule.logInfoOnce(header, FirebugContext, FirebugReps.Array);
+        else
+            this.sysout(header);
+
         if (obj instanceof Array)
         {
             if (FBTrace.dumpToPanel && FirebugContext)
-                return Firebug.TraceModule.log(obj, FirebugContext, "info", FirebugReps.Array, noThrottle);
+                return Firebug.TraceModule.logInfoOnce(obj, FirebugContext, FirebugReps.Array);
 
             for (var p = 0; p < obj.length; p++)
             {
@@ -56,7 +49,7 @@ this.dumpProperties = function(header, obj)
         else if (typeof(obj) == 'string')
         {
             if (FBTrace.dumpToPanel && FirebugContext)
-                return Firebug.TraceModule.log(obj, FirebugContext, "info", FirebugReps.Text, noThrottle);
+                return Firebug.TraceModule.logInfoOnce(obj, FirebugContext, FirebugReps.Text);
 
             this.sysout(obj+"\n");
         }
@@ -67,17 +60,17 @@ this.dumpProperties = function(header, obj)
         else
         {
             if (FBTrace.dumpToPanel && FirebugContext)
-                return Firebug.TraceModule.log(obj, FirebugContext, "info", FirebugReps.Obj, noThrottle);
+                return Firebug.TraceModule.logInfoOnce(obj, FirebugContext, FirebugReps.Obj);
 
             for (var p in obj)
             {
-				if (p.match("QueryInterface"))
-				{
-					if (this.dumpInterfaces(obj))
-						continue;
-					else
-						this.sysout("dumpInterfaces found NONE\n");
-				}
+                if (p.match("QueryInterface"))
+                {
+                    if (this.dumpInterfaces(obj))
+                        continue;
+                    else
+                        this.sysout("dumpInterfaces found NONE\n");
+                }
                 try
                 {
                     this.sysout("["+p+"]="+obj[p]+";\n");
@@ -91,27 +84,27 @@ this.dumpProperties = function(header, obj)
     }
     catch(exc)
     {
-        this.dumpStack("dumpProperties failed:"+exc+" trying with header="+header);
+        this.dumpStack("dumpProperties failed:"+exc+" trying with header="+header+"\n");
     }
 },
 
 this.dumpInterfaces = function(obj)
 {
-	var found = false;
-	// could try for classInfo
-	for(iface in Components.interfaces)
-	{
-		if (obj instanceof Components.interfaces[iface])
-		{
-			found = true;
-			for (p in Components.interfaces[iface])
-			{
-				this.sysout("["+iface+"."+p+"]="+obj[p]+";\n");
-			}
-		}
+    var found = false;
+    // could try for classInfo
+    for(iface in Components.interfaces)
+    {
+        if (obj instanceof Components.interfaces[iface])
+        {
+            found = true;
+            for (p in Components.interfaces[iface])
+            {
+                this.sysout("["+iface+"."+p+"]="+obj[p]+";\n");
+            }
+        }
 
-	}
-	return found;
+    }
+    return found;
 },
 
 this.consoleOut = function(text)
@@ -130,7 +123,7 @@ this.getComponentsStack = function(strip)
 {
     var lines = [];
     for (var frame = Components.stack; frame; frame = frame.caller)
-        lines.push(frame.filename + " (" + frame.lineNumber + ")");
+        lines.push(frame.toString()+ " "+(frame.sourceLine?frame.sourceLine:""));//frame.filename + " (" + frame.lineNumber + ")");
 
     if (strip)
         lines.splice(0, strip);

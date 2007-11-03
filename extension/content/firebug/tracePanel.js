@@ -101,6 +101,31 @@ Firebug.TraceModule = extend(Firebug.Console,
         }
     },
 
+    logInfoOnce: function(obj, context, rep)
+    {
+        if (!FBTrace.avoidRecursion)
+        {
+            var noThrottle = true;
+            FBTrace.avoidRecursion = true;
+            dump(obj);
+            Firebug.TraceModule.log(obj, context, "info", rep, noThrottle);
+        }
+        else
+        {
+            dump("avoided recursion \n");
+        }
+        FBTrace.avoidRecursion = false;
+    },
+
+    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
+    {
+        if (!context)
+            context = FirebugContext;
+        var panel = this.getPanel(context);
+        return panel.append(appender, objects, className, rep, sourceLink, noRow);
+    },
+
+
 });
 // ************************************************************************************************
 
@@ -173,6 +198,11 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         FBTrace.sysout("TraceFirebug.panel updateOption this.debug="+this.debug+"\n");
     },
 
+    cheat: function()
+    {
+        FirebugContext.window.location.href = "chrome://firebug/content/tests/crypto-hash.html";
+    },
+
     getOptionsMenuItems: function()
     {
         if (this.debug) FBTrace.sysout("TraceFirebug.panel getOptionsMenuItems for this.context="+this.context+"\n");
@@ -185,7 +215,8 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
             checked: FBTrace.dumpToPanel,
             command: function(event){
                 FBTrace.dumpToPanel = !FBTrace.dumpToPanel;
-                FBTrace.initializeTrace(self.context);
+                if (FBTrace.dumpToPanel) self.cheat();
+                else FBTrace.initializeTrace(self.context);
             }
         });
         for (p in Firebug.TraceModule)
