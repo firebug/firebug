@@ -20,6 +20,11 @@
     -moz-binding: url("chrome://firebug/content/bindings.xml#searchBox");
 }
 
+.fbSearchBox-attention {
+	color: red;
+    font-weight: bold;
+}
+
 panelBar {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelBar");
     -moz-box-orient: vertical;

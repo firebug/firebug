@@ -380,7 +380,7 @@
                 var location = panel.getObjectLocation(val);
                 var fileName = FBL.getFileName(location);
                 this.repObject = val;
-                this.setAttribute("label", FBL.cropString(fileName, 60));
+                this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
             ]]></setter>
         </property>
@@ -399,6 +399,7 @@
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectObject", true, false);
                 this.dispatchEvent(ev);
+                Firebug.Search.displayOnly("", FirebugContext);
             ]]></body>
         </method>
 
@@ -471,6 +472,7 @@
                 else
                     return;
 
+                Firebug.Search.displayOnly(this.searchString, FirebugContext);
                 FBL.cancelEvent(event);
             ]]></body>
         </method>

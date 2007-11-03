@@ -41,6 +41,18 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.value = "";
     },
 
+    displayOnly: function(text, context)
+    {
+        var searchBox = context.chrome.$("fbSearchBox");
+
+        if (text.length > 0)
+            setClass(searchBox, "fbSearchBox-attention");
+        else
+            removeClass(searchBox, "fbSearchBox-attention");
+FBTrace.sysout("search.displayOnly \""+text+"\"\n");
+        searchBox.value = text;
+    },
+
     focus: function(context)
     {
         if (context.detached)
