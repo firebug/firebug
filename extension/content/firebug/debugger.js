@@ -12,6 +12,7 @@ const nsIFireBug = CI("nsIFireBug");
 const nsIFireBugDebugger = CI("nsIFireBugDebugger");
 const nsIFireBugURLProvider = CI("nsIFireBugURLProvider");
 const nsISupports = CI("nsISupports");
+const nsICryptoHash = CI["nsICryptoHash"];
 
 const PCMAP_SOURCETEXT = jsdIScript.PCMAP_SOURCETEXT;
 
@@ -825,7 +826,7 @@ Firebug.Debugger = extend(Firebug.Module,
 
     onEventScript: function(frame)
     {
-        if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventLevel\n");                                             /*@explore*/
+        if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScript\n");                                             /*@explore*/
         var context = this.breakContext;
         delete this.breakContext;
 
@@ -838,13 +839,11 @@ Firebug.Debugger = extend(Firebug.Module,
                 context.sourceFileMap = {};
             }
 
-            var url = this.getDataURLForScript(script, script.functionName+"."+script.tag);
-            if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventLevel url="+url+"\n");                             /*@explore*/
-
-            var sourceFile = new FBL.SourceFile(url, context);
-
+            var source = script.functionSource;
+            var sourceFile = this.getSourceFile(context, frame, source, "event");
+            if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScript url="+sourceFile.href+"\n");   /*@explore*/
             sourceFile.tag = script.tag;
-            sourceFile.title = script.functionName+"."+script.tag;
+            sourceFile.title = "event:"+script.functionName+"."+script.tag;
             if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScript tag="+sourceFile.tag+"\n");                 /*@explore*/
 
             if (context.eventSourceURLByTag == undefined)
@@ -853,10 +852,11 @@ Firebug.Debugger = extend(Firebug.Module,
                 context.eventSourceFilesByURL = {};
             }
 
+            var url = sourceFile.href;
             context.eventSourceURLByTag[script.tag] = url;
             context.eventSourceFilesByURL[url] = sourceFile;
 
-            var lines = context.sourceCache.store(url, script.functionSource);
+            var lines = context.sourceCache.store(url, source);
             if (FBTrace.DBG_EVENTS)                                                                                    /*@explore*/
                  for (var i = 0; i < lines.length; i++) FBTrace.sysout("["+(i+2)+"]="+lines[i]+"\n");                  /*@explore*/
             //sourceFile.addToLineTable(script, 0, lines);    // trueBaselineNumber heursitic
@@ -868,7 +868,7 @@ Firebug.Debugger = extend(Firebug.Module,
         }
         catch(exc)
         {
-            ERROR("debugger.onEventLevel failed: "+exc);
+            ERROR("debugger.onEventScript failed: "+exc);
             return null;
         }
     },
@@ -986,10 +986,7 @@ Firebug.Debugger = extend(Firebug.Module,
 
         if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");                     /*@explore*/
 
-        var bufferURL = this.getDataURLForScript(ctor_script, source);
-        var sourceFile = new FBL.SourceFile(bufferURL, context);
-        sourceFile.source = source;
-
+        var sourceFile = this.getSourceFile(context, caller_frame, source, "Function");
         sourceFile.evalExpression = ctor_expr;
         sourceFile.tag = ctor_script.tag;
 
@@ -1038,12 +1035,24 @@ Firebug.Debugger = extend(Firebug.Module,
         var source  = this.getEvalBody(frame, "lib.createSourceFileForEval.getEvalBody", 1, eval_expr);
         if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForEval source:"+source+"\n");                     /*@explore*/
 
+        var sourceFile = this.getSourceFile(context, frame, source, "eval");
+        sourceFile.evalExpression = eval_expr;
+        sourceFile.tag = frame.script.tag;
+
+        context.sourceCache.store(sourceFile.href, sourceFile.source);
+
+        delete sourceFile.source;
+        return sourceFile;
+    },
+
+    getSourceFile: function(context, frame, source, kind)
+    {
         if (Firebug.useDebugAdapter)
             var sourceFile = this.getSourceFileFromDebugAdapter(context, frame, source);
         else if (Firebug.useLastLineForEvalName)
             var sourceFile = this.getSourceFileFromLastLine(context, frame, source)
-        else if (Firebug.useFirstLineForEvalName)
-            var sourceFile = this.getSourceFileFromFirstSourceLine(context, frame, source)
+        else if (Firebug.useMD5ForEvalName)
+            var sourceFile = this.getSourceFileFromMD5(context, frame, source, kind)
 
         if (sourceFile == undefined)
         {
@@ -1051,13 +1060,6 @@ Firebug.Debugger = extend(Firebug.Module,
             var sourceFile = new FBL.SourceFile(evalURL, context);
             sourceFile.source = source;
         }
-
-        sourceFile.evalExpression = eval_expr;
-        sourceFile.tag = frame.script.tag;
-
-        context.sourceCache.store(sourceFile.href, sourceFile.source);
-
-        delete sourceFile.source;
         return sourceFile;
     },
 
@@ -1081,10 +1083,20 @@ Firebug.Debugger = extend(Firebug.Module,
         return this.getSourceFileFromSourceLine(lastLines, source, context);
     },
 
-    getSourceFileFromFirstSourceLine: function(context, frame, source)
+    getSourceFileFromMD5: function(context, frame, source, kind)
     {
-        var firstLine = source.substr(0, 256);  // guard against giants
-        return this.getSourceFileFromSourceLine(firstLine, source, context);
+        this.hash_service.init(this.nsICryptoHash.MD5);
+        byteArray = [];
+        for (var j = 0; j < source.length; j++)
+        {
+            byteArray.push( source.charCodeAt(j) );  // TODO try chunking it
+        }
+        this.hash_service.update(byteArray, byteArray.length);
+        var hash = this.hash_service.finish(true);
+        var evalName = frame.script.fileName + (kind ? "/"+kind+"/" : "/") + hash;
+        var sourceFile = new FBL.SourceFile(evalName, context);
+        sourceFile.source = source;
+        return sourceFile;
     },
 
     getSourceFileFromSourceLine: function(line, source, context)
@@ -1254,7 +1266,7 @@ Firebug.Debugger = extend(Firebug.Module,
     },
 
     getDataURLForScript: function(script, source)
-    {
+    {FBTrace.dumpStack("getDataURLForScript");
         if (!source)
             return "eval."+script.tag;
 
@@ -1272,6 +1284,10 @@ Firebug.Debugger = extend(Firebug.Module,
 
     initialize: function()
     {
+        this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
+        FBTrace.dumpProperties("debugger.initialize nsICryptoHash", this.nsICryptoHash);
+        this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
+
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
         $("cmd_breakOnTopLevel").setAttribute("checked", Firebug.breakOnTopLevel);
     },
@@ -1917,7 +1933,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             // wait 1.2 optionMenu("ShowEvalSources", "showEvalSources"),
             optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
-            optionMenu("UseFirstLineForEvalName", "useFirstLineForEvalName")
+            optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
         ];
     },
 

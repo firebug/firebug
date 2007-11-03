@@ -98,6 +98,14 @@ top.SourceCache.prototype =
             }
         }
 
+        /*if (FBL.reChrome.test(url))  // chrome urls cannot be read with this code.
+        {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("sourceCache.load cannot read chrome source "+url+"\n");
+            return;
+        }
+*/
+
         var stream;
         try
         {
@@ -105,9 +113,6 @@ top.SourceCache.prototype =
         }
         catch (exc)
         {
-
-            if (FBL.reChrome.test(url))  // chrome urls cannot be read with this code.
-                return;
             var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";            /*@explore*/
             var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";                /*@explore*/
             FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n"); /*@explore*/

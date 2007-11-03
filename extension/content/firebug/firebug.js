@@ -75,7 +75,7 @@ const prefNames =
     "showEvalSources",
     "showAllSourceFiles",
     "useLastLineForEvalName",
-    "useFirstLineForEvalName",
+    "useMD5ForEvalName",
 
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
@@ -699,7 +699,6 @@ top.Firebug =
             browser.chrome.focus();
         else
         {
-
             if (toggleOff)
                 browser.chrome.hidePanel();
             else
@@ -1585,6 +1584,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (!sourceBox)
             sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);
+
+        FBTrace.dumpStack("firebug.showSourceFile sourceBox:"+sourceBox+"\n");
 
         this.showSourceBox(sourceBox);
     },

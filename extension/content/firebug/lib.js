@@ -1996,7 +1996,9 @@ this.addSourceFilesByURL = function(sourceFiles, sourceFilesByURL)
         if (Firebug.showAllSourceFiles || this.showThisSourceFile(url))
         {
             var sourceFile = sourceFilesByURL[url];
-            sourceFiles.push(sourceFile);     // will append, whether or not the map was overwritten
+            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("addSourceFilesByURL sourceFile for "+url+"="+sourceFile+"\n");  /*@explore*/
+            if (sourceFile)
+                sourceFiles.push(sourceFile);     // will append, whether or not the map was overwritten
         }
     }
 };
@@ -2454,6 +2456,14 @@ this.getLocalPath = function(url)
         var file = fileHandler.getFileFromURLSpec(url);
         return file.path;
     }
+};
+
+this.getURLFromLocalFile = function(file)
+{
+    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+    var URL = fileHandler.getURLSpecFromFile(file);
+    return URL;
 };
 
 this.getDomain = function(url)
