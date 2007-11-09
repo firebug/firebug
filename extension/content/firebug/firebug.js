@@ -1586,8 +1586,6 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         if (!sourceBox)
             sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);
 
-        FBTrace.dumpStack("firebug.showSourceFile sourceBox:"+sourceBox+"\n");
-
         this.showSourceBox(sourceBox);
     },
 
