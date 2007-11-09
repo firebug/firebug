@@ -1295,6 +1295,7 @@ Firebug.Panel =
 
         if (this.panelNode)
         {
+            this.panelNode = doc.adoptNode(this.panelNode, true);
             doc.body.appendChild(this.panelNode);
             this.panelNode.scrollTop = this.lastScrollTop;
             delete this.lastScrollTop;
