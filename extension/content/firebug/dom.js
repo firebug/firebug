@@ -1314,10 +1314,6 @@ function getMembers(object, level)
 function expandMembers(members, toggles, offset, level)
 {
     var expanded = 0;
-if (level > 10)
-{
-    return 0;
-}
     for (var i = offset; i < members.length; ++i)
     {
         var member = members[i];
@@ -1337,12 +1333,14 @@ if (level > 10)
             { 																							/*@explore*/
                 FBTrace.dumpProperties("expandMembers member.name", member.name); 						/*@explore*/
                 FBTrace.dumpProperties("expandMembers toggles", toggles); 								/*@explore*/
-                                                                                                         /*@explore*/
+                                                                                                        /*@explore*/
                 FBTrace.dumpProperties("expandMembers toggles[member.name]", toggles[member.name]); 	/*@explore*/
                 FBTrace.dumpProperties("dom.expandedMembers level: "+level+" member", member); 			/*@explore*/
             } 																							/*@explore*/
 
             expanded += newMembers.length;
+            // sometimes member.name == prototype then we get toggles[prototype] as a fucntion and we loop,
+            // this hack avoids the loop but I wish I understood it better XXXjjb
             var memberToggles = toggles[member.name];
             if (typeof(memberToggles) != 'object')
                 memberToggles = {};
