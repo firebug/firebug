@@ -746,6 +746,11 @@ FirebugService.prototype =
             timer.cancel();
             waitingForTimer = false;
         }
+        if (enabledDebugger)
+            return;
+
+        enabledDebugger = true;
+
         try {                                                                                                          /*@explore*/
             this.DBG_CREATION = prefs.getBoolPref("extensions.firebug.DBG_FBS_CREATION");                              /*@explore*/
             this.DBG_BP = prefs.getBoolPref("extensions.firebug.DBG_FBS_BP");                                          /*@explore*/
@@ -768,11 +773,6 @@ FirebugService.prototype =
             +"\n");                                                                 								   /*@explore*/
         }	                                                                                                           /*@explore*/
 
-        if (enabledDebugger)
-            return;
-
-        enabledDebugger = true;
-
         if (jsd)
         {
             jsd.unPause();
@@ -782,9 +782,8 @@ FirebugService.prototype =
         {
             jsd = DebuggerService.getService(jsdIDebuggerService);
 
-            jsd.flags |= DISABLE_OBJECT_TRACE;
-
             jsd.on();
+            jsd.flags |= DISABLE_OBJECT_TRACE;
             this.hookScripts();
 
             jsd.debuggerHook = { onExecute: hook(this.onDebugger, RETURN_CONTINUE) };
@@ -2056,7 +2055,9 @@ var FirebugModule =
         try
         {
             var jsd = DebuggerService.getService(jsdIDebuggerService);
-            jsd.initAtStartup = true;
+            var filterSystemURLs =  prefs.getBoolPref("extensions.firebug.filterSystemURLs");
+            if (!filterSystemURLs)  // do not turn jsd on unless we want to see chrome
+                jsd.initAtStartup = true;
         }
         catch (exc)
         {
