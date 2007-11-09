@@ -175,9 +175,10 @@ function FirebugService()
         this.DBG_CREATION = this.DBG_FBS_FF_START ? prefs.getBoolPref("extensions.firebug.DBG_FBS_CREATION") : false;  /*@explore*/
         this.DBG_BP = this.DBG_FBS_FF_START ? prefs.getBoolPref("extensions.firebug.DBG_FBS_BP") : false;              /*@explore*/
         this.DBG_ERRORS = prefs.getBoolPref("extensions.firebug.DBG_FBS_ERRORS");                                      /*@explore*/
-        this.DBG_STEP = prefs.getBoolPref("extensions.firebug.DBG_FBS_STEP");                                          /*@explore*/
+        this.DBG_STEP = prefs.getBoolPref("extensions.firebug.DBG_FBS_STEP");
+        this.DBG_FUNCTION = prefs.getBoolPref("extensions.firebug.DBG_FBS_FUNCTION");                                          /*@explore*/
         ddd("FirebugService fbs.DBG_CREATION: "+fbs.DBG_CREATION+" fbs.DBG_BP:"+fbs.DBG_BP+                            /*@explore*/
-            " fbs.DBG_ERRORS:"+fbs.DBG_ERRORS+" fbs.DBG_STEP:"+fbs.DBG_STEP+"\n");                                     /*@explore*/
+            " fbs.DBG_ERRORS:"+fbs.DBG_ERRORS+" fbs.DBG_STEP:"+fbs.DBG_STEP+" fbs.DBG_FUNCTION:"+fbs.DBG_FUNCTION+"\n");                                     /*@explore*/
     }                                                                                                                  /*@explore*/
     catch (exc)                                                                                                        /*@explore*/
     {                                                                                                                  /*@explore*/
@@ -750,16 +751,21 @@ FirebugService.prototype =
             this.DBG_BP = prefs.getBoolPref("extensions.firebug.DBG_FBS_BP");                                          /*@explore*/
             this.DBG_ERRORS = prefs.getBoolPref("extensions.firebug.DBG_FBS_ERRORS");                                  /*@explore*/
             this.DBG_STEP = prefs.getBoolPref("extensions.firebug.DBG_FBS_STEP");                                      /*@explore*/
+            this.DBG_FUNCTION = prefs.getBoolPref("extensions.firebug.DBG_FBS_FUNCTION");                              /*@explore*/
         }                                                                                                              /*@explore*/
         catch(exc)                                                                                                     /*@explore*/
         {                                                                                                              /*@explore*/
             dumpProperties("fbs.enableDebugger: failed to set tracing preferences:"+exc);	                           /*@explore*/
         }                                                                                                              /*@explore*/
-        if (this.DBG_CREATION || this.DBG_BP || this.DBG_ERRORS || this.DBG_STEP)                                      /*@explore*/
+        if (this.DBG_CREATION || this.DBG_BP || this.DBG_ERRORS || this.DBG_STEP || this.DBG_FUNCTION)                 /*@explore*/
         {                                                                                                              /*@explore*/
             ddd("\nenableDebugger start fbs debug log "+Date()+"\n");                                                  /*@explore*/
-            ddd("fbs.DBG_CREATION: "+fbs.DBG_CREATION+" fbs.DBG_BP:"+fbs.DBG_BP+" fbs.DBG_ERRORS:"+fbs.DBG_ERRORS      /*@explore*/
-                +" fbs.DBG_STEP:"+fbs.DBG_STEP+"\n");                                                                  /*@explore*/
+            ddd("fbs.DBG_CREATION: "+fbs.DBG_CREATION+																   /*@explore*/
+                " fbs.DBG_BP:"+fbs.DBG_BP+																			   /*@explore*/
+                " fbs.DBG_ERRORS:"+fbs.DBG_ERRORS      																   /*@explore*/
+                +" fbs.DBG_STEP:"+fbs.DBG_STEP																		   /*@explore*/
+                +" fbs.DBG_FUNCTION:"+fbs.DBG_FUNCTION																   /*@explore*/
+            +"\n");                                                                 								   /*@explore*/
         }	                                                                                                           /*@explore*/
 
         if (enabledDebugger)
@@ -891,7 +897,7 @@ FirebugService.prototype =
     },
 
     onBreakpoint: function(frame, type, val)
-    {ddd("onBreakPoint - ");
+    {
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
         var scriptTag = frame.script.tag;
@@ -961,7 +967,7 @@ FirebugService.prototype =
     },
 
     onThrow: function(frame, type, rv)
-    {ddd("onThrow - ");
+    {
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE_THROW;
         // Remember the error where the last exception is thrown - this will
@@ -1182,7 +1188,7 @@ FirebugService.prototype =
     },
 
     drainFunctionConstructorScriptStack: function(frame)
-    {dumpToFileWithStack("ENTER drain", frame);
+    {
         // frame is after Function() constructor call return, in source of caller.
         for (tag in this.nestedScriptStack) {
             var nestedScript = this.nestedScriptStack[tag];ddd("tag drain "+tag+" nestedScript.isValid:"+nestedScript.isValid+"\n");
@@ -1207,7 +1213,7 @@ ddd("now find\n")
 
         try
         {
-            var fileName = script.fileName; ddd("onScriptCreated - ");
+            var fileName = script.fileName;
             if (!fileName || isFilteredURL(fileName))
                 return;
 
@@ -1429,6 +1435,53 @@ ddd("now find\n")
                 ddd(i+"/"+scriptInfos.length+": "+formatScriptInfo(scriptInfos[i])+"\n");
             }
         }
+        jsd.enumerateContexts( {enumerateContext: function(jscontext)
+        {
+                var global = jscontext.globalObject.getWrappedValue();
+                ddd("jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
+                //dumpProperties("global object:\n", global);
+                if (global)
+                {
+                    var document = global.document;
+                    if (document)
+                    {
+                        ddd("global document.location: "+document.location+"\n");
+                    }
+                    else
+                        ddd("global without document\n");
+                    ddd("global type: "+typeof(global)+"\n");
+                }
+                else
+                    ddd("no global object\n");
+
+                ddd("\n");
+                try
+                {
+                    if (jscontext.privateData)
+                    {
+                        dumpProperties("jscontext.privateData", jscontext.privateData);
+                        dumpInterfaces("jscontext.privateData", jscontext.privateData);
+                    }
+
+                }
+                catch(e)
+                {
+                    ddd("jscontext dump FAILED "+e+"\n");
+                }
+                /*
+                 * jsdIContext has jsdIEphemeral, nsISupports, jsdIContext
+                 * jsdIContext.wrappedContext has nsISupports and nsITimerCallback, nothing interesting
+                 * jsdIContext.JSContext is undefined
+                 */
+                /*
+                var nsITimerCallback = Components.interfaces["nsITimerCallback"];
+                if (context instanceof nsITimerCallback)
+                {
+                    var asTimer = context.QueryInterface(nsITimerCallback);
+                    dumpProperties(nsITimerCallback, asTimer );
+                }
+                ddd("\n\n");*/
+        }});
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1437,7 +1490,7 @@ ddd("now find\n")
     {
         if (debuggers.length < 1)
             return;
-ddd("findDebugger among "+debuggers.length+"\n");
+
         var win = getFrameWindow(frame);
         if (!win)
             return;
@@ -1726,7 +1779,7 @@ ddd("findDebugger among "+debuggers.length+"\n");
         // Before we break, clear information about previous stepping session
         this.stopStepping();
 
-        if (fbs.DBG_BP || fbs.DBG_CREATION || fbs.DBG_ERRORS || fbs.DBG_STEP) flushDebugStream();                      /*@explore*/
+        if (fbs.DBG_BP || fbs.DBG_CREATION || fbs.DBG_ERRORS || fbs.DBG_STEP || fbs.DBG_FUNCTION) flushDebugStream();        /*@explore*/
 
         // Break into the debugger - execution will stop here until the user resumes
         var returned;
@@ -1844,7 +1897,7 @@ ddd("findDebugger among "+debuggers.length+"\n");
     hookInterrupts: function()
     {
         function interruptHook(frame, type, rv)
-        {ddd("hooInterrupts ");
+        {
             if ( isFilteredURL(frame.script.fileName) )
                 return RETURN_CONTINUE;
 
@@ -1907,7 +1960,7 @@ ddd("findDebugger among "+debuggers.length+"\n");
             jsd.interruptHook = null;
 
         fbs.trackingScriptsHookSet = false;
-        if (fbs.DBG_CREATION) ddd("clearHookInterruptsToTrackScripts \n");
+        if (fbs.DBG_FUNCTION) ddd("clearHookInterruptsToTrackScripts \n");
     },
 
     hookInterruptsToTrapErrors: function()
@@ -1917,7 +1970,7 @@ ddd("findDebugger among "+debuggers.length+"\n");
 
         jsd.interruptHook = { onExecute: handleTrappingErrorsInterrupt };
         fbs.trappingErrorsHookSet = true;
-        if (fbs.DBG_CREATION) ddd("hookInterruptsToTrapErrors fbs.saveInterruptHook:"+fbs.saveInterruptHook+"\n");                                                                  /*@explore*/
+        if (fbs.DBG_FUNCTION) ddd("hookInterruptsToTrapErrors fbs.saveInterruptHook:"+fbs.saveInterruptHook+"\n");                                                                  /*@explore*/
     },
 
     clearHookInterruptsToTrapErrors: function()
@@ -1931,19 +1984,20 @@ ddd("findDebugger among "+debuggers.length+"\n");
             jsd.interruptHook = null;
 
         fbs.trappingErrorsHookSet = false;
-        if (fbs.DBG_CREATION) ddd("clearHookInterruptsToTrapErrors \n");
+        if (fbs.DBG_FUNCTION) ddd("clearHookInterruptsToTrapErrors \n");
     }
 };
 
 function handleTrackingScriptsInterrupt(frame, type, rv)
 {
     try
-    {dumpToFileWithStack("handleTrackingScriptsInterrupt "+(frame.callingFrame?"haveCaller":"top")+" \n", frame);
+    {
+        if (fbs.DBG_FUNCTION) ddd("handleTrackingScriptsInterrupt "+(frame.callingFrame?"haveCaller":"top")+" \n");
         // We are not interested in Function() calls at top- or eval-level, since they don't seem to have an important use case and FF2 crashes
         if (frame.callingFrame && !isFilteredURL(frame.script.fileName) )
         {
             var frameLineId = frame.script.fileName + frame.line;
-            if (fbs.DBG_CREATION) dumpToFileWithStack("handleTrackingScriptsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type), frame);                              /*@explore*/
+            if (fbs.DBG_FUNCTION) ddd("handleTrackingScriptsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type)+"\n");                              /*@explore*/
 
             // When we are called the stack should be at the PC just after the constructor call to Function().
             fbs.drainFunctionConstructorScriptStack(frame);
@@ -1960,7 +2014,8 @@ function handleTrackingScriptsInterrupt(frame, type, rv)
 function handleTrappingErrorsInterrupt(frame, type, rv)
 {
     try
-    {ddd("handleTrappingErrorsInterrupt\n");
+    {
+        if (fbs.DBG_ERRORS) ddd("handleTrappingErrorsInterrupt\n");
         if ( isFilteredURL(frame.script.fileName) )
         {
             var frameLineId = frame.script.fileName + frame.line;
@@ -2055,7 +2110,7 @@ function denormalizeURL(url)
 
 function isFilteredURL(url)
 {
-    ddd("isFilteredURL? "+url+" fbs.filterSystemURLs:"+fbs.filterSystemURLs+"\n");
+    ddd(this.caller+" - isFilteredURL? "+url+" fbs.filterSystemURLs:"+fbs.filterSystemURLs+"\n");
     return ( fbs.filterSystemURLs && systemURLStem(url) );
 }
 
@@ -2129,9 +2184,8 @@ function getFrameWindow(frame)
             return;
     try
     {
-        var result = {};ddd("getFrameWindow, frame isValid:"+frame.isValid+"\n");
+        var result = {};
         frame.eval("window", "", 1, result);
-ddd("getFrameWindow eval complete\n");
         var win = result.value.getWrappedValue();
         return getRootWindow(win);
     }
@@ -2264,6 +2318,8 @@ var FirebugPrefsObserver =
             fbs.DBG_ERRORS = prefs.getBoolPref("extensions.firebug.DBG_FBS_ERRORS");
         else if (data == "extensions.firebug.DBG_FBS_STEP")
             fbs.DBG_STEP = prefs.getBoolPref("extensions.firebug.DBG_FBS_STEP");
+        else if (data == "extensions.firebug.DBG_FBS_FUNCTION")
+            fbs.DBG_FUNCTION = prefs.getBoolPref("extensions.firebug.DBG_FBS_FUNCTION");
         else if (data == "extensions.firebug.DBG_FBS_FF_START")
             fbs.DBG_FBS_FF_START = prefs.getBoolPref("extensions.firebug.DBG_FBS_FF_START");
         else if (data == "extensions.firebug.DBG_FLUSH_EVERY_LINE")
@@ -2351,10 +2407,40 @@ function getPropertyName(object, value)                                         
 function dumpProperties(title, obj)                                                                                    /*@explore*/
 {                                                                                                                      /*@explore*/
     var lines = [title];                                                                                               /*@explore*/
-    for (p in obj)                                                                                                     /*@explore*/
-        lines.push("["+p+"]="+obj[p]);                                                                                 /*@explore*/
+    for (p in obj)
+    {
+        try
+        {
+            lines.push("["+p+"]="+obj[p]);
+        }
+        catch(e)
+        {
+            lines.push("["+p+"] FAILED:"+e);
+        }
+    }                                                                                                   				/*@explore*/
+                                                                                                                        /*@explore*/
     ddd(lines.join("\n"));                                                                                             /*@explore*/
-}                                                                                                                      /*@explore*/
+}
+                                                                                                                         /*@explore*/
+function dumpInterfaces(title, obj)																							/*@explore*/
+{																														/*@explore*/
+    var found = false;																									/*@explore*/
+    // could try for classInfo																							/*@explore*/
+    for(iface in Components.interfaces)																					/*@explore*/
+    {																													/*@explore*/
+        if (obj instanceof Components.interfaces[iface])																/*@explore*/
+        {																												/*@explore*/
+            found = true;
+            ddd(title+" has "+iface+"\n");																						/*@explore*/
+            for (p in Components.interfaces[iface])																		/*@explore*/
+            {																											/*@explore*/
+                ddd("["+iface+"."+p+"]="+obj[p]+";\n");																	/*@explore*/
+            }																											/*@explore*/
+        }																												/*@explore*/
+                                                                                                                        /*@explore*/
+    }																													/*@explore*/
+    return found;																										/*@explore*/
+}																														/*@explore*/
 
 function getExecutionStopNameFromType(type)                                                                            /*@explore*/
 {                                                                                                                      /*@explore*/

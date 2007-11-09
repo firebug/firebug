@@ -40,6 +40,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_WINDOWS: false,    	// tabWatcher, dispatch events; very useful for understand modules/panels
     DBG_FBS_CREATION: false, // firebug-service script creation
     DBG_FBS_STEP: false,     // firebug-service stepping
+    DBG_FBS_FUNCTION: false,     // firebug-service new Function
     DBG_FBS_BP: false, // firebug-service breakpoints
     DBG_FBS_ERRORS: false, // firebug-service error handling
     DBG_FBS_FF_START: false, // firebug-service trace from start of firefox
@@ -76,7 +77,6 @@ Firebug.TraceModule = extend(Firebug.Console,
         if (this.debug)
             FBTrace.sysout("TraceModule.initContext\n");
         this.context = context;
-        FBTrace.initializeTrace(context);
         FBTrace.sysout("TraceModule.initContext try sysout\n");
     },
 
@@ -91,14 +91,6 @@ Firebug.TraceModule = extend(Firebug.Console,
             return;
 
         if (this.debug) FBTrace.sysout("TraceModule showPanel module:\n");
-        if (!FBTrace.dumpToPanel && !this.intro)
-        {
-            this.intro = "Use Options on this panel to turn on tracing.";
-            this.intro += " By default output goes to system console via dump(). (You need to set browser.dom.window.dump.enabled to true in about:config)."
-            this.intro += " You can also trace into this panel by setting the 'dump to panel' option."
-            Firebug.TraceModule.log(this.intro, FirebugContext, "info", FirebugReps.Text, true);
-            this.intro = "shown";
-        }
     },
 
     logInfoOnce: function(obj, context, rep)
@@ -208,17 +200,7 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         if (this.debug) FBTrace.sysout("TraceFirebug.panel getOptionsMenuItems for this.context="+this.context+"\n");
         var items = [];
         var self = this;
-        items.push({
-            label: "dump into fbug panel",
-            nol10n: true,
-            type: "checkbox",
-            checked: FBTrace.dumpToPanel,
-            command: function(event){
-                FBTrace.dumpToPanel = !FBTrace.dumpToPanel;
-                if (FBTrace.dumpToPanel) self.cheat();
-                else FBTrace.initializeTrace(self.context);
-            }
-        });
+
         for (p in Firebug.TraceModule)
         {
             var m = reDBG.exec(p);

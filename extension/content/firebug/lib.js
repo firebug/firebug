@@ -2939,7 +2939,7 @@ this.SourceFile.prototype =
         var lineCount = (sourceLines) ? sourceLines.length : script.lineExtent;
 
         if (FBTrace.DBG_LINETABLE)                                                                                     /*@explore*/
-            FBTrace.dumpStack("lib.addToLineTable lineCount="+lineCount+" trueBaseLineNumber="+trueBaseLineNumber+"\n");  /*@explore*/
+            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" trueBaseLineNumber="+trueBaseLineNumber+"\n");  /*@explore*/
         this.pcMapTypeByScriptTag[script.tag] = pcmap_type;
 
         if (!this.lineMap)
@@ -2959,9 +2959,9 @@ this.SourceFile.prototype =
                 var lineFromPC = script.pcToLine(pcFromLine, pcmap_type);                                              /*@explore*/
                                                                                                                        /*@explore*/
                 if (this.isInExecutableTable(mapLineNo))                                                                  /*@explore*/
-                    FBTrace.sysout("SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo]+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
+                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo]+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
                 else                                                                                                   /*@explore*/
-                    FBTrace.sysout("SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
+                    FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
             }                                                                                                          /*@explore*/
         }
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/

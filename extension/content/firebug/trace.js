@@ -2,6 +2,9 @@
 
 // Debug Logging for Firebug internals
 
+// ************************************************************************************************
+// about:config browser.dom.window.dump.enabled true
+
 var FBTrace = {};
 try {
 (function() {
@@ -9,31 +12,20 @@ try {
 const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces["nsIConsoleService"]);
 FBTrace.avoidRecursion = false;
 
-this.initializeTrace = function(context)
+this.sysout = function(msg)
 {
-        FBTrace.sysout = function(msg)
-        {
-            dump(msg);
-        }
+    dump(msg);
 }
-this.dumpToPanel = false;
-
 
 this.dumpProperties = function(header, obj)
 {
     try {
         var noThrottle = true;
         header += " sees object with typeof: \'"+typeof(obj)+"\'; object contains:\n";
-        if (FBTrace.dumpToPanel && FirebugContext)
-            Firebug.TraceModule.logInfoOnce(header, FirebugContext, FirebugReps.Array);
-        else
-            this.sysout(header);
+        this.sysout(header);
 
         if (obj instanceof Array)
         {
-            if (FBTrace.dumpToPanel && FirebugContext)
-                return Firebug.TraceModule.logInfoOnce(obj, FirebugContext, FirebugReps.Array);
-
             for (var p = 0; p < obj.length; p++)
             {
                 try
@@ -48,9 +40,6 @@ this.dumpProperties = function(header, obj)
         }
         else if (typeof(obj) == 'string')
         {
-            if (FBTrace.dumpToPanel && FirebugContext)
-                return Firebug.TraceModule.logInfoOnce(obj, FirebugContext, FirebugReps.Text);
-
             this.sysout(obj+"\n");
         }
         //else if (obj.name && obj.name == 'NS_ERROR_XPC_JS_THREW_JS_OBJECT')
@@ -59,9 +48,6 @@ this.dumpProperties = function(header, obj)
         //}
         else
         {
-            if (FBTrace.dumpToPanel && FirebugContext)
-                return Firebug.TraceModule.logInfoOnce(obj, FirebugContext, FirebugReps.Obj);
-
             for (var p in obj)
             {
                 if (p.match("QueryInterface"))
@@ -130,10 +116,6 @@ this.getComponentsStack = function(strip)
 
     return lines.join("\n");
 };
-
-
-// ************************************************************************************************
-this.initializeTrace();
 
 }).apply(FBTrace);
 } catch (exc) { alert(exc);}
