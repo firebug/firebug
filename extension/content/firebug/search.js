@@ -49,7 +49,7 @@ Firebug.Search = extend(Firebug.Module,
             setClass(searchBox, "fbSearchBox-attention");
         else
             removeClass(searchBox, "fbSearchBox-attention");
-FBTrace.sysout("search.displayOnly \""+text+"\"\n");
+
         searchBox.value = text;
     },
 

@@ -2052,12 +2052,17 @@ var FirebugModule =
         compMgr = compMgr.QueryInterface(nsIComponentRegistrar);
         compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID, fileSpec, location, type);
 
+        if (!prefs)
+           prefs = PrefService.getService(nsIPrefBranch2);
+
+        var filterSystemURLs =  prefs.getBoolPref("extensions.firebug.filterSystemURLs");
+        if (filterSystemURLs)  // do not turn jsd on unless we want to see chrome
+            return;
+
         try
         {
             var jsd = DebuggerService.getService(jsdIDebuggerService);
-            var filterSystemURLs =  prefs.getBoolPref("extensions.firebug.filterSystemURLs");
-            if (!filterSystemURLs)  // do not turn jsd on unless we want to see chrome
-                jsd.initAtStartup = true;
+            jsd.initAtStartup = true;
         }
         catch (exc)
         {

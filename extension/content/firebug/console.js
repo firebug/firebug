@@ -42,7 +42,8 @@ Firebug.Console = extend(Firebug.Module,
         if (noThrottle || !context)
         {
             var panel = this.getPanel(context);
-            return panel.append(appender, objects, className, rep, sourceLink, noRow);
+			if (panel)
+	            return panel.append(appender, objects, className, rep, sourceLink, noRow);
         }
         else
         {
