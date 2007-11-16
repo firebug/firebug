@@ -70,6 +70,7 @@ Firebug.TraceModule = extend(Firebug.Console,
             if (m)
                 FBTrace[p] = Firebug.getPref(p); // set to 'true' to turn on all traces;
         }
+        prefs.setBoolPref("browser.dom.window.dump.enabled", true);
     },
 
     initContext: function(context)
