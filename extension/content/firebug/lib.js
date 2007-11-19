@@ -2573,24 +2573,6 @@ this.parseURLEncodedText = function(text)
 // ************************************************************************************************
 // Network
 
-this.readFromScriptableStream = function(stream, charset)
-{
-    var sis = this.CCSV("@mozilla.org/scriptableinputstream;1", "nsIScriptableInputStream");
-    sis.init(stream);
-
-    var segments = [];
-    for (var count = stream.available(); count; count = stream.available())
-    {
-        var segment = sis.read(count);
-        segments.push(segment);
-    }
-
-    sis.close();
-
-    var text = segments.join("");
-    return this.convertToUnicode(text, charset);
-};
-
 this.readFromStream = function(stream, charset)
 {
     try
@@ -2602,7 +2584,6 @@ this.readFromStream = function(stream, charset)
         for (var count = stream.available(); count; count = stream.available())
             segments.push(sis.readBytes(count));
 
-        sis.close();
         var text = segments.join("");
         return this.convertToUnicode(text, charset);
      }
