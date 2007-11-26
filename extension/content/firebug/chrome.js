@@ -107,57 +107,58 @@ top.FirebugChrome =
      */
     initializeUI: function()
     {
-    try {
-        if (window.arguments)
-            var detachArgs = window.arguments[0];
+        try {
+            if (window.arguments)
+                var detachArgs = window.arguments[0];
 
-        if (detachArgs)
-        {
-            FirebugContext = detachArgs.context ? detachArgs.context : FirebugContext;
-            externalBrowser = detachArgs.browser;// else undefined
-        }
+            if (detachArgs)
+            {
+                FirebugContext = detachArgs.context ? detachArgs.context : FirebugContext;
+                externalBrowser = detachArgs.browser;// else undefined
+            }
 
-        this.applyTextSize(Firebug.textSize);
+            this.applyTextSize(Firebug.textSize);
 
-        var doc1 = panelBar1.browser.contentDocument;
-        disabledBox = doc1.getElementById("disabledBox");
-        disabledHead = doc1.getElementById("disabledHead");
-        disabledCaption = doc1.getElementById("disabledCaption");
-        enableAlwaysLink = doc1.getElementById("enableAlwaysLink");
-        enableSiteLink = doc1.getElementById("enableSiteLink");
-        enableSystemPagesLink = doc1.getElementById("enableSystemPagesLink");
+            var doc1 = panelBar1.browser.contentDocument;
+            disabledBox = doc1.getElementById("disabledBox");
+            disabledHead = doc1.getElementById("disabledHead");
+            disabledCaption = doc1.getElementById("disabledCaption");
+            enableAlwaysLink = doc1.getElementById("enableAlwaysLink");
+            enableSiteLink = doc1.getElementById("enableSiteLink");
+            enableSystemPagesLink = doc1.getElementById("enableSystemPagesLink");
 
-        doc1.addEventListener("mouseover", onPanelMouseOver, false);
-        doc1.addEventListener("mouseout", onPanelMouseOut, false);
-        doc1.addEventListener("mousedown", onPanelMouseDown, false);
-        doc1.addEventListener("click", onPanelClick, false);
-        panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
+            doc1.addEventListener("mouseover", onPanelMouseOver, false);
+            doc1.addEventListener("mouseout", onPanelMouseOut, false);
+            doc1.addEventListener("mousedown", onPanelMouseDown, false);
+            doc1.addEventListener("click", onPanelClick, false);
+            panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
 
-        var doc2 = panelBar2.browser.contentDocument;
-        doc2.addEventListener("mouseover", onPanelMouseOver, false);
-        doc2.addEventListener("mouseout", onPanelMouseOut, false);
-        doc2.addEventListener("click", onPanelClick, false);
-        doc2.addEventListener("mousedown", onPanelMouseDown, false);
-        panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
+            var doc2 = panelBar2.browser.contentDocument;
+            doc2.addEventListener("mouseover", onPanelMouseOver, false);
+            doc2.addEventListener("mouseout", onPanelMouseOut, false);
+            doc2.addEventListener("click", onPanelClick, false);
+            doc2.addEventListener("mousedown", onPanelMouseDown, false);
+            panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
-        locationList.addEventListener("selectObject", onSelectLocation, false);
+            locationList.addEventListener("selectObject", onSelectLocation, false);
 
-        var win1 = panelBar1.browser.contentWindow;
-        win1.enableAlways = bindFixed(Firebug.setPref, Firebug, "disabledAlways", false);
-        win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
-        win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
+            var win1 = panelBar1.browser.contentWindow;
+            win1.enableAlways = bindFixed(Firebug.setPref, Firebug, "disabledAlways", false);
+            win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
+            win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
 
-        for (var i = 0; i < Firebug.panelTypes.length; ++i)
-        {
-            var panelType = Firebug.panelTypes[i];
-            if (!panelType.prototype.parentPanel)
-                panelBar1.addTab(panelType);
-        }
+            for (var i = 0; i < Firebug.panelTypes.length; ++i)
+            {
+                var panelType = Firebug.panelTypes[i];
+                if (!panelType.prototype.parentPanel)
+                    panelBar1.addTab(panelType);
+            }
 
-        if (externalMode)
-            this.attachBrowser(externalBrowser, FirebugContext);
-        else
-            Firebug.initializeUI(detachArgs);
+            if (externalMode)
+                this.attachBrowser(externalBrowser, FirebugContext);
+            else
+                Firebug.initializeUI(detachArgs);
+
         } catch (exc) {
             FBTrace.dumpProperties("chrome.initializeUI fails", exc);
         }
@@ -405,6 +406,17 @@ top.FirebugChrome =
     {
         return panelBar2.selectedPanel;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Location interface provider for binding.xml panelFileList
+
+    getLocationProvider: function()
+    {
+        return function getSelectedPanelFromCurrentContext()
+        {
+            return FirebugContext.chrome.getSelectedPanel();  // panels provide location, use the selected panel
+        }
+     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Synchronization

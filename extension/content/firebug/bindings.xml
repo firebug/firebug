@@ -376,14 +376,31 @@
             ]]></getter>
 
             <setter><![CDATA[
-                var panel = FirebugContext.chrome.getSelectedPanel();
-                var location = panel.getObjectLocation(val);
-                var fileName = FBL.getFileName(location);
+                var locator = this.getLocator();
+                var description = locator.getObjectDescription(val);
+                var fileName = description.name;
                 this.repObject = val;
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
             ]]></setter>
         </property>
+
+        <method name="getLocator">
+            <body><![CDATA[
+                if (!this.locator)  // XXXjjb this is too complicated...
+                {
+                    var functionYieldingExpression = this.getAttribute("locationProvider");
+                    if (functionYieldingExpression && functionYieldingExpression.length > 0)
+                        this.locator = eval(functionYieldingExpression);
+                    else
+                    {
+                        var whichBinding = this.getAttribute("id");
+                        throw "panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
+                    }
+                }
+                return this.locator();
+            ]]></body>
+        </method>
 
         <method name="showPopup">
             <body><![CDATA[
@@ -482,9 +499,8 @@
         <handler event="popupshowing"><![CDATA[
             if (this.popup.firstChild)
                 return false;
-
-            var panel = FirebugContext.chrome.getSelectedPanel();
-            var objects = panel.getLocationList();
+            var locator = this.getLocator();
+            var objects = locator.getLocationList();
             if (!objects)
                 return false;
 
@@ -494,8 +510,7 @@
             for (var i = 0; i < objects.length; ++i)
             {
                 var object = objects[i];
-                var url = panel.getObjectLocation(object);
-                var splitName = FBL.splitURLBase(url);
+                var splitName = locator.getObjectDescription(object);
 
                 var entry = {object: object, fileName: splitName.name};
 
@@ -521,7 +536,7 @@
                 for (var j = 0; j < urls.length; ++j)
                 {
                     var menuInfo = {label: urls[j].fileName, nol10n: true};
-                    if (urls[j].object == panel.location)
+                    if (urls[j].object == locator.location)
                     {
                         menuInfo.type = "checkbox";
                         menuInfo.checked = true;

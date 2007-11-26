@@ -162,7 +162,8 @@ top.Firebug =
     initializeUI: function(detachArgs)
     {
         if (FBTrace.DBG_INITIALIZE)                                                                                    /*@explore*/
-            FBTrace.sysout("firebug.initializeUI this.disabledAlways="+this.disabledAlways+"\n");                      /*@explore*/
+            FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+					   /*@explore*/
+                    " detachArgs:", detachArgs);                      												   /*@explore*/
                                                                                                                        /*@explore*/
         fbs.registerClient(this);
 
@@ -1022,7 +1023,7 @@ top.Firebug =
     enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
     {
         if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
-                FBTrace.dumpProperties("enableContext URI:",uri);                             				/*@explore*/
+                FBTrace.sysout("enableContext URI:",uri);                             				/*@explore*/
         if ( dispatch2(extensions, "acceptContext", [win, uri]) )
             return true;
         if ( dispatch2(extensions, "declineContext", [win, uri]) )
@@ -1486,7 +1487,15 @@ Firebug.Panel =
     getObjectLocation: function(object)
     {
         return "";
+    },
+
+    // return.path: group/category label, return.name: item label
+    getObjectDescription: function(object)
+    {
+        var url = this.getObjectLocation(object);
+        return FBL.splitURLBase(url);
     }
+
 };
 
 // ************************************************************************************************
