@@ -12,8 +12,10 @@ try {
 const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces["nsIConsoleService"]);
 FBTrace.avoidRecursion = false;
 
-this.sysout = function(msg)
+this.sysout = function(msg, more)
 {
+    if (typeof(more) != "undefined")
+        msg += " " + more.toString() + "\n";
     dump(msg);
 }
 
