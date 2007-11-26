@@ -198,6 +198,9 @@ this.safeToString = function(ob)
 
 this.convertToUnicode = function(text, charset)
 {
+    if (!text)
+        return "";
+
     try
     {
         var conv = this.CCSV("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
@@ -2027,7 +2030,7 @@ this.openWindow = function(windowType, url, features, params)
     var win = windowType ? wm.getMostRecentWindow(windowType) : null;
     if (win) {
       if ("initWithParams" in win)
-        win.initWithParams(aParams);
+        win.initWithParams(params);
       win.focus();
     }
     else {
@@ -2616,6 +2619,29 @@ this.readPostText = function(url, context)
      }
 };
 
+this.getStateDescription = function(flag) {
+    var state = "";
+    var nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
+    if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START ";
+    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state += "STATE_REDIRECTING ";
+    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state += "STATE_TRANSFERRING ";
+    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state += "STATE_NEGOTIATING ";
+    else if (flag & nsIWebProgressListener.STATE_STOP) state += "STATE_STOP ";
+
+    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state += "STATE_IS_REQUEST ";
+    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state += "STATE_IS_DOCUMENT ";
+    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state += "STATE_IS_NETWORK ";
+    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state += "STATE_IS_WINDOW ";
+    if (flag & nsIWebProgressListener.STATE_RESTORING) state += "STATE_RESTORING ";
+    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state += "STATE_IS_INSECURE ";
+    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state += "STATE_IS_BROKEN ";
+    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state += "STATE_IS_SECURE ";
+    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state += "STATE_SECURE_HIGH ";
+    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state += "STATE_SECURE_MED ";
+    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW ";
+
+    return state;
+}
 // ************************************************************************************************
 // Programs
 
