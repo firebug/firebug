@@ -98,14 +98,6 @@ top.SourceCache.prototype =
             }
         }
 
-        /*if (FBL.reChrome.test(url))  // chrome urls cannot be read with this code.
-        {
-            if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("sourceCache.load cannot read chrome source "+url+"\n");
-            return;
-        }
-*/
-
         var stream;
         try
         {
