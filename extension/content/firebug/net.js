@@ -1215,7 +1215,6 @@ NetProgress.prototype =
             var index = this.windows.indexOf(win);
             if (index == -1)
             {
-                var doc = new NetDocument(win);
                 var doc = new NetDocument(win);  // XXXjjb arg ignored
                 if (win.parent != win)
                     doc.parent = this.getRequestDocument(win.parent);
