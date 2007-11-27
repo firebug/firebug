@@ -387,7 +387,7 @@
 
         <method name="getLocator">
             <body><![CDATA[
-                if (!this.locator)  // XXXjjb this is too complicated...
+                if (!this.locator)  // XXXjjb this is complicated because the location list depends upon the current panel
                 {
                     var functionYieldingExpression = this.getAttribute("locationProvider");
                     if (functionYieldingExpression && functionYieldingExpression.length > 0)
@@ -398,7 +398,7 @@
                         throw "panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
                     }
                 }
-                return this.locator();
+                return this.locator(this);
             ]]></body>
         </method>
 
