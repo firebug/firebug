@@ -1821,10 +1821,12 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     supportsObject: function(object)
     {
-        return object instanceof jsdIStackFrame
+        if( object instanceof jsdIStackFrame
             || object instanceof SourceFile
             || (object instanceof SourceLink && object.type == "js")
-            || typeof(object) == "function";
+            || typeof(object) == "function" )
+            return 1;
+        else return 0;
     },
 
     updateLocation: function(sourceFile)
@@ -1836,6 +1838,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (object instanceof jsdIStackFrame)
             this.showStackFrame(object);
+        else if (object instanceof SourceFile)
+            this.navigate(object);
         else if (object instanceof SourceLink)
             this.showSourceLink(object);
         else if (typeof(object) == "function")
