@@ -412,7 +412,7 @@
             <parameter name="object"/>
             <body><![CDATA[
                 this.repObject = object;
-                this.location = object;
+
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectObject", true, false);
                 this.dispatchEvent(ev);
