@@ -1959,7 +1959,8 @@ this.updateScriptFiles = function(context, reload)
                 }
                 else
                 {
-                    var sourceFile = new FBL.SourceFile(url, context);
+                    var sourceFile = new FBL.SourceFile(url);
+                    context.sourceFileMap[url] = sourceFile;
                 }
             }
         }
@@ -1967,6 +1968,8 @@ this.updateScriptFiles = function(context, reload)
         // iff script tag mutation
         this.iterateWindows(context.window, this.bind(function(win)
         {
+            if (FBTrace.DBG_SOURCEFILES)  																								/*@explore*/
+                FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href+" documentElement:",win.document.documentElement);  /*@explore*/
             if (!win.document.documentElement)
                 return;
 
@@ -1978,7 +1981,7 @@ this.updateScriptFiles = function(context, reload)
                 url = this.normalizeURL(url ? url : win.location.href);
                 addFile(url);
                 if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+" adding "+url+" to context="+context.uid+"\n");  /*@explore*/
+                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+" adding "+url+" to context="+context.window.location+"\n");  /*@explore*/
             }
         }, this));
 
@@ -2899,19 +2902,14 @@ this.SourceLink.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.SourceFile = function(url, context, baseLineNumber)
+this.SourceFile = function(url, source)
 {
     this.href = url;
 
-    if (baseLineNumber)
-        this.baseLineNumber = baseLineNumber;
-    else
-        this.baseLineNumber = 0;
+    if (source)
+        this.source = source;
 
     this.pcMapTypeByScriptTag = {};
-
-    if (!context) FBTrace.dumpStack("lib.SourceFile called without context");                                          /*@explore*/
-    context.sourceFileMap[url] = this;
 };
 
 this.SourceFile.prototype =

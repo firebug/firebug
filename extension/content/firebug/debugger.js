@@ -889,7 +889,11 @@ Firebug.Debugger = extend(Firebug.Module,
             if (url in context.sourceFileMap)
                 var sourceFile = context.sourceFileMap[url];
             else
-                var sourceFile = new FBL.SourceFile(url, context);
+            {
+                var sourceFile = new FBL.SourceFile(url);
+                context.sourceFileMap[url] = sourceFile;
+            }
+
 
             sourceFile.tag = script.tag;
 
@@ -1056,9 +1060,9 @@ Firebug.Debugger = extend(Firebug.Module,
 
         if (sourceFile == undefined)
         {
-            var evalURL = this.getDataURLForScript(frame.script, source);
-            var sourceFile = new FBL.SourceFile(evalURL, context);
-            sourceFile.source = source;
+            var url = this.getDataURLForScript(frame.script, source);
+            var sourceFile = new FBL.SourceFile(url, source);
+            context.sourceFileMap[url] = sourceFile;
         }
         return sourceFile;
     },
@@ -1093,9 +1097,9 @@ Firebug.Debugger = extend(Firebug.Module,
         }
         this.hash_service.update(byteArray, byteArray.length);
         var hash = this.hash_service.finish(true);
-        var evalName = frame.script.fileName + (kind ? "/"+kind+"/" : "/") + hash;
-        var sourceFile = new FBL.SourceFile(evalName, context);
-        sourceFile.source = source;
+        var url = frame.script.fileName + (kind ? "/"+kind+"/" : "/") + hash;
+        var sourceFile = new FBL.SourceFile(url, source);
+        context.sourceFileMap[url] = sourceFile;
         return sourceFile;
     },
 
@@ -1104,8 +1108,8 @@ Firebug.Debugger = extend(Firebug.Module,
         var m = reURIinComment.exec(line);
         if (m)
         {
-            var sourceFile = new FBL.SourceFile(m[1], context);
-            sourceFile.source = source;
+            var sourceFile = new FBL.SourceFile(m[1], source);
+            context.sourceFileMap[url] = sourceFile;
         }
         return sourceFile;
     },
@@ -1144,8 +1148,8 @@ Firebug.Debugger = extend(Firebug.Module,
             if (FBTrace.DBG_EVAL)                                                                                      /*@explore*/
                 FBTrace.dumpProperties("\ndebugger.createSourceFileForEval after evalBufferInfo after:", evalBufferInfo); /*@explore*/
                                                                                                                        /*@explore*/
-            var sourceFile = new FBL.SourceFile(evalBufferInfo.sourceURL, context);
-            sourceFile.source = evalBufferInfo.source;
+            var sourceFile = new FBL.SourceFile(evalBufferInfo.sourceURL, evalBufferInfo.source);
+            context.sourceFileMap[evalBufferInfo.sourceURL] = sourceFile;
 
             if (evalBufferInfo.invisible)
                 sourceFile.invisible = evalBufferInfo.invisible;
@@ -1285,7 +1289,8 @@ Firebug.Debugger = extend(Firebug.Module,
     initialize: function()
     {
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
-        FBTrace.dumpProperties("debugger.initialize nsICryptoHash", this.nsICryptoHash);
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.dumpProperties("debugger.initialize nsICryptoHash", this.nsICryptoHash);
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
