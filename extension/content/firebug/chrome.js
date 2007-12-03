@@ -455,7 +455,8 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.dumpStack("chrome.syncPanel FirebugContext="+FirebugContext+"\n");               /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.dumpStack("chrome.syncPanel FirebugContext="+			/*@explore*/
+                (FirebugContext?FirebugContext.window.location:"undefined")+"\n");               /*@explore*/
                                                                                                                        /*@explore*/
         panelStatus.clear();
 

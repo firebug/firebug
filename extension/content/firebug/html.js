@@ -739,6 +739,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     updateSelection: function(object)
     {
+        if (FBTrace.DBG_HTML)                                           /*@explore*/
+            FBTrace.sysout("html.updateSelection "+object);             /*@explore*/
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exeLine");
 

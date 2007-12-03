@@ -291,7 +291,7 @@ top.TabWatcher =
         }
 
         var persistedState = {location: context.window.location.href};
-        context.browser.persistedState = persistedState;
+        context.browser.persistedState = persistedState;  // store our state on FF browser elt
 
         iterateWindows(context.window, function(win)
         {

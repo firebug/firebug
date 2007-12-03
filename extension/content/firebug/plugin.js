@@ -15,7 +15,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
         this.browser.addEventListener("DOMContentLoaded", this.browserReady, false);
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.createBrowser DOMContentLoaded addEventListener\n");        /*@explore*/
         this.browser.className = "pluginBrowser";
-        this.browser.setAttribute("src", this.url);
+        this.browser.setAttribute("src", this.url);  // see tabContext.createPanelType
     },
 
     destroyBrowser: function()
@@ -31,7 +31,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
     {
         this.browser.removeEventListener("DOMContentLoaded", this.browserReady, false);
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.browserReady DOMContentLoaded addEventListener\n");         /*@explore*/
-        this.innerPanel = this.browser.contentWindow.FirebugPanel;
+        this.innerPanel = this.browser.contentWindow.FirebugPanel; // XXXjjb ?
         if (this.visible)
         {
             innerCall(this.innerPanel, "initialize", [this.context.window]);

@@ -1494,6 +1494,8 @@ ddd("now find\n")
         if (!win)
             return;
 
+        // XXXjjb TODO cache debuggr for win, add API to debuggr to set context w/o call to tabWatcher
+
         for (var i = 0; i < debuggers.length; ++i)
         {
             try
