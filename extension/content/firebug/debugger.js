@@ -1051,19 +1051,18 @@ Firebug.Debugger = extend(Firebug.Module,
 
     getSourceFile: function(context, frame, source, kind)
     {
-        if (Firebug.useDebugAdapter)
-            var sourceFile = this.getSourceFileFromDebugAdapter(context, frame, source);
-        else if (Firebug.useLastLineForEvalName)
-            var sourceFile = this.getSourceFileFromLastLine(context, frame, source)
-        else if (Firebug.useMD5ForEvalName)
-            var sourceFile = this.getSourceFileFromMD5(context, frame, source, kind)
+        var sourceFile = this.getSourceFileFromLastLine(context, frame, source);
+        if (sourceFile)
+            return sourceFile;
 
-        if (sourceFile == undefined)
-        {
-            var url = this.getDataURLForScript(frame.script, source);
-            var sourceFile = new FBL.SourceFile(url, source);
-            context.sourceFileMap[url] = sourceFile;
-        }
+        var sourceFile = this.getSourceFileFromMD5(context, frame, source, kind);
+        if (sourceFile)
+            return sourceFile;
+
+        var url = this.getDataURLForScript(frame.script, source);
+        var sourceFile = new FBL.SourceFile(url, source);
+        context.sourceFileMap[url] = sourceFile;
+
         return sourceFile;
     },
 
@@ -1270,7 +1269,7 @@ Firebug.Debugger = extend(Firebug.Module,
     },
 
     getDataURLForScript: function(script, source)
-    {FBTrace.dumpStack("getDataURLForScript");
+    {
         if (!source)
             return "eval."+script.tag;
 
@@ -1941,8 +1940,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             // wait 1.2 optionMenu("BreakOnTopLevel", "breakOnTopLevel"),
             // wait 1.2 optionMenu("ShowEvalSources", "showEvalSources"),
             optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
-            optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
-            optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
+            // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
+            // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
         ];
     },
 
@@ -2470,11 +2469,11 @@ function setLineBreakpoints(sourceFile, sourceBox)
             scriptRow.setAttribute("condition", "true");
     }});
 
-    if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setLineBreakpoints enumerateScriptInfos for sourceFile.href:"+sourceFile.href+"\n")
+    if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setLineBreakpoints for sourceFile.href:"+sourceFile.href+"\n")
     fbs.enumerateScriptInfos(sourceFile.href, {call: function(url, script, baseLineNumber, typename)
     {
-        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setLineBreakpoints enumerateScriptInfos "+typename+" tag@url="+script.tag+"@"+url+"\n");
-        var sourceLines = false; //TODO
+        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setLineBreakpoints enumerateScriptInfos valid="+script.isValid+" "+ typename+" tag@url="+script.tag+"@"+url+"\n");
+        var sourceLines = false; //TODO, add source for evals
         if (script.isValid)
             sourceFile.addToLineTable(script, baseLineNumber, sourceLines);
     }});
