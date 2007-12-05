@@ -206,7 +206,7 @@
 
     <target name="zipIntoXPI" depends="clean, createChromeJAR, createAptanaJAR">
         <mkdir dir="${dist_dir}" />
-		<copy file="${src_dir}/deploy.manifest" tofile="${build_dir}/chrome.manifest" />
+        <copy file="${src_dir}/deploy-chrome.manifest" tofile="${build_dir}/chrome.manifest" />
         <antcall target="integrateAptana"/>
         <zip destfile="${dist_dir}/${ant.project.name}.xpi" update="true">
             <zipfileset dir="${build_dir}" includes="*.jar" prefix="chrome" />
