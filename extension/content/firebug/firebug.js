@@ -149,10 +149,6 @@ top.Firebug =
                 FBTrace.sysout("firebug.initialize option "+prefNames[i]+"="+this[prefNames[i]]+"\n");                 /*@explore*/
         }                                                                                                              /*@explore*/
 
-        // If another window is opened, then the creation of our first context won't
-        // result in calling of enable, so we have to enable our modules ourself
-        if (fbs.enabled)
-            dispatch(modules, "enable");
     },
 
     /**
@@ -165,9 +161,14 @@ top.Firebug =
             FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+					   /*@explore*/
                     " detachArgs:", detachArgs);                      												   /*@explore*/
                                                                                                                        /*@explore*/
-        fbs.registerClient(this);
-
         TabWatcher.initialize(this);
+
+        fbs.registerClient(this);  // context creation will cause "enable" on this
+
+        // If another window is opened, then the creation of our first context won't
+        // result in calling of enable, so we have to enable our modules ourself
+        if (fbs.enabled)
+            dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         if (this.disabledAlways)
             this.disableAlways();
@@ -390,7 +391,7 @@ top.Firebug =
             prefs.setIntPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_BOOL)
             prefs.setBoolPref(prefName, value);
-                                                                                                                       /*@explore*/
+        prefs.savePrefFile(null);                                                                                                              /*@explore*/
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
     },
@@ -972,7 +973,7 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugClient
 
-    enable: function()
+    enable: function()  // Called by firebug-service when the first context is created.
     {
         dispatch(modules, "enable");
     },
