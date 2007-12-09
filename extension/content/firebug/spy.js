@@ -133,8 +133,10 @@ Firebug.Spy = extend(Firebug.Module,
     unwatchWindow: function(context, win)
     {
         try {
-            if (!Firebug.disableNetMonitor)
-                this.detachSpy(context, win);
+            // this.detachSpy has to be called even if the Firebug.disableNetMonitor
+            // is true. This make sure that the existing context is properly
+            // removed from "contexts" array.
+            this.detachSpy(context, win);
         } catch (ex) {
             // Get exceptions here sometimes, so let's just ignore them
             // since the window is going away anyhow
