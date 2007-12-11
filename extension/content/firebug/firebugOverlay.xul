@@ -50,32 +50,32 @@
     </commandset>
 
     <keyset id="mainKeyset">
-        <key id="key_reenterCommand" key="e" modifiers="control,shift"
+        <key id="key_reenterCommand" key="e" modifiers="control,shift" class="fbOnlyKey"
                 command="cmd_reenterCommand"/>
-        <key id="key_toggleInspecting" key="c" modifiers="accel,shift"
+        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" class="fbOnlyKey"
                 command="cmd_toggleInspecting"/>
-        <key id="key_toggleProfiling" key="p" modifiers="accel,shift"
+        <key id="key_toggleProfiling" key="p" modifiers="accel,shift" class="fbOnlyKey"
                 command="cmd_toggleProfiling"/>
 
-        <key id="key_focusCommandLine" key="l" modifiers="accel,shift"
+        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" class="fbOnlyKey"
                 command="cmd_focusCommandLine"/>
-        <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift"
+        <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" class="fbOnlyKey"
                 command="cmd_focusFirebugSearch"/>
-        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift"
+        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" class="fbOnlyKey"
                 command="cmd_focusWatchEditor"/>
-        <key id="key_focusLocation" key=" " modifiers="accel,shift"
+        <key id="key_focusLocation" key=" " modifiers="accel,shift" class="fbOnlyKey"
                 command="cmd_focusLocation"/>
-        <key id="key_focusLocation" key=" " modifiers="control"
+        <key id="key_focusLocation" key=" " modifiers="control" class="fbOnlyKey"
                 command="cmd_focusLocation"/>
 
-        <key id="key_nextObject" key="." modifiers="control"
+        <key id="key_nextObject" key="." modifiers="control" class="fbOnlyKey"
                 command="cmd_nextObject"/>
-        <key id="key_previousObject" key="," modifiers="control"
+        <key id="key_previousObject" key="," modifiers="control" class="fbOnlyKey"
                 command="cmd_previousObject"/>
 
-        <key id="key_previousFirebugTab" keycode="VK_TAB" modifiers="alt"
+        <key id="key_previousFirebugTab" keycode="VK_TAB" modifiers="alt" class="fbOnlyKey"
                 command="cmd_previousFirebugTab"/>
-        <key id="key_previousFirebugTab" key="`" modifiers="control"
+        <key id="key_previousFirebugTab" key="`" modifiers="control" class="fbOnlyKey"
                 command="cmd_previousFirebugTab"/>
     </keyset>
 

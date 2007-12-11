@@ -679,14 +679,25 @@ top.Firebug =
         contentSplitter.setAttribute("collapsed", !shouldShow);
         toggleCommand.setAttribute("checked", !!shouldShow);
         detachCommand.setAttribute("checked", !!browser.detached);
+		this.showKeys(shouldShow);
     },
+
+	showKeys: function(shouldShow)
+	{
+		var keyset = document.getElementById("mainKeyset");
+		var keys = FBL.getElementByClass(keyset, "fbOnlyKey");
+		for (var i = 0; i < keys.length; i++)
+		{
+			keys[i].setAttribute("disabled", !!shouldShow);
+		}
+	},
 
     toggleBar: function(forceOpen, panelName)
     {
         if (Firebug.openInWindow)
             return this.toggleDetachBar(true);
 
-        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
+        var browser = FirebugChrome.getCurrentBrowser(); 
         if (!browser.chrome)
             return;
 
