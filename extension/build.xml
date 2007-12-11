@@ -30,7 +30,7 @@
         <property name="update.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
     </target>
 
-    <target name="version" depends="properties-local, no-properties-local" description="Compute version number">
+    <target name="version" depends="clean, properties-local, no-properties-local" description="Compute version number">
         <tstamp/>
         <property name="build_dir" location="./build" />
         <property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
@@ -66,7 +66,7 @@
 
     <!-- Expand templates -->
     <target name="install-dependency" description="test tpl files">
-        <uptodate property="install.expansion.notRequired" targetfile="install.rdf">
+        <uptodate property="install.expansion.notRequired" targetfile="${build_dir}/install.rdf">
             <srcfiles dir="${src_dir}" includes="install.rdf.tpl.xml, branch.properties"/>
         </uptodate>
     </target>
@@ -88,7 +88,7 @@
     </target>
     <target name="expand-install-template" depends="install-dependency, version" unless="install.expansion.notRequired" >
         <copy file="${src_dir}/install.rdf.tpl.xml"
-               tofile="install.rdf"
+               tofile="${build_dir}/install.rdf"
                overwrite="true">
                <filterchain>
                        <replacetokens>
@@ -215,7 +215,7 @@
             <zipfileset dir="${src_dir}/components" includes="*.js" prefix="components" />
             <zipfileset dir="${src_dir}/components" includes="*.xpt" prefix="components" />
             <zipfileset dir="${src_dir}/defaults" includes="**" prefix="defaults" excludes="${excludes}" />
-            <zipfileset dir="${src_dir}" includes="install.rdf" />
+            <zipfileset dir="${build_dir}" includes="install.rdf" />
             <zipfileset dir="${build_dir}" includes="*.manifest" />
         </zip>
     </target>
