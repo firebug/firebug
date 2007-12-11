@@ -22,7 +22,7 @@ this.CI = function(ifaceName)
 
 this.CCSV = function(cName, ifaceName)
 {
-    return _CC[cName].getService(_CI[ifaceName]);
+    return _CC[cName].getService(_CI[ifaceName]);  // if fbs fails to load, the error can be _CC[cName] has no properties
 };
 
 this.CCIN = function(cName, ifaceName)

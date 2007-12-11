@@ -34,7 +34,8 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
         this.innerPanel = this.browser.contentWindow.FirebugPanel; // XXXjjb ?
         if (this.visible)
         {
-            innerCall(this.innerPanel, "initialize", [this.context.window]);
+            if (this.innerPanel)
+                innerCall(this.innerPanel, "initialize", [this.context.window]);
             this.updateSelection(this.selection);
         }
     },

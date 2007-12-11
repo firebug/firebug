@@ -504,7 +504,11 @@ this.getBody = function(doc)
     if (doc.body)
         return doc.body;
 
-    return doc.getElementsByTagName("body")[0];
+    var body = doc.getElementsByTagName("body")[0];
+    if (body)
+        return body;
+
+    return doc.firstChild;  // For non-HTML docs
 };
 
 this.findNextDown = function(node, criteria)
@@ -1981,7 +1985,7 @@ this.updateScriptFiles = function(context, reload)
                 url = this.normalizeURL(url ? url : win.location.href);
                 addFile(url);
                 if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+" adding "+url+" to context="+context.window.location+"\n");  /*@explore*/
+                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+" adding "+url+" to context="+context.window.location+"\n");  /*@explore*/
             }
         }, this));
 
@@ -2466,7 +2470,7 @@ this.getLocalPath = function(url)
 
 this.getURLFromLocalFile = function(file)
 {
-    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
+    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");  // TODO cache?
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;

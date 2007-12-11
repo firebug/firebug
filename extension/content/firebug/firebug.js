@@ -1367,7 +1367,7 @@ Firebug.Panel =
     select: function(object, forceUpdate)
     {
         if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.dumpStack("firebug.select object != this.selection:"+(object != this.selection)+"object: "+object)  /*@explore*/
+            FBTrace.dumpStack("firebug.select (object != this.selection)?"+(object != this.selection)+" object: "+object)  /*@explore*/
         if (!object)
             object = this.getDefaultSelection();
 
@@ -1593,6 +1593,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
     showSourceFile: function(sourceFile, sourceBoxDecorator)
     {
+        if (FBTrace.DBG_SOURCEFILES)																								/*@explore*/
+            FBTrace.dumpProperties("firebug.showSourceFile", sourceFile);  														    /*@explore*/
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (!sourceBox)
             sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);

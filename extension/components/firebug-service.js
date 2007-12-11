@@ -701,7 +701,11 @@ FirebugService.prototype =
             }
         }
         else
+        {
             ddd("enumerateScriptInfos: none for url="+url+"\n");
+            for (var u in this.scriptInfoArrayByURL)
+                ddd("enumerateScriptInfos have info for "+u+"\n");
+        }
 
     },
 
@@ -770,6 +774,7 @@ FirebugService.prototype =
                 " fbs.DBG_ERRORS:"+fbs.DBG_ERRORS      																   /*@explore*/
                 +" fbs.DBG_STEP:"+fbs.DBG_STEP																		   /*@explore*/
                 +" fbs.DBG_FUNCTION:"+fbs.DBG_FUNCTION																   /*@explore*/
+                +" jsd:"+jsd																   						   /*@explore*/
             +"\n");                                                                 								   /*@explore*/
         }	                                                                                                           /*@explore*/
 
@@ -781,7 +786,8 @@ FirebugService.prototype =
         else
         {
             jsd = DebuggerService.getService(jsdIDebuggerService);
-
+            if ( this.DBG_ERRORS )  																					/*@explore*/
+                ddd("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+"\n");		/*@explore*/
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
             this.hookScripts();
@@ -1190,10 +1196,9 @@ FirebugService.prototype =
     {
         // frame is after Function() constructor call return, in source of caller.
         for (tag in this.nestedScriptStack) {
-            var nestedScript = this.nestedScriptStack[tag];ddd("tag drain "+tag+" nestedScript.isValid:"+nestedScript.isValid+"\n");
+            var nestedScript = this.nestedScriptStack[tag];
             //if (nestedScript.functionName != "anonymous") //
             //    continue;
-ddd("now find\n")
             var debuggr = this.findDebugger(frame);
             if (debuggr)
             {
@@ -1202,7 +1207,7 @@ ddd("now find\n")
                 if (fbs.DBG_CREATION)                                                                                  /*@explore*/
                     ddd("drainFunctionConstructorScriptStack:"+formatScriptInfo(scriptInfo) +"\n");          	   /*@explore*/
             }
-       }ddd("DRAIN FOR done\n");
+       }
        fbs.nestedScriptStack = {};
     },
 
@@ -2041,19 +2046,11 @@ var FirebugFactory =
         if (outer != null)
             throw NS_ERROR_NO_AGGREGATION;
 
+        FirebugFactory.initializeService();
         return (new FirebugService()).QueryInterface(iid);
-    }
-};
-
-// ************************************************************************************************
-
-var FirebugModule =
-{
-    registerSelf: function (compMgr, fileSpec, location, type)
+    },
+    initializeService: function()
     {
-        compMgr = compMgr.QueryInterface(nsIComponentRegistrar);
-        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID, fileSpec, location, type);
-
         if (!prefs)
            prefs = PrefService.getService(nsIPrefBranch2);
 
@@ -2069,6 +2066,17 @@ var FirebugModule =
         catch (exc)
         {
         }
+    }
+};
+
+// ************************************************************************************************
+
+var FirebugModule =
+{
+    registerSelf: function (compMgr, fileSpec, location, type)
+    {ddd("registerSelf\n");
+        compMgr = compMgr.QueryInterface(nsIComponentRegistrar);
+        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, CONTRACT_ID, fileSpec, location, type);
     },
 
     unregisterSelf: function(compMgr, fileSpec, location)
@@ -2118,7 +2126,6 @@ function denormalizeURL(url)
 
 function isFilteredURL(url)
 {
-    ddd(this.caller+" - isFilteredURL? "+url+" fbs.filterSystemURLs:"+fbs.filterSystemURLs+"\n");
     return ( fbs.filterSystemURLs && systemURLStem(url) );
 }
 
@@ -2473,12 +2480,15 @@ function getDumpStream()
             .get("TmpD", CI("nsIFile"));
         file.append("fbug");
         if ( !file.exists() )
-            file.create(CI("nsIFile").DIRECTORY_TYPE, 0776);
+            file.create(CI("nsIFile").DIRECTORY_TYPE, 0777);
         file.append("firebug-service-dump.txt");
         //file.createUnique(CI("nsIFile").NORMAL_FILE_TYPE, 0666);
         var stream = CC("@mozilla.org/network/file-output-stream;1").createInstance(CI("nsIFileOutputStream"));
-        stream.init(file, 0x04 | 0x08 | 0x20, 664, 0); // write, create, truncate
-        return stream;
+        stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
+        if (stream)
+            return stream;
+        else
+            throw "firebug-services.js getDumpStream FAILED to get stream for TmpD/fbug";
     }
     catch (exc)
     {
@@ -2492,7 +2502,7 @@ function dumpToFile(text)
 {
     if (!dumpStream) dumpStream = getDumpStream();
     dumpStream.write(text, text.length);
-    if (fbs.DBG_FLUSH_EVERY_LINE) dumpStream.flush();  // If FF crashes you need to run with flush on every line
+    if (fbs && fbs.DBG_FLUSH_EVERY_LINE) dumpStream.flush();  // If FF crashes you need to run with flush on every line
 }
 
 function flushDebugStream()

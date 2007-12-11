@@ -110,6 +110,7 @@ Firebug.TabContext.prototype =
         if (!url)
         {
             // XXXjoe Need some kind of notification to console that URL is invalid
+            throw("addPanelType: url is invalid!");
             return;
         }
 

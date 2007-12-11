@@ -12,7 +12,9 @@ const nsIScriptableInputStream = CI("nsIScriptableInputStream");
 const nsIUploadChannel = CI("nsIUploadChannel");
 
 const IOService = CC("@mozilla.org/network/io-service;1");
+const ioService = IOService.getService(nsIIOService);
 const ScriptableInputStream = CC("@mozilla.org/scriptableinputstream;1");
+const chromeReg = CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
 const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
@@ -61,9 +63,24 @@ top.SourceCache.prototype =
             return lines;
         }
 
-        var charset = this.context.window.document.characterSet;
+        var c = FBL.reChrome.test(url);
+        if (c)
+        {
+            if (Firebug.filterSystemURLs)
+                return;  // ignore chrome
 
-        var ioService = IOService.getService(nsIIOService);
+            var chromeURI = ioService.newURI(url, null, null);
+            var localURI = chromeReg.convertChromeURL(chromeURI);
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
+            url = localURI.spec;
+        }
+
+        var doc = this.context.window.document;
+        if (doc)
+            var charset = doc.characterSet;
+        else
+            var charset = "UTF-8";
 
         var channel;
         try

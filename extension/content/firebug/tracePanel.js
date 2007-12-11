@@ -76,9 +76,8 @@ Firebug.TraceModule = extend(Firebug.Console,
     initContext: function(context)
     {
         if (this.debug)
-            FBTrace.sysout("TraceModule.initContext\n");
+            FBTrace.sysout("TraceModule.initContext try sysout\n");
         this.context = context;
-        FBTrace.sysout("TraceModule.initContext try sysout\n");
     },
 
     getPanel: function(context, noCreate)
@@ -202,7 +201,7 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var items = [];
         var self = this;
 
-        for (p in Firebug.TraceModule)
+        for (p in FBTrace)
         {
             var m = reDBG.exec(p);
             if (m)

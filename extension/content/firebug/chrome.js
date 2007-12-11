@@ -372,6 +372,8 @@ top.FirebugChrome =
 
     select: function(object, panelName, sidePanelName, forceUpdate)
     {
+        if (FBTrace.DBG_PANELS)																														  /*@explore*/
+            FBTrace.sysout("chrome.select object:"+object+" panelName:"+panelName+" sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");  /*@explore*/
         var bestPanelName = getBestPanelName(object, FirebugContext, panelName);
         var panel = this.selectPanel(bestPanelName, sidePanelName, true);
         if (panel)
@@ -455,8 +457,8 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.dumpStack("chrome.syncPanel FirebugContext="+			/*@explore*/
-                (FirebugContext?FirebugContext.window.location:"undefined")+"\n");               /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                     /*@explore*/
+                (FirebugContext?FirebugContext.window.location:"undefined")+"\n");                                     /*@explore*/
                                                                                                                        /*@explore*/
         panelStatus.clear();
 
@@ -1110,7 +1112,8 @@ function onSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
-    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
+    if (FBTrace.DBG_PANELS) 																													/*@explore*/
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext?FirebugContext.window.location:"undefined")+"\n"); /*@explore*/
 
     if (FirebugContext)
     {

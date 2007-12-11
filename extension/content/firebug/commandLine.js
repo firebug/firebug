@@ -118,8 +118,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (threw)
             {
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate evaluation threw:", result);          /*@explore*/
-                result = new FBL.ErrorMessage(result, scriptToEval, 0, 0, "js", context, null);
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate ErrorMessage result:", result);          /*@explore*/
+                result = new FBL.ErrorMessage(result, expr, 0, 0, "js", context, null);
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluate ");          /*@explore*/
             }
         }
 
