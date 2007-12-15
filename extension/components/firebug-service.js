@@ -691,7 +691,7 @@ FirebugService.prototype =
         }
         if (scriptInfos)
         {
-            ddd("enumerateScriptInfos: for url="+url+" scriptInfos.length: "+scriptInfos.length+"\n");
+            //ddd("enumerateScriptInfos: for url="+url+" scriptInfos.length: "+scriptInfos.length+"\n");
 
             for (var i = 0; i < scriptInfos.length; i++)
             {
@@ -861,18 +861,13 @@ FirebugService.prototype =
     onDebug: function(frame, type, rv)
     {
         if (fbs.DBG_ERRORS)                                                                                               /*@explore*/
-            ddd("fbs.onDebug fileName="+frame.script.fileName+"\n");                                                      /*@explore*/
+            ddd("fbs.onDebug fileName="+frame.script.fileName+ "reportNextError="                							/*@explore*/
+                                 +reportNextError+" breakOnNextError="+breakOnNextError+"\n");                            /*@explore*/
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
         try
         {
-            var debuggr = reportNextError || breakOnNextError ? this.findDebugger(frame) : null;
-            if (fbs.DBG_ERRORS) {                                                                                         /*@explore*/
-                ddd("fbs.onDebug "+(debuggr?"found debuggr with ":" NO debuggr with ")+ "reportNextError="                /*@explore*/
-                                 +reportNextError+" breakOnNextError="+breakOnNextError+"\n");                            /*@explore*/
-                if (!debuggr)                                                                                             /*@explore*/
-                    this.diagnoseFindDebugger(frame);                                                                     /*@explore*/
-            }                                                                                                             /*@explore*/
+            var debuggr = (reportNextError || breakOnNextError) ? this.findDebugger(frame) : null;
 
             if (reportNextError)
             {
@@ -1074,7 +1069,7 @@ FirebugService.prototype =
             var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
             if (!debuggr)
             {
-                if (fbs.DBG_BP) ddd("firebug-service: no debuggr for frame.fileName="+script.fileName+"\n");           /*@explore*/
+                if (fbs.DBG_BP) dumpToFileWithStack("firebug-service: no debuggr for frame.fileName="+script.fileName, frame);           /*@explore*/
                 return;
             }
 
@@ -1496,41 +1491,74 @@ FirebugService.prototype =
             return;
 
         var win = getFrameWindow(frame);
-        if (!win)
-            return;
-
-        // XXXjjb TODO cache debuggr for win, add API to debuggr to set context w/o call to tabWatcher
-
-        for (var i = 0; i < debuggers.length; ++i)
-        {
-            try
-            {
-                var debuggr = debuggers[i];
-                if (debuggr.supportsWindow(win))
-                    return debuggr;
-            }
-            catch (exc) {  ERROR("firebug-service findDebugger: "+exc);}
+        if (win)
+		{
+	        for (var i = 0; i < debuggers.length; ++i)
+	        {
+	            try
+	            {
+	                var debuggr = debuggers[i];
+	                if (debuggr.supportsWindow(win))
+	                    return debuggr;
+	            }
+	            catch (exc) {  ERROR("firebug-service findDebugger: "+exc);}
+	        }
         }
+        
+        if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
+        { 
+	        while(frame.callingFrame) // walk to the bottom of the stack
+	    		frame = frame.callingFrame; 
+	    	var debuggr = this.findDebugger(frame);
+	    	if (debuggr)
+	    		return debuggr;
+    	}
+        if (fbs.DBG_ERRORS)
+        	fbs.diagnoseFindDebugger(frame, win);
     },
 
-    diagnoseFindDebugger: function(frame)
+    diagnoseFindDebugger: function(frame, originalWin)
     {
-        dumpToFileWithStack("diagnoseFindDebugger", frame);
+    	while(frame.callingFrame) // walk to the bottom of the stack
+    		frame = frame.callingFrame; 
+    		
+        dumpToFileWithStack("\ndiagnoseFindDebugger", frame);
+
+        ddd("diagnoseFindDebugger scope "+frame.scope.jsType+"["+frame.scope.propertyCount+"] "+frame.scope.jsClassName +"\n");    
         var win = getFrameWindow(frame);
         if (!win)
-            return;
-        ddd("diagnoseFindDebugger find win.location ="+(win.location?win.location.href:"(undefined)")+"\n");
+        {
+		    ddd("No getFrameWindow! scope:\n");
+		    var listValue = {value: null}, lengthValue = {value: 0};
+		    frame.scope.getProperties(listValue, lengthValue);
+		    for (var i = 0; i < lengthValue.value; ++i)
+		    {
+		        var prop = listValue.value[i];
+		        try {
+		        var name = prop.name.getWrappedValue();
+		        ddd(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
+		        } catch (e) {
+		        ddd(i+"]"+e+"\n");
+		        }
+		    }
+		    return;
+        }
+        ddd("diagnoseFindDebugger win.location ="+(win.location?win.location.href:"(undefined)"));
         for (var i = 0; i < debuggers.length; ++i)
         {
             try
             {
                 var debuggr = debuggers[i];
                 if (debuggr.supportsWindow(win))
+                {
+                	ddd(" FOUND at "+i+"\n");
+                	ddd("diagnoseFindDebugger originalWin.location ="+(originalWin.location?originalWin.location.href:"(undefined)")+"\n");
                     return debuggr;
+                }
             }
             catch (exc) {ddd("caught:"+exc+"\n");}
         }
-        ddd("diagnoseFindDebugger tried "+debuggers.length+"\n");
+        ddd(" NO FIND tried "+debuggers.length+"\n");
     },
 
     reFindDebugger: function(frame, debuggr)
@@ -2434,7 +2462,7 @@ function dumpProperties(title, obj)                                             
         }
     }                                                                                                   				/*@explore*/
                                                                                                                         /*@explore*/
-    ddd(lines.join("\n"));                                                                                             /*@explore*/
+    ddd(lines.join("\n")+"\n");                                                                                             /*@explore*/
 }
                                                                                                                          /*@explore*/
 function dumpInterfaces(title, obj)																							/*@explore*/
