@@ -61,14 +61,13 @@ Firebug.Profiler = extend(Firebug.Module,
         var totalCalls = 0;
         var totalTime = 0;
 
-        updateScriptFiles(context);
         var sourceFileMap = context.sourceFileMap;
 
         jsd.enumerateScripts({enumerateScript: function(script)
         {
             if (script.callCount)
             {
-                var sourceLink = FBL.getSourceForScript(script, context);
+                var sourceLink = FBL.getSourceLinkForScript(script, context);
                 if (sourceLink && sourceLink.href in sourceFileMap)
                 {
                     var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,

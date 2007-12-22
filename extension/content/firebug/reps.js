@@ -236,7 +236,7 @@ this.jsdScript = domplate(Firebug.Rep,
 
     inspectObject: function(script, context)
     {
-        var sourceLink = getSourceForScript(script, context);
+        var sourceLink = getSourceLinkForScript(script, context);
         if (sourceLink)
             context.chrome.select(sourceLink);
     },

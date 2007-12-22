@@ -14,8 +14,8 @@ FBTrace.avoidRecursion = false;
 
 this.sysout = function(msg, more)
 {
-    if (typeof(more) != "undefined")
-        msg += " " + more.toString() + "\n";
+    if (more)
+         msg += " " + more.toString() + "\n";
     dump(msg);
 }
 

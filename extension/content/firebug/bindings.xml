@@ -44,7 +44,14 @@
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
-            FirebugChrome.panelBarReady(this);
+            try {
+            	FirebugChrome.panelBarReady(this);
+            }
+            catch (e)
+            {
+            	dump("bindings panelBar ctor FAILs: "+ e+"\n");
+            	dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
+            }
         ]]></constructor>
 
         <method name="createTab">
@@ -377,8 +384,10 @@
 
             <setter><![CDATA[
                 var locator = this.getLocator();
-                var description = locator.getObjectDescription(val);
-                var fileName = description.name;
+                if (val)
+                    var fileName = locator.getObjectDescription(val).name;
+                else
+                    var fileName = "(none)";
                 this.repObject = val;
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
@@ -560,9 +569,10 @@
             // after the first them they are shown - so we must do it ourselves
             var scrollbox = document.getAnonymousElementByAttribute(
                 this.popup, "class", "popup-internal-box");
-
-            scrollbox["_scrollButtonUp"].collapsed = true;
-            scrollbox["_scrollButtonDown"].collapsed = true;
+            if (scrollbox["_scrollButtonUp"])
+                scrollbox["_scrollButtonUp"].collapsed = true;
+            if (scrollbox["_scrollButtonDown"])
+                scrollbox["_scrollButtonDown"].collapsed = true;
 
             this._closed = false;
 

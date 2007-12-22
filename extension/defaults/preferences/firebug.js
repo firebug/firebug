@@ -42,6 +42,7 @@ pref("extensions.firebug.useDebugAdapter", false);
 pref("extensions.firebug.showEvalSources", true);
 pref("extensions.firebug.filterSystemURLs", true);
 pref("extensions.firebug.showAllSourceFiles", false);
+pref("extensions.firebug.trackThrowCatch", false);
 pref("extensions.firebug.useLastLineForEvalName", false);
 pref("extensions.firebug.useMD5ForEvalName", false);
 

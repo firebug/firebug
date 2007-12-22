@@ -473,3 +473,4 @@ function formatNode(object)
 }
 
 }});
+dump("insideOutBox loaded in to "+window.location+"\n");

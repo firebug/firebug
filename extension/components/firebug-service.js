@@ -167,6 +167,7 @@ function FirebugService()
     this.showStackTrace = prefs.getBoolPref("extensions.firebug.showStackTrace");
     this.breakOnErrors = prefs.getBoolPref("extensions.firebug.breakOnErrors");
     this.showEvalSources = prefs.getBoolPref("extensions.firebug.showEvalSources");
+    this.trackThrowCatch = prefs.getBoolPref("extensions.firebug.trackThrowCatch");
     this.filterSystemURLs = prefs.getBoolPref("extensions.firebug.filterSystemURLs");  // may not be exposed to users
     this.DBG_FLUSH_EVERY_LINE = prefs.getBoolPref("extensions.firebug.DBG_FLUSH_EVERY_LINE");
 
@@ -183,11 +184,14 @@ function FirebugService()
     catch (exc)                                                                                                        /*@explore*/
     {                                                                                                                  /*@explore*/
         dumpProperties("firebug-service: constructor getBoolPrefs FAILED with exception=",exc);                        /*@explore*/
-    }                                                                                                                  /*@explore*/
-    this.topLevelScriptTag = {};  // top- or eval-level
-    this.eventLevelScriptTag = {};// event scripts like onclick
-    this.nestedScriptStack = {};  // scripts contained in leveledScript that have not been drained
-    this.sourceURLByTag = {};     // all script tags created by eval
+    } 																													/*@explore*/
+    this.onEvalScriptCreated.kind = "eval"; /*@explore*/
+    this.onTopLevelScriptCreated.kind = "top-level"; /*@explore*/
+    this.onEventScriptCreated.kind = "event"; /*@explore*/
+
+    this.onXScriptCreatedByTag = {}; // fbs functions by script tag
+    this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
+                        .createInstance(Components.interfaces.nsIMutableArray);  // scripts contained in leveledScript that have not been drained
     this.scriptInfoArrayByURL = {};
     this.scriptInfoByTag = {};
 }
@@ -259,9 +263,14 @@ FirebugService.prototype =
         }
     },
 
-    registerDebugger: function(debuggr)
+    registerDebugger: function(debuggrWrapper)
     {
-        this.enableDebugger();
+        var debuggr = debuggrWrapper.wrappedJSObject;
+
+        if (debuggr)// instanceof nsIFireBugURLProvider)
+            this.enableDebugger();
+        else
+            throw "firebug-service debuggers must implement nsIFireBugURLProvider";
 
         debuggers.push(debuggr);
         try {
@@ -486,7 +495,7 @@ FirebugService.prototype =
          }
     },
 
-    hasBreakpoint: function(script)
+    hasBreakpoint: function(script)  // never called
     {
         var url = script.fileName;
         var lineNo = findExecutableLine(script, script.baseLineNumber);
@@ -901,29 +910,21 @@ FirebugService.prototype =
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
         var scriptTag = frame.script.tag;
-        if (scriptTag in this.topLevelScriptTag)
+        if (scriptTag in this.onXScriptCreatedByTag)
         {
+            var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
             if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
-                                      +scriptTag+" topLevelScriptTag\n");                                              /*@explore*/
-            delete this.topLevelScriptTag[scriptTag];
-            this.onEvalBreak(frame, type, val);
-            var checkBP = true;
+                                      +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
+            delete this.onXScriptCreatedByTag[scriptTag];
+            fbs.clearZeroPCBreakpoint(frame.script);
+            try {
+                var rc = onXScriptCreated(frame, type, val);
+            } catch (e) {
+                ddd("onBreakpoint called onXScriptCreated and it didn't end well:"+e+"\n");
+            }
+            return RETURN_CONTINUE;
         }
-        else if (scriptTag in fbs.eventLevelScriptTag)
-        {
-            if (fbs.DBG_CREATION) ddd("onBreakpoint("+getExecutionStopNameFromType(type)                               /*@explore*/
-                                       +") found eventLevelScriptTag: "+scriptTag+"\n");                               /*@explore*/
-            delete this.eventLevelScriptTag[scriptTag];
-            return this.onEventScriptBreak(frame, type, val);
-        }
-        else if (scriptTag in fbs.nestedScriptStack)
-        {
-            // We hit a BP in a newly created script that was not drained by top- or eval-level completion. Must be dynamic Function()
-            if (fbs.DBG_CREATION) ddd("onBreakpoint("+getExecutionStopNameFromType(type)                               /*@explore*/
-                                       +") found nestedScriptTag: "+scriptTag+"\n");                                    /*@explore*/
-            this.onFunctionBreak(frame, type, val);
 
-        }
         if (checkBP || disabledCount || monitorCount || conditionCount || runningUntil)
         {
             if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
@@ -959,7 +960,7 @@ FirebugService.prototype =
         }
 
         if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="              /*@explore*/
-                +frame.script.tag+" evtag="+fbs.eventLevelScriptTag[frame.script.tag]+"\n");                           /*@explore*/
+                +frame.script.tag+"\n");                           /*@explore*/
         if (runningUntil) // XXXjjb ?? bp and after onCall? Seems dubious
             return RETURN_CONTINUE;
         else
@@ -975,11 +976,14 @@ FirebugService.prototype =
         // it doesn't currently report the window where the error occured
         this._lastErrorWindow = getFrameWindow(frame);
 
-        if (fbs.DBG_ERRORS) ddd("onThrow from "+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");
+        if (fbs.trackThrowCatch)
+        {
+            if (fbs.DBG_ERRORS) ddd("onThrow from "+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");
 
-        var debuggr = this.findDebugger(frame);
-        if (debuggr)
-            return debuggr.onThrow(frame, rv);
+            var debuggr = this.findDebugger(frame);
+            if (debuggr)
+                return debuggr.onThrow(frame, rv);
+        }
 
         return RETURN_CONTINUE_THROW;
     },
@@ -1017,193 +1021,91 @@ FirebugService.prototype =
         }
     },
 
-    onEventScriptBreak: function(frame, type, val)
-    {
-        try {
-            var script = frame.script;
-            var bp = this.findZeroPCBreakpoint(script, PCMAP_SOURCETEXT);
-            if (bp == undefined)
-                script.clearBreakpoint(0);
-
-            var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
-
-            if (debuggr)
-            {
-                try
-                {
-                    debuggr.QueryInterface(nsIFireBugURLProvider);
-                    var eventURL = this.getURLFromDebugger(debuggr.onEventScript, frame);
-                    if (eventURL)
-                    {
-                        if (fbs.DBG_CREATION) ddd("onEventScriptBreak eventURL="+dFormat(script,eventURL)+"\n");       /*@explore*/
-                        this.registerEventLevelScript(script, eventURL, "event level"); // 1 is determined experimentally
-                        //fbs.drainTopLevelScriptStack(eventURL, frame, script, debuggr);  TODO test multiple functions in event
-                    }
-                    return RETURN_CONTINUE;
-                }
-                catch (exc)
-                {
-                }
-            }
-        } catch(exc) {
-            ERROR("onEventScriptBreak failed: "+exc);
-        }
-        return RETURN_CONTINUE;
-    },
-
-    onEvalBreak: function(frame, type, val)
+    onEventScriptCreated: function(frame, type, val)
     {
         try
         {
+            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
+
+            if (!debuggr)
+                return RETURN_CONTINUE;
+
+            debuggr.onEventScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
+
+        } catch(exc) {
+            dumpProperties("onEventScriptCreated failed: ", exc);
+            ERROR("onEventScriptCreated failed: "+exc);
+        }
+
+        fbs.nestedScriptStack.clear();
+        return RETURN_CONTINUE;
+    },
+
+    onEvalScriptCreated: function(frame, type, val)
+    {
+        try
+        {
+            if (!frame.callingFrame)
+            {
+                if (fbs.DBG_CREATION) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
+                // These are eval-like things called by native code. They come from .xml files
+                // They should be marked as evals but we'll treat them like event handlers for now.
+                return fbs.onEventScriptCreated(frame, type, val);
+            }
             // In onScriptCreated we found a no-name script, set a bp in PC=0, and a flag.
             // onBreakpoint saw the flag, cleared the flag, and sent us here.
             // Start by undoing our damage
             var script = frame.script;
-            var bp = this.findZeroPCBreakpoint(script, PCMAP_SOURCETEXT);  // I don't thing we need this because we will soon resetBreakpointss
-            if (bp == undefined)
-            {
-                script.clearBreakpoint(0);
-                if (fbs.DBG_CREATION) ddd("fbs.onEvalBreak clear bp@0 for tag="+script.tag+"\n");                      /*@explore*/
-            }
 
-            var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
+            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
             if (!debuggr)
-            {
-                if (fbs.DBG_BP) dumpToFileWithStack("firebug-service: no debuggr for frame.fileName="+script.fileName, frame);           /*@explore*/
-                return;
-            }
+                return RETURN_CONTINUE;
 
-            try
-            {
-                if ( !(debuggr instanceof nsIFireBugURLProvider) )  // XXXjjb Max maybe we should test this once in init insist on true or throw error
-                {
-                    if (fbs.DBG_CREATION) ddd("onEvalBreak debuggr fails instanceof test\n");
-                    return;
-                }
+            debuggr.onEvalScriptCreated(frame, script, fbs.nestedScriptStack.enumerate());
+            if (fbs.DBG_CREATION) ddd("onEvalScriptCreated tag:"+script.tag+"\n");                                                 /*@explore*/
 
-            }
-            catch (exc)
-            {
-                if (fbs.DBG_CREATION) ddd("onEvalBreak debuggr FAILS:"+exc+"\n");
-                return;
-            }
-
-            if (!frame.callingFrame)
-            {
-                var topLevelURL = this.getURLFromDebugger(debuggr.onTopLevel, frame);
-                if (topLevelURL)
-                {
-                    if (fbs.DBG_CREATION) ddd("onEvalBreak top_level: "+dFormat(script, topLevelURL)+"\n");            /*@explore*/
-                    this.registerTopLevelScript(script, topLevelURL, "top-level");
-                    this.drainTopLevelScriptStack(topLevelURL, frame, script, debuggr);
-                }
-                else                                                                                                   /*@explore*/
-                {                                                                                                      /*@explore*/
-                    if (fbs.DBG_CREATION) ddd("onEvalBreak: no url returned from debugger side");                      /*@explore*/
-                }                                                                                                      /*@explore*/
-            }
-            else
-            {
-                if (fbs.DBG_CREATION) ddd("onEvalBreak eval_level\n");                                                 /*@explore*/
-                var leveledScriptURL = this.getURLFromDebugger(debuggr.onEval, frame);
-                if (fbs.DBG_CREATION) ddd("onEvalBreak eval_level url="+leveledScriptURL+"\n");                        /*@explore*/
-                if (leveledScriptURL)
-                {
-                    this.registerEvalLevelScript(script, leveledScriptURL, "eval-level", 1);
-                    this.drainEvalScriptStack(leveledScriptURL, frame, script, debuggr);
-                }
-            }
         }
         catch (exc)
         {
-            ERROR("onEvalBreak failed: "+exc);
+            ERROR("onEvalScriptCreated failed: "+exc);
+            if (fbs.DBG_ERRORS) dumpProperties("onEvalScriptCreated failed:", exc);
         }
+
+        fbs.nestedScriptStack.clear();
+        return RETURN_CONTINUE;
     },
 
-    getURLFromDebugger: function(callback, frame)
+    onTopLevelScriptCreated: function(frame, type, val)
     {
         try
         {
-            var url = callback(frame);
-            if (!url)
-            {
-                ERROR("firebug-service: debuggr callback for url failed \n");
+            // On compilation of a top-level (global-appending) function.
+            // After this top-level script executes we lose the jsdIScript so we can't build its line table.
+            // Therefore we need to build it here.  TODO!
+            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
+            if (!debuggr)
                 return;
-            }
-            return url;
+
+            var script = frame.script;
+            debuggr.onTopLevelScriptCreated(frame, script, fbs.nestedScriptStack.enumerate());
         }
-        catch(exc)
+        catch (exc)
         {
-            if (fbs.DBG_ERRORS) dumpProperties("firebug-service: debuggr callback for url FAILED with exception=",exc);/*@explore*/
-            ERROR("firebug-service: debuggr callback for url FAILED with exception="+exc+"\n");
+            ERROR("onTopLevelScriptCreated: "+exc);
         }
+
+        fbs.nestedScriptStack.clear();
+        return RETURN_CONTINUE;
     },
 
-    drainTopLevelScriptStack: function(leveledScriptURL, frame, leveledScript, debuggr)
+    clearZeroPCBreakpoint: function(script)
     {
-        for (tag in this.nestedScriptStack)
+        var bp = this.findZeroPCBreakpoint(script, PCMAP_SOURCETEXT);  // I don't think we need this because we will soon resetBreakpointss
+        if (bp == undefined)  // means no user bp at PC=0
         {
-            var nestedScript = this.nestedScriptStack[tag];
-            if (nestedScript.fileName != leveledScriptURL)
-                continue;
-            // XXXjjb No BP in nestedScripts. nestedScript.clearBreakpoint(0);  // set in onScriptCreated and cleared here before it can ever be hit. TODO user BP at PC=0?
-
-            var lineNo = nestedScript.baseLineNumber - leveledScript.baseLineNumber + 1;
-            if (fbs.DBG_CREATION)                                                                                      /*@explore*/
-                ddd("drainTopLevelScriptStack: nestedScript.baseLineNumber - leveledScript.baseLineNumber + 1="        /*@explore*/
-                                 +nestedScript.baseLineNumber+"-"+leveledScript.baseLineNumber+" + 1\n");              /*@explore*/
-
-            debuggr = this.reFindDebugger(frame, debuggr);
-            debuggr.onTopLevelScript(leveledScriptURL, lineNo, nestedScript);
-
-            var scriptInfo = this.registerTopLevelScript(nestedScript, leveledScriptURL, "nested in top-level");
-       }
-       fbs.nestedScriptStack = {}; // XXXjjb TODO we lose all the moz scripts here
-    },
-
-    drainEvalScriptStack: function(leveledScriptURL, frame, script, debuggr)
-    {
-        for (tag in this.nestedScriptStack) {
-            var nestedScript = this.nestedScriptStack[tag];
-            if (nestedScript.fileName != script.fileName)
-                continue;
-            // XXXjjb No BP in nestedScripts. nestedScript.clearBreakpoint(0);  // set in onScriptCreated and cleared here before it can ever be hit. TODO user BP at PC=0?
-
-            var baseLineNumberWithEvalBuffer = nestedScript.baseLineNumber - script.baseLineNumber + 1;
-            if (baseLineNumberWithEvalBuffer <= 0)
-            {
-                // happens for ppfun internally generated functions and maybe for injected script tags?
-                if (fbs.DBG_CREATION)                                                                                  /*@explore*/
-                    ddd("Neg. offset for nestedScript.baseLineNumber - script.baseLineNumber + 1 @leveledScriptURL="   /*@explore*/
-                        +nestedScript.baseLineNumber+" - "+script.baseLineNumber + "+1 @"+leveledScriptURL+" src="     /*@explore*/
-                        +nestedScript.functionSource+"\n"+script.fileName+ " vs nested "+nestedScript.fileName+"\n");  /*@explore*/
-            }
-            debuggr = this.reFindDebugger(frame, debuggr);
-            debuggr.onEvalScript(leveledScriptURL, baseLineNumberWithEvalBuffer, nestedScript);
-
-            var scriptInfo = this.registerEvalLevelScript(nestedScript, leveledScriptURL, "nested in eval-level ",  baseLineNumberWithEvalBuffer);
-
-       }
-       fbs.nestedScriptStack = {};
-    },
-
-    drainFunctionConstructorScriptStack: function(frame)
-    {
-        // frame is after Function() constructor call return, in source of caller.
-        for (tag in this.nestedScriptStack) {
-            var nestedScript = this.nestedScriptStack[tag];
-            //if (nestedScript.functionName != "anonymous") //
-            //    continue;
-            var debuggr = this.findDebugger(frame);
-            if (debuggr)
-            {
-                var ctorURL = debuggr.onFunctionConstructor(frame, nestedScript);
-                var scriptInfo = this.registerFunctionConstructorScript(nestedScript, ctorURL, "Function()");
-                if (fbs.DBG_CREATION)                                                                                  /*@explore*/
-                    ddd("drainFunctionConstructorScriptStack:"+formatScriptInfo(scriptInfo) +"\n");          	   /*@explore*/
-            }
-       }
-       fbs.nestedScriptStack = {};
+            script.clearBreakpoint(0);
+            if (fbs.DBG_CREATION) ddd("fbs.onEvalScriptCreated clear bp@0 for tag="+script.tag+"\n");                      /*@explore*/
+        }
     },
 
     onScriptCreated: function(script)
@@ -1223,33 +1125,29 @@ FirebugService.prototype =
                 ddd(script.functionSource+"\n");                 /*@explore*/
             }                                                                                                          /*@explore*/
 
-            if (!fbs.showEvalSources)
+            if (!script.functionName) // top or eval-level
             {
-                this.registerTopLevelScript(script, fileName, !script.functionName ? "top-level" : "nested in top-level");
-                return;
-            }
+                // We need to detect eval() and grab its source.
+                var hasCaller = fbs.createdScriptHasCaller();
+                if (hasCaller)
+                    fbs.onXScriptCreatedByTag[script.tag] = this.onEvalScriptCreated;
+                else
+                    fbs.onXScriptCreatedByTag[script.tag] = this.onTopLevelScriptCreated;
 
-            if (!script.functionName)
-            {
-                // top or eval-level
-                // We need to detect eval() and grab its source. For that we need a stack frame.
-                // Get a frame by breakpointing the no-name script that was just created.
-                // XXXjjb try fbs.topLevelScriptTag = script.tag?
-                fbs.topLevelScriptTag[script.tag] = true;
                 script.setBreakpoint(0);
                 fbs.clearHookInterruptsToTrackScripts(); // now we know that any nested scripts are part of our buffer, not dynamic functions
-                if (fbs.DBG_CREATION) ddd("onScriptCreated: set BP at PC 0 in top or eval level tag="+script.tag+"\n");/*@explore*/
+                if (fbs.DBG_CREATION) ddd("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+"\n");/*@explore*/
             }
             else if (script.baseLineNumber == 1 && (fileName in this.scriptInfoArrayByURL))
             {
-                fbs.eventLevelScriptTag[script.tag]= true;
-                script.setBreakpoint(0);  // XXXjjb possible conflict with bp set by user
+                fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated;
+                script.setBreakpoint(0);
                 fbs.clearHookInterruptsToTrackScripts(); // Should not have been set...?
                 if (fbs.DBG_CREATION) ddd("onScriptCreated: set BP at PC 0 in event level tag="+script.tag+"\n");      /*@explore*/
             }
             else
             {
-                fbs.nestedScriptStack[script.tag] = script;
+                fbs.nestedScriptStack.appendElement(script, false);
                 if (fbs.DBG_CREATION) ddd("onScriptCreated: nested function named: "+script.functionName+"\n");                                         /*@explore*/
                 if (script.functionName == "anonymous") // not no-name
                     fbs.hookInterruptsToTrackScripts();  // if the hook is taken, then its not a eval- or top-, must be Function or ?
@@ -1258,7 +1156,23 @@ FirebugService.prototype =
         catch(exc)
         {
             ERROR("onScriptCreated failed: "+exc);
+            dumpProperties("onScriptCreated failed: ", exc);
         }
+    },
+
+    createdScriptHasCaller: function()
+    {
+        var frame = Components.stack; // createdScriptHasCaller
+        frame = frame.caller;         // onScriptCreated
+        if (!frame) return frame;
+        frame = frame.caller;         // native jsd?
+        if (!frame) return frame;
+        frame = frame.caller;         // hook apply
+        if (!frame) return frame;
+        frame = frame.caller;         // native interpret?
+        if (!frame) return frame;
+        frame = frame.caller;         // our creator ... or null if we are top level
+        return frame;
     },
 
     onScriptDestroyed: function(script)
@@ -1279,8 +1193,6 @@ FirebugService.prototype =
 
             delete this.scriptInfoByTag[scriptTag];
         }
-        delete this.nestedScriptStack[scriptTag];
-        delete this.eventLevelScriptTag[scriptTag];
 
         dispatch(scriptListeners,"onScriptDestroyed",[script]);
     },
@@ -1436,26 +1348,31 @@ FirebugService.prototype =
         }
         jsd.enumerateContexts( {enumerateContext: function(jscontext)
         {
-                var global = jscontext.globalObject.getWrappedValue();
-                ddd("jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
-                //dumpProperties("global object:\n", global);
-                if (global)
-                {
-                    var document = global.document;
-                    if (document)
-                    {
-                        ddd("global document.location: "+document.location+"\n");
-                    }
-                    else
-                        ddd("global without document\n");
-                    ddd("global type: "+typeof(global)+"\n");
-                }
-                else
-                    ddd("no global object\n");
-
                 ddd("\n");
                 try
                 {
+                    var global = jscontext.globalObject.getWrappedValue();
+                    ddd("jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
+                    //dumpProperties("global object:\n", global);
+                    if (global)
+                    {
+                        var document = global.document;
+                        if (document)
+                        {
+                            ddd("global document.location: "+document.location+"\n");
+                        }
+                        else
+                        {
+                            ddd("global without document\n");
+                            ddd("global type: "+typeof(global)+"\n");
+                            dumpProperties("global properties", global);
+                            dumpInterfaces("global interfaces", global);
+                        }
+                    }
+                    else
+                        ddd("no global object\n");
+
+
                     if (jscontext.privateData)
                     {
                         dumpProperties("jscontext.privateData", jscontext.privateData);
@@ -1492,56 +1409,59 @@ FirebugService.prototype =
 
         var win = getFrameWindow(frame);
         if (win)
-		{
-	        for (var i = 0; i < debuggers.length; ++i)
-	        {
-	            try
-	            {
-	                var debuggr = debuggers[i];
-	                if (debuggr.supportsWindow(win))
-	                    return debuggr;
-	            }
-	            catch (exc) {  ERROR("firebug-service findDebugger: "+exc);}
-	        }
+        {
+            for (var i = 0; i < debuggers.length; ++i)
+            {
+                try
+                {
+                    var debuggr = debuggers[i];
+                    if (debuggr.supportsWindow(win))
+                        return debuggr;
+                }
+                catch (exc)
+                {
+                    ERROR("firebug-service findDebugger supportsWindow FAILS: "+exc+" for window:"+win.location);
+                }
+            }
         }
-        
+
         if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
-        { 
-	        while(frame.callingFrame) // walk to the bottom of the stack
-	    		frame = frame.callingFrame; 
-	    	var debuggr = this.findDebugger(frame);
-	    	if (debuggr)
-	    		return debuggr;
-    	}
+        {
+            while(frame.callingFrame) // walk to the bottom of the stack
+                frame = frame.callingFrame;
+            var debuggr = this.findDebugger(frame);
+            if (debuggr)
+                return debuggr;
+        }
         if (fbs.DBG_ERRORS)
-        	fbs.diagnoseFindDebugger(frame, win);
+            fbs.diagnoseFindDebugger(frame, win);
     },
 
     diagnoseFindDebugger: function(frame, originalWin)
     {
-    	while(frame.callingFrame) // walk to the bottom of the stack
-    		frame = frame.callingFrame; 
-    		
+        while(frame.callingFrame) // walk to the bottom of the stack
+            frame = frame.callingFrame;
+
         dumpToFileWithStack("\ndiagnoseFindDebugger", frame);
 
-        ddd("diagnoseFindDebugger scope "+frame.scope.jsType+"["+frame.scope.propertyCount+"] "+frame.scope.jsClassName +"\n");    
+        ddd("diagnoseFindDebugger scope "+frame.scope.jsType+"["+frame.scope.propertyCount+"] "+frame.scope.jsClassName +"\n");
         var win = getFrameWindow(frame);
         if (!win)
         {
-		    ddd("No getFrameWindow! scope:\n");
-		    var listValue = {value: null}, lengthValue = {value: 0};
-		    frame.scope.getProperties(listValue, lengthValue);
-		    for (var i = 0; i < lengthValue.value; ++i)
-		    {
-		        var prop = listValue.value[i];
-		        try {
-		        var name = prop.name.getWrappedValue();
-		        ddd(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
-		        } catch (e) {
-		        ddd(i+"]"+e+"\n");
-		        }
-		    }
-		    return;
+            ddd("No getFrameWindow! scope:\n");
+            var listValue = {value: null}, lengthValue = {value: 0};
+            frame.scope.getProperties(listValue, lengthValue);
+            for (var i = 0; i < lengthValue.value; ++i)
+            {
+                var prop = listValue.value[i];
+                try {
+                var name = prop.name.getWrappedValue();
+                ddd(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
+                } catch (e) {
+                ddd(i+"]"+e+"\n");
+                }
+            }
+            return;
         }
         ddd("diagnoseFindDebugger win.location ="+(win.location?win.location.href:"(undefined)"));
         for (var i = 0; i < debuggers.length; ++i)
@@ -1551,8 +1471,8 @@ FirebugService.prototype =
                 var debuggr = debuggers[i];
                 if (debuggr.supportsWindow(win))
                 {
-                	ddd(" FOUND at "+i+"\n");
-                	ddd("diagnoseFindDebugger originalWin.location ="+(originalWin.location?originalWin.location.href:"(undefined)")+"\n");
+                    ddd(" FOUND at "+i+"\n");
+                    ddd("diagnoseFindDebugger originalWin.location ="+(originalWin.location?originalWin.location.href:"(undefined)")+"\n");
                     return debuggr;
                 }
             }
@@ -2034,7 +1954,7 @@ function handleTrackingScriptsInterrupt(frame, type, rv)
             if (fbs.DBG_FUNCTION) ddd("handleTrackingScriptsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type)+"\n");                              /*@explore*/
 
             // When we are called the stack should be at the PC just after the constructor call to Function().
-            fbs.drainFunctionConstructorScriptStack(frame);
+            // TODO implement
         }
     }
     catch (exc)
@@ -2154,6 +2074,7 @@ function denormalizeURL(url)
 
 function isFilteredURL(url)
 {
+    //ddd(this.caller+" - isFilteredURL? "+url+" fbs.filterSystemURLs:"+fbs.filterSystemURLs+"\n");
     return ( fbs.filterSystemURLs && systemURLStem(url) );
 }
 
@@ -2212,7 +2133,7 @@ function hook(fn, rv)
         }
         catch (exc)
         {
-            var msg = "Error in hook: " + exc +" stack=";
+            var msg = "Error in hook: " + exc +" fn="+fn+" stack=";
             for (var frame = Components.stack; frame; frame = frame.caller)
                 msg += frame.filename + "@" + frame.lineNumber + ";\n";
                ERROR(msg);
@@ -2351,6 +2272,8 @@ var FirebugPrefsObserver =
             fbs.breakOnErrors =  prefs.getBoolPref("extensions.firebug.breakOnErrors");
         else if (data == "extensions.firebug.showEvalSources")
             fbs.showEvalSources =  prefs.getBoolPref("extensions.firebug.showEvalSources");
+        else if (data == "extensions.firebug.trackThrowCatch")
+            fbs.trackThrowCatch =  prefs.getBoolPref("extensions.firebug.trackThrowCatch");
         else if (data == "extensions.firebug.filterSystemURLs")
             fbs.filterSystemURLs =  prefs.getBoolPref("extensions.firebug.filterSystemURLs");
         else if (data == "extensions.firebug.DBG_FBS_CREATION")

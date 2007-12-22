@@ -2,6 +2,8 @@
 
 var FirebugLib = FBL = XPCOMUtils;
 
+try { /*@explore*/
+
 (function() {
 
 // ************************************************************************************************
@@ -1438,7 +1440,7 @@ this.getStackTrace = function(frame, context)
 
 this.getStackFrame = function(frame, context)
 {
-    if (frame.isNative || frame.isDebugger)   // XXXjjb
+    if (frame.isNative || frame.isDebugger)
     {
         var excuse = (frame.isNative) ?  "(native)" : "(debugger)";
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+excuse+" frame\n");                                 /*@explore*/
@@ -1446,52 +1448,24 @@ this.getStackFrame = function(frame, context)
     }
     try
     {
-        if (frame.script.functionName) // normal js
+        var sourceFile = this.getSourceFileByScript(context, frame.script);
+        if (sourceFile)
         {
-            // XXXjjb At one time I thought this causes leak of script objects, but small test case is ok now.
-            var fn = frame.script.functionObject.getWrappedValue();
-            var args = this.getFunctionArgValues(fn, frame);
-            if (context.evalSourceURLByTag && frame.script.tag in context.evalSourceURLByTag)
-            {
-                if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame evaled function frame\n");                    /*@explore*/
-                var url = context.evalSourceURLByTag[frame.script.tag];
-                var lineNo = FBL.getLineAtPCForEvaled(frame, context);
-                return new this.StackFrame(context, fn, frame.script, url, lineNo, args, frame.pc);
-            }
-            else if (context.eventSourceURLByTag && frame.script.tag in context.eventSourceURLByTag)
-            {
-                if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame event frame\n");                              /*@explore*/
-                var url = context.eventSourceURLByTag[frame.script.tag];
-                var lineNo = FBL.getLineAtPC(frame, context);
-                return new this.StackFrame(context, fn, frame.script, url, lineNo, args, frame.pc);
-            }
-            else if (context.functionCtorSourceURLByTag && frame.script.tag in context.functionCtorSourceURLByTag)
-            {
-                if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame Function Ctor frame\n");                              /*@explore*/
-                var url = context.functionCtorSourceURLByTag[frame.script.tag];
-                var lineNo = FBL.getLineAtPC(frame, context);
-                return new this.StackFrame(context, fn, frame.script, url, lineNo, args, frame.pc);
-            }
-            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame toplevel function frame\n");                      /*@explore*/
-            return new this.StackFrame(context, fn, frame.script, frame.script.fileName, frame.line, args, frame.pc);
+            var url = sourceFile.href;
+            var analyzer = sourceFile.getScriptAnalyzer(frame.script);
+
+            var lineNo = analyzer.getSourceLineFromFrame(context, frame);
+            var fncSpec = analyzer.getFunctionDescription(frame.script, context, frame);
+
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame for sourceFile", sourceFile);
+            return new this.StackFrame(context, fncSpec.name, frame.script, url, lineNo, fncSpec.args, frame.pc);
         }
         else
         {
-            if (frame.callingFrame) // eval-level
-            {
-                var sourceFile = this.getSourceFileForEval(frame.script, context);
-                if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame eval-level sourceFile.href="+sourceFile.href+"\n"); /*@explore*/
-                var lineNo = FBL.getLineAtPCForEvaled(frame, context);
-                var eval_frame = new this.StackFrame(context, sourceFile.evalExpression, frame.script, sourceFile.href, lineNo, [sourceFile.evalExpression], frame.pc);
-                return eval_frame;
-            }
-            else // __top_level__
-            {
-                var file_name = this.getFileName(frame.script.fileName);
-                file_name = file_name ? file_name: "__top_level__";
-                if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame top-level\n");                                /*@explore*/
-                return new this.StackFrame(context, file_name, frame.script, frame.script.fileName, frame.line, [], frame.pc);
-            }
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:", frame.script.tag+"@"+frame.script.fileName);
+            var script = frame.script;
+
+            return new this.StackFrame(context, script.functionName, frame.script, script.fileName, frame.line, [], frame.pc);
         }
     }
     catch (exc)
@@ -1500,43 +1474,6 @@ this.getStackFrame = function(frame, context)
         return null;
     }
 };
-
-this.getLineAtPCForEvaled = function(frame, context)
-{
-    var lineNo = context.evalBaseLineNumberByTag[frame.script.tag];
-    var offset = frame.line - frame.script.baseLineNumber;
-    return lineNo + offset;
-}
-
-this.getSourceLinkAtPCForEvaled = function(frame, context)
-{
-    var url = context.evalSourceURLByTag[frame.script.tag];
-    var lineNo = FBL.getLineAtPCForEvaled(frame, context);
-    return new this.SourceLink(url, lineNo, "js");
-}
-
-this.getLineAtPC = function(frame, context)
-{
-    var lineNo = frame.script.pcToLine(frame.pc, PCMAP_PRETTYPRINT);
-    if (lineNo > 1) lineNo = lineNo - 1;
-    if (FBTrace.DBG_BP)   																										/*@explore*/
-    { 																															/*@explore*/
-        var l = 0;  																								  			/*@explore*/
-        var pc = frame.script.lineToPc(l, PCMAP_PRETTYPRINT); 																	/*@explore*/
-        FBTrace.sysout("lib.getLineAtPC line "+l+" has PC="+pc);																/*@explore*/
-        FBTrace.sysout("lib.getLineAtPC pc has line="+frame.script.pcToLine(pc, PCMAP_PRETTYPRINT)+"\n");						/*@explore*/
-        FBTrace.sysout("lib.getLineAtPC pc="+frame.pc+" line="+lineNo+"\n");                       								/*@explore*/
-    } 																															/*@explore*/
-
-    return lineNo;
-}
-
-this.getSourceLinkAtPCForEvent = function(frame, context)
-{  //DEAD code?
-    var url = context.eventSourceURLByTag[frame.script.tag];
-    var lineNo = FBL.getLineAtPC(frame, context);
-    return new this.SourceLink(url, lineNo, "js");
-}
 
 this.getStackDump = function()
 {
@@ -1649,76 +1586,13 @@ this.areEventsMonitored = function(object, type, context)
 // ************************************************************************************************
 // Functions
 
-this.findScript = function(url, line)
+this.findScript = function(context, url, line)
 {
-    url = this.denormalizeURL(url);
-
-    var context = this.context;
-    var foundScript = null;
-    this.jsd.enumerateScripts({enumerateScript: function(script)
-    {
-        if (script.fileName == url && line >= script.baseLineNumber
-            && line <= script.baseLineNumber+script.lineExtent)
-        {
-            // Look for the script with the smallest number of lines, since the range check
-            // doesn't account for functions inside of other functions
-            // XXXjoe Use isLineExecutable instead?
-            if (!foundScript || script.lineExtent <= foundScript.lineExtent)
-                foundScript = script;
-        }
-        else
-        {
-            if (context && context.evalSourceURLByTag && context.evalSourceURLByTag[script.tag] == url)
-            {
-                var offsetToScript = context.evalSourceLinesByTag[script.tag];
-                if (line >= offsetToScript && line <= offsetToScript + script.lineExtent)
-                    foundScript = script;  // debugger.onEvalScript deals with functions in functions.
-            }
-            else if (context && context.eventSourceURLByTag && context.eventSourceURLByTag[script.tag] == url)
-            {
-                foundScript = script;
-            }
-            else if (context && context.functionCtorSourceURLByTag && context.functionCtorSourceURLByTag[script.tag] == url)
-            {
-                foundScript = script;
-            }
-        }
-    }});
-
-    return foundScript;
-};
-
-this.findScriptsInFile = function(url)
-{
-    // TODO consider storing scripts in SourceFile
-    url = this.denormalizeURL(url);
-
-    var context = this.context;
-    var scripts = [];
-    this.jsd.enumerateScripts({enumerateScript: function(script)
-    {
-        if (script.fileName == url)
-        {
-            scripts.push(script);
-        }
-        else
-        {
-            if (context && context.evalSourceURLByTag && context.evalSourceURLByTag[script.tag] == url)
-            {
-               scripts.push(script);
-            }
-            else if (context && context.eventSourceURLByTag && context.eventSourceURLByTag[script.tag] == url)
-            {
-                scripts.push(script);
-            }
-            else if (context && context.functionCtorSourceURLByTag && context.functionCtorSourceURLByTag[script.tag] == url)
-            {
-                scripts.push(script);
-            }
-        }
-    }});
-
-    return scripts;
+    var sourceFile = context.sourceFileMap[url];
+    var script = sourceFile.getScriptByLineNumer(line);
+    if (!script)
+        FBTrace.sysout("Need to build line table or line is not executable\n");
+    return script;
 };
 
 this.findScriptForFunction = function(fn)
@@ -1739,33 +1613,20 @@ this.findScriptForFunction = function(fn)
 this.findSourceForFunction = function(fn, context)
 {
     var script = this.findScriptForFunction(fn);
-    return (script)? this.getSourceForScript(script, context) : null;
+    return (script)? this.getSourceLinkForScript(script, context) : null;
 };
 
-this.getSourceForScript = function(script, context)
+this.getSourceLinkForScript = function(script, context)
 {
-    if (context.evalSourceURLByTag && script.tag in context.evalSourceURLByTag)
+    var sourceFile = this.getSourceFileByScript(context, script);
+    if (sourceFile)
     {
-        var url = context.evalSourceURLByTag[script.tag];
-        var line = context.evalBaseLineNumberByTag[script.tag];
-        return new this.SourceLink(url, line, "js");
+        var scriptAnalyzer = sourceFile.getScriptAnalyzer(script);
+        return scriptAnalyzer.getSourceLinkForScript(script);
     }
-    else if (context.eventSourceURLByTag && script.tag in context.eventSourceURLByTag)
-    {
-        var url = context.eventSourceURLByTag[script.tag];
-        return new this.SourceLink(url, 1, "js");
-    }
-    else if (context.functionCtorSourceURLByTag && script.tag in context.functionCtorSourceURLByTag)
-    {
-        var url = context.functionCtorSourceURLByTag[script.tag];
-        return new this.SourceLink(url, 1, "js");
-    }
-    return script
-        ? new this.SourceLink(this.normalizeURL(script.fileName), script.baseLineNumber, "js")
-        : null;
 };
 
-this.getFunctionName = function(script, context, frame)  // XXXjjb need frame to avoid analyzing top level
+this.getFunctionName = function(script, context, frame)
 {
     if (!script)
     {
@@ -1774,30 +1635,18 @@ this.getFunctionName = function(script, context, frame)  // XXXjjb need frame to
     }
     var name = script.functionName;
 
-    if (!name) // XXXjjb eval frames have blank names, !name == true
+    if (!name || (name == "anonymous"))
     {
-        if (context.evalSourceURLByTag) {
-            var url = context.evalSourceURLByTag[script.tag];
-            if (url)
-                return "__eval_level__";
-        }
-        var file_name = this.getFileName(script.fileName);
-        file_name = file_name ? file_name: "__top_level__";
-        return file_name;
-    }
-    else if (name == "anonymous")
-    {
-
-        if (context.evalSourceURLByTag)
+        var analyzer = FBL.getScriptAnalyzer(context, script);
+        if (analyzer)
         {
-            var url =  context.evalSourceURLByTag[script.tag];
-
-            if (url)
-                return this.guessFunctionName(url, context.evalBaseLineNumberByTag[script.tag], context);
+            var functionSpec = analyzer.getFunctionDescription(script, context, frame);
+            name = functionSpec.name +"("+functionSpec.args.join(',')+")";
         }
-        if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName for anonymous non-eval function, script.baselineNumber="+script.baseLineNumber+" line for PC=0:"+script.pcToLine(0, PCMAP_SOURCETEXT)+"\n");     /*@explore*/
-        return this.guessFunctionName(script.fileName, script.baseLineNumber, context);
+        else
+            name =  this.guessFunctionName(script.fileName, script.baseLineNumber, context);
     }
+    if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");     /*@explore*/
 
     return name;
 };
@@ -1808,19 +1657,18 @@ this.guessFunctionName = function(url, lineNo, context)
     {
         if (context.sourceCache)
             return this.guessFunctionNameFromLines(url, lineNo, context.sourceCache);
-        return "(no cache)";
     }
-    return "(no context)";
+    return "? in "+this.getFileName(url)+"@"+lineNo;
 };
 
-this.guessFunctionNameFromLines = function(url, lineNo, source) {
+this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
         // Walk backwards from the first line in the function until we find the line which
         // matches the pattern above, which is the function definition
         var line = "";
         if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");           /*@explore*/
         for (var i = 0; i < 4; ++i)
         {
-            line = source.getLine(url, lineNo-i) + line;
+            line = sourceCache.getLine(url, lineNo-i) + line;
             if (line != undefined)
             {
                 var m = reGuessFunction.exec(line);
@@ -1828,7 +1676,7 @@ this.guessFunctionNameFromLines = function(url, lineNo, source) {
                     return m[1];
                 else
                     if (FBTrace.DBG_FUNCTION_NAMES)                                                                    /*@explore*/
-                        FBL.ERROR("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");    /*@explore*/
+                        FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");    /*@explore*/
                 m = reFunctionArgNames.exec(line);
                 if (m && m[1])
                     return m[1];
@@ -1875,37 +1723,7 @@ this.lineWithinFunction = function(script, line)
 
 this.getScriptFileByHref = function(url, context)
 {
-    if (!context.sourceFileMap || !(url in context.sourceFileMap))
-        this.updateScriptFiles(context, true);
-
     return context.sourceFileMap[url];
-};
-
-this.initSourceFileForEval = function(context)
-{
-    if (!context.evalSourceURLByTag)
-    {
-        context.evalSourceURLByTag = {};  // script.tag -> source url
-        context.evalSourceFilesByURL = {}; // source url -> sourceFile obj
-        context.evalBaseLineNumberByTag = {};       // script.tag -> source line offset in sourceFile.text
-    }
-}
-
-this.getSourceFileForEval = function(script, context)
-{
-    this.initSourceFileForEval(context);
-
-    var sourceURL = context.evalSourceURLByTag[script.tag];
-    if (sourceURL)
-        return context.evalSourceFilesByURL[sourceURL];
-};
-
-this.setSourceFileForEvalIntoContext = function(context, tag, sourceFile)
-{
-    this.initSourceFileForEval(context);
-    context.evalSourceFilesByURL[sourceFile.href] = sourceFile;
-    context.evalSourceURLByTag[tag] = sourceFile.href;
-    context.evalBaseLineNumberByTag[tag] = 1;
 };
 
 this.getStyleSheetByHref = function(url, context)
@@ -1936,81 +1754,53 @@ this.getStyleSheetByHref = function(url, context)
     }
 };
 
-this.updateScriptFiles = function(context, reload)
+this.sourceFilesAsArray = function(context)
 {
-    if (!context.sourceFiles || reload)
-        context.sourceFiles = [];    // list of all SourceFiles, built here only and cached
+    var sourceFiles = [];
+    var sourceFileMap = context.sourceFileMap;
+    for (var url in sourceFileMap)
+        sourceFiles.push(sourceFileMap[url]);
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+" -> "+context.window.location+"\n"); /*@explore*/
 
-    if (!context.sourceFileMap)
-    {
-        context.sourceFileMap = {};  // url->FBL.SourceFile built here and elsewhere
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("lib.updateScriptFiles No sourceFileMap!\n");                      /*@explore*/
-    }
-
-    if (!context.loaded || !context.sourceFiles.length) // XXXjjb: TODO dynamics may also need a new list
-    {
-        var oldMap = reload ? context.sourceFileMap : null;
-        var sourceFileMap = context.sourceFileMap;
-
-        function addFile(url)
-        {
-            if (!(url in sourceFileMap))
-            {
-                if (oldMap && url in oldMap)
-                {
-                    var sourceFile = oldMap[url];
-                    sourceFileMap[url] = sourceFile;
-                }
-                else
-                {
-                    var sourceFile = new FBL.SourceFile(url);
-                    context.sourceFileMap[url] = sourceFile;
-                }
-            }
-        }
-
-        // iff script tag mutation
-        this.iterateWindows(context.window, this.bind(function(win)
-        {
-            if (FBTrace.DBG_SOURCEFILES)  																								/*@explore*/
-                FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href+" documentElement:",win.document.documentElement);  /*@explore*/
-            if (!win.document.documentElement)
-                return;
-
-            var scripts = win.document.documentElement.getElementsByTagName("script");
-            for (var i = 0; i < scripts.length; ++i)
-            {
-                var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
-                var url = scriptSrc ? this.absoluteURL(scriptSrc, win.location.href) : win.location.href;
-                url = this.normalizeURL(url ? url : win.location.href);
-                addFile(url);
-                if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+" adding "+url+" to context="+context.window.location+"\n");  /*@explore*/
-            }
-        }, this));
-
-        this.addSourceFilesByURL(context.sourceFiles, sourceFileMap);
-
-        //addFile(context.window.location.href); // ?? This should be handled by the first iteration of iterateWindows
-    }
-
-    return context.sourceFiles;
+    return sourceFiles;
 };
 
-this.addSourceFilesByURL = function(sourceFiles, sourceFilesByURL)
+this.updateScriptFiles = function(context, reload)  // scan windows for 'script' tags
 {
-    for (url in sourceFilesByURL)
+    var oldMap = reload ? context.sourceFileMap : null;
+
+    function addFile(url, scriptTagNumber)
     {
-        if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-            FBTrace.sysout("addSourceFilesByURL Firebug.showAllSourceFiles:"+Firebug.showAllSourceFiles+" trying "+url+"\n");  /*@explore*/
-        if (Firebug.showAllSourceFiles || this.showThisSourceFile(url))
-        {
-            var sourceFile = sourceFilesByURL[url];
-            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("addSourceFilesByURL sourceFile for "+url+"="+sourceFile+"\n");  /*@explore*/
-            if (sourceFile)
-                sourceFiles.push(sourceFile);     // will append, whether or not the map was overwritten
-        }
+            if (oldMap && url in oldMap)
+            {
+                var sourceFile = oldMap[url];
+                sourceFileMap[url] = sourceFile;
+            }
+            else
+            {
+                var sourceFile = new FBL.ScriptTagSourceFile(url, scriptTagNumber);
+                sourceFileMap[url] = sourceFile;
+            }
     }
+
+    this.iterateWindows(context.window, this.bind(function(win)
+    {
+        if (FBTrace.DBG_SOURCEFILES)  																								/*@explore*/
+            FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href+" documentElement:",win.document.documentElement);  /*@explore*/
+        if (!win.document.documentElement)
+            return;
+
+        var scripts = win.document.documentElement.getElementsByTagName("script");
+        for (var i = 0; i < scripts.length; ++i)
+        {
+            var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
+            var url = scriptSrc ? this.absoluteURL(scriptSrc, win.location.href) : win.location.href;
+            url = this.normalizeURL(url ? url : win.location.href);
+            addFile(url, i);
+            if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
+                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+" adding "+url+" to context="+context.window.location+"\n");  /*@explore*/
+        }
+    }, this));
 };
 
 this.showThisSourceFile = function(url)
@@ -2702,7 +2492,7 @@ this.getIconURLForFile = function(path)
 this.getSourceLines = function(lines)
 {
     var maxLineNoChars = (lines.length + "").length;
-    return this.getSourceLineRange(lines, 0, lines.length-1, maxLineNoChars);
+    return this.getSourceLineRange(lines, 1, lines.length, maxLineNoChars);
 };
 
 this.getSourceLineRange = function(lines, min, max, maxLineNoChars)
@@ -2712,11 +2502,11 @@ this.getSourceLineRange = function(lines, min, max, maxLineNoChars)
     for (var i = min; i <= max; ++i)
     {
         // Make sure all line numbers are the same width (with a fixed-width font)
-        var lineNo = (i+1) + "";
+        var lineNo = i + "";
         while (lineNo.length < maxLineNoChars)
             lineNo = " " + lineNo;
 
-        var line = escapeHTML(lines[i]);
+        var line = escapeHTML(lines[i-1]);
 
         html.push(
             '<div class="sourceRow"><a class="sourceLine">',
@@ -2905,24 +2695,38 @@ this.SourceLink.prototype =
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-this.SourceFile = function(url, source)
+// SourceFile one for every compilation unit.
+// Unique URL for each. (href)
+// Unique outerScript, the statements outside of any function defintion
+// sourceCache keyed by href has source for this compilation unit
+// Stored by href in context.
+// Contains array of jsdIScript for functions (scripts) defined in this unit
+// May contain line table (for sources viewed)
+//
+this.SourceFile = function (compilation_unit_type)
 {
-    this.href = url;
-
-    if (source)
-        this.source = source;
-
-    this.pcMapTypeByScriptTag = {};
-};
+    this.compilation_unit_type = compilation_unit_type; /*@explore*/
+    this.OuterScriptAnalyzer = function(sourceFile)
+    {
+        this.sourceFile = sourceFile;
+    };
+}
 
 this.SourceFile.prototype =
 {
     toString: function()
     {
-        var str = this.href + " script.tags( ";
-        for (tag in this.pcMapTypeByScriptTag)
-            str += tag+" ";
+        var str = (this.compilation_unit_type?this.compilation_unit_type+" ":"")+this.href+" script.tags( ";
+        if (this.outerScript)
+            str += (this.outerScript.isValid?this.outerScript.tag:"X") +"| ";
+        if (this.innerScripts)
+        {
+            for (var i = 0; i < this.innerScripts.length; i++)
+            {
+                var script = this.innerScripts[i];
+                if (script.isValid)  str += script.tag+" ";
+            }
+        }
         str += ")";
         return str;
     },
@@ -2931,10 +2735,15 @@ this.SourceFile.prototype =
     {
         var str = "SourceFile " + this.href+"; lineMap: ";
         if (this.lineMap)
-            for (line in this.lineMap) str += "["+line+"]="+this.lineMap[line];
+            for (line in this.lineMap) str += "["+line+"]="+this.lineMap[line].tag;
         else
             str += '(not built)';
         return str;
+    },
+
+    cache: function(context)
+    {
+         context.sourceCache.load(this.href);
     },
 
     hasLineTable: function()
@@ -2942,33 +2751,51 @@ this.SourceFile.prototype =
         return this.lineMap ? true : false;
     },
 
-    addToLineTable: function(script, trueBaseLineNumber, sourceLines)
+    getSourceLength: function()
     {
-        var pcmap_type = (sourceLines) ? PCMAP_PRETTYPRINT : PCMAP_SOURCETEXT;
-        var lineCount = (sourceLines) ? sourceLines.length : script.lineExtent;
+        if (this.outerScript && (this.pcmap_type == PCMAP_PRETTYPRINT) )
+            return this.outerScript.lineExtent;
+        if (this.pcmap_type == PCMAP_SOURCETEXT)
+            return this.sourceLength;
+    },
 
-        if (FBTrace.DBG_LINETABLE)                                                                                     /*@explore*/
-            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" trueBaseLineNumber="+trueBaseLineNumber+"\n");  /*@explore*/
-        this.pcMapTypeByScriptTag[script.tag] = pcmap_type;
+    buildLineTable: function()
+    {
+        // FYI, the outerScript is already in the line table.
+        for (var i = 0; i < this.innerScripts.length; i++)
+        {
+            var script = this.innerScripts[i];
+            if (script.isValid)  this.addToLineTable(script);
+        }
+    },
 
+    addToLineTable: function(script)
+    {
         if (!this.lineMap)
             this.lineMap = {};
+
+        var lineCount = script.lineExtent;
+        if (!lineCount)
+            FBTrace.sysout("addToLineTable no lineCount this.compilation_unit_type", this.compilation_unit_type);
+        var offset = script.baseLineNumber - this.getBaseLineOffset();
+        if (FBTrace.DBG_LINETABLE)                                                                                     /*@explore*/
+            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
 
         for (var i = 0; i <= lineCount; i++)
         {
             var scriptLineNo = i + script.baseLineNumber;
-            var mapLineNo = i + trueBaseLineNumber;
+            var mapLineNo = i + offset;
 
-            if (script.isLineExecutable(scriptLineNo, pcmap_type))
-                this.lineMap[mapLineNo] = script.tag;
+            if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
+                this.lineMap[mapLineNo] = script;
                                                                                                                        /*@explore*/
             if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
             {                                                                                                          /*@explore*/
-                var pcFromLine = script.lineToPc(scriptLineNo, pcmap_type);                                            /*@explore*/
-                var lineFromPC = script.pcToLine(pcFromLine, pcmap_type);                                              /*@explore*/
+                var pcFromLine = script.lineToPc(scriptLineNo, this.pcmap_type);                                            /*@explore*/
+                var lineFromPC = script.pcToLine(pcFromLine, this.pcmap_type);                                              /*@explore*/
                                                                                                                        /*@explore*/
-                if (this.isInExecutableTable(mapLineNo))                                                                  /*@explore*/
-                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo]+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
+                if (this.getScriptByLineNumber(mapLineNo))                                                                  /*@explore*/
+                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo].tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
                 else                                                                                                   /*@explore*/
                     FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
             }                                                                                                          /*@explore*/
@@ -2976,9 +2803,329 @@ this.SourceFile.prototype =
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/
     },
 
-    isInExecutableTable: function(lineNo)
+    getScriptByLineNumber: function(lineNo)
     {
         return this.lineMap ? this.lineMap[lineNo] : false;
+    },
+
+    getLineNumberByScript: function(script)
+    {
+        if (!this.hasLineTable())
+            FBTrace.dumpStack("lib.getNestedScriptAnalyzer no linetable TODO!");
+
+        var tag = script.tag;
+        for (var i = 1; i < this.sourceLength; i++)
+        {
+            var mapScript = this.lineMap[i];
+            if (mapScript && mapScript.isValid && mapScript.tag == tag)
+                return i;
+        }
+    },
+
+    hasScript: function(script)
+    {
+        if (this.outerScript && this.outerScript.isValid && this.outerScript.tag == script.tag)
+            return true;
+        var i = this.innerScripts.indexOf(script);
+        return (i < 0) ? false : true;
+    },
+
+    // these objects map JSD's values to correct values
+    getScriptAnalyzer: function(script)
+    {
+        if (this.outerScript && (script.tag == this.outerScript.tag) )
+            return new this.OuterScriptAnalyzer(this); // depends on type
+        return new this.NestedScriptAnalyzer(this);
+    },
+
+    NestedScriptAnalyzer: function(sourceFile)
+    {
+        this.sourceFile = sourceFile;
+    }
+}
+
+this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
+{
+    // Adjust JSD line numbers based on origin of script
+    getSourceLineFromFrame: function(context, frame)
+    {
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("NestedScriptAnalyzer in "+this.sourceFile.compilation_unit_type+": frame.line  - this.sourceFile.getBaseLineOffset()",
+             frame.line +" - "+this.sourceFile.getBaseLineOffset());
+
+        return frame.line - (this.sourceFile.getBaseLineOffset());
+    },
+    // Interpret frame to give fn(args)
+    getFunctionDescription: function(script, context, frame)
+    {
+        var fnc = script.functionObject.getWrappedValue();
+        var name = fnc.name;
+        if (name ==  "anonymous")
+        {
+            name = FBL.guessFunctionName(this.sourceFile.href, this.getBaseLineNumberByScript(script), context);
+        }
+
+        if (frame)
+            var args = FBL.getFunctionArgValues(fnc, frame);
+        else
+            var args = [];
+
+        return {name: name, args: args};
+    },
+
+    getFunctionName: function(context, script)
+    {
+    },
+
+    // link to source for this script.
+    getSourceLinkForScript: function (script)
+    {
+        if (!this.sourceFile.hasLineTable())
+            FBTrace.dumpStack("lib.getNestedScriptAnalyzer no linetable TODO!");
+        var line = this.getBaseLineNumberByScript(script);
+        return new this.SourceLink(this.sourceFile.href, line, "js");
+    },
+
+    getBaseLineNumberByScript: function(script)
+    {
+        return frame.script.baseLineNumber - (this.sourceFile.getBaseLineOffset() - 1);
+    }
+}
+
+this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
+{
+    sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
+    if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
+        FBTrace.sysout("addScriptToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
+
+    // Attach the innerScripts for use later
+    sourceFile.innerScripts = [];
+    while (innerScripts.hasMoreElements())
+    {
+        sourceFile.innerScripts.push(innerScripts.getNext());
+    }
+}
+
+//------------
+this.EvalLevelSourceFile = function(url, script, eval_expr, sourceLength, innerScriptEnumerator) // ctor
+{
+    this.href = url;
+    this.outerScript = script;
+    this.evalExpression = eval_expr;
+    this.sourceLength = sourceLength;
+    this.pcmap_type = PCMAP_SOURCETEXT;
+    FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
+};
+
+this.EvalLevelSourceFile.prototype = new this.SourceFile("eval-level"); // prototypical inheritance
+
+this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
+{
+    // Adjust JSD line numbers based on origin of script
+    getSourceLineFromFrame: function(context, frame)
+    {
+        return frame.line - this.sourceFile.getBaseLineOffset();
+    },
+    // Interpret frame to give fn(args)
+    getFunctionDescription: function(script, context, frame)
+    {
+        return {name: "eval", args: [this.evalExpression] };
+    },
+    getSourceLinkForScript: function (script)
+    {
+        return new this.SourceLink(this.sourceFile.href, 1, "js");
+    }
+}
+
+this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
+{
+    return this.outerScript.baseLineNumber - 1; // baseLineNumber always valid even after jsdIscript isValid false
+}
+
+//------------
+this.EventSourceFile = function(url, script, title, sourceLength, innerScriptEnumerator)
+{
+    this.href = url;
+    this.outerScript = script;
+    this.title = title;
+    this.sourceLength = sourceLength;
+    this.pcmap_type = PCMAP_PRETTYPRINT;
+    FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
+};
+
+this.EventSourceFile.prototype = new this.SourceFile("event"); // prototypical inheritance
+
+this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
+{
+    // Adjust JSD line numbers based on origin of script
+    getSourceLineFromFrame: function(context, frame)
+    {
+        return frame.line;
+    },
+    // Interpret frame to give fn(args)
+    getFunctionDescription: function(script, context, frame)
+    {
+        var fn = script.functionObject.getWrappedValue();  //?? should be name of?
+        if (frame)
+            var args = FBL.getFunctionArgValues(fn, frame);
+        else
+            var args = [];
+        return {name: file_name, args: args};
+    },
+    getSourceLinkForScript: function (script)
+    {
+        return new this.SourceLink(this.sourceFile.href, 1, "js");
+    }
+}
+this.EventSourceFile.prototype.getBaseLineOffset = function()
+{
+    return 0;
+}
+//-----------
+this.FunctionConstructorSourceFile = function(url, script, ctor_expr, sourceLength, innerScriptEnumerator)
+{
+    this.href = url;
+    this.outerScript = script;
+    this.evalExpression = eval_expr;
+    this.sourceLength = sourceLength;
+    this.pcmap_type = PCMAP_SOURCETEXT;
+    FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
+}
+
+this.FunctionConstructorSourceFile.prototype = new this.SourceFile("newFunction");
+
+this.FunctionConstructorSourceFile.prototype.OuterScriptAnalyzer.prototype =
+{
+    // Adjust JSD line numbers based on origin of script
+    getSourceLineFromFrame: function(context, frame)
+    {
+        return frame.line - this.sourceFile.getBaseLineOffset();
+    },
+    // Interpret frame to give fn(args)
+    getFunctionDescription: function(script, context, frame)
+    {
+        return {name: "new Function", args: [this.evalExpression] };
+    },
+    getSourceLinkForScript: function (script)
+    {
+        return new this.SourceLink(this.sourceFile.href, 1, "js");
+    }
+}
+this.FunctionConstructorSourceFile.prototype.getBaseLineOffset = function()
+{
+    this.outerScript.baseLineNumber; // always valid
+}
+
+//-----------
+this.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScriptEnumerator)
+{
+    this.href = url;
+    this.outerScript = outerScript;  // Beware may not be valid after we return!!
+    this.sourceLength = sourceLength;
+    this.pcmap_type = PCMAP_SOURCETEXT;
+    FBL.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
+}
+
+this.TopLevelSourceFile.prototype = new this.SourceFile("top-level");
+
+this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
+{
+    // Adjust JSD line numbers based on origin of script
+    getSourceLineFromFrame: function(context, frame)
+    {
+        return frame.line;
+    },
+    // Interpret frame to give fn(args)
+    getFunctionDescription: function(script, context, frame)
+    {
+        var file_name = FBL.getFileName(script.fileName); // this is more useful that just "top_level"
+        file_name = file_name ? file_name: "__top_level__";
+        return {name: file_name, args: []};
+    },
+    getSourceLinkForScript: function (script)
+    {
+        return this.SourceLink(this.normalizeURL(script.fileName), script.baseLineNumber, "js")
+    }
+}
+
+this.TopLevelSourceFile.prototype.getBaseLineOffset = function()
+{
+    return 0;  // TODO depends on number of script tags https://bugzilla.mozilla.org/show_bug.cgi?id=396568
+}
+//-------
+this.EnumeratedSourceFile = function(context, url) // we don't have the outer script and we delay source load.
+{
+    this.context = context;
+    this.href = url;  // may not be outerScript file name, eg this could be an enumerated eval
+    this.innerScripts = [];
+    this.pcmap_type = PCMAP_SOURCETEXT;
+}
+
+this.EnumeratedSourceFile.prototype = new this.SourceFile("enumerated");
+
+this.EnumeratedSourceFile.prototype.OuterScriptAnalyzer.prototype =
+    this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype;
+
+this.EnumeratedSourceFile.prototype.getBaseLineOffset = function()
+{
+    // The outer script is gone, that is what the frame.line is relative to?
+    return 0;  // TODO
+}
+
+this.EnumeratedSourceFile.prototype.getSourceLength = function()
+{
+    if (!this.sourceLength)
+        this.sourceLength = this.context.sourceCache.load(this.href).length;
+    return this.sourceLength;
+}
+
+//---------
+
+this.ScriptTagSourceFile = function(url, scriptTagNumber) // we don't have the outer script and we delay source load
+{
+    this.href = url;  // we know this is not an eval
+    this.scriptTagNumber = scriptTagNumber;
+    this.innerScripts = [];
+    this.pcmap_type = PCMAP_SOURCETEXT;
+}
+
+this.ScriptTagSourceFile.prototype = new this.SourceFile("scriptTag");
+
+this.ScriptTagSourceFile.prototype.OuterScriptAnalyzer =
+    this.TopLevelSourceFile.prototype.OuterScriptAnalyzer;
+
+this.ScriptTagSourceFile.prototype.getBaseLineOffset = function()
+{
+    // We should know which line the script tag was on.
+    // By the time we are called the scripts should be in jsd, we may have them in context?
+    return this.scriptTagNumber;  // Depends on number of script tags https://bugzilla.mozilla.org/show_bug.cgi?id=396568
+}
+//-------------------
+this.getSourceFileByScript = function(context, script)
+{
+    // Other algorithms are possible:
+    //   We could store an index, context.sourceFileByTag
+    //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below
+    var lucky = context.sourceFileMap[script.fileName];
+    if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
+    if (lucky && lucky.hasScript(script))
+        return lucky;
+
+    for (var url in context.sourceFileMap)
+    {
+        var sourceFile = context.sourceFileMap[url];
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+sourceFile);
+        if (sourceFile.hasScript(script))
+            return sourceFile;
+    }
+};
+
+this.getScriptAnalyzer = function(context, script)
+{
+    var sourceFile = this.getSourceFileByScript(context, script);
+    if (sourceFile)
+    {
+        var analyzer = sourceFile.getScriptAnalyzer(script);
+        return analyzer;
     }
 };
 
@@ -2995,11 +3142,6 @@ this.SourceText = function(lines, owner)
 this.StackTrace = function()
 {
     this.frames = [];
-    if (FBTrace.DBG_STACK)                                                                                             /*@explore*/
-    {                                                                                                                  /*@explore*/
-        this.uid = FBL.getUniqueId();                                                                                  /*@explore*/
-        FBTrace.sysout("lib.StackTrace create "+this.uid+"\n");                                                        /*@explore*/
-    }                                                                                                                  /*@explore*/
 };
 
 this.StackTrace.prototype =
@@ -3034,11 +3176,6 @@ this.StackTrace.prototype =
 
 this.StackFrame = function(context, fn, script, href, lineNo, args, pc)
 {
-    if (FBTrace.DBG_STACK)                                                                                             /*@explore*/
-    {                                                                                                                  /*@explore*/
-        this.uid = FBL.getUniqueId();                                                                                  /*@explore*/
-        FBTrace.sysout("New StackFrame created:"+this.uid+"\n");                                                       /*@explore*/
-    }                                                                                                                  /*@explore*/
     this.context = context;
     this.fn = fn;
     this.script = script;
@@ -4943,3 +5080,9 @@ this.ERROR = function(exc)
 // ************************************************************************************************
 
 }).apply(FirebugLib);
+} catch(e) {																			/*@explore*/
+    dump("FBL Fails "+e+"\n");																/*@explore*/
+    FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
+    FBTrace.sysout("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
+}																			/*@explore*/
+dump("FBL loaded in to "+window.location+"\n");

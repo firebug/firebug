@@ -3,6 +3,9 @@
 var Firebug = null;
 var FirebugContext = null;
 
+if(!XPCOMUtils)
+    throw "Failed to load FBL";
+
 (function() { with (XPCOMUtils) {
 
 // ************************************************************************************************
@@ -78,7 +81,12 @@ top.FirebugChrome =
         if (detachArgs.FBL)
             top.FBL = detachArgs.FBL;
         else
+        {
+            if (!FBL || !FBL.initialize)
+                FBTrace.dumpProperties("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
+
             FBL.initialize();
+        }
 
         if (detachArgs.Firebug)
             Firebug = detachArgs.Firebug;

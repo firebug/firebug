@@ -239,7 +239,7 @@ top.Firebug =
         for (var i = 0; i < arguments.length; ++i)
             TabWatcher.addListener(arguments[i]);
                                                                                                                        /*@explore*/
-        if (FBTrace.DBG_INITIALIZE) FBTrace.dumpStack("registerModule");                                               /*@explore*/
+        if (FBTrace.DBG_INITIALIZE) FBTrace.dumpProperties("registerModule", arguments);                                               /*@explore*/
     },
 
     registerExtension: function()
@@ -391,6 +391,7 @@ top.Firebug =
             prefs.setIntPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_BOOL)
             prefs.setBoolPref(prefName, value);
+
         prefs.savePrefFile(null);                                                                                                              /*@explore*/
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
@@ -679,25 +680,25 @@ top.Firebug =
         contentSplitter.setAttribute("collapsed", !shouldShow);
         toggleCommand.setAttribute("checked", !!shouldShow);
         detachCommand.setAttribute("checked", !!browser.detached);
-		this.showKeys(shouldShow);
+        this.showKeys(shouldShow);
     },
 
-	showKeys: function(shouldShow)
-	{
-		var keyset = document.getElementById("mainKeyset");
-		var keys = FBL.getElementByClass(keyset, "fbOnlyKey");
-		for (var i = 0; i < keys.length; i++)
-		{
-			keys[i].setAttribute("disabled", !!shouldShow);
-		}
-	},
+    showKeys: function(shouldShow)
+    {
+        var keyset = document.getElementById("mainKeyset");
+        var keys = FBL.getElementByClass(keyset, "fbOnlyKey");
+        for (var i = 0; i < keys.length; i++)
+        {
+            keys[i].setAttribute("disabled", !!shouldShow);
+        }
+    },
 
     toggleBar: function(forceOpen, panelName)
     {
         if (Firebug.openInWindow)
             return this.toggleDetachBar(true);
 
-        var browser = FirebugChrome.getCurrentBrowser(); 
+        var browser = FirebugChrome.getCurrentBrowser();
         if (!browser.chrome)
             return;
 
@@ -1561,19 +1562,26 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         // For performance reason, append script lines in large chunks using the throttler,
         // otherwise displaying a large script will freeze up the UI
         var min = 0;
+        if (sourceFile.lineNumberShift)
+            min = min + sourceFile.lineNumberShift;
+
+        var totalMax = lines.length;
+        if (sourceFile.lineNumberShift)
+            totalMax = totalMax + sourceFile.lineNumberShift; // eg -1
+
         do
         {
             var max = min + scriptBlockSize;
-            if (max > lines.length)
-                max = lines.length;
+            if (max > totalMax)
+                max = totalMax;
 
-            var args = [lines, min, max-1, maxLineNoChars, sourceBox];
+            var args = [lines, min+1, max, maxLineNoChars, sourceBox];
             this.context.throttle(appendScriptLines, top, args);
 
             min += scriptBlockSize;
-        } while (max < lines.length);
+        } while (max < totalMax);
 
-        this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);  // XXXjjb TODO addLineTables here
+        this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
 
         if (sourceFile.text)
             this.anonSourceBoxes.push(sourceBox);
@@ -1605,7 +1613,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
     showSourceFile: function(sourceFile, sourceBoxDecorator)
     {
         if (FBTrace.DBG_SOURCEFILES)																								/*@explore*/
-            FBTrace.dumpProperties("firebug.showSourceFile", sourceFile);  														    /*@explore*/
+            FBTrace.sysout("firebug.showSourceFile", sourceFile);  														    /*@explore*/
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (!sourceBox)
             sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);
@@ -1705,3 +1713,4 @@ Firebug.Rep = domplate(
 // ************************************************************************************************
 
 }});
+dump("Firebug loaded into "+window.location+" = "+top.Firebug+"\n");

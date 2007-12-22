@@ -49,19 +49,19 @@ interface nsIFireBugDebugger : nsISupports
 
     /**
      * A script created by an eval is created;
-     *   url is eval-level script url,
-     *   lineNo is first line of script relative to first line of url,
-     *   script is jsd object for script with fileName and baseLineNumber of old
+     *   frame the call stack at the point of evaluation (TODO: is outerScript on stack??)
+     *   outerScript unnamed function surrounding any function definitions in eval
+     *   innerScripts functions definitions in eval
      */
-    void onEvalScript(in string url, in unsigned long lineNo, in jsdIScript script);
+    void onEvalScriptCreated(in jsdIStackFrame frame, in jsdIScript outerScript, in nsISimpleEnumerator innerScripts);
 
     /**
      * A script created by compiling top-level is created;
-     *   url is top-level script url from onTopLevel
-     *   lineNo is first line of script relative to first line of url,
-     *   script is jsd object for script with fileName and baseLineNumber of old
+     *   frame the call stack at the point of compilation (TODO: is outerScript on stack??)
+     *   outerScript unnamed function surrounding any function definitions in toplevel compilation unit
+     *   innerScripts functions definitions 
      */
-    void onTopLevelScript(in string url, in unsigned long lineNo, in jsdIScript script);
+    void onTopLevelScriptCreated(in jsdIStackFrame frame, in jsdIScript outerScript, in nsISimpleEnumerator innerScripts);
 
     /**
      * Breakpoints changes notification callbacks
@@ -236,3 +236,6 @@ interface nsIFireBugScriptListener : nsISupports
     void onScriptCreated(in jsdIScript script, in string url, in unsigned long lineNo);
     void onScriptDestroyed(in jsdIScript script);
 };
+
+[scriptable, uuid(298d951c-a804-11dc-8314-0800200c9a66)]
+interface jsdIScriptEnumerator : nsIS
