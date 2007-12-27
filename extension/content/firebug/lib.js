@@ -9,7 +9,7 @@ try { /*@explore*/
 // ************************************************************************************************
 // Constants
 
-this.fbs = this.CCSV("@joehewitt.com/firebug;1", "nsIFireBug");
+this.fbs = this.CCSV("@joehewitt.com/firebug;1", "nsIFireBug").wrappedJSObject;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
@@ -1774,12 +1774,12 @@ this.updateScriptFiles = function(context, reload)  // scan windows for 'script'
             if (oldMap && url in oldMap)
             {
                 var sourceFile = oldMap[url];
-                sourceFileMap[url] = sourceFile;
+                context.sourceFileMap[url] = sourceFile;
             }
             else
             {
                 var sourceFile = new FBL.ScriptTagSourceFile(url, scriptTagNumber);
-                sourceFileMap[url] = sourceFile;
+                context.sourceFileMap[url] = sourceFile;
             }
     }
 
@@ -2731,7 +2731,7 @@ this.SourceFile.prototype =
         return str;
     },
 
-    dumpLineMap: function()
+    dumpLineTable: function()
     {
         var str = "SourceFile " + this.href+"; lineMap: ";
         if (this.lineMap)
@@ -2767,6 +2767,7 @@ this.SourceFile.prototype =
             var script = this.innerScripts[i];
             if (script.isValid)  this.addToLineTable(script);
         }
+        this.lineMap.complete = true;
     },
 
     addToLineTable: function(script)
@@ -2805,7 +2806,9 @@ this.SourceFile.prototype =
 
     getScriptByLineNumber: function(lineNo)
     {
-        return this.lineMap ? this.lineMap[lineNo] : false;
+    	if (!this.lineMap || !this.lineMap.complete)
+    		this.buildLineTable();
+        return this.lineMap[lineNo];
     },
 
     getLineNumberByScript: function(script)
@@ -3127,6 +3130,33 @@ this.getScriptAnalyzer = function(context, script)
         var analyzer = sourceFile.getScriptAnalyzer(script);
         return analyzer;
     }
+};
+
+this.getSourceFileAndLineByScript= function(context, script, frame)
+{
+    var sourceFile = FBL.getSourceFileByScript(FirebugContext, script);
+    if (sourceFile)
+    {
+        var analyzer = sourceFile.getScriptAnalyzer(script);
+        if (analyzer)
+            var line = frame ? analyzer.getSourceLineFromFrame(frame) : analyzer.getBaseLineNumberByScript(script);
+        else
+            var line = 0;
+
+        return { sourceFile: sourceFile, lineNo: line };
+    }
+};
+
+this.guessEnclosingFunctionName = function(url, line)
+{
+    var sourceFile = this.context.sourceFileMap[url];
+    if (sourceFile)
+    {
+        var script = sourceFile.getScriptByLineNumber(line);
+        var analyzer = sourceFile.getScriptAnalyzer(script);
+         line = analyzer.getBaseLineNumberByScript(script);
+    }
+     return guessFunctionName(url, line-1, context);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

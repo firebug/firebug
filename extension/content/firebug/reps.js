@@ -196,7 +196,9 @@ this.Func = domplate(Firebug.Rep,
         if (!script)
             return;
 
-        var monitored = fbs.isMonitored(script);
+        var scriptInfo = getSourceFileAndLineByScript(context, script);
+        var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
+
         var name = script ? getFunctionName(script, context) : fn.name;
         return [
             {label: "CopySource", command: bindFixed(this.copySource, this, fn) },
@@ -261,7 +263,9 @@ this.jsdScript = domplate(Firebug.Rep,
     {
         var fn = script.functionObject.getWrappedValue();
 
-        var monitored = fbs.isMonitored(script);
+        var scriptInfo = getSourceFileAndLineByScript(context, script);
+           var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
+
         var name = getFunctionName(script, context);
 
         return [
@@ -1174,7 +1178,8 @@ this.jsdStackFrame = domplate(Firebug.Rep,
     getTooltip: function(frame, context)
     {
         if (!frame.isValid) return "(invalid frame)";  // XXXjjb avoid frame.script == null
-        return $STRF("Line", [frame.script.fileName, frame.line]);
+        var sourceInfo = FBL.getSourceFileAndLineByScript(context, frame.script, frame);
+        return $STRF("Line", [scriptInfo.sourceFile.href, sourceInfo.lineNo]);
     },
 
     getContextMenuItems: function(frame, target, context)
