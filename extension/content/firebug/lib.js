@@ -1640,11 +1640,15 @@ this.getFunctionName = function(script, context, frame)
         var analyzer = FBL.getScriptAnalyzer(context, script);
         if (analyzer)
         {
+            if (FBTrace.DBG_STACK) FBTrace.dumpProperties("getFunctionName analyzer:", analyzer);     /*@explore*/
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
             name = functionSpec.name +"("+functionSpec.args.join(',')+")";
         }
         else
+        {
+            if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");     /*@explore*/
             name =  this.guessFunctionName(script.fileName, script.baseLineNumber, context);
+        }
     }
     if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");     /*@explore*/
 
@@ -2778,14 +2782,14 @@ this.SourceFile.prototype =
         var lineCount = script.lineExtent;
         if (!lineCount)
             FBTrace.sysout("addToLineTable no lineCount this.compilation_unit_type", this.compilation_unit_type);
-        var offset = script.baseLineNumber - this.getBaseLineOffset();
+        var offset = this.getBaseLineOffset();
         if (FBTrace.DBG_LINETABLE)                                                                                     /*@explore*/
             FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
 
         for (var i = 0; i <= lineCount; i++)
         {
             var scriptLineNo = i + script.baseLineNumber;
-            var mapLineNo = i + offset;
+            var mapLineNo = scriptLineNo - offset;
 
             if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
                 this.lineMap[mapLineNo] = script;
@@ -2795,7 +2799,7 @@ this.SourceFile.prototype =
                 var pcFromLine = script.lineToPc(scriptLineNo, this.pcmap_type);                                            /*@explore*/
                 var lineFromPC = script.pcToLine(pcFromLine, this.pcmap_type);                                              /*@explore*/
                                                                                                                        /*@explore*/
-                if (this.getScriptByLineNumber(mapLineNo))                                                                  /*@explore*/
+                if (this.lineMap[mapLineNo])                                                                  /*@explore*/
                     FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo].tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
                 else                                                                                                   /*@explore*/
                     FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
@@ -2827,7 +2831,7 @@ this.SourceFile.prototype =
 
     hasScript: function(script)
     {
-        if (this.outerScript && this.outerScript.isValid && this.outerScript.tag == script.tag)
+        if (this.outerScript && (this.outerScript.tag == script.tag) )
             return true;
         var i = this.innerScripts.indexOf(script);
         return (i < 0) ? false : true;
@@ -3121,9 +3125,14 @@ this.getSourceFileByScript = function(context, script)
 this.getScriptAnalyzer = function(context, script)
 {
     var sourceFile = this.getSourceFileByScript(context, script);
+    if (FBTrace.DBG_STACK) /*@explore*/
+        FBTrace.sysout("getScriptAnalyzer finds sourceFile: ", sourceFile); /*@explore*/
     if (sourceFile)
     {
         var analyzer = sourceFile.getScriptAnalyzer(script);
+        if (FBTrace.DBG_STACK) /*@explore*/
+            FBTrace.sysout("getScriptAnalyzer finds analyzer: ", analyzer);  /*@explore*/
+
         return analyzer;
     }
 };
