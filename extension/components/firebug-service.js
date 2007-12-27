@@ -1086,14 +1086,6 @@ FirebugService.prototype =
         dispatch(scriptListeners,"onScriptDestroyed",[script]);
     },
 
-    findFirstExecutableLine: function(script)
-    {
-        var scriptInfo = this.scriptInfoByTag[script.tag];
-        var pcmap = scriptInfo.pcmap;
-        var line = script.pcToLine(0, pcmap);
-        return line;
-    },
-
     dumpContexts: function()
     {
 
@@ -1570,7 +1562,6 @@ FirebugService.prototype =
     unhookScripts: function()
     {
         jsd.scriptHook = null;
-        this.scriptInfoArrayByURL = null;
         if (fbs.DBG_STEP) ddd("unset scriptHook\n");                                                                   /*@explore*/
     },
 
@@ -1909,39 +1900,6 @@ function remove(list, item)
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-function ScriptInfo(script, url, typename)
-{
-    this.script = script;
-    this.url = url;
-    this.typename = typename;
-}
-
-function formatScriptInfo(scriptInfo)
-{
-    return scriptInfo.script.tag+"@("+scriptInfo.baseLineNumber+"-"+(scriptInfo.baseLineNumber+scriptInfo.lineExtent)+")"+ scriptInfo.url+":"+scriptInfo.typename;
-}
-
-function shiftNone(lineNo)
-{
-    return lineNo;
-}
-
-function shiftOne(lineNo)
-{
-    return lineNo + 1;
-}
-
-function unshiftOne(lineNo)
-{
-    return lineNo - 1;
-}
-
-function countLines(script) {
-    var lines = script.functionSource.split(/\r\n|\r|\n/);
-    return lines.length;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 var FirebugPrefsObserver =
 {
@@ -1971,10 +1929,10 @@ var FirebugPrefsObserver =
             fbs.DBG_FBS_FF_START = prefs.getBoolPref("extensions.firebug.DBG_FBS_FF_START");
         else if (data == "extensions.firebug.DBG_FLUSH_EVERY_LINE")
             fbs.DBG_FLUSH_EVERY_LINE = prefs.getBoolPref("extensions.firebug.DBG_FLUSH_EVERY_LINE");
-        else if (data == "extensions.firebug.DBG_FBS_SCRIPTINFO")
+        else if (data == "extensions.firebug.DBG_FBS_JSDCONTEXT")
         {
-            fbs.DBG_FBS_SCRIPTINFO = prefs.getBoolPref("extensions.firebug.DBG_FBS_SCRIPTINFO");
-            if (fbs.DBG_FBS_SCRIPTINFO)
+            fbs.DBG_FBS_JSDCONTEXT = prefs.getBoolPref("extensions.firebug.DBG_FBS_JSDCONTEXT");
+            if (fbs.DBG_FBS_JSDCONTEXT)
                 fbs.dumpContexts();
         }
     }

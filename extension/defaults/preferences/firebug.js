@@ -69,7 +69,7 @@ pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.externalEditors", "");
 
 // Trace  /*@explore*/
-pref("extensions.firebug.DBG_FBS_SCRIPTINFO", false);// firebug-service trace scriptinfo(huge) /*@explore*/
+pref("extensions.firebug.DBG_FBS_JSDCONTEXT", false);// firebug-service trace scriptinfo(huge) /*@explore*/
 pref("extensions.firebug.DBG_FBS_FF_START", false); // firebug-service trace from FF start(huge) /*@explore*/
 pref("extensions.firebug.DBG_FBS_CREATION", false); // firebug-service script creation           /*@explore*/
 pref("extensions.firebug.DBG_FBS_BP", false);       // firebug-service breakpoints               /*@explore*/

@@ -332,7 +332,7 @@ Firebug.Debugger = extend(Firebug.Module,
         for (var url in context.sourceFileMap)
         {
             var sourceFile = context.sourceFileMap[url];
-            fbs.enumerateBreakpoints(sourceFile,
+            fbs.enumerateBreakpoints(url,
             {
                 call: function(url, lineNo)
                 {
@@ -340,7 +340,7 @@ Firebug.Debugger = extend(Firebug.Module,
                 }
             });
 
-            fbs.enumerateErrorBreakpoints(sourceFile,
+            fbs.enumerateErrorBreakpoints(url,
             {
                 call: function(url, lineNo)
                 {
@@ -1427,8 +1427,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     },
 
     toggleBreakpoint: function(lineNo)
-    {FBTrace.dumpProperties("toggleBreakpoint this.location", this.location);
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+"\n");                           /*@explore*/
+    {
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+"\n");                           /*@explore*/
         var lineNode = this.getLineNode(lineNo);
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(this.location.href, lineNo);
@@ -2066,10 +2066,15 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         for (var url in this.context.sourceFileMap)
         {
-            fbs.enumerateBreakpoints(url, {call: function(url, line, startLine, props)
+            fbs.enumerateBreakpoints(url, {call: function(url, line, script, props)
             {
-                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for startLine="+startLine+"\n"); /*@explore*/
-                var name = guessFunctionName(url, startLine-1, context);
+                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+"\n"); /*@explore*/
+                var sourceFile = context.sourceFileMap[url];
+                var analyzer = getScriptAnalyzer(context, script);
+                if (analyzer)
+                    var name = analyzer.getFunctionDescription(script, this.context).name;
+                else
+                    var name = guessFunctionName(url, 1, context);
                 var source = context.sourceCache.getLine(url, line);
                 breakpoints.push({name : name, href: url, lineNumber: line,
                     checked: !props.disabled, sourceLine: source});
@@ -2132,7 +2137,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         var bpCount = 0, disabledCount = 0;
         for (var url in context.sourceFileMap)
         {
-            fbs.enumerateBreakpoints(url, {call: function(url, line, startLine, disabled, condition)
+            fbs.enumerateBreakpoints(url, {call: function(url, line, script, disabled, condition)
             {
                 ++bpCount;
                 if (fbs.isBreakpointDisabled(url, line))
@@ -2372,7 +2377,7 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
 function setLineBreakpoints(sourceFile, sourceBox)
 {
-    fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, startLine, props)
+    fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, script, props)
     {
         var scriptRow = sourceBox.childNodes[line-1];
         scriptRow.setAttribute("breakpoint", "true");

@@ -45,7 +45,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_FBS_ERRORS: false, // firebug-service error handling
     DBG_FBS_FF_START: false, // firebug-service trace from start of firefox
     DBG_FLUSH_EVERY_LINE: false, // firebug-service flush to see crash point
-    DBG_FBS_SCRIPTINFO: false, // firebug-service dump scriptinfos
+    DBG_FBS_JSDCONTEXT: false, // firebug-service dump contexts
 
     debug: this.DBG_TRACE,
 

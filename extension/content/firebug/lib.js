@@ -2806,8 +2806,8 @@ this.SourceFile.prototype =
 
     getScriptByLineNumber: function(lineNo)
     {
-    	if (!this.lineMap || !this.lineMap.complete)
-    		this.buildLineTable();
+        if (!this.lineMap || !this.lineMap.complete)
+            this.buildLineTable();
         return this.lineMap[lineNo];
     },
 
@@ -2873,10 +2873,6 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
             var args = [];
 
         return {name: name, args: args};
-    },
-
-    getFunctionName: function(context, script)
-    {
     },
 
     // link to source for this script.
