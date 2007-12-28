@@ -987,7 +987,7 @@ FirebugService.prototype =
         }
 
         fbs.nestedScriptStack.clear();
-        if (fbs.DBG_CREATION) ddd("onEvalScriptCreated outerScript.tag:"+outerScript.tag+" href: "+sourceFile.href+"\n");  /*@explore*/
+        if (fbs.DBG_CREATION) ddd("onEvalScriptCreated outerScript.tag:"+outerScript.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
         return sourceFile;
     },
 

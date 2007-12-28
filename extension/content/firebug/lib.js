@@ -1589,9 +1589,10 @@ this.areEventsMonitored = function(object, type, context)
 this.findScript = function(context, url, line)
 {
     var sourceFile = context.sourceFileMap[url];
-    var script = sourceFile.getScriptByLineNumer(line);
-    if (!script)
-        FBTrace.sysout("Need to build line table or line is not executable\n");
+    if (sourceFile)
+        var script = sourceFile.getScriptByLineNumber(line);
+    else
+        FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
     return script;
 };
 
@@ -2972,7 +2973,7 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
             var args = FBL.getFunctionArgValues(fn, frame);
         else
             var args = [];
-        return {name: file_name, args: args};
+        return {name: fn, args: args};
     },
     getSourceLinkForScript: function (script)
     {

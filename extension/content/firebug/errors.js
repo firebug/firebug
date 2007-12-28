@@ -12,7 +12,8 @@ const WARNING_FLAG = nsIScriptError.warningFlag;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const urlRe = new RegExp("([^:]*):(//)?([^/]*)");
-
+const reUncaught = /uncaught exception/;
+const reException = /uncaught exception:\s\[Exception...\s\"([^\"]*)\".*nsresult:.*\(([^\)]*)\).*location:\s\"([^\s]*)\sLine:\s(\d*)\"/;
 const statusBar = $("fbStatusBar");
 const statusText = $("fbStatusText");
 
@@ -126,10 +127,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                if (object.flags & object.exceptionFlag)
                {
                     if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe is exception\n");
-                    var thrownAndNotCaught = /uncaught exception/;
-                    if (thrownAndNotCaught.test(object.errorMessage))
+                    if (reUncaught.test(object.errorMessage))
                     {
-                        if (FBTrace.DBG_ERRORS) FBTrace.sysout("uncaught exception matches "+thrownAndNotCaught+"\n");
+                        if (FBTrace.DBG_ERRORS) FBTrace.sysout("uncaught exception matches "+reUncaught+"\n");
                         if (context.thrownStackTrace)
                         {
                             Firebug.errorStackTrace = context.thrownStackTrace;
@@ -174,23 +174,41 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
                 var sourceName = object.sourceName;
                 var lineNumber = object.lineNumber;
+                var errorMessage = object.errorMessage;
 
-
-                if (Firebug.showStackTrace && (isJSError || isUncaughtException) )
+                if (isJSError || isUncaughtException)
                 {
-                    var trace = Firebug.errorStackTrace;
-                    if (trace)
+                    var m = reException.exec(object.errorMessage);
+                    if (m)
                     {
-                        var stack_frame = trace.frames[0];
-                        if (stack_frame)
-                        {
-                            sourceName = stack_frame.href;
-                            lineNumber = stack_frame.lineNo;
-                        }
-                        var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
-                        if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-                            FBTrace.dumpProperties("errors.observe showStackTrace trace frames:", trace.frames);                          /*@explore*/
+                        var exception = m[1];
+                        if (exception)
+                            errorMessage = "uncaught exception: "+exception;
+                        var nsresult = m[2];
+                        if (nsresult)
+                            errorMessage += " ("+nsresult+")";
+                        sourceName = m[3];
+                        lineNumber = m[4];
                     }
+
+                    if (Firebug.showStackTrace)
+                    {
+                        var trace = Firebug.errorStackTrace;
+                        if (trace)
+                        {
+                            var stack_frame = trace.frames[0];
+                            if (stack_frame)
+                            {
+                                sourceName = stack_frame.href;
+                                lineNumber = stack_frame.lineNo;
+                            }
+                            if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
+                                FBTrace.dumpProperties("errors.observe showStackTrace trace frames:", trace.frames);                          /*@explore*/
+                        }
+
+                    }
+                    var correctedError = object.init(errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
+
                 }
                 Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
                 context.thrownStackTrace = null;
