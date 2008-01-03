@@ -1379,7 +1379,7 @@ Firebug.Panel =
     select: function(object, forceUpdate)
     {
         if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.dumpStack("firebug.select (object != this.selection)?"+(object != this.selection)+" object: "+object)  /*@explore*/
+            FBTrace.dumpStack("firebug.select (object != this.selection)? "+(object != this.selection)+" object: "+object)  /*@explore*/
         if (!object)
             object = this.getDefaultSelection();
 

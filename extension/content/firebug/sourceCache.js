@@ -139,6 +139,9 @@ top.SourceCache.prototype =
         }
         catch (exc)
         {
+            if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
+            	FBTrace.dumpProperties("sourceCache.load FAILS, url="+url, exc);                    /*@explore*/
+        	return exc.toString();
         }
         finally
         {

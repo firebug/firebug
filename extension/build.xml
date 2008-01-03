@@ -27,14 +27,14 @@
           <echo message="No local properties file, setting defaults"/>
         <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
         <property name="xpidl.exe" value="OperatingSystemPathTo:xpidl.exe"/>
-        <property name="update.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
+        <property name="update.rdf.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
+    	<property name="update.xpi.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
     </target>
 
     <target name="version" depends="properties-local, no-properties-local" description="Compute version number">
         <tstamp/>
         <property name="build_dir" location="./build" />
         <property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
-        <property name="UPDATEPATH" value="${update.path}" />
         <mkdir dir="${build_dir}/dist" />
         <property name="dist_dir" location="${build_dir}/dist" />
         <property name="FIREBUG-XPI" value="firebug-${VERSION}.xpi"/>
@@ -93,7 +93,7 @@
                <filterchain>
                        <replacetokens>
                             <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.path}"/>
+                            <token key="UPDATEPATH" value="${update.rdf.path}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -102,12 +102,12 @@
 
     <target name="expand-update-template" depends="update-dependency, version" unless="update.expansion.notRequired" >
         <copy file="${src_dir}/update.rdf.tpl.xml"
-               tofile="update.rdf"
+               tofile="${build_dir}/update.rdf"
                overwrite="true">
                <filterchain>
                        <replacetokens>
                             <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.path}"/>
+                            <token key="UPDATEPATH" value="${update.xpi.path}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -226,7 +226,7 @@
 
     <target name="createBranchXPI" depends="clean, version, expand-templates, zipIntoXPI" >
         <move file="${dist_dir}/firebug.xpi" tofile="${dist_dir}/${FIREBUG-XPI}"/>
-        <copy file="update.rdf" tofile="${dist_dir}/update.rdf" />
+        <copy file="${build_dir}/update.rdf" tofile="${dist_dir}/update.rdf" />
     </target>
 
 

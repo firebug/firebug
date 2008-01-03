@@ -1412,7 +1412,9 @@ this.getCurrentStackTrace = function(context)
 
     Firebug.Debugger.halt(function(frame)
     {
+    	if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace frame:", frame);
         trace = FBL.getStackTrace(frame, context);
+        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace trace:", trace);
     });
 
     return trace;
@@ -2394,8 +2396,6 @@ this.readFromStream = function(stream, charset)
      }
      catch(exc)
      {
-        if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-            FBTrace.dumpProperties("lib.readFromStream FAILS", exc);                    /*@explore*/
      }
 };
 
@@ -2416,7 +2416,9 @@ this.readPostText = function(url, context)
             return this.readFromStream(postStream, charset);
          }
          catch (exc)
-         {
+         {        
+         	if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
+            	FBTrace.dumpProperties("lib.readPostText FAILS, url:"+url, exc);                    /*@explore*/
          }
      }
 };
