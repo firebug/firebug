@@ -118,6 +118,20 @@
         <echo message="update.expansion.notRequired true"/>
     </target>
 
+	<target name="release-documentation">
+        <copy file="${src_dir}/docs/index.tpl.html"
+               tofile="${src_dir}/docs/index.html"
+               overwrite="true">
+               <filterchain>
+                       <replacetokens>
+                            <token key="FIREBUG-VERSION" value="${VERSION}"/>
+                            <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.VERSION}"/>
+                            <token key="UPDATEPATH" value="${update.xpi.path}"/>
+                       </replacetokens>
+               </filterchain>
+        </copy>
+	</target>
+	
     <!-- Incremental Build Targets -->
     <target name="incremental" depends="version, expand-templates, copy-to-extensions, adjust-chrome-manifests" />
     <target name="copy-to-extensions" depends="clean-reg, clean-xpti"
@@ -224,7 +238,7 @@
         <copy file="${dist_dir}/${ant.project.name}.xpi" tofile="${dist_dir}/${ant.project.name}.xpi.zip" />
     </target>
 
-    <target name="createBranchXPI" depends="clean, version, expand-templates, zipIntoXPI" >
+    <target name="createBranchXPI" depends="clean, version, expand-templates, zipIntoXPI, release-documentation" >
         <move file="${dist_dir}/firebug.xpi" tofile="${dist_dir}/${FIREBUG-XPI}"/>
         <copy file="${build_dir}/update.rdf" tofile="${dist_dir}/update.rdf" />
     </target>
