@@ -266,11 +266,13 @@ FirebugService.prototype =
         var debuggr = debuggrWrapper.wrappedJSObject;
 
         if (debuggr)// instanceof nsIFireBugURLProvider)
+        {
+            debuggers.push(debuggr);
             this.enableDebugger();
+        }
         else
-            throw "firebug-service debuggers must implement nsIFireBugURLProvider";
+            throw "firebug-service debuggers must have wrappedJSObject";
 
-        debuggers.push(debuggr);
         try {
             netDebuggers.push(debuggr.QueryInterface(nsIFireBugNetworkDebugger));
         } catch(exc) {
@@ -718,9 +720,12 @@ FirebugService.prototype =
         {
             jsd = DebuggerService.getService(jsdIDebuggerService);
             if ( this.DBG_ERRORS )  																					/*@explore*/
-                ddd("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+"\n");		/*@explore*/
+                ddd("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers\n");		/*@explore*/
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
+
+            dispatch(debuggers, "onTakingJSD", [jsd]);
+
             this.hookScripts();
 
             jsd.debuggerHook = { onExecute: hook(this.onDebugger, RETURN_CONTINUE) };
@@ -1016,7 +1021,12 @@ FirebugService.prototype =
 
     onScriptCreated: function(script)
     {
-        if(!fbs) return;
+        if (!fbs)
+        {
+            if (fbs.DBG_CREATION)
+                ddd("onScriptCreated, but no fbs for script.fileName="+script.fileName+"\n");
+             return;
+        }
 
         try
         {

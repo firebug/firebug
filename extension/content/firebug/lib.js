@@ -2416,9 +2416,9 @@ this.readPostText = function(url, context)
             return this.readFromStream(postStream, charset);
          }
          catch (exc)
-         {        
-         	if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-            	FBTrace.dumpProperties("lib.readPostText FAILS, url:"+url, exc);                    /*@explore*/
+         {
+             if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
+                FBTrace.dumpProperties("lib.readPostText FAILS, url:"+url, exc);                    /*@explore*/
          }
      }
 };
@@ -3116,10 +3116,11 @@ this.getSourceFileByScript = function(context, script)
     if (lucky && lucky.hasScript(script))
         return lucky;
 
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
+
     for (var url in context.sourceFileMap)
     {
         var sourceFile = context.sourceFileMap[url];
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+sourceFile);
         if (sourceFile.hasScript(script))
             return sourceFile;
     }

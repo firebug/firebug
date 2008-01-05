@@ -579,6 +579,14 @@ Firebug.Debugger = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugDebugger
 
+    onTakingJSD: function(jsd)  // just before hooks are set
+    {
+        // this is just to the the timing right.
+        // we called by fbs as a "debuggr", (one per window) and we are re-dispatching to our listeners,
+        // Firebug.DebugListeners.
+        dispatch2(listeners,"onTakingJSD",[fbs]);
+    },
+
     supportsWindow: function(win)
     {
         var context = (win ? TabWatcher.getContextByWindow(win) : null);
@@ -1758,9 +1766,12 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getLocationList: function()
     {
         var allSources = sourceFilesAsArray(this.context);
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList ", allSources);
+
         if (Firebug.showAllSourceFiles)
+        {
+            if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList "+this.context.window.location+" allSources", allSources); /*@explore*/
             return allSources;
+        }
 
         var list = [];
         for (var i = 0; i < allSources.length; i++)
@@ -2174,6 +2185,10 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
 Firebug.DebuggerListener =
 {
+    onTakingJSD: function(jsd)
+    {
+
+    },
     onStop: function(context, type, rv)
     {
     },
@@ -2191,17 +2206,18 @@ Firebug.DebuggerListener =
     {
     },
 
-    onEventScript: function(context, frame, url)
+    onEventScriptCreated: function(context, frame, url)
     {
     },
 
-    onTopLevel: function(context, frame, url)
+    onTopLevelScriptCreated: function(context, frame, url)
     {
     },
 
-    onEval: function(context, frame, url)
+    onEvalScriptCreated: function(context, frame, url)
     {
     },
+
     onFunctionConstructor: function(context, frame, ctor_script, url)
     {
     },

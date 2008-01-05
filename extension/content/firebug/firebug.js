@@ -1713,4 +1713,3 @@ Firebug.Rep = domplate(
 // ************************************************************************************************
 
 }});
-dump("Firebug loaded into "+window.location+" = "+top.Firebug+"\n");
