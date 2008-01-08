@@ -1412,7 +1412,7 @@ this.getCurrentStackTrace = function(context)
 
     Firebug.Debugger.halt(function(frame)
     {
-    	if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace frame:", frame);
+        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace frame:", frame);
         trace = FBL.getStackTrace(frame, context);
         if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace trace:", trace);
     });
@@ -1773,7 +1773,7 @@ this.sourceFilesAsArray = function(context)
 };
 
 this.updateScriptFiles = function(context, reload)  // scan windows for 'script' tags
-{
+{FBTrace.sysout("updateScriptFiles\n");
     var oldMap = reload ? context.sourceFileMap : null;
 
     function addFile(url, scriptTagNumber)
@@ -5124,4 +5124,3 @@ this.ERROR = function(exc)
     FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
     FBTrace.sysout("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
 }																			/*@explore*/
-dump("FBL loaded in to "+window.location+"\n");

@@ -2079,16 +2079,27 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         {
             fbs.enumerateBreakpoints(url, {call: function(url, line, script, props)
             {
-                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+"\n"); /*@explore*/
                 var sourceFile = context.sourceFileMap[url];
-                var analyzer = getScriptAnalyzer(context, script);
-                if (analyzer)
-                    var name = analyzer.getFunctionDescription(script, this.context).name;
+                if (script)
+                {
+                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+"\n"); /*@explore*/
+
+                    var analyzer = getScriptAnalyzer(context, script);
+                    if (analyzer)
+                        var name = analyzer.getFunctionDescription(script, this.context).name;
+                    else
+                        var name = guessFunctionName(url, 1, context);
+                    var isFuture = false;
+                }
                 else
-                    var name = guessFunctionName(url, 1, context);
+                {
+                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for url@line="+url+"@"+line+"\n"); /*@explore*/
+                    var isFuture = true;
+                }
+
                 var source = context.sourceCache.getLine(url, line);
                 breakpoints.push({name : name, href: url, lineNumber: line,
-                    checked: !props.disabled, sourceLine: source});
+                    checked: !props.disabled, sourceLine: source, isFuture: isFuture});
             }});
 
             fbs.enumerateErrorBreakpoints(url, {call: function(url, line)

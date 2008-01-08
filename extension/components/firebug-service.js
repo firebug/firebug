@@ -202,7 +202,7 @@ FirebugService.prototype =
         timer = null;
         fbs = null;
         jsd = null;
-        if (FBTrace.DBG_CREATION) ddd("FirebugService.shutdown\n");
+        ddd("FirebugService.shutdown\n");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1173,7 +1173,7 @@ FirebugService.prototype =
                 }
                 catch (exc)
                 {
-                    ERROR("firebug-service findDebugger supportsWindow FAILS: "+exc+" for window:"+win.location);
+                    ERROR("firebug-service findDebugger supportsWindow FAILS: "+exc);
                 }
             }
         }
@@ -1328,9 +1328,16 @@ FirebugService.prototype =
                     var script = bp.scriptWithBreakpoint;
                     if (script && script.isValid)
                     {
-                        var pc = script.lineToPc(lineNo, bp.pcmap);
-                        script.clearBreakpoint(pc);
-                        if (fbs.DBG_BP) ddd("removeBreakpoint in tag="+script.tag+" at "+lineNo+"@"+url+"\n");/*@explore*/
+                        try
+                        {
+                            var pc = script.lineToPc(lineNo, bp.pcmap);
+                            script.clearBreakpoint(pc);
+                            if (fbs.DBG_BP) ddd("removeBreakpoint in tag="+script.tag+" at "+lineNo+"@"+url+"\n");/*@explore*/
+                        }
+                        catch (exc)
+                        {
+                            ddd("Firebug service failed to remove breakpoint in "+script.tag+" at lineNo="+lineNo+" pcmap:"+bp.pcmap+"\n");
+                        }
                     }
                     // else this was a future breakpoint that never hit or a script that was GCed
 
