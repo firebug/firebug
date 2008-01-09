@@ -201,6 +201,7 @@ FirebugService.prototype =
         prefs.removeObserver("extensions.firebug", FirebugPrefsObserver);
         timer = null;
         fbs = null;
+        jsd.off();
         jsd = null;
         ddd("FirebugService.shutdown\n");
     },
@@ -713,6 +714,9 @@ FirebugService.prototype =
 
         if (jsd)
         {
+            if (!jsd.isOn)
+                jsd.on();
+
             jsd.unPause();
             this.hookScripts();
         }
@@ -747,6 +751,7 @@ FirebugService.prototype =
 
             jsd.pause();
             fbs.unhookScripts();
+            jsd.off();
         }}, 1000, TYPE_ONE_SHOT);
 
         waitingForTimer = true;
