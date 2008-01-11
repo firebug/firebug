@@ -17,6 +17,9 @@ const nsISupportsWeakReference = CI("nsISupportsWeakReference")
 const nsISupports = CI("nsISupports")
 const nsIIOService = CI("nsIIOService")
 const imgIRequest = CI("imgIRequest");
+const nsIUploadChannel = CI("nsIUploadChannel");
+const nsIXMLHttpRequest = CI("nsIXMLHttpRequest");
+const nsISeekableStream = CI("nsISeekableStream");
 
 const CacheService = CC("@mozilla.org/network/cache-service;1");
 const ImgCache = CC("@mozilla.org/image/cache;1");
@@ -43,6 +46,7 @@ const STORE_ANYWHERE = nsICache.STORE_ANYWHERE;
 const NS_ERROR_CACHE_KEY_NOT_FOUND = 0x804B003D;
 const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 
+const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
 
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 
@@ -1110,6 +1114,8 @@ NetProgress.prototype =
                 file.category = category;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
 
+            file.postText = getPostText(file, this.context);
+
             this.awaitFile(request, file);
             this.extendPhase(file);
 
@@ -1793,6 +1799,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                     $collapsed: "$file|hidePost"},
                     $STR("Post")
                 ),
+                A({class: "netInfoPutTab netInfoTab", onclick: "$onClickTab",
+                    view: "Put",
+                    $collapsed: "$file|hidePut"},
+                    $STR("Put")
+                ),
                 A({class: "netInfoResponseTab netInfoTab", onclick: "$onClickTab",
                     view: "Response",
                     $collapsed: "$file|hideResponse"},
@@ -1826,6 +1837,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                     TBODY()
                 )
             ),
+            DIV({class: "netInfoPutText netInfoText"},
+                TABLE({class: "netInfoPutTable", cellpadding: 0, cellspacing: 0},
+                    TBODY()
+                )
+            ),
             DIV({class: "netInfoResponseText netInfoText"},
                 $STR("Loading")
             ),
@@ -1852,6 +1868,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
     hidePost: function(file)
     {
         return file.method.toUpperCase() != "POST";
+    },
+
+    hidePut: function(file)
+    {
+        return file.method.toUpperCase() != "PUT";
     },
 
     hideResponse: function(file)
@@ -1957,6 +1978,33 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             }
         }
 
+        if (hasClass(tab, "netInfoPutTab"))
+        {
+            var putTextBox = getChildByClass(netInfoBox, "netInfoPutText");
+            if (!netInfoBox.putPresented)
+            {
+                netInfoBox.putPresented  = true;
+
+                var text = getPostText(file, context);
+                if (text != undefined)
+                {
+                    if (isURLEncodedFile(file, text))
+                    {
+                        var lines = text.split("\n");
+                        var params = parseURLEncodedText(lines[lines.length-1]);
+                        this.insertHeaderRows(netInfoBox, params, "Put");
+                    }
+                    else
+                    {
+                        var putText = formatPostText(text);
+                        if (putText)
+                            insertWrappedText(putText, putTextBox);
+                    }
+                }
+            }
+        }
+
+
         if (hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
         {
             netInfoBox.responsePresented = true;
@@ -2031,8 +2079,46 @@ function getPostText(file, context)
 {
     if (!file.postText)
         file.postText = readPostText(file.href, context);
+        
+    if (!file.postText)
+        file.postText = getPostTextFromXHR(file.request, context);
+        
+    return file.postText;    
+}
 
-    return file.postText;
+function getPostTextFromXHR(request, context)
+{
+    try
+    {
+        if (!request.notificationCallbacks)
+          return null;
+          
+        var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+        if (!xhrRequest)
+          return null;
+    
+        var is = QI(xhrRequest.channel, nsIUploadChannel).uploadStream;
+        if (is)
+        {
+            var charset = context.window.document.characterSet;
+            var text = readFromStream(is, charset);
+            var ss = QI(is, nsISeekableStream);
+            if ( ss )
+                ss.seek(NS_SEEK_SET, 0);
+                
+            return text;
+        }
+    }
+    catch(exc)
+    {
+        if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
+        {																			    /*@explore*/
+            FBTrace.dumpProperties("lib.getPostText FAILS ", exc);                      /*@explore*/
+            FBTrace.dumpProperties("lib.getPostText request", request);                 /*@explore*/
+        }																				/*@explore*/
+    }
+    
+    return null;
 }
 
 function insertWrappedText(text, textBox)
