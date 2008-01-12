@@ -48,8 +48,6 @@ const firebugURLs =
     donate: "http://www.getfirebug.com/contribute.html?product"
 };
 
-const prefDomain = "extensions.firebug";
-
 const prefNames =
 [
     "disabledAlways", "disabledFile", "allowSystemPages",
@@ -116,11 +114,13 @@ var temporaryDirectory = null;
 
 top.Firebug =
 {
-    version: "1.1",
+    version: "1.2",
 
     module: modules,
     panelTypes: panelTypes,
     reps: reps,
+    prefDomain: "extensions.firebug",
+    
 
     stringCropLength: 80,
 
@@ -135,10 +135,10 @@ top.Firebug =
             this[prefNames[i]] = this.getPref(prefNames[i]);
 
         this.loadExternalEditors();
-        prefs.addObserver(prefDomain, this, false);
+        prefs.addObserver(this.prefDomain, this, false);
 
         var basePrefNames = prefNames.length;
-        dispatch(modules, "initialize", [prefDomain, prefNames]);
+        dispatch(modules, "initialize", [this.prefDomain, prefNames]);
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(prefNames[i]);
@@ -187,7 +187,7 @@ top.Firebug =
         if (fbs.enabled)
             dispatch(modules, "disable");
 
-        prefs.removeObserver(prefDomain, this, false);
+        prefs.removeObserver(this.prefDomain, this, false);
 
         fbs.unregisterClient(this);
 
@@ -369,7 +369,7 @@ top.Firebug =
 
     getPref: function(name)
     {
-        var prefName = prefDomain + "." + name;
+        var prefName = this.prefDomain + "." + name;
 
         var type = prefs.getPrefType(prefName);
         if (type == nsIPrefBranch.PREF_STRING)
@@ -382,7 +382,7 @@ top.Firebug =
 
     setPref: function(name, value)
     {
-        var prefName = prefDomain + "." + name;
+        var prefName = this.prefDomain + "." + name;
 
         var type = prefs.getPrefType(prefName);
         if (type == nsIPrefBranch.PREF_STRING)
@@ -510,7 +510,7 @@ top.Firebug =
     {
         var args = {
             FBL: FBL,
-            prefName: prefDomain + ".externalEditors"
+            prefName: this.prefDomain + ".externalEditors"
         };
         openWindow("Firebug:ExternalEditors", "chrome://firebug/content/editors.xul", "", args);
     },
@@ -976,7 +976,7 @@ top.Firebug =
 
     observe: function(subject, topic, data)
     {
-        var name = data.substr(prefDomain.length+1);
+        var name = data.substr(this.prefDomain.length+1);
         var value = this.getPref(name);
         if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");                /*@explore*/
         this.updatePref(name, value);

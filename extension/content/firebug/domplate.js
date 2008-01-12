@@ -171,6 +171,9 @@ DomplateTag.prototype =
 
         function __link__(tag, code, outputs, args)
         {
+            if (!tag || !tag.tag)
+                return;
+                
             tag.tag.compile();
 
             var tagOutputs = [];
@@ -392,6 +395,9 @@ DomplateTag.prototype =
 
         function __link__(node, tag, args)
         {
+            if (!tag || !tag.tag)
+                return;
+                
             tag.tag.compile();
 
             var domArgs = [node, tag.tag.context, 0];

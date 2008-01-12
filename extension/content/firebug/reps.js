@@ -1179,7 +1179,8 @@ this.jsdStackFrame = domplate(Firebug.Rep,
     {
         if (!frame.isValid) return "(invalid frame)";  // XXXjjb avoid frame.script == null
         var sourceInfo = FBL.getSourceFileAndLineByScript(context, frame.script, frame);
-        return $STRF("Line", [scriptInfo.sourceFile.href, sourceInfo.lineNo]);
+        if (sourceInfo)
+            return $STRF("Line", [sourceInfo.sourceFile.href, sourceInfo.lineNo]);
     },
 
     getContextMenuItems: function(frame, target, context)
