@@ -682,6 +682,9 @@ BoxModelHighlighter.prototype =
         {
             var doc = context.window.document;
 
+            if (!doc)
+                return;
+
             function createRuler(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");

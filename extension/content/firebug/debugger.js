@@ -151,7 +151,7 @@ Firebug.Debugger = extend(Firebug.Module,
         context.debugFrame = frame;
         context.stopped = true;
 
-        const hookReturn = dispatch2(listeners,"onStop",[context,type,rv]);
+        const hookReturn = dispatch2(listeners,"onStop",[context,frame, type,rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;
@@ -610,7 +610,7 @@ Firebug.Debugger = extend(Firebug.Module,
             var context = this.breakContext;
             delete this.breakContext;
 
-            if (FBTrace.DBG_BP || FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.onBreak context="+context+"\n");       /*@explore*/
+            if (FBTrace.DBG_BP || FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.onBreak context=", context);       /*@explore*/
             if (!context)
                 context = getFrameContext(frame);
             if (!context)
@@ -717,6 +717,7 @@ Firebug.Debugger = extend(Firebug.Module,
         {
             Firebug.errorStackTrace = getStackTrace(frame, context);
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
+            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError: ",error); /*@explore*/
             if (Firebug.breakOnErrors)
                 Firebug.Errors.showMessageOnStatusBar(error);
         }
@@ -2200,7 +2201,7 @@ Firebug.DebuggerListener =
     {
 
     },
-    onStop: function(context, type, rv)
+    onStop: function(context, frame, type, rv)
     {
     },
 

@@ -1975,7 +1975,7 @@ this.isShift = function(event)
 
 this.dispatch = function(listeners, name, args)
 {
-    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
+    if (FBTrace.DBG_DISPATCH) FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
                                                                                                                        /*@explore*/
     try {
         for (var i = 0; i < listeners.length; ++i)
@@ -1993,7 +1993,7 @@ this.dispatch = function(listeners, name, args)
 
 this.dispatch2 = function(listeners, name, args)
 {
-    if (FBTrace.DBG_WINDOWS) FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
+    if (FBTrace.DBG_DISPATCH) FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
 
     for (var i = 0; i < listeners.length; ++i)
     {

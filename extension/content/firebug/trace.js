@@ -19,11 +19,21 @@ this.sysout = function(msg, more)
     dump(msg);
 }
 
+this.useFirebug = true;
+
 this.dumpProperties = function(header, obj)
 {
     try {
         var noThrottle = true;
         header += " sees object with typeof: \'"+typeof(obj)+"\'; object contains:\n";
+
+        if (this.useFirebug)
+        {
+            Firebug.Console.openGroup(header);
+            Firebug.Console.log(obj);
+            Firebug.Console.closeGroup();
+            return;
+        }
         this.sysout(header);
 
         if (obj instanceof Array)

@@ -39,6 +39,7 @@ const nsISupports = CI("nsISupports");
 const nsIFireBugNetworkDebugger = CI("nsIFireBugNetworkDebugger");
 const nsIFireBugScriptListener = CI("nsIFireBugScriptListener");
 const nsIFireBugURLProvider = CI("nsIFireBugURLProvider");
+const nsIPrefBranch = CI("nsIPrefBranch");
 const nsIPrefBranch2 = CI("nsIPrefBranch2");
 const nsIComponentRegistrar = CI("nsIComponentRegistrar");
 const nsIFactory = CI("nsIFactory");
@@ -163,6 +164,14 @@ function FirebugService()
         .getService(CI("nsIObserverService"));
     observerService.addObserver(ShutdownObserver, "quit-application", false);
     observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false);
+
+    try {
+    var allPrefs = prefs.getChildList("extensions.firebug");
+    for (var i = 0; i < allPrefs.length; i++)
+        ddd(i+": "+allPrefs[i]+"\n");
+    } catch (e) {
+    ddd(e);
+    }
 
     this.showStackTrace = prefs.getBoolPref("extensions.firebug.showStackTrace");
     this.breakOnErrors = prefs.getBoolPref("extensions.firebug.breakOnErrors");
@@ -1927,37 +1936,38 @@ var FirebugPrefsObserver =
 {
     observe: function(subject, topic, data)
     {
-        if (data == "extensions.firebug.showStackTrace")
-            fbs.showStackTrace =  prefs.getBoolPref("extensions.firebug.showStackTrace");
-        else if (data == "extensions.firebug.breakOnErrors")
-            fbs.breakOnErrors =  prefs.getBoolPref("extensions.firebug.breakOnErrors");
-        else if (data == "extensions.firebug.showEvalSources")
-            fbs.showEvalSources =  prefs.getBoolPref("extensions.firebug.showEvalSources");
-        else if (data == "extensions.firebug.trackThrowCatch")
-            fbs.trackThrowCatch =  prefs.getBoolPref("extensions.firebug.trackThrowCatch");
-        else if (data == "extensions.firebug.filterSystemURLs")
-            fbs.filterSystemURLs =  prefs.getBoolPref("extensions.firebug.filterSystemURLs");
-        else if (data == "extensions.firebug.DBG_FBS_CREATION")
-            fbs.DBG_CREATION = prefs.getBoolPref("extensions.firebug.DBG_FBS_CREATION");
-        else if (data == "extensions.firebug.DBG_FBS_BP")
-            fbs.DBG_BP = prefs.getBoolPref("extensions.firebug.DBG_FBS_BP");
-        else if (data == "extensions.firebug.DBG_FBS_ERRORS")
-            fbs.DBG_ERRORS = prefs.getBoolPref("extensions.firebug.DBG_FBS_ERRORS");
-        else if (data == "extensions.firebug.DBG_FBS_STEP")
-            fbs.DBG_STEP = prefs.getBoolPref("extensions.firebug.DBG_FBS_STEP");
-        else if (data == "extensions.firebug.DBG_FBS_FUNCTION")
-            fbs.DBG_FUNCTION = prefs.getBoolPref("extensions.firebug.DBG_FBS_FUNCTION");
-        else if (data == "extensions.firebug.DBG_FBS_FF_START")
-            fbs.DBG_FBS_FF_START = prefs.getBoolPref("extensions.firebug.DBG_FBS_FF_START");
-        else if (data == "extensions.firebug.DBG_FLUSH_EVERY_LINE")
-            fbs.DBG_FLUSH_EVERY_LINE = prefs.getBoolPref("extensions.firebug.DBG_FLUSH_EVERY_LINE");
-        else if (data == "extensions.firebug.DBG_FBS_JSDCONTEXT")
+        var prefDomain = "extensions.firebug";
+        var c = data.indexOf(prefDomain);
+        if (c == 0)
+            this.resetOption(prefDomain, data.substr(prefDomain.length) );
+    },
+
+    resetOption: function(prefDomain, optionName)
+    {
+        try
         {
-            fbs.DBG_FBS_JSDCONTEXT = prefs.getBoolPref("extensions.firebug.DBG_FBS_JSDCONTEXT");
-            if (fbs.DBG_FBS_JSDCONTEXT)
-                fbs.dumpContexts();
+            fbs[optionName] = this.getPref(prefDomain, optionName);
+            if (fbs[optionName])
+                ddd("resetOption set "+optionName+" to "+fbs[optionName]+"\n");
         }
-    }
+        catch (exc)
+        {
+            ddd("resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+        }
+    },
+
+    getPref: function(prefDomain, name)
+    {
+        var prefName = prefDomain + "." + name;
+
+        var type = prefs.getPrefType(prefName);
+        if (type == nsIPrefBranch.PREF_STRING)
+            return prefs.getCharPref(prefName);
+        else if (type == nsIPrefBranch.PREF_INT)
+            return prefs.getIntPref(prefName);
+        else if (type == nsIPrefBranch.PREF_BOOL)
+            return prefs.getBoolPref(prefName);
+    },
 };
 
 var ShutdownObserver =
