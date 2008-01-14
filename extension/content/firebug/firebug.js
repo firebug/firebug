@@ -1155,7 +1155,30 @@ top.Firebug =
     loadedContext: function(context)
     {
         context.browser.chrome.showLoadedContext(context);
+    },
+    //***********************************************************************
+
+    getTabIdForWindow: function(aWindow)
+    {
+        if (!aWindow || !this.tabBrowser.getBrowserIndexForDocument)
+            return null;
+
+        try {
+            var targetDoc = aWindow.document;
+
+            var tab = null;
+            var targetBrowserIndex = this.tabBrowser.getBrowserIndexForDocument(targetDoc);
+
+            if (targetBrowserIndex != -1)
+            {
+                tab = this.tabBrowser.tabContainer.childNodes[targetBrowserIndex];
+                return tab.linkedPanel;
+            }
+        } catch (ex) {}
+
+        return null;
     }
+
 };
 
 // ************************************************************************************************

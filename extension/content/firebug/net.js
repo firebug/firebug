@@ -176,7 +176,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
-    initialize: function()
+    initializeUI: function()
     {
         this.syncFilterButtons(FirebugChrome);
 
@@ -227,17 +227,17 @@ Firebug.NetMonitor = extend(Firebug.Module,
             context.netProgress.loaded = true;
     },
 
-	  watchWindow: function(context, win) 
-	  {
-		    FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
-	  },
-    
-    onBeforeUnload: function(aEvent) 
+      watchWindow: function(context, win)
+      {
+            FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
+      },
+
+    onBeforeUnload: function(aEvent)
     {
         // Use this event to clean up the global (local within this namespace)
         // array with contexts.
         var win = aEvent.currentTarget;
-        var tabId = getTabIdForWindow(win);
+        var tabId = Firebug.getTabIdForWindow(win);
         if (tabId)
           delete contexts[tabId];
     },
@@ -1015,7 +1015,7 @@ function NetProgress(context)
     {
         if (panel)
         {
-            // If the panel is currently active insert the file 
+            // If the panel is currently active insert the file
             // into it directly...
             var file = handler.apply(this, args);
             if (file)
@@ -1148,7 +1148,7 @@ NetProgress.prototype =
 
             // Append response status info into the response headers so,
             // it's displayed in the UI (fix for #65).
-            file.responseHeaders.push({name: "STATUS CODE", value: "HTTP/1.x " + 
+            file.responseHeaders.push({name: "STATUS CODE", value: "HTTP/1.x " +
               statusInfo.responseStatus + " " + statusInfo.responseStatusText});
 
             // This is a strange but effective tactic for simulating the
@@ -1489,17 +1489,17 @@ function monitorContext(context)
     {
         var networkContext = null;
 
-        // Use an existing context associated with the browser tab if any 
+        // Use an existing context associated with the browser tab if any
         // or create a pure new network context.
-        var tabId = getTabIdForWindow(context.window);
-        networkContext = contexts[tabId];  
+        var tabId = Firebug.getTabIdForWindow(context.window);
+        networkContext = contexts[tabId];
         if (networkContext) {
           networkContext.context = context;
         }
         else {
           networkContext = new NetProgress(context);
         }
-    
+
         var listener = context.netProgress = networkContext;
 
         // This listener is used to observe downlaod progress.
@@ -1708,12 +1708,13 @@ function safeGetWindow(webProgress)
 {
     try
     {
-        return webProgress.DOMWindow;
+        if (webProgress)
+            return webProgress.DOMWindow;
     }
     catch (exc)
     {
-        return null;
     }
+    return null;
 }
 
 function safeGetName(request)
@@ -2079,11 +2080,11 @@ function getPostText(file, context)
 {
     if (!file.postText)
         file.postText = readPostText(file.href, context);
-        
+
     if (!file.postText)
         file.postText = getPostTextFromXHR(file.request, context);
-        
-    return file.postText;    
+
+    return file.postText;
 }
 
 function getPostTextFromXHR(request, context)
@@ -2092,11 +2093,11 @@ function getPostTextFromXHR(request, context)
     {
         if (!request.notificationCallbacks)
           return null;
-          
+
         var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
         if (!xhrRequest)
           return null;
-    
+
         var is = QI(xhrRequest.channel, nsIUploadChannel).uploadStream;
         if (is)
         {
@@ -2105,7 +2106,7 @@ function getPostTextFromXHR(request, context)
             var ss = QI(is, nsISeekableStream);
             if ( ss )
                 ss.seek(NS_SEEK_SET, 0);
-                
+
             return text;
         }
     }
@@ -2117,7 +2118,7 @@ function getPostTextFromXHR(request, context)
             FBTrace.dumpProperties("lib.getPostText request", request);                 /*@explore*/
         }																				/*@explore*/
     }
-    
+
     return null;
 }
 
@@ -2162,22 +2163,22 @@ function isURLEncodedFile(file, text)
 
 // Helper HTTP observer
 // This observer is used for observing the first document http-on-modify-request
-// and http-on-examine-response events, which are fired before the context  
+// and http-on-examine-response events, which are fired before the context
 // is initialized (initContext method call). Without this observer this events
-// would be lost and the time measuring would be wrong. 
+// would be lost and the time measuring would be wrong.
 //
-// This observer stores these early requests in helper array (contexts) and maps 
+// This observer stores these early requests in helper array (contexts) and maps
 // them to appropriate tab - initContext then uses the array in order to access it.
 //-----------------------------------------------------------------------------
 
-var HttpObserver = 
+var HttpObserver =
 {
   // nsIObserver
-  observe: function(aSubject, aTopic, aData) 
+  observe: function(aSubject, aTopic, aData)
   {
       try {
           aSubject = aSubject.QueryInterface(nsIHttpChannel);
-        
+
           if (aTopic == 'http-on-modify-request') {
             this.onModifyRequest(aSubject);
           } else if (aTopic == 'http-on-examine-response') {
@@ -2188,38 +2189,8 @@ var HttpObserver =
           ERROR(err)
       }
   },
-  
-  onModifyRequest: function(aRequest) 
-  {  
-      var tabId = getTabIdForHttpChannel(aRequest);
-      var webProgress = getRequestWebProgress(aRequest, this);
-      var win = webProgress ? safeGetWindow(webProgress) : null;
 
-      if (FBTrace.DBG_NET)
-      {
-          FBTrace.sysout("=== FB: HttpObserver ON-MODIFY-REQUEST,   request: " + 
-            safeGetName(aRequest) + ", tabId: " + tabId + ", win-loc: " +
-            (win ? win.location.href : "null") + "\n");
-      } 
-      
-      if (!tabId) 
-      {
-          if (FBTrace.DBG_NET) 
-          {
-              FBTrace.sysout("**************************************\n"); 
-              FBTrace.sysout("* FB: onModifyRequest - No tab associated with the request\n"); 
-              FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n"); 
-              FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n"); 
-              FBTrace.sysout("**************************************\n"); 
-          }
-          
-          return;
-      }
-        
-      this.onStartRequest(aRequest, now(), win, tabId);
-  },
-
-  onExamineResponse: function(aRequest) 
+  onModifyRequest: function(aRequest)
   {
       var tabId = getTabIdForHttpChannel(aRequest);
       var webProgress = getRequestWebProgress(aRequest, this);
@@ -2227,35 +2198,65 @@ var HttpObserver =
 
       if (FBTrace.DBG_NET)
       {
-        FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " + 
+          FBTrace.sysout("=== FB: HttpObserver ON-MODIFY-REQUEST,   request: " +
+            safeGetName(aRequest) + ", tabId: " + tabId + ", win-loc: " +
+            (win ? win.location.href : "null") + "\n");
+      }
+
+      if (!tabId)
+      {
+          if (FBTrace.DBG_NET)
+          {
+              FBTrace.sysout("**************************************\n");
+              FBTrace.sysout("* FB: onModifyRequest - No tab associated with the request\n");
+              FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");
+              FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");
+              FBTrace.sysout("**************************************\n");
+          }
+
+          return;
+      }
+
+      this.onStartRequest(aRequest, now(), win, tabId);
+  },
+
+  onExamineResponse: function(aRequest)
+  {
+      var tabId = getTabIdForHttpChannel(aRequest);
+      var webProgress = getRequestWebProgress(aRequest, this);
+      var win = webProgress ? safeGetWindow(webProgress) : null;
+
+      if (FBTrace.DBG_NET)
+      {
+        FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +
           safeGetName(aRequest) + ", tabId: " + tabId + ", win-loc: " +
           (win ? win.location.href : "null") + "\n");
       }
-      
-      if (!tabId && FBTrace.DBG_NET) 
+
+      if (!tabId && FBTrace.DBG_NET)
       {
-          FBTrace.sysout("**************************************\n"); 
-          FBTrace.sysout("* FB: onExamineResponse - No tab associated with the request\n"); 
-          FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n"); 
-          FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n"); 
-          FBTrace.sysout("**************************************\n"); 
+          FBTrace.sysout("**************************************\n");
+          FBTrace.sysout("* FB: onExamineResponse - No tab associated with the request\n");
+          FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");
+          FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");
+          FBTrace.sysout("**************************************\n");
       }
 
       this.onEndRequest(aRequest, now(), win, tabId);
   },
 
-  onStartRequest: function(aRequest, aTime, aWin, aTabId) 
+  onStartRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
       var networkContext = context ? context.networkContext : null;
-      
+
       var name = aRequest.URI.asciiSpec;
       var origName = aRequest.originalURI.asciiSpec;
       var isRedirect = (name != origName);
-      
+
       // We only need to create a new context if this is a top document uri (not frames).
-      if ((aRequest.loadFlags & nsIChannel.LOAD_DOCUMENT_URI) && 
-          aRequest.loadGroup && 
+      if ((aRequest.loadFlags & nsIChannel.LOAD_DOCUMENT_URI) &&
+          aRequest.loadGroup &&
           aRequest.loadGroup.groupObserver &&
           aWin == aWin.parent &&
           !isRedirect && aTabId)
@@ -2265,9 +2266,9 @@ var HttpObserver =
             networkContext = new NetProgress(null);
             contexts[aTabId] = networkContext;
           }
-      }    
+      }
 
-      // Show only requests that are associated with a tab.  
+      // Show only requests that are associated with a tab.
       if (!aTabId)
           return;
 
@@ -2283,27 +2284,27 @@ var HttpObserver =
       }
   },
 
-  onEndRequest: function(aRequest, aTime, aWin, aTabId) 
+  onEndRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
 
       var name = aRequest.URI.asciiSpec;
       var origName = aRequest.originalURI.asciiSpec;
       var isRedirect = (name != origName);
-      
+
       var networkContext = contexts[aTabId];
       if (!networkContext)
         networkContext = context ? context.networkContext : null;
 
       var statusInfo = new Object();
       statusInfo.responseStatus = aRequest.responseStatus;
-      statusInfo.responseStatusText = aRequest.responseStatusText;      
+      statusInfo.responseStatusText = aRequest.responseStatusText;
 
       if (networkContext)
         networkContext.post(respondedFile, [aRequest, now(), statusInfo]);
   },
-  
-  QueryInterface: function(iid) 
+
+  QueryInterface: function(iid)
   {
       if (iid.equals(nsISupports) ||
           iid.equals(nsIObserver))
@@ -2317,26 +2318,26 @@ var HttpObserver =
 
 // ************************************************************************************************
 
-function getTabIdForHttpChannel(aHttpChannel) 
+function getTabIdForHttpChannel(aHttpChannel)
 {
     try {
-        if (aHttpChannel.notificationCallbacks) 
+        if (aHttpChannel.notificationCallbacks)
         {
             var interfaceRequestor = aHttpChannel.notificationCallbacks.QueryInterface(
               Components.interfaces.nsIInterfaceRequestor);
 
             try {
               var win = interfaceRequestor.getInterface(Components.interfaces.nsIDOMWindow);
-              var tabId = getTabIdForWindow(win);
-              if (tabId)  
+              var tabId = Firebug.getTabIdForWindow(win);
+              if (tabId)
                 return tabId;
             }
             catch (err) {}
         }
-        
+
         var progress = getRequestWebProgress(aHttpChannel);
         var win = safeGetWindow(progress);
-        return getTabIdForWindow(win);
+        return Firebug.getTabIdForWindow(win);
     }
     catch (err) {
         ERROR(err);
@@ -2345,20 +2346,20 @@ function getTabIdForHttpChannel(aHttpChannel)
     return null;
 }
 
-function getTabIdForWindow(aWindow) 
+function getTabIdForWindow(aWindow)
 {
     try {
         var targetDoc = aWindow.document;
-        
+
         var tab = null;
         var targetBrowserIndex = gBrowser.getBrowserIndexForDocument(targetDoc);
 
         if (targetBrowserIndex != -1)
             tab = gBrowser.tabContainer.childNodes[targetBrowserIndex];
-            
+
         return tab.linkedPanel;
     } catch (ex) {}
-   
+
     return null;
 }
 
