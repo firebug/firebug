@@ -28,7 +28,8 @@ const httpObserver =
     observe: function(request, topic, data)
     {
         request = QI(request, nsIHttpChannel);
-        if ((topic == "http-on-modify-request") && (request.loadFlags & LOAD_BACKGROUND))
+        if (((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
+            && (request.loadFlags & LOAD_BACKGROUND))
         {
             try
             {
@@ -42,7 +43,11 @@ const httpObserver =
                         {
                             if (contexts[i].win == win)
                             {
-                                requestStarted(xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
+                                if (topic == "http-on-modify-request")
+                                  requestStarted(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
+                                else if (topic == "http-on-examine-response")
+                                  requestStopped(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
+                                  
                                 return;
                             }
                         }
@@ -56,6 +61,8 @@ const httpObserver =
     }
 };
 
+// List of listeners that can be registerd by other FB extensions.
+// See Firebug.Spy.addListener and Firebug.Spy.removeListener.
 var listeners = [];
 
 // ************************************************************************************************
@@ -77,6 +84,7 @@ Firebug.Spy = extend(Firebug.Module,
             if ( contexts.length == 0 )
             {
                 observerService.addObserver(httpObserver, "http-on-modify-request", false);
+                observerService.addObserver(httpObserver, "http-on-examine-response", false);
             }
             contexts.push({ context: context, win: win });
         }
@@ -94,6 +102,7 @@ Firebug.Spy = extend(Firebug.Module,
                     if ( contexts.length == 0 )
                     {
                         observerService.removeObserver(httpObserver, "http-on-modify-request", false);
+                        observerService.removeObserver(httpObserver, "http-on-examine-response", false);
                     }
                     return;
                 }
@@ -193,7 +202,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getURL: function(spy)
     {
-        return spy.request.channel ? spy.request.channel.name : spy.url;
+        return spy.xhrRequest.channel ? spy.xhrRequest.channel.name : spy.href;
     },
 
     onToggleBody: function(event)
@@ -240,7 +249,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     copyResponse: function(spy)
     {
-        copyToClipboard(spy.request.responseText);
+        copyToClipboard(spy.xhrRequest.responseText);
     },
 
     openInTab: function(spy)
@@ -258,14 +267,14 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     browseObject: function(spy, context)
     {
         // XXXjoe Need to combine this with window.location
-        var url = spy.request.channel ? spy.request.channel.name : spy.url;
+        var url = spy.xhrRequest.channel ? spy.xhrRequest.channel.name : spy.href;
         openNewTab(url);
         return true;
     },
 
     getRealObject: function(spy, context)
     {
-        return spy.request;
+        return spy.xhrRequest;
     },
 
     getContextMenuItems: function(spy)
@@ -293,14 +302,15 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-top.XMLHttpRequestSpy = function(request, context)
+top.XMLHttpRequestSpy = function(request, xhrRequest, context)
 {
     this.request = request;
+    this.xhrRequest = xhrRequest;
     this.context = context;
     this.responseText = null;
 };
 
-XMLHttpRequestSpy.prototype =
+top.XMLHttpRequestSpy.prototype =
 {
     attach: function()
     {
@@ -309,18 +319,18 @@ XMLHttpRequestSpy.prototype =
         this.onLoad = function() { onHTTPSpyLoad(spy); };
         this.onError = function() { onHTTPSpyError(spy); };
 
-        this.onreadystatechange = this.request.onreadystatechange;
+        this.onreadystatechange = this.xhrRequest.onreadystatechange;
 
-        this.request.onreadystatechange = this.onReadyStateChange;
-        this.request.addEventListener("load", this.onLoad, true);
-        this.request.addEventListener("error", this.onError, true);
+        this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+        this.xhrRequest.addEventListener("load", this.onLoad, true);
+        this.xhrRequest.addEventListener("error", this.onError, true);
     },
 
     detach: function()
     {
-        this.request.onreadystatechange = this.onreadystatechange;
-        try { this.request.removeEventListener("load", this.onLoad, true); } catch (e) {}
-        try { this.request.removeEventListener("error", this.onError, true); } catch (e) {}
+        this.xhrRequest.onreadystatechange = this.onreadystatechange;
+        try { this.xhrRequest.removeEventListener("load", this.onLoad, true); } catch (e) {}
+        try { this.xhrRequest.removeEventListener("error", this.onError, true); } catch (e) {}
 
         this.onreadystatechange = null;
         this.onLoad = null;
@@ -341,78 +351,90 @@ Firebug.XHRSpyListener =
 
 // ************************************************************************************************
 
-function requestStarted(request, context, method, url)
+function getSpyForXHR(request, xhrRequest, context)
 {
-    var spy = new XMLHttpRequestSpy(request, context);
+    var spy = null;
+    var length = context.spies.length;
+    for (var i=0; i<length; i++)
+    {
+        spy = context.spies[i];
+        if (spy.request == request)
+          return spy;
+    }
+       
+    spy = new XMLHttpRequestSpy(request, xhrRequest, context);
     context.spies.push(spy);
+ 
+    var name = request.URI.asciiSpec;
+    var origName = request.originalURI.asciiSpec;
+    
+    // Attach spy only to the original request. Notice that there 
+    // can be more network requests made by the same XHR if there
+    // are redirects.
+    if (name == origName)
+      spy.attach();
+
+    return spy;
+}
+
+// ************************************************************************************************
+
+function requestStarted(request, xhrRequest, context, method, url)
+{
+    var spy = getSpyForXHR(request, xhrRequest, context);
 
     spy.method = method;
-    spy.url = url;
+    spy.href = url;
 
-    if ( method == "POST" )
-        spy.postText = getPostText(request, context);
+    // Get "body" for POST and PUT requests. It will be displayed in 
+    // appropriate tab of the XHR.
+    if (method == "POST" || method == "PUT")
+        spy.postText = getPostText(xhrRequest, context);
 
-    spy.urlParams = parseURLParams(spy.url);
+    spy.urlParams = parseURLParams(spy.href);
     spy.sourceLink = getStackSourceLink();
 
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
 
-    dispatch(listeners,"onStart",[context, spy]);
-
+    // If it's enabled log the request into the console tab.
     if (Firebug.showXMLHttpRequests)
     {
         spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
         setClass(spy.logRow, "loading");
     }
 
-    spy.attach();
+    // Notify registered listeners. The onStart event is fired
+    // once for entire XHR (even if there is more redirects within
+    // the process).
+    var name = request.URI.asciiSpec;
+    var origName = request.originalURI.asciiSpec;
+    if (name == origName)
+      dispatch(listeners, "onStart", [context, spy]);
+
+    // Remember the start time et the end, so it's most accurate.
     spy.sendTime = new Date().getTime();
 }
 
-function onHTTPSpyReadyStateChange(spy, event)
+function requestStopped(request, xhrRequest, context, method, url)
 {
-    try
-    {
-        if (spy.onreadystatechange)
-            spy.onreadystatechange.handleEvent(event);
-    }
-    catch (exc)
-    {
-    }
-
-    if (spy.request.readyState == 4)
-    {
-        onHTTPSpyLoad(spy);
-        if (!spy.responseHeaders)
-            spy.responseHeaders = getResponseHeaders(spy);
-        if (!spy.statusText)
-        {
-            spy.statusCode = spy.request.status;
-            spy.statusText = spy.request.statusText;
-        }
-        dispatch(listeners,"onLoad",[spy.context, spy]);
-    }
-}
-
-function onHTTPSpyLoad(spy)
-{
-    // If we were already detached, don't do this again
-    if (!spy.onLoad)
-        return;
-
+    var spy = getSpyForXHR(request, xhrRequest, context);
+    
     var now = new Date().getTime();
     var responseTime = now - spy.sendTime;
 
     spy.loaded = true;
 
+    if (!spy.responseHeaders)
+        spy.responseHeaders = getResponseHeaders(spy);
+
     if (!spy.responseText)
-        spy.responseText = spy.request.responseText;
+        spy.responseText = spy.xhrRequest.responseText;
 
     var netProgress = spy.context.netProgress;
     if (netProgress)
         netProgress.post(netProgress.stopFile,
-                [spy.request.channel, now, spy.postText, spy.responseText]);
+                [spy.xhrRequest.channel, now, spy.postText, spy.responseText]);
 
     if (FBL.DBG_NET)                                                                                                   /*@explore*/
         FBL.sysout("onHTTPSpyLoad netProgress:"+netProgress+" responseTime="+responseTime                              /*@explore*/
@@ -424,10 +446,52 @@ function onHTTPSpyLoad(spy)
         updateHttpSpyInfo(spy);
     }
 
-    spy.detach();
-
     if (spy.context.spies)
         remove(spy.context.spies, spy);
+               
+    if (!spy.statusText)
+    {
+        spy.statusCode = spy.xhrRequest.status;
+        spy.statusText = spy.xhrRequest.statusText;
+    }
+}
+
+function onHTTPSpyReadyStateChange(spy, event)
+{
+    try
+    {
+        if (spy.onreadystatechange)
+            spy.onreadystatechange.handleEvent(event);
+    }
+    catch (exc) { }
+
+    if (spy.xhrRequest.readyState == 4)
+    {
+        onHTTPSpyLoad(spy);
+    }
+}
+
+function onHTTPSpyLoad(spy)
+{
+    // If we were already detached, don't do this again
+    if (!spy.onLoad)
+        return;
+
+    spy.loaded = true;
+
+    // The main XHR object has to be dettached now (i.e. listeners removed).
+    spy.detach();
+
+    // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
+    // simulate the requestStopped here.        
+    while (spy.context.spies.length) 
+    {
+      var spy = spy.context.spies[0];
+      requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);    
+    }
+
+    // Notify registered listeners about fiinish of the XHR.
+    dispatch(listeners, "onLoad", [spy.context, spy]);
 }
 
 function onHTTPSpyError(spy)
@@ -436,7 +500,7 @@ function onHTTPSpyError(spy)
 
     var netProgress = spy.context.netProgress;
     if (netProgress)
-        netProgress.post(netProgress.stopFile, [spy.request.channel, now]);
+        netProgress.post(netProgress.stopFile, [spy.xhrRequest.channel, now]);
 
     if (spy.logRow)
     {
@@ -453,22 +517,23 @@ function onHTTPSpyError(spy)
 function updateLogRow(spy, responseTime)
 {
     var timeBox = spy.logRow.firstChild.firstChild.lastChild;
-    timeBox.textContent = " " + $STRF("SpyResponseTime", [responseTime]);
+    if (responseTime)
+      timeBox.textContent = " " + formatTime(responseTime);
 
     removeClass(spy.logRow, "loading");
     setClass(spy.logRow, "loaded");
 
     try
     {
-        var errorRange = Math.floor(spy.request.status/100);
+        var errorRange = Math.floor(spy.xhrRequest.status/100);
         if (errorRange == 4 || errorRange == 5)
         {
             setClass(spy.logRow, "error");
             var errorBox = spy.logRow.firstChild.firstChild.childNodes[2];
-            errorBox.textContent = spy.request.status;
+            errorBox.textContent = spy.xhrRequest.status;
         }
     }
-    catch (exc) {}
+    catch (exc) { }
 }
 
 function updateHttpSpyInfo(spy)
@@ -479,7 +544,7 @@ function updateHttpSpyInfo(spy)
     var template = Firebug.NetMonitor.NetInfoBody;
 
     if (!spy.params)
-        spy.params = parseURLParams(spy.url+"");
+        spy.params = parseURLParams(spy.href+"");
 
     if (!spy.requestHeaders)
         spy.requestHeaders = getRequestHeaders(spy);
@@ -504,9 +569,9 @@ function getRequestHeaders(spy)
 {
     var headers = [];
 
-    if (spy.request.channel instanceof nsIHttpChannel)
+    if (spy.xhrRequest.channel instanceof nsIHttpChannel)
     {
-        var http = QI(spy.request.channel, nsIHttpChannel);
+        var http = QI(spy.xhrRequest.channel, nsIHttpChannel);
         http.visitRequestHeaders({
             visitHeader: function(name, value)
             {
@@ -524,9 +589,9 @@ function getResponseHeaders(spy)
 
     try
     {
-        if (spy.request.channel instanceof nsIHttpChannel)
+        if (spy.xhrRequest.channel instanceof nsIHttpChannel)
         {
-            var http = QI(spy.request.channel, nsIHttpChannel);
+            var http = QI(spy.xhrRequest.channel, nsIHttpChannel);
             http.visitResponseHeaders({
                 visitHeader: function(name, value)
                 {
@@ -535,10 +600,7 @@ function getResponseHeaders(spy)
             });
         }
     }
-    catch (exc)
-    {
-
-    }
+    catch (exc) { }
 
     return headers;
 }

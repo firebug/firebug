@@ -451,14 +451,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     formatTime: function(elapsed)
     {
-        if (elapsed == -1)
-            return "_"; // should be &nbsp; but this will be escaped so we need something that is no whitespace
-        else if (elapsed < 1000)
-            return elapsed + "ms";
-        else if (elapsed < 60000)
-            return (Math.ceil(elapsed/10) / 100) + "s";
-        else
-            return (Math.ceil((elapsed/60000)*100)/100) + "m";
+        // Use formatTime util from the lib.
+        return formatTime(elapsed);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
