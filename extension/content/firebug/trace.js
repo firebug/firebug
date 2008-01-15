@@ -19,7 +19,6 @@ this.sysout = function(msg, more)
     dump(msg);
 }
 
-this.useFirebug = true;
 
 this.dumpProperties = function(header, obj)
 {
@@ -27,7 +26,7 @@ this.dumpProperties = function(header, obj)
         var noThrottle = true;
         header += " sees object with typeof: \'"+typeof(obj)+"\'; object contains:\n";
 
-        if (this.useFirebug)
+        if (FBTrace.DBG_DBG2FIREBUG)
         {
             Firebug.Console.openGroup(header);
             Firebug.Console.log(obj);
