@@ -2242,7 +2242,7 @@ var HttpObserver =
   onStartRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
-      var networkContext = context ? context.networkContext : null;
+      var networkContext = context ? context.netProgress : null;
 
       var name = aRequest.URI.asciiSpec;
       var origName = aRequest.originalURI.asciiSpec;
@@ -2268,7 +2268,7 @@ var HttpObserver =
 
       var networkContext = contexts[aTabId];
       if (!networkContext)
-          networkContext = context ? context.networkContext : null;
+          networkContext = context ? context.netProgress : null;
 
       if (networkContext) {
           var webProgress = getRequestWebProgress(aRequest, this);
@@ -2288,7 +2288,7 @@ var HttpObserver =
 
       var networkContext = contexts[aTabId];
       if (!networkContext)
-        networkContext = context ? context.networkContext : null;
+        networkContext = context ? context.netProgress : null;
 
       var statusInfo = new Object();
       statusInfo.responseStatus = aRequest.responseStatus;
