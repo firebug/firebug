@@ -64,8 +64,13 @@
     white-space: nowrap;
 }
 
-.netDomainCol {
+.netStatusCol {
     padding-left: 10px;
+    color: rgb(128, 128, 128);
+}
+
+.netDomainCol {
+    padding-left: 5px;
 }
 
 .netSizeCol {
@@ -79,6 +84,7 @@
     z-index: 100;
     position: absolute;
     padding-left: 18px;
+    padding-top: 1px;
     max-width: 15%;
     font-weight: bold;
 }
@@ -92,6 +98,7 @@
     background: #FFFFFF;
 }
 
+.netRow:hover > .netCol > .netStatusLabel,
 .netRow:hover > .netCol > .netDomainLabel,
 .netRow:hover > .netCol > .netHrefLabel {
     display: none;
@@ -109,10 +116,11 @@
     padding-left: 6px;
 }
 
+.netStatusLabel,
 .netDomainLabel,
 .netSizeLabel,
 .netBar {
-    padding: 2px 0 2px 0 !important;
+    padding: 1px 0 2px 0 !important;
 }
 
 .responseError {

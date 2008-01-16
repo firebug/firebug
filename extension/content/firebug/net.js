@@ -227,10 +227,10 @@ Firebug.NetMonitor = extend(Firebug.Module,
             context.netProgress.loaded = true;
     },
 
-      watchWindow: function(context, win)
-      {
-            FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
-      },
+    watchWindow: function(context, win)
+    {
+          FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
+    },
 
     onBeforeUnload: function(aEvent)
     {
@@ -267,10 +267,11 @@ NetPanel.prototype = domplate(Firebug.Panel,
         TABLE({class: "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
                 TR(
-                    TD({width: "15%"}),
+                    TD({width: "18%"}),
+                    TD({width: "12%"}),
                     TD({width: "12%"}),
                     TD({width: "4%"}),
-                    TD({width: "65%"})
+                    TD({width: "54%"})
                 )
             )
         ),
@@ -291,6 +292,10 @@ NetPanel.prototype = domplate(Firebug.Panel,
                         "$file.file.href"
                     )
                 ),
+                TD({class: "netStatusCol netCol"},
+                    DIV({class: "netStatusLabel netLabel"}, "$file.file|getStatus")
+                ),
+                
                 TD({class: "netDomainCol netCol"},
                     DIV({class: "netDomainLabel netLabel"}, "$file.file|getDomain")
                 ),
@@ -311,19 +316,19 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     headTag:
         TR({class: "netHeadRow"},
-            TD({class: "netHeadCol", colspan: 4},
+            TD({class: "netHeadCol", colspan: 5},
                 DIV({class: "netHeadLabel"}, "$doc.rootFile.href")
             )
         ),
 
     netInfoTag:
         TR({class: "netInfoRow"},
-            TD({class: "netInfoCol", colspan: 4})
+            TD({class: "netInfoCol", colspan: 5})
         ),
 
     phaseTag:
         TR({class: "netRow netPhaseRow"},
-            TD({class: "netPhaseCol", colspan: 4})
+            TD({class: "netPhaseCol", colspan: 5})
         ),
 
     summaryTag:
@@ -331,6 +336,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
             TD({class: "netCol"},
                 DIV({class: "netCountLabel netSummaryLabel"}, "-")
             ),
+            TD({class: "netCol"}),
             TD({class: "netCol"}),
             TD({class: "netTotalSizeCol netCol"},
                 DIV({class: "netTotalSizeLabel netSummaryLabel"}, "0KB")
@@ -416,10 +422,15 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     getHref: function(file)
     {
-        if (file.status && file.status != 200)
-            return getFileName(file.href) + " (" + file.status + ")";
-        else
-            return getFileName(file.href);
+        return file.method.toUpperCase() + " " + getFileName(file.href);
+    },
+
+    getStatus: function(file)
+    {
+        if (file.responseStatus && file.responseStatusText)
+          return file.responseStatus + " " + file.responseStatusText;
+          
+        return "";
     },
 
     getDomain: function(file)
@@ -851,7 +862,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         }
         else if (file.invalid)
         {
-            var sizeLabel = row.childNodes[2].firstChild;
+            var sizeLabel = row.childNodes[3].firstChild;
             sizeLabel.firstChild.nodeValue = this.getSize(file);
 
             if (file.mimeType && !file.category)
@@ -876,7 +887,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
                 hrefLabel.nodeValue = this.getHref(file);
             }
 
-            var timeLabel = row.childNodes[3].firstChild.lastChild.firstChild;
+            var timeLabel = row.childNodes[4].firstChild.lastChild.firstChild;
 
             if (file.loaded)
             {
@@ -912,7 +923,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
             phase = this.calculateFileTimes(file, phase, rightNow);
 
-            var totalBar = row.childNodes[3].firstChild.childNodes[1];
+            var totalBar = row.childNodes[4].firstChild.childNodes[1];
             var timeBar = totalBar.nextSibling;
 
             totalBar.style.left = timeBar.style.left = this.barOffset + "%";
@@ -967,7 +978,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
             ? $STR("Request")
             : $STRF("RequestCount", [fileCount]);
 
-        var sizeLabel = row.childNodes[2].firstChild;
+        var sizeLabel = row.childNodes[3].firstChild;
         sizeLabel.firstChild.nodeValue = this.formatSize(totalSize);
 
         var cacheSizeLabel = row.lastChild.firstChild.firstChild;
@@ -1140,10 +1151,8 @@ NetProgress.prototype =
 
             getHttpHeaders(request, file);
 
-            // Append response status info into the response headers so,
-            // it's displayed in the UI (fix for #65).
-            file.responseHeaders.push({name: "STATUS CODE", value: "HTTP/1.x " +
-              statusInfo.responseStatus + " " + statusInfo.responseStatusText});
+            file.responseStatus = statusInfo.responseStatus;
+            file.responseStatusText = statusInfo.responseStatusText;
 
             // This is a strange but effective tactic for simulating the
             // load of background images, which we can't actually track.
