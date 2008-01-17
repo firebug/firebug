@@ -154,6 +154,11 @@ function FirebugService()
 {
     fbs = this;
     this.wrappedJSObject = this;
+
+    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].   		/*@explore*/
+                    getService(Components.interfaces.nsIAppShellService);						/*@explore*/
+    this.hiddenWindow = appShellService.hiddenDOMWindow;										/*@explore*/
+
     this.enabled = false;
     this.profiling = false;
 
@@ -166,11 +171,11 @@ function FirebugService()
     observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false);
 
     try {
-    var allPrefs = prefs.getChildList("extensions.firebug");
-    for (var i = 0; i < allPrefs.length; i++)
-        ddd(i+": "+allPrefs[i]+"\n");
+        var allPrefs = prefs.getChildList("extensions.firebug", {});
+        for (var i = 0; i < allPrefs.length; i++)
+            ddd(i+": "+allPrefs[i]+"\n");
     } catch (e) {
-    ddd(e);
+        ddd(e);
     }
 
     this.showStackTrace = prefs.getBoolPref("extensions.firebug.showStackTrace");
@@ -194,6 +199,7 @@ function FirebugService()
     {                                                                                                                  /*@explore*/
         dumpProperties("firebug-service: constructor getBoolPrefs FAILED with exception=",exc);                        /*@explore*/
     } 																													/*@explore*/
+
     this.onEvalScriptCreated.kind = "eval"; /*@explore*/
     this.onTopLevelScriptCreated.kind = "top-level"; /*@explore*/
     this.onEventScriptCreated.kind = "event"; /*@explore*/
@@ -848,13 +854,11 @@ FirebugService.prototype =
 
     onBreakpoint: function(frame, type, val)
     {
-        if ( isFilteredURL(frame.script.fileName) )
-            return RETURN_CONTINUE;
         var scriptTag = frame.script.tag;
         if (scriptTag in this.onXScriptCreatedByTag)
         {
             var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
-            if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
+            if (this.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
                                       +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
             delete this.onXScriptCreatedByTag[scriptTag];
             frame.script.clearBreakpoint(0);  // since we just compiled this script, there will be no other bp
@@ -868,7 +872,7 @@ FirebugService.prototype =
 
         if (disabledCount || monitorCount || conditionCount || runningUntil)
         {
-            if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
+            if (this.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
                  +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
 
             var bp = this.findBreakpointByScript(frame.script, frame.line);
@@ -895,7 +899,7 @@ FirebugService.prototype =
                 return RETURN_CONTINUE;
         }
 
-        if (fbs.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="              /*@explore*/
+        if (this.DBG_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="              /*@explore*/
                 +frame.script.tag+"\n");                           /*@explore*/
         if (runningUntil) // XXXjjb ?? bp and after onCall? Seems dubious
             return RETURN_CONTINUE;
@@ -910,7 +914,7 @@ FirebugService.prototype =
         // Remember the error where the last exception is thrown - this will
         // be used later when the console service reports the error, since
         // it doesn't currently report the window where the error occured
-        this._lastErrorWindow = getFrameWindow(frame);
+        this._lastErrorWindow = getFrameGlobal(frame);
 
         if (fbs.trackThrowCatch)
         {
@@ -1045,8 +1049,12 @@ FirebugService.prototype =
         try
         {
             var fileName = script.fileName;
-            if (!fileName || isFilteredURL(fileName))
+            if (isFilteredURL(fileName))
+            {
+                if (fbs.DBG_CREATION) 											/*@explore*/
+                    ddd("onScriptCreated: filename filtered:"+fileName+"\n");  	/*@explore*/
                 return;
+            }
 
             if (fbs.DBG_CREATION) {                                                                                    /*@explore*/
                 ddd("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
@@ -1173,7 +1181,28 @@ FirebugService.prototype =
     {
         if (debuggers.length < 1)
             return;
-
+        var global = getFrameGlobal(frame);
+        if (fbs.DBG_FINDDEBUGGER) ddd(" findDebugger global:"+global+"\n");
+        if (global)
+        {
+            for ( var i = debuggers.length - 1; i >= 0; i--)
+            {
+                  try
+                  {
+                      var debuggr = debuggers[i];
+                      if (debuggr.supportsGlobal(global))
+                          return debuggr;
+                  }
+                  catch (exc)
+                  {
+                      ERROR("firebug-service findDebugger supportsGlobal FAILS: "+exc);
+                  }
+            }
+        }
+        else
+            if (fbs.DBG_FINDDEBUGGER) ddd(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
+    // TODO remove
+    if (fbs.DBG_FINDDEBUGGER) ddd(" fbs.findDebugger no find on global, trying getFrameWindow\n");
         var win = getFrameWindow(frame);
         if (win)
         {
@@ -1191,7 +1220,8 @@ FirebugService.prototype =
                 }
             }
         }
-
+// Is bottom of stack needed now?
+     if (fbs.DBG_FINDDEBUGGER) ddd(" fbs.findDebugger no find on window, try bottom of stack\n");
         if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
         {
             while(frame.callingFrame) // walk to the bottom of the stack
@@ -1250,6 +1280,9 @@ FirebugService.prototype =
 
     reFindDebugger: function(frame, debuggr)
     {
+        var global = getFrameGlobal(frame);
+        if (global && debuggr.supportsGlobal(global)) return debuggr;
+
         var win = getFrameWindow(frame);
         if (debuggr.supportsWindow(win)) return debuggr; // for side-effect: context set on debugger.js
     },
@@ -1673,7 +1706,7 @@ function handleTrappingErrorsInterrupt(frame, type, rv)
     try
     {
         if (fbs.DBG_ERRORS) ddd("handleTrappingErrorsInterrupt\n");
-        if ( isFilteredURL(frame.script.fileName) )
+        if ( !isFilteredURL(frame.script.fileName) )
         {
             var frameLineId = frame.script.fileName + frame.line;
             if (fbs.DBG_ERRORS) dumpToFileWithStack("handleTrappingErrorsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type), frame);                              /*@explore*/
@@ -1784,7 +1817,7 @@ function isFilteredURL(url)
 function systemURLStem(url)
 {
     if (!url)
-        return false;
+        return true;
     if (this.url_class)
     {
         if ( url.substr(0,this.url_class.length) == this.url_class )
@@ -1842,6 +1875,19 @@ function hook(fn, rv)
                ERROR(msg);
             return rv;
         }
+    }
+}
+
+function getFrameGlobal(frame)
+{
+    var jscontext = frame.executionContext;
+    var frameGlobal = jscontext.globalObject.getWrappedValue();
+    if (frameGlobal)
+        return frameGlobal;
+    else
+    {
+        ddd("getFrameGlobal, no frameGlobal, trying window\n");
+        return getFrameWindow(frame);
     }
 }
 
@@ -1939,7 +1985,9 @@ var FirebugPrefsObserver =
         var prefDomain = "extensions.firebug";
         var c = data.indexOf(prefDomain);
         if (c == 0)
-            this.resetOption(prefDomain, data.substr(prefDomain.length) );
+            this.resetOption(prefDomain, data.substr(prefDomain.length+1) );
+        else
+            ddd("fbs.observe no match: "+data+"\n");
     },
 
     resetOption: function(prefDomain, optionName)
@@ -1947,7 +1995,7 @@ var FirebugPrefsObserver =
         try
         {
             fbs[optionName] = this.getPref(prefDomain, optionName);
-            if (fbs[optionName])
+            //if (fbs[optionName])
                 ddd("resetOption set "+optionName+" to "+fbs[optionName]+"\n");
         }
         catch (exc)
@@ -1999,6 +2047,12 @@ function ERROR(text)
 
 function ddd(text)
 {
+    if (fbs.hiddenWindow)
+    {
+        fbs.hiddenWindow.dump(text);
+        return;
+    }
+throw "no hiddenWindow";
     if (true)      /* in the traced version we dump to file */														/*@explore*/
         dumpToFile(text);     																						/*@explore*/
     else      		/* but in the untraced version 'else' will be removed and we dump to log */						/*@explore*/

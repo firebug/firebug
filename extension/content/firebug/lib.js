@@ -3211,6 +3211,14 @@ this.StackTrace.prototype =
     }
 };
 
+this.traceToString = function(trace)                                                                                          /*@explore*/
+{                                                                                                                      /*@explore*/
+    var str = "<top>";                                                                                                 /*@explore*/
+    for(var i = 0; i < trace.frames.length; i++)                                                                       /*@explore*/
+        str += "\n" + trace.frames[i];                                                                                 /*@explore*/
+    str += "\n<bottom>";                                                                                               /*@explore*/
+    return str;                                                                                                        /*@explore*/
+}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 this.StackFrame = function(context, fn, script, href, lineNo, args, pc)

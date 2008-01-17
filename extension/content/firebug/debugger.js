@@ -594,6 +594,13 @@ Firebug.Debugger = extend(Firebug.Module,
         return !!context;
     },
 
+    supportsGlobal: function(global)
+    {
+        var context = TabWatcher.getContextByWindow(global);
+        this.breakContext = context;
+        return !!context;
+    },
+
     onLock: function(state)
     {
         // XXXjoe For now, trying to see if it's ok to have multiple contexts
@@ -610,7 +617,7 @@ Firebug.Debugger = extend(Firebug.Module,
             var context = this.breakContext;
             delete this.breakContext;
 
-            if (FBTrace.DBG_BP || FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.onBreak context=", context);       /*@explore*/
+            if (FBTrace.DBG_BP || FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.onBreak context=", FBL.getStackDump());       /*@explore*/
             if (!context)
                 context = getFrameContext(frame);
             if (!context)
@@ -643,7 +650,10 @@ Firebug.Debugger = extend(Firebug.Module,
         delete this.breakContext;
 
         if (!context)
+        {
+            FBTrace.sysout("debugger.onThrow, no context, try to get from frame\n");
             context = getFrameContext(frame);
+        }
         if (FBTrace.DBG_THROW) FBTrace.sysout("debugger.onThrow context:"+(context?context.window.location:"undefined")+"\n"); /*@explore*/
         if (!context)
             return RETURN_CONTINUE_THROW;
@@ -1239,7 +1249,7 @@ Firebug.Debugger = extend(Firebug.Module,
     },
 
     enable: function()
-    {
+    {FBTrace.dumpStack("debugger.enable ******************************");
         this.wrappedJSObject = this;
         fbs.registerDebugger(this);
     },
@@ -2444,7 +2454,7 @@ function getCallingFrame(frame)
 function getFrameWindow(frame)
 {
     var result = {};
-    if (frame.eval("window", "", 1, result))
+    if (frame.eval("var y = 2;window", "", 1, result))
     {
         var win = result.value.getWrappedValue();
         return getRootWindow(win);
@@ -2488,14 +2498,7 @@ function countBreakpoints(context)
     return count;
 }
                                                                                                                        /*@explore*/
-function traceToString(trace)                                                                                          /*@explore*/
-{                                                                                                                      /*@explore*/
-    var str = "<top>";                                                                                                 /*@explore*/
-    for(var i = 0; i < trace.frames.length; i++)                                                                       /*@explore*/
-        str += "\n" + trace.frames[i];                                                                                 /*@explore*/
-    str += "\n<bottom>";                                                                                               /*@explore*/
-    return str;                                                                                                        /*@explore*/
-}                                                                                                                      /*@explore*/
+                                                                                                                     /*@explore*/
 
 // ************************************************************************************************
 

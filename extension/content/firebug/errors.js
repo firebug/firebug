@@ -229,7 +229,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             else
             {
                 if (FBTrace.DBG_ERRORS)                                                                                /*@explore*/
-                    FBTrace.dumpProperties("errors.observe dropped:", object);                                 /*@explore*/
+                    FBTrace.dumpProperties("errors.observe showChromeMessages off, dropped:", object);                                 /*@explore*/
             }
         }
         catch (exc)

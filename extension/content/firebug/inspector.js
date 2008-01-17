@@ -52,14 +52,15 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if (element)
         {
-            highlighter.highlight(context, element, boxFrame);
+            if (context && context.window && context.window.document)
+                highlighter.highlight(context, element, boxFrame);
         }
         else if (oldContext)
         {
             oldContext.highlightTimeout = oldContext.setTimeout(function()
             {
                 delete oldContext.highlightTimeout;
-                if (oldContext.window)
+                if (oldContext.window && oldContext.window.document)
                     highlighter.unhighlight(oldContext);
             }, inspectDelay);
         }
@@ -681,9 +682,6 @@ BoxModelHighlighter.prototype =
         if (!context.boxModelHighlighter)
         {
             var doc = context.window.document;
-
-            if (!doc)
-                return;
 
             function createRuler(name)
             {
