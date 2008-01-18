@@ -2188,7 +2188,7 @@ function flushDebugStream()
 
 function dumpToFileWithStack(text, frame)
 {
-    if (!dumpStream) dumpStream = createDumpStream();
+    if (!dumpStream) dumpStream = getDumpStream();
     dumpStream.write(text, text.length);
     text = " stack: \n";
     while(frame) {

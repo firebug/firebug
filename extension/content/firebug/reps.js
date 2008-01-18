@@ -859,7 +859,14 @@ this.Window = domplate(Firebug.Rep,
 
     getLocation: function(win)
     {
-        return win.location ? getFileName(win.location.href) : "";
+        try 
+        {
+            return (win && win.location && !win.closed) ? getFileName(win.location.href) : "";
+        }
+        catch (exc)
+        {
+            FBTrace.sysout("reps.Window window closed?");
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

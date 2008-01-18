@@ -224,7 +224,10 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
                     FBTrace.dumpProperties("errors.observe showChromeMessages message:", object);             /*@explore*/
                 // Must be an nsIConsoleMessage
-                Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                if (context)
+                    Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                else
+                    FBTrace.dumpProperties("errors.observe, no context for message, FirebugContext:", FirebugContext);
             }
             else
             {
