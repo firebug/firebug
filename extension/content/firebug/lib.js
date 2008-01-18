@@ -1403,6 +1403,12 @@ this.optionMenu = function(label, option)
         command: this.bindFixed(Firebug.setPref, Firebug, option, !Firebug[option]) };
 };
 
+this.serviceOptionMenu = function(label, option)
+{
+    return {label: label, type: "checkbox", checked: Firebug[option],
+        command: this.bindFixed(Firebug.setServicePref, Firebug, option, !Firebug[option]) };
+};
+
 // ************************************************************************************************
 // Stack Traces
 

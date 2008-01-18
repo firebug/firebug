@@ -46,7 +46,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_FBS_BP: false, // firebug-service breakpoints
     DBG_FBS_ERRORS: false, // firebug-service error handling
     DBG_FBS_FF_START: false, // firebug-service trace from start of firefox
-    DBG_FLUSH_EVERY_LINE: false, // firebug-service flush to see crash point
+    DBG_FBS_FLUSH: false, // firebug-service flush to see crash point
     DBG_FBS_JSDCONTEXT: false, // firebug-service dump contexts
 
     debug: this.DBG_TRACE,
@@ -227,8 +227,12 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
         FBTrace[category] = !FBTrace[category];
-        Firebug.setPref(category, FBTrace[category] );
-        //prefs.setBoolPref(prefDomain +"." + category, FBTrace[category]);
+
+        if (label.indexOf("_FBS_") == -1)
+            Firebug.setPref("extensions.firebug."+category, FBTrace[category] );
+        else
+            prefs.setBoolPref("extensions.firebug-service."+category, FBTrace[category]);
+
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("tracePanel.setOption: "+prefDomain +"." + category + " = " + FBTrace[category] + "\n");
     },

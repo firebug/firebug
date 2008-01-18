@@ -1873,13 +1873,13 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            optionMenu("BreakOnAllErrors", "breakOnErrors"),
+            serviceOptionMenu("BreakOnAllErrors", "breakOnErrors"),
             // wait 1.2 optionMenu("BreakOnTopLevel", "breakOnTopLevel"),
             // wait 1.2 optionMenu("ShowEvalSources", "showEvalSources"),
-            optionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
+            serviceOptionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
-            optionMenu("TrackThrowCatch", "trackThrowCatch")
+            serviceOptionMenu("TrackThrowCatch", "trackThrowCatch")
         ];
     },
 

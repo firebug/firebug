@@ -57,7 +57,7 @@ const prefNames =
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
     "showChromeErrors", "showChromeMessages", "showExternalErrors",
-    "showXMLHttpRequests",  "showStackTrace",
+    "showXMLHttpRequests",
 
     // HTML
     "showFullTextNodes", "showCommentNodes", "showWhitespaceNodes",
@@ -67,10 +67,9 @@ const prefNames =
     "showComputedStyle",
 
     // Script
-    "breakOnErrors",
+
     "breakOnTopLevel",
     "useDebugAdapter",
-    "showEvalSources",
     "showAllSourceFiles",
     "useLastLineForEvalName",
     "useMD5ForEvalName",
@@ -85,7 +84,12 @@ const prefNames =
     "netFilterCategory", "disableNetMonitor", "collectHttpHeaders",
 
     // Stack
-    "omitObjectPathStack", "filterSystemURLs",
+    "omitObjectPathStack",
+];
+const servicePrefNames = [
+"showStackTrace", // Console
+"filterSystemURLs", // Stack
+"breakOnErrors",  "showEvalSources", // Script
 ];
 
 const scriptBlockSize = 20;
@@ -120,7 +124,7 @@ top.Firebug =
     panelTypes: panelTypes,
     reps: reps,
     prefDomain: "extensions.firebug",
-    
+
 
     stringCropLength: 80,
 
@@ -132,7 +136,9 @@ top.Firebug =
     initialize: function()
     {
         for (var i = 0; i < prefNames.length; ++i)
-            this[prefNames[i]] = this.getPref(prefNames[i]);
+            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
+        for (var i = 0; i < servicePrefNames.length; ++i)
+            this[servicePrefNames[i]] = this.getPref("extensions.firebug-service", servicePrefNames[i]);
 
         this.loadExternalEditors();
         prefs.addObserver(this.prefDomain, this, false);
@@ -141,7 +147,7 @@ top.Firebug =
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
-            this[prefNames[i]] = this.getPref(prefNames[i]);
+            this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
 
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
@@ -300,7 +306,7 @@ top.Firebug =
 
     disableSystemPages: function(disable)
     {
-        this.setPref("allowSystemPages", !disable);
+        this.setPref(Firebug.prefDomain, "allowSystemPages", !disable);
         this.disableCurrent(disable);
     },
 
@@ -367,9 +373,9 @@ top.Firebug =
         this.setPref(name, !this[name]);
     },
 
-    getPref: function(name)
+    getPref: function(prefDomain, name)
     {
-        var prefName = this.prefDomain + "." + name;
+        var prefName = prefDomain + "." + name;
 
         var type = prefs.getPrefType(prefName);
         if (type == nsIPrefBranch.PREF_STRING)
@@ -453,7 +459,7 @@ top.Firebug =
         const editorPrefNames = ["label", "executable", "cmdline", "image"];
 
         externalEditors = [];
-        var list = this.getPref(prefName).split(",");
+        var list = this.getPref(this.prefDomain, prefName).split(",");
         for (var i = 0; i < list.length; ++i)
         {
             var editorId = list[i];
@@ -463,7 +469,7 @@ top.Firebug =
             for( var j = 0; j < editorPrefNames.length; ++j )
             {
                 try {
-                    item[editorPrefNames[j]] = this.getPref(prefName+"."+editorId+"."+editorPrefNames[j]);
+                    item[editorPrefNames[j]] = this.getPref(this.prefDomain, prefName+"."+editorId+"."+editorPrefNames[j]);
                 }
                 catch(exc)
                 {
@@ -976,8 +982,10 @@ top.Firebug =
 
     observe: function(subject, topic, data)
     {
+        if (data.indexOf(this.prefDomain) == -1)
+            return;
         var name = data.substr(this.prefDomain.length+1);
-        var value = this.getPref(name);
+        var value = this.getPref(this.prefDomain, name);
         if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");                /*@explore*/
         this.updatePref(name, value);
     },

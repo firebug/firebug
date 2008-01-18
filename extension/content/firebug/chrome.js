@@ -151,7 +151,7 @@ top.FirebugChrome =
             locationList.addEventListener("selectObject", onSelectLocation, false);
 
             var win1 = panelBar1.browser.contentWindow;
-            win1.enableAlways = bindFixed(Firebug.setPref, Firebug, "disabledAlways", false);
+            win1.enableAlways = bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, "disabledAlways", false);
             win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
             win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
 
@@ -810,7 +810,7 @@ top.FirebugChrome =
                     else if (option == "profiling")
                         checked = fbs.profiling;
                     else
-                        checked = Firebug.getPref(option);
+                        checked = Firebug.getPref(Firebug.prefDomain, option);
 
                     child.setAttribute("checked", checked);
                 }
@@ -826,7 +826,7 @@ top.FirebugChrome =
         if (option == "disabledForSite")
             Firebug.disableSite(checked);
         else
-            Firebug.setPref(option, checked);
+            Firebug.setPref(Firebug.prefDomain, option, checked);
     },
 
     onContextShowing: function(event)

@@ -45,12 +45,12 @@
             // we need to make sure it is initialized before the browser starts loading
             // the home page
             try {
-            	FirebugChrome.panelBarReady(this);
+                FirebugChrome.panelBarReady(this);
             }
             catch (e)
             {
-            	dump("bindings panelBar ctor FAILs: "+ e+"\n");
-            	dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
+                dump("bindings panelBar ctor FAILs: "+ e+"\n");
+                dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
             }
         ]]></constructor>
 
@@ -122,7 +122,7 @@
             <body><![CDATA[
                 var panelName = tab ? tab.panelType.prototype.name : null;
                 if (panelName && !tab.panelType.prototype.parentPanel)
-                    Firebug.setPref("defaultPanelName", panelName);
+                    Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
             ]]></body>

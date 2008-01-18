@@ -269,7 +269,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var large = forceLarge || !Firebug.largeCommandLine;
         if (large != Firebug.largeCommandLine)
-            Firebug.setPref("largeCommandLine", large);
+            Firebug.setPref(Firebug.prefDomain, "largeCommandLine", large);
     },
 
     checkOverflow: function(context)
@@ -282,7 +282,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             setTimeout(bindFixed(function()
             {
-                Firebug.setPref("largeCommandLine", true);
+                Firebug.setPref(Firebug.prefDomain, "largeCommandLine", true);
             }, this));
         }
     },
