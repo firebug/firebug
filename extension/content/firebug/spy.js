@@ -431,14 +431,9 @@ function requestStopped(request, xhrRequest, context, method, url)
     if (!spy.responseText)
         spy.responseText = spy.xhrRequest.responseText;
 
-    var netProgress = spy.context.netProgress;
-    if (netProgress)
-        netProgress.post(netProgress.stopFile,
-                [spy.xhrRequest.channel, now, spy.postText, spy.responseText]);
-
     if (FBL.DBG_NET)                                                                                                   /*@explore*/
-        FBL.sysout("onHTTPSpyLoad netProgress:"+netProgress+" responseTime="+responseTime                              /*@explore*/
-                                       +" spy.responseText "+spy.responseText.length +"bytes\n");                      /*@explore*/
+        FBL.sysout("onHTTPSpyLoad responseTime=" + responseTime                              /*@explore*/
+            + " spy.responseText " + spy.responseText.length + " bytes\n");                      /*@explore*/
 
     if (spy.logRow)
     {
@@ -497,10 +492,6 @@ function onHTTPSpyLoad(spy)
 function onHTTPSpyError(spy)
 {
     var now = new Date().getTime();
-
-    var netProgress = spy.context.netProgress;
-    if (netProgress)
-        netProgress.post(netProgress.stopFile, [spy.xhrRequest.channel, now]);
 
     if (spy.logRow)
     {
