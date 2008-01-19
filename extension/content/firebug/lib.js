@@ -1400,13 +1400,13 @@ this.createMenuSeparator = function(popup, before)
 this.optionMenu = function(label, option)
 {
     return {label: label, type: "checkbox", checked: Firebug[option],
-        command: this.bindFixed(Firebug.setPref, Firebug, option, !Firebug[option]) };
+        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, option, !Firebug[option]) };
 };
 
 this.serviceOptionMenu = function(label, option)
 {
     return {label: label, type: "checkbox", checked: Firebug[option],
-        command: this.bindFixed(Firebug.setServicePref, Firebug, option, !Firebug[option]) };
+        command: this.bindFixed(Firebug.setPref, Firebug, "extensions.firebug-service", option, !Firebug[option]) };
 };
 
 // ************************************************************************************************

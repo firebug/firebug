@@ -229,12 +229,21 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         FBTrace[category] = !FBTrace[category];
 
         if (label.indexOf("_FBS_") == -1)
-            Firebug.setPref("extensions.firebug."+category, FBTrace[category] );
+        {
+            var prefDomain = Firebug.prefDomain;
+            Firebug.setPref(Firebug.prefDomain, category, FBTrace[category] );
+        }
         else
-            prefs.setBoolPref("extensions.firebug-service."+category, FBTrace[category]);
-
+        {
+            var prefDomain = "extensions.firebug-service";
+            prefs.setBoolPref(prefDomain, category, FBTrace[category]);
+        }
+        
+        prefs.savePrefFile(null);
+        
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("tracePanel.setOption: "+prefDomain +"." + category + " = " + FBTrace[category] + "\n");
+                FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
+                
     },
 
     getContextMenuItems: function(object, target)

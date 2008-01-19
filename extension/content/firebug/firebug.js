@@ -324,9 +324,9 @@ top.Firebug =
             // XXXjjb eg about:neterror and friends.
         }
         if (isSystemURL(tabBrowser.currentURI.spec))
-            this.setPref("allowSystemPages", !disable);
+            this.setPref(this.prefDomain, "allowSystemPages", !disable);
         else if (!host)
-            this.setPref("disabledFile", disable);
+            this.setPref(this.prefDomain, "disabledFile", disable);
         else
         {
             var uri = ioService.newURI("http://" + host, null, null);
@@ -370,7 +370,7 @@ top.Firebug =
 
     togglePref: function(name)
     {
-        this.setPref(name, !this[name]);
+        this.setPref(Firebug.prefDomain, name, !this[name]);
     },
 
     getPref: function(prefDomain, name)
@@ -386,9 +386,9 @@ top.Firebug =
             return prefs.getBoolPref(prefName);
     },
 
-    setPref: function(name, value)
+    setPref: function(prefDomain, name, value)
     {
-        var prefName = this.prefDomain + "." + name;
+        var prefName = prefDomain + "." + name;
 
         var type = prefs.getPrefType(prefName);
         if (type == nsIPrefBranch.PREF_STRING)
@@ -410,7 +410,7 @@ top.Firebug =
 
     setTextSize: function(value)
     {
-        this.setPref("textSize", value);
+        this.setPref(Firebug.prefDomain, "textSize", value);
     },
 
     updatePref: function(name, value)
