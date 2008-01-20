@@ -708,20 +708,21 @@ FirebugService.prototype =
 
     obeyPrefs: function()
     {
-        try {
+        try
+        {
             var allPrefs = prefs.getChildList("extensions.firebug-service", {});
             for (var i = 0; i < allPrefs.length; i++)
             {
                 var m = reDBG.exec(allPrefs[i]);
                 if (m)
-                   {
+                {
                     var prefName = "DBG_"+m[1];
                     this[prefName] = FirebugPrefsObserver.getPref("extensions.firebug-service", prefName);
-                    ddd("fbs.read pref "+i+"("+prefName+"): "+allPrefs[i]+"="+this[prefName]+"\n");
-                   }
+                }
             }
-
-        } catch (e) {
+        }
+        catch (e)
+        {
             ddd("fbs.setting options FAILS "+e+"\n");
         }
 
@@ -1175,7 +1176,7 @@ FirebugService.prototype =
         if (debuggers.length < 1)
             return;
         var global = getFrameGlobal(frame);
-        if (fbs.DBG_FINDDEBUGGER) ddd(" findDebugger global:"+global+"\n");
+        if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger global:"+global+"\n");
         if (global)
         {
             for ( var i = debuggers.length - 1; i >= 0; i--)
@@ -1193,9 +1194,9 @@ FirebugService.prototype =
             }
         }
         else
-            if (fbs.DBG_FINDDEBUGGER) ddd(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
+            if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
     // TODO remove
-    if (fbs.DBG_FINDDEBUGGER) ddd(" fbs.findDebugger no find on global, trying getFrameWindow\n");
+    if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger no find on global, trying getFrameWindow\n");
         var win = getFrameWindow(frame);
         if (win)
         {
@@ -1214,7 +1215,7 @@ FirebugService.prototype =
             }
         }
 // Is bottom of stack needed now?
-     if (fbs.DBG_FINDDEBUGGER) ddd(" fbs.findDebugger no find on window, try bottom of stack\n");
+     if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger no find on window, try bottom of stack\n");
         if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
         {
             while(frame.callingFrame) // walk to the bottom of the stack

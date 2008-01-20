@@ -10,6 +10,8 @@ const DBG_TRACE = false;
 const PrefService = CC("@mozilla.org/preferences-service;1");
 const nsIPrefBranch2 = CI("nsIPrefBranch2");
 const prefs = PrefService.getService(nsIPrefBranch2);
+const nsIPrefService = CI("nsIPrefService");
+const prefService = PrefService.getService(nsIPrefService);
 const prefDomain = "extensions.firebug";
 
 this.namespaceName = "TracePanel";
@@ -45,6 +47,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_FBS_FUNCTION: false,     // firebug-service new Function
     DBG_FBS_BP: false, // firebug-service breakpoints
     DBG_FBS_ERRORS: false, // firebug-service error handling
+    DBG_FBS_FINDDEBUGGER: false, // firebug-service routing calls to debug windows
     DBG_FBS_FF_START: false, // firebug-service trace from start of firefox
     DBG_FBS_FLUSH: false, // firebug-service flush to see crash point
     DBG_FBS_JSDCONTEXT: false, // firebug-service dump contexts
@@ -70,7 +73,9 @@ Firebug.TraceModule = extend(Firebug.Console,
         {
             var m = reDBG.exec(p);
             if (m)
-                FBTrace[p] = Firebug.getPref(p); // set to 'true' to turn on all traces;
+                FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
+            if (this.debug && m)
+                FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
         }
         prefs.setBoolPref("browser.dom.window.dump.enabled", true);
     },
@@ -228,22 +233,22 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var category = 'DBG_'+label;
         FBTrace[category] = !FBTrace[category];
 
-        if (label.indexOf("_FBS_") == -1)
+        if (category.indexOf("_FBS_") == -1)
         {
             var prefDomain = Firebug.prefDomain;
             Firebug.setPref(Firebug.prefDomain, category, FBTrace[category] );
+            prefService.savePrefFile(null);
         }
         else
         {
             var prefDomain = "extensions.firebug-service";
-            prefs.setBoolPref(prefDomain, category, FBTrace[category]);
+            prefs.setBoolPref(prefDomain+"."+category, FBTrace[category]);
+            prefService.savePrefFile(null);
         }
-        
-        prefs.savePrefFile(null);
-        
+
         if (FBTrace.DBG_OPTIONS)
                 FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
-                
+
     },
 
     getContextMenuItems: function(object, target)

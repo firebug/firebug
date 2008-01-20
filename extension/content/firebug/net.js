@@ -155,7 +155,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     onToggleFilter: function(context, filterCategory)
     {
-        Firebug.setPref("netFilterCategory", filterCategory);
+        Firebug.setPref(Firebug.prefDomain, "netFilterCategory", filterCategory);
 
         // The content filter has been changed. Make sure that the content
         // of the panel is updated (CSS is used to hide or show individual files).
@@ -182,11 +182,11 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
         // Register HTTP observer for all net-request monitoring and time measuring.
         // This is done as soon as the FB UI is loaded.
-        observerService.addObserver(HttpObserver, "http-on-modify-request", false);            
-        observerService.addObserver(HttpObserver, "http-on-examine-response", false);    
+        observerService.addObserver(HttpObserver, "http-on-modify-request", false);
+        observerService.addObserver(HttpObserver, "http-on-examine-response", false);
     },
 
-    shutdown: function() 
+    shutdown: function()
     {
         // Unregister HTTP observer. This is done when the FB UI is closed.
         observerService.removeObserver(HttpObserver, "http-on-modify-request");
@@ -295,7 +295,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
                 TD({class: "netStatusCol netCol"},
                     DIV({class: "netStatusLabel netLabel"}, "$file.file|getStatus")
                 ),
-                
+
                 TD({class: "netDomainCol netCol"},
                     DIV({class: "netDomainLabel netLabel"}, "$file.file|getDomain")
                 ),
@@ -429,7 +429,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         if (file.responseStatus && file.responseStatusText)
           return file.responseStatus + " " + file.responseStatusText;
-          
+
         return "";
     },
 

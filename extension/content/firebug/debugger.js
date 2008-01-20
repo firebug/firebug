@@ -1249,7 +1249,10 @@ Firebug.Debugger = extend(Firebug.Module,
     },
 
     enable: function()
-    {FBTrace.dumpStack("debugger.enable ******************************");
+    {
+        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("debugger.enable ******************************\n");
+
         this.wrappedJSObject = this;
         fbs.registerDebugger(this);
     },

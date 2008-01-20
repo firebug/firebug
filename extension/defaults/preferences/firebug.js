@@ -69,6 +69,7 @@ pref("extensions.firebug-service.DBG_FBS_FF_START", false); // firebug-service t
 pref("extensions.firebug-service.DBG_FBS_CREATION", false); // firebug-service script creation           /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_BP", false);       // firebug-service breakpoints               /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_ERRORS", false);   // firebug-service errors                    /*@explore*/
+pref("extensions.firebug-service.DBG_FBS_FINDDEBUGGER", false);   // firebug-service findDebugger        /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_STEP", false);     // firebug-service stepping                  /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_FUNCTION", false); // firebug-service new Function              /*@explore*/
 pref("extensions.firebug.DBG_BP", false); 			// debugger.js and firebug-services.js; lots of output   /*@explore*/

@@ -19,6 +19,9 @@ const PrefService = CC("@mozilla.org/preferences-service;1");
 const PermManager = CC("@mozilla.org/permissionmanager;1");
 const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 
+const nsIPrefService = CI("nsIPrefService");
+const prefService = PrefService.getService(nsIPrefService);
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const contentBox = $("fbContentBox");
@@ -152,7 +155,7 @@ top.Firebug =
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
              for (var i = 0; i < prefNames.length; ++i)                                                                /*@explore*/
-                FBTrace.sysout("firebug.initialize option "+prefNames[i]+"="+this[prefNames[i]]+"\n");                 /*@explore*/
+                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");                 /*@explore*/
         }                                                                                                              /*@explore*/
 
     },
@@ -193,6 +196,7 @@ top.Firebug =
         if (fbs.enabled)
             dispatch(modules, "disable");
 
+        prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
 
         fbs.unregisterClient(this);
@@ -398,7 +402,6 @@ top.Firebug =
         else if (type == nsIPrefBranch.PREF_BOOL)
             prefs.setBoolPref(prefName, value);
 
-        prefs.savePrefFile(null);                                                                                                              /*@explore*/
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
     },
@@ -450,7 +453,8 @@ top.Firebug =
 
         delete optionUpdateMap[name];
                                                                                                                        /*@explore*/
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
+        if (FBTrace.DBG_OPTIONS)  /*@explore*/
+            FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
     },
 
     loadExternalEditors: function()
