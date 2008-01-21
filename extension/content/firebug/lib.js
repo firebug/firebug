@@ -2414,12 +2414,14 @@ this.readPostText = function(url, context)
             var webNav = context.browser.webNavigation;
             var descriptor = this.QI(webNav, this.CI("nsIWebPageDescriptor")).currentDescriptor;
             var entry = this.QI(descriptor, this.CI("nsISHEntry"));
+            if (entry && entry.postData)
+            {
+                var postStream = this.QI(entry.postData, this.CI("nsISeekableStream"));
+                postStream.seek(0, 0);
 
-            var postStream = this.QI(entry.postData, this.CI("nsISeekableStream"));
-            postStream.seek(0, 0);
-
-            var charset = context.window.document.characterSet;
-            return this.readFromStream(postStream, charset);
+                var charset = context.window.document.characterSet;
+                return this.readFromStream(postStream, charset);
+            }
          }
          catch (exc)
          {
