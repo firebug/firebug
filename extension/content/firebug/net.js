@@ -1078,7 +1078,6 @@ function NetProgress(context)
     this.clear = function()
     {
         this.requests = [];
-        this.requestMap = {};
         this.files = [];
         this.phases = [];
         this.documents = [];
@@ -1231,10 +1230,6 @@ NetProgress.prototype =
         var index = this.requests.indexOf(request);
         if (index == -1)
         {
-            var file = this.requestMap[name];
-            if (file)
-                return file;
-
             if (!win || getRootWindow(win) != this.context.window)
                 return;
 
@@ -1256,7 +1251,6 @@ NetProgress.prototype =
 
             file.request = request;
             file.index = this.files.length;
-            this.requestMap[name] = file;
             this.requests.push(request);
             this.files.push(file);
 
@@ -1328,8 +1322,6 @@ NetProgress.prototype =
         if (FBTrace.DBG_NET)                                                                                           /*@explore*/
             FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");  /*@explore*/
                                                                                                                        /*@explore*/
-        delete this.requestMap[file.href];
-
         var index = this.pending.indexOf(file);
         if (index != -1)
             this.pending.splice(index, 1);
