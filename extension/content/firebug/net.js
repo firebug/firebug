@@ -1392,6 +1392,7 @@ NetProgress.prototype =
 
     onStateChange: function(progress, request, flag, status)
     {
+      /*@explore*/
       /*
         if (flag & STATE_TRANSFERRING && flag & STATE_IS_DOCUMENT)
         {
@@ -1399,17 +1400,21 @@ NetProgress.prototype =
             if (win == win.parent)
                 this.post(respondedTopWindow, [request, now(), progress]);
         }
-        else if (flag & STATE_STOP && flag & STATE_IS_REQUEST)
+      */
+        
+        if (flag & STATE_STOP && flag & STATE_IS_REQUEST)
         {
-            if (this.getRequestFile(request))
+            // Stop only real requests.
+            if (this.requests.indexOf(request) != -1)
                 this.post(stopFile, [request, now()]);
         }
-      */
     },
 
     onProgressChange : function(progress, request, current, max, total, maxTotal)
     {
-        this.post(progressFile, [request, current, max]);
+        // Log progress information only for real requests.
+        if (this.requests.indexOf(request) != -1)
+          this.post(progressFile, [request, current, max]);
     },
 
     stateIsRequest: false,
