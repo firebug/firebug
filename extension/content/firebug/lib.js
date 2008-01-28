@@ -276,6 +276,11 @@ this.$STRF = $STRF;
 
 this.isVisible = function(elt)
 {
+    if (elt instanceof XULElement)
+    {
+        //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
+        return (!elt.hidden && !elt.collapsed);
+    }
     return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags
         || elt.namespaceURI == "http://www.w3.org/2000/svg";
 };
@@ -5118,7 +5123,17 @@ const invisibleTags = this.invisibleTags =
     "style": 1,
     "script": 1,
     "noscript": 1,
-    "br": 1
+    "br": 1,
+    /*
+    "window": 1,
+    "browser": 1,
+    "frame": 1,
+    "tabbrowser": 1,
+    "WINDOW": 1,
+    "BROWSER": 1,
+    "FRAME": 1,
+    "TABBROWSER": 1,
+    */
 };
 
 // ************************************************************************************************
