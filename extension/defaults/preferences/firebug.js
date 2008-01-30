@@ -87,5 +87,6 @@ pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch event
 pref("extensions.firebug.DBG_NET", false);        	// net.js                                    /*@explore*/
 pref("extensions.firebug.DBG_SHOW_SYSTEM", false);  // isSystemURL return false always.          /*@explore*/
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
+pref("extensions.firebug.DBG_INSPECT", false);   // inspector  /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_FLUSH", false); // /*@explore*/

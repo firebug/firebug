@@ -90,7 +90,7 @@
 
     <toolbar id="fbToolbar" align="center">
         <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">
-            <toolbarbutton label="&firebug.Inspect;" class="toolbar-text-button"
+            <toolbarbutton id="fbInspectButton" label="&firebug.Inspect;" class="toolbar-text-button"
                            tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting"/>
 
             <hbox id="fbConsoleButtons">

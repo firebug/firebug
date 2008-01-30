@@ -104,6 +104,28 @@ this.dumpInterfaces = function(obj)
     return found;
 },
 
+this.dumpEvent = function(header, event)
+{
+    var phase = " capturing phase ";
+    if (event.eventPhase == event.AT_TARGET)
+        phase = " at target ";
+    else if (event.eventPhase == event.BUBBLING_PHASE)
+        phase = " bubbling phase ";
+
+    if (event.relatedTarget)
+        var from = event.relatedTarget.tagName + "->";
+    else
+        var from = "";
+    if (event.currentTarget.tagName)
+        var at = event.currentTarget.tagName + "->";
+    else
+        var at = event.currentTarget.nodeName + "->";
+    var to = event.target.tagName;
+
+    this.sysout(header+" "+event.type+phase+from+at+to+"\n");
+},
+
+
 this.consoleOut = function(text)
 {
     consoleService.logStringMessage(text + "");

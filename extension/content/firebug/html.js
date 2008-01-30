@@ -281,7 +281,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
             FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");           /*@explore*/
                                                                                                                        /*@explore*/
-        this.markChange();
+        this.markChange();  // This invalidates the panels for every mutate
 
         var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
             ? this.ioBox.createObjectBox(parent)

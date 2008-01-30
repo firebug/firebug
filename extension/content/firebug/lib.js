@@ -3125,11 +3125,11 @@ this.getSourceFileByScript = function(context, script)
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below
     var lucky = context.sourceFileMap[script.fileName];
-    if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
+    //if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
     if (lucky && lucky.hasScript(script))
         return lucky;
 
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
+    //if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
 
     for (var url in context.sourceFileMap)
     {

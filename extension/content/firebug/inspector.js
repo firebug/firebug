@@ -279,18 +279,24 @@ Firebug.Inspector = extend(Firebug.Module,
 
     onInspectingMouseOver: function(event)
     {
+        if (FBTrace.DBG_INSPECT)
+           FBTrace.dumpEvent("onInspecting event", event);
         this.inspectNode(event.target);
         cancelEvent(event);
     },
 
     onInspectingMouseDown: function(event)
     {
+        if (FBTrace.DBG_INSPECT)
+           FBTrace.dumpEvent("onInspecting event", event);
         this.stopInspecting(false, true);
         cancelEvent(event);
     },
 
     onInspectingClick: function(event)
     {
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.dumpEvent("onInspecting event", event);
         var win = event.currentTarget.defaultView;
         if (win)
         {
@@ -427,9 +433,19 @@ FrameHighlighter.prototype =
 {
     highlight: function(context, element)
     {
+        if (element instanceof XULElement)
+            return;
         var offset = getViewOffset(element, true);
         var x = offset.x, y = offset.y;
         var w = element.offsetWidth, h = element.offsetHeight;
+        if (FBTrace.DBG_INSPECT)
+                FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
+
+        var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
+        if (wacked && FBTrace.DBG_INSPECT)
+            FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for ", element.tagName);
+        if (wacked)
+            return;
 
         var nodes = this.getNodes(context, element);
 
@@ -444,7 +460,8 @@ FrameHighlighter.prototype =
 
         move(nodes.left, x-edgeSize, y-edgeSize);
         resize(nodes.left, edgeSize, h+edgeSize*2);
-
+        if (FBTrace.DBG_INSPECT)																			/*@explore*/
+            FBTrace.sysout("FrameHighlighter ", element.tagName);											/*@explore*/
         var body = getNonFrameBody(element);
         if (!body)
             return this.unhighlight(context);
@@ -452,6 +469,8 @@ FrameHighlighter.prototype =
         var needsAppend = !nodes.top.parentNode || nodes.top.ownerDocument != body.ownerDocument;
         if (needsAppend)
         {
+            if (FBTrace.DBG_INSPECT)																		/*@explore*/
+                FBTrace.sysout("FrameHighlighter needsAppend", nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI); /*@explore*/
             attachStyles(context, body);
             for (var edge in nodes)
             {
@@ -461,7 +480,7 @@ FrameHighlighter.prototype =
                 }
                 catch(exc)
                 {
-                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
+                    if (FBTrace.DBG_INSPECT)                                                                              /*@explore*/
                         FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);                     /*@explore*/
                 }
             }
@@ -470,6 +489,8 @@ FrameHighlighter.prototype =
 
     unhighlight: function(context)
     {
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.sysout("FrameHighlighter unhightlight", context.window.location);
         var nodes = this.getNodes(context);
         var body = nodes.top.parentNode;
         if (body)

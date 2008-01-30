@@ -29,13 +29,13 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_EVENTS: false,  		// debugger.js for event handlers, need more
     DBG_EVAL: false,    		// debugger.js and firebug-service.js
     DBG_FUNCTION_NAMES: false,  // heuristics for anon functions
+    DBG_INSPECT: false, 		// inspector.js
     DBG_INITIALIZE: false,		// registry (modules panels); initialize FB
     DBG_HTML: false,            // HTML panel
     DBG_LINETABLE: false,       // lib.js creating line tables.
     DBG_NET: false,        	// net.js
     DBG_OPTIONS: false,
     DBG_PANELS: false, // panel selection.
-    DBG_SCANDOCS: false,
     DBG_SHOW_SYSTEM: false,    // isSystemURL return false always.
     DBG_SOURCEFILES: false, 	// debugger and sourceCache
     DBG_STACK: false,  		// call stack, mostly debugger.js
