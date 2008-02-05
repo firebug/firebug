@@ -6,6 +6,8 @@ FBL.ns(function() { with (FBL) {
 
 var listeners = [];
 
+var maxQueueRequests = 100;
+
 // ************************************************************************************************
 
 Firebug.Console = extend(Firebug.Module,
@@ -92,6 +94,13 @@ Firebug.Console = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
+    initializeUI: function()
+    {
+        // Initialize max limit for logged requests.
+        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
+        maxQueueRequests =  value ? value : maxQueueRequests;
+    },
+
     showContext: function(browser, context)
     {
         browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
@@ -156,6 +165,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
                 FirebugReps.SourceLink.tag.append({object: sourceLink}, row);
 
             container.appendChild(row);
+            
+            if (container.childNodes.length > maxQueueRequests)
+              container.removeChild(container.firstChild);
 
             this.filterLogRow(row, scrolledToBottom);
 

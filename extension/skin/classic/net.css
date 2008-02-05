@@ -241,6 +241,25 @@
 
 /************************************************************************************************/
 
+.netLimitRow {
+    background: #BBBBBB !important;
+    font-weight:normal;
+}
+
+.netLimitLabel {
+    color: red;
+    padding-left: 18px;
+}
+
+.netLimitRow > .netCol {
+    border-bottom: 2px solid;
+    -moz-border-bottom-colors: #EFEFEF #999999;
+    padding-top: 1px;
+    padding-bottom: 2px;
+}
+
+/************************************************************************************************/
+
 .netInfoCol {
     border-top: 1px solid #EEEEEE;
     background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;

@@ -52,9 +52,6 @@ const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverServ
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const maxPendingCheck = 200;
-const maxQueueRequests = 50;
-
 const mimeExtensionMap =
 {
     "txt": "text/plain",
@@ -130,12 +127,13 @@ const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
 const layoutInterval = 300;
 const phaseInterval = 1000;
 const indentWidth = 18;
+const maxPendingCheck = 200;
 
 var cacheSession = null;
 
 var contexts = new Array();
-
 var panelName = "net";
+var maxQueueRequests = 100;
 
 // ************************************************************************************************
 
@@ -169,7 +167,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     syncFilterButtons: function(chrome)
     {
-        var button = chrome.$("fbNetFilter-"+Firebug.netFilterCategory);
+        var button = chrome.$("fbNetFilter-" + Firebug.netFilterCategory);
         button.checked = true;
     },
 
@@ -178,6 +176,11 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     initializeUI: function()
     {
+        // Initialize max limit for logged requests.
+        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
+        maxQueueRequests =  value ? value : maxQueueRequests;
+    
+        // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(FirebugChrome);
 
         // Register HTTP observer for all net-request monitoring and time measuring.
@@ -229,7 +232,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
-          FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
+        FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
     },
 
     onBeforeUnload: function(aEvent)
@@ -244,16 +247,10 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
+        // Make sure that Net panel's buttons are displayed only
+        // when the panel is activated.
         var netButtons = browser.chrome.$("fbNetButtons");
         collapse(netButtons, !panel || panel.name != panelName);
-
-        if (panel && panel.context.netProgress)
-        {
-            if (panel.name == panelName)
-                panel.context.netProgress.activate(panel);
-            else
-                panel.context.netProgress.activate(null);
-        }
     }
 });
 
@@ -279,6 +276,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     fileTag:
         FOR("file", "$files",
             TR({class: "netRow $file.file|getCategory",
+                $collapsed: "$file.file|hideRow",
                 $hasHeaders: "$file.file|hasResponseHeaders",
                 $loaded: "$file.file.loaded", $responseError: "$file.file|isError",
                 $fromCache: "$file.file.fromCache", $inFrame: "$file.file|getInFrame"},
@@ -295,7 +293,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
                 TD({class: "netStatusCol netCol"},
                     DIV({class: "netStatusLabel netLabel"}, "$file.file|getStatus")
                 ),
-
                 TD({class: "netDomainCol netCol"},
                     DIV({class: "netDomainLabel netLabel"}, "$file.file|getDomain")
                 ),
@@ -326,11 +323,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
             TD({class: "netInfoCol", colspan: 5})
         ),
 
-    phaseTag:
-        TR({class: "netRow netPhaseRow"},
-            TD({class: "netPhaseCol", colspan: 5})
-        ),
-
     summaryTag:
         TR({class: "netRow netSummaryRow"},
             TD({class: "netCol"},
@@ -357,9 +349,23 @@ NetPanel.prototype = domplate(Firebug.Panel,
             )
         ),
 
+    limitTag:
+        TR({class: "netRow netLimitRow"},
+            TD({class: "netCol netLimitCol", colspan: 5},
+                DIV({class: "netLimitLabel"},
+                    $STR("LimitExceeded")
+                )
+            )
+        ),
+
     getCategory: function(file)
     {
-        return "category-"+getFileCategory(file);
+        return "category-" + getFileCategory(file);
+    },
+
+    hideRow: function(file)
+    {
+        return !(file.loaded || (file.startTime - file.endTime));
     },
 
     getInFrame: function(file)
@@ -391,28 +397,30 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         var fileCount = 0;
         var minTime = 0, maxTime = 0;
-        for (var file = phase.phaseLastStart; file; file = file.previousFile)
+        
+        for (var i=0; i<phase.files.length; i++)
         {
-            if ((!category || file.category == category) &&
-                ((file.endTime - file.startTime) > 0))
+            var file = phase.files[i];
+            
+            if (!category || file.category == category)
             {
-                ++fileCount;
-
-                if (file.size > 0)
+                if (file.loaded)
                 {
-                    totalSize += file.size;
-                    if (file.fromCache)
-                        cachedSize += file.size;
+                    ++fileCount;
+
+                    if (file.size > 0)
+                    {
+                        totalSize += file.size;
+                        if (file.fromCache)
+                            cachedSize += file.size;
+                    }
+
+                    if (!minTime || file.startTime < minTime)
+                        minTime = file.startTime;
+                    if (file.endTime > maxTime)
+                        maxTime = file.endTime;
                 }
-
-                if (!minTime || file.startTime < minTime)
-                    minTime = file.startTime;
-                if (file.endTime > maxTime)
-                    maxTime = file.endTime;
             }
-
-            if (file == phase)
-                break;
         }
 
         var totalTime = maxTime - minTime;
@@ -422,7 +430,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     getHref: function(file)
     {
-        return file.method.toUpperCase() + " " + getFileName(file.href);
+        return (file.method ? file.method.toUpperCase() : "?") + " " + getFileName(file.href);
     },
 
     getStatus: function(file)
@@ -430,7 +438,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (file.responseStatus && file.responseStatusText)
           return file.responseStatus + " " + file.responseStatusText;
 
-        return "";
+        return "&nbsp;";
     },
 
     getDomain: function(file)
@@ -453,7 +461,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (bytes == -1 || bytes == undefined)
             return "?";
         else if (bytes < 1000)
-            return bytes + " B"; // Fix for #327
+            return bytes + " B";
         else if (bytes < 1000000)
             return Math.ceil(bytes/1000) + " KB";
         else
@@ -488,6 +496,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         this.panelNode.innerHTML = "";
         this.table = null;
         this.summaryRow = null;
+        this.limitRow = null;
 
         this.queue = [];
         this.invalidPhases = false;
@@ -595,12 +604,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     destroy: function(state)
     {
-        if (this.pendingInterval)
-        {
-            this.context.clearInterval(this.pendingInterval);
-            delete this.pendingInterval;
-        }
-
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
@@ -608,6 +611,9 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
+
+        if (this.context.netProgress)
+            this.context.netProgress.activate(this);
 
         this.layout();
         this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
@@ -618,6 +624,9 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     hide: function()
     {
+        if (this.context.netProgress)
+          this.context.netProgress.activate(null);
+    
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
         clearInterval(this.layoutInterval);
@@ -771,7 +780,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     invalidatePhase: function(phase)
     {
-        if (!phase.invalidPhase)
+        if (phase && !phase.invalidPhase)
         {
             phase.invalidPhase = true;
             this.invalidPhases = true;
@@ -805,7 +814,9 @@ NetPanel.prototype = domplate(Firebug.Panel,
         }
 
         var rightNow = now();
+
         this.updateRowData(rightNow);
+        this.updateLogLimit(maxQueueRequests);
         this.updateTimeline(rightNow);
         this.updateSummaries(rightNow);
     },
@@ -821,12 +832,15 @@ NetPanel.prototype = domplate(Firebug.Panel,
         for (var i = 0; i < queue.length; ++i)
         {
             var file = queue[i];
+            if (!file.phase)
+              continue;
+              
+            file.invalid = false;
 
             phase = this.calculateFileTimes(file, phase, rightNow);
+            
             this.updateFileRow(file, newFileData);
-
-            file.invalid = false;
-            this.invalidatePhase(file.phase);
+            this.invalidatePhase(phase);
         }
 
         if (newFileData.length)
@@ -848,23 +862,30 @@ NetPanel.prototype = domplate(Firebug.Panel,
     updateFileRow: function(file, newFileData)
     {
         var row = file.row;
-        if (!row)
+        if (file.toRemove)
         {
-            if (file.startTime && file.endTime - file.startTime > 0)
-            {
-                newFileData.push({
-                        file: file,
-                        offset: this.barOffset + "%",
-                        width: this.barWidth + "%",
-                        elapsed: file.loaded ? this.elapsed : -1
-                });
-            }
+            this.removeLogEntry(file, true);
         }
-        else if (file.invalid)
+        else if (!row)
+        {
+              newFileData.push({
+                      file: file,
+                      offset: this.barOffset + "%",
+                      width: this.barWidth + "%",
+                      elapsed: file.loaded ? this.elapsed : -1
+              });
+        }
+        else
         {
             var sizeLabel = row.childNodes[3].firstChild;
             sizeLabel.firstChild.nodeValue = this.getSize(file);
-
+          
+            var methodLabel = row.childNodes[1].firstChild;
+            methodLabel.firstChild.nodeValue = this.getStatus(file);
+            
+            var hrefLabel = row.childNodes[0].firstChild;
+            hrefLabel.firstChild.nodeValue = this.getHref(file);
+            
             if (file.mimeType && !file.category)
             {
                 removeClass(row, "category-undefined");
@@ -891,6 +912,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
             if (file.loaded)
             {
+                removeClass(row, "collapsed");
                 setClass(row, "loaded");
                 timeLabel.innerHTML = this.formatTime(this.elapsed);
             }
@@ -910,7 +932,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     updateTimeline: function(rightNow)
     {
-        var rootFile = this.context.netProgress.rootFile; // XXXjjb never read?
+        //var rootFile = this.context.netProgress.rootFile; // XXXjjb never read?
         var tbody = this.table.firstChild;
 
         // XXXjoe Don't update rows whose phase is done and layed out already
@@ -918,6 +940,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
         for (var row = tbody.firstChild; row; row = row.nextSibling)
         {
             var file = row.repObject;
+            
+            // Some rows aren't associated with a file (e.g. header, sumarry).
             if (!file)
                 continue;
 
@@ -928,20 +952,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
             totalBar.style.left = timeBar.style.left = this.barOffset + "%";
             timeBar.style.width = this.barWidth + "%";
-
-            if (file.phase.phaseLastEnd && !file.phase.summaryRow)
-            {
-                var previousPhase = this.summaryRow.phase;
-                if (previousPhase)
-                {
-                    var lastRow = previousPhase.phaseLastStart.row;
-                    previousPhase.summaryRow = this.phaseTag.insertRows({}, lastRow)[0];
-                    this.invalidatePhase(previousPhase);
-                }
-
-                this.summaryRow.phase = file.phase;
-                file.phase.summaryRow = this.summaryRow;
-            }
         }
     },
 
@@ -995,7 +1005,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         {
             phase = file.phase;
             this.phaseStartTime = phase.startTime;
-            this.phaseEndTime = phase.phaseLastEndTime ? phase.phaseLastEndTime : rightNow;
+            this.phaseEndTime = phase.endTime ? phase.endTime : rightNow;
             this.phaseElapsed = this.phaseEndTime - phase.startTime;
         }
 
@@ -1004,6 +1014,96 @@ NetPanel.prototype = domplate(Firebug.Panel,
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
 
         return phase;
+    },
+    
+    updateLogLimit: function(limit) 
+    {
+        // Must be positive number;
+        limit = Math.max(0, limit);
+        
+        var netProgress = this.context.netProgress;
+        var files = netProgress.files;
+        if (!files.length || files.length <= (limit + netProgress.pending.length))
+            return;
+
+        // Remove old requests.
+        var filesLength = files.length;
+        var removeCount = Math.max(0, filesLength - limit);
+        for (var i=0; i<removeCount; i++) 
+            this.removeLogEntry(files[0]);
+    },
+
+    removeLogEntry: function(file, noInfo) 
+    {
+        if (!this.removeFile(file))
+            return;
+
+        if (!this.table || !this.table.firstChild)
+            return;
+
+        if (file.row)
+        {
+            // The file is loaded and there is a row that has to be removed from the UI.
+            var tbody = this.table.firstChild;
+            tbody.removeChild(file.row);
+        }
+        
+        if (noInfo)
+            return;
+        
+        // Create a info row (if not created yet) that says that some requests 
+        // have been removed from the list.
+        if (!this.limitRow)
+        {
+            var limitInfo = {
+              totalCount: 0,
+            };
+            
+            this.limitRow = this.limitTag.insertRows(limitInfo, this.table.firstChild.firstChild)[0];
+            this.limitRow.limitInfo = limitInfo;
+        }
+        
+        if (!this.limitRow)
+            return;
+        
+        var limitInfo = this.limitRow.limitInfo;        
+        limitInfo.totalCount++;
+            
+        // Update info within the limit row.
+        var limitLabel = this.limitRow.firstChild.firstChild;
+        limitLabel.firstChild.nodeValue = $STRF("LimitExceeded", 
+          [limitInfo.totalCount]);
+            
+        //if (netProgress.currentPhase == file.phase)
+        //  netProgress.currentPhase = null;
+    },
+    
+    removeFile: function(file) 
+    {
+        var netProgress = this.context.netProgress;
+        var files = netProgress.files;
+        var index = files.indexOf(file);
+        if (index == -1)
+            return false;
+        
+        var requests = netProgress.requests;
+        var phases = netProgress.phases;
+
+        files.splice(index, 1);
+        requests.splice(index, 1);
+        
+        // Don't forget to remove the phase whose last file has been removed.
+        var phase = file.phase;
+        phase.removeFile(file);
+        if (!phase.files.length)
+        {
+          remove(phases, phase);
+          
+          if (netProgress.currentPhase == phase)
+            netProgress.currentPhase = null;
+        }
+         
+        return true;
     }
 });
 
@@ -1014,14 +1114,16 @@ function NetProgress(context)
     this.context = context;
 
     var queue = null;
+    var requestQueue = null;
     var panel = null;
 
     this.post = function(handler, args)
     {
+        // If the panel is currently active insert the file into it directly 
+        // otherwise wait and insert it in to a "queue". It'll be flushed
+        // into the UI when the panel is displayed (see this.flush method).
         if (panel)
         {
-            // If the panel is currently active insert the file
-            // into it directly...
             var file = handler.apply(this, args);
             if (file)
             {
@@ -1031,11 +1133,36 @@ function NetProgress(context)
         }
         else
         {
-            // ... otherwise wait and insert it in to a "queue". It'll be flushed
-            // into the UI when the panel is displayed (see this.flush method).
-            if (queue.length/2 >= maxQueueRequests)
-                queue.splice(0, 2);
+            // The newest request is always inserted into the queue. 
             queue.push(handler, args);
+
+            // Real number of requests (not posts!) is remembered.
+            var request = args[0];
+            if (requestQueue.indexOf(request) == -1)
+              requestQueue.push(request);
+
+            // If number of requests reaches the limit, let's start to remove them.
+            if (requestQueue.length + this.files.length > (maxQueueRequests + this.pending.length))
+            {
+                var hiddenPanel = this.context.getPanel(panelName, false);
+                
+                var request = requestQueue.splice(0, 1)[0];
+                for (var i=0; i<queue.length; i+=2)
+                {
+                    if (queue[i+1][0] == request)
+                    {
+                        var file = queue[i].apply(this, queue[i+1]);
+                        if (file) {
+                            hiddenPanel.updateFile(file);
+                        }
+                        
+                        queue.splice(i, 2);
+                        i -= 2;
+                    }
+                }
+                
+                hiddenPanel.layout();
+            }
         }
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_NET)                                                                                           /*@explore*/
@@ -1058,6 +1185,7 @@ function NetProgress(context)
         }
 
         queue = [];
+        requestQueue = [];
     };
 
     this.activate = function(activePanel)
@@ -1084,6 +1212,7 @@ function NetProgress(context)
         this.windows = [];
 
         queue = [];
+        requestQueue = [];
     };
 
     this.clear();
@@ -1092,6 +1221,7 @@ function NetProgress(context)
 NetProgress.prototype =
 {
     panel: null,
+    pending: [],
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1113,21 +1243,25 @@ NetProgress.prototype =
             // until we get a respondedFile call later
             file.startTime = file.endTime = time;
             //file.fromCache = true;
-            //file.loaded = true;
             if (category && !file.category)
                 file.category = category;
+                
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
-
             file.postText = getPostText(file, this.context);
 
             this.awaitFile(request, file);
             this.extendPhase(file);
 
-            if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile file", file);                               /*@explore*/
+            if (FBTrace.DBG_NET) 
+                FBTrace.dumpProperties("net.requestedFile file", file);                               /*@explore*/
+                
             return file;
         }
-        else                                                                                                           /*@explore*/
-            if (FBTrace.DBG_NET) FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
+        else    
+        {                                                                                                       /*@explore*/
+            if (FBTrace.DBG_NET) 
+                FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
+        }
     },
 
     respondedFile: function(request, time, statusInfo)
@@ -1162,6 +1296,8 @@ NetProgress.prototype =
             if (endedAlready)
                 this.endLoad(file);
 
+            this.arriveFile(file, request);
+
             return file;
         }
     },
@@ -1173,8 +1309,6 @@ NetProgress.prototype =
         {
             file.size = progress;
             file.expectedSize = expectedSize;
-
-            this.arriveFile(file, request);
 
             return file;
         }
@@ -1207,15 +1341,32 @@ NetProgress.prototype =
 
     cacheEntryReady: function(request, file, size)
     {
-        file.loaded = true;
         if (size != -1)
             file.size = size;
 
-        getHttpHeaders(request, file);
+        if (file.loaded)
+        {
+            getHttpHeaders(request, file);
+            this.arriveFile(file, request);
+            return file;
+        }
+          
+        // Don't update the UI.        
+        return null;
+    },
 
-        this.arriveFile(file, request);
-        this.endLoad(file);
+    removeFile: function(request, file, size)
+    {
+        if (file.loaded)
+          return;
 
+        if (!this.pending.length)
+        {
+            this.context.clearInterval(this.pendingInterval);
+            delete this.pendingInterval;
+        }
+          
+        file.toRemove = true;
         return file;
     },
 
@@ -1237,20 +1388,14 @@ NetProgress.prototype =
             var isDocument = request.loadFlags & LOAD_DOCUMENT_URI && fileDoc.parent;
             var doc = isDocument ? fileDoc.parent : fileDoc;
 
-            file = doc.addFile(request);
+            file = doc.createFile(request);
             if (isDocument)
             {
                 fileDoc.documentFile = file;
                 file.ownDocument = fileDoc;
             }
 
-            if (!this.rootFile)
-                this.rootFile = file;  // don't set file.previousFile
-            else
-                file.previousFile = this.files[this.files.length-1];
-
             file.request = request;
-            file.index = this.files.length;
             this.requests.push(request);
             this.files.push(file);
 
@@ -1267,12 +1412,11 @@ NetProgress.prototype =
             var index = this.windows.indexOf(win);
             if (index == -1)
             {
-                var doc = new NetDocument(win);  // XXXjjb arg ignored
+                var doc = new NetDocument();
                 if (win.parent != win)
                     doc.parent = this.getRequestDocument(win.parent);
 
-                doc.index = this.documents.length;
-                doc.level = getFrameLevel(win);
+                //doc.level = getFrameLevel(win);
 
                 this.documents.push(doc);
                 this.windows.push(win);
@@ -1290,8 +1434,7 @@ NetProgress.prototype =
 
     awaitFile: function(request, file)
     {
-        if (!this.pending)
-            this.pending = [];
+        this.pending.push(file);
 
         // XXXjoe Remove files after they have been checked N times
         if (!this.pendingInterval)
@@ -1301,20 +1444,19 @@ NetProgress.prototype =
                 for (var i = 0; i < this.pending.length; ++i)
                 {
                     var file = this.pending[i];
-                    if (file.pendingCount > maxPendingCheck)
+                    if (file.pendingCount++ > maxPendingCheck)
                     {
-                        this.post(cacheEntryReady, [request, file, 0]);
-                        this.pending.splice(i, 0);
+                        this.pending.splice(i, 1);
                         --i;
+
+                        this.post(cacheEntryReady, [request, file, 0]);
+                        this.post(removeFile, [request, file, 0]);
                     }
                     else
                         waitForCacheCompletion(request, file, this);
                 }
             }, this), 300);
         }
-
-        file.pendingIndex = this.pending.length;
-        this.pending.push(file);
     },
 
     arriveFile: function(file, request)
@@ -1337,39 +1479,39 @@ NetProgress.prototype =
 
     endLoad: function(file)
     {
+        // Set file as loaded.
         file.loaded = true;
 
-        file.phase.phaseLastEnd = file;
-        if (!file.phase.phaseLastEndTime || file.endTime > file.phase.phaseLastEndTime)
-            file.phase.phaseLastEndTime = file.endTime;
+        // Update last finished file of the associated phase.
+        file.phase.lastFinishedFile = file;
     },
 
     extendPhase: function(file)
     {
         if (this.currentPhase)
         {
-            var phaseLastStart = this.currentPhase.phaseLastStart;
-
-            if (this.loaded && file.startTime - phaseLastStart.startTime >= phaseInterval)
-                this.startPhase(file, phaseLastStart);
+            // If the new request has been started within a "phaseInterval" after the 
+            // previous reqeust has been started, associate it with the current phase;
+            // otherwise create a new phase.
+            var lastStartTime = this.currentPhase.lastStartTime;
+            if (this.loaded && file.startTime - lastStartTime >= phaseInterval)
+                this.startPhase(file);
             else
-                file.phase = this.currentPhase;
+                this.currentPhase.addFile(file);
         }
         else
-            this.startPhase(file, null);
-
-        file.phase.phaseLastStart = file;
+        {
+            // If there is no phase yet, just create it.
+            this.startPhase(file);
+        }
     },
 
-    startPhase: function(file, phaseLastStart)
+    startPhase: function(file)
     {
-        if (phaseLastStart)
-            phaseLastStart.endPhase = true;
-
-        file.phase = this.currentPhase = file;
-        file.startPhase = true;
-
-        this.phases.push(file);
+        var phase = new NetPhase(file);
+        
+        this.currentPhase = phase;
+        this.phases.push(phase);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1392,22 +1534,6 @@ NetProgress.prototype =
 
     onStateChange: function(progress, request, flag, status)
     {
-      /*@explore*/
-      /*
-        if (flag & STATE_TRANSFERRING && flag & STATE_IS_DOCUMENT)
-        {
-            var win = progress.DOMWindow;
-            if (win == win.parent)
-                this.post(respondedTopWindow, [request, now(), progress]);
-        }
-      */
-        
-        if (flag & STATE_STOP && flag & STATE_IS_REQUEST)
-        {
-            // Stop only real requests.
-            if (this.requests.indexOf(request) != -1)
-                this.post(stopFile, [request, now()]);
-        }
     },
 
     onProgressChange : function(progress, request, current, max, total, maxTotal)
@@ -1430,41 +1556,43 @@ var respondedFile = NetProgress.prototype.respondedFile;
 var progressFile = NetProgress.prototype.progressFile;
 var stopFile = NetProgress.prototype.stopFile;
 var cacheEntryReady = NetProgress.prototype.cacheEntryReady;
+var removeFile = NetProgress.prototype.removeFile;
 
 // ************************************************************************************************
 
-function NetDocument()
-{
-    this.files = [];
-}
+/**
+ * A Document is a helpers objcet that represents a document (window) on the page.
+ * This object is created for main page document and for every inner document 
+ * (within a document) for which a request is made.
+ */
+function NetDocument() { }
 
 NetDocument.prototype =
 {
-    loaded: false,
-
-    addFile: function(request)
+    createFile: function(request)
     {
-        var file = new NetFile(request.name, this);
-        this.files.push(file);
-
-        if (this.files.length == 1)
-            this.rootFile = file;
-
-        return file;
+        return new NetFile(request.name, this);
     }
 };
 
 // ************************************************************************************************
 
+/**
+ * A File is a helper object that reprents a file for which a request is made.
+ * The document refers to it's parent document (NetDocument) through a member
+ * variable.
+ */
 function NetFile(href, document)
 {
     this.href = href;
     this.document = document
-                                                                                                                       /*@explore*/
-    if (FBTrace.DBG_NET) {                                                                                             /*@explore*/
-        this.uid = FBL.getUniqueId();                                                                                  /*@explore*/
-        FBTrace.dumpProperties("NetFile", this);                                                                       /*@explore*/
-    }                                                                                                                  /*@explore*/
+
+    if (FBTrace.DBG_NET) {
+        this.uid = FBL.getUniqueId();
+        FBTrace.dumpProperties("NetFile", this);
+    }           
+    
+    this.pendingCount = 0;
 }
 
 NetFile.prototype =
@@ -1479,6 +1607,83 @@ NetFile.prototype =
 };
 
 Firebug.NetFile = NetFile;
+
+// ************************************************************************************************
+
+/**
+ * A Phase is a helper object that groups requests made in the same time frame. 
+ * In other words, if a new requests is started within a given time (specified 
+ * by phaseInterval [ms]) - after previous request has been started -
+ * it automatically belongs to the same phase. 
+ * If a request is started after this period, a new phase is created 
+ * and this file becomes to be the first in that phase. 
+ * The first phase is ended when the page finishes it's loading. Other phases 
+ * might be started by additional XHR made by the page.
+ *
+ * All phases are stored within NetProgress.phases array.
+ *
+ * Phases are used to compute size of the graphical timeline. The timeline
+ * for each phase starts from the begining of the graph.
+ */
+function NetPhase(file) 
+{ 
+  // Start time of the phase. Remains the same, even if the file
+  // is removed from the log (due to a max limit of entries).
+  // This ensures stability of the time line.
+  this.startTime = file.startTime;
+
+  // The last finished request (file) in the phase.
+  this.lastFinishedFile = null;
+  
+  // Set to true if the phase needs to be updated in the UI.
+  this.invalidPhase = null;
+  
+  // List of files associated with this phase.  
+  this.files = [];
+
+  this.addFile(file);
+}
+
+NetPhase.prototype =
+{
+    addFile: function(file)
+    {
+        this.files.push(file);
+        file.phase = this;
+    },
+    
+    removeFile: function(file)
+    {
+        remove(this.files, file);
+        file.phase = null;
+        
+        // If the last file has been removed, update the last file member.
+        if (file == this.lastFinishedFile)
+        {
+          if (this.files.length == 0)
+          {
+            this.lastFinishedFile = null;
+          }
+          else
+          {
+            for (var i=0; i<this.files.length; i++) {
+              if (this.lastFinishedFile.endTime < this.files[i].endTime)            
+                this.lastFinishedFile = this.files[i];
+            }
+          }
+        }
+    },
+    
+    get lastStartTime() 
+    {
+      return this.files[this.files.length - 1].startTime;
+    },
+    
+    get endTime() 
+    {
+      return this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
+    }    
+};
 
 // ************************************************************************************************
 // Local Helpers
@@ -1509,10 +1714,19 @@ function monitorContext(context)
 
 function unmonitorContext(context)
 {
-    if (context.netProgress)
+    var netProgress = context.netProgress;
+    if (netProgress)
     {
+        if (netProgress.pendingInterval)
+        {
+            context.clearInterval(netProgress.pendingInterval);
+            delete netProgress.pendingInterval;
+            
+            netProgress.pending.splice(0, netProgress.pending.length);
+        }
+    
         if (context.browser.docShell)
-            context.browser.removeProgressListener(context.netProgress, NOTIFY_ALL);
+            context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
 
         delete context.netProgress;
     }
@@ -1711,9 +1925,8 @@ function safeGetWindow(webProgress)
         if (webProgress)
             return webProgress.DOMWindow;
     }
-    catch (exc)
-    {
-    }
+    catch (exc) { }
+    
     return null;
 }
 
@@ -1723,10 +1936,9 @@ function safeGetName(request)
     {
         return request.name;
     }
-    catch (exc)
-    {
-        return null;
-    }
+    catch (exc) { }
+
+    return null;
 }
 
 function getFileCategory(file)
@@ -1926,8 +2138,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
     updateInfo: function(netInfoBox, file, context)
     {
-        if (FBTrace.DBG_NET) FBTrace.dumpProperties("updateInfo file", file);                                          /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_NET) 
+            FBTrace.dumpProperties("updateInfo file", file);
+
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
         {
@@ -2199,8 +2412,7 @@ var HttpObserver =
       if (FBTrace.DBG_NET)
       {
           FBTrace.sysout("=== FB: HttpObserver ON-MODIFY-REQUEST,   request: " +
-            safeGetName(aRequest) + ", tabId: " + tabId + ", win-loc: " +
-            (win ? win.location.href : "null") + "\n");
+            safeGetName(aRequest) + "\n");
       }
 
       if (!tabId)
@@ -2229,8 +2441,7 @@ var HttpObserver =
       if (FBTrace.DBG_NET)
       {
         FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +
-          safeGetName(aRequest) + ", tabId: " + tabId + ", win-loc: " +
-          (win ? win.location.href : "null") + "\n");
+          safeGetName(aRequest) + "\n");
       }
 
       if (!tabId && FBTrace.DBG_NET)
@@ -2280,6 +2491,7 @@ var HttpObserver =
           var webProgress = getRequestWebProgress(aRequest, this);
           var category = getRequestCategory(aRequest);
           var win = webProgress ? safeGetWindow(webProgress) : null;
+          
           networkContext.post(requestedFile, [aRequest, now(), win, category]);
       }
   },
