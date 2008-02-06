@@ -352,8 +352,27 @@ NetPanel.prototype = domplate(Firebug.Panel,
     limitTag:
         TR({class: "netRow netLimitRow"},
             TD({class: "netCol netLimitCol", colspan: 5},
-                DIV({class: "netLimitLabel"},
-                    $STR("LimitExceeded")
+                TABLE({class: "", cellpadding: 0, cellspacing: 0},
+                    TBODY(
+                        TR({class: ""},
+                            TD(
+                                SPAN({class: "netLimitLabel"},
+                                    $STR("LimitExceeded")
+                                )
+                            ),
+                            TD({style: "width:100%"}),
+                            TD(
+                                SPAN($STR("LimitChange")),
+                                SPAN(" "),
+                                INPUT({class: "netLimitEdit", size: 4, type: "text", maxlength: 4}),
+                                SPAN(" "),
+                                BUTTON({class: "netLimitButton", disabled: "true"}, 
+                                  $STR("LimitSet")
+                                )
+                            ),
+                            TD("&nbsp;")
+                        )
+                    )
                 )
             )
         ),
@@ -365,9 +384,41 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     hideRow: function(file)
     {
-        return !(file.loaded || (file.startTime - file.endTime));
+        return !file.loaded;
     },
 
+    onSetLimit: function(event)
+    {
+        setMaxQueueLimit(event);
+    },
+
+    onLimitKeyDown: function(event)
+    {
+        if (event.keyCode == 13)
+        {
+           // ENTER
+           setMaxQueueLimit(event);
+        }
+        else if (event.keyCode == 27)
+        {
+          // ESC
+          event.currentTarget.blur();
+          event.currentTarget.value = maxQueueRequests;
+        }
+    },
+    
+    onLimitKeyUp: function(event)
+    {
+        var edit = event.currentTarget;        
+        var button = getChildByClass(edit.parentNode, "netLimitButton");
+        
+        var value = parseInt(edit.value, 10);
+        if (value != maxQueueRequests && value > 0)
+            button.disabled = false;
+        else 
+            button.disabled = true;        
+    },
+    
     getInFrame: function(file)
     {
         return !!file.document.parent;
@@ -531,7 +582,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
             var netInfo = template.tag.replace({file: row.repObject}, netInfoRow.firstChild);
             template.selectTabByName(netInfo, "Headers");
 
-            setClass(netInfo, "category-"+getFileCategory(row.repObject));
+            setClass(netInfo, "category-" + getFileCategory(row.repObject));
         }
         else
         {
@@ -1018,16 +1069,17 @@ NetPanel.prototype = domplate(Firebug.Panel,
     
     updateLogLimit: function(limit) 
     {
-        // Must be positive number;
-        limit = Math.max(0, limit);
-        
         var netProgress = this.context.netProgress;
+
+        // Must be positive number;
+        limit = Math.max(0, limit) + netProgress.pending.length;
+        
         var files = netProgress.files;
-        if (!files.length || files.length <= (limit + netProgress.pending.length))
+        var filesLength = files.length;
+        if (!filesLength || filesLength <= limit)
             return;
 
         // Remove old requests.
-        var filesLength = files.length;
         var removeCount = Math.max(0, filesLength - limit);
         for (var i=0; i<removeCount; i++) 
             this.removeLogEntry(files[0]);
@@ -1061,6 +1113,15 @@ NetPanel.prototype = domplate(Firebug.Panel,
             
             this.limitRow = this.limitTag.insertRows(limitInfo, this.table.firstChild.firstChild)[0];
             this.limitRow.limitInfo = limitInfo;
+            
+            var button = getElementByClass(this.limitRow, "netLimitButton");
+            button.addEventListener("click", this.onSetLimit, true);            
+            button.addEventListener("mouseup", function() { this.blur(); }, true);            
+            
+            var edit = getElementByClass(this.limitRow, "netLimitEdit");        
+            edit.addEventListener("keyup", this.onLimitKeyUp, true);            
+            edit.addEventListener("keydown", this.onLimitKeyDown, true);            
+            edit.value = maxQueueRequests;
         }
         
         if (!this.limitRow)
@@ -1070,7 +1131,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         limitInfo.totalCount++;
             
         // Update info within the limit row.
-        var limitLabel = this.limitRow.firstChild.firstChild;
+        var limitLabel = getElementByClass(this.limitRow, "netLimitLabel");
         limitLabel.firstChild.nodeValue = $STRF("LimitExceeded", 
           [limitInfo.totalCount]);
             
@@ -1106,6 +1167,32 @@ NetPanel.prototype = domplate(Firebug.Panel,
         return true;
     }
 });
+
+// ************************************************************************************************
+
+function setMaxQueueLimit(event)
+{
+    var parent = event.currentTarget.parentNode;
+    
+    var button = getChildByClass(parent, "netLimitButton");
+    var edit = getChildByClass(parent, "netLimitEdit");
+    var newValue = parseInt(edit.value, 10);
+    if (newValue > 0)
+    {
+        Firebug.setPref(Firebug.prefDomain, "maxQueueRequests", newValue);
+        maxQueueRequests = newValue;
+
+        button.disabled = true;
+        edit.blur();
+        
+        var panel = FirebugContext.getPanel(panelName, true);
+        if (panel)
+        {
+            panel.updateLogLimit(maxQueueRequests);
+            panel.updateSummaries(now(), true);
+        }
+    }
+}
 
 // ************************************************************************************************
 
