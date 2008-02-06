@@ -1172,6 +1172,8 @@ top.Firebug =
 
     getTabIdForWindow: function(aWindow)
     {
+        aWindow = getRootWindow(aWindow);
+        
         if (!aWindow || !this.tabBrowser.getBrowserIndexForDocument)
             return null;
 

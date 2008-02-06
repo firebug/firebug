@@ -446,8 +446,14 @@ function requestStopped(request, xhrRequest, context, method, url)
                
     if (!spy.statusText)
     {
-        spy.statusCode = spy.xhrRequest.status;
-        spy.statusText = spy.xhrRequest.statusText;
+        try
+        {
+          spy.statusCode = spy.xhrRequest.status;
+          spy.statusText = spy.xhrRequest.statusText;
+        }
+        catch (exc)
+        {
+        }
     }
 }
 
