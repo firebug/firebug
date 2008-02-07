@@ -28,7 +28,7 @@
         <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
         <property name="xpidl.exe" value="OperatingSystemPathTo:xpidl.exe"/>
         <property name="update.rdf.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
-    	<property name="update.xpi.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
+        <property name="update.xpi.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
     </target>
 
     <target name="version" depends="properties-local, no-properties-local" description="Compute version number">
@@ -93,7 +93,7 @@
                <filterchain>
                        <replacetokens>
                             <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.rdf.path}"/>
+                            <token key="UPDATEPATH" value="${update.rdf.path}/${BRANCH}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -118,7 +118,7 @@
         <echo message="update.expansion.notRequired true"/>
     </target>
 
-	<target name="release-documentation">
+    <target name="release-documentation">
         <copy file="${src_dir}/docs/index.tpl.html"
                tofile="${src_dir}/docs/index.html"
                overwrite="true">
@@ -130,34 +130,29 @@
                        </replacetokens>
                </filterchain>
         </copy>
-	</target>
-	
+    </target>
+
     <!-- Incremental Build Targets -->
-    <target name="incremental" depends="version, expand-templates, copy-to-extensions, adjust-chrome-manifests" />
-    <target name="copy-to-extensions" depends="clean-reg, clean-xpti"
-        description="Incremental Development">
-        <copy todir="${install.dir}extensions/firebug@software.joehewitt.com" >
-            <fileset dir=".">
-                <exclude name="build/**"/>
-                <exclude name="dist/**"/>
-                <exclude name="lite/**"/>
-            </fileset>
+    <target name="dev-setup" depends="create-extension-links, expand-templates">
+        <!-- put the expanded install.rdf back in the source tree, its not committed to svn -->
+        <copy todir="." >
+            <fileset dir="build/" includes="install.rdf"/>
         </copy>
     </target>
 
-    <target name="adjust-chrome-manifests">
-        <!-- Adjust chrome.manifest for direct read not jar files -->
-        <replaceregexp match="jar:chrome/firebug\.jar!/" replace="" flags="g">
-            <fileset dir="${install.dir}extensions/firebug@software.joehewitt.com" includes="**/chrome.manifest"/>
-        </replaceregexp>
-    </target>
+    <target name="create-extension-links" depends="version">
+        <!-- These links are one line files with paths pointing into our source -->
+        <echo message="Writing links from ${install.dir}/extensions to ${basedir}"/>
 
-    <target name="firebug-service" depends="version" description="Check compreg.dat when service changes">
-        <uptodate property="deleteCompreg.notRequired" srcfile="./components/firebug-service.js" targetfile="${install.dir}/compreg.dat" />
-    </target>
-    <target name="clean-reg" depends="firebug-service" unless="deleteCompreg.notRequired"
-        description="Delete compreg.dat to reload service" >
-        <delete file="${install.dir}/compreg.dat"/>
+        <mkdir dir="${install.dir}/extensions" />
+
+        <path id="firebug-dev">
+            <pathelement location="${basedir}"/>
+        </path>
+        <pathconvert refid="firebug-dev" property="firebug-dev"/>
+
+        <echo message="${firebug-dev}" file="${install.dir}/extensions/firebug@software.joehewitt.com" />
+
     </target>
 
     <!-- IDL/XPT Targets -->
@@ -185,6 +180,15 @@
                 <include name="*.xpt"/>
             </fileset>
         </copy>
+    </target>
+
+    <target name="firebug-service" depends="version" description="Check compreg.dat when service changes">
+        <uptodate property="deleteCompreg.notRequired" srcfile="./components/firebug-service.js" targetfile="${install.dir}/compreg.dat" />
+    </target>
+
+    <target name="clean-reg" depends="firebug-service" unless="deleteCompreg.notRequired"
+        description="Delete compreg.dat to reload service" >
+        <delete file="${install.dir}/compreg.dat"/>
     </target>
 
     <!-- Distribution XPI Targets -->
@@ -220,6 +224,7 @@
 
     <target name="zipIntoXPI" depends="clean, createChromeJAR, createAptanaJAR">
         <mkdir dir="${dist_dir}" />
+        <!-- the chrome.manifest in source does not use jar files -->
         <copy file="${src_dir}/deploy-chrome.manifest" tofile="${build_dir}/chrome.manifest" />
         <antcall target="integrateAptana"/>
         <zip destfile="${dist_dir}/${ant.project.name}.xpi" update="true">
