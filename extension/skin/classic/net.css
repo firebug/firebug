@@ -242,10 +242,10 @@
 /************************************************************************************************/
 
 .netLimitRow {
-    background: #BBBBBB !important;
+    background: rgb(255, 255, 225) !important;
     font-weight:normal;
     color: black;
-    font-weight:bold;
+    font-weight:normal;
 }
 
 .netLimitLabel {
@@ -256,22 +256,14 @@
     border-bottom: 2px solid;
     -moz-border-bottom-colors: #EFEFEF #999999;
     vertical-align: middle !important;
-}
-
-.netLimitEdit {
-    -moz-appearance: none;
-    border: 1px solid;
-    -moz-border-top-colors: #96969D !important;
-    -moz-border-right-colors: #96969D !important;
-    -moz-border-bottom-colors: #96969D !important;
-    -moz-border-left-colors: #96969D !important;
-    background: -moz-field;
-    font-size: 11px;
-    width:35px;
+    padding-top: 2px;
+    padding-bottom: 2px;
 }
 
 .netLimitButton {
     font-size: 11px;
+    padding-top: 1px;
+    padding-bottom: 1px;
 }
 
 /************************************************************************************************/

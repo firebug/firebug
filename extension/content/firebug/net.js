@@ -25,6 +25,10 @@ const CacheService = CC("@mozilla.org/network/cache-service;1");
 const ImgCache = CC("@mozilla.org/image/cache;1");
 const IOService = CC("@mozilla.org/network/io-service;1");
 
+const nsIPrefBranch2 = CI("nsIPrefBranch2");
+const PrefService = CC("@mozilla.org/preferences-service;1");
+const prefs = PrefService.getService(nsIPrefBranch2);
+
 const NOTIFY_ALL = nsIWebProgress.NOTIFY_ALL;
 
 const STATE_IS_WINDOW = nsIWebProgressListener.STATE_IS_WINDOW;
@@ -177,9 +181,8 @@ Firebug.NetMonitor = extend(Firebug.Module,
     initializeUI: function()
     {
         // Initialize max limit for logged requests.
-        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
-        maxQueueRequests =  value ? value : maxQueueRequests;
-    
+        NetLimit.updateMaxLimit();
+            
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(FirebugChrome);
 
@@ -187,6 +190,8 @@ Firebug.NetMonitor = extend(Firebug.Module,
         // This is done as soon as the FB UI is loaded.
         observerService.addObserver(HttpObserver, "http-on-modify-request", false);
         observerService.addObserver(HttpObserver, "http-on-examine-response", false);
+    
+        prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
 
     shutdown: function()
@@ -194,6 +199,8 @@ Firebug.NetMonitor = extend(Firebug.Module,
         // Unregister HTTP observer. This is done when the FB UI is closed.
         observerService.removeObserver(HttpObserver, "http-on-modify-request");
         observerService.removeObserver(HttpObserver, "http-on-examine-response");
+
+        prefs.removeObserver(Firebug.prefDomain, this, false);
     },
 
     initContext: function(context)
@@ -801,15 +808,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (!this.table)
         {
             this.table = this.tableTag.replace({}, this.panelNode, this);
-
-            var limitInfo = {
-              totalCount: 0,
-            };
-
-            this.limitRow = NetLimit.limitTag.insertRows(limitInfo, this.table.firstChild)[0];
-            this.limitRow.limitInfo = limitInfo;
-            NetLimit.updateLimit(this.limitRow, maxQueueRequests);
-
+            this.limitRow = NetLimit.createRow(this.table.firstChild);
             this.summaryRow =  this.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
         }
 
@@ -1091,16 +1090,23 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
 // ************************************************************************************************
 
-var NetLimit = domplate(Firebug.Rep,
+Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 {
     isCollapsed: true,
     
+    tableTag:
+        DIV(
+            TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
+                TBODY()
+            )
+        ),
+        
     limitTag:
         TR({class: "netRow netLimitRow", $collapsed: "$isCollapsed"},
             TD({class: "netCol netLimitCol", colspan: 5},
-                TABLE({class: "", cellpadding: 0, cellspacing: 0},
+                TABLE({cellpadding: 0, cellspacing: 0},
                     TBODY(
-                        TR({class: ""},
+                        TR(
                             TD(
                                 SPAN({class: "netLimitLabel"},
                                     $STR("LimitExceeded")
@@ -1108,16 +1114,9 @@ var NetLimit = domplate(Firebug.Rep,
                             ),
                             TD({style: "width:100%"}),
                             TD(
-                                SPAN($STR("LimitChange")),
-                                SPAN(" "),
-                                INPUT({class: "netLimitEdit", size: 4, type: "text", maxlength: 4,
-                                    onkeydown: "$onEditKeyDown",
-                                    onkeyup: "$onEditKeyUp"}),
-                                SPAN(" "),
-                                BUTTON({class: "netLimitButton", disabled: "true",
-                                    onclick: "$onButtonClick",
-                                    onmouseup: "$onButtonMouseUp"}, 
-                                  $STR("LimitSet")
+                                BUTTON({class: "netLimitButton", title: $STR("LimitPrefsTitle"),
+                                    onclick: "$onPreferences"},
+                                  $STR("LimitPrefs")
                                 )
                             ),
                             TD("&nbsp;")
@@ -1127,73 +1126,14 @@ var NetLimit = domplate(Firebug.Rep,
             )
         ),
         
-    isCollapsed: function() {
+    isCollapsed: function() 
+    {
         return this.isCollapsed;
     },
-    
-    onEditKeyDown: function(event)
-    {
-        if (event.keyCode == 13) // ENTER
-        {
-           this.setMaxQueueLimit(event);
-        }
-        else if (event.keyCode == 27) // ESC
-        {
-          event.currentTarget.blur();
-          event.currentTarget.value = maxQueueRequests;
-        }
-    },
-        
-    onEditKeyUp: function(event)
-    {
-        var edit = event.currentTarget;        
-        var button = getChildByClass(edit.parentNode, "netLimitButton");
-        
-        var value = parseInt(edit.value, 10);
-        if (value != maxQueueRequests && value > 0)
-            button.disabled = false;
-        else 
-            button.disabled = true;        
-    },
-    
-    onButtonClick: function(event)
-    {
-        this.setMaxQueueLimit(event);
-    },
-    
-    onButtonMouseUp: function(event)
-    {
-        event.currentTarget.blur();    
-    },
-    
-    setMaxQueueLimit: function(event)
-    {
-        var parent = event.currentTarget.parentNode;
-        
-        var button = getChildByClass(parent, "netLimitButton");
-        var edit = getChildByClass(parent, "netLimitEdit");
-        var newValue = parseInt(edit.value, 10);
-        if (newValue > 0)
-        {
-            Firebug.setPref(Firebug.prefDomain, "maxQueueRequests", newValue);
-            maxQueueRequests = newValue;
 
-            button.disabled = true;
-            edit.blur();
-            
-            var panel = FirebugContext.getPanel(panelName, true);
-            if (panel)
-            {
-                panel.updateLogLimit(maxQueueRequests);
-                panel.updateSummaries(now(), true);
-            }
-        }
-    },
-    
-    updateLimit: function(row, limit) 
+    onPreferences: function(event)
     {
-        var edit = getElementByClass(row, "netLimitEdit");        
-        edit.value = limit;
+        openNewTab("about:config");
     },
     
     updateCounter: function(row, count) 
@@ -1203,8 +1143,47 @@ var NetLimit = domplate(Firebug.Rep,
         // Update info within the limit row.
         var limitLabel = getElementByClass(row, "netLimitLabel");
         limitLabel.firstChild.nodeValue = $STRF("LimitExceeded", [row.limitInfo.totalCount]);
-    }
+    },
+    
+    createTable: function(parent)
+    {
+        var table = this.tableTag.replace({}, parent);
+        var row = this.createRow(table.firstChild.firstChild);
+        return [table, row];
+    },
+    
+    createRow: function(parent)
+    {
+        var limitInfo = {
+          totalCount: 0,
+        };
+        
+        var row = this.limitTag.insertRows(limitInfo, parent)[0];
+        row.limitInfo = limitInfo;
+
+        return row;
+    },
+    
+    // nsIPrefObserver
+    observe: function(subject, topic, data) 
+    {
+        // We're observing preferences only.
+        if (topic != "nsPref:changed")
+          return; 
+
+        var prefName = data.substr(Firebug.prefDomain.length + 1);
+        if (prefName == "maxQueueRequests")
+            this.updateMaxLimit();
+    },
+    
+    updateMaxLimit: function()
+    {
+        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
+        maxQueueRequests =  value ? value : maxQueueRequests;
+    }    
 });
+
+var NetLimit = Firebug.NetMonitor.NetLimit;
 
 // ************************************************************************************************
 
@@ -2653,23 +2632,6 @@ function getTabIdForHttpChannel(aHttpChannel)
     catch (err) {
         ERROR(err);
     }
-
-    return null;
-}
-
-function getTabIdForWindow(aWindow)
-{
-    try {
-        var targetDoc = aWindow.document;
-
-        var tab = null;
-        var targetBrowserIndex = gBrowser.getBrowserIndexForDocument(targetDoc);
-
-        if (targetBrowserIndex != -1)
-            tab = gBrowser.tabContainer.childNodes[targetBrowserIndex];
-
-        return tab.linkedPanel;
-    } catch (ex) {}
 
     return null;
 }

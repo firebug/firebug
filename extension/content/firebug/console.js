@@ -2,10 +2,13 @@
 
 FBL.ns(function() { with (FBL) {
 
+const nsIPrefBranch2 = CI("nsIPrefBranch2");
+const PrefService = CC("@mozilla.org/preferences-service;1");
+const prefs = PrefService.getService(nsIPrefBranch2);
+
 // ************************************************************************************************
 
 var listeners = [];
-
 var maxQueueRequests = 100;
 
 // ************************************************************************************************
@@ -40,12 +43,25 @@ Firebug.Console = extend(Firebug.Module,
             context = FirebugContext;
         if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
 
-
         if (noThrottle || !context)
         {
             var panel = this.getPanel(context);
             if (panel)
-                return panel.append(appender, objects, className, rep, sourceLink, noRow);
+            {
+                var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
+                
+                var container = panel.getTopContainer();
+                var template = Firebug.NetMonitor.NetLimit;
+
+                while (container.childNodes.length > maxQueueRequests + 1)
+                {
+                    container.removeChild(container.firstChild.nextSibling);
+                    panel.limit.limitInfo.totalCount++;
+                    template.updateCounter(panel.limit);
+                }
+              
+                return row;                
+            }
         }
         else
         {
@@ -94,13 +110,6 @@ Firebug.Console = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
-    initializeUI: function()
-    {
-        // Initialize max limit for logged requests.
-        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
-        maxQueueRequests =  value ? value : maxQueueRequests;
-    },
-
     showContext: function(browser, context)
     {
         browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
@@ -145,6 +154,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
     messageCount: 0,
     lastLogTime: 0,
     groups: null,
+    limit: null,
 
     append: function(appender, objects, className, rep, sourceLink, noRow)
     {
@@ -166,9 +176,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 
             container.appendChild(row);
             
-            if (container.childNodes.length > maxQueueRequests)
-              container.removeChild(container.firstChild);
-
             this.filterLogRow(row, scrolledToBottom);
 
             if (scrolledToBottom)
@@ -299,6 +306,29 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
     searchable: true,
     editable: false,
 
+    initialize: function() 
+    {
+        Firebug.Panel.initialize.apply(this, arguments);
+
+        var row = this.createRow("limitRow");            
+        
+        var template = Firebug.NetMonitor.NetLimit;
+        var nodes = template.createTable(row);
+
+        this.limit = nodes[1];
+        
+        var container = this.getTopContainer();
+        container.appendChild(nodes[0]);
+        
+        // Initialize log limit and listen for changes.
+        this.updateMaxLimit();
+        prefs.addObserver(Firebug.prefDomain, this, false);
+    },
+
+    shutdown: function() {
+        prefs.removeObserver(Firebug.prefDomain, this, false);
+    },
+
     show: function(state)
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show\n");                                               /*@explore*/
@@ -419,7 +449,25 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         endPt.setStartAfter(logRow);
 
         return finder.Find(text, searchRange, startPt, endPt) != null;
-    }
+    },
+    
+    // nsIPrefObserver
+    observe: function(subject, topic, data) 
+    {
+        // We're observing preferences only.
+        if (topic != "nsPref:changed")
+          return; 
+
+        var prefName = data.substr(Firebug.prefDomain.length + 1);
+        if (prefName == "maxQueueRequests")
+            this.updateMaxLimit();
+    },
+    
+    updateMaxLimit: function()
+    {
+        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
+        maxQueueRequests =  value ? value : maxQueueRequests;
+    }    
 });
 
 // ************************************************************************************************
