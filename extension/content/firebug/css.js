@@ -190,8 +190,8 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.Editor.stopEditing();
         else
         {
-			if (!this.location)
-				return;
+            if (!this.location)
+                return;
 
             var styleSheet = this.location.editStyleSheet
                 ? this.location.editStyleSheet.sheet
@@ -988,9 +988,11 @@ CSSElementPanel.prototype = extend(CSSStyleSheetPanel.prototype,
             {
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
-                var href = rule.parentStyleSheet.href;
-                if (isSystemURL(href))
+                var href = rule.parentStyleSheet.href;  // Null means inline
+                if (href && isSystemURL(href))
                     continue;
+                if (!href)
+                    href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
 
                 var props = this.getRuleProperties(this.context, rule, inheritMode);
                 if (inheritMode && !props.length)
