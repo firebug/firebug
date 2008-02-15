@@ -5,28 +5,30 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIWebProgressListener = CI("nsIWebProgressListener")
-const nsIWebProgress = CI("nsIWebProgress")
-const nsIRequest = CI("nsIRequest")
-const nsIChannel = CI("nsIChannel")
-const nsIHttpChannel = CI("nsIHttpChannel")
-const nsICacheService = CI("nsICacheService")
-const nsICache = CI("nsICache")
-const nsIObserverService = CI("nsIObserverService")
-const nsISupportsWeakReference = CI("nsISupportsWeakReference")
-const nsISupports = CI("nsISupports")
-const nsIIOService = CI("nsIIOService")
-const imgIRequest = CI("imgIRequest");
-const nsIUploadChannel = CI("nsIUploadChannel");
-const nsIXMLHttpRequest = CI("nsIXMLHttpRequest");
-const nsISeekableStream = CI("nsISeekableStream");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIWebProgressListener = Ci.nsIWebProgressListener;
+const nsIWebProgress = Ci.nsIWebProgress;
+const nsIRequest = Ci.nsIRequest;
+const nsIChannel = Ci.nsIChannel;
+const nsIHttpChannel = Ci.nsIHttpChannel;
+const nsICacheService = Ci.nsICacheService;
+const nsICache = Ci.nsICache;
+const nsIObserverService = Ci.nsIObserverService;
+const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
+const nsISupports = Ci.nsISupports;
+const nsIIOService = Ci.nsIIOService;
+const imgIRequest = Ci.imgIRequest;
+const nsIUploadChannel = Ci.nsIUploadChannel;
+const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
+const nsISeekableStream = Ci.nsISeekableStream;
 
-const CacheService = CC("@mozilla.org/network/cache-service;1");
-const ImgCache = CC("@mozilla.org/image/cache;1");
-const IOService = CC("@mozilla.org/network/io-service;1");
+const CacheService = Cc["@mozilla.org/network/cache-service;1"];
+const ImgCache = Cc["@mozilla.org/image/cache;1"];
+const IOService = Cc["@mozilla.org/network/io-service;1"];
 
-const nsIPrefBranch2 = CI("nsIPrefBranch2");
-const PrefService = CC("@mozilla.org/preferences-service;1");
+const nsIPrefBranch2 = Ci.nsIPrefBranch2;
+const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
 
 const NOTIFY_ALL = nsIWebProgress.NOTIFY_ALL;
@@ -2644,4 +2646,5 @@ Firebug.registerPanel(NetPanel);
 // ************************************************************************************************
 
 }});
+
 

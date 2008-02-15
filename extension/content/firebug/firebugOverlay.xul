@@ -185,6 +185,9 @@
                 </hbox>
             </vbox>
         </deck>
+        <popup id="inspectorPopup" style="background: transparent; border: 2px solid red">
+        <label value="inspect"/>
+        </popup>
     </box>
 
     <hbox id="fbCommandBox">
@@ -193,4 +196,6 @@
         <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                        oncommand="Firebug.setPref('largeCommandLine', true)"/>
     </hbox>
+
+
 </overlay>

@@ -2,8 +2,10 @@
 
 FBL.ns(function() { with (FBL) {
 
-const nsIPrefBranch2 = CI("nsIPrefBranch2");
-const PrefService = CC("@mozilla.org/preferences-service;1");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIPrefBranch2 = Ci.nsIPrefBranch2;
+const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
 
 // ************************************************************************************************

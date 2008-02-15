@@ -11,7 +11,9 @@ if(!XPCOMUtils)
 // ************************************************************************************************
 // Constants
 
-const nsIWebNavigation = CI("nsIWebNavigation");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIWebNavigation = Ci.nsIWebNavigation;
 
 const LOAD_FLAGS_BYPASS_PROXY = nsIWebNavigation.LOAD_FLAGS_BYPASS_PROXY;
 const LOAD_FLAGS_BYPASS_CACHE = nsIWebNavigation.LOAD_FLAGS_BYPASS_CACHE;
@@ -1107,6 +1109,7 @@ function browser2Loaded()
 
 function onBlur(event)
 {
+    // XXXjjb this seems like a waste: called continuously to clear possible highlight I guess.
     Firebug.Inspector.highlightObject(null, FirebugContext);
 }
 
@@ -1315,5 +1318,6 @@ function dddx()
 {
     Firebug.Console.logFormatted(arguments);
 }
+
 
 

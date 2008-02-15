@@ -5,7 +5,9 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIDOMNodeFilter = CI("nsIDOMNodeFilter");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIDOMNodeFilter = Ci.nsIDOMNodeFilter;
 
 const SHOW_ALL = nsIDOMNodeFilter.SHOW_ALL;
 

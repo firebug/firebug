@@ -12,10 +12,12 @@ try { /*@explore*/
 this.fbs = this.CCSV("@joehewitt.com/firebug;1", "nsIFireBug").wrappedJSObject;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 
-const PCMAP_SOURCETEXT = this.CI("jsdIScript").PCMAP_SOURCETEXT;
-const PCMAP_PRETTYPRINT = this.CI("jsdIScript").PCMAP_PRETTYPRINT;
+const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
+const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -690,7 +692,7 @@ this.insertTextIntoElement = function(element, text)
     var params = this.CCIN("@mozilla.org/embedcomp/command-params;1", "nsICommandParams");
     params.setStringValue("state_data", text);
 
-    controller = this.QI(controller, this.CI("nsICommandController"));
+    controller = this.QI(controller, Ci.nsICommandController);
     controller.doCommandWithParams(command, params);
 };
 
@@ -1326,7 +1328,13 @@ this.isWhitespace = function(text)
 
 this.splitLines = function(text)
 {
-    return text.split(reSplitLines);
+    if (text.split)
+        return text.split(reSplitLines);
+    else
+    {
+        var str = new String(text);
+        return str.split(reSplitLines);  // TODO this does not work
+    }
 };
 
 // ************************************************************************************************
@@ -1784,7 +1792,7 @@ this.sourceFilesAsArray = function(context)
 };
 
 this.updateScriptFiles = function(context, reload)  // scan windows for 'script' tags
-{FBTrace.sysout("updateScriptFiles\n");
+{
     var oldMap = reload ? context.sourceFileMap : null;
 
     function addFile(url, scriptTagNumber)
@@ -1905,8 +1913,6 @@ var jsKeywords =
     "void": 1,
     "typeof": 1,
     "instanceof": 1,
-    "true": 1,
-    "false": 1,
     "break": 1,
     "continue": 1,
     "return": 1,
@@ -2219,6 +2225,7 @@ this.isSystemURL = function(url)
     if (!Firebug.filterSystemURLs) return false;
     if (!url) return true;
     if (url.length == 0) return true; // spec for about:blank
+    if (url[0] == 'h') return false;
     if (url.substr(0, 9) == "resource:")
         return true;
     else if (url.substr(0, 17) == "chrome://firebug/")
@@ -2270,7 +2277,7 @@ this.getLocalPath = function(url)
     if (this.isLocalURL(url))
     {
         var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-        var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+        var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
         var file = fileHandler.getFileFromURLSpec(url);
         return file.path;
     }
@@ -2279,7 +2286,7 @@ this.getLocalPath = function(url)
 this.getURLFromLocalFile = function(file)
 {
     var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");  // TODO cache?
-    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;
 };
@@ -2417,11 +2424,11 @@ this.readPostText = function(url, context)
         try
         {
             var webNav = context.browser.webNavigation;
-            var descriptor = this.QI(webNav, this.CI("nsIWebPageDescriptor")).currentDescriptor;
-            var entry = this.QI(descriptor, this.CI("nsISHEntry"));
+            var descriptor = this.QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+            var entry = this.QI(descriptor, Ci.nsISHEntry);
             if (entry && entry.postData)
             {
-                var postStream = this.QI(entry.postData, this.CI("nsISeekableStream"));
+                var postStream = this.QI(entry.postData, Ci.nsISeekableStream);
                 postStream.seek(0, 0);
 
                 var charset = context.window.document.characterSet;
@@ -2489,7 +2496,7 @@ this.launchProgram = function(exePath, args)
 this.getIconURLForFile = function(path)
 {
     var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(this.CI("nsIFileProtocolHandler"));
+    var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     try {
         var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
         file.initWithPath(path);
@@ -2730,6 +2737,7 @@ this.SourceFile = function (compilation_unit_type)
     {
         this.sourceFile = sourceFile;
     };
+    this.lineMap = {};
 }
 
 this.SourceFile.prototype =
@@ -2961,12 +2969,12 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 }
 
 //------------
-this.EventSourceFile = function(url, script, title, sourceLength, innerScriptEnumerator)
+this.EventSourceFile = function(url, script, title, source, innerScriptEnumerator)
 {
     this.href = url;
     this.outerScript = script;
     this.title = title;
-    this.sourceLength = sourceLength;
+    this.source = source; // points to the sourceCache lines
     this.pcmap_type = PCMAP_PRETTYPRINT;
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
@@ -2992,7 +3000,7 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return new this.SourceLink(this.sourceFile.href, 1, "js");
+        return new SourceLink(this.sourceFile.href, 1, "js");
     }
 }
 this.EventSourceFile.prototype.getBaseLineOffset = function()
@@ -3026,7 +3034,7 @@ this.FunctionConstructorSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return new this.SourceLink(this.sourceFile.href, 1, "js");
+        return new SourceLink(this.sourceFile.href, 1, "js");
     }
 }
 this.FunctionConstructorSourceFile.prototype.getBaseLineOffset = function()
@@ -3062,7 +3070,7 @@ this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return this.SourceLink(this.normalizeURL(script.fileName), script.baseLineNumber, "js")
+        return SourceLink(this.normalizeURL(script.fileName), script.baseLineNumber, "js")
     }
 }
 
@@ -3073,7 +3081,7 @@ this.TopLevelSourceFile.prototype.getBaseLineOffset = function()
 //-------
 this.EnumeratedSourceFile = function(context, url) // we don't have the outer script and we delay source load.
 {
-    this.context = context;
+    this.context = context;  // XXXjjb the context of the enumeration, not useful
     this.href = url;  // may not be outerScript file name, eg this could be an enumerated eval
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
@@ -3096,7 +3104,31 @@ this.EnumeratedSourceFile.prototype.getSourceLength = function()
         this.sourceLength = this.context.sourceCache.load(this.href).length;
     return this.sourceLength;
 }
+//---------
+this.NoScriptSourceFile = function(context, url) // Somehow we got the URL, but not the script
+{
+     this.href = url;  // we know this much
+     this.innerScripts = [];
+     this.lineMap = {};
+     this.lineMap.complete = true;  // that is, we know nothing
+}
+this.NoScriptSourceFile.prototype = new this.SourceFile("URLOnly");
 
+this.NoScriptSourceFile.prototype.OuterScriptAnalyzer.prototype =
+    this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype;
+
+this.NoScriptSourceFile.prototype.getBaseLineOffset = function()
+{
+    // The outer script is gone, that is what the frame.line is relative to?
+    return 0;  // TODO
+}
+
+this.NoScriptSourceFile.prototype.getSourceLength = function()
+{
+    if (!this.sourceLength)
+        this.sourceLength = this.context.sourceCache.load(this.href).length;
+    return this.sourceLength;
+}
 //---------
 
 this.ScriptTagSourceFile = function(url, scriptTagNumber) // we don't have the outer script and we delay source load

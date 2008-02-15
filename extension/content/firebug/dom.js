@@ -5,7 +5,9 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const jsdIStackFrame = CI("jsdIStackFrame");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const jsdIStackFrame = Ci.jsdIStackFrame;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

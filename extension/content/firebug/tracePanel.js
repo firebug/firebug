@@ -6,11 +6,13 @@ FBL.ns(function() { with (FBL) {
 
 //***********************************************************************************
 // Module
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 const DBG_TRACE = false;
-const PrefService = CC("@mozilla.org/preferences-service;1");
-const nsIPrefBranch2 = CI("nsIPrefBranch2");
+const PrefService = Cc["@mozilla.org/preferences-service;1"];
+const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const prefs = PrefService.getService(nsIPrefBranch2);
-const nsIPrefService = CI("nsIPrefService");
+const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
 const prefDomain = "extensions.firebug";
 
@@ -44,6 +46,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_UI_LOOP: false, 		// debugger.js
     DBG_WINDOWS: false,    	// tabWatcher, dispatch events; very useful for understand modules/panels
     DBG_FBS_CREATION: false, // firebug-service script creation
+    DBG_FBS_SRCUNITS: false, // firebug-service compilation units
     DBG_FBS_STEP: false,     // firebug-service stepping
     DBG_FBS_FUNCTION: false,     // firebug-service new Function
     DBG_FBS_BP: false, // firebug-service breakpoints
@@ -72,11 +75,21 @@ Firebug.TraceModule = extend(Firebug.Console,
 
         for (var p in this)
         {
-            var m = reDBG.exec(p);
-            if (m)
-                FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
-            if (this.debug && m)
-                FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
+            var f = reDBG_FBS.exec(p);
+            if (f)
+            {
+                FBTrace[p] = Firebug.getPref("extensions.firebug-service", p);
+                if (this.debug)
+                    FBTrace.sysout("TraceModule.initialize extensions.firebug-service."+p+"="+FBTrace[p]+"\n");
+            }
+            else
+            {
+                var m = reDBG.exec(p);
+                if (m)
+                    FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
+                if (this.debug && m)
+                    FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
+            }
         }
         prefs.setBoolPref("browser.dom.window.dump.enabled", true);
     },
@@ -131,6 +144,7 @@ Firebug.TraceModule = extend(Firebug.Console,
 
 Firebug.TracePanel = function() {};
 const reDBG = /DBG_(.*)/;
+const reDBG_FBS = /DBG_FBS_(.*)/;
 Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 {
     name: "TraceFirebug",

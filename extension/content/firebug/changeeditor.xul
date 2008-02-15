@@ -58,7 +58,8 @@
 
       function onBrowse()
       {
-          const nsIFilePicker = XPCOMUtils.CI("nsIFilePicker");
+        const Ci = Components.interfaces;
+        const nsIFilePicker = Ci.nsIFilePicker;
         var picker = XPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
         picker.init(window, "", nsIFilePicker.modeOpen);
         picker.appendFilters(nsIFilePicker.filterApps);

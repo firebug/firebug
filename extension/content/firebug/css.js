@@ -5,10 +5,12 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIDOMCSSStyleRule = CI("nsIDOMCSSStyleRule");
-const nsIInterfaceRequestor = CI("nsIInterfaceRequestor");
-const nsISelectionDisplay = CI("nsISelectionDisplay");
-const nsISelectionController = CI("nsISelectionController");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIDOMCSSStyleRule = Ci.nsIDOMCSSStyleRule;
+const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
+const nsISelectionDisplay = Ci.nsISelectionDisplay;
+const nsISelectionController = Ci.nsISelectionController;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

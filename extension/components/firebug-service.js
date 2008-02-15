@@ -1,18 +1,6 @@
 /* See license.txt for terms of usage */
 
 // Debug lines are marked with /*@explore*/ at column 120                                                             /*@explore*/
-// ************************************************************************************************
-// Utils
-
-function CC(className)
-{
-    return Components.classes[className];
-}
-
-function CI(ifaceName)
-{
-    return Components.interfaces[ifaceName];
-}
 
 // ************************************************************************************************
 // Constants
@@ -20,31 +8,33 @@ function CI(ifaceName)
 const CLASS_ID = Components.ID("{a380e9c0-cb39-11da-a94d-0800200c9a66}");
 const CLASS_NAME = "Firebug Service";
 const CONTRACT_ID = "@joehewitt.com/firebug;1";
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const PrefService = CC("@mozilla.org/preferences-service;1");
-const DebuggerService = CC("@mozilla.org/js/jsd/debugger-service;1");
-const ConsoleService = CC("@mozilla.org/consoleservice;1");
-const Timer = CC("@mozilla.org/timer;1");
+const PrefService = Cc["@mozilla.org/preferences-service;1"];
+const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
+const ConsoleService = Cc["@mozilla.org/consoleservice;1"];
+const Timer = Cc["@mozilla.org/timer;1"];
 
-const jsdIDebuggerService = CI("jsdIDebuggerService");
-const jsdIScript = CI("jsdIScript");
-const jsdIStackFrame = CI("jsdIStackFrame");
-const jsdICallHook = CI("jsdICallHook");
-const jsdIExecutionHook = CI("jsdIExecutionHook");
-const jsdIErrorHook = CI("jsdIErrorHook");
-const nsIFireBug = CI("nsIFireBug");
-const nsISupports = CI("nsISupports");
-const nsIFireBugNetworkDebugger = CI("nsIFireBugNetworkDebugger");
-const nsIFireBugScriptListener = CI("nsIFireBugScriptListener");
-const nsIFireBugURLProvider = CI("nsIFireBugURLProvider");
-const nsIPrefBranch = CI("nsIPrefBranch");
-const nsIPrefBranch2 = CI("nsIPrefBranch2");
-const nsIComponentRegistrar = CI("nsIComponentRegistrar");
-const nsIFactory = CI("nsIFactory");
-const nsIConsoleService = CI("nsIConsoleService");
-const nsITimer = CI("nsITimer");
+const jsdIDebuggerService = Ci.jsdIDebuggerService;
+const jsdIScript = Ci.jsdIScript;
+const jsdIStackFrame = Ci.jsdIStackFrame;
+const jsdICallHook = Ci.jsdICallHook;
+const jsdIExecutionHook = Ci.jsdIExecutionHook;
+const jsdIErrorHook = Ci.jsdIErrorHook;
+const nsIFireBug = Ci.nsIFireBug;
+const nsISupports = Ci.nsISupports;
+const nsIFireBugNetworkDebugger = Ci.nsIFireBugNetworkDebugger;
+const nsIFireBugScriptListener = Ci.nsIFireBugScriptListener;
+const nsIFireBugURLProvider = Ci.nsIFireBugURLProvider;
+const nsIPrefBranch = Ci.nsIPrefBranch;
+const nsIPrefBranch2 = Ci.nsIPrefBranch2;
+const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
+const nsIFactory = Ci.nsIFactory;
+const nsIConsoleService = Ci.nsIConsoleService;
+const nsITimer = Ci.nsITimer;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -167,8 +157,8 @@ function FirebugService()
     prefs = PrefService.getService(nsIPrefBranch2);
     prefs.addObserver("extensions.firebug-service", FirebugPrefsObserver, false);
 
-    var observerService = CC("@mozilla.org/observer-service;1")
-        .getService(CI("nsIObserverService"));
+    var observerService = Cc["@mozilla.org/observer-service;1"]
+        .getService(Ci.nsIObserverService);
     observerService.addObserver(ShutdownObserver, "quit-application", false);
     observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false); 																													/*@explore*/
 
@@ -249,7 +239,7 @@ FirebugService.prototype =
         }
     },
 
-    registerDebugger: function(debuggrWrapper)
+    registerDebugger: function(debuggrWrapper)  // first one in will be last one called.
     {
         var debuggr = debuggrWrapper.wrappedJSObject;
 
@@ -732,6 +722,8 @@ FirebugService.prototype =
         this.trackThrowCatch = prefs.getBoolPref("extensions.firebug-service.trackThrowCatch");
         this.filterSystemURLs = prefs.getBoolPref("extensions.firebug-service.filterSystemURLs");  // may not be exposed to users
         this.DBG_FBS_FLUSH = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_FLUSH");
+        this.DBG_FBS_SRCUNITS = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_SRCUNITS");
+        // this.DBG_FBS_FF_START  controlled by eg ChromeBug
 
         try {                                                                                                              /*@explore*/
               // CREATION and BP generate a huge trace                                                                     /*@explore*/
@@ -912,7 +904,7 @@ FirebugService.prototype =
 
         if (fbs.trackThrowCatch)
         {
-            if (fbs.DBG_FBS_ERRORS) ddd("onThrow from "+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");
+            if (fbs.DBG_FBS_ERRORS) ddd("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");
 
             var debuggr = this.findDebugger(frame);
             if (debuggr)
@@ -980,7 +972,7 @@ FirebugService.prototype =
         {
             if (!frame.callingFrame)
             {
-                if (fbs.DBG_FBS_CREATION) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
                 // These are eval-like things called by native code. They come from .xml files
                 // They should be marked as evals but we'll treat them like event handlers for now.
                 return fbs.onEventScriptCreated(frame, type, val);
@@ -1004,7 +996,7 @@ FirebugService.prototype =
         }
 
         fbs.nestedScriptStack.clear();
-        if (fbs.DBG_FBS_CREATION) ddd("onEvalScriptCreated outerScript.tag:"+outerScript.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onEvalScriptCreated outerScript.tag:"+outerScript.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
         return sourceFile;
     },
 
@@ -1021,13 +1013,21 @@ FirebugService.prototype =
                 var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
                 fbs.resetBreakpoints(sourceFile);
             }
+            else
+            {
+                if (fbs.DBG_FBS_SRCUNITS)
+                    ddd("FBS.onTopLevelScript no debuggr for "+frame.script.tag+"\n");
+            }
         }
         catch (exc)
         {
-            ERROR("onTopLevelScriptCreated: "+exc);
+            dumpProperties("onTopLevelScriptCreated FAILED: ", exc);
+            ERROR("onTopLevelScriptCreated Fails: "+exc);
         }
 
         fbs.nestedScriptStack.clear();
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onTopLevelScriptCreated script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+
         return sourceFile;
     },
 
@@ -1035,7 +1035,7 @@ FirebugService.prototype =
     {
         if (!fbs)
         {
-            if (fbs.DBG_FBS_CREATION)
+            if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS)
                 ddd("onScriptCreated, but no fbs for script.fileName="+script.fileName+"\n");
              return;
         }
@@ -1045,7 +1045,7 @@ FirebugService.prototype =
             var fileName = script.fileName;
             if (isFilteredURL(fileName))
             {
-                if (fbs.DBG_FBS_CREATION) 											/*@explore*/
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) 											/*@explore*/
                     ddd("onScriptCreated: filename filtered:"+fileName+"\n");  	/*@explore*/
                 return;
             }
@@ -1068,7 +1068,7 @@ FirebugService.prototype =
 
                 script.setBreakpoint(0);
                 fbs.clearHookInterruptsToTrackScripts(); // now we know that any nested scripts are part of our buffer, not dynamic functions
-                if (fbs.DBG_FBS_CREATION) ddd("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+"\n");/*@explore*/
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+"\n");/*@explore*/
             }
             else if (script.baseLineNumber == 1)
             {
@@ -1175,28 +1175,37 @@ FirebugService.prototype =
     {
         if (debuggers.length < 1)
             return;
+
         var global = getFrameGlobal(frame);
-        if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger global:"+global+"\n");
+
         if (global)
         {
+
+            // TODO? filter on global to avoid either chrome://firebug or chrome://chromebug
             for ( var i = debuggers.length - 1; i >= 0; i--)
             {
-                  try
-                  {
-                      var debuggr = debuggers[i];
-                      if (debuggr.supportsGlobal(global))
-                          return debuggr;
-                  }
-                  catch (exc)
-                  {
-                      ERROR("firebug-service findDebugger supportsGlobal FAILS: "+exc);
-                  }
+                try
+                {
+                    var debuggr = debuggers[i];
+                    if (debuggr.supportsGlobal(global))
+                    {
+                        if (!debuggr.breakContext)
+                            dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
+                        if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger found debuggr at "+i+" for global, location:"+global.location+"\n");
+                        return debuggr;
+                    }
+                }
+                catch (exc)
+                {
+                    ERROR("firebug-service findDebugger supportsGlobal FAILS: "+exc);
+                }
             }
+            if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger no find for "+frame.script.tag+"; global, location:"+global.location+"\n");
         }
         else
             if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
     // TODO remove
-    if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger no find on global, trying getFrameWindow\n");
+
         var win = getFrameWindow(frame);
         if (win)
         {
@@ -1224,7 +1233,7 @@ FirebugService.prototype =
             if (debuggr)
                 return debuggr;
         }
-        if (fbs.DBG_FBS_ERRORS)
+        if (fbs.DBG_FBS_FINDDEBUGGER)
             fbs.diagnoseFindDebugger(frame, win);
     },
 
@@ -2045,7 +2054,7 @@ function ddd(text)
         fbs.hiddenWindow.dump(text);
         return;
     }
-throw "no hiddenWindow";
+ERROR( "firebug-service: no hiddenWindow!! "+text );
     if (true)      /* in the traced version we dump to file */														/*@explore*/
         dumpToFile(text);     																						/*@explore*/
     else      		/* but in the untraced version 'else' will be removed and we dump to log */						/*@explore*/
@@ -2054,15 +2063,15 @@ throw "no hiddenWindow";
 
 function dumpit(text)
 {
-    const DirService = 	CC("@mozilla.org/file/directory_service;1")
-        .getService(CI("nsIDirectoryServiceProvider"));
+    const DirService = 	Cc["@mozilla.org/file/directory_service;1"]
+        .getService(Ci.nsIDirectoryServiceProvider);
     var tmpDir = DirService.getFile(NS_OS_TEMP_DIR, {});
-    var file = tmpDir.QueryInterface(CI("nsILocalFile"));
+    var file = tmpDir.QueryInterface(Ci.nsILocalFile);
     file.appendRelativePath("firebug/dump.txt");
        if (!file.exists())
-           file.create(CI("nsIFile").NORMAL_FILE_TYPE, 664);
-    var stream = CC("@mozilla.org/network/file-output-stream;1")
-        .createInstance(CI("nsIFileOutputStream"));
+           file.create(Ci.nsIFile.NORMAL_FILE_TYPE, 664);
+    var stream = Cc["@mozilla.org/network/file-output-stream;1"]
+        .createInstance(Ci.nsIFileOutputStream);
     stream.init(file, 0x04 | 0x08 | 0x10, 664, 0);
     stream.write(text, text.length);
     stream.flush();
@@ -2145,14 +2154,14 @@ function getDumpStream()
     {
         // OS tmp (e.g., /tmp on linux, C:\Documents and Settings\your userid\Local Settings\Temp on windows)
         var file = Components.classes["@mozilla.org/file/directory_service;1"]
-            .getService(CI("nsIProperties"))
-            .get("TmpD", CI("nsIFile"));
+            .getService(Ci.nsIProperties)
+            .get("TmpD", Ci.nsIFile);
         file.append("fbug");
         if ( !file.exists() )
-            file.create(CI("nsIFile").DIRECTORY_TYPE, 0777);
+            file.create(Ci.nsIFile.DIRECTORY_TYPE, 0777);
         file.append("firebug-service-dump.txt");
-        //file.createUnique(CI("nsIFile").NORMAL_FILE_TYPE, 0666);
-        var stream = CC("@mozilla.org/network/file-output-stream;1").createInstance(CI("nsIFileOutputStream"));
+        //file.createUnique(Ci.nsIFile.NORMAL_FILE_TYPE, 0666);
+        var stream = Cc["@mozilla.org/network/file-output-stream;1"].createInstance(Ci.nsIFileOutputStream);
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         if (stream)
             return stream;
@@ -2179,15 +2188,22 @@ function flushDebugStream()
     if(dumpStream) dumpStream.flush();
 }
 
+function getStack(frame)
+{
+    var text = "";
+    while(frame) {
+        text += frame.line+"@"+frame.script.fileName + "\n";
+        frame = frame.callingFrame;
+    }
+    return text;
+}
+
 function dumpToFileWithStack(text, frame)
 {
     if (!dumpStream) dumpStream = getDumpStream();
     dumpStream.write(text, text.length);
     text = " stack: \n";
-    while(frame) {
-        text += frame.line+"@"+frame.script.fileName + "\n";
-        frame = frame.callingFrame;
-    }
+    text += getStack(frame);
     text += "-------------------------------------\n";
     dumpStream.write(text, text.length);
     if (fbs.DBG_FBS_FLUSH) dumpStream.flush();

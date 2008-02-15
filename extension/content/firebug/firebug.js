@@ -5,21 +5,24 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIPrefBranch = CI("nsIPrefBranch");
-const nsIPrefBranch2 = CI("nsIPrefBranch2");
-const nsIPermissionManager = CI("nsIPermissionManager");
-const nsIFireBugClient = CI("nsIFireBugClient");
-const nsISupports = CI("nsISupports");
-const nsIFile = CI("nsIFile");
-const nsILocalFile = CI("nsILocalFile");
-const nsISafeOutputStream = CI("nsISafeOutputStream");
-const nsIURI = CI("nsIURI");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
-const PrefService = CC("@mozilla.org/preferences-service;1");
-const PermManager = CC("@mozilla.org/permissionmanager;1");
+const nsIPrefBranch = Ci.nsIPrefBranch;
+const nsIPrefBranch2 = Ci.nsIPrefBranch2;
+const nsIPermissionManager = Ci.nsIPermissionManager;
+const nsIFireBugClient = Ci.nsIFireBugClient;
+const nsISupports = Ci.nsISupports;
+const nsIFile = Ci.nsIFile;
+const nsILocalFile = Ci.nsILocalFile;
+const nsISafeOutputStream = Ci.nsISafeOutputStream;
+const nsIURI = Ci.nsIURI;
+
+const PrefService = Cc["@mozilla.org/preferences-service;1"];
+const PermManager = Cc["@mozilla.org/permissionmanager;1"];
 const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 
-const nsIPrefService = CI("nsIPrefService");
+const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -89,10 +92,11 @@ const prefNames =
     // Stack
     "omitObjectPathStack",
 ];
+
 const servicePrefNames = [
-"showStackTrace", // Console
-"filterSystemURLs", // Stack
-"breakOnErrors",  "showEvalSources", // Script
+    "showStackTrace", // Console
+    "filterSystemURLs", // Stack
+    "breakOnErrors",  "showEvalSources", "trackThrowCatch" // Script
 ];
 
 const scriptBlockSize = 20;
@@ -128,7 +132,6 @@ top.Firebug =
     reps: reps,
     prefDomain: "extensions.firebug",
 
-
     stringCropLength: 80,
 
     tabBrowser: tabBrowser,
@@ -145,6 +148,7 @@ top.Firebug =
 
         this.loadExternalEditors();
         prefs.addObserver(this.prefDomain, this, false);
+        prefs.addObserver("extensions.firebug-service", this, false);
 
         var basePrefNames = prefNames.length;
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
@@ -198,6 +202,7 @@ top.Firebug =
 
         prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
+        prefs.removeObserver("extensions.firebug-service", this, false);
 
         fbs.unregisterClient(this);
 
@@ -983,15 +988,27 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIPrefObserver
-
+    rePrefs: /extensions\.([^\.]*)\.(.*)/,
     observe: function(subject, topic, data)
     {
-        if (data.indexOf(this.prefDomain) == -1)
+        if (data.indexOf("extensions.") == -1)
             return;
-        var name = data.substr(this.prefDomain.length+1);
-        var value = this.getPref(this.prefDomain, name);
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");                /*@explore*/
-        this.updatePref(name, value);
+
+        var m = top.Firebug.rePrefs.exec(data);
+        if (m)
+        {
+            if (m[1] == "firebug")
+                var domain = "extensions.firebug";
+            if (m[1] == "firebug-service")
+                var domain = "extensions.firebug-service";
+        }
+        if (domain)
+        {
+            var name = data.substr(domain.length+1);
+            var value = this.getPref(domain, name);
+            if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");                /*@explore*/
+            this.updatePref(name, value);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1173,7 +1190,7 @@ top.Firebug =
     getTabIdForWindow: function(aWindow)
     {
         aWindow = getRootWindow(aWindow);
-        
+
         if (!aWindow || !this.tabBrowser.getBrowserIndexForDocument)
             return null;
 
@@ -1617,10 +1634,10 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
             min += scriptBlockSize;
         } while (max < totalMax);
-
+FBTrace.sysout("firebug.createSourceBox done appendScriptLines...");
         this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
-
-        if (sourceFile.text)
+FBTrace.sysout("firebug.createSourceBox done sourceBoxDecorator\n");
+        if (sourceFile.source)
             this.anonSourceBoxes.push(sourceBox);
         else
             this.sourceBoxes[sourceFile.href] = sourceBox;
@@ -1630,7 +1647,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
     getSourceBoxBySourceFile: function(sourceFile)
     {
-        if (!sourceFile.text)
+        if (!sourceFile.source)
             return this.getSourceBoxByURL(sourceFile.href);
 
         for (var i = 0; i < this.anonSourceBoxes.length; ++i)
@@ -1662,8 +1679,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
 function loadScriptLines(sourceFile, context)
 {
-    if (sourceFile.text)
-        return splitLines(sourceFile.text);
+    if (sourceFile.source)
+        return splitLines(sourceFile.source);
     else
         return context.sourceCache.load(sourceFile.href);
 }

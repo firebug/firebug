@@ -19,6 +19,7 @@ const highlightCSS = "chrome://firebug/content/highlighter.css";
 
 var boxModelHighlighter = null;
 var frameHighlighter = null;
+var popupHighlighter = null;
 
 // ************************************************************************************************
 
@@ -415,6 +416,13 @@ function getHighlighter(type)
 
         return frameHighlighter;
     }
+    else if (type == "popup")
+    {
+        if (!popupHighlighter)
+            popupHighlighter = new PopupHighlighter();
+
+        return popupHighlighter;
+    }
 }
 
 function pad(element, t, r, b, l)
@@ -526,7 +534,43 @@ FrameHighlighter.prototype =
         return context.frameHighlighter;
     }
 };
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+function PopupHighlighter()
+{
+}
+
+PopupHighlighter.prototype =
+{
+    highlight: function(context, element)
+    {
+        /* var boxObject = element.ownerDocument.getBoxObjectFor(element);
+            var x = boxObject.x;
+            if (x < edgeSize)
+                x = edgeSize;
+            var y = boxObject.y;
+            if (y < edgeSize)
+                y = edgeSize;
+            var w = boxObject.width;
+            var h = boxObject.height;
+            if (element.tagName == "tabbrowser") FBTrace.dumpStack("tabbrowser inspect");
+            if (FBTrace.DBG_INSPECT)
+                FBTrace.sysout("FrameHighlighter xul tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
+    */
+        var doc = context.window.document;
+        var popup = doc.getElementById("inspectorPopup");
+        popup.style.width = "200px";
+        popup.style.height = "100px";
+        popup.showPopup(element, element.boxObject.screenX,
+            element.boxObject.screenY, "popup", "none", "none");
+        FBTrace.sysout("PopupHighlighter for "+element.tagName, " at ("+element.boxObject.screenX+","+element.boxObject.screenY+")");
+        FBTrace.dumpProperties("PopupHighlighter popup=", popup);
+
+    },
+    unhighlight: function(context)
+    {
+    },
+}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function BoxModelHighlighter()
@@ -703,6 +747,7 @@ BoxModelHighlighter.prototype =
         if (!context.boxModelHighlighter)
         {
             var doc = context.window.document;
+            if (!doc) FBTrace.dumpStack("inspector getNodes no document for window:"+window.location);
 
             function createRuler(name)
             {

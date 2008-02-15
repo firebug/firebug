@@ -10,16 +10,6 @@ function XPCOMUtils() {}
 var _CI = Components.interfaces;
 var _CC = Components.classes;
 
-this.CC = function(cName)
-{
-    return _CC[cName];
-};
-
-this.CI = function(ifaceName)
-{
-    return _CI[ifaceName];
-};
-
 this.CCSV = function(cName, ifaceName)
 {
     return _CC[cName].getService(_CI[ifaceName]);  // if fbs fails to load, the error can be _CC[cName] has no properties

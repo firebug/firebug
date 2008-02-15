@@ -5,15 +5,17 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIIOService = CI("nsIIOService");
-const nsIRequest = CI("nsIRequest");
-const nsICachingChannel = CI("nsICachingChannel");
-const nsIScriptableInputStream = CI("nsIScriptableInputStream");
-const nsIUploadChannel = CI("nsIUploadChannel");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIIOService = Ci.nsIIOService;
+const nsIRequest = Ci.nsIRequest;
+const nsICachingChannel = Ci.nsICachingChannel;
+const nsIScriptableInputStream = Ci.nsIScriptableInputStream;
+const nsIUploadChannel = Ci.nsIUploadChannel;
 
-const IOService = CC("@mozilla.org/network/io-service;1");
+const IOService = Cc["@mozilla.org/network/io-service;1"];
 const ioService = IOService.getService(nsIIOService);
-const ScriptableInputStream = CC("@mozilla.org/scriptableinputstream;1");
+const ScriptableInputStream = Cc["@mozilla.org/scriptableinputstream;1"];
 const chromeReg = CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
@@ -140,8 +142,8 @@ top.SourceCache.prototype =
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-            	FBTrace.dumpProperties("sourceCache.load FAILS, url="+url, exc);                    /*@explore*/
-        	return exc.toString();
+                FBTrace.dumpProperties("sourceCache.load FAILS, url="+url, exc);                    /*@explore*/
+            return "sourceCache.load FAILS for url="+url+exc.toString();
         }
         finally
         {
@@ -244,13 +246,13 @@ function getPostStream(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = QI(webNav, CI("nsIWebPageDescriptor")).currentDescriptor;
-        var entry = QI(descriptor, CI("nsISHEntry"));
+        var descriptor = QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = QI(descriptor, Ci.nsISHEntry);
 
         if (entry.postData)
         {
             // Seek to the beginning, or it will probably start reading at the end
-            var postStream = QI(entry.postData, CI("nsISeekableStream"));
+            var postStream = QI(entry.postData, Ci.nsISeekableStream);
             postStream.seek(0, 0);
 
             return postStream;
@@ -267,8 +269,8 @@ function getCacheKey(context)
     try
     {
         var webNav = context.browser.webNavigation;
-        var descriptor = QI(webNav, CI("nsIWebPageDescriptor")).currentDescriptor;
-        var entry = QI(descriptor, CI("nsISHEntry"));
+        var descriptor = QI(webNav, Ci.nsIWebPageDescriptor).currentDescriptor;
+        var entry = QI(descriptor, Ci.nsISHEntry);
         return entry.cacheKey;
      }
      catch (exc)

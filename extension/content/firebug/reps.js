@@ -5,8 +5,10 @@ var FirebugReps = FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const jsdIStackFrame = CI("jsdIStackFrame");
-const jsdIScript = CI("jsdIScript");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const jsdIStackFrame = Ci.jsdIStackFrame;
+const jsdIScript = Ci.jsdIScript;
 
 const fbs = CCSV("@joehewitt.com/firebug;1", "nsIFireBug");
 
@@ -859,7 +861,7 @@ this.Window = domplate(Firebug.Rep,
 
     getLocation: function(win)
     {
-        try 
+        try
         {
             return (win && win.location && !win.closed) ? getFileName(win.location.href) : "";
         }
@@ -1346,7 +1348,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
     inspectObject: function(error, context)
     {
         var sourceLink = this.getSourceLink(error);
-        context.chrome.select(sourceLink);
+        FirebugReps.SourceLink.inspectObject(sourceLink, context);
     },
 
     getContextMenuItems: function(error, target, context)

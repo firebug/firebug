@@ -5,12 +5,14 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIWebNavigation = CI("nsIWebNavigation");
-const nsIWebProgressListener = CI("nsIWebProgressListener");
-const nsIWebProgress = CI("nsIWebProgress");
-const nsISupportsWeakReference = CI("nsISupportsWeakReference");
-const nsISupports = CI("nsISupports");
-const nsIURI = CI("nsIURI");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIWebNavigation = Ci.nsIWebNavigation;
+const nsIWebProgressListener = Ci.nsIWebProgressListener;
+const nsIWebProgress = Ci.nsIWebProgress;
+const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
+const nsISupports = Ci.nsISupports;
+const nsIURI = Ci.nsIURI;
 
 const NOTIFY_STATE_DOCUMENT = nsIWebProgress.NOTIFY_STATE_DOCUMENT;
 

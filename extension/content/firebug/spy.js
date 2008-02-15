@@ -5,12 +5,14 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const nsIHttpChannel = CI("nsIHttpChannel");
-const nsIUploadChannel = CI("nsIUploadChannel");
-const nsIRequest = CI("nsIRequest")
-const nsIXMLHttpRequest = CI("nsIXMLHttpRequest");
-const nsIWebProgress = CI("nsIWebProgress");
-const nsISeekableStream = CI("nsISeekableStream");
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const nsIHttpChannel = Ci.nsIHttpChannel;
+const nsIUploadChannel = Ci.nsIUploadChannel;
+const nsIRequest = Ci.nsIRequest;
+const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
+const nsIWebProgress = Ci.nsIWebProgress;
+const nsISeekableStream = Ci.nsISeekableStream;
 
 const LOAD_BACKGROUND = nsIRequest.LOAD_BACKGROUND;
 const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
@@ -47,7 +49,7 @@ const httpObserver =
                                   requestStarted(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
                                 else if (topic == "http-on-examine-response")
                                   requestStopped(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
-                                  
+
                                 return;
                             }
                         }
@@ -69,12 +71,18 @@ var listeners = [];
 
 Firebug.Spy = extend(Firebug.Module,
 {
+    skipSpy: function(win)
+    {
+        var uri = win.location.href; // don't attach spy to chrome
+        if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+                return true;
+    },
+
     attachSpy: function(context, win)
     {
         if (win)
         {
-            var uri = win.location.href; // don't attach spy to chrome
-            if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+            if (this.skipSpy(win))
                 return;
             for( var i = 0; i < contexts.length; ++i )
             {
@@ -361,14 +369,14 @@ function getSpyForXHR(request, xhrRequest, context)
         if (spy.request == request)
           return spy;
     }
-       
+
     spy = new XMLHttpRequestSpy(request, xhrRequest, context);
     context.spies.push(spy);
- 
+
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
-    
-    // Attach spy only to the original request. Notice that there 
+
+    // Attach spy only to the original request. Notice that there
     // can be more network requests made by the same XHR if there
     // are redirects.
     if (name == origName)
@@ -386,7 +394,7 @@ function requestStarted(request, xhrRequest, context, method, url)
     spy.method = method;
     spy.href = url;
 
-    // Get "body" for POST and PUT requests. It will be displayed in 
+    // Get "body" for POST and PUT requests. It will be displayed in
     // appropriate tab of the XHR.
     if (method == "POST" || method == "PUT")
         spy.postText = getPostText(xhrRequest, context);
@@ -419,7 +427,7 @@ function requestStarted(request, xhrRequest, context, method, url)
 function requestStopped(request, xhrRequest, context, method, url)
 {
     var spy = getSpyForXHR(request, xhrRequest, context);
-    
+
     var now = new Date().getTime();
     var responseTime = now - spy.sendTime;
 
@@ -443,7 +451,7 @@ function requestStopped(request, xhrRequest, context, method, url)
 
     if (spy.context.spies)
         remove(spy.context.spies, spy);
-               
+
     if (!spy.statusText)
     {
         try
@@ -484,11 +492,11 @@ function onHTTPSpyLoad(spy)
     spy.detach();
 
     // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
-    // simulate the requestStopped here.        
-    while (spy.context.spies.length) 
+    // simulate the requestStopped here.
+    while (spy.context.spies.length)
     {
       var spy = spy.context.spies[0];
-      requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);    
+      requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
     }
 
     // Notify registered listeners about fiinish of the XHR.

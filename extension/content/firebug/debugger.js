@@ -5,14 +5,16 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
-const jsdIScript = CI("jsdIScript");
-const jsdIStackFrame = CI("jsdIStackFrame");
-const jsdIExecutionHook = CI("jsdIExecutionHook");
-const nsIFireBug = CI("nsIFireBug");
-const nsIFireBugDebugger = CI("nsIFireBugDebugger");
-const nsIFireBugURLProvider = CI("nsIFireBugURLProvider");
-const nsISupports = CI("nsISupports");
-const nsICryptoHash = CI["nsICryptoHash"];
+const Cc = Components.classes;
+const Ci = Components.interfaces;
+const jsdIScript = Ci.jsdIScript;
+const jsdIStackFrame = Ci.jsdIStackFrame;
+const jsdIExecutionHook = Ci.jsdIExecutionHook;
+const nsIFireBug = Ci.nsIFireBug;
+const nsIFireBugDebugger = Ci.nsIFireBugDebugger;
+const nsIFireBugURLProvider = Ci.nsIFireBugURLProvider;
+const nsISupports = Ci.nsISupports;
+const nsICryptoHash = Ci.nsICryptoHash;
 
 const PCMAP_SOURCETEXT = jsdIScript.PCMAP_SOURCETEXT;
 
@@ -417,7 +419,7 @@ Firebug.Debugger = extend(Firebug.Module,
             if ( !context.hideDebuggerUI || (FirebugChrome.getCurrentBrowser() && FirebugChrome.getCurrentBrowser().showFirebug))
             {
                 Firebug.showBar(true);
-                if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("showBar done FirebugContext="+FirebugContext+"\n");           /*@explore*/
+                if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("showBar done FirebugContext="+(FirebugContext?FirebugContext.window.location:"undefined")+"\n");           /*@explore*/
 
                 if (Firebug.errorStackTrace)
                     var panel = context.chrome.selectPanel("script", "callstack");
@@ -658,7 +660,9 @@ Firebug.Debugger = extend(Firebug.Module,
         if (!context)
             return RETURN_CONTINUE_THROW;
 
-        // TODO if(option)
+        if (!fbs.trackThrowCatch)
+            return RETURN_CONTINUE_THROW;
+
         try
         {
             var isCatch = this.isCatchFromPreviousThrow(frame, context);
@@ -760,9 +764,9 @@ Firebug.Debugger = extend(Firebug.Module,
 
             dispatch(listeners,"onEval",[context, frame, sourceFile.href]);
             return sourceFile;
-           }
-           catch (e)
-           {
+        }
+        catch (e)
+        {
            FBTrace.dumpProperties("onEvalScriptCreated FaILS ", e);
         }
     },
@@ -779,7 +783,7 @@ Firebug.Debugger = extend(Firebug.Module,
         var url = this.getDynamicURL(frame, source, "event");
 
         var lines = context.sourceCache.store(url, source);
-        var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines.length, innerScripts);
+        var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, innerScripts);
         context.sourceFileMap[url] = sourceFile;
 
         if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScriptCreated url="+sourceFile.href+"\n");   /*@explore*/
@@ -1436,7 +1440,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     setExecutableLines: function(sourceBox)
     {
         var sourceFile = sourceBox.repObject;
-        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines: "+sourceFile.toString()+"\n");                /*@explore*/
+        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines START: "+sourceFile.toString()+"\n");                /*@explore*/
         var lineNo = 1;
         while( lineNode = this.getLineNode(lineNo) )
         {
@@ -1446,6 +1450,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 lineNode.removeAttribute("executable");
             lineNo++;
         }
+        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines DONE: "+sourceFile.toString()+"\n");                /*@explore*/
     },
 
     toggleBreakpoint: function(lineNo)
@@ -2428,12 +2433,15 @@ function setLineBreakpoints(sourceFile, sourceBox)
             scriptRow.setAttribute("condition", "true");
     }});
 
-    if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setLineBreakpoints for sourceFile.href:"+sourceFile.href+"\n")
-    sourceFile.buildLineTable();
+    //if (FBTrace.DBG_LINETABLE)
+        FBTrace.sysout("debugger.setLineBreakpoints building lineTable for sourceFile.href:"+sourceFile.href+"\n")
+    if (!sourceFile.lineMap || !sourceFile.lineMap.complete)
+        sourceFile.buildLineTable();
 
-    if (!this.setExecutableLines)
+   /* Done in undateSourceBox, but not throtled. if (!this.setExecutableLines)
         FBTrace.dumpStack("setLineBreakpoints no this.setExecutableLines\n");
     this.setExecutableLines(sourceBox);
+   */
 }
 
 function getCallingFrame(frame)
