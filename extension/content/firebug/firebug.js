@@ -75,16 +75,13 @@ const prefNames =
     // Script
 
     "breakOnTopLevel",
-    "useDebugAdapter",
     "showAllSourceFiles",
-    "useLastLineForEvalName",
-    "useMD5ForEvalName",
 
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
 
     // Layout
-    "showLayoutAdjacent", "showRulers",
+    "showRulers",
 
     // Net
     "netFilterCategory", "disableNetMonitor", "collectHttpHeaders",

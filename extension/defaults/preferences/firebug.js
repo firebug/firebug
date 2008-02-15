@@ -39,6 +39,7 @@ pref("extensions.firebug.showComputedStyle", false);
 pref("extensions.firebug-service.breakOnErrors", false);
 pref("extensions.firebug-service.showEvalSources", true);
 pref("extensions.firebug-service.filterSystemURLs", true);
+pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
 
 // Stack
@@ -84,6 +85,11 @@ pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon fu
 pref("extensions.firebug.DBG_EVAL", false);    		// debugger.js and firebug-service.js        /*@explore*/
 pref("extensions.firebug.DBG_PANELS", false);  		// panel selection                           /*@explore*/
 pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                               /*@explore*/
+pref("extensions.firebug.DBG_CSS", false);          //                                             /*@explore*/
+pref("extensions.firebug.DBG_DBG2FIREBUG", false);  //                                             /*@explore*/
+pref("extensions.firebug.DBG_DISPATCH", false);     //                                          /*@explore*/
+pref("extensions.firebug.DBG_TRACE", false);        //                                          /*@explore*/
+pref("extensions.firebug.DBG_HTML", false);         //                                          /*@explore*/
 pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/
 pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
 pref("extensions.firebug.DBG_NET", false);        	// net.js                                    /*@explore*/

@@ -286,7 +286,7 @@
 
 .headerSorted > .headerCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;
 }
 
 .headerSorted.sortedAscending > .headerCellBox {
@@ -308,7 +308,7 @@
 /*****************************************************************************************/
 
 .logRow-stackTrace {
-    padding-top: 0;    
+    padding-top: 0;
     background: #F8F8F8;
 }
 
@@ -451,7 +451,7 @@
 
 .logRow-spy.opened {
     padding-bottom: 4px;
-    border-bottom: none;    
+    border-bottom: none;
 }
 
 .spyTitle {

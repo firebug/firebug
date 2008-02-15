@@ -57,6 +57,7 @@ var listeners = [];
 
 Firebug.Debugger = extend(Firebug.Module,
 {
+    fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*explore*/
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
 

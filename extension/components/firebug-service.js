@@ -803,7 +803,7 @@ FirebugService.prototype =
     onDebug: function(frame, type, rv)
     {
         if (fbs.DBG_FBS_ERRORS)                                                                                               /*@explore*/
-            ddd("fbs.onDebug fileName="+frame.script.fileName+ "reportNextError="                							/*@explore*/
+            ddd("fbs.onDebug fileName="+frame.script.fileName+ " reportNextError="                							/*@explore*/
                                  +reportNextError+" breakOnNextError="+breakOnNextError+"\n");                            /*@explore*/
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
