@@ -39,7 +39,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    evaluate: function(expr, context, userVars, thisValue)
+    evaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)
     {
         if (!context)
             return;
@@ -117,6 +117,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
             if (threw)
             {
+                if (skipNotDefinedMessages)
+                    return;
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate("+expr+ ") threw:", result);          /*@explore*/
                 result = new FBL.ErrorMessage(result, expr, 0, 0, "js", context, null);
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluate ");          /*@explore*/

@@ -154,7 +154,7 @@ Firebug.TabContext.prototype =
             return null;
 
         var panelName = panelType.prototype.name;
-        if (panelName in this.panelMap)
+        if ( this.panelMap.hasOwnProperty(panelName) )
         {
             var panel = this.panelMap[panelName];
             if (FBTrace.DBG_PANELS)                                                                                   /*@explore*/

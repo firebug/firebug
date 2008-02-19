@@ -357,7 +357,8 @@ this.Arr = domplate(Firebug.Rep,
     supportsObject: function(object)
     {
         // return "length" in object && typeof(object.length) == "number";
-        // XXXjjb Joe review (revision 39) Maybe only a url for the license...
+        // XXXjjb the functions .hasOwnProperty(name) and .propertyIsEnumerable might make this code simpiler.
+        // Maybe only a url for the license...
         if (this.isArray(object)) return true;
         if ("length" in object && typeof(object.length) == "number")
         {

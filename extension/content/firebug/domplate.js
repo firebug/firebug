@@ -120,7 +120,7 @@ DomplateTag.prototype =
             }
             else
             {
-                if (name == "class" && name in this.attrs)
+                if (name == "class" && this.attrs.hasOwnProperty(name) )
                     this.attrs[name] += " " + val;
                 else
                     this.attrs[name] = val;
@@ -173,7 +173,7 @@ DomplateTag.prototype =
         {
             if (!tag || !tag.tag)
                 return;
-                
+
             tag.tag.compile();
 
             var tagOutputs = [];
@@ -288,10 +288,10 @@ DomplateTag.prototype =
                 readPartNames(this.props[name], topOuts);
         }
 
-        if ("class" in this.attrs || this.classes)
+        if ( this.attrs.hasOwnProperty("class") || this.classes)
         {
             topBlock.push(', " class=\\""');
-            if ("class" in this.attrs)
+            if (this.attrs.hasOwnProperty("class"))
                 addParts(this.attrs["class"], ',', topBlock, info, true);
               topBlock.push(', " "');
             for (var name in this.classes)
@@ -339,7 +339,7 @@ DomplateTag.prototype =
         for (var i = 0; i < varNames.length; ++i)
         {
             var name = varNames[i];
-            if (name in map)
+            if ( map.hasOwnProperty(name) )
                 continue;
 
             map[name] = 1;
@@ -397,7 +397,7 @@ DomplateTag.prototype =
         {
             if (!tag || !tag.tag)
                 return;
-                
+
             tag.tag.compile();
 
             var domArgs = [node, tag.tag.context, 0];

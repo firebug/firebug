@@ -523,7 +523,7 @@
 
                 var entry = {object: object, fileName: splitName.name};
 
-                if (splitName.path in groups)
+                if (groups.hasOwnProperty(splitName.path))
                     groups[splitName.path].push(entry);
                 else
                 {

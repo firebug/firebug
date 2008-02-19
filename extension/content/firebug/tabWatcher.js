@@ -390,7 +390,7 @@ top.TabWatcher =
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
-            if (name in listener)
+            if ( listener.hasOwnProperty(name) )
             {
                 try
                 {

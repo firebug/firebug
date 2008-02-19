@@ -184,7 +184,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
     {
         // Initialize max limit for logged requests.
         NetLimit.updateMaxLimit();
-            
+
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(FirebugChrome);
 
@@ -192,7 +192,7 @@ Firebug.NetMonitor = extend(Firebug.Module,
         // This is done as soon as the FB UI is loaded.
         observerService.addObserver(HttpObserver, "http-on-modify-request", false);
         observerService.addObserver(HttpObserver, "http-on-examine-response", false);
-    
+
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
 
@@ -397,11 +397,11 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         var fileCount = 0;
         var minTime = 0, maxTime = 0;
-        
+
         for (var i=0; i<phase.files.length; i++)
         {
             var file = phase.files[i];
-            
+
             if (!category || file.category == category)
             {
                 if (file.loaded)
@@ -626,7 +626,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         if (this.context.netProgress)
           this.context.netProgress.activate(null);
-    
+
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
         clearInterval(this.layoutInterval);
@@ -686,7 +686,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
                 command: bindFixed(this.copyHeaders, this, file.responseHeaders) }
         );
 
-        if (file.category in textFileCategories)
+        if ( textFileCategories.hasOwnProperty(file.category) )
         {
             items.push(
                 {label: "CopyResponse", command: bindFixed(this.copyResponse, this, file) }
@@ -835,11 +835,11 @@ NetPanel.prototype = domplate(Firebug.Panel,
             var file = queue[i];
             if (!file.phase)
               continue;
-              
+
             file.invalid = false;
 
             phase = this.calculateFileTimes(file, phase, rightNow);
-            
+
             this.updateFileRow(file, newFileData);
             this.invalidatePhase(phase);
         }
@@ -880,13 +880,13 @@ NetPanel.prototype = domplate(Firebug.Panel,
         {
             var sizeLabel = row.childNodes[3].firstChild;
             sizeLabel.firstChild.nodeValue = this.getSize(file);
-          
+
             var methodLabel = row.childNodes[1].firstChild;
             methodLabel.firstChild.nodeValue = this.getStatus(file);
-            
+
             var hrefLabel = row.childNodes[0].firstChild;
             hrefLabel.firstChild.nodeValue = this.getHref(file);
-            
+
             if (file.mimeType && !file.category)
             {
                 removeClass(row, "category-undefined");
@@ -941,7 +941,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         for (var row = tbody.firstChild; row; row = row.nextSibling)
         {
             var file = row.repObject;
-            
+
             // Some rows aren't associated with a file (e.g. header, sumarry).
             if (!file)
                 continue;
@@ -1016,14 +1016,14 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         return phase;
     },
-    
-    updateLogLimit: function(limit) 
+
+    updateLogLimit: function(limit)
     {
         var netProgress = this.context.netProgress;
 
         // Must be positive number;
         limit = Math.max(0, limit) + netProgress.pending.length;
-        
+
         var files = netProgress.files;
         var filesLength = files.length;
         if (!filesLength || filesLength <= limit)
@@ -1031,11 +1031,11 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         // Remove old requests.
         var removeCount = Math.max(0, filesLength - limit);
-        for (var i=0; i<removeCount; i++) 
+        for (var i=0; i<removeCount; i++)
             this.removeLogEntry(files[0]);
     },
 
-    removeLogEntry: function(file, noInfo) 
+    removeLogEntry: function(file, noInfo)
     {
         if (!this.removeFile(file))
             return;
@@ -1049,10 +1049,10 @@ NetPanel.prototype = domplate(Firebug.Panel,
             var tbody = this.table.firstChild;
             tbody.removeChild(file.row);
         }
-        
+
         if (noInfo || !this.limitRow)
             return;
-        
+
         this.limitRow.limitInfo.totalCount++;
 
         NetLimit.updateCounter(this.limitRow);
@@ -1060,32 +1060,32 @@ NetPanel.prototype = domplate(Firebug.Panel,
         //if (netProgress.currentPhase == file.phase)
         //  netProgress.currentPhase = null;
     },
-    
-    removeFile: function(file) 
+
+    removeFile: function(file)
     {
         var netProgress = this.context.netProgress;
         var files = netProgress.files;
         var index = files.indexOf(file);
         if (index == -1)
             return false;
-        
+
         var requests = netProgress.requests;
         var phases = netProgress.phases;
 
         files.splice(index, 1);
         requests.splice(index, 1);
-        
+
         // Don't forget to remove the phase whose last file has been removed.
         var phase = file.phase;
         phase.removeFile(file);
         if (!phase.files.length)
         {
           remove(phases, phase);
-          
+
           if (netProgress.currentPhase == phase)
             netProgress.currentPhase = null;
         }
-         
+
         return true;
     }
 });
@@ -1095,14 +1095,14 @@ NetPanel.prototype = domplate(Firebug.Panel,
 Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 {
     isCollapsed: true,
-    
+
     tableTag:
         DIV(
             TABLE({width: "100%", cellpadding: 0, cellspacing: 0},
                 TBODY()
             )
         ),
-        
+
     limitTag:
         TR({class: "netRow netLimitRow", $collapsed: "$isCollapsed"},
             TD({class: "netCol netLimitCol", colspan: 5},
@@ -1127,8 +1127,8 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
                 )
             )
         ),
-        
-    isCollapsed: function() 
+
+    isCollapsed: function()
     {
         return this.isCollapsed;
     },
@@ -1137,8 +1137,8 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
     {
         openNewTab("about:config");
     },
-    
-    updateCounter: function(row, count) 
+
+    updateCounter: function(row, count)
     {
         removeClass(row, "collapsed");
 
@@ -1146,43 +1146,43 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         var limitLabel = getElementByClass(row, "netLimitLabel");
         limitLabel.firstChild.nodeValue = $STRF("LimitExceeded", [row.limitInfo.totalCount]);
     },
-    
+
     createTable: function(parent)
     {
         var table = this.tableTag.replace({}, parent);
         var row = this.createRow(table.firstChild.firstChild);
         return [table, row];
     },
-    
+
     createRow: function(parent)
     {
         var limitInfo = {
           totalCount: 0,
         };
-        
+
         var row = this.limitTag.insertRows(limitInfo, parent)[0];
         row.limitInfo = limitInfo;
 
         return row;
     },
-    
+
     // nsIPrefObserver
-    observe: function(subject, topic, data) 
+    observe: function(subject, topic, data)
     {
         // We're observing preferences only.
         if (topic != "nsPref:changed")
-          return; 
+          return;
 
         var prefName = data.substr(Firebug.prefDomain.length + 1);
         if (prefName == "maxQueueRequests")
             this.updateMaxLimit();
     },
-    
+
     updateMaxLimit: function()
     {
         var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
         maxQueueRequests =  value ? value : maxQueueRequests;
-    }    
+    }
 });
 
 var NetLimit = Firebug.NetMonitor.NetLimit;
@@ -1199,7 +1199,7 @@ function NetProgress(context)
 
     this.post = function(handler, args)
     {
-        // If the panel is currently active insert the file into it directly 
+        // If the panel is currently active insert the file into it directly
         // otherwise wait and insert it in to a "queue". It'll be flushed
         // into the UI when the panel is displayed (see this.flush method).
         if (panel)
@@ -1213,7 +1213,7 @@ function NetProgress(context)
         }
         else
         {
-            // The newest request is always inserted into the queue. 
+            // The newest request is always inserted into the queue.
             queue.push(handler, args);
 
             // Real number of requests (not posts!) is remembered.
@@ -1225,7 +1225,7 @@ function NetProgress(context)
             if (requestQueue.length + this.files.length > (maxQueueRequests + this.pending.length))
             {
                 var hiddenPanel = this.context.getPanel(panelName, false);
-                
+
                 var request = requestQueue.splice(0, 1)[0];
                 for (var i=0; i<queue.length; i+=2)
                 {
@@ -1235,12 +1235,12 @@ function NetProgress(context)
                         if (file) {
                             hiddenPanel.updateFile(file);
                         }
-                        
+
                         queue.splice(i, 2);
                         i -= 2;
                     }
                 }
-                
+
                 hiddenPanel.layout();
             }
         }
@@ -1325,21 +1325,21 @@ NetProgress.prototype =
             //file.fromCache = true;
             if (category && !file.category)
                 file.category = category;
-                
+
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             file.postText = getPostText(file, this.context);
 
             this.awaitFile(request, file);
             this.extendPhase(file);
 
-            if (FBTrace.DBG_NET) 
+            if (FBTrace.DBG_NET)                                                                      /*@explore*/
                 FBTrace.dumpProperties("net.requestedFile file", file);                               /*@explore*/
-                
+
             return file;
         }
-        else    
+        else
         {                                                                                                       /*@explore*/
-            if (FBTrace.DBG_NET) 
+            if (FBTrace.DBG_NET)
                 FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
         }
     },
@@ -1430,8 +1430,8 @@ NetProgress.prototype =
             this.arriveFile(file, request);
             return file;
         }
-          
-        // Don't update the UI.        
+
+        // Don't update the UI.
         return null;
     },
 
@@ -1445,7 +1445,7 @@ NetProgress.prototype =
             this.context.clearInterval(this.pendingInterval);
             delete this.pendingInterval;
         }
-          
+
         file.toRemove = true;
         return file;
     },
@@ -1570,7 +1570,7 @@ NetProgress.prototype =
     {
         if (this.currentPhase)
         {
-            // If the new request has been started within a "phaseInterval" after the 
+            // If the new request has been started within a "phaseInterval" after the
             // previous reqeust has been started, associate it with the current phase;
             // otherwise create a new phase.
             var lastStartTime = this.currentPhase.lastStartTime;
@@ -1589,7 +1589,7 @@ NetProgress.prototype =
     startPhase: function(file)
     {
         var phase = new NetPhase(file);
-        
+
         this.currentPhase = phase;
         this.phases.push(phase);
     },
@@ -1642,7 +1642,7 @@ var removeFile = NetProgress.prototype.removeFile;
 
 /**
  * A Document is a helpers objcet that represents a document (window) on the page.
- * This object is created for main page document and for every inner document 
+ * This object is created for main page document and for every inner document
  * (within a document) for which a request is made.
  */
 function NetDocument() { }
@@ -1670,8 +1670,8 @@ function NetFile(href, document)
     if (FBTrace.DBG_NET) {
         this.uid = FBL.getUniqueId();
         FBTrace.dumpProperties("NetFile", this);
-    }           
-    
+    }
+
     this.pendingCount = 0;
 }
 
@@ -1691,13 +1691,13 @@ Firebug.NetFile = NetFile;
 // ************************************************************************************************
 
 /**
- * A Phase is a helper object that groups requests made in the same time frame. 
- * In other words, if a new requests is started within a given time (specified 
+ * A Phase is a helper object that groups requests made in the same time frame.
+ * In other words, if a new requests is started within a given time (specified
  * by phaseInterval [ms]) - after previous request has been started -
- * it automatically belongs to the same phase. 
- * If a request is started after this period, a new phase is created 
- * and this file becomes to be the first in that phase. 
- * The first phase is ended when the page finishes it's loading. Other phases 
+ * it automatically belongs to the same phase.
+ * If a request is started after this period, a new phase is created
+ * and this file becomes to be the first in that phase.
+ * The first phase is ended when the page finishes it's loading. Other phases
  * might be started by additional XHR made by the page.
  *
  * All phases are stored within NetProgress.phases array.
@@ -1705,8 +1705,8 @@ Firebug.NetFile = NetFile;
  * Phases are used to compute size of the graphical timeline. The timeline
  * for each phase starts from the begining of the graph.
  */
-function NetPhase(file) 
-{ 
+function NetPhase(file)
+{
   // Start time of the phase. Remains the same, even if the file
   // is removed from the log (due to a max limit of entries).
   // This ensures stability of the time line.
@@ -1714,11 +1714,11 @@ function NetPhase(file)
 
   // The last finished request (file) in the phase.
   this.lastFinishedFile = null;
-  
+
   // Set to true if the phase needs to be updated in the UI.
   this.invalidPhase = null;
-  
-  // List of files associated with this phase.  
+
+  // List of files associated with this phase.
   this.files = [];
 
   this.addFile(file);
@@ -1731,12 +1731,12 @@ NetPhase.prototype =
         this.files.push(file);
         file.phase = this;
     },
-    
+
     removeFile: function(file)
     {
         remove(this.files, file);
         file.phase = null;
-        
+
         // If the last file has been removed, update the last file member.
         if (file == this.lastFinishedFile)
         {
@@ -1747,22 +1747,22 @@ NetPhase.prototype =
           else
           {
             for (var i=0; i<this.files.length; i++) {
-              if (this.lastFinishedFile.endTime < this.files[i].endTime)            
+              if (this.lastFinishedFile.endTime < this.files[i].endTime)
                 this.lastFinishedFile = this.files[i];
             }
           }
         }
     },
-    
-    get lastStartTime() 
+
+    get lastStartTime()
     {
       return this.files[this.files.length - 1].startTime;
     },
-    
-    get endTime() 
+
+    get endTime()
     {
       return this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
-    }    
+    }
 };
 
 // ************************************************************************************************
@@ -1801,10 +1801,10 @@ function unmonitorContext(context)
         {
             context.clearInterval(netProgress.pendingInterval);
             delete netProgress.pendingInterval;
-            
+
             netProgress.pending.splice(0, netProgress.pending.length);
         }
-    
+
         if (context.browser.docShell)
             context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
 
@@ -2006,7 +2006,7 @@ function safeGetWindow(webProgress)
             return webProgress.DOMWindow;
     }
     catch (exc) { }
-    
+
     return null;
 }
 
@@ -2039,7 +2039,7 @@ function getFileCategory(file)
 function getMimeType(request)
 {
     var mimeType = request.contentType;
-    if (!mimeType || !(mimeType in mimeCategoryMap))
+    if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
     {
         var ext = getFileExtension(request.name);
         if (!ext)
@@ -2218,8 +2218,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
     updateInfo: function(netInfoBox, file, context)
     {
-        if (FBTrace.DBG_NET) 
-            FBTrace.dumpProperties("updateInfo file", file);
+        if (FBTrace.DBG_NET)                                     /*@explore*/
+            FBTrace.dumpProperties("updateInfo file", file);     /*@explore*/
 
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
@@ -2310,7 +2310,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 responseImage.src = file.href;
                 responseTextBox.replaceChild(responseImage, responseTextBox.firstChild);
             }
-            else if (!(file.category in binaryCategoryMap))
+            else if (!(binaryCategoryMap.hasOwnProperty(file.category)))
             {
                 var text = file.responseText
                     ? file.responseText
@@ -2571,7 +2571,7 @@ var HttpObserver =
           var webProgress = getRequestWebProgress(aRequest, this);
           var category = getRequestCategory(aRequest);
           var win = webProgress ? safeGetWindow(webProgress) : null;
-          
+
           networkContext.post(requestedFile, [aRequest, now(), win, category]);
       }
   },

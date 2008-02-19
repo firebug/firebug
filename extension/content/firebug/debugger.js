@@ -1515,7 +1515,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         try
         {
-            var value = Firebug.CommandLine.evaluate(expr, this.context);
+            var value = Firebug.CommandLine.evaluate(expr, this.context, null, null, true);
             var rep = Firebug.getRep(value);
             var tag = rep.shortTag ? rep.shortTag : rep.tag;
 

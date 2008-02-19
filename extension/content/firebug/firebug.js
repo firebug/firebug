@@ -421,7 +421,7 @@ top.Firebug =
     updatePref: function(name, value)
     {
         // Prevent infinite recursion due to pref observer
-        if (name in optionUpdateMap)
+        if ( optionUpdateMap.hasOwnProperty(name) )
             return;
 
         optionUpdateMap[name] = 1;
@@ -909,7 +909,12 @@ top.Firebug =
                 if (rep.supportsObject(object, type))
                     return rep;
             }
-            catch (exc) {}
+            catch (exc)
+            {
+                FBTrace.dumpProperties("firebug.getRep i/reps.length"+i+"/"+reps.length+" type:"+type, exc);
+                FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
+                FBTrace.dumpProperties("firebug.getRep object:", object);
+            }
         }
 
         return defaultRep;

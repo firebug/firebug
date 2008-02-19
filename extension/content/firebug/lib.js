@@ -1998,7 +1998,7 @@ this.dispatch = function(listeners, name, args)
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
-            if (name in listener)
+            if ( listener.hasOwnProperty(name) )
                 listener[name].apply(listener, args);
         }
     }
@@ -2015,7 +2015,7 @@ this.dispatch2 = function(listeners, name, args)
     for (var i = 0; i < listeners.length; ++i)
     {
         var listener = listeners[i];
-        if (name in listener)
+        if ( listener.hasOwnProperty(name) )
         {
             var result = listener[name].apply(listener, args);
             if ( result )

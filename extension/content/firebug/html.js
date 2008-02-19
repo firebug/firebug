@@ -116,7 +116,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     editNode: function(node)
     {
-        if (node.localName in nonEditableTags)
+        if ( nonEditableTags.hasOwnProperty(node.localName) )
             return;
 
         var objectNodeBox = this.ioBox.findObjectBox(node);
@@ -888,7 +888,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 );
             }
 
-            if (!(node.localName in nonEditableTags))
+            if (!( nonEditableTags.hasOwnProperty(node.localName) ))
             {
                 items.push(
                     "-",

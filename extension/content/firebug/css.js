@@ -301,7 +301,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     addOldProperties: function(context, ruleId, inheritMode, props)
     {
-        if (context.selectorMap && ruleId in context.selectorMap)
+        if (context.selectorMap && context.selectorMap.hasOwnProperty(ruleId) )
         {
             var moreProps = context.selectorMap[ruleId];
             for (var i = 0; i < moreProps.length; ++i)
@@ -406,7 +406,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         // Remove the property from the selector map, if it was disabled
         var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
-        if (ruleId in this.context.selectorMap)
+        if ( this.context.selectorMap.hasOwnProperty(ruleId) )
         {
             var map = this.context.selectorMap[ruleId];
             for (var i = 0; i < map.length; ++i)
@@ -436,7 +436,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         // XXXjoe Generate unique key for elements too
         var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
-        if (!(ruleId in this.context.selectorMap))
+        if (!(this.context.selectorMap.hasOwnProperty(ruleId)))
             this.context.selectorMap[ruleId] = [];
 
         var map = this.context.selectorMap[ruleId];
@@ -1019,7 +1019,7 @@ CSSElementPanel.prototype = extend(CSSStyleSheetPanel.prototype,
         for (var i = 0; i < props.length; ++i)
         {
             var prop = props[i];
-            if (prop.name in usedProps)
+            if ( usedProps.hasOwnProperty(prop.name) )
             {
                 var deadProps = usedProps[prop.name];
                 for (var j = 0; j < deadProps.length; ++j)

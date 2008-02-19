@@ -82,7 +82,7 @@ function FirebugConsole(context, win)
         if (!context.timeCounters)
             context.timeCounters = {};
 
-        if (!reset && name in context.timeCounters)
+        if (!reset && context.timeCounters.hasOwnProperty(name))
             return;
 
         context.timeCounters[name] = time;

@@ -41,7 +41,7 @@ top.SourceCache.prototype =
 
     load: function(url)
     {
-        if (url in this.cache)
+        if ( this.cache.hasOwnProperty(url) )
             return this.cache[url];
 
         var d = FBL.reDataURL.exec(url);
@@ -153,7 +153,7 @@ top.SourceCache.prototype =
 
     loadAsync: function(url, cb)
     {
-        if (url in this.cache)
+        if ( this.cache.hasOwnProperty(url) )
         {
             cb(this.cache[url], url);
             return;
@@ -189,7 +189,7 @@ top.SourceCache.prototype =
 
     getLineAsync: function(url, lineNo, cb)
     {
-        if (url in this.cache)
+        if ( this.cache.hasOwnProperty(url) )
             cb(this.cache[url][lineNo-1], url, lineNo);
         else
         {

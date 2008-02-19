@@ -84,14 +84,41 @@ Firebug.TraceModule = extend(Firebug.Console,
             }
             else
             {
-                var m = reDBG.exec(p);
-                if (m)
+                var m = p.indexOf("DBG_");
+                if (m != -1)
                     FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
                 if (this.debug && m)
                     FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
             }
         }
         prefs.setBoolPref("browser.dom.window.dump.enabled", true);
+        prefs.addObserver("extensions", this, false);
+    },
+
+    observe: function(subject, topic, data)
+    {
+        var m = reDBG.exec(data);
+        if (m)
+        {
+            var prefDomain = "extensions."+m[1];
+            this.resetOption(prefDomain, m[2]);
+        }
+        else
+             FBTrace.sysout("TracePanel data:"+data+" does not match "+reDBG+"\n");
+    },
+
+    resetOption: function(prefDomain, optionName)
+    {
+        try
+        {
+            FBTrace[optionName] = Firebug.getPref(prefDomain, optionName);
+            if (this.debug)
+                FBTrace.sysout("resetOption set FBTrace."+optionName+" to "+FBTrace[optionName]+" using prefDomain:"+prefDomain+"\n");
+        }
+        catch (exc)
+        {
+            ddd("resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+        }
     },
 
     initContext: function(context)
@@ -143,7 +170,7 @@ Firebug.TraceModule = extend(Firebug.Console,
 // ************************************************************************************************
 
 Firebug.TracePanel = function() {};
-const reDBG = /DBG_(.*)/;
+const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
 Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 {
@@ -208,8 +235,8 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
     updateOption: function(name, value)
     {
         this.debug = FBTrace.DBG_TRACE;
-        //if (this.debug)
-        FBTrace.sysout("TraceFirebug.panel updateOption this.debug="+this.debug+"\n");
+        if (this.debug)
+            FBTrace.sysout("TraceFirebug.panel updateOption this.debug="+this.debug+" name:"+name+" value:"+value+"\n");
     },
 
     cheat: function()
@@ -225,10 +252,10 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 
         for (p in FBTrace)
         {
-            var m = reDBG.exec(p);
-            if (m)
+            var m = p.indexOf("DBG_");
+            if (m != -1)
             {
-                var label = m[1];
+                var label = p.substr(4);
                 items.push({
                     label: label,
                     nol10n: true,

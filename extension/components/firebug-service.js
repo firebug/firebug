@@ -146,6 +146,8 @@ function FirebugService()
 {
     fbs = this;
     this.wrappedJSObject = this;
+    this.timeStamp = new Date();  /* explore */
+    this.breakpoints = breakpoints; // so chromebug can see it /* explore */
 
     var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].   		/*@explore*/
                     getService(Components.interfaces.nsIAppShellService);						/*@explore*/
@@ -162,6 +164,7 @@ function FirebugService()
     observerService.addObserver(ShutdownObserver, "quit-application", false);
     observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false); 																													/*@explore*/
 
+    this.alwayFilterURLsStarting = "chrome://chromebug";  // TODO allow override
     this.onEvalScriptCreated.kind = "eval"; /*@explore*/
     this.onTopLevelScriptCreated.kind = "top-level"; /*@explore*/
     this.onEventScriptCreated.kind = "event"; /*@explore*/
@@ -841,6 +844,8 @@ FirebugService.prototype =
     onBreakpoint: function(frame, type, val)
     {
         var scriptTag = frame.script.tag;
+        if (fbs.DBG_FBS_SRCUNITS) ddd("onBreakpoint frame.script.tag="+frame.script.tag +"\n")     /*@explore*/
+
         if (scriptTag in this.onXScriptCreatedByTag)
         {
             var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
@@ -887,7 +892,7 @@ FirebugService.prototype =
 
         if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="              /*@explore*/
                 +frame.script.tag+"\n");                           /*@explore*/
-        if (runningUntil) // XXXjjb ?? bp and after onCall? Seems dubious
+        if (runningUntil)
             return RETURN_CONTINUE;
         else
             return this.onBreak(frame, type, val);
@@ -1011,6 +1016,7 @@ FirebugService.prototype =
             if (debuggr)
             {
                 var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
+                if (fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScript got sourceFile:"+sourceFile+"\n");
                 fbs.resetBreakpoints(sourceFile);
             }
             else
@@ -1026,7 +1032,7 @@ FirebugService.prototype =
         }
 
         fbs.nestedScriptStack.clear();
-        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onTopLevelScriptCreated script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScriptCreated script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
 
         return sourceFile;
     },
@@ -1068,7 +1074,7 @@ FirebugService.prototype =
 
                 script.setBreakpoint(0);
                 fbs.clearHookInterruptsToTrackScripts(); // now we know that any nested scripts are part of our buffer, not dynamic functions
-                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+"\n");/*@explore*/
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS || fbs.DBG_FBS_BP) ddd("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+"\n");/*@explore*/
             }
             else if (script.baseLineNumber == 1)
             {
@@ -1397,7 +1403,7 @@ FirebugService.prototype =
                     if (bp.disabled)
                         --disabledCount;
 
-                    if (bp.condition || bp.hitCount)
+                    if (bp.condition || bp.hitCount > 0)
                     {
                         --conditionCount;
                     }
@@ -1442,10 +1448,12 @@ FirebugService.prototype =
 
     resetBreakpoints: function(sourceFile)
     {
-        if (fbs.DBG_FBS_BP) ddd("resetBreakpoints: "+sourceFile.href+"\n");                                   /*@explore*/
         // If the new script is replacing an old script with a breakpoint still
         var url = sourceFile.href;
         var urlBreakpoints = breakpoints[url];
+        if (fbs.DBG_FBS_BP)
+            ddd("resetBreakpoints: breakpoints["+sourceFile.href+"]="+urlBreakpoints+"\n");                                   /*@explore*/
+
         if (urlBreakpoints)
         {
             if (fbs.DBG_FBS_BP) ddd("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url+"\n");              /*@explore*/
@@ -1467,10 +1475,13 @@ FirebugService.prototype =
             script.setBreakpoint(pc);
             bp.scriptWithBreakpoint = script; // TODO may need array?
             bp.pcmap;
-            if (fbs.DBG_FBS_BP)ddd("setJSDBreakpoint: line="+bp.lineNo +" pc="+pc+"\n");                         /*@explore*/
+            if (fbs.DBG_FBS_BP)ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+"\n");                         /*@explore*/
         }
         else /*@explore*/
-             if (fbs.DBG_FBS_BP) dumpProperties("setJSDBreakpoint: NO script at line="+bp.lineNo, script?("script.isValid="+script.isValid):sourceFile.dumpLineTable());                         /*@explore*/
+        { /*@explore*/
+             if (fbs.DBG_FBS_BP) /*@explore*/
+                ddd("setJSDBreakpoint: "+(script?(script.tag+".isValid"+script.isValid):" NO script")+" at line="+bp.lineNo+" lineTable:"+sourceFile.dumpLineTable()+"\n");                         /*@explore*/
+        } /*@explore*/
 
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1813,14 +1824,20 @@ function denormalizeURL(url)
 
 function isFilteredURL(url)
 {
-    return ( fbs.filterSystemURLs && systemURLStem(url) );
+    if (!url)
+        return true;
+    if (url[0] == 'h')
+        return false;
+    if (fbs.filterSystemURLs)
+        return systemURLStem(url);
+    if (url.indexOf(fbs.alwayFilterURLsStarting) != -1)
+        return true;
+    return false;
 }
 
 function systemURLStem(url)
 {
-    if (!url)
-        return true;
-    if (this.url_class)
+    if (this.url_class)  // attempt to optimize stream of similar urls
     {
         if ( url.substr(0,this.url_class.length) == this.url_class )
             return this.url_class;
@@ -1856,7 +1873,7 @@ function dispatch(listeners, name, args)
     for (var i = 0; i < listeners.length; ++i)
     {
         var listener = listeners[i];
-        if (name in listener)
+        if ( listener.hasOwnProperty(name) )
             listener[name].apply(listener, args);
     }
 }
@@ -1998,7 +2015,7 @@ var FirebugPrefsObserver =
         {
             fbs[optionName] = this.getPref(prefDomain, optionName);
             //if (fbs[optionName])
-                ddd("resetOption set "+optionName+" to "+fbs[optionName]+"\n");
+                ddd("fbs.resetOption set "+optionName+" to "+fbs[optionName]+"\n");
         }
         catch (exc)
         {
@@ -2049,12 +2066,17 @@ function ERROR(text)
 
 function ddd(text)
 {
-    if (fbs.hiddenWindow)
+    if (fbs && fbs.hiddenWindow)
     {
         fbs.hiddenWindow.dump(text);
         return;
     }
-ERROR( "firebug-service: no hiddenWindow!! "+text );
+
+    if (fbs)
+        ERROR( "firebug-service: no hiddenWindow!! "+text );
+    else
+        ERROR("firebug-service: no fbs, dump to file ");
+
     if (true)      /* in the traced version we dump to file */														/*@explore*/
         dumpToFile(text);     																						/*@explore*/
     else      		/* but in the untraced version 'else' will be removed and we dump to log */						/*@explore*/

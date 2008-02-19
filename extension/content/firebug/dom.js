@@ -182,7 +182,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 for (var i = 0; i < path.length; ++i)
                 {
                     var name = path[i];
-                    if (name in toggles)
+                    if (toggles.hasOwnProperty(member.name))
                         toggles = toggles[name];
                     else
                         toggles = toggles[name] = {};
@@ -713,7 +713,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
     {
         const optionMap = {showUserProps: 1, showUserFuncs: 1, showDOMProps: 1,
             showDOMFuncs: 1, showDOMConstants: 1};
-        if (name in optionMap)
+        if ( optionMap.hasOwnProperty(name) )
             this.rebuild(true);
     },
 
@@ -1313,7 +1313,7 @@ function getMembers(object, level)
     return members;
 }
 
-function expandMembers(members, toggles, offset, level)
+function expandMembers(members, toggles, offset, level)  // recursion starts with offset=0, level=0
 {
     var expanded = 0;
     for (var i = offset; i < members.length; ++i)
@@ -1322,7 +1322,7 @@ function expandMembers(members, toggles, offset, level)
         if (member.level > level)
             break;
 
-        if (member.name in toggles)
+        if ( toggles.hasOwnProperty(member.name) )
         {
             member.open = "opened";  // member.level <= level && member.name in toggles.
 
@@ -1341,11 +1341,6 @@ function expandMembers(members, toggles, offset, level)
             } 																							/*@explore*/
 
             expanded += newMembers.length;
-            // sometimes member.name == prototype then we get toggles[prototype] as a fucntion and we loop,
-            // this hack avoids the loop but I wish I understood it better XXXjjb
-            var memberToggles = toggles[member.name];
-            if (typeof(memberToggles) != 'object')
-                memberToggles = {};
             i += newMembers.length + expandMembers(members, memberToggles, i+1, level+1);
         }
     }
