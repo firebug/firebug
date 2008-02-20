@@ -1173,8 +1173,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         if (topic != "nsPref:changed")
           return;
 
-        var prefName = data.substr(Firebug.prefDomain.length + 1);
-        if (prefName == "maxQueueRequests")
+        if (data.indexOf("maxQueueRequests") != -1)
             this.updateMaxLimit();
     },
 
