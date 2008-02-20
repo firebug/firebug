@@ -225,33 +225,17 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     showContext: function(browser, context)
     {
-        /*if (context)
+        if (!context)
         {
-            var panel = context.chrome.getSelectedPanel();
-            if (panel && panel.name == panelName)
-                context.netProgress.panel = panel;
-        }*/
+            var tabId = Firebug.getTabIdForWindow(browser.contentWindow);
+            delete contexts[tabId];
+        }
     },
 
     loadedContext: function(context)
     {
         if (context.netProgress)
             context.netProgress.loaded = true;
-    },
-
-    watchWindow: function(context, win)
-    {
-        FirebugContext.window.addEventListener("beforeunload", this.onBeforeUnload, false);
-    },
-
-    onBeforeUnload: function(aEvent)
-    {
-        // Use this event to clean up the global (local within this namespace)
-        // array with contexts.
-        var win = aEvent.currentTarget;
-        var tabId = Firebug.getTabIdForWindow(win);
-        if (tabId)
-          delete contexts[tabId];
     },
 
     showPanel: function(browser, panel)
@@ -1779,6 +1763,7 @@ function monitorContext(context)
         networkContext = contexts[tabId];
         if (networkContext) {
           networkContext.context = context;
+          delete contexts[tabId];
         }
         else {
           networkContext = new NetProgress(context);
@@ -2519,8 +2504,8 @@ var HttpObserver =
 
       if (FBTrace.DBG_NET)
       {
-        FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +
-          safeGetName(aRequest) + "\n");
+          FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +
+            safeGetName(aRequest) + "\n");
       }
 
       if (!tabId && FBTrace.DBG_NET)
@@ -2538,7 +2523,6 @@ var HttpObserver =
   onStartRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
-      var networkContext = context ? context.netProgress : null;
 
       var name = aRequest.URI.asciiSpec;
       var origName = aRequest.originalURI.asciiSpec;
@@ -2552,10 +2536,8 @@ var HttpObserver =
           !isRedirect && aTabId)
       {
           // Create a new network context prematurely.
-          if (!contexts[aTabId]) {
-            networkContext = new NetProgress(null);
-            contexts[aTabId] = networkContext;
-          }
+          if (!contexts[aTabId])
+              contexts[aTabId] = new NetProgress(null);
       }
 
       // Show only requests that are associated with a tab.
