@@ -435,7 +435,7 @@ top.FirebugChrome =
 
     showContext: function(browser, context)
     {
-        if (!context || context != FirebugContext)
+        if (!context || context != FirebugContext)  // XXXjjb shouldn't this be if (context && context != FirebugContext??
         {
             FirebugContext = context;
 

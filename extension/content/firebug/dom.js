@@ -182,7 +182,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 for (var i = 0; i < path.length; ++i)
                 {
                     var name = path[i];
-                    if (toggles.hasOwnProperty(member.name))
+                    if (toggles.hasOwnProperty(name))
                         toggles = toggles[name];
                     else
                         toggles = toggles[name] = {};

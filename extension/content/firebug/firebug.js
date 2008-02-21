@@ -911,7 +911,7 @@ top.Firebug =
             }
             catch (exc)
             {
-                FBTrace.dumpProperties("firebug.getRep i/reps.length"+i+"/"+reps.length+" type:"+type, exc);
+                FBTrace.dumpProperties("firebug.getRep i/reps.length: "+i+"/"+reps.length+" type:"+type, exc);
                 FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
                 FBTrace.dumpProperties("firebug.getRep object:", object);
             }

@@ -406,7 +406,7 @@ Firebug.Debugger = extend(Firebug.Module,
 
     startDebugging: function(context)
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging enter\n");                                             /*@explore*/
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging enter context.stopped:"+context.stopped+"\n");                                             /*@explore*/
         try {
             fbs.lockDebugger();
 
@@ -463,7 +463,7 @@ Firebug.Debugger = extend(Firebug.Module,
             if (FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("Debugger UI error during debugging loop:", exc);          /*@explore*/
             ERROR("Debugger UI error during debugging loop:"+exc+"\n");
         }
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit\n");                                              /*@explore*/
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+"\n");                                               /*@explore*/
     },
 
     stopDebugging: function(context)

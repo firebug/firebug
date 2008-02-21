@@ -103,12 +103,12 @@ Firebug.TraceModule = extend(Firebug.Console,
             var prefDomain = "extensions."+m[1];
             this.resetOption(prefDomain, m[2]);
         }
-        else
-             FBTrace.sysout("TracePanel data:"+data+" does not match "+reDBG+"\n");
     },
 
     resetOption: function(prefDomain, optionName)
     {
+        if (!FBTrace)  // we get called in a weird scope
+            return;
         try
         {
             FBTrace[optionName] = Firebug.getPref(prefDomain, optionName);
@@ -117,7 +117,7 @@ Firebug.TraceModule = extend(Firebug.Console,
         }
         catch (exc)
         {
-            ddd("resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+            FBTrace.sysout("resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
         }
     },
 

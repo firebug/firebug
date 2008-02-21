@@ -858,8 +858,17 @@ FirebugService.prototype =
             } catch (e) {
                 dumpProperties("onBreakpoint called onXScriptCreated and it didn't end well:",e);
             }
+
+            if (fbs.DBG_FBS_SRCUNITS)
+            {
+                ddd("Top Scripts Uncleared:");
+                for (p in this.onXScriptCreatedByTag) ddd(p+"|");
+                ddd("\n")
+            }
             return RETURN_CONTINUE;
         }
+
+
 
         if (disabledCount || monitorCount || conditionCount || runningUntil)
         {
@@ -1115,6 +1124,9 @@ FirebugService.prototype =
 
     onScriptDestroyed: function(script)
     {
+        if (script.tag in fbs.onXScriptCreatedByTag)
+            delete  fbs.onXScriptCreatedByTag[script.tag];
+
         dispatch(scriptListeners,"onScriptDestroyed",[script]);
     },
 
