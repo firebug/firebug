@@ -233,7 +233,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         }
     },
 
-    lessTalkMoreAction(object, context)
+    lessTalkMoreAction: function(object, context)
     {
         if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
         {
@@ -264,7 +264,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             context.errorMap = {};
 
         context.errorMap[msgId] = 1;
-    }
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
