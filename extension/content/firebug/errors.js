@@ -104,10 +104,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         try
         {
+
             if (object instanceof nsIScriptError)
             {
-                if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
-                    FBTrace.dumpProperties("errors.observe "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
                 var category = getBaseCategory(object.category);
                 var isWarning = object.flags & WARNING_FLAG;
                 var isJSError = category == "js" && !isWarning;
@@ -131,17 +130,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     }
                 }
 
-                if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
-                {
-                    if (FBTrace.DBG_ERRORS)
-                    {                                                         /*@explore*/
-                        FBTrace.sysout("errors.observe dropping error "+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
-                    }
+                if (lessTalkMoreAction(object, context))
                     return;
-                }
 
-               if (object.flags & object.exceptionFlag)
-               {
+                if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
+                    FBTrace.dumpProperties("errors.observe "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
+
+                if (object.flags & object.exceptionFlag)
+                {
                     if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe is exception\n");
                     if (reUncaught.test(object.errorMessage))
                     {
@@ -160,27 +156,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     else
                         if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
                 }
-
-                if (object.errorMessage in pointlessErrors)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("errors.observe dropping pointlessError\n");
-                    return;
-                }
-
-                var msgId = [object.errorMessage, object.sourceName, object.lineNumber].join("/");
-                if (context.errorMap && msgId in context.errorMap)
-                {
-                    context.errorMap[msgId] += 1;
-                    if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
-                        FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
-                    return;
-                }
-
-                if (!context.errorMap)
-                    context.errorMap = {};
-
-                context.errorMap[msgId] = 1;
 
                 if (!isWarning)
                     this.increaseCount(context);
@@ -257,6 +232,39 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 FBTrace.dumpProperties("errors.observe FAILS", exc);                                                   /*@explore*/
         }
     },
+
+    lessTalkMoreAction(object, context)
+    {
+        if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
+        {
+            if (FBTrace.DBG_ERRORS)
+            {                                                         /*@explore*/
+                FBTrace.sysout("errors.observe dropping error "+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
+            }
+            return true;
+        }
+
+        if (object.errorMessage in pointlessErrors)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("errors.observe dropping pointlessError\n");
+            return true;
+        }
+
+        var msgId = [object.errorMessage, object.sourceName, object.lineNumber].join("/");
+        if (context.errorMap && msgId in context.errorMap)
+        {
+            context.errorMap[msgId] += 1;
+            if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
+                FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
+            return true;
+        }
+
+        if (!context.errorMap)
+            context.errorMap = {};
+
+        context.errorMap[msgId] = 1;
+    }
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
