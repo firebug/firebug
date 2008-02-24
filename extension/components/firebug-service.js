@@ -1492,7 +1492,7 @@ FirebugService.prototype =
         else /*@explore*/
         { /*@explore*/
              if (fbs.DBG_FBS_BP) /*@explore*/
-                ddd("setJSDBreakpoint: "+(script?(script.tag+".isValid"+script.isValid):" NO script")+" at line="+bp.lineNo+" lineTable:"+sourceFile.dumpLineTable()+"\n");                         /*@explore*/
+                ddd("setJSDBreakpoint: "+(script?(script.tag+".isValid="+script.isValid):" NO script")+" at line="+bp.lineNo+" lineTable:"+sourceFile.dumpLineTable()+"\n");                         /*@explore*/
         } /*@explore*/
 
     },

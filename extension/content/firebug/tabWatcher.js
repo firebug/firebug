@@ -147,7 +147,7 @@ top.TabWatcher =
 
             if (FBTrace.DBG_WINDOWS) {                                                                                 /*@explore*/
                 context.uid = FBL.getUniqueId();                                                                       /*@explore*/
-                FBTrace.sysout("tabWatcher created context with id="+context.uid+" for uri="+uri+" and win.location.href="+win.location.href+"\n"); /*@explore*/
+                FBTrace.sysout("tabWatcher created context ++++++++++++++ with id="+context.uid+" for uri="+uri+" and win.location.href="+win.location.href+"\n"); /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
             this.dispatch("initContext", [context]);
@@ -256,7 +256,7 @@ top.TabWatcher =
         if (index != -1)
         {
             context.windows.splice(index, 1);
-            this.dispatch("unwatchWindow", [context, win]);  // XXXjjb Joe check
+            this.dispatch("unwatchWindow", [context, win]);
         }
     },
 
@@ -301,6 +301,7 @@ top.TabWatcher =
         });
 
         this.dispatch("destroyContext", [context, persistedState]);
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("tabWatcher.unwatchContext  ------------------- delete context "+(context.window?context.window.location:"no window")+"\n");
 
         if (this.cancelNextLoad)
         {
