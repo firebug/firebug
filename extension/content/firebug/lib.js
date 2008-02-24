@@ -2737,7 +2737,6 @@ this.SourceFile = function (compilation_unit_type)
     {
         this.sourceFile = sourceFile;
     };
-    this.lineMap = {};
 }
 
 this.SourceFile.prototype =
@@ -2922,10 +2921,12 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 {
     sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
-        FBTrace.sysout("addScriptToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
+        FBTrace.sysout("FBL.addScriptsToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
 
     // Attach the innerScripts for use later
-    sourceFile.innerScripts = [];
+    if (!sourceFile.innerScripts)
+        sourceFile.innerScripts = [];
+
     while (innerScripts.hasMoreElements())
     {
         sourceFile.innerScripts.push(innerScripts.getNext());
@@ -2940,10 +2941,11 @@ this.EvalLevelSourceFile = function(url, script, eval_expr, sourceLength, innerS
     this.evalExpression = eval_expr;
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
+    this.lineMap = {};
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
-this.EvalLevelSourceFile.prototype = new this.SourceFile("eval-level"); // prototypical inheritance
+this.EvalLevelSourceFile.prototype = new this.SourceFile("eval-level"); // shared prototype
 
 this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
 {
@@ -2976,6 +2978,8 @@ this.EventSourceFile = function(url, script, title, source, innerScriptEnumerato
     this.title = title;
     this.source = source; // points to the sourceCache lines
     this.pcmap_type = PCMAP_PRETTYPRINT;
+    this.lineMap = {};
+
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
@@ -3015,6 +3019,8 @@ this.FunctionConstructorSourceFile = function(url, script, ctor_expr, sourceLeng
     this.evalExpression = eval_expr;
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
+    this.lineMap = {};
+
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 }
 
@@ -3049,6 +3055,8 @@ this.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScriptEn
     this.outerScript = outerScript;  // Beware may not be valid after we return!!
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
+    this.lineMap = {};
+
     FBL.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
@@ -3085,6 +3093,7 @@ this.EnumeratedSourceFile = function(context, url) // we don't have the outer sc
     this.href = url;  // may not be outerScript file name, eg this could be an enumerated eval
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
+    this.lineMap = {};
 }
 
 this.EnumeratedSourceFile.prototype = new this.SourceFile("enumerated");
@@ -3137,6 +3146,7 @@ this.ScriptTagSourceFile = function(url, scriptTagNumber) // we don't have the o
     this.scriptTagNumber = scriptTagNumber;
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
+    this.lineMap = {};
 }
 
 this.ScriptTagSourceFile.prototype = new this.SourceFile("scriptTag");
