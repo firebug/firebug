@@ -865,9 +865,9 @@ FirebugService.prototype =
                 for (p in this.onXScriptCreatedByTag) ddd(p+"|");
                 ddd("\n")
             }
-            if (!sourceFile || !sourceFile.breakOnZero)
+            if (!sourceFile || !sourceFile.breakOnZero || sourceFile.breakOnZero != scriptTag)
                 return RETURN_CONTINUE;
-            else  // sourceFile.breakOnZero set true
+            else  // sourceFile.breakOnZero matches the script we have halted.
                if (this.DBG_FBS_BP) ddd("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
         }
 
@@ -1496,7 +1496,7 @@ FirebugService.prototype =
             bp.pcmap = pcmap;
 
             if (pc == 0)  // signal the breakpoint handler to break for user
-                sourceFile.breakOnZero = true;
+                sourceFile.breakOnZero = script.tag;
 
             if (fbs.DBG_FBS_BP)ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+"\n");                         /*@explore*/
         }

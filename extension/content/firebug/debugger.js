@@ -1113,7 +1113,9 @@ Firebug.Debugger = extend(Firebug.Module,
         }
         this.hash_service.update(byteArray, byteArray.length);
         var hash = this.hash_service.finish(true);
-        var url = callerFileName + (kind ? "/"+kind+"/" : "/") + hash;
+        
+        // encoding the hash should be ok, it should be information-preserving? Or at least reversable?
+        var url = callerFileName + (kind ? "/"+kind+"/" : "/") + encodeURIComponent(hash);
 
         return url;
     },
