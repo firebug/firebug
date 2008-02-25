@@ -852,7 +852,7 @@ FirebugService.prototype =
             if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
                                       +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
             delete this.onXScriptCreatedByTag[scriptTag];
-            frame.script.clearBreakpoint(0);  // since we just compiled this script, there will be no other bp
+            frame.script.clearBreakpoint(0);
             try {
                 var sourceFile = onXScriptCreated(frame, type, val);
             } catch (e) {
@@ -865,7 +865,10 @@ FirebugService.prototype =
                 for (p in this.onXScriptCreatedByTag) ddd(p+"|");
                 ddd("\n")
             }
-            return RETURN_CONTINUE;
+            if (!sourceFile || !sourceFile.breakOnZero)
+                return RETURN_CONTINUE;
+            else  // sourceFile.breakOnZero set true
+               if (this.DBG_FBS_BP) ddd("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
         }
 
 
@@ -1001,6 +1004,10 @@ FirebugService.prototype =
             {
                 var sourceFile = debuggr.onEvalScriptCreated(frame, outerScript, fbs.nestedScriptStack.enumerate());
                 fbs.resetBreakpoints(sourceFile);
+            }
+            else
+            {
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEvalScriptCreated no debuggr for "+outerScript.tag+":"+outerScript.fileName+"\n");
             }
         }
         catch (exc)
@@ -1486,7 +1493,11 @@ FirebugService.prototype =
             var pc = script.lineToPc(bp.lineNo, pcmap);
             script.setBreakpoint(pc);
             bp.scriptWithBreakpoint = script; // TODO may need array?
-            bp.pcmap;
+            bp.pcmap = pcmap;
+
+            if (pc == 0)  // signal the breakpoint handler to break for user
+                sourceFile.breakOnZero = true;
+
             if (fbs.DBG_FBS_BP)ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+"\n");                         /*@explore*/
         }
         else /*@explore*/
