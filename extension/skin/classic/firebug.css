@@ -11,7 +11,7 @@
 toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/inspectSmall.png);
     width: 16px;
-    height: 16px;    
+    height: 16px;
 }
 
 #firebug-button {
@@ -117,6 +117,10 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     display: none;
 }
 
+.fbURLMenuItem { // let file names be as long as need be
+    crop: none;
+    max-width: none;
+}
 /************************************************************************************************/
 
 #fbDebuggerButtons {

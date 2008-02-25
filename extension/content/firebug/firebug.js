@@ -1636,9 +1636,9 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
             min += scriptBlockSize;
         } while (max < totalMax);
-FBTrace.sysout("firebug.createSourceBox done appendScriptLines...");
+
         this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
-FBTrace.sysout("firebug.createSourceBox done sourceBoxDecorator\n");
+
         if (sourceFile.source)
             this.anonSourceBoxes.push(sourceBox);
         else

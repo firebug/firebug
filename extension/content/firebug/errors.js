@@ -130,7 +130,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     }
                 }
 
-                if (lessTalkMoreAction(object, context))
+                if (lessTalkMoreAction(object, context, isWarning))
                     return;
 
                 if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
@@ -231,39 +231,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
                 FBTrace.dumpProperties("errors.observe FAILS", exc);                                                   /*@explore*/
         }
-    },
-
-    lessTalkMoreAction: function(object, context)
-    {
-        if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
-        {
-            if (FBTrace.DBG_ERRORS)
-            {                                                         /*@explore*/
-                FBTrace.sysout("errors.observe dropping error "+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
-            }
-            return true;
-        }
-
-        if (object.errorMessage in pointlessErrors)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("errors.observe dropping pointlessError\n");
-            return true;
-        }
-
-        var msgId = [object.errorMessage, object.sourceName, object.lineNumber].join("/");
-        if (context.errorMap && msgId in context.errorMap)
-        {
-            context.errorMap[msgId] += 1;
-            if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
-                FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
-            return true;
-        }
-
-        if (!context.errorMap)
-            context.errorMap = {};
-
-        context.errorMap[msgId] = 1;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -378,6 +345,39 @@ function domainFilter(url)  // never called?
     return errorScheme == "javascript"
         || errorScheme == "chrome"
         || errorDomain == browserDomain;
+}
+
+function lessTalkMoreAction(object, context, isWarning)
+{
+    if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
+    {
+        if (FBTrace.DBG_ERRORS)
+        {                                                         /*@explore*/
+            FBTrace.sysout("errors.observe dropping error "+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
+        }
+        return true;
+    }
+
+    if (object.errorMessage in pointlessErrors)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.observe dropping pointlessError\n");
+        return true;
+    }
+
+    var msgId = [object.errorMessage, object.sourceName, object.lineNumber].join("/");
+    if (context.errorMap && msgId in context.errorMap)
+    {
+        context.errorMap[msgId] += 1;
+        if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
+            FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
+        return true;
+    }
+
+    if (!context.errorMap)
+        context.errorMap = {};
+
+    context.errorMap[msgId] = 1;
 }
 
 // ************************************************************************************************

@@ -1341,7 +1341,7 @@ function expandMembers(members, toggles, offset, level)  // recursion starts wit
             } 																							/*@explore*/
 
             expanded += newMembers.length;
-            i += newMembers.length + expandMembers(members, memberToggles, i+1, level+1);
+            i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1);
         }
     }
 

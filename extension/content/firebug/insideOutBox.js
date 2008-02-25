@@ -226,7 +226,13 @@ InsideOutBox.prototype =
             if (!this.rootObjectBox || this.rootObjectBox.repObject != rootObject)
             {
                 if (this.rootObjectBox)
-                    this.box.removeChild(this.rootObjectBox);
+                {
+                    try {
+                        this.box.removeChild(this.rootObjectBox);
+                    } catch (exc) {
+                        if (FBTrace.DBG_HTML || true) FBTrace.sysout(" this.box.removeChild(this.rootObjectBox) FAILS "+this.box+" must not contain "+this.rootObjectBox+"\n");
+                    }
+                }
 
                 this.highlightedObjectBox = null;
                 this.selectedObjectBox = null;

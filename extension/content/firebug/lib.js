@@ -1313,10 +1313,12 @@ this.cropString = function(text, limit)
     text = text + "";
 
     if (!limit)
-        limit = 100;
+        var halfLimit = 50;
+    else
+        var halfLimit = limit / 2;
 
     if (text.length > limit)
-        return this.escapeNewLines(text.substr(0, limit)) + "...";
+        return this.escapeNewLines(text.substr(0, halfLimit) + "..." + text.substr(text.length-halfLimit));
     else
         return this.escapeNewLines(text);
 };

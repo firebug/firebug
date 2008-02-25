@@ -540,7 +540,8 @@
                 var urls = groups[path];
                 urls.sort(function(a, b) { return a.fileName < b.fileName ? -1 : 1; });
 
-                FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
+                var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
+                FBL.setClass(menuHeader, "fbURLMenuItem");
 
                 for (var j = 0; j < urls.length; ++j)
                 {
@@ -553,6 +554,7 @@
 
                     var menuItem = FBL.createMenuItem(this.popup, menuInfo);
                     menuItem.repObject = urls[j].object;
+                    FBL.setClass(menuItem, "fbURLMenuItem");
                 }
             }
 

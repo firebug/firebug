@@ -15,7 +15,15 @@ FBTrace.avoidRecursion = false;
 this.sysout = function(msg, more)
 {
     if (more)
-         msg += " " + more.toString() + "\n";
+    {
+        try {
+            msg += " " + more.toString() + "\n";
+        } catch (exc) {
+            // probably xpconnect error message that won't be intelligable
+            msg += "(trace.sysout fails: "+exc+")";
+        }
+    }
+
     dump(msg);
 }
 

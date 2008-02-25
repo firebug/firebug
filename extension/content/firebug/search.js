@@ -45,7 +45,7 @@ Firebug.Search = extend(Firebug.Module,
     {
         var searchBox = context.chrome.$("fbSearchBox");
 
-        if (text.length > 0)
+        if (text && text.length > 0)
             setClass(searchBox, "fbSearchBox-attention");
         else
             removeClass(searchBox, "fbSearchBox-attention");
