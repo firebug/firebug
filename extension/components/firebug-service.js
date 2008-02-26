@@ -1050,11 +1050,14 @@ FirebugService.prototype =
         {
             // In onScriptCreated we may have found a script at baseLineNumber=1
             // Now we know its not an event
-            var firstScript = fbs.nestedScriptStack.queryElementAt(0, jsdIScript);
-            if (firstScript.tag in fbs.onXScriptCreatedByTag)
+            if (fbs.nestedScriptStack.length > 0)
             {
-                delete  fbs.onXScriptCreatedByTag[firstScript.tag];
-                firstScript.clearBreakpoint(0);
+                var firstScript = fbs.nestedScriptStack.queryElementAt(0, jsdIScript);
+                if (firstScript.tag in fbs.onXScriptCreatedByTag)
+                {
+                    delete  fbs.onXScriptCreatedByTag[firstScript.tag];
+                    firstScript.clearBreakpoint(0);
+                }
             }
 
             // On compilation of a top-level (global-appending) function.
@@ -1962,6 +1965,11 @@ function hook(fn, rv)
 function getFrameGlobal(frame)
 {
     var jscontext = frame.executionContext;
+    if (!jscontext)
+    {
+        //ddd("getFrameGlobal, frame.executionContext null\n");
+        return getFrameWindow(frame);
+    }
     var frameGlobal = jscontext.globalObject.getWrappedValue();
     if (frameGlobal)
         return frameGlobal;
