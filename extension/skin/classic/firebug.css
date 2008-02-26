@@ -117,8 +117,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     display: none;
 }
 
-.fbURLMenuItem { // let file names be as long as need be
-    crop: none;
+.fbURLMenuItem { /* let file names be as long as need be */
     max-width: none;
 }
 /************************************************************************************************/
