@@ -1113,7 +1113,7 @@ Firebug.Debugger = extend(Firebug.Module,
         }
         this.hash_service.update(byteArray, byteArray.length);
         var hash = this.hash_service.finish(true);
-        
+
         // encoding the hash should be ok, it should be information-preserving? Or at least reversable?
         var url = callerFileName + (kind ? "/"+kind+"/" : "/") + encodeURIComponent(hash);
 
@@ -2441,7 +2441,7 @@ function setLineBreakpoints(sourceFile, sourceBox)
             scriptRow.setAttribute("condition", "true");
     }});
 
-    //if (FBTrace.DBG_LINETABLE)
+    if (FBTrace.DBG_LINETABLE)
         FBTrace.sysout("debugger.setLineBreakpoints building lineTable for sourceFile.href:"+sourceFile.href+"\n")
     if (!sourceFile.lineMap || !sourceFile.lineMap.complete)
         sourceFile.buildLineTable();

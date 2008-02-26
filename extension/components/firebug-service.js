@@ -964,10 +964,31 @@ FirebugService.prototype =
         }
     },
 
-    onEventScriptCreated: function(frame, type, val)
+    onEventScriptCreated: function(frame, type, val, noNestTest)
     {
         try
         {
+           if (!noNestTest)
+            {
+                // In onScriptCreated we saw a script with baseLineNumber = 1. We marked it as event and nested.
+                // Now we know its event, not nested.
+                if (fbs.nestedScriptStack.length > 0)
+                {
+                    fbs.nestedScriptStack.removeElementAt(0);
+                }
+                else
+                {
+                    if (fbs.DBG_FBS_SRCUNITS)  // these seem to be harmless, but...
+                    {
+                        var script = frame.script;
+                         ddd("onEventScriptCreated no nestedScriptStack: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
+                            +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
+                        ddd("onEventScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
+                        ddd(script.functionSource+"\n");                 /*@explore*/
+                    }
+                }
+            }
+
             var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
             if (debuggr)
             {
@@ -980,6 +1001,8 @@ FirebugService.prototype =
         }
 
         fbs.nestedScriptStack.clear();
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onEventScriptCreated frame.script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+
         return sourceFile;
     },
 
@@ -992,7 +1015,7 @@ FirebugService.prototype =
                 if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
                 // These are eval-like things called by native code. They come from .xml files
                 // They should be marked as evals but we'll treat them like event handlers for now.
-                return fbs.onEventScriptCreated(frame, type, val);
+                return fbs.onEventScriptCreated(frame, type, val, true);
             }
             // In onScriptCreated we found a no-name script, set a bp in PC=0, and a flag.
             // onBreakpoint saw the flag, cleared the flag, and sent us here.
@@ -1025,14 +1048,23 @@ FirebugService.prototype =
     {
         try
         {
+            // In onScriptCreated we may have found a script at baseLineNumber=1
+            // Now we know its not an event
+            var firstScript = fbs.nestedScriptStack.queryElementAt(0, jsdIScript);
+            if (firstScript.tag in fbs.onXScriptCreatedByTag)
+            {
+                delete  fbs.onXScriptCreatedByTag[firstScript.tag];
+                firstScript.clearBreakpoint(0);
+            }
+
             // On compilation of a top-level (global-appending) function.
             // After this top-level script executes we lose the jsdIScript so we can't build its line table.
-            // Therefore we need to build it here.  TODO!
+            // Therefore we need to build it here.
             var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
             if (debuggr)
             {
                 var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
-                if (fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScript got sourceFile:"+sourceFile+"\n");
+                if (fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScript got sourceFile:"+sourceFile+" using "+fbs.nestedScriptStack.length+" nestedScripts\n");
                 fbs.resetBreakpoints(sourceFile);
             }
             else
@@ -1094,8 +1126,15 @@ FirebugService.prototype =
             }
             else if (script.baseLineNumber == 1)
             {
-                fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated;
+                // could be a 1) Browser-generated event handler or 2) a nested script at the top of a file
+                // One way to tell is assume both then wait to see which we hit first:
+                // 1) bp at pc=0 for this script or 2) for a top-level on at the same filename
+
+                fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated; // for case 1
                 script.setBreakpoint(0);
+
+                fbs.nestedScriptStack.appendElement(script, false);  // for case 2
+
                 fbs.clearHookInterruptsToTrackScripts(); // Should not have been set...?
                 if (fbs.DBG_FBS_CREATION) ddd("onScriptCreated: set BP at PC 0 in event level tag="+script.tag+"\n");      /*@explore*/
             }
