@@ -911,7 +911,7 @@ top.Firebug =
             }
             catch (exc)
             {
-                FBTrace.dumpProperties("firebug.getRep i/reps.length: "+i+"/"+reps.length+" type:"+type, exc);
+                FBTrace.dumpProperties("firebug.getRep FAILS at i/reps.length: "+i+"/"+reps.length+" type:"+type+" exc:", exc);
                 FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
                 FBTrace.dumpProperties("firebug.getRep object:", object);
             }
@@ -1174,8 +1174,12 @@ top.Firebug =
     unwatchWindow: function(context, win)
     {
         // XXXjoe Move this to Firebug.Console
+        try {
         delete win.console;
-
+} catch (exc) 
+{
+FBTrace.dumpStack("unwatchWindow"+exc);
+}
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];

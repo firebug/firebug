@@ -353,7 +353,7 @@ function lessTalkMoreAction(object, context, isWarning)
     {
         if (FBTrace.DBG_ERRORS)
         {                                                         /*@explore*/
-            FBTrace.sysout("errors.observe dropping error "+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
+            FBTrace.sysout("errors.observe dropping "+object.category+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
         }
         return true;
     }

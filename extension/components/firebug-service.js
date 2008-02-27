@@ -953,9 +953,10 @@ FirebugService.prototype =
         {
             reportNextError = true;
             var theNeed = this.needToBreakForError(fileName, lineNo);
+             fbs.hookInterruptsToTrapErrors();
             if (fbs.DBG_FBS_ERRORS)                                                                                        /*@explore*/
                 ddd("fbs.onError needToBreakForError="+theNeed+"; in any case we will drop in to onDebug\n");       /*@explore*/
-            fbs.hookInterruptsToTrapErrors();
+           
             return false; // Drop into onDebug, sometimes only
         }
         else

@@ -360,7 +360,7 @@ this.Arr = domplate(Firebug.Rep,
         // XXXjjb the functions .hasOwnProperty(name) and .propertyIsEnumerable might make this code simpiler.
         // Maybe only a url for the license...
         if (this.isArray(object)) return true;
-        if ("length" in object && typeof(object.length) == "number")
+        if (object && object.hasOwnProperty("length") && typeof(object.length) == "number")
         {
             var names = 0;
             for (name in object)
