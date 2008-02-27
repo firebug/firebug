@@ -105,6 +105,7 @@ function FirebugConsole(context, win)
 
             delete context.timeCounters[name];
         }
+        return diff;
     };
 
     this.profile = function(title)
