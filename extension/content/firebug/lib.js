@@ -340,7 +340,7 @@ this.getRootWindow = function(win)
 {
     for (; win; win = win.parent)
     {
-        if (!win.parent || win == win.parent)
+        if (!win.parent || win == win.parent || !(win.parent instanceof Window) )
             return win;
     }
     return null;
@@ -5186,7 +5186,7 @@ const invisibleTags = this.invisibleTags =
 this.ERROR = function(exc)
 {
     if (FBTrace)                                              /*@explore*/
-        FBTrace.dumpProperties("lib.ERROR exception:", exc);  /*@explore*/
+        FBTrace.dumpProperties("lib.ERROR:", exc);  /*@explore*/
     else                                                      /*@explore*/
         ddd("FIREBUG WARNING: " + exc);
 }

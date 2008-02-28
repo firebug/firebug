@@ -2049,7 +2049,7 @@ function getFrameLevel(win)
 {
     var level = 0;
 
-    for (; win && win != win.parent; win = win.parent)
+    for (; win && (win != win.parent) && (win.parent instanceof Window); win = win.parent)
         ++level;
 
     return level;

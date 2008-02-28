@@ -311,7 +311,7 @@ function categoryFilter(url, category, isWarning)
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
                     && isWarning && !Firebug.showJSWarnings)
             return false;
-        else if (errorScheme == "chrome" || category == "XUL" || category == "chrome" || category ="XBL"
+        else if (errorScheme == "chrome" || category == "XUL" || category == "chrome" || category == "XBL"
                 || category == "component")
             isChrome = true;
     }

@@ -332,8 +332,7 @@ top.TabWatcher =
 
     getContextByWindow: function(win)
     {
-        while (win && win.parent != win)
-            win = win.parent;
+        win = getRootWindow(win);
 
         if (!win) // eg search bar, and sometimes win.parent is null??
             return;

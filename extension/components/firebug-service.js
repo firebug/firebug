@@ -956,7 +956,7 @@ FirebugService.prototype =
              fbs.hookInterruptsToTrapErrors();
             if (fbs.DBG_FBS_ERRORS)                                                                                        /*@explore*/
                 ddd("fbs.onError needToBreakForError="+theNeed+"; in any case we will drop in to onDebug\n");       /*@explore*/
-           
+
             return false; // Drop into onDebug, sometimes only
         }
         else
@@ -2003,7 +2003,7 @@ function getRootWindow(win)
 {
     for (; win; win = win.parent)
     {
-        if (!win.parent || win == win.parent)
+        if (!win.parent || win == win.parent || !(win.parent instanceof Window) )
             return win;
     }
     return null;
