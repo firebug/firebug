@@ -1104,7 +1104,7 @@ FirebugService.prototype =
             if (isFilteredURL(fileName))
             {
                 if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) 											/*@explore*/
-                    ddd("onScriptCreated: filename filtered:"+fileName+"\n");  	/*@explore*/
+                    ddd("onScriptCreated: filename filtered:"+fileName+" "+script.functionSource+"\n");  	/*@explore*/
                 return;
             }
 

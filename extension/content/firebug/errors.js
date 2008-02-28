@@ -311,7 +311,7 @@ function categoryFilter(url, category, isWarning)
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
                     && isWarning && !Firebug.showJSWarnings)
             return false;
-        else if (errorScheme == "chrome" || category == "XUL" || category == "chrome"
+        else if (errorScheme == "chrome" || category == "XUL" || category == "chrome" || category ="XBL"
                 || category == "component")
             isChrome = true;
     }
@@ -353,7 +353,7 @@ function lessTalkMoreAction(object, context, isWarning)
     {
         if (FBTrace.DBG_ERRORS)
         {                                                         /*@explore*/
-            FBTrace.sysout("errors.observe dropping "+object.category+(context?"categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):"no context")+"\n");           /*@explore*/
+            FBTrace.sysout("errors.observe dropping "+object.category+(context?" categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):" no context")+"\n");           /*@explore*/
         }
         return true;
     }
