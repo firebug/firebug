@@ -55,7 +55,7 @@ var listeners = [];
 
 // ************************************************************************************************
 
-Firebug.Debugger = extend(Firebug.Module,
+Firebug.Debugger = extend(Firebug.AutoDisableModule,
 {
     fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*explore*/
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1253,6 +1253,8 @@ Firebug.Debugger = extend(Firebug.Module,
 
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
         $("cmd_breakOnTopLevel").setAttribute("checked", Firebug.breakOnTopLevel);
+        
+        this.panelName = "script";
     },
 
     shutdown: function()
@@ -1262,16 +1264,11 @@ Firebug.Debugger = extend(Firebug.Module,
 
     enable: function()
     {
-        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.enable ******************************\n");
-
-        this.wrappedJSObject = this;
-        fbs.registerDebugger(this);
+        // Since 1.2 the debugger is not enabled here by default. [Honza]
     },
 
     disable: function()
     {
-        fbs.unregisterDebugger(this);
     },
 
     destroyContext: function(context)
@@ -1280,6 +1277,21 @@ Firebug.Debugger = extend(Firebug.Module,
         {
             TabWatcher.cancelNextLoad = true;
             this.abort(context);
+        }
+    },
+
+    hideUI: function(browser, context)
+    {
+        Firebug.AutoDisableModule.hideUI.apply(this, arguments);
+    
+        if (context && !this.isPanelEnabled(context))
+        {
+            // Since 1.2 the debugger is disabled when the FB's UI is closed. [Honza]
+            if (this.wrappedJSObject)
+            {
+                fbs.unregisterDebugger(this);
+                this.wrappedJSObject = null;
+            }
         }
     },
 
@@ -1613,6 +1625,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onMouseOut = bind(this.onMouseOut, this);
         this.setLineBreakpoints = bind(setLineBreakpoints, this);
 
+        this.panelSplitter = $("fbPanelSplitter");
+        this.sidePanelDeck = $("fbSidePanelDeck");
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -1680,13 +1695,21 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
     },
 
-     loadedContext: function(context)
-     {
-         updateScriptFiles(context, reload);
-     },
+    loadedContext: function(context)
+    {
+        updateScriptFiles(context, reload);
+    },
 
+    clear: function()
+    {
+        clearNode(this.panelNode);
+    },
+    
     show: function(state)
     {
+        if (!this.shouldShow())
+            return;
+            
         if (this.context.loaded && !this.location)
         {
             restoreObjects(this, state);
@@ -1707,6 +1730,44 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    shouldShow: function()
+    {
+        if (Firebug.Debugger.isPanelEnabled(this.context))
+            return true;
+    
+        var panel = this;
+        var args = {
+            pageTitle: $STR("DebuggerIsDisabled"),
+            enableLabel: $STR("EnableDebugger"),
+            onEnable: function() {
+                Firebug.Debugger.enablePanel(panel.context);
+            
+                // Show side panel
+                panel.panelSplitter.collapsed = false;
+                panel.sidePanelDeck.collapsed = false;
+
+                if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("debugger.enable ******************************\n");
+
+                // OK, the user wants the debugger, so enable it.
+                Firebug.Debugger.wrappedJSObject = Firebug.Debugger;
+                fbs.registerDebugger(Firebug.Debugger);
+    
+                // Reload page.                
+                FirebugChrome.reload();
+            }
+        };
+        
+        var template = Firebug.AutoDisableModule.DefaultPage;
+        Firebug.AutoDisableModule.DefaultPage.show(this, args);
+
+        // Hide side panel            
+        this.panelSplitter.collapsed = true;
+        this.sidePanelDeck.collapsed = true;
+        
+        return false;
+    },
+    
     hide: function()
     {
         delete this.infoTipExpr;

@@ -460,7 +460,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         if (topic != "nsPref:changed")
           return; 
 
-        var prefName = data.substr(Firebug.prefDomain.length + 1);
+        // xxxHonza check this out.
+        var prefDomain = "Firebug.extension.";
+        var prefName = data.substr(prefDomain.length);
         if (prefName == "maxQueueRequests")
             this.updateMaxLimit();
     },

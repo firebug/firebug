@@ -58,9 +58,9 @@ pref("extensions.firebug.showRulers", true);
 
 // Net
 pref("extensions.firebug.netFilterCategory", "all");
-pref("extensions.firebug.disableNetMonitor", false);
 pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.maxQueueRequests", 100);
+pref("extensions.firebug.autoDisable", true);
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");

@@ -125,7 +125,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         context.spies = [];
 
-        if (!Firebug.disableNetMonitor)
+        if (Firebug.showXMLHttpRequests)
             this.attachSpy(context, context.window);
     },
 
@@ -143,16 +143,14 @@ Firebug.Spy = extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
-        if (!Firebug.disableNetMonitor)
+        if (Firebug.showXMLHttpRequests)
             this.attachSpy(context, win);
     },
 
     unwatchWindow: function(context, win)
     {
         try {
-            // this.detachSpy has to be called even if the Firebug.disableNetMonitor
-            // is true. This make sure that the existing context is properly
-            // removed from "contexts" array.
+            // This make sure that the existing context is properly removed from "contexts" array.
             this.detachSpy(context, win);
         } catch (ex) {
             // Get exceptions here sometimes, so let's just ignore them

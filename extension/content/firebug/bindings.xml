@@ -212,6 +212,13 @@
                 return panel;
             ]]></body>
         </method>
+        
+        <method name="getTab">
+            <parameter name="panelName"/>
+            <body><![CDATA[
+                return this.tabMap[panelName];
+            ]]></body>
+        </method>
     </implementation>
 
     <handlers>
@@ -251,7 +258,7 @@
     <content>
         <xul:image class="panelTab-left"/>
         <xul:label class="panelTab-text" crop="right" flex="1"
-                   xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle"/>
+                   xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle,disabled"/>
         <xul:image class="panelTab-right"/>
     </content>
 </binding>

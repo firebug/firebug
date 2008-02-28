@@ -141,9 +141,11 @@ var contexts = new Array();
 var panelName = "net";
 var maxQueueRequests = 100;
 
+var panelBar1 = $("fbPanelBar1");
+
 // ************************************************************************************************
 
-Firebug.NetMonitor = extend(Firebug.Module,
+Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
 {
     clear: function(context)
     {
@@ -196,6 +198,11 @@ Firebug.NetMonitor = extend(Firebug.Module,
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
 
+    initialize: function() 
+    {
+        this.panelName = panelName;
+    },
+    
     shutdown: function()
     {
         // Unregister HTTP observer. This is done when the FB UI is closed.
@@ -207,7 +214,9 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     initContext: function(context)
     {
-        if (!Firebug.disableNetMonitor)
+        Firebug.AutoDisableModule.initContext.apply(this, arguments);
+
+        if (this.isPanelEnabled(context))
             monitorContext(context);
     },
 
@@ -225,6 +234,8 @@ Firebug.NetMonitor = extend(Firebug.Module,
 
     showContext: function(browser, context)
     {
+        Firebug.AutoDisableModule.showContext.apply(this, arguments);
+
         if (!context)
         {
             var tabId = Firebug.getTabIdForWindow(browser.contentWindow);
@@ -244,8 +255,37 @@ Firebug.NetMonitor = extend(Firebug.Module,
         // when the panel is activated.
         var netButtons = browser.chrome.$("fbNetButtons");
         collapse(netButtons, !panel || panel.name != panelName);
+    },
+    
+    hideUI: function(browser, context)
+    {
+        Firebug.AutoDisableModule.hideUI.apply(this, arguments);
+    
+        if (context && !this.isPanelEnabled(context))
+            unmonitorContext(context);
     }
 });
+
+// ************************************************************************************************
+
+function getPersistedState(context, panelName)
+{
+    if (!context)
+        return null;
+        
+    var persistedState = context.persistedState;
+    if (!persistedState)
+        persistedState = context.persistedState = {};
+        
+    if (!persistedState.panelState)
+        persistedState.panelState = {};
+        
+    var panelState = persistedState.panelState[panelName];
+    if (!panelState)
+        panelState = persistedState.panelState[panelName] = {};
+        
+    return panelState;
+}
 
 // ************************************************************************************************
 
@@ -477,7 +517,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     clear: function()
     {
-        this.panelNode.innerHTML = "";
+        clearNode(this.panelNode);
+
         this.table = null;
         this.summaryRow = null;
         this.limitRow = null;
@@ -579,7 +620,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     searchable: true,
     editable: false,
 
-    initialize: function()
+    initialize: function(context, doc)
     {
         this.queue = [];
 
@@ -593,6 +634,9 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     show: function(state)
     {
+        if (!this.shouldShow())
+            return;
+        
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
@@ -606,6 +650,29 @@ NetPanel.prototype = domplate(Firebug.Panel,
             scrollToBottom(this.panelNode);
     },
 
+    shouldShow: function()
+    {
+        if (Firebug.NetMonitor.isPanelEnabled(this.context))
+            return true;
+
+        var panel = this;
+        var args = {
+            pageTitle: $STR("NetMonitoringIsDisabled"),
+            enableLabel: $STR("EnableNetMonitor"),
+            onEnable: function() {
+                Firebug.NetMonitor.enablePanel(panel.context);
+                
+                // Reload page.                
+                FirebugChrome.reload();
+            }
+        };
+        
+        var template = Firebug.AutoDisableModule.DefaultPage;
+        Firebug.AutoDisableModule.DefaultPage.show(this, args);
+        
+        return false;
+    },
+    
     hide: function()
     {
         if (this.context.netProgress)
@@ -619,11 +686,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        if (name == "disableNetMonitor")
-        {
-            TabWatcher.iterateContexts(value ? monitorContext : unmonitorContext);
-        }
-        else if (name == "netFilterCategory")
+        if (name == "netFilterCategory")
         {
             Firebug.NetMonitor.syncFilterButtons(this.context.chrome);
             for (var i = 0; i < TabWatcher.contexts.length; ++i)
@@ -636,9 +699,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     getOptionsMenuItems: function()
     {
-        return [
-            optionMenu("DisableNetMonitor", "disableNetMonitor")
-        ];
+        return [];
     },
 
     getContextMenuItems: function(nada, target)
@@ -788,7 +849,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     layout: function()
     {
-        if (!this.queue.length || !this.context.netProgress)
+        if (!this.queue.length || !this.context.netProgress || 
+            !Firebug.NetMonitor.isPanelEnabled(this.context))
             return;
 
         if (!this.table)
@@ -2523,6 +2585,8 @@ var HttpObserver =
   onStartRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
+      if (!Firebug.NetMonitor.isPanelEnabled(context))
+        return;
 
       var name = aRequest.URI.asciiSpec;
       var origName = aRequest.originalURI.asciiSpec;
@@ -2560,6 +2624,8 @@ var HttpObserver =
   onEndRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
+      if (!Firebug.NetMonitor.isPanelEnabled(context))
+        return;
 
       var name = aRequest.URI.asciiSpec;
       var origName = aRequest.originalURI.asciiSpec;

@@ -84,7 +84,7 @@ const prefNames =
     "showRulers",
 
     // Net
-    "netFilterCategory", "disableNetMonitor", "collectHttpHeaders",
+    "netFilterCategory", "collectHttpHeaders",
 
     // Stack
     "omitObjectPathStack",
@@ -693,6 +693,8 @@ top.Firebug =
         toggleCommand.setAttribute("checked", !!shouldShow);
         detachCommand.setAttribute("checked", !!browser.detached);
         this.showKeys(shouldShow);
+        
+        dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
     },
 
     showKeys: function(shouldShow)
@@ -1767,6 +1769,137 @@ Firebug.Rep = domplate(
     plural: function(n)
     {
         return n == 1 ? "" : "s";
+    }
+});
+
+// ************************************************************************************************
+
+Firebug.AutoDisableModule = extend(Firebug.Module,
+{
+    panelName: null,
+    panelBar1: $("fbPanelBar1"),
+    
+    initContext: function(context)
+    {
+        var persistedState = this.getPersistedState(context, this.panelName);
+        if (persistedState.enabled == "undefined")
+        {
+            var autoDisable = Firebug.getPref(Firebug.prefDomain, "autoDisable");
+            persistedState.enabled = !autoDisable;
+        }
+    },
+
+    showContext: function(browser, context)
+    {
+        var tab = this.panelBar1.getTab(this.panelName);
+        var enabled = this.isPanelEnabled(context);
+        tab.setAttribute("disabled", enabled ? "false" : "true");
+    },
+    
+    hideUI: function(browser, context)
+    {
+        var autoDisable = Firebug.getPref(Firebug.prefDomain, "autoDisable");
+        if (context && autoDisable)
+        {
+            this.disablePanel(context);
+        }
+    },
+
+    isPanelEnabled: function(context)
+    {
+        if (!context)
+            return false;
+            
+        var persistedState = this.getPersistedState(context, this.panelName);
+        if (persistedState)
+            return persistedState.enabled;
+        
+        return false;
+    },
+    
+    getPersistedState: function(context, panelName)
+    {
+        if (!context)
+            return null;
+            
+        var persistedState = context.persistedState;
+        if (!persistedState)
+            persistedState = context.persistedState = {};
+            
+        if (!persistedState.panelState)
+            persistedState.panelState = {};
+            
+        var panelState = persistedState.panelState[panelName];
+        if (!panelState)
+            panelState = persistedState.panelState[panelName] = {};
+            
+        return panelState;
+    },
+    
+    enablePanel: function(context)
+    {
+        var panel = context.getPanel(this.panelName);
+        
+        var persistedState = this.getPersistedState(panel.context, panel.name);
+        persistedState.enabled = true;
+        
+        var tab = this.panelBar1.getTab(panel.name);
+        tab.removeAttribute("disabled");
+        
+        panel.clear();
+    },
+    
+    disablePanel: function(context)
+    {
+        var panel = context.getPanel(this.panelName, true);
+        if (!panel)
+            return;
+
+        var persistedState = this.getPersistedState(context, panel.name);
+        persistedState.enabled = false;
+        
+        var tab = this.panelBar1.getTab(panel.name);
+        tab.setAttribute("disabled", "true");
+    }
+});
+
+Firebug.AutoDisableModule.DefaultPage = domplate(Firebug.Rep,
+{
+    tag:
+        DIV({class: "disablePageBox"},
+            H1({class: "disablePageHead"},
+                "$pageTitle"
+            ),
+            P({class: "disablePageCaption"}),
+            DIV({class: "disablePageRow", onclick: "$onEnable"},
+                A({class: "disablePageLink"},
+                    "$enableLabel"
+                ),
+                SPAN("&nbsp;&nbsp;"),
+                SPAN({class: "disablePageText"}, 
+                    $STR("RequiresReload")
+                )
+            ),
+            DIV({class: "disablePageRow"},
+                A({class: "disablePageLink", onclick: "$onPreferences"},
+                    $STR("ChangePreference")
+                ),
+                SPAN("&nbsp;&nbsp;"),
+                SPAN({class: "disablePageText"}, 
+                    "extensions.firebug.autoDisable"
+                )
+            )
+         ),
+         
+    onPreferences: function()
+    {
+        openNewTab("about:config");
+    },
+    
+    show: function(panel, args)
+    {
+        this.tag.replace(args, panel.panelNode, this);
+        panel.panelNode.scrollTop = 0;
     }
 });
 

@@ -88,12 +88,15 @@
             <menu id="file-menu" label="&fileMenu.label;"
                   accesskey="&fileMenu.accesskey;">
                 <menupopup onpopupshowing="FirebugChrome.onOptionsShowing(this)">
+                    <!--
+                    xxxHonza - disable firebug functionality should be entirely removed.
                     <menuitem label="&firebug.DisableFirebug;" type="checkbox"
                               oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>
                     <menuitem type="checkbox"
                               oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
                     <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
                     <menuseparator/>
+                    -->
 
                     <menuitem id="menu_closeWindow" command="cmd_closeWindow" key="key_closeWindow"
                               label="&firebug.Close;"/>
