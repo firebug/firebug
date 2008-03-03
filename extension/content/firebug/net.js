@@ -2454,7 +2454,6 @@ function getPostTextFromXHR(request, context)
         if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
         {																			    /*@explore*/
             FBTrace.dumpProperties("lib.getPostText FAILS ", exc);                      /*@explore*/
-            FBTrace.dumpProperties("lib.getPostText request", request);                 /*@explore*/
         }																				/*@explore*/
     }
 
