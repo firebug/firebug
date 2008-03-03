@@ -2915,7 +2915,7 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
 
     getBaseLineNumberByScript: function(script)
     {
-        return frame.script.baseLineNumber - (this.sourceFile.getBaseLineOffset() - 1);
+        return script.baseLineNumber - (this.sourceFile.getBaseLineOffset() - 1);
     }
 }
 
