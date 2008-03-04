@@ -55,7 +55,7 @@
         <command id="cmd_closeWindow" oncommand="window.close()"/>
         <command id="cmd_reload" oncommand="FirebugChrome.reload()"/>
         <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
-        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()"/>
+        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
     </commandset>
 
     <keyset id="mainKeyset">
@@ -104,8 +104,9 @@
             </menu>
             <menu id="view-menu" label="&firebug.View;">
                 <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                    <menuitem id="menu_toggleOrient" command="cmd_toggleOrient" type="checkbox"
-                              label="&firebug.Vertical;" persist="checked"/>
+                    <menuitem  type="checkbox" label="&firebug.Vertical;" id="menu_toggleOrient" 
+                            command="cmd_toggleOrient"
+                            option="viewPanelOrient" />
                     <menuseparator/>
 
                     <menuitem id="menu_reload" command="cmd_reload" key="key_reload"

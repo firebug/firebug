@@ -1103,7 +1103,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
     {
         var frame = this.context.currentFrame;
 
-        var newFrame = frame && frame.script != this.lastScript;
+        var newFrame = frame && frame.isValid && frame.script != this.lastScript;
         if (newFrame)
         {
             this.toggles = {};
@@ -1135,7 +1135,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
             }
         }
 
-        if (frame)
+        if (frame && frame.isValid)
         {
             var thisVar = frame.thisValue.getWrappedValue();
             addMember("user", members, "this", thisVar, 0);

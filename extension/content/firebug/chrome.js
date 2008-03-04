@@ -156,7 +156,7 @@ top.FirebugChrome =
             win1.enableAlways = bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, "disabledAlways", false);
             win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
             win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
-
+            
             for (var i = 0; i < Firebug.panelTypes.length; ++i)
             {
                 var panelType = Firebug.panelTypes[i];
@@ -544,7 +544,6 @@ top.FirebugChrome =
         {
             var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
             sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
-// FF3: if the next line is commented out, Fbug allows FF to paint page when HTML with DOMside panels are up, else not.
             panelBar2.selectPanel(sidePanelName);
         }
         else
@@ -649,6 +648,8 @@ top.FirebugChrome =
     {
         panelSplitter.orient = panelBox.orient
             = panelBox.orient == "vertical" ? "horizontal" : "vertical";
+        var option = $('menu_toggleOrient').getAttribute("option");
+        Firebug.setPref(Firebug.prefDomain, option, panelBox.orient != "vertical");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

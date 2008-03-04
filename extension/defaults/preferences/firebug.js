@@ -11,6 +11,7 @@ pref("extensions.firebug.largeCommandLine", false);
 pref("extensions.firebug.textWrapWidth", 100);
 pref("extensions.firebug.openInWindow", false);
 pref("extensions.firebug.showErrorCount", true);
+pref("extensions.firebug.viewPanelOrient", "vertical");
 
 // Console
 pref("extensions.firebug.showJSErrors", true);
