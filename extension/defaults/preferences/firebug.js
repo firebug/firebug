@@ -42,6 +42,8 @@ pref("extensions.firebug-service.showEvalSources", true);
 pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
+pref("extensions.firebug.debugger.reloadWhenEnabled", true);
+pref("extensions.firebug.debugger.enableAlways", false);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

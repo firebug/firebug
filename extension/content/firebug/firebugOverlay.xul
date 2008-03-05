@@ -110,6 +110,25 @@
                                tooltiptext="&firebug.EditCSSTooltip;" command="cmd_toggleCSSEditing"/>
             </hbox>
 
+            <hbox id="fbScriptButtons">
+                <toolbarseparator/>
+                <tooltip id="fbDebuggerPermTooltip"
+                    onpopupshowing="return Firebug.Debugger.Perm.onTooltipShowing(this, FirebugContext)"/>
+		        <toolbarbutton id="fbDebuggerPerm" type="menu" tooltip="fbDebuggerPermTooltip">
+			        <menupopup
+				        oncommand="return Firebug.Debugger.Perm.onCommand(event, FirebugContext)"
+				        onpopupshowing="return Firebug.Debugger.Perm.onPopupShowing(this, FirebugContext)"
+				        onpopuphiding="return Firebug.Debugger.Perm.onPopupHiding(this, FirebugContext)">
+				        <menuitem type="radio" name="fbDebuggerPerm" value="enable"/>
+				        <menuitem type="radio" name="fbDebuggerPerm" value="disable"/>
+				        <menuitem type="radio" name="fbDebuggerPerm" value="host-enable"/>
+				        <menuseparator/>
+				        <menuitem type="checkbox" id="fbReloadWhenEnabled" label="Reload page when enabled"
+				            oncommand="return Firebug.Debugger.Perm.onReloadPageWhenEnabled(event, FirebugContext)"/>
+			        </menupopup>
+		        </toolbarbutton>
+            </hbox>
+
             <hbox id="fbNetButtons">
                 <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
@@ -147,18 +166,18 @@
             <panelStatus id="fbPanelStatus" flex="1"
                          tooltip="fbTooltip" contextmenu="fbContextMenu"/>
 
-             <hbox id="fbDebuggerButtons" minwidth="126">
-                 <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
-                 <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
-                                tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
-                 <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"
-                                tooltiptext="&firebug.StepOver;" class="toolbar-image-button"/>
-                 <toolbarbutton id="fbStepOutButton" command="cmd_stepOut"
-                                tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
-             </hbox>
+            <hbox id="fbDebuggerButtons" minwidth="126">
+                <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
+                            tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
+                <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
+                            tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
+                <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"
+                            tooltiptext="&firebug.StepOver;" class="toolbar-image-button"/>
+                <toolbarbutton id="fbStepOutButton" command="cmd_stepOut"
+                            tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
+            </hbox>
 
-             <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1"/>
+            <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1"/>
         </hbox>
     </toolbar>
 

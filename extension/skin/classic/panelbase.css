@@ -287,9 +287,22 @@ h1.groupHeader {
     cursor: pointer;
 }
 
+.disablePageDescription {
+    margin: 8px 0;
+    font-size: 13px;
+}
+
 .disablePageRow {
     margin: 8px 0;
     font-size: 13px;
+}
+
+.disablePageRow td {
+    vertical-align:middle;
+}
+
+.disablePageRow button {
+    margin-left:250px;
 }
 
 .disablePageText {
