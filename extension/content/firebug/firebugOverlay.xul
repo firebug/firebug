@@ -113,18 +113,19 @@
             <hbox id="fbScriptButtons">
                 <toolbarseparator/>
                 <tooltip id="fbDebuggerPermTooltip"
-                    onpopupshowing="return Firebug.Debugger.Perm.onTooltipShowing(this, FirebugContext)"/>
+                    onpopupshowing="return Firebug.Debugger.Perm.Menu.onTooltipShowing(this, FirebugContext)"/>
 		        <toolbarbutton id="fbDebuggerPerm" type="menu" tooltip="fbDebuggerPermTooltip">
 			        <menupopup
-				        oncommand="return Firebug.Debugger.Perm.onCommand(event, FirebugContext)"
-				        onpopupshowing="return Firebug.Debugger.Perm.onPopupShowing(this, FirebugContext)"
-				        onpopuphiding="return Firebug.Debugger.Perm.onPopupHiding(this, FirebugContext)">
+				        oncommand="return Firebug.Debugger.Perm.Menu.onCommand(event, FirebugContext)"
+				        onpopupshowing="return Firebug.Debugger.Perm.Menu.onPopupShowing(this, FirebugContext)"
+				        onpopuphiding="return Firebug.Debugger.Perm.Menu.onPopupHiding(this, FirebugContext)">
 				        <menuitem type="radio" name="fbDebuggerPerm" value="enable"/>
 				        <menuitem type="radio" name="fbDebuggerPerm" value="disable"/>
-				        <menuitem type="radio" name="fbDebuggerPerm" value="host-enable"/>
-				        <menuseparator/>
+				        <menuitem type="radio" name="fbDebuggerPerm" value="enable-host"/>
+<!--				        <menuseparator/>
 				        <menuitem type="checkbox" id="fbReloadWhenEnabled" label="Reload page when enabled"
-				            oncommand="return Firebug.Debugger.Perm.onReloadPageWhenEnabled(event, FirebugContext)"/>
+				            oncommand="return Firebug.Debugger.Perm.Menu.onReloadPageWhenEnabled(event, FirebugContext)"/>
+-->				            
 			        </menupopup>
 		        </toolbarbutton>
             </hbox>

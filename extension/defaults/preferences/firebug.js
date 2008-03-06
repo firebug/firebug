@@ -44,6 +44,7 @@ pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
 pref("extensions.firebug.debugger.reloadWhenEnabled", true);
 pref("extensions.firebug.debugger.enableAlways", false);
+pref("extensions.firebug.debugger.enableLocalFiles", true);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

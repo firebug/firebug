@@ -55,23 +55,13 @@ var listeners = [];
 
 // ************************************************************************************************
 
-const permOptions =
-{
-	"enable": ["DebuggerEnable", true],
-	"disable": ["DebuggerDisable", true],
-	"host-enable": ["DebuggerHostEnable", true],
-};
-
 const nsIPermissionManager = Ci.nsIPermissionManager;
 const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
 
 const prefDomain = Firebug.prefDomain + ".debugger";
 const reloadWhenEnabledPref = "reloadWhenEnabled";
 const enableAlwaysPref = "enableAlways";
-
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
-const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const prefs = PrefService.getService(nsIPrefBranch2);
+const enableLocalFilesPref = "enableLocalFiles";
 
 const permButton = $("fbDebuggerPerm");
 const permTooltip = $("fbDebuggerPermTooltip");
@@ -1278,53 +1268,23 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
         $("cmd_breakOnTopLevel").setAttribute("checked", Firebug.breakOnTopLevel);
         
         this.panelName = "script";
-        
-        prefs.addObserver(prefDomain, Firebug.Debugger.PrefObserver, false);
-        
         permTooltip.fbEnabled = true;
+        this.wrappedJSObject = this;
     },
 
     shutdown: function()
     {
-        prefs.removeObserver(prefDomain, Firebug.Debugger.PrefObserver, false);
     },
 
     initContext: function(context)
     {
-        //Firebug.AutoDisableModule.initContext.apply(this, arguments);
-        
-        var persistedState = this.getPersistedState(context, this.panelName);
-        if (persistedState.enabled == "undefined")
-        {
-	        var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
-	        if (enableAlways)   
-                persistedState.enabled = true;
-                
-            var option = this.Perm.getPermission(context);
-            if (option == "host-enable")
-                persistedState.enabled = true;
-            
-            if (persistedState.enabled)
-                this.Perm.enableDebugger(context);
-         }
-    },
-    
-    shutdown: function()
-    {
-        fbs.unregisterDebugger(this);
-    },
-
-    enable: function()
-    {
-        // Since 1.2 the debugger is not enabled here by default. [Honza]
-    },
-
-    disable: function()
-    {
+        Perm.Manager.initContext(context);
     },
 
     destroyContext: function(context)
     {
+        Perm.Manager.destroyContext(context);
+
         if (context.stopped)
         {
             TabWatcher.cancelNextLoad = true;
@@ -1334,26 +1294,19 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
 
     hideUI: function(browser, context)
     {
-        if (!context)
-            return;
-        
-        //Firebug.AutoDisableModule.hideUI.apply(this, arguments);
+        Perm.Manager.hideUI(context);
+    },
+    
+    shutdown: function()
+    {
+    },
 
-        var persistedState = this.getPersistedState(context, this.panelName);
-        persistedState.enabled = false;
+    enable: function()
+    {
+    },
 
-	    var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
-	    if (enableAlways)   
-            persistedState.enabled = true;
-            
-        var option = this.Perm.getPermission(context);
-        if (option == "host-enable")
-            persistedState.enabled = true;
-        
-        if (!persistedState.enabled)
-            Firebug.Debugger.Perm.disableDebugger(context);
-        else        
-            Firebug.Debugger.Perm.enableDebugger(context);
+    disable: function()
+    {
     },
 
     updateOption: function(name, value)
@@ -1402,16 +1355,174 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
 
 // ************************************************************************************************
 
-// Managinig debugger permissions (enable, disable, etc.)
-Firebug.Debugger.Perm = extend(Object, 
+var Debugger = Firebug.Debugger;
+var Perm = Debugger.Perm = {};
+
+Perm.Manager = extend(Object, 
+{
+    initContext: function(context)
+    {
+        context.deb_uid = FBL.getUniqueId();                                                                       /*@explore*/
+        
+        var persistedState = Debugger.getPersistedState(context, Debugger.panelName);
+        if (typeof(persistedState.enabled) == "undefined")
+        {
+            var option = this.getPermission(context);
+            if (option.indexOf("enable") == 0)
+            {
+                Debugger.enablePanel(context);
+            }
+         }
+
+        if (persistedState.enabled)
+            this.enableDebugger(context);
+    },
+
+    destroyContext: function(context)
+    {
+        this.unregisterDebugger(context);
+    },
+    
+    hideUI: function(context)
+    {
+        if (!context)
+            return;
+        
+        var option = this.getPermission(context);
+        if (option.indexOf("disable") == 0)
+        {
+            var persistedState = Debugger.getPersistedState(context, Debugger.panelName);
+            persistedState.enabled = false;
+            this.disableDebugger(context);
+        }
+    },
+    
+    isEnabled: function(context)
+    {
+        return Debugger.isPanelEnabled(context);
+    },
+        
+    enableDebugger: function(context)
+    {
+        Debugger.enablePanel(context);
+
+        var panel = context.getPanel(Debugger.panelName);
+    
+        // Show side panel
+        panel.panelSplitter.collapsed = false;
+        panel.sidePanelDeck.collapsed = false;
+
+        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("debugger.enable ******************************\n");
+
+        this.registerDebugger(context);
+    },
+
+    disableDebugger: function(context)
+    {
+        Debugger.disablePanel(context);
+
+        this.unregisterDebugger(context);
+        
+        var panel = context.getPanel(Debugger.panelName);
+        var state = Firebug.getPanelState(panel);
+        panel.show(state);
+    },
+    
+    registerDebugger: function(context)
+    {
+        if (!context.debuggerRegistered)
+        {
+            context.debuggerRegistered = true;
+            fbs.registerDebugger(Debugger);
+        }
+    },
+
+    unregisterDebugger: function(context)
+    {
+        if (context.debuggerRegistered)
+        {
+            context.debuggerRegistered = false;
+            fbs.unregisterDebugger(Debugger);
+        }
+    },
+    
+    getPermission: function(context)
+    {
+        var location = context.browser.currentURI;
+	    var host = getURIHost(location);
+	    
+	    if (!host)
+	    {
+            var enable = Firebug.getPref(prefDomain, enableLocalFilesPref);
+            if (enable)
+                return "enable-host";
+        }
+        else
+        {    
+	        switch (permissionManager.testPermission(location, "firebug-debugger"))
+	        {
+	        case nsIPermissionManager.ALLOW_ACTION: 
+	            return "enable-host";	            
+	        }
+        }
+        
+	    var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
+	    if (enableAlways)   
+            return "enable";//"enable-always";
+	    
+        return "disable";
+    },
+    
+    setPermission: function(context, option)
+    {
+	    var location = context.browser.currentURI;
+	    var host = getURIHost(location);
+
+	    if (!host)
+	    {
+            // Update pref for local files.
+	        var enable = (option.indexOf("enable-host") == 0);
+            Firebug.setPref(prefDomain, enableLocalFilesPref, enable);
+	    }
+	    else
+	    {
+	        // Use permission manager for specific sites.
+	        permissionManager.remove(host, "firebug-debugger");
+	        switch(option)
+	        {
+	        case "enable-host":
+                permissionManager.add(location, "firebug-debugger", permissionManager.ALLOW_ACTION); 
+                break;
+	        }
+	    }        
+
+        if (option == "enable-always")
+            Firebug.setPref(prefDomain, enableAlwaysPref, true);
+
+        if (option.indexOf("enable") >= 0)
+        {
+            this.enableDebugger(context);
+            
+            // Reload page.        
+            //if (Firebug.getPref(prefDomain, reloadWhenEnabledPref))
+                FirebugChrome.reload();
+        }
+        else
+        {
+            this.disableDebugger(context);
+        }        
+
+	    Perm.Menu.update(context);
+    }    
+});
+
+Perm.Menu = extend(Object, 
 {
     onTooltipShowing: function(tooltip, context)
     {
         if (tooltip.fbEnabled)
-        {
-            var host = context.browser.currentURI.host;
-            tooltip.label = "Manage debugger activity"; //xxxHonza localization
-        }
+            tooltip.label = $STR("DebuggerPermMenuTooltip");
             
         return tooltip.fbEnabled;
     },
@@ -1420,7 +1531,7 @@ Firebug.Debugger.Perm = extend(Object,
     {
         var menu = event.target;
         if (menu.value)
-            this.setPermission(context, menu.value);
+            Perm.Manager.setPermission(context, menu.value);
     },
     
     onReloadPageWhenEnabled: function(event, context)
@@ -1436,7 +1547,7 @@ Firebug.Debugger.Perm = extend(Object,
         permTooltip.fbEnabled = false;
         
         var items = menu.getElementsByTagName("menuitem");        
-	    var value = this.getPermission(context);	    
+	    var value = permButton.value;	    
 	    
 	    var location = context.browser.currentURI;
 	    for (var i=0; i<items.length; i++)
@@ -1451,13 +1562,13 @@ Firebug.Debugger.Perm = extend(Object,
 		    items[i].label = this.getLabel(option, location);
 	    }
 	    
-	    var reloadOption = $("fbReloadWhenEnabled", menu.ownerDocument);
+/*	    var reloadOption = $("fbReloadWhenEnabled", menu.ownerDocument);
 	    var reload = Firebug.getPref(prefDomain, reloadWhenEnabledPref);
 	    if (reload)
     	    reloadOption.setAttribute("checked", reload);
     	else
     	    reloadOption.removeAttribute("checked");
-
+*/
 	    return true;
     },    
 
@@ -1467,151 +1578,64 @@ Firebug.Debugger.Perm = extend(Object,
         return true;
     },    
     
-    updatePermButton: function(context)
+    update: function(context)
     {
         // This is called through TabWatcher.iterateContexts and 
         // "this" isn't passed along
-        var oThis = Firebug.Debugger.Perm;
+        var oThis = Perm.Menu;
         var location = context.browser.currentURI;
-	    var value = oThis.getPermission(context);
-	    permButton.label = oThis.getLabel(value, location);
+        
+        var manager = Perm.Manager;
+        var value = manager.getPermission(context);
+        if ((value.indexOf("disable") == 0) && manager.isEnabled(context))
+            value = "enable";
+	    
+	    permButton.value = value;
+	    permButton.label = oThis.getLabel(value, location, true);
 	    permButton.removeAttribute("disabled");
 	    permButton.setAttribute("value", value);
     },
     
-    getLabel: function (option, location)
+    getLabel: function (option, location, shortened)
     {
-        var optionInfo = permOptions[option];
-        if (!optionInfo)
+        var label = "";
+        switch (option)
+        {
+        case "enable":
+            label = "DebuggerEnable";
+            break;
+            
+        case "disable":
+            label = "DebuggerDisable";
+            break;
+
+        case "enable-always":
+            label = "DebuggerEnableAlways";
+            break;
+            
+        case "enable-host":
+            if (FBL.isSystemURL(location.spec))
+                label = "DebuggerSystemPagesEnable";
+            else if (!getURIHost(location))
+                label = "DebuggerLocalFilesEnable";
+            else
+                label = "DebuggerHostEnable";
+                
+            if (shortened)
+                label = "DebuggerEnable";
+            break;            
+        }
+        
+        if (!label)
             return null;
-            
-        if (optionInfo[1])
-            return $STRF(optionInfo[0], [location.host]);
-            
-        return $STR(optionInfo[0]);
-    },
-    
-    getPermission: function(context)
-    {
-        var location = context.browser.currentURI;
-	    switch (permissionManager.testPermission(location, "firebug-debugger"))
-	    {
-	        case nsIPermissionManager.ALLOW_ACTION: 
-	            return "host-enable";	            
-	        case nsIPermissionManager.DENY_ACTION:
-	            return "disable";
-	        default:
-	            return this.getDefaultPerm(context);
-	    }
-    },
 
-    setPermission: function(context, option)
-    {
-	    var location = context.browser.currentURI;
-	    permissionManager.remove(location.host, "firebug-debugger");
-	    switch(option)
-	    {
-	        case "host-enable":
-                permissionManager.add(location, "firebug-debugger", permissionManager.ALLOW_ACTION); 
-                break;
-	    }
-
-        if (option.indexOf("enable") >= 0)
-        {
-            this.enableDebugger(context);
-            
-            // Reload page.        
-            if (Firebug.getPref(prefDomain, reloadWhenEnabledPref))
-                FirebugChrome.reload();
-        }
-        else
-        {
-            this.disableDebugger(context);
-        }        
-
-	    this.updatePermButton(context);
-    },
-    
-    getDefaultPerm: function(context)
-    {
-        if (Firebug.Debugger.isPanelEnabled(context))
-            return "enable";
-            
-        return "disable";
-    },
-
-    enableDebugger: function(context)
-    {
-        var panel = context.getPanel(Firebug.Debugger.panelName);
-
-        var module = Firebug.Debugger; 
-        module.enablePanel(context);
-    
-        // Show side panel
-        panel.panelSplitter.collapsed = false;
-        panel.sidePanelDeck.collapsed = false;
-
-        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.enable ******************************\n");
-
-        // OK, the user wants the debugger, so enable it.
-        module.wrappedJSObject = Firebug.Debugger;
-        fbs.registerDebugger(module);
-    },
-    
-    disableDebugger: function(context)
-    {
-        var module = Firebug.Debugger;
-        if (context && module.isPanelEnabled(context))
-        {
-            // Since 1.2 the debugger is disabled when the FB's UI is closed. [Honza]
-            if (module.wrappedJSObject)
-            {
-                fbs.unregisterDebugger(module);
-                module.wrappedJSObject = null;
-            }
-            
-            module.disablePanel(context);
-            
-            var panel = context.getPanel(module.panelName);
-            var state = Firebug.getPanelState(panel);
-            panel.show(state);
-        }
-    }
+        return $STRF(label, [getURIHost(location)]);
+    },    
 });
 
 // ************************************************************************************************
 
-Firebug.Debugger.PrefObserver = extend(Object,
-{
-    observe: function(aSubject, aTopic, aData) 
-    {
-        if (aTopic != "nsPref:changed")
-            return;
-            
-        if (aData == prefDomain + "." + enableAlwaysPref) 
-        {
-            var fn = Firebug.Debugger.Perm.updatePermButton;
-            //TabWatcher.iterateContexts(fn);
-        }
-    },
-    
-	QueryInterface : function (aIID) 
-	{
-		if (aIID.equals(nsIObserver) ||
-			aIID.equals(nsISupportsWeakReference) ||
-			aIID.equals(nsISupports))
-	    {
-		    return this;
-	    }
-	    
-		throw Components.results.NS_NOINTERFACE;
-	}
-});
-
-// ************************************************************************************************
-
-Firebug.Debugger.DefaultPage = domplate(Firebug.Rep,
+Perm.DefaultPage = domplate(Firebug.Rep,
 {
     tag:
         DIV({class: "disablePageBox"},
@@ -1626,12 +1650,12 @@ Firebug.Debugger.DefaultPage = domplate(Firebug.Rep,
                     TR(
                         TD(INPUT({id: "hostEnabled", type: "checkbox", onclick: "$onHostEnable"})),
                         TD("$enableHostLabel")
-                    ),
+                    )/*,
                     TR(
                         TD(INPUT({id: "reloadWhenEnabled", type: "checkbox", 
                             onclick: "$onReloadEnable", checked: "$reloadEnable"})),
                         TD("Reload page when enabled")
-                    )
+                    )*/
                 )
             ),
             DIV({class: "disablePageRow"},
@@ -1655,21 +1679,20 @@ Firebug.Debugger.DefaultPage = domplate(Firebug.Rep,
         var panel = Firebug.getElementPanel(target);
         var context = panel.context;
         
-        var reloadWhenEnabled = $("reloadWhenEnabled", target.ownerDocument);
-        var reload = reloadWhenEnabled.checked;
-        Firebug.setPref(prefDomain, reloadWhenEnabledPref, reload);
+        //var reloadWhenEnabled = $("reloadWhenEnabled", target.ownerDocument);
+        //var reload = reloadWhenEnabled.checked;
+        //Firebug.setPref(prefDomain, reloadWhenEnabledPref, reload);
                 
-        var perm = Firebug.Debugger.Perm;
         var hostEnabled = $("hostEnabled", target.ownerDocument);
-        perm.setPermission(context, hostEnabled.checked ? "host-enable" : "enable");
+        Perm.Manager.setPermission(context, hostEnabled.checked ? "enable-host" : "enable");
     },
     
     show: function(panel)
     {
         var context = panel.context;
-        var host = context.browser.currentURI.host;
+        var location = context.browser.currentURI;
         var args = {
-            enableHostLabel: $STRF("DebuggerHostEnable", [host]),
+            enableHostLabel: Perm.Menu.getLabel("enable-host", location),
             reloadEnable: Firebug.getPref(prefDomain, reloadWhenEnabledPref)
         };
 
@@ -2050,7 +2073,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     
     show: function(state)
     {
-        Firebug.Debugger.Perm.updatePermButton(this.context);        
+        Perm.Menu.update(this.context);        
     
         if (!this.shouldShow())
             return;
@@ -2077,13 +2100,12 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     shouldShow: function()
     {
-        if (Firebug.Debugger.isPanelEnabled(this.context))
+        if (Perm.Manager.isEnabled(this.context))
             return true;
 
-        var template = Firebug.Debugger.DefaultPage;
+        var template = Perm.DefaultPage;
         template.show(this);
 
-        // Hide side panel            
         this.panelSplitter.collapsed = true;
         this.sidePanelDeck.collapsed = true;
         
@@ -2446,6 +2468,19 @@ var BreakpointsTemplate = domplate(Firebug.Rep,
         }
     }
 });
+
+// xxxHoza duplicated in chrome.js
+function getURIHost(uri)
+{
+    try
+    {
+        return uri.host;
+    }
+    catch (exc)
+    {
+        return "";
+    }
+}
 
 // ************************************************************************************************
 
