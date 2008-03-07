@@ -406,7 +406,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         // Remove the property from the selector map, if it was disabled
         var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
-        if ( this.context.selectorMap.hasOwnProperty(ruleId) )
+        if ( this.context.selectorMap && this.context.selectorMap.hasOwnProperty(ruleId) )
         {
             var map = this.context.selectorMap[ruleId];
             for (var i = 0; i < map.length; ++i)
@@ -1150,20 +1150,30 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         if (hasClass(target, "cssPropName"))
         {
-            if (previousValue && previousValue != value)
-                style.removeProperty(previousValue);
-
-            if (value)
+            if (value && previousValue && previousValue != value)  // name of property has changed.
             {
-                var propValue = getChildByClass(row, "cssPropValue").textContent;
-                var parsedValue = parsePriority(propValue);
-                style.setProperty(value, parsedValue.value, parsedValue.priority);
+                // Get value from setProperty on previous edit OR from source of page OR undefined
+                this.previousPropertyValue = getChildByClass(row, "cssPropValue").textContent;
+                if (this.previousPropertyValue && this.previousPropertyValue != "undefined")
+                {
+                    this.previousPropertyName = previousValue;
+                    this.cleanUpStyle = style;
+                    this.newPropertyName = value;
+                    FBTrace.sysout("CSSEditor.saveEdit previousProperty: "+this.previousPropertyName+"->"+this.newPropertyName+" = "+this.previousPropertyValue+"\n");
+                }
+
             }
         }
         else if (getAncestorByClass(target, "cssPropValue"))
         {
             var propName = getChildByClass(row, "cssPropName").textContent;
             var propValue = getChildByClass(row, "cssPropValue").textContent;
+
+            if (FBTrace.DBG_CSS) /*@explore*/
+            {
+                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +" = "+propValue+"\n"); /*@explore*/
+               // FBTrace.dumpProperties("CSSEditor.saveEdit BEFORE style:",style);
+            }
 
             if (propValue)
             {
@@ -1181,8 +1191,25 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         this.panel.markChange(this.panel.name == "stylesheet");
     },
 
-    endEditing: function()
+    endEditing: function(currentTarget, value, cancel)
     {
+        if (this.previousPropertyName)  // Might be cleaner to have different editors for names and values...
+        {
+            // this was a name edit. 1) new name->do nothing 2) change previous name->remove old, set new
+            if (this.previousPropertyValue)
+            {
+                this.cleanUpStyle.removeProperty(this.previousPropertyName);
+                if (FBTrace.DBG_CSS)  /*@explore*/
+                    FBTrace.sysout("CSSEditor.endEditing removed:"+this.previousPropertyName+"\n"); /*@explore*/
+                var parsedValue = parsePriority(this.previousPropertyValue);
+                this.cleanUpStyle.setProperty(this.newPropertyName, parsedValue.value, parsedValue.priority);
+                if (FBTrace.DBG_CSS)  /*@explore*/
+                    FBTrace.sysout("CSSEditor.endEditing set:"+this.newPropertyName+"="+this.previousPropertyValue.value+"\n"); /*@explore*/
+
+                delete this.previousPropertyName;
+                delete this.previousPropertyValue;
+            }
+        }
         // XXXjoe We need to refresh here, but can't because it interferes
         // with the tabbing.  The only reason to refresh is to update the
         // overridden flag on properties when !importants are changed, so
@@ -1297,13 +1324,15 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
             editStyleSheet.setAttributeNS("http://www.w3.org/XML/1998/namespace", "base",
                 url.directory);
 
-            var head = doc.getElementsByTagName("head")[0];
+            var head = doc.getElementsByTagName("head")[0];  // XXXjjb re issue 43
             head.appendChild(editStyleSheet);
 
             this.styleSheet.editStyleSheet = editStyleSheet;
         }
 
         this.styleSheet.editStyleSheet.innerHTML = value;
+        if (FBTrace.DBG_CSS)  /*@explore*/
+            FBTrace.sysout("css.saveEdit styleSheet.href:"+this.styleSheet.href+" got innerHTML:"+value+"\n"); /*@explore*/
     },
 
     endEditing: function()
