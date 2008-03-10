@@ -693,7 +693,7 @@ top.Firebug =
         toggleCommand.setAttribute("checked", !!shouldShow);
         detachCommand.setAttribute("checked", !!browser.detached);
         this.showKeys(shouldShow);
-        
+
         dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
     },
 
@@ -1177,11 +1177,11 @@ top.Firebug =
     {
         // XXXjoe Move this to Firebug.Console
         try {
-        delete win.console;
-} catch (exc) 
-{
-FBTrace.dumpStack("unwatchWindow"+exc);
-}
+        	delete win.console;
+		} catch (exc)
+		{
+			FBTrace.dumpStack("unwatchWindow"+exc);
+		}
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];
@@ -1441,7 +1441,7 @@ Firebug.Panel =
     select: function(object, forceUpdate)
     {
         if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.dumpStack("firebug.select (object != this.selection)? "+(object != this.selection)+" object: "+object)  /*@explore*/
+            FBTrace.sysout("firebug.select (object != this.selection)? "+(object != this.selection), " object: "+object)  /*@explore*/
         if (!object)
             object = this.getDefaultSelection();
 
@@ -1778,10 +1778,10 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
 {
     panelName: null,
     panelBar1: $("fbPanelBar1"),
-    
+
     initContext: function(context)
     {
-        var persistedState = this.getPersistedState(context, this.panelName);
+        var persistedState = getPersistedState(context, this.panelName);
         if (persistedState.enabled == "undefined")
         {
             var autoDisable = Firebug.getPref(Firebug.prefDomain, "autoDisable");
@@ -1795,7 +1795,7 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
         var enabled = this.isPanelEnabled(context);
         tab.setAttribute("disabled", enabled ? "false" : "true");
     },
-    
+
     hideUI: function(browser, context)
     {
         var autoDisable = Firebug.getPref(Firebug.prefDomain, "autoDisable");
@@ -1809,55 +1809,36 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
     {
         if (!context)
             return false;
-            
-        var persistedState = this.getPersistedState(context, this.panelName);
+
+        var persistedState = getPersistedState(context, this.panelName);
         if (persistedState)
             return persistedState.enabled;
-        
+
         return false;
     },
-    
-    getPersistedState: function(context, panelName)
-    {
-        if (!context)
-            return null;
-            
-        var persistedState = context.persistedState;
-        if (!persistedState)
-            persistedState = context.persistedState = {};
-            
-        if (!persistedState.panelState)
-            persistedState.panelState = {};
-            
-        var panelState = persistedState.panelState[panelName];
-        if (!panelState)
-            panelState = persistedState.panelState[panelName] = {};
-            
-        return panelState;
-    },
-    
+
     enablePanel: function(context)
     {
         var panel = context.getPanel(this.panelName);
-        
-        var persistedState = this.getPersistedState(panel.context, panel.name);
+
+        var persistedState = getPersistedState(panel.context, panel.name);
         persistedState.enabled = true;
-        
+
         var tab = this.panelBar1.getTab(panel.name);
         tab.removeAttribute("disabled");
-        
+
         panel.clear();
     },
-    
+
     disablePanel: function(context)
     {
         var panel = context.getPanel(this.panelName, true);
         if (!panel)
             return;
 
-        var persistedState = this.getPersistedState(context, panel.name);
+        var persistedState = getPersistedState(context, panel.name);
         persistedState.enabled = false;
-        
+
         var tab = this.panelBar1.getTab(panel.name);
         tab.setAttribute("disabled", "true");
     }
@@ -1876,7 +1857,7 @@ Firebug.AutoDisableModule.DefaultPage = domplate(Firebug.Rep,
                     "$enableLabel"
                 ),
                 SPAN("&nbsp;&nbsp;"),
-                SPAN({class: "disablePageText"}, 
+                SPAN({class: "disablePageText"},
                     $STR("RequiresReload")
                 )
             ),
@@ -1885,17 +1866,17 @@ Firebug.AutoDisableModule.DefaultPage = domplate(Firebug.Rep,
                     $STR("ChangePreference")
                 ),
                 SPAN("&nbsp;&nbsp;"),
-                SPAN({class: "disablePageText"}, 
+                SPAN({class: "disablePageText"},
                     "extensions.firebug.autoDisable"
                 )
             )
          ),
-         
+
     onPreferences: function()
     {
         openNewTab("about:config");
     },
-    
+
     show: function(panel, args)
     {
         this.tag.replace(args, panel.panelNode, this);

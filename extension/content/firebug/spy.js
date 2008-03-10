@@ -123,7 +123,7 @@ Firebug.Spy = extend(Firebug.Module,
 
     initContext: function(context)
     {
-        context.spies = [];
+        context.spies = [];  // MAY NOT BE CALLED FOR CHROMEBUG??
 
         if (Firebug.showXMLHttpRequests)
             this.attachSpy(context, context.window);

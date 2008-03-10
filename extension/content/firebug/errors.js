@@ -26,7 +26,8 @@ const pointlessErrors =
     "uncaught exception: Permission denied to get property XULElement.accessKey": 1,
     "this.docShell has no properties": 1,
     "aDocShell.QueryInterface(Components.interfaces.nsIWebNavigation).currentURI has no properties": 1,
-    "Deprecated property window.title used. Please use document.title instead.": 1
+    "Deprecated property window.title used. Please use document.title instead.": 1,
+    "Key event not available on GTK2:": 1
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -358,11 +359,17 @@ function lessTalkMoreAction(object, context, isWarning)
         return true;
     }
 
-    if (object.errorMessage in pointlessErrors)
+    for (var msg in pointlessErrors)
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe dropping pointlessError\n");
-        return true;
+        if(msg.charAt(0) == object.errorMessage.charAt(0))
+        {
+            if (object.errorMessage.indexOf(msg) == 0)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("errors.observe dropping pointlessError"+msg+"\n");
+                return true;
+            }
+        }
     }
 
     var msgId = [object.errorMessage, object.sourceName, object.lineNumber].join("/");

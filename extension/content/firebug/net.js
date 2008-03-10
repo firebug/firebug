@@ -198,11 +198,11 @@ Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
 
-    initialize: function() 
+    initialize: function()
     {
         this.panelName = panelName;
     },
-    
+
     shutdown: function()
     {
         // Unregister HTTP observer. This is done when the FB UI is closed.
@@ -256,36 +256,15 @@ Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
         var netButtons = browser.chrome.$("fbNetButtons");
         collapse(netButtons, !panel || panel.name != panelName);
     },
-    
+
     hideUI: function(browser, context)
     {
         Firebug.AutoDisableModule.hideUI.apply(this, arguments);
-    
+
         if (context && !this.isPanelEnabled(context))
             unmonitorContext(context);
     }
 });
-
-// ************************************************************************************************
-
-function getPersistedState(context, panelName)
-{
-    if (!context)
-        return null;
-        
-    var persistedState = context.persistedState;
-    if (!persistedState)
-        persistedState = context.persistedState = {};
-        
-    if (!persistedState.panelState)
-        persistedState.panelState = {};
-        
-    var panelState = persistedState.panelState[panelName];
-    if (!panelState)
-        panelState = persistedState.panelState[panelName] = {};
-        
-    return panelState;
-}
 
 // ************************************************************************************************
 
@@ -636,7 +615,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         if (!this.shouldShow())
             return;
-        
+
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
@@ -661,18 +640,18 @@ NetPanel.prototype = domplate(Firebug.Panel,
             enableLabel: $STR("EnableNetMonitor"),
             onEnable: function() {
                 Firebug.NetMonitor.enablePanel(panel.context);
-                
-                // Reload page.                
+
+                // Reload page.
                 FirebugChrome.reload();
             }
         };
-        
+
         var template = Firebug.AutoDisableModule.DefaultPage;
         Firebug.AutoDisableModule.DefaultPage.show(this, args);
-        
+
         return false;
     },
-    
+
     hide: function()
     {
         if (this.context.netProgress)
@@ -849,7 +828,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     layout: function()
     {
-        if (!this.queue.length || !this.context.netProgress || 
+        if (!this.queue.length || !this.context.netProgress ||
             !Firebug.NetMonitor.isPanelEnabled(this.context))
             return;
 

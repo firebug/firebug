@@ -1797,24 +1797,28 @@ this.updateScriptFiles = function(context, reload)  // scan windows for 'script'
 {
     var oldMap = reload ? context.sourceFileMap : null;
 
-    function addFile(url, scriptTagNumber)
+    function addFile(url, scriptTagNumber, dependentURL)
     {
             if (oldMap && url in oldMap)
             {
                 var sourceFile = oldMap[url];
+                sourceFile.dependentURL = dependentURL;
                 context.sourceFileMap[url] = sourceFile;
+                return false;
             }
             else
             {
                 var sourceFile = new FBL.ScriptTagSourceFile(url, scriptTagNumber);
+                sourceFile.dependentURL = dependentURL;
                 context.sourceFileMap[url] = sourceFile;
+                return true;
             }
     }
 
     this.iterateWindows(context.window, this.bind(function(win)
     {
         if (FBTrace.DBG_SOURCEFILES)  																								/*@explore*/
-            FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href+" documentElement:",win.document.documentElement);  /*@explore*/
+            FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);  /*@explore*/
         if (!win.document.documentElement)
             return;
 
@@ -1824,9 +1828,9 @@ this.updateScriptFiles = function(context, reload)  // scan windows for 'script'
             var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
             var url = scriptSrc ? this.absoluteURL(scriptSrc, win.location.href) : win.location.href;
             url = this.normalizeURL(url ? url : win.location.href);
-            addFile(url, i);
+            var added = addFile(url, i, (scriptSrc?win.location.href:null));
             if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+" adding "+url+" to context="+context.window.location+"\n");  /*@explore*/
+                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.window.location+"\n");  /*@explore*/
         }
     }, this));
 };
@@ -2608,6 +2612,25 @@ this.restoreObjects = function(panel, panelState)
     }
 };
 
+this.getPersistedState = function(context, panelName)
+{
+    if (!context)
+        return null;
+
+    var persistedState = context.persistedState;
+    if (!persistedState)
+        persistedState = context.persistedState = {};
+
+    if (!persistedState.panelState)
+        persistedState.panelState = {};
+
+    var panelState = persistedState.panelState[panelName];
+    if (!panelState)
+        panelState = persistedState.panelState[panelName] = {};
+
+    return panelState;
+};
+
 // ************************************************************************************************
 
 this.ErrorMessage = function(message, href, lineNo, source, category, context, trace)
@@ -3169,11 +3192,11 @@ this.getSourceFileByScript = function(context, script)
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below
     var lucky = context.sourceFileMap[script.fileName];
-    //if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
+    if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
     if (lucky && lucky.hasScript(script))
         return lucky;
 
-    //if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
 
     for (var url in context.sourceFileMap)
     {

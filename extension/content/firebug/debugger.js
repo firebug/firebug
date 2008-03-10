@@ -1266,7 +1266,7 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
 
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
         $("cmd_breakOnTopLevel").setAttribute("checked", Firebug.breakOnTopLevel);
-        
+
         this.panelName = "script";
         permTooltip.fbEnabled = true;
         this.wrappedJSObject = this;
@@ -1280,6 +1280,13 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
     {
         Perm.Manager.initContext(context);
     },
+
+
+    loadedContext: function(context)
+    {
+        updateScriptFiles(context, false);
+    },
+
 
     destroyContext: function(context)
     {
@@ -1296,7 +1303,7 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
     {
         Perm.Manager.hideUI(context);
     },
-    
+
     shutdown: function()
     {
     },
@@ -1329,7 +1336,7 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
         var isDebugger = panel && panel.name == "script";
         var debuggerButtons = chrome.$("fbDebuggerButtons");
         collapse(debuggerButtons, !isDebugger);
-        
+
         var scriptButtons = chrome.$("fbScriptButtons");
         collapse(scriptButtons, !isDebugger);
     },
@@ -1358,13 +1365,13 @@ Firebug.Debugger = extend(Firebug.AutoDisableModule,
 var Debugger = Firebug.Debugger;
 var Perm = Debugger.Perm = {};
 
-Perm.Manager = extend(Object, 
+Perm.Manager = extend(Object,
 {
     initContext: function(context)
     {
         context.deb_uid = FBL.getUniqueId();                                                                       /*@explore*/
-        
-        var persistedState = Debugger.getPersistedState(context, Debugger.panelName);
+
+        var persistedState = getPersistedState(context, Debugger.panelName);
         if (typeof(persistedState.enabled) == "undefined")
         {
             var option = this.getPermission(context);
@@ -1382,32 +1389,32 @@ Perm.Manager = extend(Object,
     {
         this.unregisterDebugger(context);
     },
-    
+
     hideUI: function(context)
     {
         if (!context)
             return;
-        
+
         var option = this.getPermission(context);
         if (option.indexOf("disable") == 0)
         {
-            var persistedState = Debugger.getPersistedState(context, Debugger.panelName);
+            var persistedState = getPersistedState(context, Debugger.panelName);
             persistedState.enabled = false;
             this.disableDebugger(context);
         }
     },
-    
+
     isEnabled: function(context)
     {
         return Debugger.isPanelEnabled(context);
     },
-        
+
     enableDebugger: function(context)
     {
         Debugger.enablePanel(context);
 
         var panel = context.getPanel(Debugger.panelName);
-    
+
         // Show side panel
         panel.panelSplitter.collapsed = false;
         panel.sidePanelDeck.collapsed = false;
@@ -1423,12 +1430,12 @@ Perm.Manager = extend(Object,
         Debugger.disablePanel(context);
 
         this.unregisterDebugger(context);
-        
+
         var panel = context.getPanel(Debugger.panelName);
         var state = Firebug.getPanelState(panel);
         panel.show(state);
     },
-    
+
     registerDebugger: function(context)
     {
         if (!context.debuggerRegistered)
@@ -1446,56 +1453,56 @@ Perm.Manager = extend(Object,
             fbs.unregisterDebugger(Debugger);
         }
     },
-    
+
     getPermission: function(context)
     {
         var location = context.browser.currentURI;
-	    var host = getURIHost(location);
-	    
-	    if (!host)
-	    {
+        var host = getURIHost(location);
+
+        if (!host)
+        {
             var enable = Firebug.getPref(prefDomain, enableLocalFilesPref);
             if (enable)
                 return "enable-host";
         }
         else
-        {    
-	        switch (permissionManager.testPermission(location, "firebug-debugger"))
-	        {
-	        case nsIPermissionManager.ALLOW_ACTION: 
-	            return "enable-host";	            
-	        }
+        {
+            switch (permissionManager.testPermission(location, "firebug-debugger"))
+            {
+            case nsIPermissionManager.ALLOW_ACTION:
+                return "enable-host";
+            }
         }
-        
-	    var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
-	    if (enableAlways)   
+
+        var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
+        if (enableAlways)
             return "enable";//"enable-always";
-	    
+
         return "disable";
     },
-    
+
     setPermission: function(context, option)
     {
-	    var location = context.browser.currentURI;
-	    var host = getURIHost(location);
+        var location = context.browser.currentURI;
+        var host = getURIHost(location);
 
-	    if (!host)
-	    {
+        if (!host)
+        {
             // Update pref for local files.
-	        var enable = (option.indexOf("enable-host") == 0);
+            var enable = (option.indexOf("enable-host") == 0);
             Firebug.setPref(prefDomain, enableLocalFilesPref, enable);
-	    }
-	    else
-	    {
-	        // Use permission manager for specific sites.
-	        permissionManager.remove(host, "firebug-debugger");
-	        switch(option)
-	        {
-	        case "enable-host":
-                permissionManager.add(location, "firebug-debugger", permissionManager.ALLOW_ACTION); 
+        }
+        else
+        {
+            // Use permission manager for specific sites.
+            permissionManager.remove(host, "firebug-debugger");
+            switch(option)
+            {
+            case "enable-host":
+                permissionManager.add(location, "firebug-debugger", permissionManager.ALLOW_ACTION);
                 break;
-	        }
-	    }        
+            }
+        }
 
         if (option == "enable-always")
             Firebug.setPref(prefDomain, enableAlwaysPref, true);
@@ -1503,37 +1510,37 @@ Perm.Manager = extend(Object,
         if (option.indexOf("enable") >= 0)
         {
             this.enableDebugger(context);
-            
-            // Reload page.        
+
+            // Reload page.
             //if (Firebug.getPref(prefDomain, reloadWhenEnabledPref))
                 FirebugChrome.reload();
         }
         else
         {
             this.disableDebugger(context);
-        }        
+        }
 
-	    Perm.Menu.update(context);
-    }    
+        Perm.Menu.update(context);
+    }
 });
 
-Perm.Menu = extend(Object, 
+Perm.Menu = extend(Object,
 {
     onTooltipShowing: function(tooltip, context)
     {
         if (tooltip.fbEnabled)
             tooltip.label = $STR("DebuggerPermMenuTooltip");
-            
+
         return tooltip.fbEnabled;
     },
-    
+
     onCommand: function(event, context)
     {
         var menu = event.target;
         if (menu.value)
             Perm.Manager.setPermission(context, menu.value);
     },
-    
+
     onReloadPageWhenEnabled: function(event, context)
     {
         var target = event.target;
@@ -1541,61 +1548,61 @@ Perm.Menu = extend(Object,
         Firebug.setPref(prefDomain, reloadWhenEnabledPref, reload);
         return true;
     },
-    
+
     onPopupShowing: function(menu, context)
     {
         permTooltip.fbEnabled = false;
-        
-        var items = menu.getElementsByTagName("menuitem");        
-	    var value = permButton.value;	    
-	    
-	    var location = context.browser.currentURI;
-	    for (var i=0; i<items.length; i++)
-	    {
-		    var option = items[i].value;
-		    if (!option)
-		        continue;
-		        
-		    if (option == value) 
-		        items[i].setAttribute("checked", "true");
-		        
-		    items[i].label = this.getLabel(option, location);
-	    }
-	    
+
+        var items = menu.getElementsByTagName("menuitem");
+        var value = permButton.value;
+
+        var location = context.browser.currentURI;
+        for (var i=0; i<items.length; i++)
+        {
+            var option = items[i].value;
+            if (!option)
+                continue;
+
+            if (option == value)
+                items[i].setAttribute("checked", "true");
+
+            items[i].label = this.getLabel(option, location);
+        }
+
 /*	    var reloadOption = $("fbReloadWhenEnabled", menu.ownerDocument);
-	    var reload = Firebug.getPref(prefDomain, reloadWhenEnabledPref);
-	    if (reload)
-    	    reloadOption.setAttribute("checked", reload);
-    	else
-    	    reloadOption.removeAttribute("checked");
+        var reload = Firebug.getPref(prefDomain, reloadWhenEnabledPref);
+        if (reload)
+            reloadOption.setAttribute("checked", reload);
+        else
+            reloadOption.removeAttribute("checked");
 */
-	    return true;
-    },    
+        return true;
+    },
 
     onPopupHiding: function(tooltip, context)
     {
         permTooltip.fbEnabled = true;
         return true;
-    },    
-    
+    },
+
     update: function(context)
     {
-        // This is called through TabWatcher.iterateContexts and 
+        // This is called through TabWatcher.iterateContexts and
         // "this" isn't passed along
         var oThis = Perm.Menu;
         var location = context.browser.currentURI;
-        
+
         var manager = Perm.Manager;
         var value = manager.getPermission(context);
         if ((value.indexOf("disable") == 0) && manager.isEnabled(context))
             value = "enable";
-	    
-	    permButton.value = value;
-	    permButton.label = oThis.getLabel(value, location, true);
-	    permButton.removeAttribute("disabled");
-	    permButton.setAttribute("value", value);
+
+        permButton.value = value;
+        permButton.label = oThis.getLabel(value, location, true);
+        permButton.removeAttribute("disabled");
+        permButton.setAttribute("value", value);
     },
-    
+
     getLabel: function (option, location, shortened)
     {
         var label = "";
@@ -1604,7 +1611,7 @@ Perm.Menu = extend(Object,
         case "enable":
             label = "DebuggerEnable";
             break;
-            
+
         case "disable":
             label = "DebuggerDisable";
             break;
@@ -1612,7 +1619,7 @@ Perm.Menu = extend(Object,
         case "enable-always":
             label = "DebuggerEnableAlways";
             break;
-            
+
         case "enable-host":
             if (FBL.isSystemURL(location.spec))
                 label = "DebuggerSystemPagesEnable";
@@ -1620,17 +1627,17 @@ Perm.Menu = extend(Object,
                 label = "DebuggerLocalFilesEnable";
             else
                 label = "DebuggerHostEnable";
-                
+
             if (shortened)
                 label = "DebuggerEnable";
-            break;            
+            break;
         }
-        
+
         if (!label)
             return null;
 
         return $STRF(label, [getURIHost(location)]);
-    },    
+    },
 });
 
 // ************************************************************************************************
@@ -1652,7 +1659,7 @@ Perm.DefaultPage = domplate(Firebug.Rep,
                         TD("$enableHostLabel")
                     )/*,
                     TR(
-                        TD(INPUT({id: "reloadWhenEnabled", type: "checkbox", 
+                        TD(INPUT({id: "reloadWhenEnabled", type: "checkbox",
                             onclick: "$onReloadEnable", checked: "$reloadEnable"})),
                         TD("Reload page when enabled")
                     )*/
@@ -1668,25 +1675,25 @@ Perm.DefaultPage = domplate(Firebug.Rep,
     onHostEnable: function(event)
     {
     },
-         
+
     onReloadEnable: function(event)
     {
     },
-    
+
     onDebuggerEnable: function(event)
     {
         var target = event.target;
         var panel = Firebug.getElementPanel(target);
         var context = panel.context;
-        
+
         //var reloadWhenEnabled = $("reloadWhenEnabled", target.ownerDocument);
         //var reload = reloadWhenEnabled.checked;
         //Firebug.setPref(prefDomain, reloadWhenEnabledPref, reload);
-                
+
         var hostEnabled = $("hostEnabled", target.ownerDocument);
         Perm.Manager.setPermission(context, hostEnabled.checked ? "enable-host" : "enable");
     },
-    
+
     show: function(panel)
     {
         var context = panel.context;
@@ -2061,23 +2068,18 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
     },
 
-    loadedContext: function(context)
-    {
-        updateScriptFiles(context, reload);
-    },
-
     clear: function()
     {
         clearNode(this.panelNode);
     },
-    
+
     show: function(state)
     {
-        Perm.Menu.update(this.context);        
-    
+        Perm.Menu.update(this.context);
+
         if (!this.shouldShow())
             return;
-            
+
         if (this.context.loaded && !this.location)
         {
             restoreObjects(this, state);
@@ -2108,10 +2110,10 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.panelSplitter.collapsed = true;
         this.sidePanelDeck.collapsed = true;
-        
+
         return false;
     },
-    
+
     hide: function()
     {
         delete this.infoTipExpr;
@@ -2308,11 +2310,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     optionMenu: function(label, option)
     {
-	    var checked = Firebug.getPref(prefDomain, option);
+        var checked = Firebug.getPref(prefDomain, option);
         return {label: label, type: "checkbox", checked: checked,
             command: bindFixed(Firebug.setPref, Firebug, prefDomain, option, !checked) };
     },
-    
+
     getContextMenuItems: function(fn, target)
     {
         if (getAncestorByClass(target, "sourceLine"))
@@ -2869,11 +2871,11 @@ function setLineBreakpoints(sourceFile, sourceBox)
     }});
 
     if (FBTrace.DBG_LINETABLE)
-        FBTrace.sysout("debugger.setLineBreakpoints building lineTable for sourceFile.href:"+sourceFile.href+"\n")
+        FBTrace.sysout("debugger.setLineBreakpoints sourceFile.lineMap: "+ ((sourceFile.lineMap && sourceFile.lineMap.complete)?"lineTable complete":"need to build lineTable") +" for sourceFile.href:"+sourceFile.href+"\n")
     if (!sourceFile.lineMap || !sourceFile.lineMap.complete)
         sourceFile.buildLineTable();
 
-   /* Done in undateSourceBox, but not throtled. if (!this.setExecutableLines)
+   /* Done in updateSourceBox, but not throtled. if (!this.setExecutableLines)
         FBTrace.dumpStack("setLineBreakpoints no this.setExecutableLines\n");
     this.setExecutableLines(sourceBox);
    */
