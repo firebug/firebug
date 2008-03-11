@@ -103,6 +103,7 @@ const scriptBlockSize = 20;
 
 var modules = [];
 var extensions = [];
+var uiListeners = [];
 var panelTypes = [];
 var reps = [];
 var defaultRep = null;
@@ -260,6 +261,9 @@ top.Firebug =
 
         for (var i = 0; i < arguments.length; ++i)
             TabWatcher.addListener(arguments[i]);
+            
+        for (var j = 0; j < arguments.length; j++)
+            uiListeners.push(arguments[j]);
     },
 
     registerPanel: function()
@@ -1186,12 +1190,15 @@ top.Firebug =
     unwatchWindow: function(context, win)
     {
         // XXXjoe Move this to Firebug.Console
-        try {
-        	delete win.console;
-		} catch (exc)
-		{
-			FBTrace.dumpStack("unwatchWindow"+exc);
-		}
+        try 
+        {
+            delete win.console;
+        } 
+        catch (exc) 
+        {
+            FBTrace.dumpStack("unwatchWindow"+exc);  // FF3 hack TODO
+        }
+        
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];
@@ -1441,6 +1448,7 @@ Firebug.Panel =
 
             // XXXjoe This is kind of cheating, but, feh.
             this.context.chrome.onPanelNavigate(object, this);
+            if (uiListeners.length > 0) dispatch(uiListeners, "onPanelNavigate", [object, this]);  // TODO: make this.context.chrome a uiListener
         }
     },
 
@@ -1460,9 +1468,10 @@ Firebug.Panel =
             this.previousSelection = this.selection;
             this.selection = object;
             this.updateSelection(object);
-
+            
             // XXXjoe This is kind of cheating, but, feh.
             this.context.chrome.onPanelSelect(object, this);
+            if (uiListeners.length > 0) dispatch(uiListeners, "onPanelSelect", [object, this]);  // TODO: make this.context.chrome a uiListener
         }
     },
 
