@@ -1033,6 +1033,10 @@ top.Firebug =
 
     isURIAllowed: function(uri)
     {
+        return true;
+        
+        // xxxHonza
+        /*
         if (!uri)  // null or undefined is denied
             return false;
         var url  = (uri instanceof nsIURI) ? uri.spec : uri.toString();
@@ -1046,10 +1050,15 @@ top.Firebug =
                 return true;
         }
         return false;
+        */
     },
 
     isURIDenied: function(uri)
     {
+        return false;
+        
+        //xxxHonza
+        /*
         if (!uri)  // null or undefined is denied
             return true;
         var url  = (uri instanceof nsIURI) ? uri.spec : uri.toString();
@@ -1063,6 +1072,7 @@ top.Firebug =
         if (FBL.isLocalURL(url) && this.disabledFile)
             return true;
         return false;
+        */
     },
 
     enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
@@ -1819,6 +1829,110 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
 
     enablePanel: function(context)
     {
+        var persistedState = getPersistedState(context, this.panelName);
+        persistedState.enabled = true;
+
+        var tab = this.panelBar1.getTab(this.panelName);
+        tab.removeAttribute("disabled");
+
+        var panel = context.getPanel(this.panelName, true);
+        if (panel)
+            panel.clear();
+    },
+
+    disablePanel: function(context)
+    {
+        var panel = context.getPanel(this.panelName, true);
+        if (!panel)
+            return;
+
+        var persistedState = getPersistedState(context, panel.name);
+        persistedState.enabled = false;
+
+        var tab = this.panelBar1.getTab(panel.name);
+        tab.setAttribute("disabled", "true");
+    }
+});
+
+// ************************************************************************************************
+
+Firebug.ActivableModule = extend(Firebug.Module,
+{
+    panelName: null,
+    panelBar1: $("fbPanelBar1"),
+    menuButton: null,
+    menuTooltip: null,
+
+    initialize: function()
+    {
+        if (this.menuTooltip)
+            this.menuTooltip.fbEnabled = true;
+    },
+    
+    initContext: function(context)
+    {
+        var persistedState = getPersistedState(context, this.panelName);
+        if (typeof(persistedState.enabled) == "undefined")
+        {
+            var option = this.getPermission(context);
+            if (option.indexOf("enable") == 0)
+                this.enablePanel(context);
+         }
+
+        if (persistedState.enabled)
+            this.onModuleActivate(context, true);
+    },
+
+    showContext: function(browser, context)
+    {
+        var tab = this.panelBar1.getTab(this.panelName);
+        var enabled = this.isEnabled(context);
+        tab.setAttribute("disabled", enabled ? "false" : "true");
+    },
+
+    destroyContext: function(context)
+    {
+        this.onModuleDeactivate(context, true);
+    },
+
+    hideUI: function(browser, context)
+    {
+        if (!context)
+            return;
+
+        var option = this.getPermission(context);
+        if (option.indexOf("disable") == 0)
+        {
+            var persistedState = getPersistedState(context, this.panelName);
+            persistedState.enabled = false;
+            this.onModuleDeactivate(context);
+        }
+    },
+
+    onModuleActivate: function(context, init)
+    {
+        // Module activation code.
+    },
+    
+    onModuleDeactivate: function(context, destroy)
+    {
+        // Module deactivation code.
+    },
+
+    isEnabled: function(context)
+    {
+        if (!context)
+            return false;
+
+        var persistedState = getPersistedState(context, this.panelName);
+        if (persistedState)
+            return persistedState.enabled;
+
+        return false;
+    },
+
+    enablePanel: function(context)
+    {
         var panel = context.getPanel(this.panelName);
 
         var persistedState = getPersistedState(panel.context, panel.name);
@@ -1841,46 +1955,105 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
 
         var tab = this.panelBar1.getTab(panel.name);
         tab.setAttribute("disabled", "true");
-    }
-});
-
-Firebug.AutoDisableModule.DefaultPage = domplate(Firebug.Rep,
-{
-    tag:
-        DIV({class: "disablePageBox"},
-            H1({class: "disablePageHead"},
-                "$pageTitle"
-            ),
-            P({class: "disablePageCaption"}),
-            DIV({class: "disablePageRow", onclick: "$onEnable"},
-                A({class: "disablePageLink"},
-                    "$enableLabel"
-                ),
-                SPAN("&nbsp;&nbsp;"),
-                SPAN({class: "disablePageText"},
-                    $STR("RequiresReload")
-                )
-            ),
-            DIV({class: "disablePageRow"},
-                A({class: "disablePageLink", onclick: "$onPreferences"},
-                    $STR("ChangePreference")
-                ),
-                SPAN("&nbsp;&nbsp;"),
-                SPAN({class: "disablePageText"},
-                    "extensions.firebug.autoDisable"
-                )
-            )
-         ),
-
-    onPreferences: function()
+    },
+    
+    // Menu in toolbar.
+    onStateMenuTooltipShowing: function(tooltip, context)
     {
-        openNewTab("about:config");
+        if (!this.menuTooltip)   
+            return false;
+            
+        if (this.menuTooltip.fbEnabled)
+            this.menuTooltip.label = $STR(this.panelName + "." + "PermMenuTooltip");
+        
+        return this.menuTooltip.fbEnabled;
     },
 
-    show: function(panel, args)
+    onStateMenuCommand: function(event, context)
     {
-        this.tag.replace(args, panel.panelNode, this);
-        panel.panelNode.scrollTop = 0;
+        var menu = event.target;
+        if (menu.value)
+            this.setPermission(context, menu.value);
+    },
+
+    onStateMenuPopupShowing: function(menu, context)
+    {
+        if (this.menuTooltip)
+            this.menuTooltip.fbEnabled = false;
+
+        var items = menu.getElementsByTagName("menuitem");
+        var value = this.menuButton.value;
+
+        var location = context.browser.currentURI;
+        for (var i=0; i<items.length; i++)
+        {
+            var option = items[i].value;
+            if (!option)
+                continue;
+
+            if (option == value)
+                items[i].setAttribute("checked", "true");
+
+            items[i].label = this.getMenuLabel(option, location);
+        }
+
+        return true;
+    },
+
+    onStateMenuPopupHiding: function(tooltip, context)
+    {
+        if (this.menuTooltip)
+            this.menuTooltip.fbEnabled = true;
+            
+        return true;
+    },
+
+    menuUpdate: function(context)
+    {
+        var value = this.getPermission(context);
+        if ((value.indexOf("disable") == 0) && this.isEnabled(context))
+            value = "enable";
+
+        this.menuButton.value = value;
+
+        var location = context.browser.currentURI;
+        this.menuButton.label = this.getMenuLabel(value, location, true);
+        this.menuButton.removeAttribute("disabled");
+        this.menuButton.setAttribute("value", value);
+    },
+
+    getMenuLabel: function (option, location, shortened)
+    {
+        var label = "";
+        switch (option)
+        {
+        case "enable-always":
+        case "enable":
+            label = (shortened) ? "EnableShort" : "Enable";
+            break;
+
+        case "disable":
+            label = (shortened) ? "DisableShort" : "Disable";
+            break;
+
+        case "enable-host":
+            if (isSystemURL(location.spec))
+                label = "SystemPagesEnable";
+            else if (!getURIHost(location))
+                label = "LocalFilesEnable";
+            else
+                label = "HostEnable";
+
+            if (shortened)
+                label = "EnableShort";
+            break;
+        }
+
+        if (!label)
+            return null;
+
+        label = this.panelName + "." + label;
+        return $STRF(label, [getURIHost(location)]);
     }
 });
 

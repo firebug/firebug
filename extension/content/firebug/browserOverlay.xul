@@ -142,15 +142,12 @@
                 <toolbar id="fbToolbar">
                     <toolbarbutton id="fbFirebugMenu" type="menu">
                         <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                            <!--
-                            xxxHonza - disable firebug functionality should be entirely removed.
                             <menuitem label="&firebug.DisableFirebug;" type="checkbox"
                                       oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>
                             <menuitem type="checkbox"
                                       oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
                             <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
                             <menuseparator/>
-                            -->
                             <menu label="&firebug.OpenWith;">
                                 <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                                         <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>

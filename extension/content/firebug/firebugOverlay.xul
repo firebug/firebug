@@ -112,20 +112,16 @@
 
             <hbox id="fbScriptButtons">
                 <toolbarseparator/>
-                <tooltip id="fbDebuggerPermTooltip"
-                    onpopupshowing="return Firebug.Debugger.Perm.Menu.onTooltipShowing(this, FirebugContext)"/>
-		        <toolbarbutton id="fbDebuggerPerm" type="menu" tooltip="fbDebuggerPermTooltip">
+                <tooltip id="fbDebuggerStateMenuTooltip"
+                    onpopupshowing="return Firebug.Debugger.onStateMenuTooltipShowing(this, FirebugContext)"/>
+		        <toolbarbutton id="fbDebuggerStateMenu" type="menu" tooltip="fbDebuggerPermTooltip">
 			        <menupopup
-				        oncommand="return Firebug.Debugger.Perm.Menu.onCommand(event, FirebugContext)"
-				        onpopupshowing="return Firebug.Debugger.Perm.Menu.onPopupShowing(this, FirebugContext)"
-				        onpopuphiding="return Firebug.Debugger.Perm.Menu.onPopupHiding(this, FirebugContext)">
-				        <menuitem type="radio" name="fbDebuggerPerm" value="enable"/>
-				        <menuitem type="radio" name="fbDebuggerPerm" value="disable"/>
-				        <menuitem type="radio" name="fbDebuggerPerm" value="enable-host"/>
-<!--				        <menuseparator/>
-				        <menuitem type="checkbox" id="fbReloadWhenEnabled" label="Reload page when enabled"
-				            oncommand="return Firebug.Debugger.Perm.Menu.onReloadPageWhenEnabled(event, FirebugContext)"/>
--->				            
+				        oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
+				        onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
+				        onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
+				        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
+				        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
+				        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-host"/>
 			        </menupopup>
 		        </toolbarbutton>
             </hbox>
@@ -133,6 +129,19 @@
             <hbox id="fbNetButtons">
                 <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
+                <toolbarseparator/>
+                <tooltip id="fbNetStateMenuTooltip"
+                    onpopupshowing="return Firebug.NetMonitor.onMenuTooltipShowing(this, FirebugContext)"/>
+		        <toolbarbutton id="fbNetStateMenu" type="menu" tooltip="fbNetPermTooltip">
+			        <menupopup
+				        oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
+				        onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
+				        onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
+				        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
+				        <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
+				        <menuitem type="radio" name="fbNetStateMenu" value="enable-host"/>
+			        </menupopup>
+		        </toolbarbutton>
                 <toolbarseparator/>
                 <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
                                group="firebugNetFilter" checked="true"

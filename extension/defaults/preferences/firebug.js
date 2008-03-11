@@ -42,7 +42,6 @@ pref("extensions.firebug-service.showEvalSources", true);
 pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
-pref("extensions.firebug.debugger.reloadWhenEnabled", true);
 pref("extensions.firebug.debugger.enableAlways", false);
 pref("extensions.firebug.debugger.enableLocalFiles", true);
 
@@ -63,8 +62,10 @@ pref("extensions.firebug.showRulers", true);
 // Net
 pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
-pref("extensions.firebug.maxQueueRequests", 100);
+pref("extensions.firebug.maxQueueRequests", 200);
 pref("extensions.firebug.autoDisable", true);
+pref("extensions.firebug.net.enableAlways", false);
+pref("extensions.firebug.net.enableLocalFiles", true);
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");

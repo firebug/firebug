@@ -58,6 +58,15 @@ const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverServ
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+const nsIPermissionManager = Ci.nsIPermissionManager;
+const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
+
+const prefDomain = Firebug.prefDomain + ".net";
+const enableAlwaysPref = "enableAlways";
+const enableLocalFilesPref = "enableLocalFiles";
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 const mimeExtensionMap =
 {
     "txt": "text/plain",
@@ -145,7 +154,7 @@ var panelBar1 = $("fbPanelBar1");
 
 // ************************************************************************************************
 
-Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
+Firebug.NetMonitor = extend(Firebug.ActivableModule,
 {
     clear: function(context)
     {
@@ -201,6 +210,10 @@ Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
     initialize: function()
     {
         this.panelName = panelName;
+        this.menuTooltip = $("fbNetStateMenuTooltip");
+        this.menuButton = $("fbNetStateMenu");
+        
+        Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
     shutdown: function()
@@ -214,10 +227,7 @@ Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
 
     initContext: function(context)
     {
-        Firebug.AutoDisableModule.initContext.apply(this, arguments);
-
-        if (this.isPanelEnabled(context))
-            monitorContext(context);
+        Firebug.ActivableModule.initContext.apply(this, arguments);
     },
 
     reattachContext: function(browser, context)
@@ -228,13 +238,12 @@ Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
 
     destroyContext: function(context)
     {
-        if (context.netProgress)
-            unmonitorContext(context);
+        Firebug.ActivableModule.destroyContext.apply(this, arguments);
     },
 
     showContext: function(browser, context)
     {
-        Firebug.AutoDisableModule.showContext.apply(this, arguments);
+        Firebug.ActivableModule.showContext.apply(this, arguments);
 
         if (!context)
         {
@@ -256,13 +265,148 @@ Firebug.NetMonitor = extend(Firebug.AutoDisableModule,
         var netButtons = browser.chrome.$("fbNetButtons");
         collapse(netButtons, !panel || panel.name != panelName);
     },
-
-    hideUI: function(browser, context)
+    
+    onModuleActivate: function(context, init)
     {
-        Firebug.AutoDisableModule.hideUI.apply(this, arguments);
+        monitorContext(context);
+        
+        this.enablePanel(context);
+    },
+    
+    onModuleDeactivate: function(context, destroy)
+    {
+        unmonitorContext(context);
+    
+        if (!destroy)
+        {
+            this.disablePanel(context);
 
-        if (context && !this.isPanelEnabled(context))
-            unmonitorContext(context);
+            var panel = context.getPanel(panelName);
+            var state = Firebug.getPanelState(panel);
+            panel.show(state);
+        }
+    },
+
+    getPermission: function(context)
+    {
+        var location = context.browser.currentURI;
+        var host = getURIHost(location);
+
+        if (!host)
+        {
+            var enable = Firebug.getPref(prefDomain, enableLocalFilesPref);
+            if (enable)
+                return "enable-host";
+        }
+        else
+        {
+            switch (permissionManager.testPermission(location, "firebug-net"))
+            {
+            case nsIPermissionManager.ALLOW_ACTION:
+                return "enable-host";
+            }
+        }
+
+        var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
+        if (enableAlways)
+            return "enable";//"enable-always";
+
+        return "disable";
+    },
+
+    setPermission: function(context, option)
+    {
+        var location = context.browser.currentURI;
+        var host = getURIHost(location);
+
+        if (!host)
+        {
+            // Update pref for local files.
+            var enable = (option.indexOf("enable-host") == 0);
+            Firebug.setPref(prefDomain, enableLocalFilesPref, enable);
+        }
+        else
+        {
+            // Use permission manager for specific sites.
+            permissionManager.remove(host, "firebug-net");
+            switch(option)
+            {
+            case "enable-host":
+                permissionManager.add(location, "firebug-net", permissionManager.ALLOW_ACTION);
+                break;
+            }
+        }
+
+        if (option == "enable-always")
+            Firebug.setPref(prefDomain, enableAlwaysPref, true);
+
+        if (option.indexOf("enable") >= 0)
+        {
+            this.onModuleActivate(context);
+
+            // Reload page.
+            FirebugChrome.reload();
+        }
+        else
+        {
+            this.onModuleDeactivate(context);
+        }
+
+        this.menuUpdate(context);
+    }
+});
+
+// ************************************************************************************************
+
+var DefaultPage = domplate(Firebug.Rep,
+{
+    tag:
+        DIV({class: "disablePageBox"},
+            H1({class: "disablePageHead"},
+                $STR("net.defaultpage.title")
+            ),
+            P({class: "disablePageDescription"},
+                $STR("net.defaultpage.description")
+            ),
+            TABLE({class: "disablePageRow", cellspacing: "0"},
+                TBODY(
+                    TR(
+                        TD(INPUT({id: "hostEnabled", type: "checkbox", onclick: "$onHostEnable"})),
+                        TD("$enableHostLabel")
+                    )
+                )
+            ),
+            DIV({class: "disablePageRow"},
+                BUTTON({onclick: "$onNetMonitorEnable"},
+                    SPAN("Enable")
+                )
+            )
+         ),
+
+    onHostEnable: function(event)
+    {
+    },
+
+    onNetMonitorEnable: function(event)
+    {
+        var target = event.target;
+        var panel = Firebug.getElementPanel(target);
+        var context = panel.context;
+
+        var hostEnabled = $("hostEnabled", target.ownerDocument);
+        Firebug.NetMonitor.setPermission(context, hostEnabled.checked ? "enable-host" : "enable");
+    },
+
+    show: function(panel)
+    {
+        var context = panel.context;
+        var location = context.browser.currentURI;
+        var args = {
+            enableHostLabel: Firebug.NetMonitor.getMenuLabel("enable-host", location)
+        };
+
+        this.tag.replace(args, panel.panelNode, this);
+        panel.panelNode.scrollTop = 0;
     }
 });
 
@@ -613,6 +757,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     show: function(state)
     {
+        Firebug.NetMonitor.menuUpdate(this.context);
+
         if (!this.shouldShow())
             return;
 
@@ -631,23 +777,10 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     shouldShow: function()
     {
-        if (Firebug.NetMonitor.isPanelEnabled(this.context))
+        if (Firebug.NetMonitor.isEnabled(this.context))
             return true;
 
-        var panel = this;
-        var args = {
-            pageTitle: $STR("NetMonitoringIsDisabled"),
-            enableLabel: $STR("EnableNetMonitor"),
-            onEnable: function() {
-                Firebug.NetMonitor.enablePanel(panel.context);
-
-                // Reload page.
-                FirebugChrome.reload();
-            }
-        };
-
-        var template = Firebug.AutoDisableModule.DefaultPage;
-        Firebug.AutoDisableModule.DefaultPage.show(this, args);
+        DefaultPage.show(this);
 
         return false;
     },
@@ -829,7 +962,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     layout: function()
     {
         if (!this.queue.length || !this.context.netProgress ||
-            !Firebug.NetMonitor.isPanelEnabled(this.context))
+            !Firebug.NetMonitor.isEnabled(this.context))
             return;
 
         if (!this.table)
@@ -2563,7 +2696,7 @@ var HttpObserver =
   onStartRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
-      if (!Firebug.NetMonitor.isPanelEnabled(context))
+      if (!Firebug.NetMonitor.isEnabled(context))
         return;
 
       var name = aRequest.URI.asciiSpec;
@@ -2602,7 +2735,7 @@ var HttpObserver =
   onEndRequest: function(aRequest, aTime, aWin, aTabId)
   {
       var context = TabWatcher.getContextByWindow(aWin);
-      if (!Firebug.NetMonitor.isPanelEnabled(context))
+      if (!Firebug.NetMonitor.isEnabled(context))
         return;
 
       var name = aRequest.URI.asciiSpec;

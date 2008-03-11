@@ -2270,6 +2270,18 @@ this.isSystemPage = function(win)
     }
 }
 
+this.getURIHost = function(uri)
+{
+    try
+    {
+        return uri.host;
+    }
+    catch (exc)
+    {
+        return "";
+    }
+}
+
 this.isLocalURL = function(url)
 {
     if (url.substr(0, 5) == "file:")

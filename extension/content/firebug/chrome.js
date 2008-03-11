@@ -491,7 +491,7 @@ top.FirebugChrome =
             var uri = this.getCurrentURI();
             if (uri)
             {
-                var host = getURIHost(uri);
+                var host = FBL.getURIHost(uri);
                 var isSystemPage = FBL.isSystemURL(uri.spec);
                 if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel host="+host+" isSystemPage="+isSystemPage+"\n");               /*@explore*/
                 var caption;
@@ -797,7 +797,7 @@ top.FirebugChrome =
                                 checked = !Firebug.allowSystemPages;
                                 child.setAttribute("label", FBL.$STR("DisableForSystemPages"));
                             }
-                            else if (!getURIHost(uri))
+                            else if (!FBL.getURIHost(uri))
                             {
                                 checked = Firebug.disabledFile;
                                 child.setAttribute("label", FBL.$STR("DisableForFiles"));
@@ -1244,18 +1244,6 @@ function getRealObject(object)
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
     var realRep = realObject ? Firebug.getRep(realObject) : rep;
     return realObject ? realObject : object;
-}
-
-function getURIHost(uri)
-{
-    try
-    {
-        return uri.host;
-    }
-    catch (exc)
-    {
-        return "";
-    }
 }
 
 // ************************************************************************************************
