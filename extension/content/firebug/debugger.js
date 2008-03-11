@@ -15,6 +15,7 @@ const nsIFireBugDebugger = Ci.nsIFireBugDebugger;
 const nsIFireBugURLProvider = Ci.nsIFireBugURLProvider;
 const nsISupports = Ci.nsISupports;
 const nsICryptoHash = Ci.nsICryptoHash;
+const nsIURI = Ci.nsIURI;
 
 const PCMAP_SOURCETEXT = jsdIScript.PCMAP_SOURCETEXT;
 
@@ -189,7 +190,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         catch (exc)
         {
             // Just ignore exceptions that happened while in the nested loop
-            ERROR("debugger exception in nested event loop: "+exc+"\n");
+            if (FBTrace.DBG_ERRORS)  /*@explore*/
+                FBTrace.dumpProperties("debugger exception in nested event loop: ", exc); /*@explore*/
+            else     // else /*@explore*/
+                ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
 
         executionContext.scriptsEnabled = true;
@@ -477,6 +481,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     stopDebugging: function(context)
     {
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context"+context+"\n");
         try
         {
             fbs.unlockDebugger();
@@ -1282,7 +1287,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-        updateScriptFiles(context, false);
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.loadedContext context.sourceFileMap", context.sourceFileMap);
+
+        updateScriptFiles(context);
     },
 
     destroyContext: function(context)
@@ -1395,10 +1402,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         else
         {
-            switch (permissionManager.testPermission(location, "firebug-debugger"))
+            if (location instanceof nsIURI)
             {
-            case nsIPermissionManager.ALLOW_ACTION:
-                return "enable-host";
+                switch (permissionManager.testPermission(location, "firebug-debugger"))
+                {
+                case nsIPermissionManager.ALLOW_ACTION:
+                    return "enable-host";
+                }
             }
         }
 
@@ -2300,8 +2310,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
-        if (this.context.loaded)
-            this.refresh();
+        this.refresh();
     },
 
     refresh: function()
@@ -2508,11 +2517,13 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     {
         return object instanceof jsdIStackFrame;
     },
+
     updateSelection: function(object)
     {
         if (object instanceof jsdIStackFrame)
             this.showStackFrame(object);
     },
+
     refresh: function()
     {
         if (FBTrace.DBG_STACK) FBTrace.sysout("debugger.callstackPanel.refresh uid="+this.uid+"\n");                   /*@explore*/
@@ -2526,7 +2537,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         if (panel && frame)
         {
             if (FBTrace.DBG_STACK)                                                                                     /*@explore*/
-                FBTrace.sysout("debugger.callstackPanel.showStackFrame  uid="+this.uid+" frame:", frame);      /*@explore*/
+                FBTrace.dumpStack("debugger.callstackPanel.showStackFrame  uid="+this.uid+" frame:", frame);      /*@explore*/
                                                                                                                        /*@explore*/
             FBL.setClass(this.panelNode, "objectBox-stackTrace");
             trace = FBL.getStackTrace(frame, this.context);

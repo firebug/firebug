@@ -156,7 +156,7 @@ top.FirebugChrome =
             win1.enableAlways = bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, "disabledAlways", false);
             win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
             win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
-            
+
             for (var i = 0; i < Firebug.panelTypes.length; ++i)
             {
                 var panelType = Firebug.panelTypes[i];
@@ -1149,13 +1149,13 @@ function onSelectingPanel(event)
 function onSelectedSidePanel(event)
 {
     var sidePanel = panelBar2.selectedPanel;
-    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel="+sidePanel+" FirebugContext="+FirebugContext+"\n"); /*@explore*/
     if (FirebugContext)
     {
         var panelName = FirebugContext.panelName;
         var sidePanelName = sidePanel ? sidePanel.name : null;
         FirebugContext.sidePanelNames[panelName] = sidePanelName;
     }
+    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n"); /*@explore*/
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)

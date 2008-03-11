@@ -1793,9 +1793,9 @@ this.sourceFilesAsArray = function(context)
     return sourceFiles;
 };
 
-this.updateScriptFiles = function(context, reload)  // scan windows for 'script' tags
+this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows for 'script' tags
 {
-    var oldMap = reload ? context.sourceFileMap : null;
+    var oldMap = eraseSourceFileMap ? null : context.sourceFileMap;
 
     function addFile(url, scriptTagNumber, dependentURL)
     {
