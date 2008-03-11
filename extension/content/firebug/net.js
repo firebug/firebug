@@ -22,6 +22,7 @@ const imgIRequest = Ci.imgIRequest;
 const nsIUploadChannel = Ci.nsIUploadChannel;
 const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
 const nsISeekableStream = Ci.nsISeekableStream;
+const nsIURI = Ci.nsIURI;
 
 const CacheService = Cc["@mozilla.org/network/cache-service;1"];
 const ImgCache = Cc["@mozilla.org/image/cache;1"];
@@ -300,10 +301,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         }
         else
         {
-            switch (permissionManager.testPermission(location, "firebug-net"))
+            if (location instanceof nsIURI)
             {
-            case nsIPermissionManager.ALLOW_ACTION:
-                return "enable-host";
+	            switch (permissionManager.testPermission(location, "firebug-net"))
+	            {
+	            case nsIPermissionManager.ALLOW_ACTION:
+	                return "enable-host";
+	            }
             }
         }
 
@@ -1252,7 +1256,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
 Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 {
-    isCollapsed: true,
+    collapsed: true,
 
     tableTag:
         DIV(
@@ -1288,7 +1292,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     isCollapsed: function()
     {
-        return this.isCollapsed;
+        return this.collapsed;
     },
 
     onPreferences: function(event)
