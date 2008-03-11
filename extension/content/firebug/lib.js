@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-var FirebugLib = FBL = XPCOMUtils;
+var FBL = XPCOMUtils;
 
 try { /*@explore*/
 
@@ -5243,7 +5243,7 @@ this.formatTime = function(elapsed)
 
 // ************************************************************************************************
 
-}).apply(FirebugLib);
+}).apply(FBL);
 } catch(e) {																			/*@explore*/
     dump("FBL Fails "+e+"\n");																/*@explore*/
     FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
