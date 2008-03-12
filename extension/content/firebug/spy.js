@@ -82,8 +82,9 @@ Firebug.Spy = extend(Firebug.Module,
     {
         if (win)
         {
-            if (this.skipSpy(win))
+            if (Firebug.Spy.skipSpy(win))
                 return;
+                
             for( var i = 0; i < contexts.length; ++i )
             {
                 if ( (contexts[i].context == context) && (contexts[i].win == win) )
