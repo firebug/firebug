@@ -2908,6 +2908,12 @@ this.SourceFile.prototype =
     NestedScriptAnalyzer: function(sourceFile)
     {
         this.sourceFile = sourceFile;
+    },
+
+    // return.path: group/category label, return.name: item label
+    getObjectDescription: function()
+    {
+        return FBL.splitURLBase(this.href);
     }
 }
 
@@ -3007,6 +3013,17 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
     return this.outerScript.baseLineNumber - 1; // baseLineNumber always valid even after jsdIscript isValid false
 }
 
+this.EvalLevelSourceFile.prototype.getObjectDescription = function()
+{
+    if (!this.summary)
+    {
+        if (this.evalExpression)
+            this.summary = this.evalExpression.replace(/\s/, " ", "g");
+        else
+            this.summary = "null";
+    }
+    return {path: this.href.replace(/\/eval\/[^\/]+$/, "/eval"), name: this.summary };
+}
 //------------
 this.EventSourceFile = function(url, script, title, source, innerScriptEnumerator)
 {
@@ -3044,10 +3061,29 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
         return new SourceLink(this.sourceFile.href, 1, "js");
     }
 }
+
 this.EventSourceFile.prototype.getBaseLineOffset = function()
 {
     return 0;
 }
+
+this.EventSourceFile.prototype.getObjectDescription = function()
+{
+    if (!this.summary)
+    {
+        var buf  = "";
+        for (var i = 0; i < this.source.length; i++)
+        {
+            buf += this.source[i].replace(/\s/, " ", "g");
+            if (buf.length > 120)
+                break;
+        }
+        this.summary = buf.substr(0, 120);
+    }
+
+    return {path: this.href.replace(/\/event\/[^\/]+$/, "/event"), name: this.summary };
+}
+
 //-----------
 this.FunctionConstructorSourceFile = function(url, script, ctor_expr, sourceLength, innerScriptEnumerator)
 {
