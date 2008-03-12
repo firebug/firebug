@@ -1087,11 +1087,21 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     getDynamicURL: function(frame, source, kind)
     {
         var url = this.getURLFromLastLine(source);
-        if (!url)
+        if (url)
+            url.kind = "source";
+        else
+        {
             var url = this.getURLFromMD5(frame.script.fileName, source, kind);
-        if (!url)
-            var url = this.getDataURLForScript(frame.script, source);
-        return url
+            if (url)
+                url.kind = "MD5";
+            else
+            {
+                var url = this.getDataURLForScript(frame.script, source);
+                url.kind = "data";
+            }
+        }
+
+        return url;
     },
 
     getURLFromLastLine: function(source)

@@ -3015,10 +3015,13 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
+    if (this.href.kind == "source")
+        return FBL.splitURL(this.href);
+
     if (!this.summary)
     {
         if (this.evalExpression)
-            this.summary = this.evalExpression.replace(/\s/, " ", "g");
+            this.summary = FBL.summarizeSourceLineArray(this.evalExpression.substr(0, 240).split('/\r/'));
         else
             this.summary = "null";
     }
@@ -3067,18 +3070,23 @@ this.EventSourceFile.prototype.getBaseLineOffset = function()
     return 0;
 }
 
+this.summarizeSourceLineArray = function(source)
+{
+    var buf  = "";
+    for (var i = 0; i < source.length; i++)
+    {
+        buf += source[i].replace(/\s/, " ", "g");
+        if (buf.length > 120)
+            break;
+    }
+    return buf.substr(0, 120);
+};
+
 this.EventSourceFile.prototype.getObjectDescription = function()
 {
     if (!this.summary)
     {
-        var buf  = "";
-        for (var i = 0; i < this.source.length; i++)
-        {
-            buf += this.source[i].replace(/\s/, " ", "g");
-            if (buf.length > 120)
-                break;
-        }
-        this.summary = buf.substr(0, 120);
+        this.summary = FBL.summarizeSourceLineArray(this.source);
     }
 
     return {path: this.href.replace(/\/event\/[^\/]+$/, "/event"), name: this.summary };
