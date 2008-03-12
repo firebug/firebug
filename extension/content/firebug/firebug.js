@@ -261,7 +261,7 @@ top.Firebug =
 
         for (var i = 0; i < arguments.length; ++i)
             TabWatcher.addListener(arguments[i]);
-            
+
         for (var j = 0; j < arguments.length; j++)
             uiListeners.push(arguments[j]);
     },
@@ -1038,7 +1038,7 @@ top.Firebug =
     isURIAllowed: function(uri)
     {
         return true;
-        
+
         // xxxHonza
         /*
         if (!uri)  // null or undefined is denied
@@ -1060,7 +1060,7 @@ top.Firebug =
     isURIDenied: function(uri)
     {
         return false;
-        
+
         //xxxHonza
         /*
         if (!uri)  // null or undefined is denied
@@ -1190,15 +1190,15 @@ top.Firebug =
     unwatchWindow: function(context, win)
     {
         // XXXjoe Move this to Firebug.Console
-        try 
+        try
         {
             delete win.console;
-        } 
-        catch (exc) 
+        }
+        catch (exc)
         {
             FBTrace.dumpStack("unwatchWindow"+exc);  // FF3 hack TODO
         }
-        
+
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];
@@ -1468,7 +1468,7 @@ Firebug.Panel =
             this.previousSelection = this.selection;
             this.selection = object;
             this.updateSelection(object);
-            
+
             // XXXjoe This is kind of cheating, but, feh.
             this.context.chrome.onPanelSelect(object, this);
             if (uiListeners.length > 0) dispatch(uiListeners, "onPanelSelect", [object, this]);  // TODO: make this.context.chrome a uiListener
@@ -1871,13 +1871,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelBar1: $("fbPanelBar1"),
     menuButton: null,
     menuTooltip: null,
+    activeContexts: 0,
 
     initialize: function()
     {
         if (this.menuTooltip)
             this.menuTooltip.fbEnabled = true;
     },
-    
+
     initContext: function(context)
     {
         var persistedState = getPersistedState(context, this.panelName);
@@ -1922,7 +1923,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         // Module activation code.
     },
-    
+
     onModuleDeactivate: function(context, destroy)
     {
         // Module deactivation code.
@@ -1965,16 +1966,16 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var tab = this.panelBar1.getTab(panel.name);
         tab.setAttribute("disabled", "true");
     },
-    
+
     // Menu in toolbar.
     onStateMenuTooltipShowing: function(tooltip, context)
     {
-        if (!this.menuTooltip)   
+        if (!this.menuTooltip)
             return false;
-            
+
         if (this.menuTooltip.fbEnabled)
             this.menuTooltip.label = $STR(this.panelName + "." + "PermMenuTooltip");
-        
+
         return this.menuTooltip.fbEnabled;
     },
 
@@ -2013,7 +2014,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         if (this.menuTooltip)
             this.menuTooltip.fbEnabled = true;
-            
+
         return true;
     },
 

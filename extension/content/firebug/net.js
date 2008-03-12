@@ -213,7 +213,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         this.panelName = panelName;
         this.menuTooltip = $("fbNetStateMenuTooltip");
         this.menuButton = $("fbNetStateMenu");
-        
+
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
@@ -266,18 +266,18 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         var netButtons = browser.chrome.$("fbNetButtons");
         collapse(netButtons, !panel || panel.name != panelName);
     },
-    
+
     onModuleActivate: function(context, init)
     {
         monitorContext(context);
-        
+
         this.enablePanel(context);
     },
-    
+
     onModuleDeactivate: function(context, destroy)
     {
         unmonitorContext(context);
-    
+
         if (!destroy)
         {
             this.disablePanel(context);
@@ -303,11 +303,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         {
             if (location instanceof nsIURI)
             {
-	            switch (permissionManager.testPermission(location, "firebug-net"))
-	            {
-	            case nsIPermissionManager.ALLOW_ACTION:
-	                return "enable-host";
-	            }
+                switch (permissionManager.testPermission(location, "firebug-net"))
+                {
+                case nsIPermissionManager.ALLOW_ACTION:
+                    return "enable-host";
+                }
             }
         }
 

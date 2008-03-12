@@ -788,7 +788,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onEventScriptCreated: function(frame, outerScript, innerScripts)
     {
-        if (FBTrace.DBG_EVENT) FBTrace.sysout("debugger.onEventScriptCreated script.fileName="+outerScript.fileName+"\n");     /*@explore*/
+        if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScriptCreated script.fileName="+outerScript.fileName+"\n");     /*@explore*/
         var context = this.breakContext;
         delete this.breakContext;
 
@@ -804,7 +804,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScriptCreated url="+sourceFile.href+"\n");   /*@explore*/
 
         if (FBTrace.DBG_EVENTS)                                                                                    /*@explore*/
-             for (var i = 0; i < lines.length; i++) FBTrace.sysout(i+": "+lines[i]+"\n");                  /*@explore*/
+             FBTrace.dumpProperties("debugger.onEventScriptCreated sourceFileMap:", context.sourceFileMap);                 /*@explore*/
         if (FBTrace.DBG_SOURCEFILES)                                                                               /*@explore*/
             FBTrace.sysout("debugger.onEventScriptCreated sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n");                       /*@explore*/
 
@@ -1272,7 +1272,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.panelName = "script";
         this.menuTooltip = $("fbDebuggerStateMenuTooltip");
         this.menuButton = $("fbDebuggerStateMenu");
-        
+
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
@@ -1347,7 +1347,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
-    
+
     onModuleActivate: function(context, init)
     {
         this.enablePanel(context);
@@ -1364,31 +1364,28 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("debugger.enable ******************************\n");
 
-        if (!context.debuggerRegistered)
-        {
-            context.debuggerRegistered = true;
+        this.activeContexts++;
+
+        if (this.activeContexts == 1)
             fbs.registerDebugger(this);
-        }
     },
-    
+
     onModuleDeactivate: function(context, destroy)
     {
-        if (!context.debuggerRegistered)
-        {
-            context.debuggerRegistered = true;
-            fbs.registerDebugger(this);
-        }
+        this.activeContexts--;
+        if (this.activeContexts == 1)
+            fbs.unregisterDebugger(this);
 
         if (!destroy)
         {
             this.disablePanel(context);
-        
+
             var panel = context.getPanel(this.panelName);
             var state = Firebug.getPanelState(panel);
             panel.show(state);
         }
     },
-    
+
     getPermission: function(context)
     {
         var location = context.browser.currentURI;
@@ -2095,6 +2092,13 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getObjectLocation: function(sourceFile)
     {
         return sourceFile.href;
+    },
+
+    // return.path: group/category label, return.name: item label
+    getObjectDescription: function(sourceFile)
+    {
+       FBTrace.sysout("debugger.getObjectDescription ", sourceFile);
+        return sourceFile.getObjectDescription();
     },
 
     getOptionsMenuItems: function()
