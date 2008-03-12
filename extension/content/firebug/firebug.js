@@ -799,6 +799,26 @@ top.Firebug =
             this.toggleBar();
     },
 
+    onClickStatusText: function(context, event)
+    {
+        if (event.button != 0)
+            return;
+
+        if (!context || !context.errorCount)
+            return; 
+          
+        var browser = FirebugChrome.getCurrentBrowser();
+        if (!browser.chrome)
+            return;          
+            
+        var panel = browser.chrome.getSelectedPanel();  
+        if (panel && panel.name != "console")
+        {
+            browser.chrome.selectPanel("console");
+            cancelEvent(event);
+        }        
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
 

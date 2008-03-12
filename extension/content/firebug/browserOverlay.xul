@@ -212,7 +212,7 @@
         <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu"
                         onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon"/>
-            <label id="fbStatusText"/>
+            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);"/>
         </statusbarpanel>
 
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
