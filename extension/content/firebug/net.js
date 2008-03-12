@@ -259,14 +259,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    showPanel: function(browser, panel)
-    {
-        // Make sure that Net panel's buttons are displayed only
-        // when the panel is activated.
-        var netButtons = browser.chrome.$("fbNetButtons");
-        collapse(netButtons, !panel || panel.name != panelName);
-    },
-
     onModuleActivate: function(context, init)
     {
         monitorContext(context);
@@ -282,9 +274,12 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         {
             this.disablePanel(context);
 
-            var panel = context.getPanel(panelName);
-            var state = Firebug.getPanelState(panel);
-            panel.show(state);
+            var panel = context.getPanel(panelName, true);
+            if (panel)
+            {
+                var state = Firebug.getPanelState(panel);
+                panel.show(state);
+            }
         }
     },
 
@@ -761,6 +756,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     show: function(state)
     {
+        this.showToolbarButtons("fbNetButtons", true);
+    
         Firebug.NetMonitor.menuUpdate(this.context);
 
         if (!this.shouldShow())
@@ -791,6 +788,8 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     hide: function()
     {
+        this.showToolbarButtons("fbNetButtons", false);
+
         if (this.context.netProgress)
           this.context.netProgress.activate(null);
 

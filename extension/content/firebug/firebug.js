@@ -1427,6 +1427,18 @@ Firebug.Panel =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     /**
+     * Toolbar helpers
+     */
+    showToolbarButtons: function(buttonsId, show)
+    {
+        var buttons = this.context.browser.chrome.$(buttonsId);
+        if (buttons)
+            collapse(buttons, show ? "false" : "true");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    /**
      * Returns a number indicating the view's ability to inspect the object.
      *
      * Zero means not supported, and higher numbers indicate specificity.

@@ -119,19 +119,6 @@ Firebug.Console = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        // XXXjjb moved to panel show/hide
-        //var isConsole = panel && panel.name == "console";
-        //var consoleButtons = browser.chrome.$("fbConsoleButtons");
-        //collapse(consoleButtons, !isConsole);
-
-        // XXXjoe Not really the place for this - but it's the easiest for now
-        var isCSS = panel && panel.name == "stylesheet";
-        var cssButtons = browser.chrome.$("fbCSSButtons");
-        collapse(cssButtons, !isCSS);
-
-        var isHTML = panel && panel.name == "html";
-        var htmlButtons = browser.chrome.$("fbHTMLButtons");
-        collapse(htmlButtons, !isHTML);
     }
 });
 
@@ -334,17 +321,17 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
     show: function(state)
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show\n");                                               /*@explore*/
-        var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
-        collapse(consoleButtons, false);
+
+        this.showToolbarButtons("fbConsoleButtons", true);
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
     },
 
     hide: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/
-        var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
-        collapse(consoleButtons, true);
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/        
+
+        this.showToolbarButtons("fbConsoleButtons", false);
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
     },
 

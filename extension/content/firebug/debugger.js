@@ -1320,12 +1320,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             delete chrome.updateViewOnShowHook;
             hook();
         }
-        var isDebugger = panel && panel.name == "script";
-        var debuggerButtons = chrome.$("fbDebuggerButtons");
-        collapse(debuggerButtons, !isDebugger);
-
-        var scriptButtons = chrome.$("fbScriptButtons");
-        collapse(scriptButtons, !isDebugger);
     },
 
     getObjectByURL: function(context, url)
@@ -1380,9 +1374,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             this.disablePanel(context);
 
-            var panel = context.getPanel(this.panelName);
-            var state = Firebug.getPanelState(panel);
-            panel.show(state);
+            var panel = context.getPanel(this.panelName, true);
+            if (panel)
+            {
+                var state = Firebug.getPanelState(panel);
+                panel.show(state);
+            }
         }
     },
 
@@ -1879,6 +1876,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
+        this.showToolbarButtons("fbDebuggerButtons", true);
+        this.showToolbarButtons("fbScriptButtons", true);
+    
         Firebug.Debugger.menuUpdate(this.context);
 
         if (!this.shouldShow())
@@ -1919,6 +1919,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hide: function()
     {
+        this.showToolbarButtons("fbDebuggerButtons", false);
+        this.showToolbarButtons("fbScriptButtons", false);
+    
         delete this.infoTipExpr;
 
         var sourceBox = this.selectedSourceBox;

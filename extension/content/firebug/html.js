@@ -626,6 +626,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
+        this.showToolbarButtons("fbHTMLButtons", true);
+    
         if (!this.ioBox)
             this.ioBox = new InsideOutBox(this, this.panelNode);
 
@@ -653,6 +655,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     hide: function()
     {
+        this.showToolbarButtons("fbHTMLButtons", true);
+    
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
 
