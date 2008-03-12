@@ -1487,7 +1487,6 @@ NetProgress.prototype =
                 file.category = category;
 
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
-            file.postText = getPostText(file, this.context);
 
             this.awaitFile(request, file);
             this.extendPhase(file);
@@ -1504,7 +1503,7 @@ NetProgress.prototype =
         }
     },
 
-    respondedFile: function(request, time, statusInfo)
+    respondedFile: function(request, time, info)
     {
         var file = this.getRequestFile(request);
         if (file)
@@ -1517,15 +1516,16 @@ NetProgress.prototype =
             if (request.contentLength > 0)
                 file.size = request.contentLength;
 
-            if (statusInfo.responseStatus == 304)
+            if (info.responseStatus == 304)
                 file.fromCache = true;
             else if (!file.fromCache)
                 file.fromCache = false;
 
             getHttpHeaders(request, file);
 
-            file.responseStatus = statusInfo.responseStatus;
-            file.responseStatusText = statusInfo.responseStatusText;
+            file.responseStatus = info.responseStatus;
+            file.responseStatusText = info.responseStatusText;
+            file.postText = info.postText;
 
             // This is a strange but effective tactic for simulating the
             // load of background images, which we can't actually track.
@@ -2556,12 +2556,11 @@ function getPostTextFromXHR(request, context)
         if (is)
         {
             var charset = context.window.document.characterSet;
-            var text = readFromStream(is, charset);
             var ss = QI(is, nsISeekableStream);
-            if ( ss )
+            if (ss)
                 ss.seek(NS_SEEK_SET, 0);
 
-            return text;
+            return readFromStream(is, charset);
         }
     }
     catch(exc)
@@ -2749,12 +2748,13 @@ var HttpObserver =
       if (!networkContext)
         networkContext = context ? context.netProgress : null;
 
-      var statusInfo = new Object();
-      statusInfo.responseStatus = aRequest.responseStatus;
-      statusInfo.responseStatusText = aRequest.responseStatusText;
+      var info = new Object();
+      info.responseStatus = aRequest.responseStatus;
+      info.responseStatusText = aRequest.responseStatusText;
+      info.postText = getPostTextFromXHR(aRequest, context);
 
       if (networkContext)
-        networkContext.post(respondedFile, [aRequest, now(), statusInfo]);
+        networkContext.post(respondedFile, [aRequest, now(), info]);
   },
 
   QueryInterface: function(iid)
