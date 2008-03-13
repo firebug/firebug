@@ -2639,25 +2639,25 @@ var HttpObserver =
       var webProgress = getRequestWebProgress(aRequest, this);
       var win = webProgress ? safeGetWindow(webProgress) : null;
 
-      if (FBTrace.DBG_NET)
-      {
-          FBTrace.sysout("=== FB: HttpObserver ON-MODIFY-REQUEST,   request: " +
-            safeGetName(aRequest) + "\n");
-      }
+      if (FBTrace.DBG_NET)                                                                                             /*@explore*/
+      {                                                                                                                /*@explore*/
+          FBTrace.sysout("=== FB: HttpObserver ON-MODIFY-REQUEST,   request: " +                                       /*@explore*/
+            safeGetName(aRequest) + "\n");                                                                             /*@explore*/
+      }                                                                                                                /*@explore*/
 
-      if (!tabId)
-      {
-          if (FBTrace.DBG_NET)
-          {
-              FBTrace.sysout("**************************************\n");
-              FBTrace.sysout("* FB: onModifyRequest - No tab associated with the request\n");
-              FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");
-              FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");
-              FBTrace.sysout("**************************************\n");
-          }
-
-          return;
-      }
+      if (!tabId)                                                                                                      /*@explore*/
+      {                                                                                                                /*@explore*/
+          if (FBTrace.DBG_NET)                                                                                         /*@explore*/
+          {                                                                                                            /*@explore*/
+              FBTrace.sysout("**************************************\n");                                              /*@explore*/
+              FBTrace.sysout("* FB: onModifyRequest - No tab associated with the request\n");                          /*@explore*/
+              FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");                                                 /*@explore*/
+              FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");                                    /*@explore*/
+              FBTrace.sysout("**************************************\n");                                              /*@explore*/
+          }                                                                                                            /*@explore*/
+                                                                                                                        
+          return;                                                                                                      /*@explore*/
+      }                                                                                                                /*@explore*/
 
       this.onStartRequest(aRequest, now(), win, tabId);
   },
@@ -2668,20 +2668,20 @@ var HttpObserver =
       var webProgress = getRequestWebProgress(aRequest, this);
       var win = webProgress ? safeGetWindow(webProgress) : null;
 
-      if (FBTrace.DBG_NET)
-      {
-          FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +
-            safeGetName(aRequest) + "\n");
-      }
+      if (FBTrace.DBG_NET)                                                                                             /*@explore*/
+      {                                                                                                                /*@explore*/
+          FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +                                       /*@explore*/
+            safeGetName(aRequest) + "\n");                                                                             /*@explore*/
+      }                                                                                                                /*@explore*/
 
-      if (!tabId && FBTrace.DBG_NET)
-      {
-          FBTrace.sysout("**************************************\n");
-          FBTrace.sysout("* FB: onExamineResponse - No tab associated with the request\n");
-          FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");
-          FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");
-          FBTrace.sysout("**************************************\n");
-      }
+      if (!tabId && FBTrace.DBG_NET)                                                                                   /*@explore*/
+      {                                                                                                                /*@explore*/
+          FBTrace.sysout("**************************************\n");                                                  /*@explore*/
+          FBTrace.sysout("* FB: onExamineResponse - No tab associated with the request\n");                            /*@explore*/
+          FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");                                                     /*@explore*/
+          FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");                                        /*@explore*/
+          FBTrace.sysout("**************************************\n");                                                  /*@explore*/
+      }                                                                                                                /*@explore*/
 
       this.onEndRequest(aRequest, now(), win, tabId);
   },
