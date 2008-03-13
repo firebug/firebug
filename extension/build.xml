@@ -27,8 +27,7 @@
           <echo message="No local properties file, setting defaults"/>
         <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
         <property name="xpidl.exe" value="OperatingSystemPathTo:xpidl.exe"/>
-        <property name="update.rdf.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
-        <property name="update.xpi.path" value="http://fireclipse.xucia.com/files/fireclipse"/>
+        <property name="update.path" value="http://getfirebug.com/releases"/>
     </target>
 
     <target name="version" depends="properties-local, no-properties-local" description="Compute version number">
@@ -93,7 +92,7 @@
                <filterchain>
                        <replacetokens>
                             <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.rdf.path}/${BRANCH}"/>
+                            <token key="UPDATEPATH" value="${update.path}/firebug/${BRANCH}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -107,7 +106,7 @@
                <filterchain>
                        <replacetokens>
                             <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.xpi.path}"/>
+                            <token key="UPDATEPATH" value="${update.path}/firebug/${BRANCH}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -126,7 +125,7 @@
                        <replacetokens>
                             <token key="FIREBUG-VERSION" value="${VERSION}"/>
                             <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.xpi.path}"/>
+                            <token key="UPDATEPATH" value="${update.path}"/>
                        </replacetokens>
                </filterchain>
         </copy>

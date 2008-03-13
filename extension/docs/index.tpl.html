@@ -40,13 +40,20 @@
             
             <h2>Firebug 1.2 Alphas</h2>
             <p>
-            <a href="@UPDATEPATH@/firebug1.2/firebug-@FIREBUG-VERSION@.xpi">Firebug 1.2</a>
+            <a href="@UPDATEPATH@/firebug/1.2/firebug-@FIREBUG-VERSION@.xpi">Firebug 1.2</a>
              focuses on performance improvements. Currently unstable, usable, and 
              <a href="http://code.google.com/p/fbug/issues/list">bug reports</a> are welcome.</p>
             
             <h2>ChromeBug Alphas</h2>
-            <p><a href="@UPDATEPATH@/../multi-chromebug-@CHROMEBUG-VERSION@.xpi">ChromeBug</a> is Firebug for Firefox extensions. Currently unstable, barely usable, and comments welcome. 
-            The multi-XPI package for chromebug includes <a href="@UPDATEPATH@/firebug-@FIREBUG-VERSION@.xpi">Firebug</a> and <a href="@UPDATEPATH@/../chromelist/chromelist.xpi">ChromeList</a></p>
+            <p><a href="@UPDATEPATH@/chromebug/chromebug-@CHROMEBUG-VERSION@.xpi">ChromeBug</a> is Firebug for Firefox extensions. 
+            <ul>
+                <li>Requires <a href="@UPDATEPATH@/firebug/1.2/firebug-@FIREBUG-VERSION@.xpi">Firebug 1.2.</a></li>
+                <li> Works with <a href="https://addons.mozilla.org/en-US/firefox/addon/4453">Chromelist.</a></li>
+                <li> To run chromebug: <code>firefox.exe -chrome chrome://chromebug/content/chromebug.xul -firefox</code></li>
+                <li>Currently unstable, testing install and bugs in FF3, and comments welcome.</li>
+            </ul>
+            
+            <!--  DO NOT EDIT see docs/index.tmp.html -->
             
         </div>
     </div>
