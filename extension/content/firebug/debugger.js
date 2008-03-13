@@ -244,7 +244,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     stepOver: function(context)
     {
-        if (!context.debugFrame.isValid)
+        if (!context.debugFrame || !context.debugFrame.isValid)
             return;
 
         fbs.step(STEP_OVER, context.debugFrame);
@@ -1293,10 +1293,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.menuButton = $("fbDebuggerStateMenu");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
-    },
-
-    shutdown: function()
-    {
     },
 
     initContext: function(context)
