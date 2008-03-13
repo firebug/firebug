@@ -757,7 +757,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     show: function(state)
     {
         this.showToolbarButtons("fbNetButtons", true);
-    
+
         Firebug.NetMonitor.menuUpdate(this.context);
 
         if (!this.shouldShow())
@@ -2548,7 +2548,19 @@ function getPostTextFromXHR(request, context)
         if (!request.notificationCallbacks)
           return null;
 
-        var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+        try
+        {
+            var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+        }
+        catch (e)
+        {
+            if (e.name == "NS_NOINTERFACE")
+            {
+                if (FBTrace.DBG_NET)  /*@explore*/
+                    FBTrace.dumpProperties("net.getPostTextFromXHR request.notificationCallbacks has no nsIXMLHttpRequest", request.notificationCallbacks); /*@explore*/
+                return null;
+            }
+        }
         if (!xhrRequest)
           return null;
 
