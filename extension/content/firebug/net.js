@@ -2120,7 +2120,11 @@ function getRequestWebProgress(request, netProgress)
             }
             // XXXjjb Joe review: code above sets bypass, so this stmt should be in if (gives exceptions otherwise)
             if (!bypass)
-                return request.notificationCallbacks.getInterface(nsIWebProgress);
+            {
+                var progress = GI(request.notificationCallbacks, nsIWebProgress);
+                if (progress)
+                    return progress;
+            }
         }
     }
     catch (exc) {}
@@ -2544,23 +2548,11 @@ function readPostTextFromRequest(request, context)
     try
     {
         if (!request.notificationCallbacks)
-          return null;
+            return null;
 
-        try
-        {
-            var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
-            if (xhrRequest)
-                return readPostTextFromXHR(xhrRequest, context);
-        }
-        catch (e)
-        {
-            if (e.name == "NS_NOINTERFACE")
-            {
-                if (FBTrace.DBG_NET)  /*@explore*/
-                    FBTrace.dumpProperties("net.getPostTextFromXHR request.notificationCallbacks has no nsIXMLHttpRequest", request.notificationCallbacks); /*@explore*/
-                return null;
-            }
-        }
+        var xhrRequest = GI(request.notificationCallbacks, nsIXMLHttpRequest);
+        if (xhrRequest)
+            return readPostTextFromXHR(xhrRequest, context);
     }
     catch(exc)
     {
@@ -2775,11 +2767,10 @@ function getTabIdForHttpChannel(aHttpChannel)
     try {
         if (aHttpChannel.notificationCallbacks)
         {
-            var interfaceRequestor = aHttpChannel.notificationCallbacks.QueryInterface(
-              Components.interfaces.nsIInterfaceRequestor);
+            var interfaceRequestor = QI(aHttpChannel.notificationCallbacks, Ci.nsIInterfaceRequestor);
 
             try {
-              var win = interfaceRequestor.getInterface(Components.interfaces.nsIDOMWindow);
+              var win = GI(interfaceRequestor, Ci.nsIDOMWindow);
               var tabId = Firebug.getTabIdForWindow(win);
               if (tabId)
                 return tabId;
@@ -2797,6 +2788,28 @@ function getTabIdForHttpChannel(aHttpChannel)
 
     return null;
 }
+
+function GI(obj, iface)
+{
+    try
+    {
+        return obj.getInterface(iface);
+    }
+    catch (e)
+    {
+        if (e.name == "NS_NOINTERFACE")
+        {
+            if (FBTrace.DBG_NET)                                                         /*@explore*/
+            {                                                                            /*@explore*/
+                FBTrace.sysout("getInterface - obj has no interface: " + iface + "\n");  /*@explore*/
+                FBTrace.dumpProperties(obj);                                             /*@explore*/
+                FBTrace.dumpStack();                                                     /*@explore*/
+            }                                                                            /*@explore*/
+        }
+    }
+    
+    return null;
+};
 
 // ************************************************************************************************
 
