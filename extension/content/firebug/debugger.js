@@ -173,14 +173,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return hookReturn;
         }
 
-        executionContext.scriptsEnabled = false;
+        try {
+            executionContext.scriptsEnabled = false;
 
-        // Unfortunately, due to quirks in Firefox's networking system, we must
-        // be sure to load and cache all scripts NOW before we enter the nested
-        // event loop, or run the risk that some of them won't load while
-        // the new event loop is nested.  It seems that the networking system
-        // can't communicate with the nested loop.
-        cacheAllScripts(context);
+            // Unfortunately, due to quirks in Firefox's networking system, we must
+            // be sure to load and cache all scripts NOW before we enter the nested
+            // event loop, or run the risk that some of them won't load while
+            // the new event loop is nested.  It seems that the networking system
+            // can't communicate with the nested loop.
+            cacheAllScripts(context);
+
+        } catch (e) {
+            // This attribute is only valid for contexts which implement nsIScriptContext.
+        }
 
         try
         {
@@ -196,7 +201,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
 
-        executionContext.scriptsEnabled = true;
+        try {
+            executionContext.scriptsEnabled = true;
+        } catch (e) {
+            // This attribute is only valid for contexts which implement nsIScriptContext.
+        }
 
         this.stopDebugging(context);
 
@@ -1888,7 +1897,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.showToolbarButtons("fbDebuggerButtons", true);
         this.showToolbarButtons("fbScriptButtons", true);
-    
+
         Firebug.Debugger.menuUpdate(this.context);
 
         if (!this.shouldShow())
@@ -1931,7 +1940,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.showToolbarButtons("fbDebuggerButtons", false);
         this.showToolbarButtons("fbScriptButtons", false);
-    
+
         delete this.infoTipExpr;
 
         var sourceBox = this.selectedSourceBox;

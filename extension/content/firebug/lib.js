@@ -5264,8 +5264,10 @@ const invisibleTags = this.invisibleTags =
 
 this.ERROR = function(exc)
 {
-    if (FBTrace)                                              /*@explore*/
+    if (FBTrace) {                                              /*@explore*/
         FBTrace.dumpProperties("lib.ERROR:", exc);  /*@explore*/
+        FBTrace.dumpStack("lib.ERROR");
+    }
     else                                                      /*@explore*/
         ddd("FIREBUG WARNING: " + exc);
 }
@@ -5292,4 +5294,5 @@ this.formatTime = function(elapsed)
     dump("FBL Fails "+e+"\n");																/*@explore*/
     FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
     FBTrace.sysout("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
-}																			/*@explore*/
+    FBTrace.sysout("Another cause can be mangled install.rdf.\n");/*@explore*/
+}   																		/*@explore*/

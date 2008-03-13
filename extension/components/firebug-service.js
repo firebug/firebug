@@ -996,6 +996,10 @@ FirebugService.prototype =
                 var sourceFile = debuggr.onEventScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
                 fbs.resetBreakpoints(sourceFile);
             }
+            else
+            {
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName+"\n");
+            }
         } catch(exc) {
             dumpProperties("onEventScriptCreated failed: ", exc);
             ERROR("onEventScriptCreated failed: "+exc);
@@ -1248,7 +1252,6 @@ FirebugService.prototype =
 
         if (global)
         {
-
             // TODO? filter on global to avoid either chrome://firebug or chrome://chromebug
             for ( var i = debuggers.length - 1; i >= 0; i--)
             {
@@ -1272,7 +1275,6 @@ FirebugService.prototype =
         }
         else
             if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
-    // TODO remove
 
         var win = getFrameWindow(frame);
         if (win)
@@ -1291,8 +1293,9 @@ FirebugService.prototype =
                 }
             }
         }
-// Is bottom of stack needed now?
-     if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger no find on window, try bottom of stack\n");
+
+        if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger no find on window, try bottom of stack\n");
+
         if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
         {
             while(frame.callingFrame) // walk to the bottom of the stack

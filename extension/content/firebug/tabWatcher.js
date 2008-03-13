@@ -330,20 +330,43 @@ top.TabWatcher =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    getContextByWindow: function(win)
+    getContextByWindow: function(winIn)
     {
-        win = getRootWindow(win);
+        var rootWindow = getRootWindow(winIn);
 
-        if (!win) // eg search bar, and sometimes win.parent is null??
-            return;
+        if (rootWindow)
+        {
+            for (var i = 0; i < contexts.length; ++i)
+            {
+                var context = contexts[i];
+                if (context.window == rootWindow)
+                    return context;
+            }
+        }
 
+        // eg search bar, maybe a global sandbox or other non-window global
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("TabWatcher.getContextByWindow rootWindow:"+rootWindow," trying sandboxes\n"); /*@explore*/
+
+        return this.getContextBySandbox(winIn);
+    },
+
+    getContextBySandbox: function(sandbox)
+    {
         for (var i = 0; i < contexts.length; ++i)
         {
             var context = contexts[i];
-            if (context.window == win)
-                return context;
+            if (context.sandboxes)
+            {
+                for (var iframe = 0; iframe < context.sandboxes.length; iframe++)
+                {
+                    if (context.sandboxes[iframe] == sandbox)
+                        return context;
+                }
+            }
         }
+        return null;
     },
+
 
     getBrowserByWindow: function(win)
     {

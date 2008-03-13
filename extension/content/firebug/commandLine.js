@@ -80,15 +80,7 @@ Firebug.CommandLine = extend(Firebug.Module,
                 if (!context.sandboxes)
                     context.sandboxes = [];
 
-                var sandbox = null;
-                for (var why = 0; why < context.sandboxes.length; why++)
-                {
-                    if (context.sandboxes[why].__win__ == win)
-                    {
-                        sandbox = context.sandboxes[why];
-                        break;
-                    }
-                }
+                var sandbox = this.getSandboxByWindow(context, win);
 
                 if(!sandbox)
                 {
@@ -128,6 +120,20 @@ Firebug.CommandLine = extend(Firebug.Module,
         context.invalidatePanels("dom", "watches", "domSide");
 
         return result;
+    },
+
+    getSandboxByWindow: function(context, win)
+    {
+        var sandbox = null;
+        for (var iframe = 0; iframe < context.sandboxes.length; iframe++)
+        {
+            if (context.sandboxes[iframe].__win__ == win)
+            {
+                sandbox = context.sandboxes[iframe];
+                break;
+             }
+        }
+        return sandbox;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

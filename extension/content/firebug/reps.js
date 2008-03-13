@@ -1109,6 +1109,9 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
         {
             var arg = frame.args[i];
 
+            if (!arg)
+                break;
+
             var rep = Firebug.getRep(arg.value);
             var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
