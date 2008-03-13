@@ -1496,11 +1496,11 @@ NetProgress.prototype =
 
             return file;
         }
-        else
-        {                                                                                                       /*@explore*/
-            if (FBTrace.DBG_NET)
+        else                                                                                          /*@explore*/
+        {                                                                                             /*@explore*/
+            if (FBTrace.DBG_NET)                                                                      /*@explore*/
                 FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
-        }
+        }                                                                                             /*@explore*/
     },
 
     respondedFile: function(request, time, info)
@@ -1703,7 +1703,7 @@ NetProgress.prototype =
     {
         if (FBTrace.DBG_NET)                                                                                           /*@explore*/
             FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");  /*@explore*/
-                                                                                                                       /*@explore*/
+
         var index = this.pending.indexOf(file);
         if (index != -1)
             this.pending.splice(index, 1);
@@ -1827,10 +1827,8 @@ function NetFile(href, document)
     this.href = href;
     this.document = document
 
-    if (FBTrace.DBG_NET) {
-        this.uid = FBL.getUniqueId();
-        FBTrace.dumpProperties("NetFile", this);
-    }
+    if (FBTrace.DBG_NET)                                                                                                /*@explore*/
+        FBTrace.dumpProperties("NetFile", this);                                                                        /*@explore*/
 
     this.pendingCount = 0;
 }
@@ -2533,15 +2531,15 @@ function formatPostText(text)
 function getPostText(file, context)
 {
     if (!file.postText)
-        file.postText = readPostText(file.href, context);
+        file.postText = readPostTextFromPage(file.href, context);
 
     if (!file.postText)
-        file.postText = getPostTextFromXHR(file.request, context);
+        file.postText = readPostTextFromRequest(file.request, context);
 
     return file.postText;
 }
 
-function getPostTextFromXHR(request, context)
+function readPostTextFromRequest(request, context)
 {
     try
     {
@@ -2551,6 +2549,8 @@ function getPostTextFromXHR(request, context)
         try
         {
             var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+            if (xhrRequest)
+                return readPostTextFromXHR(xhrRequest, context);
         }
         catch (e)
         {
@@ -2560,19 +2560,6 @@ function getPostTextFromXHR(request, context)
                     FBTrace.dumpProperties("net.getPostTextFromXHR request.notificationCallbacks has no nsIXMLHttpRequest", request.notificationCallbacks); /*@explore*/
                 return null;
             }
-        }
-        if (!xhrRequest)
-          return null;
-
-        var is = QI(xhrRequest.channel, nsIUploadChannel).uploadStream;
-        if (is)
-        {
-            var charset = context.window.document.characterSet;
-            var ss = QI(is, nsISeekableStream);
-            if (ss)
-                ss.seek(NS_SEEK_SET, 0);
-
-            return readFromStream(is, charset);
         }
     }
     catch(exc)
@@ -2763,7 +2750,7 @@ var HttpObserver =
       var info = new Object();
       info.responseStatus = aRequest.responseStatus;
       info.responseStatusText = aRequest.responseStatusText;
-      info.postText = getPostTextFromXHR(aRequest, context);
+      info.postText = readPostTextFromRequest(aRequest, context);
 
       if (networkContext)
         networkContext.post(respondedFile, [aRequest, now(), info]);

@@ -37,6 +37,8 @@ const reWord = /([A-Za-z_][A-Za-z_0-9]*)(\.([A-Za-z_][A-Za-z_0-9]*))*/;
 
 const restoreRetryTimeout = 500;
 
+const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
+
 // ************************************************************************************************
 // Namespaces
 
@@ -2435,7 +2437,7 @@ this.readFromStream = function(stream, charset)
      }
 };
 
-this.readPostText = function(url, context)
+this.readPostTextFromPage = function(url, context)
 {
     if (url == context.browser.contentWindow.location.href)
     {
@@ -2447,7 +2449,7 @@ this.readPostText = function(url, context)
             if (entry && entry.postData)
             {
                 var postStream = this.QI(entry.postData, Ci.nsISeekableStream);
-                postStream.seek(0, 0);
+                postStream.seek(NS_SEEK_SET, 0);
 
                 var charset = context.window.document.characterSet;
                 return this.readFromStream(postStream, charset);
@@ -2460,6 +2462,30 @@ this.readPostText = function(url, context)
          }
      }
 };
+
+this.readPostTextFromXHR = function(xhrRequest, context)
+{
+    try
+    {
+        var is = this.QI(xhrRequest.channel, Ci.nsIUploadChannel).uploadStream;
+        if (is)
+        {
+            var ss = this.QI(is, Ci.nsISeekableStream);
+            if (ss) ss.seek(NS_SEEK_SET, 0);
+            var charset = context.window.document.characterSet;
+            var text = this.readFromStream(is, charset);
+            if (ss) ss.seek(NS_SEEK_SET, 0);
+            return text;                        
+        }
+    }
+    catch(exc)
+    {
+        if (FBTrace.DBG_ERRORS)                                                                                        /*@explore*/
+            FBTrace.dumpProperties("lib.readPostTextFromXHR FAILS ", exc);                                             /*@explore*/
+    }
+
+    return null;
+}
 
 this.getStateDescription = function(flag) {
     var state = "";

@@ -396,7 +396,7 @@ function requestStarted(request, xhrRequest, context, method, url)
     // Get "body" for POST and PUT requests. It will be displayed in
     // appropriate tab of the XHR.
     if (method == "POST" || method == "PUT")
-        spy.postText = getPostText(xhrRequest, context);
+        spy.postText = readPostTextFromXHR(xhrRequest, context);
 
     spy.urlParams = parseURLParams(spy.href);
     spy.sourceLink = getStackSourceLink();
@@ -607,31 +607,6 @@ function getResponseHeaders(spy)
     catch (exc) { }
 
     return headers;
-}
-
-function getPostText(request, context)
-{
-    try
-    {
-        var is = QI(request.channel, nsIUploadChannel).uploadStream;
-        if (is)
-        {
-            var charset = context.window.document.characterSet;
-            var text = readFromStream(is, charset);
-            var ss = QI(is, nsISeekableStream);
-            if ( ss )
-                ss.seek(NS_SEEK_SET, 0);
-            return text;
-        }
-    }
-    catch(exc)
-    {
-        if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-        {																			    /*@explore*/
-            FBTrace.dumpProperties("lib.getPostText FAILS ", exc);                      /*@explore*/
-            FBTrace.dumpProperties("lib.getPostText request", request);                 /*@explore*/
-        }																				/*@explore*/
-    }
 }
 
 // ************************************************************************************************
