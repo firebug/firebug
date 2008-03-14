@@ -114,16 +114,16 @@
                 <toolbarseparator/>
                 <tooltip id="fbDebuggerStateMenuTooltip"
                     onpopupshowing="return Firebug.Debugger.onStateMenuTooltipShowing(this, FirebugContext)"/>
-		        <toolbarbutton id="fbDebuggerStateMenu" type="menu" tooltip="fbDebuggerPermTooltip">
-			        <menupopup
-				        oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
-				        onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
-				        onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
-				        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
-				        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
-				        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-host"/>
-			        </menupopup>
-		        </toolbarbutton>
+                <toolbarbutton id="fbDebuggerStateMenu" type="menu" tooltip="fbDebuggerPermTooltip">
+                    <menupopup
+                        oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
+                        onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
+                        onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-host"/>
+                    </menupopup>
+                </toolbarbutton>
             </hbox>
 
             <hbox id="fbNetButtons" collapsed="true">
@@ -132,16 +132,16 @@
                 <toolbarseparator/>
                 <tooltip id="fbNetStateMenuTooltip"
                     onpopupshowing="return Firebug.NetMonitor.onMenuTooltipShowing(this, FirebugContext)"/>
-		        <toolbarbutton id="fbNetStateMenu" type="menu" tooltip="fbNetPermTooltip">
-			        <menupopup
-				        oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
-				        onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
-				        onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
-				        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
-				        <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
-				        <menuitem type="radio" name="fbNetStateMenu" value="enable-host"/>
-			        </menupopup>
-		        </toolbarbutton>
+                <toolbarbutton id="fbNetStateMenu" type="menu" tooltip="fbNetPermTooltip">
+                    <menupopup
+                        oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
+                        onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
+                        onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
+                        <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
+                        <menuitem type="radio" name="fbNetStateMenu" value="enable-host"/>
+                    </menupopup>
+                </toolbarbutton>
                 <toolbarseparator/>
                 <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
                                group="firebugNetFilter" checked="true"
@@ -210,7 +210,7 @@
                                    oncommand="Firebug.CommandLine.copyBookmarklet(FirebugContext)"/>
                     <toolbarspacer flex="1"/>
                     <toolbarbutton id="fbCommandToggleLarge" class="toolbarbutton-iconic"
-                                   oncommand="Firebug.setPref('largeCommandLine', false)"/>
+                                   oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
                 </hbox>
             </vbox>
         </deck>
@@ -223,7 +223,7 @@
         <label id="fbCommandArow" value=">>>"/>
         <textbox id="fbCommandLine" multiline="true" flex="1"/>
         <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
-                       oncommand="Firebug.setPref('largeCommandLine', true)"/>
+                       oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
     </hbox>
 
 
