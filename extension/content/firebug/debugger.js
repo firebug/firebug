@@ -1480,7 +1480,7 @@ var DefaultPage = domplate(Firebug.Rep,
                 $STR("script.defaultpage.title")
             ),
             P({class: "disablePageDescription"},
-                SPAN("script.defaultpage.description")
+                $STR("script.defaultpage.description")
             ),
             TABLE({class: "disablePageRow", cellspacing: "0"},
                 TBODY(
