@@ -1060,6 +1060,8 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
             scrollBox.scrollLeft = centerX;
         }
     }
+    if (FBTrace.DBG_SOURCEFILES) /*@explore*/
+    	FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML); /*@explore*/
 };
 
 // ************************************************************************************************
@@ -1192,6 +1194,11 @@ this.getElementCSSSelector = function(element)
         label += "." + element.getAttribute("class").split(" ")[0];
 
     return label;
+};
+
+this.getURLForStyleSheet= function(styleSheet)
+{
+    return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
 // ************************************************************************************************
@@ -1760,7 +1767,7 @@ this.getStyleSheetByHref = function(url, context)
 {
     function addSheet(sheet)
     {
-        if (sheet.href == url)
+        if (sheet.href == null) //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null. 
             return sheet;
 
         for (var i = 0; i < sheet.cssRules.length; ++i)

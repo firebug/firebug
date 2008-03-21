@@ -626,7 +626,9 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         function addSheet(sheet)
         {
-            if (isSystemURL(sheet.href))
+            var sheetLocation = getURLForStyleSheet(sheet);
+            
+            if (isSystemURL(sheetLocation))
                 return;
 
             styleSheets.push(sheet);
@@ -791,13 +793,13 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (styleSheets.length)
         {
             var sheet = styleSheets[0];
-            return isSystemURL(sheet.href) ? null : sheet;
+            return isSystemURL(getURLForStyleSheet(sheet)) ? null : sheet;
         }
     },
 
     getObjectLocation: function(styleSheet)
     {
-        return styleSheet.href;
+        return getURLForStyleSheet(styleSheet);
     },
 
     search: function(text)

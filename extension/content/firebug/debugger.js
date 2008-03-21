@@ -754,7 +754,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try
         {
             Firebug.errorStackTrace = getStackTrace(frame, context);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\nFirebug.errorStackTrace:\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
             if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError: ",error); /*@explore*/
             if (Firebug.breakOnErrors)
                 Firebug.Errors.showMessageOnStatusBar(error);
@@ -1371,7 +1371,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.enable ******************************\n");
+            FBTrace.sysout("debugger.enable **************> "+context.window.location+"\n");
 
         this.activeContexts++;
 
@@ -2020,11 +2020,12 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getLocationList: function()
     {
-        var allSources = sourceFilesAsArray(this.context);
+        var context = this.context;
+        var allSources = sourceFilesAsArray(context);
 
         if (Firebug.showAllSourceFiles)
         {
-            if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList "+this.context.window.location+" allSources", allSources); /*@explore*/
+            if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList "+context.window.location+" allSources", allSources); /*@explore*/
             return allSources;
         }
 
@@ -2034,7 +2035,22 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (FBL.showThisSourceFile(allSources[i].href))
                 list.push(allSources[i]);
         }
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList ", list);
+        
+       iterateWindows(context.window, function(win) {
+            if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
+                FBTrace.sysout("getLocationList iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);  /*@explore*/
+            if (!win.document.documentElement)
+                return;
+            var url = win.location.href;
+            if (url) 
+            {
+                if (context.sourceFileMap.hasOwnProperty(url))
+                    return;
+                list.push(new NoScriptSourceFile(context, url));
+            }
+        });
+        
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList ", list); /*@explore*/
         return list;
     },
 

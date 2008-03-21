@@ -366,7 +366,7 @@ function lessTalkMoreAction(object, context, isWarning)
             if (object.errorMessage.indexOf(msg) == 0)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("errors.observe dropping pointlessError"+msg+"\n");
+                    FBTrace.sysout("errors.observe dropping pointlessError: "+msg+"\n");
                 return true;
             }
         }
