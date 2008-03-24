@@ -223,7 +223,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 return;
             }
             if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("error logged to ", context.window.location);
+                    FBTrace.sysout("error logged to ", context.window?context.window.location:"<no context.window>");
         }
         catch (exc)
         {
