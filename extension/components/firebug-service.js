@@ -1268,7 +1268,7 @@ FirebugService.prototype =
                 }
                 catch (exc)
                 {
-                    ERROR("firebug-service findDebugger supportsGlobal FAILS: "+exc);
+                    ddd("firebug-service findDebugger supportsGlobal FAILS: "+exc+" jscontext:"+(frame.executionContext?frame.executionContext.tag:"undefined")+"\n");
                 }
             }
             if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger no find for "+frame.script.tag+"; global, location:"+global.location+"\n");

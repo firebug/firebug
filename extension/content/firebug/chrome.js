@@ -468,7 +468,7 @@ top.FirebugChrome =
     syncPanel: function()
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                     /*@explore*/
-                (FirebugContext?FirebugContext.window.location:"undefined")+"\n");                                     /*@explore*/
+                (FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                     /*@explore*/
                                                                                                                        /*@explore*/
         panelStatus.clear();
 
@@ -1125,7 +1125,7 @@ function onSelectingPanel(event)
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
     if (FBTrace.DBG_PANELS) 																													/*@explore*/
-        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext?FirebugContext.window.location:"undefined")+"\n"); /*@explore*/
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext && FirebugContext.window?FirebugContext.window.location:"undefined")+"\n"); /*@explore*/
 
     if (FirebugContext)
     {
