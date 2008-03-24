@@ -27,6 +27,25 @@ this.sysout = function(msg, more)
     dump(msg);
 }
 
+this.dumpTypes = function(header, obj)
+{
+    try {
+        if (header) this.sysout(header);
+        this.sysout(" typeof="+typeof(obj));
+        if (obj)
+        {
+            this.sysout(" constructor="+obj.constructor);
+            if (obj.prototype) 
+                this.dumpTypes(" obj.prototype", obj.prototype);
+            else
+                this.sysout("\n");
+        }
+    }
+    catch (e) 
+    {
+        this.sysout("trace.dumpTypes FAILED:"+e+"\n");
+    }
+}
 
 this.dumpProperties = function(header, obj)
 {
