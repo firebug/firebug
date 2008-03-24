@@ -655,7 +655,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     hide: function()
     {
-        this.showToolbarButtons("fbHTMLButtons", true);
+        this.showToolbarButtons("fbHTMLButtons", false);
     
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
