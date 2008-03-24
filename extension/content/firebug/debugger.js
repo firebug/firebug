@@ -615,14 +615,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     supportsWindow: function(win)
     {
-        var context = (win ? TabWatcher.getContextByWindow(win) : null);
+        var context = ( (win && TabWatcher) ? TabWatcher.getContextByWindow(win) : null);
         this.breakContext = context;
         return !!context;
     },
 
     supportsGlobal: function(global)
-    {
-        var context = TabWatcher.getContextByWindow(global);
+    { 
+        var context = (TabWatcher ? TabWatcher.getContextByWindow(global) : null);
         this.breakContext = context;
         return !!context;
     },
@@ -1400,6 +1400,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getPermission: function(context)
     {
+        if (!context || !context.browser)
+            return "disable";
+            
         var location = context.browser.currentURI;
         var host = getURIHost(location);
 
