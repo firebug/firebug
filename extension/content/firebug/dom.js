@@ -1214,7 +1214,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 // ************************************************************************************************
 // Local Helpers
 
-function getMembers(object, level)
+function getMembers(object, level)  // we expect object to be user-level object wrapped in security blanket
 {
     if (!level)
         level = 0;
@@ -1226,7 +1226,8 @@ function getMembers(object, level)
     {
         var domMembers = getDOMMembers(object);
 
-        for (var name in object)
+        var insecureObject = object.wrappedJSObject;
+        for (var name in insecureObject)  // enumeration is safe
         {
             if (ignoreVars[name] == 1)  // javascript.options.strict says ignoreVars is undefined.
                 continue;
@@ -1234,7 +1235,7 @@ function getMembers(object, level)
             var val;
             try
             {
-                val = object[name];
+                val = insecureObject[name];  // getter is safe
             }
             catch (exc)
             {

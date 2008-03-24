@@ -1,4 +1,4 @@
-content firebug content/firebug/ xpcnativewrappers=no
+content firebug content/firebug/
 skin	firebug	classic/1.0	skin/classic/
 skin	firebug-os	classic/1.0	skin/classic/win/
 locale	firebug	en-US		locale/en-US/
