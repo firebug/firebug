@@ -39,7 +39,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    evaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)
+    evaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
     {
         if (!context)
             return;
@@ -438,18 +438,20 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 preExpr = preExpr.substr(0, lastDot);
 
             var object = Firebug.CommandLine.evaluate(preExpr, context, null, context.thisValue);
-            return keys(object).sort();
+            return keys(object.wrappedJSObject).sort(); // return is safe
         }
         else
         {
             if (context.stopped)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
             else
-                return keys(context.window).sort();
+                return keys(context.window.wrappedJSObject).sort();  // return is safe
         }
     }
     catch (exc)
     {
+        if (FBTrace.DBG_ERRORS) /*@explore*/
+            FBTrace.dumpProperties("commandLine.autoCompleteEval FAILED", exc); /*@explore*/
         return [];
     }
 }

@@ -100,7 +100,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getCurrentFrameKeys: function(context)
     {
-        var globals = keys(context.window);
+        var globals = keys(context.window.wrappedJSObject);  // return is safe
 
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);

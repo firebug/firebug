@@ -1102,7 +1102,7 @@ top.Firebug =
     enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
     {
         if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
-                FBTrace.sysout("enableContext URI:",uri);                             				/*@explore*/
+                FBTrace.sysout("enableContext URI:", ((uri && uri.wrappedJSObject)?uri.wrappedJSObject:uri));                             				/*@explore*/
         if ( dispatch2(extensions, "acceptContext", [win, uri]) )
             return true;
         if ( dispatch2(extensions, "declineContext", [win, uri]) )
@@ -1189,8 +1189,8 @@ top.Firebug =
     watchWindow: function(context, win)
     {
         // XXXjoe Move this to Firebug.Console
-        if (!win.console)
-            win.console = new FirebugConsole(context, win);
+        if (!win.wrappedJSObject.console)
+            win.wrappedJSObject.console = new FirebugConsole(context, win);   
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/

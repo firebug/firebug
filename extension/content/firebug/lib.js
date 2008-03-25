@@ -92,20 +92,20 @@ this.extend = function(l, r)
     return newOb;
 };
 
-this.keys = function(map)
+this.keys = function(map)  // At least sometimes the keys will be on user-level window objects
 {
     var keys = [];
     try
     {
-        for (var name in map)
-            keys.push(name);
+        for (var name in map)  // enumeration is safe
+            keys.push(name);   // name is string, safe
     }
     catch (exc)
     {
         // Sometimes we get exceptions trying to iterate properties
     }
 
-    return keys;
+    return keys;  // return is safe
 };
 
 this.values = function(map)
@@ -122,6 +122,8 @@ this.values = function(map)
             catch (exc)
             {
                 // Sometimes we get exceptions trying to access properties
+                if (FBTrace.DBG_ERRORS) /*@explore*/
+                    FBTrace.dumpPropreties("lib.values FAILED ", exc); /*@explore*/
             }
 
         }
@@ -129,6 +131,8 @@ this.values = function(map)
     catch (exc)
     {
         // Sometimes we get exceptions trying to iterate properties
+        if (FBTrace.DBG_ERRORS) /*@explore*/
+            FBTrace.dumpPropreties("lib.values FAILED ", exc); /*@explore*/
     }
 
     return values;
