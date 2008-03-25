@@ -1539,6 +1539,9 @@ NetProgress.prototype =
 
             this.arriveFile(file, request);
 
+            if (file.fromCache)
+                getCacheEntry(file, this);
+
             return file;
         }
     },
@@ -2043,6 +2046,28 @@ function getCacheEntry(file, netProgress)
                             value: descriptor.deviceID
                           }
                         ];
+                        
+                        // Get contentType from the cache.
+                        descriptor.visitMetaData({
+                            visitMetaDataElement: function(key, value) {
+                                if (key == "response-head")
+                                {
+                                    var contentType = getContentTypeFromResponseHead(value);
+                                    file.mimeType = getMimeType(contentType, file.href);
+                                    return false;
+                                }
+                                
+                                return true;
+                            }
+                        });
+                        
+                        // Update file category.
+                        if (file.mimeType)
+                        {
+                            file.category = null;
+                            getFileCategory(file);
+                        }
+                        
                         netProgress.update(file);
                     }
                 }
@@ -2053,6 +2078,17 @@ function getCacheEntry(file, netProgress)
             ERROR(exc);
         }
     });
+}
+
+function getContentTypeFromResponseHead(value)
+{
+    var values = value.split("\r\n");
+    for (var i=0; i<values.length; i++)
+    {
+        var option = values[i].split(": ");
+        if (option[0] == "Content-Type")
+            return option[1];
+    }
 }
 
 function getDateFromSeconds(s)
@@ -2072,7 +2108,7 @@ function getHttpHeaders(request, file)
         file.urlParams = parseURLParams(file.href);
 
         if (!file.mimeType)
-            file.mimeType = getMimeType(request);
+            file.mimeType = getMimeType(request.contentType, request.name);
 
         // Disable temporarily
         if (!file.responseHeaders && Firebug.collectHttpHeaders)
@@ -2200,12 +2236,11 @@ function getFileCategory(file)
     return (file.category = mimeCategoryMap[file.mimeType]);
 }
 
-function getMimeType(request)
+function getMimeType(mimeType, uri)
 {
-    var mimeType = request.contentType;
     if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
     {
-        var ext = getFileExtension(request.name);
+        var ext = getFileExtension(uri);
         if (!ext)
             return mimeType;
         else
