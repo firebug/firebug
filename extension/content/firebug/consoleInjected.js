@@ -6,25 +6,26 @@ function _FirebugConsole()
     this.userObjects = [];
 
     this.notifyFirebug = function(objs, methodName)
-    { 
+    {
         var element = this.getFirebugElement();
         var event = document.createEvent("Events");
         event.initEvent("firebugAppendConsole", true, false);
-        element.methodName = methodName;
-        
-        element.firstAddition = this.userObjects.length + "";
+
+        element.setAttribute("methodName", methodName);
+
+        element.setAttribute("firstAddition", this.userObjects.length + "");
         for (var i = 0; i < objs.length; i++)
         {
             this.userObjects.push(objs[i]);
         }
-        element.lastAddition = this.userObjects.length - 1 + "";
+        element.setAttribute("lastAddition", this.userObjects.length - 1 + "");
         element.dispatchEvent(event);
     };
 
-    this.getFirebugElement = function() 
+    this.getFirebugElement = function()
     {
         var element = document.getElementById("_firebugConsole");
-        if (!element) 
+        if (!element)
         {
             element = document.createElement("div");
             element.setAttribute("id", "_firebugConsole");
@@ -63,7 +64,7 @@ function _FirebugConsole()
     this.assert = function(x)
     {
         if (!x)
-            this.notifyFirebug(["%o", Array.prototype.slice.call(arguments)], "assert");   
+            this.notifyFirebug(["%o", Array.prototype.slice.call(arguments)], "assert");
     };
 
     this.dir = function(o)
@@ -148,7 +149,7 @@ function _FirebugConsole()
     };
 }
 //window.dump("============================>>>> Setting console <<<< ====================================\n");
-window.console =  new _FirebugConsole(); 
+window.console =  new _FirebugConsole();
 //window.dump("============================>>>> Set console <<<< ====================================\n");
 //for (var p in window.console)
 //    window.dump(p+"="+window.console[p]+"\n");

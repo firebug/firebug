@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-// 
+//
 FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Constants
@@ -9,8 +9,8 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 top.Firebug.Console.injector = {
-    
-    attachConsole: function(context, win) 
+
+    attachConsole: function(context, win)
     {
         var src = this.getInjectedSource();
         Firebug.CommandLine.evaluate(src, context);
@@ -18,15 +18,15 @@ top.Firebug.Console.injector = {
         context.firebugConsoleHandler = new FirebugConsoleHandler(context, win);
         win.addEventListener('firebugAppendConsole', context.firebugConsoleHandler.handleEvent, true); // capturing
     },
-    
+
     getInjectedSource: function()
     {
         if (!this.injectedSource)
             this.injectedSource = this.getResource("chrome://firebug/content/consoleInjected.js");
         return this.injectedSource;
     },
-    
-    getResource: function(aURL) 
+
+    getResource: function(aURL)
     {
         var ioService=Components.classes["@mozilla.org/network/io-service;1"]
             .getService(Components.interfaces.nsIIOService);
@@ -40,7 +40,7 @@ top.Firebug.Console.injector = {
         var str=scriptableStream.read(input.available());
         scriptableStream.close();
         input.close();
-        return str; 
+        return str;
     }
 }
 
@@ -48,11 +48,39 @@ function FirebugConsoleHandler(context, win)
 {
     this.handleEvent = function(event)
     {
-        //FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
-        var element = event.target;
-        FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
-        var userObjects = win.wrappedJSObject.console.userObjects;     
-        FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);    
+        
+        var element = event.target;        
+        var firstAddition = element.getAttribute("firstAddition");
+        var lastAddition = element.getAttribute("lastAddition");
+        var methodName = element.getAttribute("methodName");
+        var hosed_userObjects = win.wrappedJSObject.console.userObjects;
+        var userObjects = new Array();
+        for (var i = 0; i < 12; i++)
+        {
+            if (hosed_userObjects[i])
+                userObjects[i] = hosed_userObjects[i];
+            else
+                break;
+        }
+        
+        if (FBTrace.DBG_CONSOLE)
+        {
+            FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
+            FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
+            FBTrace.sysout("FirebugConsoleHandler: first to last:"+firstAddition+" - "+lastAddition+"\n");
+            FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);
+        }
+        
+        var subHandler = context.firebugConsoleHandler[methodName];
+        if (subHandler)
+        {
+            subHandler.apply(context.firebugConsoleHandler, userObjects);
+        }
+        else
+        {
+            context.firebugConsoleHandler.log("FirebugConsoleHandler does not support "+methodName);
+        }
+
     };
 
     this.firebug = Firebug.version;
