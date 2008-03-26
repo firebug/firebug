@@ -38,7 +38,7 @@ const httpObserver =
                 if (request.notificationCallbacks)
                 {
                     var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
-                    if (xhrRequest)
+                    if (xhrRequest && request.loadGroup)
                     {
                         var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
                         for( var i = 0; i < contexts.length; ++i )
