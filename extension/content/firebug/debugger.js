@@ -42,13 +42,6 @@ const reHTM = /\.[hH][tT][mM]/;
 const reURIinComment = /\/\/@\ssourceURL=\s*(.*)\s*$/m;
 const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 
-const evalScriptPre =
-    "with (__scope__.vars) { with (__scope__.api) { with (__scope__.userVars) { with (window) {";
-const evalScriptPost =
-    "}}}}";
-
-const evalScriptPreWithThis =  "(function() {" + evalScriptPre + "return ";
-const evalScriptPostWithThis = evalScriptPost + "; }).apply(__scope__.thisValue)";
 
 // ************************************************************************************************
 
@@ -73,6 +66,39 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     evaluate: function(js, context, scope)
     {
+        var frame = context.currentFrame;
+        if (!frame)
+            return;
+
+        frame.scope.refresh(); // XXX what's this do?
+
+        var result = {};
+        var scriptToEval = js;
+        if (scope && scope.thisValue) {
+            // XXX need to stick scope.thisValue somewhere... frame.scope.globalObject?
+            scriptToEval = " (function() { " + js + " }).apply(__thisValue__);";
+        }
+
+        // This seem to be safe; eval'ing a getter property in content that tries to
+        // be evil and get Components.classes results in a permission denied error.
+        var ok = frame.eval(scriptToEval, "", 1, result);
+
+        var value = result.value.getWrappedValue();
+        if (ok)
+            return value;
+        else
+            throw value;
+    },
+
+    OLDevaluate: function(js, context, scope)
+    {
+        const evalScriptPre =
+            "with (__scope__.vars) { with (__scope__.api) { with (__scope__.userVars) { with (window) {";
+        const evalScriptPost =
+            "}}}}";
+
+        const evalScriptPreWithThis =  "(function() {" + evalScriptPre + "return ";
+        const evalScriptPostWithThis = evalScriptPost + "; }).apply(__scope__.thisValue)";
         var frame = context.currentFrame;
         if (frame)
         {

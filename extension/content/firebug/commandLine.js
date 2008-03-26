@@ -11,17 +11,6 @@ const commandPrefix = ">>>";
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
 
-// XXXjjb FF3  needs win.__scope__ because we eval in sandbox
-
-const evalScript = "with (__win__.__scope__.vars) { with (__win__.__scope__.api) { with (__win__.__scope__.userVars) { with (__win__) {" +
-    "try {" +
-        "__win__.__scope__.callback(eval(__win__.__scope__.expr));" +
-    "} catch (exc) {" +
-        "__win__.__scope__.callback(exc, true);" +
-    "}" +
-"}}}}";
-
-const evalScriptWithThis =  "(function() { " + evalScript + " }).apply(__win__.__scope__.thisValue);";
 
 // ************************************************************************************************
 // GLobals
@@ -34,13 +23,79 @@ var commandInsertPointer = -1;
 
 Firebug.CommandLine = extend(Firebug.Module,
 {
-    // Used externally to detect command line stack frames
-    evalScript: evalScript,
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     evaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
     {
+        if (!context)
+            return;
+
+        var result = null;
+
+        if (!context.commandLineAPI)
+            context.commandLineAPI = new FirebugCommandLineAPI(context);
+
+        if (context.stopped) {
+            var scope = {
+                api       : context.commandLineAPI,
+                vars      : getInspectorVars(context),
+                userVars  : userVars ? userVars : {},
+                thisValue : thisValue
+            };
+
+            result = Firebug.Debugger.evaluate(expr, context, scope);
+        } else {
+            var win = context.baseWindow ? context.baseWindow : context.window;
+
+            if (!context.sandboxes)
+                context.sandboxes = [];
+
+            var sandbox = this.getSandboxByWindow(context, win);
+            if (!sandbox) {
+                sandbox = new Components.utils.Sandbox(win); // Use DOM Window
+                sandbox.window = win.wrappedJSObject;
+                sandbox.document = sandbox.window.document;
+                sandbox.__proto__ = win.wrappedJSObject;
+                context.sandboxes.push(sandbox); // XXX does this get cleared?  LEAK?
+            }
+
+            var scriptToEval = expr;
+            if (thisValue) {
+                // XXX is this safe if we're recycling the sandbox?
+                sandbox.__thisValue__ = thisValue;
+                // XXX this loses any value returned by expr.
+                scriptToEval = " (function() { " + expr + " }).apply(__thisValue__);";
+            }
+
+            try {
+                result = Components.utils.evalInSandbox(scriptToEval, sandbox);
+            } catch (e) {
+                // XXX if(skipNotDefinedMessages) don't make noise?
+               // dump("\n\n=== evalInSandbox threw evaluating " + scriptToEval + "\n    ..." + e + "\n");
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILED:", e);  /*@explore*/
+                result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, scriptToEval,0, 0, "js", context, null);
+            }
+        }
+
+        context.invalidatePanels("dom", "watches", "domSide");
+
+        return result;
+    },
+
+    OLDevaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)
+    {
+
+        // previously global
+        const evalScriptWithThis =  "(function() { " + evalScript + " }).apply(__win__.__scope__.thisValue);";
+        const evalScript = "with (__win__.__scope__.vars) { with (__win__.__scope__.api) { with (__win__.__scope__.userVars) { with (__win__) {" +
+            "try {" +
+                "__win__.__scope__.callback(eval(__win__.__scope__.expr));" +
+            "} catch (exc) {" +
+                "__win__.__scope__.callback(exc, true);" +
+            "}" +
+        "}}}}";
+
+
         if (!context)
             return;
 
@@ -124,16 +179,11 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     getSandboxByWindow: function(context, win)
     {
-        var sandbox = null;
-        for (var iframe = 0; iframe < context.sandboxes.length; iframe++)
-        {
-            if (context.sandboxes[iframe].__win__ == win)
-            {
-                sandbox = context.sandboxes[iframe];
-                break;
-             }
+        for (var i = 0; i < context.sandboxes.length; i++) {
+            if (context.sandboxes[i].window === win)
+                return context.sandboxes[i];
         }
-        return sandbox;
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
