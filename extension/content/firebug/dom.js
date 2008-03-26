@@ -1225,8 +1225,12 @@ function getMembers(object, level)  // we expect object to be user-level object 
     try
     {
         var domMembers = getDOMMembers(object);
-
-        var insecureObject = object.wrappedJSObject;
+        
+        if (object.wrappedJSObject)
+            var insecureObject = object.wrappedJSObject;
+        else
+            var insecureObject = object;
+            
         for (var name in insecureObject)  // enumeration is safe
         {
             if (ignoreVars[name] == 1)  // javascript.options.strict says ignoreVars is undefined.
@@ -1240,6 +1244,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
             catch (exc)
             {
                 // Sometimes we get exceptions trying to access certain members
+                if (FBTrace.DBG_ERRORS) /*@explore*/
+                    FBTrace.dumpProperties("dom.getMembers FAILS: ", exc); /*@explore*/
             }
 
             var ordinal = parseInt(name);
@@ -1272,6 +1278,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
         // Sometimes we get exceptions just from trying to iterate the members
         // of certain objects, like StorageList, but don't let that gum up the works
         //throw exc;
+        if (FBTrace.DBG_ERRORS) /*@explore*/
+            FBTrace.dumpProperties("dom.getMembers FAILS: ", exc); /*@explore*/
     }
 
     function sortName(a, b) { return a.name > b.name ? 1 : -1; }

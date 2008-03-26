@@ -88,15 +88,15 @@ this.dumpProperties = function(header, obj)
         {
             for (var p in obj)
             {
-                if (p.match("QueryInterface"))
-                {
-                    if (this.dumpInterfaces(obj))
-                        continue;
-                    else
-                        this.sysout("dumpInterfaces found NONE\n");
-                }
                 try
                 {
+                    if (p.match("QueryInterface"))
+                    {
+                        if (this.dumpInterfaces(obj))
+                            continue;
+                        else
+                            this.sysout("dumpInterfaces found NONE\n");
+                    }
                     this.sysout("["+p+"]="+obj[p]+";\n");
                 }
                 catch (e)
