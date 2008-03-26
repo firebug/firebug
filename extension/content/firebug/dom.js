@@ -428,7 +428,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         }
     },
 
-    setPropertyValue: function(row, value)
+    setPropertyValue: function(row, value)  // value must be string
     {
         var name = getRowName(row);
         if (name == "this")
@@ -439,6 +439,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         {
             try
             {
+                // unwrappedJSobject.property = unwrappedJSObject
                 object[name] = Firebug.CommandLine.evaluate(value, this.context, null, object);
             }
             catch (exc)
@@ -448,7 +449,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                     // If the value doesn't parse, then just store it as a string.  Some users will
                     // not realize they're supposed to enter a JavaScript expression and just type
                     // literal text
-                    object[name] = value;
+                    object[name] = String(value);  // unwrappedJSobject.property = string
                 }
                 catch (exc)
                 {
@@ -460,14 +461,14 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         {
             try
             {
-                Firebug.CommandLine.evaluate(name+"="+value, this.context);
+                Firebug.CommandLine.evaluate(name+"="+value, this.context);  // XXXjjb I don't know how this can work
             }
             catch (exc)
             {
                 try
                 {
                     // See catch block above...
-                    object[name] = value;
+                    object[name] = String(value); // unwrappedJSobject.property = string
                 }
                 catch (exc)
                 {
