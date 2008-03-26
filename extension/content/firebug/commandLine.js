@@ -43,7 +43,11 @@ Firebug.CommandLine = extend(Firebug.Module,
                 thisValue : thisValue
             };
 
-            result = Firebug.Debugger.evaluate(expr, context, scope);
+            try {
+                result = Firebug.Debugger.evaluate(expr, context, scope);
+            } catch (e) {
+                result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, expr, 0, 0, "js", context, null);
+            }
         } else {
             var win = context.baseWindow ? context.baseWindow : context.window;
 
@@ -53,8 +57,6 @@ Firebug.CommandLine = extend(Firebug.Module,
             var sandbox = this.getSandboxByWindow(context, win);
             if (!sandbox) {
                 sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-                sandbox.window = win.wrappedJSObject;
-                sandbox.document = sandbox.window.document;
                 sandbox.__proto__ = win.wrappedJSObject;
                 context.sandboxes.push(sandbox); // XXX does this get cleared?  LEAK?
             }
@@ -82,105 +84,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         return result;
     },
 
-    OLDevaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)
-    {
-
-        // previously global
-        const evalScriptWithThis =  "(function() { " + evalScript + " }).apply(__win__.__scope__.thisValue);";
-        const evalScript = "with (__win__.__scope__.vars) { with (__win__.__scope__.api) { with (__win__.__scope__.userVars) { with (__win__) {" +
-            "try {" +
-                "__win__.__scope__.callback(eval(__win__.__scope__.expr));" +
-            "} catch (exc) {" +
-                "__win__.__scope__.callback(exc, true);" +
-            "}" +
-        "}}}}";
-
-
-        if (!context)
-            return;
-
-        var result = null;
-        var threw = false;
-
-        if (!context.commandLineAPI)
-            context.commandLineAPI = new FirebugCommandLineAPI(context);
-
-        var scope =
-        {
-            api: context.commandLineAPI,
-            vars: getInspectorVars(context),
-            userVars: userVars ? userVars : {},
-            thisValue: thisValue
-        };
-
-        var scriptToEval = thisValue ? evalScriptWithThis : evalScript;
-
-        if (context.stopped)
-        {
-            result = Firebug.Debugger.evaluate(expr, context, scope);
-        }
-        else
-        {
-            var win = context.baseWindow ? context.baseWindow : context.window;
-            var fullScope = extend(scope,
-            {
-                expr: expr,
-                callback: function(value, hadException) { result = value; threw = hadException; }
-            });
-
-            iterateWindows(win, function(subwin) { subwin.__scope__ = fullScope; });
-
-            try
-            {
-                if (!context.sandboxes)
-                    context.sandboxes = [];
-
-                var sandbox = this.getSandboxByWindow(context, win);
-
-                if(!sandbox)
-                {
-                    sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-                    sandbox.__win__ = win;
-                    context.sandboxes.push(sandbox);
-                }
-
-                Components.utils.evalInSandbox(scriptToEval, sandbox);
-            }
-            catch (exc)
-            {
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILS:",exc);        /*@explore*/
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate sandbox:", sandbox);        /*@explore*/
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate sandbox.__win__.__scope__:", sandbox.__win__.__scope__);        /*@explore*/
-                result = new FBL.ErrorMessage("commandLine.evaluate FAILS: "+exc, scriptToEval,0, 0, "js", context, null);
-            }
-            try
-            {
-                 iterateWindows(win, function(subwin) { delete subwin.__scope__; });
-            }
-            catch (exc)
-            {
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate iterateWindows to delete FAILS:", exc);          /*@explore*/
-                throw exc;
-            }
-            if (threw)
-            {
-                if (skipNotDefinedMessages)
-                    return;
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate("+expr+ ") threw:", result);          /*@explore*/
-                result = new FBL.ErrorMessage(result, expr, 0, 0, "js", context, null);
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluate ");          /*@explore*/
-            }
-        }
-
-        context.invalidatePanels("dom", "watches", "domSide");
-
-        return result;
-    },
-
     getSandboxByWindow: function(context, win)
     {
         for (var i = 0; i < context.sandboxes.length; i++) {
-            if (context.sandboxes[i].window === win)
+            // XXX is accessing .window safe after untrusted script has run?
+            if (context.sandboxes[i].window === win.wrappedJSObject)
                 return context.sandboxes[i];
         }
         return null;
