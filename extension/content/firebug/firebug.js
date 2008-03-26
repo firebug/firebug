@@ -1190,7 +1190,7 @@ top.Firebug =
     {
         // XXXjoe Move this to Firebug.Console
         if (!win.wrappedJSObject.console)
-            win.wrappedJSObject.console = new FirebugConsole(context, win);   
+            this.attachConsole(context, win); 
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
@@ -1205,6 +1205,12 @@ top.Firebug =
             var panel = context.panelMap[panelName];
             panel.watchWindow(win);
         }
+    },
+
+    attachConsole: function(context, win)
+    {
+        //win.wrappedJSObject.console = new FirebugConsole(context, win);
+        Firebug.Console.injector.attachConsole(context, win);  
     },
 
     unwatchWindow: function(context, win)

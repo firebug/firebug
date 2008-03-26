@@ -1,0 +1,154 @@
+/* See license.txt for terms of usage */
+function _FirebugConsole()
+{
+    //this.firebug = Firebug.version;
+
+    this.userObjects = [];
+
+    this.notifyFirebug = function(objs, methodName)
+    { 
+        var element = this.getFirebugElement();
+        var event = document.createEvent("Events");
+        event.initEvent("firebugAppendConsole", true, false);
+        element.methodName = methodName;
+        
+        element.firstAddition = this.userObjects.length + "";
+        for (var i = 0; i < objs.length; i++)
+        {
+            this.userObjects.push(objs[i]);
+        }
+        element.lastAddition = this.userObjects.length - 1 + "";
+        element.dispatchEvent(event);
+    };
+
+    this.getFirebugElement = function() 
+    {
+        var element = document.getElementById("_firebugConsole");
+        if (!element) 
+        {
+            element = document.createElement("div");
+            element.setAttribute("id", "_firebugConsole");
+            element.setAttribute("class", "firebugIgnore");
+            element.setAttribute("style", "display:none");
+            document.documentElement.appendChild(element);
+        }
+        return element;
+    };
+
+    this.log = function()
+    {
+        this.notifyFirebug(arguments, "log");
+    };
+
+    this.debug = function()
+    {
+        this.notifyFirebug(arguments, "debug");
+    };
+
+    this.info = function()
+    {
+        this.notifyFirebug(arguments, "info");
+    };
+
+    this.warn = function()
+    {
+        this.notifyFirebug(arguments, "warn");
+    };
+
+    this.error = function()
+    {
+        this.notifyFirebug(arguments, "error" );
+    };
+
+    this.assert = function(x)
+    {
+        if (!x)
+            this.notifyFirebug(["%o", Array.prototype.slice.call(arguments)], "assert");   
+    };
+
+    this.dir = function(o)
+    {
+        this.notifyFirebug(arguments, "dir");
+    };
+
+    this.dirxml = function(o)
+    {
+        if (o instanceof Window)
+            o = o.document.documentElement;
+        else if (o instanceof Document)
+            o = o.documentElement;
+
+        this.notifyFirebug(arguments, "dirxml");
+    };
+
+    this.trace = function()
+    {
+        this.notifyFirebug(arguments, "trace");
+    };
+
+    this.group = function()
+    {
+        this.notifyFirebug(arguments, "group");
+    };
+
+    this.groupEnd = function()
+    {
+        this.notifyFirebug(arguments, "groupEnd");
+    };
+
+    this.time = function(name, reset)
+    {
+        if (!name)
+            return;
+
+        var time = new Date().getTime();
+
+        if (!this.timeCounters)
+            this.timeCounters = {};
+
+        if (!reset && this.timeCounters.hasOwnProperty(name))
+            return;
+
+        this.timeCounters[name] = time;
+    };
+
+    this.timeEnd = function(name)
+    {
+        var time = new Date().getTime();
+
+        if (!this.timeCounters)
+            return;
+
+        var timeCounter = this.timeCounters[name];
+        if (timeCounter)
+        {
+            var diff = time - timeCounter;
+            var label = name + ": " + diff + "ms";
+
+            logFormatted([label], null, true);
+
+            delete this.timeCounters[name];
+        }
+        return diff;
+    };
+
+    this.profile = function(title)
+    {
+        this.notifyFirebug(arguments, "profile");
+    };
+
+    this.profileEnd = function()
+    {
+        this.notifyFirebug(arguments, "profileEnd");
+    };
+
+    this.count = function(key)
+    {
+        this.notifyFirebug(arguments, "count");
+    };
+}
+//window.dump("============================>>>> Setting console <<<< ====================================\n");
+window.console =  new _FirebugConsole(); 
+//window.dump("============================>>>> Set console <<<< ====================================\n");
+//for (var p in window.console)
+//    window.dump(p+"="+window.console[p]+"\n");
