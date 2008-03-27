@@ -1065,7 +1065,7 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
         }
     }
     if (FBTrace.DBG_SOURCEFILES) /*@explore*/
-    	FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML); /*@explore*/
+        FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML); /*@explore*/
 };
 
 // ************************************************************************************************
@@ -1534,10 +1534,13 @@ this.getStackSourceLink = function()
             break;
         }
     }
+    return this.getFrameSourceLink(frame);
+}
 
-
+this.getFrameSourceLink = function(frame)
+{
     if (frame && frame.filename && frame.filename.indexOf(Firebug.CommandLine.evalScript) == -1)
-        return new this.SourceLink(frame.filename, frame.lineNumber, "js");  // XXXjjb TODO Components stack?
+        return new this.SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;
 };
@@ -1771,7 +1774,7 @@ this.getStyleSheetByHref = function(url, context)
 {
     function addSheet(sheet)
     {
-        if (sheet.href == null) //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null. 
+        if (sheet.href == null) //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
             return sheet;
 
         for (var i = 0; i < sheet.cssRules.length; ++i)
@@ -2486,7 +2489,7 @@ this.readPostTextFromXHR = function(xhrRequest, context)
             var charset = context.window.document.characterSet;
             var text = this.readFromStream(is, charset);
             if (ss) ss.seek(NS_SEEK_SET, 0);
-            return text;                        
+            return text;
         }
     }
     catch(exc)

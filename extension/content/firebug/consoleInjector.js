@@ -14,9 +14,8 @@ top.Firebug.Console.injector = {
     {
         var src = this.getInjectedSource();
         Firebug.CommandLine.evaluate(src, context, null, win);  // win maybe frame
-        delete this.injectedSource; // XXXXXXXXXXXXXX TODO remove to cache
-        context.firebugConsoleHandler = new FirebugConsoleHandler(context, win);
-        win.addEventListener('firebugAppendConsole', context.firebugConsoleHandler.handleEvent, true); // capturing
+        var handler = new FirebugConsoleHandler(context, win);
+        win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
     },
 
     getInjectedSource: function()
@@ -48,58 +47,51 @@ function FirebugConsoleHandler(context, win)
 {
     this.handleEvent = function(event)
     {
-        
-        var element = event.target;        
+
+        var element = event.target;
         var firstAddition = element.getAttribute("firstAddition");
         var lastAddition = element.getAttribute("lastAddition");
         var methodName = element.getAttribute("methodName");
         var hosed_userObjects = win.wrappedJSObject.console.userObjects;
 
-        FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");   
+        //FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");
         //FBTrace.sysout("hosed_userObjects instanceof win.Array "+ (hosed_userObjects instanceof win.Array)+"\n");
         //FBTrace.sysout("hosed_userObjects instanceof win.wrappedJSObject.Array "+(hosed_userObjects instanceof win.wrappedJSObject.Array)+"\n");
-        FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
-        
-        if (lastAddition < firstAddition) 
-            return;
-        
+        //FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
+
         var userObjects = [];
-        FBTrace.sysout("typeof(userObjects) "+ (typeof(userObjects))+"\n");   
-        
+
+        var j = 0;
         for (var i = firstAddition; i <= lastAddition; i++)
         {
             if (hosed_userObjects[i])
-                userObjects[i] = hosed_userObjects[i];
+                userObjects[j++] = hosed_userObjects[i];
             else
                 break;
         }
-        
+
         if (FBTrace.DBG_CONSOLE || true)
         {
-            FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
-            FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
-            FBTrace.sysout("FirebugConsoleHandler: first to last:"+firstAddition+" - "+lastAddition+"\n");
+            //FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
+            //FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
+            FBTrace.sysout("FirebugConsoleHandler: method(first, last): "+methodName+"("+firstAddition+","+lastAddition+")\n");
             FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);
-            FBTrace.sysout("typeof(userObjects) "+ (typeof(userObjects))+"\n");   
+            //FBTrace.sysout("typeof(userObjects) "+ (typeof(userObjects))+"\n");
         }
-        
-        var subHandler = context.firebugConsoleHandler[methodName];
+
+        var subHandler = this[methodName];
         if (subHandler)
         {
-            subHandler.apply(context.firebugConsoleHandler, userObjects);
+            subHandler.apply(this, userObjects);
         }
         else
         {
-            context.firebugConsoleHandler.log("FirebugConsoleHandler does not support "+methodName);
+            this.log("FirebugConsoleHandler does not support "+methodName);
         }
 
     };
 
     this.firebug = Firebug.version;
-
-    // We store these functions as closures so that they can access the context privately,
-    // because it would be insecure to store context as a property of window.console and
-    // and therefore expose it to web pages.
 
     this.log = function()
     {
@@ -130,7 +122,7 @@ function FirebugConsoleHandler(context, win)
     this.assert = function(x)
     {
         if (!x)
-            logAssert(FBL.sliceArray(arguments, 1), ["%o", x]);
+            logAssert(FBL.sliceArray(arguments, 1));
     };
 
     this.dir = function(o)
@@ -151,54 +143,30 @@ function FirebugConsoleHandler(context, win)
     this.trace = function()
     {
         var trace = FBL.getCurrentStackTrace(context);
-        Firebug.Console.log(trace, context, "stackTrace");
+
+        var frames = trace.frames;
+        if (frames && (frames.length > 0) )
+        {
+            var bottom = frames.length - 1;
+            for (var i = 0; i < frames.length; i++)
+                if (frames[bottom - i].href.indexOf("chrome:") == 0) break;
+
+            trace.frames = trace.frames.slice(bottom - i + 1);
+            Firebug.Console.log(trace, context, "stackTrace");
+        }
+        else
+            Firebug.Console.log("Firebug failed to get stack trace with any frames");
     };
 
     this.group = function()
     {
-        var sourceLink = FBL.getStackSourceLink(Components.stack);
+        var sourceLink = getStackLink();
         Firebug.Console.openGroup(arguments, null, "group", null, false, sourceLink);
     };
 
     this.groupEnd = function()
     {
         Firebug.Console.closeGroup(context);
-    };
-
-    this.time = function(name, reset)
-    {
-        if (!name)
-            return;
-
-        var time = new Date().getTime();
-
-        if (!context.timeCounters)
-            context.timeCounters = {};
-
-        if (!reset && context.timeCounters.hasOwnProperty(name))
-            return;
-
-        context.timeCounters[name] = time;
-    };
-
-    this.timeEnd = function(name)
-    {
-        var time = new Date().getTime();
-
-        if (!context.timeCounters)
-            return;
-
-        var timeCounter = context.timeCounters[name];
-        if (timeCounter)
-        {
-            var diff = time - timeCounter;
-            var label = name + ": " + diff + "ms";
-
-            logFormatted([label], null, true);
-
-            delete context.timeCounters[name];
-        }
-        return diff;
     };
 
     this.profile = function(title)
@@ -257,27 +225,42 @@ function FirebugConsoleHandler(context, win)
 
     function logFormatted(args, className, linkToSource, noThrottle)
     {
-        var sourceLink = linkToSource ? FBL.getStackSourceLink(Components.stack) : null;
+        var sourceLink = linkToSource ? getStackLink() : null;
         return Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
     }
 
-    function logAssert(args, description)
+    function logAssert(args)
     {
         Firebug.Errors.increaseCount(context);
 
-        if (!args || !args.length)
+        if (!args || !args.length || args.length == 0)
             args = [FBL.$STR("Assertion")];
 
-        var sourceLink = FBL.getStackSourceLink(Components.stack);
+        var sourceLink = getStackLink();
         var row = Firebug.Console.log(null, context, "assert", FirebugReps.Assert, true, sourceLink);
 
         var argsRow = row.firstChild.firstChild;
         Firebug.Console.appendFormatted(args, argsRow, context);
-
-        var descRow = argsRow.nextSibling;
-        Firebug.Console.appendFormatted(description, descRow, context);
+        // XXXjjb I took some stuff out I didn't understand
 
         row.scrollIntoView();
+    }
+
+    function getUserStack()
+    {
+        // Starting with our stack, walk back to the user-level code
+        var frame = Components.stack;
+        var userURL = win.location.href.toString();
+
+        while (frame && (frame.filename != userURL) )
+            frame = frame.caller;
+
+        return frame;
+    }
+
+    function getStackLink()
+    {
+        return FBL.getFrameSourceLink(getUserStack());
     }
 }
 

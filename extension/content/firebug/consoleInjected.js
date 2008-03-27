@@ -64,8 +64,9 @@ function _FirebugConsole()
     this.assert = function(x)
     {
         if (!x)
-            this.notifyFirebug(["%o", Array.prototype.slice.call(arguments)], "assert");
+            this.notifyFirebug(Array.prototype.slice.call(arguments, 1), "assert");
     };
+
 
     this.dir = function(o)
     {
@@ -73,7 +74,7 @@ function _FirebugConsole()
     };
 
     this.dirxml = function(o)
-    {
+    { this.notifyFirebug(["Window in dirxml", Window], "log");
         if (o instanceof Window)
             o = o.document.documentElement;
         else if (o instanceof Document)
@@ -126,7 +127,7 @@ function _FirebugConsole()
             var diff = time - timeCounter;
             var label = name + ": " + diff + "ms";
 
-            logFormatted([label], null, true);
+            this.notifyFirebug([label], "info");
 
             delete this.timeCounters[name];
         }
