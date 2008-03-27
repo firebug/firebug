@@ -12,6 +12,7 @@ const nsIRequest = Ci.nsIRequest;
 const nsICachingChannel = Ci.nsICachingChannel;
 const nsIScriptableInputStream = Ci.nsIScriptableInputStream;
 const nsIUploadChannel = Ci.nsIUploadChannel;
+const nsIHttpChannel = Ci.nsIHttpChannel;
 
 const IOService = Cc["@mozilla.org/network/io-service;1"];
 const ioService = IOService.getService(nsIIOService);
@@ -33,13 +34,13 @@ top.SourceCache = function(context)
 
 top.SourceCache.prototype =
 {
-    loadText: function(url)
+    loadText: function(url, method)
     {
-        var lines = this.load(url);
+        var lines = this.load(url, method);
         return lines ? lines.join("\n") : null;
     },
 
-    load: function(url)
+    load: function(url, method)
     {
         if ( this.cache.hasOwnProperty(url) )
             return this.cache[url];
@@ -89,6 +90,12 @@ top.SourceCache.prototype =
         {
             channel = ioService.newChannel(url, null, null);
             channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
+            
+            if (method && (channel instanceof nsIHttpChannel))
+            {
+                var httpChannel = QI(channel, nsIHttpChannel);
+                httpChannel.requestMethod = method;
+            }
         }
         catch (exc)
         {

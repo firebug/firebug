@@ -2513,7 +2513,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             {
                 var text = file.responseText
                     ? file.responseText
-                    : context.sourceCache.loadText(file.href);
+                    : context.sourceCache.loadText(file.href, file.method);
 
                 if (text)
                     insertWrappedText(text, responseTextBox);
