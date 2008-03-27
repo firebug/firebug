@@ -90,7 +90,8 @@ this.dumpProperties = function(header, obj)
             {
                 try
                 {
-                    if (p.match("QueryInterface"))
+                    var pAsString = p + "";
+                    if (pAsString.match("QueryInterface"))
                     {
                         if (this.dumpInterfaces(obj))
                             continue;

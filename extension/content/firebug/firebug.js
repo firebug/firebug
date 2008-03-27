@@ -1194,10 +1194,10 @@ top.Firebug =
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
-            if (win.console)                                                                                           /*@explore*/
-                FBTrace.sysout("firebug.watchWindow created win.console for uid = "+win.__firebug__uid+"\n");          /*@explore*/
+            if (win.wrappedJSObject.console)                                                                                           /*@explore*/
+                FBTrace.sysout("firebug.watchWindow created win.console for "+win.location+"\n");          /*@explore*/
             else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow failed to create win.console for uid = "+win.__firebug__uid+"\n"); /*@explore*/
+                FBTrace.sysout("firebug.watchWindow failed to create win.console for "+win.location+"\n"); /*@explore*/
         }                                                                                                              /*@explore*/
                                                                                                                        /*@explore*/
         for (var panelName in context.panelMap)

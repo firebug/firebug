@@ -90,40 +90,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             throw value;
     },
 
-    OLDevaluate: function(js, context, scope)
-    {
-        const evalScriptPre =
-            "with (__scope__.vars) { with (__scope__.api) { with (__scope__.userVars) { with (window) {";
-        const evalScriptPost =
-            "}}}}";
-
-        const evalScriptPreWithThis =  "(function() {" + evalScriptPre + "return ";
-        const evalScriptPostWithThis = evalScriptPost + "; }).apply(__scope__.thisValue)";
-        var frame = context.currentFrame;
-        if (frame)
-        {
-            iterateWindows(context.window, function(win) { win.__scope__ = scope; });
-
-            frame.scope.refresh();
-
-            var scriptToEval = scope && scope.thisValue
-                ? [evalScriptPreWithThis, js, evalScriptPostWithThis]
-                : [evalScriptPre, js, evalScriptPost];
-
-            var script = scope ? scriptToEval.join("") : js;
-            var result = {};
-            var ok = frame.eval(script, "", 1, result);
-
-            iterateWindows(context.window, function(win) { delete win.__scope__; });
-
-            var value = result.value.getWrappedValue();
-            if (ok)
-                return value;
-            else
-                throw value;
-        }
-    },
-
     getCurrentFrameKeys: function(context)
     {
         var globals = keys(context.window.wrappedJSObject);  // return is safe

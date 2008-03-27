@@ -13,8 +13,8 @@ top.Firebug.Console.injector = {
     attachConsole: function(context, win)
     {
         var src = this.getInjectedSource();
-        Firebug.CommandLine.evaluate(src, context);
-        delete this.injectedSource; // TODO remove to cache
+        Firebug.CommandLine.evaluate(src, context, null, win);  // win maybe frame
+        delete this.injectedSource; // XXXXXXXXXXXXXX TODO remove to cache
         context.firebugConsoleHandler = new FirebugConsoleHandler(context, win);
         win.addEventListener('firebugAppendConsole', context.firebugConsoleHandler.handleEvent, true); // capturing
     },
@@ -54,8 +54,19 @@ function FirebugConsoleHandler(context, win)
         var lastAddition = element.getAttribute("lastAddition");
         var methodName = element.getAttribute("methodName");
         var hosed_userObjects = win.wrappedJSObject.console.userObjects;
-        var userObjects = new Array();
-        for (var i = 0; i < 12; i++)
+
+        FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");   
+        //FBTrace.sysout("hosed_userObjects instanceof win.Array "+ (hosed_userObjects instanceof win.Array)+"\n");
+        //FBTrace.sysout("hosed_userObjects instanceof win.wrappedJSObject.Array "+(hosed_userObjects instanceof win.wrappedJSObject.Array)+"\n");
+        FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
+        
+        if (lastAddition < firstAddition) 
+            return;
+        
+        var userObjects = [];
+        FBTrace.sysout("typeof(userObjects) "+ (typeof(userObjects))+"\n");   
+        
+        for (var i = firstAddition; i <= lastAddition; i++)
         {
             if (hosed_userObjects[i])
                 userObjects[i] = hosed_userObjects[i];
@@ -63,12 +74,13 @@ function FirebugConsoleHandler(context, win)
                 break;
         }
         
-        if (FBTrace.DBG_CONSOLE)
+        if (FBTrace.DBG_CONSOLE || true)
         {
             FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
             FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
             FBTrace.sysout("FirebugConsoleHandler: first to last:"+firstAddition+" - "+lastAddition+"\n");
             FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);
+            FBTrace.sysout("typeof(userObjects) "+ (typeof(userObjects))+"\n");   
         }
         
         var subHandler = context.firebugConsoleHandler[methodName];

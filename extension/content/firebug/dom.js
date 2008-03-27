@@ -440,7 +440,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
             try
             {
                 // unwrappedJSobject.property = unwrappedJSObject
-                object[name] = Firebug.CommandLine.evaluate(value, this.context, null, object);
+                object[name] = Firebug.CommandLine.evaluate(value, this.context, object);
             }
             catch (exc)
             {
@@ -1245,8 +1245,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
             catch (exc)
             {
                 // Sometimes we get exceptions trying to access certain members
-                if (FBTrace.DBG_ERRORS) /*@explore*/
-                    FBTrace.dumpProperties("dom.getMembers FAILS: ", exc); /*@explore*/
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM) /*@explore*/
+                    FBTrace.sysout("dom.getMembers cannot access "+name, exc); /*@explore*/
             }
 
             var ordinal = parseInt(name);
@@ -1279,7 +1279,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
         // Sometimes we get exceptions just from trying to iterate the members
         // of certain objects, like StorageList, but don't let that gum up the works
         //throw exc;
-        if (FBTrace.DBG_ERRORS) /*@explore*/
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM) /*@explore*/
             FBTrace.dumpProperties("dom.getMembers FAILS: ", exc); /*@explore*/
     }
 

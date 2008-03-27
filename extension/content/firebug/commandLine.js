@@ -25,7 +25,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    evaluate: function(expr, context, userVars, thisValue, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
+    evaluate: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
     {
         if (!context)
             return;
@@ -39,7 +39,6 @@ Firebug.CommandLine = extend(Firebug.Module,
             var scope = {
                 api       : context.commandLineAPI,
                 vars      : getInspectorVars(context),
-                userVars  : userVars ? userVars : {},
                 thisValue : thisValue
             };
 
@@ -49,7 +48,8 @@ Firebug.CommandLine = extend(Firebug.Module,
                 result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, expr, 0, 0, "js", context, null);
             }
         } else {
-            var win = context.baseWindow ? context.baseWindow : context.window;
+            // targetWindow may be frame in HTML
+            var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
 
             if (!context.sandboxes)
                 context.sandboxes = [];
@@ -117,8 +117,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         var result = this.evaluate(expr, context);
-        if (typeof(result)  != "undefined")
-            Firebug.Console.log(result, context);
+        Firebug.Console.log(result, context);
     },
 
     enterMenu: function(context)
@@ -395,7 +394,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             if (lastDot != -1)
                 preExpr = preExpr.substr(0, lastDot);
 
-            var object = Firebug.CommandLine.evaluate(preExpr, context, null, context.thisValue);
+            var object = Firebug.CommandLine.evaluate(preExpr, context, context.thisValue);
             return keys(object.wrappedJSObject).sort(); // return is safe
         }
         else
