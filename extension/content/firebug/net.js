@@ -172,6 +172,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     onToggleFilter: function(context, filterCategory)
     {
+        if (!context.netProgress)
+            return;
+    
         Firebug.setPref(Firebug.prefDomain, "netFilterCategory", filterCategory);
 
         // The content filter has been changed. Make sure that the content
@@ -761,7 +764,9 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         Firebug.NetMonitor.menuUpdate(this.context);
 
-        if (!this.shouldShow())
+        var shouldShow = this.shouldShow();
+        this.showToolbarButtons("fbNetButtonsFilter", shouldShow);
+        if (!shouldShow)
             return;
 
         if (!this.filterCategory)

@@ -142,29 +142,31 @@
                         <menuitem type="radio" name="fbNetStateMenu" value="enable-host"/>
                     </menupopup>
                 </toolbarbutton>
-                <toolbarseparator/>
-                <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
-                               group="firebugNetFilter" checked="true"
-                               oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'all')"/>
-                <toolbarbutton id="fbNetFilter-html" label="HTML" type="radio" class="toolbar-text-button"
-                               group="firebugNetFilter"
-                               oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'html')"/>
-                <toolbarbutton id="fbNetFilter-css" label="CSS" type="radio" class="toolbar-text-button"
-                               group="firebugNetFilter"
-                               oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'css')"/>
-                <toolbarbutton id="fbNetFilter-js" label="JS" type="radio" class="toolbar-text-button"
-                               group="firebugNetFilter"
-                               oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'js')"/>
-                <toolbarbutton id="fbNetFilter-xhr" label="XHR" type="radio"
-                                tooltiptext="XMLHttpRequest"
-                                class="toolbar-text-button" group="firebugNetFilter"
-                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'xhr')"/>
-                <toolbarbutton id="fbNetFilter-image" label="&firebug.Images;" type="radio" class="toolbar-text-button"
-                               group="firebugNetFilter"
-                               oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'image')"/>
-               <toolbarbutton id="fbNetFilter-flash" label="&firebug.Flash;" type="radio"
-                              class="toolbar-text-button" group="firebugNetFilter"
-                              oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'flash')"/>
+                <hbox id="fbNetButtonsFilter" collapsed="true">
+                    <toolbarseparator/>
+                    <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
+                                group="firebugNetFilter" checked="true"
+                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'all')"/>
+                    <toolbarbutton id="fbNetFilter-html" label="HTML" type="radio" class="toolbar-text-button"
+                                group="firebugNetFilter"
+                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'html')"/>
+                    <toolbarbutton id="fbNetFilter-css" label="CSS" type="radio" class="toolbar-text-button"
+                                group="firebugNetFilter"
+                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'css')"/>
+                    <toolbarbutton id="fbNetFilter-js" label="JS" type="radio" class="toolbar-text-button"
+                                group="firebugNetFilter"
+                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'js')"/>
+                    <toolbarbutton id="fbNetFilter-xhr" label="XHR" type="radio"
+                                    tooltiptext="XMLHttpRequest"
+                                    class="toolbar-text-button" group="firebugNetFilter"
+                                    oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'xhr')"/>
+                    <toolbarbutton id="fbNetFilter-image" label="&firebug.Images;" type="radio" class="toolbar-text-button"
+                                group="firebugNetFilter"
+                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'image')"/>
+                    <toolbarbutton id="fbNetFilter-flash" label="&firebug.Flash;" type="radio"
+                                    class="toolbar-text-button" group="firebugNetFilter"
+                                    oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'flash')"/>
+                </hbox>
             </hbox>
 
             <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
