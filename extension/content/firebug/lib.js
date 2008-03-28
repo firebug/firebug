@@ -3324,7 +3324,7 @@ this.getSourceFileAndLineByScript= function(context, script, frame)
     {
         var analyzer = sourceFile.getScriptAnalyzer(script);
         if (analyzer)
-            var line = frame ? analyzer.getSourceLineFromFrame(frame) : analyzer.getBaseLineNumberByScript(script);
+            var line = frame ? analyzer.getSourceLineFromFrame(context, frame) : analyzer.getBaseLineNumberByScript(script);
         else
             var line = 0;
 
