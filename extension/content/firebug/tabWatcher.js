@@ -513,6 +513,8 @@ var FrameProgressListener = extend(BaseProgressListener,
                     TabWatcher.watchTopWindow(win, win.location.href);
                     return;  // new one under our thumb
                 }
+                else
+                    TabWatcher.watchWindow(win);
             }
         }
 
