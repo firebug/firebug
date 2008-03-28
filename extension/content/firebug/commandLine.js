@@ -35,19 +35,27 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context);
 
-        if (context.stopped) {
+        if (context.stopped)
+        {
             var scope = {
                 api       : context.commandLineAPI,
                 vars      : getInspectorVars(context),
                 thisValue : thisValue
             };
 
-            try {
+            try
+            {
                 result = Firebug.Debugger.evaluate(expr, context, scope);
-            } catch (e) {
-                result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, expr, 0, 0, "js", context, null);
             }
-        } else {
+            catch (e)
+            {
+                var msg = "commandLine.evaluate FAILED: " + e;
+                var url = this.getDataURLForContent(expr, "FirebugDebuggerEvaluate");
+                result = new FBL.ErrorMessage(msg, url, e.lineNumber, 0, "js", context, null);
+            }
+        }
+        else
+        {
             // targetWindow may be frame in HTML
             var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
 
@@ -55,27 +63,36 @@ Firebug.CommandLine = extend(Firebug.Module,
                 context.sandboxes = [];
 
             var sandbox = this.getSandboxByWindow(context, win);
-            if (!sandbox) {
+            if (!sandbox)
+            {
                 sandbox = new Components.utils.Sandbox(win); // Use DOM Window
                 sandbox.__proto__ = win.wrappedJSObject;
-                context.sandboxes.push(sandbox); // XXX does this get cleared?  LEAK?
+                context.sandboxes.push(sandbox); // XXXdolske does this get cleared?  LEAK?
             }
 
             var scriptToEval = expr;
+
+            // If we want to use a specific |this|, wrap the expression with Function.apply()
+            // and inject the new |this| into the sandbox so it's easily accessible.
             if (thisValue) {
-                // XXX is this safe if we're recycling the sandbox?
+                // XXXdolske is this safe if we're recycling the sandbox?
                 sandbox.__thisValue__ = thisValue;
-                // XXX this loses any value returned by expr.
-                scriptToEval = " (function() { " + expr + " }).apply(__thisValue__);";
+                scriptToEval = "(function() { return " + scriptToEval + " \n}).apply(__thisValue__);";
             }
+
+            // Page scripts expect |window| to be the global object, not the
+            // sandbox object itself. Stick window into the scope chain so
+            // assignments like |foo = bar| are effectively |window.foo =
+            // bar|, else the page won't see the new value.
+            scriptToEval = "with (window) { " + scriptToEval + " \n};";
 
             try {
                 result = Components.utils.evalInSandbox(scriptToEval, sandbox);
             } catch (e) {
-                // XXX if(skipNotDefinedMessages) don't make noise?
+                // XXXdolske if(skipNotDefinedMessages) don't make noise?
                // dump("\n\n=== evalInSandbox threw evaluating " + scriptToEval + "\n    ..." + e + "\n");
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILED:", e);  /*@explore*/
-                result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, scriptToEval,0, 0, "js", context, null);
+                result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, this.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
             }
         }
 
@@ -87,11 +104,20 @@ Firebug.CommandLine = extend(Firebug.Module,
     getSandboxByWindow: function(context, win)
     {
         for (var i = 0; i < context.sandboxes.length; i++) {
-            // XXX is accessing .window safe after untrusted script has run?
+            // XXXdolske is accessing .window safe after untrusted script has run?
             if (context.sandboxes[i].window === win.wrappedJSObject)
                 return context.sandboxes[i];
         }
         return null;
+    },
+
+    getDataURLForContent: function(content, url)
+    {
+        // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
+        var uri = "data:text/html;";
+        uri += "fileName="+encodeURIComponent(url)+ ","
+        uri += encodeURIComponent(content);
+        return uri;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
