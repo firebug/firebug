@@ -13,7 +13,11 @@ top.Firebug.Console.injector = {
     attachConsole: function(context, win)
     {
         var src = this.getInjectedSource();
-        Firebug.CommandLine.evaluate(src, context, null, win);  // win maybe frame
+        var result = Firebug.CommandLine.evaluate(src, context, null, win);  // win maybe frame
+
+        if (result instanceof FBL.ErrorMessage)
+            Firebug.Console.log(result, context, "assert");
+
         var handler = new FirebugConsoleHandler(context, win);
         win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
     },
@@ -92,6 +96,12 @@ function FirebugConsoleHandler(context, win)
     };
 
     this.firebug = Firebug.version;
+
+    this.init = function()
+    {
+        var consoleElement = win.document.getElementById('_firebugConsole');
+        consoleElement.setAttribute("FirebugVersion", Firebug.version);
+    };
 
     this.log = function()
     {

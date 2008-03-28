@@ -32,8 +32,23 @@ function _FirebugConsole()
             element.setAttribute("class", "firebugIgnore");
             element.setAttribute("style", "display:none");
             document.documentElement.appendChild(element);
+
+            var event = document.createEvent("Events");
+            event.initEvent("firebugAppendConsole", true, false);
+            element.setAttribute("methodName", "init");
+            element.setAttribute("firstAddition", "0");
+            element.setAttribute("lastAddition", "-1");
+            element.dispatchEvent(event);
         }
         return element;
+    };
+
+    // ***********************************************************************
+    // Console API
+
+    this.firebugVersion = function()
+    {
+        return this.getFirebugElement().getAttribute("FirebugVersion");
     };
 
     this.log = function()
@@ -62,7 +77,7 @@ function _FirebugConsole()
     };
 
     this.assert = function(x)
-    {
+    {this.notifyFirebug(["Array.prototype", Array.prototype], "info");
         if (!x)
             this.notifyFirebug(Array.prototype.slice.call(arguments, 1), "assert");
     };
