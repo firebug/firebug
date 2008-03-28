@@ -151,20 +151,8 @@ function FirebugConsoleHandler(context, win)
 
     this.trace = function()
     {
-        var trace = FBL.getCurrentStackTrace(context);
-
-        var frames = trace.frames;
-        if (frames && (frames.length > 0) )
-        {
-            var bottom = frames.length - 1;
-            for (var i = 0; i < frames.length; i++)
-                if (frames[bottom - i].href.indexOf("chrome:") == 0) break;
-
-            trace.frames = trace.frames.slice(bottom - i + 1);
-            Firebug.Console.log(trace, context, "stackTrace");
-        }
-        else
-            Firebug.Console.log("Firebug failed to get stack trace with any frames");
+        var trace = getAccurateUserStackTrace();
+        Firebug.Console.log(trace, context, "stackTrace");
     };
 
     this.group = function()
@@ -243,14 +231,24 @@ function FirebugConsoleHandler(context, win)
         Firebug.Errors.increaseCount(context);
 
         if (!args || !args.length || args.length == 0)
-            args = [FBL.$STR("Assertion")];
+            var msg = [FBL.$STR("Assertion")];
+        else 
+            var msg = args[0];
 
-        var sourceLink = getStackLink();
-        var row = Firebug.Console.log(null, context, "assert", FirebugReps.Assert, true, sourceLink);
-        var argsRow = row.firstChild.firstChild;
-        Firebug.Console.appendFormatted(args, argsRow, context);
-        // XXXjjb I took some stuff out I didn't understand
-
+        var sourceName = win.location;
+        var lineNumber = 0;
+        var trace = getAccurateUserStackTrace();
+        if (trace && trace.frames[0])
+        {
+            var frame = trace.frames[0];
+            sourceName = frame.script.fileName;
+            lineNumber = frame.line;
+        }
+        
+        var errorObject = new FBL.ErrorMessage(msg, sourceName,
+                        lineNumber, "", "assert", context, trace);
+                        
+        var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
     }
 
@@ -259,7 +257,10 @@ function FirebugConsoleHandler(context, win)
         // Starting with our stack, walk back to the user-level code
         var frame = Components.stack;
         var userURL = win.location.href.toString();
-
+        
+        if (FBTrace.DBG_CONSOLE || true) 
+            FBTrace.sysout("consoleInjector.getUserStack for userURL "+userURL, FBL.getStackDump());
+            
         while (frame && (frame.filename != userURL) )
             frame = frame.caller;
 
@@ -269,6 +270,24 @@ function FirebugConsoleHandler(context, win)
     function getStackLink()
     {
         return FBL.getFrameSourceLink(getUserStack());
+    }
+    
+    function getAccurateUserStackTrace()
+    {
+        var trace = FBL.getCurrentStackTrace(context);
+
+        var frames = trace.frames;
+        if (frames && (frames.length > 0) )
+        {
+            var bottom = frames.length - 1;
+            for (var i = 0; i < frames.length; i++)
+                if (frames[bottom - i].href.indexOf("chrome:") == 0) break;
+
+            trace.frames = trace.frames.slice(bottom - i + 1);
+            return trace;
+        }
+        else
+            return "Firebug failed to get stack trace with any frames";
     }
 }
 

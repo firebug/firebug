@@ -77,9 +77,14 @@ function _FirebugConsole()
     };
 
     this.assert = function(x)
-    {this.notifyFirebug(["Array.prototype", Array.prototype], "info");
+    { 
         if (!x)
-            this.notifyFirebug(Array.prototype.slice.call(arguments, 1), "assert");
+        {
+            var rest = [];
+            for (var i = 1; i < arguments.length; i++)
+                rest.push(arguments[i]);
+            this.notifyFirebug(rest, "assert");
+        }
     };
 
 
@@ -114,7 +119,7 @@ function _FirebugConsole()
     };
 
     this.time = function(name, reset)
-    {
+    {try {
         if (!name)
             return;
 
@@ -127,6 +132,10 @@ function _FirebugConsole()
             return;
 
         this.timeCounters[name] = time;
+        } catch(e) {
+            this.notifyFirebug(["time FAILS", e], "trace");
+        } 
+        
     };
 
     this.timeEnd = function(name)
