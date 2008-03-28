@@ -121,8 +121,7 @@ function FirebugConsoleHandler(context, win)
 
     this.assert = function(x)
     {
-        if (!x)
-            logAssert(FBL.sliceArray(arguments, 1));
+        logAssert(arguments);
     };
 
     this.dir = function(o)
@@ -238,7 +237,6 @@ function FirebugConsoleHandler(context, win)
 
         var sourceLink = getStackLink();
         var row = Firebug.Console.log(null, context, "assert", FirebugReps.Assert, true, sourceLink);
-
         var argsRow = row.firstChild.firstChild;
         Firebug.Console.appendFormatted(args, argsRow, context);
         // XXXjjb I took some stuff out I didn't understand
