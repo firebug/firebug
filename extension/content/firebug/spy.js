@@ -84,7 +84,7 @@ Firebug.Spy = extend(Firebug.Module,
         {
             if (Firebug.Spy.skipSpy(win))
                 return;
-                
+
             for( var i = 0; i < contexts.length; ++i )
             {
                 if ( (contexts[i].context == context) && (contexts[i].win == win) )
@@ -101,20 +101,19 @@ Firebug.Spy = extend(Firebug.Module,
 
     detachSpy: function(context, win)
     {
-        if (win)
+        for( var i = 0; i < contexts.length; ++i )
         {
-            for( var i = 0; i < contexts.length; ++i )
+            if ( (contexts[i].context == context) )
             {
-                if ( (contexts[i].context == context) && (contexts[i].win == win) )
+                if (win && (contexts[i].win != win) )
+                    continue;
+                contexts.splice(i, 1);
+                if ( contexts.length == 0 )
                 {
-                    contexts.splice(i, 1);
-                    if ( contexts.length == 0 )
-                    {
-                        observerService.removeObserver(httpObserver, "http-on-modify-request", false);
-                        observerService.removeObserver(httpObserver, "http-on-examine-response", false);
-                    }
-                    return;
+                    observerService.removeObserver(httpObserver, "http-on-modify-request", false);
+                    observerService.removeObserver(httpObserver, "http-on-examine-response", false);
                 }
+                return;
             }
         }
     },
@@ -133,12 +132,7 @@ Firebug.Spy = extend(Firebug.Module,
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
-        for (var i in context.spies)
-        {
-            var spy = context.spies[i];
-            spy.detach();
-        }
-
+        this.detachSpy(context, false);   
         delete context.spies;
     },
 
@@ -273,8 +267,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     browseObject: function(spy, context)
     {
-        // XXXjoe Need to combine this with window.location
-        var url = spy.xhrRequest.channel ? spy.xhrRequest.channel.name : spy.href;
+        var url = getURL(spy);
         openNewTab(url);
         return true;
     },
@@ -438,7 +431,7 @@ function requestStopped(request, xhrRequest, context, method, url)
     if (!spy.responseText)
         spy.responseText = spy.xhrRequest.responseText;
 
-    if (FBL.DBG_NET)                                                                                                   /*@explore*/
+    if (FBTrace.DBG_NET)                                                                                                   /*@explore*/
         FBL.sysout("onHTTPSpyLoad responseTime=" + responseTime                              /*@explore*/
             + " spy.responseText " + spy.responseText.length + " bytes\n");                      /*@explore*/
 
@@ -460,6 +453,8 @@ function requestStopped(request, xhrRequest, context, method, url)
         }
         catch (exc)
         {
+            if (FBTrace.DBG_NET) /*@explore*/
+                FBTrace.dumpProperties("spy.requestStopped status access FAILED:", exc); /*@explore*/
         }
     }
 }
@@ -468,10 +463,15 @@ function onHTTPSpyReadyStateChange(spy, event)
 {
     try
     {
+        spy.context.onReadySpy = spy; // maybe the handler will eval(), we want the URL.
         if (spy.onreadystatechange)
             spy.onreadystatechange.handleEvent(event);
     }
     catch (exc) { }
+    finally
+    {
+        delete spy.context.onReadySpy;
+    }
 
     if (spy.xhrRequest.readyState == 4)
     {
@@ -517,6 +517,7 @@ function onHTTPSpyError(spy)
     if (spy.context.spies)
         remove(spy.context.spies, spy);
 }
+
 
 function updateLogRow(spy, responseTime)
 {
