@@ -1,0 +1,21 @@
+Release Notes for Firebug 1.1
+Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
+Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
+
+== Enablement UI ==
+    * Disable always: when the Firebug UI is not active on any page, the debugger is disabled (minimal overhead)
+    * Instant on: when the Firebug UI is active, HTML, CSS, DOM views activate (minimal overhead)
+    * Script panel user-activation: initially disabled, enable, or initially enabled.
+    * Net panel user-activiation: initially disabled, enable, or initially enabled.
+    * No Allowed-sites/Disable for Site 
+
+== Javascript Debugging ==
+
+== Net Panel ==
+
+== Console ==
+
+== Command Line ==
+
+== Bug Fixes ==
+
