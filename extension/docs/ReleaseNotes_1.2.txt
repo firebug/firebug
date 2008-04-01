@@ -7,15 +7,25 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Instant on: when the Firebug UI is active, HTML, CSS, DOM views activate (minimal overhead)
     * Script panel user-activation: initially disabled, enable, or initially enabled.
     * Net panel user-activiation: initially disabled, enable, or initially enabled.
-    * No Allowed-sites/Disable for Site 
+    * No Allowed-sites/Disable for Site: no longer needed.
+  The UI for this feature is being refined; overhead tests have not been completed. 
+  We are interested in feedback on this UI change.
 
 == Javascript Debugging ==
+    * Written/cleaned up eval support
+    * Performance on eval better, easier to support.
+  This feature is complete; Bug reports on javascript debugger welcome.
 
 == Net Panel ==
+    * Net timing more accurate
 
 == Console ==
+    * Redesigned to use events/attribute passing.
+  Untested, has problems, duplicate postings.
 
 == Command Line ==
+    * Redesigned to avoid using evalInSandbox.
+  Untested, has problems, no CommandLineAPI yet.
 
 == Bug Fixes ==
 

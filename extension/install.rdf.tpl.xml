@@ -27,9 +27,10 @@
     </em:targetApplication>
 
     <em:name>Firebug</em:name>
-    <em:description>Web Development Evolved. (See http://fireclipse.xucia.com for updates)</em:description>
+    <em:description>Web Development Evolved.</em:description>
     <em:creator>Joe Hewitt</em:creator>
-    <em:contributor>1.1 enhancements: John J. Barton (IBM Almaden)</em:contributor>
+    <em:contributor>1.1 and 1.2 enhancements: John J. Barton (IBM Almaden)</em:contributor>
+    <em:contributor>Jan Odvarko (All Peers Inc.)</em:contributor>
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
