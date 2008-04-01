@@ -60,7 +60,7 @@ const enableLocalFilesPref = "enableLocalFiles";
 
 Firebug.Debugger = extend(Firebug.ActivableModule,
 {
-    fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*explore*/
+    fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
 
@@ -613,7 +613,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     supportsGlobal: function(global)
-    { 
+    {
         var context = (TabWatcher ? TabWatcher.getContextByWindow(global) : null);
         this.breakContext = context;
         return !!context;
@@ -1075,7 +1075,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody", 1, eval_expr);
         if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile source:"+source+"\n");                     /*@explore*/
 
-        var url = this.getDynamicURL(frame, source, "eval");
+        if (context.onReadySpy)  // coool we can get the request URL.
+        {
+            var url = context.onReadySpy.getURL();
+            FBTrace.sysout("getEvalLevelSourceFile using spy URL:"+url+"\n");
+        }
+        else
+            var url = this.getDynamicURL(frame, source, "eval");
 
         var lines = context.sourceCache.store(url, source);
         var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines.length, innerScripts);
@@ -1394,7 +1400,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (!context || !context.browser)
             return "disable";
-            
+
         var location = context.browser.currentURI;
         var host = getURIHost(location);
 
@@ -1715,6 +1721,26 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!expr || isJavaScriptKeyword(expr))
             return false;
 
+        var self = this;
+        // If the evaluate fails, then we report an error and don't show the infoTip
+        Firebug.CommandLine.evaluate(expr, this.context, null, this.context.window,
+            function success(result, context)
+            {
+                var rep = Firebug.getRep(result);
+                var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+                tag.replace({object: result}, infoTip);
+
+                self.infoTipExpr = expr;
+            },
+            function failed(result, context)
+            {
+                self.infoTipExpr = "";
+            }
+        );
+        return (self.infoTipExpr == expr);
+
+            /*
         try
         {
             var value = Firebug.CommandLine.evaluate(expr, this.context, null, null, true);
@@ -1730,6 +1756,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             return false;
         }
+        */
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2030,21 +2057,21 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (FBL.showThisSourceFile(allSources[i].href))
                 list.push(allSources[i]);
         }
-        
+
        iterateWindows(context.window, function(win) {
             if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
                 FBTrace.sysout("getLocationList iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);  /*@explore*/
             if (!win.document.documentElement)
                 return;
             var url = win.location.href;
-            if (url) 
+            if (url)
             {
                 if (context.sourceFileMap.hasOwnProperty(url))
                     return;
                 list.push(new NoScriptSourceFile(context, url));
             }
         });
-        
+
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList ", list); /*@explore*/
         return list;
     },

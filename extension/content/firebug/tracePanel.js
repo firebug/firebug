@@ -25,6 +25,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_BP: false, 			// debugger.js and firebug-services.js; lots of output
     DBG_CSS: false,             // CSS panel or css stuff
     DBG_CACHE: false,   		// sourceCache
+    DBG_CONSOLE: false,         // console
     DBG_DISPATCH: false, 		// lib.dispatch
     DBG_DBG2FIREBUG: false,     // put trace output to Firebug console
     DBG_ERRORS: false,  		// error.js

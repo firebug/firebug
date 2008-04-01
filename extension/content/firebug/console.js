@@ -51,7 +51,7 @@ Firebug.Console = extend(Firebug.Module,
             if (panel)
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
-                
+
                 var container = panel.getTopContainer();
                 var template = Firebug.NetMonitor.NetLimit;
 
@@ -61,8 +61,8 @@ Firebug.Console = extend(Firebug.Module,
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-              
-                return row;                
+
+                return row;
             }
         }
         else
@@ -117,6 +117,65 @@ Firebug.Console = extend(Firebug.Module,
         browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
     },
 
+    watchWindow: function(context, win)
+    {
+        // This is early enough but we don't have a frame
+        if (win.wrappedJSObject && !win.wrappedJSObject.console)
+            this.attachConsoleInjector(context, win);
+
+        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
+        {                                                                                                              /*@explore*/
+            if (win.wrappedJSObject.console)                                                                                           /*@explore*/
+                FBTrace.sysout("firebug.watchWindow created win.console for "+win.location+"\n");          /*@explore*/
+            else                                                                                                       /*@explore*/
+                FBTrace.sysout("firebug.watchWindow failed to create win.console for "+win.location+"\n"); /*@explore*/
+        }                                                                                                              /*@explore*/
+                                                                                                                       /*@explore*/
+    },
+
+    getConsoleInjectionScript: function() {
+        if (!this.consoleInjectionScript)
+        {
+            var startLoader = "window.loadFirebugConsole = function() { \n";
+            var eventCreation = " var event = document.createEvent('Events'); \n";
+            var eventInit = " event.initEvent('loadFirebugConsole', true, false); \n"
+            var eventDispatch = " window.dispatchEvent(event); \n";
+            var endLoader = " /*window.dump('loadFirebugConsole dispatched event, done\\n');*/};\n";
+            this.consoleInjectionScript = startLoader + eventCreation + eventInit + eventDispatch + endLoader;
+        }
+        return this.consoleInjectionScript;
+    },
+
+    attachConsoleInjector: function(context, win)
+    {
+        if (!context.attachConsoleInjectorHandler)
+            context.attachConsoleInjectorHandler = [];
+        context.attachConsoleInjectorHandler[win] = function(event)
+        {
+            Firebug.Console.injector.attachConsole(context, win);
+            win.removeEventListener('loadFirebugConsole', context.attachConsoleInjectorHandler[win], true);
+            delete context.attachConsoleInjectorHandler[win];
+        }
+        win.addEventListener('loadFirebugConsole',  context.attachConsoleInjectorHandler[win], true);
+
+        var consoleInjection = this.getConsoleInjectionScript();
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location+":\n "+consoleInjection+"\n");
+        Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
+    },
+
+    unwatchWindow: function(context, win)
+    {
+        try
+        {
+            delete win.console;
+        }
+        catch (exc)
+        {
+            FBTrace.dumpStack("unwatchWindow"+exc);  // FF3 hack TODO
+        }
+    },
+
     showPanel: function(browser, panel)
     {
     }
@@ -164,7 +223,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
                 FirebugReps.SourceLink.tag.append({object: sourceLink}, row);
 
             container.appendChild(row);
-            
+
             this.filterLogRow(row, scrolledToBottom);
 
             if (scrolledToBottom)
@@ -295,20 +354,20 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
     searchable: true,
     editable: false,
 
-    initialize: function() 
+    initialize: function()
     {
         Firebug.Panel.initialize.apply(this, arguments);
 
-        var row = this.createRow("limitRow");            
-        
+        var row = this.createRow("limitRow");
+
         var template = Firebug.NetMonitor.NetLimit;
         var nodes = template.createTable(row);
 
         this.limit = nodes[1];
-        
+
         var container = this.getTopContainer();
         container.appendChild(nodes[0]);
-        
+
         // Initialize log limit and listen for changes.
         this.updateMaxLimit();
         prefs.addObserver(Firebug.prefDomain, this, false);
@@ -329,7 +388,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 
     hide: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/        
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/
 
         this.showToolbarButtons("fbConsoleButtons", false);
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
@@ -439,13 +498,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 
         return finder.Find(text, searchRange, startPt, endPt) != null;
     },
-    
+
     // nsIPrefObserver
-    observe: function(subject, topic, data) 
+    observe: function(subject, topic, data)
     {
         // We're observing preferences only.
         if (topic != "nsPref:changed")
-          return; 
+          return;
 
         // xxxHonza check this out.
         var prefDomain = "Firebug.extension.";
@@ -453,12 +512,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         if (prefName == "maxQueueRequests")
             this.updateMaxLimit();
     },
-    
+
     updateMaxLimit: function()
     {
         var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
         maxQueueRequests =  value ? value : maxQueueRequests;
-    }    
+    }
 });
 
 // ************************************************************************************************

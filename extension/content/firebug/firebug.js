@@ -805,18 +805,18 @@ top.Firebug =
             return;
 
         if (!context || !context.errorCount)
-            return; 
-          
+            return;
+
         var browser = FirebugChrome.getCurrentBrowser();
         if (!browser.chrome)
-            return;          
-            
-        var panel = browser.chrome.getSelectedPanel();  
+            return;
+
+        var panel = browser.chrome.getSelectedPanel();
         if (panel && panel.name != "console")
         {
             browser.chrome.selectPanel("console");
             cancelEvent(event);
-        }        
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1188,18 +1188,6 @@ top.Firebug =
 
     watchWindow: function(context, win)
     {
-        // XXXjoe Move this to Firebug.Console
-        if (!win.wrappedJSObject.console)
-            this.attachConsole(context, win); 
-
-        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-        {                                                                                                              /*@explore*/
-            if (win.wrappedJSObject.console)                                                                                           /*@explore*/
-                FBTrace.sysout("firebug.watchWindow created win.console for "+win.location+"\n");          /*@explore*/
-            else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow failed to create win.console for "+win.location+"\n"); /*@explore*/
-        }                                                                                                              /*@explore*/
-                                                                                                                       /*@explore*/
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];
@@ -1207,24 +1195,8 @@ top.Firebug =
         }
     },
 
-    attachConsole: function(context, win)
-    {
-        //win.wrappedJSObject.console = new FirebugConsole(context, win);
-        Firebug.Console.injector.attachConsole(context, win);  
-    },
-
     unwatchWindow: function(context, win)
     {
-        // XXXjoe Move this to Firebug.Console
-        try
-        {
-            delete win.console;
-        }
-        catch (exc)
-        {
-            FBTrace.dumpStack("unwatchWindow"+exc);  // FF3 hack TODO
-        }
-
         for (var panelName in context.panelMap)
         {
             var panel = context.panelMap[panelName];

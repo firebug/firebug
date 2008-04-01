@@ -25,6 +25,38 @@ Firebug.CommandLine = extend(Firebug.Module,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    evaluateAndShow: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
+    {
+        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+        var element = win.document.getElementById("_firebugConsole");
+        if (!element)
+        {
+             Firebug.Console.injector.injectConsoleScriptTag(win);
+             var element = win.document.getElementById("_firebugConsole");
+        }
+        var event = document.createEvent("Events");
+        event.initEvent("firebugCommandLine", true, false);
+        element.setAttribute("methodName", "evaluate");
+        element.setAttribute("expr", expr.toString());
+
+        context.consoleHandler.evaluated = function useConsoleFunction(result, context)
+        {
+            successConsoleFunction(result, context);  // result will be pass thru this function
+        }
+
+        if (exceptionFunction)
+        {
+            context.consoleHandler.evaluateError = function useExceptionFunction(result, context)
+            {
+                exceptionFunction(result, context);
+            }
+        }
+        else
+            context.consoleHandler.evaluateError = Firebug.Console.error;
+
+        element.dispatchEvent(event);
+    },
+
     evaluate: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
     {
         if (!context)
@@ -56,48 +88,57 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         else
         {
-            // targetWindow may be frame in HTML
             var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
-
-            if (!context.sandboxes)
-                context.sandboxes = [];
-
-            var sandbox = this.getSandboxByWindow(context, win);
-            if (!sandbox)
-            {
-                sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-                sandbox.__proto__ = win.wrappedJSObject;
-                context.sandboxes.push(sandbox); // XXXdolske does this get cleared?  LEAK?
-            }
-
-            var scriptToEval = expr;
-
-            // If we want to use a specific |this|, wrap the expression with Function.apply()
-            // and inject the new |this| into the sandbox so it's easily accessible.
-            if (thisValue) {
-                // XXXdolske is this safe if we're recycling the sandbox?
-                sandbox.__thisValue__ = thisValue;
-                scriptToEval = "(function() { return " + scriptToEval + " \n}).apply(__thisValue__);";
-            }
-
-            // Page scripts expect |window| to be the global object, not the
-            // sandbox object itself. Stick window into the scope chain so
-            // assignments like |foo = bar| are effectively |window.foo =
-            // bar|, else the page won't see the new value.
-            scriptToEval = "with (window) { " + scriptToEval + " \n};";
-
-            try {
-                result = Components.utils.evalInSandbox(scriptToEval, sandbox);
-            } catch (e) {
-                // XXXdolske if(skipNotDefinedMessages) don't make noise?
-               // dump("\n\n=== evalInSandbox threw evaluating " + scriptToEval + "\n    ..." + e + "\n");
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILED:", e);  /*@explore*/
-                result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, this.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
-            }
+            result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, skipNotDefinedMessages);
         }
 
         context.invalidatePanels("dom", "watches", "domSide");
 
+        return result;
+    },
+
+
+    // TODO: strip down to minimum, have one global sandbox that is reused.
+    evaluateInSandbox: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
+    {
+        // targetWindow may be frame in HTML
+        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+
+        if (!context.sandboxes)
+            context.sandboxes = [];
+
+        var sandbox = this.getSandboxByWindow(context, win);
+        if (!sandbox)
+        {
+            sandbox = new Components.utils.Sandbox(win); // Use DOM Window
+            sandbox.__proto__ = win.wrappedJSObject;
+            context.sandboxes.push(sandbox); // XXXdolske does this get cleared?  LEAK?
+        }
+
+        var scriptToEval = expr;
+
+        // If we want to use a specific |this|, wrap the expression with Function.apply()
+        // and inject the new |this| into the sandbox so it's easily accessible.
+        if (thisValue) {
+            // XXXdolske is this safe if we're recycling the sandbox?
+            sandbox.__thisValue__ = thisValue;
+            scriptToEval = "(function() { return " + scriptToEval + " \n}).apply(__thisValue__);";
+        }
+
+        // Page scripts expect |window| to be the global object, not the
+        // sandbox object itself. Stick window into the scope chain so
+        // assignments like |foo = bar| are effectively |window.foo =
+        // bar|, else the page won't see the new value.
+        scriptToEval = "with (window?window:null) { " + scriptToEval + " \n};";
+
+        try {
+            result = Components.utils.evalInSandbox(scriptToEval, sandbox);
+        } catch (e) {
+            // XXXdolske if(skipNotDefinedMessages) don't make noise?
+           // dump("\n\n=== evalInSandbox threw evaluating " + scriptToEval + "\n    ..." + e + "\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILED:", e);  /*@explore*/
+            result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, this.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
+        }
         return result;
     },
 
@@ -142,8 +183,9 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
         }
 
-        var result = this.evaluate(expr, context);
-        Firebug.Console.log(result, context);
+        this.evaluateAndShow(expr, context, null, context.window, FBL.bind(Firebug.Console.log, Firebug.Console)); // XXXjjb targetWindow??
+        //var result = this.evaluate(expr, context);
+        //Firebug.Console.log(result, context);
     },
 
     enterMenu: function(context)
@@ -155,6 +197,17 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         this.appendToHistory(expr, true);
 
+        this.evaluateAndShow(expr, context, null, context.window, function(result, context)
+        {
+            if (typeof(result) != "undefined")
+            {
+                context.chrome.contextMenuObject = result;
+
+                var popup = context.chrome.$("fbContextMenu");
+                popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
+            }
+        });
+        /*
         var result = this.evaluate(expr, context);
         if (typeof(result) != "undefined")
         {
@@ -163,6 +216,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             var popup = context.chrome.$("fbContextMenu");
             popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
         }
+        */
     },
 
     enterInspect: function(context)
@@ -175,9 +229,14 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.clear(context);
         this.appendToHistory(expr);
 
-        var result = this.evaluate(expr, context);
-        if (typeof(result) != undefined)
-            context.chrome.select(result);
+        this.evaluateAndShow(expr, context, null, context.window, function(result, context)
+        {
+            if (typeof(result) != undefined)
+                context.chrome.select(result);
+        });
+        //var result = this.evaluate(expr, context);
+        //if (typeof(result) != undefined)
+        //    context.chrome.select(result);
     },
 
     reenter: function(context)
@@ -337,6 +396,18 @@ Firebug.CommandLine = extend(Firebug.Module,
         var chrome = context ? context.chrome : FirebugChrome;
         var command = chrome.$("cmd_focusCommandLine");
         command.setAttribute("disabled", !context);
+
+        if (context && context.window && context.window.wrappedJSObject && !context.window.wrappedJSObject.console)
+        {
+            // There is no console, so we need to add one if the command line is used.
+            var handler = attachCommandLine(context, chrome);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("commandLine.showContext no console, attach to focus: "+handler+"\n");
+            chrome.$("fbLargeCommandLine").addEventListener('focus', handler, true);
+            chrome.$("fbCommandLine").addEventListener('focus', handler, true);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("commandLine.showContext ready onfocus to attach command line\n");
+        }
     },
 
     showPanel: function(browser, panel)
@@ -420,8 +491,20 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             if (lastDot != -1)
                 preExpr = preExpr.substr(0, lastDot);
 
-            var object = Firebug.CommandLine.evaluate(preExpr, context, context.thisValue);
-            return keys(object.wrappedJSObject).sort(); // return is safe
+            var self = this;
+            this.evaluateAndShow(preExpr, context, context.thisValue, context.window,
+                function found(result, context)
+                {
+                    self.complete = keys(result.wrappedJSObject).sort(); // return is safe
+                },
+                function failed(result, context)
+                {
+                    self.complete = [];
+                }
+            );
+            return self.complete;
+            //var object = Firebug.CommandLine.evaluate(preExpr, context, context.thisValue);
+            //return keys(object.wrappedJSObject).sort(); // return is safe
         }
         else
         {
@@ -490,6 +573,31 @@ function cleanIndentation(text)
             lines[i] = line.substr(minIndent);
     }
     return lines.join("\n");
+}
+
+function attachCommandLine(context, chrome)
+{
+    if (FBTrace.DBG_CONSOLE)
+        FBTrace.sysout("commandLine.attachCommandLine has window: "+context.window+"\n");
+    // return an event handler to be called when we need to inject the command line
+    context.attachCommandLineHandler = function(event) {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("commandLine.attachCommandLine event handler has window: "+context.window+"\n");
+        // Run on setTimeout to avoid interfering with user input interaction
+        setTimeout( function ()
+        {
+            if (!context || ! context.window)
+                return;  // XXXjjb !!!!!!!!!!!!! TODO: the handler should NOT be called, it should have been removed.
+            Firebug.Console.injector.injectConsoleScriptTag(context.window);
+            Firebug.Console.injector.addConsoleListener(context, context.window);
+
+            chrome.$("fbLargeCommandLine").removeEventListener('focus', context.attachCommandLineHandler, true);
+            chrome.$("fbCommandLine").removeEventListener('focus', context.attachCommandLineHandler, true);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("commandLine attached to "+context.window.location+"\n");
+        });
+    }
+    return context.attachCommandLineHandler;
 }
 
 // ************************************************************************************************

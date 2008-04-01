@@ -90,6 +90,7 @@ pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon fu
 pref("extensions.firebug.DBG_EVAL", false);    		// debugger.js and firebug-service.js        /*@explore*/
 pref("extensions.firebug.DBG_PANELS", false);  		// panel selection                           /*@explore*/
 pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                               /*@explore*/
+pref("extensions.firebug.DBG_CONSOLE", false);        // console                                   /*@explore*/
 pref("extensions.firebug.DBG_CSS", false);          //                                             /*@explore*/
 pref("extensions.firebug.DBG_DBG2FIREBUG", false);  //                                             /*@explore*/
 pref("extensions.firebug.DBG_DISPATCH", false);     //                                          /*@explore*/

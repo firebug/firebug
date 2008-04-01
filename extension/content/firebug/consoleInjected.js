@@ -20,6 +20,7 @@ function _FirebugConsole()
         }
         element.setAttribute("lastAddition", this.userObjects.length - 1 + "");
         element.dispatchEvent(event);
+        //dump("FirebugConsole dispatched event "+methodName+"\n");
     };
 
     this.getFirebugElement = function()
@@ -31,6 +32,16 @@ function _FirebugConsole()
             element.setAttribute("id", "_firebugConsole");
             element.setAttribute("class", "firebugIgnore");
             element.setAttribute("style", "display:none");
+
+            var self = this;
+            element.addEventListener("firebugCommandLine", function(event)
+            {
+                var element = event.target;
+                var expr = element.getAttribute("expr"); // see commandLine.js
+                dump("consoleInjected got event, sending expr to evaluate:"+expr+"\n");
+                self.evaluate(expr);
+            }, true);
+
             document.documentElement.appendChild(element);
 
             var event = document.createEvent("Events");
@@ -77,7 +88,7 @@ function _FirebugConsole()
     };
 
     this.assert = function(x)
-    { 
+    {
         if (!x)
         {
             var rest = [];
@@ -134,8 +145,8 @@ function _FirebugConsole()
         this.timeCounters[name] = time;
         } catch(e) {
             this.notifyFirebug(["time FAILS", e], "trace");
-        } 
-        
+        }
+
     };
 
     this.timeEnd = function(name)
@@ -171,6 +182,21 @@ function _FirebugConsole()
     this.count = function(key)
     {
         this.notifyFirebug(arguments, "count");
+    };
+
+    this.evaluate = function(expr)
+    {
+        try
+        {
+            var result = eval(expr);
+            this.notifyFirebug([result], "evaluated");
+        }
+        catch(exc)
+        {
+            var result = exc;
+            result.source = expr;
+            this.notifyFirebug([result], "evaluateError");
+        }
     };
 }
 //window.dump("============================>>>> Setting console <<<< ====================================\n");

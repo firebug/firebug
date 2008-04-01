@@ -437,10 +437,33 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         var object = this.getRowObject(row);
         if (object && !(object instanceof jsdIStackFrame))
         {
+                // unwrappedJSObject.property = unwrappedJSObject
+                Firebug.CommandLine.evaluateAndShow(value, this.context, object, this.context.window,
+                    function success(result, context)
+                    {
+                        object[name] = result;
+                    },
+                    function failed(result, context)
+                    {
+                        try
+                        {
+                            // If the value doesn't parse, then just store it as a string.  Some users will
+                            // not realize they're supposed to enter a JavaScript expression and just type
+                            // literal text
+                            object[name] = String(value);  // unwrappedJSobject.property = string
+                        }
+                        catch (exc)
+                        {
+                            return;
+                        }
+                     }
+                );
+
+
+                        /*
             try
             {
-                // unwrappedJSobject.property = unwrappedJSObject
-                object[name] = Firebug.CommandLine.evaluate(value, this.context, object);
+                        Firebug.CommandLine.evaluate(value, this.context, object);
             }
             catch (exc)
             {
@@ -456,12 +479,13 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                     return;
                 }
             }
+            */
         }
         else if (this.context.stopped)
         {
             try
             {
-                Firebug.CommandLine.evaluate(name+"="+value, this.context);  // XXXjjb I don't know how this can work
+                Firebug.CommandLine.evaluate(name+"="+value, this.context);
             }
             catch (exc)
             {
@@ -1118,7 +1142,22 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
             for (var i = 0; i < this.watches.length; ++i)
             {
                 var expr = this.watches[i];
-
+                var value = null;
+                Firebug.CommandLine.evaluateAndShow(expr, this.context, null, this.context.window,
+                    function success(result, context)
+                    {
+                        value = result;
+                    },
+                    function failed(result, context)
+                    {
+                        var exc = result;
+                        if (exc instanceof  context.window.Error)
+                            value = new ErrorCopy(exc.message);
+                        else
+                            value = new ErrorCopy(exc+"");
+                    }
+                );
+                /*
                 var value;
                 try
                 {
@@ -1131,7 +1170,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
                     else
                         value = new ErrorCopy(exc+"");
                 }
-
+                */
                 addMember("watch", members, expr, value, 0);
             }
         }
@@ -1226,12 +1265,12 @@ function getMembers(object, level)  // we expect object to be user-level object 
     try
     {
         var domMembers = getDOMMembers(object);
-        
+
         if (object.wrappedJSObject)
             var insecureObject = object.wrappedJSObject;
         else
             var insecureObject = object;
-            
+
         for (var name in insecureObject)  // enumeration is safe
         {
             if (ignoreVars[name] == 1)  // javascript.options.strict says ignoreVars is undefined.

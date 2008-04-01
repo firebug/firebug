@@ -12,14 +12,34 @@ top.Firebug.Console.injector = {
 
     attachConsole: function(context, win)
     {
+        if (!win)
+            return;
+
+        Firebug.Console.injector.injectConsoleScriptTag(win);
+        Firebug.Console.injector.addConsoleListener(context, win);
+    },
+
+    injectConsoleScriptTag: function(win)
+    {
+        if (!win)
+        {
+            FBTrace.dumpStack("no win in injectConsoleScriptTag!");
+            return;
+        }
+        var element = win.document.createElement("script");
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector.attacheConsoleViaScriptTag after createElement win:"+win.location+"\n");
+
+        element.setAttribute("type", "text/javascript");
+        element.setAttribute("id", "_firebugConsoleInjector");
+        element.setAttribute("class", "firebugIgnore");
+        element.setAttribute("style", "display:none");
+
         var src = this.getInjectedSource();
-        var result = Firebug.CommandLine.evaluate(src, context, null, win);  // win maybe frame
-
-        if (result instanceof FBL.ErrorMessage)
-            Firebug.Console.log(result, context, "assert");
-
-        var handler = new FirebugConsoleHandler(context, win);
-        win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
+        src += "\nconsole.getFirebugElement();\n"; // force initialization
+        element.innerHTML = src;
+        win.document.documentElement.appendChild(element);
     },
 
     getInjectedSource: function()
@@ -44,14 +64,25 @@ top.Firebug.Console.injector = {
         scriptableStream.close();
         input.close();
         return str;
-    }
+    },
+
+    addConsoleListener: function(context, win)
+    {
+        var handler = new FirebugConsoleHandler(context, win);
+        // When raised on the window, cause console script injection
+        // When raised on our injected element, callback to Firebug and append to console
+        win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
+        context.consoleHandler = handler;
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector addConsoleListener attached handler to window:"+win.location+"\n");
+    },
+
 }
 
 function FirebugConsoleHandler(context, win)
 {
     this.handleEvent = function(event)
     {
-
         var element = event.target;
         var firstAddition = element.getAttribute("firstAddition");
         var lastAddition = element.getAttribute("lastAddition");
@@ -74,7 +105,7 @@ function FirebugConsoleHandler(context, win)
                 break;
         }
 
-        if (FBTrace.DBG_CONSOLE || true)
+        if (FBTrace.DBG_CONSOLE)
         {
             //FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
             //FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
@@ -206,6 +237,16 @@ function FirebugConsoleHandler(context, win)
         }
     };
 
+    // These functions are over-ridden by commandLine
+    this.evaluated = function(result, context)
+    {
+        Firebug.Console.log(result, context);
+    };
+    this.evaluateError = function(result, context)
+    {
+        Firebug.Console.error(result, context);
+    };
+
 /*
     this.addTab = function(url, title, parentPanel)
     {
@@ -232,7 +273,7 @@ function FirebugConsoleHandler(context, win)
 
         if (!args || !args.length || args.length == 0)
             var msg = [FBL.$STR("Assertion")];
-        else 
+        else
             var msg = args[0];
 
         var sourceName = win.location;
@@ -244,10 +285,10 @@ function FirebugConsoleHandler(context, win)
             sourceName = frame.script.fileName;
             lineNumber = frame.line;
         }
-        
+
         var errorObject = new FBL.ErrorMessage(msg, sourceName,
                         lineNumber, "", "assert", context, trace);
-                        
+
         var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
     }
@@ -257,10 +298,10 @@ function FirebugConsoleHandler(context, win)
         // Starting with our stack, walk back to the user-level code
         var frame = Components.stack;
         var userURL = win.location.href.toString();
-        
-        if (FBTrace.DBG_CONSOLE || true) 
+
+        if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getUserStack for userURL "+userURL, FBL.getStackDump());
-            
+
         while (frame && (frame.filename != userURL) )
             frame = frame.caller;
 
@@ -271,7 +312,7 @@ function FirebugConsoleHandler(context, win)
     {
         return FBL.getFrameSourceLink(getUserStack());
     }
-    
+
     function getAccurateUserStackTrace()
     {
         var trace = FBL.getCurrentStackTrace(context);
