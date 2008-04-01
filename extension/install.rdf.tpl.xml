@@ -35,11 +35,7 @@
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>@UPDATEPATH@/update.rdf</em:updateURL>
-	<em:updateKey>
-		MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDA6eg5lT8wHTQsSn+ml+Njwm8p3iCgPAHM
-		xfqGlZl6Zg70mLzZo0Drna6gyHfqSuQ4BfWvQ1fIxIdH5tHGIsXpY9R7igHt2Rv3CGRDbIm3
-		Ic+oHnLytnMZc3Gu0imORZAHLSejQEnqZ4OqdT534QyRXi3aEZXCjvLZ7+cfTaMn1QIDAQAB
-	</em:updateKey>
+	<em:updateKey>ToBeReplaceByAKeyFromMcCoy</em:updateKey>
 
   </Description>
 </RDF>
