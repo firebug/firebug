@@ -39,7 +39,6 @@ const reLineNumber = /^[^\\]?#(\d*)$/;
 
 const reEval =  /\s*eval\s*\(([^)]*)\)/m;        // eval ( $1 )
 const reHTM = /\.[hH][tT][mM]/;
-const reURIinComment = /\/\/@\ssourceURL=\s*(.*)\s*$/m;
 const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 
 
@@ -1113,23 +1112,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getURLFromLastLine: function(source)
     {
-        var lastLineLength = 0;
-        var endLastLine = source.length - 1;
-        while(lastLineLength < 3) // skip newlines at end of buffer
-        {
-            var lastNewline = source.lastIndexOf('\n', endLastLine);
-            if (lastNewline < 0)
-            {
-                var lastNewLine = source.lastIndexOf('\r', endLastLine);
-                if (lastNewLine < 0)
-                    return;
-            }
-            lastLineLength = source.length - lastNewline;
-            endLastLine = lastNewline - 1;
-        }
-        var lastLines = source.slice(lastNewline + 1);
-
-        var m = reURIinComment.exec(lastLines);
+        // Ignores any trailing whitespace in |source|
+        const reURIinComment = /\/\/@\ssourceURL=\s*(\S*?)\s*$/m;
+        var m = reURIinComment.exec(source);
         if (m)
             return m[1];
     },
