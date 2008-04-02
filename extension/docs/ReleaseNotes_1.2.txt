@@ -18,6 +18,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Net Panel ==
     * Net timing more accurate
+    * Only real network requests displayed.
+    * Limit for number of requests (configurable in preferences).
+    * Additional columns for: request method, status response + text
 
 == Console ==
     * Redesigned to use events/attribute passing.
