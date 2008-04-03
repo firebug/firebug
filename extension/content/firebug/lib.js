@@ -2861,11 +2861,6 @@ this.SourceFile.prototype =
         return str;
     },
 
-    cache: function(context)
-    {
-         context.sourceCache.load(this.href);
-    },
-
     hasLineTable: function()
     {
         return this.lineMap ? true : false;
@@ -3297,6 +3292,12 @@ this.ScriptTagSourceFile.prototype.getBaseLineOffset = function()
     // By the time we are called the scripts should be in jsd, we may have them in context?
     return this.scriptTagNumber;  // Depends on number of script tags https://bugzilla.mozilla.org/show_bug.cgi?id=396568
 }
+
+this.ScriptTagSourceFile.prototype.cache = function(context)
+{
+    context.sourceCache.load(this.href);
+},
+
 //-------------------
 this.getSourceFileByScript = function(context, script)
 {
