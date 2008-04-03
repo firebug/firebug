@@ -143,7 +143,7 @@
                 <toolbar id="fbToolbar">
                     <toolbarbutton id="fbFirebugMenu" type="menu">
                         <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                            
+
                             <!--
                             xxxHonza - disable firebug functionality should be entirely removed.
                             <menuitem label="&firebug.DisableFirebug;" type="checkbox"
@@ -194,7 +194,7 @@
                             <menuseparator/>
                             <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
                             <menuseparator/>
-                            <menuitem label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
+                            <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
                         </menupopup>
                     </toolbarbutton>
 
@@ -216,12 +216,12 @@
     <statusbar id="status-bar">
         <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu"
                         onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">
-            <image id="fbStatusIcon"/>
+            <image id="fbStatusIcon" tooltiptext="Firebug"/>
             <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);"/>
         </statusbarpanel>
 
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
-            <!-- 
+            <!--
             xxxHonza - disable firebug functionality should be entirely removed.
             <menuitem label="&firebug.DisableFirebug;" type="checkbox"
                       oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>

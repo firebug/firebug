@@ -44,7 +44,7 @@
         BRANCH=eval
         TRUNK=.1.05
         -->
-    <property file="branch.properties" />
+    <property file="content/firebug/branch.properties" />
 
     <!-- Project directories -->
     <property name="src_dir" location="." />
@@ -66,7 +66,7 @@
     <!-- Expand templates -->
     <target name="install-dependency" description="test tpl files">
         <uptodate property="install.expansion.notRequired" targetfile="${build_dir}/install.rdf">
-            <srcfiles dir="${src_dir}" includes="install.rdf.tpl.xml, branch.properties"/>
+            <srcfiles dir="${src_dir}" includes="install.rdf.tpl.xml, content/firebug/branch.properties"/>
         </uptodate>
     </target>
 

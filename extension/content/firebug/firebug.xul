@@ -104,7 +104,7 @@
             </menu>
             <menu id="view-menu" label="&firebug.View;">
                 <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                    <menuitem  type="checkbox" label="&firebug.Vertical;" id="menu_toggleOrient" 
+                    <menuitem  type="checkbox" label="&firebug.Vertical;" id="menu_toggleOrient"
                             command="cmd_toggleOrient"
                             option="viewPanelOrient" />
                     <menuseparator/>
@@ -157,7 +157,7 @@
                     <menuseparator/>
                     <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
                     <menuseparator/>
-                    <menuitem label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
+                    <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
                 </menupopup>
             </menu>
         </menubar>

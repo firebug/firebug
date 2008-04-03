@@ -139,6 +139,19 @@ top.Firebug =
 
     initialize: function()
     {
+        var version = this.getVersion();
+        if (version)
+        {
+            this.version = version;
+            $('fbStatusIcon').setAttribute("tooltiptext", "Firebug "+version);
+            var about = $('Firebug_About');
+            if (about)
+            {
+                var aboutLabel = about.getAttribute("label");
+                $('Firebug_About').setAttribute("label",  aboutLabel + " " + version);
+            }
+        }
+
         for (var i = 0; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
         for (var i = 0; i < servicePrefNames.length; ++i)
@@ -160,6 +173,26 @@ top.Firebug =
                 FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");                 /*@explore*/
         }                                                                                                              /*@explore*/
 
+    },
+
+    getVersion: function()
+    {
+        var versionURL = "chrome://firebug/content/branch.properties";
+        var content = getResource(versionURL);
+        var m = /RELEASE=(.*)/.exec(content);
+        if (m)
+        {
+            var release = m[1];
+        }
+        m = /BRANCH=(.*)/.exec(content);
+        if (m)
+        {
+            var branch = m[1];
+        }
+        if (release && branch)
+            return branch+""+release;
+        else
+            FBTrace.sysout("firebug.getVersion fails with release="+release+" branch="+branch+" from content="+content+"\n");
     },
 
     /**
