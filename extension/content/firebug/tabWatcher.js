@@ -152,7 +152,7 @@ top.TabWatcher =
                                                                                                                        /*@explore*/
             this.dispatch("initContext", [context]);
 
-            win.addEventListener("pagehide", onUnloadTopWindow, true);
+            win.addEventListener("pagehide", onPageHideTopWindow, true);
             win.addEventListener("pageshow", onLoadWindowContent, true);
             win.addEventListener("DOMContentLoaded", onLoadWindowContent, true);
             if (FBTrace.DBG_INITIALIZE)                                                                                /*@explore*/
@@ -307,15 +307,6 @@ top.TabWatcher =
         {
             delete this.cancelNextLoad;
             context.browser.cancelNextLoad = true;
-        }
-
-        try
-        {
-            context.window.removeEventListener("pagehide", onUnloadTopWindow, true);
-            if (FBTrace.DBG_WINDOWS) FBTrace.sysout("tabWatcher.unwatchContext  pagehide removeEventListener\n");      /*@explore*/
-        }
-        catch (exc)
-        {
         }
 
         fbs.countContext(false);
@@ -533,9 +524,32 @@ var FrameProgressListener = extend(BaseProgressListener,
 // Local Helpers
 
 
+function onPageHideTopWindow(event)
+{
+    var win = event.currentTarget;
+    win.removeEventListener("pagehide", onPageHideTopWindow, true);
+    // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
+    if (event.persisted) // then the page is cached and there cannot be an unload handler
+    {
+        TabWatcher.unwatchTopWindow(win);
+    }
+    else
+    {
+        // Page is not cached, there may be an unload
+        win.addEventListener("unload", onUnloadTopWindow, true);
+        FBTrace.sysout("tabWatcher onPageHideTopWindow set unload handler "+win.location+"\n");
+    }
+}
+
 function onUnloadTopWindow(event)
 {
-    TabWatcher.unwatchTopWindow(event.currentTarget);
+    var win = event.currentTarget;
+    win.removeEventListener("unload", onUnloadTopWindow, true);
+    FBTrace.sysout("tabWatcher onUnloadTopWindow "+win.location+"\n");
+    //setTimeout( function delayUnwatchTopWindow()
+    //{
+        TabWatcher.unwatchTopWindow(win);
+   // });
 }
 
 function onLoadWindowContent(event)
