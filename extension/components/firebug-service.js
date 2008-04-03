@@ -985,7 +985,10 @@ FirebugService.prototype =
                          ddd("onEventScriptCreated no nestedScriptStack: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
                             +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
                         ddd("onEventScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
+                        try {
                         ddd(script.functionSource+"\n");                 /*@explore*/
+                        } catch (exc) { /*Bug 426692 */ }
+
                     }
                 }
             }
@@ -1107,8 +1110,10 @@ FirebugService.prototype =
             var fileName = script.fileName;
             if (isFilteredURL(fileName))
             {
+                try {
                 if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) 											/*@explore*/
                     ddd("onScriptCreated: filename filtered:"+fileName+" "+script.functionSource+"\n");  	/*@explore*/
+                } catch (exc) { /*Bug 426692 */ } /*@explore*/
                 return;
             }
 
@@ -1116,7 +1121,9 @@ FirebugService.prototype =
                 ddd("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
                     +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
                 ddd("onScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
+                try {
                 ddd(script.functionSource+"\n");                 /*@explore*/
+                 } catch (exc) { /*Bug 426692 */ } /*@explore*/
             }                                                                                                          /*@explore*/
 
             if (!script.functionName) // top or eval-level

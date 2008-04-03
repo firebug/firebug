@@ -794,7 +794,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var script = frame.script;
 
-        var source = script.functionSource;
+
+        try {
+            var source = script.functionSource;
+        } catch (exc) { /*Bug 426692 */  var source = script.fileName + "/"+getUniqueId(); }
+
         var url = this.getDynamicURL(frame, source, "event");
 
         var lines = context.sourceCache.store(url, source);
