@@ -90,7 +90,7 @@ top.SourceCache.prototype =
         {
             channel = ioService.newChannel(url, null, null);
             channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
-            
+
             if (method && (channel instanceof nsIHttpChannel))
             {
                 var httpChannel = QI(channel, nsIHttpChannel);
@@ -101,7 +101,6 @@ top.SourceCache.prototype =
         {
             if (FBTrace.DBG_CACHE)                                                                                     /*@explore*/
                 FBTrace.dumpProperties("sourceCache for window="+this.context.window.location.href+" FAILS:", this.cache); /*@explore*/
-            ERROR("sourceCache.load fails newChannel for url="+url+ " cause:"+exc+"\n");
             return;
         }
 
@@ -135,7 +134,7 @@ top.SourceCache.prototype =
             var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";                /*@explore*/
             FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n"); /*@explore*/
             FBTrace.dumpProperties("sourceCache.load fails channel.open for url="+url+ " cause:", exc);                /*@explore*/
-            FBTrace.dumpProperties("sourceCache.load fails channel=", channel);                                        /*@explore*/
+            FBTrace.dumpStack("sourceCache.load fails channel=", channel);                                        /*@explore*/
             return;
         }
 
