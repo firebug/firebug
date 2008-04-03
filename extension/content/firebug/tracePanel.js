@@ -122,6 +122,13 @@ Firebug.TraceModule = extend(Firebug.Console,
         }
     },
 
+    watchWindow: function(context, win)
+    {
+        // Don't call the predecessor 
+        // Firebug.Console module injects loadFirebugConsole method into the current-page.
+        // It shouldn't be done twice.
+    },
+    
     initContext: function(context)
     {
         if (this.debug)

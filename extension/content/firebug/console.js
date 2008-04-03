@@ -150,14 +150,24 @@ Firebug.Console = extend(Firebug.Module,
     {
         if (!context.attachConsoleInjectorHandler)
             context.attachConsoleInjectorHandler = [];
-        context.attachConsoleInjectorHandler[win] = function(event)
+            
+        var handler = function(event)
         {
+            var handler;
+            for (var i=0; i< context.attachConsoleInjectorHandler.length; i++) {
+                if (context.attachConsoleInjectorHandler[i].window == win) {
+                    handler = context.attachConsoleInjectorHandler[i].handler;
+                    break;
+                }
+            }
             Firebug.Console.injector.attachConsole(context, win);
-            win.removeEventListener('loadFirebugConsole', context.attachConsoleInjectorHandler[win], true);
-            delete context.attachConsoleInjectorHandler[win];
+            win.removeEventListener('loadFirebugConsole', handler, true);
+            context.attachConsoleInjectorHandler.splice(i, 1);
         }
-        win.addEventListener('loadFirebugConsole',  context.attachConsoleInjectorHandler[win], true);
+        win.addEventListener('loadFirebugConsole', handler, true);
 
+        context.attachConsoleInjectorHandler.push({window: win, handler:handler});
+    
         var consoleInjection = this.getConsoleInjectionScript();
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("attachConsoleInjector evaluating in "+win.location+":\n "+consoleInjection+"\n");

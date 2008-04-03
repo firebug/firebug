@@ -16,10 +16,11 @@ function _FirebugConsole()
         element.setAttribute("firstAddition", this.userObjects.length + "");
         for (var i = 0; i < objs.length; i++)
         {
+            //dump("FirebugConsole: userObject - " + objs[i] + "\n");                    
             this.userObjects.push(objs[i]);
         }
         element.setAttribute("lastAddition", this.userObjects.length - 1 + "");
-        element.dispatchEvent(event);
+        element.dispatchEvent(event);        
         //dump("FirebugConsole dispatched event "+methodName+"\n");
     };
 
@@ -200,6 +201,7 @@ function _FirebugConsole()
     };
 }
 //window.dump("============================>>>> Setting console <<<< ====================================\n");
+//window.dump(window.location.href + "\n");
 window.console =  new _FirebugConsole();
 //window.dump("============================>>>> Set console <<<< ====================================\n");
 //for (var p in window.console)

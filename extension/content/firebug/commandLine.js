@@ -39,20 +39,30 @@ Firebug.CommandLine = extend(Firebug.Module,
         element.setAttribute("methodName", "evaluate");
         element.setAttribute("expr", expr.toString());
 
-        context.consoleHandler.evaluated = function useConsoleFunction(result, context)
+        var consoleHandler;
+        for (var i=0; i<context.consoleHandler.length; i++)
+        {
+            if (context.consoleHandler[i].window == win)
+            {
+                consoleHandler = context.consoleHandler[i].handler;
+                break;
+            }
+        }
+
+        consoleHandler.evaluated = function useConsoleFunction(result, context)
         {
             successConsoleFunction(result, context);  // result will be pass thru this function
         }
 
         if (exceptionFunction)
         {
-            context.consoleHandler.evaluateError = function useExceptionFunction(result, context)
+            consoleHandler.evaluateError = function useExceptionFunction(result, context)
             {
                 exceptionFunction(result, context);
             }
         }
         else
-            context.consoleHandler.evaluateError = Firebug.Console.error;
+            consoleHandler.evaluateError = Firebug.Console.error;
 
         element.dispatchEvent(event);
     },

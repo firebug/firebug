@@ -26,7 +26,13 @@ top.Firebug.Console.injector = {
             FBTrace.dumpStack("no win in injectConsoleScriptTag!");
             return;
         }
-        var element = win.document.createElement("script");
+        
+        // Don't inject the script twice to the same document.
+        var element = win.document.getElementById("_firebugConsoleInjector");
+        if (element)
+            return;
+        
+        element = win.document.createElement("script");
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.attacheConsoleViaScriptTag after createElement win:"+win.location+"\n");
@@ -51,11 +57,21 @@ top.Firebug.Console.injector = {
 
     addConsoleListener: function(context, win)
     {
+        if (!context.consoleHandler)
+            context.consoleHandler = [];
+        
+        for (var i=0; i<context.consoleHandler.length; i++)
+        {
+            if (context.consoleHandler[i].window == win)
+                return;
+        }
+        
         var handler = new FirebugConsoleHandler(context, win);
         // When raised on the window, cause console script injection
         // When raised on our injected element, callback to Firebug and append to console
         win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
-        context.consoleHandler = handler;
+        context.consoleHandler.push({window:win, handler:handler});
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener attached handler to window:"+win.location+"\n");
     },
