@@ -164,18 +164,6 @@ Firebug.Console = extend(Firebug.Module,
         Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
     },
 
-    unwatchWindow: function(context, win)
-    {
-        try
-        {
-            delete win.console;
-        }
-        catch (exc)
-        {
-            FBTrace.dumpStack("unwatchWindow"+exc);  // FF3 hack TODO
-        }
-    },
-
     showPanel: function(browser, panel)
     {
     }
