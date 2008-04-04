@@ -407,7 +407,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var command = chrome.$("cmd_focusCommandLine");
         command.setAttribute("disabled", !context);
 
-        if (context && context.window && context.window.wrappedJSObject && !context.window.wrappedJSObject.console)
+        if (context && context.window && context.window.wrappedJSObject && !context.window.wrappedJSObject._firebug)
         {
             // There is no console, so we need to add one if the command line is used.
             var handler = attachCommandLine(context, chrome);

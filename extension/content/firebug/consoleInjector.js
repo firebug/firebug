@@ -23,19 +23,20 @@ top.Firebug.Console.injector = {
     {
         if (!win)
         {
-            FBTrace.dumpStack("no win in injectConsoleScriptTag!");
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.dumpStack("no win in injectConsoleScriptTag!");
             return;
         }
-        
+
         // Don't inject the script twice to the same document.
         var element = win.document.getElementById("_firebugConsoleInjector");
         if (element)
             return;
-        
+
         element = win.document.createElement("script");
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.attacheConsoleViaScriptTag after createElement win:"+win.location+"\n");
+            FBTrace.dumpStack("consoleInjector.attacheConsoleViaScriptTag after createElement win:"+win.location+"\n");
 
         element.setAttribute("type", "text/javascript");
         element.setAttribute("id", "_firebugConsoleInjector");
@@ -43,7 +44,7 @@ top.Firebug.Console.injector = {
         element.setAttribute("style", "display:none");
 
         var src = this.getInjectedSource();
-        src += "\nconsole.getFirebugElement();\n"; // force initialization
+        //src += "\nconsole.getFirebugElement();\n"; // force initialization
         element.innerHTML = src;
         win.document.documentElement.appendChild(element);
     },
@@ -59,21 +60,21 @@ top.Firebug.Console.injector = {
     {
         if (!context.consoleHandler)
             context.consoleHandler = [];
-        
+
         for (var i=0; i<context.consoleHandler.length; i++)
         {
             if (context.consoleHandler[i].window == win)
                 return;
         }
-        
+
         var handler = new FirebugConsoleHandler(context, win);
-        // When raised on the window, cause console script injection
+        // When raised on the window, cause console script injection ????
         // When raised on our injected element, callback to Firebug and append to console
         win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
         context.consoleHandler.push({window:win, handler:handler});
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector addConsoleListener attached handler to window:"+win.location+"\n");
+            FBTrace.sysout("consoleInjector addConsoleListener attached handler to window: "+win.location+"\n");
     },
 
 }
@@ -86,7 +87,7 @@ function FirebugConsoleHandler(context, win)
         var firstAddition = element.getAttribute("firstAddition");
         var lastAddition = element.getAttribute("lastAddition");
         var methodName = element.getAttribute("methodName");
-        var hosed_userObjects = win.wrappedJSObject.console.userObjects;
+        var hosed_userObjects = win.wrappedJSObject._firebug.userObjects;
 
         //FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");
         //FBTrace.sysout("hosed_userObjects instanceof win.Array "+ (hosed_userObjects instanceof win.Array)+"\n");

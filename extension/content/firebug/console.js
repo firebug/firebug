@@ -120,15 +120,15 @@ Firebug.Console = extend(Firebug.Module,
     watchWindow: function(context, win)
     {
         // This is early enough but we don't have a frame
-        if (win.wrappedJSObject && !win.wrappedJSObject.console)
+        if (win.wrappedJSObject && !win.wrappedJSObject._firebug)
             this.attachConsoleInjector(context, win);
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
-            if (win.wrappedJSObject.console)                                                                                           /*@explore*/
-                FBTrace.sysout("firebug.watchWindow created win.console for "+win.location+"\n");          /*@explore*/
+            if (win.wrappedJSObject._firebug)                                                                                           /*@explore*/
+                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          /*@explore*/
             else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow failed to create win.console for "+win.location+"\n"); /*@explore*/
+                FBTrace.sysout("firebug.watchWindow failed to create win._firebug for "+win.location+"\n"); /*@explore*/
         }                                                                                                              /*@explore*/
                                                                                                                        /*@explore*/
     },
@@ -136,12 +136,13 @@ Firebug.Console = extend(Firebug.Module,
     getConsoleInjectionScript: function() {
         if (!this.consoleInjectionScript)
         {
-            var startLoader = "window.loadFirebugConsole = function() { \n";
+            var startLoader = "window.__defineGetter__('firebug', function() { \n";
+            var checkLoad = " if (window._FirebugConsole) return this._firebug;\n";
             var eventCreation = " var event = document.createEvent('Events'); \n";
             var eventInit = " event.initEvent('loadFirebugConsole', true, false); \n"
             var eventDispatch = " window.dispatchEvent(event); \n";
-            var endLoader = " /*window.dump('loadFirebugConsole dispatched event, done\\n');*/};\n";
-            this.consoleInjectionScript = startLoader + eventCreation + eventInit + eventDispatch + endLoader;
+            var endLoader = " return this._firebug;});\n";
+            this.consoleInjectionScript = startLoader +  checkLoad + eventCreation + eventInit + eventDispatch + endLoader;
         }
         return this.consoleInjectionScript;
     },
@@ -150,7 +151,7 @@ Firebug.Console = extend(Firebug.Module,
     {
         if (!context.attachConsoleInjectorHandler)
             context.attachConsoleInjectorHandler = [];
-            
+
         var handler = function(event)
         {
             var handler;
@@ -167,11 +168,16 @@ Firebug.Console = extend(Firebug.Module,
         win.addEventListener('loadFirebugConsole', handler, true);
 
         context.attachConsoleInjectorHandler.push({window: win, handler:handler});
-    
+
         var consoleInjection = this.getConsoleInjectionScript();
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("attachConsoleInjector evaluating in "+win.location+":\n "+consoleInjection+"\n");
+
         Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluation completed\n");
     },
 
     showPanel: function(browser, panel)
