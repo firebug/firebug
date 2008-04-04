@@ -24,11 +24,12 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Console ==
     * Redesigned to use events/attribute passing.
-  Untested, has problems, duplicate postings.
-
+  tests/console/joes-original/test.html mostly passes
+  
 == Command Line ==
     * Redesigned to avoid using evalInSandbox.
-  Untested, has problems, no CommandLineAPI yet.
+  tests/console/commandLineObjects.html mostlyl passes
+  No commandLineAPI functions yet.
 
 == Bug Fixes ==
-
+    * Issue 2 Can't set breakpoints in code called by unload event
