@@ -121,8 +121,8 @@
                         </menupopup>
                     </menu>
 
-                    <menu label="&firebug.Options;">
-                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                    <menu label="&firebug.Options;" id="FirebugMenu_Options">
+                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
                             <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
                                        oncommand="FirebugChrome.onToggleOption(this)"
                                        option="openInWindow"/>

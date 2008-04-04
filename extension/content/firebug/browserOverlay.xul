@@ -142,7 +142,7 @@
             <toolbox id="fbToolbox">
                 <toolbar id="fbToolbar">
                     <toolbarbutton id="fbFirebugMenu" type="menu">
-                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup">
 
                             <!--
                             xxxHonza - disable firebug functionality should be entirely removed.
@@ -153,14 +153,14 @@
                             <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
                             <menuseparator/>
                             -->
-                            <menu label="&firebug.OpenWith;">
+                            <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
                                 <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                                         <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
                                 </menupopup>
                             </menu>
                             <menuseparator/>
 
-                            <menu label="&firebug.TextSize;">
+                            <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
                                 <menupopup>
                                     <menuitem label="&firebug.IncreaseTextSize;"
                                               oncommand="Firebug.increaseTextSize(1)"/>
@@ -170,8 +170,8 @@
                                 </menupopup>
                             </menu>
 
-                            <menu label="&firebug.Options;">
-                                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                            <menu label="&firebug.Options;" id="FirebugMenu_Options">
+                                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
                                     <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
                                                oncommand="FirebugChrome.onToggleOption(this)"
                                                option="openInWindow"/>
@@ -185,7 +185,7 @@
                                               option="shadeBoxModel"/>
                                 </menupopup>
                             </menu>
-                            <menuseparator/>
+                            <menuseparator id="FirebugBetweenOptionsAndSites"/>
 
                             <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
                             <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
