@@ -994,7 +994,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             var nodes = [];
             for (var child = node.firstChild; child; child = child.nextSibling)
             {
-                if (child.nodeType != 3 || !this.isWhitespaceText(child))
+                if (child.nodeType != 3 || !isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1422,13 +1422,6 @@ function isEmptyElement(element)
 //        }
 //    }
 //    return true;
-}
-
-function isWhitespaceText(node)
-{
-    if (node instanceof HTMLAppletElement)
-        return false;
-    return node.nodeType == 3 && isWhitespace(node.nodeValue);
 }
 
 function findNextSibling(node)
