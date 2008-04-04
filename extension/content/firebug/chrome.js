@@ -151,6 +151,9 @@ top.FirebugChrome =
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
             locationList.addEventListener("selectObject", onSelectLocation, false);
+            
+            $("fbLargeCommandLine").addEventListener('focus', onCommandLineFocus, true);
+            $("fbCommandLine").addEventListener('focus', onCommandLineFocus, true);
 
             var win1 = panelBar1.browser.contentWindow;
             win1.enableAlways = bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, "disabledAlways", false);
@@ -1244,6 +1247,17 @@ function getRealObject(object)
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
     var realRep = realObject ? Firebug.getRep(realObject) : rep;
     return realObject ? realObject : object;
+}
+
+function onCommandLineFocus(event)
+{
+    // User has decided to use the command line, but the web page may not have the console.
+    if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._firebug)
+    {
+        Firebug.Console.injector.attachConsole(FirebugContext, FirebugContext.window);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("onCommandLineFocus, added command line support to "+FirebugContext.window.location+"\n");
+    }
 }
 
 // ************************************************************************************************

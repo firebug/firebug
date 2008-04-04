@@ -31,7 +31,11 @@ top.Firebug.Console.injector = {
         // Don't inject the script twice to the same document.
         var element = win.document.getElementById("_firebugConsoleInjector");
         if (element)
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("consoleInjector.injectConsoleScriptTag: _firebugConsoleInjector already present\n");
             return;
+        }
 
         element = win.document.createElement("script");
 
@@ -44,7 +48,7 @@ top.Firebug.Console.injector = {
         element.setAttribute("style", "display:none");
 
         var src = this.getInjectedSource();
-        //src += "\nconsole.getFirebugElement();\n"; // force initialization
+        src += "\nconsole.getFirebugElement();\n"; // force initialization
         element.innerHTML = src;
         win.document.documentElement.appendChild(element);
     },
@@ -121,6 +125,7 @@ function FirebugConsoleHandler(context, win)
         }
         else
         {
+        FBTrace.dumpProperties("FirebugConsoleHandler", this);
             this.log("FirebugConsoleHandler does not support \'"+methodName+"\'");
         }
 

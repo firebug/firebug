@@ -31,7 +31,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var element = win.document.getElementById("_firebugConsole");
         if (!element)
         {
-             Firebug.Console.injector.injectConsoleScriptTag(win);
+             Firebug.Console.injector.attachConsole(context, win);
              var element = win.document.getElementById("_firebugConsole");
         }
         var event = document.createEvent("Events");
@@ -62,7 +62,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
         }
         else
-            consoleHandler.evaluateError = Firebug.Console.error;
+            consoleHandler.evaluateError = consoleHandler.error;
 
         element.dispatchEvent(event);
     },
@@ -406,18 +406,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         var chrome = context ? context.chrome : FirebugChrome;
         var command = chrome.$("cmd_focusCommandLine");
         command.setAttribute("disabled", !context);
-
-        if (context && context.window && context.window.wrappedJSObject && !context.window.wrappedJSObject._firebug)
-        {
-            // There is no console, so we need to add one if the command line is used.
-            var handler = attachCommandLine(context, chrome);
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("commandLine.showContext no console, attach to focus: "+handler+"\n");
-            chrome.$("fbLargeCommandLine").addEventListener('focus', handler, true);
-            chrome.$("fbCommandLine").addEventListener('focus', handler, true);
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("commandLine.showContext ready onfocus to attach command line\n");
-        }
     },
 
     showPanel: function(browser, panel)
@@ -583,31 +571,6 @@ function cleanIndentation(text)
             lines[i] = line.substr(minIndent);
     }
     return lines.join("\n");
-}
-
-function attachCommandLine(context, chrome)
-{
-    if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("commandLine.attachCommandLine has window: "+context.window+"\n");
-    // return an event handler to be called when we need to inject the command line
-    context.attachCommandLineHandler = function(event) {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("commandLine.attachCommandLine event handler has window: "+context.window+"\n");
-        // Run on setTimeout to avoid interfering with user input interaction
-        setTimeout( function ()
-        {
-            if (!context || ! context.window)
-                return;  // XXXjjb !!!!!!!!!!!!! TODO: the handler should NOT be called, it should have been removed.
-            Firebug.Console.injector.injectConsoleScriptTag(context.window);
-            Firebug.Console.injector.addConsoleListener(context, context.window);
-
-            chrome.$("fbLargeCommandLine").removeEventListener('focus', context.attachCommandLineHandler, true);
-            chrome.$("fbCommandLine").removeEventListener('focus', context.attachCommandLineHandler, true);
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("commandLine attached to "+context.window.location+"\n");
-        });
-    }
-    return context.attachCommandLineHandler;
 }
 
 // ************************************************************************************************
