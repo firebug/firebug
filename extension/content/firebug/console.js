@@ -136,7 +136,7 @@ Firebug.Console = extend(Firebug.Module,
     getConsoleInjectionScript: function() {
         if (!this.consoleInjectionScript)
         {
-            var startLoader = "window.__defineGetter__('firebug', function() { \n";
+            var startLoader = "window.__defineGetter__('console', function() { \n";
             var checkLoad = " if (window._FirebugConsole) return this._firebug;\n";
             var eventCreation = " var event = document.createEvent('Events'); \n";
             var eventInit = " event.initEvent('loadFirebugConsole', true, false); \n"
