@@ -1258,6 +1258,16 @@ function onCommandLineFocus(event)
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("onCommandLineFocus, added command line support to "+FirebugContext.window.location+"\n");
     }
+    else 
+    {
+        if (FBTrace.DBG_CONSOLE)
+        {
+            if (FirebugContext)
+                FBTrace.sysout("onCommandLineFocus: "+(FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window")+"\n");
+            else
+                FBTrace.sysout( "onCommandLineFocus: No FirebugContext\n");
+        }
+    }
 }
 
 // ************************************************************************************************
@@ -1302,7 +1312,7 @@ if (top.TidyBrowser)
     {
         var self = this, args = arguments;
         setTimeout(function()
-        {
+        {   
             prev.apply(self, args);
         });
     }
