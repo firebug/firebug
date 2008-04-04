@@ -132,7 +132,7 @@ Firebug.Spy = extend(Firebug.Module,
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
-        this.detachSpy(context, false);   
+        this.detachSpy(context, false);
         delete context.spies;
     },
 
@@ -198,12 +198,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getCaption: function(spy)
     {
-        return spy.method.toUpperCase() + " " + this.getURL(spy);
-    },
-
-    getURL: function(spy)
-    {
-        return spy.xhrRequest.channel ? spy.xhrRequest.channel.name : spy.href;
+        return spy.method.toUpperCase() + " " + spy.getURL();
     },
 
     onToggleBody: function(event)
@@ -227,7 +222,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     copyURL: function(spy)
     {
-        copyToClipboard(this.getURL(spy));
+        copyToClipboard(spy.getURL());
     },
 
     copyParams: function(spy)
@@ -243,7 +238,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         for (var i = 0; i < params.length; ++i)
             args.push(escape(params[i].name)+"="+escape(params[i].value));
 
-        var url = this.getURL(spy);
+        var url = spy.getURL();
         url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
         copyToClipboard(url);
     },
@@ -255,7 +250,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     openInTab: function(spy)
     {
-        openNewTab(this.getURL(spy));
+        openNewTab(spy.getURL());
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -267,7 +262,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     browseObject: function(spy, context)
     {
-        var url = getURL(spy);
+        var url = spy.getURL();
         openNewTab(url);
         return true;
     },
@@ -335,7 +330,12 @@ top.XMLHttpRequestSpy.prototype =
         this.onreadystatechange = null;
         this.onLoad = null;
         this.onError = null;
-    }
+    },
+
+    getURL: function()
+    {
+        return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
+    },
 };
 
 Firebug.XHRSpyListener =
