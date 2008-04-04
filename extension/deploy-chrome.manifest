@@ -1,4 +1,4 @@
-content firebug jar:chrome/firebug.jar!/content/firebug/ xpcnativewrappers=no
+content firebug jar:chrome/firebug.jar!/content/firebug/  
 skin	firebug	classic/1.0	jar:chrome/firebug.jar!/skin/classic/
 skin	firebug-os	classic/1.0	jar:chrome/firebug.jar!/skin/classic/win/
 locale	firebug	en-US		jar:chrome/firebug.jar!/locale/en-US/
