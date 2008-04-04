@@ -537,7 +537,8 @@ function onPageHideTopWindow(event)
     {
         // Page is not cached, there may be an unload
         win.addEventListener("unload", onUnloadTopWindow, true);
-        FBTrace.sysout("tabWatcher onPageHideTopWindow set unload handler "+win.location+"\n");
+        if (FBTrace.DBG_WINDOWS) /*@explore*/
+            FBTrace.sysout("tabWatcher onPageHideTopWindow set unload handler "+win.location+"\n"); /*@explore*/
     }
 }
 
@@ -545,11 +546,9 @@ function onUnloadTopWindow(event)
 {
     var win = event.currentTarget;
     win.removeEventListener("unload", onUnloadTopWindow, true);
-    FBTrace.sysout("tabWatcher onUnloadTopWindow "+win.location+"\n");
-    //setTimeout( function delayUnwatchTopWindow()
-    //{
-        TabWatcher.unwatchTopWindow(win);
-   // });
+    if (FBTrace.DBG_WINDOWS) /*@explore*/
+        FBTrace.sysout("tabWatcher onUnloadTopWindow "+win.location+"\n"); /*@explore*/
+    TabWatcher.unwatchTopWindow(win);
 }
 
 function onLoadWindowContent(event)
