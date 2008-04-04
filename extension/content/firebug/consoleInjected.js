@@ -30,7 +30,7 @@ function _FirebugConsole()
         {
             element = document.createElement("div");
             element.setAttribute("id", "_firebugConsole");
-            element.setAttribute("class", "firebugIgnore");
+            element.firebugIgnore = true;
             element.setAttribute("style", "display:none");
 
             var self = this;
@@ -38,7 +38,6 @@ function _FirebugConsole()
             {
                 var element = event.target;
                 var expr = element.getAttribute("expr"); // see commandLine.js
-                dump("consoleInjected got event, sending expr to evaluate:"+expr+"\n");
                 self.evaluate(expr);
             }, true);
 
@@ -105,7 +104,7 @@ function _FirebugConsole()
     };
 
     this.dirxml = function(o)
-    { this.notifyFirebug(["Window in dirxml", Window], "log");
+    {  
         if (o instanceof Window)
             o = o.document.documentElement;
         else if (o instanceof Document)

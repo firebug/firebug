@@ -40,7 +40,7 @@ top.Firebug.Console.injector = {
 
         element.setAttribute("type", "text/javascript");
         element.setAttribute("id", "_firebugConsoleInjector");
-        element.setAttribute("class", "firebugIgnore");
+        element.firebugIgnore = true;
         element.setAttribute("style", "display:none");
 
         var src = this.getInjectedSource();
