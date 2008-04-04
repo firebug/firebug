@@ -40,7 +40,7 @@ top.Firebug.Console.injector = {
         element = win.document.createElement("script");
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpStack("consoleInjector.attacheConsoleViaScriptTag after createElement win:"+win.location+"\n");
+            FBTrace.dumpStack("consoleInjector.attachConsoleViaScriptTag after createElement win:"+win.location+"\n");
 
         element.setAttribute("type", "text/javascript");
         element.setAttribute("id", "_firebugConsoleInjector");
@@ -72,13 +72,13 @@ top.Firebug.Console.injector = {
         }
 
         var handler = new FirebugConsoleHandler(context, win);
-        // When raised on the window, cause console script injection ????
         // When raised on our injected element, callback to Firebug and append to console
-        win.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
+        var element = win.document.getElementById("_firebugConsole");
+        element.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
         context.consoleHandler.push({window:win, handler:handler});
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector addConsoleListener attached handler to window: "+win.location+"\n");
+            FBTrace.sysout("consoleInjector addConsoleListener attached handler to _firebugConsole in : "+win.location+"\n");
     },
 
 }
