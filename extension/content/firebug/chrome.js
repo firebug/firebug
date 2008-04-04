@@ -540,7 +540,7 @@ top.FirebugChrome =
         var panelTypes = Firebug.getSidePanelTypes(FirebugContext, panelBar1.selectedPanel);
         panelBar2.updatePanels(panelTypes);
 
-        if (FirebugContext)
+        if (FirebugContext && FirebugContext.sidePanelNames)
         {
             var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
             sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
