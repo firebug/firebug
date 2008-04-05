@@ -251,7 +251,7 @@ top.Firebug =
     killWindow: function(browser, chrome)
     {
         deadWindows.push({browser: browser, chrome: chrome});
-        deadWindowTimeout = setTimeout(function() { Firebug.closeDeadWindows(); }, 30);
+        deadWindowTimeout = setTimeout(function() { Firebug.closeDeadWindows(); }, 3000);
     },
 
     rescueWindow: function(browser)
