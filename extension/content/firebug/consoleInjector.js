@@ -202,6 +202,14 @@ function FirebugConsoleHandler(context, win)
         Firebug.Console.closeGroup(context);
     };
 
+    this.groupCollapsed = function()
+    {
+        var sourceLink = getStackLink();
+        // noThrottle true is probably ok, openGroups will likely be short strings.
+        var row = Firebug.Console.openGroup(arguments, null, "group", null, true, sourceLink);
+        removeClass(row, "opened");
+    };
+
     this.profile = function(title)
     {
         Firebug.Profiler.startProfiling(context, title);

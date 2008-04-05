@@ -104,7 +104,7 @@ function _FirebugConsole()
     };
 
     this.dirxml = function(o)
-    {  
+    {
         if (o instanceof Window)
             o = o.document.documentElement;
         else if (o instanceof Document)
@@ -128,8 +128,13 @@ function _FirebugConsole()
         this.notifyFirebug(arguments, "groupEnd");
     };
 
+    this.groupCollapsed = function()
+    {
+        this.notifyFirebug(arguments, "groupCollapsed");
+    };
+
     this.time = function(name, reset)
-    {try {
+    {
         if (!name)
             return;
 
@@ -142,10 +147,6 @@ function _FirebugConsole()
             return;
 
         this.timeCounters[name] = time;
-        } catch(e) {
-            this.notifyFirebug(["time FAILS", e], "trace");
-        }
-
     };
 
     this.timeEnd = function(name)
