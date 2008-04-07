@@ -2041,6 +2041,9 @@ function getCacheEntry(file, netProgress)
                           { name: "Last Fetched",
                             value: getDateFromSeconds(descriptor.lastFetched)
                           },
+                          { name: "Expires",
+                            value: getDateFromSeconds(descriptor.expirationTime)
+                          },
                           { name: "Data Size",
                             value: descriptor.dataSize
                           },
