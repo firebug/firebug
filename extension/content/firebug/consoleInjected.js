@@ -189,7 +189,8 @@ function _FirebugConsole()
         try
         {
             var result = eval(expr);
-            this.notifyFirebug([result], "evaluated");
+            if (result)
+                this.notifyFirebug([result], "evaluated");
         }
         catch(exc)
         {
