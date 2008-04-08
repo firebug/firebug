@@ -337,7 +337,7 @@ function FirebugConsoleHandler(context, win)
     {
         var trace = FBL.getCurrentStackTrace(context);
 
-        var frames = trace.frames;
+        var frames = trace ? trace.frames : null;
         if (frames && (frames.length > 0) )
         {
             var bottom = frames.length - 1;

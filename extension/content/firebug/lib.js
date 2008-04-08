@@ -2902,7 +2902,7 @@ this.SourceFile.prototype =
             var scriptLineNo = i + script.baseLineNumber;
             var mapLineNo = scriptLineNo - offset;
 
-            if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
+            if (script.isValid && script.isLineExecutable(scriptLineNo, this.pcmap_type)) // extra isValid test should not be needed.
                 this.lineMap[mapLineNo] = script;
                                                                                                                        /*@explore*/
             if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
@@ -3020,7 +3020,8 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
 
 this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 {
-    sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
+    if (outerScript.isValid) 
+        sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
         FBTrace.sysout("FBL.addScriptsToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
 
