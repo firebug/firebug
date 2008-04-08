@@ -1267,8 +1267,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     initialize: function()
     {
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.dumpProperties("debugger.initialize nsICryptoHash", this.nsICryptoHash);
+
+        this.debuggerName =  window.location.href+"--"+FBL.getUniqueId(); /*@explore*/
+        if (FBTrace.DBG_INITIALIZE) /*@explore*/
+            FBTrace.dumpProperties("debugger.initialize ", this.debuggerName); /*@explore*/
+
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
@@ -1357,10 +1360,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             panel.sidePanelDeck.collapsed = false;
         }
 
-        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.enable **************> "+context.window.location+"\n");
-
         this.activeContexts++;
+
+        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
+            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on"+context.window.location+"\n"); /*@explore*/
 
         if (this.activeContexts == 1)
             fbs.registerDebugger(this);
@@ -1369,6 +1372,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onModuleDeactivate: function(context, destroy)
     {
         this.activeContexts--;
+        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
+            FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on"+context.window.location+"\n"); /*@explore*/
         if (this.activeContexts == 1)
             fbs.unregisterDebugger(this);
 

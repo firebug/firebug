@@ -249,6 +249,8 @@ FirebugService.prototype =
         if (debuggr)// instanceof nsIFireBugURLProvider)
         {
             debuggers.push(debuggr);
+            if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
+                ddd("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts+" active contexts"+"\n"); /*@explore*/
             this.enableDebugger();
         }
         else
@@ -264,8 +266,10 @@ FirebugService.prototype =
         }
     },
 
-    unregisterDebugger: function(debuggr)
+    unregisterDebugger: function(debuggrWrapper)
     {
+        var debuggr = debuggrWrapper.wrappedJSObject;
+
         for (var i = 0; i < debuggers.length; ++i)
         {
             if (debuggers[i] == debuggr)
@@ -274,6 +278,9 @@ FirebugService.prototype =
                 break;
             }
         }
+        if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
+            ddd("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts+" active contexts"+"\n"); /*@explore*/
+
         for (var i = 0; i < netDebuggers.length; ++i)
         {
             if (netDebuggers[i] == debuggr)
@@ -1296,7 +1303,8 @@ FirebugService.prototype =
                 }
                 catch (exc)
                 {
-                    ERROR("firebug-service findDebugger supportsWindow FAILS: "+exc);
+                    if (fbs.DBG_FBS_SRCUNITS)
+                        ERROR("firebug-service findDebugger supportsWindow FAILS: "+exc);
                 }
             }
         }
@@ -2004,7 +2012,8 @@ function getFrameWindow(frame)
     }
     catch (exc)
     {
-        ERROR("firebug-service getFrameWindow fails: "+exc);  // FBS.DBG_WINDOWS
+        if (fbs.DBG_FBS_SRCUNITS)
+            ERROR("firebug-service getFrameWindow fails: "+exc);  // FBS.DBG_WINDOWS
         return null;
     }
 }
