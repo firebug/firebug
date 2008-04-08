@@ -1540,7 +1540,7 @@ this.getStackSourceLink = function()
 this.getFrameSourceLink = function(frame)
 {
     if (frame && frame.filename && frame.filename.indexOf(Firebug.CommandLine.evalScript) == -1)
-        return new this.SourceLink(frame.filename, frame.lineNumber, "js");
+        return new FBL.SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;
 };
@@ -2944,8 +2944,15 @@ this.SourceFile.prototype =
     {
         if (this.outerScript && (this.outerScript.tag == script.tag) )
             return true;
-        var i = this.innerScripts.indexOf(script);
-        return (i < 0) ? false : true;
+        // XXXjjb Don't use indexOf or similar tests that rely on ===, since we are really working with
+        // wrappers around jsdIScript, not script themselves.  I guess.
+
+        for (var j = 0; j < this.innerScripts.length; j++)
+        {
+            if (script.tag == this.innerScripts[j].tag)
+                return this.innerScripts[j];
+        }
+        return false;
     },
 
     // these objects map JSD's values to correct values
@@ -3002,7 +3009,7 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
         if (!this.sourceFile.hasLineTable())
             FBTrace.dumpStack("lib.getNestedScriptAnalyzer no linetable TODO!");
         var line = this.getBaseLineNumberByScript(script);
-        return new this.SourceLink(this.sourceFile.href, line, "js");
+        return new FBL.SourceLink(this.sourceFile.href, line, "js");
     },
 
     getBaseLineNumberByScript: function(script)
@@ -3055,7 +3062,7 @@ this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return new this.SourceLink(this.sourceFile.href, 1, "js");
+        return new FBL.SourceLink(this.sourceFile.href, 1, "js");
     }
 }
 
@@ -3112,7 +3119,7 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return new SourceLink(this.sourceFile.href, 1, "js");
+        return new FBL.SourceLink(this.sourceFile.href, 1, "js");  // XXXjjb why do we need FBL.??
     }
 }
 
