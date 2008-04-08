@@ -62,6 +62,14 @@ top.Firebug.Console.injector = {
 
     addConsoleListener: function(context, win)
     {
+        var element = win.document.getElementById("_firebugConsole");
+        if (!element)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("consoleInjector.addConsoleListener fails to find _firebugConsole in "+win.location+" for context "+context.window.location+"\n");
+            return;
+        }
+
         if (!context.consoleHandler)
             context.consoleHandler = [];
 
@@ -73,7 +81,6 @@ top.Firebug.Console.injector = {
 
         var handler = new FirebugConsoleHandler(context, win);
         // When raised on our injected element, callback to Firebug and append to console
-        var element = win.document.getElementById("_firebugConsole");
         element.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
         context.consoleHandler.push({window:win, handler:handler});
 
@@ -295,7 +302,7 @@ function FirebugConsoleHandler(context, win)
         if (trace && trace.frames[0])
         {
             var frame = trace.frames[0];
-            sourceName = frame.script.fileName;
+            sourceName = normalizeURL(frame.script.fileName);
             lineNumber = frame.line;
         }
 
@@ -315,7 +322,7 @@ function FirebugConsoleHandler(context, win)
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getUserStack for userURL "+userURL, FBL.getStackDump());
 
-        while (frame && (frame.filename != userURL) )
+        while (frame && (normalizeURL(frame.filename) != userURL) )
             frame = frame.caller;
 
         return frame;
