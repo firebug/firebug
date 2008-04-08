@@ -1460,7 +1460,7 @@ this.getStackTrace = function(frame, context)
 
     for (; frame; frame = frame.callingFrame)
     {
-        if (!this.isSystemURL(frame.script.fileName))
+        if (!this.isSystemURL(normalizeURL(frame.script.fileName)))
         {
             var stackFrame = this.getStackFrame(frame, context);
             if (stackFrame)
@@ -1501,7 +1501,7 @@ this.getStackFrame = function(frame, context)
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:", frame.script.tag+"@"+frame.script.fileName);
             var script = frame.script;
 
-            return new this.StackFrame(context, script.functionName, frame.script, script.fileName, frame.line, [], frame.pc);
+            return new this.StackFrame(context, script.functionName, frame.script, normalizeURL(script.fileName), frame.line, [], frame.pc);
         }
     }
     catch (exc)
@@ -1687,7 +1687,7 @@ this.getFunctionName = function(script, context, frame)
         else
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");     /*@explore*/
-            name =  this.guessFunctionName(script.fileName, script.baseLineNumber, context);
+            name =  this.guessFunctionName(normalizeURL(script.fileName), script.baseLineNumber, context);
         }
     }
     if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");     /*@explore*/
@@ -3211,13 +3211,13 @@ this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
-        var file_name = FBL.getFileName(script.fileName); // this is more useful that just "top_level"
+        var file_name = FBL.getFileName(FBL.normalizeURL(script.fileName)); // this is more useful that just "top_level"
         file_name = file_name ? file_name: "__top_level__";
         return {name: file_name, args: []};
     },
     getSourceLinkForScript: function (script)
     {
-        return SourceLink(this.normalizeURL(script.fileName), script.baseLineNumber, "js")
+        return SourceLink(FBL.normalizeURL(script.fileName), script.baseLineNumber, "js")
     }
 }
 
@@ -3311,7 +3311,7 @@ this.getSourceFileByScript = function(context, script)
     // Other algorithms are possible:
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below
-    var lucky = context.sourceFileMap[script.fileName];
+    var lucky = context.sourceFileMap[script.fileName];  // we won't be lucky for file:/ urls, no normalizeURL applied
     if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
     if (lucky && lucky.hasScript(script))
         return lucky;

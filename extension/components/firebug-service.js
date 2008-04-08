@@ -1,6 +1,10 @@
 /* See license.txt for terms of usage */
 
 // Debug lines are marked with /*@explore*/ at column 120                                                             /*@explore*/
+// Use variable name "fileName" for href returned by JSD, file:/ not same as DOM
+// Use variable name "url" for normalizedURL, file:/// comparable to DOM
+// Convert from fileName to URL with normalizeURL
+// We probably don't need denormalizeURL since we don't send .fileName back to JSD
 
 // ************************************************************************************************
 // Constants
@@ -551,12 +555,12 @@ FirebugService.prototype =
         }
     },
 
-    findErrorBreakpoint: function(sourceFile, lineNo)
+    findErrorBreakpoint: function(url, lineNo)
     {
         for (var i = 0; i < errorBreakpoints.length; ++i)
         {
             var bp = errorBreakpoints[i];
-            if (bp.lineNo == lineNo && bp.href == sourceFile.href)
+            if (bp.lineNo == lineNo && bp.href == url)
                 return i;
         }
 
@@ -593,8 +597,6 @@ FirebugService.prototype =
     {
         if (url)
         {
-            url = denormalizeURL(url);
-
             var urlBreakpoints = breakpoints[url];
             if (urlBreakpoints)
             {
@@ -1442,7 +1444,6 @@ FirebugService.prototype =
 
     removeBreakpoint: function(type, url, lineNo, script) // xxxJJB script arg not used?
     {
-        url = denormalizeURL(url);
         if (fbs.DBG_FBS_BP) ddd("removeBreakpoint for url= "+url+"\n");                                                    /*@explore*/
 
         var urlBreakpoints = breakpoints[url];
@@ -1597,10 +1598,10 @@ FirebugService.prototype =
         return returned;
     },
 
-    needToBreakForError: function(url, lineNo)
+    needToBreakForError: function(fileName, lineNo)
     {
         return breakOnNextError =
-            this.breakOnErrors || this.findErrorBreakpoint(url, lineNo) != -1;
+            this.breakOnErrors || this.findErrorBreakpoint(normalizeURL(fileName), lineNo) != -1;
     },
 
     startStepping: function()
@@ -1903,46 +1904,47 @@ function normalizeURL(url)
 
 function denormalizeURL(url)
 {
+    // This should not be called.
     return url ? url.replace(/file:\/\/\//, "file:/") : "";
 }
 
-function isFilteredURL(url)
+function isFilteredURL(rawJSD_script_filename)
 {
-    if (!url)
+    if (!rawJSD_script_filename)
         return true;
-    if (url[0] == 'h')
+    if (rawJSD_script_filename[0] == 'h')
         return false;
     if (fbs.filterSystemURLs)
-        return systemURLStem(url);
-    if (url.indexOf(fbs.alwayFilterURLsStarting) != -1)
+        return systemURLStem(rawJSD_script_filename);
+    if (rawJSD_script_filename.indexOf(fbs.alwayFilterURLsStarting) != -1)
         return true;
     return false;
 }
 
-function systemURLStem(url)
+function systemURLStem(rawJSD_script_filename)
 {
     if (this.url_class)  // attempt to optimize stream of similar urls
     {
-        if ( url.substr(0,this.url_class.length) == this.url_class )
+        if ( rawJSD_script_filename.substr(0,this.url_class.length) == this.url_class )
             return this.url_class;
     }
-    this.url_class = deepSystemURLStem(url);
+    this.url_class = deepSystemURLStem(rawJSD_script_filename);
     return this.url_class;
 }
 
-function deepSystemURLStem(url)
+function deepSystemURLStem(rawJSD_script_filename)
 {
     for( var i = 0; i < urlFilters.length; ++i )
     {
         var filter = urlFilters[i];
-        if ( url.substr(0,filter.length) == filter )
+        if ( rawJSD_script_filename.substr(0,filter.length) == filter )
             return filter;
     }
     for( var i = 0; i < COMPONENTS_FILTERS.length; ++i )
     {
-        if ( COMPONENTS_FILTERS[i].test(url) )
+        if ( COMPONENTS_FILTERS[i].test(rawJSD_script_filename) )
         {
-            var match = COMPONENTS_FILTERS[i].exec(url);
+            var match = COMPONENTS_FILTERS[i].exec(rawJSD_script_filename);
             urlFilters.push(match[1]);
             return match[1];
         }

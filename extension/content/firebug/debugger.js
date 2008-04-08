@@ -473,8 +473,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch(exc)
         {
-            if (FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("Debugger UI error during debugging loop:", exc);          /*@explore*/
-            ERROR("Debugger UI error during debugging loop:"+exc+"\n");
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.dumpProperties("Debugger UI error during debugging loop:", exc);          /*@explore*/
+            else /*@explore*/
+                ERROR("Debugger UI error during debugging loop:"+exc+"\n");
         }
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+"\n");                                               /*@explore*/
     },
@@ -751,7 +753,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 Firebug.Errors.showMessageOnStatusBar(error);
         }
         catch (exc) {
-            ERROR("debugger.onError getStackTrace FAILED: "+exc+"\n");
             if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError getStackTrace FAILED:", exc);             /*@explore*/
         }
 
@@ -793,11 +794,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         delete this.breakContext;
 
         var script = frame.script;
-
+        var creatorURL = normalizeURL(frame.script.fileName);
 
         try {
             var source = script.functionSource;
-        } catch (exc) { /*Bug 426692 */  var source = script.fileName + "/"+getUniqueId(); }
+        } catch (exc) { /*Bug 426692 */  var source = creatorURL + "/"+getUniqueId(); }
 
         var url = this.getDynamicURL(frame, source, "event");
 
@@ -1101,7 +1102,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             url.kind = "source";
         else
         {
-            var url = this.getURLFromMD5(frame.script.fileName, source, kind);
+            var callerURL = normalizeURL(frame.script.fileName);
+            var url = this.getURLFromMD5(callerURL, source, kind);
             if (url)
                 url.kind = "MD5";
             else
@@ -1123,7 +1125,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return m[1];
     },
 
-    getURLFromMD5: function(callerFileName, source, kind)
+    getURLFromMD5: function(callerURL, source, kind)
     {
         this.hash_service.init(this.nsICryptoHash.MD5);
         byteArray = [];
@@ -1135,7 +1137,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var hash = this.hash_service.finish(true);
 
         // encoding the hash should be ok, it should be information-preserving? Or at least reversable?
-        var url = callerFileName + (kind ? "/"+kind+"/" : "/") + encodeURIComponent(hash);
+        var url = callerURL + (kind ? "/"+kind+"/" : "/") + encodeURIComponent(hash);
 
         return url;
     },
@@ -1144,7 +1146,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var expr = this.getEvalExpressionFromEval(frame, context);  // eval in eval
 
-        return (expr) ? expr : this.getEvalExpressionFromFile(frame.script.fileName, frame.script.baseLineNumber, context);
+        return (expr) ? expr : this.getEvalExpressionFromFile(normalizeURL(frame.script.fileName), frame.script.baseLineNumber, context);
     },
 
     getEvalExpressionFromFile: function(url, lineNo, context)
@@ -2736,7 +2738,7 @@ function getCallingFrame(frame)
         do
         {
             frame = frame.callingFrame;
-            if (!isSystemURL(frame.script.fileName))
+            if (!isSystemURL(normalizeURL(frame.script.fileName)))
                 return frame;
         }
         while (frame);

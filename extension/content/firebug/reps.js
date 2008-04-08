@@ -182,7 +182,7 @@ this.Func = domplate(Firebug.Rep,
     {
         var script = script ? script : findScriptForFunction(fn);
         if (script)
-            return $STRF("Line", [script.fileName, script.baseLineNumber]);
+            return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
     },
 
     getTitle: function(fn, context)
@@ -252,7 +252,7 @@ this.jsdScript = domplate(Firebug.Rep,
 
     getTooltip: function(script)
     {
-        return $STRF("Line", [script.fileName, script.baseLineNumber]);
+        return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
     },
 
     getTitle: function(script, context)
