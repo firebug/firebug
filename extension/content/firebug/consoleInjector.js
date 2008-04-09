@@ -48,7 +48,7 @@ top.Firebug.Console.injector = {
         element.setAttribute("style", "display:none");
 
         var src = this.getInjectedSource();
-        src += "\nconsole.getFirebugElement();\n"; // force initialization
+        src += "\n_firebug.getFirebugElement();\n"; // force initialization
         element.innerHTML = src;
         win.document.documentElement.appendChild(element);
     },

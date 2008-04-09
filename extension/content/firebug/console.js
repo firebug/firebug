@@ -7,6 +7,8 @@ const Ci = Components.interfaces;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
+const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
+const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
 
 // ************************************************************************************************
 
@@ -136,13 +138,29 @@ Firebug.Console = extend(Firebug.Module,
     getConsoleInjectionScript: function() {
         if (!this.consoleInjectionScript)
         {
-            var startLoader = "window.__defineGetter__('console', function() { \n";
-            var checkLoad = " if (window._FirebugConsole) return this._firebug;\n";
-            var eventCreation = " var event = document.createEvent('Events'); \n";
-            var eventInit = " event.initEvent('loadFirebugConsole', true, false); \n"
-            var eventDispatch = " window.dispatchEvent(event); \n";
-            var endLoader = " return this._firebug;});\n";
-            this.consoleInjectionScript = startLoader +  checkLoad + eventCreation + eventInit + eventDispatch + endLoader;
+            var ff3 = versionChecker.compare(appInfo.version, "3.0*") >= 0;
+
+            // There is a "console" getter defined for FF3.
+            var script = "";
+            if (ff3) 
+            {
+                script += "window.__defineGetter__('console', function() {\n";
+                script += " return window.loadFirebugConsole(); })\n";
+            }
+            
+            script += "window.loadFirebugConsole = function() {\n";
+            script += " if (window._FirebugConsole) return window._firebug;\n";
+            script += " var event = document.createEvent('Events');\n";
+            script += " event.initEvent('loadFirebugConsole', true, false);\n"
+            script += " window.dispatchEvent(event);\n";
+
+            // If not ff3 initialize "console" property.
+            if (!ff3)
+                script += " window.console = window._firebug;\n";
+
+            script += " return window._firebug };\n";
+                
+            this.consoleInjectionScript = script;
         }
         return this.consoleInjectionScript;
     },
