@@ -31,13 +31,17 @@ Firebug.CommandLine = extend(Firebug.Module,
         var element = win.document.getElementById("_firebugConsole");
         if (!element)
         {
-             Firebug.Console.injector.attachConsole(context, win);
-             var element = win.document.getElementById("_firebugConsole");
+            Firebug.Console.injector.attachConsole(context, win);
+            Firebug.CommandLine.injector.attachCommandLine(context, win);
+            var element = win.document.getElementById("_firebugConsole");
         }
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
         element.setAttribute("methodName", "evaluate");
-        element.setAttribute("expr", expr.toString());
+        
+        expr = expr.toString();
+        expr = "with (_FirebugCommandLine) {\n " + expr + " \n};";
+        element.setAttribute("expr", expr);
 
         var consoleHandler;
         for (var i=0; i<context.consoleHandler.length; i++)
@@ -435,6 +439,51 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (name == "largeCommandLine")
             this.setMultiLine(value);
+    }
+});
+
+// ************************************************************************************************
+// Shared Helpers
+
+Firebug.CommandLine.CommandHandler = extend(Object,
+{
+    handle: function(event, scope, win)
+    {
+        var element = event.target;
+        var firstAddition = element.getAttribute("firstAddition");
+        var lastAddition = element.getAttribute("lastAddition");
+        var methodName = element.getAttribute("methodName");
+        var hosed_userObjects = win.wrappedJSObject._firebug.userObjects;
+
+        //FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");
+        //FBTrace.sysout("hosed_userObjects instanceof win.Array "+ (hosed_userObjects instanceof win.Array)+"\n");
+        //FBTrace.sysout("hosed_userObjects instanceof win.wrappedJSObject.Array "+(hosed_userObjects instanceof win.wrappedJSObject.Array)+"\n");
+        //FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
+
+        var userObjects = [];
+
+        var j = 0;
+        for (var i = firstAddition; i <= lastAddition; i++)
+        {
+            if (hosed_userObjects[i])
+                userObjects[j++] = hosed_userObjects[i];
+            else
+                break;
+        }
+
+        if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
+        {                                                                                                                           /*@explore*/
+            FBTrace.sysout("FirebugConsoleHandler: method(first, last): "+methodName+"("+firstAddition+","+lastAddition+")\n");     /*@explore*/
+            FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);                                             /*@explore*/
+        }                                                                                                                           /*@explore*/
+
+        var subHandler = scope[methodName];
+        if (!subHandler)
+            return false;
+
+        subHandler.apply(scope, userObjects);
+        
+        return true;
     }
 });
 

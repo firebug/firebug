@@ -263,6 +263,17 @@ this.addStyleSheet = function(doc, link)
         doc.documentElement.appendChild(link);
 };
 
+this.addScript = function(doc, id, src)
+{
+    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "script");
+    element.setAttribute("type", "text/javascript");
+    element.setAttribute("id", id);
+    element.firebugIgnore = true;
+    element.setAttribute("style", "display:none");
+    element.innerHTML = src;
+    doc.documentElement.appendChild(element);
+}
+
 // ************************************************************************************************
 // Localization
 

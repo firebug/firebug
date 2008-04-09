@@ -1255,6 +1255,8 @@ function onCommandLineFocus(event)
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._firebug)
     {
         Firebug.Console.injector.attachConsole(FirebugContext, FirebugContext.window);
+        Firebug.CommandLine.injector.attachCommandLine(FirebugContext, FirebugContext.window);
+        
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("onCommandLineFocus, added command line support to "+FirebugContext.window.location+"\n");
     }

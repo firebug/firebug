@@ -13,7 +13,11 @@ top.Firebug.Console.injector = {
     attachConsole: function(context, win)
     {
         if (!win)
+        {
+            if (FBTrace.DBG_CONSOLE)                                           /*@explore*/
+                FBTrace.dumpStack("no win in attachConsole!");                 /*@explore*/
             return;
+        }
 
         Firebug.Console.injector.injectConsoleScriptTag(win);
         Firebug.Console.injector.addConsoleListener(context, win);
@@ -21,52 +25,31 @@ top.Firebug.Console.injector = {
 
     injectConsoleScriptTag: function(win)
     {
-        if (!win)
-        {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.dumpStack("no win in injectConsoleScriptTag!");
-            return;
-        }
+        var doc = win.document;
 
         // Don't inject the script twice to the same document.
-        var element = win.document.getElementById("_firebugConsoleInjector");
+        var element = $("_firebugConsoleInjector", doc);
         if (element)
         {
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("consoleInjector.injectConsoleScriptTag: _firebugConsoleInjector already present\n");
+            if (FBTrace.DBG_CONSOLE)                                                                                    /*@explore*/
+                FBTrace.sysout("consoleInjector.injectConsoleScriptTag: _firebugConsoleInjector already present\n");    /*@explore*/
             return;
         }
-
-        element = win.document.createElement("script");
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpStack("consoleInjector.attachConsoleViaScriptTag after createElement win:"+win.location+"\n");
-
-        element.setAttribute("type", "text/javascript");
-        element.setAttribute("id", "_firebugConsoleInjector");
-        element.firebugIgnore = true;
-        element.setAttribute("style", "display:none");
-
-        var src = this.getInjectedSource();
-        src += "\n_firebug.getFirebugElement();\n"; // force initialization
-        element.innerHTML = src;
-        win.document.documentElement.appendChild(element);
-    },
-
-    getInjectedSource: function()
-    {
-        if (!this.injectedSource)
-            this.injectedSource = getResource("chrome://firebug/content/consoleInjected.js");
-        return this.injectedSource;
+        
+        // Inject script into the document via SCRIPT tag.
+        var scriptSource = getResource("chrome://firebug/content/consoleInjected.js");
+        addScript(doc, "_firebugConsoleInjector", scriptSource);
     },
 
     addConsoleListener: function(context, win)
     {
-        var element = win.document.getElementById("_firebugConsole");
+        var doc = win.document;
+            
+        var element = $("_firebugConsole", doc);
         if (!element)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("consoleInjector.addConsoleListener fails to find _firebugConsole in "+win.location+" for context "+context.window.location+"\n");
+            if (FBTrace.DBG_ERRORS)                                                                                                                                         /*@explore*/
+                FBTrace.sysout("consoleInjector.addConsoleListener fails to find _firebugConsole in "+win.location+" for context "+context.window.location+"\n");           /*@explore*/
             return;
         }
 
@@ -86,56 +69,19 @@ top.Firebug.Console.injector = {
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener attached handler to _firebugConsole in : "+win.location+"\n");
-    },
-
+    }
 }
 
 function FirebugConsoleHandler(context, win)
 {
     this.handleEvent = function(event)
     {
-        var element = event.target;
-        var firstAddition = element.getAttribute("firstAddition");
-        var lastAddition = element.getAttribute("lastAddition");
-        var methodName = element.getAttribute("methodName");
-        var hosed_userObjects = win.wrappedJSObject._firebug.userObjects;
-
-        //FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");
-        //FBTrace.sysout("hosed_userObjects instanceof win.Array "+ (hosed_userObjects instanceof win.Array)+"\n");
-        //FBTrace.sysout("hosed_userObjects instanceof win.wrappedJSObject.Array "+(hosed_userObjects instanceof win.wrappedJSObject.Array)+"\n");
-        //FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
-
-        var userObjects = [];
-
-        var j = 0;
-        for (var i = firstAddition; i <= lastAddition; i++)
+        if (!Firebug.CommandLine.CommandHandler.handle(event, this, win))
         {
-            if (hosed_userObjects[i])
-                userObjects[j++] = hosed_userObjects[i];
-            else
-                break;
-        }
-
-        if (FBTrace.DBG_CONSOLE)
-        {
-            //FBTrace.dumpProperties("FirebugConsoleHandler: element",  element);
-            //FBTrace.dumpProperties("FirebugConsoleHandler event:", event);
-            FBTrace.sysout("FirebugConsoleHandler: method(first, last): "+methodName+"("+firstAddition+","+lastAddition+")\n");
-            FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);
-            //FBTrace.sysout("typeof(userObjects) "+ (typeof(userObjects))+"\n");
-        }
-
-        var subHandler = this[methodName];
-        if (subHandler)
-        {
-            subHandler.apply(this, userObjects);
-        }
-        else
-        {
-        FBTrace.dumpProperties("FirebugConsoleHandler", this);
+            FBTrace.dumpProperties("FirebugConsoleHandler", this);
+            // xxxHonza localization.
             this.log("FirebugConsoleHandler does not support \'"+methodName+"\'");
         }
-
     };
 
     this.firebug = Firebug.version;
@@ -174,7 +120,13 @@ function FirebugConsoleHandler(context, win)
 
     this.assert = function(x)
     {
-        logAssert(arguments);
+        if (!x)
+        {
+            var rest = [];
+            for (var i = 1; i < arguments.length; i++)
+                rest.push(arguments[i]);
+            logAssert(rest);
+        }
     };
 
     this.dir = function(o)
@@ -255,6 +207,42 @@ function FirebugConsoleHandler(context, win)
 
             frameCounter.logRow.firstChild.firstChild.nodeValue = label;
         }
+    };
+
+    this.time = function(name, reset)
+    {
+        if (!name)
+            return;
+
+        var time = new Date().getTime();
+
+        if (!this.timeCounters)
+            this.timeCounters = {};
+
+        if (!reset && this.timeCounters[name])
+            return;
+
+        this.timeCounters[name] = time;
+    };
+
+    this.timeEnd = function(name)
+    {
+        var time = new Date().getTime();
+
+        if (!this.timeCounters)
+            return;
+
+        var timeCounter = this.timeCounters[name];
+        if (timeCounter)
+        {
+            var diff = time - timeCounter;
+            var label = name + ": " + diff + "ms";
+
+            this.info(label);
+
+            delete this.timeCounters[name];
+        }
+        return diff;
     };
 
     // These functions are over-ridden by commandLine
