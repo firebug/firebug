@@ -1471,7 +1471,7 @@ this.getStackTrace = function(frame, context)
 
     for (; frame; frame = frame.callingFrame)
     {
-        if (!this.isSystemURL(normalizeURL(frame.script.fileName)))
+        if (!this.isSystemURL(FBL.normalizeURL(frame.script.fileName)))
         {
             var stackFrame = this.getStackFrame(frame, context);
             if (stackFrame)
@@ -1512,7 +1512,7 @@ this.getStackFrame = function(frame, context)
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:", frame.script.tag+"@"+frame.script.fileName);
             var script = frame.script;
 
-            return new this.StackFrame(context, script.functionName, frame.script, normalizeURL(script.fileName), frame.line, [], frame.pc);
+            return new this.StackFrame(context, script.functionName, frame.script, FBL.normalizeURL(script.fileName), frame.line, [], frame.pc);
         }
     }
     catch (exc)
@@ -1698,7 +1698,7 @@ this.getFunctionName = function(script, context, frame)
         else
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");     /*@explore*/
-            name =  this.guessFunctionName(normalizeURL(script.fileName), script.baseLineNumber, context);
+            name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
         }
     }
     if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");     /*@explore*/
