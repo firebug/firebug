@@ -247,12 +247,12 @@ this.jsdScript = domplate(Firebug.Rep,
 
     getRealObject: function(script, context)
     {
-        return null;
+        return script;
     },
 
     getTooltip: function(script)
     {
-        return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
+        return $STRF("jsdIScript", [script.tag]);
     },
 
     getTitle: function(script, context)
