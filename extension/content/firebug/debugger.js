@@ -272,7 +272,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.debugFrame.isValid)
             return;
 
-        fbs.runUntil(sourceFile, lineNo, context.debugFrame);
+        fbs.runUntil(sourceFile, lineNo, context.debugFrame, this);
         this.resume(context);
     },
 
@@ -281,7 +281,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     setBreakpoint: function(sourceFile, lineNo)
     {
-        fbs.setBreakpoint(sourceFile, lineNo, null);
+        fbs.setBreakpoint(sourceFile, lineNo, null, this);
     },
 
     clearBreakpoint: function(sourceFile, lineNo)
@@ -322,10 +322,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         for (var url in context.sourceFileMap)
         {
-            var sourceFile = context.sourceFileMap[url];
-            fbs.enumerateBreakpoints(sourceFile, {call: function(sourceFile, lineNo)
+            fbs.enumerateBreakpoints(url, {call: function(url, lineNo)
             {
-                fbs.enableBreakpoint(sourceFile, lineNo);
+                fbs.enableBreakpoint(url, lineNo);
             }});
         }
     },
@@ -334,10 +333,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         for (var url in context.sourceFileMap)
         {
-            var sourceFile = context.sourceFileMap[url];
-            fbs.enumerateBreakpoints(sourceFile, {call: function(sourceFile, lineNo)
+            fbs.enumerateBreakpoints(url, {call: function(sourceFile, lineNo)
             {
-                fbs.disableBreakpoint(sourceFile, lineNo);
+                fbs.disableBreakpoint(url, lineNo);
             }});
         }
     },
@@ -347,7 +345,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var count = 0;
         for (var url in context.sourceFileMap)
         {
-            var sourceFile = context.sourceFileMap[url];
             fbs.enumerateBreakpoints(url,
             {
                 call: function(url, lineNo)
@@ -396,7 +393,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (scriptInfo)
         {
             if (mode == "debug")
-                this.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo);
+                this.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo, null, this);
                else if (mode == "monitor")
                 fbs.monitor(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
         }
@@ -850,7 +847,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length+"\n");                         /*@explore*/
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length+"\n");                         /*@explore*/
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
             var panel = TabWatcher.contexts[i].getPanel("script", true);
@@ -858,7 +855,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 panel.context.invalidatePanels("breakpoints");
 
-                url = normalizeURL(url);
                 var sourceBox = panel.getSourceBoxByURL(url);
                 if (sourceBox)
                 {
@@ -1376,7 +1372,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.activeContexts--;
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on"+context.window.location+"\n"); /*@explore*/
-        if (this.activeContexts == 1)
+        if (this.activeContexts == 0)
             fbs.unregisterDebugger(this);
 
         if (!destroy)
@@ -1660,12 +1656,12 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     toggleBreakpoint: function(lineNo)
     {
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+"\n");                           /*@explore*/
         var lineNode = this.getLineNode(lineNo);
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n");                           /*@explore*/
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(this.location.href, lineNo);
         else
-            fbs.setBreakpoint(this.location, lineNo, null);
+            fbs.setBreakpoint(this.location, lineNo, null, this);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -2080,6 +2076,25 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getTooltipObject: function(target)
     {
+        // Target should be A element with class = sourceLine
+        if ( hasClass(target, 'sourceLine') )
+        {
+            var lineNo = parseInt(target.innerHTML);
+
+            if ( isNaN(lineNo) )
+                return;
+            var script = this.location.getScriptByLineNumber(lineNo);
+            FBTrace.sysout("debugger.getTooltipObject script "+(script?script.tag:"none")+'\n');
+            if (script)
+            {
+                return script;
+                var tip = "script tag: "+script.tag;
+                var pc = script.isValid ? " 1st pc "+script.lineToPc(lineNo, this.location.pcmap_type) : " (now invalid)";
+                return new String(tip + pc);
+            }
+            else
+                return new String("no script at "+lineNo);
+        }
         return null;
     },
 
@@ -2108,10 +2123,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceRowText = getAncestorByClass(target, "sourceRowText");
         if (!sourceRowText)
             return;
-
-        //var line = parseInt(sourceRowText.previousSibling.textContent);
-        //if (!lineWithinFunction(frame.script, line))
-            //return;
 
         var offset = getViewOffset(target);
         var text = sourceRowText.firstChild.nodeValue.replace("\t", "        ", "g");
@@ -2383,8 +2394,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         {
             fbs.enumerateBreakpoints(url, {call: function(url, line, script, props)
             {
-                var sourceFile = context.sourceFileMap[url];
-                if (script)
+                if (script)  // then this is a current (not future) breakpoint
                 {
                     if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+"\n"); /*@explore*/
 
@@ -2397,7 +2407,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 }
                 else
                 {
-                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for url@line="+url+"@"+line+"\n"); /*@explore*/
+                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints future for url@line="+url+"@"+line+"\n"); /*@explore*/
                     var isFuture = true;
                 }
 
@@ -2699,7 +2709,7 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var lineNo = parseInt(this.target.textContent);
 
             if (value)
-                fbs.setBreakpointCondition(sourceFile, lineNo, value);
+                fbs.setBreakpointCondition(sourceFile, lineNo, value, debuggr);
             else
                 fbs.clearBreakpoint(sourceFile.href, lineNo);
         }
@@ -2763,18 +2773,6 @@ function getFrameContext(frame)
 {
     var win = getFrameWindow(frame);
     return win ? TabWatcher.getContextByWindow(win) : null;
-}
-
-function findExecutableLine(script, lineNo)
-{
-    var max = script.baseLineNumber + script.lineExtent;
-    for (; lineNo <= max; ++lineNo)
-    {
-        if (script.isLineExecutable(lineNo, PCMAP_SOURCETEXT))
-            return lineNo;
-    }
-
-    return -1;
 }
 
 function cacheAllScripts(context)

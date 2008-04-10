@@ -1645,7 +1645,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
     initializeSourceBoxes: function()
     {
         this.sourceBoxes = {};
-        this.anonSourceBoxes = [];
+        this.anonSourceBoxes = []; // XXXjjb I don't think these are used now, everything is in the sourceCache
     },
 
     showSourceBox: function(sourceBox)

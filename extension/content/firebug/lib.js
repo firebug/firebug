@@ -1768,11 +1768,6 @@ this.getFunctionArgValues = function(fn, frame)
     return values;
 };
 
-this.lineWithinFunction = function(script, line)
-{
-    return line >= script.baseLineNumber-1 && line <= script.baseLineNumber+script.lineExtent;
-};
-
 // ************************************************************************************************
 // Source Files
 
@@ -2879,9 +2874,6 @@ this.SourceFile.prototype =
 
     getSourceLength: function()
     {
-        if (this.outerScript && (this.pcmap_type == PCMAP_PRETTYPRINT) )
-            return this.outerScript.lineExtent;
-        if (this.pcmap_type == PCMAP_SOURCETEXT)
             return this.sourceLength;
     },
 
@@ -2901,7 +2893,7 @@ this.SourceFile.prototype =
         if (!this.lineMap)
             this.lineMap = {};
 
-        var lineCount = script.lineExtent;
+        var lineCount = this.getSourceLength();
         if (!lineCount)
             FBTrace.sysout("addToLineTable no lineCount this.compilation_unit_type", this.compilation_unit_type);
         var offset = this.getBaseLineOffset();
@@ -3031,7 +3023,7 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
 
 this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 {
-    if (outerScript.isValid) 
+    if (outerScript.isValid)
         sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
         FBTrace.sysout("FBL.addScriptsToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
@@ -3103,7 +3095,8 @@ this.EventSourceFile = function(url, script, title, source, innerScriptEnumerato
     this.href = url;
     this.outerScript = script;
     this.title = title;
-    this.source = source; // points to the sourceCache lines
+    this.sourceLines = source; // points to the sourceCache lines
+    this.sourceLength = source.length;
     this.pcmap_type = PCMAP_PRETTYPRINT;
     this.lineMap = {};
 
@@ -3117,7 +3110,9 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
     // Adjust JSD line numbers based on origin of script
     getSourceLineFromFrame: function(context, frame)
     {
-        return frame.line;
+        var script = frame.script;
+        var line = script.pcToLine(frame.pc, PCMAP_PRETTYPRINT);
+        return line - 1;
     },
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
@@ -3137,15 +3132,15 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EventSourceFile.prototype.getBaseLineOffset = function()
 {
-    return 0;
+    return 1;
 }
 
-this.summarizeSourceLineArray = function(source)
+this.summarizeSourceLineArray = function(sourceLines)
 {
     var buf  = "";
-    for (var i = 0; i < source.length; i++)
+    for (var i = 0; i < sourceLines.length; i++)
     {
-        buf += source[i].replace(/\s/, " ", "g");
+        buf += sourceLines[i].replace(/\s/, " ", "g");
         if (buf.length > 120)
             break;
     }
@@ -3156,7 +3151,7 @@ this.EventSourceFile.prototype.getObjectDescription = function()
 {
     if (!this.summary)
     {
-        this.summary = FBL.summarizeSourceLineArray(this.source);
+        this.summary = FBL.summarizeSourceLineArray(this.sourceLines);
     }
 
     return {path: this.href.replace(/\/event\/[^\/]+$/, "/event"), name: this.summary };
@@ -3307,14 +3302,17 @@ this.ScriptTagSourceFile.prototype.OuterScriptAnalyzer =
 
 this.ScriptTagSourceFile.prototype.getBaseLineOffset = function()
 {
-    // We should know which line the script tag was on.
-    // By the time we are called the scripts should be in jsd, we may have them in context?
-    return this.scriptTagNumber;  // Depends on number of script tags https://bugzilla.mozilla.org/show_bug.cgi?id=396568
+    return 0;
+}
+
+this.ScriptTagSourceFile.prototype.getSourceLength = function()
+{
+    return context.sourceCache.load(this.href).length;
 }
 
 this.ScriptTagSourceFile.prototype.cache = function(context)
 {
-    context.sourceCache.load(this.href);
+    return context.sourceCache.load(this.href);
 },
 
 //-------------------

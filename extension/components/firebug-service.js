@@ -107,7 +107,8 @@ var contextCount = 0;
 
 var urlFilters = [
     'chrome://',
-    'XStringBundle'
+    'XStringBundle',
+    'x-jsd:ppbuffer?type=function', // internal script for pretty printing
     ];
 
 
@@ -168,7 +169,7 @@ function FirebugService()
     observerService.addObserver(ShutdownObserver, "quit-application", false);
     observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false); 																													/*@explore*/
 
-    this.alwayFilterURLsStarting = "chrome://chromebug";  // TODO allow override
+    this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer"];  // TODO allow override
     this.onEvalScriptCreated.kind = "eval"; /*@explore*/
     this.onTopLevelScriptCreated.kind = "top-level"; /*@explore*/
     this.onEventScriptCreated.kind = "event"; /*@explore*/
@@ -371,18 +372,18 @@ FirebugService.prototype =
         this.hookInterrupts();
     },
 
-    runUntil: function(sourceFile, lineNo, startFrame)
+    runUntil: function(sourceFile, lineNo, startFrame, debuggr)
     {
-        runningUntil = this.addBreakpoint(BP_UNTIL, sourceFile, lineNo);
+        runningUntil = this.addBreakpoint(BP_UNTIL, sourceFile, lineNo, null, debuggr);
         stepFrameCount = countFrames(startFrame);
         stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    setBreakpoint: function(sourceFile, lineNo, props)
+    setBreakpoint: function(sourceFile, lineNo, props, debuggr)
     {
-        var bp = this.addBreakpoint(BP_NORMAL, sourceFile, lineNo, props);
+        var bp = this.addBreakpoint(BP_NORMAL, sourceFile, lineNo, props, debuggr);
         if (bp)
         {
             dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, getBreakpointProperties(bp)]);
@@ -428,12 +429,12 @@ FirebugService.prototype =
             return false;
     },
 
-    setBreakpointCondition: function(sourceFile, lineNo, condition)
+    setBreakpointCondition: function(sourceFile, lineNo, condition, debuggr)
     {
         var bp = this.findBreakpoint(sourceFile.href, lineNo);
         if (!bp)
         {
-            bp = this.addBreakpoint(BP_NORMAL, sourceFile, lineNo);
+            bp = this.addBreakpoint(BP_NORMAL, sourceFile, lineNo, null, debuggr);
         }
 
         if (!bp)
@@ -479,7 +480,8 @@ FirebugService.prototype =
          }
     },
 
-    enumerateBreakpoints: function(url, cb)
+
+    enumerateBreakpoints: function(url, cb)  // url is sourceFile.href, not jsd script.fileName
     {
         if (url)
         {
@@ -493,15 +495,17 @@ FirebugService.prototype =
                     {
                         var rc = cb.call(url, bp.lineNo, bp.scriptWithBreakpoint, getBreakpointProperties(bp));
                         if (rc)
-                            return bp;
+                            return [bp];
                     }
                 }
             }
         }
         else
         {
+            var bps = [];
             for (var url in breakpoints)
-                this.enumerateBreakpoints(url, cb);
+                bps.push(this.enumerateBreakpoints(url, cb));
+            return bps;
         }
     },
 
@@ -807,7 +811,10 @@ FirebugService.prototype =
             }
          catch(exc)
          {
-            ERROR("onDebugger failed: "+exc);
+            if (fbs.DBG_FBS_ERRORS)  /*@explore*/
+                dumpProperties("onDebugger failed: ",exc); /*@explore*/
+            else  /*@explore*/
+                ERROR("onDebugger failed: "+exc);
             return RETURN_CONTINUE;
          }
     },
@@ -887,7 +894,7 @@ FirebugService.prototype =
             if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
                  +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
 
-            var bp = this.findBreakpointByScript(frame.script, frame.line);
+            var bp = this.findBreakpointByScript(frame.script, frame.pc);
             if (bp)
             {
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
@@ -1517,14 +1524,24 @@ FirebugService.prototype =
         return null;
     },
 
-    findBreakpointByScript: function(script, lineNo)
+    // When we are called, scripts have been compiled so all relevant breakpoints are not "future"
+    findBreakpointByScript: function(script, pc)
     {
-        var bp = fbs.enumerateBreakpoints(null, function(url, lineNo, scriptWithBreakPoint, props)
+        for (var url in breakpoints)
         {
-            if (scriptWithBreakPoint.isValid && (script.tag == scriptWithBreakPoint.tag) )
-                return true;
-        });
-        return bp;
+            var urlBreakpoints = breakpoints[url];
+            if (urlBreakpoints)
+            {
+                for (var i = 0; i < urlBreakpoints.length; ++i)
+                {
+                    var bp = urlBreakpoints[i];
+                    if ( (bp.scriptWithBreakPoint.tag == script.tag) && (bp.pc == pc) )
+                        return bp;
+                }
+            }
+        }
+
+        return null;
     },
 
     resetBreakpoints: function(sourceFile)
@@ -1552,15 +1569,21 @@ FirebugService.prototype =
         if (script && script.isValid)
         {
             var pcmap = sourceFile.pcmap_type;
-            var pc = script.lineToPc(bp.lineNo, pcmap);
+            // we subtraced this offset when we showed the user so lineNo is a user line number; now we need to talk
+            // to jsd its line world
+            var jsdLine = bp.lineNo + sourceFile.getBaseLineOffset();
+            var pc = script.lineToPc(jsdLine, pcmap);
             script.setBreakpoint(pc);
             bp.scriptWithBreakpoint = script; // TODO may need array?
             bp.pcmap = pcmap;
+            bp.pc = pc;
+            bp.jsdLine = jsdLine;
 
             if (pc == 0)  // signal the breakpoint handler to break for user
                 sourceFile.breakOnZero = script.tag;
 
-            if (fbs.DBG_FBS_BP)ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+"\n");                         /*@explore*/
+            if (fbs.DBG_FBS_BP) ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+"\n");                         /*@explore*/
+
         }
         else /*@explore*/
         { /*@explore*/
@@ -1916,8 +1939,9 @@ function isFilteredURL(rawJSD_script_filename)
         return false;
     if (fbs.filterSystemURLs)
         return systemURLStem(rawJSD_script_filename);
-    if (rawJSD_script_filename.indexOf(fbs.alwayFilterURLsStarting) != -1)
-        return true;
+    for (var i = 0; i < fbs.alwayFilterURLsStarting.length; i++)
+        if (rawJSD_script_filename.indexOf(fbs.alwayFilterURLsStarting[i]) != -1)
+            return true;
     return false;
 }
 
@@ -1955,7 +1979,7 @@ function deepSystemURLStem(rawJSD_script_filename)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function dispatch(listeners, name, args)
-{
+{ddd("fbs.dispatch "+name+" to "+listeners.length+" listeners\n");
     for (var i = 0; i < listeners.length; ++i)
     {
         var listener = listeners[i];
@@ -1976,7 +2000,7 @@ function hook(fn, rv)
         {
             var msg = "Error in hook: " + exc +" fn="+fn+" stack=";
             for (var frame = Components.stack; frame; frame = frame.caller)
-                msg += frame.filename + "@" + frame.lineNumber + ";\n";
+                msg += frame.filename + "@" + frame.line + ";\n";
                ERROR(msg);
             return rv;
         }
@@ -2077,7 +2101,7 @@ function testBreakpoint(frame, bp)
 
 function getBreakpointProperties(bp)
 {
-    return { disabled: bp.disabled & BP_NORMAL, condition: bp.condition, onTrue: bp.onTrue, hitCount: bp.hitCount };
+    return { disabled: bp.disabled & BP_NORMAL, condition: bp.condition, onTrue: bp.onTrue, hitCount: bp.hitCount, pcmap: bp.pcmap };
 }
 
 function remove(list, item)
@@ -2197,7 +2221,7 @@ function dFormat(script, url)
     return script.tag+"@("+script.baseLineNumber+"-"+(script.baseLineNumber+script.lineExtent)+")"+ url;
 }
 
-function getStackDump()                                                                                                /*@explore*/
+function getComponentsStackDump()                                                                                                /*@explore*/
 {                                                                                                                      /*@explore*/
     var lines = [];                                                                                                    /*@explore*/
     for (var frame = Components.stack; frame; frame = frame.caller)                                                    /*@explore*/
