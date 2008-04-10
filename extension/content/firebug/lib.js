@@ -1830,7 +1830,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             }
             else
             {
-                var sourceFile = new FBL.ScriptTagSourceFile(url, scriptTagNumber);
+                var sourceFile = new FBL.ScriptTagSourceFile(context, url, scriptTagNumber);
                 sourceFile.dependentURL = dependentURL;
                 context.sourceFileMap[url] = sourceFile;
                 return true;
@@ -3286,8 +3286,9 @@ this.NoScriptSourceFile.prototype.getSourceLength = function()
 }
 //---------
 
-this.ScriptTagSourceFile = function(url, scriptTagNumber) // we don't have the outer script and we delay source load
+this.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't have the outer script and we delay source load
 {
+    this.context = context;
     this.href = url;  // we know this is not an eval
     this.scriptTagNumber = scriptTagNumber;
     this.innerScripts = [];
@@ -3307,7 +3308,7 @@ this.ScriptTagSourceFile.prototype.getBaseLineOffset = function()
 
 this.ScriptTagSourceFile.prototype.getSourceLength = function()
 {
-    return context.sourceCache.load(this.href).length;
+    return this.context.sourceCache.load(this.href).length;
 }
 
 this.ScriptTagSourceFile.prototype.cache = function(context)
