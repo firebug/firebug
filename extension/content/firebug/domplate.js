@@ -136,16 +136,16 @@ DomplateTag.prototype =
         this.compileMarkup();
         this.compileDOM();
 
-        //ddd(this.renderMarkup);
-        //ddd(this.renderDOM);
-        //ddd(this.domArgs);
+        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate renderMarkup: ", this.renderMarkup);
+        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate renderDOM:", this.renderDOM);
+        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate domArgs:", this.domArgs);
     },
 
     compileMarkup: function()
     {
         this.markupArgs = [];
         var topBlock = [], topOuts = [], blocks = [], info = {args: this.markupArgs, argIndex: 0};
-        //this.addLocals(blocks);
+         
         this.generateMarkup(topBlock, topOuts, blocks, info);
         this.addCode(topBlock, topOuts, blocks);
 
@@ -403,7 +403,7 @@ DomplateTag.prototype =
             var domArgs = [node, tag.tag.context, 0];
             domArgs.push.apply(domArgs, tag.tag.domArgs);
             domArgs.push.apply(domArgs, args);
-
+            if (FBTrace.DBG_DOM) FBTrace.dumpProperties("domplate__link__ domArgs:", domArgs);
             return tag.tag.renderDOM.apply(tag.tag.subject, domArgs);
         }
 
@@ -416,14 +416,14 @@ DomplateTag.prototype =
                 iter[i][0] = i;
                 iter[i][1] = nodeCount;
                 nodeCount += fn.apply(this, iter[i]);
-                //ddd("nodeCount", nodeCount);
+                if (FBTrace.DBG_DOM) FBTrace.sysout("nodeCount", nodeCount);
             }
             return nodeCount;
         }
 
         function __path__(parent, offset)
         {
-            //ddd("offset", arguments[2])
+            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate __path__ offset: "+ offset+"\n");
             var root = parent;
 
             for (var i = 2; i < arguments.length; ++i)
@@ -438,12 +438,12 @@ DomplateTag.prototype =
                     parent = parent.childNodes[index];
             }
 
-            //ddd(arguments[2], root, parent);
+            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate: "+arguments[2]+"root: "+ root+" parent:"+ parent+"\n");
             return parent;
         }
 
         var js = fnBlock.join("");
-        //ddd(js.replace(/(\;|\{)/g, "$1\n"));
+        if (FBTrace.DBG_DOM) FBTrace.sysout(js.replace(/(\;|\{)/g, "$1\n"));
         this.renderDOM = eval(js);
     },
 
@@ -482,7 +482,6 @@ DomplateTag.prototype =
         for (var i = 0; i < path.length; ++i)
             blocks.push(",", path[i]);
         blocks.push(");");
-        //blocks.push("try {ddd(l0,l1,l2); } catch (exc) {}");
     },
 
     generateChildDOM: function(path, blocks, args)
@@ -648,7 +647,6 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
 
         path[path.length-1] = basePath+'+'+loopName;
 
-        //blocks.push("console.group('", loopName, "');");
         blocks.push(loopName,' = __loop__.apply(this, [', iterName, ', function(', counterName,',',loopName);
         for (var i = 0; i < path.renderIndex; ++i)
             blocks.push(',d'+i);
@@ -656,7 +654,6 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
         blocks.push(subBlocks.join(""));
         blocks.push('return ', nodeCount, ';');
         blocks.push('}]);');
-        //blocks.push("console.groupEnd();");
 
         path.renderIndex = preIndex;
 
@@ -995,7 +992,8 @@ var Renderer =
 
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
-
+        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate.append html: "+html+"\n");
+        
         if (!womb || womb.ownerDocument != parent.ownerDocument)
             womb = parent.ownerDocument.createElement("div");
         womb.innerHTML = html;
@@ -1007,6 +1005,8 @@ var Renderer =
         var domArgs = [root, this.tag.context, 0];
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
+        
+        if (FBTrace.DBG_DOM) FBTrace.dumpProperties("domplate append domArgs:", domArgs);
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
         return root;
