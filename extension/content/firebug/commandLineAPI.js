@@ -1,5 +1,5 @@
 /* See license.txt for terms of usage */
-
+FBL.ns(function() { with (FBL) {
 function FirebugCommandLineAPI(context)
 {
     var baseWindow = context.window;
