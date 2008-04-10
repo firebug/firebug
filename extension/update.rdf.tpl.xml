@@ -20,7 +20,5 @@
       </r:li>
     </r:Seq>
   </updates>
-  <version>@VERSION@</version>
-  <updateLink>@UPDATEPATH@/firebug-@VERSION@.xpi</updateLink>
 </r:Description>
 </r:RDF>
