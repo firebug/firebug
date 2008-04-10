@@ -1979,7 +1979,7 @@ function deepSystemURLStem(rawJSD_script_filename)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function dispatch(listeners, name, args)
-{ddd("fbs.dispatch "+name+" to "+listeners.length+" listeners\n");
+{
     for (var i = 0; i < listeners.length; ++i)
     {
         var listener = listeners[i];
