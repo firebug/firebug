@@ -146,7 +146,7 @@ function FirebugConsoleHandler(context, win)
 
     this.trace = function()
     {
-        var trace = getAccurateUserStackTrace();
+        var trace = getJSDUserStack();
         Firebug.Console.log(trace, context, "stackTrace");
     };
 
@@ -286,7 +286,7 @@ function FirebugConsoleHandler(context, win)
 
         var sourceName = win.location;
         var lineNumber = 0;
-        var trace = getAccurateUserStackTrace();
+        var trace = getJSDUserStack();
         if (trace && trace.frames[0])
         {
             var frame = trace.frames[0];
@@ -301,14 +301,14 @@ function FirebugConsoleHandler(context, win)
         row.scrollIntoView();
     }
 
-    function getUserStack()
+    function getComponentsStackDump()
     {
         // Starting with our stack, walk back to the user-level code
         var frame = Components.stack;
         var userURL = win.location.href.toString();
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getUserStack for userURL "+userURL, FBL.getStackDump());
+            FBTrace.sysout("consoleInjector.getComponentsStackDump for userURL "+userURL, FBL.getStackDump());
 
         while (frame && (normalizeURL(frame.filename) != userURL) )
             frame = frame.caller;
@@ -318,10 +318,10 @@ function FirebugConsoleHandler(context, win)
 
     function getStackLink()
     {
-        return FBL.getFrameSourceLink(getUserStack());
+        return FBL.getFrameSourceLink(getComponentsStackDump());
     }
 
-    function getAccurateUserStackTrace()
+    function getJSDUserStack()
     {
         var trace = FBL.getCurrentStackTrace(context);
 
