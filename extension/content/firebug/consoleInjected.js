@@ -81,7 +81,7 @@ function _FirebugConsole()
     {
         try
         {
-            var result = eval(expr);
+            var result = top.eval(expr);
             if (result)
                 this.notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
