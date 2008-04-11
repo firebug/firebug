@@ -93,6 +93,7 @@ pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                 
 pref("extensions.firebug.DBG_CONSOLE", false);        // console                                   /*@explore*/
 pref("extensions.firebug.DBG_CSS", false);          //                                             /*@explore*/
 pref("extensions.firebug.DBG_DBG2FIREBUG", false);  //                                             /*@explore*/
+pref("extensions.firebug.DBG_DOM", false);  //                                             /*@explore*/
 pref("extensions.firebug.DBG_DISPATCH", false);     //                                          /*@explore*/
 pref("extensions.firebug.DBG_TRACE", false);        //                                          /*@explore*/
 pref("extensions.firebug.DBG_HTML", false);         //                                          /*@explore*/
