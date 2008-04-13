@@ -1914,7 +1914,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelBar1: $("fbPanelBar1"),
     menuButton: null,
     menuTooltip: null,
-    activeContexts: 0,
+    activeContexts: [],
 
     initialize: function()
     {

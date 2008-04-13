@@ -1819,6 +1819,12 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 {
     var oldMap = eraseSourceFileMap ? null : context.sourceFileMap;
 
+    if (FBTrace.DBG_SOURCEFILES)
+    {
+        FBTrace.sysout("updateScriptFiles eraseSourceFileMap: "+eraseSourceFileMap);
+        this.sourceFilesAsArray(context);  // just for length trace
+    }
+
     function addFile(url, scriptTagNumber, dependentURL)
     {
             if (oldMap && url in oldMap)

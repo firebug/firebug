@@ -1275,7 +1275,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
         $("cmd_breakOnTopLevel").setAttribute("checked", Firebug.breakOnTopLevel);
 
-        this.wrappedJSObject = this;
+        this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
         this.menuTooltip = $("fbDebuggerStateMenuTooltip");
         this.menuButton = $("fbDebuggerStateMenu");
@@ -1290,7 +1290,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.loadedContext context.sourceFileMap", context.sourceFileMap);
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
 
         updateScriptFiles(context);
     },
@@ -1358,21 +1358,27 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             panel.sidePanelDeck.collapsed = false;
         }
 
-        this.activeContexts++;
+        this.activeContexts.push(context);
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on"+context.window.location+"\n"); /*@explore*/
 
-        if (this.activeContexts == 1)
-            fbs.registerDebugger(this);
+        fbs.registerDebugger(this);
     },
 
     onModuleDeactivate: function(context, destroy)
     {
-        this.activeContexts--;
+        var i = this.activeContexts.indexOf(context);
+        if (i != -1)
+            this.activeContexts.splice(i, 1);
+        else
+        {
+            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active");
+        }
+
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on"+context.window.location+"\n"); /*@explore*/
-        if (this.activeContexts == 0)
+            FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts.length+" for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
+        if (this.activeContexts.length == 0)
             fbs.unregisterDebugger(this);
 
         if (!destroy)

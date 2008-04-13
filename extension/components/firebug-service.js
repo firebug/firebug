@@ -255,7 +255,7 @@ FirebugService.prototype =
         {
             debuggers.push(debuggr);
             if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
-                ddd("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts+" active contexts"+"\n"); /*@explore*/
+                ddd("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
             this.enableDebugger();
         }
         else
@@ -284,7 +284,7 @@ FirebugService.prototype =
             }
         }
         if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            ddd("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts+" active contexts"+"\n"); /*@explore*/
+            ddd("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
 
         for (var i = 0; i < netDebuggers.length; ++i)
         {
@@ -888,22 +888,22 @@ FirebugService.prototype =
         }
 
 
-
-        if (disabledCount || monitorCount || conditionCount || runningUntil)
+        var bp = this.findBreakpointByScript(frame.script, frame.pc);
+        if (bp)
         {
-            if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
-                 +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
-
-            var bp = this.findBreakpointByScript(frame.script, frame.pc);
-            if (bp)
+            if (disabledCount || monitorCount || conditionCount || runningUntil)
             {
+                if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
+                     +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
+
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
                     bp.debuggr.onCall(frame);
 
                 if (bp.type & BP_UNTIL)
                 {
                     this.stopStepping();
-                    return this.onBreak(frame, type, val);
+                    if (bp.debuggr)
+                    return this.breakIntoDebugger(bp.debuggr, frame, type);
                 }
                 else if (bp.type & BP_NORMAL)
                 {
@@ -914,11 +914,11 @@ FirebugService.prototype =
                 else if (!(bp.type & BP_NORMAL) || bp.disabled & BP_NORMAL)
                     return RETURN_CONTINUE;
             }
-            else
-                return RETURN_CONTINUE;
+            else  // not special, just break for sure
+                return this.breakIntoDebugger(bp.debuggr, frame, type);
         }
 
-        if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="              /*@explore*/
+        if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="              /*@explore*/
                 +frame.script.tag+"\n");                           /*@explore*/
         if (runningUntil)
             return RETURN_CONTINUE;
@@ -1535,7 +1535,8 @@ FirebugService.prototype =
                 for (var i = 0; i < urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
-                    if ( (bp.scriptWithBreakPoint.tag == script.tag) && (bp.pc == pc) )
+                    if (fbs.DBG_FBS_BP) ddd("findBreakpointByScript "+i+")"+ (bp.scriptWithBreakPoint ? bp.scriptWithBreakPoint.tag :"future")+"@"+bp.pc+" on "+url+"\n"); /*@explore*/
+                    if ( bp.scriptWithBreakPoint && (bp.scriptWithBreakPoint.tag == script.tag) && (bp.pc == pc) )
                         return bp;
                 }
             }

@@ -35,6 +35,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == DOM Panel ==
     BROKEN Blocked on https://bugzilla.mozilla.org/show_bug.cgi?id=425139
 
+== Misc ==
+    Secure updates via signed update.rdf with xpi updateHash values.
+
 == Bug Fixes ==
     * Issue 2: Can't set breakpoints in code called by unload event
     * Issue 4: Visiting error page causes external Firebug window to close itself
