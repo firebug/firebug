@@ -1373,7 +1373,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.activeContexts.splice(i, 1);
         else
         {
-            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active");
+            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active\n");
         }
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
@@ -2182,8 +2182,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
             serviceOptionMenu("TrackThrowCatch", "trackThrowCatch"),
-            "-",
-            this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
+            //"-",
+            //1.2 option on toolbar this.optionMenu("DebuggerEnableAlways", enableAlwaysPref)
         ];
     },
 
