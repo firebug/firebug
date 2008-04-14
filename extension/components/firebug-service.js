@@ -1275,7 +1275,15 @@ FirebugService.prototype =
 
         if (global)
         {
-            // TODO? filter on global to avoid either chrome://firebug or chrome://chromebug
+        
+            if (global.location)  // then we have a window, it will be an nsIDOMWindow, right?
+            {
+                var location = global.location.toString();
+                // TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter            
+                if (location.indexOf("chrome://chromebug/") != -1)
+                        return false;
+            }
+            
             for ( var i = debuggers.length - 1; i >= 0; i--)
             {
                 try
