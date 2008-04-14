@@ -50,7 +50,7 @@
 }
 
 .sourceBox > .sourceRow > .sourceLine {
-    cursor: pointer;    
+    cursor: pointer;
 }
 
 .sourceLine:hover {
@@ -277,7 +277,7 @@
     margin: 0 !important;
     border-top: none !important;
 }
- 
+
 .panelNode-callstack  .objectLink-sourceLink {
     display: none;
 }
@@ -287,3 +287,19 @@
     overflow: auto;
 }
 
+.FBTraceColumn {
+    float: left;
+    width: 16.6%;
+}
+
+.FBTraceOption {
+    display:block;
+    width: 90%;
+    cursor: default !important;
+    border-color: #D7D7D7;
+    -moz-border-radius: 4px 4px 0 0;
+    background-color: #FFFFFF;
+}
+.FBTraceOption[checked="true"] {
+    font-weight: bold;
+}

@@ -8,7 +8,6 @@ FBL.ns(function() { with (FBL) {
 // Module
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const DBG_TRACE = false;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const prefs = PrefService.getService(nsIPrefBranch2);
@@ -44,7 +43,6 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_SOURCEFILES: false, 	// debugger and sourceCache
     DBG_STACK: false,  		// call stack, mostly debugger.js
     DBG_TOPLEVEL: false, 		// firebug-service
-    DBG_TRACE: false,
     DBG_UI_LOOP: false, 		// debugger.js
     DBG_WINDOWS: false,    	// tabWatcher, dispatch events; very useful for understand modules/panels
     DBG_FBS_CREATION: false, // firebug-service script creation
@@ -58,7 +56,7 @@ Firebug.TraceModule = extend(Firebug.Console,
     DBG_FBS_FLUSH: false, // firebug-service flush to see crash point
     DBG_FBS_JSDCONTEXT: false, // firebug-service dump contexts
 
-    debug: this.DBG_TRACE,
+    debug: this.DBG_OPTIONS,
 
     injectOptions: function()
     {
@@ -107,6 +105,13 @@ Firebug.TraceModule = extend(Firebug.Console,
         }
     },
 
+    updateOption: function(name, value)
+    {
+        this.debug = FBTrace.DBG_OPTIONS;
+        if (this.debug)
+            FBTrace.sysout("TraceFirebug.panel updateOption this.debug="+this.debug+" name:"+name+" value:"+value+"\n");
+    },
+
     resetOption: function(prefDomain, optionName)
     {
         if (!FBTrace)  // we get called in a weird scope
@@ -125,11 +130,11 @@ Firebug.TraceModule = extend(Firebug.Console,
 
     watchWindow: function(context, win)
     {
-        // Don't call the predecessor 
+        // Don't call the predecessor
         // Firebug.Console module injects loadFirebugConsole method into the current-page.
         // It shouldn't be done twice.
     },
-    
+
     initContext: function(context)
     {
         if (this.debug)
@@ -187,18 +192,69 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
     title: "FBTrace",
     searchable: false,
     editable: false,
-    debug: Firebug.TraceModule.DBG_TRACE,
+    debug: Firebug.TraceModule.DBG_OPTIONS,
 
     initializeNode: function(myPanelNode)
     {
         if (this.debug) FBTrace.sysout("TracePanel initializeNode\n");
+        var options = this.getOptionsMenuItems();
+
+        var numbers_of_columns = 6;
+        var number_of_rows = Math.round((options.length / numbers_of_columns));
+
+        for (var i = 0; i < options.length; i++)
+        {
+            var depth = i % number_of_rows;
+            if (depth == 0)
+            {
+                var optionsColumn = this.document.createElement("div");
+                setClass(optionsColumn, "FBTraceColumn");
+                myPanelNode.appendChild(optionsColumn);
+            }
+
+            var button = this.document.createElement("button");
+            setClass(button, "FBTraceOption");
+            button.innerHTML = options[i].label;
+            setItemIntoElement(button, options[i]);
+            optionsColumn.appendChild(button);
+            button.addEventListener("click", options[i].command, false);
+        }
+        prefs.addObserver("extensions", { observe: bind(this.observePrefs, this)}, false);
     },
 
-    show: function()
+    observePrefs: function(subject, topic, data)
+    {
+        var m = reDBG.exec(data);
+        if (m)
+        {
+            this.updateButtons();
+        }
+    },
+
+    show: function(state)
     {
         if (this.debug) FBTrace.sysout("TraceFirebug.panel show context="+this.context+"\n");
         var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
         collapse(consoleButtons, false);
+
+        this.updateButtons(state);
+        // TODO update options based on state to make tracing per-page
+    },
+
+    updateButtons: function()
+    {
+        var buttons = this.panelNode.getElementsByTagName("button");
+        for (var i = 0; i < buttons.length; i++)
+        {
+            var label = buttons[i].getAttribute("label");
+            var prop = "DBG_"+label;
+            if (FBTrace.hasOwnProperty(prop))
+            {
+                var optionOn = FBTrace[prop];
+                //FBTrace.sysout("tracePanel.show label: "+label+" optionOn: "+optionOn+"\n");
+                buttons[i].setAttribute("checked", optionOn);
+            }
+        }
     },
 
     hide: function()
@@ -241,18 +297,6 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         if (this.debug) FBTrace.sysout("TraceFirebug.panel getDefaultSelection\n");
     },
 
-    updateOption: function(name, value)
-    {
-        this.debug = FBTrace.DBG_TRACE;
-        if (this.debug)
-            FBTrace.sysout("TraceFirebug.panel updateOption this.debug="+this.debug+" name:"+name+" value:"+value+"\n");
-    },
-
-    cheat: function()
-    {
-        FirebugContext.window.location.href = "chrome://firebug/content/tests/crypto-hash.html";
-    },
-
     getOptionsMenuItems: function()
     {
         if (this.debug) FBTrace.sysout("TraceFirebug.panel getOptionsMenuItems for this.context="+this.context+"\n");
@@ -283,6 +327,7 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
         FBTrace[category] = !FBTrace[category];
+        menuitem.checked = FBTrace[category];
 
         if (category.indexOf("_FBS_") == -1)
         {

@@ -1386,22 +1386,7 @@ this.createMenuItem = function(popup, item, before)
 
     var menuitem = popup.ownerDocument.createElement("menuitem");
 
-    var label = item.nol10n ? item.label : this.$STR(item.label);
-
-    menuitem.setAttribute("label", label);
-    menuitem.setAttribute("type", item.type);
-    if (item.checked)
-        menuitem.setAttribute("checked", "true");
-    if (item.disabled)
-        menuitem.setAttribute("disabled", "true");
-    if (item.image)
-    {
-        menuitem.setAttribute("class", "menuitem-iconic");
-        menuitem.setAttribute("image", item.image);
-    }
-
-    if (item.command)
-        menuitem.addEventListener("command", item.command, false);
+    this.setItemIntoElement(menuitem, item);
 
     if (before)
         popup.insertBefore(menuitem, before);
@@ -1409,6 +1394,29 @@ this.createMenuItem = function(popup, item, before)
         popup.appendChild(menuitem);
     return menuitem;
 };
+
+this.setItemIntoElement = function(element, item)
+{
+    var label = item.nol10n ? item.label : this.$STR(item.label);
+
+    element.setAttribute("label", label);
+    element.setAttribute("type", item.type);
+    if (item.checked)
+        element.setAttribute("checked", "true");
+    if (item.disabled)
+        element.setAttribute("disabled", "true");
+    if (item.image)
+    {
+        element.setAttribute("class", "element-iconic");
+        element.setAttribute("image", item.image);
+    }
+
+    if (item.command)
+        element.addEventListener("command", item.command, false);
+
+    return element;
+}
+
 
 this.createMenuHeader = function(popup, item)
 {
