@@ -12,31 +12,32 @@ function _FirebugConsole()
         {
             var command = commands[i];
             this[command] = new Function(
-                "this.notifyFirebug(arguments, '" + command + "', 'firebugAppendConsole');");
+                "return this.notifyFirebug(arguments, '" + command + "', 'firebugAppendConsole');");
         }
 
         // Initialize DOM element for communication betwen the web-page a chrome.
         this.getFirebugElement();
     },
     
-    this.userObjects = [];
-
     this.notifyFirebug = function(objs, methodName, eventId)
     {
         var element = this.getFirebugElement();
+
         var event = document.createEvent("Events");
         event.initEvent(eventId, true, false);
 
-        element.setAttribute("methodName", methodName);
-
-        element.setAttribute("firstAddition", this.userObjects.length + "");
-        for (var i = 0; i < objs.length; i++)
-        {
+        this.userObjects = [];
+        for (var i=0; i<objs.length; i++)
             this.userObjects.push(objs[i]);
-        }
-        element.setAttribute("lastAddition", this.userObjects.length - 1 + "");
+
+        var length = this.userObjects.length;
+        element.setAttribute("methodName", methodName);
         element.dispatchEvent(event);
+
         //dump("FirebugConsole dispatched event "+methodName+"\n");
+        
+        if (this.userObjects.length > length)
+            return this.userObjects[length];
     };
 
     this.getFirebugElement = function()

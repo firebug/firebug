@@ -56,11 +56,10 @@ function CommandLineHandler(context, win)
         return Firebug.Console.logFormatted(args, context);
     };
 
-    var baseWindow = context.window;
+    var baseWindow = context.window.wrappedJSObject;
 
     this.$ = function(id)
     {
-        var doc = baseWindow.document;
         return baseWindow.document.getElementById(id);
     };
 
@@ -79,7 +78,7 @@ function CommandLineHandler(context, win)
         if (object instanceof Window)
             baseWindow = context.baseWindow = object;
         else
-            throw "Object must be a window.";
+            throw "Object must be a window.";   // xxxHonza localization
     };
 
     this.dir = function(o)

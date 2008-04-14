@@ -11,14 +11,14 @@ var _FirebugCommandLine =
         {
             var command = commands[i];
             this[command] = new Function(
-                "window.console.notifyFirebug(arguments, '" + command + "', 'firebugExecuteCommand');");
+                "return window.console.notifyFirebug(arguments, '" + command + "', 'firebugExecuteCommand');");
         }
         
         var consoleShortcuts = ["dir", "dirxml"];
         for (var i=0; i<consoleShortcuts.length; i++)
         {
             var command = consoleShortcuts[i];
-            this[command] = new Function("window.console." + command + ".apply(window.console, arguments)");
+            this[command] = new Function("return window.console." + command + ".apply(window.console, arguments)");
         }
     }
 };

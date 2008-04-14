@@ -452,8 +452,6 @@ Firebug.CommandLine.CommandHandler = extend(Object,
     handle: function(event, scope, win)
     {
         var element = event.target;
-        var firstAddition = element.getAttribute("firstAddition");
-        var lastAddition = element.getAttribute("lastAddition");
         var methodName = element.getAttribute("methodName");
         var hosed_userObjects = win.wrappedJSObject._firebug.userObjects;
 
@@ -462,29 +460,18 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         //FBTrace.sysout("hosed_userObjects instanceof win.wrappedJSObject.Array "+(hosed_userObjects instanceof win.wrappedJSObject.Array)+"\n");
         //FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
 
-        var userObjects = [];
-
-        var j = 0;
-        for (var i = firstAddition; i <= lastAddition; i++)
-        {
-            if (hosed_userObjects[i])
-                userObjects[j++] = hosed_userObjects[i];
-            else
-                break;
-        }
-
+        var userObjects = cloneArray(hosed_userObjects);
         if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
-        {                                                                                                                           /*@explore*/
-            FBTrace.sysout("FirebugConsoleHandler: method(first, last): "+methodName+"("+firstAddition+","+lastAddition+")\n");     /*@explore*/
             FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);                                             /*@explore*/
-        }                                                                                                                           /*@explore*/
 
         var subHandler = scope[methodName];
         if (!subHandler)
             return false;
 
-        subHandler.apply(scope, userObjects);
-        
+        var result = subHandler.apply(scope, userObjects);
+        if (result)
+            hosed_userObjects.push(result);
+
         return true;
     }
 });
