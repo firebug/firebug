@@ -817,7 +817,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // We just compiled a bunch of JS, eg a script tag in HTML.  We are about to run the outerScript.
     onTopLevelScriptCreated: function(frame, outerScript, innerScripts)
     {
-        if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScript script.fileName="+outerScript.fileName+"\n");     /*@explore*/
+        if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger("+this.debuggerName+").onTopLevelScript script.fileName="+outerScript.fileName+"\n");     /*@explore*/
         var context = this.breakContext;
         delete this.breakContext;
 
@@ -847,6 +847,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
+        if (props.debugger != this) // then not for us
+            return;
+
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length+"\n");                         /*@explore*/
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
@@ -1361,7 +1364,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.activeContexts.push(context);
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on"+context.window.location+"\n"); /*@explore*/
+            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 
         fbs.registerDebugger(this);
     },
@@ -1373,7 +1376,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.activeContexts.splice(i, 1);
         else
         {
-            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active\n");
+            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active"+context.window.location+"\n");
         }
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
