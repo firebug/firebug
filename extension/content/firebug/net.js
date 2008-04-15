@@ -2752,7 +2752,7 @@ var HttpObserver =
               contexts[aTabId] = new NetProgress(null);
       }
 
-      // Show only requests that are associated with a tab.
+      // Show only requests that are associated with a tab.  XXXjjb shouldn't this be up at beginning of method?
       if (!aTabId)
           return;
 

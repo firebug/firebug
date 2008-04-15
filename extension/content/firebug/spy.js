@@ -432,7 +432,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         spy.responseText = spy.xhrRequest.responseText;
 
     if (FBTrace.DBG_NET)                                                                                                   /*@explore*/
-        FBL.sysout("onHTTPSpyLoad responseTime=" + responseTime                              /*@explore*/
+        FBTrace.sysout("onHTTPSpyLoad responseTime=" + responseTime                              /*@explore*/
             + " spy.responseText " + spy.responseText.length + " bytes\n");                      /*@explore*/
 
     if (spy.logRow)

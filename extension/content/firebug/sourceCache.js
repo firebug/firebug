@@ -106,6 +106,7 @@ top.SourceCache.prototype =
 
         if (url == this.context.browser.contentWindow.location.href)
         {
+            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load content window href\n");                                             /*@explore*/
             if (channel instanceof nsIUploadChannel)
             {
                 var postData = getPostStream(this.context);
@@ -113,6 +114,7 @@ top.SourceCache.prototype =
                 {
                     var uploadChannel = QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postData, "", -1);
+                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");                                             /*@explore*/
                 }
             }
 
@@ -120,12 +122,14 @@ top.SourceCache.prototype =
             {
                 var cacheChannel = QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
+                if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");                                             /*@explore*/
             }
         }
 
         var stream;
         try
         {
+            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load url:"+url+"\n");                                             /*@explore*/
             stream = channel.open();
         }
         catch (exc)
