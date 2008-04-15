@@ -469,9 +469,16 @@ Firebug.CommandLine.CommandHandler = extend(Object,
             return false;
 
         var result = subHandler.apply(scope, userObjects);
-        if (result)
+        if (result && result instanceof Array)
+        {
+            for (var item in result)
+                hosed_userObjects.push(result[item]);
+        }
+        else
+        {
             hosed_userObjects.push(result);
-
+        }
+        
         return true;
     }
 });

@@ -36,8 +36,17 @@ function _FirebugConsole()
 
         //dump("FirebugConsole dispatched event "+methodName+"\n");
         
-        if (this.userObjects.length > length)
+        if (this.userObjects.length > length+1)
+        {
+            var resultArray = [];
+            for (var i=length; i<this.userObjects.length; i++)
+                resultArray.push(this.userObjects[i]);
+            return resultArray;
+        }
+        else if (this.userObjects.length > length)
+        {
             return this.userObjects[length];
+        }
     };
 
     this.getFirebugElement = function()
