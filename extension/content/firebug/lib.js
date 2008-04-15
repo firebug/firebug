@@ -1858,11 +1858,18 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
         if (!win.document.documentElement)
             return;
 
+        var baseUrl = win.location.href;
+        var bases = win.document.documentElement.getElementsByTagName("base");
+        if (bases && bases[0])
+        {
+            baseUrl = bases[0].href;
+        }
+
         var scripts = win.document.documentElement.getElementsByTagName("script");
         for (var i = 0; i < scripts.length; ++i)
         {
             var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
-            var url = scriptSrc ? this.absoluteURL(scriptSrc, win.location.href) : win.location.href;
+            var url = scriptSrc ? this.absoluteURL(scriptSrc, baseUrl) : win.location.href;
             url = this.normalizeURL(url ? url : win.location.href);
             var added = addFile(url, i, (scriptSrc?win.location.href:null));
             if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
