@@ -33,7 +33,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
   No commandLineAPI functions yet.
 
 == DOM Panel ==
-    BROKEN Blocked on https://bugzilla.mozilla.org/show_bug.cgi?id=425139
+    Works for FF3pre after about 2008041406 (https://bugzilla.mozilla.org/show_bug.cgi?id=425139)
 
 == Misc ==
     Secure updates via signed update.rdf with xpi updateHash values.
@@ -44,3 +44,6 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 14: Programatically disable firebug log from Javascript
     * Issue 38:  console.group should allow optional collapse
     * Issue 183: Configurable maximum output size
+    * Issue 474:  base href applied to scripts
+    * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
+    
