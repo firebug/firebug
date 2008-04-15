@@ -245,22 +245,21 @@ this.getRandomInt = function(min, max) {
 
 this.createStyleSheet = function(doc, url)
 {
-    var link = doc.createElementNS("http://www.w3.org/1999/xhtml", "link");
-    link.setAttribute("charset","utf-8");
-    link.firebugIgnore = true;
-    link.setAttribute("rel", "stylesheet");
-    link.setAttribute("type", "text/css");
-    link.setAttribute("href", url);
-    return link;
+    var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+    style.setAttribute("charset","utf-8");
+    style.firebugIgnore = true;
+    style.setAttribute("type", "text/css");
+    style.innerHTML = this.getResource(url);
+    return style;
 }
 
-this.addStyleSheet = function(doc, link)
+this.addStyleSheet = function(doc, style)
 {
     var heads = doc.getElementsByTagName("head");
     if (heads.length)
-        heads[0].appendChild(link);
+        heads[0].appendChild(style);
     else
-        doc.documentElement.appendChild(link);
+        doc.documentElement.appendChild(style);
 };
 
 this.addScript = function(doc, id, src)
