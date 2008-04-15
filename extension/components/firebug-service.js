@@ -346,7 +346,14 @@ FirebugService.prototype =
     exitNestedEventLoop: function()
     {
         dispatch(netDebuggers, "suspendActivity");
-        return jsd.exitNestedEventLoop();
+        try
+        {
+            return jsd.exitNestedEventLoop();
+        }
+        catch (exc)
+        {
+            ddd("fbs: jsd.exitNestedEventLoop FAILS "+exc);
+        }
     },
 
     halt: function(debuggr)
@@ -386,7 +393,7 @@ FirebugService.prototype =
         var bp = this.addBreakpoint(BP_NORMAL, sourceFile, lineNo, props, debuggr);
         if (bp)
         {
-            dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, getBreakpointProperties(bp)]);
+            dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
             return true;
         }
         return false;
@@ -394,8 +401,11 @@ FirebugService.prototype =
 
     clearBreakpoint: function(url, lineNo)
     {
-        if (this.removeBreakpoint(BP_NORMAL, url, lineNo))
-            dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, null]);
+        var bp = this.removeBreakpoint(BP_NORMAL, url, lineNo);
+        if (bp)
+            dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, bp]);
+        else /*@explore*/
+            if (fbs.DBG_FBS_BP) ddd("fbs.clearBreakpoint no find for "+lineNo+"@"+url+"\n"); /*@explore*/
     },
 
     enableBreakpoint: function(url, lineNo)
@@ -404,7 +414,7 @@ FirebugService.prototype =
         if (bp && bp.type & BP_NORMAL)
         {
             bp.disabled &= ~BP_NORMAL;
-            dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, getBreakpointProperties(bp)]);
+            dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, bp]);
             --disabledCount;
         }
     },
@@ -416,7 +426,7 @@ FirebugService.prototype =
         {
             bp.disabled |= BP_NORMAL;
             ++disabledCount;
-            dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, getBreakpointProperties(bp)]);
+            dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, bp]);
         }
     },
 
@@ -453,7 +463,7 @@ FirebugService.prototype =
         }
         bp.condition = condition;
 
-        dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, getBreakpointProperties(bp)]);
+        dispatch(debuggers, "onToggleBreakpoint", [sourceFile.href, lineNo, true, bp]);
     },
 
     getBreakpointCondition: function(url, lineNo)
@@ -493,7 +503,7 @@ FirebugService.prototype =
                     var bp = urlBreakpoints[i];
                     if (bp.type & BP_NORMAL)
                     {
-                        var rc = cb.call(url, bp.lineNo, bp.scriptWithBreakpoint, getBreakpointProperties(bp));
+                        var rc = cb.call(url, bp.lineNo, bp.scriptWithBreakpoint, bp);
                         if (rc)
                             return [bp];
                     }
@@ -512,24 +522,24 @@ FirebugService.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // error breakpoints are a way of selectively breaking on errors.  see needToBreakForError
     //
-    setErrorBreakpoint: function(url, lineNo)
+    setErrorBreakpoint: function(url, lineNo, debuggr)
     {
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index == -1)
         {
              errorBreakpoints.push({href: url, lineNo: lineNo });
-             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true]);
+             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true, debuggr]);
         }
     },
 
-    clearErrorBreakpoint: function(url, lineNo)
+    clearErrorBreakpoint: function(url, lineNo, debuggr)
     {
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
             errorBreakpoints.splice(index, 1);
 
-            dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false]);
+            dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
         }
     },
 
@@ -897,13 +907,13 @@ FirebugService.prototype =
                      +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
-                    bp.debuggr.onCall(frame);
+                    bp.debugger.onCall(frame);
 
                 if (bp.type & BP_UNTIL)
                 {
                     this.stopStepping();
-                    if (bp.debuggr)
-                    return this.breakIntoDebugger(bp.debuggr, frame, type);
+                    if (bp.debugger)
+                    return this.breakIntoDebugger(bp.debugger, frame, type);
                 }
                 else if (bp.type & BP_NORMAL)
                 {
@@ -915,7 +925,7 @@ FirebugService.prototype =
                     return RETURN_CONTINUE;
             }
             else  // not special, just break for sure
-                return this.breakIntoDebugger(bp.debuggr, frame, type);
+                return this.breakIntoDebugger(bp.debugger, frame, type);
         }
 
         if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="              /*@explore*/
@@ -1419,7 +1429,9 @@ FirebugService.prototype =
             bp.type |= type;
 
             if (debuggr)
-                bp.debuggr = debuggr;
+                bp.debugger = debuggr;
+            else /*@explore*/
+                if (fbs.DBG_FBS_BP) ddd("fbs.addBreakpoint with no debuggr:\n"+getComponentsStackDump()+"\n"); /*@explore*/
         }
         else
         {
@@ -1437,7 +1449,7 @@ FirebugService.prototype =
             breakpoints[url] = urlBreakpoints = [];
 
         var bp = {type: type, href: url, lineNo: lineNo, disabled: 0,
-            debuggr: debuggr,
+            debugger: debuggr,
             condition: "", onTrue: true, hitCount: -1, hit: 0};
         if (props)
         {
@@ -1508,8 +1520,7 @@ FirebugService.prototype =
                         delete breakpoints[url];
 
                 }
-
-                return true;
+                return bp;
             }
         }
 
@@ -2106,11 +2117,6 @@ function testBreakpoint(frame, bp)
             return false;
     }
     return true;
-}
-
-function getBreakpointProperties(bp)
-{
-    return { debugger: bp.debugger, disabled: bp.disabled & BP_NORMAL, condition: bp.condition, onTrue: bp.onTrue, hitCount: bp.hitCount, pcmap: bp.pcmap };
 }
 
 function remove(list, item)

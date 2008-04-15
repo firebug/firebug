@@ -181,7 +181,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try
         {
             // We will pause here until resume is called
-            fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
+            var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+"\n");
         }
         catch (exc)
         {
@@ -221,7 +222,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         delete context.currentFrame;
         delete context;
 
-        fbs.exitNestedEventLoop();
+        var depth = fbs.exitNestedEventLoop();
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
 
     abort: function(context)
@@ -281,7 +283,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     setBreakpoint: function(sourceFile, lineNo)
     {
-        fbs.setBreakpoint(sourceFile, lineNo, null, this);
+        fbs.setBreakpoint(sourceFile, lineNo, null, Firebug.Debugger);
     },
 
     clearBreakpoint: function(sourceFile, lineNo)
@@ -291,22 +293,22 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     setErrorBreakpoint: function(sourceFile, line)
     {
-        fbs.setErrorBreakpoint(sourceFile, line);
+        fbs.setErrorBreakpoint(sourceFile, line, Firebug.Debugger);
     },
 
     clearErrorBreakpoint: function(sourceFile, line)
     {
-        fbs.clearErrorBreakpoint(sourceFile.href, line);
+        fbs.clearErrorBreakpoint(sourceFile.href, line, Firebug.Debugger);
     },
 
     enableErrorBreakpoint: function(sourceFile, line)
     {
-        fbs.enableErrorBreakpoint(sourceFile, line);
+        fbs.enableErrorBreakpoint(sourceFile, line, Firebug.Debugger);
     },
 
     disableErrorBreakpoint: function(sourceFile, line)
     {
-        fbs.disableErrorBreakpoint(sourceFile, line);
+        fbs.disableErrorBreakpoint(sourceFile, line, Firebug.Debugger);
     },
 
     clearAllBreakpoints: function(context)
@@ -315,7 +317,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         for (var url in context.sourceFileMap)
             sourceFiles.push(context.sourceFileMap[url]);
 
-        fbs.clearAllBreakpoints(sourceFiles.length, sourceFiles);
+        fbs.clearAllBreakpoints(sourceFiles.length, sourceFiles, Firebug.Debugger);
     },
 
     enableAllBreakpoints: function(context)
@@ -848,7 +850,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
         if (props.debugger != this) // then not for us
+        {
+            if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint ignoring toggle for "+(props.debugger?props.debugger.debuggerName:props.debugger)+" target "+lineNo+"@"+url+"\n"); /*@explore*/
             return;
+        }
 
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length+"\n");                         /*@explore*/
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
@@ -1270,6 +1275,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
         this.debuggerName =  window.location.href+"--"+FBL.getUniqueId(); /*@explore*/
+        this.toString = function() { return this.debuggerName; } /*@explore*/
         if (FBTrace.DBG_INITIALIZE) /*@explore*/
             FBTrace.dumpProperties("debugger.initialize ", this.debuggerName); /*@explore*/
 
@@ -1670,7 +1676,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(this.location.href, lineNo);
         else
-            fbs.setBreakpoint(this.location, lineNo, null, this);
+            fbs.setBreakpoint(this.location, lineNo, null, Firebug.Debugger);
     },
 
     toggleDisableBreakpoint: function(lineNo)
@@ -2718,7 +2724,7 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var lineNo = parseInt(this.target.textContent);
 
             if (value)
-                fbs.setBreakpointCondition(sourceFile, lineNo, value, debuggr);
+                fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
             else
                 fbs.clearBreakpoint(sourceFile.href, lineNo);
         }
