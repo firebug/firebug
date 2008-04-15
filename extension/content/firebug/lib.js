@@ -2908,24 +2908,22 @@ this.SourceFile.prototype =
         this.lineMap.complete = true;
     },
 
-    addToLineTable: function(script)
+    addToLineTable: function(script)  // called for outer scripts and in a loop for inner scripts
     {
         if (!this.lineMap)
             this.lineMap = {};
 
-        var lineCount = this.getSourceLength();
-        if (!lineCount)
-            FBTrace.sysout("addToLineTable no lineCount this.compilation_unit_type", this.compilation_unit_type);
+        var lineCount = script.lineExtent;
         var offset = this.getBaseLineOffset();
         if (FBTrace.DBG_LINETABLE)                                                                                     /*@explore*/
             FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
 
         for (var i = 0; i <= lineCount; i++)
         {
-            var scriptLineNo = i + script.baseLineNumber;
+            var scriptLineNo = i + script.baseLineNumber;  // the max is (i + script.baseLineNumber + script.lineExtent)
             var mapLineNo = scriptLineNo - offset;
 
-            if (script.isValid && script.isLineExecutable(scriptLineNo, this.pcmap_type)) // extra isValid test should not be needed.
+            if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
                 this.lineMap[mapLineNo] = script;
                                                                                                                        /*@explore*/
             if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
