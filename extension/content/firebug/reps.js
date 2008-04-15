@@ -366,12 +366,17 @@ this.Arr = domplate(Firebug.Rep,
 
     // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
     isArray: function(obj) { // frames lose type, so test constructor string
+    try {
         if (obj && obj.constructor &&
                    obj.constructor.toString().indexOf('Array') > -1) {
             return true;
         } else {
             return ((typeof obj == 'object') || (typeof obj == 'function')) && obj.constructor == Array;
         }
+    } catch(exc) {
+        FBTrace.dumpProperties("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
+        FBTrace.dumpProperties("isArray Fails on obj", obj);
+    }
     },
     // END Yahoo BSD SOURCE See license below.
 
