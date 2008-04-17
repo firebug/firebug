@@ -468,15 +468,20 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         if (!subHandler)
             return false;
 
+        element.removeAttribute("retValueType");
         var result = subHandler.apply(scope, userObjects);
-        if (result && result instanceof Array)
+        if (typeof result != "undefined")
         {
-            for (var item in result)
-                hosed_userObjects.push(result[item]);
-        }
-        else
-        {
-            hosed_userObjects.push(result);
+            if (result instanceof Array)
+            {
+                element.setAttribute("retValueType", "array");
+                for (var item in result)
+                    hosed_userObjects.push(result[item]);
+            }
+            else
+            {
+                hosed_userObjects.push(result);
+            }
         }
         
         return true;

@@ -35,18 +35,17 @@ function _FirebugConsole()
         element.dispatchEvent(event);
 
         //dump("FirebugConsole dispatched event "+methodName+"\n");
-        
-        if (this.userObjects.length > length+1)
-        {
-            var resultArray = [];
-            for (var i=length; i<this.userObjects.length; i++)
-                resultArray.push(this.userObjects[i]);
-            return resultArray;
-        }
-        else if (this.userObjects.length > length)
-        {
+        var result;
+        if (element.getAttribute("retValueType") == "array")
+            result = [];
+
+        if (!result && this.userObjects.length == length+1)
             return this.userObjects[length];
-        }
+        
+        for (var i=length; i<this.userObjects.length && result; i++)
+            result.push(this.userObjects[i]);
+        
+        return result;
     };
 
     this.getFirebugElement = function()
@@ -92,7 +91,7 @@ function _FirebugConsole()
         try
         {
             var result = top.eval(expr);
-            if (result)
+            if (typeof result != "undefined")
                 this.notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
         catch(exc)
