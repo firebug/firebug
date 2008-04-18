@@ -83,7 +83,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (context.stopped)
         {
             if (!context.commandLineAPI)
-                context.commandLineAPI = new FirebugCommandLineAPI(context);
+                context.commandLineAPI = new FirebugCommandLineAPI(context, context.window);
         
             var scope = {
                 api       : context.commandLineAPI,
@@ -622,11 +622,12 @@ function cleanIndentation(text)
     }
     return lines.join("\n");
 }
-// ************************************************************************************************
-function FirebugCommandLineAPI(context)
-{
-    var baseWindow = context.window;
 
+// ************************************************************************************************
+// Command line APIs definition
+
+function FirebugCommandLineAPI(context, baseWindow)
+{
     this.$ = function(id)
     {
         var doc = baseWindow.document;
@@ -649,21 +650,6 @@ function FirebugCommandLineAPI(context)
             baseWindow = context.baseWindow = object;
         else
             throw "Object must be a window.";
-    };
-
-    this.dir = function(o)
-    {
-        Firebug.Console.log(o, context, "dir", Firebug.DOMPanel.DirTable);
-    };
-
-    this.dirxml = function(o)
-    {
-        if (o instanceof Window)
-            o = o.document.documentElement;
-        else if (o instanceof Document)
-            o = o.documentElement;
-
-        Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
     };
 
     this.clear = function()
@@ -731,6 +717,54 @@ function FirebugCommandLineAPI(context)
         FBL.copyToClipboard(x);
     };
 }
+
+// ************************************************************************************************
+
+Firebug.CommandLine.injector = {
+
+    attachCommandLine: function(context, win)
+    {
+        if (!win)
+            return;
+
+        // If the command line is already attached then end.
+        var doc = win.document;
+        if ($("_firebugCommandLineInjector", doc))
+            return;
+
+        // Inject command line script into the page.
+        var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
+        addScript(doc, "_firebugCommandLineInjector", scriptSource);
+
+        // Register listener for command-line execution events.
+        var handler = new CommandLineHandler(context, win);
+        var element = $("_firebugConsole", doc);
+        element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
+        
+        if (FBTrace.DBG_CONSOLE)                                                                                       /*@explore*/
+            FBTrace.sysout("Command line is successfully attached to: " + win.location + "\n");                        /*@explore*/
+    }
+};
+
+function CommandLineHandler(context, win) 
+{
+    this.handleEvent = function(event)
+    {
+        var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
+        if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
+        {
+            FBTrace.dumpProperties("CommandLineHandler", this);
+            // xxxHonza localization.
+            this.log("Firebug command line does not support \'" + methodName + "\'");
+        }
+    };
+
+    this.log = function(args)
+    {
+        return Firebug.Console.logFormatted(args, context);
+    };
+}
+
 // ************************************************************************************************
 
 Firebug.registerModule(Firebug.CommandLine);
