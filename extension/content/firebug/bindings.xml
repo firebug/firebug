@@ -29,7 +29,8 @@
         </xul:hbox>
         <xul:deck anonid="deck" flex="1">
             <xul:browser anonid="browser"
-                     xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"/>
+                     xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"
+                     src="chrome://firebug/content/panel.html"/>
         </xul:deck>
     </content>
 
@@ -212,7 +213,7 @@
                 return panel;
             ]]></body>
         </method>
-        
+
         <method name="getTab">
             <parameter name="panelName"/>
             <body><![CDATA[

@@ -107,7 +107,9 @@ top.FirebugChrome =
 
         var browser1 = panelBar1.browser;
         browser1.addEventListener("load", browser1Loaded, true);
-        browser1.loadURI(panelURL);
+
+        var browser2 = panelBar2.browser;
+        browser2.addEventListener("load", browser2Loaded, true);
 
         window.addEventListener("blur", onBlur, true);
     },
@@ -130,13 +132,6 @@ top.FirebugChrome =
             this.applyTextSize(Firebug.textSize);
 
             var doc1 = panelBar1.browser.contentDocument;
-            disabledBox = doc1.getElementById("disabledBox");
-            disabledHead = doc1.getElementById("disabledHead");
-            disabledCaption = doc1.getElementById("disabledCaption");
-            enableAlwaysLink = doc1.getElementById("enableAlwaysLink");
-            enableSiteLink = doc1.getElementById("enableSiteLink");
-            enableSystemPagesLink = doc1.getElementById("enableSystemPagesLink");
-
             doc1.addEventListener("mouseover", onPanelMouseOver, false);
             doc1.addEventListener("mouseout", onPanelMouseOut, false);
             doc1.addEventListener("mousedown", onPanelMouseDown, false);
@@ -151,7 +146,7 @@ top.FirebugChrome =
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
             locationList.addEventListener("selectObject", onSelectLocation, false);
-            
+
             $("fbLargeCommandLine").addEventListener('focus', onCommandLineFocus, true);
             $("fbCommandLine").addEventListener('focus', onCommandLineFocus, true);
 
@@ -180,7 +175,8 @@ top.FirebugChrome =
 
     shutdown: function()
     {
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("chrome.shutdown entered\n");                                       /*@explore*/
+        //if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");                                       /*@explore*/
                                                                                                                        /*@explore*/
         var doc1 = panelBar1.browser.contentDocument;
         doc1.removeEventListener("mouseover", onPanelMouseOver, false);
@@ -486,45 +482,9 @@ top.FirebugChrome =
 
             this.syncMainPanels();
             panelBar1.selectPanel(panelName, true);
-
-            disabledBox.setAttribute("collapsed", "true");
         }
         else
         {
-            var uri = this.getCurrentURI();
-            if (uri)
-            {
-                var host = FBL.getURIHost(uri);
-                var isSystemPage = FBL.isSystemURL(uri.spec);
-                if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel host="+host+" isSystemPage="+isSystemPage+"\n");               /*@explore*/
-                var caption;
-                if (Firebug.disabledAlways)
-                {
-                    caption = FBL.$STR("DisabledHeader");
-                    enableAlwaysLink.firstChild.nodeValue = FBL.$STR("EnableAlways");
-                }
-                enableSystemPagesLink.firstChild.nodeValue = "";
-                enableSiteLink.firstChild.nodeValue ="";
-                if (isSystemPage)
-                {
-                    caption = FBL.$STR("IsSystemPage");
-                    enableSystemPagesLink.firstChild.nodeValue = FBL.$STR("EnableForSystemPages");
-                }
-                else if (!host)
-                {
-                    caption = FBL.$STR("DisabledForFiles");
-                    enableSiteLink.firstChild.nodeValue = FBL.$STR("EnableForFiles");
-                }
-                else
-                {
-                    caption = FBL.$STRF("DisabledForSiteHeader", [host]);
-                    enableSiteLink.firstChild.nodeValue = FBL.$STRF("EnableForSite", [host]);
-                }
-
-                disabledHead.firstChild.nodeValue = caption;
-                disabledBox.removeAttribute("collapsed");
-            }
-
             panelBar1.selectPanel(null, true);
         }
 
@@ -1095,20 +1055,28 @@ function getBestSidePanelName(sidePanelName, panelTypes)
 
 function browser1Loaded()
 {
+    if (FBTrace.DBG_INITIALIZE)  /*@explore*/
+        FBTrace.sysout("browse1Loaded\n"); /*@explore*/
     var browser1 = panelBar1.browser;
     browser1.removeEventListener("load", browser1Loaded, true);
 
-    var browser2 = panelBar2.browser;
-    browser2.addEventListener("load", browser2Loaded, true);
-    browser2.loadURI(panelURL);
+    browser1Loaded.complete = true;
+
+    if (browser1Loaded.complete && browser2Loaded.complete)
+        FirebugChrome.initializeUI();
 }
 
 function browser2Loaded()
 {
+    if (FBTrace.DBG_INITIALIZE)  /*@explore*/
+        FBTrace.sysout("browse2Loaded\n"); /*@explore*/
     var browser2 = panelBar2.browser;
     browser2.removeEventListener("load", browser2Loaded, true);
 
-    FirebugChrome.initializeUI();
+    browser2Loaded.complete = true;
+
+    if (browser1Loaded.complete && browser2Loaded.complete)
+        FirebugChrome.initializeUI();
 }
 
 function onBlur(event)
@@ -1255,11 +1223,11 @@ function onCommandLineFocus(event)
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._firebug)
     {
         Firebug.Console.injector.attachConsole(FirebugContext, FirebugContext.window);
-        
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("onCommandLineFocus, added command line support to "+FirebugContext.window.location+"\n");
     }
-    else 
+    else
     {
         if (FBTrace.DBG_CONSOLE)
         {
@@ -1269,7 +1237,7 @@ function onCommandLineFocus(event)
                 FBTrace.sysout("onCommandLineFocus: No FirebugContext\n");
         }
     }
-    
+
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._FirebugCommandLine)
     {
         Firebug.CommandLine.injector.attachCommandLine(FirebugContext, FirebugContext.window);
@@ -1318,7 +1286,7 @@ if (top.TidyBrowser)
     {
         var self = this, args = arguments;
         setTimeout(function()
-        {   
+        {
             prev.apply(self, args);
         });
     }
