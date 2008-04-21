@@ -2766,11 +2766,8 @@ var HttpObserver =
           networkContext = context ? context.netProgress : null;
 
       if (networkContext) {
-          var webProgress = getRequestWebProgress(aRequest, this);
           var category = getRequestCategory(aRequest);
-          var win = webProgress ? safeGetWindow(webProgress) : null;
-
-          networkContext.post(requestedFile, [aRequest, now(), win, category]);
+          networkContext.post(requestedFile, [aRequest, now(), aWin, category]);
       }
   },
 
