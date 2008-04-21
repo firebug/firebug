@@ -150,13 +150,7 @@
                 if (this.selectedTab)
                     this.selectedTab.removeAttribute("selected");
 
-                var oldPanel = this.selectedPanel;
-                if (oldPanel)
-                {
-                    oldPanel.visible = false;
-                    oldPanel.hide();
-                    oldPanel.panelNode.removeAttribute("active");
-                }
+                this.hideSelectedPanel();
 
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
@@ -166,7 +160,6 @@
 
                 if (panel)
                 {
-                    panel.visible = true;
                     panel.panelBrowser = panel.browser ? panel.browser : this.browser;
                     panel.panelBrowser.currentPanel = panel;
                 }
@@ -184,10 +177,7 @@
                     if (sel)
                         sel.removeAllRanges();
 
-                    panel.panelNode.setAttribute("active", true);
-
-                    var state = Firebug.getPanelState(panel);
-                    panel.show(state);
+                    this.showSelectedPanel();
 
                     if (!noRefresh && panel.needsRefresh)
                     {
@@ -211,6 +201,32 @@
                 this.dispatchEvent(ev);
 
                 return panel;
+            ]]></body>
+        </method>
+
+        <method name="showSelectedPanel">
+            <body><![CDATA[
+                var panel = this.selectedPanel;
+                if (panel)
+                {
+                    panel.visible = true;
+                    panel.panelNode.setAttribute("active", true);
+
+                    var state = Firebug.getPanelState(panel);
+                    panel.show(state);
+                   }
+            ]]></body>
+        </method>
+
+        <method name="hideSelectedPanel">
+            <body><![CDATA[
+                var oldPanel = this.selectedPanel;
+                if (oldPanel)
+                {
+                    oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
+                    oldPanel.hide();
+                    oldPanel.panelNode.removeAttribute("active");
+                }
             ]]></body>
         </method>
 

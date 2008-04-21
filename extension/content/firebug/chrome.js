@@ -404,6 +404,7 @@ top.FirebugChrome =
 
     clearPanels: function()
     {
+        panelBar1.hideSelectedPanel();
         panelBar1.selectedPanel = null;
         panelBar2.selectedPanel = null;
     },
@@ -452,16 +453,10 @@ top.FirebugChrome =
     hidePanel: function()
     {
         if (panelBar1.selectedPanel)
-        {
-            panelBar1.selectedPanel.visible = false;
-            panelBar1.selectedPanel.hide();
-        }
+            panelBar1.hideSelectedPanel()
 
         if (panelBar2.selectedPanel)
-        {
-            panelBar2.selectedPanel.visible = false;
-            panelBar2.selectedPanel.hide();
-        }
+            panelBar2.hideSelectedPanel()
     },
 
     syncPanel: function()
