@@ -437,49 +437,27 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         var object = this.getRowObject(row);
         if (object && !(object instanceof jsdIStackFrame))
         {
-                // unwrappedJSObject.property = unwrappedJSObject
-                Firebug.CommandLine.evaluateAndShow(value, this.context, object, this.context.window,
-                    function success(result, context)
-                    {
-                        object[name] = result;
-                    },
-                    function failed(result, context)
-                    {
-                        try
-                        {
-                            // If the value doesn't parse, then just store it as a string.  Some users will
-                            // not realize they're supposed to enter a JavaScript expression and just type
-                            // literal text
-                            object[name] = String(value);  // unwrappedJSobject.property = string
-                        }
-                        catch (exc)
-                        {
-                            return;
-                        }
+             // unwrappedJSObject.property = unwrappedJSObject
+             Firebug.CommandLine.evaluateAndShow(value, this.context, object, this.context.window,
+                 function success(result, context)
+                 {
+                     object[name] = result;
+                 },
+                 function failed(result, context)
+                 {
+                     try
+                     {
+                         // If the value doesn't parse, then just store it as a string.  Some users will
+                         // not realize they're supposed to enter a JavaScript expression and just type
+                         // literal text
+                         object[name] = String(value);  // unwrappedJSobject.property = string
                      }
-                );
-
-
-                        /*
-            try
-            {
-                        Firebug.CommandLine.evaluate(value, this.context, object);
-            }
-            catch (exc)
-            {
-                try
-                {
-                    // If the value doesn't parse, then just store it as a string.  Some users will
-                    // not realize they're supposed to enter a JavaScript expression and just type
-                    // literal text
-                    object[name] = String(value);  // unwrappedJSobject.property = string
-                }
-                catch (exc)
-                {
-                    return;
-                }
-            }
-            */
+                     catch (exc)
+                     {
+                         return;
+                     }
+                  }
+             );
         }
         else if (this.context.stopped)
         {
