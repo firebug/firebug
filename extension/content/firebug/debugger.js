@@ -1303,8 +1303,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.menuTooltip = chrome.$("fbDebuggerStateMenuTooltip");
         this.menuButton = chrome.$("fbDebuggerStateMenu");
-        
-        this.menuUpdate(context);        
+
+        this.menuUpdate(context);
     },
 
     loadedContext: function(context)
@@ -1361,6 +1361,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         remove(listeners, listener);
     },
 
+    shutdown: function()
+    {
+        //FBTrace.sysout("debugger.shutdown for "+window.location+"\n")
+        fbs.unregisterDebugger(this);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 
@@ -1392,7 +1398,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.activeContexts.splice(i, 1);
         else
         {
-            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active"+context.window.location+"\n");
+            FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active "+context.window.location+"\n");
         }
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
@@ -1553,7 +1559,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.appendChild(sourceBox);
         if (this.executionFile && this.location.href == this.executionFile.href)
             this.setExecutionLine(this.executionLineNo);
-        this.setExecutableLines(sourceBox);
+        this.scrollToLine(1);  // to paint executableLines
     },
 
     showFunction: function(fn)
@@ -1617,26 +1623,32 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.context.setTimeout(bindFixed(function()
         {
-            var lineNode = this.getLineNode(lineNo);
-            if (lineNode)
-                scrollIntoCenterView(lineNode, this.selectedSourceBox);
+            this.highlightLine(lineNo, false);
         }, this));
     },
 
-    highlightLine: function(lineNo)
+    highlightLine: function(lineNo, noHighlight)
     {
         var lineNode = this.getLineNode(lineNo);
         if (lineNode)
         {
-            scrollIntoCenterView(lineNode, this.selectedSourceBox);
-            setClassTimed(lineNode, "jumpHighlight", this.context);
+            var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
+            var min = lineNo - visibleRange.before;
+            var max = lineNo + visibleRange.after;
+            this.context.setTimeout(bindFixed(function()
+            {
+                this.setExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
+            }, this));
+
+            if (!noHighlight)
+                setClassTimed(lineNode, "jumpHighlight", this.context);
             return true;
         }
         else
             return false;
     },
 
-    selectLine: function(lineNo)
+    selectLine: function(lineNo)  // never called
     {
         var lineNode = this.getLineNode(lineNo);
         if (lineNode)
@@ -1648,7 +1660,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     setExecutionLine: function(lineNo)
     {
-        var lineNode = lineNo == -1 ? null : this.getLineNode(lineNo);
+        var lineNode = (lineNo == -1) ? null : this.getLineNode(lineNo);
         if (lineNode)
             this.scrollToLine(lineNo);
 
@@ -1663,18 +1675,28 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger.setExecutionLine to lineNo: "+lineNo+" lineNode="+lineNode+"\n"); /*@explore*/
     },
 
-    setExecutableLines: function(sourceBox)
+    setExecutableLines: function(sourceBox, min, max)
     {
         var sourceFile = sourceBox.repObject;
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines START: "+sourceFile.toString()+"\n");                /*@explore*/
-        var lineNo = 1;
+        var lineNo = min ? min : 1;
         while( lineNode = this.getLineNode(lineNo) )
         {
-            if (sourceFile.getScriptByLineNumber(lineNo))
-                lineNode.setAttribute("executable", "true");
-            else
-                lineNode.removeAttribute("executable");
+            var checked = lineNode.getAttribute("exeChecked");
+            if (!checked)
+            {
+                var script = sourceFile.scriptIfLineCouldBeExecutable(lineNo, true);
+
+                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
+                if (script)
+                    lineNode.setAttribute("executable", "true");
+                else
+                    lineNode.removeAttribute("executable");
+
+                lineNode.setAttribute("exeChecked", "true");
+            }
             lineNo++;
+            if (max && lineNo > max) break;
         }
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines DONE: "+sourceFile.toString()+"\n");                /*@explore*/
     },
@@ -1756,24 +1778,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             }
         );
         return (self.infoTipExpr == expr);
-
-            /*
-        try
-        {
-            var value = Firebug.CommandLine.evaluate(expr, this.context, null, null, true);
-            var rep = Firebug.getRep(value);
-            var tag = rep.shortTag ? rep.shortTag : rep.tag;
-
-            tag.replace({object: value}, infoTip);
-
-            this.infoTipExpr = expr;
-            return true;
-        }
-        catch (exc)
-        {
-            return false;
-        }
-        */
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1838,6 +1842,52 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    onScroll: function(event)
+    {
+        if (!this.lastScrollTop)
+            this.lastScrollTop = 0;
+
+        var scrollTop = event.target.scrollTop;
+        var aLineNode = this.getLineNode(1);
+        var scrollStep = aLineNode.offsetHeight;
+        var delta = this.lastScrollTop - scrollTop;
+        var deltaStep =  delta/scrollStep;
+
+        var lastTopLine = this.lastScrollTop/scrollStep + 1;
+        var lastBottomLine = (this.lastScrollTop + event.target.clientHeight)/scrollStep;
+
+        var newTopLine = scrollTop/scrollStep + 1;
+        var newBottomLine = (scrollTop + event.target.clientHeight)/scrollStep;
+
+        if (delta < 0) // then we exposed a line at the bottom
+        {
+            var max = newBottomLine;
+            var min = newTopLine;
+            if (min < lastBottomLine)
+                min = lastBottomLine;
+        }
+        else
+        {
+            var min = newTopLine;
+            var max = newBottomLine;
+            if (max > lastTopLine)
+                max = lastTopLine;
+        }
+
+        if (FBTrace.DBG_LINETABLE)
+        {
+            FBTrace.sysout("debugger.onScroll scrollTop: "+scrollTop, " lastScrollTop:"+this.lastScrollTop);
+            FBTrace.sysout("debugger.onScroll lastTopLine:"+lastTopLine, "lastBottomLine: "+lastBottomLine);
+            FBTrace.sysout("debugger.onScroll newTopLine:"+newTopLine, "newBottomLine: "+newBottomLine);
+        }
+        this.lastScrollTop = scrollTop;
+
+        this.context.setTimeout(bindFixed(function()
+        {
+            this.setExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
+        }, this));
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
 
@@ -1850,6 +1900,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onContextMenu = bind(this.onContextMenu, this);
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
+        this.onScroll = bind(this.onScroll, this);
         this.setLineBreakpoints = bind(setLineBreakpoints, this);
 
         this.panelSplitter = $("fbPanelSplitter");
@@ -1910,6 +1961,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
+        //this.panelNode.addEventListener("DOMMouseScroll", this.onScroll, false);
+        this.panelNode.addEventListener("scroll", this.onScroll, true);
     },
 
     destroyNode: function()
@@ -1921,6 +1974,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
+        //this.panelNode.removeEventListener("DOMMouseScroll", this.onScroll, false);
+        this.panelNode.removeEventListener("scroll", this.onScroll, true);
     },
 
     clear: function()
@@ -2108,17 +2163,17 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if ( isNaN(lineNo) )
                 return;
-            var script = this.location.getScriptByLineNumber(lineNo);
-            FBTrace.sysout("debugger.getTooltipObject script "+(script?script.tag:"none")+'\n');
+            var script = this.location.scriptIfLineCouldBeExecutable(lineNo);
+            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getTooltipObject script "+(script?script.tag:"none")+'\n'); /*@explore*/
             if (script)
             {
                 return script;
-                var tip = "script tag: "+script.tag;
-                var pc = script.isValid ? " 1st pc "+script.lineToPc(lineNo, this.location.pcmap_type) : " (now invalid)";
-                return new String(tip + pc);
+//                var tip = "script tag: "+script.tag;
+//                var pc = script.isValid ? " 1st pc "+script.lineToPc(lineNo, this.location.pcmap_type) : " (now invalid)";
+//                return new String(tip + pc);
             }
             else
-                return new String("no script at "+lineNo);
+                return new String("no executable script at "+lineNo);
         }
         return null;
     },
@@ -2756,14 +2811,7 @@ function setLineBreakpoints(sourceFile, sourceBox)
     }});
 
     if (FBTrace.DBG_LINETABLE)
-        FBTrace.sysout("debugger.setLineBreakpoints sourceFile.lineMap: "+ ((sourceFile.lineMap && sourceFile.lineMap.complete)?"lineTable complete":"need to build lineTable") +" for sourceFile.href:"+sourceFile.href+"\n")
-    if (!sourceFile.lineMap || !sourceFile.lineMap.complete)
-        sourceFile.buildLineTable();
-
-   /* Done in updateSourceBox, but not throtled. if (!this.setExecutableLines)
-        FBTrace.dumpStack("setLineBreakpoints no this.setExecutableLines\n");
-    this.setExecutableLines(sourceBox);
-   */
+        FBTrace.sysout("debugger.setLineBreakpoints for sourceFile.href:"+sourceFile.href+"\n")
 }
 
 function getCallingFrame(frame)

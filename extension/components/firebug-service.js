@@ -1585,13 +1585,14 @@ FirebugService.prototype =
 
     setJSDBreakpoint: function(sourceFile, bp)
     {
-        var script = sourceFile.getScriptByLineNumber(bp.lineNo);
+        var script = sourceFile.getInnermostScriptEnclosingLineNumber(bp.lineNo);
         if (script && script.isValid)
         {
             var pcmap = sourceFile.pcmap_type;
             // we subtraced this offset when we showed the user so lineNo is a user line number; now we need to talk
             // to jsd its line world
             var jsdLine = bp.lineNo + sourceFile.getBaseLineOffset();
+            // test script.isLineExecutable(jsdLineNo, pcmap) ??
             var pc = script.lineToPc(jsdLine, pcmap);
             script.setBreakpoint(pc);
             bp.scriptWithBreakpoint = script; // TODO may need array?
@@ -1608,7 +1609,7 @@ FirebugService.prototype =
         else /*@explore*/
         { /*@explore*/
              if (fbs.DBG_FBS_BP) /*@explore*/
-                ddd("setJSDBreakpoint: "+(script?(script.tag+".isValid="+script.isValid):" NO script")+" at line="+bp.lineNo+" lineTable:"+sourceFile.dumpLineTable()+"\n");                         /*@explore*/
+                ddd("setJSDBreakpoint: "+(script?(script.tag+".isValid="+script.isValid):" NO script")+" at line="+bp.lineNo+"\n");                         /*@explore*/
         } /*@explore*/
 
     },

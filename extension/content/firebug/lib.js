@@ -1036,6 +1036,33 @@ this.resize = function(element, w, h)
     element.style.height = h + "px";
 };
 
+this.linesIntoCenterView = function(element, scrollBox)  // {before: int, after: int}
+{
+    if (!scrollBox)
+        scrollBox = this.getOverflowParent(element);
+
+    if (!scrollBox)
+        return;
+
+    var offset = this.getClientOffset(element);
+
+    var topSpace = offset.y - scrollBox.scrollTop;
+    var bottomSpace = (scrollBox.scrollTop + scrollBox.clientHeight)
+            - (offset.y + element.offsetHeight);
+
+    if (topSpace < 0 || bottomSpace < 0)
+    {
+        var split = (scrollBox.clientHeight/2);
+        var centerY = offset.y - split;
+        scrollBox.scrollTop = centerY;
+        topSpace = split;
+        bottomSpace = split -  element.offsetHeight;
+    }
+
+    return {before: Math.round((topSpace/element.offsetHeight) + 0.5),
+            after: Math.round((bottomSpace/element.offsetHeight) + 0.5) }
+};
+
 this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 {
     if (!element)
@@ -1647,7 +1674,7 @@ this.findScript = function(context, url, line)
 {
     var sourceFile = context.sourceFileMap[url];
     if (sourceFile)
-        var script = sourceFile.getScriptByLineNumber(line);
+        var script = sourceFile.scriptIfLineCouldBeExecutable(line);
     else
         FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
     return script;
@@ -2877,41 +2904,19 @@ this.SourceFile.prototype =
         return str;
     },
 
-    dumpLineTable: function()
-    {
-        var str = "SourceFile " + this.href+"; lineMap: ";
-        if (this.lineMap)
-            for (line in this.lineMap) str += "["+line+"]="+this.lineMap[line].tag;
-        else
-            str += '(not built)';
-        return str;
-    },
-
-    hasLineTable: function()
-    {
-        return this.lineMap ? true : false;
-    },
-
     getSourceLength: function()
     {
             return this.sourceLength;
     },
 
-    buildLineTable: function()
+    addToLineTable: function(script)
     {
-        // FYI, the outerScript is already in the line table.
-        for (var i = 0; i < this.innerScripts.length; i++)
-        {
-            var script = this.innerScripts[i];
-            if (script.isValid)  this.addToLineTable(script);
-        }
-        this.lineMap.complete = true;
-    },
+        // For outer scripts, a better algorithm would loop over PC, use pcToLine to mark the lines.
+        // This assumes there are fewer PCs in an outer script than lines, probably true for large systems.
+        // And now addToLineTable is only used for outerScripts (eval and top-level)
 
-    addToLineTable: function(script)  // called for outer scripts and in a loop for inner scripts
-    {
-        if (!this.lineMap)
-            this.lineMap = {};
+        if (!this.outerScriptLineMap)
+            this.outerScriptLineMap = {};
 
         var lineCount = script.lineExtent;
         var offset = this.getBaseLineOffset();
@@ -2924,15 +2929,15 @@ this.SourceFile.prototype =
             var mapLineNo = scriptLineNo - offset;
 
             if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
-                this.lineMap[mapLineNo] = script;
+                this.outerScriptLineMap[mapLineNo] = script;
                                                                                                                        /*@explore*/
             if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
             {                                                                                                          /*@explore*/
                 var pcFromLine = script.lineToPc(scriptLineNo, this.pcmap_type);                                            /*@explore*/
                 var lineFromPC = script.pcToLine(pcFromLine, this.pcmap_type);                                              /*@explore*/
                                                                                                                        /*@explore*/
-                if (this.lineMap[mapLineNo])                                                                  /*@explore*/
-                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.lineMap[mapLineNo].tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
+                if (this.outerScriptLineMap[mapLineNo])                                                                  /*@explore*/
+                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.outerScriptLineMap[mapLineNo].tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
                 else                                                                                                   /*@explore*/
                     FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
             }                                                                                                          /*@explore*/
@@ -2940,25 +2945,47 @@ this.SourceFile.prototype =
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/
     },
 
-    getScriptByLineNumber: function(lineNo)
+    getInnermostScriptEnclosingLineNumber: function(lineNo, mustBeExecutableLine)
     {
-        if (!this.lineMap || !this.lineMap.complete)
-            this.buildLineTable();
-        return this.lineMap[lineNo];
+        var offset = this.getBaseLineOffset();
+        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber for sourcefile: "+this.toString()+"\n");
+
+        var targetScript = this.outerScript;
+        var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
+
+        for (var j = 0; j < this.innerScripts.length; j++)
+        {
+            var script = this.innerScripts[j];
+            if (!script.tag) FBTrace.sysout("getInnermostScriptEnclosingLineNumber bad script for "+j+" vs "+this.toString()+"\n");
+            if (targetLineNo > script.baseLineNumber)
+            {
+                if ( (script.baseLineNumber + script.lineExtent) > targetLineNo)
+                {
+                    targetScript = script;
+                       break;
+                }
+            }
+            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" < "+targetLineNo +" < "+ (script.baseLineNumber + script.lineExtent)+"?\n");
+        }
+
+        if (mustBeExecutableLine)
+        {
+            if (targetScript.isValid)
+            {
+                if (targetScript.isLineExecutable(targetLineNo, this.pcmap_type))
+                    return targetScript;
+            }
+            return false;
+        }
+        return targetScript;
     },
 
-    getLineNumberByScript: function(script)
+    scriptIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
     {
-        if (!this.hasLineTable())
-            FBTrace.dumpStack("lib.getNestedScriptAnalyzer no linetable TODO!");
-
-        var tag = script.tag;
-        for (var i = 1; i < this.sourceLength; i++)
-        {
-            var mapScript = this.lineMap[i];
-            if (mapScript && mapScript.isValid && mapScript.tag == tag)
-                return i;
-        }
+        var script = this.getInnermostScriptEnclosingLineNumber(lineNo, true);
+        if (!script && this.outerScriptLineMap)
+            return this.outerScriptLineMap[lineNo];
+        return script;
     },
 
     hasScript: function(script)
@@ -3027,8 +3054,6 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
     // link to source for this script.
     getSourceLinkForScript: function (script)
     {
-        if (!this.sourceFile.hasLineTable())
-            FBTrace.dumpStack("lib.getNestedScriptAnalyzer no linetable TODO!");
         var line = this.getBaseLineNumberByScript(script);
         return new FBL.SourceLink(this.sourceFile.href, line, "js");
     },
@@ -3064,7 +3089,7 @@ this.EvalLevelSourceFile = function(url, script, eval_expr, sourceLength, innerS
     this.evalExpression = eval_expr;
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.lineMap = {};
+    this.outerScriptLineMap = {};
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
@@ -3116,7 +3141,6 @@ this.EventSourceFile = function(url, script, title, source, innerScriptEnumerato
     this.sourceLines = source; // points to the sourceCache lines
     this.sourceLength = source.length;
     this.pcmap_type = PCMAP_PRETTYPRINT;
-    this.lineMap = {};
 
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
@@ -3183,7 +3207,6 @@ this.FunctionConstructorSourceFile = function(url, script, ctor_expr, sourceLeng
     this.evalExpression = eval_expr;
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.lineMap = {};
 
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 }
@@ -3219,7 +3242,6 @@ this.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScriptEn
     this.outerScript = outerScript;  // Beware may not be valid after we return!!
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.lineMap = {};
 
     FBL.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
@@ -3257,7 +3279,6 @@ this.EnumeratedSourceFile = function(context, url) // we don't have the outer sc
     this.href = url;  // may not be outerScript file name, eg this could be an enumerated eval
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.lineMap = {};
 }
 
 this.EnumeratedSourceFile.prototype = new this.SourceFile("enumerated");
@@ -3282,9 +3303,8 @@ this.NoScriptSourceFile = function(context, url) // Somehow we got the URL, but 
 {
      this.href = url;  // we know this much
      this.innerScripts = [];
-     this.lineMap = {};
-     this.lineMap.complete = true;  // that is, we know nothing
 }
+
 this.NoScriptSourceFile.prototype = new this.SourceFile("URLOnly");
 
 this.NoScriptSourceFile.prototype.OuterScriptAnalyzer.prototype =
@@ -3311,7 +3331,7 @@ this.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't h
     this.scriptTagNumber = scriptTagNumber;
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.lineMap = {};
+    this.outerScriptLineMap = {};
 }
 
 this.ScriptTagSourceFile.prototype = new this.SourceFile("scriptTag");
@@ -3390,8 +3410,8 @@ this.guessEnclosingFunctionName = function(url, line)
     var sourceFile = this.context.sourceFileMap[url];
     if (sourceFile)
     {
-        var script = sourceFile.getScriptByLineNumber(line);
-        var analyzer = sourceFile.getScriptAnalyzer(script);
+        var script = sourceFile.getInnermostScriptEnclosingLineNumber(line);
+        var analyzer = sourceFile.getScriptAnalyzer(script);  // TODO
          line = analyzer.getBaseLineNumberByScript(script);
     }
      return guessFunctionName(url, line-1, context);

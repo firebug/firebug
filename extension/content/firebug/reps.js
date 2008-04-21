@@ -499,6 +499,8 @@ this.Obj = domplate(Firebug.Rep,
         {
             // Sometimes we get exceptions when trying to read from certain objects, like
             // StorageList, but don't let that gum up the works
+            // XXXjjb also History.previous fails because object is a web-page object which does not have
+            // permission to read the history
         }
 
         return props;

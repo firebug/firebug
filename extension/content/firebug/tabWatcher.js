@@ -288,7 +288,9 @@ top.TabWatcher =
         if (!context)
         {
             var browser = this.getBrowserByWindow(win);
-            this.owner.destroyTabContext(browser, null);
+            if (this.owner)
+                this.owner.destroyTabContext(browser, null);
+            // else we are probably exiting anyway.
             return;
         }
 

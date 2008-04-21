@@ -258,6 +258,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (parentTag == Firebug.HTMLPanel.TextElement.tag)
         {
             var nodeText = getTextElementTextBox(parentNodeBox);
+            if (!nodeText.firstChild)
+                return;
+
             nodeText.firstChild.nodeValue = textValue;
 
             this.highlightMutation(nodeText, parentNodeBox, "mutated");
@@ -627,7 +630,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     show: function(state)
     {
         this.showToolbarButtons("fbHTMLButtons", true);
-    
+
         if (!this.ioBox)
             this.ioBox = new InsideOutBox(this, this.panelNode);
 
@@ -656,7 +659,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     hide: function()
     {
         this.showToolbarButtons("fbHTMLButtons", false);
-    
+
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
 
