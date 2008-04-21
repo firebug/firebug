@@ -239,6 +239,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     {
         var chrome = context ? context.chrome : FirebugChrome;
         this.syncFilterButtons(chrome);
+
+        this.menuTooltip = chrome.$("fbNetStateMenuTooltip");
+        this.menuButton = chrome.$("fbNetStateMenu");
+        
+        this.menuUpdate(context);        
     },
 
     destroyContext: function(context)
@@ -1637,7 +1642,7 @@ NetProgress.prototype =
             var isDocument = request.loadFlags & LOAD_DOCUMENT_URI && fileDoc.parent;
             var doc = isDocument ? fileDoc.parent : fileDoc;
 
-            file = doc.createFile(request);
+            var file = doc.createFile(request);
             if (isDocument)
             {
                 fileDoc.documentFile = file;

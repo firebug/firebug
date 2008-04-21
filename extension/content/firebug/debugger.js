@@ -1297,6 +1297,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initContext.apply(this, arguments);
     },
 
+    reattachContext: function(browser, context)
+    {
+        var chrome = context ? context.chrome : FirebugChrome;
+
+        this.menuTooltip = chrome.$("fbDebuggerStateMenuTooltip");
+        this.menuButton = chrome.$("fbDebuggerStateMenu");
+        
+        this.menuUpdate(context);        
+    },
+
     loadedContext: function(context)
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
