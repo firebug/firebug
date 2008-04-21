@@ -29,8 +29,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Command Line ==
     * Redesigned to avoid using evalInSandbox.
-  tests/console/commandLineObjects.html mostlyl passes
-  No commandLineAPI functions yet.
+  tests/console/commandLineObjects.html mostly passes
+  commandLineAPI functions, ok.
 
 == DOM Panel ==
     Works for FF3pre after about 2008041406 (https://bugzilla.mozilla.org/show_bug.cgi?id=425139)
@@ -46,4 +46,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 183: Configurable maximum output size
     * Issue 474:  base href applied to scripts
     * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
+    * Issue 393: Text overlayed on text in script editor window.
     
