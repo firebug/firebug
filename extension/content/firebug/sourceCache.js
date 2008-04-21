@@ -161,7 +161,7 @@ top.SourceCache.prototype =
         }
     },
 
-    loadAsync: function(url, cb)
+    loadAsync: function(url, cb)  // called by getLineAsync which is never called.
     {
         if ( this.cache.hasOwnProperty(url) )
         {
@@ -197,7 +197,7 @@ top.SourceCache.prototype =
         return lines ? lines[lineNo-1] : null;
     },
 
-    getLineAsync: function(url, lineNo, cb)
+    getLineAsync: function(url, lineNo, cb)  // Never called
     {
         if ( this.cache.hasOwnProperty(url) )
             cb(this.cache[url][lineNo-1], url, lineNo);
