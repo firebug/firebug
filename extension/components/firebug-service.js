@@ -1196,6 +1196,7 @@ FirebugService.prototype =
 
     createdScriptHasCaller: function()
     {
+        if (fbs.DBG_FBS_SRCUNITS) ddd("createdScriptHasCaller\n "+getComponentsStackDump()+"\n");
         var frame = Components.stack; // createdScriptHasCaller
         frame = frame.caller;         // onScriptCreated
         if (!frame) return frame;
@@ -2151,7 +2152,7 @@ var FirebugPrefsObserver =
         }
         catch (exc)
         {
-            ddd("resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+            ddd("fbs.resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
         }
     },
 

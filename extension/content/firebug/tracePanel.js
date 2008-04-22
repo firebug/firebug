@@ -103,6 +103,8 @@ Firebug.TraceModule = extend(Firebug.Console,
             var prefDomain = "extensions."+m[1];
             this.resetOption(prefDomain, m[2]);
         }
+        else
+            FBTrace.sysout("TraceFirebug.panel observe data: "+data+"\n");
     },
 
     updateOption: function(name, value)
@@ -120,11 +122,11 @@ Firebug.TraceModule = extend(Firebug.Console,
         {
             FBTrace[optionName] = Firebug.getPref(prefDomain, optionName);
             if (this.debug)
-                FBTrace.sysout("resetOption set FBTrace."+optionName+" to "+FBTrace[optionName]+" using prefDomain:"+prefDomain+"\n");
+                FBTrace.sysout("tracePanel.resetOption set FBTrace."+optionName+" to "+FBTrace[optionName]+" using prefDomain:"+prefDomain+"\n");
         }
         catch (exc)
         {
-            FBTrace.sysout("resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+            FBTrace.sysout("tracePanel.resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
         }
     },
 

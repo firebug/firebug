@@ -440,7 +440,9 @@ top.Firebug =
             prefs.setIntPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_BOOL)
             prefs.setBoolPref(prefName, value);
-
+        else if (type == nsIPrefBranch.PREF_INVALID)
+            throw "Invalid preference "+name+" check that it is listed in defaults";
+        
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
     },

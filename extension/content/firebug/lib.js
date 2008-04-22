@@ -2983,6 +2983,7 @@ this.SourceFile.prototype =
     scriptIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
     {
         var script = this.getInnermostScriptEnclosingLineNumber(lineNo, true);
+        if (FBTrace.DBG_LINETABLE && !script) FBTrace.dumpProperties("lib.scriptIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
         if (!script && this.outerScriptLineMap)
             return this.outerScriptLineMap[lineNo];
         return script;

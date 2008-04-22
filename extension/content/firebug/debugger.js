@@ -1621,6 +1621,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     scrollToLine: function(lineNo)
     {
+        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.scrollToLine: "+lineNo+"\n");
+        
         this.context.setTimeout(bindFixed(function()
         {
             this.highlightLine(lineNo, false);
@@ -1635,8 +1637,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
             var min = lineNo - visibleRange.before;
             var max = lineNo + visibleRange.after;
-            this.context.setTimeout(bindFixed(function()
+            this.context.setTimeout(bindFixed(function delaySetExecutableLines()
             {
+                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delaySetExecutableLines min:"+min+" max:"+max+"\n");
                 this.setExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
             }, this));
 
@@ -1853,11 +1856,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var delta = this.lastScrollTop - scrollTop;
         var deltaStep =  delta/scrollStep;
 
-        var lastTopLine = this.lastScrollTop/scrollStep + 1;
-        var lastBottomLine = (this.lastScrollTop + event.target.clientHeight)/scrollStep;
+        var lastTopLine = Math.round(this.lastScrollTop/scrollStep + 1);
+        var lastBottomLine = Math.round((this.lastScrollTop + event.target.clientHeight)/scrollStep);
 
-        var newTopLine = scrollTop/scrollStep + 1;
-        var newBottomLine = (scrollTop + event.target.clientHeight)/scrollStep;
+        var newTopLine = Math.round(scrollTop/scrollStep + 1);
+        var newBottomLine = Math.round((scrollTop + event.target.clientHeight)/scrollStep);
 
         if (delta < 0) // then we exposed a line at the bottom
         {
