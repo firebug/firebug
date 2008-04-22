@@ -47,4 +47,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 474:  base href applied to scripts
     * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
     * Issue 393: Text overlayed on text in script editor window.
+    * Issue 567: Slow script warning in debugger.js on some pages
     
