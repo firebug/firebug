@@ -2913,15 +2913,21 @@ this.SourceFile.prototype =
     {
         // For outer scripts, a better algorithm would loop over PC, use pcToLine to mark the lines.
         // This assumes there are fewer PCs in an outer script than lines, probably true for large systems.
-        // And now addToLineTable is only used for outerScripts (eval and top-level)
+        // And now addToLineTable is only used for outerScripts (eval and top-level).
+        // But since we can't know the range of PC values we cannot use that approach.
 
         if (!this.outerScriptLineMap)
-            this.outerScriptLineMap = {};
+            this.outerScriptLineMap = [];
 
         var lineCount = script.lineExtent;
         var offset = this.getBaseLineOffset();
-        if (FBTrace.DBG_LINETABLE)                                                                                     /*@explore*/
+        if (FBTrace.DBG_LINETABLE)
+        {                                                                                     /*@explore*/
             FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
+            var startTime = new Date().getTime();
+        }
+        if (lineCount > 100)
+            lineCount = 100; // isLineExecutable requires about 1ms per line, so it can only be called for toy programs
 
         for (var i = 0; i <= lineCount; i++)
         {
@@ -2929,20 +2935,58 @@ this.SourceFile.prototype =
             var mapLineNo = scriptLineNo - offset;
 
             if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
-                this.outerScriptLineMap[mapLineNo] = script;
+                this.outerScriptLineMap.push(mapLineNo);
                                                                                                                        /*@explore*/
             if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
             {                                                                                                          /*@explore*/
                 var pcFromLine = script.lineToPc(scriptLineNo, this.pcmap_type);                                            /*@explore*/
                 var lineFromPC = script.pcToLine(pcFromLine, this.pcmap_type);                                              /*@explore*/
                                                                                                                        /*@explore*/
-                if (this.outerScriptLineMap[mapLineNo])                                                                  /*@explore*/
-                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+this.outerScriptLineMap[mapLineNo].tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
+                if (this.outerScriptLineMap.indexOf(mapLineNo) != -1)                                                                  /*@explore*/
+                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+script.tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
                 else                                                                                                   /*@explore*/
                     FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
             }                                                                                                          /*@explore*/
         }
-        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/
+        if (FBTrace.DBG_LINETABLE)
+        {
+            var endTime = new Date().getTime();
+            var delta = endTime - startTime ;
+            if (delta > 0) FBTrace.sysout("SourceFile.addToLineTable processed "+lineCount+" lines in "+delta+" millisecs "+Math.round(lineCount/delta)+" lines per millisecond\n");
+            FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/
+        }
+    },
+
+    addToLineTableByPCLoop: function(script)
+    {
+        // This code is not called; it crashes FF3pre https://bugzilla.mozilla.org/show_bug.cgi?id=430205
+        if (!this.outerScriptLineMap)
+            this.outerScriptLineMap = {};
+
+        var lineCount = script.lineExtent;
+        var offset = this.getBaseLineOffset();
+                                                                                           /*@explore*/
+        if (FBTrace.DBG_LINETABLE)
+        {/*@explore*/
+            FBTrace.sysout("lib.SourceFile.addToLineTableByPCLoop script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
+            var startTime = new Date().getTime();/*@explore*/
+        }/*@explore*/
+
+        for (var i = 0; i <= 10*lineCount; i++)
+        {
+            var lineFromPC = script.pcToLine(i, this.pcmap_type);
+            //FBTrace.sysout("lib.SourceFile.addToLineTableByPCLoop pc="+i+" line: "+lineFromPC+"\n");                                                                                         /*@explore*/
+            this.outerScriptLineMap[lineFromPC] = script;
+            if (lineFromPC >= lineCount) break;
+        }
+
+        if (FBTrace.DBG_LINETABLE)/*@explore*/
+        {/*@explore*/
+            FBTrace.sysout("SourceFile.addToLineTableByPCLoop: "+this.toString()+"\n");                 /*@explore*/
+            var endTime = new Date().getTime();/*@explore*/
+            var delta = endTime - startTime ;/*@explore*/
+            if (delta > 0) FBTrace.sysout("SourceFileaddToLineTableByPCLoop processed "+lineCount+" lines in "+delta+" millisecs "+Math.round(lineCount/delta)+" lines per millisecond\n");/*@explore*/
+        }        /*@explore*/
     },
 
     getInnermostScriptEnclosingLineNumber: function(lineNo, mustBeExecutableLine)
@@ -2984,8 +3028,8 @@ this.SourceFile.prototype =
     {
         var script = this.getInnermostScriptEnclosingLineNumber(lineNo, true);
         if (FBTrace.DBG_LINETABLE && !script) FBTrace.dumpProperties("lib.scriptIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
-        if (!script && this.outerScriptLineMap)
-            return this.outerScriptLineMap[lineNo];
+        if (!script && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
+            return this.outerScript;
         return script;
     },
 
@@ -3090,7 +3134,6 @@ this.EvalLevelSourceFile = function(url, script, eval_expr, sourceLength, innerS
     this.evalExpression = eval_expr;
     this.sourceLength = sourceLength;
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.outerScriptLineMap = {};
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
@@ -3332,7 +3375,6 @@ this.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't h
     this.scriptTagNumber = scriptTagNumber;
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
-    this.outerScriptLineMap = {};
 }
 
 this.ScriptTagSourceFile.prototype = new this.SourceFile("scriptTag");
