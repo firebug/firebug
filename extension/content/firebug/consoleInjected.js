@@ -71,8 +71,6 @@ function _FirebugConsole()
             var event = document.createEvent("Events");
             event.initEvent("firebugAppendConsole", true, false);
             element.setAttribute("methodName", "init");
-            element.setAttribute("firstAddition", "0");
-            element.setAttribute("lastAddition", "-1");
             element.dispatchEvent(event);
         }
         return element;
