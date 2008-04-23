@@ -32,9 +32,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!element)
         {
             Firebug.Console.injector.attachConsole(context, win);
-            Firebug.CommandLine.injector.attachCommandLine(context, win);
             var element = win.document.getElementById("_firebugConsole");
         }
+
+        // Make sure the command line script is attached.
+        if (win.wrappedJSObject && !win.wrappedJSObject._FirebugCommandLine)
+            Firebug.CommandLine.injector.attachCommandLine(context, win);
+        
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
         element.setAttribute("methodName", "evaluate");
