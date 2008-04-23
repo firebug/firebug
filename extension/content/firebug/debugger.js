@@ -597,12 +597,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugDebugger
 
-    onTakingJSD: function(jsd)  // just before hooks are set
+    onJSDActivate: function(jsd)  // just before hooks are set
     {
-        // this is just to the the timing right.
+        // this is just to get the timing right.
         // we called by fbs as a "debuggr", (one per window) and we are re-dispatching to our listeners,
         // Firebug.DebugListeners.
-        dispatch2(listeners,"onTakingJSD",[fbs]);
+        $('fbStatusIcon').setAttribute("jsd", "on");            
+        dispatch2(listeners,"onJSDActivate",[fbs]);
+    },
+
+    onJSDDeactivate: function(jsd) 
+    {
+        $('fbStatusIcon').setAttribute("jsd", "off");            
+        dispatch2(listeners,"onJSDDeactivate",[fbs]);
     },
 
     supportsWindow: function(win)
@@ -1386,9 +1393,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.activeContexts.push(context);
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
+            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 
-        fbs.registerDebugger(this);
+        var jsdStatus = fbs.registerDebugger(this);
+        
+        if (jsdStatus)
+            $('fbStatusIcon').setAttribute('jsd', 'on');
     },
 
     onModuleDeactivate: function(context, destroy)
@@ -2592,7 +2602,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
 Firebug.DebuggerListener =
 {
-    onTakingJSD: function(jsd)
+    onJSDActivate: function(jsd)
     {
 
     },

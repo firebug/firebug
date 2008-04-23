@@ -144,6 +144,7 @@ top.Firebug =
         {
             this.version = version;
             $('fbStatusIcon').setAttribute("tooltiptext", "Firebug "+version);
+            $('fbStatusIcon').setAttribute("jsd", "off");
             var about = $('Firebug_About');
             if (about)
             {

@@ -62,8 +62,12 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 #fbStatusIcon {
+    list-style-image: url(chrome://firebug/skin/firebug-gray-16.png);
+}
+#fbStatusIcon[jsd="on"] {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
+
 
 #fbStatusText {
     cursor: pointer;

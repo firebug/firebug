@@ -150,6 +150,7 @@ var waitingForTimer = false;
 function FirebugService()
 {
     fbs = this;
+    
     this.wrappedJSObject = this;
     this.timeStamp = new Date();  /* explore */
     this.breakpoints = breakpoints; // so chromebug can see it /* explore */
@@ -247,7 +248,7 @@ FirebugService.prototype =
         }
     },
 
-    registerDebugger: function(debuggrWrapper)  // first one in will be last one called.
+    registerDebugger: function(debuggrWrapper)  // first one in will be last one called. Returns state enabledDebugger
     {
         var debuggr = debuggrWrapper.wrappedJSObject;
 
@@ -269,6 +270,7 @@ FirebugService.prototype =
             scriptListeners.push(debuggr.QueryInterface(nsIFireBugScriptListener));
         } catch(exc) {
         }
+        return  enabledDebugger;
     },
 
     unregisterDebugger: function(debuggrWrapper)
@@ -698,7 +700,9 @@ FirebugService.prototype =
         {
             if (!jsd.isOn)
                 jsd.on();
-
+                
+            dispatch(debuggers, "onJSDActivate", [jsd]);
+            
             jsd.unPause();
             this.hookScripts();
         }
@@ -710,7 +714,7 @@ FirebugService.prototype =
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
 
-            dispatch(debuggers, "onTakingJSD", [jsd]);
+            dispatch(debuggers, "onJSDActivate", [jsd]);
 
             this.hookScripts();
 
@@ -779,6 +783,7 @@ FirebugService.prototype =
             jsd.pause();
             fbs.unhookScripts();
             jsd.off();
+            dispatch(debuggers, "onJSDDeactivate", [jsd]);            
         }}, 1000, TYPE_ONE_SHOT);
 
         waitingForTimer = true;

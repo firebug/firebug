@@ -2995,6 +2995,10 @@ this.SourceFile.prototype =
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber for sourcefile: "+this.toString()+"\n");
 
         var targetScript = this.outerScript;
+        
+        if (!targetScript)
+            return; // eg URLOnly
+            
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         for (var j = 0; j < this.innerScripts.length; j++)
@@ -3014,7 +3018,7 @@ this.SourceFile.prototype =
 
         if (!targetScript)
         {
-            FBTrace.dumpProperties("lib.getInnermostScriptEnclosingLineNumber no targetScript for sourceFile:", sourceFile);
+            FBTrace.dumpProperties("lib.getInnermostScriptEnclosingLineNumber no targetScript for sourceFile:", this);
             return false;
         }
 
