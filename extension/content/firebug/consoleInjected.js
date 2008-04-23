@@ -74,10 +74,9 @@ function _FirebugConsole()
     // ***********************************************************************
     // Console API
 
-    this.firebugVersion = function()
-    {
+    this.__defineGetter__("firebug", function(){
         return this.getFirebugElement().getAttribute("FirebugVersion");
-    };
+    });
 
     this.evaluate = function(expr)
     {
