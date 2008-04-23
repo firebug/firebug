@@ -53,6 +53,9 @@ top.Firebug.Console.injector = {
             return;
         }
 
+        // Initialize Firebug version.
+        element.setAttribute("FirebugVersion", Firebug.version);
+
         if (!context.consoleHandler)
             context.consoleHandler = [];
 

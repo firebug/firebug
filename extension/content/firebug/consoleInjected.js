@@ -67,11 +67,6 @@ function _FirebugConsole()
             }, true);
 
             document.documentElement.appendChild(element);
-
-            var event = document.createEvent("Events");
-            event.initEvent("firebugAppendConsole", true, false);
-            element.setAttribute("methodName", "init");
-            element.dispatchEvent(event);
         }
         return element;
     };
