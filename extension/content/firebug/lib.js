@@ -3133,12 +3133,13 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 }
 
 //------------
-this.EvalLevelSourceFile = function(url, script, eval_expr, sourceLength, innerScriptEnumerator) // ctor
+this.EvalLevelSourceFile = function(url, script, eval_expr, source, innerScriptEnumerator) // ctor
 {
     this.href = url;
     this.outerScript = script;
     this.evalExpression = eval_expr;
-    this.sourceLength = sourceLength;
+    this.sourceLength = source.length;
+    this.source = source;
     this.pcmap_type = PCMAP_SOURCETEXT;
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
@@ -3176,10 +3177,14 @@ this.EvalLevelSourceFile.prototype.getObjectDescription = function()
     if (!this.summary)
     {
         if (this.evalExpression)
-            this.summary = FBL.summarizeSourceLineArray(this.evalExpression.substr(0, 240).split('/\r/'));
-        else
-            this.summary = "null";
+            this.summary = FBL.summarizeSourceLineArray(this.evalExpression.substr(0, 240), 120);
+        if (!this.summary)
+            this.summary = "";
+        if (this.summary.length < 120)
+            this.summary = "eval("+this.summary + "...)=" + FBL.summarizeSourceLineArray(this.source, 120 - this.summary.length); 
     }
+    if (FBTrace.DBG_SOURCEFILES) /*@explore*/  
+        FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+this.evalExpression.substr(0, 240)+" summary", this.summary); /*@explore*/
     return {path: this.href.replace(/\/eval\/[^\/]+$/, "/eval"), name: this.summary };
 }
 //------------
@@ -3227,23 +3232,24 @@ this.EventSourceFile.prototype.getBaseLineOffset = function()
     return 1;
 }
 
-this.summarizeSourceLineArray = function(sourceLines)
+this.summarizeSourceLineArray = function(sourceLines, size)
 {
     var buf  = "";
     for (var i = 0; i < sourceLines.length; i++)
     {
-        buf += sourceLines[i].replace(/\s/, " ", "g");
-        if (buf.length > 120)
+        var aLine = sourceLines[i].substr(0,240);  // avoid huge lines
+        buf += aLine.replace(/\s/, " ", "g");
+        if (buf.length > size || aLine.length > 240)
             break;
     }
-    return buf.substr(0, 120);
+    return buf.substr(0, size);
 };
 
 this.EventSourceFile.prototype.getObjectDescription = function()
 {
     if (!this.summary)
     {
-        this.summary = FBL.summarizeSourceLineArray(this.sourceLines);
+        this.summary = FBL.summarizeSourceLineArray(this.sourceLines, 120);
     }
 
     return {path: this.href.replace(/\/event\/[^\/]+$/, "/event"), name: this.summary };

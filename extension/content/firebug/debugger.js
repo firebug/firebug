@@ -1092,7 +1092,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var url = this.getDynamicURL(frame, source, "eval");
 
         var lines = context.sourceCache.store(url, source);
-        var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines.length, innerScripts);
+        var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, innerScripts);
         context.sourceFileMap[url] = sourceFile;
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getEvalLevelSourceFile sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n"); /*@explore*/
 
@@ -2243,7 +2243,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     // return.path: group/category label, return.name: item label
     getObjectDescription: function(sourceFile)
     {
-       FBTrace.sysout("debugger.getObjectDescription ", sourceFile);
         return sourceFile.getObjectDescription();
     },
 
