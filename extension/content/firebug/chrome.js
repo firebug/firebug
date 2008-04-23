@@ -502,7 +502,7 @@ top.FirebugChrome =
         {
             var sidePanelName = FirebugContext.sidePanelNames[FirebugContext.panelName];
             sidePanelName = getBestSidePanelName(sidePanelName, panelTypes);
-            panelBar2.selectPanel(sidePanelName);
+            panelBar2.selectPanel(sidePanelName, true);
         }
         else
             panelBar2.selectPanel(null);

@@ -106,7 +106,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         try
         {
             if (object instanceof nsIScriptError)
-            { 
+            {
                 var category = getBaseCategory(object.category);
                 var isWarning = object.flags & WARNING_FLAG;
                 var isJSError = category == "js" && !isWarning;
@@ -116,15 +116,15 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     context = getErrorContext(object);
                     if (!context)
                         return;
-                } 
-                
+                }
+
                 if (lessTalkMoreAction(object, context, isWarning))
                     return;
 
                 if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
                     FBTrace.dumpProperties("errors.observe "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
 
-                var isUncaughtException = checkForUncaughtException(object);
+                var isUncaughtException = checkForUncaughtException(context, object);
 
                 if (!isWarning)
                     this.increaseCount(context);
@@ -167,7 +167,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         lineNumber, object.sourceLine, category, context, trace);  // the sourceLine will cause the source to be loaded.
 
                 var className = isWarning ? "warningMessage" : "errorMessage";
-                
+
                 if (context) // then report later to avoid loading sourceS
                     context.throttle(Firebug.Console.log, Firebug.Console, [error, context,  className, false, true], true);
                 else
@@ -357,29 +357,29 @@ function lessTalkMoreAction(object, context, isWarning)
     context.errorMap[msgId] = 1;
 }
 
-function checkForUncaughtException(object)
+function checkForUncaughtException(context, object)
 {
-	if (object.flags & object.exceptionFlag)
-	{
-	    if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe is exception\n");
-	    if (reUncaught.test(object.errorMessage))
-	    {
-	        if (FBTrace.DBG_ERRORS) FBTrace.sysout("uncaught exception matches "+reUncaught+"\n");
-	        if (context.thrownStackTrace)
-	        {
-	            Firebug.errorStackTrace = context.thrownStackTrace;
-	            return true;
-	            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("errors.observe trace.frames", context.thrownStackTrace.frames);
-	        }
-	        else
-	        {
-	             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe NO context.thrownStackTrace\n");
-	        }
-	    }
-	    else
-	        if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
-	}
-	return false;
+    if (object.flags & object.exceptionFlag)
+    {
+        if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe is exception\n");
+        if (reUncaught.test(object.errorMessage))
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("uncaught exception matches "+reUncaught+"\n");
+            if (context.thrownStackTrace)
+            {
+                Firebug.errorStackTrace = context.thrownStackTrace;
+                return true;
+                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("errors.observe trace.frames", context.thrownStackTrace.frames);
+            }
+            else
+            {
+                 if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe NO context.thrownStackTrace\n");
+            }
+        }
+        else
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
+    }
+    return false;
 }
 
 function getErrorContext(object)

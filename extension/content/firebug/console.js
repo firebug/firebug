@@ -142,12 +142,12 @@ Firebug.Console = extend(Firebug.Module,
 
             // There is a "console" getter defined for FF3.
             var script = "";
-            if (ff3) 
+            if (ff3)
             {
                 script += "window.__defineGetter__('console', function() {\n";
                 script += " return window.loadFirebugConsole(); })\n";
             }
-            
+
             script += "window.loadFirebugConsole = function() {\n";
             script += " if (window._FirebugConsole) return window._firebug;\n";
             script += " var event = document.createEvent('Events');\n";
@@ -159,7 +159,7 @@ Firebug.Console = extend(Firebug.Module,
                 script += " window.console = window._firebug;\n";
 
             script += " return window._firebug };\n";
-                
+
             this.consoleInjectionScript = script;
         }
         return this.consoleInjectionScript;
@@ -172,8 +172,10 @@ Firebug.Console = extend(Firebug.Module,
 
         var handler = function(event)
         {
+            if (!context.attachConsoleInjectorHandler)
+                FBTrace.dumpStack("console.attachConsoleInjector has no handler array?");
             var handler;
-            for (var i=0; i< context.attachConsoleInjectorHandler.length; i++) {
+            for (var i=0; i < context.attachConsoleInjectorHandler.length; i++) {
                 if (context.attachConsoleInjectorHandler[i].window == win) {
                     handler = context.attachConsoleInjectorHandler[i].handler;
                     break;

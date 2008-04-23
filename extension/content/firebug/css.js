@@ -549,7 +549,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     hide: function()
     {
         this.showToolbarButtons("fbCSSButtons", false);
-    
+
         this.lastScrollTop = this.panelNode.scrollTop;
     },
 
@@ -627,7 +627,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         function addSheet(sheet)
         {
             var sheetLocation = getURLForStyleSheet(sheet);
-            
+
             if (isSystemURL(sheetLocation))
                 return;
 
@@ -1074,6 +1074,7 @@ CSSElementPanel.prototype = extend(CSSStyleSheetPanel.prototype,
 
     name: "css",
     parentPanel: "html",
+    order: 0,
 
     show: function(state)
     {

@@ -927,7 +927,8 @@ DOMSidePanel.prototype = extend(DOMBasePanel.prototype,
     // extends Panel
 
     name: "domSide",
-    parentPanel: "html"
+    parentPanel: "html",
+    order: 3,
 });
 
 // ************************************************************************************************

@@ -3012,6 +3012,12 @@ this.SourceFile.prototype =
             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" < "+targetLineNo +" < "+ (script.baseLineNumber + script.lineExtent)+"?\n");
         }
 
+        if (!targetScript)
+        {
+            FBTrace.dumpProperties("lib.getInnermostScriptEnclosingLineNumber no targetScript for sourceFile:", sourceFile);
+            return false;
+        }
+
         if (mustBeExecutableLine)
         {
             if (targetScript.isValid)

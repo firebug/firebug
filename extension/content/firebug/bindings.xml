@@ -214,7 +214,7 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
-                   }
+                }
             ]]></body>
         </method>
 
