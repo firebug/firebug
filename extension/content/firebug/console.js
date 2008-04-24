@@ -122,8 +122,7 @@ Firebug.Console = extend(Firebug.Module,
     watchWindow: function(context, win)
     {
         // This is early enough but we don't have a frame
-        if (win.wrappedJSObject && !win.wrappedJSObject._firebug)
-            this.attachConsoleInjector(context, win);
+        this.attachConsoleInjector(context, win);
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
@@ -145,7 +144,7 @@ Firebug.Console = extend(Firebug.Module,
             if (ff3)
             {
                 script += "window.__defineGetter__('console', function() {\n";
-                script += " return window.loadFirebugConsole(); })\n";
+                script += " return window.loadFirebugConsole(); })\n\n";
             }
 
             script += "window.loadFirebugConsole = function() {\n";
@@ -167,6 +166,9 @@ Firebug.Console = extend(Firebug.Module,
 
     attachConsoleInjector: function(context, win)
     {
+        if (win.wrappedJSObject && win.wrappedJSObject.loadFirebugConsole)
+            return;
+
         if (!context.attachConsoleInjectorHandler)
             context.attachConsoleInjectorHandler = [];
 
@@ -181,6 +183,10 @@ Firebug.Console = extend(Firebug.Module,
                     break;
                 }
             }
+
+            if (FBTrace.DBG_CONSOLE)                                                                                   /*@explore*/
+                FBTrace.sysout("Handle loadFirebugConsole event for " + win.location + "\n");                          /*@explore*/
+            
             Firebug.Console.injector.attachConsole(context, win);
             win.removeEventListener('loadFirebugConsole', handler, true);
             context.attachConsoleInjectorHandler.splice(i, 1);
