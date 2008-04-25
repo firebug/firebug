@@ -153,7 +153,7 @@ top.TabWatcher =
                     ", win.location.href: "+win.location.href+"\n");                                                   /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
-            this.dispatch("initContext", [context]);
+            dispatch(listeners, "initContext", [context]);
 
             win.addEventListener("pagehide", onPageHideTopWindow, true);
             win.addEventListener("pageshow", onLoadWindowContent, true);
@@ -203,7 +203,7 @@ top.TabWatcher =
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
                 FBTrace.sysout("-> Context LOADED (watchLoadedTopWindow), id: "+context.uid+"\n");                                           /*@explore*/
                                                                                                                         /*@explore*/
-            this.dispatch("loadedContext", [context]);
+            dispatch(listeners, "loadedContext", [context]);
         }
     },
 
@@ -237,7 +237,7 @@ top.TabWatcher =
             var eventType = (win.parent == win) ? "pagehide" : "unload";
             win.addEventListener(eventType, onUnloadWindow, false);
             if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
-            this.dispatch("watchWindow", [context, win]);
+            dispatch(listeners, "watchWindow", [context, win]);
         }
     },
 
@@ -264,7 +264,7 @@ top.TabWatcher =
         if (index != -1)
         {
             context.windows.splice(index, 1);
-            this.dispatch("unwatchWindow", [context, win]);
+            dispatch(listeners, "unwatchWindow", [context, win]);
         }
     },
 
@@ -293,7 +293,7 @@ top.TabWatcher =
         if (browser)
             browser.isSystemPage = isSystem;
 
-        this.dispatch("showContext", [browser, context]);
+        dispatch(listeners, "showContext", [browser, context]);
     },
 
     unwatchContext: function(win, context)
@@ -312,10 +312,10 @@ top.TabWatcher =
 
         iterateWindows(context.window, function(win)
         {
-            TabWatcher.dispatch("unwatchWindow", [context, win]);
+            dispatch(listeners, "unwatchWindow", [context, win]);
         });
 
-        this.dispatch("destroyContext", [context, persistedState]);
+        dispatch(listeners, "destroyContext", [context, persistedState]);
 
         if (FBTrace.DBG_WINDOWS)                                                                                    /*@explore*/
             FBTrace.sysout("-> tabWatcher.unwatchContext DELETE context for: "+                                     /*@explore*/
@@ -412,30 +412,6 @@ top.TabWatcher =
     removeListener: function(listener)
     {
         remove(listeners, listener);
-    },
-    
-    dispatch: function(name, args)
-    {
-        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-            FBTrace.sysout("TabWatcher.dispatch "+name+" to "+listeners.length+" listeners\n");                        /*@explore*/
-                                                                                                                       /*@explore*/
-        for (var i = 0; i < listeners.length; ++i)
-        {
-            var listener = listeners[i];
-            if ( listener.hasOwnProperty(name) )
-            {
-                try
-                {
-                    listener[name].apply(listener, args);
-                }
-                catch (exc)
-                {
-                    ERROR(exc);
-                    FBTrace.dumpProperties(" Exception in TabWatcher.dispatch "+ name, exc);                           /*@explore*/
-                    FBTrace.dumpProperties(" Exception in TabWatcher.dispatch for listener[name]:", listener[name]);   /*@explore*/
-                }
-            }
-        }
     }
 };
 
