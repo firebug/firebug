@@ -10,6 +10,7 @@ try {
 (function() {
 
 const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces["nsIConsoleService"]);
+const Ci = Components.interfaces;
 FBTrace.avoidRecursion = false;
 
 this.sysout = function(msg, more)
@@ -46,7 +47,7 @@ this.dumpTypes = function(header, obj)
         this.sysout("trace.dumpTypes FAILED:"+e+"\n");
     }
 }
-
+this.reXPConnect = /\[xpconnect wrapped ([^\]]*)\]/;
 this.dumpProperties = function(header, obj)
 {
     try {
@@ -86,8 +87,10 @@ this.dumpProperties = function(header, obj)
         //}
         else
         {
+            var propsTotal = 0;
             for (var p in obj)
             {
+                propsTotal++;
                 try
                 {
                     var pAsString = p + "";
@@ -98,6 +101,16 @@ this.dumpProperties = function(header, obj)
                         else
                             this.sysout("dumpInterfaces found NONE\n");
                     }
+                    var m = this.reXPConnect.exec(pAsString);
+                    if (m)
+                    {
+                        var kind = m[1];
+                        if (!obj[p] instanceof Ci[kind])
+                        {
+                            var xpobj = obj[p].wrappedJSObject;
+                            this.sysout("["+p+"]="+xpobj+";\n");
+                        }
+                    }
                     this.sysout("["+p+"]="+obj[p]+";\n");
                 }
                 catch (e)
@@ -105,6 +118,8 @@ this.dumpProperties = function(header, obj)
                     this.sysout("dumpProperties failed:"+e+"\n");
                 }
             }
+            if (propsTotal == 0)
+                this.sysout("0 properties\n");
         }
     }
     catch(exc)
