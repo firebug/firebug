@@ -2514,11 +2514,11 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
             {
                 if (script)  // then this is a current (not future) breakpoint
                 {
-                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+"\n"); /*@explore*/
-
                     var analyzer = getScriptAnalyzer(context, script);
+                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+(analyzer?"has analyzer":"no analyzer")+"\n"); /*@explore*/
+                    
                     if (analyzer)
-                        var name = analyzer.getFunctionDescription(script, this.context).name;
+                        var name = analyzer.getFunctionDescription(script, context).name;
                     else
                         var name = guessFunctionName(url, 1, context);
                     var isFuture = false;
