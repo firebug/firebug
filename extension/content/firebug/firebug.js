@@ -1138,7 +1138,8 @@ top.Firebug =
     enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
     {
         if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
-                FBTrace.sysout("enableContext URI:", ((uri && uri.wrappedJSObject)?uri.wrappedJSObject:uri));                             				/*@explore*/
+            FBTrace.sysout("-> enableContext for: ", ((uri instanceof nsIURI)?uri.spec:uri));                             				/*@explore*/
+                
         if ( dispatch2(extensions, "acceptContext", [win, uri]) )
             return true;
         if ( dispatch2(extensions, "declineContext", [win, uri]) )

@@ -2573,23 +2573,23 @@ this.readPostTextFromXHR = function(xhrRequest, context)
 this.getStateDescription = function(flag) {
     var state = "";
     var nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
-    if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START ";
-    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state += "STATE_REDIRECTING ";
-    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state += "STATE_TRANSFERRING ";
-    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state += "STATE_NEGOTIATING ";
-    else if (flag & nsIWebProgressListener.STATE_STOP) state += "STATE_STOP ";
+    if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START\n";
+    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state += "STATE_REDIRECTING\n";
+    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state += "STATE_TRANSFERRING\n";
+    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state += "STATE_NEGOTIATING\n";
+    else if (flag & nsIWebProgressListener.STATE_STOP) state += "STATE_STOP\n";
 
-    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state += "STATE_IS_REQUEST ";
-    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state += "STATE_IS_DOCUMENT ";
-    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state += "STATE_IS_NETWORK ";
-    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state += "STATE_IS_WINDOW ";
-    if (flag & nsIWebProgressListener.STATE_RESTORING) state += "STATE_RESTORING ";
-    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state += "STATE_IS_INSECURE ";
-    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state += "STATE_IS_BROKEN ";
-    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state += "STATE_IS_SECURE ";
-    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state += "STATE_SECURE_HIGH ";
-    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state += "STATE_SECURE_MED ";
-    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW ";
+    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state += "STATE_IS_REQUEST\n";
+    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state += "STATE_IS_DOCUMENT\n";
+    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state += "STATE_IS_NETWORK\n";
+    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state += "STATE_IS_WINDOW\n";
+    if (flag & nsIWebProgressListener.STATE_RESTORING) state += "STATE_RESTORING\n";
+    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state += "STATE_IS_INSECURE\n";
+    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state += "STATE_IS_BROKEN\n";
+    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state += "STATE_IS_SECURE\n";
+    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state += "STATE_SECURE_HIGH\n";
+    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state += "STATE_SECURE_MED\n";
+    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW\n";
 
     return state;
 }

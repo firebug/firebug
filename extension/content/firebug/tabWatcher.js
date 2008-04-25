@@ -108,7 +108,8 @@ top.TabWatcher =
     watchTopWindow: function(win, uri)
     {
         if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
-            FBTrace.sysout("tabWatcher.watchTopWindow uri="+(typeof(uri) == nsIURI?uri.spec:uri)+"\n");                          /*@explore*/
+            FBTrace.sysout("-> tabWatcher.watchTopWindow for: "+(uri instanceof nsIURI?uri.spec:uri)+"\n");                          /*@explore*/
+            
         if (tabBrowser.selectedBrowser.cancelNextLoad)
         {
             // We need to cancel this load and try again after a delay... this is used
@@ -147,7 +148,9 @@ top.TabWatcher =
 
             if (FBTrace.DBG_WINDOWS) {                                                                                 /*@explore*/
                 context.uid = FBL.getUniqueId();                                                                       /*@explore*/
-                FBTrace.sysout("tabWatcher created context ++++++++++++++ with id="+context.uid+" for uri="+uri+" and win.location.href="+win.location.href+"\n"); /*@explore*/
+                FBTrace.sysout("-> tabWatcher INIT context, id: "+context.uid+", uri: "+                                /*@explore*/
+                    (uri instanceof nsIURI ? uri.spec : uri) +                                                     /*@explore*/
+                    ", win.location.href: "+win.location.href+"\n");                                                   /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
             this.dispatch("initContext", [context]);
@@ -156,7 +159,7 @@ top.TabWatcher =
             win.addEventListener("pageshow", onLoadWindowContent, true);
             win.addEventListener("DOMContentLoaded", onLoadWindowContent, true);
             if (FBTrace.DBG_INITIALIZE)                                                                                /*@explore*/
-                FBTrace.sysout("tabWatcher.watchTopWindow pagehide, pageshow, DomContentLoaded addEventListener\n");   /*@explore*/
+                FBTrace.sysout("-> tabWatcher.watchTopWindow pagehide, pageshow, DomContentLoaded addEventListener\n");   /*@explore*/
         }
         // XXXjjb at this point we either have context or we just pushed null into contexts and sent it to init...
 
@@ -165,7 +168,9 @@ top.TabWatcher =
             context.loaded = !context.browser.webProgress.isLoadingDocument;
 
         if (FBTrace.DBG_WINDOWS && context.loaded)                                                                     /*@explore*/
-            FBTrace.sysout("***************> Context loaded in tabWatcher.watchTopWindow\n");                          /*@explore*/
+            FBTrace.sysout("-> tabWatcher context LOADED (watchTopWindow), id:"+context.uid+", uri: "+                                   /*@explore*/
+                (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
+                                                                                                                        /*@explore*/
         this.watchContext(win, context);
     },
 
@@ -180,20 +185,24 @@ top.TabWatcher =
         if ((context && !context.window) || (isSystem && !Firebug.allowSystemPages))
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("tabWatcher.watchLoadedTopWindow bailing, context.window:"+context.window+" isSystem:"+isSystem+"\n"); /*@explore*/
+                FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing, context.window: "+                          /*@explore*/
+                    context.window+", isSystem: "+isSystem+"\n");                                                      /*@explore*/
+                                                                                                                       /*@explore*/
             this.unwatchTopWindow(win);
             this.watchContext(win, null, isSystem);
             return;
         }
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-            FBTrace.sysout("watchLoadedTopWindow context="+(context?(context.uid+" loaded="+context.loaded):'undefined')+"\n"); /*@explore*/
+            FBTrace.sysout("-> watchLoadedTopWindow context: "+(context?(context.uid+                                   /*@explore*/
+                ", loaded="+context.loaded):'undefined')+"\n");                                                         /*@explore*/
                                                                                                                        /*@explore*/
         if (context && !context.loaded)
         {
             context.loaded = true;
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("***************> Context loaded in tabWatcher.watchLoadedTopWindow\n");                /*@explore*/
+                FBTrace.sysout("-> Context LOADED (watchLoadedTopWindow), id: "+context.uid+"\n");                                           /*@explore*/
+                                                                                                                        /*@explore*/
             this.dispatch("loadedContext", [context]);
         }
     },
@@ -212,11 +221,10 @@ top.TabWatcher =
         var href = win.location.href;
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_WINDOWS) {                                                                                     /*@explore*/
-            FBTrace.sysout("watchWindow for href="+href+" context="+context+"\n");                                     /*@explore*/
+            FBTrace.sysout("-> watchWindow for: "+href+", context: "+context+"\n");                                    /*@explore*/
             if (context)                                                                                               /*@explore*/
                 for (var i = 0; i < context.windows.length; i++)                                                       /*@explore*/
-                    FBTrace.sysout("watchWindow context("+context.uid+").windows["+i+"]= ("                            /*@explore*/
-                             +context.windows[i].__firebug__uid+") "+context.windows[i].location.href+"\n");           /*@explore*/
+                    FBTrace.sysout("   context: "+context.uid+", "+context.windows[i].location.href+"\n");                /*@explore*/
         }                                                                                                              /*@explore*/
                                                                                                                        /*@explore*/
         if (context && context.windows.indexOf(win) == -1 && href != aboutBlank)
@@ -224,11 +232,11 @@ top.TabWatcher =
             context.windows.push(win);
 
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("watchWindow sets context for href="+href+"\n");                                        /*@explore*/
+                FBTrace.sysout("-> watchWindow sets context for: "+href+"\n");                                        /*@explore*/
                                                                                                                        /*@explore*/
             var eventType = (win.parent == win) ? "pagehide" : "unload";
             win.addEventListener(eventType, onUnloadWindow, false);
-            if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
+            if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
             this.dispatch("watchWindow", [context, win]);
         }
     },
@@ -239,7 +247,7 @@ top.TabWatcher =
     unwatchTopWindow: function(win)
     {
         var context = this.getContextByWindow(win);
-        if (FBTrace.DBG_WINDOWS) FBTrace.dumpStack("tabWatcher.unwatchTopWindow context="+context+"\n");               /*@explore*/
+        if (FBTrace.DBG_WINDOWS) FBTrace.dumpStack("-> tabWatcher.unwatchTopWindow for: "+win.location.href+", context: "+context+"\n");               /*@explore*/
         this.unwatchContext(win, context);
     },
 
@@ -252,7 +260,7 @@ top.TabWatcher =
 
         var index = context ? context.windows.indexOf(win) : -1;
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-            FBTrace.sysout("tabWatcher.unwatchWindow context="+context+" index of win="+index+"\n");                   /*@explore*/
+            FBTrace.sysout("-> tabWatcher.unwatchWindow context: "+context+", index of win: "+index+"\n");                   /*@explore*/
         if (index != -1)
         {
             context.windows.splice(index, 1);
@@ -265,7 +273,12 @@ top.TabWatcher =
      */
     watchBrowser: function(browser)
     {
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("tabWatcher.watchBrowser for URI:"+safeGetURI(browser)+"\n");  /*@explore*/
+        if (FBTrace.DBG_WINDOWS)                                                                        /*@explore*/
+        {                                                                                               /*@explore*/
+            var uri = safeGetURI(browser);                                                              /*@explore*/
+            FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");         /*@explore*/
+        }                                                                                               /*@explore*/
+                                                                                                        /*@explore*/
         this.watchTopWindow(browser.contentWindow, safeGetURI(browser));
     },
 
@@ -303,8 +316,11 @@ top.TabWatcher =
         });
 
         this.dispatch("destroyContext", [context, persistedState]);
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("tabWatcher.unwatchContext  ------------------- delete context "+(context.window?context.window.location:"no window")+"\n");
 
+        if (FBTrace.DBG_WINDOWS)                                                                                    /*@explore*/
+            FBTrace.sysout("-> tabWatcher.unwatchContext DELETE context for: "+                                     /*@explore*/
+                (context.window?context.window.location:"no window")+"\n");                                         /*@explore*/
+                                                                                                                    /*@explore*/
         if (this.cancelNextLoad)
         {
             delete this.cancelNextLoad;
@@ -338,7 +354,7 @@ top.TabWatcher =
         }
 
         // eg search bar, maybe a global sandbox or other non-window global
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("TabWatcher.getContextByWindow rootWindow:"+rootWindow," trying sandboxes\n"); /*@explore*/
+        //if (FBTrace.DBG_WINDOWS) FBTrace.sysout("TabWatcher.getContextByWindow rootWindow:"+rootWindow," trying sandboxes\n"); /*@explore*/
 
         return this.getContextBySandbox(winIn);
     },
@@ -397,7 +413,7 @@ top.TabWatcher =
     {
         remove(listeners, listener);
     },
-
+    
     dispatch: function(name, args)
     {
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
@@ -458,8 +474,8 @@ var TabProgressListener = extend(BaseProgressListener,
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("TabProgressListener.onLocationChange to uri=\'"                                        /*@explore*/
-                                          +(uri?uri.spec:"null location")+"\'\n");                                     /*@explore*/
+                FBTrace.sysout("-> TabProgressListener.onLocationChange to: "                                        /*@explore*/
+                                          +(uri?uri.spec:"null location")+"\n");                                     /*@explore*/
                                                                                                                        /*@explore*/
             TabWatcher.watchTopWindow(progress.DOMWindow, uri);
         }
@@ -482,9 +498,12 @@ var FrameProgressListener = extend(BaseProgressListener,
 {
     onStateChange: function(progress, request, flag, status)
     {
-        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-                FBTrace.sysout("FrameProgressListener "+getStateDescription(flag)+" uid="                              /*@explore*/
-                             +progress.DOMWindow.__firebug__uid+" request.name="+safeGetName(request)+"\n");                    /*@explore*/
+        if (FBTrace.DBG_WINDOWS)                                                                                        /*@explore*/
+        {                                                                                                               /*@explore*/
+            FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+                        /*@explore*/
+                "\n"+getStateDescription(flag));                                                                        /*@explore*/
+        }                                                                                                               /*@explore*/
+                                                                                                                        /*@explore*/                
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
         {
             // We need to get the hook in as soon as the new DOMWindow is created, but before
@@ -540,7 +559,7 @@ function onPageHideTopWindow(event)
         // Page is not cached, there may be an unload
         win.addEventListener("unload", onUnloadTopWindow, true);
         if (FBTrace.DBG_WINDOWS) /*@explore*/
-            FBTrace.sysout("tabWatcher onPageHideTopWindow set unload handler "+win.location+"\n"); /*@explore*/
+            FBTrace.sysout("-> tabWatcher onPageHideTopWindow set unload handler "+win.location+"\n"); /*@explore*/
     }
 }
 
@@ -549,27 +568,27 @@ function onUnloadTopWindow(event)
     var win = event.currentTarget;
     win.removeEventListener("unload", onUnloadTopWindow, true);
     if (FBTrace.DBG_WINDOWS) /*@explore*/
-        FBTrace.sysout("tabWatcher onUnloadTopWindow "+win.location+"\n"); /*@explore*/
+        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+win.location+"\n"); /*@explore*/
     TabWatcher.unwatchTopWindow(win);
 }
 
 function onLoadWindowContent(event)
 {
     if (FBTrace.DBG_WINDOWS)                                                                                           /*@explore*/
-        FBTrace.sysout("tabWatcher.onLoadWindowContent event.type="+event.type+"\n");                                  /*@explore*/
+        FBTrace.sysout("-> tabWatcher.onLoadWindowContent event.type: "+event.type+"\n");                                  /*@explore*/
                                                                                                                        /*@explore*/
     var win = event.currentTarget;
     try
     {
         win.removeEventListener("pageshow", onLoadWindowContent, true);
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.onLoadWindowContent  pageshow removeEventListener\n");  /*@explore*/
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener\n");  /*@explore*/
     }
     catch (exc) {}
 
     try
     {
         win.removeEventListener("DOMContentLoaded", onLoadWindowContent, true);
-         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("tabWatcher.onLoadWindowContent  DOMContentLoaded removeEventListener\n"); /*@explore*/
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener\n"); /*@explore*/
     }
     catch (exc) {}
 
@@ -600,7 +619,7 @@ function onUnloadWindow(event)
     var eventType = (win.parent == win) ? "pagehide" : "unload";
     win.removeEventListener(eventType, onUnloadWindow, false);
     if (FBTrace.DBG_INITIALIZE)                                                                                        /*@explore*/
-        FBTrace.sysout("tabWatcher.onUnloadWindow "+win.location.href +" removeEventListener: "+ eventType+"\n");      /*@explore*/
+        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+win.location.href +" removeEventListener: "+ eventType+"\n");      /*@explore*/
     TabWatcher.unwatchWindow(win);
 }
 
