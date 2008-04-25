@@ -170,7 +170,7 @@ function FirebugService()
     observerService.addObserver(ShutdownObserver, "quit-application", false);
     observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false); 																													/*@explore*/
 
-    this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer"];  // TODO allow override
+    this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
     this.onEvalScriptCreated.kind = "eval"; /*@explore*/
     this.onTopLevelScriptCreated.kind = "top-level"; /*@explore*/
     this.onEventScriptCreated.kind = "event"; /*@explore*/
