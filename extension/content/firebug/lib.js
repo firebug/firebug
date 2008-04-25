@@ -1754,7 +1754,7 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
         // Walk backwards from the first line in the function until we find the line which
         // matches the pattern above, which is the function definition
         var line = "";
-        if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");           /*@explore*/
+        if (FBTrace.DBG_FUNCTION_NAMES) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");           /*@explore*/
         for (var i = 0; i < 4; ++i)
         {
             line = sourceCache.getLine(url, lineNo-i) + line;
@@ -3090,19 +3090,24 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
     },
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
-    {
-        var fnc = script.functionObject.getWrappedValue();
-        var name = fnc.name;
+    {   
+        if (frame)
+        {
+            var name = frame.name;
+            var fnc = script.functionObject.getWrappedValue();
+            var args = FBL.getFunctionArgValues(fnc, frame);
+        }
+        else
+        {
+            var name = script.functionName;
+            var args = [];
+        }
+        
         if (name ==  "anonymous")
         {
             name = FBL.guessFunctionName(this.sourceFile.href, this.getBaseLineNumberByScript(script), context);
         }
-
-        if (frame)
-            var args = FBL.getFunctionArgValues(fnc, frame);
-        else
-            var args = [];
-
+        
         return {name: name, args: args};
     },
 
