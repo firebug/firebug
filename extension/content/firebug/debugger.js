@@ -174,14 +174,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // can't communicate with the nested loop.
             cacheAllScripts(context);
 
-        } catch (e) {
+        } catch (exc) {
             // This attribute is only valid for contexts which implement nsIScriptContext.
+            if (FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.stop, cacheAll exception:", exc);
         }
 
         try
         {
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
+            // For some reason we don't always end up here
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+"\n");
         }
         catch (exc)
@@ -195,8 +197,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try {
             executionContext.scriptsEnabled = true;
-        } catch (e) {
-            // This attribute is only valid for contexts which implement nsIScriptContext.
+        } catch (exc) {
+            if (FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.stop, scriptsEnabled = true exception:", exc);
         }
 
         this.stopDebugging(context);
@@ -214,8 +216,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     resume: function(context)
     {
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
         if (!context.stopped)
+        {
+            this.syncCommands(context);
             return;
+        }
 
         delete context.stopped;
         delete context.debugFrame;
@@ -494,11 +500,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var chrome = context.chrome;
                 if (!chrome)
                     chrome = FirebugChrome;
+                    
                 if ( chrome.updateViewOnShowHook )
-                {
                     delete chrome.updateViewOnShowHook;
-                    return;
-                }
 
                 this.syncCommands(context);
                 this.syncListeners(context);
@@ -515,6 +519,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch (exc)
         {
+            if (FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.stopDebugging FAILS", exc);
             // If the window is closed while the debugger is stopped,
             // then all hell will break loose here
             ERROR(exc);
@@ -670,7 +675,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onThrow: function(frame, rv)
     {
-        // onThrow is called for throw and for any catch that does not succeed...
+        // onThrow is called for throw and for any catch that does not succeed.
         var context = this.breakContext;
         delete this.breakContext;
 
@@ -1569,7 +1574,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.appendChild(sourceBox);
         if (this.executionFile && this.location.href == this.executionFile.href)
             this.setExecutionLine(this.executionLineNo);
-        this.scrollToLine(1);  // to paint executableLines
+        this.markRevealedLines(sourceBox);  // or panelNode?
     },
 
     showFunction: function(fn)
@@ -1633,7 +1638,13 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.scrollToLine: "+lineNo+"\n");
         
-        this.context.setTimeout(bindFixed(function()
+        if (this.context.scrollTimeout)
+        {
+            this.context.clearTimeout(this.contextscrollTimeout);
+            delete this.context.scrollTimeout
+        }
+        
+        this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
             this.highlightLine(lineNo, false);
         }, this));
@@ -1647,11 +1658,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
             var min = lineNo - visibleRange.before;
             var max = lineNo + visibleRange.after;
-            this.context.setTimeout(bindFixed(function delaySetExecutableLines()
-            {
-                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delaySetExecutableLines min:"+min+" max:"+max+"\n");
-                this.setExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
-            }, this));
+            
+            this.markVisible(min, max);
 
             if (!noHighlight)
                 setClassTimed(lineNode, "jumpHighlight", this.context);
@@ -1659,6 +1667,47 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
             return false;
+    },
+
+    markVisible: function(min, max)
+    {
+         if (this.context.markExecutableLinesTimeout)
+         {
+             this.context.clearTimeout(this.context.markExecutableLinesTimeout);
+             delete this.context.markExecutableLinesTimeout;
+         }
+         
+         this.context.markExecutableLinesTimeout = this.context.setTimeout(bindFixed(function delayMarkExecutableLines()
+         {
+             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delayMarkExecutableLines min:"+min+" max:"+max+"\n");
+             this.markExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
+         }, this));
+    },
+    
+    markExecutableLines: function(sourceBox, min, max)
+    {
+        var sourceFile = sourceBox.repObject;
+        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString()+"\n");                /*@explore*/
+        var lineNo = min ? min : 1;
+        while( lineNode = this.getLineNode(lineNo) )
+        {
+            var checked = lineNode.getAttribute("exeChecked");
+            if (!checked)
+            {
+                var script = sourceFile.scriptIfLineCouldBeExecutable(lineNo, true);
+
+                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
+                if (script)
+                    lineNode.setAttribute("executable", "true");
+                else
+                    lineNode.removeAttribute("executable");
+
+                lineNode.setAttribute("exeChecked", "true");
+            }
+            lineNo++;
+            if (max && lineNo > max) break;
+        }
+        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines DONE: "+sourceFile.toString()+"\n");                /*@explore*/
     },
 
     selectLine: function(lineNo)  // never called
@@ -1686,32 +1735,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             lineNode.setAttribute("exeLine", "true");
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger.setExecutionLine to lineNo: "+lineNo+" lineNode="+lineNode+"\n"); /*@explore*/
-    },
-
-    setExecutableLines: function(sourceBox, min, max)
-    {
-        var sourceFile = sourceBox.repObject;
-        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines START: "+sourceFile.toString()+"\n");                /*@explore*/
-        var lineNo = min ? min : 1;
-        while( lineNode = this.getLineNode(lineNo) )
-        {
-            var checked = lineNode.getAttribute("exeChecked");
-            if (!checked)
-            {
-                var script = sourceFile.scriptIfLineCouldBeExecutable(lineNo, true);
-
-                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
-                if (script)
-                    lineNode.setAttribute("executable", "true");
-                else
-                    lineNode.removeAttribute("executable");
-
-                lineNode.setAttribute("exeChecked", "true");
-            }
-            lineNo++;
-            if (max && lineNo > max) break;
-        }
-        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.setExecutableLines DONE: "+sourceFile.toString()+"\n");                /*@explore*/
     },
 
     toggleBreakpoint: function(lineNo)
@@ -1857,20 +1880,26 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     onScroll: function(event)
     {
+        var scrollingElement = event.target;
+        this.markRevealedLines(scrollingElement);
+    },
+    
+    markRevealedLines: function(scrollingElement) 
+    {        
         if (!this.lastScrollTop)
             this.lastScrollTop = 0;
 
-        var scrollTop = event.target.scrollTop;
+        var scrollTop = scrollingElement.scrollTop;
         var aLineNode = this.getLineNode(1);
         var scrollStep = aLineNode.offsetHeight;
         var delta = this.lastScrollTop - scrollTop;
         var deltaStep =  delta/scrollStep;
 
         var lastTopLine = Math.round(this.lastScrollTop/scrollStep + 1);
-        var lastBottomLine = Math.round((this.lastScrollTop + event.target.clientHeight)/scrollStep);
+        var lastBottomLine = Math.round((this.lastScrollTop + scrollingElement.clientHeight)/scrollStep);
 
         var newTopLine = Math.round(scrollTop/scrollStep + 1);
-        var newBottomLine = Math.round((scrollTop + event.target.clientHeight)/scrollStep);
+        var newBottomLine = Math.round((scrollTop + scrollingElement.clientHeight)/scrollStep);
 
         if (delta < 0) // then we exposed a line at the bottom
         {
@@ -1895,10 +1924,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         this.lastScrollTop = scrollTop;
 
-        this.context.setTimeout(bindFixed(function()
-        {
-            this.setExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
-        }, this));
+        this.markVisible(min, max);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1974,7 +2000,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
-        //this.panelNode.addEventListener("DOMMouseScroll", this.onScroll, false);
+        this.panelNode.addEventListener("DOMMouseScroll", this.onScroll, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
     },
 
@@ -1987,7 +2013,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
-        //this.panelNode.removeEventListener("DOMMouseScroll", this.onScroll, false);
+        this.panelNode.removeEventListener("DOMMouseScroll", this.onScroll, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
     },
 
@@ -2862,6 +2888,8 @@ function getFrameContext(frame)
 
 function cacheAllScripts(context)
 {
+    return;
+    // TODO the scripts should all be ready
     for (var url in context.sourceFileMap)
         context.sourceFileMap[url].cache(context);
 }
