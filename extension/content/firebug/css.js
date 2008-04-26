@@ -495,6 +495,13 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // extends SourceBoxPanel
+    markVisible: function()
+    {
+        // we don't have a markExecutableLines yet, but we could do something to the source lines as the are viewed.
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
 
     name: "stylesheet",
@@ -595,24 +602,11 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             try
             {
                 clearNode(this.panelNode);  // replace rendered stylesheets
-                this.showSourceFile(object, function(sourceLink, sourceBox)
-                {
-                    if (FBTrace.DBG_CSS)                                                                               /*@explore*/
-                        FBTrace.sysout("css.Decorator href="+sourceLink.href+" lineNo="+sourceLink.line+"\n");         /*@explore*/
-                    if (sourceBox.sourceRow)
-                        sourceBox.sourceRow.removeAttribute("exeLine");
-
-                    var lineNo = sourceLink.line;
-                    if (lineNo)
-                    {
-                        sourceBox.sourceRow = sourceBox.childNodes[lineNo-1];
-                        if (sourceBox.sourceRow)
-                        {
-                            sourceBox.sourceRow.setAttribute("exeLine", "true");
-                            scrollIntoCenterView(sourceBox.sourceRow, sourceBox);  // I don't know why this does not work.
-                        }
-                    }
-                });
+                this.showSourceFile(object);
+                
+                var lineNo = object.line;
+                if (lineNo)
+                    this.scrollToLine(lineNo, true);
             }
             catch(exc) {
                 FBTrace.dumpProperties("css.upDateSelection FAILS", exc);

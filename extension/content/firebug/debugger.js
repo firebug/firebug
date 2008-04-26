@@ -1571,10 +1571,14 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
     updateSourceBox: function(sourceBox)
     {
-        this.panelNode.appendChild(sourceBox);
         if (this.executionFile && this.location.href == this.executionFile.href)
             this.setExecutionLine(this.executionLineNo);
         this.markRevealedLines(sourceBox);  // or panelNode?
+    },
+
+    getSourceType: function()
+    {
+        return "js";
     },
 
     showFunction: function(fn)
@@ -1634,56 +1638,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.updateInfoTip();
     },
 
-    scrollToLine: function(lineNo)
-    {
-        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.scrollToLine: "+lineNo+"\n");
-        
-        if (this.context.scrollTimeout)
-        {
-            this.context.clearTimeout(this.contextscrollTimeout);
-            delete this.context.scrollTimeout
-        }
-        
-        this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
-        {
-            this.highlightLine(lineNo, false);
-        }, this));
-    },
-
-    highlightLine: function(lineNo, noHighlight)
-    {
-        var lineNode = this.getLineNode(lineNo);
-        if (lineNode)
-        {
-            var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
-            var min = lineNo - visibleRange.before;
-            var max = lineNo + visibleRange.after;
-            
-            this.markVisible(min, max);
-
-            if (!noHighlight)
-                setClassTimed(lineNode, "jumpHighlight", this.context);
-            return true;
-        }
-        else
-            return false;
-    },
-
-    markVisible: function(min, max)
-    {
-         if (this.context.markExecutableLinesTimeout)
-         {
-             this.context.clearTimeout(this.context.markExecutableLinesTimeout);
-             delete this.context.markExecutableLinesTimeout;
-         }
-         
-         this.context.markExecutableLinesTimeout = this.context.setTimeout(bindFixed(function delayMarkExecutableLines()
-         {
-             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delayMarkExecutableLines min:"+min+" max:"+max+"\n");
-             this.markExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
-         }, this));
-    },
-    
     markExecutableLines: function(sourceBox, min, max)
     {
         var sourceFile = sourceBox.repObject;
@@ -1720,7 +1674,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    setExecutionLine: function(lineNo)
+    setExecutionLine: function(lineNo)  // TODO should be in showSourceFile callback
     {
         var lineNode = (lineNo == -1) ? null : this.getLineNode(lineNo);
         if (lineNode)
@@ -1766,11 +1720,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    getLineNode: function(lineNo)
-    {
-        return this.selectedSourceBox ? this.selectedSourceBox.childNodes[lineNo-1] : null;
-    },
 
     addSelectionWatch: function()
     {

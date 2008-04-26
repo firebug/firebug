@@ -442,7 +442,7 @@ top.Firebug =
         else if (type == nsIPrefBranch.PREF_BOOL)
             prefs.setBoolPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INVALID)
-            throw "Invalid preference "+name+" check that it is listed in defaults";
+            throw "Invalid preference "+prefName+" check that it is listed in defaults/prefs.js";
         
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
@@ -1523,6 +1523,7 @@ Firebug.Panel =
         }
     },
 
+
     updateSelection: function(object)
     {
     },
@@ -1647,6 +1648,20 @@ Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can
 
 Firebug.SourceBoxPanel = extend(Firebug.Panel,
 {
+    // ******* override in extenders ********
+    updateSourceBox: function(sourceBox)
+    {
+        // called just before box is shown
+    },
+    
+    getSourceType: function()
+    {
+        // eg "js" or "css"
+        throw "Need to override in extender";
+    },
+    // **************************************
+
+
     initializeSourceBoxes: function()
     {
         this.sourceBoxes = {};
@@ -1666,12 +1681,6 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             this.updateSourceBox(sourceBox);
             collapse(sourceBox, false);
         }
-    },
-
-    updateSourceBox: function(sourceBox)
-    {
-        // called just before box is shown
-        this.panelNode.appendChild(sourceBox);
     },
 
     createSourceBox: function(sourceFile, sourceBoxDecorator)  // decorator(sourceFile, sourceBox)
@@ -1710,7 +1719,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             min += scriptBlockSize;
         } while (max < totalMax);
 
-        this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
+        if (sourceBoxDecorator)
+            this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
 
         if (sourceFile.source)
             this.anonSourceBoxes.push(sourceBox);
@@ -1745,10 +1755,81 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             FBTrace.sysout("firebug.showSourceFile", sourceFile);  														    /*@explore*/
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (!sourceBox)
+        {
             sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);
+            this.panelNode.appendChild(sourceBox);
+        }
 
         this.showSourceBox(sourceBox);
     },
+    
+    getLineNode: function(lineNo)
+    {
+        return this.selectedSourceBox ? this.selectedSourceBox.childNodes[lineNo-1] : null;
+    },
+    
+    getSourceLink: function(lineNo)
+    {
+        return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
+    },
+    
+    scrollToLine: function(lineNo, highlight)
+    {
+        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"\n");
+        
+        if (this.context.scrollTimeout)
+        {
+            this.context.clearTimeout(this.contextscrollTimeout);
+            delete this.context.scrollTimeout
+        }
+        
+        this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
+        {
+            this.highlightLine(lineNo, highlight);
+        }, this));
+    },
+    
+    highlightLine: function(lineNo, highlight)
+    {
+        var lineNode = this.getLineNode(lineNo);
+        if (lineNode)
+        {
+            var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
+            var min = lineNo - visibleRange.before;
+            var max = lineNo + visibleRange.after;
+            
+            this.markVisible(min, max);
+
+            if (highlight)
+                setClassTimed(lineNode, "jumpHighlight", this.context);
+            
+            if (uiListeners.length > 0)
+            {
+                var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
+                dispatch(uiListeners, "onLineSelect", [link]);
+            }
+                  
+            return true;
+        }
+        else
+            return false;
+    },
+    
+    markVisible: function(min, max)
+    {
+         if (this.context.markExecutableLinesTimeout)
+         {
+             this.context.clearTimeout(this.context.markExecutableLinesTimeout);
+             delete this.context.markExecutableLinesTimeout;
+         }
+         
+         this.context.markExecutableLinesTimeout = this.context.setTimeout(bindFixed(function delayMarkExecutableLines()
+         {
+             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delayMarkExecutableLines min:"+min+" max:"+max+"\n");
+             this.markExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
+         }, this));
+    },
+    
 
 });
 
