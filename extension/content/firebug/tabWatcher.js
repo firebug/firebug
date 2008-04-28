@@ -165,13 +165,18 @@ top.TabWatcher =
         // XXXjjb at this point we either have context or we just pushed null into contexts and sent it to init...
 
         // This is one of two places that loaded is set. The other is in watchLoadedTopWindow
-        if (context)
+        if (context && !context.loaded)
+        {
             context.loaded = !context.browser.webProgress.isLoadingDocument;
 
-        if (FBTrace.DBG_WINDOWS && context.loaded)                                                                     /*@explore*/
-            FBTrace.sysout("-> tabWatcher context *** LOADED *** (watchTopWindow), id: "+context.uid+", uri: "+                                   /*@explore*/
-                (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
-                                                                                                                        /*@explore*/
+            // If the loaded flag is set, the proper event should be dispatched.
+            dispatch(listeners, "loadedContext", [context]);
+
+            if (FBTrace.DBG_WINDOWS && context.loaded)                                                                     /*@explore*/
+                FBTrace.sysout("-> tabWatcher context *** LOADED *** in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/
+                    (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
+        }
+                                                                                                                                /*@explore*/
         this.watchContext(win, context);
     },
 
@@ -202,7 +207,8 @@ top.TabWatcher =
         {
             context.loaded = true;
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("-> Context LOADED (watchLoadedTopWindow), id: "+context.uid+"\n");                                           /*@explore*/
+                FBTrace.sysout("-> Context *** LOADED *** in watchLoadedTopWindow, id: "+context.uid+                    /*@explore*/
+                    ", uri: "+win.location.href+"\n");                                                                /*@explore*/
                                                                                                                         /*@explore*/
             dispatch(listeners, "loadedContext", [context]);
         }
@@ -293,6 +299,10 @@ top.TabWatcher =
         var browser = context ? context.browser : this.getBrowserByWindow(win);
         if (browser)
             browser.isSystemPage = isSystem;
+
+        if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
+            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: "+context.uid+", uri: "+                                   /*@explore*/
+                win.location.href+"\n");                                                         /*@explore*/
 
         dispatch(listeners, "showContext", [browser, context]);
     },
