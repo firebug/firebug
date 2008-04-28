@@ -406,7 +406,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             if (parentNode.nodeType == 9)
             {
                 if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");                  /*@explore*/
-                return parentNode.defaultView.frameElement;
+                if (parentNode.defaultView)
+                    return parentNode.defaultView.frameElement;
+                else 
+                    FBTrace.dumpProperties("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
             }
             else
                 return parentNode;

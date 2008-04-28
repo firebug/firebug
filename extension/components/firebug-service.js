@@ -231,7 +231,7 @@ FirebugService.prototype =
         return true;
     },
 
-    registerClient: function(client)
+    registerClient: function(client)  // clients are essentially XUL windows
     {
         clients.push(client);
     },
@@ -257,7 +257,8 @@ FirebugService.prototype =
             debuggers.push(debuggr);
             if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
                 ddd("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
-            this.enableDebugger();
+            if (debuggers.length == 1)
+                this.enableDebugger();
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";
@@ -304,8 +305,8 @@ FirebugService.prototype =
                 break;
             }
         }
-
-        if (!debuggers.length)
+        
+        if (debuggers.length == 0)
             this.disableDebugger();
     },
 
@@ -701,7 +702,7 @@ FirebugService.prototype =
             if (!jsd.isOn)
                 jsd.on();
                 
-            dispatch(debuggers, "onJSDActivate", [jsd]);
+            dispatch(clients, "onJSDActivate", [jsd]);
             
             jsd.unPause();
             this.hookScripts();
@@ -714,7 +715,7 @@ FirebugService.prototype =
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
 
-            dispatch(debuggers, "onJSDActivate", [jsd]);
+            dispatch(clients, "onJSDActivate", [jsd]);
 
             this.hookScripts();
 
@@ -762,7 +763,7 @@ FirebugService.prototype =
             this.DBG_FBS_ERRORS = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_ERRORS");                                      /*@explore*/
             this.DBG_FBS_STEP = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_STEP");
             this.DBG_FBS_FUNCTION = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_FUNCTION");                                          /*@explore*/
-            ddd("FirebugService fbs.DBG_FBS_CREATION: "+fbs.DBG_FBS_CREATION+" fbs.DBG_FBS_BP:"+fbs.DBG_FBS_BP+                            /*@explore*/
+            ddd("FirebugService.obeyPrefs fbs.DBG_FBS_CREATION: "+fbs.DBG_FBS_CREATION+" fbs.DBG_FBS_BP:"+fbs.DBG_FBS_BP+                            /*@explore*/
                 " fbs.DBG_FBS_ERRORS:"+fbs.DBG_FBS_ERRORS+" fbs.DBG_FBS_STEP:"+fbs.DBG_FBS_STEP+" fbs.DBG_FBS_FUNCTION:"+fbs.DBG_FBS_FUNCTION+"\n");                                     /*@explore*/
         }                                                                                                                  /*@explore*/
         catch (exc)                                                                                                        /*@explore*/
@@ -773,6 +774,9 @@ FirebugService.prototype =
 
     disableDebugger: function()
     {
+        if (fbs.DBG_FBS_FINDDEBUGGER)   
+            ddd("fbs.disableDebugger for enabledDebugger: "+enabledDebugger+"\n");
+            
         if (!enabledDebugger)
             return;
 
@@ -783,7 +787,7 @@ FirebugService.prototype =
             jsd.pause();
             fbs.unhookScripts();
             jsd.off();
-            dispatch(debuggers, "onJSDDeactivate", [jsd]);            
+            dispatch(clients, "onJSDDeactivate", [jsd]);            
         }}, 1000, TYPE_ONE_SHOT);
 
         waitingForTimer = true;

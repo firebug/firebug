@@ -119,9 +119,9 @@
                         oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
+                        <!-- <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/> -->
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-host"/>
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
                     </menupopup>
                 </toolbarbutton>
             </hbox>
@@ -137,9 +137,9 @@
                         oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
-                        <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
+                        <!-- <menuitem type="radio" name="fbNetStateMenu" value="enable"/> -->
                         <menuitem type="radio" name="fbNetStateMenu" value="enable-host"/>
+                        <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
                     </menupopup>
                 </toolbarbutton>
                 <hbox id="fbNetButtonsFilter" collapsed="true">

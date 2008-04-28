@@ -252,7 +252,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!chrome)
             chrome = FirebugChrome;
 
-        if (this.keyListeners)  // XXXjjb for some reason this is null some times...
+        if (this.keyListeners)  // XXXjjb for some reason this is null some times.
         {
             for (var i = 0; i < this.keyListeners.length; ++i)
                 chrome.keyIgnore(this.keyListeners[i]);

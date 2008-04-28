@@ -208,17 +208,16 @@ top.Firebug =
                                                                                                                        /*@explore*/
         TabWatcher.initialize(this);
 
-        fbs.registerClient(this);  // context creation will cause "enable" on this
-
         // If another window is opened, then the creation of our first context won't
         // result in calling of enable, so we have to enable our modules ourself
         if (fbs.enabled)
             dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
-        if (this.disabledAlways)
+        /* if (this.disabledAlways)
             this.disableAlways();
         else
             this.enableAlways();
+        */
 
         dispatch(modules, "initializeUI", [detachArgs]);
     },
@@ -235,8 +234,6 @@ top.Firebug =
         prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
         prefs.removeObserver("extensions.firebug-service", this, false);
-
-        fbs.unregisterClient(this);
 
         dispatch(modules, "shutdown");
 
@@ -2011,6 +2008,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     initContext: function(context)
     {
         var persistedState = getPersistedState(context, this.panelName);
+        
         if (typeof(persistedState.enabled) == "undefined")
         {
             var option = this.getPermission(context);
