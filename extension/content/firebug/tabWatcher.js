@@ -160,7 +160,7 @@ top.TabWatcher =
             win.addEventListener("pageshow", onLoadWindowContent, true);
             win.addEventListener("DOMContentLoaded", onLoadWindowContent, true);
             if (FBTrace.DBG_INITIALIZE)                                                                                /*@explore*/
-                FBTrace.sysout("-> tabWatcher.watchTopWindow pagehide, pageshow, DomContentLoaded addEventListener\n");   /*@explore*/
+                FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pagehide, pageshow, DomContentLoaded \n");   /*@explore*/
         }
         // XXXjjb at this point we either have context or we just pushed null into contexts and sent it to init...
 
@@ -170,7 +170,8 @@ top.TabWatcher =
             context.loaded = !context.browser.webProgress.isLoadingDocument;
 
             // If the loaded flag is set, the proper event should be dispatched.
-            dispatch(listeners, "loadedContext", [context]);
+            if (context.loaded)
+                dispatch(listeners, "loadedContext", [context]);
 
             if (FBTrace.DBG_WINDOWS && context.loaded)                                                                     /*@explore*/
                 FBTrace.sysout("-> tabWatcher context *** LOADED *** in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/

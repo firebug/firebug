@@ -3004,7 +3004,11 @@ this.SourceFile.prototype =
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             var script = this.innerScripts[j];
-            if (!script.tag) FBTrace.sysout("getInnermostScriptEnclosingLineNumber bad script for "+j+" vs "+this.toString()+"\n");
+            if (script instanceof Ci.jsdIScript && !script.tag)
+            { 
+                FBTrace.sysout("getInnermostScriptEnclosingLineNumber bad script for "+j+" vs "+this.toString()+"\n");
+                FBTrace.dumpProperties("getInnermostScriptEnclosingLineNumber script:", script);
+            }
             if (targetLineNo > script.baseLineNumber)
             {
                 if ( (script.baseLineNumber + script.lineExtent) > targetLineNo)

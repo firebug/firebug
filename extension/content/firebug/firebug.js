@@ -210,7 +210,7 @@ top.Firebug =
 
         // If another window is opened, then the creation of our first context won't
         // result in calling of enable, so we have to enable our modules ourself
-        if (fbs.enabled)
+        //if (fbs.enabled)
             dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         /* if (this.disabledAlways)
@@ -1240,7 +1240,7 @@ top.Firebug =
 
     loadedContext: function(context)
     {
-        context.browser.chrome.showLoadedContext(context);
+        //context.browser.chrome.showLoadedContext(context);
     },
     //***********************************************************************
 

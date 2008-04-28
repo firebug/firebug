@@ -1328,7 +1328,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     loadedContext: function(context)
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
-
         updateScriptFiles(context);
     },
 
@@ -1394,23 +1393,31 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.enablePanel(context);
 
         var panel = context.getPanel(this.panelName, true);
-
-        // Show side panel
         if (panel)
         {
-            panel.panelSplitter.collapsed = false;
+            var state = Firebug.getPanelState(panel);
+            panel.show(state);
+            panel.panelSplitter.collapsed = false; // Show side panel
             panel.sidePanelDeck.collapsed = false;
         }
 
+        if (this.activeContexts.length == 0)
+        {
+            var jsdStatus = fbs.registerDebugger(this);
+        
+            if (jsdStatus)
+                $('fbStatusIcon').setAttribute('jsd', 'on');
+        }
+        else
+        {
+            if (FBTrace.DBG_INITIALIZE)
+                for (var i = 0; i < this.activeContexts.length; i++) FBTrace.sysout("    "+i+": "+this.activeContexts[i].window.location+"\n");
+        }
+        
         this.activeContexts.push(context);
 
         if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.dumpStack("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
-
-        var jsdStatus = fbs.registerDebugger(this);
-        
-        if (jsdStatus)
-            $('fbStatusIcon').setAttribute('jsd', 'on');
     },
 
     onModuleDeactivate: function(context, destroy)
@@ -1426,8 +1433,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts.length+" for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
+
         if (this.activeContexts.length == 0)
             fbs.unregisterDebugger(this);
+        else
+        {
+            if (FBTrace.DBG_INITIALIZE)
+                for (var i = 0; i < this.activeContexts.length; i++) FBTrace.sysout("    "+i+": "+this.activeContexts[i].window.location+"\n");
+        }
 
         if (!destroy)
         {
@@ -1989,7 +2002,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!this.shouldShow())
             return;
 
-        if (this.context.loaded && !this.location)
+        if (!this.location)
         {
             restoreObjects(this, state);
 

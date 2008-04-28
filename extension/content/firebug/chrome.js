@@ -435,17 +435,8 @@ top.FirebugChrome =
 
     showContext: function(browser, context)
     {
-        if (!context || context != FirebugContext)  // XXXjjb shouldn't this be if (context && context != FirebugContext??
-        {
-            FirebugContext = context;
-
-            if (externalBrowser || browser.showFirebug)
-                this.syncPanel();
-        }
-    },
-
-    showLoadedContext: function(context)
-    {
+        FirebugContext = context; 
+        
         if (externalBrowser || context.browser.showFirebug)
             this.syncPanel();
     },
@@ -461,7 +452,7 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                     /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.dumpStack("chrome.syncPanel FirebugContext="+                                     /*@explore*/
                 (FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                     /*@explore*/
                                                                                                                        /*@explore*/
         panelStatus.clear();
