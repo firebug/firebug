@@ -1310,7 +1310,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     saveEdit: function(target, value, previousValue)
     {
-        var doc = getStyleSheetDocument(this.styleSheet);
+        var ownerNode = getStyleSheetOwnerNode(this.styleSheet);
 
         if (!this.styleSheet.editStyleSheet)
         {
@@ -1320,13 +1320,15 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
             url.spec = this.styleSheet.href;
 
             var editStyleSheet = this.editStyleSheet;
-            editStyleSheet = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+            editStyleSheet = ownerNode.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml",
+                "style");
             editStyleSheet.setAttribute("type", "text/css");
             editStyleSheet.setAttributeNS("http://www.w3.org/XML/1998/namespace", "base",
                 url.directory);
 
-            var head = doc.getElementsByTagName("head")[0];  // XXXjjb re issue 43
-            head.appendChild(editStyleSheet);
+            // Insert the edited stylesheet directly after the old one to ensure the styles
+	    // cascade properly.
+	    ownerNode.parentNode.insertBefore(editStyleSheet, ownerNode.nextSibling);
 
             this.styleSheet.editStyleSheet = editStyleSheet;
         }
@@ -1479,11 +1481,10 @@ function getStyleSheetCSS(sheet, context)
         return context.sourceCache.load(sheet.href).join("\n");
 }
 
-function getStyleSheetDocument(sheet)
-{
+function getStyleSheetOwnerNode(sheet) {
     for (; sheet && !sheet.ownerNode; sheet = sheet.parentStyleSheet);
 
-    return sheet.ownerNode.ownerDocument;
+    return sheet.ownerNode;
 }
 
 function scrollSelectionIntoView(panel)
