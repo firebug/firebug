@@ -1331,7 +1331,8 @@ Firebug.Module =
     unwatchWindow: function(context, win)
     {
     },
-
+    
+    // Called when a FF tab is create or activated (user changes FF tab)
     showContext: function(browser, context)
     {
     },

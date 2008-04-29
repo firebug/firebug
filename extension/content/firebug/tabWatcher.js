@@ -295,7 +295,7 @@ top.TabWatcher =
         this.unwatchTopWindow(browser.contentWindow);
     },
 
-    watchContext: function(win, context, isSystem)
+    watchContext: function(win, context, isSystem)  // called when tabs change in firefox
     {
         var browser = context ? context.browser : this.getBrowserByWindow(win);
         if (browser)

@@ -121,7 +121,6 @@ Firebug.Console = extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
-        // This is early enough but we don't have a frame
         this.attachConsoleInjector(context, win);
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
@@ -133,6 +132,52 @@ Firebug.Console = extend(Firebug.Module,
         }                                                                                                              /*@explore*/
                                                                                                                        /*@explore*/
     },
+
+    attachConsoleInjector: function(context, win)
+    {
+        if (win.wrappedJSObject && win.wrappedJSObject.loadFirebugConsole)
+            return;
+
+        if (!context.attachConsoleInjectorHandler)
+            context.attachConsoleInjectorHandler = [];
+
+        var subWindowHandler = function(event) // XXXjjb seems tto complicated. Better to just leave the listeners
+        {
+            if (!context.attachConsoleInjectorHandler) 
+            {
+                FBTrace.dumpStack("console.attachConsoleInjector has no handler array?"); /*@explore*/
+                return;
+            }
+            var matching_handler;
+            for (var i=0; i < context.attachConsoleInjectorHandler.length; i++) {
+                if (context.attachConsoleInjectorHandler[i].window == win) {
+                    matching_handler = context.attachConsoleInjectorHandler[i].handler;
+                    break;
+                }
+            }
+
+            if (FBTrace.DBG_CONSOLE)                                                                                   /*@explore*/
+                FBTrace.sysout("Handle loadFirebugConsole event for " + win.location + "\n");                          /*@explore*/
+            
+            Firebug.Console.injector.attachConsole(context, win);
+            win.removeEventListener('loadFirebugConsole', matching_handler, true);
+            context.attachConsoleInjectorHandler.splice(i, 1);
+        }
+        win.addEventListener('loadFirebugConsole', subWindowHandler, true);
+
+        context.attachConsoleInjectorHandler.push({window: win, handler:subWindowHandler});
+
+        var consoleInjection = this.getConsoleInjectionScript();
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location+":\n "+consoleInjection+"\n");
+
+        Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluation completed\n");
+    },
+
 
     getConsoleInjectionScript: function() {
         if (!this.consoleInjectionScript)
@@ -162,48 +207,6 @@ Firebug.Console = extend(Firebug.Module,
             this.consoleInjectionScript = script;
         }
         return this.consoleInjectionScript;
-    },
-
-    attachConsoleInjector: function(context, win)
-    {
-        if (win.wrappedJSObject && win.wrappedJSObject.loadFirebugConsole)
-            return;
-
-        if (!context.attachConsoleInjectorHandler)
-            context.attachConsoleInjectorHandler = [];
-
-        var handler = function(event)
-        {
-            if (!context.attachConsoleInjectorHandler)
-                FBTrace.dumpStack("console.attachConsoleInjector has no handler array?");
-            var handler;
-            for (var i=0; i < context.attachConsoleInjectorHandler.length; i++) {
-                if (context.attachConsoleInjectorHandler[i].window == win) {
-                    handler = context.attachConsoleInjectorHandler[i].handler;
-                    break;
-                }
-            }
-
-            if (FBTrace.DBG_CONSOLE)                                                                                   /*@explore*/
-                FBTrace.sysout("Handle loadFirebugConsole event for " + win.location + "\n");                          /*@explore*/
-            
-            Firebug.Console.injector.attachConsole(context, win);
-            win.removeEventListener('loadFirebugConsole', handler, true);
-            context.attachConsoleInjectorHandler.splice(i, 1);
-        }
-        win.addEventListener('loadFirebugConsole', handler, true);
-
-        context.attachConsoleInjectorHandler.push({window: win, handler:handler});
-
-        var consoleInjection = this.getConsoleInjectionScript();
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location+":\n "+consoleInjection+"\n");
-
-        Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("attachConsoleInjector evaluation completed\n");
     },
 
     showPanel: function(browser, panel)
