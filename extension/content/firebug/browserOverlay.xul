@@ -231,6 +231,8 @@
                 label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
+            <menuseparator/>
+            <menuitem label="Save Panels to File" command="cmd_savePanels"/>  <!-- NLS -->
         </menupopup>
     </statusbar>
 

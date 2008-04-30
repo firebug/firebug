@@ -301,6 +301,32 @@ top.FirebugChrome =
             return panelBar2.browser;
     },
 
+    savePanels: function()
+    {
+        var path = this.writePanels(panelBar1.browser.contentDocument);
+        $("fbStatusText").setAttribute("value", path);
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("Wrote panels to "+path+"\n");
+    },
+
+    writePanels: function(doc)
+    {
+        var serializer = new XMLSerializer();
+        var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"]
+               .createInstance(Components.interfaces.nsIFileOutputStream);
+        var file = Components.classes["@mozilla.org/file/directory_service;1"]
+           .getService(Components.interfaces.nsIProperties)
+           .get("TmpD", Components.interfaces.nsIFile);
+        file.append("firebug");   // extensions sub-directory
+        file.append("panelSave.html");
+        file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+        foStream.init(file, 0x02 | 0x08 | 0x20, 0664, 0);   // write, create, truncate
+        serializer.serializeToStream(doc, foStream, "");   // rememeber, doc is the DOM tree
+        foStream.close();
+        return file.path;
+    },
+
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     close: function()
@@ -435,10 +461,13 @@ top.FirebugChrome =
 
     showContext: function(browser, context)
     {
-        FirebugContext = context; 
-        
-        if (externalBrowser || context.browser.showFirebug)
-            this.syncPanel();
+        if (context)
+        {
+            FirebugContext = context;
+
+            if (externalBrowser || context.browser.showFirebug)
+                this.syncPanel();
+        }
     },
 
     hidePanel: function()
