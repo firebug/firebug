@@ -137,8 +137,7 @@
                         oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
-                        <!-- <menuitem type="radio" name="fbNetStateMenu" value="enable"/> -->
-                        <menuitem type="radio" name="fbNetStateMenu" value="enable-host"/>
+                        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>  
                         <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
                     </menupopup>
                 </toolbarbutton>
