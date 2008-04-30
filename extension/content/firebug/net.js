@@ -2647,8 +2647,16 @@ function insertWrappedText(text, textBox)
 
 function isURLEncodedFile(file, text)
 {
-    return (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)
-        || findHeader(file.requestHeaders, "Content-Type") == "application/x-www-form-urlencoded";
+    if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)
+        return true;
+        
+    // The header value doesn't have to be alway exactly "application/x-www-form-urlencoded",
+    // there can be even charset specified. So, use indexOf rather than just "==".
+    var headerValue = findHeader(file.requestHeaders, "Content-Type");
+    if (headerValue.indexOf("application/x-www-form-urlencoded") == 0)
+        return true;
+        
+    return false;
 }
 
 // ************************************************************************************************
