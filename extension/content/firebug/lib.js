@@ -1855,7 +1855,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 
     if (FBTrace.DBG_SOURCEFILES)
     {
-        FBTrace.sysout("updateScriptFiles eraseSourceFileMap: "+eraseSourceFileMap);
+        FBTrace.sysout("updateScriptFiles eraseSourceFileMap: "+eraseSourceFileMap+"\n");
         this.sourceFilesAsArray(context);  // just for length trace
     }
 
@@ -2995,17 +2995,17 @@ this.SourceFile.prototype =
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber for sourcefile: "+this.toString()+"\n");
 
         var targetScript = this.outerScript;
-        
+
         if (!targetScript)
             return; // eg URLOnly
-            
+
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             var script = this.innerScripts[j];
             if (script instanceof Ci.jsdIScript && !script.tag)
-            { 
+            {
                 FBTrace.sysout("getInnermostScriptEnclosingLineNumber bad script for "+j+" vs "+this.toString()+"\n");
                 FBTrace.dumpProperties("getInnermostScriptEnclosingLineNumber script:", script);
             }
@@ -3094,7 +3094,7 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
     },
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
-    {   
+    {
         if (frame)
         {
             var name = frame.name;
@@ -3106,12 +3106,12 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
             var name = script.functionName;
             var args = [];
         }
-        
+
         if (name ==  "anonymous")
         {
             name = FBL.guessFunctionName(this.sourceFile.href, this.getBaseLineNumberByScript(script), context);
         }
-        
+
         return {name: name, args: args};
     },
 
@@ -3194,9 +3194,9 @@ this.EvalLevelSourceFile.prototype.getObjectDescription = function()
         if (!this.summary)
             this.summary = "";
         if (this.summary.length < 120)
-            this.summary = "eval("+this.summary + "...)=" + FBL.summarizeSourceLineArray(this.source, 120 - this.summary.length); 
+            this.summary = "eval("+this.summary + "...)=" + FBL.summarizeSourceLineArray(this.source, 120 - this.summary.length);
     }
-    if (FBTrace.DBG_SOURCEFILES) /*@explore*/  
+    if (FBTrace.DBG_SOURCEFILES) /*@explore*/
         FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+this.evalExpression.substr(0, 240)+" summary", this.summary); /*@explore*/
     return {path: this.href.replace(/\/eval\/[^\/]+$/, "/eval"), name: this.summary };
 }

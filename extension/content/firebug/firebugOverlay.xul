@@ -22,6 +22,7 @@
 
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
+        <command id="cmd_savePanels" oncommand="FirebugChrome.savePanels()"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
@@ -119,8 +120,7 @@
                         oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
-                        <!-- <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/> -->
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-host"/>
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
                     </menupopup>
                 </toolbarbutton>

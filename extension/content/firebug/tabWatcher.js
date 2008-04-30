@@ -110,7 +110,7 @@ top.TabWatcher =
         if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
             FBTrace.sysout("-> tabWatcher.watchTopWindow for: "+(uri instanceof nsIURI?uri.spec:uri)+   /*@explore*/
                 ", tab: "+Firebug.getTabIdForWindow(win)+"\n");                          /*@explore*/
-            
+
         if (tabBrowser.selectedBrowser.cancelNextLoad)
         {
             // We need to cancel this load and try again after a delay... this is used
@@ -129,13 +129,10 @@ top.TabWatcher =
             {
                 return this.watchContext(win, null);
             }
-        }
 
-        if (!context)
-        {
             var browser = this.getBrowserByWindow(win);
-            if (!fbs.countContext(true))
-                return;
+            //if (!fbs.countContext(true))
+            //    return;
 
             // If the page is reloaded, store the persisted state from the previous
             // page on the new context
@@ -147,8 +144,8 @@ top.TabWatcher =
             context = this.owner.createTabContext(win, browser, browser.chrome, persistedState);
             contexts.push(context);
 
+            context.uid = FBL.getUniqueId();                                                                       /*@explore*/
             if (FBTrace.DBG_WINDOWS) {                                                                                 /*@explore*/
-                context.uid = FBL.getUniqueId();                                                                       /*@explore*/
                 FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+", uri: "+                                /*@explore*/
                     (uri instanceof nsIURI ? uri.spec : uri) +                                                     /*@explore*/
                     ", win.location.href: "+win.location.href+"\n");                                                   /*@explore*/
@@ -178,7 +175,7 @@ top.TabWatcher =
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
         }
                                                                                                                                 /*@explore*/
-        this.watchContext(win, context);
+        this.watchContext(win, context);  // calls showContext
     },
 
     /**
@@ -240,7 +237,7 @@ top.TabWatcher =
             if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
             dispatch(listeners, "watchWindow", [context, win]);
         }
-        
+
         if (FBTrace.DBG_WINDOWS) {                                                                                     /*@explore*/
             FBTrace.sysout("-> watchWindow for: "+href+", context: "+context+"\n");                                    /*@explore*/
             if (context)                                                                                               /*@explore*/
@@ -302,10 +299,10 @@ top.TabWatcher =
             browser.isSystemPage = isSystem;
 
         if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
-            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: "+context.uid+", uri: "+                                   /*@explore*/
+            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: "+context?context.uid:"null"+", uri: "+                                   /*@explore*/
                 win.location.href+"\n");                                                         /*@explore*/
 
-        dispatch(listeners, "showContext", [browser, context]);
+        dispatch(listeners, "showContext", [browser, context]); // context is null for unwatchContext
     },
 
     unwatchContext: function(win, context)
@@ -368,7 +365,7 @@ top.TabWatcher =
         // eg search bar, maybe a global sandbox or other non-window global
         //if (FBTrace.DBG_WINDOWS) FBTrace.sysout("TabWatcher.getContextByWindow rootWindow:"+rootWindow," trying sandboxes\n"); /*@explore*/
 
-        return this.getContextBySandbox(winIn);
+        //return this.getContextBySandbox(winIn);
     },
 
     getContextBySandbox: function(sandbox)
@@ -400,11 +397,11 @@ top.TabWatcher =
                 {
                     browser.chrome = FirebugChrome;
                     browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
-                    
+
                     if (FBTrace.DBG_WINDOWS)                                                                                    /*@explore*/
                         FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+                                     /*@explore*/
                             (win.location.href)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");                                                                           /*@explore*/
-                    
+
                 }
                 return browser;
             }
@@ -479,7 +476,7 @@ var TabProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
             FBTrace.sysout("-> TabProgressListener.onStateChange to: "                                        /*@explore*/
                 +(request.name)+"\n");                                                                          /*@explore*/
-    
+
         /*if (flag & STATE_STOP)
         {
             var win = progress.DOMWindow;
@@ -500,7 +497,7 @@ var FrameProgressListener = extend(BaseProgressListener,
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+                        /*@explore*/
                 "\n"+getStateDescription(flag)+"\n");                                                                        /*@explore*/
         }                                                                                                               /*@explore*/
-                                                                                                                        /*@explore*/                
+                                                                                                                        /*@explore*/
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
         {
             // We need to get the hook in as soon as the new DOMWindow is created, but before

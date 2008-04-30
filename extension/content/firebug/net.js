@@ -59,15 +59,6 @@ const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverServ
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const nsIPermissionManager = Ci.nsIPermissionManager;
-const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
-
-const prefDomain = Firebug.prefDomain + ".net";
-const enableAlwaysPref = "enableAlways";
-const enableLocalFilesPref = "enableLocalFiles";
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 const mimeExtensionMap =
 {
     "txt": "text/plain",
@@ -174,7 +165,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     {
         if (!context.netProgress)
             return;
-    
+
         Firebug.setPref(Firebug.prefDomain, "netFilterCategory", filterCategory);
 
         // The content filter has been changed. Make sure that the content
@@ -237,13 +228,12 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     reattachContext: function(browser, context)
     {
+        Firebug.ActivableModule.reattachContext.apply(this, arguments);
         var chrome = context ? context.chrome : FirebugChrome;
         this.syncFilterButtons(chrome);
 
         this.menuTooltip = chrome.$("fbNetStateMenuTooltip");
         this.menuButton = chrome.$("fbNetStateMenu");
-        
-        this.menuUpdate(context);        
     },
 
     destroyContext: function(context)
@@ -273,6 +263,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         monitorContext(context);
 
         this.enablePanel(context);
+
+        if (!init)
+            FirebugChrome.reload();
     },
 
     onModuleDeactivate: function(context, destroy)
@@ -292,76 +285,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         }
     },
 
-    getPermission: function(context)
-    {
-        var location = context.browser.currentURI;
-        var host = getURIHost(location);
-
-        if (!host)
-        {
-            var enable = Firebug.getPref(prefDomain, enableLocalFilesPref);
-            if (enable)
-                return "enable-host";
-        }
-        else
-        {
-            if (location instanceof nsIURI)
-            {
-                switch (permissionManager.testPermission(location, "firebug-net"))
-                {
-                case nsIPermissionManager.ALLOW_ACTION:
-                    return "enable-host";
-                }
-            }
-        }
-
-        var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
-        if (enableAlways)
-            return "enable";//"enable-always";
-
-        return "disable";
-    },
-
-    setPermission: function(context, option)
-    {
-        var location = context.browser.currentURI;
-        var host = getURIHost(location);
-
-        if (!host)
-        {
-            // Update pref for local files.
-            var enable = (option.indexOf("enable-host") == 0);
-            Firebug.setPref(prefDomain, enableLocalFilesPref, enable);
-        }
-        else
-        {
-            // Use permission manager for specific sites.
-            permissionManager.remove(host, "firebug-net");
-            switch(option)
-            {
-            case "enable-host":
-                permissionManager.add(location, "firebug-net", permissionManager.ALLOW_ACTION);
-                break;
-            }
-        }
-
-        if (option == "enable-always")
-            Firebug.setPref(prefDomain, enableAlwaysPref, true);
-
-        if (option.indexOf("enable") >= 0)
-        {
-            this.onModuleActivate(context);
-
-            // Reload page.
-            FirebugChrome.reload();
-        }
-        else
-        {
-            this.onModuleDeactivate(context);
-        }
-
-        this.menuUpdate(context);
-    }
 });
 
 // ************************************************************************************************
@@ -376,17 +299,9 @@ var DefaultPage = domplate(Firebug.Rep,
             P({class: "disablePageDescription"},
                 $STR("net.defaultpage.description")
             ),
-            TABLE({class: "disablePageRow", cellspacing: "0"},
-                TBODY(
-                    TR(
-                        TD(INPUT({id: "hostEnabled", type: "checkbox", onclick: "$onHostEnable"})),
-                        TD("$enableHostLabel")
-                    )
-                )
-            ),
             DIV({class: "disablePageRow"},
                 BUTTON({onclick: "$onNetMonitorEnable"},
-                    SPAN("Enable")
+                    SPAN("$enableHostLabel")
                 )
             )
          ),
@@ -402,7 +317,7 @@ var DefaultPage = domplate(Firebug.Rep,
         var context = panel.context;
 
         var hostEnabled = $("hostEnabled", target.ownerDocument);
-        Firebug.NetMonitor.setPermission(context, hostEnabled.checked ? "enable-host" : "enable");
+        Firebug.NetMonitor.setEnabledForHost(context, true);
     },
 
     show: function(panel)
@@ -410,7 +325,7 @@ var DefaultPage = domplate(Firebug.Rep,
         var context = panel.context;
         var location = context.browser.currentURI;
         var args = {
-            enableHostLabel: Firebug.NetMonitor.getMenuLabel("enable-host", location)
+            enableHostLabel: Firebug.NetMonitor.getMenuLabel("enable", location)
         };
 
         this.tag.replace(args, panel.panelNode, this);
@@ -2059,7 +1974,7 @@ function getCacheEntry(file, netProgress)
                             value: descriptor.deviceID
                           }
                         ];
-                        
+
                         // Get contentType from the cache.
                         descriptor.visitMetaData({
                             visitMetaDataElement: function(key, value) {
@@ -2069,18 +1984,18 @@ function getCacheEntry(file, netProgress)
                                     file.mimeType = getMimeType(contentType, file.href);
                                     return false;
                                 }
-                                
+
                                 return true;
                             }
                         });
-                        
+
                         // Update file category.
                         if (file.mimeType)
                         {
                             file.category = null;
                             getFileCategory(file);
                         }
-                        
+
                         netProgress.update(file);
                     }
                 }
@@ -2712,7 +2627,7 @@ var HttpObserver =
               FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");                                    /*@explore*/
               FBTrace.sysout("**************************************\n");                                              /*@explore*/
           }                                                                                                            /*@explore*/
-                                                                                                                        
+
           return;                                                                                                      /*@explore*/
       }                                                                                                                /*@explore*/
 
@@ -2861,7 +2776,7 @@ function GI(obj, iface)
             }                                                                            /*@explore*/
         }
     }
-    
+
     return null;
 };
 

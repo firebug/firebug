@@ -10,7 +10,6 @@ const Ci = Components.interfaces;
 
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
-const nsIPermissionManager = Ci.nsIPermissionManager;
 const nsIFireBugClient = Ci.nsIFireBugClient;
 const nsISupports = Ci.nsISupports;
 const nsIFile = Ci.nsIFile;
@@ -21,9 +20,14 @@ const nsIURI = Ci.nsIURI;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const PermManager = Cc["@mozilla.org/permissionmanager;1"];
 const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
+const ioService = CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
 
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
+
+const nsIPermissionManager = Ci.nsIPermissionManager;
+const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
+const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -353,8 +357,6 @@ top.Firebug =
 
     disableSite: function(disable)
     {
-        var ioService = CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-
         var host;
         try
         {
@@ -440,7 +442,7 @@ top.Firebug =
             prefs.setBoolPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INVALID)
             throw "Invalid preference "+prefName+" check that it is listed in defaults/prefs.js";
-        
+
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
     },
@@ -1136,7 +1138,7 @@ top.Firebug =
     {
         if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
             FBTrace.sysout("-> enableContext for: ", ((uri instanceof nsIURI)?uri.spec:uri)+"\n");                             				/*@explore*/
-                
+
         if ( dispatch2(extensions, "acceptContext", [win, uri]) )
             return true;
         if ( dispatch2(extensions, "declineContext", [win, uri]) )
@@ -1215,7 +1217,7 @@ top.Firebug =
         if (browser)
             browser.chrome.showContext(browser, context);
 
-        FirebugContext = context;
+        FirebugContext = context;  // Maybe null
 
         this.syncBar();
     },
@@ -1265,7 +1267,7 @@ top.Firebug =
         } catch (ex) {}
 
         return null;
-    }
+    },
 
 };
 
@@ -1331,8 +1333,9 @@ Firebug.Module =
     unwatchWindow: function(context, win)
     {
     },
-    
+
     // Called when a FF tab is create or activated (user changes FF tab)
+    // Called after context is created or with context == null (to abort?)
     showContext: function(browser, context)
     {
     },
@@ -1395,8 +1398,11 @@ Firebug.Panel =
         this.panelNode = doc.createElement("div");
         this.panelNode.ownerPanel = this;
 
-        setClass(this.panelNode, "panelNode panelNode-"+this.name);
+        setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
         doc.body.appendChild(this.panelNode);
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("firebug.initialize panelNode for "+this.name+"\n");
 
         this.initializeNode(this.panelNode);
     },
@@ -1505,7 +1511,7 @@ Firebug.Panel =
     select: function(object, forceUpdate)
     {
         if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.sysout("firebug.select (object != this.selection)? "+(object != this.selection), " object: "+object)  /*@explore*/
+            FBTrace.dumpStack("firebug.select (object != this.selection)? "+(object != this.selection), " object: "+object)  /*@explore*/
         if (!object)
             object = this.getDefaultSelection();
 
@@ -1651,7 +1657,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
     {
         // called just before box is shown
     },
-    
+
     getSourceType: function()
     {
         // eg "js" or "css"
@@ -1760,33 +1766,33 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         this.showSourceBox(sourceBox);
     },
-    
+
     getLineNode: function(lineNo)
     {
         return this.selectedSourceBox ? this.selectedSourceBox.childNodes[lineNo-1] : null;
     },
-    
+
     getSourceLink: function(lineNo)
     {
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
-    
+
     scrollToLine: function(lineNo, highlight)
     {
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"\n");
-        
+
         if (this.context.scrollTimeout)
         {
             this.context.clearTimeout(this.contextscrollTimeout);
             delete this.context.scrollTimeout
         }
-        
+
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
             this.highlightLine(lineNo, highlight);
         }, this));
     },
-    
+
     highlightLine: function(lineNo, highlight)
     {
         var lineNode = this.getLineNode(lineNo);
@@ -1795,24 +1801,24 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
             var min = lineNo - visibleRange.before;
             var max = lineNo + visibleRange.after;
-            
+
             this.markVisible(min, max);
 
             if (highlight)
                 setClassTimed(lineNode, "jumpHighlight", this.context);
-            
+
             if (uiListeners.length > 0)
             {
                 var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
                 dispatch(uiListeners, "onLineSelect", [link]);
             }
-                  
+
             return true;
         }
         else
             return false;
     },
-    
+
     markVisible: function(min, max)
     {
          if (this.context.markExecutableLinesTimeout)
@@ -1820,14 +1826,14 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
              this.context.clearTimeout(this.context.markExecutableLinesTimeout);
              delete this.context.markExecutableLinesTimeout;
          }
-         
+
          this.context.markExecutableLinesTimeout = this.context.setTimeout(bindFixed(function delayMarkExecutableLines()
          {
              if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delayMarkExecutableLines min:"+min+" max:"+max+"\n");
              this.markExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
          }, this));
     },
-    
+
 
 });
 
@@ -1927,11 +1933,11 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
 
     initContext: function(context)
     {
-        var persistedState = getPersistedState(context, this.panelName);
-        if (persistedState.enabled == "undefined")
+        var persistedPanelState = getPersistedState(context, this.panelName);
+        if (persistedPanelState.enabled == "undefined")
         {
             var autoDisable = Firebug.getPref(Firebug.prefDomain, "autoDisable");
-            persistedState.enabled = !autoDisable;
+            persistedPanelState.enabled = !autoDisable;
         }
     },
 
@@ -1956,17 +1962,17 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
         if (!context)
             return false;
 
-        var persistedState = getPersistedState(context, this.panelName);
-        if (persistedState)
-            return persistedState.enabled;
+        var persistedPanelState = getPersistedState(context, this.panelName);
+        if (persistedPanelState)
+            return persistedPanelState.enabled;
 
         return false;
     },
 
     enablePanel: function(context)
     {
-        var persistedState = getPersistedState(context, this.panelName);
-        persistedState.enabled = true;
+        var persistedPanelState = getPersistedState(context, this.panelName);
+        persistedPanelState.enabled = true;
 
         var tab = this.panelBar1.getTab(this.panelName);
         tab.removeAttribute("disabled");
@@ -1982,8 +1988,8 @@ Firebug.AutoDisableModule = extend(Firebug.Module,
         if (!panel)
             return;
 
-        var persistedState = getPersistedState(context, panel.name);
-        persistedState.enabled = false;
+        var persistedPanelState = getPersistedState(context, panel.name);
+        persistedPanelState.enabled = false;
 
         var tab = this.panelBar1.getTab(panel.name);
         tab.setAttribute("disabled", "true");
@@ -1998,27 +2004,44 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelBar1: $("fbPanelBar1"),
     menuButton: null,
     menuTooltip: null,
-    activeContexts: [],
+    activeContexts: null,
 
     initialize: function()
     {
+        this.activeContexts = [];
         if (this.menuTooltip)
             this.menuTooltip.fbEnabled = true;
     },
 
     initContext: function(context)
     {
-        var persistedState = getPersistedState(context, this.panelName);
-        
-        if (typeof(persistedState.enabled) == "undefined")
-        {
-            var option = this.getPermission(context);
-            if (option.indexOf("enable") == 0)
-                this.enablePanel(context);
-         }
+        observerService.addObserver(this, "perm-changed", false);
 
-        if (persistedState.enabled)
-            this.onModuleActivate(context, true);
+        var persistedPanelState = this.syncPersistedPanelState(context, true);
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.initContext panelName "+this.panelName+" persistedPanelState.enabled "+persistedPanelState.enabled+"\n");
+    },
+
+    syncPersistedPanelState: function(context, beginOrEnd)
+    {
+        var persistedPanelState = getPersistedState(context, this.panelName);
+
+        persistedPanelState.enabled = this.isEnabledForHost(context.browser.currentURI);
+
+        if (persistedPanelState.enabled)
+            this.moduleActivate(context, beginOrEnd);
+        else
+            this.moduleDeactivate(context, beginOrEnd);
+
+        this.menuUpdate(context);
+
+        return persistedPanelState;
+    },
+
+    reattachContext: function(context)
+    {
+        var persistedPanelState = this.syncPersistedPanelState(context, false);
     },
 
     showContext: function(browser, context)
@@ -2030,31 +2053,51 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     destroyContext: function(context)
     {
-        this.onModuleDeactivate(context, true);
+        this.syncPersistedPanelState(context, true);
     },
 
-    hideUI: function(browser, context)
+    moduleActivate: function(context, init)
     {
-        if (!context)
+        // #ifdef explore
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("moduleActivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
+        // #endif explore
+        if (this.isEnabled(context))
             return;
 
-        var option = this.getPermission(context);
-        if (option.indexOf("disable") == 0)
+        this.activeContexts.push(context);FBTrace.sysout("write to activeContexts "+this.panelName+"\n");
+        this.onModuleActivate(context, init);
+    },
+
+    moduleDeactivate: function(context, destroy)
+    {
+        // #ifdef explore
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("moduleDeactivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
+        // #endif explore
+        if (!this.isEnabled(context))
+            return;
+
+        var i = this.activeContexts.indexOf(context);
+        if (i != -1)
+            this.activeContexts.splice(i, 1);
+        else
         {
-            var persistedState = getPersistedState(context, this.panelName);
-            persistedState.enabled = false;
-            this.onModuleDeactivate(context);
+            FBTrace.sysout("moduleDeactivate "+context.window.location +" not in activeContexts\n");
+            return;
         }
+
+        this.onModuleDeactivate(context, destroy);
     },
 
     onModuleActivate: function(context, init)
     {
-        // Module activation code.
+        // Module activation code. Just added to activeContexts
     },
 
     onModuleDeactivate: function(context, destroy)
     {
-        // Module deactivation code.
+        // Module deactivation code. Just removed from activeContexts
     },
 
     isEnabled: function(context)
@@ -2062,19 +2105,136 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (!context)
             return false;
 
-        var persistedState = getPersistedState(context, this.panelName);
-        if (persistedState)
-            return persistedState.enabled;
+        return (this.activeContexts.indexOf(context) != -1);
+    },
+
+    wasEnabled: function(context)
+    {
+        if (!context)
+            return false;
+
+        var persistedPanelState = getPersistedState(context, this.panelName);
+        if (persistedPanelState)
+            return persistedPanelState.enabled;
 
         return false;
+    },
+
+    getPrefDomain: function()
+    {
+        if (!this.prefDomain)
+            this.prefDomain = Firebug.prefDomain + "." + this.panelName;
+         return this.prefDomain;
+    },
+
+    isEnabledForHost: function(an_nsIURI)
+    {
+        if (an_nsIURI)
+        {
+            var prefDomain = this.getPrefDomain();
+
+            if ( !(an_nsIURI instanceof Ci.nsIURI) )
+                an_nsIURI = ioService.newURI(an_nsIURI, null, null);
+
+            if (permissionManager.testPermission(an_nsIURI, prefDomain))
+            {
+                if (FBTrace.DBG_PANELS)
+                    FBTrace.sysout(prefDomain+".isEnabledForHost true uri:"+an_nsIURI.host+"\n");
+
+                return true;
+            }
+        }
+        if (FBTrace.DBG_PANELS)
+                FBTrace.sysout(prefDomain+".isEnabledForHost false uri:"+an_nsIURI.host+"\n");
+
+        return false;
+    },
+
+    setEnabledForHost: function(context, enable)
+    {
+        var location = context.browser.currentURI;
+        var prefDomain = this.getPrefDomain();
+
+/*@*/   if (FBTrace.DBG_PANELS)
+/*@*/       FBTrace.sysout("firebug.setEnabledForHost enable:"+enable+" prefDomain:"+prefDomain+" for "+location.host+"\n");
+/*@*/
+/*@*/   if (this.isEnabledForHost(location) == enable)
+/*@*/   {
+/*@*/        FBTrace.sysout("firebug.setEnabledForHost attempt to change to same state: "+enable+"\n");
+/*@*/   }
+
+        permissionManager.remove(location.host, prefDomain);  // API junk
+        if (enable)
+            permissionManager.add(location, prefDomain, permissionManager.ALLOW_ACTION);
+
+        FBTrace.sysout("firebug.setEnabledForHost enumerate permissions:\n");
+        var perms = permissionManager.enumerator;
+        while(perms.hasMoreElements())
+        {
+            var perm = perms.getNext();
+            if (perm instanceof Ci.nsIPermission)
+                FBTrace.dumpProperties("firebug ", perm);
+            else
+                FBTrace.dumpProperties("NOT an nsIPermission", perm);
+        }
+        FBTrace.sysout("firebug.setEnabledForHost enumerate permissions DONE\n");
+    },
+
+    observe: function(subject, topic, data)
+    {
+        try {
+/*@*/       if (FBTrace.DBG_PANELS)
+/*@*/           FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+((topic == 'perm-changed')?" isPermChanged":" FAIL")+" data: "+data+"\n");
+
+            if (topic == 'perm-changed')
+            {
+                if (subject instanceof Ci.nsIPermission)
+                {
+/*@*/               if (FBTrace.DBG_PANELS)
+/*@*/                   FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
+                    var host = subject.host;
+                    var prefDomain = subject.type;  // eg extensions.firebug.script
+                    dispatch(modules, "activationChange", [host, prefDomain, data]); // data will be 'added' or 'deleted'
+                }
+/*@*/           else
+/*@*/               FBTrace.dumpProperties("!firebug.observe perm-changed subject is not an nsIPermission", subject);
+            }
+         }
+         catch (exc)
+         {
+            FBTrace.dumpProperties("firebug.observe permisssions FAILS", exc);
+         }
+    },
+
+    activationChange: function(host, prefDomain, direction)
+    {
+        // #ifdef explore
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.activationChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" direction:"+ direction+"\n");
+        // #endif explore
+        if (prefDomain == this.getPrefDomain())
+        {
+            var module = this;
+            TabWatcher.iterateContexts(
+                function changeActivation(context)
+                {
+                    // #ifdef explore
+                    if (FBTrace.DBG_PANELS)
+                        FBTrace.sysout("trying "+ context.window.location.hostname +"=="+ host+((context.window.location.host.indexOf(host)!=-1)?"FOUND":"no match")+"\n");
+                    // #endif explore
+                    if (context.window.location.host.indexOf(host) != -1)
+                        module.syncPersistedPanelState(context, false);
+                }
+            );
+        }
     },
 
     enablePanel: function(context)
     {
         var panel = context.getPanel(this.panelName);
 
-        var persistedState = getPersistedState(panel.context, panel.name);
-        persistedState.enabled = true;
+        var persistedPanelState = getPersistedState(panel.context, panel.name);
+        persistedPanelState.enabled = true;
 
         var tab = this.panelBar1.getTab(panel.name);
         tab.removeAttribute("disabled");
@@ -2088,8 +2248,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (!panel)
             return;
 
-        var persistedState = getPersistedState(context, panel.name);
-        persistedState.enabled = false;
+        var persistedPanelState = getPersistedState(context, panel.name);
+        persistedPanelState.enabled = false;
 
         var tab = this.panelBar1.getTab(panel.name);
         tab.setAttribute("disabled", "true");
@@ -2110,8 +2270,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     onStateMenuCommand: function(event, context)
     {
         var menu = event.target;
-        if (menu.value)
-            this.setPermission(context, menu.value);
+        this.setEnabledForHost(context, (menu.value == "enable"));
     },
 
     onStateMenuPopupShowing: function(menu, context)
@@ -2148,8 +2307,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     menuUpdate: function(context)
     {
-        var value = this.getPermission(context);
-        if ((value.indexOf("disable") == 0) && this.isEnabled(context))
+        var value = "disable";
+        if (this.isEnabled(context))
             value = "enable";
 
         this.menuButton.value = value;
@@ -2165,16 +2324,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var label = "";
         switch (option)
         {
-        case "enable-always":
-        case "enable":
-            label = (shortened) ? "EnableShort" : "Enable";
-            break;
-
         case "disable":
             label = (shortened) ? "DisableShort" : "Disable";
             break;
 
-        case "enable-host":
+        case "enable":
             if (isSystemURL(location.spec))
                 label = "SystemPagesEnable";
             else if (!getURIHost(location))

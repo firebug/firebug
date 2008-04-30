@@ -48,15 +48,6 @@ var listeners = [];
 
 // ************************************************************************************************
 
-const nsIPermissionManager = Ci.nsIPermissionManager;
-const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
-
-const prefDomain = Firebug.prefDomain + ".debugger";
-const enableAlwaysPref = "enableAlways";
-const enableLocalFilesPref = "enableLocalFiles";
-
-// ************************************************************************************************
-
 Firebug.Debugger = extend(Firebug.ActivableModule,
 {
     fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
@@ -500,7 +491,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var chrome = context.chrome;
                 if (!chrome)
                     chrome = FirebugChrome;
-                    
+
                 if ( chrome.updateViewOnShowHook )
                     delete chrome.updateViewOnShowHook;
 
@@ -604,16 +595,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onJSDActivate: function(jsd)  // just before hooks are set
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.dumpStack("debugger.onJSDActivate");
+
         // this is just to get the timing right.
         // we called by fbs as a "debuggr", (one per window) and we are re-dispatching to our listeners,
         // Firebug.DebugListeners.
-        $('fbStatusIcon').setAttribute("jsd", "on");            
+        $('fbStatusIcon').setAttribute("jsd", "on");
         dispatch2(listeners,"onJSDActivate",[fbs]);
     },
 
-    onJSDDeactivate: function(jsd) 
+    onJSDDeactivate: function(jsd)
     {
-        $('fbStatusIcon').setAttribute("jsd", "off");            
+        $('fbStatusIcon').setAttribute("jsd", "off");
         dispatch2(listeners,"onJSDDeactivate",[fbs]);
     },
 
@@ -1298,7 +1292,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
-        
+
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
@@ -1306,7 +1300,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         this.menuTooltip = $("fbDebuggerStateMenuTooltip");
         this.menuButton = $("fbDebuggerStateMenu");
-    
+
         fbs.registerClient(this);   // allow callbacks for jsd
     },
 
@@ -1321,8 +1315,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.menuTooltip = chrome.$("fbDebuggerStateMenuTooltip");
         this.menuButton = chrome.$("fbDebuggerStateMenu");
-
-        this.menuUpdate(context);
+        Firebug.ActivableModule.reattachContext.apply(this, arguments);
     },
 
     loadedContext: function(context)
@@ -1400,38 +1393,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             panel.panelSplitter.collapsed = false; // Show side panel
             panel.sidePanelDeck.collapsed = false;
         }
-
-        if (this.activeContexts.length == 0)
-        {
-            var jsdStatus = fbs.registerDebugger(this);
-        
-            if (jsdStatus)
-                $('fbStatusIcon').setAttribute('jsd', 'on');
-        }
         else
-        {
-            if (FBTrace.DBG_INITIALIZE)
-                for (var i = 0; i < this.activeContexts.length; i++) FBTrace.sysout("    "+i+": "+this.activeContexts[i].window.location+"\n");
-        }
-        
-        this.activeContexts.push(context);
+            FBTrace.sysout("debugger.onModuleActivate no panel for this.panelName "+this.panelName+" "+context.window.location+"\n");
 
-        if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.dumpStack("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
+       // if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
+            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
+
+        var jsdStatus = fbs.registerDebugger(this);
+
+        if (jsdStatus)
+            $('fbStatusIcon').setAttribute('jsd', 'on');
+
+        if (!init)
+            FirebugChrome.reload();
     },
 
     onModuleDeactivate: function(context, destroy)
     {
-        var i = this.activeContexts.indexOf(context);
-        if (i != -1)
-            this.activeContexts.splice(i, 1);
-        else
-        {
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("debugger.onModuleDeactivate Attempt to deactive context that is not active "+context.window.location+"\n");
-        }
-
-        if (FBTrace.DBG_INITIALIZE || FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
+        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts.length+" for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
 
         if (this.activeContexts.length == 0)
@@ -1455,79 +1434,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
-    getPermission: function(context)
-    {
-        if (!context || !context.browser)
-            return "disable";
-
-        var location = context.browser.currentURI;
-        var host = getURIHost(location);
-
-        if (!host)
-        {
-            var enable = Firebug.getPref(prefDomain, enableLocalFilesPref);
-            if (enable)
-                return "enable-host";
-        }
-        else
-        {
-            if (location instanceof nsIURI)
-            {
-                switch (permissionManager.testPermission(location, "firebug-debugger"))
-                {
-                case nsIPermissionManager.ALLOW_ACTION:
-                    return "enable-host";
-                }
-            }
-        }
-
-        var enableAlways = Firebug.getPref(prefDomain, enableAlwaysPref);
-        if (enableAlways)
-            return "enable";//"enable-always";
-
-        return "disable";
-    },
-
-    setPermission: function(context, option)
-    {
-        var location = context.browser.currentURI;
-        var host = getURIHost(location);
-
-        if (!host)
-        {
-            // Update pref for local files.
-            var enable = (option.indexOf("enable-host") == 0);
-            Firebug.setPref(prefDomain, enableLocalFilesPref, enable);
-        }
-        else
-        {
-            // Use permission manager for specific sites.
-            permissionManager.remove(host, "firebug-debugger");
-            switch(option)
-            {
-            case "enable-host":
-                permissionManager.add(location, "firebug-debugger", permissionManager.ALLOW_ACTION);
-                break;
-            }
-        }
-
-        if (option == "enable-always")
-            Firebug.setPref(prefDomain, enableAlwaysPref, true);
-
-        if (option.indexOf("enable") >= 0)
-        {
-            this.onModuleActivate(context);
-
-            // Reload page.
-            FirebugChrome.reload();
-        }
-        else
-        {
-            this.onModuleDeactivate(context);
-        }
-
-        this.menuUpdate(context);
-    }
 });
 
 // ************************************************************************************************
@@ -1542,17 +1448,9 @@ var DefaultPage = domplate(Firebug.Rep,
             P({class: "disablePageDescription"},
                 $STR("script.defaultpage.description")
             ),
-            TABLE({class: "disablePageRow", cellspacing: "0"},
-                TBODY(
-                    TR(
-                        TD(INPUT({id: "hostEnabled", type: "checkbox", onclick: "$onHostEnable"})),
-                        TD("$enableHostLabel")
-                    )
-                )
-            ),
             DIV({class: "disablePageRow"},
                 BUTTON({onclick: "$onDebuggerEnable"},
-                    SPAN("Enable")
+                    SPAN("$enableHostLabel")
                 )
             )
          ),
@@ -1568,7 +1466,7 @@ var DefaultPage = domplate(Firebug.Rep,
         var context = panel.context;
 
         var hostEnabled = $("hostEnabled", target.ownerDocument);
-        Firebug.Debugger.setPermission(context, hostEnabled.checked ? "enable-host" : "enable");
+        Firebug.Debugger.setEnabledForHost(context, true);
     },
 
     show: function(panel)
@@ -1576,7 +1474,7 @@ var DefaultPage = domplate(Firebug.Rep,
         var context = panel.context;
         var location = context.browser.currentURI;
         var args = {
-            enableHostLabel: Firebug.Debugger.getMenuLabel("enable-host", location)
+            enableHostLabel: Firebug.Debugger.getMenuLabel("enable", location)
         };
 
         this.tag.replace(args, panel.panelNode, this);
@@ -1853,9 +1751,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var scrollingElement = event.target;
         this.markRevealedLines(scrollingElement);
     },
-    
-    markRevealedLines: function(scrollingElement) 
-    {        
+
+    markRevealedLines: function(scrollingElement)
+    {
         if (!this.lastScrollTop)
             this.lastScrollTop = 0;
 
@@ -1996,8 +1894,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.showToolbarButtons("fbDebuggerButtons", true);
         this.showToolbarButtons("fbScriptButtons", true);
-
-        Firebug.Debugger.menuUpdate(this.context);
 
         if (!this.shouldShow())
             return;
@@ -2161,6 +2057,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var sourceFiles = this.getLocationList();
         return sourceFiles[0];
+    },
+
+    getDefaultSelection: function()
+    {
+        return this.getDefaultLocation();
     },
 
     getTooltipObject: function(target)
@@ -2486,7 +2387,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 {
                     var analyzer = getScriptAnalyzer(context, script);
                     if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+(analyzer?"has analyzer":"no analyzer")+"\n"); /*@explore*/
-                    
+
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
                     else
