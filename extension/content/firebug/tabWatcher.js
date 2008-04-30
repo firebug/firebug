@@ -498,7 +498,7 @@ var FrameProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)                                                                                        /*@explore*/
         {                                                                                                               /*@explore*/
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+                        /*@explore*/
-                "\n"+getStateDescription(flag));                                                                        /*@explore*/
+                "\n"+getStateDescription(flag)+"\n");                                                                        /*@explore*/
         }                                                                                                               /*@explore*/
                                                                                                                         /*@explore*/                
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
