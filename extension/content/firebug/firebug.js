@@ -1511,7 +1511,7 @@ Firebug.Panel =
     select: function(object, forceUpdate)
     {
         if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.dumpStack("firebug.select (object != this.selection)? "+(object != this.selection), " object: "+object)  /*@explore*/
+            FBTrace.sysout("firebug.select (object != this.selection)? "+(object != this.selection), " object: "+object)  /*@explore*/
         if (!object)
             object = this.getDefaultSelection();
 
@@ -1840,7 +1840,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 function loadScriptLines(sourceFile, context)
 {
     if (sourceFile.source)
-        return splitLines(sourceFile.source);
+        return sourceFile.source; 
     else
         return context.sourceCache.load(sourceFile.href);
 }
@@ -2053,7 +2053,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     destroyContext: function(context)
     {
-        this.syncPersistedPanelState(context, true);
+        this.moduleDeactivate(context, true);
     },
 
     moduleActivate: function(context, init)
@@ -2065,7 +2065,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (this.isEnabled(context))
             return;
 
-        this.activeContexts.push(context);FBTrace.sysout("write to activeContexts "+this.panelName+"\n");
+        this.activeContexts.push(context);
         this.onModuleActivate(context, init);
     },
 
@@ -2166,18 +2166,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         permissionManager.remove(location.host, prefDomain);  // API junk
         if (enable)
             permissionManager.add(location, prefDomain, permissionManager.ALLOW_ACTION);
-
-        FBTrace.sysout("firebug.setEnabledForHost enumerate permissions:\n");
-        var perms = permissionManager.enumerator;
-        while(perms.hasMoreElements())
-        {
-            var perm = perms.getNext();
-            if (perm instanceof Ci.nsIPermission)
-                FBTrace.dumpProperties("firebug ", perm);
-            else
-                FBTrace.dumpProperties("NOT an nsIPermission", perm);
-        }
-        FBTrace.sysout("firebug.setEnabledForHost enumerate permissions DONE\n");
     },
 
     observe: function(subject, topic, data)

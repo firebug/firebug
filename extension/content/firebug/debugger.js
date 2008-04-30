@@ -1396,7 +1396,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
             FBTrace.sysout("debugger.onModuleActivate no panel for this.panelName "+this.panelName+" "+context.window.location+"\n");
 
-       // if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
+        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 
         var jsdStatus = fbs.registerDebugger(this);

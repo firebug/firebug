@@ -264,6 +264,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         this.enablePanel(context);
 
+        $('fbStatusIcon').setAttribute("net", "on");
+
         if (!init)
             FirebugChrome.reload();
     },
@@ -283,6 +285,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
                 panel.show(state);
             }
         }
+         
+        if (this.activeContexts.length == 0)
+             $('fbStatusIcon').removeAttribute("net");
     },
 
 });

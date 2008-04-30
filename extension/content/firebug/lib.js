@@ -1384,8 +1384,9 @@ this.splitLines = function(text)
         return text.split(reSplitLines);
     else
     {
-        var str = new String(text);
-        return str.split(reSplitLines);  // TODO this does not work
+        var str = text+"";
+        var theSplit = str.split(reSplitLines);  
+        return theSplit;
     }
 };
 

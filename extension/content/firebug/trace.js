@@ -9,8 +9,10 @@ var FBTrace = {};
 try {
 (function() {
 
-const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Components.interfaces["nsIConsoleService"]);
 const Ci = Components.interfaces;
+const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+const permissionManager = Components.classes["@mozilla.org/permissionmanager;1"].getService(Ci.nsIPermissionManager);
+
 FBTrace.avoidRecursion = false;
 
 this.sysout = function(msg, more)
@@ -168,6 +170,20 @@ this.dumpEvent = function(header, event)
     this.sysout(header+" "+event.type+phase+from+at+to+"\n");
 },
 
+this.dumpPermissions = function()
+{
+    FBTrace.sysout("Enumerate permissions:\n");
+    var perms = permissionManager.enumerator;
+    while(perms.hasMoreElements())
+    {
+        var perm = perms.getNext();
+        if (perm instanceof Ci.nsIPermission)
+            FBTrace.dumpProperties("Permission ", perm);
+        else
+            FBTrace.dumpProperties("NOT an nsIPermission", perm);
+    }
+    FBTrace.sysout("Enumerate permissions DONE\n");
+},
 
 this.consoleOut = function(text)
 {
