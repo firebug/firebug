@@ -9,6 +9,7 @@
 .firebugLayoutBoxParent {
     z-index: 2147483647;
     position: absolute;
+    background-color: transparent;
     border-right: 1px dashed #BBBBBB;
     border-bottom: 1px dashed #BBBBBB;
 }
