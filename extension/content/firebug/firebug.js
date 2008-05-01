@@ -1490,6 +1490,8 @@ Firebug.Panel =
 
     navigate: function(object)
     {
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("navigate "+object+"\n");
         if (!object)
             object = this.getDefaultLocation();
 
@@ -1731,6 +1733,9 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         else
             this.sourceBoxes[sourceFile.href] = sourceBox;
 
+        if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
+            FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.source?" anon ":" sourceBoxes")); /*@explore*/
+
         return sourceBox;
     },
 
@@ -1755,9 +1760,9 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
     showSourceFile: function(sourceFile, sourceBoxDecorator)
     {
-        if (FBTrace.DBG_SOURCEFILES)																								/*@explore*/
-            FBTrace.sysout("firebug.showSourceFile", sourceFile);  														    /*@explore*/
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
+        if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
+            FBTrace.sysout("firebug.showSourceFile: ", sourceFile+(sourceBox?" has sourcebox ":" needs new sourcebox ")); /*@explore*/
         if (!sourceBox)
         {
             sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);
@@ -1840,7 +1845,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 function loadScriptLines(sourceFile, context)
 {
     if (sourceFile.source)
-        return sourceFile.source; 
+        return sourceFile.source;
     else
         return context.sourceCache.load(sourceFile.href);
 }

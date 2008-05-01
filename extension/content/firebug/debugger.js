@@ -1383,21 +1383,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onModuleActivate: function(context, init)
     {
-        this.enablePanel(context);
-
-        var panel = context.getPanel(this.panelName, true);
-        if (panel)
-        {
-            var state = Firebug.getPanelState(panel);
-            panel.show(state);
-            panel.panelSplitter.collapsed = false; // Show side panel
-            panel.sidePanelDeck.collapsed = false;
-        }
-        else
-            FBTrace.sysout("debugger.onModuleActivate no panel for this.panelName "+this.panelName+" "+context.window.location+"\n");
-
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
+
+        this.enablePanel(context);
 
         var jsdStatus = fbs.registerDebugger(this);
 
@@ -1895,8 +1884,16 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbDebuggerButtons", true);
         this.showToolbarButtons("fbScriptButtons", true);
 
-        if (!this.shouldShow())
-            return;
+        if (!Firebug.Debugger.isEnabled(this.context))
+        {
+            DefaultPage.show(this);
+
+            this.panelSplitter.collapsed = true;
+            this.sidePanelDeck.collapsed = true;
+        }
+
+        this.panelSplitter.collapsed = false; // Show side panel
+        this.sidePanelDeck.collapsed = false;
 
         if (!this.location)
         {
@@ -1916,19 +1913,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (breakpointPanel)
                 breakpointPanel.refresh();
         }
-    },
-
-    shouldShow: function()
-    {
-        if (Firebug.Debugger.isEnabled(this.context))
-            return true;
-
-        DefaultPage.show(this);
-
-        this.panelSplitter.collapsed = true;
-        this.sidePanelDeck.collapsed = true;
-
-        return false;
     },
 
     hide: function()
@@ -2048,7 +2032,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 list.push(new NoScriptSourceFile(context, url));
             }
         });
-
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList ", list); /*@explore*/
         return list;
     },
@@ -2078,9 +2061,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (script)
             {
                 return script;
-//                var tip = "script tag: "+script.tag;
-//                var pc = script.isValid ? " 1st pc "+script.lineToPc(lineNo, this.location.pcmap_type) : " (now invalid)";
-//                return new String(tip + pc);
             }
             else
                 return new String("no executable script at "+lineNo);

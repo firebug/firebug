@@ -150,7 +150,7 @@ var waitingForTimer = false;
 function FirebugService()
 {
     fbs = this;
-    
+
     this.wrappedJSObject = this;
     this.timeStamp = new Date();  /* explore */
     this.breakpoints = breakpoints; // so chromebug can see it /* explore */
@@ -305,7 +305,7 @@ FirebugService.prototype =
                 break;
             }
         }
-        
+
         if (debuggers.length == 0)
             this.disableDebugger();
     },
@@ -701,9 +701,9 @@ FirebugService.prototype =
         {
             if (!jsd.isOn)
                 jsd.on();
-                
+
             dispatch(clients, "onJSDActivate", [jsd]);
-            
+
             jsd.unPause();
             this.hookScripts();
         }
@@ -774,9 +774,9 @@ FirebugService.prototype =
 
     disableDebugger: function()
     {
-        if (fbs.DBG_FBS_FINDDEBUGGER)   
+        if (fbs.DBG_FBS_FINDDEBUGGER)
             ddd("fbs.disableDebugger for enabledDebugger: "+enabledDebugger+"\n");
-            
+
         if (!enabledDebugger)
             return;
 
@@ -787,7 +787,7 @@ FirebugService.prototype =
             jsd.pause();
             fbs.unhookScripts();
             jsd.off();
-            dispatch(clients, "onJSDDeactivate", [jsd]);            
+            dispatch(clients, "onJSDDeactivate", [jsd]);
         }}, 1000, TYPE_ONE_SHOT);
 
         waitingForTimer = true;
@@ -1147,7 +1147,7 @@ FirebugService.prototype =
             {
                 try {
                 if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) 											/*@explore*/
-                    ddd("onScriptCreated: filename filtered:"+fileName+" "+script.functionSource+"\n");  	/*@explore*/
+                    ddd("onScriptCreated: filename filtered:"+fileName+"\n");  	/*@explore*/
                 } catch (exc) { /*Bug 426692 */ } /*@explore*/
                 return;
             }

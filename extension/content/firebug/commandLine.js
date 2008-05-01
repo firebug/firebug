@@ -38,11 +38,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         // Make sure the command line script is attached.
         if (win.wrappedJSObject && !win.wrappedJSObject._FirebugCommandLine)
             Firebug.CommandLine.injector.attachCommandLine(context, win);
-        
+
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
         element.setAttribute("methodName", "evaluate");
-        
+
         expr = expr.toString();
         expr = "with (_FirebugCommandLine) {\n " + expr + " \n};";
         element.setAttribute("expr", expr);
@@ -82,13 +82,11 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         var result = null;
 
-
-
         if (context.stopped)
         {
             if (!context.commandLineAPI)
                 context.commandLineAPI = new FirebugCommandLineAPI(context, context.window);
-        
+
             var scope = {
                 api       : context.commandLineAPI,
                 vars      : getInspectorVars(context),
@@ -487,7 +485,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
                 hosed_userObjects.push(result);
             }
         }
-        
+
         return true;
     }
 });
@@ -744,13 +742,13 @@ Firebug.CommandLine.injector = {
         var handler = new CommandLineHandler(context, win);
         var element = $("_firebugConsole", doc);
         element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
-        
+
         if (FBTrace.DBG_CONSOLE)                                                                                       /*@explore*/
             FBTrace.sysout("Command line is successfully attached to: " + win.location + "\n");                        /*@explore*/
     }
 };
 
-function CommandLineHandler(context, win) 
+function CommandLineHandler(context, win)
 {
     this.handleEvent = function(event)
     {

@@ -1385,7 +1385,7 @@ this.splitLines = function(text)
     else
     {
         var str = text+"";
-        var theSplit = str.split(reSplitLines);  
+        var theSplit = str.split(reSplitLines);
         return theSplit;
     }
 };
@@ -2679,6 +2679,8 @@ this.getSourceLineRange = function(lines, min, max, maxLineNoChars)
 
 this.persistObjects = function(panel, panelState)
 {
+    if (FBTrace.DBG_PANELS)
+        FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+"\n");
     // Persist the location and selection so we can restore them in case of a reload
     if (panel.location)
         panelState.persistedLocation = this.persistObject(panel.location, panel.context);
@@ -2695,6 +2697,8 @@ this.persistObject = function(object, context)
 
 this.restoreObjects = function(panel, panelState)
 {
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
     // Persist the location and selection so we can restore them in case of a reload
     if (!panel.location && panelState && panelState.persistedLocation)
     {
