@@ -525,6 +525,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         persistObjects(this, state);
 
+        Firebug.Editor.stopEditing();
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
