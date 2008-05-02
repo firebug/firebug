@@ -1165,6 +1165,8 @@ FirebugService.prototype =
             {
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
+                if (fbs.DBG_FBS_SRCUNITS) ddd("createdScriptHasCaller "+hasCaller+"\n");
+        
                 if (hasCaller)
                     fbs.onXScriptCreatedByTag[script.tag] = this.onEvalScriptCreated;
                 else
@@ -1205,7 +1207,6 @@ FirebugService.prototype =
 
     createdScriptHasCaller: function()
     {
-        if (fbs.DBG_FBS_SRCUNITS) ddd("createdScriptHasCaller\n "+getComponentsStackDump()+"\n");
         var frame = Components.stack; // createdScriptHasCaller
         frame = frame.caller;         // onScriptCreated
         if (!frame) return frame;

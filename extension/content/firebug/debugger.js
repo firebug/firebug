@@ -505,7 +505,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 var panel = context.getPanel("script", true);
                 if (panel)
-                    panel.select(null);
+                { 
+                    if (panel.executionLine)
+                        panel.executionLine.removeAttribute("exeLine"); 
+                    panel.select(null);        
+                }
             }
         }
         catch (exc)
@@ -873,7 +877,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (sourceBox)
                 {
                     if (FBTrace.DBG_BP)                                                                                /*@explore*/
-                        FBTrace.sysout("onToggleBreakpoint sourceBox.childNodes.length="+sourceBox.childNodes.length+" [lineNo-1]="+sourceBox.childNodes[lineNo-1].innerHTML+"\n"); /*@explore*/
+                        FBTrace.sysout(i+") onToggleBreakpoint sourceBox.childNodes.length="+sourceBox.childNodes.length+" [lineNo-1]="+sourceBox.childNodes[lineNo-1].innerHTML+"\n"); /*@explore*/
                     var row = sourceBox.childNodes[lineNo-1];
                     row.setAttribute("breakpoint", isSet);
                     if (isSet && props)
@@ -885,11 +889,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         row.removeAttribute("condition");
                         row.removeAttribute("disabledBreakpoint");
                     }
-                }
-                else // trace on else
-                {
-                    if (FBTrace.DBG_BP) 										 													  /*@explore*/
-                        FBTrace.dumpProperties("debugger.onToggleBreakPoint no find sourcebox["+url+"]+, sourceBoxes[url]", panel.sourceBoxes); /*@explore*/
                 }
             }
         }
@@ -1322,6 +1321,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
         updateScriptFiles(context);
+        
     },
 
     destroyContext: function(context)
@@ -1466,9 +1466,15 @@ var DefaultPage = domplate(Firebug.Rep,
             enableHostLabel: Firebug.Debugger.getMenuLabel("enable", location)
         };
 
-        this.tag.replace(args, panel.panelNode, this);
+        this.box = this.tag.replace(args, panel.panelNode, this);
         panel.panelNode.scrollTop = 0;
-    }
+    },
+    
+    hide: function(panel)
+    {
+        if (this.box)
+            this.box.setAttribute("collapsed", "true");
+    },
 });
 
 // ************************************************************************************************
@@ -1891,6 +1897,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.panelSplitter.collapsed = true;
             this.sidePanelDeck.collapsed = true;
         }
+        DefaultPage.hide(this);
 
         this.panelSplitter.collapsed = false; // Show side panel
         this.sidePanelDeck.collapsed = false;
@@ -2094,11 +2101,10 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!sourceRowText)
             return;
 
-        var offset = getViewOffset(target);
         var text = sourceRowText.firstChild.nodeValue.replace("\t", "        ", "g");
-        var offsetX = x-sourceRowText.offsetLeft;
+        var offsetX = x-sourceRowText.offsetLeft; // runs from 0 at the left most pixel of the source code line that could have a character
         var charWidth = sourceRowText.offsetWidth/text.length;
-        var charOffset = Math.floor(offsetX/charWidth);
+        var charOffset = Math.floor(offsetX/charWidth); // runs from 0 over the first character spot, 1 over the second...
         var expr = getExpressionAt(text, charOffset);
         if (!expr || !expr.expr)
             return;

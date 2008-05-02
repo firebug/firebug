@@ -174,8 +174,16 @@ top.TabWatcher =
                 FBTrace.sysout("-> tabWatcher context *** LOADED *** in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
         }
-                                                                                                                                /*@explore*/
-        this.watchContext(win, context);  // calls showContext
+        
+        if (context && !context.loaded)  // then it really is still loading, we want to showContext but not too agressively
+        {
+            setTimeout(bindFixed( function delayShowContext()
+            {
+                this.watchContext(win, context);  // calls showContext
+            }, this), 200);
+        }
+        else                                                                                                                  
+            this.watchContext(win, context);  // calls showContext
     },
 
     /**

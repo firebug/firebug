@@ -33,7 +33,7 @@ this.reCSS = /\.css$/;
 const reSplitLines = /\r\n|\r|\n/;
 const reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
 const reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
-const reWord = /([A-Za-z_][A-Za-z_0-9]*)(\.([A-Za-z_][A-Za-z_0-9]*))*/;
+const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 
 const restoreRetryTimeout = 500;
 
@@ -2679,7 +2679,7 @@ this.getSourceLineRange = function(lines, min, max, maxLineNoChars)
 
 this.persistObjects = function(panel, panelState)
 {
-    if (FBTrace.DBG_PANELS)
+    if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+"\n");
     // Persist the location and selection so we can restore them in case of a reload
     if (panel.location)

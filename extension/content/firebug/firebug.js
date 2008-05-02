@@ -1831,7 +1831,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
              this.context.clearTimeout(this.context.markExecutableLinesTimeout);
              delete this.context.markExecutableLinesTimeout;
          }
-
+            if (FBTrace.DBG_LINETABLE) FBTrace.dumpStack("debugger.markVisible min:"+min+" max:"+max+"\n");
          this.context.markExecutableLinesTimeout = this.context.setTimeout(bindFixed(function delayMarkExecutableLines()
          {
              if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delayMarkExecutableLines min:"+min+" max:"+max+"\n");

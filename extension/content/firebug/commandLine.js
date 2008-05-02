@@ -75,7 +75,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         element.dispatchEvent(event);
     },
 
-    evaluate: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
+    evaluate: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
     {
         if (!context)
             return;
@@ -95,13 +95,17 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             try
             {
+            FBTrace.sysout("commandLine.evaluate expr: "+expr+"\n");
                 result = Firebug.Debugger.evaluate(expr, context, scope);
+                FBTrace.dumpProperties("commandLine.evaluate result: ", result);
+                successConsoleFunction(result, context);  // result will be pass thru this function
             }
             catch (e)
             {
-                var msg = "commandLine.evaluate FAILED: " + e;
-                var url = this.getDataURLForContent(expr, "FirebugDebuggerEvaluate");
-                result = new FBL.ErrorMessage(msg, url, e.lineNumber, 0, "js", context, null);
+                exceptionFunction(e, context);
+               // var msg = "commandLine.evaluate FAILED: " + e;
+               // var url = this.getDataURLForContent(expr, "FirebugDebuggerEvaluate");
+               // result = new FBL.ErrorMessage(msg, url, e.lineNumber, 0, "js", context, null);
             }
         }
         else
