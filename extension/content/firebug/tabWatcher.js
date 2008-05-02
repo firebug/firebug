@@ -29,6 +29,8 @@ const STOP_ALL = nsIWebNavigation.STOP_ALL;
 const dummyURI = "about:layout-dummy-request";
 const aboutBlank = "about:blank";
 
+const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const tabBrowser = $("content");
@@ -45,6 +47,9 @@ top.TabWatcher =
 {
     initialize: function(owner)
     {
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher initialize\n");
+    
         // Store contexts where they can be accessed externally
         this.contexts = contexts;
 
@@ -53,10 +58,17 @@ top.TabWatcher =
 
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
+            
+        observerService.addObserver(HttpObserver, "http-on-modify-request", false);            
     },
 
     destroy: function()
     {
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher destroy\n");
+    
+        observerService.removeObserver(HttpObserver, "http-on-modify-request");
+
         if (tabBrowser)
         {
             tabBrowser.removeProgressListener(TabProgressListener);
@@ -74,6 +86,8 @@ top.TabWatcher =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    // xxxHonza activate and deactivate are not used since only usage is in Firebug.enableAlways
+    // and Firebug.disableAways, which are never called.
     activate: function()
     {
         if (tabBrowser)
@@ -159,7 +173,17 @@ top.TabWatcher =
             if (FBTrace.DBG_INITIALIZE)                                                                                /*@explore*/
                 FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pagehide, pageshow, DomContentLoaded \n");   /*@explore*/
         }
+
+        // xxxHonza is this still valid comment? How this could happen?
         // XXXjjb at this point we either have context or we just pushed null into contexts and sent it to init...
+        if (FBTrace.DBG_WINDOWS && !context) {
+            FBTrace.sysout("-> tabWatcher.watchTopWindow *** NULL CONTEXT *** for uri: "+ 
+                (uri instanceof nsIURI ? uri.spec : uri) + "\n");
+        }
+
+        // Make sure every top window is automatially watched.
+        if (context)
+            this.watchWindow(win, context);
 
         // This is one of two places that loaded is set. The other is in watchLoadedTopWindow
         if (context && !context.loaded)
@@ -197,7 +221,7 @@ top.TabWatcher =
         if ((context && !context.window) || (isSystem && !Firebug.allowSystemPages))
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing, context.window: "+                          /*@explore*/
+                FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing !!!, context.window: "+                          /*@explore*/
                     context.window+", isSystem: "+isSystem+"\n");                                                      /*@explore*/
                                                                                                                        /*@explore*/
             this.unwatchTopWindow(win);
@@ -206,8 +230,9 @@ top.TabWatcher =
         }
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-            FBTrace.sysout("-> watchLoadedTopWindow context: "+(context?(context.uid+                                   /*@explore*/
-                ", loaded="+context.loaded):'undefined')+"\n");                                                         /*@explore*/
+            FBTrace.sysout("-> watchLoadedTopWindow context: "+                                                         /*@explore*/
+                (context?(context.uid+", loaded="+context.loaded):'undefined')+                                         /*@explore*/
+                ", "+win.location.href+"\n");                                                                            /*@explore*/
                                                                                                                        /*@explore*/
         if (context && !context.loaded)
         {
@@ -238,20 +263,21 @@ top.TabWatcher =
             context.windows.push(win);
 
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
-                FBTrace.sysout("-> watchWindow sets context for: "+href+"\n");                                        /*@explore*/
+                FBTrace.sysout("-> watchWindow register *** FRAME *** to context: "+href+"\n");                                        /*@explore*/
                                                                                                                        /*@explore*/
             var eventType = (win.parent == win) ? "pagehide" : "unload";
             win.addEventListener(eventType, onUnloadWindow, false);
             if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
-            dispatch(listeners, "watchWindow", [context, win]);
-        }
 
-        if (FBTrace.DBG_WINDOWS) {                                                                                     /*@explore*/
-            FBTrace.sysout("-> watchWindow for: "+href+", context: "+context+"\n");                                    /*@explore*/
-            if (context)                                                                                               /*@explore*/
-                for (var i = 0; i < context.windows.length; i++)                                                       /*@explore*/
-                    FBTrace.sysout("   context: "+context.uid+", window in context: "+context.windows[i].location.href+"\n");                /*@explore*/
-        }                                                                                                              /*@explore*/
+            dispatch(listeners, "watchWindow", [context, win]);
+            
+            if (FBTrace.DBG_WINDOWS) {                                                                                     /*@explore*/
+                FBTrace.sysout("-> watchWindow for: "+href+", context: "+context.uid+"\n");                                    /*@explore*/
+                if (context)                                                                                               /*@explore*/
+                    for (var i = 0; i < context.windows.length; i++)                                                       /*@explore*/
+                        FBTrace.sysout("   context: "+context.uid+", window in context: "+context.windows[i].location.href+"\n");                /*@explore*/
+            }                                                                                                              /*@explore*/
+        }
     },
 
     /**
@@ -307,8 +333,8 @@ top.TabWatcher =
             browser.isSystemPage = isSystem;
 
         if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
-            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: "+context?context.uid:"null"+", uri: "+                                   /*@explore*/
-                win.location.href+"\n");                                                         /*@explore*/
+            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: " +        /*@explore*/
+                (context?context.uid:"null")+", uri: "+win.location.href+"\n");                                                         /*@explore*/
 
         dispatch(listeners, "showContext", [browser, context]); // context is null for unwatchContext
     },
@@ -402,15 +428,8 @@ top.TabWatcher =
             if (browser.contentWindow == win)
             {
                 if (!browser.chrome)
-                {
-                    browser.chrome = FirebugChrome;
-                    browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
-
-                    if (FBTrace.DBG_WINDOWS)                                                                                    /*@explore*/
-                        FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+                                     /*@explore*/
-                            (win.location.href)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");                                                                           /*@explore*/
-
-                }
+                    registerFrameListener(browser);
+                    
                 return browser;
             }
         }
@@ -483,8 +502,8 @@ var TabProgressListener = extend(BaseProgressListener,
     {
         if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
             FBTrace.sysout("-> TabProgressListener.onStateChange to: "                                        /*@explore*/
-                +(request.name)+"\n");                                                                          /*@explore*/
-
+                +safeGetName(request)+"\n"+getStateDescription(flag)+"\n");                                      /*@explore*/
+        
         /*if (flag & STATE_STOP)
         {
             var win = progress.DOMWindow;
@@ -503,7 +522,7 @@ var FrameProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)                                                                                        /*@explore*/
         {                                                                                                               /*@explore*/
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+                        /*@explore*/
-                "\n"+getStateDescription(flag)+"\n");                                                                        /*@explore*/
+                ", win: "+progress.DOMWindow.location.href+ "\n"+getStateDescription(flag)+"\n");                                                                        /*@explore*/
         }                                                                                                               /*@explore*/
                                                                                                                         /*@explore*/
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
@@ -522,7 +541,7 @@ var FrameProgressListener = extend(BaseProgressListener,
                 //if (win.parent == win && win.location.href == "about:blank")
                 //    TabWatcher.watchTopWindow(win, win.location);
                 // XXXms check this
-                if (win.parent == win && (win.location.href == "about:blank" ))//  || safeName == "about:document-onload-blocker"))
+                if (win.parent == win && (win.location.href == "about:blank" || safeName == "about:document-onload-blocker"))
                 {
                     TabWatcher.watchTopWindow(win, win.location.href);
                     return;  // new one under our thumb
@@ -543,9 +562,118 @@ var FrameProgressListener = extend(BaseProgressListener,
     }
 });
 
+// Registers frame listener for specified tab browser.
+function registerFrameListener(browser)
+{
+    if (browser.chrome)
+        return;
+        
+    browser.chrome = FirebugChrome;
+    browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
+
+    if (FBTrace.DBG_WINDOWS)                                                                /*@explore*/
+    {                                                                                       /*@explore*/
+        var win = browser.contentWindow;                                                    /*@explore*/
+        FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+                /*@explore*/
+            (win.location.href)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");             /*@explore*/
+    }                                                                                       /*@explore*/
+}
+
+var HttpObserver = extend(Object,
+{
+    // nsIObserver
+    observe: function(aSubject, aTopic, aData) 
+    {
+        try  {
+            aSubject = aSubject.QueryInterface(Ci.nsIHttpChannel);
+            if (aTopic == "http-on-modify-request")
+                this.onModifyRequest(aSubject);
+        }
+        catch (err) {
+            ERROR(err);
+        }
+    },
+  
+    onModifyRequest: function(request) 
+    {
+        var win = getWindowForRequest(request);
+        var tabId = Firebug.getTabIdForWindow(win);
+        
+        // Tab watcher is only interested in tab related requests.
+        if (!tabId)
+            return;
+
+        // Ignore redirects
+        if (request.URI.spec != request.originalURI.spec)
+            return;
+                    
+        // A document request for the specified tab is here. It can be a top window 
+        // request (win == win.parent) or embedded iframe request.
+        if (request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI)
+        {
+            //#ifdef explore    
+            if (FBTrace.DBG_WINDOWS && win == win.parent)
+            {
+                FBTrace.sysout("-> tabWatcher HttpObserver *** START *** " +
+                    "document request for: " + request.URI.spec + "\n");
+            }
+            //#endif explore    
+        
+            // Make sure the frame listener is registered for top level window so,
+            // we can get all onStateChange events and init context for all opened tabs.
+            if (win == win.parent)
+                TabWatcher.getBrowserByWindow(win);
+        }
+    },
+
+	QueryInterface : function (aIID) 
+	{
+		if (aIID.equals(Ci.nsIObserver) ||
+			aIID.equals(Ci.nsISupportsWeakReference) ||
+			aIID.equals(Ci.nsISupports))
+	    {
+		    return this;
+	    }
+	    
+		throw Components.results.NS_NOINTERFACE;
+	}
+});
+
+function getWindowForRequest(request) 
+{
+    var webProgress = getRequestWebProgress(request);
+    return webProgress ? safeGetWindow(webProgress) : null;
+}
+
+function getRequestWebProgress(request) 
+{
+    try
+    {
+        if (request.notificationCallbacks)
+            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
+    } catch (exc) {}
+
+    try
+    {
+        if (request.loadGroup && request.loadGroup.groupObserver)
+            return QI(request.loadGroup.groupObserver, Ci.nsIWebProgress);
+    } catch (exc) {}
+
+    return null;
+}
+
+function safeGetWindow(webProgress) 
+{
+    try {
+        return webProgress.DOMWindow;
+    }
+    catch (ex) {
+        return null;
+    }
+}
+
 // ************************************************************************************************
 // Local Helpers
-
 
 function onPageHideTopWindow(event)
 {
