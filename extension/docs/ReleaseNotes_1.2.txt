@@ -5,7 +5,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Enablement UI ==
     * Disable always: when the Firebug UI is not active on any page, the debugger is disabled (minimal overhead)
     * Instant on: when the Firebug UI is active, HTML, CSS, DOM views activate (minimal overhead)
-    * Script panel user-activation: initially disabled or enabled always 
+    * Script panel user-activation: initially disabled or enabled always
     * Net panel user-activiation: initially disabled or enabled always
     * Bug Icon gray unless some page has Script or Net panel activation
     * No Allowed-sites/Disable for Site: no longer needed.
@@ -54,4 +54,4 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 43: Edit CSS behaviour - appending styles to the dom is unexpected. Contribution by  tonygentilcore
     * Issue 573: setting css background-color affects layout inspector. Contribution by tonygentilcore
     * Issue 361:  Edit button gets stuck when reloading page whilst editing CSS. Contribution by tonygentilcore
-    
+    * Issue 1: Reload external Firebug window while its tab is hidden closes the window
