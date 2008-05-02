@@ -95,17 +95,12 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             try
             {
-            FBTrace.sysout("commandLine.evaluate expr: "+expr+"\n");
                 result = Firebug.Debugger.evaluate(expr, context, scope);
-                FBTrace.dumpProperties("commandLine.evaluate result: ", result);
                 successConsoleFunction(result, context);  // result will be pass thru this function
             }
             catch (e)
             {
                 exceptionFunction(e, context);
-               // var msg = "commandLine.evaluate FAILED: " + e;
-               // var url = this.getDataURLForContent(expr, "FirebugDebuggerEvaluate");
-               // result = new FBL.ErrorMessage(msg, url, e.lineNumber, 0, "js", context, null);
             }
         }
         else
@@ -156,8 +151,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         try {
             result = Components.utils.evalInSandbox(scriptToEval, sandbox);
         } catch (e) {
-            // XXXdolske if(skipNotDefinedMessages) don't make noise?
-           // dump("\n\n=== evalInSandbox threw evaluating " + scriptToEval + "\n    ..." + e + "\n");
             if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILED:", e);  /*@explore*/
             result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, this.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
         }
