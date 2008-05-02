@@ -505,10 +505,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 var panel = context.getPanel("script", true);
                 if (panel)
-                { 
+                {
                     if (panel.executionLine)
-                        panel.executionLine.removeAttribute("exeLine"); 
-                    panel.select(null);        
+                        panel.executionLine.removeAttribute("exeLine");
+                    panel.select(null);
                 }
             }
         }
@@ -1321,7 +1321,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
         updateScriptFiles(context);
-        
+
     },
 
     destroyContext: function(context)
@@ -1461,7 +1461,7 @@ var DefaultPage = domplate(Firebug.Rep,
     show: function(panel)
     {
         var context = panel.context;
-        var location = context.browser.currentURI;
+        var location = FirebugChrome.getBrowserURI(context);
         var args = {
             enableHostLabel: Firebug.Debugger.getMenuLabel("enable", location)
         };
@@ -1469,7 +1469,7 @@ var DefaultPage = domplate(Firebug.Rep,
         this.box = this.tag.replace(args, panel.panelNode, this);
         panel.panelNode.scrollTop = 0;
     },
-    
+
     hide: function(panel)
     {
         if (this.box)
@@ -1820,6 +1820,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             ? sourceBox.scrollTop
             : this.lastScrollTop;
 
+        delete this.selectedSourceBox;
+
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
@@ -2100,7 +2102,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceRowText = getAncestorByClass(target, "sourceRowText");
         if (!sourceRowText)
             return;
-
+		// http://www.w3.org/TR/CSS21/text.html#white-space-prop ....123456789 
         var text = sourceRowText.firstChild.nodeValue.replace("\t", "        ", "g");
         var offsetX = x-sourceRowText.offsetLeft; // runs from 0 at the left most pixel of the source code line that could have a character
         var charWidth = sourceRowText.offsetWidth/text.length;

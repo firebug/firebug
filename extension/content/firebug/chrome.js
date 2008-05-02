@@ -285,6 +285,21 @@ top.FirebugChrome =
         }
     },
 
+    getBrowserURI: function(context)
+    {
+        try
+        {
+            if (externalBrowser)
+                return externalBrowser.currentURI;
+            if (context && context.browser)
+                return context.browser.currentURI;
+        }
+        catch (exc)
+        {
+            return null;
+        }
+    },
+
     getPanelDocument: function(panelType)
     {
         if (!panelType.prototype.parentPanel)
@@ -353,6 +368,7 @@ top.FirebugChrome =
             : LOAD_FLAGS_NONE;
 
         var browser = this.getCurrentBrowser();
+        browser.firebugReload = true;
         browser.webNavigation.reload(reloadFlags);
     },
 

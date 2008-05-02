@@ -217,12 +217,6 @@ top.Firebug =
         //if (fbs.enabled)
             dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
-        /* if (this.disabledAlways)
-            this.disableAlways();
-        else
-            this.enableAlways();
-        */
-
         dispatch(modules, "initializeUI", [detachArgs]);
     },
 
@@ -1187,7 +1181,12 @@ top.Firebug =
             }
 
             if (context.externalChrome)
-                this.killWindow(context.browser, context.externalChrome);
+            {
+                if (browser.firebugReload)
+                    delete browser.firebugReload; // and don't kiiWindow
+                else
+                    this.killWindow(context.browser, context.externalChrome);
+            }
         }
         else if (browser.detached)
             this.killWindow(browser, browser.chrome);
@@ -2032,7 +2031,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         var persistedPanelState = getPersistedState(context, this.panelName);
 
-        persistedPanelState.enabled = this.isEnabledForHost(context.browser.currentURI);
+        persistedPanelState.enabled = this.isEnabledForHost(FirebugChrome.getBrowserURI(context));
 
         if (persistedPanelState.enabled)
             this.moduleActivate(context, beginOrEnd);
@@ -2148,16 +2147,15 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
                 return true;
             }
-        }
-        if (FBTrace.DBG_PANELS)
+            if (FBTrace.DBG_PANELS)
                 FBTrace.sysout(prefDomain+".isEnabledForHost false uri:"+an_nsIURI.host+"\n");
-
+        }
         return false;
     },
 
     setEnabledForHost: function(context, enable)
     {
-        var location = context.browser.currentURI;
+        var location = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
 
 /*@*/   if (FBTrace.DBG_PANELS)
@@ -2274,7 +2272,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var items = menu.getElementsByTagName("menuitem");
         var value = this.menuButton.value;
 
-        var location = context.browser.currentURI;
+        var location = FirebugChrome.getBrowserURI(context);
         for (var i=0; i<items.length; i++)
         {
             var option = items[i].value;
@@ -2306,7 +2304,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         this.menuButton.value = value;
 
-        var location = context.browser.currentURI;
+        var location = FirebugChrome.getBrowserURI(context);
         this.menuButton.label = this.getMenuLabel(value, location, true);
         this.menuButton.removeAttribute("disabled");
         this.menuButton.setAttribute("value", value);

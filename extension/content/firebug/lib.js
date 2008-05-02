@@ -2344,7 +2344,10 @@ this.getURIHost = function(uri)
 {
     try
     {
-        return uri.host;
+        if (uri)
+            return uri.host;
+        else
+            return "";
     }
     catch (exc)
     {

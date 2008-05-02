@@ -285,7 +285,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
                 panel.show(state);
             }
         }
-         
+
         if (this.activeContexts.length == 0)
              $('fbStatusIcon').removeAttribute("net");
     },
@@ -328,7 +328,7 @@ var DefaultPage = domplate(Firebug.Rep,
     show: function(panel)
     {
         var context = panel.context;
-        var location = context.browser.currentURI;
+        var location = FirebugChrome.getBrowserURI(context);
         var args = {
             enableHostLabel: Firebug.NetMonitor.getMenuLabel("enable", location)
         };
@@ -2569,13 +2569,13 @@ function isURLEncodedFile(file, text)
 {
     if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)
         return true;
-        
+
     // The header value doesn't have to be alway exactly "application/x-www-form-urlencoded",
     // there can be even charset specified. So, use indexOf rather than just "==".
     var headerValue = findHeader(file.requestHeaders, "Content-Type");
     if (headerValue.indexOf("application/x-www-form-urlencoded") == 0)
         return true;
-        
+
     return false;
 }
 
