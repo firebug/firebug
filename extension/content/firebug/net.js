@@ -2573,7 +2573,7 @@ function isURLEncodedFile(file, text)
     // The header value doesn't have to be alway exactly "application/x-www-form-urlencoded",
     // there can be even charset specified. So, use indexOf rather than just "==".
     var headerValue = findHeader(file.requestHeaders, "Content-Type");
-    if (headerValue.indexOf("application/x-www-form-urlencoded") == 0)
+    if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)
         return true;
 
     return false;
