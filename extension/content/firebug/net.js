@@ -1337,7 +1337,8 @@ function NetProgress(context)
         }
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_NET)                                                                                           /*@explore*/
-            FBTrace.dumpProperties( " net.post.args "+(panel?" applied":"queued @"+(queue.length-2)), args);           /*@explore*/
+            FBTrace.dumpProperties( " net.post.args "+(panel?" applied":"queued @"+(queue.length-2))+                  /*@explore*/
+                " "+handler.name, args);                                                                               /*@explore*/
     };
 
     this.flush = function()
@@ -1403,7 +1404,7 @@ NetProgress.prototype =
         return this.respondedFile(request, time);
     },
 
-    requestedFile: function(request, time, win, category) // XXXjjb 3rd arg was webProgress, pulled safeGetWindow up
+    requestedFile: function requestedFile(request, time, win, category) // XXXjjb 3rd arg was webProgress, pulled safeGetWindow up
     {
         // XXXjjb to allow spy to pass win.  var win = webProgress ? safeGetWindow(webProgress) : null;
         var file = this.getRequestFile(request, win);
@@ -1434,7 +1435,7 @@ NetProgress.prototype =
         }                                                                                             /*@explore*/
     },
 
-    respondedFile: function(request, time, info)
+    respondedFile: function respondedFile(request, time, info)
     {
         var file = this.getRequestFile(request);
         if (file)
@@ -1476,7 +1477,7 @@ NetProgress.prototype =
         }
     },
 
-    progressFile: function(request, progress, expectedSize)
+    progressFile: function progressFile(request, progress, expectedSize)
     {
         var file = this.getRequestFile(request);
         if (file)
@@ -1488,7 +1489,7 @@ NetProgress.prototype =
         }
     },
 
-    stopFile: function(request, time, postText, responseText)
+    stopFile: function stopFile(request, time, postText, responseText)
     {
         var file = this.getRequestFile(request);
         if (file)
@@ -1513,7 +1514,7 @@ NetProgress.prototype =
             if (FBTrace.DBG_NET) FBTrace.dumpProperties("stopfile no file for request=", request);                     /*@explore*/
     },
 
-    cacheEntryReady: function(request, file, size)
+    cacheEntryReady: function cacheEntryReady(request, file, size)
     {
         if (size != -1)
             file.size = size;
@@ -1529,7 +1530,7 @@ NetProgress.prototype =
         return null;
     },
 
-    removeFile: function(request, file, size)
+    removeFile: function removeFile(request, file, size)
     {
         if (file.loaded)
           return;
@@ -1546,7 +1547,7 @@ NetProgress.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    getRequestFile: function(request, win)
+    getRequestFile: function getRequestFile(request, win)
     {
         var name = safeGetName(request);
         if (!name || reIgnore.exec(name))
@@ -1824,7 +1825,7 @@ NetPhase.prototype =
         file.phase = this;
     },
 
-    removeFile: function(file)
+    removeFile: function removeFile(file)
     {
         remove(this.files, file);
         file.phase = null;
@@ -2618,8 +2619,8 @@ var HttpObserver =
 
       if (FBTrace.DBG_NET)                                                                                             /*@explore*/
       {                                                                                                                /*@explore*/
-          FBTrace.sysout("net.HttpObserver ON-MODIFY-REQUEST "+(tabId?"":"(No TAB)")+", request: ",                                       /*@explore*/
-             safeGetName(aRequest), aRequest);                                                                             /*@explore*/
+          FBTrace.sysout("net.HttpObserver *** ON-MODIFY-REQUEST *** "+(tabId?"":"(No TAB)")+", request: ",                                       /*@explore*/
+             safeGetName(aRequest));                                                                             /*@explore*/
       }                                                                                                                /*@explore*/
 
       if (!tabId)                                                                                                      /*@explore*/
@@ -2636,7 +2637,7 @@ var HttpObserver =
 
       if (FBTrace.DBG_NET)                                                                                             /*@explore*/
       {                                                                                                                /*@explore*/
-          FBTrace.sysout("net.HttpObserver ON-EXAMINE-RESPONSE "+(tabId?"":"(No TAB)")+", request: ",                                        /*@explore*/
+          FBTrace.sysout("net.HttpObserver *** ON-EXAMINE-RESPONSE *** "+(tabId?"":"(No TAB)")+", request: ",                                        /*@explore*/
             safeGetName(aRequest), aRequest);                                                                             /*@explore*/
       }                                                                                                                /*@explore*/
 
