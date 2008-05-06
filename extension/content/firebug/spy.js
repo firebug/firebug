@@ -421,23 +421,20 @@ function requestStopped(request, xhrRequest, context, method, url)
     var spy = getSpyForXHR(request, xhrRequest, context);
 
     var now = new Date().getTime();
-    var responseTime = now - spy.sendTime;
+    spy.responseTime = now - spy.sendTime;
 
     spy.loaded = true;
 
     if (!spy.responseHeaders)
         spy.responseHeaders = getResponseHeaders(spy);
 
-    if (!spy.responseText)
-        spy.responseText = spy.xhrRequest.responseText;
-
     if (FBTrace.DBG_NET)                                                                                                   /*@explore*/
-        FBTrace.sysout("onHTTPSpyLoad responseTime=" + responseTime                              /*@explore*/
+        FBTrace.sysout("onHTTPSpyLoad responseTime=" + spy.responseTime                              /*@explore*/
             + " spy.responseText " + spy.responseText.length + " bytes\n");                      /*@explore*/
 
     if (spy.logRow)
     {
-        updateLogRow(spy, responseTime);
+        updateLogRow(spy, spy.responseTime);
         updateHttpSpyInfo(spy);
     }
 
@@ -489,6 +486,14 @@ function onHTTPSpyLoad(spy)
 
     // The main XHR object has to be dettached now (i.e. listeners removed).
     spy.detach();
+
+    if (!spy.responseText)
+        spy.responseText = spy.xhrRequest.responseText;
+
+    var netProgress = spy.context.netProgress;
+    if (netProgress)
+        netProgress.post(netProgress.stopFile,
+                [spy.request, spy.responseTime, spy.postText, spy.responseText]);
 
     // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
     // simulate the requestStopped here.
