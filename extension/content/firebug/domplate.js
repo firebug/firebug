@@ -438,7 +438,7 @@ DomplateTag.prototype =
                     parent = parent.childNodes[index];
             }
 
-            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate: "+arguments[2]+"root: "+ root+" parent:"+ parent+"\n");
+            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate: "+arguments[2]+", root: "+ root+", parent: "+ parent+"\n");
             return parent;
         }
 

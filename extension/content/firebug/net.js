@@ -663,7 +663,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         file.request.cancel(NS_BINDING_ABORTED);
     },
-
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
 
@@ -1423,7 +1423,7 @@ NetProgress.prototype =
             this.extendPhase(file);
 
             if (FBTrace.DBG_NET)                                                                      /*@explore*/
-                FBTrace.dumpProperties("net.requestedFile file", file);                               /*@explore*/
+                FBTrace.dumpProperties("net.requestedFile="+file.href, file);                               /*@explore*/
 
             return file;
         }
@@ -1762,7 +1762,7 @@ function NetFile(href, document)
     this.document = document
 
     if (FBTrace.DBG_NET)                                                                                                /*@explore*/
-        FBTrace.dumpProperties("NetFile", this);                                                                        /*@explore*/
+        FBTrace.dumpProperties("net.NetFile: "+href, this);                                                                        /*@explore*/
 
     this.pendingCount = 0;
 }
@@ -2618,23 +2618,12 @@ var HttpObserver =
 
       if (FBTrace.DBG_NET)                                                                                             /*@explore*/
       {                                                                                                                /*@explore*/
-          FBTrace.sysout("=== FB: HttpObserver ON-MODIFY-REQUEST,   request: " +                                       /*@explore*/
-            safeGetName(aRequest) + "\n");                                                                             /*@explore*/
+          FBTrace.sysout("net.HttpObserver ON-MODIFY-REQUEST "+(tabId?"":"(No TAB)")+", request: ",                                       /*@explore*/
+             safeGetName(aRequest), aRequest);                                                                             /*@explore*/
       }                                                                                                                /*@explore*/
 
       if (!tabId)                                                                                                      /*@explore*/
-      {                                                                                                                /*@explore*/
-          if (FBTrace.DBG_NET)                                                                                         /*@explore*/
-          {                                                                                                            /*@explore*/
-              FBTrace.sysout("**************************************\n");                                              /*@explore*/
-              FBTrace.sysout("* FB: onModifyRequest - No tab associated with the request\n");                          /*@explore*/
-              FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");                                                 /*@explore*/
-              FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");                                    /*@explore*/
-              FBTrace.sysout("**************************************\n");                                              /*@explore*/
-          }                                                                                                            /*@explore*/
-
           return;                                                                                                      /*@explore*/
-      }                                                                                                                /*@explore*/
 
       this.onStartRequest(aRequest, now(), win, tabId);
   },
@@ -2647,17 +2636,8 @@ var HttpObserver =
 
       if (FBTrace.DBG_NET)                                                                                             /*@explore*/
       {                                                                                                                /*@explore*/
-          FBTrace.sysout("=== FB: HttpObserver ON-EXAMINE-RESPONSE, request: " +                                       /*@explore*/
-            safeGetName(aRequest) + "\n");                                                                             /*@explore*/
-      }                                                                                                                /*@explore*/
-
-      if (!tabId && FBTrace.DBG_NET)                                                                                   /*@explore*/
-      {                                                                                                                /*@explore*/
-          FBTrace.sysout("**************************************\n");                                                  /*@explore*/
-          FBTrace.sysout("* FB: onExamineResponse - No tab associated with the request\n");                            /*@explore*/
-          FBTrace.sysout("* FB: " + safeGetName(aRequest) + "\n");                                                     /*@explore*/
-          FBTrace.sysout("* FB: " + (win ? win.location.href : "null") + "\n");                                        /*@explore*/
-          FBTrace.sysout("**************************************\n");                                                  /*@explore*/
+          FBTrace.sysout("net.HttpObserver ON-EXAMINE-RESPONSE "+(tabId?"":"(No TAB)")+", request: ",                                        /*@explore*/
+            safeGetName(aRequest), aRequest);                                                                             /*@explore*/
       }                                                                                                                /*@explore*/
 
       this.onEndRequest(aRequest, now(), win, tabId);
@@ -2774,11 +2754,7 @@ function GI(obj, iface)
         if (e.name == "NS_NOINTERFACE")
         {
             if (FBTrace.DBG_NET)                                                         /*@explore*/
-            {                                                                            /*@explore*/
-                FBTrace.sysout("getInterface - obj has no interface: " + iface + "\n");  /*@explore*/
-                FBTrace.dumpProperties(obj);                                             /*@explore*/
-                FBTrace.dumpStack();                                                     /*@explore*/
-            }                                                                            /*@explore*/
+                FBTrace.sysout("net.getInterface - obj has no interface: ", iface, obj);  /*@explore*/
         }
     }
 
