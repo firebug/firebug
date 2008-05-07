@@ -1210,6 +1210,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             lineNo = lineNo - callingFrame.script.baseLineNumber + 1;
             var url  = sourceFile.href;
 
+            if (FBTrace.DBG_EVAL && !context.sourceCache)
+                FBTrace.dumpStack("debugger.getEvalExpressionFromEval context.sourceCache null??\n");
+
             // Walk backwards from the first line in the function until we find the line which
             // matches the pattern above, which is the eval call
             var line = "";
@@ -1754,6 +1757,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var scrollTop = scrollingElement.scrollTop;
         var aLineNode = this.getLineNode(1);
+        if (!aLineNode)
+        {
+            if (FBTrace.DBG_LINETABLE) FBTrace.dumpStack("debugger.markRevealedLines: no line node\n");
+            return;
+        }
         var scrollStep = aLineNode.offsetHeight;
         var delta = this.lastScrollTop - scrollTop;
         var deltaStep =  delta/scrollStep;
@@ -2102,7 +2110,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceRowText = getAncestorByClass(target, "sourceRowText");
         if (!sourceRowText)
             return;
-		// http://www.w3.org/TR/CSS21/text.html#white-space-prop ....123456789 
+        // http://www.w3.org/TR/CSS21/text.html#white-space-prop ....123456789
         var text = sourceRowText.firstChild.nodeValue.replace("\t", "        ", "g");
         var offsetX = x-sourceRowText.offsetLeft; // runs from 0 at the left most pixel of the source code line that could have a character
         var charWidth = sourceRowText.offsetWidth/text.length;

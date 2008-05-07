@@ -411,8 +411,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (context)  // null for eg about:crashes
         {
             var chrome = context ? context.chrome : FirebugChrome;
-            var command = chrome.$("cmd_focusCommandLine");
-            command.setAttribute("disabled", !context);
+            if (chrome)
+            {
+                var command = chrome.$("cmd_focusCommandLine");
+                command.setAttribute("disabled", !context);
+            }
         }
     },
 
