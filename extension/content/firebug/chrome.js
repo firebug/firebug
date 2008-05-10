@@ -481,7 +481,7 @@ top.FirebugChrome =
         {
             FirebugContext = context;
 
-            if (externalBrowser || context.browser.showFirebug)
+            if (externalBrowser || (context.browser && context.browser.showFirebug) )
                 this.syncPanel();
         }
     },
