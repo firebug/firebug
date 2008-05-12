@@ -116,7 +116,8 @@ Firebug.Console = extend(Firebug.Module,
 
     showContext: function(browser, context)
     {
-        browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
+        if (browser)
+            browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
     },
 
     watchWindow: function(context, win)
@@ -143,7 +144,7 @@ Firebug.Console = extend(Firebug.Module,
 
         var subWindowHandler = function(event) // XXXjjb seems tto complicated. Better to just leave the listeners
         {
-            if (!context.attachConsoleInjectorHandler) 
+            if (!context.attachConsoleInjectorHandler)
             {
                 FBTrace.dumpStack("console.attachConsoleInjector has no handler array?"); /*@explore*/
                 return;
@@ -158,7 +159,7 @@ Firebug.Console = extend(Firebug.Module,
 
             if (FBTrace.DBG_CONSOLE)                                                                                   /*@explore*/
                 FBTrace.sysout("Handle loadFirebugConsole event for " + win.location + "\n");                          /*@explore*/
-            
+
             Firebug.Console.injector.attachConsole(context, win);
             win.removeEventListener('loadFirebugConsole', matching_handler, true);
             context.attachConsoleInjectorHandler.splice(i, 1);
