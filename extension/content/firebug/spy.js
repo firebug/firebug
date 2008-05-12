@@ -29,11 +29,11 @@ const httpObserver =
 
     observe: function(request, topic, data)
     {
-        request = QI(request, nsIHttpChannel);
-        if (((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
-            && (request.loadFlags & LOAD_BACKGROUND))
+        try
         {
-            try
+            request = QI(request, nsIHttpChannel);
+            if (((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
+                && (request.loadFlags & LOAD_BACKGROUND))
             {
                 if (request.notificationCallbacks)
                 {
@@ -56,9 +56,11 @@ const httpObserver =
                     }
                 }
             }
-            catch(exc)
-            {
-            }
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("spy.httpObserver FAILS", exc);
         }
     }
 };
