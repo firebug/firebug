@@ -422,8 +422,8 @@ function requestStopped(request, xhrRequest, context, method, url)
 {
     var spy = getSpyForXHR(request, xhrRequest, context);
 
-    var now = new Date().getTime();
-    spy.responseTime = now - spy.sendTime;
+    spy.endTime = new Date().getTime();
+    spy.responseTime = spy.endTime - spy.sendTime;
 
     spy.loaded = true;
 
@@ -495,7 +495,7 @@ function onHTTPSpyLoad(spy)
     var netProgress = spy.context.netProgress;
     if (netProgress)
         netProgress.post(netProgress.stopFile,
-                [spy.request, spy.responseTime, spy.postText, spy.responseText]);
+                [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
     // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
     // simulate the requestStopped here.
