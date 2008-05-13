@@ -1,0 +1,18 @@
+/* See license.txt for terms of usage */
+
+#include "nsISupports.idl"
+
+[scriptable, uuid(476F0A43-3F5E-46c7-95D6-1A7091FF7C6A)]
+interface nsIFireBugCache : nsISupports
+{
+    /**
+     * Called to initialize the cache.
+     */ 
+    void init();
+
+    /*
+     * Returns cached response for specified URL or null
+     * if the URL isn't in the cache.
+     */
+    string getSource(in string url);
+};  
