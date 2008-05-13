@@ -26,7 +26,8 @@ const StorageStream = Cc["@mozilla.org/storagestream;1"];
 const MemoryService = Cc["@mozilla.org/xpcom/memory-service;1"];
 const BinaryOutputStream = Cc["@mozilla.org/binaryoutputstream;1"];
 
-const compReg = Components.manager.QueryInterface(Ci.nsIComponentRegistrar);
+const compRegistrar = Components.manager.QueryInterface(Ci.nsIComponentRegistrar);
+const compManager = Components.manager.QueryInterface(Ci.nsIComponentManager);
 
 const reSplitLines = /\r\n|\r|\n/;
 
@@ -123,14 +124,12 @@ FirebugCache.prototype =
 	/* nsIFireBugCache */
     init: function()
     {
-        // Save original tee listener for use in the future
-        var savedTee = CCSV(TEE_CONTRACT_ID, "nsIStreamListenerTee");
+        // Save original tee listener factory for use in the future
+        var originalTeeFactory = compManager.getClassObjectByContractID(TEE_CONTRACT_ID, Ci.nsIFactory);
 
-        var teeListener = new TeeListener(savedTee);
-        this.teeFactory = new TeeListenerFactory(teeListener);
-
-        // Register new tee stream listener.
-        compReg.registerFactory(TEE_CLASS_ID, TEE_CLASS_NAME, TEE_CONTRACT_ID, this.teeFactory);
+        // Register new tee stream listener factory.
+        this.teeFactory = new TeeListenerFactory(originalTeeFactory);
+        compRegistrar.registerFactory(TEE_CLASS_ID, TEE_CLASS_NAME, TEE_CONTRACT_ID, this.teeFactory);
 
         Trace.sysout("FirebugCache initialized (TeeListener replaced).\n");
     },
@@ -318,9 +317,9 @@ function TeeListener(listener)
 // ************************************************************************************************
 // TeeListener factory
 
-function TeeListenerFactory(tee)
+function TeeListenerFactory(originalTeeFactory)
 {
-    this.tee = tee;
+    this.originalTeeFactory = originalTeeFactory;
 }
 
 TeeListenerFactory.prototype = extend(BaseFactory,
@@ -337,7 +336,11 @@ TeeListenerFactory.prototype = extend(BaseFactory,
             iid.equals(Ci.nsIStreamListenerTee) ||
 		    iid.equals(Ci.nsISupports))
 		{
-            return this.tee.QueryInterface(iid);
+            var teeListener = new TeeListener(
+                this.originalTeeFactory.createInstance(
+                    null, Ci.nsIStreamListenerTee));
+
+            return teeListener.QueryInterface(iid);
         }
         
         throw NS_ERROR_NO_INTERFACE;
