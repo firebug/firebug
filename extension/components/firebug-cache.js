@@ -34,6 +34,9 @@ const reSplitLines = /\r\n|\r|\n/;
 // object for more details
 var gCache = [];
 
+// Registered listeners.
+var listeners = [];
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 /**
@@ -134,11 +137,38 @@ FirebugCache.prototype =
         
     getSource: function(url)
     {
-        var cacheEntry = gCache[url];
+        var cacheEntry = this.getEntry(url);
         if (!cacheEntry)
             return null;
 
         return cacheEntry.source;
+    },
+
+    getEntry: function(url)
+    {
+        return gCache[url];
+    },
+
+    iterateEntries: function(handler)
+    {
+        handler = handler.QueryInterface(Ci.nsIFirebugCacheIteratorHandler);
+        for(var entry in gCache)
+            iteratorObserver.onEntry(gCache[entry]);
+    },
+
+    addListener: function(listener)
+    {
+        listeners.push(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        for (var i=0; i<listeners.length; i++) {
+            if (listeners[i] == listener) {
+                listeners.splice(i, 1);
+                break;
+            }
+        }
     },
 
     /* nsISupports */
@@ -197,8 +227,10 @@ function TeeListener(listener)
 
     this.onStartRequest = function(request, context)
     {
+        // Firefox never calls this method as the tee listener 
+        // is registered after the event is fired (FF3pre)
         Trace.dumpProperties("TeeListener: Request started " + 
-            request.name + "\n", request);
+            safeGetName(request) + "\n", request);
 
         listener.onStartRequest(request, context);
     }
@@ -209,7 +241,7 @@ function TeeListener(listener)
         {
             request = request.QueryInterface(Ci.nsIHttpChannel);
 	        Trace.dumpProperties("TeeListener: onDataAvailable intercepted: count=" + 
-	            count + " offset=" + offset + ", " + request.name + ", " + 
+	            count + " offset=" + offset + ", " + safeGetName(request) + ", " + 
                 request.contentType + "\n", request);
 
             // Cache only specified text based content-types.
@@ -219,6 +251,8 @@ function TeeListener(listener)
                 var newStream = cacheEntry.onDataAvailable(request, context, inputStream, offset, count);
                 if (newStream)
                     inputStream = newStream;
+
+                this.dispatch(listeners, "onDataAvailable", [request, cacheEntry]);
             }
         }
         catch (err)
@@ -238,6 +272,10 @@ function TeeListener(listener)
         else
             removeCacheEntry(request);
 
+        // Dispatch to all registered listeners.
+        this.dispatch(listeners, "onStopRequest", [request, cacheEntry, statusCode]);
+
+        // Call original Tee listener
         listener.onStopRequest(request, context, statusCode);
     }
 
@@ -257,7 +295,24 @@ function TeeListener(listener)
         //    Components.interfacesByID[iid].name + "\n", iid);
 
         throw Components.results.NS_NOINTERFACE;
-    }	
+    },
+
+    this.dispatch = function(listeners, name, args)
+    {
+        try 
+        {
+            for (var i=0; i<listeners.length; i++)
+            {
+                var listener = listeners[i];
+                if (listener.hasOwnProperty(name))
+                    listener[name].apply(listener, args);
+            }
+        }
+        catch (exc)
+        {
+            Trace.dumpProperties("Exception in dispatch", err);
+        }
+    }
 }
 
 // ************************************************************************************************
@@ -297,16 +352,14 @@ TeeListenerFactory.prototype = extend(BaseFactory,
  */
 function CacheEntry(request)
 {
-    // xxxHonza nsIFireBugCacheEntry
-    //this.id = safeGetName(request);
-    //this.contentType = request.contentType;
-    //this.contentLength = request.contentLength;
-    //this.method = request.method;
-    //this.time = (new Date()).getTime();
-    this.source = "";
-    this.done = false;
-
+    this.key = safeGetName(request);
+    this.contentType = request.contentType;
+    this.contentLength = request.contentLength;
+    this.method = request.method;
+    this.time = (new Date()).getTime();
     this.data = [];
+    this.done = false;
+    this.source = "";
 }
 
 CacheEntry.prototype =
@@ -337,6 +390,16 @@ CacheEntry.prototype =
         this.done = true;
         this.source = this.data.join("");
         this.data = [];
+    },
+
+    /*nsISupports*/
+    QueryInterface: function(iid) 
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsIFirebugCacheEntry))
+            return this;
+
+        throw NS_ERROR_NO_INTERFACE;
     }
 };
 
