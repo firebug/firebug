@@ -106,6 +106,9 @@
                <filterchain>
                        <replacetokens>
                             <token key="FULLVERSION" value="${FULLVERSION}"/>
+                            <token key="VERSION" value="${VERSION}"/>
+                            <token key="RELEASE" value="${RELEASE}"/>
+                            <token key="LEAF" value="firebug-${VERSION}${RELEASE}.xpi"/>
                             <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
