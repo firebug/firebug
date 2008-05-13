@@ -192,13 +192,13 @@ top.Firebug =
         {
             var release = m[1];
         }
-        m = /BRANCH=(.*)/.exec(content);
+        m = /VERSION=(.*)/.exec(content);
         if (m)
         {
-            var branch = m[1];
+            var version = m[1];
         }
-        if (release && branch)
-            return branch+""+release;
+        if (release && version)
+            return version+""+release;
         else
             FBTrace.sysout("firebug.getVersion fails with release="+release+" branch="+branch+" from content="+content+"\n");
     },
