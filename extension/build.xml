@@ -33,15 +33,15 @@
     <target name="version" depends="properties-local, no-properties-local" description="Compute version number">
         <tstamp/>
         <property name="build_dir" location="./build" />
-        <property name="VERSION"  value="${BRANCH}${RELEASE}${TRUNK}"/>
+        <property name="FULLVERSION"  value="${VERSION}${RELEASE}${TRUNK}"/>
         <mkdir dir="${build_dir}/dist" />
         <property name="dist_dir" location="${build_dir}/dist" />
-        <property name="FIREBUG-XPI" value="firebug-${VERSION}.xpi"/>
+        <property name="FIREBUG-XPI" value="firebug-${FULLVERSION}.xpi"/>
     </target>
 
     <!-- eg
         RELEASE=.88
-        BRANCH=eval
+        VERSION=eval
         TRUNK=.1.05
         -->
     <property file="content/firebug/branch.properties" />
@@ -91,8 +91,8 @@
                overwrite="true">
                <filterchain>
                        <replacetokens>
-                            <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.path}/firebug/${BRANCH}"/>
+                            <token key="FULLVERSION" value="${FULLVERSION}"/>
+                            <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -105,8 +105,8 @@
                overwrite="true">
                <filterchain>
                        <replacetokens>
-                            <token key="VERSION" value="${VERSION}"/>
-                            <token key="UPDATEPATH" value="${update.path}/firebug/${BRANCH}"/>
+                            <token key="FULLVERSION" value="${FULLVERSION}"/>
+                            <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
                               <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
@@ -123,8 +123,8 @@
                overwrite="true">
                <filterchain>
                        <replacetokens>
-                            <token key="FIREBUG-VERSION" value="${VERSION}"/>
-                            <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.VERSION}"/>
+                            <token key="FIREBUG-VERSION" value="${FULLVERSION}"/>
+                            <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.FULLVERSION}"/>
                             <token key="UPDATEPATH" value="${update.path}"/>
                        </replacetokens>
                </filterchain>
