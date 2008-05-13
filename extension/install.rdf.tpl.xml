@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>@VERSION@</em:version>
+    <em:version>@FULLVERSION@</em:version>
     <em:type>2</em:type>
 
     <!-- Firefox -->
