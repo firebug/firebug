@@ -1299,10 +1299,17 @@ FirebugService.prototype =
 
             if (global.location)  // then we have a window, it will be an nsIDOMWindow, right?
             {
-                var location = global.location.toString();
-                // TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
-                if (location.indexOf("chrome://chromebug/") != -1)
-                        return false;
+            	try 
+            	{
+            		var location = global.location.toString();
+                    // TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
+                    if (location.indexOf("chrome://chromebug/") != -1)
+                            return false;
+            	} 
+            	catch (exc)
+            	{
+            		// FF3 gives (NS_ERROR_INVALID_POINTER) [nsIDOMLocation.toString]
+            	}
             }
 
             for ( var i = debuggers.length - 1; i >= 0; i--)
