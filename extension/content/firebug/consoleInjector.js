@@ -35,7 +35,7 @@ top.Firebug.Console.injector = {
                 FBTrace.sysout("consoleInjector.injectConsoleScriptTag: _firebugConsoleInjector already present\n");    /*@explore*/
             return;
         }
-        
+
         // Inject script into the document via SCRIPT tag.
         var scriptSource = getResource("chrome://firebug/content/consoleInjected.js");
         addScript(doc, "_firebugConsoleInjector", scriptSource);
@@ -44,7 +44,7 @@ top.Firebug.Console.injector = {
     addConsoleListener: function(context, win)
     {
         var doc = win.document;
-            
+
         var element = $("_firebugConsole", doc);
         if (!element)
         {
@@ -81,7 +81,8 @@ function FirebugConsoleHandler(context, win)
     {
         if (!Firebug.CommandLine.CommandHandler.handle(event, this, win))
         {
-            FBTrace.dumpProperties("FirebugConsoleHandler", this);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.dumpProperties("FirebugConsoleHandler", this);
             // xxxHonza localization.
             this.log("FirebugConsoleHandler does not support \'"+methodName+"\'");
         }

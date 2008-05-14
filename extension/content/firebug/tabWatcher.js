@@ -49,7 +49,7 @@ top.TabWatcher =
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher initialize\n");
-    
+
         // Store contexts where they can be accessed externally
         this.contexts = contexts;
 
@@ -58,15 +58,15 @@ top.TabWatcher =
 
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
-            
-        observerService.addObserver(HttpObserver, "http-on-modify-request", false);            
+
+        observerService.addObserver(HttpObserver, "http-on-modify-request", false);
     },
 
     destroy: function()
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher destroy\n");
-    
+
         observerService.removeObserver(HttpObserver, "http-on-modify-request");
 
         if (tabBrowser)
@@ -177,7 +177,7 @@ top.TabWatcher =
         // xxxHonza is this still valid comment? How this could happen?
         // XXXjjb at this point we either have context or we just pushed null into contexts and sent it to init...
         if (FBTrace.DBG_WINDOWS && !context) {
-            FBTrace.sysout("-> tabWatcher.watchTopWindow *** NULL CONTEXT *** for uri: "+ 
+            FBTrace.sysout("-> tabWatcher.watchTopWindow *** NULL CONTEXT *** for uri: "+
                 (uri instanceof nsIURI ? uri.spec : uri) + "\n");
         }
 
@@ -198,7 +198,7 @@ top.TabWatcher =
                 FBTrace.sysout("-> tabWatcher context *** LOADED *** in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
         }
-        
+
         if (context && !context.loaded)  // then it really is still loading, we want to showContext but not too agressively
         {
             setTimeout(bindFixed( function delayShowContext()
@@ -206,7 +206,7 @@ top.TabWatcher =
                 this.watchContext(win, context);  // calls showContext
             }, this), 200);
         }
-        else                                                                                                                  
+        else
             this.watchContext(win, context);  // calls showContext
     },
 
@@ -270,7 +270,7 @@ top.TabWatcher =
             if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
 
             dispatch(listeners, "watchWindow", [context, win]);
-            
+
             if (FBTrace.DBG_WINDOWS) {                                                                                     /*@explore*/
                 FBTrace.sysout("-> watchWindow for: "+href+", context: "+context.uid+"\n");                                    /*@explore*/
                 if (context)                                                                                               /*@explore*/
@@ -395,11 +395,6 @@ top.TabWatcher =
                     return context;
             }
         }
-
-        // eg search bar, maybe a global sandbox or other non-window global
-        //if (FBTrace.DBG_WINDOWS) FBTrace.sysout("TabWatcher.getContextByWindow rootWindow:"+rootWindow," trying sandboxes\n"); /*@explore*/
-
-        //return this.getContextBySandbox(winIn);
     },
 
     getContextBySandbox: function(sandbox)
@@ -429,7 +424,7 @@ top.TabWatcher =
             {
                 if (!browser.chrome)
                     registerFrameListener(browser);
-                    
+
                 return browser;
             }
         }
@@ -503,7 +498,7 @@ var TabProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
             FBTrace.sysout("-> TabProgressListener.onStateChange to: "                                        /*@explore*/
                 +safeGetName(request)+"\n"+getStateDescription(flag)+"\n");                                      /*@explore*/
-        
+
         /*if (flag & STATE_STOP)
         {
             var win = progress.DOMWindow;
@@ -567,7 +562,7 @@ function registerFrameListener(browser)
 {
     if (browser.chrome)
         return;
-        
+
     browser.chrome = FirebugChrome;
     browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
 
@@ -582,7 +577,7 @@ function registerFrameListener(browser)
 var HttpObserver = extend(Object,
 {
     // nsIObserver
-    observe: function(aSubject, aTopic, aData) 
+    observe: function(aSubject, aTopic, aData)
     {
         try  {
             aSubject = aSubject.QueryInterface(Ci.nsIHttpChannel);
@@ -593,12 +588,12 @@ var HttpObserver = extend(Object,
             ERROR(err);
         }
     },
-  
-    onModifyRequest: function(request) 
+
+    onModifyRequest: function(request)
     {
         var win = getWindowForRequest(request);
         var tabId = Firebug.getTabIdForWindow(win);
-        
+
         // Tab watcher is only interested in tab related requests.
         if (!tabId)
             return;
@@ -606,19 +601,19 @@ var HttpObserver = extend(Object,
         // Ignore redirects
         if (request.URI.spec != request.originalURI.spec)
             return;
-                    
-        // A document request for the specified tab is here. It can be a top window 
+
+        // A document request for the specified tab is here. It can be a top window
         // request (win == win.parent) or embedded iframe request.
         if (request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI)
         {
-            //#ifdef explore    
+            //#ifdef explore
             if (FBTrace.DBG_WINDOWS && win == win.parent)
             {
                 FBTrace.sysout("-> tabWatcher HttpObserver *** START *** " +
                     "document request for: " + request.URI.spec + "\n");
             }
-            //#endif explore    
-        
+            //#endif explore
+
             // Make sure the frame listener is registered for top level window so,
             // we can get all onStateChange events and init context for all opened tabs.
             if (win == win.parent)
@@ -626,26 +621,26 @@ var HttpObserver = extend(Object,
         }
     },
 
-	QueryInterface : function (aIID) 
-	{
-		if (aIID.equals(Ci.nsIObserver) ||
-			aIID.equals(Ci.nsISupportsWeakReference) ||
-			aIID.equals(Ci.nsISupports))
-	    {
-		    return this;
-	    }
-	    
-		throw Components.results.NS_NOINTERFACE;
-	}
+    QueryInterface : function (aIID)
+    {
+        if (aIID.equals(Ci.nsIObserver) ||
+            aIID.equals(Ci.nsISupportsWeakReference) ||
+            aIID.equals(Ci.nsISupports))
+        {
+            return this;
+        }
+
+        throw Components.results.NS_NOINTERFACE;
+    }
 });
 
-function getWindowForRequest(request) 
+function getWindowForRequest(request)
 {
     var webProgress = getRequestWebProgress(request);
     return webProgress ? safeGetWindow(webProgress) : null;
 }
 
-function getRequestWebProgress(request) 
+function getRequestWebProgress(request)
 {
     try
     {
@@ -662,7 +657,7 @@ function getRequestWebProgress(request)
     return null;
 }
 
-function safeGetWindow(webProgress) 
+function safeGetWindow(webProgress)
 {
     try {
         return webProgress.DOMWindow;

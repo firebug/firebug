@@ -663,7 +663,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         file.request.cancel(NS_BINDING_ABORTED);
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
 
@@ -1510,8 +1510,10 @@ NetProgress.prototype =
 
             return file;
         }
-        else                                                                                                           /*@explore*/
+        else
+        {                                                                                                          /*@explore*/
             if (FBTrace.DBG_NET) FBTrace.dumpProperties("stopfile no file for request=", request);                     /*@explore*/
+        }
     },
 
     cacheEntryReady: function cacheEntryReady(request, file, size)

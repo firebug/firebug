@@ -408,8 +408,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");                  /*@explore*/
                 if (parentNode.defaultView)
                     return parentNode.defaultView.frameElement;
-                else 
-                    FBTrace.dumpProperties("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
+                else
+                {
+                    if (FBTrace.DBG_HTML || FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
+                }
             }
             else
                 return parentNode;
@@ -534,7 +537,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             }
             catch (exc)
             {
-                FBTrace.dumpProperties("html.onMutateNode FAILS:", exc);
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
+                    FBTrace.dumpProperties("html.onMutateNode FAILS:", exc);
             }
         }, this);
     },

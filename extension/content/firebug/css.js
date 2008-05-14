@@ -604,13 +604,14 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 clearNode(this.panelNode);  // replace rendered stylesheets
                 this.showSourceFile(object);
-                
+
                 var lineNo = object.line;
                 if (lineNo)
                     this.scrollToLine(lineNo, true);
             }
             catch(exc) {
-                FBTrace.dumpProperties("css.upDateSelection FAILS", exc);
+                if (FBTrace.DBG_CSS)
+                    FBTrace.dumpProperties("css.upDateSelection FAILS", exc);
             }
         }
     },
@@ -1161,7 +1162,8 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     this.previousPropertyName = previousValue;
                     this.cleanUpStyle = style;
                     this.newPropertyName = value;
-                    FBTrace.sysout("CSSEditor.saveEdit previousProperty: "+this.previousPropertyName+"->"+this.newPropertyName+" = "+this.previousPropertyValue+"\n");
+                    if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("CSSEditor.saveEdit previousProperty: "+this.previousPropertyName+"->"+this.newPropertyName+" = "+this.previousPropertyValue+"\n");
                 }
 
             }
@@ -1328,8 +1330,8 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
                 url.directory);
 
             // Insert the edited stylesheet directly after the old one to ensure the styles
-	    // cascade properly.
-	    ownerNode.parentNode.insertBefore(editStyleSheet, ownerNode.nextSibling);
+        // cascade properly.
+        ownerNode.parentNode.insertBefore(editStyleSheet, ownerNode.nextSibling);
 
             this.styleSheet.editStyleSheet = editStyleSheet;
         }

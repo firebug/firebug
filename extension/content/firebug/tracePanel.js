@@ -104,7 +104,9 @@ Firebug.TraceModule = extend(Firebug.Console,
             this.resetOption(prefDomain, m[2]);
         }
         else
+        {
             if (this.debug) FBTrace.sysout("TraceFirebug.panel observe data: "+data+"\n");
+        }
     },
 
     updateOption: function(name, value)

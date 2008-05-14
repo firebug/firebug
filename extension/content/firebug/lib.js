@@ -1512,9 +1512,11 @@ this.getStackTrace = function(frame, context)
             if (stackFrame)
                 trace.frames.push(stackFrame);
         }
-        else                                                                                                           /*@explore*/
+        else
+        {                                                                                                           /*@explore*/
             if (FBTrace.DBG_STACK)                                                                                     /*@explore*/
                 FBTrace.sysout("lib.getStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");     /*@explore*/
+        }
     }
 
     return trace;
@@ -1677,7 +1679,10 @@ this.findScript = function(context, url, line)
     if (sourceFile)
         var script = sourceFile.scriptIfLineCouldBeExecutable(line);
     else
-        FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
+    {
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
+    }
     return script;
 };
 
@@ -2080,7 +2085,8 @@ this.dispatch = function(listeners, name, args)
     }
     catch (exc)
     {
-            FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc); // XXXjjb
+        if (FBTRace.DBG_ERRORS)
+            FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
     }
 };
 
@@ -3012,7 +3018,7 @@ this.SourceFile.prototype =
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             var script = this.innerScripts[j];
-            if (script instanceof Ci.jsdIScript && !script.tag)
+            if (FBTrace.DBG_LINETABLE && script instanceof Ci.jsdIScript && !script.tag)
             {
                 FBTrace.sysout("getInnermostScriptEnclosingLineNumber bad script for "+j+" vs "+this.toString()+"\n");
                 FBTrace.dumpProperties("getInnermostScriptEnclosingLineNumber script:", script);
@@ -3028,7 +3034,7 @@ this.SourceFile.prototype =
             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" < "+targetLineNo +" < "+ (script.baseLineNumber + script.lineExtent)+"?\n");
         }
 
-        if (!targetScript)
+        if (FBTrace.DBG_LINETABLE && !targetScript)
         {
             FBTrace.dumpProperties("lib.getInnermostScriptEnclosingLineNumber no targetScript for sourceFile:", this);
             return false;
@@ -5481,7 +5487,10 @@ this.formatTime = function(elapsed)
 }).apply(FBL);
 } catch(e) {																			/*@explore*/
     dump("FBL Fails "+e+"\n");																/*@explore*/
-    FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
-    FBTrace.sysout("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
-    FBTrace.sysout("Another cause can be mangled install.rdf.\n");/*@explore*/
+    if (FBTrace.dumpProperties)
+    {
+        FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
+        FBTrace.sysout("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
+        FBTrace.sysout("Another cause can be mangled install.rdf.\n");/*@explore*/
+    }
 }   																		/*@explore*/

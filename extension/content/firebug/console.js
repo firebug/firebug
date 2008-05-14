@@ -146,7 +146,8 @@ Firebug.Console = extend(Firebug.Module,
         {
             if (!context.attachConsoleInjectorHandler)
             {
-                FBTrace.dumpStack("console.attachConsoleInjector has no handler array?"); /*@explore*/
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.dumpStack("console.attachConsoleInjector has no handler array?"); /*@explore*/
                 return;
             }
             var matching_handler;

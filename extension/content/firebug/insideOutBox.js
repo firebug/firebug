@@ -57,7 +57,8 @@ InsideOutBox.prototype =
 
     select: function(object, makeBoxVisible, forceOpen, noScrollIntoView)
     {
-        if (FBTrace.DBG_HTML) FBTrace.dumpProperties("insideOutBox.select object:", object);                     /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.dumpProperties("insideOutBox.select object:", object);                     /*@explore*/
         var objectBox = this.createObjectBox(object);
         this.selectObjectBox(objectBox, forceOpen);
         if (makeBoxVisible)
@@ -187,15 +188,7 @@ InsideOutBox.prototype =
         if (!object)
             return null;
 
-       // var rootObject = this.rootObject;
-       // if (!rootObject)
             this.rootObject = this.getRootNode(object);
-      //  else                                                                                                           /*@explore*/
-      //      if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
-      //      {                                                                                                          /*@explore*/
-      //          FBTrace.sysout("Root already set:");                                                                   /*@explore*/
-      //          this.getRootNode(object);                                                                              /*@explore*/
-      //      }                                                                                                          /*@explore*/
 
         // Get or create all of the boxes for the target and its ancestors
         var objectBox = this.createObjectBoxes(object, this.rootObject);
@@ -230,7 +223,8 @@ InsideOutBox.prototype =
                     try {
                         this.box.removeChild(this.rootObjectBox);
                     } catch (exc) {
-                        if (FBTrace.DBG_HTML || true) FBTrace.sysout(" this.box.removeChild(this.rootObjectBox) FAILS "+this.box+" must not contain "+this.rootObjectBox+"\n");
+                        if (FBTrace.DBG_HTML)
+                            FBTrace.sysout(" this.box.removeChild(this.rootObjectBox) FAILS "+this.box+" must not contain "+this.rootObjectBox+"\n");
                     }
                 }
 
@@ -239,9 +233,11 @@ InsideOutBox.prototype =
                 this.rootObjectBox = this.view.createObjectBox(object, true);
                 this.box.appendChild(this.rootObjectBox);
             }
-            if (FBTrace.DBG_HTML)                                                                                      /*@explore*/
+            if (FBTrace.DBG_HTML)
+            {                                                                                    /*@explore*/
                 FBTrace.sysout("insideOutBox.createObjectBoxes("+formatNode(object)+","+formatNode(rootObject)+") rootObjectBox: "             /*@explore*/
                                             +this.rootObjectBox+"\n\n");                                               /*@explore*/
+            }
             return this.rootObjectBox;
         }
         else

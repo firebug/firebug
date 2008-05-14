@@ -199,8 +199,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         this.evaluateAndShow(expr, context, null, context.window, FBL.bind(Firebug.Console.log, Firebug.Console)); // XXXjjb targetWindow??
-        //var result = this.evaluate(expr, context);
-        //Firebug.Console.log(result, context);
     },
 
     enterMenu: function(context)
@@ -222,16 +220,6 @@ Firebug.CommandLine = extend(Firebug.Module,
                 popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
             }
         });
-        /*
-        var result = this.evaluate(expr, context);
-        if (typeof(result) != "undefined")
-        {
-            context.chrome.contextMenuObject = result;
-
-            var popup = context.chrome.$("fbContextMenu");
-            popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
-        }
-        */
     },
 
     enterInspect: function(context)
@@ -249,9 +237,6 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (typeof(result) != undefined)
                 context.chrome.select(result);
         });
-        //var result = this.evaluate(expr, context);
-        //if (typeof(result) != undefined)
-        //    context.chrome.select(result);
     },
 
     reenter: function(context)
@@ -460,11 +445,6 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         var methodName = element.getAttribute("methodName");
         var hosed_userObjects = win.wrappedJSObject._firebug.userObjects;
 
-        //FBTrace.sysout("typeof(hosed_userObjects) "+ (typeof(hosed_userObjects))+"\n");
-        //FBTrace.sysout("hosed_userObjects instanceof win.Array "+ (hosed_userObjects instanceof win.Array)+"\n");
-        //FBTrace.sysout("hosed_userObjects instanceof win.wrappedJSObject.Array "+(hosed_userObjects instanceof win.wrappedJSObject.Array)+"\n");
-        //FBTrace.dumpProperties("hosed_userObjects", hosed_userObjects);
-
         var userObjects = cloneArray(hosed_userObjects);
         if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
             FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);                                             /*@explore*/
@@ -556,8 +536,6 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 }
             );
             return self.complete;
-            //var object = Firebug.CommandLine.evaluate(preExpr, context, context.thisValue);
-            //return keys(object.wrappedJSObject).sort(); // return is safe
         }
         else
         {
@@ -758,7 +736,6 @@ function CommandLineHandler(context, win)
         var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
         if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
         {
-            FBTrace.dumpProperties("CommandLineHandler", this);
             // xxxHonza localization.
             this.log("Firebug command line does not support \'" + methodName + "\'");
         }

@@ -655,7 +655,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch (exc)
         {
-            FBTrace.dumpProperties("debugger.onBreak FAILS", exc);
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_BP)
+                FBTrace.dumpProperties("debugger.onBreak FAILS", exc);
             throw exc;
         }
     },
@@ -698,7 +699,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (FBTrace.DBG_THROW) FBTrace.dumpProperties("debugger.onThrow reset context.thrownStackTrace", context.thrownStackTrace.frames);
             }
             else
+            {
                 if (FBTrace.DBG_THROW) FBTrace.sysout("debugger.onThrow isCatch\n");
+            }
         }
         catch  (exc)
         {
@@ -792,7 +795,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch (e)
         {
-           FBTrace.dumpProperties("onEvalScriptCreated FaILS ", e);
+            if (FBTrace.DBG_EVAL || FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("onEvalScriptCreated FaILS ", e);
         }
     },
 
@@ -807,7 +811,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try {
             var source = script.functionSource;
-        } catch (exc) { /*Bug 426692 */  var source = creatorURL + "/"+getUniqueId(); }
+        } catch (exc) {
+            /*Bug 426692 */
+            var source = creatorURL + "/"+getUniqueId();
+        }
 
         var url = this.getDynamicURL(frame, source, "event");
 
@@ -939,7 +946,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (!context)
         {
-            FBTrace.dumpStack("debugger.onEventScript context null");
+            if (FBTrace.DBG_EVENTS || FBTrace.DBG_ERRORS)
+                FBTrace.dumpStack("debugger.onEventScript context null");
             return;
         }
 
@@ -1091,7 +1099,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.onReadySpy)  // coool we can get the request URL.
         {
             var url = context.onReadySpy.getURL();
-            FBTrace.sysout("getEvalLevelSourceFile using spy URL:"+url+"\n");
+            if (FBTrace.DBG_EVAL || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("getEvalLevelSourceFile using spy URL:"+url+"\n");
         }
         else
             var url = this.getDynamicURL(frame, source, "eval");
@@ -1196,8 +1205,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     getEvalExpressionFromEval: function(frame, context)
     {
         var callingFrame = frame.callingFrame;
-        if (!FBL.getSourceFileByScript)
-            FBTrace.dumpProperties("getEvalExpressionFromEval: FBL",FBL);
         var sourceFile = FBL.getSourceFileByScript(context, callingFrame.script);
         if (sourceFile)
         {
@@ -1376,7 +1383,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        //FBTrace.sysout("debugger.shutdown for "+window.location+"\n")
         fbs.unregisterDebugger(this);
         fbs.unregisterClient(this);
     },
@@ -2716,7 +2722,7 @@ function setLineBreakpoints(sourceFile, sourceBox)
     }});
 
     if (FBTrace.DBG_LINETABLE)
-        FBTrace.sysout("debugger.setLineBreakpoints for sourceFile.href:"+sourceFile.href+"\n")
+        FBTrace.sysout("debugger.setLineBreakpoints for sourceFile.href:"+sourceFile.href+"\n");
 }
 
 function getCallingFrame(frame)

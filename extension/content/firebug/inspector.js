@@ -453,7 +453,7 @@ FrameHighlighter.prototype =
                 FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
 
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
-        if (wacked && FBTrace.DBG_INSPECT)
+        if (FBTrace.DBG_INSPECT && wacked)
             FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for ", element.tagName);
         if (wacked)
             return;
@@ -547,29 +547,19 @@ PopupHighlighter.prototype =
 {
     highlight: function(context, element)
     {
-        /* var boxObject = element.ownerDocument.getBoxObjectFor(element);
-            var x = boxObject.x;
-            if (x < edgeSize)
-                x = edgeSize;
-            var y = boxObject.y;
-            if (y < edgeSize)
-                y = edgeSize;
-            var w = boxObject.width;
-            var h = boxObject.height;
-            if (element.tagName == "tabbrowser") FBTrace.dumpStack("tabbrowser inspect");
-            if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("FrameHighlighter xul tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
-    */
         var doc = context.window.document;
         var popup = doc.getElementById("inspectorPopup");
         popup.style.width = "200px";
         popup.style.height = "100px";
         popup.showPopup(element, element.boxObject.screenX,
             element.boxObject.screenY, "popup", "none", "none");
-        FBTrace.sysout("PopupHighlighter for "+element.tagName, " at ("+element.boxObject.screenX+","+element.boxObject.screenY+")");
-        FBTrace.dumpProperties("PopupHighlighter popup=", popup);
-
+        if (FBTrace.DBG_INSPECT)
+        {
+            FBTrace.sysout("PopupHighlighter for "+element.tagName, " at ("+element.boxObject.screenX+","+element.boxObject.screenY+")");
+            FBTrace.dumpProperties("PopupHighlighter popup=", popup);
+        }
     },
+
     unhighlight: function(context)
     {
     },
@@ -750,7 +740,7 @@ BoxModelHighlighter.prototype =
         if (!context.boxModelHighlighter)
         {
             var doc = context.window.document;
-            if (!doc) FBTrace.dumpStack("inspector getNodes no document for window:"+window.location);
+            if (FBTrace.DBG_ERRORS && !doc) FBTrace.dumpStack("inspector getNodes no document for window:"+window.location);
 
             function createRuler(name)
             {

@@ -374,8 +374,11 @@ this.Arr = domplate(Firebug.Rep,
             return ((typeof obj == 'object') || (typeof obj == 'function')) && obj.constructor == Array;
         }
     } catch(exc) {
-        FBTrace.dumpProperties("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
-        FBTrace.dumpProperties("isArray Fails on obj", obj);
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.dumpProperties("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
+            FBTrace.dumpProperties("isArray Fails on obj", obj);
+        }
     }
     },
     // END Yahoo BSD SOURCE See license below.
@@ -870,7 +873,8 @@ this.Window = domplate(Firebug.Rep,
         }
         catch (exc)
         {
-            FBTrace.sysout("reps.Window window closed?");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.Window window closed?");
         }
     },
 
@@ -1231,10 +1235,6 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     getLastErrorStackTrace: function(error)
     {
-//        var trace = Firebug.errorStackTrace;
-//        if (FBTrace.DBG_STACK && trace) Firebug.errorStackTrace.destroy();                                             /*@explore*/
-//        Firebug.errorStackTrace = null;
-//        if (FBTrace.DBG_STACK) FBTrace.sysout("reps.getLastErrorStackTrace cleared errorStackTrace\n");                /*@explore*/
         return error.trace;
     },
 

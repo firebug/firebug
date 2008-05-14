@@ -97,14 +97,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     observe: function(object)
     {
-        if(typeof(FBTrace) == "undefined") return;  /*@explore*/
-        var context = FirebugContext;
-
-        if (FBTrace.DBG_ERRORS && !FirebugContext)
-            FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
-
         try
         {
+            var context = FirebugContext;
+
+            if (FBTrace.DBG_ERRORS && !FirebugContext)
+                FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
+
+
             if (object instanceof nsIScriptError)
             {
                 var category = getBaseCategory(object.category);
@@ -182,7 +182,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                 else
                 {
-                    FBTrace.dumpProperties("errors.observe, no context for message, FirebugContext:", FirebugContext);
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("errors.observe, no context for message, FirebugContext:", FirebugContext);
                     return;
                 }
             }
@@ -198,7 +199,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         catch (exc)
         {
             // Errors prior to console init will come out here, eg error message from Firefox startup jjb.
-            // ERROR("Error while reporting error: " + exc);
             if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
                 FBTrace.dumpProperties("errors.observe FAILS", exc);                                                   /*@explore*/
         }
@@ -377,7 +377,9 @@ function checkForUncaughtException(context, object)
             }
         }
         else
+        {
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
+        }
     }
     return false;
 }
@@ -395,7 +397,7 @@ function getErrorContext(object)
                 FBTrace.sysout("errors.observe isJSError !syntax context:"+context+" errorWin"+errorWin+"\n");           /*@explore*/
             return context;
         }
-        if (object.errorMessage)
+        if (FBTrace.DBG_ERRORS && object.errorMessage)
             FBTrace.sysout("errors.observe isJSError !syntax no ErrorWindow object.errorMessage: "+object.errorMessage+"\n");
     }
     return FirebugContext;

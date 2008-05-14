@@ -65,7 +65,8 @@ top.FirebugChrome =
         }
         catch (exc)
         {
-            FBTrace.dumpProperties("chrome.panelBarReady FAILS", exc);
+            if (FBTrace.dumpProperties)
+                FBTrace.dumpProperties("chrome.panelBarReady FAILS", exc);
         }
 
     },
@@ -84,7 +85,7 @@ top.FirebugChrome =
             top.FBL = detachArgs.FBL;
         else
         {
-            if (!FBL || !FBL.initialize)
+            if (FBTrace.dumpProperties && (!FBL || !FBL.initialize) )
                 FBTrace.dumpProperties("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
 
             FBL.initialize();
@@ -175,8 +176,8 @@ top.FirebugChrome =
 
     shutdown: function()
     {
-        //if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");                                       /*@explore*/
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");                                       /*@explore*/
                                                                                                                        /*@explore*/
         var doc1 = panelBar1.browser.contentDocument;
         doc1.removeEventListener("mouseover", onPanelMouseOver, false);

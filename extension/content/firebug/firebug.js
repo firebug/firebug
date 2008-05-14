@@ -200,7 +200,9 @@ top.Firebug =
         if (release && version)
             return version+""+release;
         else
+        {
             FBTrace.sysout("firebug.getVersion fails with release="+release+" branch="+branch+" from content="+content+"\n");
+        }
     },
 
     /**
@@ -969,9 +971,12 @@ top.Firebug =
             }
             catch (exc)
             {
-                FBTrace.dumpProperties("firebug.getRep FAILS at i/reps.length: "+i+"/"+reps.length+" type:"+type+" exc:", exc);
-                FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
-                FBTrace.dumpProperties("firebug.getRep object:", object);
+                if (FBTrace.dumpProperties)
+                {
+                    FBTrace.dumpProperties("firebug.getRep FAILS at i/reps.length: "+i+"/"+reps.length+" type:"+type+" exc:", exc);
+                    FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
+                    FBTrace.dumpProperties("firebug.getRep object:", object);
+                }
             }
         }
 
@@ -2065,10 +2070,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     moduleActivate: function(context, init)
     {
-        // #ifdef explore
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("moduleActivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
-        // #endif explore
         if (this.isEnabled(context))
             return;
 
@@ -2078,10 +2081,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     moduleDeactivate: function(context, destroy)
     {
-        // #ifdef explore
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("moduleDeactivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
-        // #endif explore
+
         if (!this.isEnabled(context))
             return;
 
@@ -2161,13 +2163,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var location = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
 
-/*@*/   if (FBTrace.DBG_PANELS)
-/*@*/       FBTrace.sysout("firebug.setEnabledForHost enable:"+enable+" prefDomain:"+prefDomain+" for "+location.host+"\n");
-/*@*/
-/*@*/   if (this.isEnabledForHost(location) == enable)
-/*@*/   {
-/*@*/        FBTrace.sysout("firebug.setEnabledForHost attempt to change to same state: "+enable+"\n");
-/*@*/   }
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.setEnabledForHost enable:"+enable+" prefDomain:"+prefDomain+" for "+location.host+"\n");
+
+        if (this.isEnabledForHost(location) == enable)
+        {
+             FBTrace.sysout("firebug.setEnabledForHost attempt to change to same state: "+enable+"\n");
+        }
 
         permissionManager.remove(location.host, prefDomain);  // API junk
         if (enable)
@@ -2177,45 +2179,46 @@ Firebug.ActivableModule = extend(Firebug.Module,
     observe: function(subject, topic, data)
     {
         try {
-/*@*/       if (FBTrace.DBG_PANELS)
-/*@*/           FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+((topic == 'perm-changed')?" isPermChanged":" FAIL")+" data: "+data+"\n");
+            if (FBTrace.DBG_PANELS)
+                FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+((topic == 'perm-changed')?" isPermChanged":" FAIL")+" data: "+data+"\n");
 
             if (topic == 'perm-changed')
             {
                 if (subject instanceof Ci.nsIPermission)
                 {
-/*@*/               if (FBTrace.DBG_PANELS)
-/*@*/                   FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
+                    if (FBTrace.DBG_PANELS)
+                        FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
                     var host = subject.host;
                     var prefDomain = subject.type;  // eg extensions.firebug.script
                     dispatch(modules, "activationChange", [host, prefDomain, data]); // data will be 'added' or 'deleted'
                 }
-/*@*/           else
-/*@*/               FBTrace.dumpProperties("!firebug.observe perm-changed subject is not an nsIPermission", subject);
+                else
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("!firebug.observe perm-changed subject is not an nsIPermission", subject);
+                }
             }
          }
          catch (exc)
          {
-            FBTrace.dumpProperties("firebug.observe permisssions FAILS", exc);
+            if (FBTrace.dumpProperties)
+                FBTrace.dumpProperties("firebug.observe permisssions FAILS", exc);
          }
     },
 
     activationChange: function(host, prefDomain, direction)
     {
-        // #ifdef explore
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.activationChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" direction:"+ direction+"\n");
-        // #endif explore
+
         if (prefDomain == this.getPrefDomain())
         {
             var module = this;
             TabWatcher.iterateContexts(
                 function changeActivation(context)
                 {
-                    // #ifdef explore
                     if (FBTrace.DBG_PANELS)
                         FBTrace.sysout("trying "+ context.window.location.hostname +"=="+ host+((context.window.location.host.indexOf(host)!=-1)?"FOUND":"no match")+"\n");
-                    // #endif explore
                     if (context.window.location.host.indexOf(host) != -1)
                         module.syncPersistedPanelState(context, false);
                 }
