@@ -29,8 +29,6 @@ const nsIPermissionManager = Ci.nsIPermissionManager;
 const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 
-const firebugCache = CCSV("@joehewitt.com/firebug-cache;1", "nsIFireBugCache");
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const contentBox = $("fbContentBox");
@@ -173,8 +171,6 @@ top.Firebug =
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
-
-        firebugCache.init();
 
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/

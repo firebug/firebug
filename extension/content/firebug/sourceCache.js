@@ -24,8 +24,6 @@ const LOAD_BYPASS_LOCAL_CACHE_IF_BUSY = nsICachingChannel.LOAD_BYPASS_LOCAL_CACH
 
 const NS_BINDING_ABORTED = 0x804b0002;
 
-const firebugCache = CCSV("@joehewitt.com/firebug-cache;1", "nsIFireBugCache");
-
 // ************************************************************************************************
 
 top.SourceCache = function(context)
@@ -46,15 +44,6 @@ top.SourceCache.prototype =
     {
         if ( this.cache.hasOwnProperty(url) )
             return this.cache[url];
-
-        var source = firebugCache.getSource(url);
-        if (source)
-        {
-            var lines = source.split(/\r\n|\r|\n/);
-            this.cache[url] = lines;
-
-            return lines;
-        }
 
         var d = FBL.reDataURL.exec(url);
         if (d)
