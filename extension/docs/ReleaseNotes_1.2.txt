@@ -38,7 +38,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Misc ==
     Secure updates via signed update.rdf with xpi updateHash values.
-    Avoid duplicate requests to server.
+     
 
 == Bug Fixes ==
     * Issue 2: Can't set breakpoints in code called by unload event
@@ -57,9 +57,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 361:  Edit button gets stuck when reloading page whilst editing CSS. Contribution by tonygentilcore
     * Issue 1: Reload external Firebug window while its tab is hidden closes the window
     * Issue 659: firebug.js:1473 - "this.context.browser is undefined"
-    * Issue 601: XHR in console shows stale/cached output
-    * Issue 550 Net Panel should show the POST response but it shows the GET response
-    * Issue 351 Intermittently, loading page or entering debugger causes page to be rerequested from server
-    * Issue 448 Javascript errors retrigger a request if response stream is still open
-    * Issue 363 Firebug invoke requested URL two times instead to show first time results.
-    * Issue 634 XHR request details not showing up
+    ? Issue 601: XHR in console shows stale/cached output
+    ? Issue 550 Net Panel should show the POST response but it shows the GET response
+    ? Issue 351 Intermittently, loading page or entering debugger causes page to be rerequested from server
+    ? Issue 448 Javascript errors retrigger a request if response stream is still open
+    ? Issue 363 Firebug invoke requested URL two times instead to show first time results.
+    ? Issue 634 XHR request details not showing up
