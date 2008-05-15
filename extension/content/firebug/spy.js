@@ -414,6 +414,9 @@ function requestStarted(request, xhrRequest, context, method, url)
     if (name == origName)
       dispatch(listeners, "onStart", [context, spy]);
 
+    if (FBTrace.DBG_NET)
+    	FBTrace.sysout("spy.requestStarted "+spy.href+"\n");
+    
     // Remember the start time et the end, so it's most accurate.
     spy.sendTime = new Date().getTime();
 }
@@ -432,7 +435,7 @@ function requestStopped(request, xhrRequest, context, method, url)
 
     if (FBTrace.DBG_NET)                                                                                                   /*@explore*/
         FBTrace.sysout("onHTTPSpyLoad responseTime=" + spy.responseTime                              /*@explore*/
-            + " spy.responseText " + spy.responseText.length + " bytes\n");                      /*@explore*/
+            + " spy.responseText " + (spy.reponseText?spy.responseText.length:0) + " bytes\n");                      /*@explore*/
 
     if (spy.logRow)
     {
