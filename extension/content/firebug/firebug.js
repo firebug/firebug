@@ -225,10 +225,7 @@ top.Firebug =
     {
         TabWatcher.destroy();
 
-        // TabWatcher will destroy all contexts, potentially disabling the client - but if
-        // it is still enabled, then we have to disable our modules ourself
-        if (fbs.enabled)
-            dispatch(modules, "disable");
+        dispatch(modules, "disable");
 
         prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);

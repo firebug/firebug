@@ -99,7 +99,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     {
         try
         {
-            var context = FirebugContext;
+        	var context = null;
+        	if (FirebugContext)
+        		context = FirebugContext;
 
             if (FBTrace.DBG_ERRORS && !FirebugContext)
                 FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
@@ -217,6 +219,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     disable: function()
     {
+    	window.dump("errors, disable unregistering observer\n");
         consoleService.unregisterListener(this);
     },
 
