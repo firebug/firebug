@@ -10,9 +10,6 @@ const Ci = Components.interfaces;
 const jsdIScript = Ci.jsdIScript;
 const jsdIStackFrame = Ci.jsdIStackFrame;
 const jsdIExecutionHook = Ci.jsdIExecutionHook;
-const nsIFireBug = Ci.nsIFireBug;
-const nsIFireBugDebugger = Ci.nsIFireBugDebugger;
-const nsIFireBugURLProvider = Ci.nsIFireBugURLProvider;
 const nsISupports = Ci.nsISupports;
 const nsICryptoHash = Ci.nsICryptoHash;
 const nsIURI = Ci.nsIURI;
@@ -27,9 +24,9 @@ const RETURN_ABORT = jsdIExecutionHook.RETURN_ABORT;
 
 const TYPE_THROW = jsdIExecutionHook.TYPE_THROW;
 
-const STEP_OVER = nsIFireBug.STEP_OVER;
-const STEP_INTO = nsIFireBug.STEP_INTO;
-const STEP_OUT = nsIFireBug.STEP_OUT;
+const STEP_OVER = 1;
+const STEP_INTO = 2;
+const STEP_OUT = 3;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -579,23 +576,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         delete this.keyListeners;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsISupports
-
-    QueryInterface : function(iid)
-    {
-        if (iid.equals(nsIFireBugDebugger) ||
-            iid.equals(nsIFireBugURLProvider) ||
-            iid.equals(nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIFireBugDebugger
 
     onJSDActivate: function(jsd)  // just before hooks are set
     {
@@ -936,7 +918,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
      // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIFireBugURLProvider
 
     onEventScript: function(frame)
     {

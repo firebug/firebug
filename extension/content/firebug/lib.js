@@ -9,11 +9,10 @@ try { /*@explore*/
 // ************************************************************************************************
 // Constants
 
-this.fbs = this.CCSV("@joehewitt.com/firebug;1", "nsIFireBug").wrappedJSObject;
-this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
-
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
+this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 
 const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;

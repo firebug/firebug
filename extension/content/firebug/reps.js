@@ -10,7 +10,7 @@ const Ci = Components.interfaces;
 const jsdIStackFrame = Ci.jsdIStackFrame;
 const jsdIScript = Ci.jsdIScript;
 
-const fbs = CCSV("@joehewitt.com/firebug;1", "nsIFireBug");
+const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 
 // ************************************************************************************************
 // Common Tags

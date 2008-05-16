@@ -28,11 +28,7 @@ const jsdIStackFrame = Ci.jsdIStackFrame;
 const jsdICallHook = Ci.jsdICallHook;
 const jsdIExecutionHook = Ci.jsdIExecutionHook;
 const jsdIErrorHook = Ci.jsdIErrorHook;
-const nsIFireBug = Ci.nsIFireBug;
 const nsISupports = Ci.nsISupports;
-const nsIFireBugNetworkDebugger = Ci.nsIFireBugNetworkDebugger;
-const nsIFireBugScriptListener = Ci.nsIFireBugScriptListener;
-const nsIFireBugURLProvider = Ci.nsIFireBugURLProvider;
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
@@ -67,9 +63,9 @@ const RETURN_CONTINUE_THROW = jsdIExecutionHook.RETURN_CONTINUE_THROW;
 
 const NS_OS_TEMP_DIR = "TmpD"
 
-const STEP_OVER = nsIFireBug.STEP_OVER;
-const STEP_INTO = nsIFireBug.STEP_INTO;
-const STEP_OUT = nsIFireBug.STEP_OUT;
+const STEP_OVER = 1;
+const STEP_INTO = 2;
+const STEP_OUT = 3;
 const STEP_SUSPEND = -1; // XXXms: find a better way
 
 const TYPE_ONE_SHOT = nsITimer.TYPE_ONE_SHOT;
@@ -167,8 +163,9 @@ function FirebugService()
 
     var observerService = Cc["@mozilla.org/observer-service;1"]
         .getService(Ci.nsIObserverService);
-    observerService.addObserver(ShutdownObserver, "quit-application", false);
-    observerService.addObserver(ShutdownRequestedObserver, "quit-application-requested", false); 																													/*@explore*/
+    observerService.addObserver(QuitApplicationGrantedObserver, "quit-application-granted", false);
+    observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
+    observerService.addObserver(QuitApplicationObserver, "quit-application", false); 																													/*@explore*/
 
     this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
     this.onEvalScriptCreated.kind = "eval"; /*@explore*/
@@ -186,7 +183,6 @@ FirebugService.prototype =
     {
         prefs.removeObserver("extensions.firebug-service", FirebugPrefsObserver);
         timer = null;
-        fbs = null;
         jsd.off();
         jsd = null;
         ddd("FirebugService.shutdown\n");
@@ -197,14 +193,13 @@ FirebugService.prototype =
 
     QueryInterface: function(iid)
     {
-        if (!iid.equals(nsIFireBug) && !iid.equals(nsISupports))
+        if (!iid.equals(nsISupports))
             throw NS_ERROR_NO_INTERFACE;
 
         return this;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIFireBug
 
     get lastErrorWindow()
     {
@@ -252,7 +247,7 @@ FirebugService.prototype =
     {
         var debuggr = debuggrWrapper.wrappedJSObject;
 
-        if (debuggr)// instanceof nsIFireBugURLProvider)
+        if (debuggr)
         {
             debuggers.push(debuggr);
             if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
@@ -264,11 +259,13 @@ FirebugService.prototype =
             throw "firebug-service debuggers must have wrappedJSObject";
 
         try {
-            netDebuggers.push(debuggr.QueryInterface(nsIFireBugNetworkDebugger));
+            if (debuggr.suspendActivity)
+                netDebuggers.push(debuggr);
         } catch(exc) {
         }
         try {
-            scriptListeners.push(debuggr.QueryInterface(nsIFireBugScriptListener));
+            if (debuggr.onScriptCreated)
+                scriptListeners.push(debuggr);
         } catch(exc) {
         }
         return  enabledDebugger;
@@ -371,7 +368,7 @@ FirebugService.prototype =
         stepFrameCount = countFrames(startFrame);
         stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
                                                                                                                        /*@explore*/
-        if (fbs.DBG_FBS_STEP) ddd("step stepMode = "+getPropertyName(nsIFireBug, stepMode)                                 /*@explore*/
+        if (fbs.DBG_FBS_STEP) ddd("step stepMode = "+getStepName(stepMode)                                 /*@explore*/
                  +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+"\n");                         /*@explore*/
     },
 
@@ -1166,7 +1163,7 @@ FirebugService.prototype =
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
                 if (fbs.DBG_FBS_SRCUNITS) ddd("createdScriptHasCaller "+hasCaller+"\n");
-        
+
                 if (hasCaller)
                     fbs.onXScriptCreatedByTag[script.tag] = this.onEvalScriptCreated;
                 else
@@ -1299,17 +1296,17 @@ FirebugService.prototype =
 
             if (global.location)  // then we have a window, it will be an nsIDOMWindow, right?
             {
-            	try 
-            	{
-            		var location = global.location.toString();
+                try
+                {
+                    var location = global.location.toString();
                     // TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
                     if (location.indexOf("chrome://chromebug/") != -1)
                             return false;
-            	} 
-            	catch (exc)
-            	{
-            		// FF3 gives (NS_ERROR_INVALID_POINTER) [nsIDOMLocation.toString]
-            	}
+                }
+                catch (exc)
+                {
+                    // FF3 gives (NS_ERROR_INVALID_POINTER) [nsIDOMLocation.toString]
+                }
             }
 
             for ( var i = debuggers.length - 1; i >= 0; i--)
@@ -1671,7 +1668,7 @@ FirebugService.prototype =
         if (!stepMode && !runningUntil)
             return;
 
-         if (fbs.DBG_FBS_STEP) ddd("startStepping stepMode = "+getPropertyName(nsIFireBug, stepMode)                        /*@explore*/
+         if (fbs.DBG_FBS_STEP) ddd("startStepping stepMode = "+getStepName(stepMode)                        /*@explore*/
                  +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");                           /*@explore*/
 
         this.hookFunctions();
@@ -1713,14 +1710,14 @@ FirebugService.prototype =
                     if (stepMode == STEP_OVER)
                         jsd.interruptHook = null;
 
-                    if (fbs.DBG_FBS_STEP) ddd("functionHook TYPE_FUNCTION_CALL stepMode = "+getPropertyName(nsIFireBug, stepMode)/*@explore*/
+                    if (fbs.DBG_FBS_STEP) ddd("functionHook TYPE_FUNCTION_CALL stepMode = "+getStepName(stepMode)/*@explore*/
                              +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");               /*@explore*/
                     break;
                 }
                 case TYPE_FUNCTION_RETURN:
                 {
                     --hookFrameCount;
-                    if (fbs.DBG_FBS_STEP) ddd("functionHook TYPE_FUNCTION_RETURN stepMode = "+getPropertyName(nsIFireBug, stepMode)/*@explore*/
+                    if (fbs.DBG_FBS_STEP) ddd("functionHook TYPE_FUNCTION_RETURN stepMode = "+getStepName(stepMode)/*@explore*/
                                         +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");    /*@explore*/
 
                     if (hookFrameCount == 0) {
@@ -1838,6 +1835,13 @@ FirebugService.prototype =
         if (fbs.DBG_FBS_FUNCTION) ddd("clearHookInterruptsToTrapErrors \n");
     }
 };
+
+function getStepName(mode)
+{
+    if (mode==STEP_OVER) return "STEP_OVER";
+    if (mode==STEP_IN) return "STEP_IN";
+    if (mode==STEP_OUT) return "STEP_OUT";
+}
 
 function handleTrackingScriptsInterrupt(frame, type, rv)
 {
@@ -2187,18 +2191,28 @@ var FirebugPrefsObserver =
     },
 };
 
-var ShutdownObserver =
+var QuitApplicationGrantedObserver =
 {
     observe: function(subject, topic, data)
     {
+        ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver start xxxxxxxxxxxxxxx\n");
         fbs.shutdown();
+        ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver end xxxxxxxxxxxxxxxxx\n");
     }
 };
-var ShutdownRequestedObserver =
+var QuitApplicationRequestedObserver =
 {
     observe: function(subject, topic, data)
     {
-        ddd("FirebugService ShutdownRequestedObserver\n");
+        ddd("FirebugService QuitApplicationRequestedObserver\n");
+    }
+};
+var QuitApplicationObserver =
+{
+    observe: function(subject, topic, data)
+    {
+        ddd("FirebugService QuitApplicationObserver\n");
+        fbs = null;
     }
 };
 

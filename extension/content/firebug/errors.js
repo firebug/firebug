@@ -32,7 +32,7 @@ const pointlessErrors =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-const fbs = CCSV("@joehewitt.com/firebug;1", "nsIFireBug");
+const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 // ************************************************************************************************

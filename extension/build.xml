@@ -26,7 +26,6 @@
             depends="local-check">
           <echo message="No local properties file, setting defaults"/>
         <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
-        <property name="xpidl.exe" value="OperatingSystemPathTo:xpidl.exe"/>
         <property name="update.path" value="http://getfirebug.com/releases"/>
     </target>
 
@@ -157,33 +156,6 @@
 
     </target>
 
-    <!-- IDL/XPT Targets -->
-    <target name="idl" description="test idl">
-        <uptodate property="xpidl.notRequired" srcfile="./components/nsIFireBug.idl" targetfile="./components/nsIFireBug.xpt" />
-    </target>
-
-    <target name="xpt" depends="idl" description="compile idl" unless="xpidl.notRequired">
-        <exec dir="./components" executable="${xpidl.exe}"><arg  line="-v -m typelib nsIFireBug.idl"/></exec>
-    </target>
-
-    <target name="xpti" depends="xpt" description="Check xpti.dat to when .xpt changes">
-        <uptodate property="deleteXPTI.notRequired" srcfile="./components/nsIFireBug.xpt" targetfile="${install.dir}/xpti.dat" />
-    </target>
-
-    <target name="clean-xpti" depends="xpti" unless="deleteXPTI.notRequired"
-        description="Delete xpti.dat to reload xpt" >
-            <delete file="${install.dir}/xpti.dat"/>
-    </target>
-
-    <target name="copy-xpt" depends="xpt">
-        <copy todir="./components">
-            <fileset dir="firebug">
-                <include name="*.idl"/>
-                <include name="*.xpt"/>
-            </fileset>
-        </copy>
-    </target>
-
     <target name="firebug-service" depends="version" description="Check compreg.dat when service changes">
         <uptodate property="deleteCompreg.notRequired" srcfile="./components/firebug-service.js" targetfile="${install.dir}/compreg.dat" />
     </target>
@@ -234,7 +206,6 @@
             <zipfileset dir="${src_dir}" includes="icons/**" prefix="chrome" excludes="${excludes}" />
             <zipfileset dir="${src_dir}/platform" includes="**" prefix="platform" excludes="${excludes}, **/skin/**" />
             <zipfileset dir="${src_dir}/components" includes="*.js" prefix="components" />
-            <zipfileset dir="${src_dir}/components" includes="*.xpt" prefix="components" />
             <zipfileset dir="${src_dir}/defaults" includes="**" prefix="defaults" excludes="${excludes}" />
             <zipfileset dir="${build_dir}" includes="install.rdf" />
             <zipfileset dir="${build_dir}" includes="*.manifest" />
@@ -266,7 +237,7 @@
         </delete>
     </target>
 
-    <target name="copy-to-unexplore" depends="xpt"
+    <target name="copy-to-unexplore"
         description="copy to clean out tracing code before xpi">
         <copy todir="${unexplore.dir}" >
             <fileset dir=".">
