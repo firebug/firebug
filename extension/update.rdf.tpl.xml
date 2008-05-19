@@ -13,7 +13,7 @@
               <id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</id>
               <minVersion>1.5</minVersion>
               <maxVersion>3.9</maxVersion>
-              <updateLink>http://getfirebug.com/releases/firebug/1.2/@LEAF@</updateLink>
+              <updateLink>http://getfirebug.com/releases/firebug/@VERSION@/@LEAF@</updateLink>
             </r:Description>
           </targetApplication>
         </r:Description>
