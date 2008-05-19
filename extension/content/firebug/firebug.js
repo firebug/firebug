@@ -2058,6 +2058,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     destroyContext: function(context)
     {
+        observerService.removeObserver(this, "perm-changed");
+
         this.moduleDeactivate(context, true);
     },
 
