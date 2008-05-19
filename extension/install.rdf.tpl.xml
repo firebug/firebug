@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>@FULLVERSION@</em:version>
+    <em:version>@VERSION@@RELEASE@</em:version>
     <em:type>2</em:type>
 
     <!-- Firefox -->
@@ -34,8 +34,8 @@
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
-    <em:updateURL>@UPDATEPATH@/update.rdf</em:updateURL>
-	<em:updateKey>ToBeReplaceByAKeyFromMcCoy</em:updateKey>
+    <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
+    <em:updateKey>ToBeReplaceByAKeyFromMcCoy</em:updateKey>
 
   </Description>
 </RDF>
