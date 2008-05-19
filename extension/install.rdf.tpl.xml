@@ -35,7 +35,7 @@
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
-    <em:updateKey>ToBeReplaceByAKeyFromMcCoy</em:updateKey>
+    <em:updateKey>@PUBLICKEY@</em:updateKey>
 
   </Description>
 </RDF>
