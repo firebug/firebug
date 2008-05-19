@@ -199,6 +199,15 @@ top.TabWatcher =
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
         }
 
+        // Call showContext only for currently active context.
+        if (tabBrowser.currentURI.spec != context.browser.currentURI.spec)
+        {
+            if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
+                FBTrace.sysout("-> watchTopWindow: Do not show context as it's not active: " +         /*@explore*/
+                    context.browser.currentURI.spec + "\n");                                                    /*@explore*/
+            return;                
+        }
+
         if (context && !context.loaded)  // then it really is still loading, we want to showContext but not too agressively
         {
             setTimeout(bindFixed( function delayShowContext()
