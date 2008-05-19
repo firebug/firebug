@@ -267,7 +267,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         $('fbStatusIcon').setAttribute("net", "on");
 
         if (!init)
-            FirebugChrome.reload();
+            context.window.location.reload();
     },
 
     onModuleDeactivate: function(context, destroy)
