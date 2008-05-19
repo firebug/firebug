@@ -268,7 +268,7 @@ top.FirebugChrome =
 
     getCurrentBrowser: function()
     {
-        return externalBrowser ? externalBrowser : Firebug.tabBrowser.selectedBrowser
+        return externalBrowser ? externalBrowser : Firebug.tabBrowser.selectedBrowser;
     },
 
     getCurrentURI: function()

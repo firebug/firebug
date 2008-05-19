@@ -2148,7 +2148,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 return true;
             }
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout(prefDomain+".isEnabledForHost false uri:"+an_nsIURI.host+"\n");
+                FBTrace.sysout(prefDomain+".isEnabledForHost false uri:"+(an_nsIURI.host?an_nsIURI.host:an_nsIURI)+"\n");
         }
         return false;
     },
