@@ -426,7 +426,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if ( !context.hideDebuggerUI || (FirebugChrome.getCurrentBrowser() && FirebugChrome.getCurrentBrowser().showFirebug))
             {
                 Firebug.showBar(true);
-                if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("showBar done FirebugContext="+(FirebugContext?FirebugContext.window.location:"undefined")+"\n");           /*@explore*/
 
                 if (Firebug.errorStackTrace)
                     var panel = context.chrome.selectPanel("script", "callstack");
