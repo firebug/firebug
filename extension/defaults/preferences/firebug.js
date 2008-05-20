@@ -43,7 +43,7 @@ pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
 pref("extensions.firebug.debugger.enableAlways", false);
-pref("extensions.firebug.debugger.enableLocalFiles", true);
+pref("extensions.firebug.script.enableLocalFiles", true);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

@@ -1383,7 +1383,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             $('fbStatusIcon').setAttribute('jsd', 'on');
 
         if (!init)
-            FirebugChrome.reload();
+            context.window.location.reload();
     },
 
     onModuleDeactivate: function(context, destroy)
@@ -1883,22 +1883,30 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
-        this.showToolbarButtons("fbDebuggerButtons", true);
+        var enabled = Firebug.Debugger.isEnabled(this.context);
+
+        // The "enable/disable" button is always visible.
         this.showToolbarButtons("fbScriptButtons", true);
 
-        if (!Firebug.Debugger.isEnabled(this.context))
-        {
+        // These buttons are visible only if debugger is enabled.
+        this.showToolbarButtons("fbLocationList", enabled);
+        this.showToolbarButtons("fbLocationSeparator", enabled);
+        this.showToolbarButtons("fbDebuggerButtons", enabled);
+
+        // The default page with description and enable button is
+        // visible only if debugger is disabled.
+        if (enabled)
+            DefaultPage.hide(this);
+        else
             DefaultPage.show(this);
 
-            this.panelSplitter.collapsed = true;
-            this.sidePanelDeck.collapsed = true;
-        }
-        DefaultPage.hide(this);
+        // Additional debugger panels are visible only if debugger
+        // is enabled.
+        this.panelSplitter.collapsed = !enabled;
+        this.sidePanelDeck.collapsed = !enabled;
 
-        this.panelSplitter.collapsed = false; // Show side panel
-        this.sidePanelDeck.collapsed = false;
-
-        if (!this.location)
+        // Source box is updated only if debugger is enabled.
+        if (enabled && !this.location)
         {
             restoreObjects(this, state);
 

@@ -2020,10 +2020,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     initContext: function(context)
     {
+        // Add observers for permissions and preference changes so, activable modules
+        // (net, script) can be properly updated.
         observerService.addObserver(this, "perm-changed", false);
+        prefs.addObserver(this.getPrefDomain(), this, false);
 
         var persistedPanelState = this.syncPersistedPanelState(context, true);
-
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.initContext panelName "+this.panelName+" persistedPanelState.enabled "+persistedPanelState.enabled+"\n");
     },
@@ -2059,6 +2061,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     destroyContext: function(context)
     {
         observerService.removeObserver(this, "perm-changed");
+        prefs.removeObserver(this.getPrefDomain(), this);
 
         this.moduleDeactivate(context, true);
     },
@@ -2140,16 +2143,20 @@ Firebug.ActivableModule = extend(Firebug.Module,
             if ( !(an_nsIURI instanceof Ci.nsIURI) )
                 an_nsIURI = ioService.newURI(an_nsIURI, null, null);
 
-            if (permissionManager.testPermission(an_nsIURI, prefDomain))
-            {
-                if (FBTrace.DBG_PANELS)
-                    FBTrace.sysout(prefDomain+".isEnabledForHost true uri:"+an_nsIURI.host+"\n");
+            // Permission-manager can't be used for local URIs. So, check the URI
+            // and use preferences in such a case.
+            var enabled;
+            if (!isLocalURL(an_nsIURI.spec))
+                enabled = permissionManager.testPermission(an_nsIURI, prefDomain);
+            else
+                enabled = Firebug.getPref(prefDomain, "enableLocalFiles");
 
-                return true;
-            }
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout(prefDomain+".isEnabledForHost false uri:"+(an_nsIURI.host?an_nsIURI.host:an_nsIURI)+"\n");
+                FBTrace.sysout(prefDomain+".isEnabledForHost false uri: "+(an_nsIURI.host?an_nsIURI.host:an_nsIURI)+"\n");
+
+            return enabled;
         }
+
         return false;
     },
 
@@ -2159,23 +2166,40 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var prefDomain = this.getPrefDomain();
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.setEnabledForHost enable:"+enable+" prefDomain:"+prefDomain+" for "+location.host+"\n");
+            FBTrace.sysout("firebug.setEnabledForHost enable:"+enable+" prefDomain:"+prefDomain+" for "+location.spec+"\n");
 
         if (this.isEnabledForHost(location) == enable)
         {
-             FBTrace.sysout("firebug.setEnabledForHost attempt to change to same state: "+enable+"\n");
+            if (FBTrace.DBG_PANELS)
+                 FBTrace.sysout("firebug.setEnabledForHost attempt to change to same state: "+enable+"\n");
         }
 
-        permissionManager.remove(location.host, prefDomain);  // API junk
-        if (enable)
-            permissionManager.add(location, prefDomain, permissionManager.ALLOW_ACTION);
+        if (!isLocalURL(location.spec))
+        {
+            permissionManager.remove(location.host, prefDomain);  // API junk
+            if (enable)
+                permissionManager.add(location, prefDomain, permissionManager.ALLOW_ACTION);
+        }
+        else 
+        {
+            Firebug.setPref(prefDomain, "enableLocalFiles", enable);
+        }
     },
 
     observe: function(subject, topic, data)
     {
-        try {
+        try 
+        {
+            // This methods observes two events:
+            // perm-changed - fired when permissions are changed.
+            // nsPref:changed - fired when preferences are changed.
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+((topic == 'perm-changed')?" isPermChanged":" FAIL")+" data: "+data+"\n");
+            {
+                if ((topic != "perm-changed") && (topic != "nsPref:changed"))
+                    FBTrace.sysout("firebug.ActivableModule.observe UNKNOWN topic "+topic+" data: "+data+"\n");
+                else
+                    FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+" data: "+data+"\n");
+            }
 
             if (topic == 'perm-changed')
             {
@@ -2193,12 +2217,22 @@ Firebug.ActivableModule = extend(Firebug.Module,
                         FBTrace.dumpProperties("!firebug.observe perm-changed subject is not an nsIPermission", subject);
                 }
             }
-         }
-         catch (exc)
-         {
+            else if (topic == "nsPref:changed")
+            {
+                var prefDomain = this.getPrefDomain();
+                if (data == prefDomain + ".enableLocalFiles")
+                {
+                    if (FBTrace.DBG_PANELS)
+                        FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
+                    dispatch(modules, "activationChange", [null, prefDomain, data]);
+                }
+            }
+        }
+        catch (exc)
+        {
             if (FBTrace.dumpProperties)
                 FBTrace.dumpProperties("firebug.observe permisssions FAILS", exc);
-         }
+        }
     },
 
     activationChange: function(host, prefDomain, direction)
@@ -2212,9 +2246,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
             TabWatcher.iterateContexts(
                 function changeActivation(context)
                 {
+                    var location = context.window.location;
+
                     if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("trying "+ context.window.location.hostname +"=="+ host+((context.window.location.host.indexOf(host)!=-1)?"FOUND":"no match")+"\n");
-                    if (context.window.location.host.indexOf(host) != -1)
+                        FBTrace.sysout("trying "+ location.href +"=="+ host+((location.host.indexOf(host)!=-1)?" ***FOUND***":" no match")+"\n");
+
+                    if (isLocalURL(location.href))
+                        module.syncPersistedPanelState(context, false);
+                    else if (location.host.indexOf(host) != -1)
                         module.syncPersistedPanelState(context, false);
                 }
             );
