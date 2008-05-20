@@ -10,6 +10,11 @@ var _FirebugCommandLine =
         for (var i=0; i<commands.length; i++)
         {
             var command = commands[i];
+
+            // If the method is already defined, don't override it. 
+            if (top[command])
+                continue;
+
             this[command] = new Function(
                 "return window.console.notifyFirebug(arguments, '" + command + "', 'firebugExecuteCommand');");
         }
