@@ -106,11 +106,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS && !FirebugContext)
                 FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
 
-
+            var isWarning = object.flags & WARNING_FLAG;
+            
             if (object instanceof nsIScriptError)
             {
                 var category = getBaseCategory(object.category);
-                var isWarning = object.flags & WARNING_FLAG;
                 var isJSError = category == "js" && !isWarning;
 
                 if (isJSError)
@@ -177,6 +177,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
             else if (Firebug.showChromeMessages)
             {
+                if (lessTalkMoreAction(object, context, isWarning))
+                    return;
                 if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
                     FBTrace.dumpProperties("errors.observe showChromeMessages message:", object);             /*@explore*/
                 // Must be an nsIConsoleMessage
@@ -196,7 +198,16 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 return;
             }
             if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("error logged to ", context.window?context.window.location:"<no context.window>");
+            {
+            	if (context.window)
+                    FBTrace.sysout("error logged to ",  context.window.location+"\n");
+            	else
+            	{
+            		FBTrace.dumpProperties("errors.observe, context with no window, error object:", object);
+            		FBTrace.dumpProperties("errors.observe, context with no window, context:", context);
+            		FBTrace.dumpStack("errors.observe, context with no window");
+            	}
+            }
         }
         catch (exc)
         {

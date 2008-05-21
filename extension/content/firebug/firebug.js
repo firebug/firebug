@@ -1218,6 +1218,9 @@ top.Firebug =
             browser.chrome.showContext(browser, context);
 
         FirebugContext = context;  // Maybe null
+        
+        if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
+        	FBTrace.sysout("firebug.showContext context: "+(context?context.window:"null ")+"\n");
 
         this.syncBar();
     },
