@@ -200,7 +200,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getCaption: function(spy)
     {
-        return spy.method.toUpperCase() + " " + spy.getURL();
+        return spy.method.toUpperCase() + " " + cropString(spy.getURL(), 100);
     },
 
     onToggleBody: function(event)
