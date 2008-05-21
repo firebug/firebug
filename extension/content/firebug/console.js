@@ -122,14 +122,15 @@ Firebug.Console = extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
-        this.attachConsoleInjector(context, win);
+        if (Firebug.Debugger.isEnabled(context))
+            this.attachConsoleInjector(context, win); // TODO if script panel enabled
 
         if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
             if (win.wrappedJSObject._firebug)                                                                                           /*@explore*/
                 FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          /*@explore*/
             else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow failed to create win._firebug for "+win.location+"\n"); /*@explore*/
+                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n"); /*@explore*/
         }                                                                                                              /*@explore*/
                                                                                                                        /*@explore*/
     },
