@@ -125,7 +125,7 @@
                overwrite="true">
                <filterchain>
                        <replacetokens>
-                            <token key="FIREBUG-VERSION" value="${FULLVERSION}"/>
+                            <token key="FIREBUG-VERSION" value="${RELEASE}"/>
                             <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.FULLVERSION}"/>
                             <token key="UPDATEPATH" value="${update.path}"/>
                        </replacetokens>
@@ -198,8 +198,6 @@
 
     <target name="zipIntoXPI" depends="clean, createChromeJAR, createAptanaJAR">
         <mkdir dir="${dist_dir}" />
-        <!-- the chrome.manifest in source does not use jar files -->
-        <copy file="${src_dir}/deploy-chrome.manifest" tofile="${build_dir}/chrome.manifest" />
         <antcall target="integrateAptana"/>
         <zip destfile="${dist_dir}/${ant.project.name}.xpi" update="true">
             <zipfileset dir="${build_dir}" includes="*.jar" prefix="chrome" />
