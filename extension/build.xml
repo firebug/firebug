@@ -119,7 +119,7 @@
         <echo message="update.expansion.notRequired true"/>
     </target>
 
-    <target name="release-documentation">
+    <target name="release-documentation" depends="clean, version, expand-templates">
         <copy file="${src_dir}/docs/index.tpl.html"
                tofile="${src_dir}/docs/index.html"
                overwrite="true">
