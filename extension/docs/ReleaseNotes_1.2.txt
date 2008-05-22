@@ -41,30 +41,50 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
      
 
 == Bug Fixes ==
+    * Issue 1: Reload external Firebug window while its tab is hidden closes the window
     * Issue 2: Can't set breakpoints in code called by unload event
     * Issue 4: Visiting error page causes external Firebug window to close itself
+    * Issue 7 Long URLs in XHR spy rows should be cropped
     * Issue 14: Programatically disable firebug log from Javascript
     * Issue 38:  console.group should allow optional collapse
-    * Issue 183: Configurable maximum output size
-    * Issue 474:  base href applied to scripts
-    * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
-    * Issue 393: Text overlayed on text in script editor window.
-    * Issue 567: Slow script warning in debugger.js on some pages
-    * Issue 619: Reopening firebug results in grey DOM, Layout or Style Pane, fixed by forceUpdate on syncSidePanel.
-    * Issue 618: HTML: tab order, fixed by setting order properties on side panels.
     * Issue 43: Edit CSS behaviour - appending styles to the dom is unexpected. Contribution by  tonygentilcore
-    * Issue 573: setting css background-color affects layout inspector. Contribution by tonygentilcore
-    * Issue 361:  Edit button gets stuck when reloading page whilst editing CSS. Contribution by tonygentilcore
-    * Issue 1: Reload external Firebug window while its tab is hidden closes the window
-    * Issue 659: firebug.js:1473 - "this.context.browser is undefined"
-    * Issue 601: XHR in console shows stale/cached output
-    ? Issue 550 Net Panel should show the POST response but it shows the GET response
-    ? Issue 351 Intermittently, loading page or entering debugger causes page to be rerequested from server
-    ? Issue 448 Javascript errors retrigger a request if response stream is still open
-    ? Issue 363 Firebug invoke requested URL two times instead to show first time results.
-    ? Issue 634 XHR request details not showing up
-    * Issue 468 fast [enable -> inspect element -> disable] ergonomy
-    * Issue 690 New zh-CN local file for Firebug 1.2
-    * Issue 7 Long URLs in XHR spy rows should be cropped
+    * Issue 65 show HTTP Status code on NET response
+    * Issue 183: Configurable maximum output size
+    * Issue 186 Only one line in net monitor for multiple xhr post requests
     * Issue 202 Clicking status bar error warning closes firebug
+    * Issue 215 Display total page load time 
+    * Issue 216 Improve network monitor to include server-side processing time
+    * Issue 266 PUT & DELETE requests appear as POST requests in firebug
+    * Issue 316 Show HTTP request method and request content in Firebugs "Net" tab
+    * Issue 325 PUT operations do not show contained entity in Net tab
+    * Issue 327 "Net" tab: lowercase b for bytes (instead of B)
+    * Issue 331 XHR resolves relative URIs to resource:// protocol
+    * Issue 346 Fix Net Panel timings
+    * Issue 349 Local file XHR events not listed in console
+    * Issue 359 No entry in the Net tab for XHR when response content length is 0
+    * Issue 361:  Edit button gets stuck when reloading page whilst editing CSS. Contribution by tonygentilcore
+    * Issue 393: Text overlayed on text in script editor window.
+    * Issue 401 Net tab does not consider "application/javascript" a JS MIME type
+    * Issue 402 Net tab tries to show previews of non-images with image file extensions
+    * Issue 404 UI change to help users activate expensive debugging features only when they need them.
+    * Issue 405 The Net panel consumes a lot of memory if there is a lot of XHR activity without page reload.
+    * Issue 414 XHR Breaks When Using Firebug 1.1 beta when > 1 HTTP 302 Redirect Is Returned
+    * Issue 421 onLoad of XHRSpyListener does not fire correctly
+    * Issue 430 about:blank pages always show firebug as enabled
+    * Issue 468 [feature request] fast [enable -> inspect element -> disable] ergonomy
+    * Issue 474:  base href applied to scripts
+    * Issue 475 Show Return Code (HTTP HEADER-Response)
+    * Issue 503 disable doesn't work properly
+    * Issue 567: Slow script warning in debugger.js on some pages
+    * Issue 573: setting css background-color affects layout inspector. Contribution by tonygentilcore
+    * Issue 583 Javascript console cannot work with Firefox 3 beta5
+    * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
+    * Issue 601 XHR in console shows stale/cached output
+    * Issue 618: HTML: tab order, fixed by setting order properties on side panels.
+    * Issue 619: Reopening firebug results in grey DOM, Layout or Style Pane, fixed by forceUpdate on syncSidePanel.
+    * Issue 634 XHR request details not showing up
+    * Issue 659: firebug.js:1473 - "this.context.browser is undefined"
+    * Issue 676 Exception in firebug-cache.js when visiting http://www.takebacktheweb.org/CaE.html
+    * Issue 679 Firebug 1.2.0a27X blocking most AJAX calls
+    * Issue 690 New zh-CN local file for Firebug 1.2
     
