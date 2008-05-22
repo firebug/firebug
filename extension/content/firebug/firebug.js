@@ -2111,7 +2111,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             if (enable)
                 permissionManager.add(location, prefDomain, permissionManager.ALLOW_ACTION);
         }
-        else 
+        else
         {
             Firebug.setPref(prefDomain, "enableLocalFiles", enable);
         }
@@ -2119,7 +2119,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     observe: function(subject, topic, data)
     {
-        try 
+        try
         {
             // This methods observes two events:
             // perm-changed - fired when permissions are changed.
@@ -2177,15 +2177,23 @@ Firebug.ActivableModule = extend(Firebug.Module,
             TabWatcher.iterateContexts(
                 function changeActivation(context)
                 {
-                    var location = context.window.location;
+                    try
+                    {
+                        var location = context.window.location;
 
-                    if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("trying "+ location.href +"=="+ host+((location.host.indexOf(host)!=-1)?" ***FOUND***":" no match")+"\n");
+                        if (FBTrace.DBG_PANELS)
+                            FBTrace.sysout("trying "+ location.href +"=="+ host+((location.host.indexOf(host)!=-1)?" ***FOUND***":" no match")+"\n");
 
-                    if (isLocalURL(location.href))
-                        module.syncPersistedPanelState(context, false);
-                    else if (location.host.indexOf(host) != -1)
-                        module.syncPersistedPanelState(context, false);
+                        if (isLocalURL(location.href))
+                            module.syncPersistedPanelState(context, false);
+                        else if (location.host.indexOf(host) != -1)
+                            module.syncPersistedPanelState(context, false);
+                    }
+                    catch (exc)
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                            FBTrace.dumpProperties("firebug.activationChange changeActivation fails for "+location, location);
+                    }
                 }
             );
         }
