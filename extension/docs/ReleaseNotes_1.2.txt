@@ -83,6 +83,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 618: HTML: tab order, fixed by setting order properties on side panels.
     * Issue 619: Reopening firebug results in grey DOM, Layout or Style Pane, fixed by forceUpdate on syncSidePanel.
     * Issue 634 XHR request details not showing up
+    * Issue 637 $ FireBug function overwrites existing $ function
     * Issue 659: firebug.js:1473 - "this.context.browser is undefined"
     * Issue 676 Exception in firebug-cache.js when visiting http://www.takebacktheweb.org/CaE.html
     * Issue 679 Firebug 1.2.0a27X blocking most AJAX calls
