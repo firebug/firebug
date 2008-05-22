@@ -1,4 +1,4 @@
-Release Notes for Firebug 1.1
+Release Notes for Firebug 1.2
 Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
 
@@ -38,7 +38,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Misc ==
     Secure updates via signed update.rdf with xpi updateHash values.
-     
+
 
 == Bug Fixes ==
     * Issue 1: Reload external Firebug window while its tab is hidden closes the window
