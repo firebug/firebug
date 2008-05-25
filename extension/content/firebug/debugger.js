@@ -1311,7 +1311,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
         updateScriptFiles(context);
-
     },
 
     destroyContext: function(context)
@@ -1386,30 +1385,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.window.location.reload();
     },
 
-    onModuleDeactivate: function(context, destroy)
+    onLastModuleDeactivate: function(context, destroy)
     {
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onModuleDeactivate **************> activeContexts: "+this.activeContexts.length+" for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
+            FBTrace.sysout("debugger.onLastModuleDeactivate for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
 
-        if (this.activeContexts.length == 0)
-            fbs.unregisterDebugger(this);
-        else
-        {
-            if (FBTrace.DBG_INITIALIZE)
-                for (var i = 0; i < this.activeContexts.length; i++) FBTrace.sysout("    "+i+": "+this.activeContexts[i].window.location+"\n");
-        }
-
-        if (!destroy)
-        {
-            this.disablePanel(context);
-
-            var panel = context.getPanel(this.panelName, true);
-            if (panel)
-            {
-                var state = Firebug.getPanelState(panel);
-                panel.show(state);
-            }
-        }
+        fbs.unregisterDebugger(this);
     },
 
 });

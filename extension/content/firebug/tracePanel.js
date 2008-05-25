@@ -17,7 +17,9 @@ const prefDomain = "extensions.firebug";
 
 this.namespaceName = "TracePanel";
 
-Firebug.TraceModule = extend(Firebug.Console,
+var ConsoleModule = extend(Firebug.ConsoleBase, Firebug.Module);
+
+Firebug.TraceModule = extend(ConsoleModule,
 {
     // These will appear as options in FBTrace panel, with the DBG_ removed.
         // Also add extension.firebug.BP etc to defaults/preferences/chromebug.js if you want persistence.

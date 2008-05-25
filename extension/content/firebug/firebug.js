@@ -1218,9 +1218,9 @@ top.Firebug =
             browser.chrome.showContext(browser, context);
 
         FirebugContext = context;  // Maybe null
-        
+
         if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-        	FBTrace.sysout("firebug.showContext context: "+(context?context.window:"null ")+"\n");
+            FBTrace.sysout("firebug.showContext context: "+(context?context.window.location:"null ")+"\n");
 
         this.syncBar();
     },
@@ -1991,6 +1991,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     destroyContext: function(context)
     {
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.destroyContext panelName "+this.panelName+"\n");
         observerService.removeObserver(this, "perm-changed");
         prefs.removeObserver(this.getPrefDomain(), this);
 
@@ -2004,7 +2006,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (this.isEnabled(context))
             return;
 
+        if (this.activeContexts.length == 0)
+            this.onFirstModuleActivate(context, init);
+
         this.activeContexts.push(context);
+
         this.onModuleActivate(context, init);
     },
 
@@ -2026,6 +2032,26 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
 
         this.onModuleDeactivate(context, destroy);
+
+        if (!destroy)
+        {
+            this.disablePanel(context);
+
+            var panel = context.getPanel(panelName, true);
+            if (panel)
+            {
+                var state = Firebug.getPanelState(panel);
+                panel.show(state);
+            }
+        }
+
+        if (this.activeContexts.length == 0)
+            this.onLastModuleActivate(context, destroy);
+    },
+
+    onFirstModuleActivate: function(context, init)
+    {
+        // Just before onModuleActivate, no previous activecontext
     },
 
     onModuleActivate: function(context, init)
@@ -2036,6 +2062,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
     onModuleDeactivate: function(context, destroy)
     {
         // Module deactivation code. Just removed from activeContexts
+    },
+
+    onLastModuleActivate: function(context, init)
+    {
+        // Just after onModuleDeactivate, no remaining activecontext
     },
 
     isEnabled: function(context)
@@ -2072,7 +2103,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
             var prefDomain = this.getPrefDomain();
 
             if ( !(an_nsIURI instanceof Ci.nsIURI) )
+            {
                 an_nsIURI = ioService.newURI(an_nsIURI, null, null);
+
+                if (FBTrace.DBG_PANELS)
+                    FBTrace.sysout(prefDomain+".isEnabledForHost false uri: "+(an_nsIURI.host?an_nsIURI.host:an_nsIURI)+"\n");
+            }
 
             // Permission-manager can't be used for local URIs. So, check the URI
             // and use preferences in such a case.
@@ -2081,9 +2117,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 enabled = permissionManager.testPermission(an_nsIURI, prefDomain);
             else
                 enabled = Firebug.getPref(prefDomain, "enableLocalFiles");
-
-            if (FBTrace.DBG_PANELS)
-                FBTrace.sysout(prefDomain+".isEnabledForHost false uri: "+(an_nsIURI.host?an_nsIURI.host:an_nsIURI)+"\n");
 
             return enabled;
         }

@@ -17,7 +17,7 @@ var maxQueueRequests = 100;
 
 // ************************************************************************************************
 
-Firebug.Console = extend(Firebug.Module,
+Firebug.ConsoleBase =
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
     {
@@ -111,29 +111,15 @@ Firebug.Console = extend(Firebug.Module,
         remove(listeners, listener);
     },
 
+
+}
+
+var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
+
+Firebug.Console = extend(ActivableConsole,
+{
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
-
-    showContext: function(browser, context)
-    {
-        if (browser)
-            browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
-    },
-
-    watchWindow: function(context, win)
-    {
-        if (Firebug.Debugger.isEnabled(context))
-            this.attachConsoleInjector(context, win); // TODO if script panel enabled
-
-        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
-        {                                                                                                              /*@explore*/
-            if (win.wrappedJSObject._firebug)                                                                                           /*@explore*/
-                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          /*@explore*/
-            else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n"); /*@explore*/
-        }                                                                                                              /*@explore*/
-                                                                                                                       /*@explore*/
-    },
 
     attachConsoleInjector: function(context, win)
     {
@@ -214,7 +200,64 @@ Firebug.Console = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-    }
+    },
+
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // extends ActivableModule
+    initialize: function()
+    {
+        this.panelName = "console";
+        this.menuTooltip = $("fbConsoleStateMenuTooltip");
+        this.menuButton = $("fbConsoleStateMenu");
+
+        Firebug.ActivableModule.initialize.apply(this, arguments);
+    },
+
+    initContext: function(context)
+    {
+        Firebug.ActivableModule.initContext.apply(this, arguments);
+    },
+
+
+    watchWindow: function(context, win)
+    {
+        if (this.isEnabled(context))
+            this.attachConsoleInjector(context, win);
+
+        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
+        {                                                                                                              /*@explore*/
+            if (win.wrappedJSObject._firebug)                                                                                           /*@explore*/
+                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          /*@explore*/
+            else                                                                                                       /*@explore*/
+                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n"); /*@explore*/
+        }                                                                                                              /*@explore*/
+    },
+
+    showContext: function(browser, context)
+    {
+        if (browser)
+            browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
+        Firebug.ActivableModule.showContext.apply(this, arguments);
+    },
+
+    onModuleActivate: function(context, init)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onModuleActivate**************> activeContexts: "+this.activeContexts.length+"\n");
+
+        this.enablePanel(context);
+
+        if (!init)
+            context.window.location.reload();
+    },
+
+    onLastModuleDeactivate: function(context, destroy)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onLastModuleDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
+        // turn off error observer
+    },
 });
 
 Firebug.ConsoleListener =

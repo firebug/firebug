@@ -273,21 +273,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     onModuleDeactivate: function(context, destroy)
     {
         unmonitorContext(context);
+    },
 
-        if (!destroy)
-        {
-            this.disablePanel(context);
-
-            var panel = context.getPanel(panelName, true);
-            if (panel)
-            {
-                var state = Firebug.getPanelState(panel);
-                panel.show(state);
-            }
-        }
-
-        if (this.activeContexts.length == 0)
-             $('fbStatusIcon').removeAttribute("net");
+    onLastModuleDeactivate: function(context, destroy)
+    {
+        $('fbStatusIcon').removeAttribute("net");
     },
 
 });

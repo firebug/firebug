@@ -99,6 +99,18 @@
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
                 <toolbarbutton label="&firebug.Profile;" class="toolbar-text-button" type="checkbox"
                                tooltiptext="&firebug.ProfileTooltip;" command="cmd_toggleProfiling"/>
+                <toolbarseparator/>
+                <tooltip id="fbConsoleStateMenuTooltip"
+                    onpopupshowing="return Firebug.NetMonitor.onMenuTooltipShowing(this, FirebugContext)"/>
+                <toolbarbutton id="fbConsoleStateMenu" type="menu" tooltip="fbConsolePermTooltip">
+                    <menupopup
+                        oncommand="return Firebug.Console.onStateMenuCommand(event, FirebugContext)"
+                        onpopupshowing="return Firebug.Console.onStateMenuPopupShowing(this, FirebugContext)"
+                        onpopuphiding="return Firebug.Console.onStateMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbConsoleStateMenu" value="enable"/>
+                        <menuitem type="radio" name="fbConsoleStateMenu" value="disable"/>
+                    </menupopup>
+                </toolbarbutton>
             </hbox>
 
             <hbox id="fbHTMLButtons" collapsed="true">
@@ -137,7 +149,7 @@
                         oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>  
+                        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
                     </menupopup>
                 </toolbarbutton>
