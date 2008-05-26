@@ -357,10 +357,14 @@ this.Arr = domplate(Firebug.Rep,
     supportsObject: function(object)
     {
         if (this.isArray(object)) return true;
-        if (!object.propertyIsEnumerable) return false;
-        if (object && object.propertyIsEnumerable("length") && typeof(object.length) == "number")
+
+        // Don't use propertyIsEnumerable("length") as "arguments" array isn't real JS array,
+        // "arguments" have .length but do not respond to object property enumeration.
+        if ("length" in object && typeof(object.length) == "number")
         {
-            return true; // arguments have .length but do not respond to object property enumeration
+            for (name in object)
+                return false;
+            return true;
         }
     },
 
