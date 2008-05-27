@@ -448,7 +448,7 @@ this.$ = function(id, doc)
         return document.getElementById(id);
 };
 
-this.getChildByClass = function(node)
+this.getChildByClass = function(node) // ,classname, classname, classname...
 {
     for (var i = 1; i < arguments.length; ++i)
     {

@@ -93,21 +93,42 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Called by Console
+
+    startObserving: function()
+    {
+        consoleService.registerListener(this);
+        $('fbStatusIcon').setAttribute("errors", "on");
+
+        if (statusBar)
+            statusBar.setAttribute("disabled", "true");
+
+    },
+
+    stopObserving: function()
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.disable unregisterListener\n");
+        consoleService.unregisterListener(this);
+         $('fbStatusIcon').removeAttribute("errors");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ConsoleObserver
 
     observe: function(object)
     {
         try
         {
-        	var context = null;
-        	if (FirebugContext)
-        		context = FirebugContext;
+            var context = null;
+            if (FirebugContext)
+                context = FirebugContext;
 
             if (FBTrace.DBG_ERRORS && !FirebugContext)
                 FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
 
             var isWarning = object.flags & WARNING_FLAG;
-            
+
             if (object instanceof nsIScriptError)
             {
                 var category = getBaseCategory(object.category);
@@ -199,14 +220,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
             if (FBTrace.DBG_ERRORS)
             {
-            	if (context.window)
+                if (context.window)
                     FBTrace.sysout("error logged to ",  context.window.location+"\n");
-            	else
-            	{
-            		FBTrace.dumpProperties("errors.observe, context with no window, error object:", object);
-            		FBTrace.dumpProperties("errors.observe, context with no window, context:", context);
-            		FBTrace.dumpStack("errors.observe, context with no window");
-            	}
+                else
+                {
+                    FBTrace.dumpProperties("errors.observe, context with no window, error object:", object);
+                    FBTrace.dumpProperties("errors.observe, context with no window, context:", context);
+                    FBTrace.dumpStack("errors.observe, context with no window");
+                }
             }
         }
         catch (exc)
@@ -219,20 +240,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
-
-    enable: function()
-    {
-        consoleService.registerListener(this);
-
-        if (statusBar)
-            statusBar.setAttribute("disabled", "true");
-    },
-
-    disable: function()
-    {
-    	window.dump("errors, disable unregistering observer\n");
-        consoleService.unregisterListener(this);
-    },
 
     initContext: function(context)
     {

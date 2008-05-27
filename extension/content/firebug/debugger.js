@@ -1395,57 +1395,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
 });
 
-// ************************************************************************************************
-
-var DefaultPage = domplate(Firebug.Rep,
-{
-    tag:
-        DIV({class: "disablePageBox"},
-            H1({class: "disablePageHead"},
-                $STR("script.defaultpage.title")
-            ),
-            P({class: "disablePageDescription"},
-                $STR("script.defaultpage.description")
-            ),
-            DIV({class: "disablePageRow"},
-                BUTTON({onclick: "$onDebuggerEnable"},
-                    SPAN("$enableHostLabel")
-                )
-            )
-         ),
-
-    onHostEnable: function(event)
-    {
-    },
-
-    onDebuggerEnable: function(event)
-    {
-        var target = event.target;
-        var panel = Firebug.getElementPanel(target);
-        var context = panel.context;
-
-        var hostEnabled = $("hostEnabled", target.ownerDocument);
-        Firebug.Debugger.setEnabledForHost(context, true);
-    },
-
-    show: function(panel)
-    {
-        var context = panel.context;
-        var location = FirebugChrome.getBrowserURI(context);
-        var args = {
-            enableHostLabel: Firebug.Debugger.getMenuLabel("enable", location)
-        };
-
-        this.box = this.tag.replace(args, panel.panelNode, this);
-        panel.panelNode.scrollTop = 0;
-    },
-
-    hide: function(panel)
-    {
-        if (this.box)
-            this.box.setAttribute("collapsed", "true");
-    },
-});
 
 // ************************************************************************************************
 
@@ -1877,9 +1826,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // The default page with description and enable button is
         // visible only if debugger is disabled.
         if (enabled)
-            DefaultPage.hide(this);
+            Firebug.DisabledPage.hide(this);
         else
-            DefaultPage.show(this);
+            Firebug.DisabledPage.show(this);
 
         // Additional debugger panels are visible only if debugger
         // is enabled.

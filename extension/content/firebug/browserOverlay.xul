@@ -218,15 +218,6 @@
         </statusbarpanel>
 
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
-            <!--
-            xxxHonza - disable firebug functionality should be entirely removed.
-            <menuitem label="&firebug.DisableFirebug;" type="checkbox"
-                      oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>
-            <menuitem type="checkbox"
-                      oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
-            <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
-            <menuseparator/>
-            -->
             <menuitem id="menu_detachFirebug"
                 label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
             <menuseparator/>

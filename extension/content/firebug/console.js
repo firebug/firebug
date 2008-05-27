@@ -241,6 +241,11 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
+    onFirstModuleActivate: function(context, init)
+    {
+        Firebug.Errors.startObserving();
+    },
+
     onModuleActivate: function(context, init)
     {
         if (FBTrace.DBG_CONSOLE)
@@ -257,6 +262,7 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onLastModuleDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
         // turn off error observer
+        Firebug.Errors.stopObserving();
     },
 });
 
@@ -458,11 +464,22 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
 
     show: function(state)
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show\n");                                               /*@explore*/
+        // The "enable/disable" button is always visible.
+        this.showToolbarButtons("fbConsoleButtons", true); // TODO, only enable/disable menu here
+                                                   /*@explore*/
+        // The default page with description and enable button is
+        // visible only if debugger is disabled.
+        var enabled = Firebug.Debugger.isEnabled(this.context);
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show enabled:"+ enabled+"\n");
+        if (enabled)
+        {
+            Firebug.DisabledPage.hide(this);
 
-        this.showToolbarButtons("fbConsoleButtons", true);
-        if (this.wasScrolledToBottom)
-            scrollToBottom(this.panelNode);
+            if (this.wasScrolledToBottom)
+                scrollToBottom(this.panelNode);
+        }
+        else
+            Firebug.DisabledPage.show(this);
     },
 
     hide: function()

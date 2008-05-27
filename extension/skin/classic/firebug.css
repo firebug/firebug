@@ -70,6 +70,9 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 #fbStatusIcon[net="on"] {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
+#fbStatusIcon[errors="on"] {
+    list-style-image: url(chrome://firebug/skin/firebug16.png);
+}
 
 
 #fbStatusText {

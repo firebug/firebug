@@ -284,52 +284,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
 // ************************************************************************************************
 
-var DefaultPage = domplate(Firebug.Rep,
-{
-    tag:
-        DIV({class: "disablePageBox"},
-            H1({class: "disablePageHead"},
-                $STR("net.defaultpage.title")
-            ),
-            P({class: "disablePageDescription"},
-                $STR("net.defaultpage.description")
-            ),
-            DIV({class: "disablePageRow"},
-                BUTTON({onclick: "$onNetMonitorEnable"},
-                    SPAN("$enableHostLabel")
-                )
-            )
-         ),
-
-    onHostEnable: function(event)
-    {
-    },
-
-    onNetMonitorEnable: function(event)
-    {
-        var target = event.target;
-        var panel = Firebug.getElementPanel(target);
-        var context = panel.context;
-
-        var hostEnabled = $("hostEnabled", target.ownerDocument);
-        Firebug.NetMonitor.setEnabledForHost(context, true);
-    },
-
-    show: function(panel)
-    {
-        var context = panel.context;
-        var location = FirebugChrome.getBrowserURI(context);
-        var args = {
-            enableHostLabel: Firebug.NetMonitor.getMenuLabel("enable", location)
-        };
-
-        this.tag.replace(args, panel.panelNode, this);
-        panel.panelNode.scrollTop = 0;
-    }
-});
-
-// ************************************************************************************************
-
 function NetPanel() {}
 
 NetPanel.prototype = domplate(Firebug.Panel,
@@ -702,7 +656,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (Firebug.NetMonitor.isEnabled(this.context))
             return true;
 
-        DefaultPage.show(this);
+        Firebug.DisabledPage.show(this);
 
         return false;
     },

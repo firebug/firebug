@@ -216,7 +216,7 @@ top.Firebug =
         // If another window is opened, then the creation of our first context won't
         // result in calling of enable, so we have to enable our modules ourself
         //if (fbs.enabled)
-            dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
+        dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         dispatch(modules, "initializeUI", [detachArgs]);
     },
@@ -2037,7 +2037,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         {
             this.disablePanel(context);
 
-            var panel = context.getPanel(panelName, true);
+            var panel = context.getPanel(this.panelName, true);
             if (panel)
             {
                 var state = Firebug.getPanelState(panel);
@@ -2353,5 +2353,161 @@ Firebug.ActivableModule = extend(Firebug.Module,
 });
 
 // ************************************************************************************************
+
+Firebug.DisabledPage = domplate(Firebug.Rep,
+{
+    tag:
+        DIV({class: "disablePageBox"},
+            P({class: "disablePageDescription"},
+                SPAN("Enabling these panels will reduce Firefox performance")
+            ),
+            TABLE({cellpadding: 0, cellspacing: 0},
+                    TBODY(
+                        TR({class: "disablePageRow $consoleModule|getEnabledClass"},
+                            TD(
+                                SPAN({class: "consoleEnablement"},
+                                    "Console logging"
+                                )
+                            ),
+                            TD(
+                                SPAN("$consoleModule|getEnabledLabel")
+                            ),
+                            TD(
+                                INPUT({class: "panelEnablePreference", type: "checkbox",
+                                    checked: "$consoleModule|getEnablePref", onclick: "$consoleModule|onPanelPref"})
+                            ),
+                            TD({rowspan: "3", class: "enableAll"},
+                                BUTTON({onclick: "$onPanelEnable"},
+                                    SPAN("Enable These Panels and Reload")
+                                )
+                            )
+                        ),
+                        TR({class: "disablePageRow $debuggerModule|getEnabledClass"},
+                            TD(
+                                SPAN({class: "debuggerEnablement"},
+                                    "Script debugging"
+                                )
+                            ),
+                            TD(
+                                SPAN("$debuggerModule|getEnabledLabel")
+                            ),
+                            TD(
+                                INPUT({class: "panelEnablePreference", type: "checkbox",
+                                    checked: "$debuggerModule|getEnablePref", onclick: "$debuggerModule|onPanelPref"})
+                            )
+                        ),
+                        TR({class: "disablePageRow $netModule|getEnabledClass"},
+                            TD(
+                                SPAN({class: "netEnablement"},
+                                    "Net monitoring"
+                                )
+                            ),
+                            TD(
+                                SPAN("$netModule|getEnabledLabel")
+                            ),
+                            TD(
+                                INPUT({class: "panelEnablePreference", type: "checkbox",
+                                    checked: "$netModule|getEnablePref", onclick: "$netModule|onPanelPref"})
+                            )
+                        )
+                    )
+             ),
+             P({class: "disablePageHead"},
+                INPUT({class: "alwaysEnable", type: "checkbox",
+                                    checked: "$location|getAlwaysEnablePref", onclick: "$location|setAlwaysEnablePref"}),
+                SPAN("Always Enable These Panels When Using Firebug (Reset this option in the statusbar icon menu)")
+             )
+         ),
+
+    getEnabledLabel: function(module)
+    {
+        var enabled = module.isEnabled(this.context);
+        return (enabled ? "enabled" : "disabled"); // TODO NLS
+    },
+
+    getEnabledClass: function(module)
+    {
+        return this.getEnabledLabel(module)+"PanelRow";
+    },
+
+    getEnablePref: function(module)
+    {
+        var prefName = module.panelName + ".enableWithOthers";
+        var prefValue = Firebug.getPref(Firebug.prefDomain, prefName);
+        FBTrace.sysout("getEnablePref "+prefName+"="+prefValue+"\n");
+        return prefValue;
+    },
+
+    setEnablePref: function(module, value)
+    {
+        var prefName = module.panelName + ".enableWithOthers";
+        Firebug.setPref(Firebug.prefDomain, prefName, value);
+        FBTrace.sysout("setEnablePref "+prefName+"="+value+"\n");
+        return value;
+    },
+
+    getAlwaysEnablePref: function()
+    {
+        var prefName = "alwaysEnableThesePanels";
+        var prefValue = Firebug.getPref(Firebug.prefDomain, prefName);
+        FBTrace.sysout("getAlwaysEnablePref "+prefName+"="+prefValue+"\n");
+        return prefValue;
+    },
+
+    setAlwaysEnablePref: function()
+    {
+        return function handleAlwaysEnablePref(event)
+        {
+            var checked = event.target.checked;
+            var prefName = "alwaysEnableThesePanels";
+            Firebug.setPref(Firebug.prefDomain, prefName, checked);
+        }
+    },
+
+    onPanelPref: function(module)
+    {
+        return function setPrefOnClick(event)
+        {
+            var checked = event.target.checked;
+            Firebug.DisabledPage.setEnablePref(module, checked);
+        }
+    },
+
+    onPanelEnable: function(event)
+    {
+        Firebug.DisabledPage.enablePanel(Firebug.Console);
+        Firebug.DisabledPage.enablePanel(Firebug.Debugger);
+        Firebug.DisabledPage.enablePanel(Firebug.NetMonitor);
+    },
+
+    enablePanel: function(module)
+    {
+        var shouldEnable = this.getEnablePref(module);
+        if (shouldEnable) module.setEnabledForHost(this.context, true);
+    },
+
+    show: function(panel)
+    {
+        this.context = panel.context;
+        var location = FirebugChrome.getBrowserURI(panel.context);
+
+        var args = {
+            consoleModule: Firebug.Console,
+            debuggerModule: Firebug.Debugger,
+            netModule: Firebug.NetMonitor,
+            location: location
+        };
+
+        this.box = this.tag.replace(args, panel.panelNode, this);
+        panel.panelNode.scrollTop = 0;
+    },
+
+    hide: function(panel)
+    {
+        if (this.box)
+            this.box.setAttribute("collapsed", "true");
+    },
+
+});
 
 }});

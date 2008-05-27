@@ -301,8 +301,25 @@ h1.groupHeader {
     vertical-align:middle;
 }
 
+.disablePageBox table {
+    border: solid 1px Gray;
+}
+
+.disablePageRow span {
+    margin: 1em;
+}
+
 .disablePageRow button {
-    margin-left:250px;
+    margin-left: 2em;
+    margin-right: 1em;
+}
+
+.enabledPanelRow {
+     color:Gray;
+}
+
+.enabledPanelRow input {
+    display: none;
 }
 
 .disablePageText {
