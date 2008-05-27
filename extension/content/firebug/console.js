@@ -13,7 +13,7 @@ const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVer
 // ************************************************************************************************
 
 var listeners = [];
-var maxQueueRequests = 100;
+var maxQueueRequests = 500;
 
 // ************************************************************************************************
 
@@ -54,7 +54,7 @@ Firebug.ConsoleBase =
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
 
-                var container = panel.getTopContainer();
+                var container = panel.panelNode;
                 var template = Firebug.NetMonitor.NetLimit;
 
                 while (container.childNodes.length > maxQueueRequests + 1)
@@ -217,8 +217,26 @@ Firebug.Console = extend(ActivableConsole,
     initContext: function(context)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
-    },
 
+        // Create limit row. This row is the first in the list of entries
+        // and initially hidden. It's displayed as soon as the number of 
+        // entries reache the limit.
+        var panel = context.getPanel(this.panelName);
+        var row = panel.createRow("limitRow");
+
+        var limitInfo = {
+            totalCount: 0,
+            limitPrefsTitle: $STRF("LimitPrefsTitle", ["extensions.firebug.console.logLimit"])
+        };
+
+        var netLimitRep = Firebug.NetMonitor.NetLimit;
+        var nodes = netLimitRep.createTable(row, limitInfo);
+
+        panel.limit = nodes[1];
+
+        var container = panel.panelNode;
+        container.insertBefore(nodes[0], container.firstChild);
+    },
 
     watchWindow: function(context, win)
     {
@@ -443,16 +461,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
     {
         Firebug.Panel.initialize.apply(this, arguments);
 
-        var row = this.createRow("limitRow");
-
-        var template = Firebug.NetMonitor.NetLimit;
-        var nodes = template.createTable(row);
-
-        this.limit = nodes[1];
-
-        var container = this.getTopContainer();
-        container.appendChild(nodes[0]);
-
         // Initialize log limit and listen for changes.
         this.updateMaxLimit();
         prefs.addObserver(Firebug.prefDomain, this, false);
@@ -605,13 +613,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         // xxxHonza check this out.
         var prefDomain = "Firebug.extension.";
         var prefName = data.substr(prefDomain.length);
-        if (prefName == "maxQueueRequests")
+        if (prefName == "console.logLimit")
             this.updateMaxLimit();
     },
 
     updateMaxLimit: function()
     {
-        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
+        var value = Firebug.getPref(Firebug.prefDomain, "console.logLimit");
         maxQueueRequests =  value ? value : maxQueueRequests;
     }
 });

@@ -25,6 +25,7 @@ pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug.console.enableWithOthers", false);
 pref("extensions.firebug-service.showStackTrace", true);
+pref("extensions.firebug.console.logLimit", 500);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
@@ -65,7 +66,7 @@ pref("extensions.firebug.showRulers", true);
 // Net
 pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
-pref("extensions.firebug.maxQueueRequests", 200);
+pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.autoDisable", true);
 pref("extensions.firebug.net.enableAlways", false);
 pref("extensions.firebug.net.enableLocalFiles", true);

@@ -141,7 +141,7 @@ var cacheSession = null;
 
 var contexts = new Array();
 var panelName = "net";
-var maxQueueRequests = 100;
+var maxQueueRequests = 500;
 
 var panelBar1 = $("fbPanelBar1");
 
@@ -845,8 +845,13 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         if (!this.table)
         {
+            var limitInfo = {
+                totalCount: 0,
+                limitPrefsTitle: $STRF("LimitPrefsTitle", ["extensions.firebug.net.logLimit"])
+            };
+
             this.table = this.tableTag.replace({}, this.panelNode, this);
-            this.limitRow = NetLimit.createRow(this.table.firstChild);
+            this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
             this.summaryRow =  this.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
         }
 
@@ -1152,7 +1157,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
                             ),
                             TD({style: "width:100%"}),
                             TD(
-                                BUTTON({class: "netLimitButton", title: $STR("LimitPrefsTitle"),
+                                BUTTON({class: "netLimitButton", title: "$limitPrefsTitle",
                                     onclick: "$onPreferences"},
                                   $STR("LimitPrefs")
                                 )
@@ -1183,22 +1188,17 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         limitLabel.firstChild.nodeValue = $STRF("LimitExceeded", [row.limitInfo.totalCount]);
     },
 
-    createTable: function(parent)
+    createTable: function(parent, limitInfo)
     {
         var table = this.tableTag.replace({}, parent);
-        var row = this.createRow(table.firstChild.firstChild);
+        var row = this.createRow(table.firstChild.firstChild, limitInfo);
         return [table, row];
     },
 
-    createRow: function(parent)
+    createRow: function(parent, limitInfo)
     {
-        var limitInfo = {
-          totalCount: 0,
-        };
-
-        var row = this.limitTag.insertRows(limitInfo, parent)[0];
+        var row = this.limitTag.insertRows(limitInfo, parent, this)[0];
         row.limitInfo = limitInfo;
-
         return row;
     },
 
@@ -1209,13 +1209,13 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         if (topic != "nsPref:changed")
           return;
 
-        if (data.indexOf("maxQueueRequests") != -1)
+        if (data.indexOf("net.logLimit") != -1)
             this.updateMaxLimit();
     },
 
     updateMaxLimit: function()
     {
-        var value = Firebug.getPref(Firebug.prefDomain, "maxQueueRequests");
+        var value = Firebug.getPref(Firebug.prefDomain, "net.logLimit");
         maxQueueRequests =  value ? value : maxQueueRequests;
     }
 });
@@ -2716,5 +2716,6 @@ Firebug.registerPanel(NetPanel);
 // ************************************************************************************************
 
 }});
+
 
 
