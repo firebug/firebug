@@ -2364,6 +2364,15 @@ Firebug.DisabledPage = domplate(Firebug.Rep,
             TABLE({cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR({class: "disablePageRow $consoleModule|getEnabledClass"},
+                            TD({rowspan: "3", class: "enableAll"},
+                                BUTTON({onclick: "$onPanelEnable"},
+                                    SPAN("Enable These Panels and Reload")
+                                )
+                            ),
+                            TD(
+                                INPUT({class: "panelEnablePreference", type: "checkbox",
+                                    checked: "$consoleModule|getEnablePref", onclick: "$consoleModule|onPanelPref"})
+                            ),
                             TD(
                                 SPAN({class: "consoleEnablement"},
                                     "Console logging"
@@ -2371,18 +2380,13 @@ Firebug.DisabledPage = domplate(Firebug.Rep,
                             ),
                             TD(
                                 SPAN("$consoleModule|getEnabledLabel")
-                            ),
-                            TD(
-                                INPUT({class: "panelEnablePreference", type: "checkbox",
-                                    checked: "$consoleModule|getEnablePref", onclick: "$consoleModule|onPanelPref"})
-                            ),
-                            TD({rowspan: "3", class: "enableAll"},
-                                BUTTON({onclick: "$onPanelEnable"},
-                                    SPAN("Enable These Panels and Reload")
-                                )
                             )
                         ),
                         TR({class: "disablePageRow $debuggerModule|getEnabledClass"},
+                            TD(
+                                INPUT({class: "panelEnablePreference", type: "checkbox",
+                                    checked: "$debuggerModule|getEnablePref", onclick: "$debuggerModule|onPanelPref"})
+                            ),
                             TD(
                                 SPAN({class: "debuggerEnablement"},
                                     "Script debugging"
@@ -2390,13 +2394,13 @@ Firebug.DisabledPage = domplate(Firebug.Rep,
                             ),
                             TD(
                                 SPAN("$debuggerModule|getEnabledLabel")
-                            ),
-                            TD(
-                                INPUT({class: "panelEnablePreference", type: "checkbox",
-                                    checked: "$debuggerModule|getEnablePref", onclick: "$debuggerModule|onPanelPref"})
                             )
                         ),
                         TR({class: "disablePageRow $netModule|getEnabledClass"},
+                            TD(
+                                INPUT({class: "panelEnablePreference", type: "checkbox",
+                                    checked: "$netModule|getEnablePref", onclick: "$netModule|onPanelPref"})
+                            ),
                             TD(
                                 SPAN({class: "netEnablement"},
                                     "Net monitoring"
@@ -2404,10 +2408,6 @@ Firebug.DisabledPage = domplate(Firebug.Rep,
                             ),
                             TD(
                                 SPAN("$netModule|getEnabledLabel")
-                            ),
-                            TD(
-                                INPUT({class: "panelEnablePreference", type: "checkbox",
-                                    checked: "$netModule|getEnablePref", onclick: "$netModule|onPanelPref"})
                             )
                         )
                     )
