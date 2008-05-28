@@ -949,7 +949,11 @@ FirebugService.prototype =
         // Remember the error where the last exception is thrown - this will
         // be used later when the console service reports the error, since
         // it doesn't currently report the window where the error occured
-        this._lastErrorWindow = getFrameGlobal(frame);
+
+        this._lastErrorWindow =  getFrameGlobal(frame);
+
+        if (fbs.DBG_FBS_ERRORS)
+            ddd("onThrow set lastErrorWindow.location "+(this._lastErrorWindow ? this._lastErrorWindow.location : "undefined lastErrorWindow")+"\n");
 
         if (fbs.trackThrowCatch)
         {
@@ -979,15 +983,16 @@ FirebugService.prototype =
             ddd("fbs.onError with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="                 /*@explore*/
                    +this.breakOnErrors+" kind="+messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");     /*@explore*/
         }                                                                                                              /*@explore*/
-
+        
+        // global to pass info to onDebug
         errorInfo = { message: message, fileName: fileName, lineNo: lineNo, pos: pos, flags: flags, errnum: errnum, exc: exc };
         if (this.showStackTrace)
         {
             reportNextError = true;
-            var theNeed = this.needToBreakForError(fileName, lineNo);
-             fbs.hookInterruptsToTrapErrors();
+            //var theNeed = this.needToBreakForError(fileName, lineNo);
+            // fbs.hookInterruptsToTrapErrors();
             if (fbs.DBG_FBS_ERRORS)                                                                                        /*@explore*/
-                ddd("fbs.onError needToBreakForError="+theNeed+"; in any case we will drop in to onDebug\n");       /*@explore*/
+                ddd("fbs.onError showStackTrace, we will try to drop into onDebug\n");       /*@explore*/
 
             return false; // Drop into onDebug, sometimes only
         }
@@ -1377,18 +1382,7 @@ FirebugService.prototype =
         if (!win)
         {
             ddd("No getFrameWindow! scope:\n");
-            var listValue = {value: null}, lengthValue = {value: 0};
-            frame.scope.getProperties(listValue, lengthValue);
-            for (var i = 0; i < lengthValue.value; ++i)
-            {
-                var prop = listValue.value[i];
-                try {
-                var name = prop.name.getWrappedValue();
-                ddd(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
-                } catch (e) {
-                ddd(i+"]"+e+"\n");
-                }
-            }
+            this.dumpIValue(frame.scope);
             return;
         }
         ddd("diagnoseFindDebugger win.location ="+(win.location?win.location.href:"(undefined)"));
@@ -1407,6 +1401,22 @@ FirebugService.prototype =
             catch (exc) {ddd("caught:"+exc+"\n");}
         }
         ddd(" NO FIND tried "+debuggers.length+"\n");
+    },
+
+    dumpIValue: function(value)
+    {
+        var listValue = {value: null}, lengthValue = {value: 0};
+        value.getProperties(listValue, lengthValue);
+        for (var i = 0; i < lengthValue.value; ++i)
+        {
+            var prop = listValue.value[i];
+            try {
+            var name = prop.name.getWrappedValue();
+            ddd(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
+            } catch (e) {
+            ddd(i+"]"+e+"\n");
+            }
+        }
     },
 
     reFindDebugger: function(frame, debuggr)
@@ -1860,7 +1870,7 @@ function handleTrackingScriptsInterrupt(frame, type, rv)
     }
     catch (exc)
     {
-        if (fbs.DBG_FBS_CREATION) dumpToFileWithStack("handleTrackingScriptsInterrupt FAILS: "+exc);                              /*@explore*/
+        if (fbs.DBG_FBS_CREATION) ddd("handleTrackingScriptsInterrupt FAILS: "+exc);                              /*@explore*/
     }
     fbs.clearHookInterruptsToTrackScripts();
     return RETURN_CONTINUE;
