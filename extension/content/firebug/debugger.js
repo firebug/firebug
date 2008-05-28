@@ -2273,6 +2273,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     name: "breakpoints",
     parentPanel: "script",
+    order: 2,
 
     initialize: function()
     {
@@ -2468,6 +2469,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     name: "callstack",
     parentPanel: "script",
+    order: 1,
 
     initialize: function(context, doc)
     {

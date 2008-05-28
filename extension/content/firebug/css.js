@@ -161,9 +161,9 @@ const styleGroups =
 
 // ************************************************************************************************
 
-function CSSStyleSheetPanel() {}
+Firebug.CSSStyleSheetPanel = function() {}
 
-CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
+Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
     template: domplate(
     {
@@ -852,7 +852,7 @@ CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
 function CSSElementPanel() {}
 
-CSSElementPanel.prototype = extend(CSSStyleSheetPanel.prototype,
+CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 {
     template: domplate(
     {
@@ -1508,7 +1508,7 @@ function getSelectionController(panel)
 
 // ************************************************************************************************
 
-Firebug.registerPanel(CSSStyleSheetPanel);
+Firebug.registerPanel(Firebug.CSSStyleSheetPanel);
 Firebug.registerPanel(CSSElementPanel);
 
 // ************************************************************************************************
