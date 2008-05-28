@@ -1955,7 +1955,8 @@ function getCacheEntry(file, netProgress)
         }
         catch (exc)
         {
-            ERROR(exc);
+            if (FBTrace.DBG_ERRORS)
+                ERROR(exc);
         }
     });
 }
@@ -2552,8 +2553,10 @@ var HttpObserver =
             this.onExamineResponse(aSubject);
           }
       }
-      catch (err) {
-          ERROR(err)
+      catch (err) 
+      {
+          if (FBTrace.DBG_ERRORS)
+            ERROR(err)
       }
   },
 
@@ -2683,8 +2686,10 @@ function getTabIdForHttpChannel(aHttpChannel)
         var win = safeGetWindow(progress);
         return Firebug.getTabIdForWindow(win);
     }
-    catch (err) {
-        ERROR(err);
+    catch (err) 
+    {
+        if (FBTrace.DBG_ERRORS)
+            ERROR(err);
     }
 
     return null;
