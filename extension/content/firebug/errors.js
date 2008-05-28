@@ -372,7 +372,6 @@ function getErrorContext(object)
     TabWatcher.iterateContexts(
         function findContextByURL(context)
         {
-        FBTrace.sysout("errors.observe trying context "+context.window.location.toString()+"\n");
             if (context.window.location.toString() == url)
                 return errorContext = context;
             else
