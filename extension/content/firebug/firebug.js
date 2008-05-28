@@ -2444,6 +2444,8 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         var moduleRow = Firebug.getRepNode(event.target);
         var checkBox = getElementByClass(moduleRow, "activableModuleCheckBox");
         checkBox.checked = checkBox.checked ? false : true;
+
+        this.updateApplyButton();
     },
 
     onEnable: function(event)
