@@ -106,6 +106,7 @@ const scriptBlockSize = 20;
 // Globals
 
 var modules = [];
+var activableModules = [];
 var extensions = [];
 var uiListeners = [];
 var panelTypes = [];
@@ -280,6 +281,12 @@ top.Firebug =
             TabWatcher.addListener(arguments[i]);
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_INITIALIZE) FBTrace.dumpProperties("registerModule", arguments);                                               /*@explore*/
+    },
+
+    registerActivableModule: function()
+    {
+        activableModules.push.apply(activableModules, arguments);
+        this.registerModule.apply(this, arguments);
     },
 
     registerExtension: function()
@@ -2354,160 +2361,160 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
 // ************************************************************************************************
 
-Firebug.DisabledPage = domplate(Firebug.Rep,
+Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 {
     tag:
-        DIV({class: "disablePageBox"},
-            P({class: "disablePageDescription"},
-                SPAN("Enabling these panels will reduce Firefox performance")
+        DIV({class: "moduleManagerBox"},
+            H1({class: "moduleManagerHead"},
+                $STR("moduleManager.title")
             ),
-            TABLE({cellpadding: 0, cellspacing: 0},
-                    TBODY(
-                        TR({class: "disablePageRow $consoleModule|getEnabledClass"},
-                            TD({rowspan: "3", class: "enableAll"},
-                                BUTTON({onclick: "$onPanelEnable"},
-                                    SPAN("Enable These Panels and Reload")
-                                )
+            P({class: "moduleManagerDescription"},
+                $STR("moduleManager.description")
+            ),
+            TABLE({class: "activableModuleTable", cellpadding: 0, cellspacing: 0},
+                TBODY(
+                    FOR("module", "$modules",
+                        TR({class: "activableModuleRow", _repObject: "$module", 
+                            $panelDisabled: "$module|isModuleDisabled"},
+                            TD({class: "activableModuleCell activableModuleState"},
+                                INPUT({class: "activableModuleCheckBox", type: "checkbox",
+                                    onchange: "$onModuleStateChanged"})
                             ),
-                            TD(
-                                INPUT({class: "panelEnablePreference", type: "checkbox",
-                                    checked: "$consoleModule|getEnablePref", onclick: "$consoleModule|onPanelPref"})
-                            ),
-                            TD(
-                                SPAN({class: "consoleEnablement"},
-                                    "Console logging"
-                                )
-                            ),
-                            TD(
-                                SPAN("$consoleModule|getEnabledLabel")
-                            )
-                        ),
-                        TR({class: "disablePageRow $debuggerModule|getEnabledClass"},
-                            TD(
-                                INPUT({class: "panelEnablePreference", type: "checkbox",
-                                    checked: "$debuggerModule|getEnablePref", onclick: "$debuggerModule|onPanelPref"})
-                            ),
-                            TD(
-                                SPAN({class: "debuggerEnablement"},
-                                    "Script debugging"
-                                )
-                            ),
-                            TD(
-                                SPAN("$debuggerModule|getEnabledLabel")
-                            )
-                        ),
-                        TR({class: "disablePageRow $netModule|getEnabledClass"},
-                            TD(
-                                INPUT({class: "panelEnablePreference", type: "checkbox",
-                                    checked: "$netModule|getEnablePref", onclick: "$netModule|onPanelPref"})
-                            ),
-                            TD(
-                                SPAN({class: "netEnablement"},
-                                    "Net monitoring"
-                                )
-                            ),
-                            TD(
-                                SPAN("$netModule|getEnabledLabel")
-                            )
+                            TD({class: "activableModuleCell activableModuleName",
+                                onclick: "$onModuleNameClick"}, "$module|getModuleName"),
+                            TD({class: "activableModuleCell activableModuleDesc"}, "$module|getModuleDesc"),
+                            TD({class: "activableModuleCell"}, "$module|getModuleState")
                         )
                     )
-             ),
-             P({class: "disablePageHead"},
-                INPUT({class: "alwaysEnable", type: "checkbox",
-                                    checked: "$location|getAlwaysEnablePref", onclick: "$location|setAlwaysEnablePref"}),
-                SPAN("Always Enable These Panels When Using Firebug (Reset this option in the statusbar icon menu)")
-             )
+                )
+            ),
+            DIV({class: "moduleManagerRow", style: "align:right"},
+                BUTTON({class: "moduleMangerApplyButton", onclick: "$onEnable"},
+                    SPAN("$enableHostLabel")
+                )
+            )
          ),
 
-    getEnabledLabel: function(module)
+    getModuleName: function(module)
+    {
+        return module.panelName;
+    },
+
+    getModuleDesc: function(module)
+    {
+        return module.description;
+    },
+
+    getModuleState: function(module)
     {
         var enabled = module.isEnabled(this.context);
-        return (enabled ? "enabled" : "disabled"); // TODO NLS
+        return enabled ? "" : $STR("moduleManager.disabled");
     },
 
-    getEnabledClass: function(module)
+    isModuleDisabled: function(module)
     {
-        return this.getEnabledLabel(module)+"PanelRow";
+        return !module.isEnabled(this.context);
     },
 
-    getEnablePref: function(module)
+    isModuleEnabled: function(module)
     {
-        var prefName = module.panelName + ".enableWithOthers";
-        var prefValue = Firebug.getPref(Firebug.prefDomain, prefName);
-        FBTrace.sysout("getEnablePref "+prefName+"="+prefValue+"\n");
-        return prefValue;
+        return module.isEnabled(this.context);
     },
 
-    setEnablePref: function(module, value)
+    onModuleStateChanged: function(event)
     {
-        var prefName = module.panelName + ".enableWithOthers";
-        Firebug.setPref(Firebug.prefDomain, prefName, value);
-        FBTrace.sysout("setEnablePref "+prefName+"="+value+"\n");
-        return value;
+        this.updateApplyButton();
     },
 
-    getAlwaysEnablePref: function()
+    updateApplyButton: function()
     {
-        var prefName = "alwaysEnableThesePanels";
-        var prefValue = Firebug.getPref(Firebug.prefDomain, prefName);
-        FBTrace.sysout("getAlwaysEnablePref "+prefName+"="+prefValue+"\n");
-        return prefValue;
-    },
-
-    setAlwaysEnablePref: function()
-    {
-        return function handleAlwaysEnablePref(event)
+        for (var i=0; i<this.inputs.length; i++)
         {
-            var checked = event.target.checked;
-            var prefName = "alwaysEnableThesePanels";
-            Firebug.setPref(Firebug.prefDomain, prefName, checked);
+            var input = this.inputs[i];
+            if (input.checked != input.originalValue)
+            {
+                this.applyButton.disabled = false;
+                return;
+            }
         }
     },
 
-    onPanelPref: function(module)
+    onModuleNameClick: function(event)
     {
-        return function setPrefOnClick(event)
+        var moduleRow = Firebug.getRepNode(event.target);
+        var checkBox = getElementByClass(moduleRow, "activableModuleCheckBox");
+        checkBox.checked = checkBox.checked ? false : true;
+    },
+
+    onEnable: function(event)
+    {
+        for (var i=0; i<this.inputs.length; i++)
         {
-            var checked = event.target.checked;
-            Firebug.DisabledPage.setEnablePref(module, checked);
+            var input = this.inputs[i];
+            if (!hasClass(input, "activableModuleCheckBox"))
+                continue;
+
+            var model = Firebug.getRepObject(input);
+            if (input.checked)
+                this.enableModule(model);
+            else
+                this.disableModule(model);
         }
     },
 
-    onPanelEnable: function(event)
+    enableModule: function(module)
     {
-        Firebug.DisabledPage.enablePanel(Firebug.Console);
-        Firebug.DisabledPage.enablePanel(Firebug.Debugger);
-        Firebug.DisabledPage.enablePanel(Firebug.NetMonitor);
+        if (!this.isModuleEnabled(module)) 
+            module.setEnabledForHost(this.context, true);
     },
 
-    enablePanel: function(module)
+    disableModule: function(module)
     {
-        var shouldEnable = this.getEnablePref(module);
-        if (shouldEnable) module.setEnabledForHost(this.context, true);
+        if (this.isModuleEnabled(module)) 
+            module.setEnabledForHost(this.context, false);
     },
 
     show: function(panel)
     {
         this.context = panel.context;
         var location = FirebugChrome.getBrowserURI(panel.context);
+        var hostURI = getURIHost(location);
+        hostURI = hostURI ? hostURI : "Local Files";
 
+        // Prepare arguments for the template.
         var args = {
-            consoleModule: Firebug.Console,
-            debuggerModule: Firebug.Debugger,
-            netModule: Firebug.NetMonitor,
-            location: location
+            modules: [Firebug.Console, Firebug.Debugger, Firebug.NetMonitor],
+            enableHostLabel: $STRF("moduleManager.apply.title", [hostURI])
         };
 
+        // Render panel HTML
         this.box = this.tag.replace(args, panel.panelNode, this);
         panel.panelNode.scrollTop = 0;
+
+        // Update value of all checkboxes 
+        // xxxHonza: is there a better domplate way how to set default value for a checkbox?
+        this.inputs = panel.panelNode.getElementsByTagName("input");
+        for (var i=0; i<this.inputs.length; i++)
+        {
+            var input = this.inputs[i];
+            if (!hasClass(input, "activableModuleCheckBox"))
+                continue;
+
+            var model = Firebug.getRepObject(input);
+            input.checked = input.originalValue = this.isModuleEnabled(model);
+        }
+
+        this.applyButton = getElementByClass(panel.panelNode, "moduleMangerApplyButton");
+        this.applyButton.disabled = true;
     },
 
     hide: function(panel)
     {
         if (this.box)
             this.box.setAttribute("collapsed", "true");
-    },
-
+    }
 });
+
+// ************************************************************************************************
 
 }});

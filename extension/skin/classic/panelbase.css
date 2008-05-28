@@ -273,55 +273,81 @@ h1.groupHeader {
 
 /************************************************************************************************/
 
-.disablePageBox {
+.moduleManagerBox {
     width: 100%;
     position: relative;
-    padding: 20px 30px 30px 90px;
+    padding: 10px 10px 0px 90px;
     background: -moz-field url(chrome://firebug/skin/firebug32.png) no-repeat 30px 30px;
     color: -moz-fieldText;
     font: message-box;
 }
 
-.disablePageLink:hover {
+.moduleManagerLink:hover {
     text-decoration: underline;
     cursor: pointer;
 }
 
-.disablePageDescription {
+.moduleManagerDescription {
     margin: 8px 0;
+    font-size: 13px;
+    width: 75%;
+}
+
+.moduleManagerRow {
+    margin: 5px 0;
     font-size: 13px;
 }
 
-.disablePageRow {
-    margin: 8px 0;
-    font-size: 13px;
-}
-
-.disablePageRow td {
+.moduleManagerRow td {
     vertical-align:middle;
 }
 
-.disablePageBox table {
+.moduleManagerBox table {
     border: solid 1px Gray;
 }
 
-.disablePageRow span {
+.moduleManagerRow span {
     margin: 1em;
 }
 
-.disablePageRow button {
-    margin-left: 2em;
+.moduleManagerRow button {
+    margin-left: 4em;
     margin-right: 1em;
 }
 
-.enabledPanelRow {
-     color:Gray;
+/************************************************************************************************/
+
+.activableModuleTable {
+    border: 0 !important;
+    font-size: 13px;
+    border-top: 1px solid threedlightshadow !important;    
+    margin:8px;
 }
 
-.enabledPanelRow input {
-    display: none;
+.activableModuleCell {
+    padding: 0 20px 0 0;
+    border-bottom: 1px solid threedlightshadow !important;    
 }
 
-.disablePageText {
-    color:Gray;
+.activableModuleRow:hover {
+    background-color: #EFEFEF;
+}
+
+.panelDisabled {
+    color:gray !important;
+}
+    
+.activableModuleState {
+    padding: 0 5px 0 20px;
+}
+
+.activableModuleName {
+    padding-right:20px;    
+    font-weight:bold;
+}
+
+.activableModuleName:hover {
+    text-decoration:underline;
+    color:Blue;
+    cursor: pointer;
 }

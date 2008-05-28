@@ -208,6 +208,7 @@ Firebug.Console = extend(ActivableConsole,
     initialize: function()
     {
         this.panelName = "console";
+        this.description = $STR("console.modulemanager.description");
         this.menuTooltip = $("fbConsoleStateMenuTooltip");
         this.menuButton = $("fbConsoleStateMenu");
 
@@ -481,13 +482,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show enabled:"+ enabled+"\n");
         if (enabled)
         {
-            Firebug.DisabledPage.hide(this);
+            Firebug.ModuleManagerPage.hide(this);
 
             if (this.wasScrolledToBottom)
                 scrollToBottom(this.panelNode);
         }
         else
-            Firebug.DisabledPage.show(this);
+            Firebug.ModuleManagerPage.show(this);
     },
 
     hide: function()
@@ -682,7 +683,7 @@ var appendCloseGroup = Firebug.ConsolePanel.prototype.appendCloseGroup;
 
 // ************************************************************************************************
 
-Firebug.registerModule(Firebug.Console);
+Firebug.registerActivableModule(Firebug.Console);
 Firebug.registerPanel(Firebug.ConsolePanel);
 
 // ************************************************************************************************

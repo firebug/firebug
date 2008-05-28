@@ -1281,6 +1281,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
+        this.description = $STR("script.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
@@ -1826,9 +1827,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // The default page with description and enable button is
         // visible only if debugger is disabled.
         if (enabled)
-            Firebug.DisabledPage.hide(this);
+            Firebug.ModuleManagerPage.hide(this);
         else
-            Firebug.DisabledPage.show(this);
+            Firebug.ModuleManagerPage.show(this);
 
         // Additional debugger panels are visible only if debugger
         // is enabled.
@@ -2704,7 +2705,7 @@ function countBreakpoints(context)
 
 // ************************************************************************************************
 
-Firebug.registerModule(Firebug.Debugger);
+Firebug.registerActivableModule(Firebug.Debugger);
 Firebug.registerPanel(BreakpointsPanel);
 Firebug.registerPanel(CallstackPanel);
 Firebug.registerPanel(ScriptPanel);

@@ -208,6 +208,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         this.panelName = panelName;
         this.menuTooltip = $("fbNetStateMenuTooltip");
         this.menuButton = $("fbNetStateMenu");
+        this.description = $STR("net.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
@@ -656,7 +657,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (Firebug.NetMonitor.isEnabled(this.context))
             return true;
 
-        Firebug.DisabledPage.show(this);
+        Firebug.ModuleManagerPage.show(this);
 
         return false;
     },
@@ -2718,7 +2719,7 @@ function GI(obj, iface)
 
 // ************************************************************************************************
 
-Firebug.registerModule(Firebug.NetMonitor);
+Firebug.registerActivableModule(Firebug.NetMonitor);
 Firebug.registerPanel(NetPanel);
 
 // ************************************************************************************************
