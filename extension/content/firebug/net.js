@@ -2572,7 +2572,7 @@ var HttpObserver =
              safeGetName(aRequest));                                                                             /*@explore*/
       }                                                                                                                /*@explore*/
 
-      if (!tabId)                                                                                                      /*@explore*/
+      if (!tabId || !win)                                                                                                      /*@explore*/
           return;                                                                                                      /*@explore*/
 
       this.onStartRequest(aRequest, now(), win, tabId);
@@ -2589,8 +2589,8 @@ var HttpObserver =
           FBTrace.sysout("net.HttpObserver *** ON-EXAMINE-RESPONSE *** "+(tabId?"":"(No TAB)")+", request: ",                                        /*@explore*/
             safeGetName(aRequest), aRequest);                                                                             /*@explore*/
       }                                                                                                                /*@explore*/
-
-      this.onEndRequest(aRequest, now(), win, tabId);
+      if (win)
+        this.onEndRequest(aRequest, now(), win, tabId);
   },
 
   onStartRequest: function(aRequest, aTime, aWin, aTabId)
@@ -2631,6 +2631,9 @@ var HttpObserver =
 
   onEndRequest: function(aRequest, aTime, aWin, aTabId)
   {
+      if (!aWin)
+        return;
+
       var context = TabWatcher.getContextByWindow(aWin);
       if (!Firebug.NetMonitor.isEnabled(context))
         return;
