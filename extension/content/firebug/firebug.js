@@ -2431,15 +2431,18 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     updateApplyButton: function()
     {
+        var disabled = true;
         for (var i=0; i<this.inputs.length; i++)
         {
             var input = this.inputs[i];
             if (input.checked != input.originalValue)
             {
-                this.applyButton.disabled = false;
-                return;
+                disabled = false;
+                break;
             }
         }
+
+        this.applyButton.disabled = disabled;
     },
 
     onModuleNameClick: function(event)
