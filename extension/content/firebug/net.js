@@ -380,7 +380,11 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     getCategory: function(file)
     {
-        return "category-" + getFileCategory(file);
+        var category = getFileCategory(file);
+        if (category)
+            return "category-" + category;
+
+        return "";
     },
 
     hideRow: function(file)
@@ -1449,7 +1453,10 @@ NetProgress.prototype =
             getHttpHeaders(request, file);
 
             this.arriveFile(file, request);
-            this.endLoad(file);
+
+            // Don't mark this file as "loaded". Only request for which the http-on-examine-response
+            // event is received is displayed within the list.
+            //this.endLoad(file);
 
             getCacheEntry(file, this);
 
