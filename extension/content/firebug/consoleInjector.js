@@ -83,8 +83,8 @@ function FirebugConsoleHandler(context, win)
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.dumpProperties("FirebugConsoleHandler", this);
-            // xxxHonza localization.
-            this.log("FirebugConsoleHandler does not support \'"+methodName+"\'");
+
+            this.log($STRF("console.MethodNotSupported.MethodNotSupported", [methodName]);
         }
     };
 

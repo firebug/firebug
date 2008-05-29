@@ -736,8 +736,7 @@ function CommandLineHandler(context, win)
         var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
         if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
         {
-            // xxxHonza localization.
-            this.log("Firebug command line does not support \'" + methodName + "\'");
+            this.log($STRF("commandline.MethodNotSupported", [methodName]);
         }
     };
 

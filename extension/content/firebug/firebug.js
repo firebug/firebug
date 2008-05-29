@@ -2498,7 +2498,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     {
         var location = FirebugChrome.getBrowserURI(this.context);
         var hostURI = getURIHost(location);
-        hostURI = hostURI ? hostURI : "Local Files";
+        hostURI = hostURI ? hostURI : $STR("moduleManager.localfiles");
 
         // Prepare arguments for the template (list of activableModules and
         // title for the apply button).
