@@ -736,7 +736,7 @@ function CommandLineHandler(context, win)
         var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
         if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
         {
-            this.log($STRF("commandline.MethodNotSupported", [methodName]);
+            this.log($STRF("commandline.MethodNotSupported", [methodName]));
         }
     };
 

@@ -478,7 +478,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
                                                    /*@explore*/
         // The default page with description and enable button is
         // visible only if debugger is disabled.
-        var enabled = Firebug.Debugger.isEnabled(this.context);
+        var enabled = Firebug.Console.isEnabled(this.context);
         if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show enabled:"+ enabled+"\n");
         if (enabled)
         {
