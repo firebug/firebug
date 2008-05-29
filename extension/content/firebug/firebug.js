@@ -2044,8 +2044,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
         {
             this.disablePanel(context);
 
+            var panelBar1 = $("fbPanelBar1");
             var panel = context.getPanel(this.panelName, true);
-            if (panel)
+
+            // Refresh the panel only if it's currently selected.
+            if (panel && panelBar1.selectedPanel == panel)
             {
                 var state = Firebug.getPanelState(panel);
                 panel.show(state);
@@ -2462,6 +2465,8 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             else
                 this.disableModule(model);
         }
+
+        this.refresh();
     },
 
     enableModule: function(module)
@@ -2479,23 +2484,36 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     show: function(panel)
     {
         this.context = panel.context;
-        var location = FirebugChrome.getBrowserURI(panel.context);
+        this.panelNode = panel.panelNode;
+        this.refresh();
+    },
+
+    hide: function(panel)
+    {
+        if (this.box)
+            this.box.setAttribute("collapsed", "true");
+    },
+
+    refresh: function()
+    {
+        var location = FirebugChrome.getBrowserURI(this.context);
         var hostURI = getURIHost(location);
         hostURI = hostURI ? hostURI : "Local Files";
 
-        // Prepare arguments for the template.
+        // Prepare arguments for the template (list of activableModules and
+        // title for the apply button).
         var args = {
-            modules: [Firebug.Console, Firebug.Debugger, Firebug.NetMonitor],
+            modules: activableModules,
             enableHostLabel: $STRF("moduleManager.apply.title", [hostURI])
         };
 
         // Render panel HTML
-        this.box = this.tag.replace(args, panel.panelNode, this);
-        panel.panelNode.scrollTop = 0;
+        this.box = this.tag.replace(args, this.panelNode, this);
+        this.panelNode.scrollTop = 0;
 
         // Update value of all checkboxes 
         // xxxHonza: is there a better domplate way how to set default value for a checkbox?
-        this.inputs = panel.panelNode.getElementsByTagName("input");
+        this.inputs = this.panelNode.getElementsByTagName("input");
         for (var i=0; i<this.inputs.length; i++)
         {
             var input = this.inputs[i];
@@ -2506,14 +2524,8 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             input.checked = input.originalValue = this.isModuleEnabled(model);
         }
 
-        this.applyButton = getElementByClass(panel.panelNode, "moduleMangerApplyButton");
+        this.applyButton = getElementByClass(this.panelNode, "moduleMangerApplyButton");
         this.applyButton.disabled = true;
-    },
-
-    hide: function(panel)
-    {
-        if (this.box)
-            this.box.setAttribute("collapsed", "true");
     }
 });
 
