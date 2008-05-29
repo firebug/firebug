@@ -2251,8 +2251,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         var tab = this.panelBar1.getTab(panel.name);
         tab.removeAttribute("disabled");
-
-        panel.clear();
     },
 
     disablePanel: function(context)
@@ -2266,6 +2264,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         var tab = this.panelBar1.getTab(panel.name);
         tab.setAttribute("disabled", "true");
+
+        panel.clear();
     },
 
     // Menu in toolbar.

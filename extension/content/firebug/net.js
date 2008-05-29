@@ -145,6 +145,8 @@ var maxQueueRequests = 500;
 
 var panelBar1 = $("fbPanelBar1");
 
+var listeners = [];
+
 // ************************************************************************************************
 
 Firebug.NetMonitor = extend(Firebug.ActivableModule,
@@ -281,6 +283,15 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         $('fbStatusIcon').removeAttribute("net");
     },
 
+    addListener: function(listener)
+    {
+        listeners.push(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        remove(listeners, listener);
+    }
 });
 
 // ************************************************************************************************
@@ -625,11 +636,17 @@ NetPanel.prototype = domplate(Firebug.Panel,
         this.queue = [];
 
         Firebug.Panel.initialize.apply(this, arguments);
+
+        if (this.context.netProgress && listeners.length)
+            this.context.netProgress.activate(this);
     },
 
     destroy: function(state)
     {
         Firebug.Panel.destroy.apply(this, arguments);
+
+        if (this.context.netProgress && listeners.length)
+            this.context.netProgress.activate(null);
     },
 
     show: function(state)
@@ -646,7 +663,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
-        if (this.context.netProgress)
+        if (this.context.netProgress && !listeners.length)
             this.context.netProgress.activate(this);
 
         this.layout();
@@ -670,7 +687,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         this.showToolbarButtons("fbNetButtons", false);
 
-        if (this.context.netProgress)
+        if (this.context.netProgress && !listeners.length)
           this.context.netProgress.activate(null);
 
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
@@ -1421,6 +1438,8 @@ NetProgress.prototype =
 
             if (file.fromCache)
                 getCacheEntry(file, this);
+
+            dispatch(listeners, "onLoad", [this.context, file]);
 
             return file;
         }
