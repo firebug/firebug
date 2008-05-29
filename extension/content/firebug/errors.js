@@ -191,12 +191,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (errorContext)
             context = errorContext;
 
-        if (lessTalkMoreAction(context, object, isWarning))
-            return;
-
-        if (!isWarning)
-            this.increaseCount(context);
-
         if (isJSError && Firebug.showStackTrace)
         {
             var trace = Firebug.errorStackTrace;
@@ -209,8 +203,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             correctLineNumbersOnExceptions(context, object);
         }
 
+        if (lessTalkMoreAction(context, object, isWarning))
+            return;
+
         Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
         context.thrownStackTrace = null;
+
+        if (!isWarning)
+            this.increaseCount(context);
 
         var error = new ErrorMessage(object.errorMessage, object.sourceName,
             object.lineNumber, object.sourceLine, category, context, trace);  // the sourceLine will cause the source to be loaded.
@@ -334,6 +334,10 @@ function lessTalkMoreAction(context, object, isWarning)
         }
         return true;
     }
+
+    var enabled = Firebug.Console.isEnabled(context);
+    if (!enabled)
+        return true;
 
     for (var msg in pointlessErrors)
     {
