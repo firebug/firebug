@@ -25,6 +25,7 @@ pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug-service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
+pref("extensions.firebug.console.enableLocalFiles", true);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
