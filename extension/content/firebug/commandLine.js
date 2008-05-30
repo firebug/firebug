@@ -34,6 +34,11 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.injector.attachConsole(context, win);
             var element = win.document.getElementById("_firebugConsole");
         }
+        if (!element)
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateAndShow: no _firebugConsole!");
+            return;  // we're in trouble here.
+        }
 
         // Make sure the command line script is attached.
         if (win.wrappedJSObject && !win.wrappedJSObject._FirebugCommandLine)
