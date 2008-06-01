@@ -530,10 +530,10 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 preExpr = preExpr.substr(0, lastDot);
 
             var self = this;
-            this.evaluateAndShow(preExpr, context, context.thisValue, context.window,
+            Firebug.CommandLine.evaluateAndShow(preExpr, context, context.thisValue, context.window,
                 function found(result, context)
                 {
-                    self.complete = keys(result.wrappedJSObject).sort(); // return is safe
+                    self.complete = keys(result).sort();
                 },
                 function failed(result, context)
                 {
