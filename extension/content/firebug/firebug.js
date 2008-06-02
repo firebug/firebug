@@ -1738,10 +1738,10 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         if (sourceBoxDecorator)
             this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
 
-        if (sourceFile.source)
-            this.anonSourceBoxes.push(sourceBox);
-        else
+        if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
+        else
+            this.anonSourceBoxes.push(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
             FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.source?" anon ":" sourceBoxes")); /*@explore*/

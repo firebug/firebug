@@ -417,6 +417,9 @@ FirebugService.prototype =
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, bp]);
             --disabledCount;
         }
+        else {
+            if (fbs.DBG_FBS_BP) ddd("fbs.enableBreakpoint no find for "+lineNo+"@"+url+"\n");
+        }
     },
 
     disableBreakpoint: function(url, lineNo)
@@ -428,6 +431,11 @@ FirebugService.prototype =
             ++disabledCount;
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, true, bp]);
         }
+        else
+        {
+            if (fbs.DBG_FBS_BP) ddd("fbs.disableBreakpoint no find for "+lineNo+"@"+url+"\n");
+        }
+
     },
 
     isBreakpointDisabled: function(url, lineNo)
@@ -980,7 +988,7 @@ FirebugService.prototype =
             ddd("fbs.onError with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="                 /*@explore*/
                    +this.breakOnErrors+" kind="+messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");     /*@explore*/
         }                                                                                                              /*@explore*/
-        
+
         // global to pass info to onDebug
         errorInfo = { message: message, fileName: fileName, lineNo: lineNo, pos: pos, flags: flags, errnum: errnum, exc: exc };
         if (this.showStackTrace)
