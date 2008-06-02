@@ -509,8 +509,10 @@ top.FirebugChrome =
                 ? FirebugContext.panelName
                 : Firebug.defaultPanelName;
 
+            // Make HTML panel the default panel, which is displayed 
+            // to the user the very first time.
             if (!panelName || !Firebug.getPanelType(panelName))
-                panelName = "console";
+                panelName = "html";
 
             this.syncMainPanels();
             panelBar1.selectPanel(panelName, true);
@@ -952,9 +954,7 @@ top.FirebugChrome =
             {
                 var panelName = panelType.prototype.name;
 
-                var title = panelType.prototype.title
-                    ? panelType.prototype.title
-                    : FBL.$STR("Panel-"+panelName);
+                var title = Firebug.getPanelTitle(panelType);
                 var label = FBL.$STRF("InspectInTab", [title]);
 
                 var command = bindFixed(this.select, this, object, panelName);

@@ -1830,7 +1830,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (enabled)
             Firebug.ModuleManagerPage.hide(this);
         else
-            Firebug.ModuleManagerPage.show(this);
+            Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
 
         // Additional debugger panels are visible only if debugger
         // is enabled.

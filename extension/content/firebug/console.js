@@ -486,7 +486,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
                 scrollToBottom(this.panelNode);
         }
         else
-            Firebug.ModuleManagerPage.show(this);
+            Firebug.ModuleManagerPage.show(this, Firebug.Console);
     },
 
     hide: function()

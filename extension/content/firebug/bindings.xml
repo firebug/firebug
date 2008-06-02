@@ -61,10 +61,7 @@
             var tab = document.createElement("panelTab");
             tab.panelType = panelType;
 
-            var title = panelType.prototype.title
-                ? panelType.prototype.title
-                : FBL.$STR("Panel-"+panelType.prototype.name);
-
+            var title = Firebug.getPanelTitle(panelType);
             tab.setAttribute("label", title);
 
             return this.tabMap[panelType.prototype.name] = tab;

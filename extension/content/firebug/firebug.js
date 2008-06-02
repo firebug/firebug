@@ -861,6 +861,12 @@ top.Firebug =
         return panelTypeMap[panelName];
     },
 
+    getPanelTitle: function(panelType)
+    {
+        return panelType.prototype.title ? panelType.prototype.title
+            : FBL.$STR("Panel-"+panelType.prototype.name);
+    },
+
     getMainPanelTypes: function(context)
     {
         var resultTypes = [];
@@ -2372,7 +2378,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     tag:
         DIV({class: "moduleManagerBox"},
             H1({class: "moduleManagerHead"},
-                $STR("moduleManager.title")
+                SPAN("$pageTitle")
             ),
             P({class: "moduleManagerDescription"},
                 $STR("moduleManager.description")
@@ -2403,7 +2409,8 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     getModuleName: function(module)
     {
-        return module.panelName;
+        var panelType = Firebug.getPanelType(module.panelName);
+        return Firebug.getPanelTitle(panelType);
     },
 
     getModuleDesc: function(module)
@@ -2487,8 +2494,9 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             module.setEnabledForHost(this.context, false);
     },
 
-    show: function(panel)
+    show: function(panel, module)
     {
+        this.module = module;
         this.context = panel.context;
         this.panelNode = panel.panelNode;
         this.refresh();
@@ -2510,6 +2518,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         // title for the apply button).
         var args = {
             modules: activableModules,
+            pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
             enableHostLabel: $STRF("moduleManager.apply.title", [hostURI])
         };
 
@@ -2526,12 +2535,14 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             if (!hasClass(input, "activableModuleCheckBox"))
                 continue;
 
-            var model = Firebug.getRepObject(input);
-            input.checked = input.originalValue = this.isModuleEnabled(model);
+            var module = Firebug.getRepObject(input);
+            input.checked = input.originalValue = this.isModuleEnabled(module);
+
+            if (module == this.module)
+                input.checked = true;                    
         }
 
         this.applyButton = getElementByClass(this.panelNode, "moduleMangerApplyButton");
-        this.applyButton.disabled = true;
     }
 });
 

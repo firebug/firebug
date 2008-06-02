@@ -679,7 +679,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (Firebug.NetMonitor.isEnabled(this.context))
             return true;
 
-        Firebug.ModuleManagerPage.show(this);
+        Firebug.ModuleManagerPage.show(this, Firebug.NetMonitor);
 
         return false;
     },
