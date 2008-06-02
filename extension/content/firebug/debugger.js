@@ -878,6 +878,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         row.removeAttribute("disabledBreakpoint");
                     }
                 }
+                else
+                {
+                    if (FBTrace.DBG_BP) FBTrace.dumpProperties("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
+                }
             }
         }
     },
@@ -1369,27 +1373,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
+    onFirstPanelActivate: function(context, init)
+    {
+        fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
+    },
 
-    onModuleActivate: function(context, init)
+    onPanelActivate: function(context, init)
     {
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onModuleActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
-
-        this.enablePanel(context);
-
-        var jsdStatus = fbs.registerDebugger(this);
-
-        if (jsdStatus)
-            $('fbStatusIcon').setAttribute('jsd', 'on');
+            FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 
         if (!init)
             context.window.location.reload();
     },
 
-    onLastModuleDeactivate: function(context, destroy)
+    onLastPanelDeactivate: function(context, destroy)
     {
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onLastModuleDeactivate for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
+            FBTrace.sysout("debugger.onLastPanelDeactivate for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
 
         fbs.unregisterDebugger(this);
     },

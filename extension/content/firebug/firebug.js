@@ -1975,9 +1975,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
         persistedPanelState.enabled = this.isEnabledForHost(FirebugChrome.getBrowserURI(context));
 
         if (persistedPanelState.enabled)
-            this.moduleActivate(context, beginOrEnd);
+            this.panelActivate(context, beginOrEnd);
         else
-            this.moduleDeactivate(context, beginOrEnd);
+            this.panelDeactivate(context, beginOrEnd);
 
         this.menuUpdate(context);
 
@@ -2003,28 +2003,30 @@ Firebug.ActivableModule = extend(Firebug.Module,
         observerService.removeObserver(this, "perm-changed");
         prefs.removeObserver(this.getPrefDomain(), this);
 
-        this.moduleDeactivate(context, true);
+        this.panelDeactivate(context, true);
     },
 
-    moduleActivate: function(context, init)
+    panelActivate: function(context, init)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("moduleActivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
+            FBTrace.sysout("panelActivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
         if (this.isEnabled(context))
             return;
 
         if (this.activeContexts.length == 0)
-            this.onFirstModuleActivate(context, init);
+            this.onFirstPanelActivate(context, init);
 
         this.activeContexts.push(context);
 
-        this.onModuleActivate(context, init);
+        this.enablePanel(context);
+
+        this.onPanelActivate(context, init);
     },
 
-    moduleDeactivate: function(context, destroy)
+    panelDeactivate: function(context, destroy)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("moduleDeactivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
+            FBTrace.sysout("panelDeactivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
 
         if (!this.isEnabled(context))
             return;
@@ -2034,11 +2036,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.activeContexts.splice(i, 1);
         else
         {
-            FBTrace.sysout("moduleDeactivate "+context.window.location +" not in activeContexts\n");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("panelDeactivate "+context.window.location +" not in activeContexts\n");
             return;
         }
 
-        this.onModuleDeactivate(context, destroy);
+        this.onPanelDeactivate(context, destroy);
 
         if (!destroy)
         {
@@ -2059,24 +2062,24 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onLastModuleActivate(context, destroy);
     },
 
-    onFirstModuleActivate: function(context, init)
+    onFirstPanelActivate: function(context, init)
     {
-        // Just before onModuleActivate, no previous activecontext
+        // Just before onPanelActivate, no previous activecontext
     },
 
-    onModuleActivate: function(context, init)
+    onPanelActivate: function(context, init)
     {
         // Module activation code. Just added to activeContexts
     },
 
-    onModuleDeactivate: function(context, destroy)
+    onPanelDeactivate: function(context, destroy)
     {
         // Module deactivation code. Just removed from activeContexts
     },
 
     onLastModuleActivate: function(context, init)
     {
-        // Just after onModuleDeactivate, no remaining activecontext
+        // Just after onPanelDeactivate, no remaining activecontext
     },
 
     isEnabled: function(context)
@@ -2377,7 +2380,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             TABLE({class: "activableModuleTable", cellpadding: 0, cellspacing: 0},
                 TBODY(
                     FOR("module", "$modules",
-                        TR({class: "activableModuleRow", _repObject: "$module", 
+                        TR({class: "activableModuleRow", _repObject: "$module",
                             $panelDisabled: "$module|isModuleDisabled"},
                             TD({class: "activableModuleCell activableModuleState"},
                                 INPUT({class: "activableModuleCheckBox", type: "checkbox",
@@ -2474,13 +2477,13 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     enableModule: function(module)
     {
-        if (!this.isModuleEnabled(module)) 
+        if (!this.isModuleEnabled(module))
             module.setEnabledForHost(this.context, true);
     },
 
     disableModule: function(module)
     {
-        if (this.isModuleEnabled(module)) 
+        if (this.isModuleEnabled(module))
             module.setEnabledForHost(this.context, false);
     },
 
@@ -2514,7 +2517,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         this.box = this.tag.replace(args, this.panelNode, this);
         this.panelNode.scrollTop = 0;
 
-        // Update value of all checkboxes 
+        // Update value of all checkboxes
         // xxxHonza: is there a better domplate way how to set default value for a checkbox?
         this.inputs = this.panelNode.getElementsByTagName("input");
         for (var i=0; i<this.inputs.length; i++)

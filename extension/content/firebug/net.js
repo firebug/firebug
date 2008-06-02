@@ -261,11 +261,12 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    onModuleActivate: function(context, init)
+    onPanelActivate: function(context, init)
     {
         monitorContext(context);
 
-        this.enablePanel(context);
+        // xxxJJB Honza delete this if all is well, moved to firebug.panelActivate
+        // this.enablePanel(context);
 
         $('fbStatusIcon').setAttribute("net", "on");
 
@@ -273,12 +274,12 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.window.location.reload();
     },
 
-    onModuleDeactivate: function(context, destroy)
+    onPanelDeactivate: function(context, destroy)
     {
         unmonitorContext(context);
     },
 
-    onLastModuleDeactivate: function(context, destroy)
+    onLastPanelDeactivate: function(context, destroy)
     {
         $('fbStatusIcon').removeAttribute("net");
     },
@@ -2580,7 +2581,7 @@ var HttpObserver =
             this.onExamineResponse(aSubject);
           }
       }
-      catch (err) 
+      catch (err)
       {
           if (FBTrace.DBG_ERRORS)
             ERROR(err)
@@ -2716,7 +2717,7 @@ function getTabIdForHttpChannel(aHttpChannel)
         var win = safeGetWindow(progress);
         return Firebug.getTabIdForWindow(win);
     }
-    catch (err) 
+    catch (err)
     {
         if (FBTrace.DBG_ERRORS)
             ERROR(err);

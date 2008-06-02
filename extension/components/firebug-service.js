@@ -952,9 +952,6 @@ FirebugService.prototype =
 
         this._lastErrorWindow =  getFrameGlobal(frame);
 
-        if (fbs.DBG_FBS_ERRORS)
-            ddd("onThrow set lastErrorWindow.location "+(this._lastErrorWindow ? this._lastErrorWindow.location : "undefined lastErrorWindow")+"\n");
-
         if (fbs.trackThrowCatch)
         {
             if (fbs.DBG_FBS_ERRORS) ddd("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");

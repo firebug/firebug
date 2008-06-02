@@ -1849,7 +1849,7 @@ this.sourceFilesAsArray = function(context)
     var sourceFileMap = context.sourceFileMap;
     for (var url in sourceFileMap)
         sourceFiles.push(sourceFileMap[url]);
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+" -> "+context.window.location+"\n"); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+" in context "+context.window.location+"\n"); /*@explore*/
 
     return sourceFiles;
 };
@@ -1860,7 +1860,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 
     if (FBTrace.DBG_SOURCEFILES)
     {
-        FBTrace.sysout("updateScriptFiles eraseSourceFileMap: "+eraseSourceFileMap+"\n");
+        FBTrace.sysout("updateScriptFiles oldMap "+oldMap+"\n");
         this.sourceFilesAsArray(context);  // just for length trace
     }
 
@@ -1907,6 +1907,10 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
                 FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.window.location+"\n");  /*@explore*/
         }
     }, this));
+    if (FBTrace.DBG_SOURCEFILES)
+    {
+        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context));
+    }
 };
 
 this.showThisSourceFile = function(url)
@@ -3210,7 +3214,7 @@ this.EvalLevelSourceFile.prototype.getObjectDescription = function()
             this.summary = "eval("+this.summary + "...)=" + FBL.summarizeSourceLineArray(this.source, 120 - this.summary.length);
     }
     if (FBTrace.DBG_SOURCEFILES) /*@explore*/
-        FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+this.evalExpression.substr(0, 240)+" summary", this.summary); /*@explore*/
+        FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+(this.evalExpression?this.evalExpression.substr(0, 240):"null")+" summary", this.summary); /*@explore*/
     return {path: this.href.replace(/\/eval\/[^\/]+$/, "/eval"), name: this.summary };
 }
 //------------

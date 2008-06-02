@@ -220,7 +220,7 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
         // Create limit row. This row is the first in the list of entries
-        // and initially hidden. It's displayed as soon as the number of 
+        // and initially hidden. It's displayed as soon as the number of
         // entries reache the limit.
         var panel = context.getPanel(this.panelName);
         var row = panel.createRow("limitRow");
@@ -260,26 +260,24 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
-    onFirstModuleActivate: function(context, init)
+    onFirstPanelActivate: function(context, init)
     {
         Firebug.Errors.startObserving();
     },
 
-    onModuleActivate: function(context, init)
+    onPanelActivate: function(context, init)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onModuleActivate**************> activeContexts: "+this.activeContexts.length+"\n");
-
-        this.enablePanel(context);
+            FBTrace.sysout("console.onPanelActivate**************> activeContexts: "+this.activeContexts.length+"\n");
 
         if (!init)
             context.window.location.reload();
     },
 
-    onLastModuleDeactivate: function(context, destroy)
+    onLastPanelDeactivate: function(context, destroy)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onLastModuleDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
+            FBTrace.sysout("console.onLastPanelDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
         // turn off error observer
         Firebug.Errors.stopObserving();
     },
