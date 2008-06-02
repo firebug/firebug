@@ -1275,8 +1275,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.debuggerName =  window.location.href+"--"+FBL.getUniqueId(); /*@explore*/
         this.toString = function() { return this.debuggerName; } /*@explore*/
-        if (FBTrace.DBG_INITIALIZE) /*@explore*/
-            FBTrace.dumpProperties("debugger.initialize ", this.debuggerName); /*@explore*/
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("debugger.initialize "+ this.debuggerName);
 
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 

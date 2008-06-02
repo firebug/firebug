@@ -2059,7 +2059,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
 
         if (this.activeContexts.length == 0)
-            this.onLastModuleActivate(context, destroy);
+            this.onLastPanelDeactivate(context, destroy);
     },
 
     onFirstPanelActivate: function(context, init)
@@ -2077,7 +2077,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         // Module deactivation code. Just removed from activeContexts
     },
 
-    onLastModuleActivate: function(context, init)
+    onLastPanelDeactivate: function(context, init)
     {
         // Just after onPanelDeactivate, no remaining activecontext
     },

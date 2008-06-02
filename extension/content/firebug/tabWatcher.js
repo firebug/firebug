@@ -205,14 +205,19 @@ top.TabWatcher =
             if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
                 FBTrace.sysout("-> watchTopWindow: Do not show context as it's not active: " +         /*@explore*/
                     context.browser.currentURI.spec + "\n");                                                    /*@explore*/
-            return;                
+            return;
         }
 
         if (context && !context.loaded)  // then it really is still loading, we want to showContext but not too agressively
         {
             setTimeout(bindFixed( function delayShowContext()
             {
-                this.watchContext(win, context);  // calls showContext
+                // Sometimes context.window is not defined
+                if (context.window)
+                    this.watchContext(win, context);  // calls showContext
+                else
+                    if(FBTrace.DBG_ERRORS) FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
+
             }, this), 200);
         }
         else
