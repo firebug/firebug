@@ -26,6 +26,7 @@ pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug-service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableLocalFiles", true);
+pref("extensions.firebug.console.enableAlways", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
@@ -47,6 +48,7 @@ pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
 pref("extensions.firebug.debugger.enableAlways", false);
 pref("extensions.firebug.script.enableLocalFiles", true);
+pref("extensions.firebug.script.enableAlways", false);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
@@ -69,6 +71,7 @@ pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.autoDisable", true);
 pref("extensions.firebug.net.enableAlways", false);
 pref("extensions.firebug.net.enableLocalFiles", true);
+pref("extensions.firebug.net.enableAlways", false);
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");

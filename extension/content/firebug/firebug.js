@@ -1487,9 +1487,17 @@ Firebug.Panel =
      */
     showToolbarButtons: function(buttonsId, show)
     {
-        var buttons = this.context.browser.chrome.$(buttonsId);
-        if (buttons)
-            collapse(buttons, show ? "false" : "true");
+        try
+        {
+            var buttons = this.context.browser.chrome.$(buttonsId);
+            if (buttons)
+                collapse(buttons, show ? "false" : "true");
+        }
+        catch (exc)
+        {
+            if (FBTrace.dumpProperties)
+                FBTrace.dumpProperties("firebug.Panel showToolbarButtons FAILS", exc);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2115,8 +2123,17 @@ Firebug.ActivableModule = extend(Firebug.Module,
          return this.prefDomain;
     },
 
+    isEnabledAlways: function()
+    {
+        var prefDomain = this.getPrefDomain();
+        return Firebug.getPref(prefDomain, "enableAlways");
+    },
+
     isEnabledForHost: function(an_nsIURI)
     {
+        if (this.isEnabledAlways())
+            return true;
+
         if (an_nsIURI)
         {
             var prefDomain = this.getPrefDomain();
@@ -2203,7 +2220,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
             else if (topic == "nsPref:changed")
             {
                 var prefDomain = this.getPrefDomain();
-                if (data == prefDomain + ".enableLocalFiles")
+                if (data == prefDomain + ".enableLocalFiles" ||
+                    data == prefDomain + ".enableAlways")
                 {
                     if (FBTrace.DBG_PANELS)
                         FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
@@ -2218,10 +2236,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
     },
 
-    activationChange: function(host, prefDomain, direction)
+    activationChange: function(host, prefDomain, data)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.activationChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" direction:"+ direction+"\n");
+            FBTrace.sysout("firebug.activationChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" data:"+ data+"\n");
 
         if (prefDomain == this.getPrefDomain())
         {
@@ -2239,6 +2257,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
                         if (isLocalURL(location.href))
                             module.syncPersistedPanelState(context, false);
                         else if (location.host.indexOf(host) != -1)
+                            module.syncPersistedPanelState(context, false);
+                        else if ((prefDomain + ".enableAlways") == data)
                             module.syncPersistedPanelState(context, false);
                     }
                     catch (exc)
@@ -2292,7 +2312,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
     onStateMenuCommand: function(event, context)
     {
         var menu = event.target;
-        this.setEnabledForHost(context, (menu.value == "enable"));
+        var enableAlways = (menu.value == "enableAlways");
+
+        var prefDomain = this.getPrefDomain();
+        Firebug.setPref(prefDomain, "enableAlways", enableAlways);
+
+        if (!enableAlways)
+            this.setEnabledForHost(context, (menu.value == "enable"));
     },
 
     onStateMenuPopupShowing: function(menu, context)
@@ -2330,7 +2356,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
     menuUpdate: function(context)
     {
         var value = "disable";
-        if (this.isEnabled(context))
+        if (this.isEnabledAlways())
+            value = "enableAlways";
+        else if (this.isEnabled(context))
             value = "enable";
 
         this.menuButton.value = value;
@@ -2341,7 +2369,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.menuButton.setAttribute("value", value);
     },
 
-    getMenuLabel: function (option, location, shortened)
+    getMenuLabel: function(option, location, shortened)
     {
         var label = "";
         switch (option)
@@ -2349,6 +2377,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
         case "disable":
             label = (shortened) ? "DisableShort" : "Disable";
             break;
+
+        case "enableAlways":
+            if (!shortened)
+                return $STR(this.panelName + "." + "EnableAlways");
+    
+            label = "EnableShort";
+            break;           
 
         case "enable":
             if (isSystemURL(location.spec))
