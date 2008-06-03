@@ -215,9 +215,10 @@ top.TabWatcher =
                 // Sometimes context.window is not defined
                 if (context.window)
                     this.watchContext(win, context);  // calls showContext
-                else
+                else 
+                {
                     if(FBTrace.DBG_ERRORS) FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
-
+                }
             }, this), 200);
         }
         else

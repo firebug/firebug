@@ -2584,7 +2584,7 @@ var HttpObserver =
       catch (err)
       {
           if (FBTrace.DBG_ERRORS)
-            ERROR(err)
+            ERROR(err);
       }
   },
 
