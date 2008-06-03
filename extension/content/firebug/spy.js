@@ -37,7 +37,18 @@ const httpObserver =
             {
                 if (request.notificationCallbacks)
                 {
-                    var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+                    try 
+                    {
+                        var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+                    }
+                    catch (e) 
+                    {
+                        if (e.name == "NS_NOINTERFACE")
+                        {
+                            if (FBTrace.DBG_NET)                                                          
+                                FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);   
+                        }
+                    }
                     if (xhrRequest && request.loadGroup)
                     {
                         var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
@@ -127,7 +138,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         context.spies = [];  // MAY NOT BE CALLED FOR CHROMEBUG??
 
-        if (Firebug.showXMLHttpRequests)
+        if (Firebug.showXMLHttpRequests  && Firebug.Console.isEnabled(context))
             this.attachSpy(context, context.window);
     },
 
@@ -140,7 +151,7 @@ Firebug.Spy = extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
-        if (Firebug.showXMLHttpRequests)
+        if (Firebug.showXMLHttpRequests && Firebug.Console.isEnabled(context))
             this.attachSpy(context, win);
     },
 
@@ -158,7 +169,7 @@ Firebug.Spy = extend(Firebug.Module,
 
     updateOption: function(name, value)
     {
-        if (name == "showXMLHttpRequests")
+        if (name == "showXMLHttpRequests")  // XXXjjb Honza, if Console.isEnabled(context) false, then this can't be called, but somehow seems not correct
         {
             var tach = value ? this.attachSpy : this.detachSpy;
             for (var i = 0; i < TabWatcher.contexts.length; ++i)
@@ -400,7 +411,7 @@ function requestStarted(request, xhrRequest, context, method, url)
         spy.requestHeaders = getRequestHeaders(spy);
 
     // If it's enabled log the request into the console tab.
-    if (Firebug.showXMLHttpRequests)
+    if (Firebug.showXMLHttpRequests && Firebug.Console.isEnabled(context))
     {
         spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
         setClass(spy.logRow, "loading");
