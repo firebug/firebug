@@ -7,7 +7,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Instant on: when the Firebug UI is active, HTML, CSS, DOM views activate (minimal overhead)
     * Script panel user-activation: initially disabled or enabled always
     * Net panel user-activiation: initially disabled or enabled always
+    * Console panel user-activation: initially disabled or enabled always. Controls ShowXMLHTTPRequest, consoleListener
     * Bug Icon gray unless some page has Script or Net panel activation
+    * Multipanel enablement.
     * No Allowed-sites/Disable for Site: no longer needed.
   The UI for this feature is being refined; overhead tests have not been completed.
   We are interested in feedback on this UI change.
@@ -56,6 +58,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 216 Improve network monitor to include server-side processing time
     * Issue 266 PUT & DELETE requests appear as POST requests in firebug
     * Issue 316 Show HTTP request method and request content in Firebugs "Net" tab
+    * Issue 321 arguments can no longer be logged
     * Issue 325 PUT operations do not show contained entity in Net tab
     * Issue 327 "Net" tab: lowercase b for bytes (instead of B)
     * Issue 331 XHR resolves relative URIs to resource:// protocol
@@ -78,6 +81,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 567: Slow script warning in debugger.js on some pages
     * Issue 573: setting css background-color affects layout inspector. Contribution by tonygentilcore
     * Issue 583 Javascript console cannot work with Firefox 3 beta5
+    * Issue 587 Custom listeners for observing net-monitor.
     * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
     * Issue 601 XHR in console shows stale/cached output
     * Issue 618: HTML: tab order, fixed by setting order properties on side panels.
@@ -87,5 +91,10 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 659: firebug.js:1473 - "this.context.browser is undefined"
     * Issue 676 Exception in firebug-cache.js when visiting http://www.takebacktheweb.org/CaE.html
     * Issue 679 Firebug 1.2.0a27X blocking most AJAX calls
+    * Issue 680 Tab completion of JavaScript elements not working
     * Issue 690 New zh-CN local file for Firebug 1.2
+    * Issue 720 Net tab -> response status = &nbsp; and response time = NaNm.
+    * Issue 719 Firebug's log limit has been reached - difficult named option
+    * Issue 723, JavaScript errors not shown in Firebug even when debugging is enabled;
+   
     
