@@ -1,0 +1,14 @@
+<!ENTITY  editors.Description       "Beállított Firebug szerkesztők:">
+<!ENTITY  editors.NameColumn        "Szerkesztő">
+<!ENTITY  editors.ExecutableColumn  "Futtatható">
+<!ENTITY  editors.ParamsColumn      "Futási paraméterek">
+
+<!ENTITY  add.label               "Add">
+<!ENTITY  remove.label            "Eltávolít">
+<!ENTITY  change.label            "Módosít">
+<!ENTITY  close.label             "Bezár">
+<!ENTITY  browse.label            "Tallóz...">
+
+<!ENTITY  changeEditor.Name       "Név:">
+<!ENTITY  changeEditor.Executable "Futtatható:">
+<!ENTITY  changeEditor.CmdLine    "Paraméterek:">
