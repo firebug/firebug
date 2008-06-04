@@ -917,8 +917,11 @@ FirebugService.prototype =
         {
             if (disabledCount || monitorCount || conditionCount || runningUntil)
             {
-                if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount    /*@explore*/
-                     +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil+"\n"); /*@explore*/
+                if (this.DBG_FBS_BP)
+                {
+                    dumpProperties("onBreakpoint("+getExecutionStopNameFromType(type)+") disabledCount:"+disabledCount
+                              +" monitorCount:"+monitorCount+" conditionCount:"+conditionCount+" runningUntil:"+runningUntil, bp);
+                }
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
                     bp.debugger.onCall(frame);
@@ -927,7 +930,11 @@ FirebugService.prototype =
                 {
                     this.stopStepping();
                     if (bp.debugger)
-                    return this.breakIntoDebugger(bp.debugger, frame, type);
+                        return this.breakIntoDebugger(bp.debugger, frame, type);
+                }
+                else if (!(bp.type & BP_NORMAL) || bp.disabled & BP_NORMAL)
+                {
+                    return  RETURN_CONTINUE;
                 }
                 else if (bp.type & BP_NORMAL)
                 {
@@ -935,15 +942,17 @@ FirebugService.prototype =
                     if (!passed)
                         return RETURN_CONTINUE;
                 }
-                else if (!(bp.type & BP_NORMAL) || bp.disabled & BP_NORMAL)
-                    return RETURN_CONTINUE;
+                // type was normal, but passed test
             }
             else  // not special, just break for sure
                 return this.breakIntoDebugger(bp.debugger, frame, type);
         }
-
-        if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="              /*@explore*/
+        else
+        {
+            if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="              /*@explore*/
                 +frame.script.tag+"\n");                           /*@explore*/
+        }
+
         if (runningUntil)
             return RETURN_CONTINUE;
         else
@@ -1584,8 +1593,12 @@ FirebugService.prototype =
                 for (var i = 0; i < urlBreakpoints.length; ++i)
                 {
                     var bp = urlBreakpoints[i];
-                    if (fbs.DBG_FBS_BP) ddd("findBreakpointByScript "+i+")"+ (bp.scriptWithBreakPoint ? bp.scriptWithBreakPoint.tag :"future")+"@"+bp.pc+" on "+url+"\n"); /*@explore*/
-                    if ( bp.scriptWithBreakPoint && (bp.scriptWithBreakPoint.tag == script.tag) && (bp.pc == pc) )
+                    if (fbs.DBG_FBS_BP)
+                    {
+                        var vs = (bp.scriptWithBreakpoint ? bp.scriptWithBreakpoint.tag :"future")+"@"+bp.pc+" on "+url;
+                        ddd("findBreakpointByScript["+i+"]"+" looking for "+script.tag+"@"+pc+" vs "+vs+"\n"); /*@explore*/
+                    }
+                    if ( bp.scriptWithBreakpoint && (bp.scriptWithBreakpoint.tag == script.tag) && (bp.pc == pc) )
                         return bp;
                 }
             }
@@ -1600,7 +1613,18 @@ FirebugService.prototype =
         var url = sourceFile.href;
         var urlBreakpoints = breakpoints[url];
         if (fbs.DBG_FBS_BP)
-            ddd("resetBreakpoints: breakpoints["+sourceFile.href+"]="+urlBreakpoints+"\n");                                   /*@explore*/
+        {
+            try
+            {
+                var msg = "resetBreakpoints: breakpoints["+sourceFile.href;
+                msg += "]="+urlBreakpoints+"\n";
+                ddd(msg);
+            }
+            catch (exc)
+            {
+                ddd("Failed to give resetBreakpoints trace "+exc+"\n");
+            }
+        }
 
         if (urlBreakpoints)
         {
@@ -1633,7 +1657,7 @@ FirebugService.prototype =
             if (pc == 0)  // signal the breakpoint handler to break for user
                 sourceFile.breakOnZero = script.tag;
 
-            if (fbs.DBG_FBS_BP) ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+"\n");                         /*@explore*/
+            if (fbs.DBG_FBS_BP) ddd("setJSDBreakpoint tag: "+bp.scriptWithBreakpoint.tag+" line.pc@url="+bp.lineNo +"."+bp.pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+"\n");                         /*@explore*/
 
         }
         else /*@explore*/

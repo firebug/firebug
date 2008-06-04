@@ -114,6 +114,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, skipNotDefinedMessages);
         }
 
+        // XXXjjb TODO this cause a lot of panel cpu, it should be moved in to the callers where appropriate.
         context.invalidatePanels("dom", "watches", "domSide");
 
         return result;
