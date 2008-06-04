@@ -53,6 +53,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 65 show HTTP Status code on NET response
     * Issue 183: Configurable maximum output size
     * Issue 186 Only one line in net monitor for multiple xhr post requests
+    * Issue 188: "Open in new tab" for failed POST request opens incorrect URL
     * Issue 202 Clicking status bar error warning closes firebug
     * Issue 215 Display total page load time 
     * Issue 216 Improve network monitor to include server-side processing time
@@ -74,10 +75,12 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 414 XHR Breaks When Using Firebug 1.1 beta when > 1 HTTP 302 Redirect Is Returned
     * Issue 421 onLoad of XHRSpyListener does not fire correctly
     * Issue 430 about:blank pages always show firebug as enabled
+    * Issue 445: http header content-type missing disables network monitoring    
     * Issue 468 [feature request] fast [enable -> inspect element -> disable] ergonomy
     * Issue 474:  base href applied to scripts
     * Issue 475 Show Return Code (HTTP HEADER-Response)
     * Issue 503 disable doesn't work properly
+    * Issue 521: Prototype iterator functions die in console
     * Issue 567: Slow script warning in debugger.js on some pages
     * Issue 573: setting css background-color affects layout inspector. Contribution by tonygentilcore
     * Issue 583 Javascript console cannot work with Firefox 3 beta5
