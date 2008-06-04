@@ -14,7 +14,7 @@
 }
 
 .memberValueCell {
-    padding: 1px 0 1px 25px;
+    padding: 1px 0 1px 5px;
     display: block;
     overflow: hidden;
 }
@@ -23,9 +23,9 @@
     cursor: default;
     -moz-user-select:  none;
     overflow: hidden;
-    position: absolute;
+    /*position: absolute;*/
     padding-left: 18px;
-    max-width: 30%;
+    /*max-width: 30%;*/    
     white-space: nowrap;
     background-color: #FFFFFF;
 }
