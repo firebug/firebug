@@ -49,7 +49,6 @@
 
 <!ENTITY  firebug.Profile               "Profile">
 <!ENTITY  firebug.ProfileScript         "Profile JavaScript">
-<!ENTITY  firebug.ProfileTooltip        "Profile JavaScript execution time">
 
 <!ENTITY  firebug.Clear                 "Clear">
 <!ENTITY  firebug.ClearConsole          "Clear Console">
