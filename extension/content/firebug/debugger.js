@@ -307,11 +307,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     clearAllBreakpoints: function(context)
     {
-        var sourceFiles = [];
-        for (var url in context.sourceFileMap)
-            sourceFiles.push(context.sourceFileMap[url]);
-
-        fbs.clearAllBreakpoints(sourceFiles.length, sourceFiles, Firebug.Debugger);
+        var sourceFiles = sourceFilesAsArray(context);
+        fbs.clearAllBreakpoints(sourceFiles, Firebug.Debugger);
     },
 
     enableAllBreakpoints: function(context)

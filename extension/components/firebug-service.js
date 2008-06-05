@@ -480,11 +480,14 @@ FirebugService.prototype =
         return bp ? bp.condition : "";
     },
 
-    clearAllBreakpoints: function(urlCount, urls)
+    clearAllBreakpoints: function(sourceFiles)
     {
-        for (var i = 0; i < urls.length; ++i)
+        for (var i = 0; i < sourceFiles.length; ++i)
         {
-            var url = urls[i];
+            var url = sourceFiles[i].href;
+            if (!url)
+                continue;
+
             var urlBreakpoints = breakpoints[url];
             if (!urlBreakpoints)
                 continue;
