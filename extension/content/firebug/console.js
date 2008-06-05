@@ -508,10 +508,18 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
             optionMenu("ShowChromeErrors", "showChromeErrors"),
             optionMenu("ShowChromeMessages", "showChromeMessages"),
             optionMenu("ShowExternalErrors", "showExternalErrors"),
-            serviceOptionMenu("ShowStackTrace", "showStackTrace"),
+            this.getShowStackTraceMenuItem(),
             "-",
             optionMenu("LargeCommandLine", "largeCommandLine")
         ];
+    },
+
+    getShowStackTraceMenuItem: function()
+    {
+        var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
+        if (FirebugContext && !Firebug.Debugger.isEnabled(FirebugContext))
+            menuItem.disabled = true;
+        return menuItem;
     },
 
     search: function(text)
