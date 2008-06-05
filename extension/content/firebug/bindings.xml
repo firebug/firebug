@@ -241,6 +241,13 @@
                 return;
 
             var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
+
+            if (this.selectedTab.getAttribute("disabled"))
+            {
+                for (var i = 0; i < menu.length; i++)
+                    menu[i].disabled = true;
+            }
+
             if (menu)
             {
                 for (var i = 0; i < menu.length; ++i)
