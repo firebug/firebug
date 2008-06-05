@@ -28,7 +28,10 @@ const ignoreVars =
     "JavaMember": 1,
     "JavaObject": 1,
     "JavaClass": 1,
-    "JavaPackage": 1
+    "JavaPackage": 1,
+    "_firebug": 1,
+    "_FirebugConsole": 1,
+    "_FirebugCommandLine": 1,
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
