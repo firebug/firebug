@@ -1495,8 +1495,11 @@ Firebug.Panel =
         }
         catch (exc)
         {
-            if (FBTrace.dumpProperties)
+            if (FBTrace.DBG_ERRORS)
+            {
                 FBTrace.dumpProperties("firebug.Panel showToolbarButtons FAILS", exc);
+                if (!this.context.browser)FBTrace.dumpStack("firebug.Panel showToolbarButtons no browser");
+            }
         }
     },
 
@@ -2381,9 +2384,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
         case "enableAlways":
             if (!shortened)
                 return $STR(this.panelName + "." + "EnableAlways");
-    
+
             label = "EnableShort";
-            break;           
+            break;
 
         case "enable":
             if (isSystemURL(location.spec))
@@ -2574,7 +2577,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             input.checked = input.originalValue = this.isModuleEnabled(module);
 
             if (module == this.module)
-                input.checked = true;                    
+                input.checked = true;
         }
 
         this.applyButton = getElementByClass(this.panelNode, "moduleMangerApplyButton");

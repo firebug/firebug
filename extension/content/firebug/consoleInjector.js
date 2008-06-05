@@ -19,8 +19,18 @@ top.Firebug.Console.injector = {
             return;
         }
 
-        Firebug.Console.injector.injectConsoleScriptTag(win);
+        if (context.stopped)
+            Firebug.Console.injector.evaluateConsoleScript(context);
+        else
+            Firebug.Console.injector.injectConsoleScriptTag(win);
+
         Firebug.Console.injector.addConsoleListener(context, win);
+    },
+
+    evaluateConsoleScript: function(context)
+    {
+        var scriptSource = getResource("chrome://firebug/content/consoleInjected.js");
+        Firebug.Debugger.evaluate(scriptSource, context);
     },
 
     injectConsoleScriptTag: function(win)

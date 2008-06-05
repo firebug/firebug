@@ -36,7 +36,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         if (!element)
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateAndShow: no _firebugConsole!");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateAndShow: no _firebugConsole!\n");
             return;  // we're in trouble here.
         }
 
@@ -721,17 +721,39 @@ Firebug.CommandLine.injector = {
         if ($("_firebugCommandLineInjector", doc))
             return;
 
+        if (context.stopped)
+            Firebug.CommandLine.injector.evalCommandLineScript(context);
+        else
+            Firebug.CommandLine.injector.injectCommandLineScript(doc);
+
+        Firebug.CommandLine.injector.addCommandLineListener(context, win, doc);
+    },
+
+    evalCommandLineScript: function(context)
+    {
+        var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
+        Firebug.Debugger.evaluate(scriptSource, context);
+    },
+
+    injectCommandLineScript: function(doc)
+    {
         // Inject command line script into the page.
         var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
         addScript(doc, "_firebugCommandLineInjector", scriptSource);
+    },
 
+    addCommandLineListener: function(context, win, doc)
+    {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
         var element = $("_firebugConsole", doc);
-        element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
-
-        if (FBTrace.DBG_CONSOLE)                                                                                       /*@explore*/
-            FBTrace.sysout("Command line is successfully attached to: " + win.location + "\n");                        /*@explore*/
+        if (element)
+            element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Commandline.injector, no element " + win.location + "\n");
+        }
     }
 };
 

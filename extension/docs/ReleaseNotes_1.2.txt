@@ -41,6 +41,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Misc ==
     Secure updates via signed update.rdf with xpi updateHash values.
 
+== Localization ==
+    * Hu-hu by Zoltan Papp (issue 749)
 
 == Bug Fixes ==
     * Issue 1: Reload external Firebug window while its tab is hidden closes the window
@@ -55,7 +57,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 186 Only one line in net monitor for multiple xhr post requests
     * Issue 188: "Open in new tab" for failed POST request opens incorrect URL
     * Issue 202 Clicking status bar error warning closes firebug
-    * Issue 215 Display total page load time 
+    * Issue 215 Display total page load time
     * Issue 216 Improve network monitor to include server-side processing time
     * Issue 266 PUT & DELETE requests appear as POST requests in firebug
     * Issue 316 Show HTTP request method and request content in Firebugs "Net" tab
@@ -99,6 +101,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 691 Enablement for site does not reload other tabs
     * Issue 720 Net tab -> response status = &nbsp; and response time = NaNm.
     * Issue 719 Firebug's log limit has been reached - difficult named option
-    * Issue 723, JavaScript errors not shown in Firebug even when debugging is enabled;
-   
-    
+    * Issue 723 JavaScript errors not shown in Firebug even when debugging is enabled;
+    * Issue 734 While debugging, click into the console. The execution context is not available

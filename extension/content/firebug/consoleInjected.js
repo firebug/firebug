@@ -3,8 +3,8 @@ function _FirebugConsole()
 {
     this.init = function()
     {
-        var commands = ["log", "debug", "info", "warn", "error", "assert", "dir", 
-            "dirxml", "trace", "group", "groupEnd", "groupCollapsed", 
+        var commands = ["log", "debug", "info", "warn", "error", "assert", "dir",
+            "dirxml", "trace", "group", "groupEnd", "groupCollapsed",
             "time", "timeEnd", "profile", "profileEnd", "count"];
 
         // Create console API
@@ -18,7 +18,7 @@ function _FirebugConsole()
         // Initialize DOM element for communication betwen the web-page a chrome.
         this.getFirebugElement();
     },
-    
+
     this.notifyFirebug = function(objs, methodName, eventId)
     {
         var element = this.getFirebugElement();
@@ -41,10 +41,10 @@ function _FirebugConsole()
 
         if (!result && this.userObjects.length == length+1)
             return this.userObjects[length];
-        
+
         for (var i=length; i<this.userObjects.length && result; i++)
             result.push(this.userObjects[i]);
-        
+
         return result;
     };
 

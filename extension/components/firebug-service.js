@@ -1622,7 +1622,7 @@ FirebugService.prototype =
             }
             catch (exc)
             {
-                ddd("Failed to give resetBreakpoints trace "+exc+"\n");
+                dumpProperties("Failed to give resetBreakpoints trace "+exc+" for urlBreakpoints=", urlBreakpoints);
             }
         }
 

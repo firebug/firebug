@@ -1503,7 +1503,7 @@ this.getStackTrace = function(frame, context)
 {
     var trace = new this.StackTrace();
 
-    for (; frame; frame = frame.callingFrame)
+    for (; frame && frame.isValid; frame = frame.callingFrame)
     {
         if (!this.isSystemURL(FBL.normalizeURL(frame.script.fileName)))
         {
