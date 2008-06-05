@@ -160,7 +160,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
             if (FBTrace.DBG_ERRORS)
             {
-                if (context.window)
+                if (context && context.window)
                     FBTrace.sysout("error logged to ",  context.window.location+"\n");
                 else
                 {
