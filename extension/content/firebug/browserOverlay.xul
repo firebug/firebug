@@ -70,7 +70,7 @@
     </menu>
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
-                    oncommand="Firebug.showBar(true); FirebugChrome.select(document.popupNode);"/>
+                    oncommand="Firebug.toggleBar(true); FirebugChrome.select(document.popupNode);"/>
     </popup>
 
     <menupopup id="menu_viewPopup">
