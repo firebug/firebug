@@ -114,8 +114,10 @@ Firebug.Profiler = extend(Firebug.Module,
             var tag = Firebug.Profiler.ProfileCall.tag;
             var insert = tag.insertRows;
 
-            for (var i = 0; i < calls.length; ++i)
+            for (var i = 0; i < calls.length; ++i) {
+                calls[i].index = i;
                 context.throttle(insert, tag, [{object: calls[i]}, tbody]);
+            }
 
             context.throttle(groupRow.scrollIntoView, groupRow);
         }
@@ -228,8 +230,10 @@ Firebug.Profiler.ProfileTable = domplate(
 
             header.sorted = -1;
 
-            for (var i = 0; i < values.length; ++i)
+            for (var i = 0; i < values.length; ++i) {
+                values[i].row.setAttribute("odd", (i % 2));
                 tbody.appendChild(values[i].row);
+            }
         }
         else
         {
@@ -238,8 +242,10 @@ Firebug.Profiler.ProfileTable = domplate(
 
             header.sorted = 1;
 
-            for (var i = values.length-1; i >= 0; --i)
+            for (var i = values.length-1; i >= 0; --i) {
+                values[i].row.setAttribute("odd", (Math.abs(i-values.length-1) % 2));
                 tbody.appendChild(values[i].row);
+            }
         }
     }
 });
@@ -261,7 +267,7 @@ Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
 Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 {
     tag:
-        TR(
+        TR({odd: "$object|isOddRow"},
             TD(
                 FirebugReps.OBJECTLINK("$object|getCallName")
             ),
@@ -278,6 +284,11 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    isOddRow: function(call)
+    {
+        return (call.index % 2) ? 1 : 0;
+    },
 
     getCallName: function(call)
     {

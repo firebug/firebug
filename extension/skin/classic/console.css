@@ -257,6 +257,15 @@
     padding: 0 0 4px 0;
 }
 
+.profileTable tr[odd="1"] {
+    background-color: #F5F5F5;
+    vertical-align:middle;
+}
+
+.profileTable a {
+    vertical-align:middle;
+}
+
 .profileTable td {
     padding: 1px 4px 0 4px;
 }
