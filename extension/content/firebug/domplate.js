@@ -45,13 +45,13 @@ domplate.context = function(context, fn)
     domplate.topContext = lastContext;
 };
 
-top.TAG = function()
+FBL.TAG = function()
 {
     var embed = new DomplateEmbed();
     return embed.merge(arguments);
 };
 
-top.FOR = function()
+FBL.FOR = function()
 {
     var loop = new DomplateLoop();
     return loop.merge(arguments);
@@ -865,7 +865,7 @@ function ArrayIterator(array)
 
 function StopIteration() {}
 
-top.$break = function()
+FBL.$break = function()
 {
     throw StopIteration;
 };
@@ -1023,7 +1023,7 @@ function defineTags()
         var fn = new Function("var newTag = new DomplateTag('"+tagName+"'); return newTag.merge(arguments);");
 
         var fnName = tagName.toUpperCase();
-        top[fnName] = fn;
+        FBL[fnName] = fn;
     }
 }
 
