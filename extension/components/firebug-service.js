@@ -787,7 +787,10 @@ FirebugService.prototype =
 
         if (!enabledDebugger)
             return;
-
+        
+        if (!timer)  // then we probably shutdown
+            return; 
+        
         timer.init({observe: function()
         {
             enabledDebugger = false;
