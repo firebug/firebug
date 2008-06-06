@@ -3,6 +3,10 @@
 @import "chrome://firebug/skin/firebug.css";
 @import "chrome://firebug-os/skin/firebug.css";
 
+window[chromehidden~="toolbar"] #fbToolbar {
+   display: -moz-box;
+}
+
 #fbContentBox {
     -moz-binding: url("chrome://firebug/content/bindings.xml#initializer");
     height: 270px;
@@ -21,7 +25,7 @@
 }
 
 .fbSearchBox-attention {
-	color: red;
+    color: red;
     font-weight: bold;
 }
 
