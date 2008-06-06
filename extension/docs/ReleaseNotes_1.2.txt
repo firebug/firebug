@@ -45,20 +45,22 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Hu-hu by Zoltan Papp (issue 749)
 
 == Bug Fixes ==
-    * Issue 1: Reload external Firebug window while its tab is hidden closes the window
-    * Issue 2: Can't set breakpoints in code called by unload event
-    * Issue 4: Visiting error page causes external Firebug window to close itself
+    * Issue 1 Reload external Firebug window while its tab is hidden closes the window
+    * Issue 2 Can't set breakpoints in code called by unload event
+    * Issue 4 Visiting error page causes external Firebug window to close itself
     * Issue 7 Long URLs in XHR spy rows should be cropped
-    * Issue 14: Programatically disable firebug log from Javascript
-    * Issue 38:  console.group should allow optional collapse
-    * Issue 43: Edit CSS behaviour - appending styles to the dom is unexpected. Contribution by  tonygentilcore
+    * Issue 14 Programatically disable firebug log from Javascript
+    * Issue 38  console.group should allow optional collapse
+    * Issue 43 Edit CSS behaviour - appending styles to the dom is unexpected. Contribution by  tonygentilcore
+    * Issue 56 Enhancement: row distinction in profiler
     * Issue 65 show HTTP Status code on NET response
-    * Issue 183: Configurable maximum output size
+    * Issue 183 Configurable maximum output size
     * Issue 186 Only one line in net monitor for multiple xhr post requests
-    * Issue 188: "Open in new tab" for failed POST request opens incorrect URL
+    * Issue 188 "Open in new tab" for failed POST request opens incorrect URL
     * Issue 202 Clicking status bar error warning closes firebug
     * Issue 215 Display total page load time
     * Issue 216 Improve network monitor to include server-side processing time
+    * Issue 256 Inspect element in context menu always opens fbug in same window regardless of settings and closes inproperly
     * Issue 266 PUT & DELETE requests appear as POST requests in firebug
     * Issue 316 Show HTTP request method and request content in Firebugs "Net" tab
     * Issue 321 arguments can no longer be logged
@@ -68,8 +70,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 346 Fix Net Panel timings
     * Issue 349 Local file XHR events not listed in console
     * Issue 359 No entry in the Net tab for XHR when response content length is 0
-    * Issue 361:  Edit button gets stuck when reloading page whilst editing CSS. Contribution by tonygentilcore
-    * Issue 393: Text overlayed on text in script editor window.
+    * Issue 361  Edit button gets stuck when reloading page whilst editing CSS. Contribution by tonygentilcore
+    * Issue 393 Text overlayed on text in script editor window.
     * Issue 401 Net tab does not consider "application/javascript" a JS MIME type
     * Issue 402 Net tab tries to show previews of non-images with image file extensions
     * Issue 404 UI change to help users activate expensive debugging features only when they need them.
@@ -77,29 +79,35 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 414 XHR Breaks When Using Firebug 1.1 beta when > 1 HTTP 302 Redirect Is Returned
     * Issue 421 onLoad of XHRSpyListener does not fire correctly
     * Issue 430 about:blank pages always show firebug as enabled
-    * Issue 445: http header content-type missing disables network monitoring    
+    * Issue 445 http header content-type missing disables network monitoring
+    * Issue 455 Firebug and iMacros Incompatibility    
     * Issue 468 [feature request] fast [enable -> inspect element -> disable] ergonomy
-    * Issue 474:  base href applied to scripts
+    * Issue 474 base href applied to scripts
     * Issue 475 Show Return Code (HTTP HEADER-Response)
     * Issue 503 disable doesn't work properly
-    * Issue 521: Prototype iterator functions die in console
-    * Issue 567: Slow script warning in debugger.js on some pages
-    * Issue 573: setting css background-color affects layout inspector. Contribution by tonygentilcore
+    * Issue 521 Prototype iterator functions die in console
+    * Issue 567 Slow script warning in debugger.js on some pages
+    * Issue 573 setting css background-color affects layout inspector. Contribution by tonygentilcore
     * Issue 583 Javascript console cannot work with Firefox 3 beta5
     * Issue 587 Custom listeners for observing net-monitor.
-    * issue 599, Firebug Inspect Outline Does Not Show Up Over Web Page Elements
+    * issue 599 Firebug Inspect Outline Does Not Show Up Over Web Page Elements
     * Issue 601 XHR in console shows stale/cached output
-    * Issue 618: HTML: tab order, fixed by setting order properties on side panels.
-    * Issue 619: Reopening firebug results in grey DOM, Layout or Style Pane, fixed by forceUpdate on syncSidePanel.
+    * Issue 618 HTML: tab order, fixed by setting order properties on side panels.
+    * Issue 619 Reopening firebug results in grey DOM, Layout or Style Pane, fixed by forceUpdate on syncSidePanel.
+    * Issue 623 Pop up windows do not show all FireBug controls
     * Issue 634 XHR request details not showing up
     * Issue 637 $ FireBug function overwrites existing $ function
-    * Issue 659: firebug.js:1473 - "this.context.browser is undefined"
+    * Issue 659 firebug.js:1473 - "this.context.browser is undefined"
     * Issue 676 Exception in firebug-cache.js when visiting http://www.takebacktheweb.org/CaE.html
     * Issue 679 Firebug 1.2.0a27X blocking most AJAX calls
     * Issue 680 Tab completion of JavaScript elements not working
     * Issue 690 New zh-CN local file for Firebug 1.2
     * Issue 691 Enablement for site does not reload other tabs
+    * Issue 707 'Remove All Breakpoints' does nothing
+    * Issue 709 Visible Console Objects
     * Issue 720 Net tab -> response status = &nbsp; and response time = NaNm.
     * Issue 719 Firebug's log limit has been reached - difficult named option
     * Issue 723 JavaScript errors not shown in Firebug even when debugging is enabled;
     * Issue 734 While debugging, click into the console. The execution context is not available
+    * Issue 736 Temp disabling breakpoints does not work. 
+    * Issue 750 DOM side-panel - variables names overlay actual values
