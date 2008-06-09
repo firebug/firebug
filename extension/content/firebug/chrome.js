@@ -482,6 +482,9 @@ top.FirebugChrome =
         {
             FirebugContext = context;
 
+            if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("chrome.showContext context: "+(context?context.window.location:"null ")+"\n");
+
             if (externalBrowser || (context.browser && context.browser.showFirebug) )
                 this.syncPanel();
         }
