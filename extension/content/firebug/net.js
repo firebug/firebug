@@ -265,8 +265,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     {
         monitorContext(context);
 
-        // xxxJJB Honza delete this if all is well, moved to firebug.panelActivate
-        // this.enablePanel(context);
+        if (context.netProgress && listeners.length)
+        {
+            var panel = context.getPanel(panelName);
+            context.netProgress.activate(panel);
+        }
 
         $('fbStatusIcon').setAttribute("net", "on");
 
@@ -276,6 +279,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     onPanelDeactivate: function(context, destroy)
     {
+        if (context.netProgress && listeners.length)
+            context.netProgress.activate(null);
+
         unmonitorContext(context);
     },
 
@@ -637,17 +643,11 @@ NetPanel.prototype = domplate(Firebug.Panel,
         this.queue = [];
 
         Firebug.Panel.initialize.apply(this, arguments);
-
-        if (this.context.netProgress && listeners.length)
-            this.context.netProgress.activate(this);
     },
 
     destroy: function(state)
     {
         Firebug.Panel.destroy.apply(this, arguments);
-
-        if (this.context.netProgress && listeners.length)
-            this.context.netProgress.activate(null);
     },
 
     show: function(state)
