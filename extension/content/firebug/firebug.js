@@ -1444,7 +1444,7 @@ Firebug.Panel =
 
         if (this.panelNode)
         {
-            this.panelNode = doc.importNode(this.panelNode, true);
+            this.panelNode = doc.adoptNode(this.panelNode, true);
             this.panelNode.ownerPanel = this;
             doc.body.appendChild(this.panelNode);
             this.panelNode.scrollTop = this.lastScrollTop;
