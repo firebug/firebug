@@ -1258,8 +1258,9 @@ top.Firebug =
 
     loadedContext: function(context)
     {
-        // re-synchronize after load
-        context.browser.chrome.showContext(context.browser, context);
+        // re-synchronize after load if this context is showing
+        if (this.tabBrowser.currentURI.spec == context.browser.currentURI.spec)
+            context.browser.chrome.showContext(context.browser, context);
     },
     //***********************************************************************
 
