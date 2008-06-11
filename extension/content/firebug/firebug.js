@@ -59,8 +59,8 @@ const firebugURLs =
 };
 
 const prefNames =
-[
-    "disabledAlways", "disabledFile", "allowSystemPages",
+[    
+    // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
 
@@ -328,86 +328,6 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Disabling
-
-    enableAlways: function()
-    {
-        TabWatcher.activate();
-    },
-
-    disableAlways: function()
-    {
-        var currentSelected = TabWatcher.deactivate();
-        if (currentSelected)
-        {
-            for (var i = 0; i < tabBrowser.browsers.length; ++i)
-            {
-                var browser = tabBrowser.browsers[i];
-                TabWatcher.watchContext(browser.contentWindow, null);
-            }
-        }
-    },
-
-    disableSystemPages: function(disable)
-    {
-        this.setPref(Firebug.prefDomain, "allowSystemPages", !disable);
-        this.disableCurrent(disable);
-    },
-
-    disableSite: function(disable)
-    {
-        var host;
-        try
-        {
-            host = tabBrowser.currentURI.host;
-        }
-        catch (exc)
-        {
-            // XXXjjb eg about:neterror and friends.
-        }
-        if (isSystemURL(tabBrowser.currentURI.spec))
-            this.setPref(this.prefDomain, "allowSystemPages", !disable);
-        else if (!host)
-            this.setPref(this.prefDomain, "disabledFile", disable);
-        else
-        {
-            var uri = ioService.newURI("http://" + host, null, null);
-            if (disable)
-                pm.add(uri, "firebug", DENY_ACTION);
-            else
-            {
-                if (this.isURIDenied(uri))
-                    pm.remove(host, "firebug");
-                else
-                    pm.add(uri, "firebug", ALLOW_ACTION);
-            }
-        }
-        this.disableCurrent(disable);
-    },
-
-    disableCurrent: function(disable)
-    {
-        if (!tabBrowser)
-            return; // externalBrowser
-
-        if (disable)
-        {
-            TabWatcher.unwatchBrowser(tabBrowser.selectedBrowser);
-            for (var i = 0; i < tabBrowser.browsers.length; ++i)
-            {
-                var browser = tabBrowser.browsers[i];
-                TabWatcher.watchContext(browser.contentWindow, null);
-            }
-        }
-        else
-        {
-            TabWatcher.activate();  // These statement are redundant
-            TabWatcher.watchBrowser(tabBrowser.selectedBrowser);
-        }
-
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Options
 
     togglePref: function(name)
@@ -479,13 +399,6 @@ top.Firebug =
             }
         }
 
-        if (name == "disabledAlways")
-        {
-            if (value)
-                this.disableAlways();
-            else
-                this.enableAlways();
-        }
         if (name.substr(0, 15) == "externalEditors")
         {
             this.loadExternalEditors();
@@ -541,19 +454,6 @@ top.Firebug =
             newArray.push.apply(newArray, externalEditors);
 
         return newArray;
-    },
-
-    openPermissions: function()
-    {
-        var params = {
-            permissionType: "extensions.firebug.net",
-            windowTitle: $STR("FirebugPermissions"),
-            introText: $STR("FirebugPermissionsIntro"),
-            blockVisible: true, sessionVisible: false, allowVisible: true, prefilledHost: ""
-        };
-
-        openWindow("Browser:Permissions", "chrome://browser/content/preferences/permissions.xul",
-            "", params);
     },
 
     openEditors: function()
@@ -1098,50 +998,6 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Owner
 
-    isURIAllowed: function(uri)
-    {
-        return true;
-
-        // xxxHonza
-        /*
-        if (!uri)  // null or undefined is denied
-            return false;
-        var url  = (uri instanceof nsIURI) ? uri.spec : uri.toString();
-        if (FBL.isLocalURL(url) && !this.disabledFile)
-            return true;
-        if (isSystemURL(url) && Firebug.allowSystemPages)
-            return true;
-        if (uri instanceof nsIURI)
-        {
-               if (pm.testPermission(uri, "firebug") == ALLOW_ACTION)
-                return true;
-        }
-        return false;
-        */
-    },
-
-    isURIDenied: function(uri)
-    {
-        return false;
-
-        //xxxHonza
-        /*
-        if (!uri)  // null or undefined is denied
-            return true;
-        var url  = (uri instanceof nsIURI) ? uri.spec : uri.toString();
-        if (isSystemURL(url) && !Firebug.allowSystemPages)
-            return true;
-        if (uri instanceof nsIURI)
-        {
-            if (pm.testPermission(uri, "firebug") == DENY_ACTION)
-                return true;
-        } // else we cannot test! TODO
-        if (FBL.isLocalURL(url) && this.disabledFile)
-            return true;
-        return false;
-        */
-    },
-
     enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
     {
         if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
@@ -1152,18 +1008,6 @@ top.Firebug =
         if ( dispatch2(extensions, "declineContext", [win, uri]) )
             return false;
 
-        if (this.disabledAlways)
-        {
-            // Check if the whitelist makes an exception
-            if (!this.isURIAllowed(uri))
-                return false;
-        }
-        else
-        {
-            // Check if the blacklist says no
-            if (this.isURIDenied(uri))
-                return false;
-        }
         return true;
     },
 

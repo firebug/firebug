@@ -16,8 +16,6 @@
     </stringbundleset>
 
     <commandset id="mainCommandSet">
-        <!-- xxxHonza
-        <command id="cmd_openFirebugPermissions" oncommand="Firebug.openPermissions()"/> -->
         <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
         <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
 

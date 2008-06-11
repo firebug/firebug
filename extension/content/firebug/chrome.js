@@ -151,11 +151,6 @@ top.FirebugChrome =
             $("fbLargeCommandLine").addEventListener('focus', onCommandLineFocus, true);
             $("fbCommandLine").addEventListener('focus', onCommandLineFocus, true);
 
-            var win1 = panelBar1.browser.contentWindow;
-            win1.enableAlways = bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, "disabledAlways", false);
-            win1.enableSite = bindFixed(Firebug.disableSite, Firebug, false);
-            win1.enableSystemPages = bindFixed(Firebug.disableSystemPages, Firebug, false);
-
             for (var i = 0; i < Firebug.panelTypes.length; ++i)
             {
                 var panelType = Firebug.panelTypes[i];
@@ -787,30 +782,7 @@ top.FirebugChrome =
                 if (option)
                 {
                     var checked = false;
-                    if (option == "disabledForSite")
-                    {
-                        var uri = this.getCurrentURI();
-                        if (uri)
-                        {
-                            if (FBL.isSystemURL(uri.spec))
-                            {
-                                checked = !Firebug.allowSystemPages;
-                                child.setAttribute("label", FBL.$STR("DisableForSystemPages"));
-                            }
-                            else if (!FBL.getURIHost(uri))
-                            {
-                                checked = Firebug.disabledFile;
-                                child.setAttribute("label", FBL.$STR("DisableForFiles"));
-                            }
-                            else
-                            {
-                                checked = Firebug.isURIDenied(uri);
-                                child.setAttribute("label",
-                                    FBL.$STRF("DisableForSite", [uri.host]));
-                            }
-                        }
-                    }
-                    else if (option == "profiling")
+                    if (option == "profiling")
                         checked = fbs.profiling;
                     else
                         checked = Firebug.getPref(Firebug.prefDomain, option);
@@ -826,10 +798,7 @@ top.FirebugChrome =
         var option = menuitem.getAttribute("option");
         var checked = menuitem.getAttribute("checked") == "true";
 
-        if (option == "disabledForSite")
-            Firebug.disableSite(checked);
-        else
-            Firebug.setPref(Firebug.prefDomain, option, checked);
+        Firebug.setPref(Firebug.prefDomain, option, checked);
     },
 
     onContextShowing: function(event)

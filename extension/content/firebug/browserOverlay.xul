@@ -96,16 +96,6 @@
                 </menu>
                 <menuseparator/>
 
-                <!--
-                xxxHonza - disable firebug functionality should be entirely removed.
-                <menuitem label="&firebug.DisableFirebug;" type="checkbox"
-                          oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>
-                <menuitem type="checkbox"
-                          oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
-                <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
-                <menuseparator/>
-                -->
-
                 <menuitem id="menu_inspectElement" label="&firebug.InspectElement;"
                           command="cmd_toggleInspecting" key="key_toggleInspecting"/>
                 <menuitem label="&firebug.ProfileScript;"
@@ -141,20 +131,12 @@
                     <toolbarbutton id="fbFirebugMenu" type="menu">
                         <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup">
 
-                            <!--
-                            xxxHonza - disable firebug functionality should be entirely removed.
-                            <menuitem label="&firebug.DisableFirebug;" type="checkbox"
-                                      oncommand="FirebugChrome.onToggleOption(this)" option="disabledAlways"/>
-                            <menuitem type="checkbox"
-                                      oncommand="FirebugChrome.onToggleOption(this)" option="disabledForSite"/>
-                            <menuitem label="&firebug.AllowedSites;" command="cmd_openFirebugPermissions"/>
-                            <menuseparator/>
-                            -->
                             <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
                                 <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                                         <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
                                 </menupopup>
                             </menu>
+                            
                             <menuseparator/>
 
                             <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">

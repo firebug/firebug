@@ -86,36 +86,6 @@ top.TabWatcher =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    // xxxHonza activate and deactivate are not used since only usage is in Firebug.enableAlways
-    // and Firebug.disableAways, which are never called.
-    activate: function()
-    {
-        if (tabBrowser)
-            this.watchBrowser(tabBrowser.selectedBrowser);
-    },
-
-    deactivate: function()
-    {
-        if (tabBrowser)
-        {
-            var currentSelected = false;
-            for (var i = 0; i < tabBrowser.browsers.length; ++i)
-            {
-                var browser = tabBrowser.browsers[i];
-                if (!this.owner.isURIAllowed(safeGetURI(browser)))
-                {
-                    this.unwatchTopWindow(browser.contentWindow);
-
-                    if (browser == tabBrowser.selectedBrowser)
-                        currentSelected = true;
-                }
-            }
-            return currentSelected;
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
     /**
      * Attaches to a top-level window. Creates context unless we just re-activated on an existing context
      */
@@ -233,7 +203,7 @@ top.TabWatcher =
         var isSystem = isSystemPage(win);
 
         var context = this.getContextByWindow(win);
-        if ((context && !context.window) || (isSystem && !Firebug.allowSystemPages))
+        if ((context && !context.window) || isSystem) //xxxHonza system pages aren't allowed now
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
                 FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing !!!, context.window: "+                          /*@explore*/

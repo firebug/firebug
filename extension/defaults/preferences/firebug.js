@@ -1,9 +1,6 @@
 
 // Global
-pref("extensions.firebug.disabledAlways", false);  // TODO clean up
 pref("extensions.firebug.alwaysEnableThesePanels", false);
-pref("extensions.firebug.allowSystemPages", false);
-pref("extensions.firebug.disabledFile", true);
 pref("extensions.firebug.defaultPanelName", "html");
 pref("extensions.firebug.throttleMessages", true);
 pref("extensions.firebug.textSize", 0);
