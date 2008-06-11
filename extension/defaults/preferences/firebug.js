@@ -13,6 +13,7 @@ pref("extensions.firebug.textWrapWidth", 100);
 pref("extensions.firebug.openInWindow", false);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", "vertical");
+pref("extensions.firebug.alwaysEnable", false);
 
 // Console
 pref("extensions.firebug.showJSErrors", true);
@@ -25,8 +26,8 @@ pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug-service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
-pref("extensions.firebug.console.enableLocalFiles", true);
-pref("extensions.firebug.console.enableAlways", false);
+pref("extensions.firebug.console.enableLocalFiles", "default");
+pref("extensions.firebug.console.enableSystemPages", "default");
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
@@ -46,9 +47,8 @@ pref("extensions.firebug-service.showEvalSources", true);
 pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
-pref("extensions.firebug.debugger.enableAlways", false);
-pref("extensions.firebug.script.enableLocalFiles", true);
-pref("extensions.firebug.script.enableAlways", false);
+pref("extensions.firebug.script.enableLocalFiles", "default");
+pref("extensions.firebug.script.enableSystemPages", "default");
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
@@ -69,9 +69,8 @@ pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.autoDisable", true);
-pref("extensions.firebug.net.enableAlways", false);
-pref("extensions.firebug.net.enableLocalFiles", true);
-pref("extensions.firebug.net.enableAlways", false);
+pref("extensions.firebug.net.enableLocalFiles", "default");
+pref("extensions.firebug.net.enableSystemPages", "default");
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");

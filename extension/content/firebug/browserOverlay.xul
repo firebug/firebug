@@ -180,6 +180,10 @@
                                     <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
                                               oncommand="FirebugChrome.onToggleOption(this)"
                                               option="shadeBoxModel"/>
+
+                                    <menuitem type="checkbox" label="&firebug.AlwaysEnableFirebug;"
+                                              oncommand="FirebugChrome.onToggleOption(this)"
+                                              option="alwaysEnable"/>
                                 </menupopup>
                             </menu>
                             <menuseparator id="FirebugBetweenOptionsAndSites"/>

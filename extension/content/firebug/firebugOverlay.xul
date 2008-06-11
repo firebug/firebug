@@ -16,13 +16,15 @@
     </stringbundleset>
 
     <commandset id="mainCommandSet">
-        <command id="cmd_openFirebugPermissions" oncommand="Firebug.openPermissions()"/>
+        <!-- xxxHonza
+        <command id="cmd_openFirebugPermissions" oncommand="Firebug.openPermissions()"/> -->
         <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
         <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
 
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_savePanels" oncommand="FirebugChrome.savePanels()"/>
+        <command id="cmd_alwaysEnableFirebug" oncommand="Firebug.alwaysEnableFirebug()"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
@@ -107,9 +109,12 @@
                         oncommand="return Firebug.Console.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Console.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.Console.onStateMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbConsoleStateMenu" value="default"/>
                         <menuitem type="radio" name="fbConsoleStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbConsoleStateMenu" value="disable"/>
-                        <menuitem type="radio" name="fbConsoleStateMenu" value="enableAlways"/>
+                        <menuseparator />
+                        <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
+                                oncommand="Firebug.Console.openPermissions(event)"/>
                     </menupopup>
                 </toolbarbutton>
             </hbox>
@@ -133,9 +138,12 @@
                         oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="default"/>
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enableAlways"/>
+                        <menuseparator />
+                        <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
+                                oncommand="Firebug.Debugger.openPermissions(event)"/>
                     </menupopup>
                 </toolbarbutton>
             </hbox>
@@ -151,9 +159,12 @@
                         oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbNetStateMenu" value="default"/>
                         <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
-                        <menuitem type="radio" name="fbNetStateMenu" value="enableAlways"/>
+                        <menuseparator />
+                        <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
+                                oncommand="Firebug.NetMonitor.openPermissions(event)"/>
                     </menupopup>
                 </toolbarbutton>
                 <hbox id="fbNetButtonsFilter" collapsed="true">
