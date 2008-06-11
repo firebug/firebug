@@ -1,11 +1,11 @@
-
-
 .FBTraceColumn {
     float: left;
     width: 16.7%;
 }
 
 .FBTraceOption {
+    display:block;
+    width: 90%;
     cursor: default !important;
     border-color: #D7D7D7;
     -moz-border-radius: 4px 4px 0 0;
@@ -13,4 +13,5 @@
 }
 .FBTraceOption[checked="true"] {
     font-weight: bold;
+    background-color: #D7D7D7;
 }
