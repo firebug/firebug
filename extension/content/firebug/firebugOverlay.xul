@@ -112,7 +112,7 @@
                         <menuitem type="radio" name="fbConsoleStateMenu" value="disable"/>
                         <menuseparator />
                         <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
-                                oncommand="Firebug.Console.openPermissions(event)"/>
+                                oncommand="Firebug.Console.openPermissions(event, FirebugContext)"/>
                     </menupopup>
                 </toolbarbutton>
             </hbox>
@@ -140,8 +140,8 @@
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
                         <menuseparator />
-                        <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
-                                oncommand="Firebug.Debugger.openPermissions(event)"/>
+                        <menuitem name="fbDebuggerPermisions" label="&firebug.Permissions;"
+                                oncommand="Firebug.Debugger.openPermissions(event, FirebugContext)"/>
                     </menupopup>
                 </toolbarbutton>
             </hbox>
@@ -161,8 +161,8 @@
                         <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
                         <menuseparator />
-                        <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
-                                oncommand="Firebug.NetMonitor.openPermissions(event)"/>
+                        <menuitem name="fbNetMonitorPermisions" label="&firebug.Permissions;"
+                                oncommand="Firebug.NetMonitor.openPermissions(event, FirebugContext)"/>
                     </menupopup>
                 </toolbarbutton>
                 <hbox id="fbNetButtonsFilter" collapsed="true">

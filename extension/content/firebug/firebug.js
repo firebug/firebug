@@ -2083,15 +2083,19 @@ Firebug.ActivableModule = extend(Firebug.Module,
     /**
      * Opens a dialog with list of created permissions for this module.
      */
-    openPermissions: function(event)
+    openPermissions: function(event, context)
     {
         cancelEvent(event);
 
+        var location = FirebugChrome.getBrowserURI(context);
         var params = {
             permissionType: this.getPrefDomain(),
             windowTitle: $STR(this.panelName + ".Permissions"),
             introText: $STR(this.panelName + ".PermissionsIntro"),
-            blockVisible: true, sessionVisible: false, allowVisible: true, prefilledHost: ""
+            blockVisible: true, 
+            sessionVisible: false, 
+            allowVisible: true, 
+            prefilledHost: location.host
         };
 
         openWindow("Browser:Permissions", "chrome://browser/content/preferences/permissions.xul",
