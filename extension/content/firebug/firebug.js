@@ -59,7 +59,7 @@ const firebugURLs =
 };
 
 const prefNames =
-[    
+[
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
@@ -1982,7 +1982,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var option = this.getHostPermission(context);
         switch (option)
         {
-	        case "enable": 
+            case "enable":
                 return true;
             case "disable":
                 return false;
@@ -1992,14 +1992,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         if (FBTrace.DBG_PANELS)
         {
-            FBTrace.sysout("firebug.isHostEnabled UNKNOWN option: " + option + 
+            FBTrace.sysout("firebug.isHostEnabled UNKNOWN option: " + option +
                 ", location: " + (context ? context.window.location : "null") +
                 "\n");
         }
     },
 
     /**
-     * Sets host permission for the module. 
+     * Sets host permission for the module.
      * There are three types of permissions that can be specified in the option:
      * "enabled" - the module is always enabled for this host.
      * "disabled" - the module is always disabled for this host.
@@ -2027,12 +2027,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
             return;
         }
 
-	    switch(option)
-	    {
-	        case "enable": 
+        switch(option)
+        {
+            case "enable":
                 permissionManager.add(location, prefDomain, permissionManager.ALLOW_ACTION);
                 break;
-            
+
             case "disable":
                 permissionManager.add(location, prefDomain, permissionManager.DENY_ACTION);
                 break;
@@ -2052,21 +2052,24 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var location = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
 
+        if (!location.spec)
+            return Firebug.getPref(prefDomain, "enableSystemPages"); // eg resource://gre/res/hiddenWindow.html
+
         if (isLocalURL(location.spec))
             return Firebug.getPref(prefDomain, "enableLocalFiles");
         else if (isSystemURL(location.spec))
-            return Firebug.getPref(prefDomain, "enableSystemPages", option);
+            return Firebug.getPref(prefDomain, "enableSystemPages");
 
-	    switch (permissionManager.testPermission(location, prefDomain))
-	    {
-	        case nsIPermissionManager.ALLOW_ACTION: 
+        switch (permissionManager.testPermission(location, prefDomain))
+        {
+            case nsIPermissionManager.ALLOW_ACTION:
                 return "enable";
-	        case nsIPermissionManager.DENY_ACTION:  
-	            return "disable";
+            case nsIPermissionManager.DENY_ACTION:
+                return "disable";
 
-	        default:
+            default:
                 return "default";
-	    }
+        }
     },
 
     /**
