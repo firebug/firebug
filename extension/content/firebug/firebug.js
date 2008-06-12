@@ -2016,6 +2016,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 prefDomain+" for "+location.spec+"\n");
         }
 
+        if (!location.spec)
+        {
+            Firebug.setPref(prefDomain, "enableSystemPages", option);
+            return;
+        }
+
         if (isLocalURL(location.spec))
         {
             Firebug.setPref(prefDomain, "enableLocalFiles", option);
@@ -2088,6 +2094,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
         cancelEvent(event);
 
         var location = FirebugChrome.getBrowserURI(context);
+        var isSystem = isSystemURL(location.spec);
+
         var params = {
             permissionType: this.getPrefDomain(),
             windowTitle: $STR(this.panelName + ".Permissions"),
@@ -2095,7 +2103,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             blockVisible: true, 
             sessionVisible: false, 
             allowVisible: true, 
-            prefilledHost: location.host
+            prefilledHost: (isSystem ? "" : location.host)
         };
 
         openWindow("Browser:Permissions", "chrome://browser/content/preferences/permissions.xul",
@@ -2137,6 +2145,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             {
                 var prefDomain = this.getPrefDomain();
                 if (data == prefDomain + ".enableLocalFiles" ||
+                    data == prefDomain + ".enableSystemPages" ||
                     data == prefDomain + ".enableAlways")
                 {
                     if (FBTrace.DBG_PANELS)
@@ -2170,7 +2179,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                         if (FBTrace.DBG_PANELS)
                             FBTrace.sysout("trying "+ location.href +"=="+ host+((location.host.indexOf(host)!=-1)?" ***FOUND***":" no match")+"\n");
 
-                        if (isLocalURL(location.href))
+                        if (isLocalURL(location.href) || isSystemURL(location.href))
                             module.syncPersistedPanelState(context, false);
                         else if (location.host.indexOf(host) != -1)
                             module.syncPersistedPanelState(context, false);
@@ -2461,7 +2470,13 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     {
         var location = FirebugChrome.getBrowserURI(this.context);
         var hostURI = getURIHost(location);
-        hostURI = hostURI ? hostURI : $STR("moduleManager.localfiles");
+
+        if (isSystemURL(location.spec))
+            label = "moduleManager.systempages";
+        else if (!hostURI)
+            label = "moduleManager.localfiles";
+
+        hostURI = hostURI ? hostURI : $STR(label);
 
         // Prepare arguments for the template (list of activableModules and
         // title for the apply button).

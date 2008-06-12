@@ -203,7 +203,7 @@ top.TabWatcher =
         var isSystem = isSystemPage(win);
 
         var context = this.getContextByWindow(win);
-        if ((context && !context.window) || isSystem) //xxxHonza system pages aren't allowed now
+        if ((context && !context.window))
         {
             if (FBTrace.DBG_WINDOWS)                                                                                   /*@explore*/
                 FBTrace.sysout("-> tabWatcher.watchLoadedTopWindow bailing !!!, context.window: "+                          /*@explore*/
