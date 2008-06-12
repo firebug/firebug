@@ -1,0 +1,8 @@
+content firebug jar:chrome/firebug.jar!/content/firebug/
+skin	firebug	classic/1.0	jar:chrome/firebug.jar!/skin/classic/
+skin	firebug-os	classic/1.0	jar:chrome/firebug.jar!/skin/classic/win/
+locale	firebug	en-US		jar:chrome/firebug.jar!/locale/en-US/
+locale  firebug hu-HU       locale/hu-HU/
+
+overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul

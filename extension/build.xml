@@ -64,7 +64,7 @@
 
     <!-- Expand templates -->
     <target name="install-dependency" description="test tpl files">
-        <uptodate property="install.expansion.notRequired" targetfile="${build_dir}/install.rdf">
+        <uptodate property="install.expansion.notRequired" targetfile="${src_dir}/install.rdf">
             <srcfiles dir="${src_dir}" includes="install.rdf.tpl.xml, content/firebug/branch.properties"/>
         </uptodate>
     </target>
@@ -86,13 +86,14 @@
     </target>
     <target name="expand-install-template" depends="install-dependency, version" unless="install.expansion.notRequired" >
         <copy file="${src_dir}/install.rdf.tpl.xml"
-               tofile="${build_dir}/install.rdf"
+               tofile="${src_dir}/install.rdf"
                overwrite="true">
                <filterchain>
                        <replacetokens>
                             <token key="FULLVERSION" value="${FULLVERSION}"/>
+                            <token key="VERSION" value="${VERSION}"/>
+                            <token key="RELEASE" value="${RELEASE}"/>
                             <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
-                              <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
                        </replacetokens>
                </filterchain>
         </copy>
@@ -135,10 +136,7 @@
 
     <!-- Incremental Build Targets -->
     <target name="dev-setup" depends="create-extension-links, expand-templates">
-        <!-- put the expanded install.rdf back in the source tree, its not committed to svn -->
-        <copy todir="." >
-            <fileset dir="build/" includes="install.rdf"/>
-        </copy>
+
     </target>
 
     <target name="create-extension-links" depends="version">
@@ -205,8 +203,8 @@
             <zipfileset dir="${src_dir}/platform" includes="**" prefix="platform" excludes="${excludes}, **/skin/**" />
             <zipfileset dir="${src_dir}/components" includes="*.js" prefix="components" />
             <zipfileset dir="${src_dir}/defaults" includes="**" prefix="defaults" excludes="${excludes}" />
-            <zipfileset dir="${build_dir}" includes="install.rdf" />
-            <zipfileset dir="${build_dir}" includes="*.manifest" />
+            <zipfileset dir="${src_dir}" includes="install.rdf" />
+            <zipfileset dir="${src_dir}" includes="jarred.manifest" fullpath="chrome.manifest"/>
         </zip>
     </target>
 
