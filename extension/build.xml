@@ -35,7 +35,7 @@
         <property name="FULLVERSION"  value="${VERSION}${RELEASE}${TRUNK}"/>
         <mkdir dir="${build_dir}/dist" />
         <property name="dist_dir" location="${build_dir}/dist" />
-        <property name="FIREBUG-XPI" value="firebug-${FULLVERSION}.xpi"/>
+        <property name="FIREBUG-XPI" value="firebug-${VERSION}J${RELEASE}.xpi"/>
     </target>
 
     <!-- eg
@@ -91,7 +91,7 @@
                <filterchain>
                        <replacetokens>
                             <token key="FULLVERSION" value="${FULLVERSION}"/>
-                            <token key="VERSION" value="${VERSION}"/>
+                            <token key="VERSION" value="${VERSION}J"/>
                             <token key="RELEASE" value="${RELEASE}"/>
                             <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
                        </replacetokens>
@@ -106,7 +106,7 @@
                <filterchain>
                        <replacetokens>
                             <token key="FULLVERSION" value="${FULLVERSION}"/>
-                            <token key="VERSION" value="${VERSION}"/>
+                            <token key="VERSION" value="${VERSION}J"/>
                             <token key="RELEASE" value="${RELEASE}"/>
                             <token key="LEAF" value="firebug-${VERSION}${RELEASE}.xpi"/>
                             <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
