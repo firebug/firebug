@@ -624,7 +624,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             var sheetLocation = getURLForStyleSheet(sheet);
 
-            if (isSystemURL(sheetLocation))
+            if (isSystemURL(sheetLocation) && Firebug.filterSystemURLs)
                 return;
 
             styleSheets.push(sheet);
@@ -789,7 +789,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (styleSheets.length)
         {
             var sheet = styleSheets[0];
-            return isSystemURL(getURLForStyleSheet(sheet)) ? null : sheet;
+            return (Firebug.filterSystemURLs && isSystemURL(getURLForStyleSheet(sheet))) ? null : sheet;
         }
     },
 
@@ -993,7 +993,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var href = rule.parentStyleSheet.href;  // Null means inline
-                if (href && isSystemURL(href))
+                if (href && && Firebug.filterSystemURLs && isSystemURL(href))
                     continue;
                 if (!href)
                     href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452

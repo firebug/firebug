@@ -1505,7 +1505,7 @@ this.getStackTrace = function(frame, context)
 
     for (; frame && frame.isValid; frame = frame.callingFrame)
     {
-        if (!this.isSystemURL(FBL.normalizeURL(frame.script.fileName)))
+        if (!(Firebug.filterSystemURLs && this.isSystemURL(FBL.normalizeURL(frame.script.fileName))))
         {
             var stackFrame = this.getStackFrame(frame, context);
             if (stackFrame)
@@ -2307,9 +2307,8 @@ this.getFileExtension = function(url)
 
 this.isSystemURL = function(url)
 {
-    if (!Firebug.filterSystemURLs) return false;
     if (!url) return true;
-    if (url.length == 0) return true; // spec for about:blank
+    if (url.length == 0) return true; // spec for about:blank in FF2, no op in FF3
     if (url[0] == 'h') return false;
     if (url.substr(0, 9) == "resource:")
         return true;

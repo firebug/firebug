@@ -2651,7 +2651,7 @@ function getCallingFrame(frame)
         do
         {
             frame = frame.callingFrame;
-            if (!isSystemURL(normalizeURL(frame.script.fileName)))
+            if (!(Firebug.filterSystemURLs && isSystemURL(normalizeURL(frame.script.fileName))))
                 return frame;
         }
         while (frame);

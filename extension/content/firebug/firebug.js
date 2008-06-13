@@ -492,7 +492,7 @@ top.Firebug =
         if (!location)
             return;
         location = location.toString();
-        if (isSystemURL(location))
+        if (Firebug.filterSystemURLs && isSystemURL(location))
             return;
 
         var list = extendArray(editors, externalEditors);
@@ -1973,6 +1973,30 @@ Firebug.ActivableModule = extend(Firebug.Module,
         return this.prefDomain;
     },
 
+    getHostForLocation: function(location)
+    {
+        if (Firebug.filterSystemURLs)
+            return isSystemURL(location.spec) ? "" : location.host;
+        else
+        {
+            if (location.spec.substr(0, 6) == "about:")
+                return "about";
+            else 
+            {
+                try 
+                {
+                    return location.host;
+                } 
+                catch (exc)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("openPermissions location.host fails for location: "+safeToString(location.wrappedJSObject)+" spec: "+location.spec, exc);
+                    return "";
+                }
+            }
+        }
+    },
+    
     /**
      * Returns true if the module can be enabled for the specified host.
      * Returns false otherwise.
@@ -2094,7 +2118,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         cancelEvent(event);
 
         var location = FirebugChrome.getBrowserURI(context);
-        var isSystem = isSystemURL(location.spec);
+        var host = this.getHostForLocation(location);
 
         var params = {
             permissionType: this.getPrefDomain(),
@@ -2103,7 +2127,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             blockVisible: true, 
             sessionVisible: false, 
             allowVisible: true, 
-            prefilledHost: (isSystem ? "" : location.host)
+            prefilledHost: host,
         };
 
         openWindow("Browser:Permissions", "chrome://browser/content/preferences/permissions.xul",

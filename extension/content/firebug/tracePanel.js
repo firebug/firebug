@@ -41,7 +41,6 @@ Firebug.TraceModule = extend(ConsoleModule,
     DBG_NET: false,        	// net.js
     DBG_OPTIONS: false,
     DBG_PANELS: false, // panel selection.
-    DBG_SHOW_SYSTEM: false,    // isSystemURL return false always.
     DBG_SOURCEFILES: false, 	// debugger and sourceCache
     DBG_STACK: false,  		// call stack, mostly debugger.js
     DBG_TOPLEVEL: false, 		// firebug-service
