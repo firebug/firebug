@@ -47,10 +47,6 @@ Firebug.ConsoleBase =
 
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
-        if (!context)
-            context = FirebugContext;
-        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
-
         if (noThrottle || !context)
         {
             var panel = this.getPanel(context);
@@ -295,6 +291,17 @@ Firebug.Console = extend(ActivableConsole,
         // turn off error observer
         Firebug.Errors.stopObserving();
     },
+
+    logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
+    {
+        if (!context)
+            context = FirebugContext;
+
+        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
+
+        if (this.isEnabled(context))
+            return Firebug.ConsoleBase.logRow.apply(this, arguments);
+    }
 });
 
 Firebug.ConsoleListener =
