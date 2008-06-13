@@ -1482,10 +1482,10 @@ NetProgress.prototype =
 
             return file;
         }
-        else
+        else                                                                                                       /*@explore*/
         {                                                                                                          /*@explore*/
             if (FBTrace.DBG_NET) FBTrace.dumpProperties("stopfile no file for request=", request);                     /*@explore*/
-        }
+        }                                                                                                           /*@explore*/
     },
 
     cacheEntryReady: function cacheEntryReady(request, file, size)
