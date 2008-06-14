@@ -2308,7 +2308,7 @@ this.getFileExtension = function(url)
 this.isSystemURL = function(url)
 {
     if (!url) return true;
-    if (url.length == 0) return true; // spec for about:blank in FF2, no op in FF3
+    if (url.length == 0) return true;
     if (url[0] == 'h') return false;
     if (url.substr(0, 9) == "resource:")
         return true;
@@ -3476,7 +3476,7 @@ this.getScriptAnalyzer = function(context, script)
 
 this.getSourceFileAndLineByScript= function(context, script, frame)
 {
-    var sourceFile = FBL.getSourceFileByScript(FirebugContext, script);
+    var sourceFile = FBL.getSourceFileByScript(context, script);
     if (sourceFile)
     {
         var analyzer = sourceFile.getScriptAnalyzer(script);

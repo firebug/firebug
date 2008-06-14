@@ -1026,11 +1026,11 @@ top.Firebug =
 
             if (browser.detached || context == FirebugContext)
             {
-                clearContextTimeout = setTimeout(function()
+                clearContextTimeout = setTimeout(function delayClearContext()
                 {
                     if (context == FirebugContext)
                     {
-                        browser.isSystemPage = true;
+                        browser.isSystemPage = true;  // XXXjjb I don't believe this is ever tested.
                         Firebug.showContext(browser, null);
                     }
                 }, 100);
@@ -1071,15 +1071,18 @@ top.Firebug =
         if (deadWindowTimeout)
             this.rescueWindow(browser);
 
-        if (browser)
-            browser.chrome.showContext(browser, context);
+        if (context)
+        {
+            if (browser)
+                browser.chrome.showContext(browser, context);  // if context null, no-op
 
-        FirebugContext = context;  // Maybe null
+            FirebugContext = context;
 
-        if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("firebug.showContext context: "+(context?context.window.location:"null ")+"\n");
+            if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("firebug.showContext set FirebugContext: "+context.window.location+"\n");
 
-        this.syncBar();
+            this.syncBar();
+        }
     },
 
     watchWindow: function(context, win)
