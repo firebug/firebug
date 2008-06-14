@@ -152,6 +152,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return hookReturn;
         }
 
+        // TODO make FirebugContext == context
+
         try {
             executionContext.scriptsEnabled = false;
 
@@ -623,7 +625,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var context = this.breakContext;
             delete this.breakContext;
 
-            if (FBTrace.DBG_BP || FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.onBreak context=", FBL.getStackDump());       /*@explore*/
             if (!context)
                 context = getFrameContext(frame);
             if (!context)
@@ -1817,8 +1818,10 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // The "enable/disable" button is always visible.
         this.showToolbarButtons("fbScriptButtons", true);
 
+        // static scripts can be shown
+        this.showToolbarButtons("fbLocationList", true);
+
         // These buttons are visible only if debugger is enabled.
-        this.showToolbarButtons("fbLocationList", enabled);
         this.showToolbarButtons("fbLocationSeparator", enabled);
         this.showToolbarButtons("fbDebuggerButtons", enabled);
 
@@ -1923,6 +1926,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(sourceFile)
     {
+        if (!Firebug.Debugger.isEnabled(this.context))
+            Firebug.ModuleManagerPage.hide(this);
+
         this.showSourceFile(sourceFile, this.setLineBreakpoints);
     },
 
