@@ -70,7 +70,7 @@
     </menu>
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
-                    oncommand="Firebug.toggleBar(true); FirebugChrome.select(document.popupNode);"/>
+                    oncommand="Firebug.toggleBar(true); FirebugChrome.select(document.popupNode, 'html'); "/>
     </popup>
 
     <menupopup id="menu_viewPopup">
@@ -136,7 +136,7 @@
                                         <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
                                 </menupopup>
                             </menu>
-                            
+
                             <menuseparator/>
 
                             <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
