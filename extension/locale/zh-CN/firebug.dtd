@@ -47,9 +47,8 @@
 <!ENTITY  firebug.EditHTMLTooltip       "编辑 HTML">
 <!ENTITY  firebug.EditCSSTooltip        "编辑样式表">
 
-<!ENTITY  firebug.Profile               "概况Profile">
+<!ENTITY  firebug.Profile               "概况">
 <!ENTITY  firebug.ProfileScript         "JavaScript 概况">
-<!ENTITY  firebug.ProfileTooltip        "JavaScript 执行时概况">
 
 <!ENTITY  firebug.Clear                 "清除">
 <!ENTITY  firebug.ClearConsole          "清除控制台">
