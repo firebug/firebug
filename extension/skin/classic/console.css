@@ -252,6 +252,12 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+.profileSizer {
+    width:100%;
+    overflow-x:auto;
+    overflow-y:noscroll;
+}
+
 .profileTable {
     border-bottom: 1px solid #D7D7D7;
     padding: 0 0 4px 0;

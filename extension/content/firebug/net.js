@@ -261,8 +261,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    onPanelActivate: function(context, init)
+    onPanelActivate: function(context, init, activatedPanelName)
     {
+        if (activatedPanelName != panelName)
+            return;
+
         monitorContext(context);
 
         if (context.netProgress && listeners.length)
@@ -277,8 +280,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.window.location.reload();
     },
 
-    onPanelDeactivate: function(context, destroy)
+    onPanelDeactivate: function(context, destroy, deactivatedPanelName)
     {
+        if (deactivatedPanelName != panelName)
+            return;
+
         if (context.netProgress && listeners.length)
             context.netProgress.activate(null);
 

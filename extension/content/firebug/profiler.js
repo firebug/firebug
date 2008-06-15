@@ -1,11 +1,50 @@
 /* See license.txt for terms of usage */
 
+
 FBL.ns(function() { with (FBL) {
+
+var toggleProfiling = $("fbToggleProfiling");
 
 // ************************************************************************************************
 
 Firebug.Profiler = extend(Firebug.Module,
 {
+    showContext: function(browser, context)
+    {
+        this.setEnabled(context);
+    },
+
+    onPanelActivate: function(context, init, panelName)
+    {
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("Profiler.onPanelActivate panelName: "+panelName+"\n");
+
+        if (panelName == "net" || panelName == "script")
+            this.setEnabled(context);
+    },
+
+    onPanelDeactivate: function(context, init, panelName)
+    {
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("Profiler.onPanelDeactivate panelName: "+panelName+"\n");
+
+       if (panelName == "net" || panelName == "script")
+            this.setEnabled(context);
+    },
+
+    setEnabled: function(context)
+    {
+        // The profiler is available only if the debugger (script panel) and console are enabled.
+        var debuggerEnabled = Firebug.Debugger.isEnabled(context);
+        var consoleEnabled = Firebug.Console.isEnabled(context);
+        toggleProfiling.disabled = !debuggerEnabled || !consoleEnabled;
+
+        // Update button's tooltip.
+        var tooltipText = toggleProfiling.disabled ? $STR("ProfileButton.Disabled.Tooltip")
+            : $STR("ProfileButton.Enabled.Tooltip");
+        toggleProfiling.setAttribute("tooltiptext", tooltipText);
+    },
+
     toggleProfiling: function(context)
     {
         if (fbs.profiling)
@@ -62,6 +101,11 @@ Firebug.Profiler = extend(Firebug.Module,
         var totalTime = 0;
 
         var sourceFileMap = context.sourceFileMap;
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+	        for (url in sourceFileMap)
+    	        FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
+    	}
 
         jsd.enumerateScripts({enumerateScript: function(script)
         {
@@ -108,15 +152,16 @@ Firebug.Profiler = extend(Firebug.Module,
             timeBox.textContent = $STRF("ProfileTime", [totalTime, totalCalls]);
 
             var groupBody = groupRow.lastChild;
-            var table = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);
-            var tbody = table.lastChild;
+            var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);
+            var table = sizer.firstChild;
+            var tHeader = table.lastChild;  // no rows inserted.
 
             var tag = Firebug.Profiler.ProfileCall.tag;
             var insert = tag.insertRows;
 
             for (var i = 0; i < calls.length; ++i) {
                 calls[i].index = i;
-                context.throttle(insert, tag, [{object: calls[i]}, tbody]);
+                context.throttle(insert, tag, [{object: calls[i]}, tHeader]);
             }
 
             context.throttle(groupRow.scrollIntoView, groupRow);
@@ -134,8 +179,9 @@ Firebug.Profiler = extend(Firebug.Module,
 Firebug.Profiler.ProfileTable = domplate(
 {
     tag:
+      DIV({class: "profileSizer" },
         TABLE({class: "profileTable", cellspacing: 0, cellpadding: 0, width: "100%"},
-            TBODY(
+            TBODY({class: "profileTbody"},
                 TR({class: "headerRow", onclick: "$onClick"},
                     TD({class: "headerCell alphaValue"},
                         DIV({class: "headerCellBox"},
@@ -184,6 +230,7 @@ Firebug.Profiler.ProfileTable = domplate(
                     )
                 )
             )
+          )
         ),
 
     onClick: function(event)
@@ -204,7 +251,7 @@ Firebug.Profiler.ProfileTable = domplate(
 
     sort: function(table, colIndex, numerical)
     {
-        var tbody = table.lastChild;
+        var tbody = getChildByClass(table, "profileTbody");
 
         var values = [];
         for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
@@ -292,7 +339,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getCallName: function(call)
     {
-        return getFunctionName(call.script, call.context);
+        return cropString(getFunctionName(call.script, call.context), 60);
     },
 
     avgTime: function(call)

@@ -17,10 +17,6 @@ var maxQueueRequests = 500;
 
 // ************************************************************************************************
 
-var toggleProfiling = $("fbToggleProfiling");
-
-// ************************************************************************************************
-
 Firebug.ConsoleBase =
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
@@ -259,15 +255,6 @@ Firebug.Console = extend(ActivableConsole,
             browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
-
-        // The profiler is available only if the debugger (script panel) is enabled.
-        var debuggerEnabled = Firebug.Debugger.isEnabled(context);
-        toggleProfiling.disabled = !debuggerEnabled;
-
-        // Update button's tooltip.
-        var tooltipText = debuggerEnabled ? $STR("ProfileButton.Enabled.Tooltip")
-            : $STR("ProfileButton.Disabled.Tooltip");
-        toggleProfiling.setAttribute("tooltiptext", tooltipText);
     },
 
     onFirstPanelActivate: function(context, init)
@@ -275,8 +262,11 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.Errors.startObserving();
     },
 
-    onPanelActivate: function(context, init)
+    onPanelActivate: function(context, init, panelName)
     {
+        if (panelName != this.panelName)  // no cross panel work needed
+            return;
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onPanelActivate**************> activeContexts: "+this.activeContexts.length+"\n");
 

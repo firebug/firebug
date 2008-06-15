@@ -1179,8 +1179,8 @@ FirebugService.prototype =
                     +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
                 ddd("onScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
                 try {
-                ddd(script.functionSource+"\n");                 /*@explore*/
-                 } catch (exc) { /*Bug 426692 */ } /*@explore*/
+                    ddd(script.functionSource+"\n");                 /*@explore*/
+                } catch (exc) { /*Bug 426692 */ } /*@explore*/
             }                                                                                                          /*@explore*/
 
             if (!script.functionName) // top or eval-level

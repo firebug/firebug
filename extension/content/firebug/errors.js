@@ -172,8 +172,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         catch (exc)
         {
             // Errors prior to console init will come out here, eg error message from Firefox startup jjb.
-            if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
+            if (FBTrace.DBG_ERRORS)                                                                                     /*@explore*/
+            {
                 FBTrace.dumpProperties("errors.observe FAILS", exc);                                                   /*@explore*/
+                FBTrace.dumpProperties("errors.observe object", object);
+            }
         }
     },
 

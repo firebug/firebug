@@ -1376,8 +1376,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
     },
 
-    onPanelActivate: function(context, init)
+    onPanelActivate: function(context, init, panelName)
     {
+        if (panelName != this.panelName)
+            return;
+
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 

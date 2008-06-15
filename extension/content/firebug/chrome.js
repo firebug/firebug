@@ -475,7 +475,7 @@ top.FirebugChrome =
     {
         if (context)
         {
-            FirebugContext = context;
+            FirebugContext = context;  // the other place the FirebugContext is set is in firebug.js
 
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("chrome.showContext context: "+(context?context.window.location:"null ")+"\n");
@@ -507,7 +507,7 @@ top.FirebugChrome =
                 ? FirebugContext.panelName
                 : Firebug.defaultPanelName;
 
-            // Make HTML panel the default panel, which is displayed 
+            // Make HTML panel the default panel, which is displayed
             // to the user the very first time.
             if (!panelName || !Firebug.getPanelType(panelName))
                 panelName = "html";

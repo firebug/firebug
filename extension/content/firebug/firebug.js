@@ -1886,7 +1886,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         this.enablePanel(context);
 
-        this.onPanelActivate(context, init);
+        dispatch(modules, "onPanelActivate", [context, init, this.panelName]);
     },
 
     panelDeactivate: function(context, destroy)
@@ -1907,7 +1907,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             return;
         }
 
-        this.onPanelDeactivate(context, destroy);
+        dispatch(modules, "onPanelDeactivate", [context, destroy, this.panelName]);
 
         if (!destroy)
         {
@@ -1928,17 +1928,19 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onLastPanelDeactivate(context, destroy);
     },
 
+    // ---------------------------------------------------------------------------------------
+
     onFirstPanelActivate: function(context, init)
     {
         // Just before onPanelActivate, no previous activecontext
     },
 
-    onPanelActivate: function(context, init)
+    onPanelActivate: function(context, init, panelName)
     {
         // Module activation code. Just added to activeContexts
     },
 
-    onPanelDeactivate: function(context, destroy)
+    onPanelDeactivate: function(context, destroy, panelName)
     {
         // Module deactivation code. Just removed from activeContexts
     },
@@ -2480,11 +2482,15 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     },
 
     show: function(panel, module)
-    {
+    {try {
         this.module = module;
         this.context = panel.context;
         this.panelNode = panel.panelNode;
         this.refresh();
+        }catch(e) {
+        FBTrace.dumpProperties("firebug moduleManager show", e);
+        }
+        FBTrace.sysout("firebug moduleManager show\n");
     },
 
     hide: function(panel)
@@ -2495,10 +2501,10 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     refresh: function()
     {
-        var location = FirebugChrome.getBrowserURI(this.context);
-        var hostURI = getURIHost(location);
+        var currentURI = FirebugChrome.getBrowserURI(this.context);
+        var hostURI = getURIHost(currentURI);
 
-        if (isSystemURL(location.spec))
+        if (isSystemURL(currentURI.spec))
             label = "moduleManager.systempages";
         else if (!hostURI)
             label = "moduleManager.localfiles";
