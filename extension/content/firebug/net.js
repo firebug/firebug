@@ -508,12 +508,12 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         if (bytes == -1 || bytes == undefined)
             return "?";
-        else if (bytes < 1000)
+        else if (bytes < 1024)
             return bytes + " B";
-        else if (bytes < 1000000)
-            return Math.ceil(bytes/1000) + " KB";
+        else if (bytes < 1024*1024)
+            return Math.ceil(bytes/1024) + " KB";
         else
-            return (Math.ceil(bytes/10000)/100) + " MB";
+            return (Math.ceil(bytes/(1024*1024))) + " MB";
     },
 
     formatTime: function(elapsed)
