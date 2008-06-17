@@ -268,7 +268,7 @@ function getBaseCategory(categories)
     }
 }
 
-function categoryFilter(url, category, isWarning)
+function isShownCategory(url, category, isWarning)
 {
     var m = urlRe.exec(url);
     var errorScheme = m ? m[1] : "";
@@ -329,11 +329,11 @@ function domainFilter(url)  // never called?
 
 function lessTalkMoreAction(context, object, isWarning)
 {
-    if (!context || !categoryFilter(object.sourceName, object.category, isWarning))
+    if (!context || !isShownCategory(object.sourceName, object.category, isWarning))
     {
         if (FBTrace.DBG_ERRORS)
         {                                                         /*@explore*/
-            FBTrace.sysout("errors.observe dropping "+object.category+(context?" categoryFilter:"+categoryFilter(object.sourceName, object.category, isWarning):" no context")+"\n");           /*@explore*/
+            FBTrace.sysout("errors.observe dropping "+object.category+(context?" isShownCategory:"+isShownCategory(object.sourceName, object.category, isWarning):" no context")+"\n");           /*@explore*/
         }
         return true;
     }
@@ -368,6 +368,8 @@ function lessTalkMoreAction(context, object, isWarning)
         context.errorMap = {};
 
     context.errorMap[msgId] = 1;
+    
+    return false;
 }
 
 function getErrorContext(object)
