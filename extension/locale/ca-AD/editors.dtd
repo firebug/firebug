@@ -1,0 +1,14 @@
+
+<!ENTITY  editors.Description       "Editors Firebug Configurats:">
+<!ENTITY  editors.NameColumn        "Editor">
+<!ENTITY  editors.ExecutableColumn  "Executable">
+<!ENTITY  editors.ParamsColumn      "Paràmetres">
+
+<!ENTITY  add.label               "Afegir">
+<!ENTITY  remove.label            "Esborrar">
+<!ENTITY  change.label            "Canviar">
+<!ENTITY  close.label             "Tancar">
+<!ENTITY  browse.label            "Mirar...">
+<!ENTITY  changeEditor.Name       "Nom:">
+<!ENTITY  changeEditor.Executable "Executable:">
+<!ENTITY  changeEditor.CmdLine    "Arguments:">
