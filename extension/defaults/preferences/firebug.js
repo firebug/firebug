@@ -1,6 +1,5 @@
 
 // Global
-pref("extensions.firebug.alwaysEnableThesePanels", false);
 pref("extensions.firebug.defaultPanelName", "html");
 pref("extensions.firebug.throttleMessages", true);
 pref("extensions.firebug.textSize", 0);
@@ -10,7 +9,6 @@ pref("extensions.firebug.textWrapWidth", 100);
 pref("extensions.firebug.openInWindow", false);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", "vertical");
-pref("extensions.firebug.alwaysEnable", false);
 
 // Console
 pref("extensions.firebug.showJSErrors", true);
@@ -23,8 +21,9 @@ pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug-service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
-pref("extensions.firebug.console.enableLocalFiles", "default");
-pref("extensions.firebug.console.enableSystemPages", "default");
+pref("extensions.firebug.console.enableLocalFiles", false);
+pref("extensions.firebug.console.enableSystemPages", false);
+pref("extensions.firebug.console.enableSites", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
@@ -44,8 +43,9 @@ pref("extensions.firebug-service.showEvalSources", true);
 pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
-pref("extensions.firebug.script.enableLocalFiles", "default");
-pref("extensions.firebug.script.enableSystemPages", "default");
+pref("extensions.firebug.script.enableLocalFiles", false);
+pref("extensions.firebug.script.enableSystemPages", false);
+pref("extensions.firebug.script.enableSites", false);
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
@@ -65,9 +65,9 @@ pref("extensions.firebug.showRulers", true);
 pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
-pref("extensions.firebug.autoDisable", true);
-pref("extensions.firebug.net.enableLocalFiles", "default");
-pref("extensions.firebug.net.enableSystemPages", "default");
+pref("extensions.firebug.net.enableLocalFiles", false);
+pref("extensions.firebug.net.enableSystemPages", false);
+pref("extensions.firebug.net.enableSites", false);
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");

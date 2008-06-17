@@ -1860,6 +1860,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var tab = this.panelBar1.getTab(this.panelName);
         var enabled = this.isEnabled(context);
         tab.setAttribute("disabled", enabled ? "false" : "true");
+
+        this.menuUpdate(context);
     },
 
     destroyContext: function(context)
@@ -2012,11 +2014,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
         switch (option)
         {
             case "enable":
+            case "enable-site":
                 return true;
+
             case "disable":
+            case "disable-site":
                 return false;
-            case "default":
-                return this.isAlwaysEnabled();
         }
 
         if (FBTrace.DBG_PANELS)
@@ -2030,14 +2033,16 @@ Firebug.ActivableModule = extend(Firebug.Module,
     /**
      * Sets host permission for the module.
      * There are three types of permissions that can be specified in the option:
-     * "enabled" - the module is always enabled for this host.
-     * "disabled" - the module is always disabled for this host.
-     * "default" - the module respects default option "extensions.firebug.alwaysEnable" .
+     * "enable" - the module should be enabled for all sites.
+     * "disable" - the module should be disbled for all sites.
+     * "enable-site" - the module should be enabled for this site.
+     * "disable-site" - the module should be disabled for this site.
      */
     setHostPermission: function(context, option)
     {
         var browserURI = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
+        var enable = (option.indexOf("enable") == 0) ? true : false;
 
         if (FBTrace.DBG_PANELS)
         {
@@ -2047,40 +2052,41 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         if (!browserURI.spec)
         {
-            Firebug.setPref(prefDomain, "enableSystemPages", option);
+            Firebug.setPref(prefDomain, "enableSystemPages", enable);
             return;
         }
 
         if (isLocalURL(browserURI.spec))
         {
-            Firebug.setPref(prefDomain, "enableLocalFiles", option);
+            Firebug.setPref(prefDomain, "enableLocalFiles", enable);
             return;
         }
         else if (isSystemURL(browserURI.spec))
         {
-            Firebug.setPref(prefDomain, "enableSystemPages", option);
+            Firebug.setPref(prefDomain, "enableSystemPages", enable);
             return;
         }
 
         switch(option)
         {
-            case "enable":
+            case "enable-site":
                 permissionManager.add(browserURI, prefDomain, permissionManager.ALLOW_ACTION);
                 break;
 
-            case "disable":
+            case "disable-site":
                 permissionManager.add(browserURI, prefDomain, permissionManager.DENY_ACTION);
                 break;
 
-            case "default":
+            default:
                 permissionManager.remove(browserURI.host, prefDomain);
+                Firebug.setPref(prefDomain, "enableSites", enable);
                 break;
         }
     },
 
     /*
      * Returns current host permision for the module.
-     * Return value: "enabled", "disabled" or "default".
+     * Return value: "enable", "disable", "enable-site" or "disable-site".
      */
     getHostPermission: function(context)
     {
@@ -2090,29 +2096,31 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (!browserURI.spec)
             return Firebug.getPref(prefDomain, "enableSystemPages"); // eg resource://gre/res/hiddenWindow.html
 
+        // If it's a local-file or a system-page see preferences.
         if (isLocalURL(browserURI.spec))
-            return Firebug.getPref(prefDomain, "enableLocalFiles");
+            return Firebug.getPref(prefDomain, "enableLocalFiles") ? "enable" : "disable";
         else if (isSystemURL(browserURI.spec))
-            return Firebug.getPref(prefDomain, "enableSystemPages");
+            return Firebug.getPref(prefDomain, "enableSystemPages") ? "enable" : "disable";
 
         switch (permissionManager.testPermission(browserURI, prefDomain))
         {
             case nsIPermissionManager.ALLOW_ACTION:
-                return "enable";
+                return "enable-site";
             case nsIPermissionManager.DENY_ACTION:
-                return "disable";
+                return "disable-site";
 
             default:
-                return "default";
+                return this.isAlwaysEnabled() ? "enable" : "disable";
         }
     },
 
     /**
      * Return true if the module should be enabled by default.
      */
-    isAlwaysEnabled: function(context)
+    isAlwaysEnabled: function()
     {
-        return Firebug.getPref(Firebug.prefDomain, "alwaysEnable");
+        var prefDomain = this.getPrefDomain();
+        return Firebug.getPref(prefDomain, "enableSites");
     },
 
     /**
@@ -2175,7 +2183,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 var prefDomain = this.getPrefDomain();
                 if (data == prefDomain + ".enableLocalFiles" ||
                     data == prefDomain + ".enableSystemPages" ||
-                    data == prefDomain + ".enableAlways")
+                    data == prefDomain + ".enableSites")
                 {
                     if (FBTrace.DBG_PANELS)
                         FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
@@ -2212,7 +2220,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                             module.syncPersistedPanelState(context, false);
                         else if (location.host.indexOf(host) != -1)
                             module.syncPersistedPanelState(context, false);
-                        else if ((prefDomain + ".enableAlways") == data)
+                        else if ((prefDomain + ".enableSites") == data)
                             module.syncPersistedPanelState(context, false);
                     }
                     catch (exc)
@@ -2319,7 +2327,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         switch (option)
         {
-        case "disable":
+        case "disable-site":
             if (isSystemURL(location.spec))
                 label = "SystemPagesDisable";
             else if (!getURIHost(location))
@@ -2331,7 +2339,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 return $STR("panel.Disabled");
             break;
 
-        case "enable":
+        case "enable-site":
             if (isSystemURL(location.spec))
                 label = "SystemPagesEnable";
             else if (!getURIHost(location))
@@ -2343,11 +2351,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 return $STR("panel.Enabled");
             break;
 
-        case "default":
-            if (this.isAlwaysEnabled())
-                return shortened ? $STR("panel.Enabled") : $STR("panel.EnabledByDefault");
-            else
-                return shortened ? $STR("panel.Disabled") : $STR("panel.DisabledByDefault");
+        case "enable":
+            return $STR("panel.Enabled");
+
+        case "disable":
+            return $STR("panel.Disabled");
         }
 
         if (!label)
@@ -2472,13 +2480,13 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     enableModule: function(module)
     {
         if (!this.isModuleEnabled(module))
-            module.setHostPermission(this.context, "enable");
+            module.setHostPermission(this.context, "enable-site");
     },
 
     disableModule: function(module)
     {
         if (this.isModuleEnabled(module))
-            module.setHostPermission(this.context, "disable");
+            module.setHostPermission(this.context, "disable-site");
     },
 
     show: function(panel, module)

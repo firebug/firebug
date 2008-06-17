@@ -22,13 +22,12 @@
 <!ENTITY  firebug.Donate                "Contribute...">
 <!ENTITY  firebug.About                 "About...">
 <!ENTITY  firebug.AlwaysOpenInWindow    "Always Open in New Window">
-<!ENTITY  firebug.AlwaysEnableFirebug   "Always Enable Firebug">
 
 <!ENTITY  firebug.ShowFirebug           "Open Firebug">
 <!ENTITY  firebug.DetachFirebug         "Open Firebug in New Window">
 <!ENTITY  firebug.OpenWith              "Open With Editor">
 <!ENTITY  firebug.CloseFirebug          "Close Firebug">
-<!ENTITY  firebug.Permissions           "Permissions...">
+<!ENTITY  firebug.Permissions           "Sites...">
 <!ENTITY  firebug.ConfigureEditors      "Configure Editors...">
 <!ENTITY  firebug.CommandLine           "Command Line">
 <!ENTITY  firebug.Search                "Search">

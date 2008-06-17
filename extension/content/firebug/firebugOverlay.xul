@@ -22,7 +22,6 @@
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_savePanels" oncommand="FirebugChrome.savePanels()"/>
-        <command id="cmd_alwaysEnableFirebug" oncommand="Firebug.alwaysEnableFirebug()"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
@@ -107,9 +106,10 @@
                         oncommand="return Firebug.Console.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Console.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.Console.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbConsoleStateMenu" value="default"/>
                         <menuitem type="radio" name="fbConsoleStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbConsoleStateMenu" value="disable"/>
+                        <menuitem type="radio" name="fbConsoleStateMenu" value="enable-site"/>
+                        <menuitem type="radio" name="fbConsoleStateMenu" value="disable-site"/>
                         <menuseparator />
                         <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
                                 oncommand="Firebug.Console.openPermissions(event, FirebugContext)"/>
@@ -136,9 +136,10 @@
                         oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="default"/>
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-site"/>
+                        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable-site"/>
                         <menuseparator />
                         <menuitem name="fbDebuggerPermisions" label="&firebug.Permissions;"
                                 oncommand="Firebug.Debugger.openPermissions(event, FirebugContext)"/>
@@ -157,9 +158,10 @@
                         oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
                         onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbNetStateMenu" value="default"/>
                         <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
                         <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
+                        <menuitem type="radio" name="fbNetStateMenu" value="enable-site"/>
+                        <menuitem type="radio" name="fbNetStateMenu" value="disable-site"/>
                         <menuseparator />
                         <menuitem name="fbNetMonitorPermisions" label="&firebug.Permissions;"
                                 oncommand="Firebug.NetMonitor.openPermissions(event, FirebugContext)"/>

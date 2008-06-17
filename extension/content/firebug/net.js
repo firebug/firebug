@@ -660,8 +660,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
     {
         this.showToolbarButtons("fbNetButtons", true);
 
-        Firebug.NetMonitor.menuUpdate(this.context);
-
         var shouldShow = this.shouldShow();
         this.showToolbarButtons("fbNetButtonsFilter", shouldShow);
         if (!shouldShow)
