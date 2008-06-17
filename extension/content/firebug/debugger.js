@@ -366,7 +366,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = findScriptForFunction(fn);
+            var script = findScriptForFunctionInContext(FirebugContext, fn);
             if (script)
                 this.traceFunction(fn, script, mode);
         }
@@ -376,7 +376,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
-            var script = findScriptForFunction(fn);
+            var script = findScriptForFunctionInContext(FirebugContext, fn);
             if (script)
                 this.untraceFunction(fn, script, mode);
         }

@@ -1685,24 +1685,87 @@ this.findScript = function(context, url, line)
     return script;
 };
 
+this.findScriptForFunctionInContext = function(context, fn)
+{
+    var found = {tag: "not set"};
+
+    for (var url in context.sourceFileMap)
+    {
+        var sourceFile = context.sourceFileMap[url];
+        FBTrace.sysout("lib.findScriptForFunctionInContext Looking for "+fn+" in "+sourceFile+"\n");
+        sourceFile.forEachScript(function seekFn(script)
+        {
+            if (!script.isValid)
+                return;
+            try
+            {
+                var testFunctionObject = script.functionObject;
+                if (testFunctionObject.isValid)
+                    return;
+                var unwrapped = testFunctionObject.getWrappedValue();
+                if (!unwrapped.toString)
+                    return;
+                var tfs = unwrapped.toString();
+                var fns = fn.toString();
+                if (tfs == fns)
+                    found = script;
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                {
+                    if (exc.name == "NS_ERROR_NOT_AVAILABLE")
+                        FBTrace.sysout("lib.findScriptForFunctionInContext no functionObject for "+script.tag+"_"+script.fileName+"\n");
+                    else
+                       FBTrace.dumpProperties("lib.findScriptForFunctionInContext FAILS ",exc);
+                }
+            }
+        });
+    }
+
+    FBTrace.sysout("findScriptForFunctionInContext found "+found.tag+"\n");
+    return found;
+}
+
 this.findScriptForFunction = function(fn)
 {
-    var found = null;
+    var found = {tag: "not set"};
 
-    this.jsd.enumerateScripts({enumerateScript: function(script)
+    this.jsd.enumerateScripts({enumerateScript: function findScriptMatchingFn(script)
     {
-        try {
-            if (script.functionObject.getWrappedValue() == fn)
-                found = script;
-        } catch (exc) {}
+        try {  
+            if (script.isValid)
+            {
+
+                var iValueFunctionObject = script.functionObject;
+                //FBTrace.dumpIValue("lib.findScriptForFunction iValueFunctionObject", iValueFunctionObject);
+                var testFunctionObject = script.functionObject.getWrappedValue();
+                if (testFunctionObject instanceof Function)
+                    FBTrace.sysout("lib.findScriptForFunction testFunctionObject "+testFunctionObject+" vs "+fn+"\n");
+                if (testFunctionObject == fn)
+                {
+                    found = script;
+                    return;
+                }
+            }
+        } catch (exc) {
+            if (FBTrace.DBG_ERRORS)
+            {
+                if (exc.name == "NS_ERROR_NOT_AVAILABLE")
+                    FBTrace.sysout("lib.findScriptForFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
+                else
+                    FBTrace.dumpProperties("lib.findScriptForFunction FAILS ",exc);
+            }
+        }
     }});
 
+    FBTrace.dumpProperties("findScriptForFunction found ", found.tag);
     return found;
 };
 
 this.findSourceForFunction = function(fn, context)
 {
-    var script = this.findScriptForFunction(fn);
+    var script = this.findScriptForFunctionInContext(context, fn);
     return (script)? this.getSourceLinkForScript(script, context) : null;
 };
 
@@ -2921,6 +2984,20 @@ this.SourceFile.prototype =
         }
         str += ")";
         return str;
+    },
+
+    forEachScript: function(callback)
+    {
+        if (this.outerScript)
+            callback(this.outerScript);
+        if (this.innerScripts)
+        {
+            for (var i = 0; i < this.innerScripts.length; i++)
+            {
+                var script = this.innerScripts[i];
+                callback(script);
+            }
+        }
     },
 
     getSourceLength: function()

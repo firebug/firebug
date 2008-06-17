@@ -1139,20 +1139,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
                             value = new ErrorCopy(exc+"");
                     }
                 );
-                /*
-                var value;
-                try
-                {
-                    value = Firebug.CommandLine.evaluate(expr, this.context);
-                }
-                catch (exc)
-                {
-                    if (exc instanceof this.context.window.Error)
-                        value = new ErrorCopy(exc.message);
-                    else
-                        value = new ErrorCopy(exc+"");
-                }
-                */
+
                 addMember("watch", members, expr, value, 0);
             }
         }

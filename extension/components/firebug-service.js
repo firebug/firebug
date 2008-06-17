@@ -787,10 +787,10 @@ FirebugService.prototype =
 
         if (!enabledDebugger)
             return;
-        
+
         if (!timer)  // then we probably shutdown
-            return; 
-        
+            return;
+
         timer.init({observe: function()
         {
             enabledDebugger = false;
@@ -1884,7 +1884,7 @@ FirebugService.prototype =
 function getStepName(mode)
 {
     if (mode==STEP_OVER) return "STEP_OVER";
-    if (mode==STEP_IN) return "STEP_IN";
+    if (mode==STEP_INTO) return "STEP_INTO";
     if (mode==STEP_OUT) return "STEP_OUT";
 }
 

@@ -38,13 +38,13 @@ this.dumpTypes = function(header, obj)
         if (obj)
         {
             this.sysout(" constructor="+obj.constructor);
-            if (obj.prototype) 
+            if (obj.prototype)
                 this.dumpTypes(" obj.prototype", obj.prototype);
             else
                 this.sysout("\n");
         }
     }
-    catch (e) 
+    catch (e)
     {
         this.sysout("trace.dumpTypes FAILED:"+e+"\n");
     }
@@ -113,7 +113,10 @@ this.dumpProperties = function(header, obj)
                             this.sysout("["+p+"]="+xpobj+";\n");
                         }
                     }
-                    this.sysout("["+p+"]="+obj[p]+";\n");
+                    if (obj.wrappedJSObject)
+                        this.sysout("w["+p+"]="+obj.wrappedJSOboject[p]+";\n");
+                    else
+                        this.sysout("["+p+"]="+obj[p]+";\n");
                 }
                 catch (e)
                 {
@@ -183,6 +186,24 @@ this.dumpPermissions = function()
             FBTrace.dumpProperties("NOT an nsIPermission", perm);
     }
     FBTrace.sysout("Enumerate permissions DONE\n");
+},
+
+
+this.dumpIValue= function(header, iValue)
+{
+    FBTrace.sysout(header+"\n");
+    var listValue = {value: null}, lengthValue = {value: 0};
+    iValue.getProperties(listValue, lengthValue);
+    for (var i = 0; i < lengthValue.value; ++i)
+    {
+        var prop = listValue.value[i];
+        try {
+            var name = prop.name.getWrappedValue();
+            FBTrace.sysout(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
+        } catch (e) {
+            FBTrace.sysout(i+"]"+e+"\n");
+        }
+    }
 },
 
 this.consoleOut = function(text)

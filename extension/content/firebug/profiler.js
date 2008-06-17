@@ -103,9 +103,9 @@ Firebug.Profiler = extend(Firebug.Module,
         var sourceFileMap = context.sourceFileMap;
         if (FBTrace.DBG_SOURCEFILES)
         {
-	        for (url in sourceFileMap)
-    	        FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
-    	}
+            for (url in sourceFileMap)
+                FBTrace.sysout("logProfileReport: "+sourceFileMap[url]+"\n");
+        }
 
         jsd.enumerateScripts({enumerateScript: function(script)
         {
@@ -374,8 +374,16 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getTooltip: function(call)
     {
-        var fn = call.script.functionObject.getWrappedValue();
-        return FirebugReps.Func.getTooltip(fn);
+        try
+        {
+            var fn = call.script.functionObject.getWrappedValue();
+            return FirebugReps.Func.getTooltip(fn, call.context);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("profiler.getTooltip FAILS ", exc);
+        }
     },
 
     getContextMenuItems: function(call, target, context)

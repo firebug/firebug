@@ -959,7 +959,7 @@ top.FirebugChrome =
 
         if (object && rep)
         {
-            var label = rep.getTooltip(object);
+            var label = rep.getTooltip(object, FirebugContext);
             if (label)
             {
                 tooltip.setAttribute("label", label);

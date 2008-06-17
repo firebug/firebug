@@ -178,9 +178,9 @@ this.Func = domplate(Firebug.Rep,
             context.chrome.select(sourceLink);
     },
 
-    getTooltip: function(fn)
+    getTooltip: function(fn, context)
     {
-        var script = script ? script : findScriptForFunction(fn);
+        var script = script ? script : findScriptForFunctionInContext(context, fn);
         if (script)
             return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
     },
@@ -194,7 +194,7 @@ this.Func = domplate(Firebug.Rep,
     getContextMenuItems: function(fn, target, context, script)
     {
         if (!script)
-            script = findScriptForFunction(fn);
+            script = findScriptForFunctionInContext(context, fn);
         if (!script)
             return;
 
