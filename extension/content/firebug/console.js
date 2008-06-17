@@ -520,6 +520,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
             optionMenu("ShowChromeMessages", "showChromeMessages"),
             optionMenu("ShowExternalErrors", "showExternalErrors"),
             this.getShowStackTraceMenuItem(),
+            this.getStrictOptionMenuItem(),
             "-",
             optionMenu("LargeCommandLine", "largeCommandLine")
         ];
@@ -533,6 +534,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         return menuItem;
     },
 
+    getStrictOptionMenuItem: function()
+    {
+        var strictDomain = "javascript.options";
+        var strictName = "strict";
+        var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
+        return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue, 
+            command: bindFixed(Firebug.setPref, Firebug, strictDomain, strictName, !strictValue) };
+    },
+    
     search: function(text)
     {
         if (!text)

@@ -1714,7 +1714,7 @@ var removeFile = NetProgress.prototype.removeFile;
 // ************************************************************************************************
 
 /**
- * A Document is a helpers objcet that represents a document (window) on the page.
+ * A Document is a helpers object that represents a document (window) on the page.
  * This object is created for main page document and for every inner document
  * (within a document) for which a request is made.
  */
@@ -1731,7 +1731,7 @@ NetDocument.prototype =
 // ************************************************************************************************
 
 /**
- * A File is a helper object that reprents a file for which a request is made.
+ * A File is a helper object that represents a file for which a request is made.
  * The document refers to it's parent document (NetDocument) through a member
  * variable.
  */
