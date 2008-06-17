@@ -24,8 +24,30 @@ var commandInsertPointer = -1;
 Firebug.CommandLine = extend(Firebug.Module,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    
+    // targetWindow was needed by evaluateInSandbox, let's leave it for a while in case we rethink this yet again
+    
+    evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
+    {
+        if (!context)
+            return;
 
-    evaluateAndShow: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
+        var result = null;
+
+        if (context.stopped)
+        {
+            result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+        }
+        else
+        {
+            result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+        }
+
+        return result;
+    },
+
+
+    evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
         var element = win.document.getElementById("_firebugConsole");
@@ -36,7 +58,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         if (!element)
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateAndShow: no _firebugConsole!\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no _firebugConsole!\n");
             return;  // we're in trouble here.
         }
 
@@ -80,46 +102,30 @@ Firebug.CommandLine = extend(Firebug.Module,
         element.dispatchEvent(event);
     },
 
-    evaluate: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
+    evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction)
     {
-        if (!context)
-            return;
-
         var result = null;
+        
+        if (!context.commandLineAPI)
+            context.commandLineAPI = new FirebugCommandLineAPI(context, context.window);
 
-        if (context.stopped)
+        var scope = {
+            api       : context.commandLineAPI,
+            vars      : getInspectorVars(context),
+            thisValue : thisValue
+        };
+
+        try
         {
-            if (!context.commandLineAPI)
-                context.commandLineAPI = new FirebugCommandLineAPI(context, context.window);
-
-            var scope = {
-                api       : context.commandLineAPI,
-                vars      : getInspectorVars(context),
-                thisValue : thisValue
-            };
-
-            try
-            {
-                result = Firebug.Debugger.evaluate(expr, context, scope);
-                successConsoleFunction(result, context);  // result will be pass thru this function
-            }
-            catch (e)
-            {
-                exceptionFunction(e, context);
-            }
+            result = Firebug.Debugger.evaluate(expr, context, scope);
+            successConsoleFunction(result, context);  // result will be pass thru this function
         }
-        else
+        catch (e)
         {
-            var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
-            result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, skipNotDefinedMessages);
+            exceptionFunction(e, context);
         }
-
-        // XXXjjb TODO this cause a lot of panel cpu, it should be moved in to the callers where appropriate.
-        context.invalidatePanels("dom", "watches", "domSide");
-
         return result;
     },
-
 
     // TODO: strip down to minimum, have one global sandbox that is reused.
     evaluateInSandbox: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
@@ -204,7 +210,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
         }
 
-        this.evaluateAndShow(expr, context, null, context.window, FBL.bind(Firebug.Console.log, Firebug.Console)); // XXXjjb targetWindow??
+        this.evaluate(expr, context, null, context.window, FBL.bind(Firebug.Console.log, Firebug.Console)); // XXXjjb targetWindow??
     },
 
     enterMenu: function(context)
@@ -216,7 +222,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         this.appendToHistory(expr, true);
 
-        this.evaluateAndShow(expr, context, null, context.window, function(result, context)
+        this.evaluate(expr, context, null, context.window, function(result, context)
         {
             if (typeof(result) != "undefined")
             {
@@ -238,7 +244,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.clear(context);
         this.appendToHistory(expr);
 
-        this.evaluateAndShow(expr, context, null, context.window, function(result, context)
+        this.evaluate(expr, context, null, context.window, function(result, context)
         {
             if (typeof(result) != undefined)
                 context.chrome.select(result);
@@ -531,7 +537,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 preExpr = preExpr.substr(0, lastDot);
 
             var self = this;
-            Firebug.CommandLine.evaluateAndShow(preExpr, context, context.thisValue, context.window,
+            Firebug.CommandLine.evaluate(preExpr, context, context.thisValue, context.window,
                 function found(result, context)
                 {
                     self.complete = keys(result).sort();

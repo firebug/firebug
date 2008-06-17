@@ -441,7 +441,7 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
         if (object && !(object instanceof jsdIStackFrame))
         {
              // unwrappedJSObject.property = unwrappedJSObject
-             Firebug.CommandLine.evaluateAndShow(value, this.context, object, this.context.window,
+             Firebug.CommandLine.evaluate(value, this.context, object, this.context.window,
                  function success(result, context)
                  {
                      object[name] = result;
@@ -1125,7 +1125,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
             {
                 var expr = this.watches[i];
                 var value = null;
-                Firebug.CommandLine.evaluateAndShow(expr, this.context, null, this.context.window,
+                Firebug.CommandLine.evaluate(expr, this.context, null, this.context.window,
                     function success(result, context)
                     {
                         value = result;

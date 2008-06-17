@@ -1129,8 +1129,16 @@ function onSelectedSidePanel(event)
     if (FirebugContext)
     {
         var panelName = FirebugContext.panelName;
-        var sidePanelName = sidePanel ? sidePanel.name : null;
-        FirebugContext.sidePanelNames[panelName] = sidePanelName;
+        if (panelName)
+        {
+            var sidePanelName = sidePanel ? sidePanel.name : null;
+            FirebugContext.sidePanelNames[panelName] = sidePanelName;
+        }
+        else
+        {
+        	if (FBTrace.DBG_ERRORS)
+	            FBTrace.dumpProperties("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
+        }
     }
     if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n"); /*@explore*/
 

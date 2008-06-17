@@ -417,10 +417,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             context.currentFrame = context.debugFrame;
 
+            // Make FirebugContext = context and sync the UI
+            var browser = context.browser;            
+            browser.chrome.showContext(browser, context);  
+
             this.syncCommands(context);
             this.syncListeners(context);
-            context.chrome.syncSidePanels();
-
+             
             // XXXms : better way to do this ?
             if ( !context.hideDebuggerUI || (FirebugChrome.getCurrentBrowser() && FirebugChrome.getCurrentBrowser().showFirebug))
             {
@@ -431,8 +434,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 else
                     var panel = context.chrome.selectPanel("script");  // else use prev sidePanel
 
-                if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("selectPanel done "+panel.name+"\n");                               /*@explore*/
-                panel.select(context.debugFrame, true);
+                if (panel)
+                {
+                    if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("selectPanel done "+(panel?panel.name:"panel null")+"\n");                               /*@explore*/
+                    panel.select(context.debugFrame, true);
+                }
+                else
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("debugger.startDebugging no panel for context "+context.window+"\n");
+                }
 
                 var stackPanel = context.getPanel("callstack");
                 if (stackPanel)
