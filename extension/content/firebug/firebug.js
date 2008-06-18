@@ -2395,7 +2395,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
                     )
                 )
             ),
-            DIV({class: "moduleManagerRow", style: "align:right"},
+            DIV({class: "moduleManagerRow"},
                 BUTTON({class: "moduleMangerApplyButton", onclick: "$onEnable"},
                     SPAN("$enableHostLabel")
                 )
