@@ -3875,7 +3875,8 @@ domMemberMap.Window =
     "btoa",
     "updateCommands",
     "XPCNativeWrapper",
-    "GeckoActiveXObject"
+    "GeckoActiveXObject",
+    "applicationCache"      // FF3
 ];
 
 domMemberMap.Location =

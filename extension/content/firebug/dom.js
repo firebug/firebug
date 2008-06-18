@@ -1390,13 +1390,13 @@ function hasProperties(ob)
 
 function addMember(type, props, name, value, level, order)
 {
+    var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents
+    var tag = rep.shortTag ? rep.shortTag : rep.tag;
+    
     var valueType = typeof(value);
     var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
         (valueType == "function" || (valueType == "object" && value != null)
         || (valueType == "string" && value.length > Firebug.stringCropLength));
-
-    var rep = Firebug.getRep(value);
-    var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
     props.push({
         name: name,

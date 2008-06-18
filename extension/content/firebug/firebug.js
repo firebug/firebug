@@ -881,7 +881,7 @@ top.Firebug =
                 {
                     FBTrace.dumpProperties("firebug.getRep FAILS at i/reps.length: "+i+"/"+reps.length+" type:"+type+" exc:", exc);
                     FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
-                    FBTrace.dumpProperties("firebug.getRep object:", object);
+                    FBTrace.dumpStack("firebug.getRep");
                 }
             }
         }
