@@ -12,7 +12,7 @@ function _FirebugConsole()
         {
             var command = commands[i];
             this[command] = new Function(
-                "return this.notifyFirebug(arguments, '" + command + "', 'firebugAppendConsole');");
+                "return window.console.notifyFirebug(arguments, '" + command + "', 'firebugAppendConsole');");
         }
 
         // Initialize DOM element for communication betwen the web-page a chrome.
