@@ -429,10 +429,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 Firebug.showBar(true);
 
-                if (Firebug.errorStackTrace)
-                    var panel = context.chrome.selectPanel("script", "callstack");
-                else
-                    var panel = context.chrome.selectPanel("script");  // else use prev sidePanel
+                var panel = context.chrome.selectPanel("script");  
 
                 if (panel)
                 {
@@ -456,10 +453,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 // when stopping in top-level frame // investigate later
                 context.chrome.updateViewOnShowHook = function()
                 {
-                    if (Firebug.errorStackTrace)
-                        var panel = context.chrome.selectPanel("script", "callstack");
-                    else
-                        var panel = context.chrome.selectPanel("script");  // else use prev sidePanel
+                    var panel = context.chrome.selectPanel("script");  // else use prev sidePanel
 
                     if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("selectPanel done "+panel+"\n");                           /*@explore*/
                     panel.select(context.debugFrame);
