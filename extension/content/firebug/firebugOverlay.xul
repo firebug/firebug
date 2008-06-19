@@ -111,6 +111,20 @@
             </hbox>
 
             <hbox id="fbScriptButtons" collapsed="true">
+                <toolbarseparator/>
+                <tooltip id="fbScriptFilterMenuTooltip"
+                    onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
+                <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip">
+                    <menupopup
+                        oncommand="return Firebug.Debugger.onScriptFilterMenuCommand(event, FirebugContext)"
+                        onpopupshowing="return Firebug.Debugger.onScriptFilterMenuPopupShowing(this, FirebugContext)"
+                        onpopuphiding="return Firebug.Debugger.onScriptFilterMenuPopupHiding(this, FirebugContext)">
+                        <menuitem type="radio" name="fbScriptFilterMenu" value="static"/>
+                        <menuitem type="radio" name="fbScriptFilterMenu" value="evals"/>
+                        <menuitem type="radio" name="fbScriptFilterMenu" value="events"/>
+                        <menuitem type="radio" name="fbScriptFilterMenu" value="all"/>
+                    </menupopup>
+                </toolbarbutton>
             </hbox>
 
             <hbox id="fbNetButtons" collapsed="true">

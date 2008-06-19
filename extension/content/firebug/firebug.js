@@ -1818,6 +1818,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.activeContexts = [];
     },
 
+    initializeUI: function(detachArgs)
+    {
+        // Create activable menu within the tab.
+        var tab = this.panelBar1.getTab(this.panelName);
+        this.tabMenu = tab.initTabMenu(this);
+    },
+
     initContext: function(context)
     {
         // Add observers for permissions and preference changes so, activable modules
@@ -1857,8 +1864,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var enabled = this.isEnabled(context);
         tab.setAttribute("disabled", enabled ? "false" : "true");
 
-        // Create activable menu within the tab.
-        this.tabMenu = tab.initTabMenu(this);
         this.updateMenuValue(context);
     },
 

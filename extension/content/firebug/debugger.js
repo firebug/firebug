@@ -1301,6 +1301,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
+    	Firebug.ActivableModule.initializeUI.apply(this, arguments);
+		this.filterButton = $("fbScriptFilterMenu");
+		this.filterMenuUpdate();
         fbs.registerClient(this);   // allow callbacks for jsd
     },
 
@@ -1400,6 +1403,81 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.unregisterDebugger(this);
     },
 
+	//---------------------------------------------------------------------------------------------
+    // Menu in toolbar.
+    
+    onScriptFilterMenuTooltipShowing: function(tooltip, context)
+    {
+        FBTrace.dumpStack("onScriptFilterMenuTooltipShowing");
+    },
+
+    onScriptFilterMenuCommand: function(event, context)
+    {
+        var menu = event.target;
+        FBTrace.sysout(" onScriptFilterMenuCommand value: "+ menu.value+"\n");
+        Firebug.setPref("extensions.firebug", "scriptsFilter", menu.value);
+        Firebug.Debugger.filterMenuUpdate();
+    },
+
+    menuFullLabel: 
+    {
+        static: $STR("ScriptsFilterStatic"),
+        evals: $STR("ScriptsFilterEval"),
+        events: $STR("ScriptsFilterEvent"),
+        all: $STR("ScriptsFilterAll"),
+    },
+    
+    menuShortLabel: 
+    {
+        static: $STR("ScriptsFilterStaticShort"),
+        evals: $STR("ScriptsFilterEvalShort"),
+        events: $STR("ScriptsFilterEventShort"),
+        all: $STR("ScriptsFilterAllShort"),
+    },
+    
+    onScriptFilterMenuPopupShowing: function(menu, context)
+    {
+        if (this.menuTooltip)
+            this.menuTooltip.fbEnabled = false;
+
+        var items = menu.getElementsByTagName("menuitem");
+        var value = this.filterButton.value;
+
+        for (var i=0; i<items.length; i++)
+        {
+            var option = items[i].value;
+            if (!option)
+                continue;
+
+            if (option == value)
+                items[i].setAttribute("checked", "true");
+
+            items[i].label = Firebug.Debugger.menuFullLabel[option];
+        }
+
+        return true;
+    },
+
+    onScriptFilterMenuPopupHiding: function(tooltip, context)
+    {
+        if (this.menuTooltip)
+            this.menuTooltip.fbEnabled = true;
+
+        return true;
+    },
+
+    filterMenuUpdate: function()
+    {
+        var value = Firebug.getPref("extensions.firebug", "scriptsFilter");
+        this.filterButton.value = value;
+
+        this.filterButton.label = this.menuShortLabel[value];
+        this.filterButton.removeAttribute("disabled");
+        this.filterButton.setAttribute("value", value);
+    },
+
+    //----------------------------------------------------------------------------------
+
 });
 
 
@@ -1409,6 +1487,7 @@ function ScriptPanel() {}
 
 ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
+
     updateSourceBox: function(sourceBox)
     {
         if (this.executionFile && this.location.href == this.executionFile.href)
@@ -1953,7 +2032,22 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         else
             this.showStackFrame(null);
     },
-
+	
+	showThisSourceFile: function(sourceFile)
+	{
+    	//-----------------------------------123456789
+    	if (sourceFile.href.substr(0, 9) == "chrome://")
+        	return false;
+        	
+       	if (sourceFile.isEval() && !this.showEvals)
+       		return false;
+       		
+        if (sourceFile.isEvent() && !this.showEvents)
+        	return false;		
+       
+    	return true;
+	},
+	
     getLocationList: function()
     {
         var context = this.context;
@@ -1965,10 +2059,14 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return allSources;
         }
 
+		var filter = Firebug.getPref("extensions.firebug", "scriptsFilter");
+		this.showEvents = (filter == "all" || filter == "events");
+		this.showEvals = (filter == "all" | filter == "evals");
+		 
         var list = [];
         for (var i = 0; i < allSources.length; i++)
         {
-            if (FBL.showThisSourceFile(allSources[i].href))
+            if (this.showThisSourceFile(allSources[i]))
                 list.push(allSources[i]);
         }
 

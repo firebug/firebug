@@ -1976,14 +1976,6 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
     }
 };
 
-this.showThisSourceFile = function(url)
-{
-    //-----------------------123456789
-    if (url.substr(0, 9) == "chrome://")
-        return false;
-    return true;
-}
-
 // ************************************************************************************************
 // Firefox browsing
 
@@ -3175,6 +3167,16 @@ this.SourceFile.prototype =
     getObjectDescription: function()
     {
         return FBL.splitURLBase(this.href);
+    },
+    
+    isEval: function() 
+    {
+        return (this.compilation_unit_type == "eval-level") || (this.compilation_unit_type == "newFunction");
+    },
+    
+    isEvent: function()
+    {
+        return (this.compilation_unit_type == "event");
     }
 }
 

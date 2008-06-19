@@ -191,6 +191,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
+        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        
         // Initialize max limit for logged requests.
         NetLimit.updateMaxLimit();
 

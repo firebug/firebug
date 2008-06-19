@@ -113,10 +113,7 @@ this.dumpProperties = function(header, obj)
                             this.sysout("["+p+"]="+xpobj+";\n");
                         }
                     }
-                    if (obj.wrappedJSObject)
-                        this.sysout("w["+p+"]="+obj.wrappedJSOboject[p]+";\n");
-                    else
-                        this.sysout("["+p+"]="+obj[p]+";\n");
+                    this.sysout("["+p+"]="+obj[p]+";\n");
                 }
                 catch (e)
                 {
