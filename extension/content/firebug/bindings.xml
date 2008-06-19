@@ -343,13 +343,15 @@
         <handler event="popupshowing"><![CDATA[
             var items = this.popup.getElementsByTagName("xul:menuitem");
             var location = FirebugChrome.getBrowserURI(FirebugContext);
+            var value = this.module.getHostPermission(FirebugContext);
+            
             for (var i=0; i<items.length; i++)
             {
                 var option = items[i].value;
                 if (!option)
                     continue;
 
-                if (option == this.value)
+                if (option == value)
                     items[i].setAttribute("checked", "true");
 
                 items[i].label = this.module.getMenuLabel(option, location);

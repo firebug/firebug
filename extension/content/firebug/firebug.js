@@ -1848,8 +1848,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         else
             this.panelDeactivate(context, beginOrEnd);
 
-        this.updateMenuValue(context);
-
         return persistedPanelState;
     },
 
@@ -1864,7 +1862,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var enabled = this.isEnabled(context);
         tab.setAttribute("disabled", enabled ? "false" : "true");
 
-        this.updateMenuValue(context);
     },
 
     destroyContext: function(context)
@@ -2260,12 +2257,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         tab.setAttribute("disabled", "true");
 
         panel.clear();
-    },
-
-    updateMenuValue: function(context)
-    {
-        var value = this.getHostPermission(context);
-        this.tabMenu.value = value;
     },
 
     getMenuLabel: function(option, location, shortened)
