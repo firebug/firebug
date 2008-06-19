@@ -208,6 +208,10 @@ panelTab:hover > .panelTab-text {
     background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
 }
 
+panelTab:hover > panelTabMenu {
+    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
+}
+
 panelTab:hover > .panelTab-right {
     background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat bottom;
 }
@@ -217,6 +221,10 @@ panelTab[selected="true"] > .panelTab-left {
 }
 
 panelTab[selected="true"] > .panelTab-text {
+    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
+}
+
+panelTab[selected="true"] > panelTabMenu {
     background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
 }
 

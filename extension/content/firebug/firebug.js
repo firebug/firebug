@@ -1811,15 +1811,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
 {
     panelName: null,
     panelBar1: $("fbPanelBar1"),
-    menuButton: null,
-    menuTooltip: null,
     activeContexts: null,
 
     initialize: function()
     {
         this.activeContexts = [];
-        if (this.menuTooltip)
-            this.menuTooltip.fbEnabled = true;
     },
 
     initContext: function(context)
@@ -1845,7 +1841,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         else
             this.panelDeactivate(context, beginOrEnd);
 
-        this.menuUpdate(context);
+        this.updateMenuValue(context);
 
         return persistedPanelState;
     },
@@ -1861,7 +1857,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var enabled = this.isEnabled(context);
         tab.setAttribute("disabled", enabled ? "false" : "true");
 
-        this.menuUpdate(context);
+        // Create activable menu within the tab.
+        this.tabMenu = tab.initTabMenu(this);
+        this.updateMenuValue(context);
     },
 
     destroyContext: function(context)
@@ -2259,65 +2257,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
         panel.clear();
     },
 
-    // Menu in toolbar.
-    onStateMenuTooltipShowing: function(tooltip, context)
-    {
-        if (!this.menuTooltip)
-            return false;
-
-        if (this.menuTooltip.fbEnabled)
-            this.menuTooltip.label = $STR(this.panelName + "." + "PermMenuTooltip");
-
-        return this.menuTooltip.fbEnabled;
-    },
-
-    onStateMenuCommand: function(event, context)
-    {
-        var menu = event.target;
-        this.setHostPermission(context, menu.value);
-    },
-
-    onStateMenuPopupShowing: function(menu, context)
-    {
-        if (this.menuTooltip)
-            this.menuTooltip.fbEnabled = false;
-
-        var items = menu.getElementsByTagName("menuitem");
-        var value = this.menuButton.value;
-
-        var location = FirebugChrome.getBrowserURI(context);
-        for (var i=0; i<items.length; i++)
-        {
-            var option = items[i].value;
-            if (!option)
-                continue;
-
-            if (option == value)
-                items[i].setAttribute("checked", "true");
-
-            items[i].label = this.getMenuLabel(option, location);
-        }
-
-        return true;
-    },
-
-    onStateMenuPopupHiding: function(tooltip, context)
-    {
-        if (this.menuTooltip)
-            this.menuTooltip.fbEnabled = true;
-
-        return true;
-    },
-
-    menuUpdate: function(context)
+    updateMenuValue: function(context)
     {
         var value = this.getHostPermission(context);
-        this.menuButton.value = value;
-
-        var location = FirebugChrome.getBrowserURI(context);
-        this.menuButton.label = this.getMenuLabel(value, location, true);
-        this.menuButton.removeAttribute("disabled");
-        this.menuButton.setAttribute("value", value);
+        this.tabMenu.value = value;
     },
 
     getMenuLabel: function(option, location, shortened)

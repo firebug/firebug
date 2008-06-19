@@ -193,6 +193,10 @@ panelTab:hover > .panelTab-text {
     background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x bottom;
 }
 
+panelTab:hover > panelTabMenu {
+    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x bottom;
+}
+
 panelTab:hover > .panelTab-right {
     background: url(chrome://firebug/skin/mac/tabRightHover.png) no-repeat bottom;
 }
@@ -202,6 +206,10 @@ panelTab[selected="true"] > .panelTab-left {
 }
 
 panelTab[selected="true"] > .panelTab-text {
+    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x bottom;
+}
+
+panelTab[selected="true"] > panelTabMenu {
     background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x bottom;
 }
 

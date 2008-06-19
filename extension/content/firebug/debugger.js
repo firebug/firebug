@@ -1301,9 +1301,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
-        this.menuTooltip = $("fbDebuggerStateMenuTooltip");
-        this.menuButton = $("fbDebuggerStateMenu");
-
         fbs.registerClient(this);   // allow callbacks for jsd
     },
 
@@ -1314,10 +1311,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     reattachContext: function(browser, context)
     {
-        var chrome = context ? context.chrome : FirebugChrome;
-
-        this.menuTooltip = chrome.$("fbDebuggerStateMenuTooltip");
-        this.menuButton = chrome.$("fbDebuggerStateMenu");
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
     },
 

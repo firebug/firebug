@@ -275,13 +275,88 @@
     </handlers>
 </binding>
 
-<binding id="panelTab" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
+<binding id="panelTab" display="xul:button">
     <content>
         <xul:image class="panelTab-left"/>
         <xul:label class="panelTab-text" crop="right" flex="1"
                    xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle,disabled"/>
+        <children includes="panelTabMenu"/>
         <xul:image class="panelTab-right"/>
     </content>
+    <implementation>
+        <method name="initTabMenu">
+            <parameter name="module"/>
+            <body><![CDATA[
+            if (!this.tabMenu)
+            {
+                this.tabMenu = document.createElement("panelTabMenu");
+                this.tabMenu.module = module;
+                return this.appendChild(this.tabMenu);
+            }
+            return this.tabMenu;
+            ]]></body>
+        </method>
+    </implementation>
+</binding>
+
+<binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
+    <content>
+        <xul:menupopup anonid="popup"
+                       oncommand="return this.parentNode.onCommand(event)">
+            <xul:menuitem type="radio" value="enable"/>
+            <xul:menuitem type="radio" value="disable"/>
+            <xul:menuitem type="radio" value="enable-site"/>
+            <xul:menuitem type="radio" value="disable-site"/>
+            <xul:menuseparator />
+            <xul:menuitem label="&firebug.Permissions;"
+                          oncommand="this.parentNode.parentNode.openPermissions(event)"/>
+        </xul:menupopup>
+        <xul:image anonid="menuTarget" class="menuTarget"/>
+    </content>
+    <implementation>
+        <constructor>
+        <![CDATA[
+           this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
+           this.popup.tooltip
+        ]]>
+        </constructor>
+        <field name="value"/>
+        <field name="module"/>
+        <method name="onCommand">
+            <parameter name="event"/>
+            <body><![CDATA[
+                var menu = event.target;
+                this.module.setHostPermission(FirebugContext, menu.value);
+            ]]></body>
+        </method>
+        <method name="openPermissions">
+            <parameter name="event"/>
+            <body><![CDATA[
+                this.module.openPermissions(event, FirebugContext);
+            ]]></body>
+        </method>
+    </implementation>
+    <handlers>
+        <handler event="mousedown" button="0"><![CDATA[
+            this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
+        ]]></handler>
+        <handler event="popupshowing"><![CDATA[
+            var items = this.popup.getElementsByTagName("xul:menuitem");
+            var location = FirebugChrome.getBrowserURI(FirebugContext);
+            for (var i=0; i<items.length; i++)
+            {
+                var option = items[i].value;
+                if (!option)
+                    continue;
+
+                if (option == this.value)
+                    items[i].setAttribute("checked", "true");
+
+                items[i].label = this.module.getMenuLabel(option, location);
+            }
+            return true;
+        ]]></handler>
+    </handlers>
 </binding>
 
 <binding id="panelStatus">

@@ -205,8 +205,6 @@ Firebug.Console = extend(ActivableConsole,
     {
         this.panelName = "console";
         this.description = $STR("console.modulemanager.description");
-        this.menuTooltip = $("fbConsoleStateMenuTooltip");
-        this.menuButton = $("fbConsoleStateMenu");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },

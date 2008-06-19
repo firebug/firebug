@@ -98,23 +98,6 @@
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
                 <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button" 
                                type="checkbox" command="cmd_toggleProfiling"/>
-                <toolbarseparator/>
-                <tooltip id="fbConsoleStateMenuTooltip"
-                    onpopupshowing="return Firebug.NetMonitor.onMenuTooltipShowing(this, FirebugContext)"/>
-                <toolbarbutton id="fbConsoleStateMenu" type="menu" tooltip="fbConsolePermTooltip">
-                    <menupopup
-                        oncommand="return Firebug.Console.onStateMenuCommand(event, FirebugContext)"
-                        onpopupshowing="return Firebug.Console.onStateMenuPopupShowing(this, FirebugContext)"
-                        onpopuphiding="return Firebug.Console.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbConsoleStateMenu" value="enable"/>
-                        <menuitem type="radio" name="fbConsoleStateMenu" value="disable"/>
-                        <menuitem type="radio" name="fbConsoleStateMenu" value="enable-site"/>
-                        <menuitem type="radio" name="fbConsoleStateMenu" value="disable-site"/>
-                        <menuseparator />
-                        <menuitem name="fbConsolePermisions" label="&firebug.Permissions;"
-                                oncommand="Firebug.Console.openPermissions(event, FirebugContext)"/>
-                    </menupopup>
-                </toolbarbutton>
             </hbox>
 
             <hbox id="fbHTMLButtons" collapsed="true">
@@ -128,45 +111,11 @@
             </hbox>
 
             <hbox id="fbScriptButtons" collapsed="true">
-                <toolbarseparator/>
-                <tooltip id="fbDebuggerStateMenuTooltip"
-                    onpopupshowing="return Firebug.Debugger.onStateMenuTooltipShowing(this, FirebugContext)"/>
-                <toolbarbutton id="fbDebuggerStateMenu" type="menu" tooltip="fbDebuggerPermTooltip">
-                    <menupopup
-                        oncommand="return Firebug.Debugger.onStateMenuCommand(event, FirebugContext)"
-                        onpopupshowing="return Firebug.Debugger.onStateMenuPopupShowing(this, FirebugContext)"
-                        onpopuphiding="return Firebug.Debugger.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable"/>
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable"/>
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="enable-site"/>
-                        <menuitem type="radio" name="fbDebuggerStateMenu" value="disable-site"/>
-                        <menuseparator />
-                        <menuitem name="fbDebuggerPermisions" label="&firebug.Permissions;"
-                                oncommand="Firebug.Debugger.openPermissions(event, FirebugContext)"/>
-                    </menupopup>
-                </toolbarbutton>
             </hbox>
 
             <hbox id="fbNetButtons" collapsed="true">
                 <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
-                <toolbarseparator/>
-                <tooltip id="fbNetStateMenuTooltip"
-                    onpopupshowing="return Firebug.NetMonitor.onMenuTooltipShowing(this, FirebugContext)"/>
-                <toolbarbutton id="fbNetStateMenu" type="menu" tooltip="fbNetPermTooltip">
-                    <menupopup
-                        oncommand="return Firebug.NetMonitor.onStateMenuCommand(event, FirebugContext)"
-                        onpopupshowing="return Firebug.NetMonitor.onStateMenuPopupShowing(this, FirebugContext)"
-                        onpopuphiding="return Firebug.NetMonitor.onStateMenuPopupHiding(this, FirebugContext)">
-                        <menuitem type="radio" name="fbNetStateMenu" value="enable"/>
-                        <menuitem type="radio" name="fbNetStateMenu" value="disable"/>
-                        <menuitem type="radio" name="fbNetStateMenu" value="enable-site"/>
-                        <menuitem type="radio" name="fbNetStateMenu" value="disable-site"/>
-                        <menuseparator />
-                        <menuitem name="fbNetMonitorPermisions" label="&firebug.Permissions;"
-                                oncommand="Firebug.NetMonitor.openPermissions(event, FirebugContext)"/>
-                    </menupopup>
-                </toolbarbutton>
                 <hbox id="fbNetButtonsFilter" collapsed="true">
                     <toolbarseparator/>
                     <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"

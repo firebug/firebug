@@ -62,3 +62,25 @@ panelStatus {
     /* Prevent full-screen from hiding toolbar */
     visibility: visible;
 }
+
+/************************************************************************************************/
+
+panelTabMenu {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelTabMenu");
+}
+
+panelTab > panelTabMenu .menuTarget {
+    visibility:collapse;
+}
+
+panelTab[selected="true"] > panelTabMenu .menuTarget {
+    background: url(chrome://firebug/skin/tabMenuTarget.png) no-repeat center;
+    width: 11px;
+    height: 10px;
+    vertical-align:middle;
+    visibility:visible;
+}
+
+panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
+    background: url(chrome://firebug/skin/tabMenuTargetHover.png) no-repeat center;
+}

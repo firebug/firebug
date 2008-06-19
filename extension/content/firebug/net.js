@@ -208,8 +208,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     initialize: function()
     {
         this.panelName = panelName;
-        this.menuTooltip = $("fbNetStateMenuTooltip");
-        this.menuButton = $("fbNetStateMenu");
         this.description = $STR("net.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
@@ -234,9 +232,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
         var chrome = context ? context.chrome : FirebugChrome;
         this.syncFilterButtons(chrome);
-
-        this.menuTooltip = chrome.$("fbNetStateMenuTooltip");
-        this.menuButton = chrome.$("fbNetStateMenu");
     },
 
     destroyContext: function(context)
