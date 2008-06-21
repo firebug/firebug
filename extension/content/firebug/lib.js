@@ -2796,7 +2796,7 @@ this.restoreObjects = function(panel, panelState)
             // If we couldn't restore the selection, wait a bit and try again
             panel.context.setTimeout(function()
             {
-                if (panel.selection == panel.getDefaultSelection())
+                if (panel.selection == panel.getDefaultSelection(panel.context))
                 {
                     var selection = panelState.persistedSelection(panel.context);
                     if (selection)
@@ -3523,6 +3523,9 @@ this.ScriptTagSourceFile.prototype.cache = function(context)
 //-------------------
 this.getSourceFileByScript = function(context, script)
 {
+    if (!context.sourceFileMap)
+        return null;
+    
     // Other algorithms are possible:
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below

@@ -1006,6 +1006,10 @@ FirebugService.prototype =
 
         // global to pass info to onDebug
         errorInfo = { message: message, fileName: fileName, lineNo: lineNo, pos: pos, flags: flags, errnum: errnum, exc: exc };
+        
+        if (message=="out of memory")  // bail
+            return true;
+        
         if (this.showStackTrace)
         {
             reportNextError = true;

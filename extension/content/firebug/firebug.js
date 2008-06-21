@@ -1369,7 +1369,7 @@ Firebug.Panel =
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("navigate "+object+"\n");
         if (!object)
-            object = this.getDefaultLocation();
+            object = this.getDefaultLocation(this.context);
 
         if (object != this.location)
         {
@@ -1391,7 +1391,7 @@ Firebug.Panel =
         if(FBTrace.DBG_PANELS)    /*@explore*/
             FBTrace.sysout("firebug.select forceUpdate: "+forceUpdate+" (object != this.selection)? "+(object != this.selection), " object: "+object);  /*@explore*/
         if (!object)
-            object = this.getDefaultSelection();
+            object = this.getDefaultSelection(this.context);
 
         if (forceUpdate || object != this.selection)
         {

@@ -574,9 +574,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     detachListeners: function(context, chrome)
     {
-        for (var i = 0; i < this.keyListeners.length; ++i)
-            chrome.keyIgnore(this.keyListeners[i]);
-        delete this.keyListeners;
+        if (this.keyListeners)
+        {
+            for (var i = 0; i < this.keyListeners.length; ++i)
+                chrome.keyIgnore(this.keyListeners[i]);
+            delete this.keyListeners;
+        }
     },
 
 
@@ -753,8 +756,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         var hookReturn = dispatch2(listeners,"onError",[context, frame, error]);
+        
+        if (Firebug.breakOnErrors)
+            return -1;  // break
+            
         if (hookReturn)
             return hookReturn;
+        
         return -2; /* let firebug service decide to break or not */
     },
 
@@ -2081,15 +2089,25 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return list;
     },
 
-    getDefaultLocation: function()
+    getDefaultLocation: function(context)
     {
         var sourceFiles = this.getLocationList();
-        return sourceFiles[0];
+        if (context)
+        {
+            var url = context.window.location.toString();
+            for (var i = 0; i < sourceFiles.length; i++)
+            {
+                if (url == sourceFiles[i].href)
+                    return sourceFiles[i];
+            }
+        }
+        else
+            return sourceFiles[0];
     },
 
-    getDefaultSelection: function()
+    getDefaultSelection: function(context)
     {
-        return this.getDefaultLocation();
+        return this.getDefaultLocation(context);
     },
 
     getTooltipObject: function(target)
