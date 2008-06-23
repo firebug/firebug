@@ -1733,7 +1733,7 @@ this.findScriptForFunction = function(fn)
 
     this.jsd.enumerateScripts({enumerateScript: function findScriptMatchingFn(script)
     {
-        try {  
+        try {
             if (script.isValid)
             {
 
@@ -2999,6 +2999,13 @@ this.SourceFile.prototype =
 
     addToLineTable: function(script)
     {
+        if (!script || !script.isValid)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("addToLineTable got invalid script "+(script?script.tag:"null")+"\n");
+            return;
+        }
+
         // For outer scripts, a better algorithm would loop over PC, use pcToLine to mark the lines.
         // This assumes there are fewer PCs in an outer script than lines, probably true for large systems.
         // And now addToLineTable is only used for outerScripts (eval and top-level).
@@ -3168,12 +3175,12 @@ this.SourceFile.prototype =
     {
         return FBL.splitURLBase(this.href);
     },
-    
-    isEval: function() 
+
+    isEval: function()
     {
         return (this.compilation_unit_type == "eval-level") || (this.compilation_unit_type == "newFunction");
     },
-    
+
     isEvent: function()
     {
         return (this.compilation_unit_type == "event");
@@ -3229,7 +3236,18 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
 this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 {
     if (outerScript.isValid)
-        sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
+    {
+        try
+        {
+            sourceFile.addToLineTable(outerScript, outerScript.baseLineNumber);
+        }
+        catch (exc)
+        {
+            // XXXjjb I think this is happening when we go out of the script range in isLineExecutable.
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("addScriptsToSourceFile addLineTable FAILS", exc);
+        }
+    }
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
         FBTrace.sysout("FBL.addScriptsToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
 
@@ -3525,7 +3543,7 @@ this.getSourceFileByScript = function(context, script)
 {
     if (!context.sourceFileMap)
         return null;
-    
+
     // Other algorithms are possible:
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below

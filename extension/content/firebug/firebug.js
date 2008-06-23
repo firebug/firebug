@@ -1058,6 +1058,8 @@ top.Firebug =
         context.panelName = context.browser.panelName;
         if (context.browser.sidePanelNames)
             context.sidePanelNames = context.browser.sidePanelNames;
+        if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
+            FBTrace.dumpProperties("firebug.initContext sidePanelNames:",context.sidePanelNames);
     },
 
     showContext: function(browser, context)
@@ -1618,7 +1620,13 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
     getSourceBoxBySourceFile: function(sourceFile)
     {
         if (!sourceFile.source)
-            return this.getSourceBoxByURL(sourceFile.href);
+        {
+            var sourceBox = this.getSourceBoxByURL(sourceFile.href);
+            if (sourceBox && sourceBox.repObject == sourceFile)
+                return sourceBox;
+            else
+                return null;  // cause a new one to be created
+        }
 
         for (var i = 0; i < this.anonSourceBoxes.length; ++i)
         {

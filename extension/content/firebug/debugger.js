@@ -418,18 +418,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.currentFrame = context.debugFrame;
 
             // Make FirebugContext = context and sync the UI
-            var browser = context.browser;            
-            browser.chrome.showContext(browser, context);  
+            var browser = context.browser;
+            browser.chrome.showContext(browser, context);
 
             this.syncCommands(context);
             this.syncListeners(context);
-             
+
             // XXXms : better way to do this ?
             if ( !context.hideDebuggerUI || (FirebugChrome.getCurrentBrowser() && FirebugChrome.getCurrentBrowser().showFirebug))
             {
                 Firebug.showBar(true);
 
-                var panel = context.chrome.selectPanel("script");  
+                var panel = context.chrome.selectPanel("script");
 
                 if (panel)
                 {
@@ -756,13 +756,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         var hookReturn = dispatch2(listeners,"onError",[context, frame, error]);
-        
+
         if (Firebug.breakOnErrors)
             return -1;  // break
-            
+
         if (hookReturn)
             return hookReturn;
-        
+
         return -2; /* let firebug service decide to break or not */
     },
 
@@ -1303,9 +1303,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     initializeUI: function()
     {
-    	Firebug.ActivableModule.initializeUI.apply(this, arguments);
-		this.filterButton = $("fbScriptFilterMenu");
-		this.filterMenuUpdate();
+        Firebug.ActivableModule.initializeUI.apply(this, arguments);
+        this.filterButton = $("fbScriptFilterMenu");
+        this.filterMenuUpdate();
         fbs.registerClient(this);   // allow callbacks for jsd
     },
 
@@ -1391,7 +1391,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" with fbs.enabledDebugger:"+fbs.enabledDebugger+" for "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
+            FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" for debuggerName "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 
         if (!init)
             context.window.location.reload();
@@ -1405,9 +1405,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.unregisterDebugger(this);
     },
 
-	//---------------------------------------------------------------------------------------------
+    //---------------------------------------------------------------------------------------------
     // Menu in toolbar.
-    
+
     onScriptFilterMenuTooltipShowing: function(tooltip, context)
     {
         FBTrace.dumpStack("onScriptFilterMenuTooltipShowing");
@@ -1421,22 +1421,22 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.Debugger.filterMenuUpdate();
     },
 
-    menuFullLabel: 
+    menuFullLabel:
     {
         static: $STR("ScriptsFilterStatic"),
         evals: $STR("ScriptsFilterEval"),
         events: $STR("ScriptsFilterEvent"),
         all: $STR("ScriptsFilterAll"),
     },
-    
-    menuShortLabel: 
+
+    menuShortLabel:
     {
         static: $STR("ScriptsFilterStaticShort"),
         evals: $STR("ScriptsFilterEvalShort"),
         events: $STR("ScriptsFilterEventShort"),
         all: $STR("ScriptsFilterAllShort"),
     },
-    
+
     onScriptFilterMenuPopupShowing: function(menu, context)
     {
         if (this.menuTooltip)
@@ -2017,7 +2017,14 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!Firebug.Debugger.isEnabled(this.context))
             Firebug.ModuleManagerPage.hide(this);
 
-        this.showSourceFile(sourceFile, this.setLineBreakpoints);
+        // Since our last use of the sourceFile we may have compiled or recompiled the source
+        var updatedSourceFile = this.context.sourceFileMap[sourceFile.href];
+        if (!updatedSourceFile)
+            updatedSourceFile = this.getDefaultLocation(this.context);
+        if (!updatedSourceFile)
+            return;
+
+        this.showSourceFile(updatedSourceFile, this.setLineBreakpoints);
     },
 
     updateSelection: function(object)
@@ -2034,22 +2041,22 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         else
             this.showStackFrame(null);
     },
-	
-	showThisSourceFile: function(sourceFile)
-	{
-    	//-----------------------------------123456789
-    	if (sourceFile.href.substr(0, 9) == "chrome://")
-        	return false;
-        	
-       	if (sourceFile.isEval() && !this.showEvals)
-       		return false;
-       		
+
+    showThisSourceFile: function(sourceFile)
+    {
+        //-----------------------------------123456789
+        if (sourceFile.href.substr(0, 9) == "chrome://")
+            return false;
+
+           if (sourceFile.isEval() && !this.showEvals)
+               return false;
+
         if (sourceFile.isEvent() && !this.showEvents)
-        	return false;		
-       
-    	return true;
-	},
-	
+            return false;
+
+        return true;
+    },
+
     getLocationList: function()
     {
         var context = this.context;
@@ -2061,16 +2068,18 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return allSources;
         }
 
-		var filter = Firebug.getPref("extensions.firebug", "scriptsFilter");
-		this.showEvents = (filter == "all" || filter == "events");
-		this.showEvals = (filter == "all" | filter == "evals");
-		 
+        var filter = Firebug.getPref("extensions.firebug", "scriptsFilter");
+        this.showEvents = (filter == "all" || filter == "events");
+        this.showEvals = (filter == "all" | filter == "evals");
+
         var list = [];
         for (var i = 0; i < allSources.length; i++)
         {
             if (this.showThisSourceFile(allSources[i]))
                 list.push(allSources[i]);
         }
+
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList BEFORE iterateWindows ", list); /*@explore*/
 
        iterateWindows(context.window, function(win) {
             if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
@@ -2083,6 +2092,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (context.sourceFileMap.hasOwnProperty(url))
                     return;
                 list.push(new NoScriptSourceFile(context, url));
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpStack("Created NoScriptSourceFile for URL:"+url);
             }
         });
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger getLocationList ", list); /*@explore*/
@@ -2537,7 +2547,8 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         );
 
         return items;
-    }
+    },
+
 });
 
 Firebug.DebuggerListener =

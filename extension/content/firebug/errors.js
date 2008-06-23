@@ -277,6 +277,9 @@ function isShownCategory(url, category, isWarning)
 
     var isChrome = false;
 
+    if (!category)
+        return Firebug.showChromeErrors;
+
     var categories = category.split(" ");
     for (var i = 0 ; i < categories.length; ++i)
     {
@@ -368,7 +371,7 @@ function lessTalkMoreAction(context, object, isWarning)
         context.errorMap = {};
 
     context.errorMap[msgId] = 1;
-    
+
     return false;
 }
 

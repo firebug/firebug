@@ -37,16 +37,16 @@ const httpObserver =
             {
                 if (request.notificationCallbacks)
                 {
-                    try 
+                    try
                     {
                         var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
                     }
-                    catch (e) 
+                    catch (e)
                     {
                         if (e.name == "NS_NOINTERFACE")
                         {
-                            if (FBTrace.DBG_NET)                                                          
-                                FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);   
+                            if (FBTrace.DBG_NET)
+                                FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);
                         }
                     }
                     if (xhrRequest && request.loadGroup)
@@ -426,8 +426,8 @@ function requestStarted(request, xhrRequest, context, method, url)
       dispatch(listeners, "onStart", [context, spy]);
 
     if (FBTrace.DBG_NET)
-    	FBTrace.sysout("spy.requestStarted "+spy.href+"\n");
-    
+        FBTrace.sysout("spy.requestStarted "+spy.href+"\n");
+
     // Remember the start time et the end, so it's most accurate.
     spy.sendTime = new Date().getTime();
 }
@@ -513,7 +513,7 @@ function onHTTPSpyLoad(spy)
 
     // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
     // simulate the requestStopped here.
-    while (spy.context.spies.length)
+    while (spy.context.spies && spy.context.spies.length)
     {
       var spy = spy.context.spies[0];
       requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
