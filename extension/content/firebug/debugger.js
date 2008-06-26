@@ -2799,7 +2799,7 @@ function getCallingFrame(frame)
 function getFrameWindow(frame)
 {
     var result = {};
-    if (frame.eval("var y = 2;window", "", 1, result))
+    if (frame.eval("window", "", 1, result))
     {
         var win = result.value.getWrappedValue();
         return getRootWindow(win);
