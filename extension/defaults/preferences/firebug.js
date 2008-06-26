@@ -46,7 +46,7 @@ pref("extensions.firebug-service.trackThrowCatch", false);
 pref("extensions.firebug.script.enableLocalFiles", false);
 pref("extensions.firebug.script.enableSystemPages", false);
 pref("extensions.firebug.script.enableSites", false);
-pref("extensions.firebug.scriptsFilter", "all");
+pref("extensions.firebug-service.scriptsFilter", "all");
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);

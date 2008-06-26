@@ -1417,7 +1417,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var menu = event.target;
         FBTrace.sysout(" onScriptFilterMenuCommand value: "+ menu.value+"\n");
-        Firebug.setPref("extensions.firebug", "scriptsFilter", menu.value);
+        Firebug.setPref("extensions.firebug-service", "scriptsFilter", menu.value);
         Firebug.Debugger.filterMenuUpdate();
     },
 
@@ -1470,7 +1470,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     filterMenuUpdate: function()
     {
-        var value = Firebug.getPref("extensions.firebug", "scriptsFilter");
+        var value = Firebug.getPref("extensions.firebug-service", "scriptsFilter");
         this.filterButton.value = value;
 
         this.filterButton.label = this.menuShortLabel[value];
@@ -2068,9 +2068,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return allSources;
         }
 
-        var filter = Firebug.getPref("extensions.firebug", "scriptsFilter");
+        var filter = Firebug.getPref("extensions.firebug-service", "scriptsFilter");
         this.showEvents = (filter == "all" || filter == "events");
-        this.showEvals = (filter == "all" | filter == "evals");
+        this.showEvals = (filter == "all" || filter == "evals");
 
         var list = [];
         for (var i = 0; i < allSources.length; i++)

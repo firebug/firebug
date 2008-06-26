@@ -167,6 +167,7 @@ function FirebugService()
     observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
     observerService.addObserver(QuitApplicationObserver, "quit-application", false); 																													/*@explore*/
 
+    this.scriptsFilter = "all";
     this.alwayFilterURLsStarting = ["chrome://chromebug", "x-jsd:ppbuffer", "chrome://firebug/content/commandLine.js"];  // TODO allow override
     this.onEvalScriptCreated.kind = "eval"; /*@explore*/
     this.onTopLevelScriptCreated.kind = "top-level"; /*@explore*/
@@ -1006,10 +1007,10 @@ FirebugService.prototype =
 
         // global to pass info to onDebug
         errorInfo = { message: message, fileName: fileName, lineNo: lineNo, pos: pos, flags: flags, errnum: errnum, exc: exc };
-        
+
         if (message=="out of memory")  // bail
             return true;
-        
+
         if (this.showStackTrace)
         {
             reportNextError = true;
@@ -1028,45 +1029,48 @@ FirebugService.prototype =
 
     onEventScriptCreated: function(frame, type, val, noNestTest)
     {
-        try
+        if (fbs.showEvents)
         {
-           if (!noNestTest)
+            try
             {
-                // In onScriptCreated we saw a script with baseLineNumber = 1. We marked it as event and nested.
-                // Now we know its event, not nested.
-                if (fbs.nestedScriptStack.length > 0)
+               if (!noNestTest)
                 {
-                    fbs.nestedScriptStack.removeElementAt(0);
+                    // In onScriptCreated we saw a script with baseLineNumber = 1. We marked it as event and nested.
+                    // Now we know its event, not nested.
+                    if (fbs.nestedScriptStack.length > 0)
+                    {
+                        fbs.nestedScriptStack.removeElementAt(0);
+                    }
+                    else
+                    {
+                        if (fbs.DBG_FBS_SRCUNITS)  // these seem to be harmless, but...
+                        {
+                            var script = frame.script;
+                             ddd("onEventScriptCreated no nestedScriptStack: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
+                                +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
+                            ddd("onEventScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
+                            try {
+                            ddd(script.functionSource+"\n");                 /*@explore*/
+                            } catch (exc) { /*Bug 426692 */ }
+
+                        }
+                    }
+                }
+
+                var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
+                if (debuggr)
+                {
+                    var sourceFile = debuggr.onEventScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
+                    fbs.resetBreakpoints(sourceFile);
                 }
                 else
                 {
-                    if (fbs.DBG_FBS_SRCUNITS)  // these seem to be harmless, but...
-                    {
-                        var script = frame.script;
-                         ddd("onEventScriptCreated no nestedScriptStack: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
-                            +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
-                        ddd("onEventScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
-                        try {
-                        ddd(script.functionSource+"\n");                 /*@explore*/
-                        } catch (exc) { /*Bug 426692 */ }
-
-                    }
+                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName+"\n");
                 }
+            } catch(exc) {
+                dumpProperties("onEventScriptCreated failed: ", exc);
+                ERROR("onEventScriptCreated failed: "+exc);
             }
-
-            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
-            if (debuggr)
-            {
-                var sourceFile = debuggr.onEventScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
-                fbs.resetBreakpoints(sourceFile);
-            }
-            else
-            {
-                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName+"\n");
-            }
-        } catch(exc) {
-            dumpProperties("onEventScriptCreated failed: ", exc);
-            ERROR("onEventScriptCreated failed: "+exc);
         }
 
         fbs.nestedScriptStack.clear();
@@ -1077,35 +1081,38 @@ FirebugService.prototype =
 
     onEvalScriptCreated: function(frame, type, val)
     {
-        try
+        if (fbs.showEvals)
         {
-            if (!frame.callingFrame)
+            try
             {
-                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
-                // These are eval-like things called by native code. They come from .xml files
-                // They should be marked as evals but we'll treat them like event handlers for now.
-                return fbs.onEventScriptCreated(frame, type, val, true);
-            }
-            // In onScriptCreated we found a no-name script, set a bp in PC=0, and a flag.
-            // onBreakpoint saw the flag, cleared the flag, and sent us here.
-            // Start by undoing our damage
-            var outerScript = frame.script;
+                if (!frame.callingFrame)
+                {
+                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
+                    // These are eval-like things called by native code. They come from .xml files
+                    // They should be marked as evals but we'll treat them like event handlers for now.
+                    return fbs.onEventScriptCreated(frame, type, val, true);
+                }
+                // In onScriptCreated we found a no-name script, set a bp in PC=0, and a flag.
+                // onBreakpoint saw the flag, cleared the flag, and sent us here.
+                // Start by undoing our damage
+                var outerScript = frame.script;
 
-            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
-            if (debuggr)
-            {
-                var sourceFile = debuggr.onEvalScriptCreated(frame, outerScript, fbs.nestedScriptStack.enumerate());
-                fbs.resetBreakpoints(sourceFile);
+                var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
+                if (debuggr)
+                {
+                    var sourceFile = debuggr.onEvalScriptCreated(frame, outerScript, fbs.nestedScriptStack.enumerate());
+                    fbs.resetBreakpoints(sourceFile);
+                }
+                else
+                {
+                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEvalScriptCreated no debuggr for "+outerScript.tag+":"+outerScript.fileName+"\n");
+                }
             }
-            else
+            catch (exc)
             {
-                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEvalScriptCreated no debuggr for "+outerScript.tag+":"+outerScript.fileName+"\n");
+                ERROR("onEvalScriptCreated failed: "+exc);
+                if (fbs.DBG_FBS_ERRORS) dumpProperties("onEvalScriptCreated failed:", exc);
             }
-        }
-        catch (exc)
-        {
-            ERROR("onEvalScriptCreated failed: "+exc);
-            if (fbs.DBG_FBS_ERRORS) dumpProperties("onEvalScriptCreated failed:", exc);
         }
 
         fbs.nestedScriptStack.clear();
@@ -1632,7 +1639,7 @@ FirebugService.prototype =
             }
             catch (exc)
             {
-                dumpProperties("Failed to give resetBreakpoints trace "+exc+" for urlBreakpoints=", urlBreakpoints);
+                dumpProperties("Failed to give resetBreakpoints trace in url: "+url+" because "+exc+" for urlBreakpoints=", urlBreakpoints);
             }
         }
 
@@ -2202,14 +2209,18 @@ function remove(list, item)
 
 var FirebugPrefsObserver =
 {
+    prefDomain:"extensions.firebug-service",
+
     observe: function(subject, topic, data)
     {
-        var prefDomain = "extensions.firebug-service";
-        var c = data.indexOf(prefDomain);
+        var c = data.indexOf(this.prefDomain);
         if (c == 0)
-            this.resetOption(prefDomain, data.substr(prefDomain.length+1) );
+            this.resetOption(this.prefDomain, data.substr(this.prefDomain.length+1) );
         else
-            ddd("fbs.observe no match: "+data+"\n");
+        {
+            if (fbs.DBG_FBS_ERRORS)
+                ddd("fbs.observe no match: "+data+"\n");
+        }
     },
 
     resetOption: function(prefDomain, optionName)
@@ -2217,12 +2228,19 @@ var FirebugPrefsObserver =
         try
         {
             fbs[optionName] = this.getPref(prefDomain, optionName);
-            //if (fbs[optionName])
+            if (fbs.DBG_FBS_ERRORS)
                 ddd("fbs.resetOption set "+optionName+" to "+fbs[optionName]+"\n");
+
+            var filter = fbs.scriptsFilter;
+            fbs.showEvents = (filter == "all" || filter == "events");
+            fbs.showEvals = (filter == "all" || filter == "evals");
+            if (fbs.DBG_FBS_ERRORS)
+                ddd("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals+"\n");
         }
         catch (exc)
         {
-            ddd("fbs.resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+            if (fbs.DBG_FBS_ERRORS)
+                ddd("fbs.resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
         }
     },
 
@@ -2244,23 +2262,27 @@ var QuitApplicationGrantedObserver =
 {
     observe: function(subject, topic, data)
     {
-        ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver start xxxxxxxxxxxxxxx\n");
+        if (fbs.DBG_FBS_ERRORS)
+            ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver start xxxxxxxxxxxxxxx\n");
         fbs.shutdown();
-        ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver end xxxxxxxxxxxxxxxxx\n");
+        if (fbs.DBG_FBS_ERRORS)
+            ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver end xxxxxxxxxxxxxxxxx\n");
     }
 };
 var QuitApplicationRequestedObserver =
 {
     observe: function(subject, topic, data)
     {
-        ddd("FirebugService QuitApplicationRequestedObserver\n");
+        if (fbs.DBG_FBS_ERRORS)
+            ddd("FirebugService QuitApplicationRequestedObserver\n");
     }
 };
 var QuitApplicationObserver =
 {
     observe: function(subject, topic, data)
     {
-        ddd("FirebugService QuitApplicationObserver\n");
+        if (fbs.DBG_FBS_ERRORS)
+            ddd("FirebugService QuitApplicationObserver\n");
         fbs = null;
     }
 };
