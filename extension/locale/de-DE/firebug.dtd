@@ -1,0 +1,59 @@
+<!ENTITY  firebug.Firebug               "Firebug">
+<!ENTITY  firebug.Close                 "Schließen">
+<!ENTITY  firebug.View                  "Anzeigen">
+<!ENTITY  firebug.Help                  "Hilfe">
+<!ENTITY  firebug.Vertical              "Vertikale Fenster">
+<!ENTITY  firebug.Run                   "Ausführen">
+<!ENTITY  firebug.Copy                  "Kopieren">
+<!ENTITY  firebug.CopyBookmarklet       "Skript als Lesezeichen kopieren.">
+
+<!ENTITY  firebug.Options               "Optionen">
+<!ENTITY  firebug.TextSize              "Schriftgröße">
+<!ENTITY  firebug.IncreaseTextSize      "Schriftgröße vergrößern">
+<!ENTITY  firebug.DecreaseTextSize      "Schriftgröße verkleinern">
+<!ENTITY  firebug.NormalTextSize        "Normale Schriftgröße">
+<!ENTITY  firebug.ShowTooltips          "Vorschau-Tooltips anzeigen">
+<!ENTITY  firebug.ShadeBoxModel         "Box-Modell schattieren">
+<!ENTITY  firebug.Website               "Firebug-Webseite...">
+<!ENTITY  firebug.Documentation         "Dokumentation...">
+<!ENTITY  firebug.KeyShortcuts          "Tastaturkürzel...">
+<!ENTITY  firebug.Forums                "Diskussionsgruppen...">
+<!ENTITY  firebug.Issues                "Problem-Tracker...">
+<!ENTITY  firebug.Donate                "Beitragen...">
+<!ENTITY  firebug.About                 "Über...">
+<!ENTITY  firebug.AlwaysOpenInWindow    "Immer in einem neuen Fenster öffnen">
+
+<!ENTITY  firebug.ShowFirebug           "Firebug öffnen">
+<!ENTITY  firebug.DetachFirebug         "Firebug in einem neuen Fenster öffnen">
+<!ENTITY  firebug.OpenWith              "Mit einem Editor öffnen">
+<!ENTITY  firebug.CloseFirebug          "Firebug schließen">
+<!ENTITY  firebug.DisableFirebug        "Firebug deaktivieren">
+<!ENTITY  firebug.AllowedSites          "Erlaubte Seiten...">
+<!ENTITY  firebug.ConfigureEditors      "Editoren konfigurieren...">
+<!ENTITY  firebug.CommandLine           "Befehlszeile">
+<!ENTITY  firebug.Search                "Suche">
+
+<!ENTITY  firebug.Continue              "Fortfahren (F8)">
+<!ENTITY  firebug.StepOver              "Überspringen (F10)">
+<!ENTITY  firebug.StepInto              "Hineinspringen (F11)">
+<!ENTITY  firebug.StepOut               "Rausspringen">
+<!ENTITY  firebug.BreakOnErrors         "Bei Fehlern anhalten">
+
+<!ENTITY  firebug.Inspect               "Untersuchen">
+<!ENTITY  firebug.InspectElement        "Element untersuchen">
+<!ENTITY  firebug.InspectTooltip        "Klicken Sie auf ein Element der Seite, um es zu untersuchen">
+
+<!ENTITY  firebug.Edit                  "Bearbeiten">
+<!ENTITY  firebug.EditHTMLTooltip       "Dieses HTML bearbeiten">
+<!ENTITY  firebug.EditCSSTooltip        "Dieses Stylesheet bearbeiten">
+
+<!ENTITY  firebug.Profile               "Analysieren">
+<!ENTITY  firebug.ProfileScript         "JavaScript analysieren">
+
+<!ENTITY  firebug.Clear                 "Leeren">
+<!ENTITY  firebug.ClearConsole          "Konsole leeren">
+<!ENTITY  firebug.ClearTooltip          "Leert die Konsole">
+
+<!ENTITY  firebug.All                   "Alle">
+<!ENTITY  firebug.Images                "Bilder">
+<!ENTITY  firebug.Flash                 "Flash">
