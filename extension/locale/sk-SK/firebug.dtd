@@ -1,3 +1,9 @@
+<!ENTITY firebug.Issues "Issue Tracker..."〉>
+〈<!ENTITY firebug.About "About...">〉
+〈<!ENTITY firebug.OpenWith "Open With Editor"〉>
+〈<!ENTITY firebug.Permissions "Sites...">〉
+〈<!ENTITY firebug.ConfigureEditors "Configure Editors..."〉>
+
 <!ENTITY firebug.Firebug "Firebug">
 <!ENTITY firebug.Close "Zavrieť">
 <!ENTITY firebug.View "Zobraziť">

@@ -1,4 +1,6 @@
-﻿<!ENTITY  firebug.Firebug               "Firebug">
+﻿<!ENTITY firebug.Permissions "Sites..."〉>
+
+<!ENTITY  firebug.Firebug               "Firebug">
 <!ENTITY  firebug.Close                 "关闭">
 <!ENTITY  firebug.View                  "查看">
 <!ENTITY  firebug.Help                  "帮助">
