@@ -54,6 +54,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 43 Edit CSS behaviour - appending styles to the dom is unexpected. Contribution by  tonygentilcore
     * Issue 56 Enhancement: row distinction in profiler
     * Issue 65 show HTTP Status code on NET response
+    * Issue 165: Profile results table can get too wide for console.
     * Issue 183 Configurable maximum output size
     * Issue 186 Only one line in net monitor for multiple xhr post requests
     * Issue 188 "Open in new tab" for failed POST request opens incorrect URL
@@ -84,6 +85,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 468 [feature request] fast [enable -> inspect element -> disable] ergonomy
     * Issue 474 base href applied to scripts
     * Issue 475 Show Return Code (HTTP HEADER-Response)
+    * Issue 479 pt-BR locale submission, Comment 10 by leandromerces, Jun 21
     * Issue 503 disable doesn't work properly
     * Issue 521 Prototype iterator functions die in console
     * Issue 567 Slow script warning in debugger.js on some pages
@@ -94,6 +96,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 601 XHR in console shows stale/cached output
     * Issue 618 HTML: tab order, fixed by setting order properties on side panels.
     * Issue 619 Reopening firebug results in grey DOM, Layout or Style Pane, fixed by forceUpdate on syncSidePanel.
+    * Issue 622 Reopening firebug with inspect element results in grey html pane and Style/Layout/DOM
     * Issue 623 Pop up windows do not show all FireBug controls
     * Issue 634 XHR request details not showing up
     * Issue 637 $ FireBug function overwrites existing $ function
@@ -103,11 +106,23 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 680 Tab completion of JavaScript elements not working
     * Issue 690 New zh-CN local file for Firebug 1.2
     * Issue 691 Enablement for site does not reload other tabs
+    * Issue 698 Debug panel file navigation too painful
     * Issue 707 'Remove All Breakpoints' does nothing
     * Issue 709 Visible Console Objects
     * Issue 720 Net tab -> response status = &nbsp; and response time = NaNm.
+    * Issue 761 HTML panel blank, fails to update view 
     * Issue 719 Firebug's log limit has been reached - difficult named option
     * Issue 723 JavaScript errors not shown in Firebug even when debugging is enabled;
+    * Issue 724 (Content in console tab is broken when opening firebug in new window)
     * Issue 734 While debugging, click into the console. The execution context is not available
     * Issue 736 Temp disabling breakpoints does not work. 
     * Issue 750 DOM side-panel - variables names overlay actual values
+    * Issue 755 New zh-CN locale file for Firebug 1.2, contribution by http://code.google.com/u/shawphy/
+    * Issue 762 this.notifyFirebug is not a function error (contribution by zmarties)
+    * Issue 764 Source code for all scripts not visible on scripts tab without enabling debugger
+    * Issue 769 HTML Tab Unresponsive After Dock/Undock
+    * Issue 771 Improve the display of the FBTrace buttons contribution by Ken Arnold
+    * Issue 772: de locale for German Firebug, contribution by  benedikt.langens
+    * Issue 785  Update Japanese Locale, contribution by http://code.google.com/u/norahmarinkovic/
+    * Issue 794 Catalan locale ca-AD, contribution by Àlex Corretgé http://bloc.corretge.cat
+    * Issue 873 alien variable "y=2" in global watch list, contribution of jwitch
