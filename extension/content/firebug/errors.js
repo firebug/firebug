@@ -59,7 +59,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     showMessageOnStatusBar: function(error)
     {
-        if (statusText && statusBar && Firebug.breakOnErrors && error.message &&  !(error.flags & nsIScriptError.WARNING_FLAG))  // sometimes statusText is undefined..how?
+        if (statusText && statusBar && Firebug.breakOnErrors && error.message &&  !(error.flags & WARNING_FLAG))  // sometimes statusText is undefined..how?
         {
             statusText.setAttribute("value", error.message);
             statusBar.setAttribute("errors", "true");
@@ -127,14 +127,15 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS && !FirebugContext)
                 FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
 
-            var isWarning = object.flags & WARNING_FLAG;
 
             if (object instanceof nsIScriptError)
             {
+                var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
                 this.logScriptError(context, object, isWarning);
             }
             else
             {
+                var isWarning = object.flags & WARNING_FLAG;
                 if (Firebug.showChromeMessages)
                 {
                     if (lessTalkMoreAction(context, object, isWarning))
@@ -161,10 +162,10 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS)
             {
                 if (context && context.window)
-                    FBTrace.sysout("error logged to ",  context.window.location+"\n");
+                    FBTrace.sysout((isWarning?"warning":"error")+" logged to ",  context.window.location+"\n");
                 else
                 {
-                    FBTrace.dumpProperties("errors.observe, context with no window, error object:", object);
+                    FBTrace.dumpProperties("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
                     FBTrace.dumpStack("errors.observe, context with no window");
                 }
             }
@@ -194,7 +195,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (errorContext)
             context = errorContext;
 
-        if (isJSError && Firebug.showStackTrace)
+        if (Firebug.showStackTrace)
         {
             var trace = Firebug.errorStackTrace;
             if (trace)
