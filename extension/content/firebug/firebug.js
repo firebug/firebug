@@ -758,7 +758,10 @@ top.Firebug =
 
     getPanelType: function(panelName)
     {
-        return panelTypeMap[panelName];
+        if (panelTypeMap.hasOwnProperty(panelName))
+            return panelTypeMap[panelName];
+        else
+            return null;
     },
 
     getPanelTitle: function(panelType)
@@ -801,7 +804,7 @@ top.Firebug =
         for (var i = 0; i < panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
-            if (panelType.prototype.parentPanel == mainPanel.name)
+            if (panelType.prototype.parentPanel && (panelType.prototype.parentPanel == mainPanel.name) )
                 resultTypes.push(panelType);
         }
 

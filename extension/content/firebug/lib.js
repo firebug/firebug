@@ -1586,7 +1586,7 @@ this.getStackSourceLink = function()
 
 this.getFrameSourceLink = function(frame)
 {
-    if (frame && frame.filename && frame.filename.indexOf(Firebug.CommandLine.evalScript) == -1)
+    if (frame && frame.filename && frame.filename.indexOf("XPCSafeJSObjectWrapper") == -1)
         return new FBL.SourceLink(frame.filename, frame.lineNumber, "js");
     else
         return null;

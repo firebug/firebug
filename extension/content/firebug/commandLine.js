@@ -24,9 +24,9 @@ var commandInsertPointer = -1;
 Firebug.CommandLine = extend(Firebug.Module,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    
+
     // targetWindow was needed by evaluateInSandbox, let's leave it for a while in case we rethink this yet again
-    
+
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
     {
         if (!context)
@@ -50,6 +50,12 @@ Firebug.CommandLine = extend(Firebug.Module,
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+        if (!win)
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluateByEventPassing: no targetWindow!\n");
+            return;
+        }
+
         var element = win.document.getElementById("_firebugConsole");
         if (!element)
         {
@@ -105,7 +111,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction)
     {
         var result = null;
-        
+
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context, context.window);
 

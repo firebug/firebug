@@ -969,7 +969,7 @@ this.SourceLink = domplate(Firebug.Rep,
 
     hideSourceLink: function(sourceLink)
     {
-        return sourceLink ? sourceLink.href.indexOf(Firebug.CommandLine.evalScript) != -1 : true;
+        return sourceLink ? sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1 : true;
     },
 
     getSourceLinkTitle: function(sourceLink)
@@ -1244,7 +1244,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-        var fromCommandLine = error.href.indexOf(Firebug.CommandLine.evalScript) != -1;
+        var fromCommandLine = error.href.indexOf("XPCSafeJSObjectWrapper") != -1;
         return !fromCommandLine && error.trace;
     },
 
@@ -1271,7 +1271,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
         {
             if (error.source)
                 return cropString(error.source, 80);
-            else if (error.href && error.href.indexOf(Firebug.CommandLine.evalScript) == -1)
+            else if (error.href && error.href.indexOf("XPCSafeJSObjectWrapper") == -1)
                 return cropString(error.getSourceLine(), 80);
         }
     },
@@ -1468,14 +1468,14 @@ this.ApplicationCache = domplate(Firebug.Rep,
 
     summarizeCache: function(applicationCache)
     {
-        try 
+        try
         {
             return applicationCache.length + " items in offline cache";
         }
         catch(exc)
         {
             return "https://bugzilla.mozilla.org/show_bug.cgi?id=422264";
-        }        
+        }
     },
 
     showApplicationCache: function(event)
@@ -1491,7 +1491,7 @@ this.ApplicationCache = domplate(Firebug.Rep,
     {
         return (object instanceof Ci.nsIDOMOfflineResourceList);
     }
-    
+
 });
 
 
