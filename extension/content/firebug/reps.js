@@ -183,6 +183,8 @@ this.Func = domplate(Firebug.Rep,
         var script = script ? script : findScriptForFunctionInContext(context, fn);
         if (script)
             return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
+        else
+            return fn.toString();
     },
 
     getTitle: function(fn, context)

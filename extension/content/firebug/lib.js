@@ -1687,12 +1687,13 @@ this.findScript = function(context, url, line)
 
 this.findScriptForFunctionInContext = function(context, fn)
 {
-    var found = {tag: "not set"};
+    var found = null;
 
     for (var url in context.sourceFileMap)
     {
         var sourceFile = context.sourceFileMap[url];
-        FBTrace.sysout("lib.findScriptForFunctionInContext Looking for "+fn+" in "+sourceFile+"\n");
+        if (FBTrace.DBG_FUNCTION_NAMES)
+            FBTrace.sysout("lib.findScriptForFunctionInContext Looking for "+fn+" in "+sourceFile+"\n");
         sourceFile.forEachScript(function seekFn(script)
         {
             if (!script.isValid)
@@ -1723,7 +1724,9 @@ this.findScriptForFunctionInContext = function(context, fn)
         });
     }
 
-    FBTrace.sysout("findScriptForFunctionInContext found "+found.tag+"\n");
+    if (FBTrace.DBG_FUNCTION_NAMES)
+        FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
+
     return found;
 }
 
