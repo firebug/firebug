@@ -385,6 +385,9 @@ function getErrorContext(object)
     TabWatcher.iterateContexts(
         function findContextByURL(context)
         {
+            if (!context.window || !context.window.location)
+                return;
+
             if (context.window.location.toString() == url)
                 return errorContext = context;
             else
