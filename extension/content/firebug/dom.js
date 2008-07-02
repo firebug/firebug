@@ -650,6 +650,13 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
                 }
 
                 var value = this.getPathObject(previousIndex);
+                if (!value)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("dom.updateSelection no pathObject for "+previousIndex+"\n");
+                    return;
+                }
+
                 for (var i = 0; i < newPath.length; ++i)
                 {
                     var name = newPath[i];
@@ -1392,7 +1399,7 @@ function addMember(type, props, name, value, level, order)
 {
     var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents
     var tag = rep.shortTag ? rep.shortTag : rep.tag;
-    
+
     var valueType = typeof(value);
     var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
         (valueType == "function" || (valueType == "object" && value != null)
