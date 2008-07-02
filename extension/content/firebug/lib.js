@@ -3122,7 +3122,7 @@ this.SourceFile.prototype =
 
         if (FBTrace.DBG_LINETABLE && scripts.length < 1)
         {
-            FBTrace.dumpProperties("lib.getScriptsAtLineNumber no targetScript for sourceFile:", this);
+            FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
             return false;
         }
 

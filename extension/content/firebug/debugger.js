@@ -1494,7 +1494,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (this.executionFile && this.location.href == this.executionFile.href)
             this.setExecutionLine(this.executionLineNo);
-        this.markRevealedLines(sourceBox);  // or panelNode?
+        setTimeout(bind(this.markRevealedLines, this, sourceBox));
     },
 
     getSourceType: function()
@@ -1571,7 +1571,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 var scripts = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
 
-                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
+                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(scripts?scripts.length+" scripts":"X")+"\n");
                 if (scripts)
                     lineNode.setAttribute("executable", "true");
                 else
@@ -1767,6 +1767,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
         var scrollStep = aLineNode.offsetHeight;
+        if (scrollStep < 1) // then not rendered yet
+        {
+            if (FBTrace.DBG_LINETABLE) FBTrace.dumpStack("debugger.markRevealedLines: no offsetHeight", aLineNode);
+            return;
+        }
         var delta = this.lastScrollTop - scrollTop;
         var deltaStep =  delta/scrollStep;
 
