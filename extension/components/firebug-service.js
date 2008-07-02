@@ -406,7 +406,9 @@ FirebugService.prototype =
         if (bp)
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, bp]);
         else /*@explore*/
+        {
             if (fbs.DBG_FBS_BP) ddd("fbs.clearBreakpoint no find for "+lineNo+"@"+url+"\n"); /*@explore*/
+        }
     },
 
     enableBreakpoint: function(url, lineNo)
@@ -1462,12 +1464,12 @@ FirebugService.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // jsd breakpoints are on a PC in a jsdIScript
     // Users breakpoint on a line of source
-    // Since firebug 1.1, sourceFile.href+line is unique
+    // Because test.js can be included multiple times, the URL+line number from the UI is not unique.
     // sourcefile.href != script.fileName, generally script.fileName cannot be used.
     // If the source is compiled, then we have zero, one, or more jsdIScripts on a line.
     //    If zero, cannot break at that line
     //    If one, set a jsd breakpoint
-    //    If more than one, set jsd breakpoint on each script (or disallow it? Will confuse users either way)
+    //    If more than one, set jsd breakpoint on each script
     // Else we know that the source will be compiled before it is run.
     //    Save the sourceFile.href+line and set the jsd breakpoint when we compile
     //    Venkman called these "future" breakpoints
@@ -1624,7 +1626,7 @@ FirebugService.prototype =
         return null;
     },
 
-    resetBreakpoints: function(sourceFile)
+    resetBreakpoints: function(sourceFile) // the sourcefile has just been created after compile
     {
         // If the new script is replacing an old script with a breakpoint still
         var url = sourceFile.href;
@@ -1656,31 +1658,37 @@ FirebugService.prototype =
 
     setJSDBreakpoint: function(sourceFile, bp)
     {
-        var script = sourceFile.getInnermostScriptEnclosingLineNumber(bp.lineNo);
-        if (script && script.isValid)
+        var scripts = sourceFile.getScriptsAtLineNumber(bp.lineNo);
+        if (scripts)
         {
-            var pcmap = sourceFile.pcmap_type;
-            // we subtraced this offset when we showed the user so lineNo is a user line number; now we need to talk
-            // to jsd its line world
-            var jsdLine = bp.lineNo + sourceFile.getBaseLineOffset();
-            // test script.isLineExecutable(jsdLineNo, pcmap) ??
-            var pc = script.lineToPc(jsdLine, pcmap);
-            script.setBreakpoint(pc);
-            bp.scriptWithBreakpoint = script; // TODO may need array?
-            bp.pcmap = pcmap;
-            bp.pc = pc;
-            bp.jsdLine = jsdLine;
+            for (var i = 0; i < scripts.length; i++)
+            {
+                var script = scripts[i];
+                if (!script.isValid)
+                    continue;
 
-            if (pc == 0)  // signal the breakpoint handler to break for user
-                sourceFile.breakOnZero = script.tag;
+                var pcmap = sourceFile.pcmap_type;
+                // we subtraced this offset when we showed the user so lineNo is a user line number; now we need to talk
+                // to jsd its line world
+                var jsdLine = bp.lineNo + sourceFile.getBaseLineOffset();
+                // test script.isLineExecutable(jsdLineNo, pcmap) ??
+                var pc = script.lineToPc(jsdLine, pcmap);
+                script.setBreakpoint(pc);
+                bp.scriptWithBreakpoint = script; // TODO may need array?
+                bp.pcmap = pcmap;
+                bp.pc = pc;
+                bp.jsdLine = jsdLine;
 
-            if (fbs.DBG_FBS_BP) ddd("setJSDBreakpoint tag: "+bp.scriptWithBreakpoint.tag+" line.pc@url="+bp.lineNo +"."+bp.pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+"\n");                         /*@explore*/
+                if (pc == 0)  // signal the breakpoint handler to break for user
+                    sourceFile.breakOnZero = script.tag;
 
+                if (fbs.DBG_FBS_BP) ddd("setJSDBreakpoint tag: "+bp.scriptWithBreakpoint.tag+" line.pc@url="+bp.lineNo +"."+bp.pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+"\n");                         /*@explore*/
+             }
         }
         else /*@explore*/
         { /*@explore*/
              if (fbs.DBG_FBS_BP) /*@explore*/
-                ddd("setJSDBreakpoint: "+(script?(script.tag+".isValid="+script.isValid):" NO script")+" at line="+bp.lineNo+"\n");                         /*@explore*/
+                ddd("setJSDBreakpoint:  NO scripts"+" at line="+bp.lineNo+"\n");                         /*@explore*/
         } /*@explore*/
 
     },

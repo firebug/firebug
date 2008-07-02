@@ -1569,10 +1569,10 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var checked = lineNode.getAttribute("exeChecked");
             if (!checked)
             {
-                var script = sourceFile.scriptIfLineCouldBeExecutable(lineNo, true);
+                var scripts = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
 
                 if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
-                if (script)
+                if (scripts)
                     lineNode.setAttribute("executable", "true");
                 else
                     lineNode.removeAttribute("executable");
@@ -2129,11 +2129,13 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if ( isNaN(lineNo) )
                 return;
-            var script = this.location.scriptIfLineCouldBeExecutable(lineNo);
-            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getTooltipObject script "+(script?script.tag:"none")+'\n'); /*@explore*/
-            if (script)
+            var scripts = this.location.scriptsIfLineCouldBeExecutable(lineNo);
+            if (scripts)
             {
-                return script;
+                var str = "scripts ";
+                for(var i = 0; i < scripts.length; i++)
+                    str += scripts[i].tag +" ";
+                return str;
             }
             else
                 return new String("no executable script at "+lineNo);
@@ -2154,7 +2156,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         var lineNo = parseInt(sourceRow.firstChild.textContent);
-        return findScript(this.context, this.location.href, lineNo);
+        var scripts = findScripts(this.context, this.location.href, lineNo);
+        return scripts; // gee I wonder what will happen?
     },
 
     showInfoTip: function(infoTip, target, x, y)

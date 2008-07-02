@@ -1672,11 +1672,11 @@ this.areEventsMonitored = function(object, type, context)
 // ************************************************************************************************
 // Functions
 
-this.findScript = function(context, url, line)
+this.findScripts = function(context, url, line)
 {
     var sourceFile = context.sourceFileMap[url];
     if (sourceFile)
-        var script = sourceFile.scriptIfLineCouldBeExecutable(line);
+        var script = sourceFile.scriptsIfLineCouldBeExecutable(line);
     else
     {
         if (FBTrace.DBG_STACK)
@@ -3087,10 +3087,10 @@ this.SourceFile.prototype =
         }        /*@explore*/
     },
 
-    getInnermostScriptEnclosingLineNumber: function(lineNo, mustBeExecutableLine)
+    getScriptsAtLineNumber: function(lineNo, mustBeExecutableLine)
     {
         var offset = this.getBaseLineOffset();
-        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber for sourcefile: "+this.toString()+"\n");
+        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber for sourcefile: "+this.toString()+"\n");
 
         var targetScript = this.outerScript;
 
@@ -3099,47 +3099,40 @@ this.SourceFile.prototype =
 
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
+        var scripts = [];
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             var script = this.innerScripts[j];
             if (FBTrace.DBG_LINETABLE && script instanceof Ci.jsdIScript && !script.tag)
             {
-                FBTrace.sysout("getInnermostScriptEnclosingLineNumber bad script for "+j+" vs "+this.toString()+"\n");
-                FBTrace.dumpProperties("getInnermostScriptEnclosingLineNumber script:", script);
+                FBTrace.sysout("getScriptsAtLineNumber bad script for "+j+" vs "+this.toString()+"\n");
+                FBTrace.dumpProperties("getScriptsAtLineNumber script:", script);
             }
             if (targetLineNo > script.baseLineNumber)
             {
                 if ( (script.baseLineNumber + script.lineExtent) > targetLineNo)
                 {
-                    targetScript = script;
-                       break;
+                    if (mustBeExecutableLine && !script.isLineExecutable(targetLineNo, this.pcmap_type))
+                        continue;
+                    scripts.push(script);
                 }
             }
-            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getInnermostScriptEnclosingLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" < "+targetLineNo +" < "+ (script.baseLineNumber + script.lineExtent)+"?\n");
+            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" < "+targetLineNo +" < "+ (script.baseLineNumber + script.lineExtent)+"?\n");
         }
 
-        if (FBTrace.DBG_LINETABLE && !targetScript)
+        if (FBTrace.DBG_LINETABLE && scripts.length < 1)
         {
-            FBTrace.dumpProperties("lib.getInnermostScriptEnclosingLineNumber no targetScript for sourceFile:", this);
+            FBTrace.dumpProperties("lib.getScriptsAtLineNumber no targetScript for sourceFile:", this);
             return false;
         }
 
-        if (mustBeExecutableLine)
-        {
-            if (targetScript.isValid)
-            {
-                if (targetScript.isLineExecutable(targetLineNo, this.pcmap_type))
-                    return targetScript;
-            }
-            return false;
-        }
-        return targetScript;
+        return scripts;
     },
 
-    scriptIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
+    scriptsIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
     {
-        var script = this.getInnermostScriptEnclosingLineNumber(lineNo, true);
-        if (FBTrace.DBG_LINETABLE && !script) FBTrace.dumpProperties("lib.scriptIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
+        var script = this.getScriptsAtLineNumber(lineNo, true);
+        if (FBTrace.DBG_LINETABLE && !script) FBTrace.dumpProperties("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
         if (!script && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
             return this.outerScript;
         return script;
@@ -3461,6 +3454,13 @@ this.TopLevelSourceFile.prototype.getBaseLineOffset = function()
     return 0;  // TODO depends on number of script tags https://bugzilla.mozilla.org/show_bug.cgi?id=396568
 }
 //-------
+// A source included more than one time
+this.ReusedSourceFile = function(sourceFile, outerScript, innerScriptEnumerator)
+{
+// need to override most functions.
+}
+
+//-------
 this.EnumeratedSourceFile = function(context, url) // we don't have the outer script and we delay source load.
 {
     this.context = context;  // XXXjjb the context of the enumeration, not useful
@@ -3600,7 +3600,7 @@ this.guessEnclosingFunctionName = function(url, line)
     var sourceFile = this.context.sourceFileMap[url];
     if (sourceFile)
     {
-        var script = sourceFile.getInnermostScriptEnclosingLineNumber(line);
+        var script = sourceFile.getScriptsAtLineNumber(line);
         var analyzer = sourceFile.getScriptAnalyzer(script);  // TODO
          line = analyzer.getBaseLineNumberByScript(script);
     }
