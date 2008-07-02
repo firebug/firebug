@@ -346,11 +346,17 @@ function lessTalkMoreAction(context, object, isWarning)
     if (!enabled)
         return true;
 
+    var incoming_message = object.errorMessage;  // nsIScriptError
+    if (!incoming_message)                       // nsIConsoleMessage
+        incoming_message = object.message;
+
+
     for (var msg in pointlessErrors)
     {
-        if(msg.charAt(0) == object.errorMessage.charAt(0))
+
+        if( msg.charAt(0) == incoming_message.charAt(0) )
         {
-            if (object.errorMessage.indexOf(msg) == 0)
+            if (incoming_message.indexOf(msg) == 0)
             {
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("errors.observe dropping pointlessError: "+msg+"\n");
@@ -359,7 +365,7 @@ function lessTalkMoreAction(context, object, isWarning)
         }
     }
 
-    var msgId = [object.errorMessage, object.sourceName, object.lineNumber].join("/");
+    var msgId = [incoming_message, object.sourceName, object.lineNumber].join("/");
     if (context.errorMap && msgId in context.errorMap)
     {
         context.errorMap[msgId] += 1;
