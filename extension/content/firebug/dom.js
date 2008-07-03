@@ -1140,10 +1140,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
                     function failed(result, context)
                     {
                         var exc = result;
-                        if (exc instanceof  context.window.Error)
-                            value = new ErrorCopy(exc.message);
-                        else
-                            value = new ErrorCopy(exc+"");
+                        value = new ErrorCopy(exc+"");
                     }
                 );
 
