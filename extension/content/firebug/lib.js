@@ -1676,13 +1676,13 @@ this.findScripts = function(context, url, line)
 {
     var sourceFile = context.sourceFileMap[url];
     if (sourceFile)
-        var script = sourceFile.scriptsIfLineCouldBeExecutable(line);
+        var scripts = sourceFile.scriptsIfLineCouldBeExecutable(line);
     else
     {
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("lib.findScript, no sourceFile in context for url=", url);
     }
-    return script;
+    return scripts;
 };
 
 this.findScriptForFunctionInContext = function(context, fn)
@@ -1701,7 +1701,7 @@ this.findScriptForFunctionInContext = function(context, fn)
             try
             {
                 var testFunctionObject = script.functionObject;
-                if (testFunctionObject.isValid)
+                if (!testFunctionObject.isValid)
                     return;
                 var unwrapped = testFunctionObject.getWrappedValue();
                 if (!unwrapped.toString)
@@ -3092,9 +3092,7 @@ this.SourceFile.prototype =
         var offset = this.getBaseLineOffset();
         if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber for sourcefile: "+this.toString()+"\n");
 
-        var targetScript = this.outerScript;
-
-        if (!targetScript)
+        if (!this.innerScripts)
             return; // eg URLOnly
 
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
@@ -3103,16 +3101,17 @@ this.SourceFile.prototype =
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             var script = this.innerScripts[j];
-            if (FBTrace.DBG_LINETABLE && script instanceof Ci.jsdIScript && !script.tag)
+            if (FBTrace.DBG_LINETABLE && (script instanceof Ci.jsdIScript) && !script.tag)
             {
                 FBTrace.sysout("getScriptsAtLineNumber bad script for "+j+" vs "+this.toString()+"\n");
                 FBTrace.dumpProperties("getScriptsAtLineNumber script:", script);
+                continue;
             }
             if (targetLineNo > script.baseLineNumber)
             {
                 if ( (script.baseLineNumber + script.lineExtent) > targetLineNo)
                 {
-                    if (mustBeExecutableLine && !script.isLineExecutable(targetLineNo, this.pcmap_type))
+                    if (mustBeExecutableLine && (!script.isValid || !script.isLineExecutable(targetLineNo, this.pcmap_type) ))
                         continue;
                     scripts.push(script);
                 }
@@ -3126,16 +3125,16 @@ this.SourceFile.prototype =
             return false;
         }
 
-        return scripts;
+        return (scripts.length > 0) ? scripts : false;
     },
 
     scriptsIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
     {
-        var script = this.getScriptsAtLineNumber(lineNo, true);
-        if (FBTrace.DBG_LINETABLE && !script) FBTrace.dumpProperties("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
-        if (!script && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
-            return this.outerScript;
-        return script;
+        var scripts = this.getScriptsAtLineNumber(lineNo, true);
+        if (FBTrace.DBG_LINETABLE && !scripts) FBTrace.dumpProperties("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
+        if (!scripts && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
+            return [this.outerScript];
+        return scripts;
     },
 
     hasScript: function(script)
@@ -3600,9 +3599,13 @@ this.guessEnclosingFunctionName = function(url, line)
     var sourceFile = this.context.sourceFileMap[url];
     if (sourceFile)
     {
-        var script = sourceFile.getScriptsAtLineNumber(line);
-        var analyzer = sourceFile.getScriptAnalyzer(script);  // TODO
-         line = analyzer.getBaseLineNumberByScript(script);
+        var scripts = sourceFile.getScriptsAtLineNumber(line);
+        if (scripts)
+        {
+            var script = scripts[0]; // TODO try others?
+            var analyzer = sourceFile.getScriptAnalyzer(script);
+            line = analyzer.getBaseLineNumberByScript(script);
+        }
     }
      return guessFunctionName(url, line-1, context);
 };

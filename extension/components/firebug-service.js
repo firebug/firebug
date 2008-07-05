@@ -760,12 +760,13 @@ FirebugService.prototype =
 
         this.showStackTrace = prefs.getBoolPref("extensions.firebug-service.showStackTrace");
         this.breakOnErrors = prefs.getBoolPref("extensions.firebug-service.breakOnErrors");
-        this.showEvalSources = prefs.getBoolPref("extensions.firebug-service.showEvalSources");
         this.trackThrowCatch = prefs.getBoolPref("extensions.firebug-service.trackThrowCatch");
+        this.scriptsFilter = prefs.getCharPref("extensions.firebug-service.scriptsFilter");
         this.filterSystemURLs = prefs.getBoolPref("extensions.firebug-service.filterSystemURLs");  // may not be exposed to users
         this.DBG_FBS_FLUSH = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_FLUSH");
         this.DBG_FBS_SRCUNITS = prefs.getBoolPref("extensions.firebug-service.DBG_FBS_SRCUNITS");
-        // this.DBG_FBS_FF_START  controlled by eg ChromeBug
+
+        FirebugPrefsObserver.syncFilter();
 
         try {                                                                                                              /*@explore*/
               // CREATION and BP generate a huge trace                                                                     /*@explore*/
@@ -2239,11 +2240,7 @@ var FirebugPrefsObserver =
             if (fbs.DBG_FBS_ERRORS)
                 ddd("fbs.resetOption set "+optionName+" to "+fbs[optionName]+"\n");
 
-            var filter = fbs.scriptsFilter;
-            fbs.showEvents = (filter == "all" || filter == "events");
-            fbs.showEvals = (filter == "all" || filter == "evals");
-            if (fbs.DBG_FBS_ERRORS)
-                ddd("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals+"\n");
+            FirebugPrefsObserver.syncFilter();
         }
         catch (exc)
         {
@@ -2263,6 +2260,15 @@ var FirebugPrefsObserver =
             return prefs.getIntPref(prefName);
         else if (type == nsIPrefBranch.PREF_BOOL)
             return prefs.getBoolPref(prefName);
+    },
+
+    syncFilter: function()
+    {
+        var filter = fbs.scriptsFilter;
+        fbs.showEvents = (filter == "all" || filter == "events");
+        fbs.showEvals = (filter == "all" || filter == "evals");
+        if (fbs.DBG_FBS_ERRORS)
+            ddd("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals+"\n");
     },
 };
 

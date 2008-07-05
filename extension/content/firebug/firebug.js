@@ -97,7 +97,7 @@ const prefNames =
 const servicePrefNames = [
     "showStackTrace", // Console
     "filterSystemURLs", // Stack
-    "breakOnErrors",  "showEvalSources", "trackThrowCatch" // Script
+    "breakOnErrors",  "trackThrowCatch" // Script
 ];
 
 const scriptBlockSize = 20;

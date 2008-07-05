@@ -176,11 +176,13 @@ this.Func = domplate(Firebug.Rep,
         var sourceLink = findSourceForFunction(fn, context);
         if (sourceLink)
             context.chrome.select(sourceLink);
+        if (FBTrace.DBG_FUNCTION_NAME)
+            FBTrace.dumpProperties("reps.function.inspectObject selected sourceLink is ", sourceLink);
     },
 
     getTooltip: function(fn, context)
     {
-        var script = script ? script : findScriptForFunctionInContext(context, fn);
+        var script = findScriptForFunctionInContext(context, fn);
         if (script)
             return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
         else

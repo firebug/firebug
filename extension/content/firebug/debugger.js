@@ -152,8 +152,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return hookReturn;
         }
 
-        // TODO make FirebugContext == context
-
         try {
             executionContext.scriptsEnabled = false;
 
@@ -1416,7 +1414,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onScriptFilterMenuCommand: function(event, context)
     {
         var menu = event.target;
-        FBTrace.sysout(" onScriptFilterMenuCommand value: "+ menu.value+"\n");
         Firebug.setPref("extensions.firebug-service", "scriptsFilter", menu.value);
         Firebug.Debugger.filterMenuUpdate();
     },
@@ -1507,6 +1504,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceLink = findSourceForFunction(fn, this.context);
         if (sourceLink)
             this.showSourceLink(sourceLink);
+        else
+            if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("no sourcelink for function"); // want to avoid the debugger panel if possible
     },
 
     showSourceLink: function(sourceLink)
@@ -1516,7 +1515,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             this.navigate(sourceFile);
             if (sourceLink.line)
-                this.context.throttle(this.highlightLine, this, [sourceLink.line]);
+                this.scrollToLine(sourceLink.line, true);
         }
     },
 
@@ -2220,7 +2219,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return [
             serviceOptionMenu("BreakOnAllErrors", "breakOnErrors"),
             // wait 1.2 optionMenu("BreakOnTopLevel", "breakOnTopLevel"),
-            // wait 1.2 optionMenu("ShowEvalSources", "showEvalSources"),
             serviceOptionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")
