@@ -39,7 +39,6 @@ pref("extensions.firebug.showComputedStyle", false);
 
 // Script
 pref("extensions.firebug-service.breakOnErrors", false);
-pref("extensions.firebug-service.showEvalSources", true);
 pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
