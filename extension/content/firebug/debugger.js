@@ -1491,7 +1491,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (this.executionFile && this.location.href == this.executionFile.href)
             this.setExecutionLine(this.executionLineNo);
-        setTimeout(bind(this.markRevealedLines, this, sourceBox));
+
+        var self = this;
+        setTimeout( function delayMarkRevealedLines() {
+            self.markRevealedLines(sourceBox);
+        });
     },
 
     getSourceType: function()
@@ -1570,7 +1574,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 var scripts = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
 
-                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(scripts?scripts.length+" scripts":"X")+"\n");
+                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]= "+(scripts?scripts.length+" scripts":"(none)")+"\n");
                 if (scripts)
                     lineNode.setAttribute("executable", "true");
                 else
@@ -1759,6 +1763,9 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             this.lastScrollTop = 0;
 
         var scrollTop = scrollingElement.scrollTop;
+        if (!scrollTop)
+            scrollTop = 0;
+
         var aLineNode = this.getLineNode(1);
         if (!aLineNode)
         {
@@ -1766,40 +1773,52 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
         var scrollStep = aLineNode.offsetHeight;
-        if (scrollStep < 1) // then not rendered yet
+        if (!scrollStep || scrollStep < 1) // then not rendered yet
         {
-            if (FBTrace.DBG_LINETABLE) FBTrace.dumpStack("debugger.markRevealedLines: no offsetHeight", aLineNode);
-            return;
-        }
-        var delta = this.lastScrollTop - scrollTop;
-        var deltaStep =  delta/scrollStep;
-
-        var lastTopLine = Math.round(this.lastScrollTop/scrollStep + 1);
-        var lastBottomLine = Math.round((this.lastScrollTop + scrollingElement.clientHeight)/scrollStep);
-
-        var newTopLine = Math.round(scrollTop/scrollStep + 1);
-        var newBottomLine = Math.round((scrollTop + scrollingElement.clientHeight)/scrollStep);
-
-        if (delta < 0) // then we exposed a line at the bottom
-        {
-            var max = newBottomLine;
-            var min = newTopLine;
-            if (min < lastBottomLine)
-                min = lastBottomLine;
+            if (FBTrace.DBG_LINETABLE)
+            {
+                FBTrace.dumpStack("debugger.markRevealedLines: no offsetHeight", aLineNode);
+                FBTrace.dumpProperties("debugger.markRevealedLines: no offsetHeight", aLineNode);
+            }
+            min = 1;
+            max = 20;
         }
         else
         {
-            var min = newTopLine;
-            var max = newBottomLine;
-            if (max > lastTopLine)
-                max = lastTopLine;
-        }
 
-        if (FBTrace.DBG_LINETABLE)
-        {
-            FBTrace.sysout("debugger.onScroll scrollTop: "+scrollTop, " lastScrollTop:"+this.lastScrollTop);
-            FBTrace.sysout("debugger.onScroll lastTopLine:"+lastTopLine, "lastBottomLine: "+lastBottomLine);
-            FBTrace.sysout("debugger.onScroll newTopLine:"+newTopLine, "newBottomLine: "+newBottomLine);
+            var lastTopLine = Math.round(this.lastScrollTop/scrollStep + 1);
+            var lastBottomLine = Math.round((this.lastScrollTop + scrollingElement.clientHeight)/scrollStep);
+
+            var newTopLine = Math.round(scrollTop/scrollStep + 1);
+            var newBottomLine = Math.round((scrollTop + scrollingElement.clientHeight)/scrollStep);
+
+            var delta = this.lastScrollTop - scrollTop;
+            if (delta < 0) // then we exposed a line at the bottom
+            {
+                var min = newTopLine;
+                if (min < lastBottomLine)
+                    min = lastBottomLine;
+                var max = newBottomLine;
+            }
+            else if (delta > 0)
+            {
+                var min = newTopLine;
+                var max = newBottomLine;
+                if (max > lastTopLine)
+                    max = lastTopLine;
+            }
+            else  // delta = 0
+            {
+                var min = newTopLine;
+                var max = newBottomLine;
+            }
+
+            if (FBTrace.DBG_LINETABLE)
+            {
+                FBTrace.sysout("debugger.markRevealedLines scrollTop: "+scrollTop, " lastScrollTop:"+this.lastScrollTop);
+                FBTrace.sysout("debugger.markRevealedLines lastTopLine:"+lastTopLine, "lastBottomLine: "+lastBottomLine);
+                FBTrace.sysout("debugger.markRevealedLines newTopLine:"+newTopLine, "newBottomLine: "+newBottomLine);
+            }
         }
         this.lastScrollTop = scrollTop;
 

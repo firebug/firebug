@@ -3090,11 +3090,12 @@ this.SourceFile.prototype =
     getScriptsAtLineNumber: function(lineNo, mustBeExecutableLine)
     {
         var offset = this.getBaseLineOffset();
-        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber for sourcefile: "+this.toString()+"\n");
 
         if (!this.innerScripts)
             return; // eg URLOnly
 
+        if (FBTrace.DBG_LINETABLE)
+            FBTrace.sysout("getScriptsAtLineNumber "+this.innerScripts.length+" innerScripts, offset "+offset+" for sourcefile: "+this.toString()+"\n");
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         var scripts = [];
@@ -3107,16 +3108,20 @@ this.SourceFile.prototype =
                 FBTrace.dumpProperties("getScriptsAtLineNumber script:", script);
                 continue;
             }
-            if (targetLineNo > script.baseLineNumber)
+            if (targetLineNo >= script.baseLineNumber)
             {
-                if ( (script.baseLineNumber + script.lineExtent) > targetLineNo)
+                if ( (script.baseLineNumber + script.lineExtent) >= targetLineNo)
                 {
                     if (mustBeExecutableLine && (!script.isValid || !script.isLineExecutable(targetLineNo, this.pcmap_type) ))
+                    {
+                        if (FBTrace.DBG_LINETABLE)
+                            FBTrace.sysout("getScriptsAtLineNumber["+j+"] trying "+script.tag+", isValid: "+script.isValid+" targetLineNo:"+targetLineNo+" isLineExecutable: "+script.isLineExecutable(targetLineNo, this.pcmap_type)+"\n");
                         continue;
+                    }
                     scripts.push(script);
                 }
             }
-            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" < "+targetLineNo +" < "+ (script.baseLineNumber + script.lineExtent)+"?\n");
+            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" <= "+targetLineNo +" <= "+ (script.baseLineNumber + script.lineExtent)+"? using offset = "+offset+"\n");
         }
 
         if (FBTrace.DBG_LINETABLE && scripts.length < 1)
@@ -3353,7 +3358,7 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EventSourceFile.prototype.getBaseLineOffset = function()
 {
-    return 1;
+    return 0;
 }
 
 this.summarizeSourceLineArray = function(sourceLines, size)
