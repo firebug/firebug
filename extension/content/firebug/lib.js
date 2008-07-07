@@ -1518,6 +1518,14 @@ this.getStackTrace = function(frame, context)
         }                                                                                                           /*@explore*/
     }
 
+    if (trace.frames.length > 100)
+    {
+        var originalLength = trace.frames.length;
+        trace.frames.splice(50, originalLength - 100);
+        var excuse = "(eliding "+(originalLength - 100)+" frames)";
+        trace.frames[50] = new this.StackFrame(context, excuse, null, excuse, 0, []);
+    }
+
     return trace;
 };
 
@@ -3676,7 +3684,7 @@ this.StackFrame = function(context, fn, script, href, lineNo, args, pc)
     this.href = href;
     this.lineNo = lineNo;
     this.args = args;
-    this.flags = script.flags;
+    this.flags = (script?script.flags:null);
     this.pc = pc;
 };
 
@@ -3685,8 +3693,11 @@ this.StackFrame.prototype =
     toString: function()
     {
         // XXXjjb analyze args and fn?
-        return "("+this.flags+")"+this.href+":"+this.script.baseLineNumber+"-"
+        if (this.script)
+            return "("+this.flags+")"+this.href+":"+this.script.baseLineNumber+"-"
                   +(this.script.baseLineNumber+this.script.lineExtent)+"@"+this.lineNo;
+        else
+            return this.href;
     },
     destroy: function()
     {
