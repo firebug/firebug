@@ -422,48 +422,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.syncCommands(context);
             this.syncListeners(context);
 
-            // XXXms : better way to do this ?
-            if ( !context.hideDebuggerUI || (FirebugChrome.getCurrentBrowser() && FirebugChrome.getCurrentBrowser().showFirebug))
-            {
-                Firebug.showBar(true);
+            Firebug.toggleBar(true);
 
-                var panel = context.chrome.selectPanel("script");
+            FirebugChrome.select(context.currentFrame, "script");
 
-                if (panel)
-                {
-                    if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("selectPanel done "+(panel?panel.name:"panel null")+"\n");                               /*@explore*/
-                    panel.select(context.debugFrame, true);
-                }
-                else
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("debugger.startDebugging no panel for context "+context.window+"\n");
-                }
+            var stackPanel = context.getPanel("callstack");
+            if (stackPanel)
+                stackPanel.refresh(context);
 
-                var stackPanel = context.getPanel("callstack");
-                if (stackPanel)
-                    stackPanel.refresh(context);
+            context.chrome.focus();
 
-                if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("select done; stackPanel="+stackPanel.name+"\n");                   /*@explore*/
-                context.chrome.focus();
-            } else {
-                // XXXms: workaround for Firebug hang in selectPanel("script")
-                // when stopping in top-level frame // investigate later
-                context.chrome.updateViewOnShowHook = function()
-                {
-                    var panel = context.chrome.selectPanel("script");  // else use prev sidePanel
-
-                    if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("selectPanel done "+panel+"\n");                           /*@explore*/
-                    panel.select(context.debugFrame);
-
-                    var stackPanel = context.getPanel("callstack", true);
-                    if (stackPanel)
-                        stackPanel.refresh(context);
-
-                    if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("select done; stackPanel="+stackPanel+"\n");               /*@explore*/
-                    context.chrome.focus();
-                };
-            }
         }
         catch(exc)
         {
@@ -489,9 +457,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var chrome = context.chrome;
                 if (!chrome)
                     chrome = FirebugChrome;
-
-                if ( chrome.updateViewOnShowHook )
-                    delete chrome.updateViewOnShowHook;
 
                 this.syncCommands(context);
                 this.syncListeners(context);
@@ -1342,17 +1307,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             $("cmd_breakOnTopLevel").setAttribute("checked", value);
     },
 
-    showPanel: function(browser, panel)
-    {
-        var chrome =  browser.chrome;
-        if (chrome.updateViewOnShowHook)
-        {
-            const hook = chrome.updateViewOnShowHook;
-            delete chrome.updateViewOnShowHook;
-            hook();
-        }
-    },
-
     getObjectByURL: function(context, url)
     {
         var sourceFile = getScriptFileByHref(url, context);
@@ -1391,8 +1345,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" for debuggerName "+this.debuggerName+" on "+context.window.location+"\n"); /*@explore*/
 
+        this.enableAllBreakpoints(context);
+
         if (!init)
             context.window.location.reload();
+    },
+
+    onPanelDeactivate: function(context, destroy, panelName)
+    {
+        this.disableAllBreakpoints(context);
     },
 
     onLastPanelDeactivate: function(context, destroy)
