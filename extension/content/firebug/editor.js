@@ -504,7 +504,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     initializeInline: function(doc)
     {
         this.box = this.tag.replace({}, doc, this);
-        this.input = this.box.childNodes[1].firstChild.firstChild;
+        this.input = this.box.childNodes[1].firstChild.firstChild;  // XXXjjb childNode[1] required
         this.expander = this.expanderTag.replace({}, doc, this);
         this.initialize();
     },

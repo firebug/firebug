@@ -838,9 +838,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var sourceBox = panel.getSourceBoxByURL(url);
                 if (sourceBox)
                 {
+                    var row = Firebug.SourceBoxPanel.getLineNode(lineNo, sourceBox)
                     if (FBTrace.DBG_BP)                                                                                /*@explore*/
-                        FBTrace.sysout(i+") onToggleBreakpoint sourceBox.childNodes.length="+sourceBox.childNodes.length+" [lineNo-1]="+sourceBox.childNodes[lineNo-1].innerHTML+"\n"); /*@explore*/
-                    var row = sourceBox.childNodes[lineNo-1];
+                        FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+"\n"); /*@explore*/
+                    if (!row)
+                        continue;  // we *should* only be called for lines in the viewport...
+
                     row.setAttribute("breakpoint", isSet);
                     if (isSet && props)
                     {
@@ -1450,18 +1453,27 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateSourceBox: function(sourceBox)
     {
-        if (this.executionFile && this.location.href == this.executionFile.href)
-            this.setExecutionLine(this.executionLineNo);
 
-        var self = this;
-        setTimeout( function delayMarkRevealedLines() {
-            self.markRevealedLines(sourceBox);
-        });
     },
 
     getSourceType: function()
     {
         return "js";
+    },
+
+    getDecorator: function(sourceBox)
+    {
+        if (!this.decorator)
+            this.decorator = bind(this.decorateJavascript, this, sourceBox);
+        return this.decorator;
+    },
+
+    decorateJavascript: function(sourceBox)
+    {
+        if (this.executionFile && this.location.href == this.executionFile.href)
+            this.setExecutionLine(this.executionLineNo);
+        this.markExecutableLines(sourceBox);
+        this.setLineBreakpoints(sourceBox.repObject, sourceBox)
     },
 
     showFunction: function(fn)
@@ -1504,7 +1516,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n"); /*@explore*/
 
             this.navigate(this.executionFile);
-            this.context.throttle(this.setExecutionLine, this, [this.executionLineNo]);
+            this.scrollToLine(this.executionLineNo, true);
             this.context.throttle(this.updateInfoTip, this);
             return;
         }
@@ -1523,47 +1535,29 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.updateInfoTip();
     },
 
-    markExecutableLines: function(sourceBox, min, max)
+    markExecutableLines: function(sourceBox)
     {
         var sourceFile = sourceBox.repObject;
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString()+"\n");                /*@explore*/
-        var lineNo = min ? min : 1;
+        var lineNo = sourceBox.firstViewableLine;
         while( lineNode = this.getLineNode(lineNo) )
         {
-            var checked = lineNode.getAttribute("exeChecked");
-            if (!checked)
-            {
-                var scripts = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
+            var script = sourceFile.scriptIfLineCouldBeExecutable(lineNo, true);
 
-                if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]= "+(scripts?scripts.length+" scripts":"(none)")+"\n");
-                if (scripts)
-                    lineNode.setAttribute("executable", "true");
-                else
-                    lineNode.removeAttribute("executable");
+            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
+            if (script)
+                lineNode.setAttribute("executable", "true");
+            else
+                lineNode.removeAttribute("executable");
 
-                lineNode.setAttribute("exeChecked", "true");
-            }
             lineNo++;
-            if (max && lineNo > max) break;
         }
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines DONE: "+sourceFile.toString()+"\n");                /*@explore*/
-    },
-
-    selectLine: function(lineNo)  // never called
-    {
-        var lineNode = this.getLineNode(lineNo);
-        if (lineNode)
-        {
-            var selection = this.document.defaultView.getSelection();
-            selection.selectAllChildren(lineNode);
-        }
     },
 
     setExecutionLine: function(lineNo)  // TODO should be in showSourceFile callback
     {
         var lineNode = (lineNo == -1) ? null : this.getLineNode(lineNo);
-        if (lineNode)
-            this.scrollToLine(lineNo);
 
         if (this.executionLine)
             this.executionLine.removeAttribute("exeLine");
@@ -1715,75 +1709,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     onScroll: function(event)
     {
         var scrollingElement = event.target;
-        this.markRevealedLines(scrollingElement);
-    },
-
-    markRevealedLines: function(scrollingElement)
-    {
-        if (!this.lastScrollTop)
-            this.lastScrollTop = 0;
-
-        var scrollTop = scrollingElement.scrollTop;
-        if (!scrollTop)
-            scrollTop = 0;
-
-        var aLineNode = this.getLineNode(1);
-        if (!aLineNode)
-        {
-            if (FBTrace.DBG_LINETABLE) FBTrace.dumpStack("debugger.markRevealedLines: no line node\n");
-            return;
-        }
-        var scrollStep = aLineNode.offsetHeight;
-        if (!scrollStep || scrollStep < 1) // then not rendered yet
-        {
-            if (FBTrace.DBG_LINETABLE)
-            {
-                FBTrace.dumpStack("debugger.markRevealedLines: no offsetHeight", aLineNode);
-                FBTrace.dumpProperties("debugger.markRevealedLines: no offsetHeight", aLineNode);
-            }
-            min = 1;
-            max = 20;
-        }
-        else
-        {
-
-            var lastTopLine = Math.round(this.lastScrollTop/scrollStep + 1);
-            var lastBottomLine = Math.round((this.lastScrollTop + scrollingElement.clientHeight)/scrollStep);
-
-            var newTopLine = Math.round(scrollTop/scrollStep + 1);
-            var newBottomLine = Math.round((scrollTop + scrollingElement.clientHeight)/scrollStep);
-
-            var delta = this.lastScrollTop - scrollTop;
-            if (delta < 0) // then we exposed a line at the bottom
-            {
-                var min = newTopLine;
-                if (min < lastBottomLine)
-                    min = lastBottomLine;
-                var max = newBottomLine;
-            }
-            else if (delta > 0)
-            {
-                var min = newTopLine;
-                var max = newBottomLine;
-                if (max > lastTopLine)
-                    max = lastTopLine;
-            }
-            else  // delta = 0
-            {
-                var min = newTopLine;
-                var max = newBottomLine;
-            }
-
-            if (FBTrace.DBG_LINETABLE)
-            {
-                FBTrace.sysout("debugger.markRevealedLines scrollTop: "+scrollTop, " lastScrollTop:"+this.lastScrollTop);
-                FBTrace.sysout("debugger.markRevealedLines lastTopLine:"+lastTopLine, "lastBottomLine: "+lastBottomLine);
-                FBTrace.sysout("debugger.markRevealedLines newTopLine:"+newTopLine, "newBottomLine: "+newBottomLine);
-            }
-        }
-        this.lastScrollTop = scrollTop;
-
-        this.markVisible(min, max);
+        this.reView(scrollingElement);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1861,7 +1787,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
-        this.panelNode.addEventListener("DOMMouseScroll", this.onScroll, false);
+        // XXXjjb, The event target for wheel events is not what I expected. Maybe not needed...
+        //this.panelNode.addEventListener("DOMMouseScroll", this.onScroll, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
     },
 
@@ -1874,7 +1801,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
-        this.panelNode.removeEventListener("DOMMouseScroll", this.onScroll, false);
+        //this.panelNode.removeEventListener("DOMMouseScroll", this.onScroll, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
     },
 
@@ -2008,7 +1935,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!updatedSourceFile)
             return;
 
-        this.showSourceFile(updatedSourceFile, this.setLineBreakpoints);
+        this.showSourceFile(updatedSourceFile);
     },
 
     updateSelection: function(object)
@@ -2659,7 +2586,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 function ConditionEditor(doc)
 {
     this.box = this.tag.replace({}, doc, this);
-    this.input = this.box.childNodes[1].firstChild.firstChild.lastChild;
+    this.input = this.box.childNodes[1].firstChild.firstChild.lastChild;  // XXXjjb we need childNode[1] always
     this.initialize();
 }
 
@@ -2752,16 +2679,20 @@ function setLineBreakpoints(sourceFile, sourceBox)
 {
     fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, script, props)
     {
-        var scriptRow = sourceBox.childNodes[line-1];
-        scriptRow.setAttribute("breakpoint", "true");
-        if (props.disabled)
-            scriptRow.setAttribute("disabledBreakpoint", "true");
-        if (props.condition)
-            scriptRow.setAttribute("condition", "true");
+        var scriptRow = Firebug.SourceBoxPanel.getLineNode(line, sourceBox);
+        if (scriptRow)
+        {
+            scriptRow.setAttribute("breakpoint", "true");
+            if (props.disabled)
+                scriptRow.setAttribute("disabledBreakpoint", "true");
+            if (props.condition)
+                scriptRow.setAttribute("condition", "true");
+        }
+        if (FBTrace.DBG_LINETABLE)
+            FBTrace.sysout("debugger.setLineBreakpoints found "+scriptRow+" for "+line+"@"+sourceFile.href+"\n");
     }});
 
-    if (FBTrace.DBG_LINETABLE)
-        FBTrace.sysout("debugger.setLineBreakpoints for sourceFile.href:"+sourceFile.href+"\n");
+
 }
 
 function getCallingFrame(frame)

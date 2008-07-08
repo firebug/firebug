@@ -1541,6 +1541,16 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         // called just before box is shown
     },
 
+    getDecorator: function(sourceBox)
+    {
+        // called at sourceBox creation, return a function to be called on a delay after the view port is updated.
+        return function decorate(sourceBox, sourceFile)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("firebug.getDecorator not overridden\n");
+        };
+    },
+
     getSourceType: function()
     {
         // eg "js" or "css"
@@ -1576,24 +1586,25 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         if (!lines)
             return null;
 
-        var maxLineNoChars = (lines.length + "").length;
 
         var sourceBox = this.document.createElement("div");
         sourceBox.repObject = sourceFile;
         setClass(sourceBox, "sourceBox");
         collapse(sourceBox, true);
         //
+        sourceBox.maxLineNoChars = (lines.length + "").length;
+        sourceBox.lines = lines;
 
-        // For performance reason, append script lines in large chunks using the throttler,
-        // otherwise displaying a large script will freeze up the UI
-        var min = 0;
+        sourceBox.min = 0;
         if (sourceFile.lineNumberShift)
-            min = min + sourceFile.lineNumberShift;
+            sourceBox.min = sourceBox.min + sourceFile.lineNumberShift;
 
-        var totalMax = lines.length;
+        sourceBox.totalMax = lines.length;
         if (sourceFile.lineNumberShift)
-            totalMax = totalMax + sourceFile.lineNumberShift; // eg -1
+            sourceBox.totalMax = sourceBox.totalMax + sourceFile.lineNumberShift; // eg -1
 
+        sourceBox.decorator = sourceBoxDecorator;
+/*
         do
         {
             var max = min + scriptBlockSize;
@@ -1608,6 +1619,21 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         if (sourceBoxDecorator)
             this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
+*/
+        var paddedSource = "<div class='topSourcePadding'></div>"+
+            "<div class='sourceViewport'></div>"+
+            "<div class='bottomSourcePadding'><div>";
+        appendInnerHTML(sourceBox, paddedSource);
+
+        // Initial View
+        var view = getChildByClass(sourceBox, 'sourceViewport');
+        var max = scriptBlockSize;
+        if (max > sourceBox.totalMax)
+            max = sourceBox.totalMax;
+        appendScriptLines(lines, 1, max, sourceBox.maxLineNoChars, view);
+
+        // delay until the panel is build so we know size
+        this.context.throttle(this.buildViewAround, this, [sourceBox], true);
 
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
@@ -1645,23 +1671,35 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         return url ? this.sourceBoxes[url] : null;
     },
 
-    showSourceFile: function(sourceFile, sourceBoxDecorator)
+    showSourceFile: function(sourceFile)
     {
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
             FBTrace.sysout("firebug.showSourceFile: ", sourceFile+(sourceBox?" has sourcebox ":" needs new sourcebox ")); /*@explore*/
         if (!sourceBox)
         {
-            sourceBox = this.createSourceBox(sourceFile, sourceBoxDecorator);
+
+            sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
             this.panelNode.appendChild(sourceBox);
         }
 
         this.showSourceBox(sourceBox);
     },
 
-    getLineNode: function(lineNo)
+    getLineNode: function(lineNo, sourceBox)
     {
-        return this.selectedSourceBox ? this.selectedSourceBox.childNodes[lineNo-1] : null;
+        if (!sourceBox)
+            sourceBox = this.selectedSourceBox;
+
+        if (sourceBox)
+        {
+            if (lineNo >= sourceBox.firstViewableLine && lineNo <= sourceBox.lastViewableLine)
+            {
+                var view = getChildByClass(sourceBox, 'sourceViewport');
+                return view.childNodes[lineNo - sourceBox.firstViewableLine];
+            }
+        }
+        return null;
     },
 
     getSourceLink: function(lineNo)
@@ -1687,14 +1725,9 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
     highlightLine: function(lineNo, highlight)
     {
-        var lineNode = this.getLineNode(lineNo);
-        if (lineNode)
+        if (this.selectedSourceBox)
         {
-            var visibleRange = linesIntoCenterView(lineNode, this.selectedSourceBox);
-            var min = lineNo - visibleRange.before;
-            var max = lineNo + visibleRange.after;
-
-            this.markVisible(min, max);
+            var lineNode = this.buildViewAround(this.selectedSourceBox, lineNo);
 
             if (highlight)
                 setClassTimed(lineNode, "jumpHighlight", this.context);
@@ -1711,19 +1744,75 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             return false;
     },
 
-    markVisible: function(min, max)
+    buildViewAround: function(sourceBox, lineNo)  // defaults to first viewable lines
     {
-         if (this.context.markExecutableLinesTimeout)
+            var view = getChildByClass(sourceBox, 'sourceViewport');
+            if (!view)
+                FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+            var panelHeight = this.panelNode.clientHeight;
+            sourceBox.lineHeight = view.childNodes[0].clientHeight;
+            var viewableLines = Math.round(panelHeight / sourceBox.lineHeight);
+            FBTrace.sysout("buildViewAround "+lineNo+" panelHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ viewableLines+"\n");
+
+            var centerNodeNumber = Math.round(viewableLines/2.0);
+
+            var topLine = 1; // will be view.childNodes[0] or [1]?
+            if (lineNo)
+                topLine = lineNo - centerNodeNumber;
+            if (topLine < 1)
+                topLine = 1;
+
+            var bottomLine = topLine + viewableLines;
+            if (bottomLine > sourceBox.totalMax)
+                bottomLine = sourceBox.totalMax;
+
+            clearNode(view);
+            FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+"\n");
+            appendScriptLines(sourceBox.lines, topLine, bottomLine, sourceBox.maxLineNoChars, view);
+
+            view.previousSibling.style.height = (topLine - 1) * sourceBox.lineHeight + "px";
+            view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
+
+            sourceBox.firstViewableLine = topLine;
+            sourceBox.lastViewableLine = bottomLine;
+
+            this.applyDecorator(sourceBox);
+
+
+            return view.childNodes[centerNodeNumber]; // node for lineNo.
+    },
+
+    applyDecorator: function(sourceBox)
+    {
+         if (this.context.sourceBoxDecoratorTimeout)
          {
-             this.context.clearTimeout(this.context.markExecutableLinesTimeout);
-             delete this.context.markExecutableLinesTimeout;
+             this.context.clearTimeout(this.context.sourceBoxDecoratorTimeout);
+             delete this.context.sourceBoxDecoratorTimeout;
          }
-            if (FBTrace.DBG_LINETABLE) FBTrace.dumpStack("debugger.markVisible min:"+min+" max:"+max+"\n");
-         this.context.markExecutableLinesTimeout = this.context.setTimeout(bindFixed(function delayMarkExecutableLines()
+         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
          {
-             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.delayMarkExecutableLines min:"+min+" max:"+max+"\n");
-             this.markExecutableLines(this.selectedSourceBox, ((min > 0)? min : 1), max);
+             sourceBox.decorator(sourceBox, sourceBox.repObject);
          }, this));
+    },
+
+    reView: function(sourceBox)
+    {
+        if (!this.lastScrollTop)
+            this.lastScrollTop = 0;
+
+        var scrollTop = sourceBox.scrollTop;
+
+        var scrollStep = sourceBox.lineHeight;
+        if (!scrollStep || scrollStep < 1)
+            FBTrace.dumpStack("badScrollStep");
+        var newTopLine = Math.round(scrollTop/scrollStep + 1);
+        var newBottomLine = Math.round((scrollTop + sourceBox.clientHeight)/scrollStep);
+
+        var newCenterLine = Math.round((newTopLine + newBottomLine)/2.0);
+        FBTrace.sysout("reView scrollTop: "+scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
+        this.buildViewAround(sourceBox, newCenterLine);
+
+        this.lastScrollTop = scrollTop;
     },
 
 
