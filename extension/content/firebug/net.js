@@ -662,6 +662,17 @@ NetPanel.prototype = domplate(Firebug.Panel,
         getCacheEntry(file, this.context.netProgress);
     },
 
+    openRequestInTab: function(file)
+    {
+        var stringStream = getInputStreamFromString(file.postText);
+        var postData = CCIN("@mozilla.org/network/mime-input-stream;1", "nsIMIMEInputStream");
+        postData.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        postData.addContentLength = true;
+        postData.setData(stringStream);
+
+        gBrowser.selectedTab = gBrowser.addTab(file.href, null, null, postData);
+    },
+
     stopLoading: function(file)
     {
         const NS_BINDING_ABORTED = 0x804b0002;
@@ -783,7 +794,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
         items.push(
             "-",
-            {label: "OpenInTab", command: bindFixed(openNewTab, FBL, file.href) }
+            {label: "OpenInTab", command: bindFixed(this.openRequestInTab, this, file) }
         );
 
         if (!file.loaded)

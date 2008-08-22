@@ -2734,6 +2734,19 @@ this.getStateDescription = function(flag) {
 
     return state;
 }
+
+this.getInputStreamFromString = function(dataString)
+{
+    var stringStream = this.CCIN("@mozilla.org/io/string-input-stream;1", "nsIStringInputStream");
+
+    if ("data" in stringStream) // Gecko 1.9 or newer
+        stringStream.data = dataString;
+    else // 1.8 or older
+        stringStream.setData(dataString, dataString.length);
+
+    return stringStream;
+}
+
 // ************************************************************************************************
 // Programs
 

@@ -133,8 +133,7 @@ top.SourceCache.prototype =
                 var postData = getPostText(file, this.context);
                 if (postData)
                 {
-                    var postDataStream = CCIN("@mozilla.org/io/string-input-stream;1", "nsIStringInputStream");
-                    postDataStream.setData(postData, postData.length);
+                    var postDataStream = getInputStreamFromString(postData);
                     var uploadChannel = QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
                     if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");                                             /*@explore*/

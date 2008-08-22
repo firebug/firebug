@@ -174,4 +174,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 992 New zh-CN locale file for Firebug 1.2 (contribution by shawphy)
     * Issue 993 Scripts included with relative paths appear twice in scripts list; breakpoints ignored
     * Issue 997 GET and POST calls are shown truncated in console view using ellipsis
+    * Issue 1029 Firefox cache not cleared
     * Issue 1037 incomplete report of uncaught exception
+    * Issue 1092 Open in new tab doesn't POST data
+    * Issue 
