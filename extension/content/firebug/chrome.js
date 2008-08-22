@@ -478,7 +478,7 @@ top.FirebugChrome =
             FirebugContext = context;  // the other place the FirebugContext is set is in firebug.js
 
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("chrome.showContext context: "+(context?context.window.location:"null ")+"\n");
+                FBTrace.sysout("chrome.showContext set FirebugContext to: "+(context?context.window.location:"null ")+"\n");
 
             if (externalBrowser || (context.browser && context.browser.showFirebug) )
                 this.syncPanel();
@@ -690,6 +690,15 @@ top.FirebugChrome =
             FirebugContext.originalChrome.setGlobalAttribute(id, name, value);
     },
 
+
+    setChromeDocumentAttribute: function(id, name, value)
+    {
+        // Call as context.browser.chrome.setChromeDocumentAttribute() to set attributes in another window.
+        var elt = $(id);
+        if (elt)
+            elt.setAttribute(name, value);
+    },
+
     keyCodeListen: function(key, filter, listener, capture)
     {
         if (!filter)
@@ -811,7 +820,7 @@ top.FirebugChrome =
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         if (!panel)
-            return false;
+            panel = panelBar1.selectedPanel; // the event must be on our chrome not inside the panel
 
         FBL.eraseNode(popup);
 
@@ -834,6 +843,9 @@ top.FirebugChrome =
         var rep = Firebug.getRep(object);
         var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
         var realRep = realObject ? Firebug.getRep(realObject) : null;
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("chrome.onContextShowing object:"+object+" rep: "+rep+" realObject: "+realObject+" realRep:"+realRep+"\n");
 
         if (realObject && realRep)
         {
@@ -1136,8 +1148,8 @@ function onSelectedSidePanel(event)
         }
         else
         {
-        	if (FBTrace.DBG_ERRORS)
-	            FBTrace.dumpProperties("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
         }
     }
     if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n"); /*@explore*/
@@ -1239,7 +1251,7 @@ function onCommandLineFocus(event)
         Firebug.Console.injector.attachConsole(FirebugContext, FirebugContext.window);
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("onCommandLineFocus, added command line support to "+FirebugContext.window.location+"\n");
+            FBTrace.sysout("onCommandLineFocus, attachConsole "+FirebugContext.window.location+"\n");
     }
     else
     {
@@ -1255,6 +1267,20 @@ function onCommandLineFocus(event)
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._FirebugCommandLine)
     {
         Firebug.CommandLine.injector.attachCommandLine(FirebugContext, FirebugContext.window);
+    }
+    else
+    {
+        if (FBTrace.DBG_CONSOLE)
+        {
+            try
+            {
+                var cmdLine = FirebugContext.window.wrappedJSObject._FirebugCommandLine
+            }
+            catch (e)
+            {
+                FBTrace.sysout("onCommandLineFocus, did NOT attachCommandLine ", e);
+            }
+        }
     }
 }
 

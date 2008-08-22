@@ -581,15 +581,11 @@ function injectScript(script, win)
 function getInspectorVars(context)
 {
     var htmlPanel = context.getPanel("html", true);
-    var domPanel = context.getPanel("dom", true);
+    var vars = {};
+    for (var i=0; i<2; i++)
+        vars["$"+i] = htmlPanel ? htmlPanel.inspectorHistory[i] : null;
 
-    return {
-        $0: htmlPanel ? htmlPanel.selection : null,
-        $1: htmlPanel ? htmlPanel.selection : null,
-        $2: htmlPanel ? htmlPanel.previousSelection : null,
-        $$1: domPanel ? domPanel.selection : null,
-        $$2: domPanel ? domPanel.previousSelection : null
-    };
+    return vars;
 }
 
 function getCommandLine(context)
@@ -643,6 +639,22 @@ function FirebugCommandLineAPI(context, baseWindow)
     this.$x = function(xpath)
     {
         return FBL.getElementsByXPath(baseWindow.document, xpath);
+    };
+
+    this.$n = function(index)
+    {
+        var htmlPanel = context.getPanel("html", true);
+        if (!htmlPanel)
+            return null;
+
+        if (index < 0 || index >= htmlPanel.inspectorHistory.length)
+            return null;
+
+        var node = htmlPanel.inspectorHistory[index];
+        if (!node)
+            return node;
+
+        return node.wrappedJSObject;
     };
 
     this.cd = function(object)
@@ -760,11 +772,13 @@ Firebug.CommandLine.injector = {
         var handler = new CommandLineHandler(context, win);
         var element = $("_firebugConsole", doc);
         if (element)
+        {
             element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
+        }
         else
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Commandline.injector, no element " + win.location + "\n");
+                FBTrace.sysout("Commandline.injector, no _firebugConsole element " + win.location + "\n");
         }
     }
 };
@@ -774,15 +788,22 @@ function CommandLineHandler(context, win)
     this.handleEvent = function(event)
     {
         var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
+
+        // Appends variables into the scope.
+        var vars = getInspectorVars(context);
+        for (var prop in vars)
+        {
+            function createHandler(p) {
+                return function() { return vars[p] ? vars[p].wrappedJSObject : null; }
+            }
+            scope[prop] = createHandler(prop);
+        }
+
         if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
         {
-            this.log($STRF("commandline.MethodNotSupported", [methodName]));
+            var methodName = event.target.getAttribute("methodName");
+            Firebug.Console.log($STRF("commandline.MethodNotSupported", [methodName]));
         }
-    };
-
-    this.log = function(args)
-    {
-        return Firebug.Console.logFormatted(args, context);
     };
 }
 

@@ -1,4 +1,4 @@
-<!ENTITY firebug.Permissions "Sites...">
+<!ENTITY firebug.Permissions "Oldalak...">
 
 <!ENTITY  firebug.Firebug               "Firebug">
 <!ENTITY  firebug.Close                 "Bezár">
@@ -17,11 +17,11 @@
 <!ENTITY  firebug.ShowTooltips          "Tippek megjelenítése">
 <!ENTITY  firebug.ShadeBoxModel         "Árnyékolt doboz modell">
 <!ENTITY  firebug.Website               "Firebug honlap...">
-<!ENTITY  firebug.Documentation         "Documentáció...">
+<!ENTITY  firebug.Documentation         "Dokumentáció...">
 <!ENTITY  firebug.KeyShortcuts          "Gyorsbillentyűk...">
 <!ENTITY  firebug.Forums                "Vita fórum...">
 <!ENTITY  firebug.Issues                "Hiba követő...">
-<!ENTITY  firebug.Donate                "Közreműködők...">
+<!ENTITY  firebug.Donate                "Támogatom...">
 <!ENTITY  firebug.About                 "Névjegy...">
 <!ENTITY  firebug.AlwaysOpenInWindow    "Megnyitás mindig új ablakba">
 
@@ -31,7 +31,7 @@
 <!ENTITY  firebug.CloseFirebug          "Firebug bezárása">
 <!ENTITY  firebug.DisableFirebug        "Firebug tiltása">
 <!ENTITY  firebug.AllowedSites          "Engedélyezett oldalak...">
-<!ENTITY  firebug.ConfigureEditors      "Szerkesztők beállítása...">
+<!ENTITY  firebug.ConfigureEditors      "Szerkesztők beállítása">
 <!ENTITY  firebug.CommandLine           "Parancs sor">
 <!ENTITY  firebug.Search                "Keresés">
 
@@ -54,7 +54,7 @@
 <!ENTITY  firebug.ProfileTooltip        "JavaScript futási idő elemzés">
 
 <!ENTITY  firebug.Clear                 "Törlés">
-<!ENTITY  firebug.ClearConsole          "Konzol törtélse">
+<!ENTITY  firebug.ClearConsole          "Konzol törlése">
 <!ENTITY  firebug.ClearTooltip          "Tooltip törlése">
 
 <!ENTITY  firebug.All                   "Mind">

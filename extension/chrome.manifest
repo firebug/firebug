@@ -1,8 +1,10 @@
+content firebug content/firebug/ contentaccessible=yes
 content firebug content/firebug/
 skin	firebug	classic/1.0	skin/classic/
 skin	firebug-os	classic/1.0	skin/classic/win/
 locale  firebug bg	      	locale/bg/
 locale	firebug	ca-AD		locale/ca-AD/
+locale	firebug	cs-CZ		locale/cs-CZ/
 locale  firebug da-DK       locale/da-DK/
 locale  firebug de-DE       locale/de-DE/
 locale  firebug en-US       locale/en-US/

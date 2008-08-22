@@ -260,6 +260,11 @@ panelTab[selected="true"] > .panelTab-right {
     text-decoration: underline;
 }
 
+.panelOptionsButton[disabled="true"] > .toolbarbutton-text {
+    color: graytext;
+    text-decoration: none;
+}
+
 /************************************************************************************************/
 
 #fbPanelStatus {

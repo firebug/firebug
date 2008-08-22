@@ -136,7 +136,7 @@ Firebug.Spy = extend(Firebug.Module,
 
     initContext: function(context)
     {
-        context.spies = [];  // MAY NOT BE CALLED FOR CHROMEBUG??
+        context.spies = [];
 
         if (Firebug.showXMLHttpRequests  && Firebug.Console.isEnabled(context))
             this.attachSpy(context, context.window);
@@ -200,18 +200,42 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 {
     tag:
         DIV({class: "spyHead", _repObject: "$object"},
-            A({class: "spyTitle", onclick: "$onToggleBody"},
-                IMG({class: "spyIcon", src: "blank.gif"}),
-                SPAN({class: "spyURI"}, "$object|getCaption"),
-                SPAN({class: "spyErrorCode"}),
-                SPAN({class: "spyTime"})
-            ),
-            TAG(FirebugReps.SourceLink.tag, {object: "$object.sourceLink"})
+            TABLE({cellpadding: 0, cellspacing: 0},
+                TBODY(
+                    TR({class: "spyRow"},
+                        TD({class: "spyCol", onclick: "$onToggleBody"},
+                            DIV({class: "spyTitle"},
+                                "$object|getCaption"
+                            ),
+                            DIV({class: "spyFullTitle spyTitle"},
+                                "$object|getFullUri"
+                            )
+                        ),
+                        TD({class: "spyCol"},
+                            IMG({class: "spyIcon", src: "blank.gif"})
+                        ),
+                        TD({class: "spyCol"},
+                            SPAN({class: "spyErrorCode"})
+                        ),
+                        TD({class: "spyCol"},
+                            SPAN({class: "spyTime"})
+                        ),
+                        TD({class: "spyCol"},
+                            TAG(FirebugReps.SourceLink.tag, {object: "$object.sourceLink"})
+                        )
+                    )
+                )
+            )
         ),
 
     getCaption: function(spy)
     {
         return spy.method.toUpperCase() + " " + cropString(spy.getURL(), 100);
+    },
+
+    getFullUri: function(spy)
+    {
+        return spy.getURL();
     },
 
     onToggleBody: function(event)
@@ -515,11 +539,11 @@ function onHTTPSpyLoad(spy)
     // simulate the requestStopped here.
     while (spy.context.spies && spy.context.spies.length)
     {
-      var spy = spy.context.spies[0];
-      requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
+        var spy = spy.context.spies[0];
+        requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
     }
 
-    // Notify registered listeners about fiinish of the XHR.
+    // Notify registered listeners about finish of the XHR.
     dispatch(listeners, "onLoad", [spy.context, spy]);
 }
 
@@ -542,7 +566,7 @@ function onHTTPSpyError(spy)
 
 function updateLogRow(spy, responseTime)
 {
-    var timeBox = spy.logRow.firstChild.firstChild.lastChild;
+    var timeBox = getElementByClass(spy.logRow, "spyTime");
     if (responseTime)
       timeBox.textContent = " " + formatTime(responseTime);
 
@@ -555,7 +579,7 @@ function updateLogRow(spy, responseTime)
         if (errorRange == 4 || errorRange == 5)
         {
             setClass(spy.logRow, "error");
-            var errorBox = spy.logRow.firstChild.firstChild.childNodes[2];
+            var errorBox = getElementByClass(spy.logRow, "spyErrorCode");
             errorBox.textContent = spy.xhrRequest.status;
         }
     }

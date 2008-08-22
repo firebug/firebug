@@ -24,6 +24,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
         {
             this.browser.parentNode.removeChild(this.browser);
             delete this.browser;
+            if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.destroyBrowser \n");        /*@explore*/
         }
     },
 

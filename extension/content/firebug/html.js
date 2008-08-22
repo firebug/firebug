@@ -595,6 +595,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     name: "html",
     searchable: true,
     dependents: ["css", "layout", "dom", "domSide", "watch"],
+    inspectorHistory: new Array(5),
 
     initialize: function()
     {
@@ -803,6 +804,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     stopInspecting: function(object, cancelled)
     {
+        if (object != this.inspectorHistory)
+        {
+            // Manage history of selection for later access in the command line.
+            this.inspectorHistory.unshift(object);
+            if (this.inspectorHistory.length > 5)
+                this.inspectorHistory.pop();            
+        }
+
         this.ioBox.highlight(null);
 
         if (!cancelled)

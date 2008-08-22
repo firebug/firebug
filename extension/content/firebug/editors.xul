@@ -3,14 +3,19 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://browser/skin/preferences/preferences.css"?>
 
-<!DOCTYPE dialog SYSTEM "chrome://firebug/locale/editors.dtd">
+<!DOCTYPE window [
+<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
+%firebugDTD;
+<!ENTITY % editorsDTD SYSTEM "chrome://firebug/locale/editors.dtd">
+%editorsDTD;
+]>
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         class="windowDialog"
         windowtype="Firebug:ExternalEditors"
         id="firebug-external-editors"
         width="600" height="300"
-        title="Firebug Editors"
+        title="&firebug.ConfigureEditors;"
         onload="gEditorManager.init();"
         onunload="gEditorManager.uninit();"
         persist="screenX screenY width height">

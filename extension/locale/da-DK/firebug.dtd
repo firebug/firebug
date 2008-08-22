@@ -1,49 +1,49 @@
-<!ENTITY firebug.About "About...">
-<!ENTITY firebug.OpenWith "Open With Editor">
-<!ENTITY firebug.Permissions "Sites...">
-<!ENTITY firebug.ConfigureEditors "Configure Editors...">
+<!ENTITY firebug.About "Om...">
+<!ENTITY firebug.OpenWith "Åben med editor">
+<!ENTITY firebug.Permissions "Domæner...">
+<!ENTITY firebug.ConfigureEditors "Konfigurer programmer">
 
 <!ENTITY  firebug.Firebug               "Firebug">
 <!ENTITY  firebug.Close                 "Luk">
 <!ENTITY  firebug.View                  "Vis">
-<!ENTITY  firebug.Help                  "Hj�lp">
+<!ENTITY  firebug.Help                  "Hjælp">
 <!ENTITY  firebug.Vertical              "Vertikal opdeling">
-<!ENTITY  firebug.Run                   "K�r">
+<!ENTITY  firebug.Run                   "Kør">
 <!ENTITY  firebug.Copy                  "Kopier">
-<!ENTITY  firebug.CopyBookmarklet       "Kopier scriptet som et bogm�rke.">
+<!ENTITY  firebug.CopyBookmarklet       "Kopier scriptet som et bogmærke.">
 
 <!ENTITY  firebug.Options               "Indstillinger">
-<!ENTITY  firebug.TextSize              "Tekst st�rrelse">
-<!ENTITY  firebug.IncreaseTextSize      "For�g tekst st�rrelse">
-<!ENTITY  firebug.DecreaseTextSize      "Formindsk tekst st�rrelse">
-<!ENTITY  firebug.NormalTextSize        "Normal tekst st�rrelse">
-<!ENTITY  firebug.ShowTooltips          "Vis hj�lpetekster">
+<!ENTITY  firebug.TextSize              "Tekst størrelse">
+<!ENTITY  firebug.IncreaseTextSize      "Forøg tekst størrelse">
+<!ENTITY  firebug.DecreaseTextSize      "Formindsk tekst størrelse">
+<!ENTITY  firebug.NormalTextSize        "Normal tekst størrelse">
+<!ENTITY  firebug.ShowTooltips          "Vis hjælpetekster">
 <!ENTITY  firebug.ShadeBoxModel         "Skygge boks model">
 <!ENTITY  firebug.Website               "Firebug hjemmeside...">
 <!ENTITY  firebug.Documentation         "Dokumentation...">
 <!ENTITY  firebug.KeyShortcuts          "Tastatur genveje...">
 <!ENTITY  firebug.Forums                "Diskussions gruppe...">
 <!ENTITY  firebug.Issues                "Problem liste...">
-<!ENTITY  firebug.Donate                "St�t Firebug...">
-<!ENTITY  firebug.AlwaysOpenInWindow    "Altid �ben i nyt vindue">
+<!ENTITY  firebug.Donate                "Støt Firebug...">
+<!ENTITY  firebug.AlwaysOpenInWindow    "Altid åben i nyt vindue">
 
-<!ENTITY  firebug.ShowFirebug           "�ben Firebug">
-<!ENTITY  firebug.DetachFirebug         "�ben Firebug i nyt vindue">
+<!ENTITY  firebug.ShowFirebug           "Åben Firebug">
+<!ENTITY  firebug.DetachFirebug         "Åben Firebug i nyt vindue">
 <!ENTITY  firebug.CloseFirebug          "Luk Firebug">
 <!ENTITY  firebug.DisableFirebug        "Deaktiver Firebug">
-<!ENTITY  firebug.AllowedSites          "Tilladte dom�ner...">
+<!ENTITY  firebug.AllowedSites          "Tilladte domæner...">
 <!ENTITY  firebug.CommandLine           "Kommando linie">
-<!ENTITY  firebug.Search                "S�g">
+<!ENTITY  firebug.Search                "Søg">
 
-<!ENTITY  firebug.Continue              "Forts�t (F8)">
+<!ENTITY  firebug.Continue              "Fortsæt (F8)">
 <!ENTITY  firebug.StepOver              "Spring over (F10)">
 <!ENTITY  firebug.StepInto              "Spring ind i (F11)">
 <!ENTITY  firebug.StepOut               "Spring ud">
 <!ENTITY  firebug.BreakOnErrors         "Afbryd ved fejl">
 
-<!ENTITY  firebug.Inspect               "Unders�g">
-<!ENTITY  firebug.InspectElement        "Unders�g element">
-<!ENTITY  firebug.InspectTooltip        "Klik p� et element p� siden for at unders�ge det">
+<!ENTITY  firebug.Inspect               "Undersøg">
+<!ENTITY  firebug.InspectElement        "Undersøg element">
+<!ENTITY  firebug.InspectTooltip        "Klik på et element på siden for at undersøge det">
 
 <!ENTITY  firebug.Edit                  "Ret">
 <!ENTITY  firebug.EditHTMLTooltip       "Ret i HTML">
@@ -51,7 +51,7 @@
 
 <!ENTITY  firebug.Profile               "Profil">
 <!ENTITY  firebug.ProfileScript         "Profil af JavaScript">
-<!ENTITY  firebug.ProfileTooltip        "Profil af JavaScript udf�relses tid">
+<!ENTITY  firebug.ProfileTooltip        "Profil af JavaScript udførelses tid">
 
 <!ENTITY  firebug.Clear                 "Ryd">
 <!ENTITY  firebug.ClearConsole          "Ryd konsol">

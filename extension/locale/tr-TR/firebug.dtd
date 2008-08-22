@@ -31,7 +31,7 @@
 <!ENTITY  firebug.CloseFirebug          "Firebug'i kapat">
 <!ENTITY  firebug.DisableFirebug        "Firebug'i etkisiz kil">
 <!ENTITY  firebug.AllowedSites          "Etkin Siteler...">
-<!ENTITY  firebug.ConfigureEditors      "Editorleri Ayarla...">
+<!ENTITY  firebug.ConfigureEditors      "Editorleri Ayarla">
 <!ENTITY  firebug.CommandLine           "Komut Satiri">
 <!ENTITY  firebug.Search                "Ara">
 

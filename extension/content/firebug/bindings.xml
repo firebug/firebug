@@ -23,7 +23,7 @@
             <children includes="panelTab"/>
             <xul:spacer flex="1"/>
             <children/>
-            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;">
+            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" anonid="panelOptions">
                 <xul:menupopup anonid="optionsPopup"/>
             </xul:toolbarbutton>
         </xul:hbox>
@@ -174,7 +174,7 @@
                     if (sel)
                         sel.removeAllRanges();
 
-                    this.showSelectedPanel();
+                    this.showSelectedPanel();  // sets active attribute true
 
                     if (!noRefresh && panel.needsRefresh)
                     {
@@ -211,6 +211,10 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
+
+                    var menu = panel.getOptionsMenuItems(FirebugContext);
+                    var panelOptions = document.getAnonymousElementByAttribute(this, "anonid", "panelOptions");
+                    panelOptions.disabled = (!menu || !menu.length);
                 }
             ]]></body>
         </method>
@@ -237,7 +241,7 @@
 
     <handlers>
         <handler event="popupshowing"><![CDATA[
-            if (!this.selectedPanel)
+            if (!this.selectedPanel || (event.target != this))
                 return;
 
             var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
@@ -341,10 +345,11 @@
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
         ]]></handler>
         <handler event="popupshowing"><![CDATA[
-            var items = this.popup.getElementsByTagName("xul:menuitem");
+            // XXXjjb getElementsByTagName("xul:menuitem"); fails 2.0.0.16
+            var items = this.popup.getElementsByTagNameNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
             var location = FirebugChrome.getBrowserURI(FirebugContext);
             var value = this.module.getHostPermission(FirebugContext);
-            
+
             for (var i=0; i<items.length; i++)
             {
                 var option = items[i].value;
@@ -589,7 +594,10 @@
             <parameter name="event"/>
             <body><![CDATA[
                 if (event.keyCode == 13) // Return
+                {
                     this.enterActiveItem();
+                    this.searchString = '';
+                }
                 else if (event.keyCode == 8) // Backspace
                 {
                     this.searchString = this.searchString.substr(0, this.searchString.length-2);

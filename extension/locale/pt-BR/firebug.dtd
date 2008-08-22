@@ -26,7 +26,7 @@
 <!ENTITY firebug.OpenWith "Abrir Com Editor">
 <!ENTITY firebug.CloseFirebug "Fechar Firebug">
 <!ENTITY firebug.Permissions "Sites...">
-<!ENTITY firebug.ConfigureEditors "Configurar Editores...">
+<!ENTITY firebug.ConfigureEditors "Configurar Editores">
 <!ENTITY firebug.CommandLine "Linha de Comando">
 <!ENTITY firebug.Search "Busca">
 <!ENTITY firebug.Continue "Continuar (F8)">

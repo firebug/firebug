@@ -10,6 +10,12 @@ pref("extensions.firebug.openInWindow", false);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", "vertical");
 
+pref("extensions.firebug.preferEnabled.Console", false);
+pref("extensions.firebug.preferEnabled.Script", false);
+pref("extensions.firebug.preferEnabled.Net", false);
+
+pref("extensions.firebug.allowDoublePost", false);
+
 // Console
 pref("extensions.firebug.showJSErrors", true);
 pref("extensions.firebug.showJSWarnings", false);
@@ -21,8 +27,8 @@ pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug-service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
-pref("extensions.firebug.console.enableLocalFiles", false);
-pref("extensions.firebug.console.enableSystemPages", false);
+pref("extensions.firebug.console.enableLocalFiles", "");
+pref("extensions.firebug.console.enableSystemPages", "");
 pref("extensions.firebug.console.enableSites", false);
 
 // HTML
@@ -42,8 +48,8 @@ pref("extensions.firebug-service.breakOnErrors", false);
 pref("extensions.firebug-service.filterSystemURLs", true);
 pref("extensions.firebug-service.showAllSourceFiles", false);
 pref("extensions.firebug-service.trackThrowCatch", false);
-pref("extensions.firebug.script.enableLocalFiles", false);
-pref("extensions.firebug.script.enableSystemPages", false);
+pref("extensions.firebug.script.enableLocalFiles", "");
+pref("extensions.firebug.script.enableSystemPages", "");
 pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug-service.scriptsFilter", "all");
 
@@ -65,8 +71,8 @@ pref("extensions.firebug.showRulers", true);
 pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
-pref("extensions.firebug.net.enableLocalFiles", false);
-pref("extensions.firebug.net.enableSystemPages", false);
+pref("extensions.firebug.net.enableLocalFiles", "");
+pref("extensions.firebug.net.enableSystemPages", "");
 pref("extensions.firebug.net.enableSites", false);
 
 // External Editors

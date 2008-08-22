@@ -17,9 +17,7 @@
 <!ENTITY  firebug.NormalTextSize        "Стандартен размер на шрифта">
 <!ENTITY  firebug.ShowTooltips          "Показване на подсказки">
 <!ENTITY  firebug.ShadeBoxModel         "Оцветяване на модела на разполагането">
-<!ENTITY  firebug.Support               "Поддръжка на Firebug">
 <!ENTITY  firebug.Website               "Сайт на Firebug…">
-<!ENTITY  firebug.Plugins               "Допълнителни приставки…">
 <!ENTITY  firebug.Documentation         "Документация…">
 <!ENTITY  firebug.KeyShortcuts          "Клавишни комбинации…">
 <!ENTITY  firebug.Forums                "Група за дискусии…">

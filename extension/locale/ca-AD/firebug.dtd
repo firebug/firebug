@@ -29,7 +29,7 @@
 <!ENTITY  firebug.OpenWith              "Obrir amb Editor">
 <!ENTITY  firebug.CloseFirebug          "Tancar Firebug">
 <!ENTITY  firebug.Permissions           "Permissos...">
-<!ENTITY  firebug.ConfigureEditors      "Configurar Editors...">
+<!ENTITY  firebug.ConfigureEditors      "Configurar Editors">
 <!ENTITY  firebug.CommandLine           "Línia de Comandes">
 <!ENTITY  firebug.Search                "Cercar">
 

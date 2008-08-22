@@ -53,7 +53,7 @@ function _FirebugConsole()
         var element = document.getElementById("_firebugConsole");
         if (!element)
         {
-            element = document.createElement("div");
+            element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
             element.setAttribute("id", "_firebugConsole");
             element.firebugIgnore = true;
             element.setAttribute("style", "display:none");

@@ -97,6 +97,9 @@ Firebug.TabContext.prototype =
                 panelNode.parentNode.removeChild(panelNode);
         }
 
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("tabContext.destroy "+(this.window && this.window.location?this.window.location:"no window location")+"\n");
+
         // Release all members just to be safe in case somebody leaks this context
         for (var name in this)
             delete this[name];

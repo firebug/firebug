@@ -192,7 +192,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     initializeUI: function()
     {
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
-        
+
         // Initialize max limit for logged requests.
         NetLimit.updateMaxLimit();
 
@@ -201,8 +201,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // Register HTTP observer for all net-request monitoring and time measuring.
         // This is done as soon as the FB UI is loaded.
-        observerService.addObserver(HttpObserver, "http-on-modify-request", false);
-        observerService.addObserver(HttpObserver, "http-on-examine-response", false);
+        HttpObserver.registerObserver();
 
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
@@ -218,8 +217,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     shutdown: function()
     {
         // Unregister HTTP observer. This is done when the FB UI is closed.
-        observerService.removeObserver(HttpObserver, "http-on-modify-request");
-        observerService.removeObserver(HttpObserver, "http-on-examine-response");
+        HttpObserver.unregisterObserver();
 
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
@@ -265,7 +263,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         monitorContext(context);
 
-        if (context.netProgress && listeners.length)
+        if (context.netProgress)
         {
             var panel = context.getPanel(panelName);
             context.netProgress.activate(panel);
@@ -282,7 +280,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (deactivatedPanelName != panelName)
             return;
 
-        if (context.netProgress && listeners.length)
+        if (context.netProgress)
             context.netProgress.activate(null);
 
         unmonitorContext(context);
@@ -291,6 +289,32 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     onLastPanelDeactivate: function(context, destroy)
     {
         $('fbStatusIcon').removeAttribute("net");
+    },
+
+    onSuspendFirebug: function(context)
+    {
+        HttpObserver.unregisterObserver();  // safe for multiple calls
+        try
+        {
+            if (context.browser.removeProgressListener)  // XXXjjb often false?
+                context.browser.removeProgressListener(context.netProgress, NOTIFY_ALL);
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.onSuspendFirebug could not removeProgressListener: ", e);
+        }
+
+        $('fbStatusIcon').removeAttribute("net");
+    },
+
+    onResumeFirebug: function(context)
+    {
+        HttpObserver.registerObserver();  // safe for multiple calls
+        context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
+
+        if (Firebug.NetMonitor.isEnabled(this.context))
+            $('fbStatusIcon').setAttribute("net", "on");
     },
 
     addListener: function(listener)
@@ -620,11 +644,22 @@ NetPanel.prototype = domplate(Firebug.Panel,
 
     copyResponse: function(file)
     {
-        var text = file.responseText
+        var allowDoublePost = Firebug.getPref(Firebug.prefDomain, "allowDoublePost");
+        if (!allowDoublePost && !file.cacheEntry)
+        {
+            if (!confirm("The response can be re-requested from the server, OK?"))
+                return;
+        }
+
+        // The response text can be empty so, test against undefined.
+        var text = (file.responseText != undefined)
             ? file.responseText
-            : this.context.sourceCache.loadText(file.href);
+            : this.context.sourceCache.loadText(file.href, file.method, file);
 
         copyToClipboard(text);
+
+        // Try to update file.cacheEntry flag.
+        getCacheEntry(file, this.context.netProgress);
     },
 
     stopLoading: function(file)
@@ -665,9 +700,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
-        if (this.context.netProgress && !listeners.length)
-            this.context.netProgress.activate(this);
-
         this.layout();
         this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
 
@@ -688,9 +720,6 @@ NetPanel.prototype = domplate(Firebug.Panel,
     hide: function()
     {
         this.showToolbarButtons("fbNetButtons", false);
-
-        if (this.context.netProgress && !listeners.length)
-          this.context.netProgress.activate(null);
 
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
@@ -1097,7 +1126,19 @@ NetPanel.prototype = domplate(Firebug.Panel,
         // Remove old requests.
         var removeCount = Math.max(0, filesLength - limit);
         for (var i=0; i<removeCount; i++)
-            this.removeLogEntry(files[0]);
+        {
+            var file = files[0];
+            this.removeLogEntry(file);
+
+            // Remove the file occurrence from the queue.
+            for (var j=0; j<this.queue.length; j++)
+            {
+                if (this.queue[j] == file) {
+                    this.queue.splice(j, 1);
+                    j--;
+                }
+            }
+        }
     },
 
     removeLogEntry: function(file, noInfo)
@@ -1203,7 +1244,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         openNewTab("about:config");
     },
 
-    updateCounter: function(row, count)
+    updateCounter: function(row)
     {
         removeClass(row, "collapsed");
 
@@ -1252,56 +1293,29 @@ function NetProgress(context)
 {
     this.context = context;
 
-    var queue = null;
-    var requestQueue = null;
     var panel = null;
+    var queue = [];
 
     this.post = function(handler, args)
     {
-        // If the panel is currently active insert the file into it directly
-        // otherwise wait and insert it in to a "queue". It'll be flushed
-        // into the UI when the panel is displayed (see this.flush method).
         if (panel)
         {
             var file = handler.apply(this, args);
             if (file)
             {
                 panel.updateFile(file);
+
+                // If the panel isn't currently visible, make sure the limit is up to date.
+                if (!panel.layoutInterval)
+                    panel.updateLogLimit(maxQueueRequests);
+
                 return file;
             }
         }
         else
         {
-            // The newest request is always inserted into the queue.
+            // The first page request is made before the initContext (known problem).
             queue.push(handler, args);
-
-            // Real number of requests (not posts!) is remembered.
-            var request = args[0];
-            if (requestQueue.indexOf(request) == -1)
-              requestQueue.push(request);
-
-            // If number of requests reaches the limit, let's start to remove them.
-            if (requestQueue.length + this.files.length > (maxQueueRequests + this.pending.length))
-            {
-                var hiddenPanel = this.context.getPanel(panelName, false);
-
-                var request = requestQueue.splice(0, 1)[0];
-                for (var i=0; i<queue.length; i+=2)
-                {
-                    if (queue[i+1][0] == request)
-                    {
-                        var file = queue[i].apply(this, queue[i+1]);
-                        if (file) {
-                            hiddenPanel.updateFile(file);
-                        }
-
-                        queue.splice(i, 2);
-                        i -= 2;
-                    }
-                }
-
-                hiddenPanel.layout();
-            }
         }
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_NET)                                                                                           /*@explore*/
@@ -1311,27 +1325,14 @@ function NetProgress(context)
 
     this.flush = function()
     {
-        for (var i = 0; i < queue.length; i += 2)
-        {
-            if (FBTrace.DBG_NET)                                                                                       /*@explore*/
-            {                                                                                                          /*@explore*/
-                FBTrace.dumpProperties("net.flush handler("+i+")", queue[i]);                                          /*@explore*/
-                FBTrace.dumpProperties("net.flush args ", queue[i+1]);                                                 /*@explore*/
-            }                                                                                                          /*@explore*/
-                                                                                                                       /*@explore*/
-            var file = queue[i].apply(this, queue[i+1]);
-            if (file)
-                panel.updateFile(file);
-        }
+        for (var i=0; i<queue.length; i+=2)
+            this.post(queue[i], queue[i+1]);
 
         queue = [];
-        requestQueue = [];
     };
 
     this.activate = function(activePanel)
     {
-        // As soon as the panel is activated flush all the "queued"
-        // files into the UI.
         this.panel = panel = activePanel;
         if (panel)
             this.flush();
@@ -1405,6 +1406,9 @@ NetProgress.prototype =
 
     respondedFile: function respondedFile(request, time, info)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.respondedFile for: " +  safeGetRequest(request) + "\n");
+
         var file = this.getRequestFile(request);
         if (file)
         {
@@ -1461,6 +1465,9 @@ NetProgress.prototype =
 
     stopFile: function stopFile(request, time, postText, responseText)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.stopFile for: " + safeGetName(request) + "\n");
+
         var file = this.getRequestFile(request);
         if (file)
         {
@@ -1491,6 +1498,9 @@ NetProgress.prototype =
 
     cacheEntryReady: function cacheEntryReady(request, file, size)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.cacheEntryReady for file.href: " + file.href + "\n");
+
         if (size != -1)
             file.size = size;
 
@@ -1584,6 +1594,9 @@ NetProgress.prototype =
 
     awaitFile: function(request, file)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.awaitFile for file.href: " + file.href + "\n");
+
         this.pending.push(file);
 
         // XXXjoe Remove files after they have been checked N times
@@ -1738,7 +1751,7 @@ function NetFile(href, document)
     this.document = document
 
     if (FBTrace.DBG_NET)                                                                                                /*@explore*/
-        FBTrace.dumpProperties("net.NetFile: "+href, this);                                                                        /*@explore*/
+        FBTrace.dumpProperties("net.NetFile (constructor): "+href, this);                                                                        /*@explore*/
 
     this.pendingCount = 0;
 }
@@ -1887,6 +1900,9 @@ function initCacheSession()
 {
     if (!cacheSession)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.initCacheSession\n");
+
         var cacheService = CacheService.getService(nsICacheService);
         cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
         cacheSession.doomEntriesIfExpired = false;
@@ -1901,6 +1917,8 @@ function waitForCacheCompletion(request, file, netProgress)
         var descriptor = cacheSession.openCacheEntry(file.href, ACCESS_READ, false);
         if (descriptor)
             netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("waitForCacheCompletion "+(descriptor?"posted ":"no cache entry ")+file.href+"\n");
     }
     catch (exc)
     {
@@ -1915,16 +1933,24 @@ function waitForCacheCompletion(request, file, netProgress)
 
 function getCacheEntry(file, netProgress)
 {
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.getCacheEntry for file.href: " + file.href + "\n");
+
     // Pause first because this is usually called from stopFile, at which point
     // the file's cache entry is locked
-    setTimeout(function()
+    setTimeout(function delayGetCacheEntry()
     {
         try
         {
             initCacheSession();
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.delayGetCacheEntry for file.href=" + file.href + "\n");
             cacheSession.asyncOpenCacheEntry(file.href, ACCESS_READ, {
                 onCacheEntryAvailable: function(descriptor, accessGranted, status)
                 {
+                    if (FBTrace.DBG_NET)
+                        FBTrace.sysout("net.onCacheEntryAvailable for file.href=" + file.href + "\n");
+
                     if (descriptor)
                     {
                         if(file.size == -1)
@@ -1985,7 +2011,7 @@ function getCacheEntry(file, netProgress)
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                ERROR(exc);
+                FBTrace.dumpProperties("net.delayGetCacheEntry FAILS", exc);
         }
     });
 }
@@ -2245,7 +2271,10 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 )
             ),
             DIV({class: "netInfoResponseText netInfoText"},
-                $STR("Loading")
+                DIV({class: "loadResponseMessage"}),
+                BUTTON({onclick: "$onLoadResponse"},
+                    SPAN("Load Response")
+                )
             ),
             DIV({class: "netInfoCacheText netInfoText"},
                 TABLE({class: "netInfoCacheTable", cellpadding: 0, cellspacing: 0},
@@ -2407,28 +2436,35 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             }
         }
 
-
         if (hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
         {
-            netInfoBox.responsePresented = true;
-
             var responseTextBox = getChildByClass(netInfoBox, "netInfoResponseText");
             if (file.category == "image")
             {
+                netInfoBox.responsePresented = true;
+
                 var responseImage = netInfoBox.ownerDocument.createElement("img");
                 responseImage.src = file.href;
                 responseTextBox.replaceChild(responseImage, responseTextBox.firstChild);
             }
             else if (!(binaryCategoryMap.hasOwnProperty(file.category)))
             {
-                var text = file.responseText
-                    ? file.responseText
-                    : context.sourceCache.loadText(file.href, file.method);
+                var allowDoublePost = Firebug.getPref(Firebug.prefDomain, "allowDoublePost");
 
-                if (text)
-                    insertWrappedText(text, responseTextBox);
+                // If the response is in the cache get it and display it;
+                // otherwise display a button, which can be used by the user
+                // to re-request the response from the server.
+                // xxxHonza this is a workaround, which should be removed
+                // as soon as the #430155 is fixed.
+                if (allowDoublePost || file.cacheEntry)
+                {
+                    this.setResponseText(file, netInfoBox, responseTextBox, context);
+                }
                 else
-                    insertWrappedText("", responseTextBox);
+                {
+                    var msgBox = getElementByClass(netInfoBox, "loadResponseMessage");
+                    msgBox.innerHTML = doublePostForbiddenMessage(file.href);
+                }
             }
         }
 
@@ -2437,10 +2473,39 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             netInfoBox.cachePresented = true;
 
             var responseTextBox = getChildByClass(netInfoBox, "netInfoCacheText");
-            if(file.cacheEntry) {
-              this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
+            if (file.cacheEntry) {
+                this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
         }
+    },
+
+    setResponseText: function(file, netInfoBox, responseTextBox, context)
+    {
+        // The response text can be empty so, test against undefined.
+        var text = (file.responseText != undefined)
+            ? file.responseText
+            : context.sourceCache.loadText(file.href, file.method, file);
+
+        if (text)
+            insertWrappedText(text, responseTextBox);
+        else
+            insertWrappedText("", responseTextBox);
+
+        netInfoBox.responsePresented = true;
+
+        // Try to get the data from cache and update file.cacheEntry so,
+        // the response is displayed automatically the next time the
+        // net-entry is expanded again.
+        getCacheEntry(file, context.netProgress);
+    },
+
+    onLoadResponse: function(event)
+    {
+        var file = Firebug.getRepObject(event.target);
+        var netInfoBox = getAncestorByClass(event.target, "netInfoBody");
+        var responseTextBox = getElementByClass(netInfoBox, "netInfoResponseText");
+
+        this.setResponseText(file, netInfoBox, responseTextBox, FirebugContext);
     },
 
     insertHeaderRows: function(netInfoBox, headers, tableName, rowName)
@@ -2458,6 +2523,21 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             setClass(titleRow, "collapsed");
     }
 });
+
+function doublePostForbiddenMessage(url)
+{
+    var msg = "Firebug needs to POST to the server to get this information for url:<br/><b>" + url + "</b><br/><br/>";
+    msg += "This second POST can interfere with some sites.";
+    msg += " If you want to send the POST again, open a new tab in Firefox, use URL 'about:config', ";
+    msg += "set boolean value 'extensions.firebug.allowDoublePost' to true<br/>";
+    msg += " This value is reset every time you restart Firefox";
+    msg += " This problem will disappear when https://bugzilla.mozilla.org/show_bug.cgi?id=430155 is shipped.<br/><br/>";
+
+    if (FBTrace.DBG_CACHE)
+        FBTrace.sysout(msg);
+
+    return msg;
+}
 
 // ************************************************************************************************
 
@@ -2570,6 +2650,44 @@ function isURLEncodedFile(file, text)
 
 var HttpObserver =
 {
+    registered: false,
+
+    registerObserver: function()
+    {
+        if (this.registered)
+            return;
+
+        try
+        {
+            observerService.addObserver(HttpObserver, "http-on-modify-request", false);
+            observerService.addObserver(HttpObserver, "http-on-examine-response", false);
+            this.registered = true;
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("net.HttpObserver.registerObserver: ", err);
+        }
+    },
+
+    unregisterObserver: function()
+    {
+        if (!this.registered)
+            return;
+
+        try
+        {
+            observerService.removeObserver(HttpObserver, "http-on-modify-request");
+            observerService.removeObserver(HttpObserver, "http-on-examine-response");
+            this.registered = false;
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("net.HttpObserver.unregisterObserver: ", err);
+        }
+    },
+
   // nsIObserver
   observe: function(aSubject, aTopic, aData)
   {
@@ -2753,6 +2871,7 @@ Firebug.registerPanel(NetPanel);
 // ************************************************************************************************
 
 }});
+
 
 
 

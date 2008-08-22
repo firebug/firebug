@@ -13,7 +13,7 @@ body {
 
 .twisty,
 .logRow-errorMessage > .hasTwisty > .errorTitle,
-.logRow-spy > .spyHead > .spyTitle,
+.logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
 .hasHeaders .netHrefLabel {
@@ -23,7 +23,7 @@ body {
 }
 
 .logRow-errorMessage > .hasTwisty.opened > .errorTitle,
-.logRow-spy.opened > .spyHead > .spyTitle,
+.logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
 .nodeBox.highlightOpen > .nodeLabel > .twisty,

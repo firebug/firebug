@@ -435,7 +435,7 @@
 /************************************************************************************************/
 
 .logRow-errorMessage > .hasTwisty > .errorTitle,
-.logRow-spy > .spyHead > .spyTitle,
+.logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow {
     cursor: pointer;
     padding-left: 18px;
@@ -448,7 +448,7 @@
 }
 
 .logRow-errorMessage > .hasTwisty > .errorTitle:hover,
-.logRow-spy > .spyHead > .spyTitle:hover,
+.logRow-spy .spyHead .spyTitle:hover,
 .logGroup > .logRow:hover {
     text-decoration: underline;
 }
@@ -456,12 +456,14 @@
 /*****************************************************************************************/
 
 .logRow-spy {
-    padding: 2px 0 1px 0;
+    padding: 0px 0 1px 0;
 }
 
 .logRow-spy,
 .logRow-spy .objectLink-sourceLink {
     background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    padding-right: 4px;
+    right: 0;
 }
 
 .logRow-spy.opened {
@@ -470,23 +472,40 @@
 }
 
 .spyTitle {
-    padding-top: 1px;
     color: #000000;
     font-weight: bold;
+    -moz-box-sizing: padding-box;
+    overflow: hidden;
+    z-index: 100;
+    padding-left: 18px;
 }
 
-.spyTitle:hover {
-    color: blue;
-    text-decoration: none !important;
+.spyCol {
+    padding: 0;
+    white-space: nowrap;
 }
 
-.spyTitle:hover > .spyURI {
-    text-decoration: underline !important;
+.spyRow:hover > .spyCol > .objectLink-sourceLink,
+.spyRow:hover > .spyCol > .spyTime,
+.spyRow:hover > .spyCol > .spyTitle {
+    display: none;
+}
+
+.spyFullTitle {
+    display: none;
+    -moz-user-select: none;
+    max-width: 100%;
+    background-color: Transparent;
+}
+
+.spyRow:hover > .spyCol > .spyFullTitle {
+    display: block;
 }
 
 .spyTime {
-    color: #555555;
-    font-style: italic;
+    margin-left:4px;
+    margin-right:4px;
+    color: rgb(128, 128, 128);
 }
 
 .spyErrorCode {
@@ -495,38 +514,40 @@
 
 .error .spyErrorCode {
     margin-left: 4px;
+    margin-right: 4px;
     display: inline;
     font-weight: bold;
-    font-style: italic;
+    color: Red;
 }
 
 .spyIcon {
-    margin-right: 6px;
+    margin-right: 4px;
+    margin-left: 4px;
     width: 16px;
     height: 16px;
     vertical-align: middle;
     background: transparent no-repeat 0 0;
 }
 
-.logRow-spy.loading > .spyHead > .spyTitle > .spyIcon {
+.logRow-spy.loading .spyHead .spyRow .spyIcon {
     background-image: url(chrome://firebug/skin/loading_16.gif);
 }
 
-.logRow-spy.loaded:not(.error) > .spyHead > .spyTitle > .spyIcon {
+.logRow-spy.loaded:not(.error) .spyHead .spyRow .spyIcon {
     width: 0;
     margin: 0;
 }
 
-.logRow-spy.error > .spyHead > .spyTitle > .spyIcon {
+.logRow-spy.error .spyHead .spyRow .spyIcon {
     background-image: url(chrome://firebug/skin/errorIcon-sm.png);
     background-position: 2px 2px;
 }
 
-.logRow-spy > .spyHead > .netInfoBody {
+.logRow-spy .spyHead .netInfoBody {
     display: none;
 }
 
-.logRow-spy.opened > .spyHead > .netInfoBody {
+.logRow-spy.opened .spyHead .netInfoBody {
     margin-top: 10px;
     display: block;
 }

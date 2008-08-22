@@ -320,7 +320,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         name = this.translateName(name, value);
         if (name)
         {
-            value = rgbToHex(value);
+            value = stripUnits(rgbToHex(value));
             important = important ? " !important" : "";
 
             var prop = {name: name, value: value, important: important, disabled: disabled};
@@ -938,7 +938,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             for (var i = 0; i < props.length; ++i)
             {
                 var propName = props[i];
-                var propValue = rgbToHex(style.getPropertyValue(propName));
+                var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
                 if (propValue)
                     group.props.push({name: propName, value: propValue});
             }
@@ -987,8 +987,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var href = rule.parentStyleSheet.href;  // Null means inline
-                if (href && Firebug.filterSystemURLs && isSystemURL(href))
-                    continue;
+                // This removes user agent rules, which we dont want to do.
+                //if (href && Firebug.filterSystemURLs && isSystemURL(href))
+                //    continue;
                 if (!href)
                     href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
 
@@ -1159,8 +1160,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                     if (FBTrace.DBG_CSS)
                         FBTrace.sysout("CSSEditor.saveEdit previousProperty: "+this.previousPropertyName+"->"+this.newPropertyName+" = "+this.previousPropertyValue+"\n");
                 }
-
             }
+            else if (!value) // name of the property has been deleted, so remove the property.
+                style.removeProperty(previousValue);
         }
         else if (getAncestorByClass(target, "cssPropValue"))
         {
@@ -1363,25 +1365,17 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
 function rgbToHex(value)
 {
-    var reg = /rgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/i;
-    var m = reg.exec(value);
-    if (!m)
-        return value;
+    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b) {
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
+    });
+}
 
-    var r = parseInt(m[1]).toString(16);
-    if (r.length == 1)
-        r = "0" + r;
-    var g = parseInt(m[2]).toString(16);
-    if (g.length == 1)
-        g = "0" + g;
-    var b = parseInt(m[3]).toString(16);
-    if (b.length == 1)
-        b = "0" + b;
-
-    var preExpr = value.substr(0, m.index);
-    var postExpr = value.substr(m.index+m[0].length);
-
-    return preExpr + "#" + (r + g + b).toUpperCase() + postExpr;
+function stripUnits(value)
+{
+    // remove units from '0px', '0em' etc. leave non-zero units in-tact.
+    return value.replace(/(url\(.*?\)|[^0]\S*\s*)|0(%|em|ex|px|in|cm|mm|pt|pc)(\s|$)/gi, function(_, skip, remove, whitespace) {
+    return skip || ('0' + whitespace);
+    });
 }
 
 function parsePriority(value)

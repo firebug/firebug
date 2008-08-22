@@ -94,7 +94,8 @@ function FirebugConsoleHandler(context, win)
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.dumpProperties("FirebugConsoleHandler", this);
 
-            this.log($STRF("console.MethodNotSupported.MethodNotSupported", [methodName]));
+            var methodName = event.target.getAttribute("methodName");
+            Firebug.Console.log($STRF("console.MethodNotSupported", [methodName]));
         }
     };
 
@@ -321,11 +322,18 @@ function FirebugConsoleHandler(context, win)
         var frame = Components.stack;
         var userURL = win.location.href.toString();
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump for userURL "+userURL, FBL.getStackDump());
-
-        while (frame && (normalizeURL(frame.filename) != userURL) )
+        // Drop frames until we get into user code.
+        while (frame && FBL.isSystemURL(frame.filename) )
             frame = frame.caller;
+        
+        // Drop two frames to get back to the point of call for eg console.log()
+        if (frame)
+            frame = frame.caller;
+        if (frame)
+            frame = frame.caller
+            
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector.getComponentsStackDump for userURL "+userURL, frame);
 
         return frame;
     }

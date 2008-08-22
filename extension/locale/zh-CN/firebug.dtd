@@ -1,13 +1,11 @@
-﻿<!ENTITY firebug.Permissions "Sites...">
-
-<!ENTITY  firebug.Firebug               "Firebug">
+﻿<!ENTITY  firebug.Firebug               "Firebug">
 <!ENTITY  firebug.Close                 "关闭">
 <!ENTITY  firebug.View                  "查看">
 <!ENTITY  firebug.Help                  "帮助">
 <!ENTITY  firebug.Vertical              "垂直面板">
 <!ENTITY  firebug.Run                   "运行">
-<!ENTITY  firebug.Copy                  "拷贝">
-<!ENTITY  firebug.CopyBookmarklet       "拷贝脚本为书签。">
+<!ENTITY  firebug.Copy                  "复制">
+<!ENTITY  firebug.CopyBookmarklet       "复制脚本为书签。">
 
 <!ENTITY  firebug.Options               "选项">
 <!ENTITY  firebug.TextSize              "文本尺寸">
@@ -29,9 +27,8 @@
 <!ENTITY  firebug.DetachFirebug         "在新窗口中打开 Firebug">
 <!ENTITY  firebug.OpenWith              "打开编辑器">
 <!ENTITY  firebug.CloseFirebug          "关闭 Firebug">
-<!ENTITY  firebug.DisableFirebug        "禁用 Firebug">
-<!ENTITY  firebug.AllowedSites          "允许站点列表...">
-<!ENTITY  firebug.ConfigureEditors      "配置编辑器...">
+<!ENTITY  firebug.Permissions           "站点...">
+<!ENTITY  firebug.ConfigureEditors      "配置编辑器">
 <!ENTITY  firebug.CommandLine           "命令行">
 <!ENTITY  firebug.Search                "搜索">
 

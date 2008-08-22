@@ -97,24 +97,38 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     startObserving: function()
     {
-        consoleService.registerListener(this);
-        $('fbStatusIcon').setAttribute("errors", "on");
-
-        if (statusBar)
-            statusBar.setAttribute("disabled", "true");
-
+        var errorsOn = $('fbStatusIcon').getAttribute("errors"); // signal user and be a marker.
+        if (!errorsOn) // need to be safe to multiple calls
+        {
+            consoleService.registerListener(this);
+            $('fbStatusIcon').setAttribute("errors", "on");
+        }
     },
 
     stopObserving: function()
     {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.disable unregisterListener\n");
-        consoleService.unregisterListener(this);
-         $('fbStatusIcon').removeAttribute("errors");
+        var errorsOn = $('fbStatusIcon').getAttribute("errors");
+        if (errorsOn)  // need to be safe to multiple calls
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("errors.stopObserving try unregisterListener\n");
+            try
+            {
+                consoleService.unregisterListener(this);
+                $('fbStatusIcon').removeAttribute("errors");
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("errors.stopObserving done unregisterListener\n");
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("errors.disable FAILS: ", e);
+            }
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends ConsoleObserver
+    // extends consoleListener
 
     observe: function(object)
     {
@@ -131,7 +145,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (object instanceof nsIScriptError)
             {
                 var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
-                this.logScriptError(context, object, isWarning);
+                context = this.logScriptError(context, object, isWarning)
+                if(!context)
+                    return;
             }
             else
             {
@@ -161,13 +177,18 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
             if (FBTrace.DBG_ERRORS)
             {
-                if (context && context.window)
-                    FBTrace.sysout((isWarning?"warning":"error")+" logged to ",  context.window.location+"\n");
-                else
+                if (context)
                 {
-                    FBTrace.dumpProperties("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
-                    FBTrace.dumpStack("errors.observe, context with no window");
+                    if (context.window)
+                        FBTrace.sysout((isWarning?"warning":"error")+" logged to ",  context.window.location+"\n");
+                    else
+                    {
+                        FBTrace.dumpProperties("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
+                        FBTrace.dumpProperties("errors.observe, context with no window, context:", context);
+                    }
                 }
+                else
+                    FBTrace.sysout("errors.observe, no context!\n");
             }
         }
         catch (exc)
@@ -195,11 +216,10 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (errorContext)
             context = errorContext;
 
-        if (Firebug.showStackTrace)
+        if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
             var trace = Firebug.errorStackTrace;
-            if (trace)
-                correctLineNumbersWithStack(trace, object);
+            trace = correctLineNumbersWithStack(trace, object) ? trace : null;
         }
         else if (checkForUncaughtException(context, object))
         {
@@ -208,7 +228,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         }
 
         if (lessTalkMoreAction(context, object, isWarning))
-            return;
+            return null;
 
         Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
         context.thrownStackTrace = null;
@@ -221,10 +241,18 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         var className = isWarning ? "warningMessage" : "errorMessage";
 
-        if (context) // then report later to avoid loading sourceS
+        if (context)
+        {
+             // then report later to avoid loading sourceS
             context.throttle(Firebug.Console.log, Firebug.Console, [error, context,  className, false, true], true);
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.window.location+"\n");
+        }
         else
+        {
             Firebug.Console.log(error, context,  className);
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe direct log to "+context+"\n");
+        }
+        return context;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -237,9 +265,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     showContext: function(browser, context)
     {
-        if (statusBar)
-            statusBar.setAttribute("disabled", !context);
-
         this.showCount(context ? context.errorCount : 0);
     }
 });
@@ -343,8 +368,10 @@ function lessTalkMoreAction(context, object, isWarning)
     }
 
     var enabled = Firebug.Console.isEnabled(context);
-    if (!enabled)
+    if (!enabled) {
+        FBTrace.sysout("errors.observe not enabled for context "+(context.window?context.window.location:"no window")+"\n");
         return true;
+    }
 
     var incoming_message = object.errorMessage;  // nsIScriptError
     if (!incoming_message)                       // nsIConsoleMessage
@@ -418,13 +445,13 @@ function checkForUncaughtException(context, object)
             if (context.thrownStackTrace)
             {
                 Firebug.errorStackTrace = context.thrownStackTrace;
-                return true;
                 if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("errors.observe trace.frames", context.thrownStackTrace.frames);
             }
             else
             {
                  if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe NO context.thrownStackTrace\n");
             }
+            return true;
         }
         else
         {
@@ -467,15 +494,21 @@ function correctLineNumbersOnExceptions(context, object)
 
 function correctLineNumbersWithStack(trace, object)
 {
-    if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-        FBTrace.dumpProperties("errors.observe showStackTrace trace frames:", trace.frames);                          /*@explore*/
     var stack_frame = trace.frames[0];
     if (stack_frame)
     {
         sourceName = stack_frame.href;
         lineNumber = stack_frame.lineNo;
+        // XXXjjb Seems to change the message seen in Firefox Error Console
+        var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
+        if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
+            FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());                          /*@explore*/
+        return true;
     }
-    var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
+    if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
+        FBTrace.dumpProperties("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);                          /*@explore*/
+
+    return false;
 }
 
 // ************************************************************************************************

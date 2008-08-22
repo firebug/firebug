@@ -21,7 +21,7 @@
 
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
-        <command id="cmd_savePanels" oncommand="FirebugChrome.savePanels()"/>
+        <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
@@ -96,7 +96,7 @@
             <hbox id="fbConsoleButtons" collapsed="true">
                 <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
-                <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button" 
+                <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button"
                                type="checkbox" command="cmd_toggleProfiling"/>
             </hbox>
 

@@ -278,6 +278,8 @@
     border-top: none !important;
 }
 
+
+/* ************************************************************************** */
 .panelNode-callstack  .objectLink-sourceLink {
     display: none;
 }
@@ -285,4 +287,18 @@
 .panelNode-callstack {
     margin-left: 4px;
     overflow: auto;
+}
+/* This objectLink-stackFrame should be consistent with panelStatusLabel so the call stack looks the same in toolbar and panel */
+.objectLink-stackFrame {
+    cursor: pointer;
+    margin: 0;
+    padding: 0 4px;
+}
+
+.objectLink-stackFrame:hover {
+    color: blue;
+}
+
+.objectLink-stackFrame[selected="true"] {
+    font-weight: bold;
 }

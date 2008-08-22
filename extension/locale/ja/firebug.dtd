@@ -29,7 +29,7 @@
 <!ENTITY  firebug.OpenWith              "エディタで開く">
 <!ENTITY  firebug.CloseFirebug          "Firebug を閉じる">
 <!ENTITY  firebug.Permissions           "使用するサイト...">
-<!ENTITY  firebug.ConfigureEditors      "エディタの構成...">
+<!ENTITY  firebug.ConfigureEditors      "エディタの構成">
 <!ENTITY  firebug.CommandLine           "コマンドライン">
 <!ENTITY  firebug.Search                "検索">
 

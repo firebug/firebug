@@ -125,7 +125,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         }
     },
 
-    showInfoTip: function(infoTip, panel, target, x, y)
+    showInfoTip: function(infoTip, panel, target, x, y, rangeParent, rangeOffset)
     {
         if (!Firebug.showInfoTips)
             return;
@@ -133,7 +133,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         var scrollParent = getOverflowParent(target);
         var scrollX = x + (scrollParent ? scrollParent.scrollLeft : 0);
 
-        if (panel.showInfoTip(infoTip, target, scrollX, y))
+        if (panel.showInfoTip(infoTip, target, scrollX, y, rangeParent, rangeOffset))
         {
             var htmlElt = infoTip.ownerDocument.documentElement;
             var panelWidth = htmlElt.clientWidth;
@@ -184,7 +184,7 @@ Firebug.InfoTip = extend(Firebug.Module,
         if (browser.currentPanel)
         {
             var x = event.clientX, y = event.clientY;
-            this.showInfoTip(browser.infoTip, browser.currentPanel, event.target, x, y);
+            this.showInfoTip(browser.infoTip, browser.currentPanel, event.target, x, y, event.rangeParent, event.rangeOffset);
         }
         else
             this.hideInfoTip(browser.infoTip);

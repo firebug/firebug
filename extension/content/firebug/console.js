@@ -255,6 +255,8 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
+    // -----------------------------------------------------------------------------------------------------
+
     onFirstPanelActivate: function(context, init)
     {
         Firebug.Errors.startObserving();
@@ -276,9 +278,25 @@ Firebug.Console = extend(ActivableConsole,
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onLastPanelDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
-        // turn off error observer
+        // last one out, turn off error observer
         Firebug.Errors.stopObserving();
     },
+
+    onSuspendFirebug: function(context)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onSuspendFirebug\n");
+        Firebug.Errors.stopObserving();  // safe for multiple calls
+    },
+
+    onResumeFirebug: function(context)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onResumeFirebug\n");
+        if (this.isEnabled(context))
+            Firebug.Errors.startObserving(); // safe for multiple calls
+    },
+    // ----------------------------------------------------------------------------------------------------
 
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
@@ -491,11 +509,20 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         {
             Firebug.ModuleManagerPage.hide(this);
 
+            FirebugContext.chrome.$("fbCommandBox").collapsed = false;
+            if (Firebug.largeCommandLine)
+                Firebug.CommandLine.setMultiLine(true);
+
             if (this.wasScrolledToBottom)
                 scrollToBottom(this.panelNode);
         }
         else
+        {
+            Firebug.CommandLine.setMultiLine(false);
+            FirebugContext.chrome.$("fbCommandBox").collapsed = true;
+
             Firebug.ModuleManagerPage.show(this, Firebug.Console);
+        }
     },
 
     hide: function()
@@ -537,10 +564,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.Panel,
         var strictDomain = "javascript.options";
         var strictName = "strict";
         var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
-        return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue, 
+        return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue,
             command: bindFixed(Firebug.setPref, Firebug, strictDomain, strictName, !strictValue) };
     },
-    
+
     search: function(text)
     {
         if (!text)

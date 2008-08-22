@@ -11,6 +11,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Bug Icon gray unless some page has Script or Net panel activation
     * Multipanel enablement.
     * No Allowed-sites/Disable for Site: no longer needed.
+    * Suspend/Resume Firebug in status bar context menu
+    * List pages that enable Firebug on the Context menu tooltip.
   The UI for this feature is being refined; overhead tests have not been completed.
   We are interested in feedback on this UI change.
 
@@ -25,6 +27,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Limit for number of requests (configurable in preferences).
     * Additional columns for: request method, status response + text
     * Cache tab has expiration time in Net panel
+    * The Response tab has a hack to prevent extra requests to the server. Users must click on a button to force the request. 
+      The hack will not be needed in the next release of Firebug.
 
 == Console ==
     * Redesigned to use events/attribute passing.
@@ -52,8 +56,10 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 14 Programatically disable firebug log from Javascript
     * Issue 38  console.group should allow optional collapse
     * Issue 43 Edit CSS behaviour - appending styles to the dom is unexpected. Contribution by  tonygentilcore
+    * Issue 45 HTML Edit bug when editing <tr> and <td> (contribution by ash.searle)
     * Issue 56 Enhancement: row distinction in profiler
     * Issue 65 show HTTP Status code on NET response
+    * Issue 73 Can't show function contents in DOM browser. 
     * Issue 165: Profile results table can get too wide for console.
     * Issue 183 Configurable maximum output size
     * Issue 186 Only one line in net monitor for multiple xhr post requests
@@ -63,6 +69,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 216 Improve network monitor to include server-side processing time
     * Issue 256 Inspect element in context menu always opens fbug in same window regardless of settings and closes inproperly
     * Issue 266 PUT & DELETE requests appear as POST requests in firebug
+    * Issue 268 Firebug adds pt unit when unit not specified (e.g. 0pt) (contribution by ash.searle)
+    * Issue 307 Cannot edit HTML
     * Issue 316 Show HTTP request method and request content in Firebugs "Net" tab
     * Issue 321 arguments can no longer be logged
     * Issue 325 PUT operations do not show contained entity in Net tab
@@ -79,16 +87,26 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 405 The Net panel consumes a lot of memory if there is a lot of XHR activity without page reload.
     * Issue 414 XHR Breaks When Using Firebug 1.1 beta when > 1 HTTP 302 Redirect Is Returned
     * Issue 421 onLoad of XHRSpyListener does not fire correctly
+    * Issue 427 fix configure editor localization
     * Issue 430 about:blank pages always show firebug as enabled
+    * Issue 438 hide "Open With Editor" menu item for input/iframe/textarea elements
+    * Issue 440 Scripts included with relative paths appear twice in script list
     * Issue 445 http header content-type missing disables network monitoring
     * Issue 455 Firebug and iMacros Incompatibility    
     * Issue 468 [feature request] fast [enable -> inspect element -> disable] ergonomy
+    * Issue 469 hide "open with editor" when no editors configured
     * Issue 474 base href applied to scripts
     * Issue 475 Show Return Code (HTTP HEADER-Response)
+    * Issue 476 Infinite recursive loop crash firefox, fix the long time it takes to show the stack.
     * Issue 479 pt-BR locale submission, Comment 10 by leandromerces, Jun 21
     * Issue 503 disable doesn't work properly
     * Issue 521 Prototype iterator functions die in console
+    * Issue 528 Context menu missing from script dropdown
+    * Issue 544 Net Panel incorrect rounding of file size
+    * Issue 549 The Options menu should *not* be displayed if there are no options available (contribution by Ash Searle)
+    * Issue 564 Can't "disable for on this site" firebug
     * Issue 567 Slow script warning in debugger.js on some pages
+    * Issue 570 User agent stylesheet rules are not shown
     * Issue 573 setting css background-color affects layout inspector. Contribution by tonygentilcore
     * Issue 583 Javascript console cannot work with Firefox 3 beta5
     * Issue 587 Custom listeners for observing net-monitor.
@@ -101,8 +119,10 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 634 XHR request details not showing up
     * Issue 637 $ FireBug function overwrites existing $ function
     * Issue 659 firebug.js:1473 - "this.context.browser is undefined"
+    * Issue 663 $0 should be a reference to the most recent inspected element
     * Issue 676 Exception in firebug-cache.js when visiting http://www.takebacktheweb.org/CaE.html
     * Issue 679 Firebug 1.2.0a27X blocking most AJAX calls
+    * Issue 663 $0 should be a reference to the most recent inspected element
     * Issue 680 Tab completion of JavaScript elements not working
     * Issue 690 New zh-CN local file for Firebug 1.2
     * Issue 691 Enablement for site does not reload other tabs
@@ -116,13 +136,42 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 724 (Content in console tab is broken when opening firebug in new window)
     * Issue 734 While debugging, click into the console. The execution context is not available
     * Issue 736 Temp disabling breakpoints does not work. 
+    * Issue 749 Hungarian Locale
     * Issue 750 DOM side-panel - variables names overlay actual values
     * Issue 755 New zh-CN locale file for Firebug 1.2, contribution by http://code.google.com/u/shawphy/
+    * Issue 760 Inspect tab looses focus
     * Issue 762 this.notifyFirebug is not a function error (contribution by zmarties)
     * Issue 764 Source code for all scripts not visible on scripts tab without enabling debugger
     * Issue 769 HTML Tab Unresponsive After Dock/Undock
     * Issue 771 Improve the display of the FBTrace buttons contribution by Ken Arnold
-    * Issue 772: de locale for German Firebug, contribution by  benedikt.langens
-    * Issue 785  Update Japanese Locale, contribution by http://code.google.com/u/norahmarinkovic/
+    * Issue 772 de locale for German Firebug, contribution by  benedikt.langens
+    * Issue 775 Deleting font-family from the Style tab doesn't delete it but sets it to 'null'
+    * Issue 784 Breakpoints in scripts included in an iframe don't cause debugger to break. Introduced
+    * Issue 785 Update Japanese Locale, contribution by http://code.google.com/u/norahmarinkovic/
+    * Issue 793 warnings classified as errors
     * Issue 794 Catalan locale ca-AD, contribution by Àlex Corretgé http://bloc.corretge.cat
+    * Issue 797 Problem with XMLHttpRequest Logs
+    * Issue 810 1.2b3 bloody mess => no syntax error reporting, weird xul errors, and stuff 
+    * Issue 823 Firebug 1.2.0b3 unresponsive in Firefox 3 when opened in own window
+    * Issue 829 Refreshing Browser while stopped at a breakpoint will lock in an endless blank reload loop
+    * Issue 831 Clicking HTML select element in panelNode causes option menu items to multiply (contribution by Nathan Mische)
+    * Issue 840 Console links and buttons inactive on popout FF3
+    * Issue 869 Net page size info shows up as ? on some sites
     * Issue 873 alien variable "y=2" in global watch list, contribution of jwitch
+    * Issue 881 "open with editor" not working on Linux
+    * Issue 883 "undefined" appears in the search box after selecting a script to show with the Enter key (contribution by splintor)
+    * Issue 884 FB 1.2b4 - en-/disable button missing
+    * Issue 889 variable-value on under the cursor is no longer displayed with Rainbow For Firebug, contributed patch by antonin.hildebrand
+    * Issue 892 firebug hangs up in net.js line 1298 when browsing in framesets
+    * Issue 910 Watch window stops responding after invalid JS Entry
+    * Issue 914 View Response of Ajax POST with empty reply displays entire HTML source of page
+    * Issue 920 fbug 1.2.0b4 will not launch in FireFox 3.0 with Danish languageda-DK
+    * Issue 921 Empty script tab when Firebug window is closed
+    * Issue 923 Don't enter breakpoints if Script panel is disabled for the domain
+    * Issue 926 1.2.0b4 version does not work in hungarian firefox
+    * Issue 947 Ajax request parameters and Arrays
+    * Issue 979 Firebug adds a hidden breakpoint when adding a breakpoint in a dynamically created function
+    * Issue 992 New zh-CN locale file for Firebug 1.2 (contribution by shawphy)
+    * Issue 993 Scripts included with relative paths appear twice in scripts list; breakpoints ignored
+    * Issue 997 GET and POST calls are shown truncated in console view using ellipsis
+    * Issue 1037 incomplete report of uncaught exception

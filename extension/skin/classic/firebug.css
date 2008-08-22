@@ -74,6 +74,12 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/firebug16.png);
 }
 
+#menu_toggleSuspendFirebug[suspended="suspending"] {
+        color: graytext;
+}
+#menu_toggleSuspendFirebug[suspended="resuming"] {
+        color: graytext;
+}
 
 #fbStatusText {
     cursor: pointer;
@@ -83,10 +89,6 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 
 #fbStatusBar[errors] #fbStatusIcon {
     list-style-image: url(chrome://firebug/skin/errorIcon-sm.png);
-}
-
-#fbStatusBar[disabled="true"] #fbStatusIcon {
-    list-style-image: url(chrome://firebug/skin/disabledIcon.png);
 }
 
 /********************************************************************************************/

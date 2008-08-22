@@ -37,6 +37,7 @@ const toggleCommand = $("cmd_toggleFirebug");
 const detachCommand = $("cmd_toggleDetachFirebug");
 const tabBrowser = $("content");
 
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const prefs = PrefService.getService(nsIPrefBranch2);
@@ -149,7 +150,7 @@ top.Firebug =
         {
             this.version = version;
             $('fbStatusIcon').setAttribute("tooltiptext", "Firebug "+version);
-            $('fbStatusIcon').setAttribute("jsd", "off");
+
             var about = $('Firebug_About');
             if (about)
             {
@@ -162,6 +163,8 @@ top.Firebug =
             this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
         for (var i = 0; i < servicePrefNames.length; ++i)
             this[servicePrefNames[i]] = this.getPref("extensions.firebug-service", servicePrefNames[i]);
+
+        this.internationalizeUI();
 
         this.loadExternalEditors();
         prefs.addObserver(this.prefDomain, this, false);
@@ -182,6 +185,9 @@ top.Firebug =
 
     getVersion: function()
     {
+        if (this.fullVersion)
+            return this.fullVersion;
+
         var versionURL = "chrome://firebug/content/branch.properties";
         var content = getResource(versionURL);
         var m = /RELEASE=(.*)/.exec(content);
@@ -195,13 +201,26 @@ top.Firebug =
             var version = m[1];
         }
         if (release && version)
-            return version+""+release;
+        {
+            this.fullVersion = version+""+release;
+            return this.fullVersion;
+        }
         else
         {
             FBTrace.sysout("firebug.getVersion fails with release="+release+" branch="+branch+" from content="+content+"\n");
         }
     },
 
+    internationalizeUI: function()  // Substitute strings in the UI with fall back to en-US
+    {
+        FBL.internationalize('menu_toggleSuspendFirebug', 'label');
+    },
+
+    broadcast: function(message, args)
+    {
+        // dispatch message to all XUL windows registered to firebug service.
+        // Implemented in Firebug.Debugger.
+    },
     /**
      * Called when the UI is ready to be initialized, once the panel browsers are loaded,
      * but before any contexts are created.
@@ -238,6 +257,148 @@ top.Firebug =
         this.deleteTemporaryFiles();
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("firebug.shutdown exited\n");                                       /*@explore*/
+    },
+
+    // ----------------------------------------------------------------------------------------------------------------
+
+    getSuspended: function()
+    {
+        var suspendMenuItem = $("menu_toggleSuspendFirebug");
+        if (suspendMenuItem.hasAttribute("suspended"))
+            return suspendMenuItem.getAttribute("suspended");
+        return null;
+    },
+
+    setSuspended: function(value)
+    {
+        var suspendMenuItem = $("menu_toggleSuspendFirebug");
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("Firebug.setSuspended to "+value+"\n");
+
+        if (value)
+        {
+            suspendMenuItem.setAttribute("suspended", value);
+            $('menu_toggleSuspendFirebug').setAttribute("label", $STR("Resume Firebug"));
+        }
+        else
+        {
+            suspendMenuItem.removeAttribute("suspended");
+            $('menu_toggleSuspendFirebug').setAttribute("label", $STR("Suspend Firebug"));
+        }
+
+        Firebug.ActivableModule.resetTooltip();
+    },
+
+    toggleSuspend: function()
+    {
+        if (this.getSuspended())         // then we should not be visible,
+        {
+            if (FirebugContext.detached)
+            {
+                if (FBTrace.DBG_INITIALIZE)
+                    FBTrace.sysout("firebug.toggleSuspend detached\n");
+                FirebugContext.chrome.focus();
+                this.resume();
+            }
+            else
+                this.toggleBar(true);   // become visible and call resume()
+        }
+        else
+        {
+            this.suspend();
+            this.syncBar();  // pull down the visible UI
+        }
+    },
+
+    suspend: function()  // dispatch suspendFirebug to all windows
+    {
+        this.broadcast('suspendFirebug', []);
+    },
+
+    suspendFirebug: function() // dispatch onSuspendFirebug to all modules
+    {
+        this.setSuspended("suspending");
+        TabWatcher.iterateContexts(
+            function suspendContext(context)
+            {
+                // turn every activable module off.
+                for (var i = 0; i < activableModules.length; i++)
+                {
+                    try
+                    {
+                        activableModules[i].onSuspendFirebug(context);
+                    }
+                    catch (e)
+                    {
+                        try
+                        {
+                            var url = (context.window && context.window.location)? context.window.location : "no context.window.location";
+
+                            if (FBTrace.DBG_ERRORS)
+                                FBTrace.dumpProperties("Firebug.suspend FAILS for "+activableModules[i].paneName+" context: "+url, e);
+                        }
+                        catch (e2)
+                        {
+                            if (FBTrace.DBG_ERRORS)
+                                FBTrace.dumpProperties("Firebug.suspend FAILS (no context) for "+activableModules[i].paneName, e);
+                        }
+                    }
+                    // don't show Firebug panel as another hint we are suspended.
+                    context.browser.showFirebug = false;
+                    if (context.browser.detached)
+                    {
+                        // Pulls down the UI and put up a cover showing a resume button.
+                        if (FBTrace.DBG_INITIALIZE)
+                            FBTrace.sysout("suspendFirebug detached "+window.location+"\n");
+                        context.chrome.setChromeDocumentAttribute("fbToolbox", "collapsed", "true");
+                        context.chrome.setChromeDocumentAttribute("fbResumeBoxButton", "label", "Resume Firebug");
+                        context.chrome.setChromeDocumentAttribute("fbResumeBox", "collapsed", "false");
+                        context.chrome.setChromeDocumentAttribute("fbContentBox", "collapsed", "true");
+                    }
+                }
+            }
+        );
+
+        this.setSuspended("suspended");
+    },
+
+    resume: function()
+    {
+        this.broadcast('resumeFirebug', []);
+    },
+
+    resumeFirebug: function()  // dispatch onResumeFirebug to all modules
+    {
+        this.setSuspended("resuming");
+        TabWatcher.iterateContexts
+        (
+            function resumeContext(context)
+            {
+                try
+                {
+                    // turn every activable module on.
+                    for (var i = 0; i < activableModules.length; i++)
+                        activableModules[i].onResumeFirebug(context);
+                }
+                catch (e)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("Firebug.resumeFirebug FAILS for context: "+context.window.location, e);
+                }
+
+                if (context.browser.detached && context.originalChrome)
+                {
+                    // Pull down the "resume" button covering the UI, bring up the UI
+                    if (FBTrace.DBG_INITIALIZE)
+                        FBTrace.sysout("resumeFirebug detached "+context.chrome.window.location+"\n");
+                    context.chrome.setChromeDocumentAttribute("fbToolbox", "collapsed", "false");
+                    context.chrome.setChromeDocumentAttribute("fbContentBox", "collapsed", "false");
+                    context.chrome.setChromeDocumentAttribute("fbResumeBox", "collapsed", "true");
+                }
+            }
+        );
+
+        this.setSuspended(null);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -570,6 +731,7 @@ top.Firebug =
         }
 
         var lpath = href.replace(/^[^:]+:\/*/g, "").replace(/\?.*$/g, "").replace(/[^0-9a-zA-Z\/.]/g, "_");
+        /* dummy comment to workaround eclipse bug */
         if ( !/\.[\w]{1,5}$/.test(lpath) )
         {
             if ( lpath.charAt(lpath.length-1) == '/' )
@@ -581,11 +743,11 @@ top.Firebug =
         var file = QI(temporaryDirectory.clone(), nsILocalFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
-            file.create(nsIFile.NORMAL_FILE_TYPE, 664);
+            file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
         var stream = CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
-        stream.init(file, 0x04 | 0x08 | 0x20, 664, 0); // write, create, truncate
+        stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
         if (stream instanceof nsISafeOutputStream)
             stream.finish();
@@ -651,12 +813,21 @@ top.Firebug =
             return this.toggleDetachBar(true);
 
         var browser = FirebugChrome.getCurrentBrowser();
-        if (!browser.chrome)
-            return;
+        if (!browser.chrome) // then a page without a context
+        {
+            // Check to see if the context was skipped while suspended.
+            if (this.getSuspended() && TabWatcher.watchBrowser(browser))
+                this.resume();
+            else
+                return;
+        }
 
-        var toggleOff = forceOpen == undefined ? !contentBox.collapsed : !forceOpen;
+        var toggleOff = (forceOpen == undefined) ? !contentBox.collapsed : !forceOpen;
         if (toggleOff == contentBox.collapsed)
             return;
+
+        if (this.getSuspended())
+            this.resume();
 
         if (panelName)
             browser.chrome.selectPanel(panelName);
@@ -676,7 +847,7 @@ top.Firebug =
 
     toggleDetachBar: function(forceOpen)
     {
-        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
+        var browser = FirebugChrome.getCurrentBrowser();
         if (!forceOpen && browser.detached)
         {
             browser.chrome.close();
@@ -688,7 +859,7 @@ top.Firebug =
 
     detachBar: function()
     {
-        var browser = FirebugChrome.getCurrentBrowser(); // XXXjjb Joe check tabBrowser.selectedBrowser;
+        var browser = FirebugChrome.getCurrentBrowser();
         if (!browser.chrome)
             return;
 
@@ -986,7 +1157,7 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIFireBugClient
+    // nsIFireBugClient  These are per XUL window callbacks
 
     enable: function()  // Called by firebug-service when the first context is created.
     {
@@ -1011,6 +1182,8 @@ top.Firebug =
         if ( dispatch2(extensions, "declineContext", [win, uri]) )
             return false;
 
+        if (Firebug.getSuspended())  // during suspend we will not create new contexts
+            return false;
         return true;
     },
 
@@ -1086,8 +1259,25 @@ top.Firebug =
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("firebug.showContext set FirebugContext: "+context.window.location+"\n");
 
+            /* XXXjjb this implements "auto-suspend", but it has at least one side effect see issue 1073.
+               reconsider for 1.3
+            if (this.isDisabledFor(FirebugContext))
+            {
+                    var browser = FirebugChrome.getCurrentBrowser();
+                    if (browser && !browser.detached && !browser.showFirebug)
+                        this.suspend();
+            }
+            */
+
             this.syncBar();
         }
+    },
+
+    isDisabledFor: function(context)
+    {
+        for (var i = 0; i < activableModules.length; i++)
+            if (activableModules[i].isEnabled(context)) return false;
+        return true;
     },
 
     watchWindow: function(context, win)
@@ -1343,6 +1533,8 @@ Firebug.Panel =
     {
         try
         {
+            if (!this.context.browser) // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
+                return;
             var buttons = this.context.browser.chrome.$(buttonsId);
             if (buttons)
                 collapse(buttons, show ? "false" : "true");
@@ -1400,13 +1592,13 @@ Firebug.Panel =
 
         if (forceUpdate || object != this.selection)
         {
-            this.previousSelection = this.selection;
             this.selection = object;
             this.updateSelection(object);
 
             // XXXjoe This is kind of cheating, but, feh.
             this.context.chrome.onPanelSelect(object, this);
-            if (uiListeners.length > 0) dispatch(uiListeners, "onPanelSelect", [object, this]);  // TODO: make this.context.chrome a uiListener
+            if (uiListeners.length > 0)
+                dispatch(uiListeners, "onPanelSelect", [object, this]);  // TODO: make this.context.chrome a uiListener
         }
     },
 
@@ -1978,6 +2170,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("panelActivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
+
+        if (Firebug.getSuspended())
+            Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
+
         if (this.isEnabled(context))
             return;
 
@@ -1985,6 +2181,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onFirstPanelActivate(context, init);
 
         this.activeContexts.push(context);
+        this.resetTooltip();
 
         this.enablePanel(context);
 
@@ -2001,7 +2198,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         var i = this.activeContexts.indexOf(context);
         if (i != -1)
+        {
             this.activeContexts.splice(i, 1);
+            this.resetTooltip();
+        }
         else
         {
             if (FBTrace.DBG_ERRORS)
@@ -2030,6 +2230,54 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onLastPanelDeactivate(context, destroy);
     },
 
+    resetTooltip: function()
+    {
+        var tooltip = "Firebug "+ Firebug.getVersion();
+        if (Firebug.getSuspended())
+            tooltip += ": " + Firebug.getSuspended();
+        else
+        {
+            var urls = Firebug.ActivableModule.getURLsForAllActiveContexts();
+            if (urls.length > 0)
+            {
+                tooltip += " activated by "+urls.length+" page(s)";
+                for (var i = 0; i < urls.length; i++)
+                    tooltip += "\n"+urls[i];
+            }
+        }
+        $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
+    },
+
+    getURLsForAllActiveContexts: function()
+    {
+        var contextURLSet = [];  // create a list of all unique activeContexts in all modules
+        for (var i = 0; i < modules.length; i++)
+        {
+            var module = modules[i];
+            if (module.activeContexts)
+            {
+                for (var ic = 0; ic < module.activeContexts.length; ic++)
+                {
+                    try
+                    {
+                        var cw = module.activeContexts[ic].window;
+                        if (cw.location && cw.location.toString)
+                        {
+                            var url = cw.location.toString();
+                            if (contextURLSet.indexOf(url) == -1)
+                                contextURLSet.push(url);
+                        }
+                    }
+                    catch(e)
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                            FBTrace.dumpProperties("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
+                    }
+                }
+            }
+        }
+        return contextURLSet;
+    },
     // ---------------------------------------------------------------------------------------
 
     onFirstPanelActivate: function(context, init)
@@ -2051,6 +2299,17 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         // Just after onPanelDeactivate, no remaining activecontext
     },
+
+    onSuspendFirebug: function(context)
+    {
+        // When the user requests Suspend Firebug. Modules should remove listeners, disable function that takes resources
+    },
+
+    onResumeFirebug: function(context)
+    {
+        // When the user requests Resume Firebug Modules should undo the work done in onSuspendFirebug
+    },
+    // ---------------------------------------------------------------------------------------
 
     isEnabled: function(context)
     {
@@ -2143,27 +2402,33 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var browserURI = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
         var enable = (option.indexOf("enable") == 0) ? true : false;
+        var global = (option.indexOf("site") == -1) ? true : false;
 
-        if (FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_OPTIONS)
         {
             FBTrace.sysout("firebug.setHostPermission option:"+option+" prefDomain:"+
                 prefDomain+" for "+browserURI.spec+"\n");
         }
 
-        if (!browserURI.spec)
-        {
-            Firebug.setPref(prefDomain, "enableSystemPages", enable);
-            return;
-        }
+        // The preferences for both system and local pages is three-state.
+        // So, it's the same logic as for site-permissions, which can
+        // be set to true/false or not set at all.
+        //
+        // "enable" - enables system/local pages
+        // "disable" - disales system/local pages
+        // "" - if not set the global option is used.
+        if (!browserURI.spec || isSystemURL(browserURI.spec))
+            Firebug.setPref(prefDomain, "enableSystemPages", (global ? "" : option));
+        else if (isLocalURL(browserURI.spec))
+            Firebug.setPref(prefDomain, "enableLocalFiles", (global ? "" : option));
 
-        if (isLocalURL(browserURI.spec))
+        if (!browserURI.spec || isSystemURL(browserURI.spec) || isLocalURL(browserURI.spec))
         {
-            Firebug.setPref(prefDomain, "enableLocalFiles", enable);
-            return;
-        }
-        else if (isSystemURL(browserURI.spec))
-        {
-            Firebug.setPref(prefDomain, "enableSystemPages", enable);
+            // If the global option is set while system or local page is displayed
+            // not to forget to update the global preference.
+            if (global)
+                Firebug.setPref(prefDomain, "enableSites", enable);
+
             return;
         }
 
@@ -2193,14 +2458,20 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var browserURI = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
 
-        if (!browserURI.spec)
-            return Firebug.getPref(prefDomain, "enableSystemPages"); // eg resource://gre/res/hiddenWindow.html
-
         // If it's a local-file or a system-page see preferences.
-        if (isLocalURL(browserURI.spec))
-            return Firebug.getPref(prefDomain, "enableLocalFiles") ? "enable" : "disable";
-        else if (isSystemURL(browserURI.spec))
-            return Firebug.getPref(prefDomain, "enableSystemPages") ? "enable" : "disable";
+        // In case of eg resource://gre/res/hiddenWindow.html the spec can be null.
+        if (!browserURI || !browserURI.spec || isSystemURL(browserURI.spec))
+        {
+            var option = Firebug.getPref(prefDomain, "enableSystemPages");
+
+            // If the preference isn't set use the global option.
+            return option ? option : (this.isAlwaysEnabled() ? "enable" : "disable");
+        }
+        else if (isLocalURL(browserURI.spec))
+        {
+            var option = Firebug.getPref(prefDomain, "enableLocalFiles");
+            return option ? option : (this.isAlwaysEnabled() ? "enable" : "disable");
+        }
 
         switch (permissionManager.testPermission(browserURI, prefDomain))
         {
@@ -2500,6 +2771,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     onEnable: function(event)
     {
+        var needReload = false;
         for (var i=0; i<this.inputs.length; i++)
         {
             var input = this.inputs[i];
@@ -2508,18 +2780,28 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
             var model = Firebug.getRepObject(input);
             if (input.checked)
-                this.enableModule(model);
+            {
+                var oneReload = this.enableModule(model);
+                needReload = needReload || oneReload;
+            }
             else
                 this.disableModule(model);
         }
 
         this.refresh();
+
+        if (needReload)
+            this.context.window.location.reload();
     },
 
     enableModule: function(module)
     {
         if (!this.isModuleEnabled(module))
+        {
             module.setHostPermission(this.context, "enable-site");
+            return true;
+        }
+        return false;
     },
 
     disableModule: function(module)
@@ -2529,13 +2811,18 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     },
 
     show: function(panel, module)
-    {try {
-        this.module = module;
-        this.context = panel.context;
-        this.panelNode = panel.panelNode;
-        this.refresh();
-        }catch(e) {
-        FBTrace.dumpProperties("firebug moduleManager show", e);
+    {
+        try
+        {
+            this.module = module;
+            this.context = panel.context;
+            this.panelNode = panel.panelNode;
+            this.refresh();
+        }
+        catch(e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("firebug moduleManager show", e);
         }
         FBTrace.sysout("firebug moduleManager show\n");
     },
@@ -2579,11 +2866,18 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             if (!hasClass(input, "activableModuleCheckBox"))
                 continue;
 
+            // Set the checkboxes to cause the big button to return the panels to a state the user has liked.
             var module = Firebug.getRepObject(input);
-            input.checked = input.originalValue = this.isModuleEnabled(module);
+            var prefName = "preferEnabled."+this.getModuleName(module);
+            var preferEnable = Firebug.getPref(this.prefDomain, prefName);
+            var isSiteEnabled = (module.getHostPermission(this.context) == "enable-site");
 
-            if (module == this.module)
-                input.checked = true;
+            if (preferEnable || isSiteEnabled)
+                input.originalValue = true;
+            else
+                input.originalValue = false;
+
+            input.checked = input.originalValue;
         }
 
         this.applyButton = getElementByClass(this.panelNode, "moduleMangerApplyButton");

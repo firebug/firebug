@@ -34,13 +34,13 @@ top.SourceCache = function(context)
 
 top.SourceCache.prototype =
 {
-    loadText: function(url, method)
+    loadText: function(url, method, file)
     {
-        var lines = this.load(url, method);
+        var lines = this.load(url, method, file);
         return lines ? lines.join("\n") : null;
     },
 
-    load: function(url, method)
+    load: function(url, method, file)
     {
         if ( this.cache.hasOwnProperty(url) )
             return this.cache[url];
@@ -100,7 +100,7 @@ top.SourceCache.prototype =
         catch (exc)
         {
             if (FBTrace.DBG_CACHE)                                                                                     /*@explore*/
-                FBTrace.dumpProperties("sourceCache for window="+this.context.window.location.href+" FAILS:", this.cache); /*@explore*/
+                FBTrace.dumpProperties("sourceCache for url:"+url+" window="+this.context.window.location.href+" FAILS:", exc); /*@explore*/
             return;
         }
 
@@ -125,6 +125,23 @@ top.SourceCache.prototype =
                 if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");                                             /*@explore*/
             }
         }
+        else if ((method == "PUT" || method == "POST") && file)
+        {
+            if (channel instanceof nsIUploadChannel)
+            {
+                // In case of PUT and POST, don't forget to use the original body.
+                var postData = getPostText(file, this.context);
+                if (postData)
+                {
+                    var postDataStream = CCIN("@mozilla.org/io/string-input-stream;1", "nsIStringInputStream");
+                    postDataStream.setData(postData, postData.length);
+                    var uploadChannel = QI(channel, nsIUploadChannel);
+                    uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
+                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");                                             /*@explore*/
+                }
+            }
+        }
+
 
         var stream;
         try
@@ -216,6 +233,40 @@ top.SourceCache.prototype =
     }
 };
 
+// xxxHonza getPostText and readPostTextFromRequest are copied from
+// net.js. These functions should be removed when this cache is 
+// refactored due to the double-load problem.
+function getPostText(file, context)
+{
+    if (!file.postText)
+        file.postText = readPostTextFromPage(file.href, context);
+
+    if (!file.postText)
+        file.postText = readPostTextFromRequest(file.request, context);
+
+    return file.postText;
+}
+
+function readPostTextFromRequest(request, context)
+{
+    try
+    {
+        if (!request.notificationCallbacks)
+            return null;
+
+        var xhrRequest = GI(request.notificationCallbacks, nsIXMLHttpRequest);
+        if (xhrRequest)
+            return readPostTextFromXHR(xhrRequest, context);
+    }
+    catch(exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.dumpProperties("lib.getPostText FAILS ", exc);
+    }
+
+    return null;
+}
+
 // ************************************************************************************************
 
 function StreamListener(url, cache, cb)
@@ -289,6 +340,21 @@ function getCacheKey(context)
      catch (exc)
      {
      }
+}
+
+function doublePostForbiddenMessage(url)
+{
+    var msg = "Firebug needs to POST to the server to get this information for url: "+url+"\n";
+    msg += " This second POST can interfere with some sites.\n"
+    msg += " If you want to send the POST again, open a new tab in Firefox, use URL 'about:config', ";
+    msg += "set boolean value 'extensions.firebug.allowDoublePost' to true\n";
+    msg += " This value is reset every time you restart Firefox\n";
+    msg += " This problem will disappear when https://bugzilla.mozilla.org/show_bug.cgi?id=430155 is shipped\n";
+
+    if (FBTrace.DBG_CACHE)
+        FBTrace.sysout(msg);
+
+    return msg.split('\n');
 }
 
 // ************************************************************************************************

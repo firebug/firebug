@@ -1090,7 +1090,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
 
     show: function(state)
     {
-        if (state)
+        if (state && state.watches)
             this.watches = state.watches;
     },
 

@@ -269,24 +269,65 @@ this.addScript = function(doc, id, src)
     element.firebugIgnore = true;
     element.setAttribute("style", "display:none");
     element.innerHTML = src;
-    doc.documentElement.appendChild(element);
+    if (doc.documentElement)
+        doc.documentElement.appendChild(element);
+    else
+    {
+        // See issue 1079, the svg test case gives this error
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.dumpProperties("lib.addScript doc has no documentElement:", doc);
+    }
 }
 
 // ************************************************************************************************
 // Localization
 
-function $STR(name)
+function $STR(name) // name with _ in place of spaces is the key in the firebug.properties file.
 {
-    return document.getElementById("strings_firebug").getString(name);
+    try
+    {
+        return document.getElementById("strings_firebug").getString(name.replace(' ', '_'));
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("lib.getString: " + name + "\n");
+            FBTrace.dumpProperties("lib.getString FAILS ", err);
+        }
+    }
+
+    return name;
 }
 
 function $STRF(name, args)
 {
-    return document.getElementById("strings_firebug").getFormattedString(name, args);
+    try
+    {
+        return document.getElementById("strings_firebug").getFormattedString(name.replace(' ', '_'), args);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            FBTrace.sysout("lib.getString: " + name + "\n");
+            FBTrace.dumpProperties("lib.getString FAILS ", err);
+        }
+    }
+
+    return name;
 }
 
 this.$STR = $STR;
 this.$STRF = $STRF;
+
+this.internationalize = function(eltID, attr, args)  // Use the current value of the attribute as a key to look up the localized value
+{
+    var elt = document.getElementById(eltID);
+    var xulString = elt.getAttribute(attr);
+    var localized = args ? $STRF(xulString, args) : $STR(xulString);
+    elt.setAttribute(attr, localized);
+}
 
 // ************************************************************************************************
 // Visibility
@@ -677,7 +718,7 @@ this.setOuterHTML = function(element, html)
 {
     var doc = element.ownerDocument;
     var range = doc.createRange();
-    range.selectNode(doc.documentElement);
+    range.selectNode(element || doc.documentElement);
 
     var fragment = range.createContextualFragment(html);
     var first = fragment.firstChild;
@@ -1714,7 +1755,15 @@ this.findScriptForFunctionInContext = function(context, fn)
                 var unwrapped = testFunctionObject.getWrappedValue();
                 if (!unwrapped.toString)
                     return;
-                var tfs = unwrapped.toString();
+                try {
+                    var tfs = unwrapped.toString();
+                } catch (etfs) {
+                    FBTrace.dumpProperties("unwrapped.toString fails for unwrapped: "+etfs, unwrapped);
+                }
+
+                if (!fn.toString)
+                    return;
+
                 var fns = fn.toString();
                 if (tfs == fns)
                     found = script;
@@ -1804,7 +1853,7 @@ this.getFunctionName = function(script, context, frame)
         var analyzer = FBL.getScriptAnalyzer(context, script);
         if (analyzer)
         {
-            if (FBTrace.DBG_STACK) FBTrace.dumpProperties("getFunctionName analyzer:", analyzer);     /*@explore*/
+            if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);     /*@explore*/
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
             name = functionSpec.name +"("+functionSpec.args.join(',')+")";
         }
@@ -2157,7 +2206,7 @@ this.dispatch = function(listeners, name, args)
         if (FBTrace.DBG_ERRORS)
         {
             FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
-            FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
+            //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
         }
     }
 };
@@ -2436,6 +2485,8 @@ this.isLocalURL = function(url)
 {
     if (url.substr(0, 5) == "file:")
         return true;
+    else if (url.substr(0, 8) == "wyciwyg:")
+        return true;
     else
         return false;
 };
@@ -2479,6 +2530,11 @@ this.getPrettyDomain = function(url)
 
 this.absoluteURL = function(url, baseURL)
 {
+    return this.absoluteURLWithDots(url, baseURL).replace("/./", "/", "g");
+};
+
+this.absoluteURLWithDots = function(url, baseURL)
+{
     if (url[0] == "?")
         return baseURL + url;
 
@@ -2510,6 +2566,10 @@ this.absoluteURL = function(url, baseURL)
 
 this.normalizeURL = function(url)
 {
+    if (!url)
+        return "";
+    // Replace one or more characters that are not forward-slash followed by /.., by space.
+    url = url.replace(/[^/]+\/\.\.\//, "");
     // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
     // don't match up with the URLs we get back from the DOM
     return url ? url.replace(/file:\/([^/])/g, "file:///$1") : "";
@@ -2558,7 +2618,7 @@ this.parseURLEncodedText = function(text)
             params.push({name: unescape(parts[0]), value: ""});
     }
 
-    params.sort(function(a, b) { return a.name < b.name ? -1 : 1; });
+    params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
 
     return params;
 };
@@ -3025,11 +3085,11 @@ this.SourceFile.prototype =
         if (!this.outerScriptLineMap)
             this.outerScriptLineMap = [];
 
-        var lineCount = script.lineExtent;
+        var lineCount = script.lineExtent + 1;
         var offset = this.getBaseLineOffset();
         if (FBTrace.DBG_LINETABLE)
         {                                                                                     /*@explore*/
-            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
+            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineExtent="+lineCount+" baseLineNumber="+script.baseLineNumber+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
             var startTime = new Date().getTime();
         }
         if (lineCount > 100)
@@ -3039,9 +3099,15 @@ this.SourceFile.prototype =
         {
             var scriptLineNo = i + script.baseLineNumber;  // the max is (i + script.baseLineNumber + script.lineExtent)
             var mapLineNo = scriptLineNo - offset;
-
-            if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
-                this.outerScriptLineMap.push(mapLineNo);
+            try
+            {
+                if (script.isLineExecutable(scriptLineNo, this.pcmap_type))
+                    this.outerScriptLineMap.push(mapLineNo);
+            }
+            catch (e)
+            {
+                // I guess not...
+            }
                                                                                                                        /*@explore*/
             if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
             {                                                                                                          /*@explore*/
@@ -3110,27 +3176,11 @@ this.SourceFile.prototype =
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             var script = this.innerScripts[j];
-            if (FBTrace.DBG_LINETABLE && (script instanceof Ci.jsdIScript) && !script.tag)
-            {
-                FBTrace.sysout("getScriptsAtLineNumber bad script for "+j+" vs "+this.toString()+"\n");
-                FBTrace.dumpProperties("getScriptsAtLineNumber script:", script);
-                continue;
-            }
-            if (targetLineNo >= script.baseLineNumber)
-            {
-                if ( (script.baseLineNumber + script.lineExtent) >= targetLineNo)
-                {
-                    if (mustBeExecutableLine && (!script.isValid || !script.isLineExecutable(targetLineNo, this.pcmap_type) ))
-                    {
-                        if (FBTrace.DBG_LINETABLE)
-                            FBTrace.sysout("getScriptsAtLineNumber["+j+"] trying "+script.tag+", isValid: "+script.isValid+" targetLineNo:"+targetLineNo+" isLineExecutable: "+script.isLineExecutable(targetLineNo, this.pcmap_type)+"\n");
-                        continue;
-                    }
-                    scripts.push(script);
-                }
-            }
-            if (FBTrace.DBG_LINETABLE) FBTrace.sysout("getScriptsAtLineNumber["+j+"] trying "+script.tag+", is "+script.baseLineNumber+" <= "+targetLineNo +" <= "+ (script.baseLineNumber + script.lineExtent)+"? using offset = "+offset+"\n");
+            if (mustBeExecutableLine && !script.isValid) continue;
+            this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
         }
+        if (this.outerScript && !(mustBeExecutableLine && !this.outerScript.isValid) )
+            this.addScriptAtLineNumber(scripts, this.outerScript, targetLineNo, mustBeExecutableLine, offset);
 
         if (FBTrace.DBG_LINETABLE && scripts.length < 1)
         {
@@ -3139,6 +3189,45 @@ this.SourceFile.prototype =
         }
 
         return (scripts.length > 0) ? scripts : false;
+    },
+
+    addScriptAtLineNumber: function(scripts, script, targetLineNo, mustBeExecutableLine, offset)
+    {
+        // script.isValid will be true.
+        if (FBTrace.DBG_LINETABLE)
+            FBTrace.sysout("getScriptsAtLineNumber trying "+script.tag+", is "+script.baseLineNumber+" <= "+targetLineNo +" <= "+ (script.baseLineNumber + script.lineExtent)+"? using offset = "+offset+"\n");
+
+        if (targetLineNo >= script.baseLineNumber)
+        {
+            if ( (script.baseLineNumber + script.lineExtent) >= targetLineNo)
+            {
+                if (mustBeExecutableLine)
+                {
+                    try
+                    {
+                        if (!script.isLineExecutable(targetLineNo, this.pcmap_type) )
+                        {
+                            if (FBTrace.DBG_LINETABLE)
+                                FBTrace.sysout("getScriptsAtLineNumber tried "+script.tag+", not executable at targetLineNo:"+targetLineNo+" pcmap:"+this.pcmap_type+"\n");
+                            return;
+                        }
+                    }
+                    catch (e)
+                    {
+                        // Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [jsdIScript.isLineExecutable]
+                        return;
+                    }
+                }
+                scripts.push(script);
+                if (FBTrace.DBG_LINETABLE)
+                {
+                    var checkExecutable = "";
+                    if (mustBeExecutableLine)
+                        var checkExecutable = " isLineExecutable: "+script.isLineExecutable(targetLineNo, this.pcmap_type);
+                    FBTrace.sysout("getScriptsAtLineNumber found "+script.tag+", isValid: "+script.isValid+" targetLineNo:"+targetLineNo+checkExecutable+"\n");
+                }
+            }
+        }
     },
 
     scriptsIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
@@ -3366,7 +3455,7 @@ this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EventSourceFile.prototype.getBaseLineOffset = function()
 {
-    return 0;
+    return 1;
 }
 
 this.summarizeSourceLineArray = function(sourceLines, size)

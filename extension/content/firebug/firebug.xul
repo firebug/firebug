@@ -130,7 +130,7 @@
                     <menuseparator/>
                     <menu label="&firebug.OpenWith;">
                         <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                            <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+                            <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
                         </menupopup>
                      </menu>
 
@@ -158,6 +158,16 @@
     <vbox id="fbContentBox" flex="1">
         <box id="fbPanelBox" flex="1"/>
         <hbox id="fbCommandBox"/>
+    </vbox>
+
+    <vbox id="fbResumeBox" flex="1" collapsed="true">
+        <spacer flex="1"/>
+        <hbox>
+            <spacer flex="1"/>
+            <button id="fbResumeBoxButton" label="Resume Firebug" command="cmd_toggleSuspendFirebug" />
+            <spacer flex="1"/>
+        </hbox>
+        <spacer flex="1"/>
     </vbox>
 
 </window>

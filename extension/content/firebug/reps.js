@@ -186,7 +186,8 @@ this.Func = domplate(Firebug.Rep,
         if (script)
             return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
         else
-            return fn.toString();
+            if (fn.toString)
+                return fn.toString();
     },
 
     getTitle: function(fn, context)
@@ -1493,7 +1494,8 @@ this.ApplicationCache = domplate(Firebug.Rep,
 
     supportsObject: function(object, type)
     {
-        return (object instanceof Ci.nsIDOMOfflineResourceList);
+        if (Ci.nsIDOMOfflineResourceList)
+            return (object instanceof Ci.nsIDOMOfflineResourceList);
     }
 
 });

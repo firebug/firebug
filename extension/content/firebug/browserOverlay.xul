@@ -62,10 +62,28 @@
                 command="cmd_detachFirebug"/>
     </keyset>
 
+    <script type="application/x-javascript">
+        function OpenEditorShowHide(event) {
+            var item = document.getElementById("menu_firebugOpenEithEditor");
+            var popupNode = document.popupNode;
+            item.hidden = (popupNode instanceof HTMLInputElement
+                                || popupNode instanceof HTMLIFrameElement
+                                || popupNode instanceof HTMLTextAreaElement
+                || Firebug.registeredEditors.length == 0);
+        }
+        function addOpenEditorSHowHide(event) {
+            window.removeEventListener("load", addOpenEditorSHowHide, false);
+            var contextMenu = document.getElementById("contentAreaContextMenu");
+            if (contextMenu)
+                contextMenu.addEventListener("popupshowing", OpenEditorShowHide, false);
+        };
+        window.addEventListener("load", addOpenEditorSHowHide, false);
+    </script>
+
     <popup id="contentAreaContextMenu">
-        <menu label="&firebug.OpenWith;" insertbefore="context-viewsource">
+        <menu label="&firebug.OpenWith;" id="menu_firebugOpenEithEditor" insertbefore="context-viewsource">
             <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
             </menupopup>
     </menu>
         <menuseparator/>
@@ -91,7 +109,7 @@
 
                 <menu label="&firebug.OpenWith;">
                     <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                                <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+                                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
                     </menupopup>
                 </menu>
                 <menuseparator/>
@@ -133,7 +151,7 @@
 
                             <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
                                 <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                                        <menuitem label="&firebug.ConfigureEditors;" command="cmd_openFirebugEditors"/>
+                                        <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
                                 </menupopup>
                             </menu>
 
@@ -204,8 +222,8 @@
                 label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
-            <!-- <menuseparator/>
-            <menuitem label="Save Panels to File" command="cmd_savePanels"/>  NLS -->
+            <menuseparator/>
+            <menuitem id="menu_toggleSuspendFirebug" label="Suspend Firebug" command="cmd_toggleSuspendFirebug"/>
         </menupopup>
     </statusbar>
 
