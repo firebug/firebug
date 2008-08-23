@@ -30,6 +30,7 @@
         <xul:deck anonid="deck" flex="1">
             <xul:browser anonid="browser"
                      xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"
+                     disablehistory="true"
                      src="chrome://firebug/content/panel.html"/>
         </xul:deck>
     </content>
