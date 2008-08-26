@@ -255,7 +255,7 @@
 .profileSizer {
     width:100%;
     overflow-x:auto;
-    overflow-y:noscroll;
+    overflow-y: scroll;
 }
 
 .profileTable {
