@@ -1401,7 +1401,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onScriptFilterMenuTooltipShowing: function(tooltip, context)
     {
         if (FBTrace.DBG_OPTIONS)
-        	FBTrace.dumpStack("onScriptFilterMenuTooltipShowing not implemented");
+            FBTrace.dumpStack("onScriptFilterMenuTooltipShowing not implemented");
     },
 
     onScriptFilterMenuCommand: function(event, context)
@@ -1576,7 +1576,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var lineNo = sourceBox.firstViewableLine;
         while( lineNode = this.getLineNode(lineNo) )
         {
-            var script = sourceFile.scriptIfLineCouldBeExecutable(lineNo, true);
+            var script = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
 
             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
             if (script)
