@@ -1916,7 +1916,9 @@ function initCacheSession()
 
         var cacheService = CacheService.getService(nsICacheService);
         cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
-        cacheSession.doomEntriesIfExpired = false;
+
+        // xxxHonza setting this to false makes problems with the cache. See Issue 1029.
+        //cacheSession.doomEntriesIfExpired = false;
     }
 }
 
