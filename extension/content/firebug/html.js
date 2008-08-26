@@ -667,7 +667,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     hide: function()
     {
         this.showToolbarButtons("fbHTMLButtons", false);
-
+        delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
 
@@ -942,7 +942,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (targetNode && targetNode.nodeType == 1 && targetNode.localName.toUpperCase() == "IMG")
         {
             var url = targetNode.src;
-            if (url == this.infoTipURL)
+            if (url == this.infoTipURL) // This state cleared in hide()
                 return true;
 
             this.infoTipURL = url;
