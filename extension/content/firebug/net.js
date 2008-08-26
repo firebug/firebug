@@ -1418,7 +1418,7 @@ NetProgress.prototype =
     respondedFile: function respondedFile(request, time, info)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.respondedFile for: " +  safeGetRequest(request) + "\n");
+            FBTrace.sysout("net.respondedFile for: " + safeGetName(request) + "\n");
 
         var file = this.getRequestFile(request);
         if (file)
