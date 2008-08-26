@@ -2811,6 +2811,9 @@ var HttpObserver =
       info.responseStatusText = aRequest.responseStatusText;
       info.postText = readPostTextFromRequest(aRequest, context);
 
+      if (!info.postText)
+        info.postText = readPostTextFromPage(aRequest.name, context);
+
       if (networkContext)
         networkContext.post(respondedFile, [aRequest, now(), info]);
   },
