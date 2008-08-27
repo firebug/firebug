@@ -373,20 +373,16 @@ this.Arr = domplate(Firebug.Rep,
         }
     },
 
+    // http://code.google.com/p/fbug/issues/detail?id=874
     // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
-    isArray: function(obj) { // frames lose type, so test constructor string
+    isArray: function(obj) {
         try {
-            function isNumber(o)
-            {
-                return typeof o === 'number' && isFinite(o);
-            }
-
-            if (o)
-               return isNumber(o.length) && typeof o.splice === 'function';
-
-            return false;
-        } 
-        catch(exc) 
+            if (obj)
+                return isFinite(obj) && typeof obj.splice === 'function';
+            else
+                return false;
+        }
+        catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
             {
