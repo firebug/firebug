@@ -1873,11 +1873,10 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelSplitter.collapsed = !enabled;
         this.sidePanelDeck.collapsed = !enabled;
 
-        // Source box is updated only if debugger is enabled.
-        if (enabled && !this.location)
+        restoreObjects(this, state);
+        
+        if (enabled) // Source box is updated only if debugger is enabled.
         {
-            restoreObjects(this, state);
-
             if (state)
             {
                 this.context.throttle(function()
@@ -2065,6 +2064,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (url == sourceFiles[i].href)
                     return sourceFiles[i];
             }
+            return sourceFiles[0];
         }
         else
             return sourceFiles[0];
