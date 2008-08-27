@@ -631,6 +631,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     supportsWindow: function(win)
     {
         var context = ( (win && TabWatcher) ? TabWatcher.getContextByWindow(win) : null);
+        
+        if (!this.isEnabled(context))
+            return false;
+        
         this.breakContext = context;
         return !!context;
     },
@@ -638,6 +642,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     supportsGlobal: function(global)
     {
         var context = (TabWatcher ? TabWatcher.getContextByWindow(global) : null);
+        
+        if (!this.isEnabled(context))
+            return false;
+        
         this.breakContext = context;
         return !!context;
     },
