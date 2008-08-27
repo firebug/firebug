@@ -13,7 +13,7 @@ const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const prefs = PrefService.getService(nsIPrefBranch2);
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
-const prefDomain = "extensions.firebug";
+ 
 
 this.namespaceName = "TracePanel";
 
@@ -72,16 +72,16 @@ Firebug.TraceModule = extend(ConsoleModule,
 
     initialize: function(prefDomain, prefNames)
     {
-        if (this.debug) FBTrace.sysout("TraceModule.initialize prefDomain="+prefDomain+"\n");
+        if (this.debug) FBTrace.sysout("TraceModule.initialize prefDomain="+ prefDomain+"\n");
 
         for (var p in this)
         {
             var f = reDBG_FBS.exec(p);
             if (f)
             {
-                FBTrace[p] = Firebug.getPref("extensions.firebug-service", p);
+                FBTrace[p] = Firebug.getPref(Firebug.servicePrefDomain, p);
                 if (this.debug)
-                    FBTrace.sysout("TraceModule.initialize extensions.firebug-service."+p+"="+FBTrace[p]+"\n");
+                    FBTrace.sysout("TraceModule.initialize "+Firebug.servicePrefDomain+" "+p+"="+FBTrace[p]+"\n");
             }
             else
             {
@@ -89,7 +89,7 @@ Firebug.TraceModule = extend(ConsoleModule,
                 if (m != -1)
                     FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
                 if (this.debug && m)
-                    FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
+                    FBTrace.sysout("TraceModule.initialize "+ prefDomain+"."+p+"="+FBTrace[p]+"\n");
             }
         }
         prefs.setBoolPref("browser.dom.window.dump.enabled", true);
@@ -337,19 +337,18 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         if (category.indexOf("_FBS_") == -1)
         {
             var prefDomain = Firebug.prefDomain;
-            Firebug.setPref(Firebug.prefDomain, category, FBTrace[category] );
+            Firebug.setPref(prefDomain, category, FBTrace[category] );
             prefService.savePrefFile(null);
-        }
+            if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
+        } 
         else
         {
-            var prefDomain = "extensions.firebug-service";
-            prefs.setBoolPref(prefDomain+"."+category, FBTrace[category]);
+            prefs.setBoolPref(Firebug.servicePrefDomain+"."+category, FBTrace[category]);
             prefService.savePrefFile(null);
+            if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("tracePanel.setOption: "+Firebug.servicePrefDomain+"."+category+ " = " + FBTrace[category] + "\n");
         }
-
-        if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
-
     },
 
     getContextMenuItems: function(object, target)

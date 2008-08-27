@@ -221,7 +221,7 @@ Firebug.Console = extend(ActivableConsole,
 
         var limitInfo = {
             totalCount: 0,
-            limitPrefsTitle: $STRF("LimitPrefsTitle", ["extensions.firebug.console.logLimit"])
+            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".console.logLimit"])
         };
 
         var netLimitRep = Firebug.NetMonitor.NetLimit;

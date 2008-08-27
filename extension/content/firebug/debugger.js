@@ -164,6 +164,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // event loop, or run the risk that some of them won't load while
             // the new event loop is nested.  It seems that the networking system
             // can't communicate with the nested loop.
+            // XXXjjb recheck this when we have Honza's new hook
             cacheAllScripts(context);
 
         } catch (exc) {
@@ -1407,7 +1408,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onScriptFilterMenuCommand: function(event, context)
     {
         var menu = event.target;
-        Firebug.setPref("extensions.firebug-service", "scriptsFilter", menu.value);
+        Firebug.setPref(Firebug.servicePrefDomain, "scriptsFilter", menu.value);
         Firebug.Debugger.filterMenuUpdate();
     },
 
@@ -1460,7 +1461,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     filterMenuUpdate: function()
     {
-        var value = Firebug.getPref("extensions.firebug-service", "scriptsFilter");
+        var value = Firebug.getPref(Firebug.servicePrefDomain, "scriptsFilter");
         this.filterButton.value = value;
         this.filterButton.label = this.menuShortLabel[value];
         this.filterButton.removeAttribute("disabled");
@@ -1932,7 +1933,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (this.highlightLine(lineNo))
                 return true;
         }
-
+        // XXXjjb TODO this code needs to change for viewport based script source box.
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
             row = this.currentSearch.findNext(true);
@@ -2022,7 +2023,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return allSources;
         }
 
-        var filter = Firebug.getPref("extensions.firebug-service", "scriptsFilter");
+        var filter = Firebug.getPref(Firebug.servicePrefDomain, "scriptsFilter");
         this.showEvents = (filter == "all" || filter == "events");
         this.showEvals = (filter == "all" || filter == "evals");
 

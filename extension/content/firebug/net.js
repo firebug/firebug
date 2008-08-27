@@ -911,7 +911,7 @@ NetPanel.prototype = domplate(Firebug.Panel,
         {
             var limitInfo = {
                 totalCount: 0,
-                limitPrefsTitle: $STRF("LimitPrefsTitle", ["extensions.firebug.net.logLimit"])
+                limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".net.logLimit"])
             };
 
             this.table = this.tableTag.replace({}, this.panelNode, this);

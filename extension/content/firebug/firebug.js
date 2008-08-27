@@ -135,6 +135,7 @@ top.Firebug =
     panelTypes: panelTypes,
     reps: reps,
     prefDomain: "extensions.firebug",
+    servicePrefDomain: "extensions.firebug-service",
 
     stringCropLength: 80,
 
@@ -162,13 +163,13 @@ top.Firebug =
         for (var i = 0; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
         for (var i = 0; i < servicePrefNames.length; ++i)
-            this[servicePrefNames[i]] = this.getPref("extensions.firebug-service", servicePrefNames[i]);
+            this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
 
         this.internationalizeUI();
 
         this.loadExternalEditors();
         prefs.addObserver(this.prefDomain, this, false);
-        prefs.addObserver("extensions.firebug-service", this, false);
+        prefs.addObserver(this.servicePrefDomain, this, false);
 
         var basePrefNames = prefNames.length;
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
@@ -249,7 +250,7 @@ top.Firebug =
 
         prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
-        prefs.removeObserver("extensions.firebug-service", this, false);
+        prefs.removeObserver(this.servicePrefDomain, this, false);
 
         dispatch(modules, "shutdown");
 
@@ -1133,20 +1134,16 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIPrefObserver
-    rePrefs: /extensions\.([^\.]*)\.(.*)/,
     observe: function(subject, topic, data)
-    {
+    { 
         if (data.indexOf("extensions.") == -1)
             return;
 
-        var m = top.Firebug.rePrefs.exec(data);
-        if (m)
-        {
-            if (m[1] == "firebug")
-                var domain = "extensions.firebug";
-            if (m[1] == "firebug-service")
-                var domain = "extensions.firebug-service";
-        }
+        if (data.substring(0, Firebug.prefDomain.length) == Firebug.prefDomain)
+            var domain = Firebug.prefDomain;
+        if (data.substring(0, Firebug.servicePrefDomain.length) == Firebug.servicePrefDomain)
+            var domain = Firebug.servicePrefDomain; 
+            
         if (domain)
         {
             var name = data.substr(domain.length+1);
@@ -1825,7 +1822,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         appendScriptLines(lines, 1, max, sourceBox.maxLineNoChars, view);
 
         // delay until the panel is build so we know size
-        this.context.throttle(this.buildViewAround, this, [sourceBox], true);
+        this.context.throttle(this.buildViewAround, this, [sourceBox, 1], true);
 
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;

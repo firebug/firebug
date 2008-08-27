@@ -1520,7 +1520,7 @@ this.optionMenu = function(label, option)
 this.serviceOptionMenu = function(label, option)
 {
     return {label: label, type: "checkbox", checked: Firebug[option],
-        command: this.bindFixed(Firebug.setPref, Firebug, "extensions.firebug-service", option, !Firebug[option]) };
+        command: this.bindFixed(Firebug.setPref, Firebug, Firebug.servicePrefDomain, option, !Firebug[option]) };
 };
 
 // ************************************************************************************************
