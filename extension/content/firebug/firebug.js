@@ -1135,15 +1135,15 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIPrefObserver
     observe: function(subject, topic, data)
-    { 
+    {
         if (data.indexOf("extensions.") == -1)
             return;
 
         if (data.substring(0, Firebug.prefDomain.length) == Firebug.prefDomain)
             var domain = Firebug.prefDomain;
         if (data.substring(0, Firebug.servicePrefDomain.length) == Firebug.servicePrefDomain)
-            var domain = Firebug.servicePrefDomain; 
-            
+            var domain = Firebug.servicePrefDomain;
+
         if (domain)
         {
             var name = data.substr(domain.length+1);
@@ -1821,8 +1821,22 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             max = sourceBox.totalMax;
         appendScriptLines(lines, 1, max, sourceBox.maxLineNoChars, view);
 
-        // delay until the panel is build so we know size
-        this.context.throttle(this.buildViewAround, this, [sourceBox, 1], true);
+        // delay until the panel is built so we know size
+        if (this.context.buildViewTimeout)
+        {
+            this.context.clearTimeout(this.context.buildViewTimeout);
+            delete this.context.buildViewTimeout
+        }
+
+        this.context.buildViewTimeout = this.context.setTimeout(bindFixed(function()
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("firebug.createSourceBox, calling buildViewTimeout on in setTimeout\n");
+               this.buildViewAround(sourceBox, 1);
+        }, this));
+
+        if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("firebug.createSourceBox, did setTimeout\n");
 
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
@@ -1898,7 +1912,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
     scrollToLine: function(lineNo, highlight)
     {
-        if (FBTrace.DBG_LINETABLE) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"\n");
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"\n");
 
         if (this.context.scrollTimeout)
         {
@@ -1935,40 +1949,55 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
     buildViewAround: function(sourceBox, lineNo)  // defaults to first viewable lines
     {
-            var view = getChildByClass(sourceBox, 'sourceViewport');
-            if (!view)
-                FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
-            var panelHeight = this.panelNode.clientHeight;
-            sourceBox.lineHeight = view.childNodes[0].clientHeight;
-            var viewableLines = Math.round(panelHeight / sourceBox.lineHeight);
+        if (this.context.buildViewTimeout) // if we are called on set time out, harmless to clear it.
+        {
+            // there is a call on a delay, but a direct call should override it.
+            this.context.clearTimeout(this.context.buildViewTimeout);
+            delete this.context.buildViewTimeout
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("firebug.buildViewAround, cleared setTimeout\n");
+        }
+
+        var view = getChildByClass(sourceBox, 'sourceViewport');
+        if (!view)
+            FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+
+        var panelHeight = this.panelNode.clientHeight;
+        sourceBox.lineHeight = view.childNodes[0].clientHeight;
+        var viewableLines = Math.round(panelHeight / sourceBox.lineHeight);
+
+        if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("buildViewAround "+lineNo+" panelHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ viewableLines+"\n");
 
-            var centerNodeNumber = Math.round(viewableLines/2.0);
+        var centerNodeNumber = Math.round(viewableLines/2.0);
 
-            var topLine = 1; // will be view.childNodes[0] or [1]?
-            if (lineNo)
-                topLine = lineNo - centerNodeNumber;
-            if (topLine < 1)
-                topLine = 1;
+        var topLine = 1; // will be view.childNodes[0] or [1]?
+        if (lineNo)
+            topLine = lineNo - centerNodeNumber;
+        if (topLine < 1)
+            topLine = 1;
 
-            var bottomLine = topLine + viewableLines;
-            if (bottomLine > sourceBox.totalMax)
-                bottomLine = sourceBox.totalMax;
+        var bottomLine = topLine + viewableLines;
+        if (bottomLine > sourceBox.totalMax)
+            bottomLine = sourceBox.totalMax;
 
-            clearNode(view);
+        clearNode(view);
+
+        if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+"\n");
-            appendScriptLines(sourceBox.lines, topLine, bottomLine, sourceBox.maxLineNoChars, view);
 
-            view.previousSibling.style.height = (topLine - 1) * sourceBox.lineHeight + "px";
-            view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
+        appendScriptLines(sourceBox.lines, topLine, bottomLine, sourceBox.maxLineNoChars, view);
 
-            sourceBox.firstViewableLine = topLine;
-            sourceBox.lastViewableLine = bottomLine;
+        view.previousSibling.style.height = (topLine - 1) * sourceBox.lineHeight + "px";
+        view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
 
-            this.applyDecorator(sourceBox);
+        sourceBox.firstViewableLine = topLine;
+        sourceBox.lastViewableLine = bottomLine;
+
+        this.applyDecorator(sourceBox);
 
 
-            return view.childNodes[centerNodeNumber]; // node for lineNo.
+        return view.childNodes[centerNodeNumber]; // node for lineNo.
     },
 
     applyDecorator: function(sourceBox)
@@ -1993,12 +2022,16 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         var scrollStep = sourceBox.lineHeight;
         if (!scrollStep || scrollStep < 1)
-            FBTrace.dumpStack("badScrollStep");
+            FBTrace.dumpStack("firebug.reView: badScrollStep");
+
         var newTopLine = Math.round(scrollTop/scrollStep + 1);
         var newBottomLine = Math.round((scrollTop + sourceBox.clientHeight)/scrollStep);
 
         var newCenterLine = Math.round((newTopLine + newBottomLine)/2.0);
-        FBTrace.sysout("reView scrollTop: "+scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("reView scrollTop: "+scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
+
         this.buildViewAround(sourceBox, newCenterLine);
 
         this.lastScrollTop = scrollTop;
