@@ -145,8 +145,8 @@ Firebug.TabContext.prototype =
         var panelType = Firebug.getPanelType(panelName);
         if (!panelType && this.panelTypeMap)
             panelType = this.panelTypeMap[panelName];
-        if (FBTrace.DBG_PANELS)                                                                                       /*@expore*/
-            FBTrace.sysout("tabContext.getPanel name="+panelName+" noCreate="+noCreate+" panelType="+(panelType?panelType.prototype.name:"null")+"\n");  /*@expore*/
+        //if (FBTrace.DBG_PANELS)                                                                                       /*@expore*/
+        //    FBTrace.sysout("tabContext.getPanel name="+panelName+" noCreate="+noCreate+" panelType="+(panelType?panelType.prototype.name:"null")+"\n");  /*@expore*/
         if (panelType)
             return this.getPanelByType(panelType, noCreate);
     },
@@ -160,8 +160,8 @@ Firebug.TabContext.prototype =
         if ( this.panelMap.hasOwnProperty(panelName) )
         {
             var panel = this.panelMap[panelName];
-            if (FBTrace.DBG_PANELS)                                                                                   /*@explore*/
-                FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");           /*@explore*/
+            //if (FBTrace.DBG_PANELS)                                                                                   /*@explore*/
+            //    FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");           /*@explore*/
             if (panel.invalid)
             {
                 var doc = this.chrome.getPanelDocument(panelType);
@@ -173,7 +173,7 @@ Firebug.TabContext.prototype =
         }
         else if (!noCreate)
         {
-            if (FBTrace.DBG_PANELS) FBTrace.sysout("tabContext.getPanelByType panel NOT in panelMap\n");              /*@explore*/
+            //if (FBTrace.DBG_PANELS) FBTrace.sysout("tabContext.getPanelByType panel NOT in panelMap\n");              /*@explore*/
             var panel = new panelType();
             var doc = this.chrome.getPanelDocument(panelType);
             panel.initialize(this, doc);
