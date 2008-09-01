@@ -805,7 +805,7 @@ this.cssToXPath = function(rule)
         lastRule = rule;
 
         // Trim leading whitespace
-        rule = rule.replace(/^\s*|\s*$/g,"");
+        rule = this.trimLeft(rule);
         if (!rule.length)
             break;
 

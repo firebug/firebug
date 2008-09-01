@@ -2604,37 +2604,6 @@ function readPostTextFromRequest(request, context)
     return null;
 }
 
-function insertWrappedText(text, textBox)
-{
-    var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
-
-    var html = [];
-    var wrapWidth = Firebug.textWrapWidth;
-
-    var lines = splitLines(text);
-    for (var i = 0; i < lines.length; ++i)
-    {
-        var line = lines[i];
-        while (line.length > wrapWidth)
-        {
-            var m = reNonAlphaNumeric.exec(line.substr(wrapWidth, 100));
-            var wrapIndex = wrapWidth+ (m ? m.index : 0);
-            var subLine = line.substr(0, wrapIndex);
-            line = line.substr(wrapIndex);
-
-            html.push("<pre>");
-            html.push(escapeHTML(subLine));
-            html.push("</pre>");
-        }
-
-        html.push("<pre>");
-        html.push(escapeHTML(line));
-        html.push("</pre>");
-    }
-
-    textBox.innerHTML = html.join("");
-}
-
 function isURLEncodedFile(file, text)
 {
     if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)
