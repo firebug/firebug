@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://global/skin/findBar.css" type="text/css"?>
+<?xml-stylesheet href="chrome://firebug/skin/traceConsole.css"?>
+
+<!DOCTYPE window [
+<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
+%browserDTD;
+<!ENTITY % findBarDTD SYSTEM "chrome://global/locale/findbar.dtd" >
+%findBarDTD;
+]>
+
+<window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        xmlns:html="http://www.w3.org/1999/xhtml"
+        id="TraceConsole" 
+        windowtype="FBTraceConsole" 
+        title="Firebug Trace Console"
+        width="640" height="480"
+        screenX="10" screenY="10"
+        persist="screenX screenY width height sizemode"
+        onload="Console.onLoad()"
+        onunload="Console.onUnload()">
+
+  <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
+  <script type="application/x-javascript" src="chrome://firebug/content/traceConsole.js"/>
+  <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
+
+  <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
+  
+  <commandset id="mainCommandSet">
+    <command id="cmd_clearConsole" oncommand="Console.onClearConsole()"/>
+    <command id="cmd_find" oncommand="gFindBar.onFindCommand();"/>
+    <command id="cmd_findAgain" oncommand="gFindBar.onFindAgainCmd();"/>
+    <command id="cmd_findPrevious" oncommand="gFindBar.onFindPreviousCmd();"/>
+    <command id="cmd_separateConsole" oncommand="Console.onSeparateConsole();"/>
+    <command id="cmd_saveToFile" oncommand="Console.onSaveToFile();"/>
+    <command id="cmd_exitFirefox" oncommand="Console.onExitFirefox();"/>
+    <command id="cmd_restartFirefox" oncommand="Console.onRestartFirefox();"/>
+  </commandset>
+
+  <keyset id="mainKeyset">
+    <key id="key_find" key="&findOnCmd.commandkey;" command="cmd_find" modifiers="accel"/>
+    <key id="key_clearConsole" key="c" command="cmd_clearConsole" modifiers="accel"/>
+    <key id="key_separateConsole" key="b" command="cmd_separateConsole" modifiers="accel"/>
+    <key id="key_saveToFile" key="s" command="cmd_saveToFile" modifiers="accel"/>
+  </keyset>
+
+  <toolbox id="consoleToolbox">
+    <!-- Toolbar -->
+    <toolbar id="consoleToolbar" align="center">
+      <toolbarbutton id="clearConsole"
+        label="Clear" class="toolbar-image-button"
+        tooltiptext="Clear Console Ctrl+C" 
+        command="cmd_clearConsole"/>
+      <toolbarbutton id="findConsole"
+        label="Find" class="toolbar-image-button"
+        tooltiptext="Find Text Ctrl+F" 
+        command="cmd_find"/>
+      <toolbarbutton id="separateConsole"
+        label="Bookmark" class="toolbar-image-button"
+        tooltiptext="Insert Bookmark Ctrl+B" 
+        command="cmd_separateConsole"/>
+      <!--<toolbarbutton id="saveToFile"
+        label="Save to File" class="toolbar-image-button"
+        tooltiptext="Save to File Ctrl+S" 
+        command="cmd_saveToFile"/> -->
+      <toolbarseparator flex="1"/>
+      <toolbarbutton id="restartFirefox"
+        label="Restart Firefox" class="toolbar-image-button"
+        tooltiptext="Restart Firefox" 
+        command="cmd_restartFirefox"/>
+      <toolbarbutton id="closeFirefox"
+        label="Exit Firefox" class="toolbar-image-button"
+        tooltiptext="Exit Firefox" 
+        command="cmd_exitFirefox"/>
+    </toolbar> 
+  </toolbox>
+
+  <vbox flex="1">
+    <browser id="consoleFrame" type="content-primary"
+             src="chrome://firebug/content/traceConsole.html" flex="1"
+             disablehistory="true"/>
+    <findbar id="FindToolbar" browserid="consoleFrame"/>
+  </vbox>
+</window>
