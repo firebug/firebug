@@ -6,14 +6,23 @@
 // about:config browser.dom.window.dump.enabled true
 
 var FBTrace = {};
-try {
-(function() {
+try { (function() {
+
+// ************************************************************************************************
+// Shorcuts and Services
 
 const Ci = Components.interfaces;
-const consoleService = Components.classes["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
-const permissionManager = Components.classes["@mozilla.org/permissionmanager;1"].getService(Ci.nsIPermissionManager);
+const Cc = Components.classes;
+
+const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+const permissionManager = Cc["@mozilla.org/permissionmanager;1"].getService(Ci.nsIPermissionManager);
 
 FBTrace.avoidRecursion = false;
+
+this.reXPConnect = /\[xpconnect wrapped ([^\]]*)\]/;
+
+// Trace API
+// ************************************************************************************************
 
 this.sysout = function(msg, more)
 {
@@ -49,7 +58,7 @@ this.dumpTypes = function(header, obj)
         this.sysout("trace.dumpTypes FAILED:"+e+"\n");
     }
 }
-this.reXPConnect = /\[xpconnect wrapped ([^\]]*)\]/;
+
 this.dumpProperties = function(header, obj)
 {
     try {
@@ -185,7 +194,6 @@ this.dumpPermissions = function()
     FBTrace.sysout("Enumerate permissions DONE\n");
 },
 
-
 this.dumpIValue= function(header, iValue)
 {
     FBTrace.sysout(header+"\n");
@@ -208,12 +216,13 @@ this.consoleOut = function(text)
     consoleService.logStringMessage(text + "");
 },
 
-this.dumpStack = function(optional_header) {
+this.dumpStack = function(optional_header) 
+{
     if (optional_header)
         this.sysout(optional_header + "\n");
     this.sysout(this.getComponentsStack(2));
     this.sysout("\n");
-}
+},
 
 this.getComponentsStack = function(strip)
 {
@@ -225,7 +234,9 @@ this.getComponentsStack = function(strip)
         lines.splice(0, strip);
 
     return lines.join("\n");
-};
+}
+
+// ************************************************************************************************
 
 }).apply(FBTrace);
-} catch (exc) { alert(exc);}
+} catch (exc) { alert(exc); }

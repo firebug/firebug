@@ -1430,6 +1430,42 @@ this.splitLines = function(text)
     }
 };
 
+this.trimLeft = function(text)
+{
+    return text.replace(/^\s*|\s*$/g,"");
+}
+
+this.insertWrappedText = function (text, textBox)
+{
+    var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
+
+    var html = [];
+    var wrapWidth = Firebug.textWrapWidth;
+
+    var lines = this.splitLines(text);
+    for (var i = 0; i < lines.length; ++i)
+    {
+        var line = lines[i];
+        while (line.length > wrapWidth)
+        {
+            var m = reNonAlphaNumeric.exec(line.substr(wrapWidth, 100));
+            var wrapIndex = wrapWidth+ (m ? m.index : 0);
+            var subLine = line.substr(0, wrapIndex);
+            line = line.substr(wrapIndex);
+
+            html.push("<pre>");
+            html.push(escapeHTML(subLine));
+            html.push("</pre>");
+        }
+
+        html.push("<pre>");
+        html.push(escapeHTML(line));
+        html.push("</pre>");
+    }
+
+    textBox.innerHTML = html.join("");
+}
+
 // ************************************************************************************************
 // Menus
 

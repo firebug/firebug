@@ -47,6 +47,8 @@
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(FirebugContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
         <command id="cmd_breakOnTopLevel" oncommand="Firebug.togglePref('breakOnTopLevel')"/>
+        
+        <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.toggleConsole(false)"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -157,6 +159,13 @@
                 </hbox>
             </hbox>
 
+            <hbox id="fbTraceButtons" collapsed="true">
+                <toolbarseparator/>
+                <toolbarbutton label="&firebug.Trace.ToggleConsole;" class="toolbar-text-button"
+                               tooltiptext="&firebug.Trace.ToggleConsoleTooltip;" 
+                               command="cmd_toggleTraceConsole"/>
+            </hbox>
+            
             <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
             <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
                             class="toolbar-text-menubutton" collapsed="true"

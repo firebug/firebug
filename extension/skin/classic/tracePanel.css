@@ -11,6 +11,7 @@
     -moz-border-radius: 4px 4px 0 0;
     background-color: #FFFFFF;
 }
+
 .FBTraceOption[checked="true"] {
     font-weight: bold;
     background-color: #D7D7D7;
