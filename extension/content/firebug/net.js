@@ -2013,13 +2013,6 @@ function getCacheEntry(file, netProgress)
                             }
                         });
 
-                        // Update file category.
-                        if (file.mimeType)
-                        {
-                            file.category = null;
-                            getFileCategory(file);
-                        }
-
                         netProgress.update(file);
                     }
                 }
