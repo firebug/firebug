@@ -17,6 +17,7 @@ const prefs = PrefService.getService(nsIPrefBranch2);
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
 const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
@@ -115,6 +116,16 @@ Firebug.TraceModule = extend(ConsoleModule,
 
         prefs.setBoolPref("browser.dom.window.dump.enabled", true);
         prefs.addObserver("extensions", this, false);
+
+        consoleService.registerListener(Firebug.TraceModule.JSErrorConsoleObserver);
+    },
+
+    shutdown: function()
+    {
+        consoleService.unregisterListener(Firebug.TraceModule.JSErrorConsoleObserver);
+        
+        if (this.consoleWindow)
+            this.consoleWindow.Console.unregisterModule(this);
     },
 
     observe: function(subject, topic, data)
@@ -1166,6 +1177,37 @@ Firebug.TraceModule.TraceMessage.prototype =
      
         return this.err;   
     }
+}
+
+// ************************************************************************************************
+// Javascript Error Console observer
+
+Firebug.TraceModule.JSErrorConsoleObserver = 
+{
+    observe: function(object)
+    {
+        try
+        {
+            if (object.message.indexOf("[JavaScript Error:") == 0)
+            {
+                object = object.QueryInterface(Ci.nsIScriptError);
+                var message = "JavaScript Error: " + object.errorMessage;
+                Firebug.TraceModule.dumpProperties(message, object);
+            }
+        }
+        catch (exc)
+        {
+        }
+    },
+    
+	QueryInterface: function(iid) 
+	{
+		if (iid.equals(Ci.nsISupports) ||
+		    iid.equals(Ci.nsIConsoleListener))
+			return this;
+			
+		throw NS_ERROR_NO_INTERFACE;
+	}
 }
 
 // ************************************************************************************************
