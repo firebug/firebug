@@ -2854,7 +2854,6 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.dumpProperties("firebug moduleManager show", e);
         }
-        FBTrace.sysout("firebug moduleManager show\n");
     },
 
     hide: function(panel)
