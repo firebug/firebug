@@ -2660,7 +2660,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         panel.clear();
     },
 
-    getMenuLabel: function(option, location, shortened)
+    getMenuLabel: function(option, location)
     {
         var label = "";
         var host = "";
@@ -2674,9 +2674,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 label = "LocalFilesDisable";
             else
                 label = "HostDisable";
-
-            if (shortened)
-                return $STR("panel.Disabled");
             break;
 
         case "enable-site":
@@ -2686,9 +2683,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 label = "LocalFilesEnable";
             else
                 label = "HostEnable";
-
-            if (shortened)
-                return $STR("panel.Enabled");
             break;
 
         case "enable":
