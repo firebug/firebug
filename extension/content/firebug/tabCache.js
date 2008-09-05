@@ -54,8 +54,8 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             delete contexts[tabId];
 
             if (FBTrace.DBG_CACHE)
-                FBTrace.dumpProperties("tabCache.Temporary context used for: " + win.location.href,
-                    context.sourceCache.cache);
+                FBTrace.dumpProperties("tabCache.Temporary context used for: " + 
+                    context.window.location.href, context.sourceCache.cache);
         }
     },
 
