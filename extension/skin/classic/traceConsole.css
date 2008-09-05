@@ -154,8 +154,11 @@
 }
 
 .messageInfoStackTable .stackFrame > A:hover {
-	text-decoration:underline;
+}
+
+.stackFrameLink:hover {
 	cursor:pointer;
+	text-decoration:underline;
 }
 
 .messageInfoExcText > .ExceptionMessage {

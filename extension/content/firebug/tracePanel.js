@@ -639,7 +639,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                         FOR("stack", "$message|stackIterator",
                             TR(
                                 TD({class: "stackFrame"},
-                                    A({onclick: "$onClickStackFrame", lineNumber: "$stack.lineNumber"},
+                                    A({class: "stackFrameLink", onclick: "$onClickStackFrame", 
+                                        lineNumber: "$stack.lineNumber"},
                                         "$stack.fileName"),
                                     SPAN("&nbsp;"),
                                     SPAN("(", "$stack.lineNumber", ")")
