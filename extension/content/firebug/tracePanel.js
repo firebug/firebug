@@ -346,6 +346,14 @@ Firebug.TraceModule = extend(ConsoleModule,
                 this.listeners[i].onDump(message);
         }
 
+        var index = message.text.indexOf("ERROR");
+        if (index != -1)
+            message.type = "DBG_ERROR";
+
+        index = message.text.indexOf("EXCEPTION");
+        if (index != -1)
+            message.type = "DBG_ERROR";
+
         // If the panel isn't visible, push the message into a queue;
         // otherwise dump it directly to the panel.
         if (this.consoleRoot)
@@ -1132,6 +1140,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 
     getResponse: function()
     {
+        var result = null;
         try
         {
             var self = this;
@@ -1192,9 +1201,13 @@ Firebug.TraceModule.JSErrorConsoleObserver =
         {
             if (object.message.indexOf("[JavaScript Error:") == 0)
             {
+                // Log only chrome script errors.
                 object = object.QueryInterface(Ci.nsIScriptError);
-                var message = "JavaScript Error: " + object.errorMessage;
-                Firebug.TraceModule.dumpProperties(message, object);
+                if (object.sourceName && !object.sourceName.indexOf("chrome:"))
+                {
+                    var message = "JavaScript Error: " + object.errorMessage;
+                    Firebug.TraceModule.dumpProperties(message, object);
+                }
             }
         }
         catch (exc)
