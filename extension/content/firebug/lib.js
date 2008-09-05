@@ -286,7 +286,7 @@ function $STR(name) // name with _ in place of spaces is the key in the firebug.
 {
     try
     {
-        return document.getElementById("strings_firebug").getString(name.replace(' ', '_'));
+        return document.getElementById("strings_firebug").getString(name.replace(' ', '_', "g"));
     }
     catch (err)
     {
@@ -304,7 +304,7 @@ function $STRF(name, args)
 {
     try
     {
-        return document.getElementById("strings_firebug").getFormattedString(name.replace(' ', '_'), args);
+        return document.getElementById("strings_firebug").getFormattedString(name.replace(' ', '_', "g"), args);
     }
     catch (err)
     {
