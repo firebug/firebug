@@ -1775,7 +1775,6 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         if (!lines)
             return null;
 
-
         var sourceBox = this.document.createElement("div");
         sourceBox.repObject = sourceFile;
         setClass(sourceBox, "sourceBox");
@@ -1793,50 +1792,36 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             sourceBox.totalMax = sourceBox.totalMax + sourceFile.lineNumberShift; // eg -1
 
         sourceBox.decorator = sourceBoxDecorator;
-/*
-        do
-        {
-            var max = min + scriptBlockSize;
-            if (max > totalMax)
-                max = totalMax;
 
-            var args = [lines, min+1, max, maxLineNoChars, sourceBox];
-            this.context.throttle(appendScriptLines, top, args);
-
-            min += scriptBlockSize;
-        } while (max < totalMax);
-
-        if (sourceBoxDecorator)
-            this.context.throttle(sourceBoxDecorator, top, [sourceFile, sourceBox]);
-*/
         var paddedSource = "<div class='topSourcePadding'></div>"+
             "<div class='sourceViewport'></div>"+
             "<div class='bottomSourcePadding'><div>";
         appendInnerHTML(sourceBox, paddedSource);
 
-        // Initial View
+        // Initial View so that we can compute sourceBox.lineHeight = view.childNodes[0].clientHeight;
         var view = getChildByClass(sourceBox, 'sourceViewport');
         var max = scriptBlockSize;
         if (max > sourceBox.totalMax)
             max = sourceBox.totalMax;
         appendScriptLines(lines, 1, max, sourceBox.maxLineNoChars, view);
 
-        // delay until the panel is built so we know size
-        if (this.context.buildViewTimeout)
+        delete this.lastScrollTop;
+        setTimeout( bind(function delayScrollToLineOne()
         {
-            this.context.clearTimeout(this.context.buildViewTimeout);
-            delete this.context.buildViewTimeout
-        }
-
-        this.context.buildViewTimeout = this.context.setTimeout(bindFixed(function()
-        {
+            var view = getChildByClass(sourceBox, 'sourceViewport');
+            sourceBox.lineHeight = view.childNodes[0].clientHeight;
+            if (sourceBox.lineHeight == 0)
+                debugger;
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("firebug.createSourceBox, calling buildViewTimeout on in setTimeout\n");
-               this.buildViewAround(sourceBox, 1);
+                    FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+"\n");
+
+            if (sourceBox.scrollTop != 0)
+                sourceBox.scrollTop = 0; // causes onscroll event that triggers first buildViewAround
+            else
+                this.reView(sourceBox);
         }, this));
 
-        if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("firebug.createSourceBox, did setTimeout\n");
+
 
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
@@ -1881,7 +1866,6 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             FBTrace.sysout("firebug.showSourceFile: ", sourceFile+(sourceBox?" has sourcebox ":" needs new sourcebox ")); /*@explore*/
         if (!sourceBox)
         {
-
             sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
             this.panelNode.appendChild(sourceBox);
         }
@@ -1930,7 +1914,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
     {
         if (this.selectedSourceBox)
         {
-            var lineNode = this.buildViewAround(this.selectedSourceBox, lineNo);
+            var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
+            this.selectedSourceBox.scrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight;
 
             if (highlight && lineNode)
                 setClassTimed(lineNode, "jumpHighlight", this.context);
@@ -1947,96 +1932,107 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             return false;
     },
 
+    // should only be called onScroll
     buildViewAround: function(sourceBox, lineNo)  // defaults to first viewable lines
     {
-        if (this.context.buildViewTimeout) // if we are called on set time out, harmless to clear it.
-        {
-            // there is a call on a delay, but a direct call should override it.
-            this.context.clearTimeout(this.context.buildViewTimeout);
-            delete this.context.buildViewTimeout
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("firebug.buildViewAround, cleared setTimeout\n");
-        }
-
+        // TODO move the setup stuff to a resize event handler to make scrolling crisp
         var view = getChildByClass(sourceBox, 'sourceViewport');
         if (!view)
             FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
 
         var panelHeight = this.panelNode.clientHeight;
         sourceBox.lineHeight = view.childNodes[0].clientHeight;
-        var viewableLines = Math.round(panelHeight / sourceBox.lineHeight);
+        var viewableLines = Math.round(panelHeight / sourceBox.lineHeight);  // eg 17
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("buildViewAround "+lineNo+" panelHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ viewableLines+"\n");
 
-        var centerNodeNumber = Math.round(viewableLines/2.0);
+        var halfViewableLines = Math.round(viewableLines/2.0);  //eg 8
+        sourceBox.halfViewableLines = halfViewableLines;
 
         var topLine = 1; // will be view.childNodes[0] or [1]?
         if (lineNo)
-            topLine = lineNo - centerNodeNumber;
+            topLine = lineNo - halfViewableLines;  // eg 2544 - 8
+
         if (topLine < 1)
             topLine = 1;
 
-        var bottomLine = topLine + viewableLines;
+        var bottomLine = topLine + viewableLines;  // eg 2544 - 8 + 17
         if (bottomLine > sourceBox.totalMax)
+        {
             bottomLine = sourceBox.totalMax;
+            topLine = bottomLine - viewableLines;
+            if (topLine < 1)
+                topLine = 1;
+        }
 
         clearNode(view);
 
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+"\n");
-
-        appendScriptLines(sourceBox.lines, topLine, bottomLine, sourceBox.maxLineNoChars, view);
-
-        view.previousSibling.style.height = (topLine - 1) * sourceBox.lineHeight + "px";
+        var newScrollTop = (topLine - 1) * sourceBox.lineHeight;
+        view.previousSibling.style.height = newScrollTop + "px";
         view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
 
         sourceBox.firstViewableLine = topLine;
         sourceBox.lastViewableLine = bottomLine;
 
+        appendScriptLines(sourceBox.lines, topLine, bottomLine, sourceBox.maxLineNoChars, view);
+
+        this.lastScrollTop = sourceBox.scrollTop;  // prevent reView before sourceBoxDecoratorTimeout reset scrollTop
+
         this.applyDecorator(sourceBox);
 
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+" prev height: "+view.previousSibling.style.height+" next height: "+view.nextSibling.style.height+"\n");
 
-        return view.childNodes[centerNodeNumber]; // node for lineNo.
+        return;
     },
 
     applyDecorator: function(sourceBox)
     {
-         if (this.context.sourceBoxDecoratorTimeout)
-         {
-             this.context.clearTimeout(this.context.sourceBoxDecoratorTimeout);
-             delete this.context.sourceBoxDecoratorTimeout;
-         }
-         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
-         {
-             sourceBox.decorator(sourceBox, sourceBox.repObject);
-         }, this));
+        if (this.context.sourceBoxDecoratorTimeout)
+        {
+            this.context.clearTimeout(this.context.sourceBoxDecoratorTimeout);
+            delete this.context.sourceBoxDecoratorTimeout;
+        }
+        this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
+        {
+            sourceBox.decorator(sourceBox, sourceBox.repObject);
+        }, this));
     },
 
-    reView: function(sourceBox)
+    reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
+        var scrollTop = sourceBox.scrollTop;
+
+        //if (scrollTop == this.lastScrollTop)
+        //    return;
+
         if (!this.lastScrollTop)
             this.lastScrollTop = 0;
 
-        var scrollTop = sourceBox.scrollTop;
-
         var scrollStep = sourceBox.lineHeight;
         if (!scrollStep || scrollStep < 1)
-            FBTrace.dumpStack("firebug.reView: badScrollStep");
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("reView scrollTop: "+scrollTop+" no scrollStep\n");
 
-        var newTopLine = Math.round(scrollTop/scrollStep + 1);
-        var newBottomLine = Math.round((scrollTop + sourceBox.clientHeight)/scrollStep);
+            this.buildViewAround(sourceBox, 1);
+        }
+        else
+        {
+            var newTopLine = Math.round(scrollTop/scrollStep + 1);
+            var newBottomLine = Math.round((scrollTop + sourceBox.clientHeight)/scrollStep);
 
-        var newCenterLine = Math.round((newTopLine + newBottomLine)/2.0);
+            var newCenterLine = Math.round((newTopLine + newBottomLine)/2.0);
 
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("reView scrollTop: "+scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("reView scrollTop: "+scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
 
-        this.buildViewAround(sourceBox, newCenterLine);
+            this.buildViewAround(sourceBox, newCenterLine);
+        }
 
         this.lastScrollTop = scrollTop;
     },
-
 
 });
 
