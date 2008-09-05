@@ -65,11 +65,14 @@ HttpRequestObserver.prototype =
 
         try 
         {
-            subject.QueryInterface(Ci.nsIHttpChannel);
-            if (topic == "http-on-modify-request")
-                this.fireOnModifyRequest(subject);
-            else if (topic == "http-on-examine-response")
-                this.fireOnExamineResponse(subject);
+            if (subject instanceof Ci.nsIHttpChannel)
+            {
+                var win = getWindowForRequest(subject);
+                if (topic == "http-on-modify-request")
+                    this.fireOnModifyRequest(subject, win);
+                else if (topic == "http-on-examine-response")
+                    this.fireOnExamineResponse(subject, win);
+            }
         }
         catch (err)
         {
@@ -78,24 +81,26 @@ HttpRequestObserver.prototype =
         }
     },
 
-    fireOnModifyRequest: function(request)
+    fireOnModifyRequest: function(request, win)
     {
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.dumpProperties("httpObserver.onModifyRequest: (" + 
+            FBTrace.dumpProperties("httpObserver.onRequest: (" + 
                 + this.listeners.length + ") " + request.name, request);
 
+        win = win.wrappedJSObject;
         for (var i=0; i<this.listeners.length; i++)
-            this.listeners[i].onModifyRequest(request);
+            this.listeners[i].onModifyRequest(request, win);
     },
 
-    fireOnExamineResponse: function(request)
+    fireOnExamineResponse: function(request, win)
     {
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.dumpProperties("httpObserver.onExamineResponse: (" + 
+            FBTrace.dumpProperties("httpObserver.onResponse: (" + 
                 + this.listeners.length + ") " + request.name, request);
 
+        win = win.wrappedJSObject;
         for (var i=0; i<this.listeners.length; i++)
-            this.listeners[i].onExamineResponse(request);
+            this.listeners[i].onExamineResponse(request, win);
     },
 
     addListener: function(listener)
@@ -123,6 +128,42 @@ HttpRequestObserver.prototype =
 		
 		throw Cr.NS_ERROR_NO_INTERFACE;
 	}
+}
+
+// ************************************************************************************************
+// Helper functions
+
+function getWindowForRequest(request) 
+{
+    var webProgress = getRequestWebProgress(request);
+    return webProgress ? safeGetWindow(webProgress) : null;
+}
+
+function getRequestWebProgress(request) 
+{
+    try
+    {
+        if (request.notificationCallbacks)
+            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
+    } catch (exc) {}
+
+    try
+    {
+        if (request.loadGroup && request.loadGroup.groupObserver)
+            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
+    } catch (exc) {}
+
+    return null;
+}
+
+function safeGetWindow(webProgress) 
+{
+    try {
+        return webProgress.DOMWindow;
+    }
+    catch (ex) {
+        return null;
+    }
 }
 
 // xxxHonza: the FBTrace isn't available her yet. This is a place holder.
