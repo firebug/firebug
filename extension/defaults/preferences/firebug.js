@@ -42,6 +42,7 @@ pref("extensions.firebug.shadeBoxModel", true);
 
 // CSS
 pref("extensions.firebug.showComputedStyle", false);
+pref("extensions.firebug.showUserAgentCSS", false);
 
 // Script
 pref("extensions.firebug-service.breakOnErrors", false);

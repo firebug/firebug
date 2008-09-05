@@ -75,7 +75,7 @@ const prefNames =
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
 
     // CSS
-    "showComputedStyle",
+    "showComputedStyle", "showUserAgentCSS",
 
     // Script
 

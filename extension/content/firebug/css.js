@@ -987,9 +987,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var href = rule.parentStyleSheet.href;  // Null means inline
-                // This removes user agent rules, which we dont want to do.
-                //if (href && Firebug.filterSystemURLs && isSystemURL(href))
-                //    continue;
+                
+                if (href && !Firebug.showUserAgentCSS && isSystemURL(href)) // This removes user agent rules 
+                    continue;
                 if (!href)
                     href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
 
@@ -1105,7 +1105,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showComputedStyle")
+        if (name == "showComputedStyle" || name == "showUserAgentCSS")
             this.refresh();
     },
 
@@ -1113,7 +1113,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         return [
             {label: "ShowComputedStyle", type: "checkbox", checked: Firebug.showComputedStyle,
-                command: bindFixed(Firebug.togglePref, Firebug, "showComputedStyle") }
+                command: bindFixed(Firebug.togglePref, Firebug, "showComputedStyle") },
+            {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
+                    command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }    
         ];
     }
 });
