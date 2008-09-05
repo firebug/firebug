@@ -2464,9 +2464,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 // If the response is in the cache get it and display it;
                 // otherwise display a button, which can be used by the user
                 // to re-request the response from the server.
+
                 // xxxHonza this is a workaround, which should be removed
                 // as soon as the #430155 is fixed.
-                if (allowDoublePost || file.cacheEntry)
+                // xxxHonza: OK, #430155 is fixed this must be removed.
+                if (Ci.nsITraceableChannel || allowDoublePost || file.cacheEntry)
                 {
                     this.setResponseText(file, netInfoBox, responseTextBox, context);
                 }

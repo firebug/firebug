@@ -2746,9 +2746,10 @@ this.readPostTextFromXHR = function(xhrRequest, context)
     }
 
     return null;
-}
+};
 
-this.getStateDescription = function(flag) {
+this.getStateDescription = function(flag) 
+{
     var state = "";
     var nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
     if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START ";
