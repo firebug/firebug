@@ -1019,6 +1019,9 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         {
         }
     }
+
+    // Get snapshot of all properties now, as they can be changed.
+    this.getProperties();
 }
 
 // ************************************************************************************************
