@@ -226,7 +226,8 @@
                 if (oldPanel)
                 {
                     oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
-                    oldPanel.hide();
+                    var state = Firebug.getPanelState(oldPanel);
+                    oldPanel.hide(state);
                     oldPanel.panelNode.removeAttribute("active");
                 }
             ]]></body>

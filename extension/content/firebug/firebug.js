@@ -1371,7 +1371,7 @@ Firebug.Module =
     },
 
     /**
-     * Called when a context is destroyed.
+     * Called when a context is destroyed. Module may store info on persistedState for reloaded pages.
      */
     destroyContext: function(context, persistedState)
     {
@@ -1464,7 +1464,7 @@ Firebug.Panel =
         this.initializeNode(this.panelNode);
     },
 
-    destroy: function(state)
+    destroy: function(state) // Panel may store info on state
     {
         if (this.panelNode)
             delete this.panelNode.ownerPanel;
@@ -1501,11 +1501,11 @@ Firebug.Panel =
     {
     },
 
-    show: function(state)
+    show: function(state)  // persistedPanelState plus non-persisted hide() values
     {
     },
 
-    hide: function()
+    hide: function(state)  // store info on state for next show.
     {
     },
 
@@ -1932,7 +1932,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         {
             var lineNode = this.buildViewAround(this.selectedSourceBox, lineNo);
 
-            if (highlight)
+            if (highlight && lineNode)
                 setClassTimed(lineNode, "jumpHighlight", this.context);
 
             if (uiListeners.length > 0)
