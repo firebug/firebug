@@ -202,27 +202,30 @@
 /************************************************************************************************/
 
 #clearConsole {
-	list-style-image:url("chrome://firebug/skin/trace/delete.png");
+    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 192px 16px 176px);
 }
 
 #findConsole {
-	list-style-image:url("chrome://firebug/skin/trace/find.png");	
+    list-style-image: url("chrome://browser/skin/Search-glass-rtl.png");
+    -moz-image-region: rect(0px 16px 16px 0px);
 }
 
 #separateConsole {
-	list-style-image:url("chrome://firebug/skin/trace/clipping.png");	
+	list-style-image:url("chrome://mozapps/skin/places/tagContainerIcon.png");
 }
 
 #saveToFile {
-	list-style-image:url("chrome://firebug/skin/trace/disk.png");	
 }
 
 #closeFirefox {
-	list-style-image:url("chrome://firebug/skin/trace/exit.png");	
+    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 48px 16px 32px);
 }
 
 #restartFirefox {
-	list-style-image:url("chrome://firebug/skin/trace/restart.png");
+    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 64px 16px 48px);
 }
 
 /************************************************************************************************/
