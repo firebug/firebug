@@ -58,5 +58,5 @@
 <!ENTITY  firebug.Flash                 "Flash">
 
 <!ENTITY  firebug.Trace.ToggleConsole           "Open Console">
-<!ENTITY  firebug.Trace.ToggleConsoleTooltip    "Open or close Firebug trace console.">
+<!ENTITY  firebug.Trace.ToggleConsoleTooltip    "Open Firebug trace console.">
 
