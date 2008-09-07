@@ -643,7 +643,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                                         lineNumber: "$stack.lineNumber"},
                                         "$stack.fileName"),
                                     SPAN("&nbsp;"),
-                                    SPAN("(", "$stack.lineNumber", ")")
+                                    SPAN("(", "$stack.lineNumber", ")"),
+                                    SPAN("&nbsp;"),
+                                    A({class: "openDebugger", onclick: "$onOpenDebugger", 
+                                        lineNumber: "$stack.lineNumber",
+                                        fileName: "$stack.fileName"}, 
+                                        "[...]")
                                 )
                             )
                         )
@@ -720,6 +725,20 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         openDialog("chrome://global/content/viewSource.xul",
             winType, "all,dialog=no",
             event.target.innerHTML, null, null, lineNumber, false);
+    },
+
+    onOpenDebugger: function(event)
+    {
+        var target = event.target;
+        var lineNumber = target.getAttribute("lineNumber");
+        var fileName = target.getAttribute("fileName");
+
+        if (typeof(ChromeBugOpener) == "undefined")
+            return;
+
+        // xxxHonza: Open Chromebug with the source code file, scrolled automatically
+        // to the specified line number.
+        ChromeBugOpener.openNow();
     },
 
     // Firebug rep support
