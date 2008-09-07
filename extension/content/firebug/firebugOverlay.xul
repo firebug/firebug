@@ -48,7 +48,7 @@
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
         <command id="cmd_breakOnTopLevel" oncommand="Firebug.togglePref('breakOnTopLevel')"/>
         
-        <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.toggleConsole(false)"/>
+        <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
     </commandset>
 
     <keyset id="mainKeyset">

@@ -89,8 +89,13 @@ Firebug.TraceModule = extend(ConsoleModule,
 
     initialize: function(prefDomain, prefNames)
     {
-        if (this.isEnabled())
-            this.toggleConsole(true);
+        // If the trace-console window is already opened, attach to it.
+        if (!this.attachConsole())
+        {
+            // If the window isn't opened, open it automatically if it's allowed.
+            if (this.isEnabled())
+                this.openConsole();
+        }
 
         if (this.debug)
             FBTrace.sysout("TraceModule.initialize prefDomain="+ prefDomain+"\n");
@@ -217,16 +222,11 @@ Firebug.TraceModule = extend(ConsoleModule,
     },
 
     // Support for HTML trace console.
-    toggleConsole: function(forceOpen)
+    openConsole: function()
     {
-        // If console wndow is opened close it.
-        this.consoleWindow = windowMediator.getMostRecentWindow("FBTraceConsole");
-        if (forceOpen && this.consoleWindow)
-        {
-            this.consoleWindow.Console.registerModule(this);
-            this.consoleWindow.focus();
+        // Try to connect an existing trace-console window first.
+        if (this.attachConsole())
             return;
-        }
 
         // Make sure hooks are initialized now.
         this.registerHooks(true);
@@ -241,6 +241,24 @@ Firebug.TraceModule = extend(ConsoleModule,
             "FBTraceConsole",
             "chrome,resizable,scrollbars=auto,minimizable",
             args);
+    },
+
+    attachConsole: function()
+    {
+        // Already attached.
+        if (this.consoleRoot)
+            return true;
+
+        // If the trace-console window is already opened, attach it.
+        this.consoleWindow = windowMediator.getMostRecentWindow("FBTraceConsole");
+        if (this.consoleWindow)
+        {
+            this.consoleWindow.Console.registerModule(this);
+            this.consoleWindow.focus();
+            return true;
+        }
+
+        return false;
     },
 
     onLoadConsole: function(win, rootNode)
