@@ -202,12 +202,11 @@
 /************************************************************************************************/
 
 #clearConsole {
-    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
-    -moz-image-region: rect(0px 192px 16px 176px);
+    list-style-image: url("chrome://firebug/skin/trace/clear.png");
 }
 
 #findConsole {
-    list-style-image: url("chrome://browser/skin/Search-glass-rtl.png");
+    list-style-image: url("chrome://browser/skin/Search-glass.png");
     -moz-image-region: rect(0px 16px 16px 0px);
 }
 
