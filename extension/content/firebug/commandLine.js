@@ -794,7 +794,11 @@ function CommandLineHandler(context, win)
         for (var prop in vars)
         {
             function createHandler(p) {
-                return function() { return vars[p] ? vars[p].wrappedJSObject : null; }
+                return function() { 
+                    if (FBTrace.DBG_CONSOLE)
+                        FBTrace.dumpProperties("commandline.getInspectorHistory: " + p, vars);
+                    return vars[p] ? vars[p].wrappedJSObject : null; 
+                }
             }
             scope[prop] = createHandler(prop);
         }

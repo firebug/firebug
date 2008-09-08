@@ -810,6 +810,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.inspectorHistory.unshift(object);
             if (this.inspectorHistory.length > 5)
                 this.inspectorHistory.pop();            
+
+            if (FBTrace.DBG_HTML)
+                FBTrace.dumpProperties("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
         }
 
         this.ioBox.highlight(null);
