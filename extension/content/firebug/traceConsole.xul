@@ -41,7 +41,6 @@
 
   <keyset id="mainKeyset">
     <key id="key_find" key="&findOnCmd.commandkey;" command="cmd_find" modifiers="accel"/>
-    <key id="key_clearConsole" key="c" command="cmd_clearConsole" modifiers="accel"/>
     <key id="key_separateConsole" key="b" command="cmd_separateConsole" modifiers="accel"/>
     <key id="key_saveToFile" key="s" command="cmd_saveToFile" modifiers="accel"/>
   </keyset>
