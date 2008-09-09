@@ -803,6 +803,9 @@ function CommandLineHandler(context, win)
             scope[prop] = createHandler(prop);
         }
 
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand'): ", scope);
+
         if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
         {
             var methodName = event.target.getAttribute("methodName");
