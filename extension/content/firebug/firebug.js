@@ -1810,11 +1810,13 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         {
             var view = getChildByClass(sourceBox, 'sourceViewport');
             sourceBox.lineHeight = view.childNodes[0].clientHeight;
-            if (sourceBox.lineHeight == 0)
-                debugger;
+
             if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+"\n");
-
+            
+            if (sourceBox.lineHeight == 0) // if the panel is not selected (not active), then the DOM is not correct anyway.
+                return;
+            
             if (sourceBox.scrollTop != 0)
                 sourceBox.scrollTop = 0; // causes onscroll event that triggers first buildViewAround
             else
@@ -2036,7 +2038,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
 });
 
-function loadScriptLines(sourceFile, context)
+function loadScriptLines(sourceFile, context)  // array of lines
 {
     if (sourceFile.source)
         return sourceFile.source;

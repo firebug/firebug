@@ -2695,6 +2695,8 @@ this.readFromStream = function(stream, charset)
      }
      catch(exc)
      {
+    	 if (FBTrace.DBG_ERRORS)
+    		 FBTrace.dumpProperties("lib.readFromStream FAILS ", exc);
      }
 };
 
@@ -2988,7 +2990,22 @@ this.TextSearch = function(rootNode, rowFinder)
     this.findNext = function(wrapAround, sameNode)
     {
         startPt = doc.createRange();
-        startPt.setStartAfter(this.currentNode ? this.currentNode : rootNode);
+        try 
+        {
+        	startPt.setStartAfter(this.currentNode ? this.currentNode : rootNode);
+        }
+        catch (e)
+        {
+        	if (FBTrace.DBG_ERRORS)
+        		FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
+        	try {
+        		FBTrace.sysout("setStart try\n");
+        		startPt.setStart(this.currentNode ? this.currentNode : rootNode);
+        		FBTrace.sysout("setStart success\n");
+        	} catch (exc) {
+        		return;
+        	}
+        }
 
         var match = this.find(this.text);
         if (!match && wrapAround)
@@ -3020,6 +3037,46 @@ this.TextSearch = function(rootNode, rowFinder)
 };
 
 // ************************************************************************************************
+this.SourceBoxTextSearch = function(sourceBox)
+{
+    this.find = function(text)
+    {
+    	this.text = text;
+    	
+    	this.re = new RegExp(text, 'g');
+        return this.findNext(false);
+    };
+
+    this.findNext = function(wrapAround)
+    {
+        var match = null;
+        for (var point = this.mark; point < sourceBox.lines.length; point++)
+        {
+        	match = this.re.exec(sourceBox.lines[point]);
+        	if (match)
+        	{
+        		this.mark = point;
+        		return point;
+        	}
+        }
+        
+        if (!match && wrapAround)
+        {
+            this.reset();
+            return this.findNext(false);
+        }
+
+        return match;
+    };
+
+    this.reset = function()
+    {
+    	this.mark = 1;
+    };
+
+    this.reset();
+};
+//************************************************************************************************
 
 this.Continued = function()
 {
