@@ -601,7 +601,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
                 var lineNo = object.line;
                 if (lineNo)
-                    this.scrollToLine(lineNo, true);
+                    this.scrollToLine(lineNo, bind(this.highlightLine, this));
             }
             catch(exc) {
                 if (FBTrace.DBG_CSS)

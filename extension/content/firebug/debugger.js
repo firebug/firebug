@@ -1537,7 +1537,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             this.navigate(sourceFile);
             if (sourceLink.line)
-                this.scrollToLine(sourceLink.line, true);
+                this.scrollToLine(sourceLink.line, bind(this.highlightLine, this));
         }
     },
 
@@ -1942,10 +1942,13 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 return true; // Don't beep if only a # has been typed
 
             var lineNo = parseInt(m[1]);
-            if (this.highlightLine(lineNo))
+            if (!isNaN(lineNo) && (lineNo > 0) && (lineNo < sourceBox.lines.length) )
+            {
+            	this.scrollToLine(lineNo,  bind(this.highlightLine, this))
                 return true;
+            }
         }
-        // XXXjjb TODO this code needs to change for viewport based script source box.
+        
         var lineNo = null;
         if (this.currentSearch && text == this.currentSearch.text)
             lineNo = this.currentSearch.findNext(true);
@@ -1957,8 +1960,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (lineNo)
         {
-        	var highlight = true; // TODO pass in decorator to set window selection 
-        	this.scrollToLine(lineNo, highlight);
+        	this.scrollToLine(lineNo, bind(this.highlightLine, this));
             //var sel = this.document.defaultView.getSelection();
             //sel.removeAllRanges();
             //sel.addRange(this.currentSearch.range);

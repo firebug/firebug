@@ -1896,7 +1896,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
 
-    scrollToLine: function(lineNo, highlight)
+    scrollToLine: function(lineNo, highlighter)
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"\n");
 
@@ -1908,30 +1908,27 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
-            this.highlightLine(lineNo, highlight);
+        	if (this.selectedSourceBox)
+            {
+        		this.selectedSourceBox.highlighter = highlighter;
+                var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
+                this.selectedSourceBox.scrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight;
+
+                if (uiListeners.length > 0)
+                {
+                    var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
+                    dispatch(uiListeners, "onLineSelect", [link]);
+                }
+            }
         }, this));
     },
 
-    highlightLine: function(lineNo, highlight)
+    highlightLine: function(lineNode)
     {
-        if (this.selectedSourceBox)
+        if (lineNode)
         {
-            var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
-            this.selectedSourceBox.scrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight;
-
-            if (highlight && lineNode)
-                setClassTimed(lineNode, "jumpHighlight", this.context);
-
-            if (uiListeners.length > 0)
-            {
-                var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
-                dispatch(uiListeners, "onLineSelect", [link]);
-            }
-
-            return true;
+        	setClassTimed(lineNode, "jumpHighlight", this.context);
         }
-        else
-            return false;
     },
 
     // should only be called onScroll
@@ -1952,13 +1949,14 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         var halfViewableLines = Math.round(viewableLines/2.0);  //eg 8
         sourceBox.halfViewableLines = halfViewableLines;
 
+        
         var topLine = 1; // will be view.childNodes[0] or [1]?
         if (lineNo)
             topLine = lineNo - halfViewableLines;  // eg 2544 - 8
 
-        if (topLine < 1)
+        if (topLine < 1)  // the lineNo was less than half the viewable lines, eg 4-8 = -4
             topLine = 1;
-
+        
         var bottomLine = topLine + viewableLines;  // eg 2544 - 8 + 17
         if (bottomLine > sourceBox.totalMax)
         {
@@ -1968,6 +1966,9 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
                 topLine = 1;
         }
 
+        // Zero-based childNode index in view for lineNo. 2544 - (2544 - 8) = 8 or 4 - 1 = 3
+        var lineNodeNo = lineNo ? (lineNo - topLine) : -1; 
+        
         clearNode(view);
 
         var newScrollTop = (topLine - 1) * sourceBox.lineHeight;
@@ -1981,7 +1982,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         this.lastScrollTop = sourceBox.scrollTop;  // prevent reView before sourceBoxDecoratorTimeout reset scrollTop
 
-        this.applyDecorator(sourceBox);
+        this.applyDecorator(sourceBox, view.childNodes[lineNodeNo]);
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+" prev height: "+view.previousSibling.style.height+" next height: "+view.nextSibling.style.height+"\n");
@@ -1989,7 +1990,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         return;
     },
 
-    applyDecorator: function(sourceBox)
+    applyDecorator: function(sourceBox, lineNode)
     {
         if (this.context.sourceBoxDecoratorTimeout)
         {
@@ -1998,7 +1999,20 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         }
         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
         {
-            sourceBox.decorator(sourceBox, sourceBox.repObject);
+        	try 
+        	{
+        		if (sourceBox.highlighter)
+        		{
+        			sourceBox.highlighter(lineNode);
+        			delete sourceBox.highlighter;
+        		}
+        		sourceBox.decorator(sourceBox, sourceBox.repObject);
+        	}
+        	catch (exc) 
+        	{
+        		if (FBTrace.DBG_ERRORS)
+        			FBTrace.dumpProperties("sourcebox applyDecorator FAILS", exc);
+        	}
         }, this));
     },
 
