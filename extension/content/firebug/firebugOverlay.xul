@@ -161,8 +161,8 @@
 
             <hbox id="fbTraceButtons" collapsed="true">
                 <toolbarseparator/>
-                <toolbarbutton label="&firebug.Trace.ToggleConsole;" class="toolbar-text-button"
-                               tooltiptext="&firebug.Trace.ToggleConsoleTooltip;" 
+                <toolbarbutton id="fbTraceOpenConsole" class="toolbar-text-button"
+                               label="Open Console" tooltiptext="Open Console Tooltip" 
                                command="cmd_toggleTraceConsole"/>
             </hbox>
             

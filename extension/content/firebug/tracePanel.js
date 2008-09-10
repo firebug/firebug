@@ -89,6 +89,10 @@ Firebug.TraceModule = extend(ConsoleModule,
 
     initialize: function(prefDomain, prefNames)
     {
+        // Localize "Open Console" toolbar button.
+        FBL.internationalize("fbTraceOpenConsole", "label");
+        FBL.internationalize("fbTraceOpenConsole", "tooltiptext");
+
         // If the trace-console window is already opened, attach to it.
         if (!this.attachConsole())
         {
