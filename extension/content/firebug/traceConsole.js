@@ -18,6 +18,10 @@ var Console =
     onLoad: function()
     {
         var args = window.arguments[0];
+
+        FBL = args.FBL;
+        Firebug = args.Firebug;
+        
         this.activeModule = args.traceModule;
     
         var consoleFrame = document.getElementById("consoleFrame");

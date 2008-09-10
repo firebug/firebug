@@ -812,15 +812,17 @@ top.FirebugChrome =
 
     onContextShowing: function(event)
     {
-        if (!panelBar1.selectedPanel)
-            return false;
+        // xxxHonza: This context-menu support can be used even in separate window, which
+        // doesn't contain the FBUI (panels).
+        //if (!panelBar1.selectedPanel)
+        //    return false;
 
         var popup = $("fbContextMenu");
         var target = document.popupNode;
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         if (!panel)
-            panel = panelBar1.selectedPanel; // the event must be on our chrome not inside the panel
+            panel = panelBar1 ? panelBar1.selectedPanel : null; // the event must be on our chrome not inside the panel
 
         FBL.eraseNode(popup);
 
@@ -835,8 +837,10 @@ top.FirebugChrome =
             object = this.contextMenuObject;
         else if (target && target.ownerDocument == document)
             object = Firebug.getRepObject(target);
-        else if (target)
+        else if (target && panel)
             object = panel.getPopupObject(target);
+        else if (target)
+            object = Firebug.getRepObject(target); // xxxHonza: What about a node from different document? Is that OK?
 
         this.contextMenuObject = null;
 
@@ -951,8 +955,10 @@ top.FirebugChrome =
 
     onTooltipShowing: function(event)
     {
-        if (!panelBar1.selectedPanel)
-            return false;
+        // xxxHonza: This tooltip support can be used even in separate window, which
+        // doesn't contain the FBUI (panels).
+        //if (!panelBar1.selectedPanel)
+        //    return false;
 
         var tooltip = $("fbTooltip");
         var target = document.tooltipNode;
@@ -960,7 +966,9 @@ top.FirebugChrome =
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         var object;
-        if (target.ownerDocument == document)
+        if (this.contextMenuObject)
+            object = this.contextMenuObject;
+        else if (target && target.ownerDocument == document)
             object = Firebug.getRepObject(target);
         else if (panel)
             object = panel.getTooltipObject(target);

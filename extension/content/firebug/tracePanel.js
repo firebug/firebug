@@ -18,6 +18,7 @@ const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
 const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
+const clipboard = CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
@@ -237,6 +238,8 @@ Firebug.TraceModule = extend(ConsoleModule,
 
         var self = this;
         var args = {
+            FBL: FBL,
+            Firebug: Firebug,
             traceModule: self,
         };
 
@@ -796,7 +799,50 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     // Context menu
     getContextMenuItems: function(message, target, context)
     {
-        return [];
+        var items = [];
+
+        items.push({
+          label: "Cut",
+          nol10n: true,
+          command: bindFixed(this.onCut, this, message)
+        });
+
+        items.push({
+          label: "Copy",
+          nol10n: true,
+          command: bindFixed(this.onCopy, this, message)
+        });
+
+        items.push("-");
+
+        items.push({
+          label: "Remove",
+          nol10n: true,
+          command: bindFixed(this.onRemove, this, message)
+        });
+
+        return items;
+    },
+
+    getTooltip: function(message)
+    {
+        return message.text;
+    },
+
+    // Context menu commands
+    onCut: function(message)
+    {
+        this.onCopy(message);
+        this.onRemove(message);
+    },
+    
+    onCopy: function(message)
+    {
+        message.copyToClipboard();
+    },
+
+    onRemove: function(message)
+    {
     },
 
     // Implementation
@@ -1246,6 +1292,22 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
 
         return this.err;
+    },
+        
+    copyToClipboard: function()
+    {
+        if (!this.text)
+            return;
+
+        // Initialize transfer data.
+        var trans = CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
+        var wrapper = CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
+        wrapper.data = this.text;
+        trans.addDataFlavor("text/unicode");
+        trans.setTransferData("text/unicode", wrapper, this.text.length * 2);
+
+        // Set the data into the global clipboard
+        clipboard.setData(trans, null, Ci.nsIClipboard.kGlobalClipboard);
     }
 }
 

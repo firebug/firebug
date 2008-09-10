@@ -23,9 +23,14 @@
         onunload="Console.onUnload()">
 
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
-  <script type="application/x-javascript" src="chrome://firebug/content/traceConsole.js"/>
   <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
+  <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+  <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
+  <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+  
+  <script type="application/x-javascript" src="chrome://firebug/content/traceConsole.js"/>
+      
   <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
   
   <commandset id="mainCommandSet">
@@ -37,6 +42,7 @@
     <command id="cmd_saveToFile" oncommand="Console.onSaveToFile();"/>
     <command id="cmd_exitFirefox" oncommand="Console.onExitFirefox();"/>
     <command id="cmd_restartFirefox" oncommand="Console.onRestartFirefox();"/>
+    <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
   </commandset>
 
   <keyset id="mainKeyset">
@@ -76,10 +82,16 @@
     </toolbar> 
   </toolbox>
 
+  <popupset id="mainPopupSet">
+    <popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);" />
+    <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
+  </popupset>
+    
   <vbox flex="1">
     <browser id="consoleFrame" type="content-primary"
              src="chrome://firebug/content/traceConsole.html" flex="1"
-             disablehistory="true"/>
+             disablehistory="true" contextmenu="fbContextMenu"
+             tooltip="fbTooltip"/>
     <findbar id="FindToolbar" browserid="consoleFrame"/>
   </vbox>
 </window>
