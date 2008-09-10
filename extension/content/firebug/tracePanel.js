@@ -758,9 +758,23 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (typeof(ChromeBugOpener) == "undefined")
             return;
 
+        // Open Chromebug window.
+        var cbWindow = ChromeBugOpener.openNow();
+        FBTrace.dumpProperties("Chromebug window has been opened", cbWindow);
+
         // xxxHonza: Open Chromebug with the source code file, scrolled automatically
-        // to the specified line number.
-        ChromeBugOpener.openNow();
+        // to the specified line number. Currently chrome bug doesn't return the window
+        // from ChromeBugOpener.openNow method. If it would be following code opens
+        // the source code file and scrolls to the given line.
+
+        // Register onLoad listener and open the source file at the specified line.
+        if (cbWindow) {
+            cbWindow.addEventListener("load", function() {
+                var context = cbWindow.FirebugContext;
+                var link = new cbWindow.FBL.SourceLink(fileName, lineNumber, "js");
+                context.chrome.select(link, "script");
+            }, true);
+        }
     },
 
     // Firebug rep support
