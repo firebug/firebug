@@ -426,7 +426,7 @@ function requestStarted(request, xhrRequest, context, method, url)
     // Get "body" for POST and PUT requests. It will be displayed in
     // appropriate tab of the XHR.
     if (method == "POST" || method == "PUT")
-        spy.postText = readPostTextFromXHR(xhrRequest, context);
+        spy.postText = readPostTextFromRequest(request, context);
 
     spy.urlParams = parseURLParams(spy.href);
     spy.sourceLink = getStackSourceLink();

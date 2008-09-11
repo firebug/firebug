@@ -2726,11 +2726,11 @@ this.readPostTextFromPage = function(url, context)
      }
 };
 
-this.readPostTextFromXHR = function(xhrRequest, context)
+this.readPostTextFromRequest = function(request, context)
 {
     try
     {
-        var is = this.QI(xhrRequest.channel, Ci.nsIUploadChannel).uploadStream;
+        var is = this.QI(request, Ci.nsIUploadChannel).uploadStream;
         if (is)
         {
             var ss = this.QI(is, Ci.nsISeekableStream);
@@ -2744,7 +2744,7 @@ this.readPostTextFromXHR = function(xhrRequest, context)
     catch(exc)
     {
         if (FBTrace.DBG_ERRORS)                                                                                        /*@explore*/
-            FBTrace.dumpProperties("lib.readPostTextFromXHR FAILS ", exc);                                             /*@explore*/
+            FBTrace.dumpProperties("lib.readPostTextFromRequest FAILS ", exc);                                             /*@explore*/
     }
 
     return null;

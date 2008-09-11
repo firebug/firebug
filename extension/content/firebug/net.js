@@ -2541,28 +2541,6 @@ function getPostText(file, context)
     return file.postText;
 }
 
-function readPostTextFromRequest(request, context)
-{
-    try
-    {
-        if (!request.notificationCallbacks)
-            return null;
-
-        var xhrRequest = GI(request.notificationCallbacks, nsIXMLHttpRequest);
-        if (xhrRequest)
-            return readPostTextFromXHR(xhrRequest, context);
-    }
-    catch(exc)
-    {
-        if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-        {																			    /*@explore*/
-            FBTrace.dumpProperties("lib.getPostText FAILS ", exc);                      /*@explore*/
-        }																				/*@explore*/
-    }
-
-    return null;
-}
-
 function isURLEncodedFile(file, text)
 {
     if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)

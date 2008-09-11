@@ -246,26 +246,6 @@ function getPostText(file, context)
     return file.postText;
 }
 
-function readPostTextFromRequest(request, context)
-{
-    try
-    {
-        if (!request.notificationCallbacks)
-            return null;
-
-        var xhrRequest = GI(request.notificationCallbacks, nsIXMLHttpRequest);
-        if (xhrRequest)
-            return readPostTextFromXHR(xhrRequest, context);
-    }
-    catch(exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpProperties("lib.getPostText FAILS ", exc);
-    }
-
-    return null;
-}
-
 // ************************************************************************************************
 
 function StreamListener(url, cache, cb)
