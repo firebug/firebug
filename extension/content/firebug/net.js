@@ -56,6 +56,7 @@ const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
 
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsISupports);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1332,10 +1333,6 @@ function NetProgress(context)
             // The first page request is made before the initContext (known problem).
             queue.push(handler, args);
         }
-                                                                                                                       /*@explore*/
-        if (FBTrace.DBG_NET)                                                                                           /*@explore*/
-            FBTrace.dumpProperties( " net.post.args "+(panel?" applied":"queued @"+(queue.length-2))+                  /*@explore*/
-                " "+handler.name, args);                                                                               /*@explore*/
     };
 
     this.flush = function()
@@ -2083,43 +2080,6 @@ function getHttpHeaders(request, file)
     }
 }
 
-function getRequestWebProgress(request, netProgress)
-{
-    try
-    {
-        if (request.notificationCallbacks)
-        {
-            var bypass = false;
-            if (request.notificationCallbacks instanceof XMLHttpRequest)
-            {
-                request.notificationCallbacks.channel.visitRequestHeaders(
-                {
-                    visitHeader: function(header, value)
-                    {
-                        if (header == "X-Moz" && value == "microsummary")
-                            bypass = true;
-                    }
-                });
-            }
-            // XXXjjb Joe review: code above sets bypass, so this stmt should be in if (gives exceptions otherwise)
-            if (!bypass)
-            {
-                var progress = GI(request.notificationCallbacks, nsIWebProgress);
-                if (progress)
-                    return progress;
-            }
-        }
-    }
-    catch (exc) {}
-
-    try
-    {
-        if (request.loadGroup && request.loadGroup.groupObserver)
-            return QI(request.loadGroup.groupObserver, nsIWebProgress);
-    }
-    catch (exc) {}
-}
-
 function getRequestCategory(request)
 {
     try
@@ -2638,17 +2598,8 @@ var HttpObserver =
         if (this.registered)
             return;
 
-        try
-        {
-            observerService.addObserver(HttpObserver, "http-on-modify-request", false);
-            observerService.addObserver(HttpObserver, "http-on-examine-response", false);
-            this.registered = true;
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("net.HttpObserver.registerObserver: ", err);
-        }
+        httpObserver.wrappedJSObject.addListener(this);
+        this.registered = true;
     },
 
     unregisterObserver: function()
@@ -2656,70 +2607,41 @@ var HttpObserver =
         if (!this.registered)
             return;
 
-        try
-        {
-            observerService.removeObserver(HttpObserver, "http-on-modify-request");
-            observerService.removeObserver(HttpObserver, "http-on-examine-response");
-            this.registered = false;
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("net.HttpObserver.unregisterObserver: ", err);
-        }
+        httpObserver.wrappedJSObject.removeListener(this);
+        this.registered = false;
     },
 
-  // nsIObserver
-  observe: function(aSubject, aTopic, aData)
-  {
-      try {
-          aSubject = aSubject.QueryInterface(nsIHttpChannel);
+    onModifyRequest: function(aRequest, win)
+    {
+        var tabId = Firebug.getTabIdForWindow(win);
 
-          if (aTopic == 'http-on-modify-request') {
-            this.onModifyRequest(aSubject);
-          } else if (aTopic == 'http-on-examine-response') {
-            this.onExamineResponse(aSubject);
-          }
-      }
-      catch (err)
-      {
-          if (FBTrace.DBG_ERRORS)
-            ERROR(err);
-      }
-  },
+        if (FBTrace.DBG_NET) {
+            FBTrace.dumpProperties("net.HttpObserver: ON_MODIFY_REQUEST " +
+                aRequest.requestMethod + " " + 
+                (tabId ? "" : "(No TAB) ") + safeGetName(aRequest), 
+                aRequest);
+        }
 
-  onModifyRequest: function(aRequest)
-  {
-      var tabId = getTabIdForHttpChannel(aRequest);
-      var webProgress = getRequestWebProgress(aRequest, this);
-      var win = webProgress ? safeGetWindow(webProgress) : null;
+        if (!tabId || !win)                                                                                                      /*@explore*/
+            return;                                                                                                      /*@explore*/
 
-      if (FBTrace.DBG_NET)                                                                                             /*@explore*/
-      {                                                                                                                /*@explore*/
-          FBTrace.sysout("net.HttpObserver *** ON-MODIFY-REQUEST *** "+(tabId?"":"(No TAB)")+", request: ",                                       /*@explore*/
-             safeGetName(aRequest));                                                                             /*@explore*/
-      }                                                                                                                /*@explore*/
+        this.onStartRequest(aRequest, now(), win, tabId);
+    },
 
-      if (!tabId || !win)                                                                                                      /*@explore*/
-          return;                                                                                                      /*@explore*/
+    onExamineResponse: function(aRequest, win)
+    {
+        var tabId = Firebug.getTabIdForWindow(win);
 
-      this.onStartRequest(aRequest, now(), win, tabId);
-  },
+        if (FBTrace.DBG_NET) {
+            FBTrace.dumpProperties("net.HttpObserver: ON_EXAMINE_RESPONSE " +
+                aRequest.requestMethod + " " + 
+                (tabId ? "" : "(No TAB) ") + safeGetName(aRequest), 
+                aRequest);
+        }
 
-  onExamineResponse: function(aRequest)
-  {
-      var tabId = getTabIdForHttpChannel(aRequest);
-      var webProgress = getRequestWebProgress(aRequest, this);
-      var win = webProgress ? safeGetWindow(webProgress) : null;
-
-      if (FBTrace.DBG_NET)                                                                                             /*@explore*/
-      {                                                                                                                /*@explore*/
-          FBTrace.sysout("net.HttpObserver *** ON-EXAMINE-RESPONSE *** "+(tabId?"":"(No TAB)")+", request: ",                                        /*@explore*/
-            safeGetName(aRequest), aRequest);                                                                             /*@explore*/
-      }                                                                                                                /*@explore*/
-      if (win)
-        this.onEndRequest(aRequest, now(), win, tabId);
-  },
+        if (win)
+            this.onEndRequest(aRequest, now(), win, tabId);
+    },
 
   onStartRequest: function(aRequest, aTime, aWin, aTabId)
   {
@@ -2754,6 +2676,15 @@ var HttpObserver =
       if (networkContext) {
           var category = getRequestCategory(aRequest);
           networkContext.post(requestedFile, [aRequest, now(), aWin, category]);
+
+          if (FBTrace.DBG_NET)
+          {
+              var postText = readPostTextFromRequest(aRequest, context);
+              if (!postText)
+                postText = readPostTextFromPage(aRequest.name, context);
+
+              FBTrace.dumpProperties("net.onStartRequest, POST data: " + postText);
+          }
       }
   },
 
@@ -2782,52 +2713,16 @@ var HttpObserver =
       if (!info.postText)
         info.postText = readPostTextFromPage(aRequest.name, context);
 
+      if (FBTrace.DBG_NET)
+          FBTrace.dumpProperties("net.onEndRequest, POST data: " + info.postText, info);
+
       if (networkContext)
         networkContext.post(respondedFile, [aRequest, now(), info]);
-  },
-
-  QueryInterface: function(iid)
-  {
-      if (iid.equals(nsISupports) ||
-          iid.equals(nsIObserver))
-      {
-          return this;
-      }
-
-      throw Components.results.NS_NOINTERFACE;
   }
 }
 
 // ************************************************************************************************
 
-function getTabIdForHttpChannel(aHttpChannel)
-{
-    try {
-        if (aHttpChannel.notificationCallbacks)
-        {
-            var interfaceRequestor = QI(aHttpChannel.notificationCallbacks, Ci.nsIInterfaceRequestor);
-
-            try {
-              var win = GI(interfaceRequestor, Ci.nsIDOMWindow);
-              var tabId = Firebug.getTabIdForWindow(win);
-              if (tabId)
-                return tabId;
-            }
-            catch (err) {}
-        }
-
-        var progress = getRequestWebProgress(aHttpChannel);
-        var win = safeGetWindow(progress);
-        return Firebug.getTabIdForWindow(win);
-    }
-    catch (err)
-    {
-        if (FBTrace.DBG_ERRORS)
-            ERROR(err);
-    }
-
-    return null;
-}
 
 function GI(obj, iface)
 {
