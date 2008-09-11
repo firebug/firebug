@@ -2557,7 +2557,7 @@ function isURLEncodedFile(file, text)
 
 // ************************************************************************************************
 
-// Helper HTTP observer
+// HTTP listener - based on firebug-http-observer component
 // This observer is used for observing the first document http-on-modify-request
 // and http-on-examine-response events, which are fired before the context
 // is initialized (initContext method call). Without this observer this events
@@ -2698,27 +2698,6 @@ var HttpObserver =
         networkContext.post(respondedFile, [aRequest, now(), info]);
   }
 }
-
-// ************************************************************************************************
-
-
-function GI(obj, iface)
-{
-    try
-    {
-        return obj.getInterface(iface);
-    }
-    catch (e)
-    {
-        if (e.name == "NS_NOINTERFACE")
-        {
-            if (FBTrace.DBG_NET)                                                         /*@explore*/
-                FBTrace.sysout("net.getInterface - obj has no interface: ", iface, obj);  /*@explore*/
-        }
-    }
-
-    return null;
-};
 
 // ************************************************************************************************
 

@@ -180,23 +180,6 @@ top.SourceCache.prototype =
         }
     },
 
-    loadAsync: function(url, cb)  // called by getLineAsync which is never called.
-    {
-        if ( this.cache.hasOwnProperty(url) )
-        {
-            cb(this.cache[url], url);
-            return;
-        }
-
-        var ioService = IOService.getService(nsIIOService);
-
-        var channel = ioService.newChannel(url, null, null);
-        channel.loadFlags |= LOAD_FROM_CACHE | LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
-
-        var listener = new StreamListener(url, this, cb);
-        channel.asyncOpen(listener, null);
-    },
-
     store: function(url, text)
     {
         if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
@@ -214,21 +197,6 @@ top.SourceCache.prototype =
     {
         var lines = this.load(url);
         return lines ? lines[lineNo-1] : null;
-    },
-
-    getLineAsync: function(url, lineNo, cb)  // Never called
-    {
-        if ( this.cache.hasOwnProperty(url) )
-            cb(this.cache[url][lineNo-1], url, lineNo);
-        else
-        {
-            function loader(lines, url)
-            {
-                cb(lines[lineNo-1], url, lineNo);
-            }
-
-            this.loadAsync(url, loader);
-        }
     }
 };
 
@@ -248,42 +216,6 @@ function getPostText(file, context)
 
 // ************************************************************************************************
 
-function StreamListener(url, cache, cb)
-{
-    this.url = url;
-    this.cache = cache;
-    this.cb = cb;
-    this.data = [];
-}
-
-StreamListener.prototype =
-{
-    onStartRequest: function(request, context)
-    {
-    },
-
-    onStopRequest: function(request, context, status)
-    {
-        this.done = true;
-
-        if (status != NS_BINDING_ABORTED)
-        {
-            var data = this.data.join("");
-            var lines = this.cache.store(this.url, data);
-            this.cb(lines, this.url, status);
-        }
-    },
-
-    onDataAvailable: function(request, context, inStr, sourceOffset, count)
-    {
-        var sis = ScriptableInputStream.createInstance(nsIScriptableInputStream);
-        sis.init(inStr);
-        this.data.push(sis.read(count));
-    }
-};
-
-// ************************************************************************************************
-
 function getPostStream(context)
 {
     try
@@ -297,10 +229,8 @@ function getPostStream(context)
             // Seek to the beginning, or it will probably start reading at the end
             var postStream = QI(entry.postData, Ci.nsISeekableStream);
             postStream.seek(0, 0);
-
             return postStream;
         }
-
      }
      catch (exc)
      {
