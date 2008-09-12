@@ -109,7 +109,8 @@ Firebug.CommandLine = extend(Firebug.Module,
                 var m = reCmdSource.exec(result.source);
                 if (m.length > 0)
                     result.source = m[1];
-                this.error(result);
+
+                Firebug.Console.logFormatted([result], context, "error", true);
             }
         }
 
@@ -802,10 +803,10 @@ function CommandLineHandler(context, win)
         for (var prop in vars)
         {
             function createHandler(p) {
-                return function() { 
+                return function() {
                     if (FBTrace.DBG_CONSOLE)
                         FBTrace.dumpProperties("commandline.getInspectorHistory: " + p, vars);
-                    return vars[p] ? vars[p].wrappedJSObject : null; 
+                    return vars[p] ? vars[p].wrappedJSObject : null;
                 }
             }
             scope[prop] = createHandler(prop);
