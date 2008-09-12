@@ -2695,8 +2695,8 @@ this.readFromStream = function(stream, charset)
      }
      catch(exc)
      {
-    	 if (FBTrace.DBG_ERRORS)
-    		 FBTrace.dumpProperties("lib.readFromStream FAILS ", exc);
+         if (FBTrace.DBG_ERRORS)
+             FBTrace.dumpProperties("lib.readFromStream FAILS ", exc);
      }
 };
 
@@ -2750,7 +2750,7 @@ this.readPostTextFromRequest = function(request, context)
     return null;
 };
 
-this.getStateDescription = function(flag) 
+this.getStateDescription = function(flag)
 {
     var state = "";
     var nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
@@ -2990,21 +2990,21 @@ this.TextSearch = function(rootNode, rowFinder)
     this.findNext = function(wrapAround, sameNode)
     {
         startPt = doc.createRange();
-        try 
+        try
         {
-        	startPt.setStartAfter(this.currentNode ? this.currentNode : rootNode);
+            startPt.setStartAfter(this.currentNode ? this.currentNode : rootNode);
         }
         catch (e)
         {
-        	if (FBTrace.DBG_ERRORS)
-        		FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
-        	try {
-        		FBTrace.sysout("setStart try\n");
-        		startPt.setStart(this.currentNode ? this.currentNode : rootNode);
-        		FBTrace.sysout("setStart success\n");
-        	} catch (exc) {
-        		return;
-        	}
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
+            try {
+                FBTrace.sysout("setStart try\n");
+                startPt.setStart(this.currentNode ? this.currentNode : rootNode);
+                FBTrace.sysout("setStart success\n");
+            } catch (exc) {
+                return;
+            }
         }
 
         var match = this.find(this.text);
@@ -3041,9 +3041,9 @@ this.SourceBoxTextSearch = function(sourceBox)
 {
     this.find = function(text)
     {
-    	this.text = text;
-    	
-    	this.re = new RegExp(text, 'g');
+        this.text = text;
+
+        this.re = new RegExp(text, 'g');
         return this.findNext(false);
     };
 
@@ -3052,14 +3052,14 @@ this.SourceBoxTextSearch = function(sourceBox)
         var match = null;
         for (var point = this.mark; point < sourceBox.lines.length; point++)
         {
-        	match = this.re.exec(sourceBox.lines[point]);
-        	if (match)
-        	{
-        		this.mark = point;
-        		return point;
-        	}
+            match = this.re.exec(sourceBox.lines[point]);
+            if (match)
+            {
+                this.mark = point;
+                return point;
+            }
         }
-        
+
         if (!match && wrapAround)
         {
             this.reset();
@@ -3071,7 +3071,7 @@ this.SourceBoxTextSearch = function(sourceBox)
 
     this.reset = function()
     {
-    	this.mark = 1;
+        this.mark = 1;
     };
 
     this.reset();
@@ -3440,7 +3440,7 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
 
 this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 {
-    if (outerScript.isValid)
+/*    if (outerScript.isValid)
     {
         try
         {
@@ -3453,8 +3453,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
                 FBTrace.dumpProperties("addScriptsToSourceFile addLineTable FAILS", exc);
         }
     }
-    if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
-        FBTrace.sysout("FBL.addScriptsToSourceFile sourcefile="+sourceFile.toString()+"\n");                        /*@explore*/
+*/
 
     // Attach the innerScripts for use later
     if (!sourceFile.innerScripts)
@@ -3464,6 +3463,8 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
     {
         sourceFile.innerScripts.push(innerScripts.getNext());
     }
+    if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
+        FBTrace.sysout("FBL.addScriptsToSourceFile "+sourceFile.innerScripts.length+" scripts, sourcefile="+sourceFile.toString()+"\n");
 }
 
 //------------

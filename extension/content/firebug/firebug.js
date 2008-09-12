@@ -1792,6 +1792,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             sourceBox.totalMax = sourceBox.totalMax + sourceFile.lineNumberShift; // eg -1
 
         sourceBox.decorator = sourceBoxDecorator;
+        sourceBox.getLineNode = getLineNodeIfViewable;
 
         var paddedSource = "<div class='topSourcePadding'></div>"+
             "<div class='sourceViewport'></div>"+
@@ -1813,17 +1814,15 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
             if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+"\n");
-            
+
             if (sourceBox.lineHeight == 0) // if the panel is not selected (not active), then the DOM is not correct anyway.
                 return;
-            
+
             if (sourceBox.scrollTop != 0)
                 sourceBox.scrollTop = 0; // causes onscroll event that triggers first buildViewAround
             else
                 this.reView(sourceBox);
         }, this));
-
-
 
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
@@ -1831,14 +1830,14 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
             this.anonSourceBoxes.push(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-            FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.source?" anon ":" sourceBoxes")); /*@explore*/
+            FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.href?" sourceBoxes":" anon ")); /*@explore*/
 
         return sourceBox;
     },
 
     getSourceBoxBySourceFile: function(sourceFile)
     {
-        if (!sourceFile.source)
+        if (sourceFile.href)
         {
             var sourceBox = this.getSourceBoxByURL(sourceFile.href);
             if (sourceBox && sourceBox.repObject == sourceFile)
@@ -1875,30 +1874,14 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         this.showSourceBox(sourceBox);
     },
 
-    getLineNode: function(lineNo, sourceBox)
-    {
-        if (!sourceBox)
-            sourceBox = this.selectedSourceBox;
-
-        if (sourceBox)
-        {
-            if (lineNo >= sourceBox.firstViewableLine && lineNo <= sourceBox.lastViewableLine)
-            {
-                var view = getChildByClass(sourceBox, 'sourceViewport');
-                return view.childNodes[lineNo - sourceBox.firstViewableLine];
-            }
-        }
-        return null;
-    },
-
     getSourceLink: function(lineNo)
     {
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
 
-    scrollToLine: function(lineNo, highlighter)
+    scrollToLine: function(href, lineNo, highlighter)
     {
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"\n");
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"@"+href+"\n");
 
         if (this.context.scrollTimeout)
         {
@@ -1908,11 +1891,15 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
-        	if (this.selectedSourceBox)
+            // At this time we know which sourcebox is selected but the viewport is not selected.
+            // We need to scroll, let the scroll handler set the viewport, then highlight any lines visible.
+            if (this.selectedSourceBox)
             {
-        		this.selectedSourceBox.highlighter = highlighter;
+                if (highlighter) this.selectedSourceBox.highlighter = highlighter;
                 var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
                 this.selectedSourceBox.scrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight;
+
+                this.applyDecorator(this.selectedSourceBox); // scroll event may already call this
 
                 if (uiListeners.length > 0)
                 {
@@ -1923,11 +1910,20 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         }, this));
     },
 
-    highlightLine: function(lineNode)
+    jumpHighlightFactory: function(lineNo, context)
     {
-        if (lineNode)
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("jumpHighlightFactory on line "+lineNo+"\n");
+        return function jumpHighlightIfInView(sourceBox)
         {
-        	setClassTimed(lineNode, "jumpHighlight", this.context);
+            var  lineNode = sourceBox.getLineNode(lineNo);
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+lineNode.innerHTML+"\n");
+            if (lineNode)
+            {
+                setClassTimed(lineNode, "jumpHighlight", context);
+            }
+            return false; // not sticky
         }
     },
 
@@ -1949,14 +1945,14 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         var halfViewableLines = Math.round(viewableLines/2.0);  //eg 8
         sourceBox.halfViewableLines = halfViewableLines;
 
-        
+
         var topLine = 1; // will be view.childNodes[0] or [1]?
         if (lineNo)
             topLine = lineNo - halfViewableLines;  // eg 2544 - 8
 
         if (topLine < 1)  // the lineNo was less than half the viewable lines, eg 4-8 = -4
             topLine = 1;
-        
+
         var bottomLine = topLine + viewableLines;  // eg 2544 - 8 + 17
         if (bottomLine > sourceBox.totalMax)
         {
@@ -1967,8 +1963,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         }
 
         // Zero-based childNode index in view for lineNo. 2544 - (2544 - 8) = 8 or 4 - 1 = 3
-        var lineNodeNo = lineNo ? (lineNo - topLine) : -1; 
-        
+        var centralLineNumber = lineNo ? (lineNo - topLine) : -1;
+
         clearNode(view);
 
         var newScrollTop = (topLine - 1) * sourceBox.lineHeight;
@@ -1982,7 +1978,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         this.lastScrollTop = sourceBox.scrollTop;  // prevent reView before sourceBoxDecoratorTimeout reset scrollTop
 
-        this.applyDecorator(sourceBox, view.childNodes[lineNodeNo]);
+        this.applyDecorator(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+" prev height: "+view.previousSibling.style.height+" next height: "+view.nextSibling.style.height+"\n");
@@ -1990,7 +1986,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         return;
     },
 
-    applyDecorator: function(sourceBox, lineNode)
+    applyDecorator: function(sourceBox)
     {
         if (this.context.sourceBoxDecoratorTimeout)
         {
@@ -1999,20 +1995,21 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         }
         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
         {
-        	try 
-        	{
-        		if (sourceBox.highlighter)
-        		{
-        			sourceBox.highlighter(lineNode);
-        			delete sourceBox.highlighter;
-        		}
-        		sourceBox.decorator(sourceBox, sourceBox.repObject);
-        	}
-        	catch (exc) 
-        	{
-        		if (FBTrace.DBG_ERRORS)
-        			FBTrace.dumpProperties("sourcebox applyDecorator FAILS", exc);
-        	}
+            try
+            {
+                if (sourceBox.highlighter)
+                {
+                    var sticky = sourceBox.highlighter(sourceBox);
+                    if (!sticky)
+                        delete sourceBox.highlighter;
+                }
+                sourceBox.decorator(sourceBox, sourceBox.repObject);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.dumpProperties("sourcebox applyDecorator FAILS", exc);
+            }
         }, this));
     },
 
@@ -2064,6 +2061,16 @@ function appendScriptLines(lines, min, max, maxLineNoChars, panelNode)
 {
     var html = getSourceLineRange(lines, min, max, maxLineNoChars);
     appendInnerHTML(panelNode, html);
+}
+
+function getLineNodeIfViewable(lineNo)
+{
+    if (lineNo >= this.firstViewableLine && lineNo <= this.lastViewableLine)
+    {
+        var view = getChildByClass(this, 'sourceViewport');
+        return view.childNodes[lineNo - this.firstViewableLine];
+    }
+    return null;
 }
 
 // ************************************************************************************************
@@ -2920,5 +2927,6 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 });
 
 // ************************************************************************************************
+
 
 }});

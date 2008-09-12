@@ -461,7 +461,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     stopDebugging: function(context)
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context"+context+"\n");
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.window+"\n");
         try
         {
             fbs.unlockDebugger();
@@ -488,8 +488,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var panel = context.getPanel("script", true);
                 if (panel)
                 {
-                    if (panel.executionLine)
-                        panel.executionLine.removeAttribute("exeLine");
+                    panel.showNoStackFrame();
                     panel.select(null);
                 }
             }
@@ -578,9 +577,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             delete chrome.updateViewOnShowHook;
             updateViewOnShowHook();
         }
-        
+
         if (panel)
-        	this.syncCommands(panel.context);
+            this.syncCommands(panel.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -912,7 +911,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var sourceBox = panel.getSourceBoxByURL(url);
                 if (sourceBox)
                 {
-                    var row = Firebug.SourceBoxPanel.getLineNode(lineNo, sourceBox)
+                    var row = sourceBox.getLineNode(lineNo);
                     if (FBTrace.DBG_BP)                                                                                /*@explore*/
                         FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+"\n"); /*@explore*/
                     if (!row)
@@ -1511,8 +1510,6 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     decorateJavascript: function(sourceBox)
     {
-        if (this.executionFile && this.location.href == this.executionFile.href)
-            this.setExecutionLine(this.executionLineNo);
         this.markExecutableLines(sourceBox);
         this.setLineBreakpoints(sourceBox.repObject, sourceBox)
     },
@@ -1537,7 +1534,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             this.navigate(sourceFile);
             if (sourceLink.line)
-                this.scrollToLine(sourceLink.line, bind(this.highlightLine, this));
+                this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
         }
     },
 
@@ -1561,7 +1558,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n"); /*@explore*/
 
             this.navigate(this.executionFile);
-            this.scrollToLine(this.executionLineNo, true);
+            this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
             this.context.throttle(this.updateInfoTip, this);
             return;
         }
@@ -1576,7 +1573,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.executionFile = null;
         this.executionLineNo = -1;
-        this.setExecutionLine(-1);
+        this.highlightExecutionLine(this.selectedSourceBox);
         this.updateInfoTip();
     },
 
@@ -1585,7 +1582,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceFile = sourceBox.repObject;
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString()+"\n");                /*@explore*/
         var lineNo = sourceBox.firstViewableLine;
-        while( lineNode = this.getLineNode(lineNo) )
+        while( lineNode = sourceBox.getLineNode(lineNo) )
         {
             var script = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
 
@@ -1600,24 +1597,25 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines DONE: "+sourceFile.toString()+"\n");                /*@explore*/
     },
 
-    setExecutionLine: function(lineNo)  // TODO should be in showSourceFile callback
+    highlightExecutionLine: function(sourceBox)
     {
-        var lineNode = (lineNo == -1) ? null : this.getLineNode(lineNo);
-
-        if (this.executionLine)
+        if (this.executionLine)  // could point to any node in any sourcebox
             this.executionLine.removeAttribute("exeLine");
 
-        this.executionLine = lineNode;
+        var lineNode = sourceBox.getLineNode(this.executionLineNo);
+
+        this.executionLine = lineNode;  // if null, clears
 
         if (lineNode)
             lineNode.setAttribute("exeLine", "true");
                                                                                                                        /*@explore*/
-        if (FBTrace.DBG_BP || FBTrace.DBG_STACK) FBTrace.sysout("debugger.setExecutionLine to lineNo: "+lineNo+" lineNode="+lineNode+"\n"); /*@explore*/
+        if (FBTrace.DBG_BP || FBTrace.DBG_STACK) FBTrace.sysout("debugger.highlightExecutionLine lineNode="+lineNode+"\n"); /*@explore*/
+        return true; // sticky
     },
 
     toggleBreakpoint: function(lineNo)
     {
-        var lineNode = this.getLineNode(lineNo);
+        var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n");                           /*@explore*/
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(this.location.href, lineNo);
@@ -1627,7 +1625,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     toggleDisableBreakpoint: function(lineNo)
     {
-        var lineNode = this.getLineNode(lineNo);
+        var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (lineNode.getAttribute("disabledBreakpoint") == "true")
             fbs.enableBreakpoint(this.location.href, lineNo);
         else
@@ -1636,7 +1634,7 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     editBreakpointCondition: function(lineNo)
     {
-        var sourceRow = this.getLineNode(lineNo);
+        var sourceRow = this.selectedSourceBox.getLineNode(lineNo);
         var sourceLine = getChildByClass(sourceRow, "sourceLine");
         var condition = fbs.getBreakpointCondition(this.location.href, lineNo);
 
@@ -1944,11 +1942,11 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var lineNo = parseInt(m[1]);
             if (!isNaN(lineNo) && (lineNo > 0) && (lineNo < sourceBox.lines.length) )
             {
-            	this.scrollToLine(lineNo,  bind(this.highlightLine, this))
+                this.scrollToLine(sourceBox.repObject.href, lineNo,  this.jumpHighlightFactory(lineNo, this.context))
                 return true;
             }
         }
-        
+
         var lineNo = null;
         if (this.currentSearch && text == this.currentSearch.text)
             lineNo = this.currentSearch.findNext(true);
@@ -1960,7 +1958,8 @@ ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (lineNo)
         {
-        	this.scrollToLine(lineNo, bind(this.highlightLine, this));
+            // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
+            this.scrollToLine(sourceBox.repObject.href, lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
             //var sel = this.document.defaultView.getSelection();
             //sel.removeAllRanges();
             //sel.addRange(this.currentSearch.range);
@@ -2794,7 +2793,7 @@ function setLineBreakpoints(sourceFile, sourceBox)
 {
     fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, script, props)
     {
-        var scriptRow = Firebug.SourceBoxPanel.getLineNode(line, sourceBox);
+        var scriptRow = sourceBox.getLineNode(line);
         if (scriptRow)
         {
             scriptRow.setAttribute("breakpoint", "true");
