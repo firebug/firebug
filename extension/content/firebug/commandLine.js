@@ -10,7 +10,7 @@ const commandPrefix = ">>>";
 
 const reOpenBracket = /[\[\(\{]/;
 const reCloseBracket = /[\]\)\}]/;
-
+const reCmdSource = /^with\(_FirebugCommandLine\){(.*)};$/;
 
 // ************************************************************************************************
 // GLobals
@@ -77,7 +77,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         element.setAttribute("methodName", "evaluate");
 
         expr = expr.toString();
-        expr = "with (_FirebugCommandLine) {\n " + expr + " \n};";
+        expr = "with(_FirebugCommandLine){" + expr + "};";
         element.setAttribute("expr", expr);
 
         var consoleHandler;
@@ -103,7 +103,15 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
         }
         else
-            consoleHandler.evaluateError = consoleHandler.error;
+        {
+            consoleHandler.evaluateError = function useErrorFunction(result)
+            {
+                var m = reCmdSource.exec(result.source);
+                if (m.length > 0)
+                    result.source = m[1];
+                this.error(result);
+            }
+        }
 
         element.dispatchEvent(event);
     },
