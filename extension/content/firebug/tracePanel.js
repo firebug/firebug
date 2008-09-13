@@ -403,7 +403,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                     "$message|getMessageIndex")
             ),
             TD({class: "messageCol"},
-                DIV({class: "messageLabel", title: "$message|getMessageLabel"},
+                DIV({class: "messageLabel", title: "$message|getMessageTitle"},
                     "$message|getMessageLabel")
             )
         ),
@@ -488,7 +488,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             DIV({class: "messageInfoExcText messageInfoText"}),
             DIV({class: "messageInfoPropsText messageInfoText"}),
             DIV({class: "messageInfoResponseText messageInfoText"},
-                "Cache not available."
+                IFRAME({class: "messageInfoResponseFrame"})
             ),
             DIV({class: "messageInfoSourceText messageInfoText"}),
             DIV({class: "messageInfoIfacesText messageInfoText"}),
@@ -508,6 +508,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     },
 
     getMessageLabel: function(message)
+    {
+        // xxxHonza: should be parametrized in preferences.
+        return cropString(message.getLabel(), 150);
+    },
+
+    getMessageTitle: function(message) 
     {
         return message.getLabel();
     },
@@ -826,7 +832,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         }
         else if (hasClass(tab, "messageInfoResponseTab"))
         {
-            this.updateInfoImpl(messageInfoBody, view, message, message.getResponse);
+            this.updateInfoImpl(messageInfoBody, view, message, message.getResponse,
+                function (valueBox, text) {
+                    var iframe = getChildByClass(valueBox, "messageInfoResponseFrame");
+                    iframe.contentWindow.document.body.innerHTML = text;
+                });
         }
         else if (hasClass(tab, "messageInfoSourceTab"))
         {

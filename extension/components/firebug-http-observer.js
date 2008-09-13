@@ -27,7 +27,8 @@ var FBTrace = null;
  */
 function HttpRequestObserver()
 {
-    // Get firebug-trace service for logging (the service should be registered now).
+    // Get firebug-trace service for logging (the service should be already
+    // registered at this moment).
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
         .getService(Ci.nsISupports).wrappedJSObject;
 
