@@ -961,6 +961,9 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
 
     // Get snapshot of all properties now, as they can be changed.
     this.getProperties();
+
+    // See comment in getTypes method.
+    this.getTypes();
 }
 
 // ************************************************************************************************
@@ -1159,7 +1162,11 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 this.types += "typeof = " + typeof(obj) + EOF;
                 if (obj)
-                    this.types += "    constructor = " + obj.constructor + EOF;
+                    // xxxHonza: FF Crashes on this line if the obj is an exception.
+                    // This happens only for TypeError object (exception in catch block)
+                    // and only if this function is called when the log in trace console
+                    // is expanded. This is way it's called automatically in constructor.
+                    this.types += "    constructor = " + obj.constructor + EOF; 
 
                 obj = obj.prototype;
             }
@@ -1245,7 +1252,8 @@ Firebug.TraceModule.JSErrorConsoleObserver =
                 if (object.sourceName && !object.sourceName.indexOf("chrome:"))
                 {
                     var message = "JavaScript Error: " + object.errorMessage;
-                    Firebug.TraceModule.dumpProperties(message, object);
+                    Firebug.TraceModule.dump(
+                        new Firebug.TraceModule.TraceMessage("", message, object));
                 }
             }
         }

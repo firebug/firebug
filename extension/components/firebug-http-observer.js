@@ -94,7 +94,7 @@ HttpRequestObserver.prototype =
             FBTrace.dumpProperties("httpObserver.onRequest: (" + 
                 + this.listeners.length + ") " + request.name, request);
 
-        win = win.wrappedJSObject;
+        win = win ? win.wrappedJSObject : null;
         for (var i=0; i<this.listeners.length; i++)
             this.listeners[i].onModifyRequest(request, win);
     },
@@ -105,7 +105,7 @@ HttpRequestObserver.prototype =
             FBTrace.dumpProperties("httpObserver.onResponse: (" + 
                 + this.listeners.length + ") " + request.name, request);
 
-        win = win.wrappedJSObject;
+        win = win ? win.wrappedJSObject : null;
         for (var i=0; i<this.listeners.length; i++)
             this.listeners[i].onExamineResponse(request, win);
     },

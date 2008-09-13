@@ -12,6 +12,7 @@ const Ci = Components.interfaces;
 const Cr = Components.results;
 
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 
 // ************************************************************************************************
 
@@ -115,8 +116,27 @@ TraceConsoleService.prototype =
 
     notifyObservers: function(subject, topic, someData)
     {
-        for (var i=0; i<this.observers.length; i++)
-            this.observers[i].observe(subject, topic, someData);
+        try
+        {
+            if (typeof(subject) == "string") {
+                someData += " " + subject.toString();
+                subject = null;
+            }
+
+            for (var i=0; i<this.observers.length; i++)
+                this.observers[i].observe(subject, topic, someData);
+        }
+        catch (err)
+        {
+            // If it's not possible to distribute the log through registered observers,
+            // use Firefox ErrorConsole. Ulimately the trace-console listens for it
+            // too and so, will display that.
+            var scriptError = Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError);
+            scriptError.init("[JavaScript Error: Failed to notify firebug-trace observers!] " +
+                err.toString(), "chrome://firebug/components/firebug-trace-service.js",
+                err.sourceLine, err.lineNumber, err.columnNumber, err.flags, err.category);
+            consoleService.logMessage(scriptError);
+        }
     },
 
     enumerateObservers: function(topic)

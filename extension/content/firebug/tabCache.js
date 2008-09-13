@@ -245,7 +245,7 @@ TracingListener.prototype =
         }
         catch (err)
         {
-            if (FBTrace.ERRORS)
+            if (FBTrace.DBG_ERRORS)
                 FBTrace.dumpProperties("tabCache.TracingListener.onCollectData EXCEPTION\n", err);
         }
 
