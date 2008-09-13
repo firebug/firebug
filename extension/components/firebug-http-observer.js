@@ -17,6 +17,8 @@ var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICate
 // ************************************************************************************************
 // HTTP Request Observer implementation
 
+var FBTrace = null;
+
 /**
  * This service is intended as the only HTTP observer registered by Firebug.
  * All FB extensions and Firebug itself should register a listener within this
@@ -25,6 +27,10 @@ var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICate
  */
 function HttpRequestObserver()
 {
+    // Get firebug-trace service for logging (the service should be registered now).
+    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
+        .getService(Ci.nsISupports).wrappedJSObject;
+
     this.wrappedJSObject = this;
     this.listeners = [];
 }
@@ -38,7 +44,7 @@ HttpRequestObserver.prototype =
         observerService.addObserver(this, "http-on-examine-response", false);
 
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.dump("httpObserver.initialize OK");
+            FBTrace.sysout("httpObserver.initialize OK");
     },
 
     shutdown: function()
@@ -48,7 +54,7 @@ HttpRequestObserver.prototype =
         observerService.removeObserver(this, "http-on-examine-response");
 
         if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.dump("httpObserver.shutdown OK");
+            FBTrace.sysout("httpObserver.shutdown OK");
     },
 
     /* nsIObserve */
@@ -77,7 +83,7 @@ HttpRequestObserver.prototype =
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpException("httpObserver.observe EXCEPTION", err);
+                FBTrace.sysout("httpObserver.observe EXCEPTION", err);
         }
     },
 
@@ -164,15 +170,6 @@ function safeGetWindow(webProgress)
     catch (ex) {
         return null;
     }
-}
-
-// xxxHonza: the FBTrace isn't available her yet. This is a place holder.
-var FBTrace =
-{
-    DBG_HTTPOBSERVER: false,
-    dump: function(message) { },
-    dumpProperties: function(message, object) { },
-    dumpException: function(message, exception) { }
 }
 
 // ************************************************************************************************
