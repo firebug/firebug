@@ -56,7 +56,7 @@ const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
 
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
-const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsISupports);
+const httpObserver = CCSV("@joehewitt.com/firebug-http-observer;1", "nsISupports");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -2592,14 +2592,6 @@ var HttpObserver =
     onModifyRequest: function(aRequest, win)
     {
         var tabId = Firebug.getTabIdForWindow(win);
-
-        if (FBTrace.DBG_NET) {
-            FBTrace.dumpProperties("net.HttpObserver: ON_MODIFY_REQUEST " +
-                aRequest.requestMethod + " " + 
-                (tabId ? "" : "(No TAB) ") + safeGetName(aRequest), 
-                aRequest);
-        }
-
         if (!tabId || !win)                                                                                                      /*@explore*/
             return;                                                                                                      /*@explore*/
 
@@ -2609,14 +2601,6 @@ var HttpObserver =
     onExamineResponse: function(aRequest, win)
     {
         var tabId = Firebug.getTabIdForWindow(win);
-
-        if (FBTrace.DBG_NET) {
-            FBTrace.dumpProperties("net.HttpObserver: ON_EXAMINE_RESPONSE " +
-                aRequest.requestMethod + " " + 
-                (tabId ? "" : "(No TAB) ") + safeGetName(aRequest), 
-                aRequest);
-        }
-
         if (win)
             this.onEndRequest(aRequest, now(), win, tabId);
     },
