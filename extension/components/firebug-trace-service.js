@@ -123,8 +123,10 @@ TraceConsoleService.prototype =
                 subject = null;
             }
 
+            // Pass JS object (subject) properly through XPConnect.
+            var wrappedSubject = {wrappedJSObject: subject};
             for (var i=0; i<this.observers.length; i++)
-                this.observers[i].observe(subject, topic, someData);
+                this.observers[i].observe(wrappedSubject, topic, someData);
         }
         catch (err)
         {

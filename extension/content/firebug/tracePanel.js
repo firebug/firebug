@@ -155,7 +155,7 @@ Firebug.TraceModule = extend(Firebug.Module,
     observe: function(subject, topic, data)
     {
         if (topic == "firebug-trace-on-message")
-            this.dump(new Firebug.TraceModule.TraceMessage("", data, subject));
+            this.dump(new Firebug.TraceModule.TraceMessage("", data, subject.wrappedJSObject));
     },
 
     messages: [],        // Queue of messages not dumped into the UI yet.
@@ -928,7 +928,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         for (var frame = Components.stack, i=0; frame; frame = frame.caller, i++)
         {
             // Skip first three frames (this code).
-            if (i < 3)
+            if (i < 6)
                 continue;
 
             var fileName = unescape(frame.filename ? frame.filename : "");
@@ -961,9 +961,6 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
 
     // Get snapshot of all properties now, as they can be changed.
     this.getProperties();
-
-    // See comment in getTypes method.
-    this.getTypes();
 }
 
 // ************************************************************************************************
@@ -1162,10 +1159,6 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 this.types += "typeof = " + typeof(obj) + EOF;
                 if (obj)
-                    // xxxHonza: FF Crashes on this line if the obj is an exception.
-                    // This happens only for TypeError object (exception in catch block)
-                    // and only if this function is called when the log in trace console
-                    // is expanded. This is way it's called automatically in constructor.
                     this.types += "    constructor = " + obj.constructor + EOF; 
 
                 obj = obj.prototype;
