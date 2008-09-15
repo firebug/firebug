@@ -1461,7 +1461,7 @@ this.SourceText = domplate(Firebug.Rep,
 
     getHTML: function(sourceText)
     {
-        return getSourceLines(sourceText.lines);
+        return getSourceLineRange(sourceText, 1, sourceText.lines.length);
     }
 });
 

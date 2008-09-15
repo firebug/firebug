@@ -1779,9 +1779,10 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         sourceBox.repObject = sourceFile;
         setClass(sourceBox, "sourceBox");
         collapse(sourceBox, true);
-        //
+
         sourceBox.maxLineNoChars = (lines.length + "").length;
         sourceBox.lines = lines;
+        sourceBox.getLineAsHTML = getSourceBoxLineAsHTML;
 
         sourceBox.min = 0;
         if (sourceFile.lineNumberShift)
@@ -1804,7 +1805,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         var max = scriptBlockSize;
         if (max > sourceBox.totalMax)
             max = sourceBox.totalMax;
-        appendScriptLines(lines, 1, max, sourceBox.maxLineNoChars, view);
+        appendScriptLines(sourceBox, 1, max, view);
 
         delete this.lastScrollTop;
         setTimeout( bind(function delayScrollToLineOne()
@@ -1974,7 +1975,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         sourceBox.firstViewableLine = topLine;
         sourceBox.lastViewableLine = bottomLine;
 
-        appendScriptLines(sourceBox.lines, topLine, bottomLine, sourceBox.maxLineNoChars, view);
+        appendScriptLines(sourceBox, topLine, bottomLine, view);
 
         this.lastScrollTop = sourceBox.scrollTop;  // prevent reView before sourceBoxDecoratorTimeout reset scrollTop
 
@@ -2057,9 +2058,9 @@ function loadScriptLines(sourceFile, context)  // array of lines
         return context.sourceCache.load(sourceFile.href);
 }
 
-function appendScriptLines(lines, min, max, maxLineNoChars, panelNode)
+function appendScriptLines(sourceBox, min, max, panelNode)
 {
-    var html = getSourceLineRange(lines, min, max, maxLineNoChars);
+    var html = getSourceLineRange(sourceBox, min, max);
     appendInnerHTML(panelNode, html);
 }
 
@@ -2072,6 +2073,12 @@ function getLineNodeIfViewable(lineNo)
     }
     return null;
 }
+
+function getSourceBoxLineAsHTML(lineNo)  // XXXjjb TODO make this a prototype
+{
+    return escapeHTML(this.lines[lineNo]);
+};
+
 
 // ************************************************************************************************
 

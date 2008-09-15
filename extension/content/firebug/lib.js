@@ -2837,13 +2837,7 @@ this.getIconURLForFile = function(path)
 
 // ************************************************************************************************
 
-this.getSourceLines = function(lines)
-{
-    var maxLineNoChars = (lines.length + "").length;
-    return this.getSourceLineRange(lines, 1, lines.length, maxLineNoChars);
-};
-
-this.getSourceLineRange = function(lines, min, max, maxLineNoChars)
+this.getSourceLineRange = function(sourceBox, min, max)
 {
     var html = [];
 
@@ -2851,10 +2845,11 @@ this.getSourceLineRange = function(lines, min, max, maxLineNoChars)
     {
         // Make sure all line numbers are the same width (with a fixed-width font)
         var lineNo = i + "";
+        var maxLineNoChars = sourceBox.maxLineNoChars;
         while (lineNo.length < maxLineNoChars)
             lineNo = " " + lineNo;
 
-        var line = escapeHTML(lines[i-1]);
+        var line =  sourceBox.getLineAsHTML(i-1);
 
         html.push(
             '<div class="sourceRow"><a class="sourceLine">',
@@ -3827,6 +3822,11 @@ this.SourceText = function(lines, owner)
 {
     this.lines = lines;
     this.owner = owner;
+};
+
+this.SourceText.getLineAsHTML = function(lineNo)
+{
+    return escapeHTML(this.lines[lineNo-1]);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
