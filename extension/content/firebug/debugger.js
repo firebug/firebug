@@ -1486,9 +1486,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
 // ************************************************************************************************
 
-function ScriptPanel() {}
+Firebug.ScriptPanel = function() {};
 
-ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
+Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
 
     updateSourceBox: function(sourceBox)
@@ -2871,7 +2871,7 @@ function countBreakpoints(context)
 Firebug.registerActivableModule(Firebug.Debugger);
 Firebug.registerPanel(BreakpointsPanel);
 Firebug.registerPanel(CallstackPanel);
-Firebug.registerPanel(ScriptPanel);
+Firebug.registerPanel(Firebug.ScriptPanel);
 
 // ************************************************************************************************
 
