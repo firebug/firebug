@@ -2005,6 +2005,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
                         delete sourceBox.highlighter;
                 }
                 sourceBox.decorator(sourceBox, sourceBox.repObject);
+
+                if (uiListeners.length > 0) dispatch(uiListeners, "onApplyDecorator", [sourceBox]);
             }
             catch (exc)
             {
