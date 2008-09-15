@@ -172,7 +172,7 @@ top.SourceCache.prototype =
         {
             if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
                 FBTrace.dumpProperties("sourceCache.load FAILS, url="+url, exc);                    /*@explore*/
-            return "sourceCache.load FAILS for url="+url+exc.toString();
+            return ["sourceCache.load FAILS for url="+url, exc.toString()];
         }
         finally
         {
@@ -201,7 +201,7 @@ top.SourceCache.prototype =
 };
 
 // xxxHonza getPostText and readPostTextFromRequest are copied from
-// net.js. These functions should be removed when this cache is 
+// net.js. These functions should be removed when this cache is
 // refactored due to the double-load problem.
 function getPostText(file, context)
 {
