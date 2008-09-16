@@ -762,7 +762,7 @@ top.FirebugChrome =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // UI Event Listeners
+    // UI Event Listeners uilisteners
 
     onPanelNavigate: function(object, panel)
     {
@@ -781,6 +781,15 @@ top.FirebugChrome =
         }
     },
 
+    onApplyDecorator: function(sourceBox) // called on setTimeout after sourceBox viewport has been repainted
+    {
+    },
+    
+    onLineSelect: function(sourceLink) // called on scrollTo, passing in the selected line
+    {
+    },
+    //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    
     onOptionsShowing: function(popup)
     {
         for (var child = popup.firstChild; child; child = child.nextSibling)
