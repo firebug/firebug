@@ -14,6 +14,8 @@ const Cr = Components.results;
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 
+const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+
 // ************************************************************************************************
 
 var TracePrefs = [
@@ -122,11 +124,18 @@ TraceConsoleService.prototype =
                 someData += " " + subject.toString();
                 subject = null;
             }
-
-            // Pass JS object (subject) properly through XPConnect.
-            var wrappedSubject = {wrappedJSObject: subject};
-            for (var i=0; i<this.observers.length; i++)
-                this.observers[i].observe(wrappedSubject, topic, someData);
+            if (this.observers.length > 0)
+            {
+                // Pass JS object (subject) properly through XPConnect.
+                var wrappedSubject = {wrappedJSObject: subject};
+                for (var i=0; i<this.observers.length; i++)
+                    this.observers[i].observe(wrappedSubject, topic, someData);
+            }
+            else
+            {
+                var hiddenWindow = appShellService.hiddenDOMWindow; 
+                hiddenWindow.dump("firebug-trace-service: "+someData+"\n");
+            }            
         }
         catch (err)
         {
