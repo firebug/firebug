@@ -142,10 +142,14 @@ var errorInfo = null;
 var timer = Timer.createInstance(nsITimer);
 var waitingForTimer = false;
 
+var FBTrace = null;
+
 // ************************************************************************************************
 
 function FirebugService()
 {
+    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports).wrappedJSObject;
+
     fbs = this;
 
     this.wrappedJSObject = this;
@@ -2461,11 +2465,15 @@ function ERROR(text)
 
 function ddd(text)
 {
+    FBTrace.sysout(text);
+
+    return _ddd(text)
+}
+
+function _ddd(text)
+{
     if (fbs && fbs.hiddenWindow)
-    {
-        fbs.hiddenWindow.dump(text);
         return;
-    }
 
     if (fbs)
         ERROR( "firebug-service: no hiddenWindow!! "+text );
@@ -2516,6 +2524,8 @@ function getPropertyName(object, value)                                         
 
 function dumpProperties(title, obj)                                                                                    /*@explore*/
 {                                                                                                                      /*@explore*/
+    FBTrace.sysout(title, obj);
+
     var lines = [title];                                                                                               /*@explore*/
     for (p in obj)
     {
@@ -2529,11 +2539,13 @@ function dumpProperties(title, obj)                                             
         }
     }                                                                                                   				/*@explore*/
                                                                                                                         /*@explore*/
-    ddd(lines.join("\n")+"\n");                                                                                             /*@explore*/
+    _ddd(lines.join("\n")+"\n");                                                                                             /*@explore*/
 }
                                                                                                                          /*@explore*/
 function dumpInterfaces(title, obj)																							/*@explore*/
 {																														/*@explore*/
+    FBTrace.sysout(title, obj);
+
     var found = false;																									/*@explore*/
     // could try for classInfo																							/*@explore*/
     for(iface in Components.interfaces)																					/*@explore*/
@@ -2541,10 +2553,10 @@ function dumpInterfaces(title, obj)																							/*@explore*/
         if (obj instanceof Components.interfaces[iface])																/*@explore*/
         {																												/*@explore*/
             found = true;
-            ddd(title+" has "+iface+"\n");																						/*@explore*/
+            _ddd(title+" has "+iface+"\n");																						/*@explore*/
             for (p in Components.interfaces[iface])																		/*@explore*/
             {																											/*@explore*/
-                ddd("["+iface+"."+p+"]="+obj[p]+";\n");																	/*@explore*/
+                _ddd("["+iface+"."+p+"]="+obj[p]+";\n");																	/*@explore*/
             }																											/*@explore*/
         }																												/*@explore*/
                                                                                                                         /*@explore*/
