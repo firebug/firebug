@@ -8,6 +8,10 @@ const Ci = Components.interfaces;
 
 var gFindBar;
 
+var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+var hiddenWindow = appShellService.hiddenDOMWindow;           
+
+
 // Implementation
 //-----------------------------------------------------------------------------
 
@@ -15,15 +19,24 @@ var Console =
 {
     modules: [],
 
-    onLoad: function()
+    onLoad: function()  
     {
         var args = window.arguments[0];
-
+        /*
+        hiddenWindow.dump("traceConsole window.arguments.length:"+window.arguments.length+"\n");
+        hiddenWindow.dump("traceConsole window.arguments[0]"+window.arguments[0]+"\n");
+        for (var i in args)
+        {
+            hiddenWindow.dump("args["+i+"]="+args[i]+"\n");
+        }
+        */
         FBL = args.FBL;
-        Firebug = args.Firebug;
-        
+        Firebug = args.Firebug; 
+        this.prefDomain = args.prefDomain;
         this.activeModule = args.traceModule;
     
+        window.title = "Firebug Trace Console: "+this.prefDomain;
+        
         var consoleFrame = document.getElementById("consoleFrame");
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
 

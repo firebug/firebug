@@ -40,16 +40,17 @@ Firebug.TraceModule = extend(Firebug.Module,
         FBL.internationalize("fbTraceOpenConsole", "label");
         FBL.internationalize("fbTraceOpenConsole", "tooltiptext");
 
-        // If the trace-console window is already opened, attach to it.
-        if (!this.attachConsole())
+        if (this.isEnabled())
         {
-            // If the window isn't opened, open it automatically if it's allowed.
-            if (this.isEnabled())
-                this.openConsole();
+            if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("TraceModule.initialize prefDomain="+ prefDomain+"\n");
+            this.openConsole(prefDomain);
         }
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule.initialize prefDomain="+ prefDomain+"\n");
+        else
+        {
+            if (FBTrace.DBG_OPTIONS)
+                FBTrace.sysout("TraceModule.initialize NOT enabled prefDomain="+ prefDomain+"\n");
+        }
 
         traceService.addObserver(this, "firebug-trace-on-message", false);
         consoleService.registerListener(this.JSErrorConsoleObserver);
@@ -72,7 +73,7 @@ Firebug.TraceModule = extend(Firebug.Module,
     initContext: function(context)
     {
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule.initContext try sysout\n");
+            FBTrace.sysout("TraceModule.initContext Firebug.prefDomain: "+Firebug.prefDomain+"\n");
 
         this.context = context;
     },
@@ -92,34 +93,37 @@ Firebug.TraceModule = extend(Firebug.Module,
     },
 
     // HTML trace console.
-    openConsole: function()
+    openConsole: function(prefDomain)
     {
         // Try to connect an existing trace-console window first.
-        if (this.attachConsole())
+        if (this.attachConsole(prefDomain))
             return;
-
+FBTrace.sysout("tracePanel.openConsole prefDomain:"+prefDomain +" args", args);
         var self = this;
         var args = {
             FBL: FBL,
             Firebug: Firebug,
             traceModule: self,
+            prefDomain: prefDomain,
         };
-
+        for (var p in args)
+            FBTrace.sysout("tracePanel.openConsole prefDomain:"+prefDomain +" args["+p+"]= "+ args[p]+"\n");
         this.consoleWindow = window.openDialog(
             "chrome://firebug/content/traceConsole.xul",
-            "FBTraceConsole",
+            "FBTraceConsole."+prefDomain,
             "chrome,resizable,scrollbars=auto,minimizable",
             args);
     },
 
-    attachConsole: function()
+    attachConsole: function(prefDomain)
     {
         // Already attached.
         if (this.consoleRoot)
             return true;
 
         // If the trace-console window is already opened, attach it.
-        this.consoleWindow = windowMediator.getMostRecentWindow("FBTraceConsole");
+        this.consoleWindow = windowMediator.getMostRecentWindow("FBTraceConsole."+prefDomain);
+        FBTrace.sysout("tracePanel.attachConsole "+ (this.consoleWindow?this.consoleWindow.location:"no consoleWindow"));
         if (this.consoleWindow)
         {
             this.consoleWindow.Console.registerModule(this);
@@ -247,7 +251,7 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 
     observePrefs: function(subject, topic, data)
     {
-        if ((data.indexOf("extensions.firebug.DBG_") != -1) ||
+        if ((data.indexOf(Firebug.prefDomain+".DBG_") != -1) ||
             (data.indexOf("extensions.firebug-service.DBG_") != -1))
         {
             // Update UI after timeout so, FBTrace object is already updated.
