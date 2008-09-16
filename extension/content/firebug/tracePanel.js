@@ -1052,6 +1052,10 @@ Firebug.TraceModule.TraceMessage.prototype =
                 }
             }
         }
+        else if (this.obj instanceof Ci.nsISupportsCString)
+        {
+            this.props = this.obj.data;
+        }
         else
         {
             var propsTotal = 0;
