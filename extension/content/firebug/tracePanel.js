@@ -36,6 +36,8 @@ Firebug.TraceModule = extend(Firebug.Module,
 {
     initialize: function(prefDomain, prefNames)
     {
+        this.prefDomain = prefDomain;
+
         // Localize "Open Console" toolbar button.
         FBL.internationalize("fbTraceOpenConsole", "label");
         FBL.internationalize("fbTraceOpenConsole", "tooltiptext");
@@ -98,7 +100,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         // Try to connect an existing trace-console window first.
         if (this.attachConsole(prefDomain))
             return;
-FBTrace.sysout("tracePanel.openConsole prefDomain:"+prefDomain +" args", args);
+        FBTrace.sysout("tracePanel.openConsole prefDomain:"+prefDomain +" args", args);
         var self = this;
         var args = {
             FBL: FBL,
@@ -441,6 +443,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                     $collapsed: "$message|hideProperties"},
                     "Properties"
                 ),
+                A({class: "messageInfoScopeTab messageInfoTab", onclick: "$onClickTab",
+                    view: "Scope",
+                    $collapsed: "$message|hideScope"},
+                    "Scope"
+                ),
                 A({class: "messageInfoResponseTab messageInfoTab", onclick: "$onClickTab",
                     view: "Response",
                     $collapsed: "$message|hideResponse"},
@@ -456,10 +463,16 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                     $collapsed: "$message|hideInterfaces"},
                     "Interfaces"
                 ),
-                A({class: "messageInfoTypesTab messageInfoTab", onclick: "$onClickTab",
+                // xxxHonza: this doesn't seem to be much useful.
+                /*A({class: "messageInfoTypesTab messageInfoTab", onclick: "$onClickTab",
                     view: "Types",
                     $collapsed: "$message|hideTypes"},
                     "Types"
+                ),*/
+                A({class: "messageInfoObjectTab messageInfoTab", onclick: "$onClickTab",
+                    view: "Types",
+                    $collapsed: "$message|hideObject"},
+                    "Object"
                 ),
                 A({class: "messageInfoEventTab messageInfoTab", onclick: "$onClickTab",
                     view: "Event",
@@ -496,7 +509,9 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             ),
             DIV({class: "messageInfoSourceText messageInfoText"}),
             DIV({class: "messageInfoIfacesText messageInfoText"}),
+            DIV({class: "messageInfoScopeText messageInfoText"}),
             DIV({class: "messageInfoTypesText messageInfoText"}),
+            DIV({class: "messageInfoObjectText messageInfoText"}),
             DIV({class: "messageInfoEventText messageInfoText"})
         ),
 
@@ -532,6 +547,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         return !message.getProperties();
     },
 
+    hideScope: function(message)
+    {
+        return !message.getScope();
+    },
+
     hideInterfaces: function(message)
     {
         return !message.getInterfaces();
@@ -540,6 +560,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     hideTypes: function(message)
     {
         return !message.getTypes();
+    },
+
+    hideObject: function(message)
+    {
+        return !message.getObject();
     },
 
     hideEvent: function(message)
@@ -648,7 +673,19 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
           command: bindFixed(this.onRemove, this, message)
         });
 
+        items.push("-");
+
+        items.push(this.optionMenu("Show Scope Variables", "trace.enableScope"));
+
         return items;
+    },
+
+    optionMenu: function(label, option)
+    {
+        var checked = Firebug.getPref(Firebug.TraceModule.prefDomain, option);
+        return {label: label, type: "checkbox", checked: checked, nol10n: true,
+            command: bindFixed(Firebug.setPref, Firebug, Firebug.TraceModule.prefDomain, 
+                option, !checked) };
     },
 
     getTooltip: function(message)
@@ -818,6 +855,13 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties);
         }
+        else if (hasClass(tab, "messageInfoScopeTab"))
+        {
+            this.updateInfoImpl(messageInfoBody, view, message, message.getScope,
+                function (message, valueBox, text) {
+                    Firebug.TraceModule.PropertyTree.tag.replace({object: message.scope}, valueBox);
+                });
+        }
         else if (hasClass(tab, "messageInfoIfacesTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getInterfaces);
@@ -830,6 +874,16 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getEvent);
         }
+        else if (hasClass(tab, "messageInfoObjectTab"))
+        {
+            this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
+                function (message, valueBox, text) {
+                    if (message.obj instanceof Element)
+                        Firebug.HTMLPanel.CompleteElement.tag.replace({object: message.obj}, valueBox);
+                    else
+                        Firebug.TraceModule.PropertyTree.tag.replace({object: message.obj}, valueBox);
+                });
+        }
         else if (hasClass(tab, "messageInfoExcTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getException);
@@ -837,7 +891,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         else if (hasClass(tab, "messageInfoResponseTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getResponse,
-                function (valueBox, text) {
+                function (message, valueBox, text) {
                     var iframe = getChildByClass(valueBox, "messageInfoResponseFrame");
                     iframe.contentWindow.document.body.innerHTML = text;
                 });
@@ -845,7 +899,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         else if (hasClass(tab, "messageInfoSourceTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getResponse,
-                function (valueBox, text) {
+                function (message, valueBox, text) {
                     if (text)
                         insertWrappedText(text, valueBox);
                 });
@@ -863,7 +917,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 valueBox.valuePresented = true;
 
                 if (setter)
-                    setter(valueBox, text);
+                    setter(message, valueBox, text);
                 else
                     valueBox.innerHTML = text;
             }
@@ -965,6 +1019,9 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
 
     // Get snapshot of all properties now, as they can be changed.
     this.getProperties();
+    
+    // Get current scope
+    this.getScope();
 }
 
 // ************************************************************************************************
@@ -1103,6 +1160,41 @@ Firebug.TraceModule.TraceMessage.prototype =
         return this.ifaces;
     },
 
+   getScope: function()
+   {
+       var enabled = Firebug.getPref(Firebug.TraceModule.prefDomain, "trace.enableScope");
+       if (!enabled)
+           return null;
+
+       if (this.scope)
+           return this.scope;
+
+       var scope = {};
+       Firebug.Debugger.halt(function(frame)
+       {
+           for (var i=0; i<4 && frame; i++)
+               frame = frame.callingFrame;
+
+           if (frame)
+           {           
+               var listValue = {value: null}, lengthValue = {value: 0};
+               frame.scope.getProperties(listValue, lengthValue);
+
+               for (var i=lengthValue.value-1; i>=0; i--)
+               {
+                   var prop = listValue.value[i];
+                   var name = prop.name.getWrappedValue();
+                   var value = prop.value.getWrappedValue();
+
+                   if ((typeof(value) != "function") && name && value)
+                       scope[name.toString()] = value.toString();
+               }
+           }
+       });
+
+       return this.scope = scope;
+   },
+
     getResponse: function()
     {
         var result = null;
@@ -1220,6 +1312,11 @@ Firebug.TraceModule.TraceMessage.prototype =
         return this.eventInfo;
     },
 
+    getObject: function()
+    {
+        return this.obj;
+    },
+
     copyToClipboard: function()
     {
         if (!this.text)
@@ -1272,6 +1369,170 @@ Firebug.TraceModule.JSErrorConsoleObserver =
         throw NS_ERROR_NO_INTERFACE;
     }
 }
+
+// ************************************************************************************************
+// Domplate helpers - Tree (domplate widget)
+
+/**
+ * This object is intended as a domplate widget for displaying hierarchical
+ * structure (tree). Specific tree should be derived from this object and 
+ * getMembers method should be implemented.
+ */
+Firebug.TraceModule.Tree = domplate(Firebug.Rep,
+{
+    tag:
+        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
+            TBODY(
+                FOR("member", "$object|memberIterator", 
+                    TAG("$member|getRowTag", {member: "$member"}))
+            )
+        ),
+
+    rowTag:
+        TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
+            _repObject: "$member", level: "$member.level"},
+            TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px"},
+                DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
+            ),
+            TD({class: "memberValueCell"},
+                TAG("$member.tag", {object: "$member.value"})
+            )
+        ),
+
+    loop:
+        FOR("member", "$members", 
+            TAG("$member|getRowTag", {member: "$member"})),
+
+    memberIterator: function(object)
+    {
+        return this.getMembers(object);
+    },
+
+    getRowTag: function(member)
+    {
+        return this.rowTag;
+    },
+
+    onClick: function(event)
+    {
+        if (!isLeftClick(event))
+            return;
+
+        var row = getAncestorByClass(event.target, "memberRow");
+        var label = getAncestorByClass(event.target, "memberLabel");
+        if (label && hasClass(row, "hasChildren"))
+            this.toggleRow(row);
+    },
+
+    toggleRow: function(row)
+    {
+        var level = parseInt(row.getAttribute("level"));
+
+        if (hasClass(row, "opened"))
+        {
+            removeClass(row, "opened");
+
+            var tbody = row.parentNode;
+            for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling) {
+                if (parseInt(firstRow.getAttribute("level")) <= level)
+                    break;
+
+                tbody.removeChild(firstRow);
+            }
+        }
+        else
+        {
+            setClass(row, "opened");
+
+            var repObject = row.repObject;
+            if (repObject) {
+                var members = this.getMembers(repObject.value, level+1);
+                if (members)
+                    this.loop.insertRows({members: members}, row);
+            }
+        }
+    },
+
+    getMembers: function(object, level)
+    {
+        // Implement in derived classes.
+        return [];
+    },
+
+    createMember: function(type, name, value, level)
+    {
+        var rep = Firebug.getRep(value);
+        var tag = rep.shortTag ? rep.shortTag : rep.tag;
+        var valueType = typeof(value);
+        var hasChildren = this.hasProperties(value) && (valueType == "object");
+
+        return {
+            name: name,
+            value: value,
+            type: type,
+            rowClass: "memberRow-" + type,
+            open: "",
+            level: level,
+            indent: level*16,
+            hasChildren: hasChildren,
+            tag: tag
+        };
+    },
+
+    hasProperties: function(ob)
+    {
+        try {
+            for (var name in ob)
+                return true;
+        } catch (exc) {}
+        return false;
+    }
+});
+
+// ************************************************************************************************
+
+Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
+{
+    reXPConnect: /\[xpconnect wrapped ([^\]]*)\]/,
+
+    getMembers: function(object, level)
+    {
+        if (!level)
+            level = 0;
+
+        try
+        {
+            var members = [];
+            for (var p in object)
+            {
+                try
+                {
+                    var pAsString = p + "";
+                    var m = this.reXPConnect.exec(pAsString);
+                    if (m)
+                    {
+                        var kind = m[1];
+                        if (!object[p] instanceof Ci[kind])
+                        {
+                            var xpobj = object[p].wrappedJSObject;
+                            members.push(this.createMember("dom", p, xpobj, level));
+                        }
+                    }
+                    members.push(this.createMember("dom", p, object[p], level));
+                }
+                catch (e)
+                {
+                }
+            }
+        }
+        catch (err)
+        {
+            FBTrace.sysout("Exception", err);
+        }
+
+        return members;
+    }
+});
 
 // ************************************************************************************************
 // Registration
