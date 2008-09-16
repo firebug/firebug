@@ -121,9 +121,12 @@ TraceConsoleService.prototype =
         try
         {
             if (typeof(subject) == "string") {
-                someData += " " + subject.toString();
-                subject = null;
+                var string = Cc["@mozilla.org/supports-cstring;1"]
+                    .createInstance(Ci.nsISupportsCString);
+                string.data = subject;
+                subject = string;
             }
+
             if (this.observers.length > 0)
             {
                 // Pass JS object (subject) properly through XPConnect.
