@@ -537,6 +537,22 @@ this.getElementByClass = function(node, className)
     return null;
 };
 
+this.getElementsByClass = function(node, className, result)
+{
+    if (!result)
+        result = [];
+
+    for (var child = node.firstChild; child; child = child.nextSibling)
+    {
+        if (this.hasClass(child, className))
+            result.push(child);
+
+        this.getElementsByClass(child, className, result);
+    }
+
+    return result;
+};
+
 this.isAncestor = function(node, potentialAncestor)
 {
     for (var parent = node; parent; parent = parent.parentNode)
