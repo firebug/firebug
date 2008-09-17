@@ -81,6 +81,27 @@ TraceConsoleService.prototype =
         }
     },
 
+    // Prepare trace-object and dispatch to all observers.
+    dispatch: function(messageType, message, obj)
+    {
+        // Translate string object.
+        if (typeof(obj) == "string") {
+            var string = Cc["@mozilla.org/supports-cstring;1"].createInstance(Ci.nsISupportsCString);
+            string.data = subject;
+            obj = string;
+        }
+
+        // Create wrapper with message type info.
+        var messageInfo = {
+            obj: obj, 
+            type: messageType
+        };
+
+        // Pass JS object properly through XPConnect.
+        var wrappedSubject = {wrappedJSObject: messageInfo};
+        gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
+    },
+
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
@@ -120,19 +141,10 @@ TraceConsoleService.prototype =
     {
         try
         {
-            if (typeof(subject) == "string") {
-                var string = Cc["@mozilla.org/supports-cstring;1"]
-                    .createInstance(Ci.nsISupportsCString);
-                string.data = subject;
-                subject = string;
-            }
-
             if (this.observers.length > 0)
             {
-                // Pass JS object (subject) properly through XPConnect.
-                var wrappedSubject = {wrappedJSObject: subject};
                 for (var i=0; i<this.observers.length; i++)
-                    this.observers[i].observe(wrappedSubject, topic, someData);
+                    this.observers[i].observe(subject, topic, someData);
             }
             else
             {
@@ -173,9 +185,13 @@ TraceConsoleService.prototype =
 // Public FBTrace API
 
 var FBTrace = 
-{
-    sysout: function(message, more) {
-        gTraceService.notifyObservers(more, "firebug-trace-on-message", message);
+{    
+    dump: function(messageType, message, obj) {
+        gTraceService.dispatch(messageType, message, obj);
+    },
+
+    sysout: function(message, obj) {
+        this.dump(null, message, obj);
     },
 
     // OBSOLETE

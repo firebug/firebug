@@ -1,13 +1,46 @@
 /* See license.txt for terms of usage */
 
-// Debug Logging for Firebug internals (see firebug-trace-service for more details).
-var FBTrace = Components.classes["@joehewitt.com/firebug-trace-service;1"]
-    .getService(Components.interfaces.nsISupports).wrappedJSObject;
+// The only global trace object.
+var FBTrace = null;
 
-// FBTrace.sysout("Hello World!")       // Log "Hello World!" into the console.
+// ************************************************************************************************
+
+(function() {
+
+// Debug Logging for Firebug internals (see firebug-trace-service for more details).
+var FBTraceAPI = Components.classes["@joehewitt.com/firebug-trace-service;1"].getService(Components.interfaces.nsISupports).wrappedJSObject;
+
+// Override sysout function in order to mark all logs from this extension. 
+// This makes possible to filter logs by source extensions.
+function _FBTrace(prefDomain) {
+    this.prefDomain = prefDomain; // Modified from within a Firebug extension.
+}
+
+_FBTrace.prototype = FBTraceAPI;
+_FBTrace.prototype.sysout = function(message, obj) {
+    FBTraceAPI.dump(this.prefDomain, message, obj);
+};
+
+// Initialize global object.
+FBTrace = new _FBTrace("extensions.firebug");
+
+})();
+
+// ************************************************************************************************
+// Some examples of tracing APIs
+
+// 1) Log "Hello World!" into the console.
+//    FBTrace.sysout("Hello World!")       
 //
-// if (FBTrace.DBG_ERROR)
-//     FBTrace.sysout("Hello World!");  // Log "Hello World!" if the DBG_ERROR option is true.
+// 2) Log "Hello World!" if the DBG_ERROR option is true.
+//    if (FBTrace.DBG_ERROR)
+//       FBTrace.sysout("Hello World!");  
 //
-// FBTrace.sysout("Hello World!", world);  // log "Hello World!" and various info about 'world' object.
-// 
+// 3) Log "Hello World!" and various info about 'world' object.
+//    FBTrace.sysout("Hello World!", world);  
+//
+// 4) Log into specific console (created by Firebug extension).
+//    FBTrace.dump("firebug.extensions", "Hello World!", world);
+//    FBTrace.dump("chromebug.extensions", "Hello World!", world);
+//
+// TODO: how to open another console.

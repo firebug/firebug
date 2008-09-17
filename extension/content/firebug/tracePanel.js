@@ -160,8 +160,16 @@ Firebug.TraceModule = extend(Firebug.Module,
     // nsIObserver
     observe: function(subject, topic, data)
     {
-        if (topic == "firebug-trace-on-message")
-            this.dump(new Firebug.TraceModule.TraceMessage("", data, subject.wrappedJSObject));
+        if (topic != "firebug-trace-on-message")
+            return;
+
+        // Display messages only messages with "firebug.extensions" type.
+        var messageInfo = subject.wrappedJSObject;
+        if (messageInfo.type != this.prefDomain)
+            return;
+
+        this.dump(new Firebug.TraceModule.TraceMessage(
+            messageInfo.type, data, messageInfo.obj));
     },
 
     messages: [],        // Queue of messages not dumped into the UI yet.
