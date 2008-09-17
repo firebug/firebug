@@ -87,7 +87,7 @@ TraceConsoleService.prototype =
         // Translate string object.
         if (typeof(obj) == "string") {
             var string = Cc["@mozilla.org/supports-cstring;1"].createInstance(Ci.nsISupportsCString);
-            string.data = subject;
+            string.data = obj;
             obj = string;
         }
 
