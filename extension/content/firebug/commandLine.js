@@ -32,15 +32,28 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context)
             return;
 
-        var result = null;
+        var debuggerState = Firebug.Debugger.beginInternalOperation();
+        try
+        {
+            var result = null;
 
-        if (context.stopped)
-        {
-            result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+            if (context.stopped)
+            {
+                result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+            }
+            else
+            {
+                result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+            }
         }
-        else
+        catch (exc)  // XXX jjb, I don't expect this to be taken, the try here is for the finally
         {
-            result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("CommandLine.evaluate with context.stopped:"+context.stopped+" FAILS:", exc);
+        }
+        finally
+        {
+            Firebug.Debugger.endInternalOperation(debuggerState);
         }
 
         return result;

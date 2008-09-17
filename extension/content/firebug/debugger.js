@@ -117,6 +117,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    beginInternalOperation: function() // stop debugger operations like breakOnErrors
+    {
+        var state = {breakOnErrors: Firebug.breakOnErrors};
+        Firebug.breakOnErrors = false;
+        return state;
+    },
+
+    endInternalOperation: function(state)  // pass back the object given by beginInternalOperation
+    {
+        Firebug.breakOnErrors = state.breakOnErrors;
+        return true;
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     halt: function(fn)
     {
