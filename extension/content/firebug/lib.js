@@ -5803,7 +5803,6 @@ this.ERROR = function(exc)
 {
     if (FBTrace) {                                              /*@explore*/
         FBTrace.dumpProperties("lib.ERROR:", exc);  /*@explore*/
-        FBTrace.dumpStack("lib.ERROR");
     }
     else                                                      /*@explore*/
         ddd("FIREBUG WARNING: " + exc);

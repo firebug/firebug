@@ -82,6 +82,7 @@ pref("extensions.firebug.externalEditors", "");
 // Trace  /*@explore*/
 pref("extensions.firebug.enableTraceConsole", true);     /*@explore*/
 pref("extensions.firebug.trace.enableScope", false);     /*@explore*/
+pref("extensions.firebug.trace.enableJSConsoleLogs", false);     /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_JSDCONTEXT", false);// firebug-service trace scriptinfo(huge) /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_FF_START", false); // firebug-service trace from FF start(huge) /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_CREATION", false); // firebug-service script creation           /*@explore*/

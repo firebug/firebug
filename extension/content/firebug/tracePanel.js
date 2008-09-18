@@ -684,6 +684,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         items.push("-");
 
         items.push(this.optionMenu("Show Scope Variables", "trace.enableScope"));
+        items.push(this.optionMenu("Show Errors from JS Console", "trace.enableJSConsoleLogs"));
 
         return items;
     },
@@ -1025,6 +1026,12 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         }
     }
 
+    if (this.obj instanceof Error || this.obj instanceof Ci.nsIException)
+    {
+        // Put the error message into the title so, it's immediately visible.
+        this.text += " " + this.obj.message;
+    }
+
     // Get snapshot of all properties now, as they can be changed.
     this.getProperties();
     
@@ -1045,8 +1052,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 
     getLabel: function()
     {
-        var text = this.text;
-        return cropString(text, 400);
+        return this.text.substr(0, 400) + "...";
     },
 
     getStackArray: function()
@@ -1170,8 +1176,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 
    getScope: function()
    {
-       var enabled = Firebug.getPref(Firebug.TraceModule.prefDomain, "trace.enableScope");
-       if (!enabled)
+       if (!Firebug.getPref(Firebug.prefDomain, "trace.enableScope"))
            return null;
 
        if (this.scope)
@@ -1349,6 +1354,9 @@ Firebug.TraceModule.JSErrorConsoleObserver =
 {
     observe: function(object)
     {
+        if (!Firebug.getPref(Firebug.prefDomain, "trace.enableJSConsoleLogs"))
+            return;
+
         try
         {
             if (object.message.indexOf("[JavaScript Error:") == 0)
