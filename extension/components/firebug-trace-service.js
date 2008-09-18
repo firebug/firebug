@@ -149,7 +149,9 @@ TraceConsoleService.prototype =
             else
             {
                 var hiddenWindow = appShellService.hiddenDOMWindow; 
-                hiddenWindow.dump("firebug-trace-service: "+someData+"\n");
+                var unwrapped = subject.wrappedJSObject;
+                var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
+                hiddenWindow.dump("firebug-trace-service: "+someData+objPart+"\n");
             }            
         }
         catch (err)
