@@ -1,0 +1,303 @@
+/* See license.txt for terms of usage */
+
+.panelNode-script {
+    overflow: hidden;
+    font-family: Monaco, monospace;
+}
+
+/************************************************************************************************/
+
+.scriptTooltip {
+    position: fixed;
+    z-index: 2147483647;
+    padding: 2px 3px;
+    border: 1px solid #CBE087;
+    background: LightYellow;
+    font-family: Monaco, monospace;
+    color: #000000;
+}
+
+/************************************************************************************************/
+
+.sourceBox {
+    overflow: auto;
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.sourceRow {
+    white-space: nowrap;
+}
+
+.sourceRow.hovered {
+    background-color: #EEEEEE;
+}
+
+/************************************************************************************************/
+
+.sourceLine {
+    -moz-user-select: none;
+    margin-right: 10px;
+    border-bottom: 1px solid #EEEEEE;
+    border-right: 1px solid #CCCCCC;
+    padding: 0px 4px 0 20px;
+    background: #EEEEEE no-repeat 2px 0px;
+    color: #A0A0A0;
+    white-space: pre;
+}
+
+.sourceBox > .sourceRow > .sourceLine {
+    cursor: pointer;
+}
+
+.sourceLine:hover {
+    text-decoration: none;
+}
+
+.sourceRowText {
+    white-space: pre;
+}
+
+.sourceRow[exeLine="true"] {
+    outline: 1px solid #D9D9B6;
+    margin-right: 1px;
+    background-color: lightgoldenrodyellow;
+}
+
+.sourceRow[executable="true"] > .sourceLine {
+    content: "-";
+    color: #565656;  /* Dark Grey */
+}
+
+.sourceRow[exeLine="true"] > .sourceLine {
+    background-image: url(chrome://firebug/skin/exe.png);
+    color: #000000;
+}
+
+.sourceRow[breakpoint="true"] > .sourceLine {
+    background-image: url(chrome://firebug/skin/breakpoint.png);
+}
+
+.sourceRow[breakpoint="true"][condition="true"] > .sourceLine {
+    background-image: url(chrome://firebug/skin/breakpointCondition.png);
+}
+
+.sourceRow[breakpoint="true"][disabledBreakpoint="true"] > .sourceLine {
+    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+}
+
+.sourceRow[breakpoint="true"][exeLine="true"] > .sourceLine {
+    background-image: url(chrome://firebug/skin/breakpointExe.png);
+}
+
+.sourceRow[breakpoint="true"][exeLine="true"][disabledBreakpoint="true"] > .sourceLine {
+    background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
+}
+
+.sourceLine.editing {
+    background-image: url(chrome://firebug/skin/breakpoint.png);
+}
+
+/************************************************************************************************/
+
+.conditionEditor {
+    z-index: 2147483647;
+    position: absolute;
+    margin-top: 0;
+    left: 2px;
+    width: 90%;
+}
+
+.conditionEditorInner {
+    position: relative;
+    top: -26px;
+    height: 0;
+}
+
+.conditionCaption {
+    margin-bottom: 2px;
+    font-family: Lucida Grande, sans-serif;
+    font-weight: bold;
+    font-size: 11px;
+    color: #226679;
+}
+
+.conditionInput {
+    width: 100%;
+    border: 1px solid #0096C0;
+    font-family: Monaco, monospace;
+    font-size: inherit;
+}
+
+.conditionEditorInner1 {
+    padding-left: 37px;
+    background: url(condBorders.png) repeat-y;
+}
+
+.conditionEditorInner2 {
+    padding-right: 25px;
+    background: url(condBorders.png) repeat-y 100% 0;
+}
+
+.conditionEditorTop1 {
+    background: url(condCorners.png) no-repeat 100% 0;
+    margin-left: 37px;
+    height: 35px;
+}
+
+.conditionEditorTop2 {
+    position: relative;
+    left: -37px;
+    width: 37px;
+    height: 35px;
+    background: url(condCorners.png) no-repeat;
+}
+
+.conditionEditorBottom1 {
+    background: url(condCorners.png) no-repeat 100% 100%;
+    margin-left: 37px;
+    height: 33px;
+}
+
+.conditionEditorBottom2 {
+    position: relative;    left: -37px;
+    width: 37px;
+    height: 33px;
+    background: url(condCorners.png) no-repeat 0 100%;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+
+.upsideDown {
+    margin-top: 2px;
+}
+
+.upsideDown .conditionEditorInner {
+    top: -8px;
+}
+
+.upsideDown .conditionEditorInner1 {
+    padding-left: 33px;
+    background: url(condBordersUps.png) repeat-y;
+}
+
+.upsideDown .conditionEditorInner2 {
+    padding-right: 25px;
+    background: url(condBordersUps.png) repeat-y 100% 0;
+}
+
+.upsideDown .conditionEditorTop1 {
+    background: url(condCornersUps.png) no-repeat 100% 0;
+    margin-left: 33px;
+    height: 25px;
+}
+
+.upsideDown .conditionEditorTop2 {
+    position: relative;
+    left: -33px;
+    width: 33px;
+    height: 25px;
+    background: url(condCornersUps.png) no-repeat;
+}
+
+.upsideDown .conditionEditorBottom1 {
+    background: url(condCornersUps.png) no-repeat 100% 100%;
+    margin-left: 33px;
+    height: 43px;
+}
+
+.upsideDown .conditionEditorBottom2 {
+    position: relative;
+    left: -33px;
+    width: 33px;
+    height: 43px;
+    background: url(condCornersUps.png) no-repeat 0 100%;
+}
+
+/************************************************************************************************/
+
+.breakpointBlockHead {
+    position: relative;
+    padding-top: 4px;
+}
+
+.breakpointBlockHead > .checkbox {
+    margin-right: 4px;
+}
+
+.breakpointBlockHead > .objectLink-sourceLink {
+    top: 2px;
+    right: 20px;
+}
+
+.breakpointBlockHead > .closeButton {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+}
+
+.breakpointCheckbox {
+    margin-top: 0;
+    vertical-align: top;
+}
+
+.breakpointName {
+    margin-left: 4px;
+    font-weight: bold;
+}
+
+.breakpointCode {
+    overflow: hidden;
+    white-space: nowrap;
+    padding-left: 24px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #D7D7D7;
+    font-family: Monaco, monospace;
+    color: DarkGreen;
+}
+
+.breakpointBlock-breakpoints > .groupHeader {
+    display: none;
+}
+
+.breakpointBlock-monitors > .breakpointCode {
+    padding: 0;
+}
+
+.breakpointBlock-errorBreakpoints .breakpointCheckbox,
+.breakpointBlock-monitors .breakpointCheckbox {
+    display: none;
+}
+
+.breakpointHeader {
+    margin: 0 !important;
+    border-top: none !important;
+}
+
+
+/* ************************************************************************** */
+.panelNode-callstack  .objectLink-sourceLink {
+    display: none;
+}
+
+.panelNode-callstack {
+    margin-left: 4px;
+    overflow: auto;
+}
+/* This objectLink-stackFrame should be consistent with panelStatusLabel so the call stack looks the same in toolbar and panel */
+.objectLink-stackFrame {
+    cursor: pointer;
+    margin: 0;
+    padding: 0 4px;
+}
+
+.objectLink-stackFrame:hover {
+    color: blue;
+}
+
+.objectLink-stackFrame[selected="true"] {
+    font-weight: bold;
+}
