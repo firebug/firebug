@@ -69,7 +69,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     isEnabled: function()
     {
-        return Firebug.getPref(Firebug.prefDomain, "enableTraceConsole");
+        return Firebug.getPref(this.prefDomain, "enableTraceConsole");
     },
 
     initContext: function(context)
