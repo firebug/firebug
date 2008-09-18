@@ -197,7 +197,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         // otherwise dump it directly to the panel.
         if (this.consoleRoot)
             MessageTemplate.dump(message, this.consoleRoot.firstChild);
-        else
+        else if (this.isEnabled())
             this.messages.push(message);
     },
 
