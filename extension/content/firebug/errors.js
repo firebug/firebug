@@ -134,6 +134,16 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     {
         try
         {
+            if (!FBTrace)
+                return;
+        }
+        catch(exc)
+        {
+            return;
+        }
+        
+        try
+        {
             var context = null;
             if (FirebugContext)
                 context = FirebugContext;
