@@ -90,7 +90,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         if (!panel || panel.name != "TraceFirebug")
             return;
 
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TraceModule showPanel module:\n");
     },
 
@@ -156,7 +156,7 @@ Firebug.TraceModule = extend(Firebug.Module,
     {
         this.consoleRoot = null;
     },
-    
+
     // nsIObserver
     observe: function(subject, topic, data)
     {
@@ -389,13 +389,13 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 
     getContextMenuItems: function(object, target)
     {
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TraceFirebug.panel getContextMenuItems\n");
     },
 
     getEditor: function(target, value)
     {
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TraceFirebug.panel getEditor\n");
     }
 });
@@ -499,15 +499,15 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                         FOR("stack", "$message|stackIterator",
                             TR(
                                 TD({class: "stackFrame"},
-                                    A({class: "stackFrameLink", onclick: "$onClickStackFrame", 
+                                    A({class: "stackFrameLink", onclick: "$onClickStackFrame",
                                         lineNumber: "$stack.lineNumber"},
                                         "$stack.fileName"),
                                     SPAN("&nbsp;"),
                                     SPAN("(", "$stack.lineNumber", ")"),
                                     SPAN("&nbsp;"),
-                                    A({class: "openDebugger", onclick: "$onOpenDebugger", 
+                                    A({class: "openDebugger", onclick: "$onOpenDebugger",
                                         lineNumber: "$stack.lineNumber",
-                                        fileName: "$stack.fileName"}, 
+                                        fileName: "$stack.fileName"},
                                         "[...]")
                                 )
                             )
@@ -545,7 +545,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         return cropString(message.getLabel(), 150);
     },
 
-    getMessageTitle: function(message) 
+    getMessageTitle: function(message)
     {
         return message.getLabel();
     },
@@ -698,7 +698,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     {
         var checked = Firebug.getPref(Firebug.TraceModule.prefDomain, option);
         return {label: label, type: "checkbox", checked: checked, nol10n: true,
-            command: bindFixed(Firebug.setPref, Firebug, Firebug.TraceModule.prefDomain, 
+            command: bindFixed(Firebug.setPref, Firebug, Firebug.TraceModule.prefDomain,
                 option, !checked) };
     },
 
@@ -713,7 +713,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         this.onCopy(message);
         this.onRemove(message);
     },
-    
+
     onCopy: function(message)
     {
         message.copyToClipboard();
@@ -1039,7 +1039,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
 
     // Get snapshot of all properties now, as they can be changed.
     this.getProperties();
-    
+
     // Get current scope
     this.getScope();
 }
@@ -1057,7 +1057,10 @@ Firebug.TraceModule.TraceMessage.prototype =
 
     getLabel: function()
     {
-        return this.text.substr(0, 400) + "...";
+        if (this.text.length > 400)
+            return this.text.substr(0, 400) + "...";
+        else
+            return this.text.replace(/[\n]/g,"");
     },
 
     getStackArray: function()
@@ -1194,7 +1197,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                frame = frame.callingFrame;
 
            if (frame)
-           {           
+           {
                var listValue = {value: null}, lengthValue = {value: 0};
                frame.scope.getProperties(listValue, lengthValue);
 
@@ -1263,7 +1266,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 
         return this.err;
     },
-     
+
     getTypes: function()
     {
         if (this.types)
@@ -1277,7 +1280,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 this.types += "typeof = " + typeof(obj) + EOF;
                 if (obj)
-                    this.types += "    constructor = " + obj.constructor + EOF; 
+                    this.types += "    constructor = " + obj.constructor + EOF;
 
                 obj = obj.prototype;
             }
@@ -1396,7 +1399,7 @@ Firebug.TraceModule.JSErrorConsoleObserver =
 
 /**
  * This object is intended as a domplate widget for displaying hierarchical
- * structure (tree). Specific tree should be derived from this object and 
+ * structure (tree). Specific tree should be derived from this object and
  * getMembers method should be implemented.
  */
 Firebug.TraceModule.Tree = domplate(Firebug.Rep,
@@ -1404,7 +1407,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     tag:
         TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
-                FOR("member", "$object|memberIterator", 
+                FOR("member", "$object|memberIterator",
                     TAG("$member|getRowTag", {member: "$member"}))
             )
         ),
@@ -1421,7 +1424,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         ),
 
     loop:
-        FOR("member", "$members", 
+        FOR("member", "$members",
             TAG("$member|getRowTag", {member: "$member"})),
 
     memberIterator: function(object)
