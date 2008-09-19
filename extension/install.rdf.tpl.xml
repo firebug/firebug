@@ -37,5 +37,9 @@
     <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
     <em:updateKey>@PUBLICKEY@</em:updateKey>
 
+    <em:translator>Leszek(teo)Życzkowski (pl-PL)</em:translator>
+    <em:translator>markh (nl-NL)</em:translator>
+    <em:translator>peter3 (sv-SE)</em:translator>
+      
   </Description>
 </RDF>
