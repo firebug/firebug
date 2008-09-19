@@ -10,16 +10,20 @@ var FBTrace = null;
 // Debug Logging for Firebug internals (see firebug-trace-service for more details).
 var FBTraceAPI = Components.classes["@joehewitt.com/firebug-trace-service;1"].getService(Components.interfaces.nsISupports).wrappedJSObject;
 
-// Override sysout function in order to mark all logs from this extension. 
-// This makes possible to filter logs by source extensions.
+// Helper trace object associted with extension domain.
 function _FBTrace(prefDomain) {
     this.prefDomain = prefDomain; // Modified from within a Firebug extension.
 }
 
-_FBTrace.prototype = FBTraceAPI;
+// Derive all properties from FBTraceAPI
+for (var p in FBTraceAPI)
+    _FBTrace.prototype[p] = FBTraceAPI[p];
+
+// Override sysout function in order to mark all logs from this extension. 
+// This makes possible to filter logs by source extensions.
 _FBTrace.prototype.sysout = function(message, obj) {
     FBTraceAPI.dump(this.prefDomain, message, obj);
-};
+}
 
 // Initialize global object.
 FBTrace = new _FBTrace("extensions.firebug");

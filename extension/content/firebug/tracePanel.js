@@ -165,6 +165,11 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         // Display messages only messages with "firebug.extensions" type.
         var messageInfo = subject.wrappedJSObject;
+
+        // If the message type isn't specified, use Firebug's pref domain as the default.
+        if (!messageInfo.type)
+            messageInfo.type = "extensions.firebug";
+
         if (messageInfo.type != this.prefDomain)
             return;
 
