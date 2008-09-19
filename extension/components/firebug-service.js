@@ -198,18 +198,18 @@ FirebugService.prototype =
             do
             {
                 var depth = jsd.exitNestedEventLoop();
-                //ddd("FirebugService.shutdown exitNestedEventLoop "+depth+"\n"); // just in case we are not making progress...
+                //FBTrace.sysout("FirebugService.shutdown exitNestedEventLoop "+depth+"\n"); // just in case we are not making progress...
             }
             while(depth > 0);
         }
         catch (exc)
         {
-            // Seems to be the normal path...ddd("FirebugService, attempt to exitNestedEventLoop fails "+exc+"\n");
+            // Seems to be the normal path...FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop fails "+exc+"\n");
         }
 
         jsd.off();
         jsd = null;
-        //ddd("FirebugService.shutdown\n");
+        //FBTrace.sysout("FirebugService.shutdown\n");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -275,7 +275,7 @@ FirebugService.prototype =
         {
             debuggers.push(debuggr);
             if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
-                ddd("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
+                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
             if (debuggers.length == 1)
                 this.enableDebugger();
         }
@@ -308,7 +308,7 @@ FirebugService.prototype =
             }
         }
         if (fbs.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            ddd("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
+            FBTrace.sysout("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"+"\n"); /*@explore*/
 
         for (var i = 0; i < netDebuggers.length; ++i)
         {
@@ -376,7 +376,7 @@ FirebugService.prototype =
         }
         catch (exc)
         {
-            ddd("fbs: jsd.exitNestedEventLoop FAILS "+exc+"\n");
+            FBTrace.sysout("fbs: jsd.exitNestedEventLoop FAILS "+exc+"\n");
         }
     },
 
@@ -392,8 +392,8 @@ FirebugService.prototype =
         stepFrameCount = countFrames(startFrame);
         stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
                                                                                                                        /*@explore*/
-        if (fbs.DBG_FBS_STEP) ddd("step stepMode = "+getStepName(stepMode)                                 /*@explore*/
-                 +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+"\n");                         /*@explore*/
+        if (fbs.DBG_FBS_STEP)
+            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+"\n");                         /*@explore*/
     },
 
     suspend: function()
@@ -430,7 +430,7 @@ FirebugService.prototype =
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, bp]);
         else /*@explore*/
         {
-            if (fbs.DBG_FBS_BP) ddd("fbs.clearBreakpoint no find for "+lineNo+"@"+url+"\n"); /*@explore*/
+            if (fbs.DBG_FBS_BP) FBTrace.sysout("fbs.clearBreakpoint no find for "+lineNo+"@"+url+"\n"); /*@explore*/
         }
     },
 
@@ -444,7 +444,7 @@ FirebugService.prototype =
             --disabledCount;
         }
         else {
-            if (fbs.DBG_FBS_BP) ddd("fbs.enableBreakpoint no find for "+lineNo+"@"+url+"\n");
+            if (fbs.DBG_FBS_BP) FBTrace.sysout("fbs.enableBreakpoint no find for "+lineNo+"@"+url+"\n");
         }
     },
 
@@ -459,7 +459,7 @@ FirebugService.prototype =
         }
         else
         {
-            if (fbs.DBG_FBS_BP) ddd("fbs.disableBreakpoint no find for "+lineNo+"@"+url+"\n");
+            if (fbs.DBG_FBS_BP) FBTrace.sysout("fbs.disableBreakpoint no find for "+lineNo+"@"+url+"\n");
         }
 
     },
@@ -755,7 +755,7 @@ FirebugService.prototype =
         {
             jsd = DebuggerService.getService(jsdIDebuggerService);
             if ( this.DBG_FBS_ERRORS )  																					/*@explore*/
-                ddd("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers\n");		/*@explore*/
+                FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers\n");		/*@explore*/
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
 
@@ -788,7 +788,7 @@ FirebugService.prototype =
         }
         catch (e)
         {
-            ddd("fbs.setting options FAILS "+e+"\n");
+            FBTrace.sysout("fbs.setting options FAILS "+e+"\n");
         }
 
         this.showStackTrace = prefs.getBoolPref("extensions.firebug-service.showStackTrace");
@@ -818,7 +818,7 @@ FirebugService.prototype =
     disableDebugger: function()
     {
         if (fbs.DBG_FBS_FINDDEBUGGER)
-            ddd("fbs.disableDebugger for enabledDebugger: "+enabledDebugger+"\n");
+            FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger+"\n");
 
         if (!enabledDebugger)
             return;
@@ -853,7 +853,7 @@ FirebugService.prototype =
         {
             var depth = jsd.unPause();
             if ( (this.suspended !=  1 || depth != 0) && fbs.DBG_FBS_ERRORS)
-                ddd("fbs.resume unpause mismatch this.suspended "+this.suspended+" unpause depth "+depth+"\n");
+                FBTrace.sysout("fbs.resume unpause mismatch this.suspended "+this.suspended+" unpause depth "+depth+"\n");
             delete this.suspended;
             dispatch(clients, "onJSDActivate", [jsd]);
             return depth;
@@ -870,7 +870,7 @@ FirebugService.prototype =
     {
         dispatch(clients, message, args);
         if (fbs.DBG_FBS_ERRORS)
-            ddd("fbs.broadcast "+message+" to "+clients.length+" windows\n");
+            FBTrace.sysout("fbs.broadcast "+message+" to "+clients.length+" windows\n");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -880,7 +880,7 @@ FirebugService.prototype =
     // || interuptHook.  rv is ignored
     onBreak: function(frame, type, rv)
     {
-        if (fbs.DBG_FBS_STEP) ddd("fbs.onBreak type="+getExecutionStopNameFromType(type)+"\n");                            /*@explore*/
+        if (fbs.DBG_FBS_STEP) FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+"\n");                            /*@explore*/
         try
         {
             var debuggr = this.findDebugger(frame);
@@ -897,7 +897,7 @@ FirebugService.prototype =
     // When engine encounters debugger keyword (only)
     onDebugger: function(frame, type, rv)
     {
-        if (fbs.DBG_FBS_BP) ddd("fbs.onDebugger with haltDebugger="+haltDebugger+"\n");                                    /*@explore*/
+        if (fbs.DBG_FBS_BP) FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+"\n");                                    /*@explore*/
         try {
             if (haltDebugger)
             {
@@ -921,7 +921,7 @@ FirebugService.prototype =
     onDebug: function(frame, type, rv)
     {
         if (fbs.DBG_FBS_ERRORS)                                                                                               /*@explore*/
-            ddd("fbs.onDebug fileName="+frame.script.fileName+ " reportNextError="                							/*@explore*/
+            FBTrace.sysout("fbs.onDebug fileName="+frame.script.fileName+ " reportNextError="                							/*@explore*/
                                  +reportNextError+" breakOnNextError="+breakOnNextError+"\n");                            /*@explore*/
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
@@ -959,12 +959,12 @@ FirebugService.prototype =
     onBreakpoint: function(frame, type, val)
     {
         var scriptTag = frame.script.tag;
-        if (fbs.DBG_FBS_SRCUNITS) ddd("onBreakpoint frame.script.tag="+frame.script.tag +"\n")     /*@explore*/
+        if (fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("onBreakpoint frame.script.tag="+frame.script.tag +"\n");     /*@explore*/
 
         if (scriptTag in this.onXScriptCreatedByTag)
         {
             var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
-            if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
+            if (this.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          /*@explore*/
                                       +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
             delete this.onXScriptCreatedByTag[scriptTag];
             frame.script.clearBreakpoint(0);
@@ -976,14 +976,14 @@ FirebugService.prototype =
 
             if (fbs.DBG_FBS_SRCUNITS)
             {
-                ddd("Top Scripts Uncleared:");
-                for (p in this.onXScriptCreatedByTag) ddd(p+"|");
-                ddd("\n")
+                var msg = "Top Scripts Uncleared:";
+                for (p in this.onXScriptCreatedByTag) msg += (p+"|");
+                FBTrace.sysout(msg+"\n");
             }
             if (!sourceFile || !sourceFile.breakOnZero || sourceFile.breakOnZero != scriptTag)
                 return RETURN_CONTINUE;
             else  // sourceFile.breakOnZero matches the script we have halted.
-               if (this.DBG_FBS_BP) ddd("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
+               if (this.DBG_FBS_BP) FBTrace.sysout("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
         }
 
 
@@ -1024,7 +1024,7 @@ FirebugService.prototype =
         }
         else
         {
-            if (this.DBG_FBS_BP) ddd("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="              /*@explore*/
+            if (this.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="              /*@explore*/
                 +frame.script.tag+"\n");                           /*@explore*/
         }
 
@@ -1046,7 +1046,7 @@ FirebugService.prototype =
 
         if (fbs.trackThrowCatch)
         {
-            if (fbs.DBG_FBS_ERRORS) ddd("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");
+            if (fbs.DBG_FBS_ERRORS) FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc+"\n");
 
             var debuggr = this.findDebugger(frame);
             if (debuggr)
@@ -1069,7 +1069,7 @@ FirebugService.prototype =
                 messageKind = "Uncaught-Exception";                                                                    /*@explore*/
             if (flags & jsdIErrorHook.REPORT_STRICT)                                                                   /*@explore*/
                 messageKind += "-Strict";                                                                              /*@explore*/
-            ddd("fbs.onError with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="                 /*@explore*/
+            FBTrace.sysout("fbs.onError with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="                 /*@explore*/
                    +this.breakOnErrors+" kind="+messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");     /*@explore*/
         }                                                                                                              /*@explore*/
 
@@ -1085,7 +1085,7 @@ FirebugService.prototype =
             //var theNeed = this.needToBreakForError(fileName, lineNo);
             // fbs.hookInterruptsToTrapErrors();
             if (fbs.DBG_FBS_ERRORS)                                                                                        /*@explore*/
-                ddd("fbs.onError showStackTrace, we will try to drop into onDebug\n");       /*@explore*/
+                FBTrace.sysout("fbs.onError showStackTrace, we will try to drop into onDebug\n");       /*@explore*/
 
             return false; // Drop into onDebug, sometimes only
         }
@@ -1114,11 +1114,11 @@ FirebugService.prototype =
                         if (fbs.DBG_FBS_SRCUNITS)  // these seem to be harmless, but...
                         {
                             var script = frame.script;
-                             ddd("onEventScriptCreated no nestedScriptStack: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
+                             FBTrace.sysout("onEventScriptCreated no nestedScriptStack: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
                                 +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
-                            ddd("onEventScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
+                            FBTrace.sysout("onEventScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
                             try {
-                            ddd(script.functionSource+"\n");                 /*@explore*/
+                            FBTrace.sysout(script.functionSource+"\n");                 /*@explore*/
                             } catch (exc) { /*Bug 426692 */ }
 
                         }
@@ -1133,7 +1133,7 @@ FirebugService.prototype =
                 }
                 else
                 {
-                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName+"\n");
+                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName+"\n");
                 }
             } catch(exc) {
                 dumpProperties("onEventScriptCreated failed: ", exc);
@@ -1142,7 +1142,7 @@ FirebugService.prototype =
         }
 
         fbs.clearNestedScripts();
-        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onEventScriptCreated frame.script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("onEventScriptCreated frame.script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
 
         return sourceFile;
     },
@@ -1155,7 +1155,7 @@ FirebugService.prototype =
             {
                 if (!frame.callingFrame)
                 {
-                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
+                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("No calling Frame for eval frame.script.fileName:"+frame.script.fileName+"\n");
                     // These are eval-like things called by native code. They come from .xml files
                     // They should be marked as evals but we'll treat them like event handlers for now.
                     return fbs.onEventScriptCreated(frame, type, val, true);
@@ -1173,7 +1173,7 @@ FirebugService.prototype =
                 }
                 else
                 {
-                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onEvalScriptCreated no debuggr for "+outerScript.tag+":"+outerScript.fileName+"\n");
+                    if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onEvalScriptCreated no debuggr for "+outerScript.tag+":"+outerScript.fileName+"\n");
                 }
             }
             catch (exc)
@@ -1184,7 +1184,7 @@ FirebugService.prototype =
         }
 
         fbs.clearNestedScripts();
-        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("onEvalScriptCreated outerScript.tag:"+outerScript.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("onEvalScriptCreated outerScript.tag:"+outerScript.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
         return sourceFile;
     },
 
@@ -1201,7 +1201,7 @@ FirebugService.prototype =
                 {
                     delete  fbs.onXScriptCreatedByTag[firstScript.tag];
                     firstScript.clearBreakpoint(0);
-                    if (fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScriptCreated clear bp@0 for firstScript.tag: "+firstScript.tag+"\n")
+                    if (fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onTopLevelScriptCreated clear bp@0 for firstScript.tag: "+firstScript.tag+"\n")
                 }
             }
 
@@ -1212,13 +1212,13 @@ FirebugService.prototype =
             if (debuggr)
             {
                 var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
-                if (fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScriptCreated got sourceFile:"+sourceFile+" using "+fbs.nestedScriptStack.length+" nestedScripts\n");
+                if (fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onTopLevelScriptCreated got sourceFile:"+sourceFile+" using "+fbs.nestedScriptStack.length+" nestedScripts\n");
                 fbs.resetBreakpoints(sourceFile, frame.script.baseLineNumber+frame.script.lineExtent);
             }
             else
             {
                 if (fbs.DBG_FBS_SRCUNITS)
-                    ddd("FBS.onTopLevelScriptCreated no debuggr for "+frame.script.tag+"\n");
+                    FBTrace.sysout("FBS.onTopLevelScriptCreated no debuggr for "+frame.script.tag+"\n");
             }
         }
         catch (exc)
@@ -1228,7 +1228,7 @@ FirebugService.prototype =
         }
 
         fbs.clearNestedScripts();
-        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) ddd("fbs.onTopLevelScriptCreated script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
+        if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onTopLevelScriptCreated script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile")+"\n");  /*@explore*/
 
         return sourceFile;
     },
@@ -1254,7 +1254,7 @@ FirebugService.prototype =
         if (!fbs)
         {
             if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS)
-                ddd("onScriptCreated, but no fbs for script.fileName="+script.fileName+"\n");
+                FBTrace.sysout("onScriptCreated, but no fbs for script.fileName="+script.fileName+"\n");
              return;
         }
 
@@ -1265,17 +1265,17 @@ FirebugService.prototype =
             {
                 try {
                 if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS) 											/*@explore*/
-                    ddd("onScriptCreated: filename filtered:"+fileName+"\n");  	/*@explore*/
+                    FBTrace.sysout("onScriptCreated: filename filtered:"+fileName+"\n");  	/*@explore*/
                 } catch (exc) { /*Bug 426692 */ } /*@explore*/
                 return;
             }
 
             if (fbs.DBG_FBS_CREATION) {                                                                                    /*@explore*/
-                ddd("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
+                FBTrace.sysout("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"                                      /*@explore*/
                     +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");                              /*@explore*/
-                ddd("onScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
+                FBTrace.sysout("onScriptCreated name: \'"+script.functionName+"\'\n");                 /*@explore*/
                 try {
-                    ddd(script.functionSource+"\n");                 /*@explore*/
+                    FBTrace.sysout(script.functionSource+"\n");                 /*@explore*/
                 } catch (exc) { /*Bug 426692 */ } /*@explore*/
             }                                                                                                          /*@explore*/
 
@@ -1283,7 +1283,7 @@ FirebugService.prototype =
             {
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
-                if (fbs.DBG_FBS_SRCUNITS) ddd("createdScriptHasCaller "+hasCaller+"\n");
+                if (fbs.DBG_FBS_SRCUNITS) FBTrace.sysout("createdScriptHasCaller "+hasCaller+"\n");
 
                 if (hasCaller)
                     fbs.onXScriptCreatedByTag[script.tag] = this.onEvalScriptCreated;
@@ -1292,7 +1292,7 @@ FirebugService.prototype =
 
                 script.setBreakpoint(0);
                 fbs.clearHookInterruptsToTrackScripts(); // now we know that any nested scripts are part of our buffer, not dynamic functions
-                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS || fbs.DBG_FBS_BP) ddd("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+"\n");/*@explore*/
+                if (fbs.DBG_FBS_CREATION || fbs.DBG_FBS_SRCUNITS || fbs.DBG_FBS_BP) FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+"\n");/*@explore*/
             }
             else if (script.baseLineNumber == 1)
             {
@@ -1306,12 +1306,12 @@ FirebugService.prototype =
                 fbs.nestedScriptStack.appendElement(script, false);  // for case 2
 
                 fbs.clearHookInterruptsToTrackScripts(); // Should not have been set...?
-                if (fbs.DBG_FBS_CREATION) ddd("onScriptCreated: set BP at PC 0 in event level tag="+script.tag+"\n");      /*@explore*/
+                if (fbs.DBG_FBS_CREATION) FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag="+script.tag+"\n");      /*@explore*/
             }
             else
             {
                 fbs.nestedScriptStack.appendElement(script, false);
-                if (fbs.DBG_FBS_CREATION) ddd("onScriptCreated: nested function named: "+script.functionName+"\n");                                         /*@explore*/
+                if (fbs.DBG_FBS_CREATION) FBTrace.sysout("onScriptCreated: nested function named: "+script.functionName+"\n");                                         /*@explore*/
                 if (script.functionName == "anonymous")  // not no-name
                     fbs.hookInterruptsToTrackScripts();  // if the hook is taken, then its not a eval- or top-, must be Function or ?
                 dispatch(scriptListeners,"onScriptCreated",[script, fileName, script.baseLineNumber]);
@@ -1352,7 +1352,7 @@ FirebugService.prototype =
             if (isFilteredURL(fileName))
                 return;
             if (fbs.DBG_FBS_CREATION)
-                ddd('fbs.onScriptDestroyed '+script.tag+"\n");
+                FBTrace.sysout('fbs.onScriptDestroyed '+script.tag+"\n");
 
             dispatch(scriptListeners,"onScriptDestroyed",[script]);
         }
@@ -1368,29 +1368,29 @@ FirebugService.prototype =
 
         jsd.enumerateContexts( {enumerateContext: function(jscontext)
         {
-                ddd("\n");
+                FBTrace.sysout("\n");
                 try
                 {
                     var global = jscontext.globalObject.getWrappedValue();
-                    ddd("jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
+                    FBTrace.sysout("jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
                     //dumpProperties("global object:\n", global);
                     if (global)
                     {
                         var document = global.document;
                         if (document)
                         {
-                            ddd("global document.location: "+document.location+"\n");
+                            FBTrace.sysout("global document.location: "+document.location+"\n");
                         }
                         else
                         {
-                            ddd("global without document\n");
-                            ddd("global type: "+typeof(global)+"\n");
+                            FBTrace.sysout("global without document\n");
+                            FBTrace.sysout("global type: "+typeof(global)+"\n");
                             dumpProperties("global properties", global);
                             dumpInterfaces("global interfaces", global);
                         }
                     }
                     else
-                        ddd("no global object\n");
+                        FBTrace.sysout("no global object\n");
 
 
                     if (jscontext.privateData)
@@ -1402,7 +1402,7 @@ FirebugService.prototype =
                 }
                 catch(e)
                 {
-                    ddd("jscontext dump FAILED "+e+"\n");
+                    FBTrace.sysout("jscontext dump FAILED "+e+"\n");
                 }
                 /*
                  * jsdIContext has jsdIEphemeral, nsISupports, jsdIContext
@@ -1416,7 +1416,7 @@ FirebugService.prototype =
                     var asTimer = context.QueryInterface(nsITimerCallback);
                     dumpProperties(nsITimerCallback, asTimer );
                 }
-                ddd("\n\n");*/
+                FBTrace.sysout("\n\n");*/
         }});
     },
 
@@ -1455,19 +1455,19 @@ FirebugService.prototype =
                     {
                         if (!debuggr.breakContext)
                             dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
-                        if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger found debuggr at "+i+" for global, location:"+global.location+"\n");
+                        if (fbs.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for global, location:"+global.location+"\n");
                         return debuggr;
                     }
                 }
                 catch (exc)
                 {
-                    ddd("firebug-service findDebugger supportsGlobal FAILS: "+exc+" jscontext:"+(frame.executionContext?frame.executionContext.tag:"undefined")+"\n");
+                    FBTrace.sysout("firebug-service findDebugger supportsGlobal FAILS: "+exc+" jscontext:"+(frame.executionContext?frame.executionContext.tag:"undefined")+"\n");
                 }
             }
-            if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" findDebugger no find for "+frame.script.tag+"; global, location:"+global.location+"\n");
+            if (fbs.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger no find for "+frame.script.tag+"; global, location:"+global.location+"\n");
         }
         else
-            if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
+            if (fbs.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag+"\n");
 
         var win = getFrameWindow(frame);
         if (win)
@@ -1488,7 +1488,7 @@ FirebugService.prototype =
             }
         }
 
-        if (fbs.DBG_FBS_FINDDEBUGGER) ddd(" fbs.findDebugger no find on window, try bottom of stack\n");
+        if (fbs.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" fbs.findDebugger no find on window, try bottom of stack\n");
 
         if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
         {
@@ -1509,15 +1509,15 @@ FirebugService.prototype =
 
         dumpToFileWithStack("\ndiagnoseFindDebugger", frame);
 
-        ddd("diagnoseFindDebugger scope "+frame.scope.jsType+"["+frame.scope.propertyCount+"] "+frame.scope.jsClassName +"\n");
+        FBTrace.sysout("diagnoseFindDebugger scope "+frame.scope.jsType+"["+frame.scope.propertyCount+"] "+frame.scope.jsClassName +"\n");
         var win = getFrameWindow(frame);
         if (!win)
         {
-            ddd("No getFrameWindow! scope:\n");
+            FBTrace.sysout("No getFrameWindow! scope:\n");
             this.dumpIValue(frame.scope);
             return;
         }
-        ddd("diagnoseFindDebugger win.location ="+(win.location?win.location.href:"(undefined)"));
+        var msg = "diagnoseFindDebugger win.location ="+(win.location?win.location.href:"(undefined)");
         for (var i = 0; i < debuggers.length; ++i)
         {
             try
@@ -1525,14 +1525,18 @@ FirebugService.prototype =
                 var debuggr = debuggers[i];
                 if (debuggr.supportsWindow(win))
                 {
-                    ddd(" FOUND at "+i+"\n");
-                    ddd("diagnoseFindDebugger originalWin.location ="+(originalWin.location?originalWin.location.href:"(undefined)")+"\n");
+                    FBTrace.sysout(msg+" FOUND at "+i+"\n");
+                    FBTrace.sysout("diagnoseFindDebugger originalWin.location ="+(originalWin.location?originalWin.location.href:"(undefined)")+"\n");
                     return debuggr;
                 }
             }
-            catch (exc) {ddd("caught:"+exc+"\n");}
+            catch (exc)
+            {
+                FBTrace.sysout(msg+"caught:"+exc+"\n");
+                return;
+               }
         }
-        ddd(" NO FIND tried "+debuggers.length+"\n");
+        FBTrace.sysout(msg+" NO FIND tried "+debuggers.length+"\n");
     },
 
     dumpIValue: function(value)
@@ -1544,9 +1548,9 @@ FirebugService.prototype =
             var prop = listValue.value[i];
             try {
             var name = prop.name.getWrappedValue();
-            ddd(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
+            FBTrace.sysout(i+"]"+name+"="+prop.value.getWrappedValue()+"\n");
             } catch (e) {
-            ddd(i+"]"+e+"\n");
+            FBTrace.sysout(i+"]"+e+"\n");
             }
         }
     },
@@ -1588,7 +1592,7 @@ FirebugService.prototype =
             if (debuggr)
                 bp.debugger = debuggr;
             else /*@explore*/
-                if (fbs.DBG_FBS_BP) ddd("fbs.addBreakpoint with no debuggr:\n"+getComponentsStackDump()+"\n"); /*@explore*/
+                if (fbs.DBG_FBS_BP) FBTrace.sysout("fbs.addBreakpoint with no debuggr:\n"+getComponentsStackDump()+"\n"); /*@explore*/
         }
         else
         {
@@ -1628,18 +1632,18 @@ FirebugService.prototype =
 
     removeBreakpoint: function(type, url, lineNo, script) // xxxJJB script arg not used?
     {
-        if (fbs.DBG_FBS_BP) ddd("removeBreakpoint for url= "+url+"\n");                                                    /*@explore*/
+        if (fbs.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint for url= "+url+"\n");                                                    /*@explore*/
 
         var urlBreakpoints = breakpoints[url];
         if (!urlBreakpoints)
             return false;
 
-        if (fbs.DBG_FBS_BP) ddd("removeBreakpoint need to check bps="+urlBreakpoints.length+"\n");                         /*@explore*/
+        if (fbs.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint need to check bps="+urlBreakpoints.length+"\n");                         /*@explore*/
 
         for (var i = 0; i < urlBreakpoints.length; ++i)
         {
             var bp = urlBreakpoints[i];
-            if (fbs.DBG_FBS_BP) ddd("removeBreakpoint checking bp.lineNo vs lineNo="+bp.lineNo+" vs "+lineNo+"\n");        /*@explore*/
+            if (fbs.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint checking bp.lineNo vs lineNo="+bp.lineNo+" vs "+lineNo+"\n");        /*@explore*/
 
             if (bp.lineNo == lineNo)
             {
@@ -1656,11 +1660,11 @@ FirebugService.prototype =
                                 try
                                 {
                                     script.clearBreakpoint(bp.pc[j]);
-                                    if (fbs.DBG_FBS_BP) ddd("removeBreakpoint in tag="+script.tag+" at "+lineNo+"@"+url+"\n");/*@explore*/
+                                    if (fbs.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint in tag="+script.tag+" at "+lineNo+"@"+url+"\n");/*@explore*/
                                 }
                                 catch (exc)
                                 {
-                                    ddd("Firebug service failed to remove breakpoint in "+script.tag+" at lineNo="+lineNo+" pcmap:"+bp.pcmap+"\n");
+                                    FBTrace.sysout("Firebug service failed to remove breakpoint in "+script.tag+" at lineNo="+lineNo+" pcmap:"+bp.pcmap+"\n");
                                 }
                             }
                         }
@@ -1724,7 +1728,7 @@ FirebugService.prototype =
                             if (fbs.DBG_FBS_BP)
                             {
                                 var vs = (bp.scriptsWithBreakpoint[j] ? bp.scriptsWithBreakpoint[j].tag+"@"+bp.pc[j]:"future")+" on "+url;
-                                ddd("findBreakpointByScript["+i+"]"+" looking for "+script.tag+"@"+pc+" vs "+vs+"\n"); /*@explore*/
+                                FBTrace.sysout("findBreakpointByScript["+i+"]"+" looking for "+script.tag+"@"+pc+" vs "+vs+"\n"); /*@explore*/
                             }
                             if ( bp.scriptsWithBreakpoint[j] && (bp.scriptsWithBreakpoint[j].tag == script.tag) && (bp.pc[j] == pc) )
                                 return bp;
@@ -1748,7 +1752,7 @@ FirebugService.prototype =
             {
                 var msg = "resetBreakpoints: breakpoints["+sourceFile.href;
                 msg += "]="+urlBreakpoints+"\n";
-                ddd(msg);
+                FBTrace.sysout(msg);
             }
             catch (exc)
             {
@@ -1758,7 +1762,7 @@ FirebugService.prototype =
 
         if (urlBreakpoints)
         {
-            if (fbs.DBG_FBS_BP) ddd("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url+" lastLineNumber="+lastLineNumber+"\n");              /*@explore*/
+            if (fbs.DBG_FBS_BP) FBTrace.sysout("resetBreakpoints total bp="+urlBreakpoints.length+" for url="+url+" lastLineNumber="+lastLineNumber+"\n");              /*@explore*/
 
             for (var i = 0; i < urlBreakpoints.length; ++i)
             {
@@ -1767,7 +1771,7 @@ FirebugService.prototype =
                 if (lastLineNumber && !bp.jsdLine && !(bp.disabled & BP_NORMAL) && (bp.lineNo < lastLineNumber))
                 {
                      if (fbs.DBG_FBS_BP)
-                        ddd("resetBreakpoints:  mark breakpoint disabled: "+bp.lineNo+"@"+sourceFile+"\n");
+                        FBTrace.sysout("resetBreakpoints:  mark breakpoint disabled: "+bp.lineNo+"@"+sourceFile+"\n");
                      fbs.disableBreakpoint(url, bp.lineNo);
                 }
             }
@@ -1780,11 +1784,11 @@ FirebugService.prototype =
         if (!scripts)
         {
              if (fbs.DBG_FBS_BP)
-                ddd("setJSDBreakpoint:  NO inner scripts: "+bp.lineNo+"@"+sourceFile+"\n");
+                FBTrace.sysout("setJSDBreakpoint:  NO inner scripts: "+bp.lineNo+"@"+sourceFile+"\n");
              if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
              {
                 if (fbs.DBG_FBS_BP)
-                    ddd("setJSDBreakpoint:  NO valid outerScript\n");
+                    FBTrace.sysout("setJSDBreakpoint:  NO valid outerScript\n");
                 return;
              }
              scripts = [sourceFile.outerScript];
@@ -1823,10 +1827,10 @@ FirebugService.prototype =
                     sourceFile.breakOnZero = script.tag;
 
                 if (fbs.DBG_FBS_BP)
-                    ddd("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+" sourceFile.breakOnZero: "+sourceFile.breakOnZero+"\n");                         /*@explore*/
+                    FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+" sourceFile.breakOnZero: "+sourceFile.breakOnZero+"\n");                         /*@explore*/
             }
             else
-                if (fbs.DBG_FBS_BP) ddd("setJSDBreakpoint NO tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+"\n");                         /*@explore*/
+                if (fbs.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NO tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+"\n");                         /*@explore*/
          }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1869,7 +1873,7 @@ FirebugService.prototype =
         if (!stepMode && !runningUntil)
             return;
 
-         if (fbs.DBG_FBS_STEP) ddd("startStepping stepMode = "+getStepName(stepMode)                        /*@explore*/
+         if (fbs.DBG_FBS_STEP) FBTrace.sysout("startStepping stepMode = "+getStepName(stepMode)                        /*@explore*/
                  +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");                           /*@explore*/
 
         this.hookFunctions();
@@ -1880,7 +1884,7 @@ FirebugService.prototype =
 
     stopStepping: function()
     {
-        if (fbs.DBG_FBS_STEP) ddd("stopStepping\n");                                                                       /*@explore*/
+        if (fbs.DBG_FBS_STEP) FBTrace.sysout("stopStepping\n");                                                                       /*@explore*/
         stepMode = 0;
         stepFrame = null;
         stepFrameCount = 0;
@@ -1911,14 +1915,14 @@ FirebugService.prototype =
                     if (stepMode == STEP_OVER)
                         jsd.interruptHook = null;
 
-                    if (fbs.DBG_FBS_STEP) ddd("functionHook TYPE_FUNCTION_CALL stepMode = "+getStepName(stepMode)/*@explore*/
+                    if (fbs.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_CALL stepMode = "+getStepName(stepMode)/*@explore*/
                              +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");               /*@explore*/
                     break;
                 }
                 case TYPE_FUNCTION_RETURN:
                 {
                     --hookFrameCount;
-                    if (fbs.DBG_FBS_STEP) ddd("functionHook TYPE_FUNCTION_RETURN stepMode = "+getStepName(stepMode)/*@explore*/
+                    if (fbs.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN stepMode = "+getStepName(stepMode)/*@explore*/
                                         +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");    /*@explore*/
 
                     if (hookFrameCount == 0) {
@@ -1947,7 +1951,7 @@ FirebugService.prototype =
             }
         }
 
-        if (fbs.DBG_FBS_STEP) ddd("set functionHook\n");                                                                   /*@explore*/
+        if (fbs.DBG_FBS_STEP) FBTrace.sysout("set functionHook\n");                                                                   /*@explore*/
         jsd.functionHook = { onCall: functionHook };
     },
 
@@ -1961,20 +1965,20 @@ FirebugService.prototype =
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
             var frameLineId = hookFrameCount + frame.script.fileName + frame.line;
-            if (fbs.DBG_FBS_STEP) ddd("interruptHook frameLineId: "+frameLineId+"\n");                                     /*@explore*/
+            if (fbs.DBG_FBS_STEP) FBTrace.sysout("interruptHook frameLineId: "+frameLineId+"\n");                                     /*@explore*/
             if (frameLineId != stepFrameLineId)
                 return fbs.onBreak(frame, type, rv);
             else
                 return RETURN_CONTINUE;
         }
 
-        if (fbs.DBG_FBS_STEP) ddd("set InterruptHook\n");                                                                  /*@explore*/
+        if (fbs.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook\n");                                                                  /*@explore*/
         jsd.interruptHook = { onExecute: interruptHook };
     },
 
     hookScripts: function()
     {
-        if (fbs.DBG_FBS_STEP) ddd("set scriptHook\n");                                                                     /*@explore*/
+        if (fbs.DBG_FBS_STEP) FBTrace.sysout("set scriptHook\n");                                                                     /*@explore*/
         jsd.scriptHook = {
             onScriptCreated: hook(this.onScriptCreated),
             onScriptDestroyed: hook(this.onScriptDestroyed)
@@ -1985,7 +1989,7 @@ FirebugService.prototype =
     unhookScripts: function()
     {
         jsd.scriptHook = null;
-        if (fbs.DBG_FBS_STEP) ddd("unset scriptHook\n");                                                                   /*@explore*/
+        if (fbs.DBG_FBS_STEP) FBTrace.sysout("unset scriptHook\n");                                                                   /*@explore*/
     },
 
     hookInterruptsToTrackScripts: function()
@@ -1995,7 +1999,7 @@ FirebugService.prototype =
 
         jsd.interruptHook = { onExecute: handleTrackingScriptsInterrupt };
         fbs.trackingScriptsHookSet = true;
-        if (fbs.DBG_FBS_CREATION) ddd("hookInterruptsToTrackScripts fbs.saveInterruptHook:"+fbs.saveInterruptHook+"\n");                                                                  /*@explore*/
+        if (fbs.DBG_FBS_CREATION) FBTrace.sysout("hookInterruptsToTrackScripts fbs.saveInterruptHook:"+fbs.saveInterruptHook+"\n");                                                                  /*@explore*/
     },
 
     clearHookInterruptsToTrackScripts: function()
@@ -2012,7 +2016,7 @@ FirebugService.prototype =
         }
 
         fbs.trackingScriptsHookSet = false;
-        if (fbs.DBG_FBS_FUNCTION) ddd("clearHookInterruptsToTrackScripts \n");
+        if (fbs.DBG_FBS_FUNCTION) FBTrace.sysout("clearHookInterruptsToTrackScripts \n");
     },
 
     hookInterruptsToTrapErrors: function()
@@ -2022,7 +2026,7 @@ FirebugService.prototype =
 
         jsd.interruptHook = { onExecute: handleTrappingErrorsInterrupt };
         fbs.trappingErrorsHookSet = true;
-        if (fbs.DBG_FBS_FUNCTION) ddd("hookInterruptsToTrapErrors fbs.saveInterruptHook:"+fbs.saveInterruptHook+"\n");                                                                  /*@explore*/
+        if (fbs.DBG_FBS_FUNCTION) FBTrace.sysout("hookInterruptsToTrapErrors fbs.saveInterruptHook:"+fbs.saveInterruptHook+"\n");                                                                  /*@explore*/
     },
 
     clearHookInterruptsToTrapErrors: function()
@@ -2039,7 +2043,7 @@ FirebugService.prototype =
         }
 
         fbs.trappingErrorsHookSet = false;
-        if (fbs.DBG_FBS_FUNCTION) ddd("clearHookInterruptsToTrapErrors \n");
+        if (fbs.DBG_FBS_FUNCTION) FBTrace.sysout("clearHookInterruptsToTrapErrors \n");
     }
 };
 
@@ -2054,12 +2058,12 @@ function handleTrackingScriptsInterrupt(frame, type, rv)
 {
     try
     {
-        if (fbs.DBG_FBS_FUNCTION) ddd("handleTrackingScriptsInterrupt "+(frame.callingFrame?"haveCaller":"top")+" \n");
+        if (fbs.DBG_FBS_FUNCTION) FBTrace.sysout("handleTrackingScriptsInterrupt "+(frame.callingFrame?"haveCaller":"top")+" \n");
         // We are not interested in Function() calls at top- or eval-level, since they don't seem to have an important use case and FF2 crashes
         if (frame.callingFrame && !isFilteredURL(frame.script.fileName) )
         {
             var frameLineId = frame.script.fileName + frame.line;
-            if (fbs.DBG_FBS_FUNCTION) ddd("handleTrackingScriptsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type)+"\n");                              /*@explore*/
+            if (fbs.DBG_FBS_FUNCTION) FBTrace.sysout("handleTrackingScriptsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type)+"\n");                              /*@explore*/
 
             // When we are called the stack should be at the PC just after the constructor call to Function().
             // TODO implement
@@ -2067,7 +2071,7 @@ function handleTrackingScriptsInterrupt(frame, type, rv)
     }
     catch (exc)
     {
-        if (fbs.DBG_FBS_CREATION) ddd("handleTrackingScriptsInterrupt FAILS: "+exc);                              /*@explore*/
+        if (fbs.DBG_FBS_CREATION) FBTrace.sysout("handleTrackingScriptsInterrupt FAILS: "+exc);                              /*@explore*/
     }
     fbs.clearHookInterruptsToTrackScripts();
     // call restored interruptHook if present
@@ -2080,7 +2084,7 @@ function handleTrappingErrorsInterrupt(frame, type, rv)
 {
     try
     {
-        if (fbs.DBG_FBS_ERRORS) ddd("handleTrappingErrorsInterrupt\n");
+        if (fbs.DBG_FBS_ERRORS) FBTrace.sysout("handleTrappingErrorsInterrupt\n");
         if ( !isFilteredURL(frame.script.fileName) )
         {
             var frameLineId = frame.script.fileName + frame.line;
@@ -2270,7 +2274,7 @@ function getFrameGlobal(frame)
     var jscontext = frame.executionContext;
     if (!jscontext)
     {
-        //ddd("getFrameGlobal, frame.executionContext null\n");
+        //FBTrace.sysout("getFrameGlobal, frame.executionContext null\n");
         return getFrameWindow(frame);
     }
     var frameGlobal = jscontext.globalObject.getWrappedValue();
@@ -2278,7 +2282,7 @@ function getFrameGlobal(frame)
         return frameGlobal;
     else
     {
-        ddd("getFrameGlobal, no frameGlobal, trying window\n");
+        FBTrace.sysout("getFrameGlobal, no frameGlobal, trying window\n");
         return getFrameWindow(frame);
     }
 }
@@ -2378,7 +2382,7 @@ var FirebugPrefsObserver =
         else
         {
             if (fbs.DBG_FBS_ERRORS)
-                ddd("fbs.observe no match: "+data+"\n");
+                FBTrace.sysout("fbs.observe no match: "+data+"\n");
         }
     },
 
@@ -2388,14 +2392,14 @@ var FirebugPrefsObserver =
         {
             fbs[optionName] = this.getPref(prefDomain, optionName);
             if (fbs.DBG_FBS_ERRORS)
-                ddd("fbs.resetOption set "+optionName+" to "+fbs[optionName]+"\n");
+                FBTrace.sysout("fbs.resetOption set "+optionName+" to "+fbs[optionName]+"\n");
 
             FirebugPrefsObserver.syncFilter();
         }
         catch (exc)
         {
             if (fbs.DBG_FBS_ERRORS)
-                ddd("fbs.resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
+                FBTrace.sysout("fbs.resetOption "+optionName+" is not an option; not set in defaults/prefs.js?\n");
         }
     },
 
@@ -2418,7 +2422,7 @@ var FirebugPrefsObserver =
         fbs.showEvents = (filter == "all" || filter == "events");
         fbs.showEvals = (filter == "all" || filter == "evals");
         if (fbs.DBG_FBS_ERRORS)
-            ddd("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals+"\n");
+            FBTrace.sysout("fbs.showEvents "+fbs.showEvents+" fbs.showEvals "+fbs.showEvals+"\n");
     },
 };
 
@@ -2427,10 +2431,10 @@ var QuitApplicationGrantedObserver =
     observe: function(subject, topic, data)
     {
         if (fbs.DBG_FBS_ERRORS)
-            ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver start xxxxxxxxxxxxxxx\n");
+            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver start xxxxxxxxxxxxxxx\n");
         fbs.shutdown();
         if (fbs.DBG_FBS_ERRORS)
-            ddd("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver end xxxxxxxxxxxxxxxxx\n");
+            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver end xxxxxxxxxxxxxxxxx\n");
     }
 };
 var QuitApplicationRequestedObserver =
@@ -2438,7 +2442,7 @@ var QuitApplicationRequestedObserver =
     observe: function(subject, topic, data)
     {
         if (fbs.DBG_FBS_ERRORS)
-            ddd("FirebugService QuitApplicationRequestedObserver\n");
+            FBTrace.sysout("FirebugService QuitApplicationRequestedObserver\n");
     }
 };
 var QuitApplicationObserver =
@@ -2446,7 +2450,7 @@ var QuitApplicationObserver =
     observe: function(subject, topic, data)
     {
         if (fbs.DBG_FBS_ERRORS)
-            ddd("FirebugService QuitApplicationObserver\n");
+            FBTrace.sysout("FirebugService QuitApplicationObserver\n");
         fbs = null;
     }
 };
@@ -2463,28 +2467,7 @@ function ERROR(text)
     consoleService.logStringMessage(text + "");
 }
 
-function ddd(text)
-{
-    FBTrace.sysout(text);
 
-    return _ddd(text)
-}
-
-function _ddd(text)
-{
-    if (fbs && fbs.hiddenWindow)
-        return;
-
-    if (fbs)
-        ERROR( "firebug-service: no hiddenWindow!! "+text );
-    else
-        ERROR("firebug-service: no fbs, dump to file ");
-
-    if (true)      /* in the traced version we dump to file */														/*@explore*/
-        dumpToFile(text);     																						/*@explore*/
-    else      		/* but in the untraced version 'else' will be removed and we dump to log */						/*@explore*/
-        ERROR(text);
-}
 
 function dumpit(text)
 {
@@ -2539,7 +2522,7 @@ function dumpProperties(title, obj)                                             
         }
     }                                                                                                   				/*@explore*/
                                                                                                                         /*@explore*/
-    _ddd(lines.join("\n")+"\n");                                                                                             /*@explore*/
+    _FBTrace.sysout(lines.join("\n")+"\n");                                                                                             /*@explore*/
 }
                                                                                                                          /*@explore*/
 function dumpInterfaces(title, obj)																							/*@explore*/
@@ -2553,10 +2536,10 @@ function dumpInterfaces(title, obj)																							/*@explore*/
         if (obj instanceof Components.interfaces[iface])																/*@explore*/
         {																												/*@explore*/
             found = true;
-            _ddd(title+" has "+iface+"\n");																						/*@explore*/
+            _FBTrace.sysout(title+" has "+iface+"\n");																						/*@explore*/
             for (p in Components.interfaces[iface])																		/*@explore*/
             {																											/*@explore*/
-                _ddd("["+iface+"."+p+"]="+obj[p]+";\n");																	/*@explore*/
+                _FBTrace.sysout("["+iface+"."+p+"]="+obj[p]+";\n");																	/*@explore*/
             }																											/*@explore*/
         }																												/*@explore*/
                                                                                                                         /*@explore*/
