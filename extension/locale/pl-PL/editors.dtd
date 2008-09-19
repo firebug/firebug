@@ -1,14 +1,12 @@
-
-<!ENTITY  editors.Description       "Configured Firebug Editors:">
-<!ENTITY  editors.NameColumn        "Editor">
-<!ENTITY  editors.ExecutableColumn  "Executable">
-<!ENTITY  editors.ParamsColumn      "Launch arguments">
-
-<!ENTITY  add.label               "Add">
-<!ENTITY  remove.label            "Remove">
-<!ENTITY  change.label            "Change">
-<!ENTITY  close.label             "Close">
-<!ENTITY  browse.label            "Browse...">
-<!ENTITY  changeEditor.Name       "Name:">
-<!ENTITY  changeEditor.Executable "Executable:">
-<!ENTITY  changeEditor.CmdLine    "Arguments:">
+<!ENTITY editors.Description "Skonfigurowane edytory Firebuga:">
+<!ENTITY editors.NameColumn "Edytor">
+<!ENTITY editors.ExecutableColumn "Wykonywalne">
+<!ENTITY editors.ParamsColumn "Uruchom argumenty">
+<!ENTITY add.label "Dodaj">
+<!ENTITY remove.label "Usuń">
+<!ENTITY change.label "Zmień">
+<!ENTITY close.label "Zamknij">
+<!ENTITY browse.label "Przeglądaj">
+<!ENTITY changeEditor.Name "Nazwa:">
+<!ENTITY changeEditor.Executable "Wykonywalne:">
+<!ENTITY changeEditor.CmdLine "Argumenty:">
