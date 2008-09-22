@@ -23,6 +23,7 @@ const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindo
 const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 const clipboard = CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 const traceService = CCSV("@joehewitt.com/firebug-trace-service;1", "nsIObserverService");
+const FBTraceAPI = CCSV("@joehewitt.com/firebug-trace-service;1", "nsISupports").wrappedJSObject;
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
@@ -303,8 +304,8 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 
     observePrefs: function(subject, topic, data)
     {
-        if ((data.indexOf(Firebug.prefDomain+".DBG_") != -1) ||
-            (data.indexOf("extensions.firebug-service.DBG_") != -1))
+        var m = reDBG.exec(data);
+        if (m)
         {
             // Update UI after timeout so, FBTrace object is already updated.
             var self = this;

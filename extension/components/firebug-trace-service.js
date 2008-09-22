@@ -16,6 +16,8 @@ const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsICons
 
 const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
 
+const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
+
 // ************************************************************************************************
 
 var TracePrefs = [
@@ -107,11 +109,14 @@ TraceConsoleService.prototype =
     {
         // Preferences for FBTrace begins with extensions.firebug.DBG_ or 
         // extensions.firebug-service.DBG_
-        if ((data.indexOf("extensions.firebug.DBG_") != -1) ||
-            (data.indexOf("extensions.firebug-service.DBG_") != -1))
+        var m = reDBG.exec(data);
+        if (m)
         {
             var optionName = data.substr(data.lastIndexOf(".")+1);
             FBTrace[optionName] = prefs.getBoolPref(data);
+
+            //dump("TraceConsoleService.observe, FBTrace[" + optionName + "] => " 
+            //    + FBTrace[optionName] + "\n");
         }
     },
 

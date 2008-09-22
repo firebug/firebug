@@ -18,8 +18,10 @@ function _FBTrace(prefDomain) {
 // Derive all properties from FBTraceAPI
 for (var p in FBTraceAPI)
 {
-    if (p.indexOf("DBG_") != 0)
+    if (p.indexOf("DBG_") != 0) {
+        _FBTrace.prototype[p] = FBTraceAPI[p];
         continue;
+    }
 
     function createGetter(prop) {
         return function() {
