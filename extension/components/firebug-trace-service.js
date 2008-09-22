@@ -173,10 +173,17 @@ TraceConsoleService.prototype =
 // ************************************************************************************************
 // Public FBTrace API
 
+// Prevent tracing from code that performs tracing.
+var noTrace = false;
 var FBTrace = 
 {    
     dump: function(messageType, message, obj) {
+        if (noTrace)
+            return;
+
+        noTrace = true;
         gTraceService.dispatch(messageType, message, obj);
+        noTrace = false;
     },
 
     sysout: function(message, obj) {
