@@ -69,7 +69,8 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     initDomainOptions: function(prefDomain)
     {
-        if (this.debug) FBTrace.sysout("TraceModule.initialize prefDomain="+prefDomain+"\n");
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("TraceModule.initialize prefDomain="+prefDomain+"\n");
 
         for (var p in FBTrace)
         {
@@ -95,6 +96,9 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     shutdown: function()
     {
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("TraceModule.shutdown\n");
+
         prefs.removeObserver("extensions", this, false);
 
         traceService.removeObserver(this, "firebug-trace-on-message");
@@ -242,7 +246,7 @@ Firebug.TraceModule = extend(Firebug.Module,
             if (m)
             {
                 var prefDomain = "extensions."+m[1];
-                this.resetOption(prefDomain, m[2]);
+                FBTrace[optionName] = Firebug.getPref(prefDomain, m[2]);
             }
             else
             {
@@ -298,7 +302,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 // Trace Panel
 
 Firebug.TracePanel = function() {};
-Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
+Firebug.TracePanel.prototype = extend(Firebug.Panel,
 {
     name: "TraceFirebug",
     title: "FBTrace",
@@ -307,9 +311,10 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
 
     initializeNode: function(myPanelNode)
     {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TracePanel initializeNode\n");
-        var options = this.getOptionsMenuItems();
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("TracePanel initializeNode\n");
 
+        var options = this.getOptionsMenuItems();
         var numbers_of_columns = 6;
         var number_of_rows = Math.round((options.length / numbers_of_columns));
 
@@ -332,10 +337,19 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
             optionsColumn.appendChild(button);
             button.addEventListener("click", options[i].command, false);
         }
-        prefs.addObserver("extensions", { observe: bind(this.observePrefs, this)}, false);
+
+        prefs.addObserver("extensions", this, false);
     },
 
-    observePrefs: function(subject, topic, data)
+    destroyNode: function()
+    {
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("TracePanel destroyNode\n");
+
+        prefs.removeObserver("extensions", this, false);
+    },
+
+    observe: function(subject, topic, data)
     {
         var m = reDBG.exec(data);
         if (m)
@@ -363,6 +377,10 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var button = this.panelNode.ownerDocument.getElementById(optionName);
         if (button)
             button.setAttribute("checked", FBTrace[optionName]);
+
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("TraceFirebug.updateButton: " + optionName + 
+                ", " + FBTrace[optionName], button);
     },
 
     hide: function()
@@ -440,6 +458,10 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var category = 'DBG_'+label;
         FBTrace[category] = !FBTrace[category];
         menuitem.checked = FBTrace[category];
+
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("TraceFirebug.panel setOption: " + category + ", " + 
+                FBTrace[category], menuitem);
 
         var prefDomain;
         if (category.indexOf("_FBS_") == -1)
@@ -921,7 +943,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
         var message = Firebug.getRepObject(messageInfoBody);
 
+        // Make sure the original Domplate is *not* tracing for now.
+        var dumpDOM = FBTrace.DBG_DOM;
+        FBTrace.DBG_DOM = false;
         this.updateInfo(messageInfoBody, view, message);
+        FBTrace.DBG_DOM = dumpDOM;
     },
 
     updateInfo: function(messageInfoBody, view, message)
