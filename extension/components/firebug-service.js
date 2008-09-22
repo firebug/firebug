@@ -2508,45 +2508,13 @@ function getPropertyName(object, value)                                         
 
 function dumpProperties(title, obj)                                                                                    /*@explore*/
 {                                                                                                                      /*@explore*/
-    FBTrace.sysout(title, obj);
-
-    var lines = [title];                                                                                               /*@explore*/
-    for (p in obj)
-    {
-        try
-        {
-            lines.push("["+p+"]="+obj[p]);
-        }
-        catch(e)
-        {
-            lines.push("["+p+"] FAILED:"+e);
-        }
-    }                                                                                                   				/*@explore*/
-                                                                                                                        /*@explore*/
-    _FBTrace.sysout(lines.join("\n"));                                                                                             /*@explore*/
-}
-                                                                                                                         /*@explore*/
-function dumpInterfaces(title, obj)																							/*@explore*/
-{																														/*@explore*/
-    FBTrace.sysout(title, obj);
-
-    var found = false;																									/*@explore*/
-    // could try for classInfo																							/*@explore*/
-    for(iface in Components.interfaces)																					/*@explore*/
-    {																													/*@explore*/
-        if (obj instanceof Components.interfaces[iface])																/*@explore*/
-        {																												/*@explore*/
-            found = true;
-            _FBTrace.sysout(title+" has "+iface);																						/*@explore*/
-            for (p in Components.interfaces[iface])																		/*@explore*/
-            {																											/*@explore*/
-                _FBTrace.sysout("["+iface+"."+p+"]="+obj[p]+";\n");																	/*@explore*/
-            }																											/*@explore*/
-        }																												/*@explore*/
-                                                                                                                        /*@explore*/
-    }																													/*@explore*/
-    return found;																										/*@explore*/
-}																														/*@explore*/
+    FBTrace.sysout(title, obj);                                                                                        /*@explore*/
+}                                                                                                                      /*@explore*/
+                                                                                                                       /*@explore*/
+function dumpInterfaces(title, obj)																				       /*@explore*/
+{																													   /*@explore*/
+    FBTrace.sysout(title, obj);                                                                                        /*@explore*/
+}                                                                                                                      /*@explore*/
 
 function getExecutionStopNameFromType(type)                                                                            /*@explore*/
 {                                                                                                                      /*@explore*/

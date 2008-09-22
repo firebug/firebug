@@ -404,23 +404,25 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var menuitem = event.target;
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
-        FBTrace[category] = !FBTrace[category];
-        menuitem.checked = FBTrace[category];
+
+        // Appropriate FBTrace property (category) is updated within firebug-trace-service.js
+        var newOptionValue = !FBTrace[category];
+        menuitem.checked = newOptionValue;
 
         if (category.indexOf("_FBS_") == -1)
         {
             var prefDomain = Firebug.prefDomain;
-            Firebug.setPref(prefDomain, category, FBTrace[category] );
+            Firebug.setPref(prefDomain, category, newOptionValue);
             prefService.savePrefFile(null);
             if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
+                FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + newOptionValue + "\n");
         }
         else
         {
-            prefs.setBoolPref(Firebug.servicePrefDomain+"."+category, FBTrace[category]);
+            prefs.setBoolPref(Firebug.servicePrefDomain+"."+category, !FBTrace[category]);
             prefService.savePrefFile(null);
             if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("tracePanel.setOption: "+Firebug.servicePrefDomain+"."+category+ " = " + FBTrace[category] + "\n");
+                FBTrace.sysout("tracePanel.setOption: "+Firebug.servicePrefDomain+"."+category+ " = " + newOptionValue + "\n");
         }
     },
 

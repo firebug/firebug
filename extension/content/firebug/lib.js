@@ -5828,10 +5828,6 @@ this.formatTime = function(elapsed)
 }).apply(FBL);
 } catch(e) {																			/*@explore*/
     dump("FBL Fails "+e+"\n");																/*@explore*/
-    if (FBTrace.dumpProperties)
-    {
-        FBTrace.dumpProperties("FBL FAILS", e);									/*@explore*/
-        FBTrace.sysout("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
-        FBTrace.sysout("Another cause can be mangled install.rdf.\n");/*@explore*/
-    }
+    dump("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
+    dump("Another cause can be mangled install.rdf.\n");/*@explore*/
 }   																		/*@explore*/

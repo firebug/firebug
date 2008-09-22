@@ -17,7 +17,28 @@ function _FBTrace(prefDomain) {
 
 // Derive all properties from FBTraceAPI
 for (var p in FBTraceAPI)
-    _FBTrace.prototype[p] = FBTraceAPI[p];
+{
+    if (p.indexOf("DBG_") != 0)
+        continue;
+
+    function createGetter(prop) {
+        return function() {
+            return FBTraceAPI[prop];
+        }
+    }
+
+    // xxxHonza: the setter shouldn't be defined and the only way how to change
+    // the option should be through preferences. Hoever this is a simple way
+    // how to create new options from Firebug extensions.
+    function createSetter(prop) {
+        return function(value) {
+            FBTraceAPI[prop] = value;
+        }
+    }
+
+    _FBTrace.prototype.__defineGetter__(p, createGetter(p));
+    _FBTrace.prototype.__defineSetter__(p, createSetter(p));
+}
 
 // Override sysout function in order to mark all logs from this extension. 
 // This makes possible to filter logs by source extensions.
