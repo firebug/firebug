@@ -11,6 +11,9 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+
+
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const prefs = PrefService.getService(nsIPrefBranch2);
@@ -42,11 +45,15 @@ Firebug.TraceModule = extend(Firebug.Module,
         FBL.internationalize("fbTraceOpenConsole", "label");
         FBL.internationalize("fbTraceOpenConsole", "tooltiptext");
 
-        if (this.isEnabled())
+        var enabled = this.isEnabled();
+        if (enabled)
         {
             if (FBTrace.DBG_OPTIONS)
                 FBTrace.sysout("TraceModule.initialize prefDomain="+ prefDomain+"\n");
-            this.openConsole(prefDomain);
+            if (enabled == "panel")
+                this.openPanel(prefDomain);
+            else
+                this.openConsole(prefDomain);
         }
         else
         {
@@ -75,9 +82,34 @@ Firebug.TraceModule = extend(Firebug.Module,
     initContext: function(context)
     {
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule.initContext Firebug.prefDomain: "+Firebug.prefDomain+"\n");
+            FBTrace.sysout("TraceModule.initContext Firebug.prefDomain: "+Firebug.prefDomain+" "+context.window.location.toString()+"\n");
 
         this.context = context;
+    },
+
+    loadedContext: function(context)
+    {
+        if(context.window.location.toString() == "chrome://firebug/content/panel.html")
+        {
+            var fbTracePanelNode = context.getPanel("TraceFirebug", false).panelNode;
+            var doc = fbTracePanelNode.ownerDocument;
+            var iframe = doc.createElement("iframe");
+
+            var self = this;
+            iframe.addEventListener("load", function attachTraceConsoleToPanel()
+            {
+                    self.consoleNode = iframe.contentDocument.getElementById("panelNode-traceConsole");
+                    FBTrace.sysout("TraceModule.loadedContext Firebug.prefDomain: "+Firebug.prefDomain+" "+context.window.location.toString()+" self.consoleNode:", self.consoleNode);
+                    if (!self.consoleNode)
+                        FBTrace.sysout("TraceModule.loadedContext no consoleNode ",iframe.contentDocument);
+                    self.onLoadConsole(window, self.consoleNode);
+             }, true);
+
+            iframe.setAttribute("src", "chrome://firebug/content/traceConsole.html");
+            iframe.setAttribute("height", "100%");
+            iframe.setAttribute("width", "100%");
+            fbTracePanelNode.appendChild(iframe);
+        }
     },
 
     getPanel: function(context, noCreate)
@@ -134,6 +166,11 @@ Firebug.TraceModule = extend(Firebug.Module,
         }
 
         return false;
+    },
+
+    openPanel: function(prefDomain)
+    {
+        //this.onLoadConsole(window, this.consoleNode);
     },
 
     onLoadConsole: function(win, rootNode)
