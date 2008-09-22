@@ -1466,6 +1466,9 @@ Firebug.Panel =
 
     destroy: function(state) // Panel may store info on state
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("firebug.destroy panelNode for "+this.name+"\n");
+
         if (this.panelNode)
             delete this.panelNode.ownerPanel;
 
