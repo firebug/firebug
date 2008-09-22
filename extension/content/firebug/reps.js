@@ -378,7 +378,7 @@ this.Arr = domplate(Firebug.Rep,
     isArray: function(obj) {
         try {
             if (obj)
-                return isFinite(obj) && typeof obj.splice === 'function';
+                return isFinite(obj.length) && typeof obj.splice === 'function';
             else
                 return false;
         }
