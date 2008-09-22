@@ -16,47 +16,6 @@ const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsICons
 
 const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
 
-const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
-
-// ************************************************************************************************
-
-var TracePrefs = [
-    "firebug.DBG_BP",
-    "firebug.DBG_CSS",
-    "firebug.DBG_CACHE",
-    "firebug.DBG_CONSOLE",
-    "firebug.DBG_DISPATCH",
-    "firebug.DBG_DOM",
-    "firebug.DBG_DBG2FIREBUG",
-    "firebug.DBG_ERRORS",
-    "firebug.DBG_EVENTS",
-    "firebug.DBG_EVAL",
-    "firebug.DBG_FUNCTION_NAMES",
-    "firebug.DBG_INSPECT",
-    "firebug.DBG_INITIALIZE",
-    "firebug.DBG_HTML",
-    "firebug.DBG_LINETABLE",
-    "firebug.DBG_NET",
-    "firebug.DBG_OPTIONS",
-    "firebug.DBG_PANELS",
-    "firebug.DBG_SOURCEFILES",
-    "firebug.DBG_STACK",
-    "firebug.DBG_TOPLEVEL",
-    "firebug.DBG_UI_LOOP",
-    "firebug.DBG_WINDOWS",
-    "firebug-service.DBG_FBS_CREATION",
-    "firebug-service.DBG_FBS_SRCUNITS",
-    "firebug-service.DBG_FBS_STEP",
-    "firebug-service.DBG_FBS_FUNCTION",
-    "firebug-service.DBG_FBS_BP",
-    "firebug-service.DBG_FBS_ERRORS",
-    "firebug-service.DBG_FBS_FINDDEBUGGER",
-    "firebug-service.DBG_FBS_FF_START",
-    "firebug-service.DBG_FBS_FLUSH",
-    "firebug-service.DBG_FBS_JSDCONTEXT",
-    "firebug.DBG_HTTPOBSERVER"
-];
-
 // ************************************************************************************************
 // Service implementation
 
@@ -76,10 +35,17 @@ TraceConsoleService.prototype =
 {
     initializeOptions: function()
     {
-        for (p in TracePrefs) {
-            var prefName = TracePrefs[p];
-            var optionName = prefName.substr(prefName.indexOf(".")+1);
-            FBTrace[optionName] = prefs.getBoolPref("extensions." + prefName);
+        var allPrefs = prefs.getChildList("extensions", {});
+        for (var i = 0; i < allPrefs.length; i++)
+        {
+            var prefName = allPrefs[i];
+            if (this.isFirebugTracePref(prefName))
+            {
+                var optionName = prefName.substr(prefName.lastIndexOf(".")+1);
+                FBTrace[optionName] = this.getPref(prefName);
+                
+                //dump("FBTrace[" + optionName + "]=>" + FBTrace[optionName] + "\n");
+            }
         }
     },
 
@@ -104,16 +70,32 @@ TraceConsoleService.prototype =
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
     },
 
+    isFirebugTracePref: function(prefName)
+    {
+        return (prefName.indexOf("extensions.firebug.DBG_") == 0 ||
+            prefName.indexOf("extensions.firebug-service.") == 0);
+    },
+
+    getPref: function(prefName)
+    {
+        var type = prefs.getPrefType(prefName);
+        if (type == Ci.nsIPrefBranch.PREF_STRING)
+            return prefs.getCharPref(prefName);
+        else if (type == Ci.nsIPrefBranch.PREF_INT)
+            return prefs.getIntPref(prefName);
+        else if (type == Ci.nsIPrefBranch.PREF_BOOL)
+            return prefs.getBoolPref(prefName);
+    },
+
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
         // Preferences for FBTrace begins with extensions.firebug.DBG_ or 
         // extensions.firebug-service.DBG_
-        var m = reDBG.exec(data);
-        if (m)
+        if (this.isFirebugTracePref(data))
         {
             var optionName = data.substr(data.lastIndexOf(".")+1);
-            FBTrace[optionName] = prefs.getBoolPref(data);
+            FBTrace[optionName] = this.getPref(data);
 
             //dump("TraceConsoleService.observe, FBTrace[" + optionName + "] => " 
             //    + FBTrace[optionName] + "\n");
@@ -156,7 +138,7 @@ TraceConsoleService.prototype =
                 var hiddenWindow = appShellService.hiddenDOMWindow; 
                 var unwrapped = subject.wrappedJSObject;
                 var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
-                hiddenWindow.dump("firebug-trace-service: "+someData+objPart+"\n");
+                hiddenWindow.dump("FTS: "+someData+objPart+"\n");
             }            
         }
         catch (err)

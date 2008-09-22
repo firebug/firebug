@@ -23,7 +23,6 @@ const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindo
 const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
 const clipboard = CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 const traceService = CCSV("@joehewitt.com/firebug-trace-service;1", "nsIObserverService");
-const FBTraceAPI = CCSV("@joehewitt.com/firebug-trace-service;1", "nsISupports").wrappedJSObject;
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
@@ -46,6 +45,8 @@ Firebug.TraceModule = extend(Firebug.Module,
         FBL.internationalize("fbTraceOpenConsole", "label");
         FBL.internationalize("fbTraceOpenConsole", "tooltiptext");
 
+        this.initDomainOptions(prefDomain);
+
         var enabled = this.isEnabled();
         if (enabled)
         {
@@ -66,8 +67,36 @@ Firebug.TraceModule = extend(Firebug.Module,
         consoleService.registerListener(this.JSErrorConsoleObserver);
     },
 
+    initDomainOptions: function(prefDomain)
+    {
+        if (this.debug) FBTrace.sysout("TraceModule.initialize prefDomain="+prefDomain+"\n");
+
+        for (var p in FBTrace)
+        {
+            var f = reDBG_FBS.exec(p);
+            if (f)
+            {
+                FBTrace[p] = Firebug.getPref("extensions.firebug-service", p);
+                if (FBTrace.DBG_OPTIONS)
+                    FBTrace.sysout("TraceModule.initialize extensions.firebug-service."+p+"="+FBTrace[p]+"\n");
+            }
+            else
+            {
+                var m = p.indexOf("DBG_");
+                if (m != -1)
+                    FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
+                if (FBTrace.DBG_OPTIONS && m)
+                    FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
+            }
+        }
+        prefs.setBoolPref("browser.dom.window.dump.enabled", true);
+        prefs.addObserver("extensions", this, false);
+    },
+
     shutdown: function()
     {
+        prefs.removeObserver("extensions", this, false);
+
         traceService.removeObserver(this, "firebug-trace-on-message");
         consoleService.unregisterListener(this.JSErrorConsoleObserver);
 
@@ -182,12 +211,6 @@ Firebug.TraceModule = extend(Firebug.Module,
         }
 
         this.consoleRoot = MessageTemplate.createTable(rootNode);
-        if (this.messages.length == 0)
-            return;
-
-        MessageTemplate.dumpMessages(this.messages, this.consoleRoot.firstChild);
-
-        this.messages = [];
     },
 
     onUnloadConsole: function()
@@ -198,24 +221,36 @@ Firebug.TraceModule = extend(Firebug.Module,
     // nsIObserver
     observe: function(subject, topic, data)
     {
-        if (topic != "firebug-trace-on-message")
-            return;
+        if (topic == "firebug-trace-on-message")
+        {
+            // Display messages only with "firebug.extensions" type.
+            var messageInfo = subject.wrappedJSObject;
 
-        // Display messages only messages with "firebug.extensions" type.
-        var messageInfo = subject.wrappedJSObject;
+            // If the message type isn't specified, use Firebug's pref domain as the default.
+            if (!messageInfo.type)
+                messageInfo.type = "extensions.firebug";
 
-        // If the message type isn't specified, use Firebug's pref domain as the default.
-        if (!messageInfo.type)
-            messageInfo.type = "extensions.firebug";
+            if (messageInfo.type != this.prefDomain)
+                return;
 
-        if (messageInfo.type != this.prefDomain)
-            return;
-
-        this.dump(new Firebug.TraceModule.TraceMessage(
-            messageInfo.type, data, messageInfo.obj));
+            this.dump(new Firebug.TraceModule.TraceMessage(
+                messageInfo.type, data, messageInfo.obj));
+        }
+        else if (topic == "nsPref:changed")
+        {
+            var m = reDBG.exec(data);
+            if (m)
+            {
+                var prefDomain = "extensions."+m[1];
+                this.resetOption(prefDomain, m[2]);
+            }
+            else
+            {
+                if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel observe data: "+data+"\n");
+            }
+        }
     },
 
-    messages: [],        // Queue of messages not dumped into the UI yet.
     table: null,         // Table element with all logs (rows) in the console window.
     consoleWindow: null, // Reference to the console.
     listeners: [],       // Listeners for customizing the Console window.
@@ -240,8 +275,6 @@ Firebug.TraceModule = extend(Firebug.Module,
         // otherwise dump it directly to the panel.
         if (this.consoleRoot)
             MessageTemplate.dump(message, this.consoleRoot.firstChild);
-        else if (this.isEnabled())
-            this.messages.push(message);
     },
 
     dumpSeparator: function()
@@ -405,26 +438,25 @@ Firebug.TracePanel.prototype = extend(Firebug.ConsolePanel.prototype,
         var menuitem = event.target;
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
+        FBTrace[category] = !FBTrace[category];
+        menuitem.checked = FBTrace[category];
 
-        // Appropriate FBTrace property (category) is updated within firebug-trace-service.js
-        var newOptionValue = !FBTrace[category];
-        menuitem.checked = newOptionValue;
-
+        var prefDomain;
         if (category.indexOf("_FBS_") == -1)
         {
-            var prefDomain = Firebug.prefDomain;
-            Firebug.setPref(prefDomain, category, newOptionValue);
+            prefDomain = Firebug.prefDomain;
+            Firebug.setPref(prefDomain, category, FBTrace[category] );
             prefService.savePrefFile(null);
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + newOptionValue + "\n");
         }
         else
         {
-            prefs.setBoolPref(Firebug.servicePrefDomain+"."+category, !FBTrace[category]);
+            prefDomain = "extensions.firebug-service";
+            prefs.setBoolPref(prefDomain+"."+category, FBTrace[category]);
             prefService.savePrefFile(null);
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("tracePanel.setOption: "+Firebug.servicePrefDomain+"."+category+ " = " + newOptionValue + "\n");
         }
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
     },
 
     getContextMenuItems: function(object, target)
@@ -811,12 +843,6 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             scrollToBottom(panelNode);
 
         panelNode.scrollTop = panelNode.scrollHeight - panelNode.offsetHeight + 50;
-    },
-
-    dumpMessages: function(messages, parentNode)
-    {
-        for (var i=0; i<messages.length; ++i)
-            this.dump(messages[i], parentNode);
     },
 
     // Body of the message.
