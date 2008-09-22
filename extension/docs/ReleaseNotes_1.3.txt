@@ -30,3 +30,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1125: (partial) Net panel not working as expected (1.2.0) (issue 402 tested and works)
 	* Issue 1137: Forgets which JS file being viewed after switching away and back to Script tab
 	* Issue 1151: Break on all errors should not break when a watch is undefined
+	* Issue 1159: Console results for "$x" incorrect
+	* Issue 1164: Firebug console no longer shows Array indicators
