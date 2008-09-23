@@ -8,8 +8,7 @@ const Ci = Components.interfaces;
 
 var gFindBar;
 
-var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
-var hiddenWindow = appShellService.hiddenDOMWindow;           
+
 
 
 // Implementation
@@ -19,10 +18,12 @@ var Console =
 {
     modules: [],
 
-    onLoad: function()  
+    onLoad: function()
     {
         var args = window.arguments[0];
         /*
+        var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);
+        var hiddenWindow = appShellService.hiddenDOMWindow;
         hiddenWindow.dump("traceConsole window.arguments.length:"+window.arguments.length+"\n");
         hiddenWindow.dump("traceConsole window.arguments[0]"+window.arguments[0]+"\n");
         for (var i in args)
@@ -31,12 +32,12 @@ var Console =
         }
         */
         FBL = args.FBL;
-        Firebug = args.Firebug; 
+        Firebug = args.Firebug;
         this.prefDomain = args.prefDomain;
         this.activeModule = args.traceModule;
-    
+
         window.title = "Firebug Trace Console: "+this.prefDomain;
-        
+
         var consoleFrame = document.getElementById("consoleFrame");
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
 
@@ -53,7 +54,7 @@ var Console =
         for (var i=0; i<this.modules.length; ++i)
             this.modules[i].onUnloadConsole();
     },
-    
+
     registerModule: function(module)
     {
         module.consoleRoot = this.activeModule.consoleRoot;
@@ -77,12 +78,12 @@ var Console =
         while (tbody.firstChild)
             tbody.removeChild(tbody.lastChild);
     },
-    
+
     onSeparateConsole: function()
     {
         this.activeModule.dumpSeparator();
     },
-    
+
     onSaveToFile: function()
     {
     },
@@ -92,7 +93,7 @@ var Console =
         Cc["@mozilla.org/toolkit/app-startup;1"].getService(Ci.nsIAppStartup).
             quit(Ci.nsIAppStartup.eRestart | Ci.nsIAppStartup.eAttemptQuit);
     },
-    
+
     onExitFirefox: function()
     {
         goQuitApplication();
