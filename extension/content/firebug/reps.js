@@ -285,6 +285,79 @@ this.jsdScript = domplate(Firebug.Rep,
     }
 });
 
+//************************************************************************************************
+
+this.Obj = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            SPAN({class: "objectTitle"}, "$object|getTitle"),
+            FOR("prop", "$object|propIterator",
+                " $prop.name=",
+                SPAN({class: "objectPropValue"}, "$prop.value|cropString")
+            )
+        ),
+
+    propIterator: function (object)
+    {
+        if (!object)
+            return [];
+
+        var props = [];
+        var len = 0;
+
+        try
+        {
+            for (var name in object)
+            {
+                var val;
+                try
+                {
+                    val = object[name];
+                }
+                catch (exc)
+                {
+                    continue;
+                }
+
+                var t = typeof(val);
+                if (t == "boolean" || t == "number" || (t == "string" && val)
+                    || (t == "object" && val && val.toString))
+                {
+                    var title = (t == "object")
+                        ? Firebug.getRep(val).getTitle(val)
+                        : val+"";
+
+                    len += name.length + title.length + 1;
+                    if (len < 50)
+                        props.push({name: name, value: title});
+                    else
+                        break;
+                }
+            }
+        }
+        catch (exc)
+        {
+            // Sometimes we get exceptions when trying to read from certain objects, like
+            // StorageList, but don't let that gum up the works
+            // XXXjjb also History.previous fails because object is a web-page object which does not have
+            // permission to read the history
+        }
+
+        return props;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "object",
+
+    supportsObject: function(object, type)
+    {
+        return true;
+    }
+});
+
+
 // ************************************************************************************************
 
 this.Arr = domplate(Firebug.Rep,
@@ -305,6 +378,10 @@ this.Arr = domplate(Firebug.Rep,
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
                 SPAN({class: "arrayComma"}, "$item.delim")
+            ),
+            FOR("prop", "$object|shortPropIterator",
+                    " $prop.name=",
+                    SPAN({class: "objectPropValue"}, "$prop.value|cropString")
             ),
             SPAN({class: "arrayRightBracket"}, "]")
         ),
@@ -344,6 +421,8 @@ this.Arr = domplate(Firebug.Rep,
         return items;
     },
 
+    shortPropIterator:    this.Obj.propIterator,
+    
     getItemIndex: function(child)
     {
         var arrayIndex = 0;
@@ -377,8 +456,14 @@ this.Arr = domplate(Firebug.Rep,
     // BEGIN Yahoo BSD Source (modified here)  YAHOO.lang.isArray, YUI 2.2.2 June 2007
     isArray: function(obj) {
         try {
-            if (obj)
-                return isFinite(obj.length) && typeof obj.splice === 'function';
+            if (!obj)
+                return false;
+            else if (isFinite(obj.length) && typeof obj.splice === 'function')
+                return true;
+            else if (obj instanceof HTMLCollection)
+                return true;
+            else if (obj instanceof NodeList)
+                return true;
             else
                 return false;
         }
@@ -459,77 +544,6 @@ this.Except = domplate(Firebug.Rep,
     }
 });
 
-// ************************************************************************************************
-
-this.Obj = domplate(Firebug.Rep,
-{
-    tag:
-        OBJECTLINK(
-            SPAN({class: "objectTitle"}, "$object|getTitle"),
-            FOR("prop", "$object|propIterator",
-                " $prop.name=",
-                SPAN({class: "objectPropValue"}, "$prop.value|cropString")
-            )
-        ),
-
-    propIterator: function (object)
-    {
-        if (!object)
-            return [];
-
-        var props = [];
-        var len = 0;
-
-        try
-        {
-            for (var name in object)
-            {
-                var val;
-                try
-                {
-                    val = object[name];
-                }
-                catch (exc)
-                {
-                    continue;
-                }
-
-                var t = typeof(val);
-                if (t == "boolean" || t == "number" || (t == "string" && val)
-                    || (t == "object" && val && val.toString))
-                {
-                    var title = (t == "object")
-                        ? Firebug.getRep(val).getTitle(val)
-                        : val+"";
-
-                    len += name.length + title.length + 1;
-                    if (len < 50)
-                        props.push({name: name, value: title});
-                    else
-                        break;
-                }
-            }
-        }
-        catch (exc)
-        {
-            // Sometimes we get exceptions when trying to read from certain objects, like
-            // StorageList, but don't let that gum up the works
-            // XXXjjb also History.previous fails because object is a web-page object which does not have
-            // permission to read the history
-        }
-
-        return props;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    className: "object",
-
-    supportsObject: function(object, type)
-    {
-        return true;
-    }
-});
 
 // ************************************************************************************************
 
