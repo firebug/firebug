@@ -69,7 +69,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     initDomainOptions: function(prefDomain)
     {
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TraceModule.initialize prefDomain="+prefDomain+"\n");
 
         for (var p in FBTrace)
@@ -96,7 +96,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     shutdown: function()
     {
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TraceModule.shutdown\n");
 
         prefs.removeObserver("extensions", this, false);
@@ -246,6 +246,7 @@ Firebug.TraceModule = extend(Firebug.Module,
             if (m)
             {
                 var prefDomain = "extensions."+m[1];
+                var optionName = data.substr(data.lastIndexOf(".")+1);
                 FBTrace[optionName] = Firebug.getPref(prefDomain, m[2]);
             }
             else
@@ -311,7 +312,7 @@ Firebug.TracePanel.prototype = extend(Firebug.Panel,
 
     initializeNode: function(myPanelNode)
     {
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TracePanel initializeNode\n");
 
         var options = this.getOptionsMenuItems();
@@ -343,7 +344,7 @@ Firebug.TracePanel.prototype = extend(Firebug.Panel,
 
     destroyNode: function()
     {
-        if (FBTrace.DBG_OPTIONS) 
+        if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("TracePanel destroyNode\n");
 
         prefs.removeObserver("extensions", this, false);
@@ -378,8 +379,8 @@ Firebug.TracePanel.prototype = extend(Firebug.Panel,
         if (button)
             button.setAttribute("checked", FBTrace[optionName]);
 
-        if (FBTrace.DBG_OPTIONS) 
-            FBTrace.sysout("TraceFirebug.updateButton: " + optionName + 
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("TraceFirebug.updateButton: " + optionName +
                 ", " + FBTrace[optionName], button);
     },
 
@@ -459,8 +460,8 @@ Firebug.TracePanel.prototype = extend(Firebug.Panel,
         FBTrace[category] = !FBTrace[category];
         menuitem.checked = FBTrace[category];
 
-        if (FBTrace.DBG_OPTIONS) 
-            FBTrace.sysout("TraceFirebug.panel setOption: " + category + ", " + 
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("TraceFirebug.panel setOption: " + category + ", " +
                 FBTrace[category], menuitem);
 
         var prefDomain;
