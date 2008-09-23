@@ -1153,35 +1153,60 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
             var thisVar = frame.thisValue.getWrappedValue();
             addMember("user", members, "this", thisVar, 0);
 
-            var listValue = {value: null}, lengthValue = {value: 0};
-            frame.scope.getProperties(listValue, lengthValue);
+            var scopeChain = this.generateScopeChain(frame.scope);
+            addMember("scopes", members, "scopeChain", scopeChain, 0);
 
-            var props = [], funcs = [];
-            for (var i = 0; i < lengthValue.value; ++i)
-            {
-                var prop = listValue.value[i];
-                var name = prop.name.getWrappedValue();
-                if (ignoreVars[name] == 1)
-                    continue;
-
-                var value = prop.value.getWrappedValue();
-                if (typeof(value) == "function")
-                    addMember("userFunction", funcs, name, value, 0);
-                else
-                    addMember("user", props, name, value, 0);
-            }
-
-            function sortName(a, b) { return a.name > b.name ? 1 : -1; }
-
-            props.sort(sortName);
-            members.push.apply(members, props);
-
-            funcs.sort(sortName);
-            members.push.apply(members, funcs);
+            members.push.apply(members, getMembers(scopeChain[0]));
         }
 
         expandMembers(members, this.toggles, 0, 0);
         this.showMembers(members, !newFrame);
+    },
+
+    generateScopeChain: function (scope) {
+        var ret = [];
+        while (scope) {
+            var scopeVars;
+            // getWrappedValue will not contain any variables for closure
+            // scopes, so we want to special case this to get all variables
+            // in all cases.
+            if (scope.jsClassName == "Call") {
+                scopeVars = {};
+                var listValue = {value: null}, lengthValue = {value: 0};
+                scope.getProperties(listValue, lengthValue);
+
+                for (var i = 0; i < lengthValue.value; ++i)
+                {
+                    var prop = listValue.value[i];
+                    var name = prop.name.getWrappedValue();
+                    if (ignoreVars[name] == 1)
+                        continue;
+
+                    scopeVars[name] = prop.value.getWrappedValue();
+                }
+            } else {
+                scopeVars = scope.getWrappedValue();
+            }
+
+            if (!scopeVars.hasOwnProperty("toString")) {
+                (function() {
+                    var className = scope.jsClassName;
+                    scopeVars.toString = function() {
+                        return $STR(className + " Scope");
+                    };
+                })();
+            }
+
+            ret.push(scopeVars);
+
+            scope = scope.jsParent;
+        }
+
+        ret.toString = function() {
+            return $STR("Scope Chain");
+        };
+
+        return ret;
     }
 });
 

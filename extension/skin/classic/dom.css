@@ -25,7 +25,7 @@
     overflow: hidden;
     /*position: absolute;*/
     padding-left: 18px;
-    /*max-width: 30%;*/    
+    /*max-width: 30%;*/
     white-space: nowrap;
     background-color: #FFFFFF;
 }
@@ -66,6 +66,17 @@
 .ordinalLabel {
     color: SlateBlue;
     font-weight: bold;
+}
+
+/* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+.scopesRow {
+    padding: 2px 18px;
+    background-color: LightYellow;
+    border-bottom: 5px solid #BEBEBE;
+    color: #666666;
+}
+.scopesLabel {
+    background-color:  LightYellow;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
