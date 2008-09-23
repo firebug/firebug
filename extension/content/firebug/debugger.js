@@ -739,7 +739,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch  (exc)
         {
-            ddd("onThrow FAILS: "+exc+"\n");
+            FBTrace.sysout("onThrow FAILS: "+exc+"\n");
         }
 
         if (dispatch2(listeners,"onThrow",[context, frame, rv]))
