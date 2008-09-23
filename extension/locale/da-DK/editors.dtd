@@ -1,14 +1,12 @@
-﻿
-<!ENTITY  editors.Description       "Opsatte Firebug redigeringsprogrammer:">
-<!ENTITY  editors.NameColumn        "Navn">
-<!ENTITY  editors.ExecutableColumn  "Programfil">
-<!ENTITY  editors.ParamsColumn      "Kommandolinie argumenter">
-
-<!ENTITY  add.label               "Tilføj">
-<!ENTITY  remove.label            "Fjern">
-<!ENTITY  change.label            "Rediger">
-<!ENTITY  close.label             "Luk">
-<!ENTITY  browse.label            "Vælg...">
-<!ENTITY  changeEditor.Name       "Navn:">
-<!ENTITY  changeEditor.Executable "Program:">
-<!ENTITY  changeEditor.CmdLine    "Argumenter:">
+<!ENTITY editors.Description "Opsatte Firebug redigeringsprogrammer:">
+<!ENTITY editors.NameColumn "Navn">
+<!ENTITY editors.ExecutableColumn "Programfil">
+<!ENTITY editors.ParamsColumn "Kommandolinjeargumenter">
+<!ENTITY add.label "Tilføj">
+<!ENTITY remove.label "Fjern">
+<!ENTITY change.label "Rediger">
+<!ENTITY close.label "Luk">
+<!ENTITY browse.label "Vælg...">
+<!ENTITY changeEditor.Name "Navn:">
+<!ENTITY changeEditor.Executable "Program:">
+<!ENTITY changeEditor.CmdLine "Argumenter:">
