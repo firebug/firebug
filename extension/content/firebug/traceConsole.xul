@@ -19,8 +19,8 @@
         width="640" height="480"
         screenX="10" screenY="10"
         persist="screenX screenY width height sizemode"
-        onload="Console.onLoad()"
-        onunload="Console.onUnload()">
+        onload="TraceConsole.initialize()"
+        onunload="TraceConsole.shutdown()">
 
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
@@ -34,14 +34,14 @@
   <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
   
   <commandset id="mainCommandSet">
-    <command id="cmd_clearConsole" oncommand="Console.onClearConsole()"/>
+    <command id="cmd_clearConsole" oncommand="TraceConsole.onClearConsole()"/>
     <command id="cmd_find" oncommand="gFindBar.onFindCommand();"/>
     <command id="cmd_findAgain" oncommand="gFindBar.onFindAgainCmd();"/>
     <command id="cmd_findPrevious" oncommand="gFindBar.onFindPreviousCmd();"/>
-    <command id="cmd_separateConsole" oncommand="Console.onSeparateConsole();"/>
-    <command id="cmd_saveToFile" oncommand="Console.onSaveToFile();"/>
-    <command id="cmd_exitFirefox" oncommand="Console.onExitFirefox();"/>
-    <command id="cmd_restartFirefox" oncommand="Console.onRestartFirefox();"/>
+    <command id="cmd_separateConsole" oncommand="TraceConsole.onSeparateConsole();"/>
+    <command id="cmd_saveToFile" oncommand="TraceConsole.onSaveToFile();"/>
+    <command id="cmd_exitFirefox" oncommand="TraceConsole.onExitFirefox();"/>
+    <command id="cmd_restartFirefox" oncommand="TraceConsole.onRestartFirefox();"/>
     <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
   </commandset>
 

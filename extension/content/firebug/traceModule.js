@@ -11,60 +11,104 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
-
+const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+const clipboard = CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
-const prefs = PrefService.getService(nsIPrefBranch2);
-const nsIPrefService = Ci.nsIPrefService;
-const prefService = PrefService.getService(nsIPrefService);
-const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
-const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService");
-const clipboard = CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
-const traceService = CCSV("@joehewitt.com/firebug-trace-service;1", "nsIObserverService");
+const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefService = PrefService.getService(Ci.nsIPrefService);
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
-const reSplitLines = /\r\n|\r|\n/;
 
 var EOF = "<br/>";
-
-this.namespaceName = "TracePanel";
 
 // ***********************************************************************************
 // Trace Module
 
 Firebug.TraceModule = extend(Firebug.Module,
 {
+    listeners: [],
+
     initialize: function(prefDomain, prefNames)
     {
+        FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("traceModule.initialize: " + prefDomain);
+
         this.prefDomain = prefDomain;
 
-        // Localize "Open Console" toolbar button.
-        FBL.internationalize("fbTraceOpenConsole", "label");
-        FBL.internationalize("fbTraceOpenConsole", "tooltiptext");
+        // Create menu items for Trace Console 
+        // (Open Console and a new option Always Open Console)
+        this.initMenu();
 
-        this.initDomainOptions(prefDomain);
+        // Init option according to the pref domain.
+        this.initDomainOptions(this.prefDomain);
 
-        var enabled = this.isEnabled();
-        if (enabled)
+        prefs.addObserver("extensions", this, false);
+
+        // Open console automatically if the pref says so.
+        if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
+            this.openConsole();
+    },
+
+    shutdown: function()
+    {
+        prefs.removeObserver("extensions", this, false);
+
+        if (this.consoleWindow)
+            this.consoleWindow.TraceConsole.unregisterModule(this);
+    },
+
+    initMenu: function()
+    {
+        // Create menu item "Open Trace Console" within Firebug menu.        
+        var popupMenu = $("fbFirebugMenuPopup");
+        if (popupMenu)
         {
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("TraceModule.initialize prefDomain="+ prefDomain+"\n");
-            if (enabled == "panel")
-                this.openPanel(prefDomain);
+            var menuItem = document.createElement("menuitem");
+            menuItem.setAttribute("label", $STR("Open_Console"));
+            menuItem.setAttribute("oncommand", "Firebug.TraceModule.openConsole()");
+            var openWith = $("FirebugMenu_OpenWith");
+            popupMenu.insertBefore(menuItem, openWith);
+            popupMenu.insertBefore(document.createElement("menuseparator"), openWith)
+        }
+
+        // Create new option "Always Open Trace Console" item within Firebug options menu.
+        var opionsMenu = $("FirebugMenu_OptionsPopup");
+        if (opionsMenu)
+        {
+            menuItem = document.createElement("menuitem");
+            menuItem.setAttribute("label", "Alwas Open Trace Console"); // xxxHonza localization
+            menuItem.setAttribute("type", "checkbox");
+            menuItem.setAttribute("oncommand", "FirebugChrome.onToggleOption(this)");
+            menuItem.setAttribute("option", "alwaysOpenTraceConsole");
+            opionsMenu.appendChild(document.createElement("menuseparator"))
+            opionsMenu.appendChild(menuItem);
+        }
+    },
+
+    // nsIObserver
+    observe: function(subject, topic, data)
+    {
+        if (topic == "nsPref:changed")
+        {
+            var m = reDBG.exec(data);
+            if (m)
+            {
+                var prefDomain = "extensions." + m[1];
+                if (prefDomain == this.prefDomain) {
+                    var optionName = data.substr(data.lastIndexOf(".")+1);
+                    FBTrace[optionName] = Firebug.getPref(prefDomain, m[2]);
+                }
+            }
             else
-                this.openConsole(prefDomain);
+            {
+                if (FBTrace.DBG_OPTIONS) 
+                    FBTrace.sysout("traceModule.observe : "+data+"\n");
+            }
         }
-        else
-        {
-            if (FBTrace.DBG_OPTIONS)
-                FBTrace.sysout("TraceModule.initialize NOT enabled prefDomain="+ prefDomain+"\n");
-        }
-
-        traceService.addObserver(this, "firebug-trace-on-message", false);
-        consoleService.registerListener(this.JSErrorConsoleObserver);
     },
 
     initDomainOptions: function(prefDomain)
@@ -94,374 +138,47 @@ Firebug.TraceModule = extend(Firebug.Module,
         prefs.addObserver("extensions", this, false);
     },
 
-    shutdown: function()
-    {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule.shutdown\n");
-
-        prefs.removeObserver("extensions", this, false);
-
-        traceService.removeObserver(this, "firebug-trace-on-message");
-        consoleService.unregisterListener(this.JSErrorConsoleObserver);
-
-        if (this.consoleWindow && this.consoleWindow.Console)
-            this.consoleWindow.Console.unregisterModule(this);
-    },
-
-    isEnabled: function()
-    {
-        return Firebug.getPref(this.prefDomain, "enableTraceConsole");
-    },
-
-    initContext: function(context)
-    {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule.initContext Firebug.prefDomain: "+Firebug.prefDomain+" "+context.window.location.toString()+"\n");
-
-        this.context = context;
-    },
-
-    loadedContext: function(context)
-    {
-        if(context.window.location.toString() == "chrome://firebug/content/panel.html")
-        {
-            var fbTracePanelNode = context.getPanel("TraceFirebug", false).panelNode;
-            var doc = fbTracePanelNode.ownerDocument;
-            var iframe = doc.createElement("iframe");
-
-            var self = this;
-            iframe.addEventListener("load", function attachTraceConsoleToPanel()
-            {
-                    self.consoleNode = iframe.contentDocument.getElementById("panelNode-traceConsole");
-                    FBTrace.sysout("TraceModule.loadedContext Firebug.prefDomain: "+Firebug.prefDomain+" "+context.window.location.toString()+" self.consoleNode:", self.consoleNode);
-                    if (!self.consoleNode)
-                        FBTrace.sysout("TraceModule.loadedContext no consoleNode ",iframe.contentDocument);
-                    self.onLoadConsole(window, self.consoleNode);
-             }, true);
-
-            iframe.setAttribute("src", "chrome://firebug/content/traceConsole.html");
-            iframe.setAttribute("height", "100%");
-            iframe.setAttribute("width", "100%");
-            fbTracePanelNode.appendChild(iframe);
-        }
-    },
-
-    getPanel: function(context, noCreate)
-    {
-        return context ? context.getPanel("TraceFirebug", noCreate) : this.context.getPanel("TraceFirebug", noCreate);
-    },
-
-    showPanel: function(browser, panel)
-    {
-        if (!panel || panel.name != "TraceFirebug")
-            return;
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule showPanel module:\n");
-    },
-
-    // HTML trace console.
-    openConsole: function(prefDomain)
-    {
-        // Try to connect an existing trace-console window first.
-        if (this.attachConsole(prefDomain))
-            return;
-        FBTrace.sysout("tracePanel.openConsole prefDomain:"+prefDomain +" args", args);
-        var self = this;
-        var args = {
-            FBL: FBL,
-            Firebug: Firebug,
-            traceModule: self,
-            prefDomain: prefDomain,
-        };
-        for (var p in args)
-            FBTrace.sysout("tracePanel.openConsole prefDomain:"+prefDomain +" args["+p+"]= "+ args[p]+"\n");
-        this.consoleWindow = window.openDialog(
-            "chrome://firebug/content/traceConsole.xul",
-            "FBTraceConsole."+prefDomain,
-            "chrome,resizable,scrollbars=auto,minimizable",
-            args);
-    },
-
-    attachConsole: function(prefDomain)
-    {
-        // Already attached.
-        if (this.consoleRoot)
-            return true;
-
-        // If the trace-console window is already opened, attach it.
-        this.consoleWindow = windowMediator.getMostRecentWindow("FBTraceConsole."+prefDomain);
-        FBTrace.sysout("tracePanel.attachConsole "+ (this.consoleWindow?this.consoleWindow.location:"no consoleWindow"));
-        if (this.consoleWindow)
-        {
-            this.consoleWindow.Console.registerModule(this);
-            this.consoleWindow.focus();
-            return true;
-        }
-
-        return false;
-    },
-
-    openPanel: function(prefDomain)
-    {
-        //this.onLoadConsole(window, this.consoleNode);
-    },
-
-    onLoadConsole: function(win, rootNode)
-    {
-        for (var i=0; i<this.listeners.length; i++) {
-            if (this.listeners[i].onLoadConsole)
-                this.listeners[i].onLoadConsole(win, rootNode);
-        }
-
-        this.consoleRoot = MessageTemplate.createTable(rootNode);
-    },
-
-    onUnloadConsole: function()
-    {
-        this.consoleRoot = null;
-    },
-
-    // nsIObserver
-    observe: function(subject, topic, data)
-    {
-        if (topic == "firebug-trace-on-message")
-        {
-            // Display messages only with "firebug.extensions" type.
-            var messageInfo = subject.wrappedJSObject;
-
-            // If the message type isn't specified, use Firebug's pref domain as the default.
-            if (!messageInfo.type)
-                messageInfo.type = "extensions.firebug";
-
-            if (messageInfo.type != this.prefDomain)
-                return;
-
-            this.dump(new Firebug.TraceModule.TraceMessage(
-                messageInfo.type, data, messageInfo.obj));
-        }
-        else if (topic == "nsPref:changed")
-        {
-            var m = reDBG.exec(data);
-            if (m)
-            {
-                var prefDomain = "extensions."+m[1];
-                var optionName = data.substr(data.lastIndexOf(".")+1);
-                FBTrace[optionName] = Firebug.getPref(prefDomain, m[2]);
-            }
-            else
-            {
-                if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel observe data: "+data+"\n");
-            }
-        }
-    },
-
-    table: null,         // Table element with all logs (rows) in the console window.
-    consoleWindow: null, // Reference to the console.
-    listeners: [],       // Listeners for customizing the Console window.
-
-    // Message dump
-    dump: function(message)
-    {
-        for (var i=0; i<this.listeners.length; i++) {
-            if (this.listeners[i].onDump)
-                this.listeners[i].onDump(message);
-        }
-
-        var index = message.text.indexOf("ERROR");
-        if (index != -1)
-            message.type = "DBG_ERROR";
-
-        index = message.text.indexOf("EXCEPTION");
-        if (index != -1)
-            message.type = "DBG_ERROR";
-
-        // If the panel isn't visible, push the message into a queue;
-        // otherwise dump it directly to the panel.
-        if (this.consoleRoot)
-            MessageTemplate.dump(message, this.consoleRoot.firstChild);
-    },
-
-    dumpSeparator: function()
-    {
-        MessageTemplate.dumpSeparator(Firebug.TraceModule.consoleRoot.firstChild);
-    },
-
-    // Listeners
-    addListener: function(listener)
-    {
-        this.listeners.push(listener);
-    },
-
-    removeListener: function()
-    {
-        remove(this.listeners, listener);
-    }
-});
-
-// ************************************************************************************************
-// Trace Panel
-
-Firebug.TracePanel = function() {};
-Firebug.TracePanel.prototype = extend(Firebug.Panel,
-{
-    name: "TraceFirebug",
-    title: "FBTrace",
-    searchable: false,
-    editable: false,
-
-    initializeNode: function(myPanelNode)
-    {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TracePanel initializeNode\n");
-
-        var options = this.getOptionsMenuItems();
-        var numbers_of_columns = 6;
-        var number_of_rows = Math.round((options.length / numbers_of_columns));
-
-        for (var i = 0; i < options.length; i++)
-        {
-            var depth = i % number_of_rows;
-            if (depth == 0)
-            {
-                var optionsColumn = this.document.createElement("div");
-                setClass(optionsColumn, "FBTraceColumn");
-                myPanelNode.appendChild(optionsColumn);
-            }
-
-            var button = this.document.createElement("button");
-            setClass(button, "FBTraceOption");
-            button.innerHTML = options[i].label;
-            setItemIntoElement(button, options[i]);
-            button.setAttribute("id", options[i].pref);
-            button.removeAttribute("type");
-            optionsColumn.appendChild(button);
-            button.addEventListener("click", options[i].command, false);
-        }
-
-        prefs.addObserver("extensions", this, false);
-    },
-
-    destroyNode: function()
-    {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TracePanel destroyNode\n");
-
-        prefs.removeObserver("extensions", this, false);
-    },
-
-    observe: function(subject, topic, data)
-    {
-        var m = reDBG.exec(data);
-        if (m)
-        {
-            // Update UI after timeout so, FBTrace object is already updated.
-            var self = this;
-            setTimeout(function() { self.updateButton(data); }, 100);
-        }
-    },
-
-    show: function(state)
-    {
-        this.showToolbarButtons("fbTraceButtons", true);
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceFirebug.panel show context="+this.context+"\n");
-
-        var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
-        collapse(consoleButtons, false);
-    },
-
-    updateButton: function(data)
-    {
-        var optionName = data.substr(data.lastIndexOf(".")+1);
-        var button = this.panelNode.ownerDocument.getElementById(optionName);
-        if (button)
-            button.setAttribute("checked", FBTrace[optionName]);
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceFirebug.updateButton: " + optionName +
-                ", " + FBTrace[optionName], button);
-    },
-
-    hide: function()
-    {
-        this.showToolbarButtons("fbTraceButtons", false);
-
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.dumpStack("TraceFirebug.panel hide\n");
-
-        if (this.context && this.context.browser)
-        {
-            var consoleButtons = this.context.browser.chrome.$("fbConsoleButtons");
-            collapse(consoleButtons, true);
-        }
-    },
-
-    watchWindow: function(win)
-    {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel watchWindow\n");
-    },
-
-    unwatchWindow: function(win)
-    {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel unwatchWindow\n");
-        var errorWin = fbs.lastErrorWindow;
-        if (errorWin)
-            FBTrace.sysout("tracePanel had to clear lastErrorWindow <*><*><*><*>\n");
-    },
-
-    updateSelection: function(object)
-    {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel updateSelection\n");
-    },
-
-    getObjectPath: function(object)
-    {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel getObjectPath\n");
-        return TabWatcher.contexts;
-    },
-
-    getDefaultSelection: function()
-    {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel getDefaultSelection\n");
-    },
-
     getOptionsMenuItems: function()
     {
-        if (FBTrace.DBG_OPTIONS) FBTrace.sysout("TraceFirebug.panel getOptionsMenuItems for this.context="+this.context+"\n");
         var items = [];
-        var self = this;
-
-        for (p in FBTrace)
+        for (p in FBTrace) 
         {
             var m = p.indexOf("DBG_");
-            if (m != -1)
-            {
-                var label = p.substr(4);
-                items.push({
-                    label: label,
-                    nol10n: true,
-                    type: "checkbox",
-                    checked: FBTrace[p],
-                    pref: p,
-                    command: this.setOption
-                });
-            }
+            if (m == -1)
+                continue;
+
+            var label = p.substr(4);
+            items.push({
+                label: label,
+                nol10n: true,
+                type: "checkbox",
+                checked: FBTrace[p],
+                pref: p,
+                command: this.setOption
+            });
         }
+
+        items.sort(function(a, b) {
+            return a.label > b.label;
+        });
+
         return items;
     },
 
     setOption: function(event)
     {
-        var menuitem = event.target;
+        var menuitem = event.target.wrappedJSObject;
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
         FBTrace[category] = !FBTrace[category];
-        menuitem.checked = FBTrace[category];
 
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceFirebug.panel setOption: " + category + ", " +
+        if (FBTrace[category])
+            menuitem.setAttribute("checked", "true");
+        else
+            menuitem.removeAttribute("checked");
+
+        if (FBTrace.DBG_OPTIONS) 
+            FBTrace.sysout("traceConsole.setOption: " + category + ", " + 
                 FBTrace[category], menuitem);
 
         var prefDomain;
@@ -479,24 +196,169 @@ Firebug.TracePanel.prototype = extend(Firebug.Panel,
         }
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("tracePanel.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
+            FBTrace.sysout("traceConsole.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
     },
 
-    getContextMenuItems: function(object, target)
+    openConsole: function()
     {
+        this.consoleWindow = windowMediator.getMostRecentWindow(
+            "FBTraceConsole." + this.prefDomain);
+
+        // Try to connect an existing trace-console window first.
+        if (this.consoleWindow) {
+            this.consoleWindow.TraceConsole.registerModule(this);
+            this.consoleWindow.focus();
+            return;
+        }
+
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceFirebug.panel getContextMenuItems\n");
+            FBTrace.sysout("traceModule.openConsole, prefDomain: " + this.prefDomain);
+
+        var self = this;
+        var args = {
+            FBL: FBL,
+            Firebug: Firebug,
+            traceModule: self,
+            prefDomain: this.prefDomain,
+        };
+
+        if (FBTrace.DBG_OPTIONS) {
+            for (var p in args)
+                FBTrace.sysout("tracePanel.openConsole prefDomain:" +
+                    this.prefDomain +" args["+p+"]= "+ args[p]+"\n");
+        }
+
+        this.consoleWindow = window.openDialog(
+            "chrome://firebug/content/traceConsole.xul",
+            "FBTraceConsole." + this.prefDomain,
+            "chrome,resizable,scrollbars=auto,minimizable",
+            args);
     },
 
-    getEditor: function(target, value)
+    // Trace console listeners
+    onLoadConsole: function(win, rootNode)
     {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceFirebug.panel getEditor\n");
+        try
+        {
+            for (var i=0; i<this.listeners.length; i++) {
+                if (this.listeners[i].onLoadConsole)
+                    this.listeners[i].onLoadConsole(win, rootNode);
+            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS || DBG_OPTIONS)
+                FBTrace.sysout("traceModule.onLoadConsole EXCEPTION", err);
+        }
+    },
+
+    onUnloadConsole: function(win)
+    {
+        try
+        {
+            for (var i=0; i<this.listeners.length; i++) {
+                if (this.listeners[i].onUnloadConsole)
+                    this.listeners[i].onUnloadConsole(win);
+            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS || DBG_OPTIONS)
+                FBTrace.sysout("traceModule.onUnloadConsole EXCEPTION", err);
+        }
+    },
+
+    onDump: function(message)
+    {
+        try
+        {
+            for (var i=0; i<this.listeners.length; i++) {
+                if (this.listeners[i].onDump)
+                    this.listeners[i].onDump(message);
+            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS || DBG_OPTIONS)
+                FBTrace.sysout("traceModule.onDump EXCEPTION", err);
+        }
+    },
+
+    addListener: function(listener)
+    {
+        this.listeners.push(listener);
+    },
+
+    removeListener: function()
+    {
+        remove(this.listeners, listener);
     }
 });
 
 // ************************************************************************************************
-// Domplate
+// Trace Console Rep
+
+Firebug.TraceModule.PanelTemplate = domplate({
+
+    tag:
+        TABLE({class: "traceTable", cellpadding: 0, cellspacing: 0},
+            TBODY(
+                TR({class: "traceInfoRow"},
+                    TD({class: "traceInfoCol"},
+                        DIV({class: "traceInfoBody"},
+                            DIV({class: "traceInfoTabs"},
+                                A({class: "traceInfoLogsTab traceInfoTab", onclick: "$onClickTab",
+                                    view: "Logs"},
+                                    "Logs" //xxxHonza localization
+                                ),
+                                A({class: "traceInfoOptionsTab traceInfoTab", onclick: "$onClickTab",
+                                    view: "Options"},
+                                    "Options"  //xxxHonza localization
+                                )
+                            ),
+                            DIV({class: "traceInfoLogsText traceInfoText"}),
+                            DIV({class: "traceInfoOptionsText traceInfoText"})
+                        )
+                    )
+                )
+            )
+        ),
+
+    onClickTab: function(event)
+    {
+        this.selectTab(event.currentTarget);
+    },
+
+    selectTabByName: function(parentNode, tabName)
+    {
+        var tab = getElementByClass(parentNode, "traceInfo" + tabName + "Tab");
+        if (tab)
+            this.selectTab(tab);
+    },
+
+    selectTab: function(tab)
+    {
+        var messageInfoBody = tab.parentNode.parentNode;
+
+        var view = tab.getAttribute("view");
+        if (messageInfoBody.selectedTab)
+        {
+            messageInfoBody.selectedTab.removeAttribute("selected");
+            messageInfoBody.selectedText.removeAttribute("selected");
+        }
+
+        var textBodyName = "traceInfo" + view + "Text";
+
+        messageInfoBody.selectedTab = tab;
+        messageInfoBody.selectedText = getChildByClass(messageInfoBody, textBodyName);
+
+        messageInfoBody.selectedTab.setAttribute("selected", "true");
+        messageInfoBody.selectedText.setAttribute("selected", "true");
+    }
+});
+
+// ************************************************************************************************
+// Trace message 
 
 Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 {
@@ -1069,8 +931,6 @@ var HelperDomplate = (function()
    }
 }());
 
-var MessageTemplate = Firebug.TraceModule.MessageTemplate;
-
 // ************************************************************************************************
 // Trace Messate Object
 
@@ -1449,45 +1309,6 @@ Firebug.TraceModule.TraceMessage.prototype =
 }
 
 // ************************************************************************************************
-// Javascript Error Console observer
-
-Firebug.TraceModule.JSErrorConsoleObserver =
-{
-    observe: function(object)
-    {
-        if (!Firebug.getPref(Firebug.prefDomain, "trace.enableJSConsoleLogs"))
-            return;
-
-        try
-        {
-            if (object.message.indexOf("[JavaScript Error:") == 0)
-            {
-                // Log only chrome script errors.
-                object = object.QueryInterface(Ci.nsIScriptError);
-                if (object.sourceName && !object.sourceName.indexOf("chrome:"))
-                {
-                    var message = "JavaScript Error: " + object.errorMessage;
-                    Firebug.TraceModule.dump(
-                        new Firebug.TraceModule.TraceMessage("", message, object));
-                }
-            }
-        }
-        catch (exc)
-        {
-        }
-    },
-
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIConsoleListener))
-            return this;
-
-        throw NS_ERROR_NO_INTERFACE;
-    }
-}
-
-// ************************************************************************************************
 // Domplate helpers - Tree (domplate widget)
 
 /**
@@ -1655,7 +1476,6 @@ Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
 // Registration
 
 Firebug.registerModule(Firebug.TraceModule);
-Firebug.registerPanel(Firebug.TracePanel);
 Firebug.registerRep(Firebug.TraceModule.MessageTemplate);
 
 // ************************************************************************************************

@@ -9,11 +9,76 @@
     color: #000000;
 }
 
-.messageTable {
+/************************************************************************************************/
+
+.traceTable {
     width: 100%;
+    height: 100%;
+}
+
+.traceInfoCol {
+    border-top: 1px solid #EEEEEE;
+    background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
+    vertical-align: top;
+}
+
+.traceInfoBody {
+    margin: 10px 0 0 0;
+    height: 100%;
+}
+
+.traceInfoTabs {
+    position: relative;
+    padding-left: 14px;
+}
+
+.traceInfoTab {
+    position: relative;
+    top: -3px;
+    margin-top: 10px;
+    padding: 4px 6px;
+    border: 1px solid transparent;
+    border-bottom: none;
+    font-weight: bold;
+    color: #565656;
+}
+
+.traceInfoTab:hover {
+    cursor: pointer;
+}
+
+.traceInfoTab[selected="true"] {
+    cursor: default !important;
+    border-color: #D7D7D7;
+    -moz-border-radius: 4px 4px 0 0;
+    background-color: #FFFFFF;
+}
+
+.traceInfoText {
+    display: none;
+    margin: 0;
+    border-top: 1px solid #D7D7D7;
+    padding: 0px;
+    background-color: #FFFFFF;
+}
+
+.traceInfoText[selected="true"] {
+    display: block;
+}
+
+.traceInfoOptionsText {
+    float:left;
+    padding: 3px;
+}
+
+.traceInfoLogsText {
 }
 
 /************************************************************************************************/
+
+.messageTable {
+    width: 100%;
+}
 
 .messageRow .messageNameLabel {
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
@@ -242,3 +307,18 @@
 }
 
 /************************************************************************************************/
+
+.traceOption {
+    float:left;
+    display: block;
+    margin: 2px;
+    cursor: default !important;
+    padding: 0 2px 0 2px; 
+    border: solid 1px #D7D7D7;
+    background-color: #FFFFFF;
+    font-size: 12px;
+}
+
+.traceOption[checked="true"] {
+    background-color: #D7D7D7;
+}

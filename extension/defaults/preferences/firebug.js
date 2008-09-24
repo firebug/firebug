@@ -81,6 +81,7 @@ pref("extensions.firebug.externalEditors", "");
 
 // Trace  /*@explore*/
 pref("extensions.firebug.enableTraceConsole", true);     /*@explore*/
+pref("extensions.firebug.alwaysOpenTraceConsole", false);     /*@explore*/
 pref("extensions.firebug.trace.enableScope", false);     /*@explore*/
 pref("extensions.firebug.trace.enableJSConsoleLogs", false);     /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_JSDCONTEXT", false);// firebug-service trace scriptinfo(huge) /*@explore*/
