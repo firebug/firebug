@@ -8,6 +8,5 @@
 @import "chrome://firebug/skin/debugger.css";
 @import "chrome://firebug/skin/layout.css";
 @import "chrome://firebug/skin/dom.css";
-@import "chrome://firebug/skin/tracePanel.css"; /*@explore*/
 @import "chrome://firebug-os/skin/panel.css";
 
