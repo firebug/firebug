@@ -1727,6 +1727,19 @@ Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can
 
 Firebug.SourceBoxPanel = extend(Firebug.Panel,
 {
+	initialize: function(context, doc)
+    {
+		Firebug.Panel.initialize.apply(this, arguments);
+		this.onResize =  bind(this.onResize, this);
+        contentBox.addEventListener("resize", this.onResize, true);
+    },
+	
+    destroy: function(state)
+    {
+        Firebug.Panel.destroy.apply(this, arguments);
+        contentBox.removeEventListener("resize", this.onResize, true);
+    },
+    
     // ******* override in extenders ********
     updateSourceBox: function(sourceBox)
     {
@@ -1748,8 +1761,8 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         // eg "js" or "css"
         throw "Need to override in extender";
     },
+    
     // **************************************
-
 
     initializeSourceBoxes: function()
     {
@@ -2089,6 +2102,14 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         this.lastScrollTop = scrollTop;
     },
 
+    onResize: function(event)   
+    {
+    	// The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
+    	// But our SourceBoxPanel has viewport that will change size.
+    	if (this.selectedSourceBox)
+    		this.reView(this.selectedSourceBox);
+    },
+    
 });
 
 function loadScriptLines(sourceFile, context)  // array of lines

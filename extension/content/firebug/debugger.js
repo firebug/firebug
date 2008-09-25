@@ -1786,7 +1786,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelSplitter = $("fbPanelSplitter");
         this.sidePanelDeck = $("fbSidePanelDeck");
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -1801,7 +1801,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         delete this.selectedSourceBox;
 
-        Firebug.Panel.destroy.apply(this, arguments);
+        Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
 
     detach: function(oldChrome, newChrome)
@@ -1817,12 +1817,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         Firebug.Debugger.syncCommands(this.context);
 
-        Firebug.Panel.detach.apply(this, arguments);
+        Firebug.SourceBoxPanel.detach.apply(this, arguments);
     },
 
     reattach: function(doc)
     {
-        Firebug.Panel.reattach.apply(this, arguments);
+    	Firebug.SourceBoxPanel.reattach.apply(this, arguments);
 
         setTimeout(bind(function()
         {
@@ -1845,7 +1845,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
-        this.panelNode.addEventListener("resize", this.onScroll, true);
     },
 
     destroyNode: function()
@@ -1858,7 +1857,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
-        this.panelNode.removeEventListener("resize", this.onScroll, true);
     },
 
     clear: function()
