@@ -1844,9 +1844,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
-        // XXXjjb, The event target for wheel events is not what I expected. Maybe not needed...
-        //this.panelNode.addEventListener("DOMMouseScroll", this.onScroll, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
+        this.panelNode.addEventListener("resize", this.onScroll, true);
     },
 
     destroyNode: function()
@@ -1858,8 +1857,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
-        //this.panelNode.removeEventListener("DOMMouseScroll", this.onScroll, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
+        this.panelNode.removeEventListener("resize", this.onScroll, true);
     },
 
     clear: function()

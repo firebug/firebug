@@ -1282,6 +1282,16 @@ this.readBoxStyles = function(style)
     return styles;
 };
 
+this.getBoxFromStyles = function(style, element)
+{
+    var args = this.readBoxStyles(style);
+    args.width = element.offsetWidth
+        - (args.paddingLeft+args.paddingRight+args.borderLeft+args.borderRight);
+    args.height = element.offsetHeight
+        - (args.paddingTop+args.paddingBottom+args.borderTop+args.borderBottom);
+    return args;
+};
+
 this.getElementCSSSelector = function(element)
 {
     var label = element.localName.toLowerCase();
@@ -3187,6 +3197,11 @@ this.SourceFile.prototype =
             return this.sourceLength;
     },
 
+    getLine: function(context, lineNo)
+    {
+        return context.sourceCache.getLine(this.href, lineNo);
+    },
+
     addToLineTable: function(script)
     {
         if (!script || !script.isValid)
@@ -3492,6 +3507,11 @@ this.EvalLevelSourceFile = function(url, script, eval_expr, source, innerScriptE
 
 this.EvalLevelSourceFile.prototype = new this.SourceFile("eval-level"); // shared prototype
 
+this.EvalLevelSourceFile.prototype.getLine = function(context, lineNo)
+{
+    return this.source[lineNo - 1];
+},
+
 this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
 {
     // Adjust JSD line numbers based on origin of script
@@ -3547,6 +3567,13 @@ this.EventSourceFile = function(url, script, title, source, innerScriptEnumerato
 };
 
 this.EventSourceFile.prototype = new this.SourceFile("event"); // prototypical inheritance
+
+
+this.EvalLevelSourceFile.prototype.getLine = function(context, lineNo)
+{
+    return this.sourceLines[lineNo - 1];
+},
+
 
 this.EventSourceFile.prototype.OuterScriptAnalyzer.prototype =
 {

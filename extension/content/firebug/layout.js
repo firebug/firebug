@@ -181,11 +181,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
         function getStyle(st, name) { return parseInt(st.getPropertyCSSValue(name).cssText); }
 
-        var args = readBoxStyles(style);
-        args.width = element.offsetWidth
-            - (args.paddingLeft+args.paddingRight+args.borderLeft+args.borderRight);
-        args.height = element.offsetHeight
-            - (args.paddingTop+args.paddingBottom+args.borderTop+args.borderBottom);
+        var args = getBoxFromStyles(style, element);
 
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = 0;
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";

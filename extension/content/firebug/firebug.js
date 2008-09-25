@@ -1798,9 +1798,18 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         sourceBox.decorator = sourceBoxDecorator;
         sourceBox.getLineNode = getLineNodeIfViewable;
 
-        var paddedSource = "<div class='topSourcePadding'></div>"+
+        var lineNoCharsSpacer = "";
+        for (var i = 0; i < sourceBox.maxLineNoChars; i++)
+        	lineNoCharsSpacer += "0";
+        	
+        var paddedSource = 
+        	"<div class='topSourcePadding'>" +
+        		"<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
+        	"</div>"+
             "<div class='sourceViewport'></div>"+
-            "<div class='bottomSourcePadding'><div>";
+            "<div class='bottomSourcePadding'>"+
+            	"<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
+            "<div>";
         appendInnerHTML(sourceBox, paddedSource);
 
         // Initial View so that we can compute sourceBox.lineHeight = view.childNodes[0].clientHeight;
@@ -1814,14 +1823,26 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         setTimeout( bind(function delayScrollToLineOne()
         {
             var view = getChildByClass(sourceBox, 'sourceViewport');
-            sourceBox.lineHeight = view.childNodes[0].clientHeight;
-
-            if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+"\n");
-
+            
+            sourceBox.viewport = view;
+            sourceBox.lineHeight = view.firstChild.clientHeight;  // sourceRow
+            
             if (sourceBox.lineHeight == 0) // if the panel is not selected (not active), then the DOM is not correct anyway.
                 return;
 
+            var sourceTextExample = view.firstChild.firstChild; // sourceLine
+            if (sourceTextExample)
+            {
+                var style = sourceTextExample.ownerDocument.defaultView.getComputedStyle(sourceTextExample, "");
+                var box = getBoxFromStyles(style, sourceTextExample);
+            	sourceBox.lineNoWidth = box.width; // sourceLine width
+            }
+            else 
+            	FBTrace.sysout("view?", view);
+
+            //if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
+            
             if (sourceBox.scrollTop != 0)
                 sourceBox.scrollTop = 0; // causes onscroll event that triggers first buildViewAround
             else
@@ -1935,12 +1956,16 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
     buildViewAround: function(sourceBox, lineNo)  // defaults to first viewable lines
     {
         // TODO move the setup stuff to a resize event handler to make scrolling crisp
-        var view = getChildByClass(sourceBox, 'sourceViewport');
+        var view = sourceBox.viewport;
         if (!view)
-            FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+        {
+        	if (FBTrace.DBG_ERRORS)
+        		FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+        	return;
+        }
 
         var panelHeight = this.panelNode.clientHeight;
-        sourceBox.lineHeight = view.childNodes[0].clientHeight;
+        //sourceBox.lineHeight = view.childNodes[0].clientHeight;
         var viewableLines = Math.round(panelHeight / sourceBox.lineHeight);  // eg 17
 
         if (FBTrace.DBG_SOURCEFILES)
@@ -1949,8 +1974,7 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
         var halfViewableLines = Math.round(viewableLines/2.0);  //eg 8
         sourceBox.halfViewableLines = halfViewableLines;
 
-
-        var topLine = 1; // will be view.childNodes[0] or [1]?
+        var topLine = 1; // will be view.firstChild
         if (lineNo)
             topLine = lineNo - halfViewableLines;  // eg 2544 - 8
 
@@ -1971,9 +1995,21 @@ Firebug.SourceBoxPanel = extend(Firebug.Panel,
 
         clearNode(view);
 
+        // Set the size on the line number field so the padding is filled with same style as source lines.
         var newScrollTop = (topLine - 1) * sourceBox.lineHeight;
         view.previousSibling.style.height = newScrollTop + "px";
         view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
+        
+        //sourceRow
+        view.previousSibling.firstChild.style.height = newScrollTop + "px";
+        view.nextSibling.firstChild.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
+        
+        //sourceLine
+        view.previousSibling.firstChild.firstChild.style.height = newScrollTop + "px";
+        view.nextSibling.firstChild.firstChild.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
+        
+        view.previousSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
+        view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth +"px";
 
         sourceBox.firstViewableLine = topLine;
         sourceBox.lastViewableLine = bottomLine;
