@@ -120,7 +120,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             consoleHandler.evaluateError = function useErrorFunction(result)
             {
                 var m = reCmdSource.exec(result.source);
-                if (m.length > 0)
+                if (m && m.length > 0)
                     result.source = m[1];
 
                 Firebug.Console.logFormatted([result], context, "error", true);
