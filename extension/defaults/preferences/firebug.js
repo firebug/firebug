@@ -118,3 +118,4 @@ pref("extensions.firebug.DBG_INSPECT", false);   // inspector  /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/
 pref("extensions.firebug-service.DBG_FBS_FLUSH", false); // /*@explore*/
 pref("extensions.firebug.DBG_HTTPOBSERVER", false); // Centralized HTTP Observer /*@explore*/
+pref("extensions.firebug.DBG_SPY", false);          // spy.js

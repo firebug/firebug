@@ -45,7 +45,7 @@ const httpObserver =
                     {
                         if (e.name == "NS_NOINTERFACE")
                         {
-                            if (FBTrace.DBG_NET)
+                            if (FBTrace.DBG_SPY)
                                 FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);
                         }
                     }
@@ -449,8 +449,8 @@ function requestStarted(request, xhrRequest, context, method, url)
     if (name == origName)
       dispatch(listeners, "onStart", [context, spy]);
 
-    if (FBTrace.DBG_NET)
-        FBTrace.sysout("spy.requestStarted "+spy.href+"\n");
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.requestStarted "+spy.href+"\n", spy);
 
     // Remember the start time et the end, so it's most accurate.
     spy.sendTime = new Date().getTime();
@@ -468,9 +468,10 @@ function requestStopped(request, xhrRequest, context, method, url)
     if (!spy.responseHeaders)
         spy.responseHeaders = getResponseHeaders(spy);
 
-    if (FBTrace.DBG_NET)                                                                                                   /*@explore*/
+    if (FBTrace.DBG_SPY)                                                                                                   /*@explore*/
         FBTrace.sysout("onHTTPSpyLoad responseTime=" + spy.responseTime                              /*@explore*/
-            + " spy.responseText " + (spy.reponseText?spy.responseText.length:0) + " bytes\n");                      /*@explore*/
+            + " spy.responseText " + (spy.reponseText?spy.responseText.length:0) + 
+            " bytes\n", spy);                      /*@explore*/
 
     if (spy.logRow)
     {
@@ -490,7 +491,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         }
         catch (exc)
         {
-            if (FBTrace.DBG_NET) /*@explore*/
+            if (FBTrace.DBG_SPY) /*@explore*/
                 FBTrace.dumpProperties("spy.requestStopped status access FAILED:", exc); /*@explore*/
         }
     }
