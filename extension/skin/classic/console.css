@@ -487,6 +487,7 @@
 
 .spyRow:hover > .spyCol > .objectLink-sourceLink,
 .spyRow:hover > .spyCol > .spyTime,
+.spyRow:hover > .spyCol > .spyStatus,
 .spyRow:hover > .spyCol > .spyTitle {
     display: none;
 }
@@ -500,6 +501,11 @@
 
 .spyRow:hover > .spyCol > .spyFullTitle {
     display: block;
+}
+
+.spyStatus {
+    padding-left: 10px;
+    color: rgb(128, 128, 128);
 }
 
 .spyTime {

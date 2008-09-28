@@ -212,6 +212,9 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                             )
                         ),
                         TD({class: "spyCol"},
+                            DIV({class: "spyStatus"}, "$object|getStatus")
+                        ),
+                        TD({class: "spyCol"},
                             IMG({class: "spyIcon", src: "blank.gif"})
                         ),
                         TD({class: "spyCol"},
@@ -236,6 +239,14 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
     getFullUri: function(spy)
     {
         return spy.getURL();
+    },
+
+    getStatus: function(spy)
+    {
+        if (spy.responseStatus && spy.responseStatusText)
+          return spy.responseStatus + " " + spy.responseStatusText;
+
+        return "";
     },
 
     onToggleBody: function(event)
@@ -462,6 +473,8 @@ function requestStopped(request, xhrRequest, context, method, url)
 
     spy.endTime = new Date().getTime();
     spy.responseTime = spy.endTime - spy.sendTime;
+    spy.responseStatus = request.responseStatus;
+    spy.responseStatusText = request.responseStatusText;
 
     spy.loaded = true;
 
@@ -569,7 +582,10 @@ function updateLogRow(spy, responseTime)
 {
     var timeBox = getElementByClass(spy.logRow, "spyTime");
     if (responseTime)
-      timeBox.textContent = " " + formatTime(responseTime);
+        timeBox.textContent = " " + formatTime(responseTime);
+
+    var statusBox = getElementByClass(spy.logRow, "spyStatus");
+    statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
 
     removeClass(spy.logRow, "loading");
     setClass(spy.logRow, "loaded");
