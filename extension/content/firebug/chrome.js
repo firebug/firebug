@@ -942,6 +942,11 @@ top.FirebugChrome =
     {
         var items = [];
 
+        // Domplate (+ support for context menus) can be used even in separate
+        // windows when FirebugContext doesn't have to be defined.
+        if (!FirebugContext)
+            return items;
+
         for (var i = 0; i < Firebug.panelTypes.length; ++i)
         {
             var panelType = Firebug.panelTypes[i];
