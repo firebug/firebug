@@ -321,19 +321,27 @@ function FirebugConsoleHandler(context, win)
         // Starting with our stack, walk back to the user-level code
         var frame = Components.stack;
         var userURL = win.location.href.toString();
+        
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+userURL, frame);
 
         // Drop frames until we get into user code.
         while (frame && FBL.isSystemURL(frame.filename) )
             frame = frame.caller;
         
-        // Drop two frames to get back to the point of call for eg console.log()
+        // Drop two user-frames that are actually our console injection frames to get back to the point of call.
         if (frame)
             frame = frame.caller;
+        while (frame && FBL.isSystemURL(frame.filename) )  // skip XPCSafeJSObjectWrapper
+            frame = frame.caller;
+        
         if (frame)
             frame = frame.caller
+        while (frame && FBL.isSystemURL(frame.filename) )
+            frame = frame.caller;
             
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector.getComponentsStackDump for userURL "+userURL, frame);
+            FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
 
         return frame;
     }
