@@ -604,7 +604,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     },
 
     // Firebug rep support
-    supportsObject: function(message)
+    supportsObject: function(message, type)
     {
         return message instanceof Firebug.TraceModule.TraceMessage;
     },
@@ -624,27 +624,50 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     {
         var items = [];
 
-        items.push({
-          label: "Cut",
-          nol10n: true,
-          command: bindFixed(this.onCut, this, message)
-        });
+        if (getAncestorByClass(target, "messageRow"))
+        {
+            items.push({
+              label: "Cut",   //xxxHonza localization
+              nol10n: true,
+              command: bindFixed(this.onCutMessage, this, message)
+            });
 
-        items.push({
-          label: "Copy",
-          nol10n: true,
-          command: bindFixed(this.onCopy, this, message)
-        });
+            items.push({
+              label: "Copy",  //xxxHonza localization
+              nol10n: true,
+              command: bindFixed(this.onCopyMessage, this, message)
+            });
 
-        items.push("-");
+            items.push("-");
 
-        items.push({
-          label: "Remove",
-          nol10n: true,
-          command: bindFixed(this.onRemove, this, message)
-        });
+            items.push({
+              label: "Remove",  //xxxHonza localization
+              nol10n: true,
+              command: bindFixed(this.onRemoveMessage, this, message)
+            });
+        }
 
-        items.push("-");
+        if (getAncestorByClass(target, "messageInfoStackText"))
+        {
+            items.push({
+              label: "Copy Stack",  //xxxHonza localization
+              nol10n: true,
+              command: bindFixed(this.onCopyStack, this, message)
+            });
+        }
+
+        if (getAncestorByClass(target, "messageInfoExcText"))
+        {
+            items.push({
+              label: "Copy Exception",  //xxxHonza localization
+              nol10n: true,
+              command: bindFixed(this.onCopyException, this, message)
+            });
+        }
+
+        if (items.length > 0)
+            items.push("-");
+
 
         items.push(this.optionMenu("Show Scope Variables", "trace.enableScope"));
         items.push(this.optionMenu("Show Errors from JS Console", "trace.enableJSConsoleLogs"));
@@ -666,21 +689,48 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     },
 
     // Context menu commands
-    onCut: function(message)
+    onCutMessage: function(message)
     {
-        this.onCopy(message);
-        this.onRemove(message);
+        this.onCopyMessage(message);
+        this.onRemoveMessage(message);
     },
 
-    onCopy: function(message)
+    onCopyMessage: function(message)
     {
-        message.copyToClipboard();
+        copyToClipboard(message.text);
     },
 
-    onRemove: function(message)
+    onRemoveMessage: function(message)
     {
         var parentNode = message.row.parentNode;
         parentNode.removeChild(message.row);
+    },
+
+    onCopyStack: function(message)
+    {
+        copyToClipboard(message.getStack());
+    },
+
+    onCopyException: function(message)
+    {
+        copyToClipboard(message.getException());
+    },
+
+    // Clipboard helpers
+    copyToClipboard: function(text)
+    {
+        if (!text)
+            return;
+
+        // Initialize transfer data.
+        var trans = CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
+        var wrapper = CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
+        wrapper.data = text;
+        trans.addDataFlavor("text/unicode");
+        trans.setTransferData("text/unicode", wrapper, text.length * 2);
+
+        // Set the data into the global clipboard
+        clipboard.setData(trans, null, Ci.nsIClipboard.kGlobalClipboard);
     },
 
     // Implementation
@@ -1024,6 +1074,17 @@ Firebug.TraceModule.TraceMessage.prototype =
         return this.stack;
     },
 
+    getStack: function()
+    {
+        var result = "";
+        for (var i=0; i<this.stack.length; i++) {
+            var frame = this.stack[i];
+            result += frame.fileName + " (" + frame.lineNumber + ")\n";
+        }
+
+        return result;
+    },
+
     getProperties: function()
     {
         if (this.props)
@@ -1292,22 +1353,6 @@ Firebug.TraceModule.TraceMessage.prototype =
     getObject: function()
     {
         return this.obj;
-    },
-
-    copyToClipboard: function()
-    {
-        if (!this.text)
-            return;
-
-        // Initialize transfer data.
-        var trans = CCIN("@mozilla.org/widget/transferable;1", "nsITransferable");
-        var wrapper = CCIN("@mozilla.org/supports-string;1", "nsISupportsString");
-        wrapper.data = this.text;
-        trans.addDataFlavor("text/unicode");
-        trans.setTransferData("text/unicode", wrapper, this.text.length * 2);
-
-        // Set the data into the global clipboard
-        clipboard.setData(trans, null, Ci.nsIClipboard.kGlobalClipboard);
     }
 }
 
