@@ -2494,6 +2494,8 @@ this.isSystemURL = function(url)
         return true;
     else if (url.substr(0, 17) == "chrome://firebug/")
         return true;
+    else if (url  == "XPCSafeJSObjectWrapper.cpp")
+    	return true;
     else if (url.substr(0, 6) == "about:")
         return true;
     else if (url.indexOf("firebug-service.js") != -1)
