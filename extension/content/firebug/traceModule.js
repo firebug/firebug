@@ -985,7 +985,9 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         }
     }
 
-    if (this.obj instanceof Error || this.obj instanceof Ci.nsIException)
+    if (this.obj instanceof Error || 
+        this.obj instanceof Ci.nsIException || 
+        this.obj instanceof Ci.nsIScriptError)
     {
         // Put the error message into the title so, it's immediately visible.
         this.text += " " + this.obj.message;
