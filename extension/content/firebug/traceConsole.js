@@ -6,7 +6,6 @@
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 const traceService = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsIObserverService);
 const hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService).hiddenDOMWindow;
 
@@ -44,7 +43,6 @@ var TraceConsole =
 
         // Register listeners and observers
         traceService.addObserver(this, "firebug-trace-on-message", false);
-        consoleService.registerListener(JSErrorConsoleObserver);
         prefs.addObserver("extensions", this, false);
 
         gFindBar = document.getElementById("FindToolbar");
@@ -58,7 +56,6 @@ var TraceConsole =
     {
         prefs.removeObserver("extensions", this, false);
         traceService.removeObserver(this, "firebug-trace-on-message");
-        consoleService.unregisterListener(this.JSErrorConsoleObserver);
 
         // Notify listeners
         for (var i=0; i<this.modules.length; ++i)
@@ -189,44 +186,5 @@ var TraceConsole =
         goQuitApplication();
     }
 };
-
-// ************************************************************************************************
-// Javascript Error Console observer
-
-var JSErrorConsoleObserver =
-{
-    observe: function(object)
-    {
-        if (!Firebug.getPref(Firebug.prefDomain, "trace.enableJSConsoleLogs"))
-            return;
-
-        try
-        {
-            if (object.message.indexOf("[JavaScript Error:") == 0)
-            {
-                // Log only chrome script errors.
-                object = object.QueryInterface(Ci.nsIScriptError);
-                if (object.sourceName && !object.sourceName.indexOf("chrome:"))
-                {
-                    var message = "JavaScript Error: " + object.errorMessage;
-                    Firebug.TraceModule.dump(
-                        new Firebug.TraceModule.TraceMessage("", message, object));
-                }
-            }
-        }
-        catch (exc)
-        {
-        }
-    },
-
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsISupports) ||
-            iid.equals(Ci.nsIConsoleListener))
-            return this;
-
-        throw NS_ERROR_NO_INTERFACE;
-    }
-}
 
 // ************************************************************************************************

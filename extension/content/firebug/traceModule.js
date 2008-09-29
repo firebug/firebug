@@ -668,9 +668,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (items.length > 0)
             items.push("-");
 
-
         items.push(this.optionMenu("Show Scope Variables", "trace.enableScope"));
-        items.push(this.optionMenu("Show Errors from JS Console", "trace.enableJSConsoleLogs"));
 
         return items;
     },
