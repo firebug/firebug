@@ -498,13 +498,14 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     getMessageLabel: function(message)
     {
-        // xxxHonza: should be parametrized in preferences.
-        return cropString(message.getLabel(), 150);
+        var maxLength = Firebug.getPref(Firebug.TraceModule.prefDomain, 
+            "trace.maxMessageLength");
+        return message.getLabel(maxLength);
     },
 
     getMessageTitle: function(message)
     {
-        return message.getLabel();
+        return message.getLabel(-1);
     },
 
     isException: function(message)
@@ -1008,12 +1009,12 @@ Firebug.TraceModule.TraceMessage.prototype =
         return this.type;
     },
 
-    getLabel: function()
+    getLabel: function(maxLength)
     {
-        if (this.text.length > 400)
-            return this.text.substr(0, 400) + "...";
-        else
+        if (maxLength <= 10 || this.text.length <= maxLength)
             return this.text.replace(/[\n]/g,"");
+
+        return this.text.substr(0, maxLength - 3) + "...";
     },
 
     getStackArray: function()
