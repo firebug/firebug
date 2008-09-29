@@ -473,8 +473,18 @@ function requestStopped(request, xhrRequest, context, method, url)
 
     spy.endTime = new Date().getTime();
     spy.responseTime = spy.endTime - spy.sendTime;
-    spy.responseStatus = request.responseStatus;
-    spy.responseStatusText = request.responseStatusText;
+
+    try 
+    {
+        // xxxHonza: weird exception in Chromebug here.
+        spy.responseStatus = request.responseStatus;
+        spy.responseStatusText = request.responseStatusText;
+    }
+    catch (err) 
+    {
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.requestStopped EXCEPTION", err);
+    }
 
     spy.loaded = true;
 
