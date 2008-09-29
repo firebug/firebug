@@ -965,6 +965,7 @@ FirebugService.prototype =
         var bp = this.findBreakpointByScript(frame.script, frame.pc);
         if (bp)
         {
+        	// See issue 1179, should not break if we resumed from a single step and have not advanced.
             if (disabledCount || monitorCount || conditionCount || runningUntil)
             {
                 if (FBTrace.DBG_FBS_BP)
@@ -1401,118 +1402,79 @@ FirebugService.prototype =
         if (debuggers.length < 1)
             return;
 
-        var global = getFrameGlobal(frame);
-
-        if (global)
+        var checkFrame = frame;
+        while (checkFrame) // We may stop in a component, but want the callers Window
         {
-            try
-            {
-                if (global.location)  // then we have a window, it will be an nsIDOMWindow, right?
-                {
-                    var location = global.location.toString();
-                    // TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
-                    if (location.indexOf("chrome://chromebug/") != -1)
-                            return false;
-                }
-            }
-            catch (exc)
-            {
-                    // FF3 gives (NS_ERROR_INVALID_POINTER) [nsIDOMLocation.toString]
-            }
-
-            for ( var i = debuggers.length - 1; i >= 0; i--)
-            {
-                try
-                {
-                    var debuggr = debuggers[i];
-                    if (debuggr.supportsGlobal(global))
-                    {
-                        if (!debuggr.breakContext)
-                            FBTrace.dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
-                        if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for global, location:"+global.location);
-                        return debuggr;
-                    }
-                }
-                catch (exc)
-                {
-                    FBTrace.sysout("firebug-service findDebugger supportsGlobal FAILS: "+exc+" jscontext:"+(frame.executionContext?frame.executionContext.tag:"undefined"));
-                }
-            }
-            if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger no find for "+frame.script.tag+"; global, location:"+global.location);
+        	var frameWin = getFrameScopeWindowAncestor(checkFrame);
+        	if (frameWin) 
+        		break;
+        	
+        	if (FBTrace.DBG_FBS_FINDDEBUGGER)
+        		FBTrace.sysout("fbs.findDebugger no frame Window, looking down the stack", checkFrame);
+        	
+        	checkFrame = checkFrame.callingFrame;
         }
+        
+        if (!checkFrame && FBTrace.DBG_FBS_FINDDEBUGGER)
+        	FBTrace.sysout("fbs.findDebugger fell thru bottom of stack", frame);
+        	
+        var deb = fbs.askDebuggersForSupport(frameWin);
+        if (deb)
+         	return deb;
         else
-            if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" fbs.findDebugger: no global in frame.executionContext for script.tag"+frame.script.tag);
-
-        var win = getFrameWindow(frame);
-        if (win)
-        {
-            for (var i = 0; i < debuggers.length; ++i)
-            {
-                try
-                {
-                    var debuggr = debuggers[i];
-                    if (debuggr.supportsWindow(win))
-                        return debuggr;
-                }
-                catch (exc)
-                {
-                    if (FBTrace.DBG_FBS_SRCUNITS)
-                        ERROR("firebug-service findDebugger supportsWindow FAILS: "+exc);
-                }
-            }
-        }
-
-        if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" fbs.findDebugger no find on window, try bottom of stack\n");
-
-        if (frame.callingFrame)  // then maybe we crossed an xpcom boundary.
-        {
-            while(frame.callingFrame) // walk to the bottom of the stack
-                frame = frame.callingFrame;
-            var debuggr = this.findDebugger(frame);
-            if (debuggr)
-                return debuggr;
-        }
-        if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            fbs.diagnoseFindDebugger(frame, win);
+        	return null;
     },
 
-    diagnoseFindDebugger: function(frame, originalWin)
+    getLocationFiltered: function(global)
     {
-        while(frame.callingFrame) // walk to the bottom of the stack
-            frame = frame.callingFrame;
+    	var location = fbs.getLocationSafe(global);
+		// TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
+		if (location && location.indexOf("chrome://chromebug/") == -1)
+			return location;
+		else
+			return null;
+    },
 
-        if (FBTrace.DBG_FBS_ERRORS) FBTrace.sysout("\ndiagnoseFindDebugger", frame);
-
-        FBTrace.sysout("diagnoseFindDebugger scope "+frame.scope.jsType+"["+frame.scope.propertyCount+"] "+frame.scope.jsClassName );
-        var win = getFrameWindow(frame);
-        if (!win)
-        {
-            FBTrace.sysout("No getFrameWindow! scope:\n");
-            this.dumpIValue(frame.scope);
-            return;
-        }
-        var msg = "diagnoseFindDebugger win.location ="+(win.location?win.location.href:"(undefined)");
-        for (var i = 0; i < debuggers.length; ++i)
+    getLocationSafe: function(global)
+    {
+		try
+		{
+			if (global && global.location)  // then we have a window, it will be an nsIDOMWindow, right?
+				return global.location.toString();
+		}
+		catch (exc)
+    	{
+            // FF3 gives (NS_ERROR_INVALID_POINTER) [nsIDOMLocation.toString]
+    	}
+		return null;
+    },
+    
+    askDebuggersForSupport: function(global)
+    {
+    	if (!global || !fbs.getLocationFiltered(global))
+        	return false;
+    	
+        for ( var i = debuggers.length - 1; i >= 0; i--)
         {
             try
             {
                 var debuggr = debuggers[i];
-                if (debuggr.supportsWindow(win))
+                if (debuggr.supportsGlobal(global))
                 {
-                    FBTrace.sysout(msg+" FOUND at "+i);
-                    FBTrace.sysout("diagnoseFindDebugger originalWin.location ="+(originalWin.location?originalWin.location.href:"(undefined)"));
+                    if (!debuggr.breakContext)
+                        FBTrace.dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
+                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for global, location:"+global.location);
                     return debuggr;
                 }
             }
             catch (exc)
             {
-                FBTrace.sysout(msg+"caught:"+exc);
-                return;
-               }
+                FBTrace.sysout("firebug-service askDebuggersForSupport FAILS: ",exc);
+            }
         }
-        FBTrace.sysout(msg+" NO FIND tried "+debuggers.length);
+        return null;
     },
-
+    
     dumpIValue: function(value)
     {
         var listValue = {value: null}, lengthValue = {value: 0};
@@ -2239,6 +2201,24 @@ function hook(fn, rv)
             return rv;
         }
     }
+}
+
+function getFrameScopeWindowAncestor(frame)  // walk script scope chain to bottom, null unless a Window
+{
+	var scope = frame.scope;
+	if (scope)
+	{	
+		while(scope.jsParent)
+			scope = scope.jsParent;
+	
+		if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
+			return  scope.getWrappedValue();
+		
+		if (FBTrace.DBG_FBS_FINDDEBUGGER)
+			FBTrace.sysout("fbs.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
+	}
+	else
+		return null;
 }
 
 function getFrameGlobal(frame)
