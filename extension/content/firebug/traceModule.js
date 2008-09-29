@@ -68,7 +68,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         if (popupMenu)
         {
             var menuItem = document.createElement("menuitem");
-            menuItem.setAttribute("label", $STR("Open_Console"));
+            menuItem.setAttribute("label", "Open Firebug Tracing"); // xxxHonza localization
             menuItem.setAttribute("oncommand", "Firebug.TraceModule.openConsole()");
             var openWith = $("FirebugMenu_OpenWith");
             popupMenu.insertBefore(menuItem, openWith);
@@ -80,7 +80,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         if (opionsMenu)
         {
             menuItem = document.createElement("menuitem");
-            menuItem.setAttribute("label", "Alwas Open Trace Console"); // xxxHonza localization
+            menuItem.setAttribute("label", "Always Open Firebug Tracing"); // xxxHonza localization
             menuItem.setAttribute("type", "checkbox");
             menuItem.setAttribute("oncommand", "FirebugChrome.onToggleOption(this)");
             menuItem.setAttribute("option", "alwaysOpenTraceConsole");
