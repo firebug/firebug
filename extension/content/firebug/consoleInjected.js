@@ -18,6 +18,7 @@ function _FirebugConsole()
     this.profile = function() { this.notifyFirebug(arguments, 'profile', 'firebugAppendConsole'); }
     this.profileEnd = function() { this.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
     this.count = function() { this.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
+    this.clear = function() { this.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
 
     this.notifyFirebug = function(objs, methodName, eventID)
     {

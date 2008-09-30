@@ -202,6 +202,11 @@ function FirebugConsoleHandler(context, win)
         }
     };
 
+    this.clear = function()
+    {
+        Firebug.Console.clear(context);
+    };
+
     this.time = function(name, reset)
     {
         if (!name)
