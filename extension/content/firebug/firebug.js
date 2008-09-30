@@ -2261,7 +2261,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         return persistedPanelState;
     },
 
-    reattachContext: function(context)
+    reattachContext: function(browser, context)
     {
         var persistedPanelState = this.syncPersistedPanelState(context, false);
     },
