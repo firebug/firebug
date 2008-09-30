@@ -69,7 +69,8 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         // Create menu item "Open Firebug Tracing" within Firefox Tools menu.
         var toolsMenu = $("menu_firebug");
-        this.createOpenTracingMenu(toolsMenu.menupopup);
+        if (toolsMenu)  // then we are in Firefox not eg Chromebug
+            this.createOpenTracingMenu(toolsMenu.menupopup);
 
         // Create new option "Always Open Firebug Tracing" item within Firebug options menu.
         var optionsMenu = $("FirebugMenu_OptionsPopup");
