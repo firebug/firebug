@@ -1270,17 +1270,18 @@ function onCommandLineFocus(event)
     // User has decided to use the command line, but the web page may not have the console.
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._firebug)
     {
+        // Should never be called  now
         Firebug.Console.injector.attachConsole(FirebugContext, FirebugContext.window);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("onCommandLineFocus, attachConsole "+FirebugContext.window.location+"\n");
     }
-    else
+    else  // the page had _firebug so we know that consoleInjected.js compiled and ran. 
     {
         if (FBTrace.DBG_CONSOLE)
         {
             if (FirebugContext)
-                FBTrace.sysout("onCommandLineFocus: "+(FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window")+"\n");
+                FBTrace.sysout("onCommandLineFocus: ", (FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window"));
             else
                 FBTrace.sysout("onCommandLineFocus: No FirebugContext\n");
         }
@@ -1297,6 +1298,7 @@ function onCommandLineFocus(event)
             try
             {
                 var cmdLine = FirebugContext.window.wrappedJSObject._FirebugCommandLine
+                FBTrace.sysout("onCommandLineFocus, attachCommandLine ", cmdLine);
             }
             catch (e)
             {

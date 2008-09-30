@@ -1,30 +1,30 @@
 /* See license.txt for terms of usage */
 function _FirebugConsole()
 {
-    this.init = function()
-    {
-        var commands = ["log", "debug", "info", "warn", "error", "assert", "dir",
-            "dirxml", "trace", "group", "groupEnd", "groupCollapsed",
-            "time", "timeEnd", "profile", "profileEnd", "count"];
+    this.log = function() { this.notifyFirebug(arguments, 'log', 'firebugAppendConsole'); }
+    this.debug = function() { this.notifyFirebug(arguments, 'debug', 'firebugAppendConsole'); }
+    this.info = function() { this.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
+    this.warn = function() { this.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
+    this.error = function() { this.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
+    this.assert = function() { this.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
+    this.dir = function() { this.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
+    this.dirxml = function() { this.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
+    this.trace = function() { this.notifyFirebug(arguments, 'trace', 'firebugAppendConsole'); }
+    this.group = function() { this.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
+    this.groupEnd = function() { this.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
+    this.groupCollapsed = function() { this.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
+    this.time = function() { this.notifyFirebug(arguments, 'time', 'firebugAppendConsole'); }
+    this.timeEnd = function() { this.notifyFirebug(arguments, 'timeEnd', 'firebugAppendConsole'); }
+    this.profile = function() { this.notifyFirebug(arguments, 'profile', 'firebugAppendConsole'); }
+    this.profileEnd = function() { this.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
+    this.count = function() { this.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
 
-        // Create console API
-        for (var i=0; i<commands.length; i++)
-        {
-            var command = commands[i];
-            this[command] = new Function(
-                "return window.console.notifyFirebug(arguments, '" + command + "', 'firebugAppendConsole');");
-        }
-
-        // Initialize DOM element for communication betwen the web-page a chrome.
-        this.getFirebugElement();
-    },
-
-    this.notifyFirebug = function(objs, methodName, eventId)
+    this.notifyFirebug = function(objs, methodName, eventID)
     {
         var element = this.getFirebugElement();
 
         var event = document.createEvent("Events");
-        event.initEvent(eventId, true, false);
+        event.initEvent(eventID, true, false);
 
         this.userObjects = [];
         for (var i=0; i<objs.length; i++)
@@ -34,7 +34,7 @@ function _FirebugConsole()
         element.setAttribute("methodName", methodName);
         element.dispatchEvent(event);
 
-        //dump("FirebugConsole dispatched event "+methodName+"\n");
+        //dump("FirebugConsole dispatched event "+methodName+" via "+eventID+"\n");
         var result;
         if (element.getAttribute("retValueType") == "array")
             result = [];
@@ -50,53 +50,31 @@ function _FirebugConsole()
 
     this.getFirebugElement = function()
     {
-        var element = document.getElementById("_firebugConsole");
-        if (!element)
-        {
-            element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
-            element.setAttribute("id", "_firebugConsole");
-            element.firebugIgnore = true;
-            element.setAttribute("style", "display:none");
-
-            var self = this;
-            element.addEventListener("firebugCommandLine", function(event)
-            {
-                var element = event.target;
-                var expr = element.getAttribute("expr"); // see commandLine.js
-                self.evaluate(expr);
-            }, true);
-
-            document.documentElement.appendChild(element);
-        }
-        return element;
-    };
-
+        if (!this.element)
+            this.element = window._getFirebugConsoleElement();
+        return this.element;
+    },
+    
     // ***********************************************************************
     // Console API
 
     this.__defineGetter__("firebug", function(){
         return this.getFirebugElement().getAttribute("FirebugVersion");
     });
-
-    this.evaluate = function(expr)
-    {
-        try
-        {
-            var result = top.eval(expr);
-            if (typeof result != "undefined")
-                this.notifyFirebug([result], "evaluated", "firebugAppendConsole");
-        }
-        catch(exc)
-        {
-            var result = exc;
-            result.source = expr;
-            this.notifyFirebug([result], "evaluateError", "firebugAppendConsole");
-        }
-    };
 }
-//window.dump("============================>>>> Setting _firebug <<<< ====================================\n");
-window._firebug =  new _FirebugConsole();
-//window.dump("============================>>>> Set _firebug "+window._firebug+" "+window._FirebugConsole+" <<<< ====================================\n");
-//for (var p in window.firebug)
-//    window.dump(p+"="+window.console[p]+"\n");
-window._firebug.init();
+
+window._getFirebugConsoleElement = function()  // could this be done in extension code? but only after load....
+{
+    var element = document.getElementById("_firebugConsole");
+    if (!element)
+    {
+        element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
+        element.setAttribute("id", "_firebugConsole");
+        //element.firebugIgnore = true;
+        element.setAttribute("style", "display:none");
+
+        document.documentElement.appendChild(element);
+    }
+    return element;
+};
+ 

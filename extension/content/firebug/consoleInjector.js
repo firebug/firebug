@@ -18,13 +18,13 @@ top.Firebug.Console.injector = {
                 FBTrace.dumpStack("no win in attachConsole!");                 /*@explore*/
             return;
         }
-
+        
+        var consoleForcer = "window.loadFirebugConsole();";
+        
         if (context.stopped)
-            Firebug.Console.injector.evaluateConsoleScript(context);
+            Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
         else
-            Firebug.Console.injector.injectConsoleScriptTag(win);
-
-        Firebug.Console.injector.addConsoleListener(context, win);
+            Firebug.CommandLine.evaluateInSandbox(consoleForcer, context, null, win);
     },
 
     evaluateConsoleScript: function(context)
@@ -33,48 +33,23 @@ top.Firebug.Console.injector = {
         Firebug.Debugger.evaluate(scriptSource, context);
     },
 
-    injectConsoleScriptTag: function(win)
-    {
-        var doc = win.document;
-
-        // Don't inject the script twice to the same document.
-        var element = $("_firebugConsoleInjector", doc);
-        if (element)
-        {
-            if (FBTrace.DBG_CONSOLE)                                                                                    /*@explore*/
-                FBTrace.sysout("consoleInjector.injectConsoleScriptTag: _firebugConsoleInjector already present\n");    /*@explore*/
-            return;
-        }
-
-        // Inject script into the document via SCRIPT tag.
-        var scriptSource = getResource("chrome://firebug/content/consoleInjected.js");
-        addScript(doc, "_firebugConsoleInjector", scriptSource);
-    },
-
     addConsoleListener: function(context, win)
     {
-        var doc = win.document;
-
-        var element = $("_firebugConsole", doc);
-        if (!element)
-        {
-            if (FBTrace.DBG_ERRORS)                                                                                                                                         /*@explore*/
-                FBTrace.sysout("consoleInjector.addConsoleListener fails to find _firebugConsole in "+win.location+" for context "+context.window.location+"\n");           /*@explore*/
-            return;
+        if (!context.consoleHandler)  // then we have not been this way before
+            context.consoleHandler = [];  
+        else
+        {   // we've been this way, maybe already done?
+            for (var i=0; i<context.consoleHandler.length; i++)
+            {
+                if (context.consoleHandler[i].window == win)
+                    return true;
+            }   
         }
-
-        // Initialize Firebug version.
-        element.setAttribute("FirebugVersion", Firebug.version);
-
-        if (!context.consoleHandler)
-            context.consoleHandler = [];
-
-        for (var i=0; i<context.consoleHandler.length; i++)
-        {
-            if (context.consoleHandler[i].window == win)
-                return;
-        }
-
+        
+        // We need the element to attach our event listener.
+        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+        element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
+        
         var handler = new FirebugConsoleHandler(context, win);
         // When raised on our injected element, callback to Firebug and append to console
         element.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
@@ -82,6 +57,7 @@ top.Firebug.Console.injector = {
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener attached handler to _firebugConsole in : "+win.location+"\n");
+        return true;
     }
 }
 
@@ -89,6 +65,8 @@ function FirebugConsoleHandler(context, win)
 {
     this.handleEvent = function(event)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.dumpProperties("FirebugConsoleHandler event", event);
         if (!Firebug.CommandLine.CommandHandler.handle(event, this, win))
         {
             if (FBTrace.DBG_CONSOLE)
@@ -328,18 +306,7 @@ function FirebugConsoleHandler(context, win)
         // Drop frames until we get into user code.
         while (frame && FBL.isSystemURL(frame.filename) )
             frame = frame.caller;
-        
-        // Drop two user-frames that are actually our console injection frames to get back to the point of call.
-        if (frame)
-            frame = frame.caller;
-        while (frame && FBL.isSystemURL(frame.filename) )  // skip XPCSafeJSObjectWrapper
-            frame = frame.caller;
-        
-        if (frame)
-            frame = frame.caller
-        while (frame && FBL.isSystemURL(frame.filename) )
-            frame = frame.caller;
-            
+ 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
 

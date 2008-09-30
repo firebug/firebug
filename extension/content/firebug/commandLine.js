@@ -68,25 +68,23 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluateByEventPassing: no targetWindow!\n");
             return;
         }
-
-        var element = win.document.getElementById("_firebugConsole");
-        if (!element)
-        {
-            Firebug.Console.injector.attachConsole(context, win);
-            var element = win.document.getElementById("_firebugConsole");
-        }
-        if (!element)
-        {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no _firebugConsole!\n");
-            return;  // we're in trouble here.
-        }
-
+        
         // Make sure the command line script is attached.
-        if (win.wrappedJSObject && !win.wrappedJSObject._FirebugCommandLine)
-            Firebug.CommandLine.injector.attachCommandLine(context, win);
+        if (win.wrappedJSObject)
+        {
+            if (!win.wrappedJSObject._FirebugCommandLine)
+                Firebug.CommandLine.injector.attachCommandLine(context, win);
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no win.wrappedJSObject\n");
+            return;  // we're in trouble here
+        }
 
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
+        
+        var element = Firebug.Console.getFirebugConsoleElement(context, win);
         element.setAttribute("methodName", "evaluate");
 
         expr = expr.toString();
@@ -119,14 +117,19 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             consoleHandler.evaluateError = function useErrorFunction(result)
             {
-                var m = reCmdSource.exec(result.source);
-                if (m && m.length > 0)
-                    result.source = m[1];
+                if (result)
+                {
+                    var m = reCmdSource.exec(result.source);
+                    if (m && m.length > 0)
+                        result.source = m[1];
+                }
 
                 Firebug.Console.logFormatted([result], context, "error", true);
             }
         }
 
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("evaluateByEventPassing event:", event);
         element.dispatchEvent(event);
     },
 
@@ -792,16 +795,10 @@ Firebug.CommandLine.injector = {
     {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
-        var element = $("_firebugConsole", doc);
-        if (element)
-        {
-            element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
-        }
-        else
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Commandline.injector, no _firebugConsole element " + win.location + "\n");
-        }
+        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+        element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("addCommandLineListener to element", element);
     }
 };
 
@@ -809,6 +806,9 @@ function CommandLineHandler(context, win)
 {
     this.handleEvent = function(event)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand') event: ", event);
+        
         var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
 
         // Appends variables into the scope.

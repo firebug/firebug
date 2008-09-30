@@ -121,41 +121,11 @@ Firebug.Console = extend(ActivableConsole,
     {
         if (win.wrappedJSObject && win.wrappedJSObject.loadFirebugConsole)
             return;
-
-        if (!context.attachConsoleInjectorHandler)
-            context.attachConsoleInjectorHandler = [];
-
-        var subWindowHandler = function(event) // XXXjjb seems tto complicated. Better to just leave the listeners
-        {
-            if (!context.attachConsoleInjectorHandler)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.dumpStack("console.attachConsoleInjector has no handler array?"); /*@explore*/
-                return;
-            }
-            var matching_handler;
-            for (var i=0; i < context.attachConsoleInjectorHandler.length; i++) {
-                if (context.attachConsoleInjectorHandler[i].window == win) {
-                    matching_handler = context.attachConsoleInjectorHandler[i].handler;
-                    break;
-                }
-            }
-
-            if (FBTrace.DBG_CONSOLE)                                                                                   /*@explore*/
-                FBTrace.sysout("Handle loadFirebugConsole event for " + win.location + "\n");                          /*@explore*/
-
-            Firebug.Console.injector.attachConsole(context, win);
-            win.removeEventListener('loadFirebugConsole', matching_handler, true);
-            context.attachConsoleInjectorHandler.splice(i, 1);
-        }
-        win.addEventListener('loadFirebugConsole', subWindowHandler, true);
-
-        context.attachConsoleInjectorHandler.push({window: win, handler:subWindowHandler});
-
-        var consoleInjection = this.getConsoleInjectionScript();
-
+        
+        var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
+       
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location+":\n "+consoleInjection+"\n");
+            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
 
         Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
 
@@ -178,17 +148,19 @@ Firebug.Console = extend(ActivableConsole,
             }
 
             script += "window.loadFirebugConsole = function() {\n";
-            script += " if (window._FirebugConsole) return window._firebug;\n";
-            script += " var event = document.createEvent('Events');\n";
-            script += " event.initEvent('loadFirebugConsole', true, false);\n"
-            script += " window.dispatchEvent(event);\n";
-
+            script += "window._firebug =  new _FirebugConsole();";
             // If not ff3 initialize "console" property.
             if (!ff3)
                 script += " window.console = window._firebug;\n";
 
             script += " return window._firebug };\n";
-
+            
+            var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
+            script += theFirebugConsoleScript;
+            
+            if (!ff3)
+                script += " window.loadFirebugConsole();\n";
+            
             this.consoleInjectionScript = script;
         }
         return this.consoleInjectionScript;
@@ -198,7 +170,33 @@ Firebug.Console = extend(ActivableConsole,
     {
     },
 
-
+    getFirebugConsoleElement: function(context, win)
+    {
+        var element = win.document.getElementById("_firebugConsole");
+        if (!element)
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("getFirebugConsoleElement forcing element");
+            var elementForcer = "var r=null; try { r = window._getFirebugConsoleElement();}catch(exc){r=exc;} r;";  // we could just add the elements here
+            
+            if (context.stopped)
+                Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
+            else
+                var r = Firebug.CommandLine.evaluateInSandbox(elementForcer, context, null, win);
+            
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("getFirebugConsoleElement forcing element result ", r);
+            
+            var element = win.document.getElementById("_firebugConsole");
+        }
+        if (!element) // elementForce fails
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("console.getFirebugConsoleElement: no _firebugConsole!\n");
+            return;  // we're in trouble here.
+        }
+        return element;
+    },
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
     initialize: function()
@@ -236,9 +234,12 @@ Firebug.Console = extend(ActivableConsole,
     watchWindow: function(context, win)
     {
         if (this.isEnabled(context))
+        {
             this.attachConsoleInjector(context, win);
+            this.injector.addConsoleListener(context, win); 
+        }
 
-        if (FBTrace.DBG_WINDOWS)                                                                                       /*@explore*/
+        if (FBTrace.DBG_CONSOLE)                                                                                       /*@explore*/
         {                                                                                                              /*@explore*/
             if (win.wrappedJSObject._firebug)                                                                                           /*@explore*/
                 FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          /*@explore*/

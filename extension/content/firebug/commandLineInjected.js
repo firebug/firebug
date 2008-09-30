@@ -39,7 +39,37 @@ var _FirebugCommandLine =
             this.__defineGetter__(prop, new Function(
                 "return window.console.notifyFirebug(arguments, '" + prop + "', 'firebugExecuteCommand');"));
         }
-    }
+        
+        this.attachCommandLine();
+    },
+    
+    attachCommandLine: function()
+    {
+        var element = window.console.getFirebugElement();
+        var self = this;
+        element.addEventListener("firebugCommandLine", function _firebugEvalEvent(event)
+        {
+            var element = event.target;
+            var expr = element.getAttribute("expr"); // see commandLine.js
+            self.evaluate(expr);
+        }, true);
+    },
+
+    evaluate: function(expr)
+    {
+        try
+        {
+            var result = top.eval(expr);
+            if (typeof result != "undefined")
+                window.console.notifyFirebug([result], "evaluated", "firebugAppendConsole");
+        }
+        catch(exc)
+        {
+            var result = exc;
+            result.source = expr;
+            window.console.notifyFirebug([result], "evaluateError", "firebugAppendConsole");
+        }
+    },
 };
 
 _FirebugCommandLine.init();
