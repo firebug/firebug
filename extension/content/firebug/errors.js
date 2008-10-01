@@ -229,7 +229,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
             var trace = Firebug.errorStackTrace;
-            trace = correctLineNumbersWithStack(trace, object) ? trace : null;
+            trace = this.correctLineNumbersWithStack(trace, object) ? trace : null;
         }
         else if (checkForUncaughtException(context, object))
         {
@@ -265,6 +265,25 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         return context;
     },
 
+    correctLineNumbersWithStack: function(trace, object)
+    {
+        var stack_frame = trace.frames[0];
+        if (stack_frame)
+        {
+            sourceName = stack_frame.href;
+            lineNumber = stack_frame.lineNo;
+            // XXXjjb Seems to change the message seen in Firefox Error Console
+            var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
+            if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
+                FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());                          /*@explore*/
+            return true;
+        }
+        if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
+            FBTrace.dumpProperties("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);                          /*@explore*/
+
+        return false;
+    },
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
@@ -500,25 +519,6 @@ function correctLineNumbersOnExceptions(context, object)
 
         var correctedError = object.init(errorMessage, sourceName, object.sourceLine, lineNumber, object.columnNumber, object.flags, object.category);
     }
-}
-
-function correctLineNumbersWithStack(trace, object)
-{
-    var stack_frame = trace.frames[0];
-    if (stack_frame)
-    {
-        sourceName = stack_frame.href;
-        lineNumber = stack_frame.lineNo;
-        // XXXjjb Seems to change the message seen in Firefox Error Console
-        var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
-        if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-            FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());                          /*@explore*/
-        return true;
-    }
-    if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-        FBTrace.dumpProperties("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);                          /*@explore*/
-
-    return false;
 }
 
 // ************************************************************************************************
