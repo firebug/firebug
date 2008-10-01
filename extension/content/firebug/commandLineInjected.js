@@ -49,10 +49,13 @@ var _FirebugCommandLine =
         var self = this;
         element.addEventListener("firebugCommandLine", function _firebugEvalEvent(event)
         {
+        	//window.dump("_firebugEvalEvent firebugCommandLine\n");
             var element = event.target;
             var expr = element.getAttribute("expr"); // see commandLine.js
             self.evaluate(expr);
+            //window.dump("_firebugEvalEvent did evaluate on "+expr+"\n");
         }, true);
+        //window.dump("Added listener for firebugCommandLine event");
     },
 
     evaluate: function(expr)

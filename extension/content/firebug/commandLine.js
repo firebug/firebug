@@ -23,7 +23,8 @@ var commandInsertPointer = -1;
 
 Firebug.CommandLine = extend(Firebug.Module,
 {
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+	
+	// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // targetWindow was needed by evaluateInSandbox, let's leave it for a while in case we rethink this yet again
 
@@ -73,7 +74,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (win.wrappedJSObject)
         {
             if (!win.wrappedJSObject._FirebugCommandLine)
-                Firebug.CommandLine.injector.attachCommandLine(context, win);
+            {
+            	if (FBTrace.DBG_ERRORS) 
+            		FBTrace.sysout("Firebug cannot find _FirebugCommandLine object, its too early for command line");
+            	Firebug.Console.logFormatted(["Firebug cannot find _FirebugCommandLine object, its too early for command line", win], context, "error", true);
+            }
         }
         else
         {
@@ -129,8 +134,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("evaluateByEventPassing event:", event);
+            FBTrace.sysout("evaluateByEventPassing using firebugCommandLine event:", event);
         element.dispatchEvent(event);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("evaluateByEventPassing return after firebugCommandLine event:", event);
     },
 
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction)
@@ -474,7 +481,22 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (name == "largeCommandLine")
             this.setMultiLine(value);
-    }
+    },
+    
+    // called by users of command line, currently:
+    // 1) Console on focus command line, 2) Watch onfocus, and 3) debugger loadedContext if watches exist
+    isNeededGetReady: function(context) 
+    {
+    	if (FBTrace.DBG_CONSOLE)
+    		FBTrace.sysout("command line isNeededGetReady ", context);
+    	
+    	Firebug.CommandLine.injector.attachCommandLine(context, context.window);
+    	// the attach is asynchronous, we can report when it is complete:
+    	if (context.window.wrappedJSObject._FirebugCommandLine)
+    		return true;
+    	else
+    		return false;
+    },
 });
 
 // ************************************************************************************************

@@ -1398,7 +1398,7 @@ Firebug.Module =
     },
 
     /**
-     * Called after a context's page is loaded
+     * Called after a context's page gets DOMContentLoaded
      */
     loadedContext: function(context)
     {
@@ -1420,7 +1420,13 @@ Firebug.Module =
 
     getObjectByURL: function(context, url)
     {
-    }
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // intermodule dependency
+    
+    isNeededGetReady: function(context)   // caller needs module. true means module is ready now, else getting ready 
+    {
+    },
 };
 
 // ************************************************************************************************

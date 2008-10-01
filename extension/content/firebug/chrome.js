@@ -1289,7 +1289,7 @@ function onCommandLineFocus(event)
 
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._FirebugCommandLine)
     {
-        Firebug.CommandLine.injector.attachCommandLine(FirebugContext, FirebugContext.window);
+        Firebug.CommandLine.isNeededGetReady(FirebugContext);
     }
     else
     {

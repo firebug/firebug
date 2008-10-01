@@ -113,7 +113,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var watchPanel = context.getPanel("watches", true);
         if (watchPanel)
+        {
+        	Firebug.CommandLine.isNeededGetReady(context);
             watchPanel.editNewWatch();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1321,6 +1324,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
+    	var watchPanelState = Firebug.getPanelState({name: "watches"});
+    	if (watchPanelState && watchPanelState.watches)
+    		Firebug.CommandLine.isNeededGetReady(context);
+    	else
+    		FBTrace.sysout("debugger loadedContext watchPanelState", watchPanelState);
+    	
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
         updateScriptFiles(context);
     },
@@ -1434,12 +1443,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var watchPanel = context.getPanel("watches", true);
             if (watchPanel)
                 watchPanel.enablePanel();
+            return watchPanel;
         }
         else
         {
             var watchPanel = context.getPanel("watches", true);
             if (watchPanel)
                 watchPanel.disablePanel();
+            return false;
         }
     },
     

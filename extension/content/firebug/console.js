@@ -188,12 +188,13 @@ Firebug.Console = extend(ActivableConsole,
                 FBTrace.sysout("getFirebugConsoleElement forcing element result ", r);
             
             var element = win.document.getElementById("_firebugConsole");
+            if (!element) // elementForce fails
+            {
+                if (FBTrace.DBG_ERRORS) FBTrace.sysout("console.getFirebugConsoleElement: no _firebugConsole!", r);
+                Firebug.Console.logFormatted(["Firebug cannot find _firebugConsole element", r], context, "error", true);
+            }
         }
-        if (!element) // elementForce fails
-        {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("console.getFirebugConsoleElement: no _firebugConsole!\n");
-            return;  // we're in trouble here.
-        }
+        
         return element;
     },
     
