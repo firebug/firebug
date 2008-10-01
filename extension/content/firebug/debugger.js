@@ -1324,7 +1324,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-    	var watchPanelState = Firebug.getPanelState({name: "watches"});
+    	var watchPanelState = Firebug.getPanelState({name: "watches", context: context});
     	if (watchPanelState && watchPanelState.watches)
     		Firebug.CommandLine.isNeededGetReady(context);
     	else
