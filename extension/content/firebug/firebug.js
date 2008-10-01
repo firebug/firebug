@@ -1721,11 +1721,47 @@ Firebug.Panel =
 
 };
 
+//************************************************************************************************
+
+Firebug.AblePanel = extend(Firebug.Panel, 
+{
+    enablePanel: function()
+    {
+        var persistedPanelState = getPersistedState(this.context, this.name);
+        persistedPanelState.enabled = true;
+
+        var tab = this.getTab();
+        if (tab)
+            tab.removeAttribute("disabled");
+    },
+
+    disablePanel: function()
+    {
+        var persistedPanelState = getPersistedState(this.context, this.name);
+        persistedPanelState.enabled = false;
+
+        var tab = this.getTab();
+        if (tab)
+            tab.setAttribute("disabled", "true");
+
+        clearNode(this.panelNode);
+    },
+    
+    getTab: function()
+    {
+        var tab = $("fbPanelBar2").getTab(this.name);
+        if (!tab)
+            tab = $("fbPanelBar1").getTab(this.name);
+        return tab;
+    },
+    
+});
+
 // ************************************************************************************************
 
 Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can be extended.
 
-Firebug.SourceBoxPanel = extend(Firebug.Panel,
+Firebug.SourceBoxPanel = extend(Firebug.AblePanel,
 {
 	initialize: function(context, doc)
     {
@@ -2300,8 +2336,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         this.activeContexts.push(context);
         this.resetTooltip();
-
-        this.enablePanel(context);
+        
+        var panel = context.getPanel(this.panelName, true);
+        if (panel)
+            panel.enablePanel();
 
         dispatch(modules, "onPanelActivate", [context, init, this.panelName]);
     },
@@ -2331,7 +2369,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         if (!destroy)
         {
-            this.disablePanel(context);
+            var panel = context.getPanel(this.panelName, true);
+            if (panel)
+                panel.disablePanel();
 
             var panelBar1 = $("fbPanelBar1");
             var panel = context.getPanel(this.panelName, true);
@@ -2720,32 +2760,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 }
             );
         }
-    },
-
-    enablePanel: function(context)
-    {
-        var panel = context.getPanel(this.panelName);
-
-        var persistedPanelState = getPersistedState(panel.context, panel.name);
-        persistedPanelState.enabled = true;
-
-        var tab = this.panelBar1.getTab(panel.name);
-        tab.removeAttribute("disabled");
-    },
-
-    disablePanel: function(context)
-    {
-        var panel = context.getPanel(this.panelName, true);
-        if (!panel)
-            return;
-
-        var persistedPanelState = getPersistedState(context, panel.name);
-        persistedPanelState.enabled = false;
-
-        var tab = this.panelBar1.getTab(panel.name);
-        tab.setAttribute("disabled", "true");
-
-        panel.clear();
     },
 
     getMenuLabel: function(option, location)

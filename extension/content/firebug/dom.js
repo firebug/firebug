@@ -51,7 +51,7 @@ const WatchRowTag =
     TR({class: "watchNewRow", level: 0},
         TD({class: "watchEditCell", colspan: 2},
             DIV({class: "watchEditBox"},
-                $STR("NewWatch")
+                    $STR("NewWatch")
             )
         )
     );
@@ -236,7 +236,7 @@ const ToolboxPlate = domplate(
 
 function DOMBasePanel() {}
 
-DOMBasePanel.prototype = extend(Firebug.Panel,
+DOMBasePanel.prototype = extend(Firebug.AblePanel,
 {
     tag: DirTablePlate.tableTag,
 
@@ -373,7 +373,10 @@ DOMBasePanel.prototype = extend(Firebug.Panel,
     editProperty: function(row, editValue)
     {
         if (hasClass(row, "watchNewRow"))
-            Firebug.Editor.startEditing(row, "");
+        {
+            if (Firebug.Console.isEnabled(this.context))
+                Firebug.Editor.startEditing(row, "");
+        }
         else if (hasClass(row, "watchRow"))
             Firebug.Editor.startEditing(row, getRowName(row));
         else
@@ -1126,7 +1129,8 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
 
         var members = [];
 
-        if (this.watches)
+        var showWatches = this.context.onLoadWindowContent && !this.context.stopped;
+        if (this.watches && showWatches)
         {
             for (var i = 0; i < this.watches.length; ++i)
             {
@@ -1207,7 +1211,8 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
         };
 
         return ret;
-    }
+    },
+    
 });
 
 // ************************************************************************************************

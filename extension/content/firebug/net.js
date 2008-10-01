@@ -333,7 +333,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
 function NetPanel() {}
 
-NetPanel.prototype = domplate(Firebug.Panel,
+NetPanel.prototype = domplate(Firebug.AblePanel,
 {
     tableTag:
         TABLE({class: "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},

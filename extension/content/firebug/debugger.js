@@ -591,8 +591,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             updateViewOnShowHook();
         }
 
-        if (panel)
+        if (panel) 
+        {
             this.syncCommands(panel.context);
+            this.ableWatchSidePanel(panel.context);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1373,6 +1376,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onPanelActivate: function(context, init, panelName)
     {
+        //if (panelName == "console" || panelName == this.panelName)
+        //    this.ableWatchSidePanel(context);
+        
         if (panelName != this.panelName)
             return;
 
@@ -1385,6 +1391,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onPanelDeactivate: function(context, destroy, panelName)
     {
+        if (panelName != this.panelName)
+            return;
+        
         if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDeactivate destroy: "+destroy+" for "+context.window.location+"\n");
 
         if (!destroy)  // then the user is saying no to debugging
@@ -1418,6 +1427,22 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onResumeFirebug active:"+active+" isEnabled " +Firebug.Debugger.isEnabled(context)+ " for "+context.window.location+"\n");
     },
 
+    ableWatchSidePanel: function(context)
+    {
+        if (Firebug.Console.isEnabled(context))
+        {
+            var watchPanel = context.getPanel("watches", true);
+            if (watchPanel)
+                watchPanel.enablePanel();
+        }
+        else
+        {
+            var watchPanel = context.getPanel("watches", true);
+            if (watchPanel)
+                watchPanel.disablePanel();
+        }
+    },
+    
     //---------------------------------------------------------------------------------------------
     // Menu in toolbar.
 
