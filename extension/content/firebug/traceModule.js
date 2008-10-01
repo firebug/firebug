@@ -1018,7 +1018,7 @@ var HelperDomplate = (function()
 }());
 
 // ************************************************************************************************
-// Trace Messate Object
+// Trace Message Object
 
 Firebug.TraceModule.TraceMessage = function(type, text, obj)
 {
@@ -1029,8 +1029,14 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
-        // Put info about the script error location into the stack.
-        this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
+        var trace = Firebug.errorStackTrace;
+        if (trace)
+        {
+            trace = this.correctLineNumbersWithStack(trace, obj) ? trace : null;
+            this.stack = trace;
+        }
+        else  // Put info about the script error location into the stack.
+            this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
     }
     else
     {
