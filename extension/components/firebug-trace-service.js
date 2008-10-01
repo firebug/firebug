@@ -148,7 +148,7 @@ TraceConsoleService.prototype =
             // too and so, will display that.
             var scriptError = Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError);
             scriptError.init("[JavaScript Error: Failed to notify firebug-trace observers!] " +
-                err.toString(), "chrome://firebug/components/firebug-trace-service.js",
+                err.toString(), err.sourceName,
                 err.sourceLine, err.lineNumber, err.columnNumber, err.flags, err.category);
             consoleService.logMessage(scriptError);
         }
