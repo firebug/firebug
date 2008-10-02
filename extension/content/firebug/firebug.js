@@ -1895,8 +1895,8 @@ Firebug.SourceBoxPanel = extend(Firebug.AblePanel,
             else 
             	FBTrace.sysout("view?", view);
 
-            //if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("firebug.createSourceBox, delayScrollToLineOne sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
             
             if (sourceBox.scrollTop != 0)
                 sourceBox.scrollTop = 0; // causes onscroll event that triggers first buildViewAround
