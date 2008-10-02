@@ -44,14 +44,25 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 472: New console API - clear
 	* Issue 489: Array content is not printed in version 1.1 beta
 	* Issue 502:  Component is not available (SessionStore exception)
+	* Issue 548:  'open with editor' mangles non-ascii characters
 	* Issue 588:  DOM HTMLCollection/NodeList should be formatted like an array in the console
+	* Issue 789:  Using the console in the context of the current debugging stack
+	* Issue 874:  User object incorrectly identified as arrays
 	* Issue 882:  console.log() reports wrong source file and line number
+	* Issue 983:  GWT with Firebug on FF3 cause "listener is undefined"
+	* Issue 992: New zh-CN locale file for Firebug 1.2
+	* Issue 1000: console.group doesn't work
+	* Issue 1050: GMaps2.setCenter seems to wipe out console.log in 1.2.0b7
+	* Issue 1063: Spanish translation for 'script' shouldn't be 'guión'
 	* Issue 1097: Inspect image tooltip confuses images from different tabs
 	* Issue 1107: Toggleing Table css properties breaks page permanently firebug 1.2.0b1
+	* Issue 1109: Missing POST information (empty POST tab)
 	* Issue 1110: Firebug doesn't respond (abclinuxu.cz) (very long URL)
 	* Issue 1121: "Open in Tab" does a POST request for a GET request
+	* Issue 1124: console.assert() doesn't work  
 	* Issue 1125: (partial) Net panel not working as expected (1.2.0) (issue 402 tested and works)
 	* Issue 1137: Forgets which JS file being viewed after switching away and back to Script tab
+	* Issue 1149: console.trace still not working
 	* Issue 1151: Break on all errors should not break when a watch is undefined
 	* Issue 1154: Debugger watch panel does not include closure variables, contribution kpdecker
 	* Issue 1159: Console results for "$x" incorrect
