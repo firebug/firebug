@@ -958,7 +958,9 @@ FirebugService.prototype =
             if (!sourceFile || !sourceFile.breakOnZero || sourceFile.breakOnZero != scriptTag)
                 return RETURN_CONTINUE;
             else  // sourceFile.breakOnZero matches the script we have halted.
+            {
                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
+            }
         }
 
 
@@ -1177,7 +1179,8 @@ FirebugService.prototype =
                 {
                     delete  fbs.onXScriptCreatedByTag[firstScript.tag];
                     firstScript.clearBreakpoint(0);
-                    if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onTopLevelScriptCreated clear bp@0 for firstScript.tag: "+firstScript.tag+"\n")
+                    if (FBTrace.DBG_FBS_SRCUNITS) 
+                        FBTrace.sysout("fbs.onTopLevelScriptCreated clear bp@0 for firstScript.tag: "+firstScript.tag+"\n");
                 }
             }
 
@@ -1527,8 +1530,11 @@ FirebugService.prototype =
 
             if (debuggr)
                 bp.debugger = debuggr;
-            else /*@explore*/
-                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.addBreakpoint with no debuggr:\n"); /*@explore*/
+            else  
+            {
+                if (FBTrace.DBG_FBS_BP) 
+                    FBTrace.sysout("fbs.addBreakpoint with no debuggr:\n");  
+            }
         }
         else
         {
@@ -1766,7 +1772,9 @@ FirebugService.prototype =
                     FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+" sourceFile.breakOnZero: "+sourceFile.breakOnZero);                         /*@explore*/
             }
             else
-                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NO tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable"));                         /*@explore*/
+            {
+                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NO tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable"));                      
+            }    
          }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2194,7 +2202,7 @@ function hook(fn, rv)
         }
         catch (exc)
         {
-            var msg = FBTrace.dumpProperties("Error in hook: ", exc) +" fn=\n"+fn+"\n stack=\n";
+            var msg =  "Error in hook: "+ exc +" fn=\n"+fn+"\n stack=\n";
             for (var frame = Components.stack; frame; frame = frame.caller)
                 msg += frame.filename + "@" + frame.line + ";\n";
                ERROR(msg);
@@ -2226,7 +2234,6 @@ function getFrameGlobal(frame)
     var jscontext = frame.executionContext;
     if (!jscontext)
     {
-        //FBTrace.sysout("getFrameGlobal, frame.executionContext null\n");
         return getFrameWindow(frame);
     }
     var frameGlobal = jscontext.globalObject.getWrappedValue();
@@ -2234,7 +2241,6 @@ function getFrameGlobal(frame)
         return frameGlobal;
     else
     {
-        FBTrace.sysout("getFrameGlobal, no frameGlobal, trying window\n");
         return getFrameWindow(frame);
     }
 }
