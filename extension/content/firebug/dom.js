@@ -1129,7 +1129,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
 
         var members = [];
 
-        var showWatches = this.context.onLoadWindowContent && !this.context.stopped;
+        var showWatches = this.context.onLoadWindowContent || this.context.stopped;
         if (this.watches && showWatches)
         {
             for (var i = 0; i < this.watches.length; ++i)

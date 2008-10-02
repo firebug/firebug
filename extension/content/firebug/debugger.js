@@ -1324,13 +1324,30 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
+        var watchPanel = this.ableWatchSidePanel(context);
+        var needNow = watchPanel && watchPanel.watches;
     	var watchPanelState = Firebug.getPanelState({name: "watches", context: context});
-    	if (watchPanelState && watchPanelState.watches)
+    	var needPersistent = watchPanelState && watchPanelState.watches;
+    	if (needNow || needPersistent) 
+    	{
     		Firebug.CommandLine.isNeededGetReady(context);
+    		if (watchPanel)
+    		{
+    		    context.setTimeout(function refreshWatchesAfterCommandLineReady() 
+    		    {
+    		        watchPanel.refresh(); 
+    		    });
+    		}
+    	}
     	else
-    		FBTrace.sysout("debugger loadedContext watchPanelState", watchPanelState);
+    	{
+    	    if (FBTrace.DBG_ERRORS)
+    	        FBTrace.sysout("debugger loadedContext watchPanelState", watchPanelState);
+    	}
     	
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
+        if (FBTrace.DBG_SOURCEFILES) 
+            FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
+        
         updateScriptFiles(context);
     },
 
