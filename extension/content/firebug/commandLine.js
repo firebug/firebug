@@ -75,9 +75,12 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             if (!win.wrappedJSObject._FirebugCommandLine)
             {
-            	if (FBTrace.DBG_ERRORS) 
-            		FBTrace.sysout("Firebug cannot find _FirebugCommandLine object, its too early for command line");
-            	Firebug.Console.logFormatted(["Firebug cannot find _FirebugCommandLine object, its too early for command line", win], context, "error", true);
+                // XXXjjb, xxxHonza: check this. the commandline isn't loaded for iframes.
+                Firebug.CommandLine.injector.attachCommandLine(context, win);
+
+            	//if (FBTrace.DBG_ERRORS) 
+            	//	FBTrace.sysout("Firebug cannot find _FirebugCommandLine object, its too early for command line");
+            	//Firebug.Console.logFormatted(["Firebug cannot find _FirebugCommandLine object, its too early for command line", win], context, "error", true);
             }
         }
         else
