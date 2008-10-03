@@ -251,7 +251,10 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
         }
 
-        this.evaluate(expr, context, null, context.window, FBL.bind(Firebug.Console.log, Firebug.Console)); // XXXjjb targetWindow??
+        // The target window should be the one, which is selected by "cd" function 
+        // in the command line. The expression must be executed in context of this window.
+        this.evaluate(expr, context, null, (context.baseWindow ? context.baseWindow : context.window), 
+            FBL.bind(Firebug.Console.log, Firebug.Console));
     },
 
     enterMenu: function(context)
@@ -677,18 +680,20 @@ function FirebugCommandLineAPI(context, baseWindow)
 {
     this.$ = function(id)
     {
-        var doc = baseWindow.document;
-        return baseWindow.document.getElementById(id);
+        var win = context.baseWindow ? context.baseWindow : baseWindow;
+        return win.document.getElementById(id);
     };
 
     this.$$ = function(selector)
     {
-        return FBL.getElementsBySelector(baseWindow.document, selector);
+        var win = context.baseWindow ? context.baseWindow : baseWindow;
+        return FBL.getElementsBySelector(win.document, selector);
     };
 
     this.$x = function(xpath)
     {
-        return FBL.getElementsByXPath(baseWindow.document, xpath);
+        var win = context.baseWindow ? context.baseWindow : baseWindow;
+        return FBL.getElementsByXPath(win.document, xpath);
     };
 
     this.$n = function(index)
@@ -709,10 +714,18 @@ function FirebugCommandLineAPI(context, baseWindow)
 
     this.cd = function(object)
     {
-        if (object instanceof Window)
-            baseWindow = context.baseWindow = object;
-        else
+        if (!(object instanceof Window))
             throw "Object must be a window.";
+
+        // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper 
+        // (and its wrappedJSObject member). So, look within all registered consoleHandlers for 
+        // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
+        for (var i=0; i<context.consoleHandler.length; i++) {
+            if (context.consoleHandler[i].window == object) {
+                baseWindow = context.baseWindow = context.consoleHandler[i].window;
+                break;
+            }
+        }
     };
 
     this.clear = function()

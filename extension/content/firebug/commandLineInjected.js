@@ -13,7 +13,7 @@ var _FirebugCommandLine =
             var command = commands[i];
 
             // If the method is already defined, don't override it. 
-            if (top[command])
+            if (window[command])
                 continue;
 
             this[command] = new Function(
@@ -62,7 +62,7 @@ var _FirebugCommandLine =
     {
         try
         {
-            var result = top.eval(expr);
+            var result = eval(expr);
             if (typeof result != "undefined")
                 window.console.notifyFirebug([result], "evaluated", "firebugAppendConsole");
         }
