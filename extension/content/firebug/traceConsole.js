@@ -18,6 +18,9 @@ var gFindBar;
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
 
+// The lib.js isn't included in this window so, define the global here.
+var FBL;
+
 // ************************************************************************************************
 // Trace Window Implementation
 
