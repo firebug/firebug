@@ -1032,7 +1032,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         var trace = Firebug.errorStackTrace;
         if (trace)
         {
-            trace = this.correctLineNumbersWithStack(trace, obj) ? trace : null;
+            trace = Firebug.Errors.correctLineNumbersWithStack(trace, obj) ? trace : null;
             this.stack = trace;
         }
         else  // Put info about the script error location into the stack.
