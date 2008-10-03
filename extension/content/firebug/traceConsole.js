@@ -42,7 +42,7 @@ var TraceConsole =
         // Initialize root node of the trace-console window.
         var consoleFrame = document.getElementById("consoleFrame");
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
-        this.initializeNode(this.consoleNode);
+        this.logs = Firebug.TraceModule.initializeContent(this.consoleNode, this.prefDomain);
 
         // Register listeners and observers
         traceService.addObserver(this, "firebug-trace-on-message", false);
@@ -80,37 +80,6 @@ var TraceConsole =
         }
     },
 
-    initializeNode: function(parentNode)
-    {
-        // Create basic layout for trace console content.
-        var rep = Firebug.TraceModule.PanelTemplate;
-        rep.tag.replace({}, parentNode, rep);
-
-        // This node is the container for all logs.
-        var logTabContent = FBL.getElementByClass(parentNode, "traceInfoLogsText");
-        this.logs = Firebug.TraceModule.MessageTemplate.createTable(logTabContent);
-
-        // Initialize content for Options tab (a button for each DBG_ option).
-        var optionsBody = FBL.getElementByClass(parentNode, "traceInfoOptionsText");
-        var options = Firebug.TraceModule.getOptionsMenuItems();
-        var doc = parentNode.ownerDocument;
-        for (var i=0; i<options.length; i++)
-        {
-            var option = options[i];
-            var button = doc.createElement("button");
-            FBL.setClass(button, "traceOption");
-            FBL.setItemIntoElement(button, option);
-            button.innerHTML = option.label;
-            button.setAttribute("id", option.pref);
-            button.removeAttribute("type");
-            button.addEventListener("click", option.command, false);
-            optionsBody.appendChild(button);
-        }
-
-        // Select default tab.
-        rep.selectTabByName(parentNode, "Logs");
-    },
-
     // nsIObserver
     observe: function(subject, topic, data)
     {
@@ -144,15 +113,7 @@ var TraceConsole =
         for (var i=0; i<this.modules.length; ++i)
             this.modules[i].onDump(message);
 
-        var index = message.text.indexOf("ERROR");
-        if (index != -1)
-            message.type = "DBG_ERROR";
-
-        index = message.text.indexOf("EXCEPTION");
-        if (index != -1)
-            message.type = "DBG_ERROR";
-
-        Firebug.TraceModule.MessageTemplate.dump(message, this.logs.firstChild);
+        Firebug.TraceModule.dump(message, this.logs.firstChild);
     },
 
     dumpSeparator: function()

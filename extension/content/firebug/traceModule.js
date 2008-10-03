@@ -175,24 +175,30 @@ Firebug.TraceModule = extend(Firebug.Module,
         prefs.addObserver("extensions", this, false);
     },
 
-    getOptionsMenuItems: function()
+    getOptionsMenuItems: function(prefDomain)
     {
         var items = [];
         for (p in FBTrace) 
         {
             var m = p.indexOf("DBG_");
-            if (m == -1)
+            if (m != 0)
                 continue;
 
-            var label = p.substr(4);
-            items.push({
-                label: label,
-                nol10n: true,
-                type: "checkbox",
-                checked: FBTrace[p],
-                pref: p,
-                command: this.setOption
-            });
+            try {
+                var prefValue = Firebug.getPref(prefDomain, p);
+                var label = p.substr(4);
+                items.push({
+                    label: label,
+                    nol10n: true,
+                    type: "checkbox",
+                    checked: prefValue,
+                    pref: p,
+                    command: bind(this.setOption, this, prefDomain)
+                });
+            }
+            catch (err) {
+                // if the option doesn't exist in this prefDomain, just continue...
+            }
         }
 
         items.sort(function(a, b) {
@@ -202,38 +208,42 @@ Firebug.TraceModule = extend(Firebug.Module,
         return items;
     },
 
-    setOption: function(event)
+    setOption: function(event, prefDomain)
     {
         var menuitem = event.target.wrappedJSObject;
+        if (!menuitem)
+            menuitem = event.target;
+
         var label = menuitem.getAttribute("label");
         var category = 'DBG_'+label;
-        FBTrace[category] = !FBTrace[category];
+        var newValue = !(menuitem.getAttribute("checked") == "true");
 
-        if (FBTrace[category])
+        // Toggle button state (checked/unchecked).
+        if (newValue)
             menuitem.setAttribute("checked", "true");
         else
             menuitem.removeAttribute("checked");
 
         if (FBTrace.DBG_OPTIONS) 
             FBTrace.sysout("traceConsole.setOption: " + category + ", " + 
-                FBTrace[category], menuitem);
+                newValue, menuitem);
 
         var prefDomain;
         if (category.indexOf("_FBS_") == -1)
         {
-            prefDomain = Firebug.prefDomain;
-            Firebug.setPref(prefDomain, category, FBTrace[category] );
+            Firebug.setPref(prefDomain, category, newValue);
             prefService.savePrefFile(null);
         }
         else
         {
-            prefDomain = "extensions.firebug-service";
-            prefs.setBoolPref(prefDomain+"."+category, FBTrace[category]);
+            //xxxHonza: Is this special branch really necessary?
+            prefDomain = "extensions.firebug-service"; 
+            prefs.setBoolPref(prefDomain+"."+category, newValue);
             prefService.savePrefFile(null);
         }
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceConsole.setOption: "+prefDomain+"."+category+ " = " + FBTrace[category] + "\n");
+            FBTrace.sysout("traceConsole.setOption: "+prefDomain+"."+category+ " = " + newValue + "\n");
     },
 
     openConsole: function()
@@ -329,6 +339,54 @@ Firebug.TraceModule = extend(Firebug.Module,
     removeListener: function()
     {
         remove(this.listeners, listener);
+    },
+
+    dump: function(message, parentNode)
+    {
+        // xxxHonza: find better solution for checking an ERROR messages 
+        // (setup some rules).
+        var index = message.text.indexOf("ERROR");
+        if (index != -1)
+            message.type = "DBG_ERROR";
+
+        index = message.text.indexOf("EXCEPTION");
+        if (index != -1)
+            message.type = "DBG_ERROR";
+
+        Firebug.TraceModule.MessageTemplate.dump(message, parentNode);
+    },
+
+    initializeContent: function(parentNode, prefDomain)
+    {
+        // Create basic layout for trace console content.
+        var rep = Firebug.TraceModule.PanelTemplate;
+        rep.tag.replace({}, parentNode, rep);
+
+        // This node is the container for all logs.
+        var logTabContent = FBL.getElementByClass(parentNode, "traceInfoLogsText");
+        var logNode = Firebug.TraceModule.MessageTemplate.createTable(logTabContent);
+
+        // Initialize content for Options tab (a button for each DBG_ option).
+        var optionsBody = FBL.getElementByClass(parentNode, "traceInfoOptionsText");
+        var options = Firebug.TraceModule.getOptionsMenuItems(prefDomain);
+        var doc = parentNode.ownerDocument;
+        for (var i=0; i<options.length; i++)
+        {
+            var option = options[i];
+            var button = doc.createElement("button");
+            FBL.setClass(button, "traceOption");
+            FBL.setItemIntoElement(button, option);
+            button.innerHTML = option.label;
+            button.setAttribute("id", option.pref);
+            button.removeAttribute("type");
+            button.addEventListener("click", option.command, false);
+            optionsBody.appendChild(button);
+        }
+
+        // Select default tab.
+        rep.selectTabByName(parentNode, "Logs");
+
+        return logNode;
     }
 });
 
