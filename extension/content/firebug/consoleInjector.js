@@ -66,7 +66,7 @@ function FirebugConsoleHandler(context, win)
     this.handleEvent = function(event)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("FirebugConsoleHandler event", event);
+            FBTrace.dumpProperties("FirebugConsoleHandler "+event.target.getAttribute("methodName")+", event", event);
         if (!Firebug.CommandLine.CommandHandler.handle(event, this, win))
         {
             if (FBTrace.DBG_CONSOLE)

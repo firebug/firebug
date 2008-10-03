@@ -55,6 +55,7 @@ var _FirebugCommandLine =
             self.evaluate(expr);
             //window.dump("_firebugEvalEvent did evaluate on "+expr+"\n");
         }, true);
+        element.setAttribute("firebugCommandLineAttached", "true")
         //window.dump("Added listener for firebugCommandLine event");
     },
 

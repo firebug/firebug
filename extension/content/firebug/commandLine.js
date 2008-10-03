@@ -71,28 +71,27 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
         
         // Make sure the command line script is attached.
-        if (win.wrappedJSObject)
+        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+        if (element)
         {
-            if (!win.wrappedJSObject._FirebugCommandLine)
+        	var attached = element.getAttribute("firebugCommandLineAttached");
+            if (!attached)
             {
-                // XXXjjb, xxxHonza: check this. the commandline isn't loaded for iframes.
-                Firebug.CommandLine.injector.attachCommandLine(context, win);
-
-            	//if (FBTrace.DBG_ERRORS) 
-            	//	FBTrace.sysout("Firebug cannot find _FirebugCommandLine object, its too early for command line");
-            	//Firebug.Console.logFormatted(["Firebug cannot find _FirebugCommandLine object, its too early for command line", win], context, "error", true);
+            	if (FBTrace.DBG_ERRORS) 
+            		FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
+            	Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
             }
         }
         else
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no win.wrappedJSObject\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no firebug console element", win);
             return;  // we're in trouble here
         }
 
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
         
-        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+        
         element.setAttribute("methodName", "evaluate");
 
         expr = expr.toString();
@@ -148,7 +147,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var result = null;
 
         if (!context.commandLineAPI)
-            context.commandLineAPI = new FirebugCommandLineAPI(context, context.window);
+            context.commandLineAPI = new FirebugCommandLineAPI(context, context.baseWindow.wrappedJSObject);  // TODO should be baseWindow
 
         var scope = {
             api       : context.commandLineAPI,
@@ -251,10 +250,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
         }
 
-        // The target window should be the one, which is selected by "cd" function 
-        // in the command line. The expression must be executed in context of this window.
-        this.evaluate(expr, context, null, (context.baseWindow ? context.baseWindow : context.window), 
-            FBL.bind(Firebug.Console.log, Firebug.Console));
+        this.evaluate(expr, context, null, null, FBL.bind(Firebug.Console.log, Firebug.Console));  
     },
 
     enterMenu: function(context)
@@ -266,7 +262,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         this.appendToHistory(expr, true);
 
-        this.evaluate(expr, context, null, context.window, function(result, context)
+        this.evaluate(expr, context, null, null, function(result, context)
         {
             if (typeof(result) != "undefined")
             {
@@ -288,7 +284,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.clear(context);
         this.appendToHistory(expr);
 
-        this.evaluate(expr, context, null, context.window, function(result, context)
+        this.evaluate(expr, context, null, null, function(result, context)
         {
             if (typeof(result) != undefined)
                 context.chrome.select(result);
@@ -497,6 +493,9 @@ Firebug.CommandLine = extend(Firebug.Module,
     		FBTrace.sysout("command line isNeededGetReady ", context);
     	
     	Firebug.CommandLine.injector.attachCommandLine(context, context.window);
+    	for (var i = 0; i < context.windows.length; i++)
+    		Firebug.CommandLine.injector.attachCommandLine(context, context.windows[i]);
+    	
     	// the attach is asynchronous, we can report when it is complete:
     	if (context.window.wrappedJSObject._FirebugCommandLine)
     		return true;
@@ -510,7 +509,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
 Firebug.CommandLine.CommandHandler = extend(Object,
 {
-    handle: function(event, scope, win)
+    handle: function(event, api, win)
     {
         var element = event.target;
         var methodName = element.getAttribute("methodName");
@@ -518,14 +517,14 @@ Firebug.CommandLine.CommandHandler = extend(Object,
 
         var userObjects = cloneArray(hosed_userObjects);
         if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
-            FBTrace.dumpProperties("FirebugConsoleHandler: userObjects",  userObjects);                                             /*@explore*/
+            FBTrace.dumpProperties("Firebug.CommandLine.CommandHandler: "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
 
-        var subHandler = scope[methodName];
+        var subHandler = api[methodName];
         if (!subHandler)
             return false;
 
         element.removeAttribute("retValueType");
-        var result = subHandler.apply(scope, userObjects);
+        var result = subHandler.apply(api, userObjects);
         if (typeof result != "undefined")
         {
             if (result instanceof Array)
@@ -596,7 +595,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
                 preExpr = preExpr.substr(0, lastDot);
 
             var self = this;
-            Firebug.CommandLine.evaluate(preExpr, context, context.thisValue, context.window,
+            Firebug.CommandLine.evaluate(preExpr, context, context.thisValue, null,
                 function found(result, context)
                 {
                     self.complete = keys(result).sort();
@@ -680,20 +679,18 @@ function FirebugCommandLineAPI(context, baseWindow)
 {
     this.$ = function(id)
     {
-        var win = context.baseWindow ? context.baseWindow : baseWindow;
-        return win.document.getElementById(id);
+        var doc = baseWindow.document;
+        return baseWindow.document.getElementById(id);
     };
 
     this.$$ = function(selector)
     {
-        var win = context.baseWindow ? context.baseWindow : baseWindow;
-        return FBL.getElementsBySelector(win.document, selector);
+        return FBL.getElementsBySelector(baseWindow.document, selector);
     };
 
     this.$x = function(xpath)
     {
-        var win = context.baseWindow ? context.baseWindow : baseWindow;
-        return FBL.getElementsByXPath(win.document, xpath);
+        return FBL.getElementsByXPath(baseWindow.document, xpath);
     };
 
     this.$n = function(index)
@@ -726,6 +723,8 @@ function FirebugCommandLineAPI(context, baseWindow)
                 break;
             }
         }
+        
+        Firebug.Console.log(["Current window:", context.baseWindow], context, "info");
     };
 
     this.clear = function()
@@ -842,14 +841,15 @@ Firebug.CommandLine.injector = {
 
 function CommandLineHandler(context, win)
 {
-    this.handleEvent = function(event)
+    this.handleEvent = function(event)  // win is the window the handler is bound into 
     {
+        var baseWindow = context.baseWindow? context.baseWindow : context.window;
+        this.api = new FirebugCommandLineAPI(context,  baseWindow.wrappedJSObject);
+ 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand') event: ", event);
-        
-        var scope = new FirebugCommandLineAPI(context, context.window.wrappedJSObject);
-
-        // Appends variables into the scope.
+            FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand') event in baseWindow "+baseWindow.location, event);
+         
+        // Appends variables into the api.
         var vars = getInspectorVars(context);
         for (var prop in vars)
         {
@@ -860,17 +860,16 @@ function CommandLineHandler(context, win)
                     return vars[p] ? vars[p].wrappedJSObject : null;
                 }
             }
-            scope[prop] = createHandler(prop);
+            this.api[prop] = createHandler(prop);  // XXXjjb should these be removed?
         }
 
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand'): ", scope);
-
-        if (!Firebug.CommandLine.CommandHandler.handle(event, scope, win))
+        if (!Firebug.CommandLine.CommandHandler.handle(event, this.api, win))
         {
             var methodName = event.target.getAttribute("methodName");
             Firebug.Console.log($STRF("commandline.MethodNotSupported", [methodName]));
         }
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.dumpProperties("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+context.baseWindow.location, context.baseWindow);
     };
 }
 
