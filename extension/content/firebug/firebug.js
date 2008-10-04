@@ -522,7 +522,9 @@ top.Firebug =
         else if (type == nsIPrefBranch.PREF_BOOL)
             prefs.setBoolPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INVALID)
-            throw "Invalid preference "+prefName+" check that it is listed in defaults/prefs.js";
+        {
+            FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" check that it is listed in defaults/prefs.js");
+        }
 
         if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
