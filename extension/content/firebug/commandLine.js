@@ -145,9 +145,12 @@ Firebug.CommandLine = extend(Firebug.Module,
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction)
     {
         var result = null;
-
+        
+        // targetWindow may be frame in HTML
+        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+        
         if (!context.commandLineAPI)
-            context.commandLineAPI = new FirebugCommandLineAPI(context, context.baseWindow.wrappedJSObject);  // TODO should be baseWindow
+            context.commandLineAPI = new FirebugCommandLineAPI(context, (win.wrappedJSObject?win.wrappedJSObject:win));  // TODO should be baseWindow
 
         var scope = {
             api       : context.commandLineAPI,
