@@ -47,6 +47,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 548:  'open with editor' mangles non-ascii characters
 	* Issue 588:  DOM HTMLCollection/NodeList should be formatted like an array in the console
 	* Issue 789:  Using the console in the context of the current debugging stack
+	* Issue 814:  cd not working correctly
 	* Issue 874:  User object incorrectly identified as arrays
 	* Issue 882:  console.log() reports wrong source file and line number
 	* Issue 983:  GWT with Firebug on FF3 cause "listener is undefined"
@@ -62,9 +63,11 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1124: console.assert() doesn't work  
 	* Issue 1125: (partial) Net panel not working as expected (1.2.0) (issue 402 tested and works)
 	* Issue 1137: Forgets which JS file being viewed after switching away and back to Script tab
+	* Issue 1147: after refreshing page, text not shown properly
 	* Issue 1149: console.trace still not working
 	* Issue 1151: Break on all errors should not break when a watch is undefined
 	* Issue 1154: Debugger watch panel does not include closure variables, contribution kpdecker
 	* Issue 1159: Console results for "$x" incorrect
 	* Issue 1164: Firebug console no longer shows Array indicators
 	* Issue 1180: Show HTTP status code on all XHR requests in the console
+	* Issue 1190: 1.3.0 a3 with console enabled changes appearance of pages automaticallly
