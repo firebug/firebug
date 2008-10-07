@@ -180,7 +180,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!sandbox)
         {
             sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-            sandbox.__proto__ = win.wrappedJSObject;
+            sandbox.__proto__ = (win.wrappedJSObject?win.wrappedJSObject:win); //  XPCNativeWrapper vs  XPCSafeJSObjectWrapper
             context.sandboxes.push(sandbox); // XXXdolske does this get cleared?  LEAK?
         }
 
@@ -487,14 +487,19 @@ Firebug.CommandLine = extend(Firebug.Module,
     
     // called by users of command line, currently:
     // 1) Console on focus command line, 2) Watch onfocus, and 3) debugger loadedContext if watches exist
-    isNeededGetReady: function(context) 
+    isNeededGetReady: function(context, win) 
     {
     	if (FBTrace.DBG_CONSOLE)
     		FBTrace.sysout("command line isNeededGetReady ", context);
     	
-    	Firebug.CommandLine.injector.attachCommandLine(context, context.window);
-    	for (var i = 0; i < context.windows.length; i++)
-    		Firebug.CommandLine.injector.attachCommandLine(context, context.windows[i]);
+    	if (win)
+    	    Firebug.CommandLine.injector.attachCommandLine(context, win);
+    	else
+    	{
+    	    Firebug.CommandLine.injector.attachCommandLine(context, context.window);
+    	    for (var i = 0; i < context.windows.length; i++)
+    	        Firebug.CommandLine.injector.attachCommandLine(context, context.windows[i]);
+    	}
     	
     	// the attach is asynchronous, we can report when it is complete:
     	if (context.window.wrappedJSObject._FirebugCommandLine)
@@ -513,7 +518,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
     {
         var element = event.target;
         var methodName = element.getAttribute("methodName");
-        var hosed_userObjects = win.wrappedJSObject._firebug.userObjects;
+        var hosed_userObjects = (win.wrappedJSObject?win.wrappedJSObject:win)._firebug.userObjects;
 
         var userObjects = cloneArray(hosed_userObjects);
         if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
@@ -869,7 +874,7 @@ function CommandLineHandler(context, win)
             Firebug.Console.log($STRF("commandline.MethodNotSupported", [methodName]));
         }
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+context.baseWindow.location, context.baseWindow);
+            FBTrace.dumpProperties("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+(context.baseWindow?context.baseWindow.location:"no basewindow"), context.baseWindow);
     };
 }
 

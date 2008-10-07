@@ -1267,11 +1267,10 @@ function getRealObject(object)
 
 function onCommandLineFocus(event)
 {
-    // User has decided to use the command line, but the web page may not have the console.
-    if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._firebug)
+    // User has decided to use the command line, but the web page may not have the console if the page has no javascript
+    if (Firebug.Console.isNeededGetReady(FirebugContext, FirebugContext.window))
     {
-        // Should never be called  now
-        Firebug.Console.injector.attachConsole(FirebugContext, FirebugContext.window);
+        Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("onCommandLineFocus, attachConsole "+FirebugContext.window.location+"\n");

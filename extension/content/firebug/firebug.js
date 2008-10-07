@@ -1426,7 +1426,9 @@ Firebug.Module =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // intermodule dependency
     
-    isNeededGetReady: function(context)   // caller needs module. true means module is ready now, else getting ready 
+    // caller needs module. win maybe context.window or iframe in context.window.
+    // true means module is ready now, else getting ready
+    isNeededGetReady: function(context, win) 
     {
     },
 };

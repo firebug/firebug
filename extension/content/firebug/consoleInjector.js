@@ -7,15 +7,78 @@ FBL.ns(function() { with (FBL) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
+const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
 
 top.Firebug.Console.injector = {
 
-    attachConsole: function(context, win)
+        isAttached: function(win)  // win needs to be a XPCSafeJSObjectWrapper
+        {
+            return (win._getFirebugConsoleElement ? true : false);
+        },
+        
+        attachIfNeeded: function(context, win)
+        {
+            if (this.isAttached(win))
+                return true;
+            
+            this.attachConsoleInjector(context, win);
+            this.addConsoleListener(context, win);
+        
+            return this.isAttached(win);
+        },
+        
+        attachConsoleInjector: function(context, win)
+        {
+            var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
+           
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
+
+            Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
+
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("attachConsoleInjector evaluation completed\n");
+        },
+
+        getConsoleInjectionScript: function() {
+            if (!this.consoleInjectionScript)
+            {
+                var ff3 = versionChecker.compare(appInfo.version, "3.0*") >= 0;
+
+                // There is a "console" getter defined for FF3.
+                var script = "";
+                if (ff3)
+                {
+                    script += "window.__defineGetter__('console', function() {\n";
+                    script += " return window.loadFirebugConsole(); })\n\n";
+                }
+
+                script += "window.loadFirebugConsole = function() {\n";
+                script += "window._firebug =  new _FirebugConsole();";
+                // If not ff3 initialize "console" property.
+                if (!ff3)
+                    script += " window.console = window._firebug;\n";
+
+                script += " return window._firebug };\n";
+                
+                var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
+                script += theFirebugConsoleScript;
+                
+                if (!ff3)
+                    script += " window.loadFirebugConsole();\n";
+                
+                this.consoleInjectionScript = script;
+            }
+            return this.consoleInjectionScript;
+        },
+
+    forceConsoleCompilationInPage: function(context, win)
     {
         if (!win)
         {
             if (FBTrace.DBG_CONSOLE)                                           /*@explore*/
-                FBTrace.dumpStack("no win in attachConsole!");                 /*@explore*/
+                FBTrace.dumpStack("no win in forceConsoleCompilationInPage!");                 /*@explore*/
             return;
         }
         
@@ -29,7 +92,7 @@ top.Firebug.Console.injector = {
 
     evaluateConsoleScript: function(context)
     {
-        var scriptSource = getResource("chrome://firebug/content/consoleInjected.js");
+        var scriptSource = this.getConsoleInjectionScript(); // TODO XXXjjb this should be getConsoleInjectionScript
         Firebug.Debugger.evaluate(scriptSource, context);
     },
 

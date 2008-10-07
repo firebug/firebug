@@ -659,12 +659,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return !!context;
     },
 
-    supportsGlobal: function(global)
+    supportsGlobal: function(global) // This is call from fbs for almost all fbs operations
     {
         var context = (TabWatcher ? TabWatcher.getContextByWindow(global) : null);
-
-        if (!this.isEnabled(context))
-            return false;
+        
+        if (context)
+        {
+            // Apparently the global is a XPCSafeJSObjectWrapper that looks like a Window. 
+            // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
+            if (!global._getFirebugConsoleElement && Firebug.Console.isEnabled(context))
+            {
+                var consoleReady = Firebug.Console.isNeededGetReady(context, global);
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("debugger.supportsGlobal consoleReady:"+consoleReady, global);
+            }
+        
+            if (!this.isEnabled(context))
+                return false;
+        }
 
         this.breakContext = context;
         return !!context;

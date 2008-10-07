@@ -7,8 +7,6 @@ const Ci = Components.interfaces;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
-const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
-const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
 
 // ************************************************************************************************
 
@@ -117,55 +115,6 @@ Firebug.Console = extend(ActivableConsole,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
-    attachConsoleInjector: function(context, win)
-    {
-        if (win.wrappedJSObject && win.wrappedJSObject.loadFirebugConsole)
-            return;
-        
-        var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
-       
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
-
-        Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("attachConsoleInjector evaluation completed\n");
-    },
-
-
-    getConsoleInjectionScript: function() {
-        if (!this.consoleInjectionScript)
-        {
-            var ff3 = versionChecker.compare(appInfo.version, "3.0*") >= 0;
-
-            // There is a "console" getter defined for FF3.
-            var script = "";
-            if (ff3)
-            {
-                script += "window.__defineGetter__('console', function() {\n";
-                script += " return window.loadFirebugConsole(); })\n\n";
-            }
-
-            script += "window.loadFirebugConsole = function() {\n";
-            script += "window._firebug =  new _FirebugConsole();";
-            // If not ff3 initialize "console" property.
-            if (!ff3)
-                script += " window.console = window._firebug;\n";
-
-            script += " return window._firebug };\n";
-            
-            var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
-            script += theFirebugConsoleScript;
-            
-            if (!ff3)
-                script += " window.loadFirebugConsole();\n";
-            
-            this.consoleInjectionScript = script;
-        }
-        return this.consoleInjectionScript;
-    },
-
     showPanel: function(browser, panel)
     {
     },
@@ -196,6 +145,21 @@ Firebug.Console = extend(ActivableConsole,
         }
         
         return element;
+    },
+    
+    isNeededGetReady: function(context, win) 
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.isNeededGetReady "+(win?win.location:context.window.location), context);
+        
+        if (win)
+            return this.injector.attachIfNeeded(context, win);
+        else
+        {
+            for (var i = 0; i < context.windows.length; i++)
+                this.injector.attachIfNeeded(context, context.windows[i]);
+            return this.injector.attachIfNeeded(context, context.window);
+        }
     },
     
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -231,24 +195,24 @@ Firebug.Console = extend(ActivableConsole,
         var container = panel.panelNode;
         container.insertBefore(nodes[0], container.firstChild);
     },
-
+/*
     watchWindow: function(context, win)
     {
         if (this.isEnabled(context))
         {
-            this.attachConsoleInjector(context, win);
+            this.injector.attachConsoleInjector(context, win);
             this.injector.addConsoleListener(context, win); 
         }
 
-        if (FBTrace.DBG_CONSOLE)                                                                                       /*@explore*/
-        {                                                                                                              /*@explore*/
-            if (win.wrappedJSObject._firebug)                                                                                           /*@explore*/
-                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          /*@explore*/
-            else                                                                                                       /*@explore*/
-                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n"); /*@explore*/
-        }                                                                                                              /*@explore*/
+        if (FBTrace.DBG_CONSOLE)                                                                                        
+        {                                                                                                              
+            if (win.wrappedJSObject._firebug)                                                                                           
+                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          
+            else                                                                                                       
+                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n");  
+        }                                                                                                               
     },
-
+*/
     showContext: function(browser, context)
     {
         if (browser)
