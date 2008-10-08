@@ -1749,27 +1749,32 @@ FirebugService.prototype =
             // to jsd its line world
             var jsdLine = bp.lineNo + sourceFile.getBaseLineOffset();
             // test script.isLineExecutable(jsdLineNo, pcmap) ??
-            var pc = script.lineToPc(jsdLine, pcmap);
-            var pcToLine = script.pcToLine(pc, pcmap);
+            
             try {
                 var isExecutable = script.isLineExecutable(jsdLine, pcmap);
             } catch(e) {
                 // guess not then...
             }
-            if (pcToLine == jsdLine && isExecutable)
+            if (isExecutable)
             {
-                script.setBreakpoint(pc);
+            	var pc = script.lineToPc(jsdLine, pcmap); 
+            	var pcToLine = script.pcToLine(pc, pcmap);  // avoid calling this unless we have to...
+            
+            	if (pcToLine == jsdLine)
+            	{
+            		script.setBreakpoint(pc);
 
-                bp.scriptsWithBreakpoint.push(script);
-                bp.pc.push(pc);
-                bp.pcmap = pcmap;
-                bp.jsdLine = jsdLine;
+            		bp.scriptsWithBreakpoint.push(script);
+            		bp.pc.push(pc);
+            		bp.pcmap = pcmap;
+            		bp.jsdLine = jsdLine;
 
-                if (pc == 0)  // signal the breakpoint handler to break for user
-                    sourceFile.breakOnZero = script.tag;
+            		if (pc == 0)  // signal the breakpoint handler to break for user
+            			sourceFile.breakOnZero = script.tag;
 
-                if (FBTrace.DBG_FBS_BP)
-                    FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+" sourceFile.breakOnZero: "+sourceFile.breakOnZero);                         /*@explore*/
+            		if (FBTrace.DBG_FBS_BP)
+            			FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+" sourceFile.breakOnZero: "+sourceFile.breakOnZero);                         /*@explore*/
+            	}
             }
             else
             {
