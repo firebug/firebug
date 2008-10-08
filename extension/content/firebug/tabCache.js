@@ -203,7 +203,7 @@ Firebug.TabCache.prototype =
     getLine: function(url, lineNumber)
     {
         var lines = this.load(url);
-        return lines ? lines[lineNo-1] : null;
+        return lines ? lines[lineNumber-1] : null;
     }
 };
 
