@@ -276,7 +276,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         this.consoleWindow = window.openDialog(
             "chrome://firebug/content/traceConsole.xul",
             "FBTraceConsole." + this.prefDomain,
-            "chrome,resizable,scrollbars=auto,minimizable",
+            "chrome,resizable,scrollbars=auto,minimizable,dialog=no",
             args);
     },
 
