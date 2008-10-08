@@ -225,7 +225,7 @@ Firebug.TraceModule = extend(Firebug.Module,
             menuitem.removeAttribute("checked");
 
         if (FBTrace.DBG_OPTIONS) 
-            FBTrace.sysout("traceConsole.setOption: " + category + ", " + 
+            FBTrace.sysout("traceConsole.setOption this.prefDomain:"+this.prefDomain+" prefDomain "+prefDomain+"  " + category + ", " + 
                 newValue, menuitem);
 
         var prefDomain;
@@ -242,8 +242,6 @@ Firebug.TraceModule = extend(Firebug.Module,
             prefService.savePrefFile(null);
         }
 
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceConsole.setOption: "+prefDomain+"."+category+ " = " + newValue + "\n");
     },
 
     openConsole: function()
@@ -832,13 +830,16 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         return HelperDomplate.replace(this.tableTag, {}, parentNode, this);
     },
 
-    dump: function(message, parentNode)
+    dump: function(message, parentNode, index)
     {
         var panelNode = parentNode.parentNode.parentNode;
         var scrolledToBottom = isScrolledToBottom(panelNode);
 
         // Set message index
-        message.index = parentNode.childNodes.length;
+        if (index)
+        	message.index = index;
+        else
+        	message.index = parentNode.childNodes.length;
 
         // Insert log into the console.
         var row = HelperDomplate.insertRows(this.rowTag, {message: message},
