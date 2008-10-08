@@ -116,7 +116,7 @@ TraceConsoleService.prototype =
         if (topic != "firebug-trace-on-message")
             throw Cr.NS_ERROR_INVALID_ARG;
 
-        for (var i=0; this.observers.length; i++) {
+        for (var i=0; i < this.observers.length; i++) {
             if (this.observers[i] == observer) {
                 this.observers.splice(i, 1);
                 break;
