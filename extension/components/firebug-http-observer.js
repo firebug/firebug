@@ -34,6 +34,7 @@ function HttpRequestObserver()
 
     this.wrappedJSObject = this;
     this.listeners = [];
+    this.observers = [];
 }
 
 HttpRequestObserver.prototype = 
@@ -72,6 +73,9 @@ HttpRequestObserver.prototype =
 
         try 
         {
+            // Support for listeners that needs the window.
+            // xxxHonza: this can be eventually removed, but the window is quite useful 
+            // for listeners
             if (subject instanceof Ci.nsIHttpChannel)
             {
                 var win = getWindowForRequest(subject);
@@ -80,6 +84,12 @@ HttpRequestObserver.prototype =
                 else if (topic == "http-on-examine-response")
                     this.fireOnExamineResponse(subject, win);
             }
+
+            // Support for nsIObserver(s). 
+            // xxxHonza: It's safer to pass the object through a defined interface 
+            // (the JS object remains the same).
+            if (topic == "http-on-modify-request" || topic == "http-on-examine-response")
+                this.notifyObservers(subject, topic, data);
         }
         catch (err)
         {
@@ -90,11 +100,12 @@ HttpRequestObserver.prototype =
 
     fireOnModifyRequest: function(request, win)
     {
+        win = win ? win.wrappedJSObject : null;
+
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.dumpProperties("httpObserver.onRequest: (" + 
                 + this.listeners.length + ") " + request.name, request);
 
-        win = win ? win.wrappedJSObject : null;
         for (var i=0; i<this.listeners.length; i++)
             this.listeners[i].onModifyRequest(request, win);
     },
@@ -117,7 +128,7 @@ HttpRequestObserver.prototype =
 	
     removeListener: function(listener)
     {
-        for (var i=0; this.listeners.length; i++) {
+        for (var i=0; i<this.listeners.length; i++) {
             if (this.listeners[i] == listener) {
                 this.listeners.splice(i, 1);
                 break;
@@ -125,11 +136,45 @@ HttpRequestObserver.prototype =
         }
     },
 
+    /* nsIObserverService */
+    addObserver: function(observer, topic, weak)
+    {
+        if (topic != "http-on-modify-request" && topic != "http-on-examine-response")
+            throw Cr.NS_ERROR_INVALID_ARG;
+
+        this.observers.push(observer);
+    },
+
+    removeObserver: function(observer, topic)
+    {
+        if (topic != "http-on-modify-request" && topic != "http-on-examine-response")
+            throw Cr.NS_ERROR_INVALID_ARG;
+
+        for (var i=0; i<this.observers.length; i++) {
+            if (this.observers[i] == observer) {
+                this.observers.splice(i, 1);
+                break;
+            }
+        }
+    },
+
+    notifyObservers: function(subject, topic, data)
+    {
+        for (var i=0; i<this.observers.length; i++)
+            this.observers[i].observe(subject, topic, data);
+    },
+
+    enumerateObservers: function(topic)
+    {
+        return null;
+    },
+
 	/* nsISupports */
 	QueryInterface: function(iid) 
 	{
         if (iid.equals(Ci.nsISupports) || 
-			iid.equals(Ci.nsIObserver)) {
+            iid.equals(Ci.nsIObserverService) ||
+            iid.equals(Ci.nsIObserver)) {
  		    return this;
  		}
 		
@@ -185,7 +230,8 @@ var HttpRequestObserverFactory =
             throw Cr.NS_ERROR_NO_AGGREGATION;
 
         if (iid.equals(Ci.nsISupports) ||
-			iid.equals(Ci.nsIObserver))
+            iid.equals(Ci.nsIObserverService) ||
+            iid.equals(Ci.nsIObserver))
 		{
             if (!gHttpObserverSingleton)
                 gHttpObserverSingleton = new HttpRequestObserver();
