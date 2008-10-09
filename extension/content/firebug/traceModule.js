@@ -1107,8 +1107,14 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         var trace = Firebug.errorStackTrace;
         if (trace)
         {
-            trace = Firebug.Errors.correctLineNumbersWithStack(trace, obj) ? trace : null;
-            this.stack = trace;
+            if (Firebug.Errors.correctLineNumbersWithStack(trace, obj))
+            {
+                for (var i=0; i<trace.frames.length; i++) {
+                    var frame = trace.frames[i];
+                    if (frame.href && frame.lineNo)
+                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo});
+                }
+            }
         }
         else  // Put info about the script error location into the stack.
             this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
