@@ -634,7 +634,7 @@ FirebugService.prototype =
         if (lineNo != -1 && this.addBreakpoint(BP_MONITOR, sourceFile, lineNo, null, debuggr))
         {
             ++monitorCount;
-            dispatch(debuggers, "onToggleMonitor", [url, lineNo, true]);
+            dispatch(debuggers, "onToggleMonitor", [sourceFile.href, lineNo, true]);
         }
     },
 
