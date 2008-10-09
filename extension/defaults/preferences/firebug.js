@@ -84,15 +84,15 @@ pref("extensions.firebug.enableTraceConsole", true);     /*@explore*/
 pref("extensions.firebug.alwaysOpenTraceConsole", false);     /*@explore*/
 pref("extensions.firebug.trace.maxMessageLength", 400);     /*@explore*/
 pref("extensions.firebug.trace.enableScope", false);     /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_JSDCONTEXT", false);// firebug-service trace scriptinfo(huge) /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_FF_START", false); // firebug-service trace from FF start(huge) /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_CREATION", false); // firebug-service script creation           /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_BP", false);       // firebug-service breakpoints               /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_SRCUNITS", false); // firebug-service script creation           /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_ERRORS", false);   // firebug-service errors                    /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_FINDDEBUGGER", false);   // firebug-service findDebugger        /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_STEP", false);     // firebug-service stepping                  /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_FUNCTION", false); // firebug-service new Function              /*@explore*/
+pref("extensions.firebug.DBG_FBS_JSDCONTEXT", false);// firebug trace scriptinfo(huge) /*@explore*/
+pref("extensions.firebug.DBG_FBS_FF_START", false); // firebug trace from FF start(huge) /*@explore*/
+pref("extensions.firebug.DBG_FBS_CREATION", false); // firebug script creation           /*@explore*/
+pref("extensions.firebug.DBG_FBS_BP", false);       // firebug breakpoints               /*@explore*/
+pref("extensions.firebug.DBG_FBS_SRCUNITS", false); // firebug script creation           /*@explore*/
+pref("extensions.firebug.DBG_FBS_ERRORS", false);   // firebug errors                    /*@explore*/
+pref("extensions.firebug.DBG_FBS_FINDDEBUGGER", false);   // firebug findDebugger        /*@explore*/
+pref("extensions.firebug.DBG_FBS_STEP", false);     // firebug stepping                  /*@explore*/
+pref("extensions.firebug.DBG_FBS_FUNCTION", false); // firebug new Function              /*@explore*/
 pref("extensions.firebug.DBG_BP", false); 			// debugger.js and firebug-services.js; lots of output   /*@explore*/
 pref("extensions.firebug.DBG_TOPLEVEL", false); 	// top level jsd scripts                     /*@explore*/
 pref("extensions.firebug.DBG_STACK", false);  		// call stack, mostly debugger.js            /*@explore*/
@@ -116,6 +116,6 @@ pref("extensions.firebug.DBG_NET", false);        	// net.js                    
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
 pref("extensions.firebug.DBG_INSPECT", false);   // inspector  /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/
-pref("extensions.firebug-service.DBG_FBS_FLUSH", false); // /*@explore*/
+pref("extensions.firebug.DBG_FBS_FLUSH", false); // /*@explore*/
 pref("extensions.firebug.DBG_HTTPOBSERVER", false); // Centralized HTTP Observer /*@explore*/
 pref("extensions.firebug.DBG_SPY", false);          // spy.js
