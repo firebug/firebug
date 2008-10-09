@@ -380,8 +380,6 @@ Firebug.TraceModule.CommonBaseUI = {
         });
         
         var menuitems = this.optionsController.getOptionsMenuItems();
-        window.dump("initializeContent "+prefDomain+" items "+menuitems.length+"\n");
-        
         var doc = parentNode.ownerDocument;
         for (var i=0; i<menuitems.length; i++)
         {
