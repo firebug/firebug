@@ -97,7 +97,7 @@
     display: none;
     -moz-user-select: none;
     padding-right: 10px;
-    padding-bottom: 4px;
+    padding-bottom: 3px;
     max-width: 100%;
     background: #FFFFFF;
 }
@@ -143,16 +143,37 @@
 
 .netBar {
     position: relative;
-    border-right: 50px solid Cyan;
+    border-right: 50px solid transparent;
 }
 
-.netTotalBar {
+.netConnectingBar {
     position: absolute;
     left: 0;
-    right: 0;
     top: 0;
     bottom: 0;
-    background: Cyan;
+    background: #FFFFFF url(chrome://firebug/skin/netBarConnecting.gif) repeat-x;
+    min-width: 1px;
+    z-index:40;
+}
+
+.netWaitingBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: #FFFFFF url(chrome://firebug/skin/netBarWaiting.gif) repeat-x;
+    min-width: 2px;
+    z-index:30;
+}
+
+.netRespondedBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: #FFFFFF url(chrome://firebug/skin/netBarResponded.gif) repeat-x;
+    min-width: 3px;
+    z-index:20;
 }
 
 .netTimeBar {    
@@ -163,6 +184,7 @@
     min-width: 3px;
     background: #38D63B url(chrome://firebug/skin/netBarLoading.gif) repeat-x;
     border-right: 1px solid #38D63B;
+    z-index:10;
 }
 
 .netTimeLabel {
@@ -174,6 +196,22 @@
     color: #444444;
     min-width: 16px;
     background: url(chrome://firebug/skin/loading_16.gif) no-repeat 4px -1px;
+}
+
+.netBarTimeInfo {
+    width: 15px;
+    height: 16px;
+    background: url(chrome://firebug/skin/netBarTiming.png) no-repeat 0px 2px;
+    z-index: 2000;
+}
+
+.timeInfoTip {
+    width: 150px; 
+    height: 40px
+}
+
+.timeInfoTipBar {
+    position: relative;
 }
 
 .netSummaryRow .netTimeLabel,

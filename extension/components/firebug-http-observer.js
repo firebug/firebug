@@ -139,7 +139,7 @@ HttpRequestObserver.prototype =
     /* nsIObserverService */
     addObserver: function(observer, topic, weak)
     {
-        if (topic != "http-on-modify-request" && topic != "http-on-examine-response")
+        if (topic != "firebug-http-event")
             throw Cr.NS_ERROR_INVALID_ARG;
 
         this.observers.push(observer);
@@ -147,7 +147,7 @@ HttpRequestObserver.prototype =
 
     removeObserver: function(observer, topic)
     {
-        if (topic != "http-on-modify-request" && topic != "http-on-examine-response")
+        if (topic != "firebug-http-event")
             throw Cr.NS_ERROR_INVALID_ARG;
 
         for (var i=0; i<this.observers.length; i++) {
