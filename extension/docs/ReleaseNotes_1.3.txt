@@ -19,6 +19,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Net Panel ==
     * Reimplement all response views with nsITraceableChannel
     * Centralize handlers for http-on-modify-request in firebug-http-observer component
+    * Net panel timing improvements: more categories in timing.
 
 == Tracing ==
 	* Add TraceConsole to aid debugging Firebug.
@@ -71,3 +72,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1164: Firebug console no longer shows Array indicators
 	* Issue 1180: Show HTTP status code on all XHR requests in the console
 	* Issue 1190: 1.3.0 a3 with console enabled changes appearance of pages automaticallly
+	* Issue 1198: Cannot expand line in FBTrace
+	* Issue 1199: "Reference error: url not defined" when calling monitor() contribution by tonysung
