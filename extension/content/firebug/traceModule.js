@@ -23,14 +23,135 @@ const reDBG_FBS = /DBG_FBS_(.*)/;
 
 var EOF = "<br/>";
 
+//************************************************************************************************
+//The controller for the prefDomain Model.
+//  getOptionsMenuItems to create View, onPrefChangeHandler for View update
+//  base for trace viewers like tracePanel and traceConsole
+//  binds  to the branch 'prefDomain' of prefs  
+
+Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
+{
+	this.prefDomain = prefDomain;
+	
+	this.traceService =  Cc["@joehewitt.com/firebug-trace-service;1"]
+	                                     .getService(Ci.nsISupports).wrappedJSObject;
+	
+	this.addObserver = function()  
+	{
+		prefs.setBoolPref("browser.dom.window.dump.enabled", true);
+	    this.observer = { observe: bind(this.observe, this) };
+	    prefs.addObserver(prefDomain, this.observer, false);
+	};
+
+	this.removeObserver = function()
+	{
+		prefs.removeObserver( prefDomain, this.observer, false);
+	};
+	
+	// nsIObserver
+	this.observe = function(subject, topic, data)  // 
+	{
+		if (topic == "nsPref:changed")
+		{
+			var m = reDBG.exec(data);  
+			if (m)
+			{
+				var changedPrefDomain = "extensions." + m[1];
+				if (changedPrefDomain == prefDomain) 
+				{
+					var optionName = data.substr(prefDomain.length+1); // skip dot
+					var optionValue = Firebug.getPref(prefDomain, m[2]);
+					if (this.prefEventToUserEvent)
+						this.prefEventToUserEvent(optionName, optionValue);
+				}
+			}
+			else
+			{
+				if (FBTrace.DBG_OPTIONS) 
+					FBTrace.sysout("traceModule.observe : "+data+"\n");
+			}
+		}
+	};
+
+//*************** UI ***************************************************************
+
+	this.getOptionsMenuItems = function()  // Firebug menu items from option map
+	{
+		var optionMap = this.traceService.getManagedOptionMap(prefDomain);
+		var items = [];
+		for (var p in optionMap) 
+		{ 
+			var m = p.indexOf("DBG_");
+			if (m != 0)
+				continue;
+
+			try 
+			{
+				var prefValue = Firebug.getPref(this.prefDomain, p);
+				var label = p.substr(4);
+				items.push({
+                 label: label,
+                 nol10n: true,
+                 type: "checkbox",
+                 checked: prefValue,
+                 pref: p,
+                 command: bind(this.userEventToPrefEvent, this)
+				});
+			}
+			catch (err) 
+			{
+				if (FBTrace.DBG_ERRORS)
+					FBTrace.sysout("traceModule.getOptionsMenuItems could not create item for "+p+" in prefDomain "+this.prefDomain);
+				// if the option doesn't exist in this prefDomain, just continue...
+			}
+		}
+
+		items.sort(function(a, b) {
+			return a.label > b.label;
+		});
+
+		return items;
+	};
+
+	this.userEventToPrefEvent = function(event)  // use as an event listener on UI control
+	{
+		var menuitem = event.target.wrappedJSObject;
+		if (!menuitem)
+			menuitem = event.target;
+
+		var label = menuitem.getAttribute("label");
+		var category = 'DBG_'+label;
+		var value = Firebug.getPref(this.prefDomain, category);
+		var newValue = !value;
+
+		Firebug.setPref(this.prefDomain, category, newValue);
+		prefService.savePrefFile(null);
+
+		if (FBTrace.DBG_OPTIONS)
+			FBTrace.sysout("traceConsole.setOption: new value "+ this.prefDomain+"."+category+ " = " + newValue, menuitem);
+	};
+ 
+	if (onPrefChangeHandler)
+		this.prefEventToUserEvent = onPrefChangeHandler;
+	else
+	{
+		this.prefEventToUserEvent = function(optionName, optionValue)
+		{
+			FBTrace.sysout("TraceOptionsController owner needs to implement prefEventToUser Event", {name: optionName, value: optionValue});
+		};
+	}
+  
+};
+
 // ***********************************************************************************
 // Trace Module
+
 
 Firebug.TraceModule = extend(Firebug.Module,
 {
     listeners: [],
 
-    initialize: function(prefDomain, prefNames)
+    initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
     {
         FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
 
@@ -43,11 +164,6 @@ Firebug.TraceModule = extend(Firebug.Module,
         // (Open Console and a new option Always Open Console)
         this.initMenu();
 
-        // Init option according to the pref domain.
-        this.initDomainOptions(this.prefDomain);
-
-        prefs.addObserver("extensions", this, false);
-
         // Open console automatically if the pref says so.
         if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
@@ -55,8 +171,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     shutdown: function()
     {
-        prefs.removeObserver("extensions", this, false);
-
         if (this.consoleWindow)
             this.consoleWindow.TraceConsole.unregisterModule(this);
     },
@@ -124,124 +238,6 @@ Firebug.TraceModule = extend(Firebug.Module,
         menuItem.setAttribute("option", "alwaysOpenTraceConsole");
         parentMenu.appendChild(document.createElement("menuseparator"));
         parentMenu.appendChild(menuItem);
-    },
-
-    // nsIObserver
-    observe: function(subject, topic, data)
-    {
-        if (topic == "nsPref:changed")
-        {
-            var m = reDBG.exec(data);
-            if (m)
-            {
-                var prefDomain = "extensions." + m[1];
-                if (prefDomain == this.prefDomain) {
-                    var optionName = data.substr(data.lastIndexOf(".")+1);
-                    FBTrace[optionName] = Firebug.getPref(prefDomain, m[2]);
-                }
-            }
-            else
-            {
-                if (FBTrace.DBG_OPTIONS) 
-                    FBTrace.sysout("traceModule.observe : "+data+"\n");
-            }
-        }
-    },
-
-    initDomainOptions: function(prefDomain)
-    {
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("TraceModule.initialize prefDomain="+prefDomain+"\n");
-
-        for (var p in FBTrace)
-        {
-            var f = reDBG_FBS.exec(p);
-            if (f)
-            {
-                FBTrace[p] = Firebug.getPref("extensions.firebug-service", p);
-                if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("TraceModule.initialize extensions.firebug-service."+p+"="+FBTrace[p]+"\n");
-            }
-            else
-            {
-                var m = p.indexOf("DBG_");
-                if (m != -1)
-                    FBTrace[p] = Firebug.getPref(prefDomain, p); // set to 'true' to turn on all traces;
-                if (FBTrace.DBG_OPTIONS && m)
-                    FBTrace.sysout("TraceModule.initialize "+prefDomain+"."+p+"="+FBTrace[p]+"\n");
-            }
-        }
-        prefs.setBoolPref("browser.dom.window.dump.enabled", true);
-        prefs.addObserver("extensions", this, false);
-    },
-
-    getOptionsMenuItems: function(prefDomain)
-    {
-        var items = [];
-        for (p in FBTrace) 
-        {
-            var m = p.indexOf("DBG_");
-            if (m != 0)
-                continue;
-
-            try {
-                var prefValue = Firebug.getPref(prefDomain, p);
-                var label = p.substr(4);
-                items.push({
-                    label: label,
-                    nol10n: true,
-                    type: "checkbox",
-                    checked: prefValue,
-                    pref: p,
-                    command: bind(this.setOption, this, prefDomain)
-                });
-            }
-            catch (err) {
-                // if the option doesn't exist in this prefDomain, just continue...
-            }
-        }
-
-        items.sort(function(a, b) {
-            return a.label > b.label;
-        });
-
-        return items;
-    },
-
-    setOption: function(event, prefDomain)
-    {
-        var menuitem = event.target.wrappedJSObject;
-        if (!menuitem)
-            menuitem = event.target;
-
-        var label = menuitem.getAttribute("label");
-        var category = 'DBG_'+label;
-        var newValue = !(menuitem.getAttribute("checked") == "true");
-
-        // Toggle button state (checked/unchecked).
-        if (newValue)
-            menuitem.setAttribute("checked", "true");
-        else
-            menuitem.removeAttribute("checked");
-
-        if (FBTrace.DBG_OPTIONS) 
-            FBTrace.sysout("traceConsole.setOption this.prefDomain:"+this.prefDomain+" prefDomain "+prefDomain+"  " + category + ", " + 
-                newValue, menuitem);
-
-        var prefDomain;
-        if (category.indexOf("_FBS_") == -1)
-        {
-            Firebug.setPref(prefDomain, category, newValue);
-            prefService.savePrefFile(null);
-        }
-        else
-        {
-            //xxxHonza: Is this special branch really necessary?
-            prefDomain = "extensions.firebug-service"; 
-            prefs.setBoolPref(prefDomain+"."+category, newValue);
-            prefService.savePrefFile(null);
-        }
-
     },
 
     openConsole: function()
@@ -353,7 +349,15 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         Firebug.TraceModule.MessageTemplate.dump(message, parentNode);
     },
+});
 
+Firebug.TraceModule.CommonBaseUI = {
+
+	destroy: function() 
+	{
+		this.optionsController.removeObserver();
+	},
+		
     initializeContent: function(parentNode, prefDomain)
     {
         // Create basic layout for trace console content.
@@ -366,30 +370,44 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         // Initialize content for Options tab (a button for each DBG_ option).
         var optionsBody = FBL.getElementByClass(parentNode, "traceInfoOptionsText");
-        var options = Firebug.TraceModule.getOptionsMenuItems(prefDomain);
-        var doc = parentNode.ownerDocument;
-        for (var i=0; i<options.length; i++)
+        this.optionsController = new Firebug.TraceOptionsController(prefDomain, function updateButton(optionName, optionValue)
         {
-            var option = options[i];
+        	var button = parentNode.ownerDocument.getElementById(optionName);
+        	if (button)
+        		button.setAttribute("checked", optionValue?"true":"false");
+        	else
+        		FBTrace.sysout("traceModule onPrefChange no button with name "+optionName+ " in parentNode", parentNode);
+        });
+        
+        var menuitems = this.optionsController.getOptionsMenuItems();
+        window.dump("initializeContent "+prefDomain+" items "+menuitems.length+"\n");
+        
+        var doc = parentNode.ownerDocument;
+        for (var i=0; i<menuitems.length; i++)
+        {
+            var menuitem = menuitems[i];
             var button = doc.createElement("button");
             FBL.setClass(button, "traceOption");
-            FBL.setItemIntoElement(button, option);
-            button.innerHTML = option.label;
-            button.setAttribute("id", option.pref);
+            FBL.setItemIntoElement(button, menuitem);
+            button.innerHTML = menuitem.label;
+            button.setAttribute("id", menuitem.pref);
             button.removeAttribute("type");
-            button.addEventListener("click", option.command, false);
+            button.addEventListener("click", menuitem.command, false);
             optionsBody.appendChild(button);
         }
 
         // Select default tab.
         rep.selectTabByName(parentNode, "Logs");
 
+        this.optionsController.addObserver();
+        
         return logNode;
-    }
-});
+    },
+};
 
-// ************************************************************************************************
-// Trace Console Rep
+
+//************************************************************************************************
+//Trace Console Rep
 
 Firebug.TraceModule.PanelTemplate = domplate({
 

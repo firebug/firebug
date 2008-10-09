@@ -37,16 +37,15 @@ var TraceConsole =
         // Get pref domain is used for message filtering. Only logs that belong
         // to this pref-domain will be displayed.
         this.prefDomain = args.prefDomain; 
-        window.title = "Firebug Tracing: " + this.prefDomain;
+        window.title = "Tracing: " + this.prefDomain;
 
         // Initialize root node of the trace-console window.
         var consoleFrame = document.getElementById("consoleFrame");
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
-        this.logs = Firebug.TraceModule.initializeContent(this.consoleNode, this.prefDomain);
+        this.logs = Firebug.TraceModule.CommonBaseUI.initializeContent(this.consoleNode, this.prefDomain);
 
         // Register listeners and observers
         traceService.addObserver(this, "firebug-trace-on-message", false);
-        prefs.addObserver("extensions", this, false);
 
         gFindBar = document.getElementById("FindToolbar");
 
@@ -57,7 +56,6 @@ var TraceConsole =
 
     shutdown: function()
     {
-        prefs.removeObserver("extensions", this, false);
         traceService.removeObserver(this, "firebug-trace-on-message");
 
         // Notify listeners
@@ -97,12 +95,6 @@ var TraceConsole =
 
             this.dump(new Firebug.TraceModule.TraceMessage(
                 messageInfo.type, data, messageInfo.obj));
-        }
-        else if (topic == "nsPref:changed")
-        {
-            // xxxHonza
-            // traceConsole can't use the FBTrace object here as it can be different
-            // from the FBTrace object in the Firebug chrome window
         }
     },
 

@@ -6,12 +6,16 @@
 const CLASS_ID = Components.ID("{D2AC51BC-1622-4d4d-85CB-F8E8B5805CB9}");
 const CLASS_NAME = "Firebug Trace Console Service";
 const CONTRACT_ID = "@joehewitt.com/firebug-trace-service;1";
+const EXTENSIONS = "extensions";
+const DBG_ = "DBG_";
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const PrefService = Cc["@mozilla.org/preferences-service;1"];
+const prefs = PrefService.getService(Ci.nsIPrefBranch2);
+const prefService = PrefService.getService(Ci.nsIPrefService);
 const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 
 const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
@@ -19,34 +23,74 @@ const appShellService = Components.classes["@mozilla.org/appshell/appShellServic
 // ************************************************************************************************
 // Service implementation
 
-function TraceConsoleService()
+function TraceConsoleService()  // singleton
 {
-    this.wrappedJSObject = FBTrace;
     this.observers = [];
-
-    // Initialize options of FBTrace object according to the preferences.
-    this.initializeOptions();
-
+    this.optionMaps = {};
+    
     // Listen for preferences changes. Trace Options can be changed at run time.
     prefs.addObserver("extensions", this, false);
+    
+    this.wrappedJSObject = this;  
 }
 
 TraceConsoleService.prototype = 
 {
-    initializeOptions: function()
+	getManagedOptionMap: function(prefDomain)  
+	{
+		if (!this.optionMaps[prefDomain])
+			this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
+		
+		return this.optionMaps[prefDomain];
+	},
+
+	createManagedOptionMap: function(prefDomain)
+	{
+		var optionMap = new TraceBase(prefDomain); 
+	     
+		var branch = prefService.getBranch ( prefDomain );
+		var arrayDesc = {};
+		var children = branch.getChildList("", arrayDesc);
+		for (var i = 0; i < children.length; i++)
+		{
+			var p = children[i];
+			var m = p.indexOf("DBG_");   
+			if (m != -1)
+			{
+				var optionName = p.substr(1); // drop leading .
+				optionMap[optionName] = this.getPref(prefDomain)
+			}
+		}
+		
+		return optionMap;
+	},
+	
+    /* nsIObserve */
+    observe: function(subject, topic, data)
     {
-        var allPrefs = prefs.getChildList("extensions", {});
-        for (var i = 0; i < allPrefs.length; i++)
-        {
-            var prefName = allPrefs[i];
-            if (this.isFirebugTracePref(prefName))
-            {
-                var optionName = prefName.substr(prefName.lastIndexOf(".")+1);
-                FBTrace[optionName] = this.getPref(prefName);
-                
-                //dump("FBTrace[" + optionName + "]=>" + FBTrace[optionName] + "\n");
-            }
-        }
+    	if (data.substr(0,EXTENSIONS.length) == EXTENSIONS)
+    	{
+    		for (var prefDomain in gTraceService.optionMaps)
+    		{
+    			if (data.substr(0, prefDomain.length) == prefDomain)
+    			{
+    				var optionName = data.substr(prefDomain.length+1); // skip dot
+    				if (optionName.substr(0, DBG_.length) == DBG_)
+    					gTraceService.optionMaps[prefDomain][optionName] = this.getPref(data);
+    			}
+    		}
+    	}
+    },
+
+    getPref: function(prefName)
+    {
+        var type = prefs.getPrefType(prefName);
+        if (type == Ci.nsIPrefBranch.PREF_STRING)
+            return prefs.getCharPref(prefName);
+        else if (type == Ci.nsIPrefBranch.PREF_INT)
+            return prefs.getIntPref(prefName);
+        else if (type == Ci.nsIPrefBranch.PREF_BOOL)
+            return prefs.getBoolPref(prefName);
     },
 
     // Prepare trace-object and dispatch to all observers.
@@ -68,38 +112,6 @@ TraceConsoleService.prototype =
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
-    },
-
-    isFirebugTracePref: function(prefName)
-    {
-        return (prefName.indexOf("extensions.firebug.DBG_") == 0 ||
-            prefName.indexOf("extensions.firebug-service.") == 0);
-    },
-
-    getPref: function(prefName)
-    {
-        var type = prefs.getPrefType(prefName);
-        if (type == Ci.nsIPrefBranch.PREF_STRING)
-            return prefs.getCharPref(prefName);
-        else if (type == Ci.nsIPrefBranch.PREF_INT)
-            return prefs.getIntPref(prefName);
-        else if (type == Ci.nsIPrefBranch.PREF_BOOL)
-            return prefs.getBoolPref(prefName);
-    },
-
-    /* nsIObserve */
-    observe: function(subject, topic, data)
-    {
-        // Preferences for FBTrace begins with extensions.firebug.DBG_ or 
-        // extensions.firebug-service.DBG_
-        if (this.isFirebugTracePref(data))
-        {
-            var optionName = data.substr(data.lastIndexOf(".")+1);
-            FBTrace[optionName] = this.getPref(data);
-
-            //dump("TraceConsoleService.observe, FBTrace[" + optionName + "] => " 
-            //    + FBTrace[optionName] + "\n");
-        }
     },
 
     /* nsIObserverService */
@@ -171,12 +183,12 @@ TraceConsoleService.prototype =
 };
 
 // ************************************************************************************************
-// Public FBTrace API
+// Public TraceService API
 
 // Prevent tracing from code that performs tracing.
 var noTrace = false;
-var FBTrace = 
-{    
+
+var TraceAPI = {    
     dump: function(messageType, message, obj) {
         if (noTrace)
             return;
@@ -207,6 +219,17 @@ var FBTrace =
         this.sysout(message, eventObj);
     }
 };
+
+var TraceBase = function(prefDomain) {
+	this.prefDomain;
+}
+//Derive all properties from TraceAPI
+for (var p in TraceAPI)
+    TraceBase.prototype[p] = TraceAPI[p];
+
+TraceBase.prototype.sysout = function(message, obj) {
+    TraceAPI.dump(this.prefDomain, message, obj);
+}
 
 // ************************************************************************************************
 // Service factory

@@ -1,34 +1,9 @@
 /* See license.txt for terms of usage */
 
-// The only global trace object.
-var FBTrace = null;
+// Our global trace object.
 
-// ************************************************************************************************
-
-(function() {
-
-// Debug Logging for Firebug internals (see firebug-trace-service for more details).
-var FBTraceAPI = Components.classes["@joehewitt.com/firebug-trace-service;1"].getService(Components.interfaces.nsISupports).wrappedJSObject;
-
-// Helper trace object associted with extension domain.
-function _FBTrace(prefDomain) {
-    this.prefDomain = prefDomain; // Modified from within a Firebug extension.
-}
-
-// Derive all properties from FBTraceAPI
-for (var p in FBTraceAPI)
-    _FBTrace.prototype[p] = FBTraceAPI[p];
-
-// Override sysout function in order to mark all logs from this extension. 
-// This makes possible to filter logs by source extensions.
-_FBTrace.prototype.sysout = function(message, obj) {
-    FBTraceAPI.dump(this.prefDomain, message, obj);
-}
-
-// Initialize global object.
-FBTrace = new _FBTrace("extensions.firebug");
-
-})();
+var FBTrace = Components.classes["@joehewitt.com/firebug-trace-service;1"]
+                 .getService(Components.interfaces.nsISupports).wrappedJSObject.getManagedOptionMap("extensions.firebug");
 
 // ************************************************************************************************
 // Some examples of tracing APIs

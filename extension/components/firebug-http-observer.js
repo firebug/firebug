@@ -29,9 +29,12 @@ function HttpRequestObserver()
 {
     // Get firebug-trace service for logging (the service should be already
     // registered at this moment).
+	var obj = Cc["@joehewitt.com/firebug-trace-service;1"]
+	              .getService(Ci.nsISupports).wrappedJSObject;
+	
+	
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-        .getService(Ci.nsISupports).wrappedJSObject;
-
+       .getService(Ci.nsISupports).wrappedJSObject.getManagedOptionMap("extensions.firebug");
     this.wrappedJSObject = this;
     this.listeners = [];
     this.observers = [];
@@ -174,7 +177,7 @@ HttpRequestObserver.prototype =
 	{
         if (iid.equals(Ci.nsISupports) || 
             iid.equals(Ci.nsIObserverService) ||
-            iid.equals(Ci.nsIObserver)) {
+			iid.equals(Ci.nsIObserver)) {
  		    return this;
  		}
 		
@@ -231,7 +234,7 @@ var HttpRequestObserverFactory =
 
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService) ||
-            iid.equals(Ci.nsIObserver))
+			iid.equals(Ci.nsIObserver))
 		{
             if (!gHttpObserverSingleton)
                 gHttpObserverSingleton = new HttpRequestObserver();
