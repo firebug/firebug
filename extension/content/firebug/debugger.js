@@ -667,11 +667,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             // Apparently the global is a XPCSafeJSObjectWrapper that looks like a Window. 
             // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
-            if (!global._getFirebugConsoleElement && Firebug.Console.isEnabled(context))
+            if (!global._getFirebugConsoleElement)
             {
-                var consoleReady = Firebug.Console.isNeededGetReady(context, global);
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("debugger.supportsGlobal consoleReady:"+consoleReady, global);
+                if (Firebug.Console.isEnabled(context))
+                {
+                    var consoleReady = Firebug.Console.isNeededGetReady(context, global);
+                    if (FBTrace.DBG_CONSOLE)
+                        FBTrace.sysout("debugger.supportsGlobal !global._getFirebugConsoleElement consoleReady:"+consoleReady, global);
+                }
+                else
+                {
+                    if (FBTrace.DBG_CONSOLE)
+                        FBTrace.sysout("debugger.supportsGlobal !global._getFirebugConsoleElement console NOT enabled ", global);
+                }
             }
         
             if (!this.isEnabled(context))
@@ -1319,6 +1327,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
         fbs.registerClient(this);   // allow callbacks for jsd
+        fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
     },
 
     initContext: function(context)
@@ -1409,7 +1418,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // extends ActivableModule
     onFirstPanelActivate: function(context, init)
     {
-        fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
+       // Because the console injection is done during onTopLevelScript, we must register a debugger for this XUL window, 
+       // independent of the enable status of Script panel. Otherwise this method would be a great place to registerDebugger().
     },
 
     onPanelActivate: function(context, init, panelName)
@@ -1443,8 +1453,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onLastPanelDeactivate for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
-
-        fbs.unregisterDebugger(this);
     },
 
     onSuspendFirebug: function(context)
