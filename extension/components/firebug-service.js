@@ -149,7 +149,7 @@ var FBTrace = null;
 function FirebugService()
 {
 	FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-	             .getService(Ci.nsISupports).wrappedJSObject.getManagedOptionMap("extensions.firebug");
+	             .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
     fbs = this;
 

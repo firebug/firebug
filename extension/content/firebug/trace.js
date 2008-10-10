@@ -3,7 +3,7 @@
 // Our global trace object.
 
 var FBTrace = Components.classes["@joehewitt.com/firebug-trace-service;1"]
-                 .getService(Components.interfaces.nsISupports).wrappedJSObject.getManagedOptionMap("extensions.firebug");
+                 .getService(Components.interfaces.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
 // ************************************************************************************************
 // Some examples of tracing APIs

@@ -77,7 +77,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
 	this.getOptionsMenuItems = function()  // Firebug menu items from option map
 	{
-		var optionMap = this.traceService.getManagedOptionMap(prefDomain);
+		var optionMap = this.traceService.getTracer(prefDomain);
 		var items = [];
 		for (var p in optionMap) 
 		{ 

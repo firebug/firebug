@@ -39,12 +39,12 @@ function TraceConsoleService()  // singleton
 
 TraceConsoleService.prototype = 
 {
-	getManagedOptionMap: function(prefDomain)  
+	getTracer: function(prefDomain)  
 	{
 		if (!this.optionMaps[prefDomain])
 			this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
 		if (win)
-			win.dump("TraceConsoleService.getManagedOptionMap, prefDomain: "+prefDomain+"\n");
+			win.dump("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
 		return this.optionMaps[prefDomain];
 	},
 

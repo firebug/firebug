@@ -34,7 +34,7 @@ function HttpRequestObserver()
 	
 	
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
-       .getService(Ci.nsISupports).wrappedJSObject.getManagedOptionMap("extensions.firebug");
+       .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
     this.wrappedJSObject = this;
     this.listeners = [];
     this.observers = [];
