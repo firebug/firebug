@@ -983,18 +983,27 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         }
         else if (hasClass(tab, "messageInfoPropsTab"))
         {
-            this.updateInfoImpl(messageInfoBody, view, message, message.getProperties);
+            this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
+                function (message, valueBox, text) {
+                    Firebug.TraceModule.Tree.tag.replace({object: message.props}, valueBox,
+                        Firebug.TraceModule.Tree);
+                });
         }
         else if (hasClass(tab, "messageInfoScopeTab"))
         {
             this.updateInfoImpl(messageInfoBody, view, message, message.getScope,
                 function (message, valueBox, text) {
-                    Firebug.TraceModule.PropertyTree.tag.replace({object: message.scope}, valueBox);
+                    Firebug.TraceModule.PropertyTree.tag.replace({object: message.scope}, valueBox,
+                        Firebug.TraceModule.PropertyTree);
                 });
         }
         else if (hasClass(tab, "messageInfoIfacesTab"))
         {
-            this.updateInfoImpl(messageInfoBody, view, message, message.getInterfaces);
+            this.updateInfoImpl(messageInfoBody, view, message, message.getInterfaces,
+                function (message, valueBox, text) {
+                    Firebug.TraceModule.Tree.tag.replace({object: message.ifaces}, valueBox,
+                        Firebug.TraceModule.Tree);
+                });
         }
         else if (hasClass(tab, "messageInfoTypesTab"))
         {
@@ -1009,9 +1018,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             this.updateInfoImpl(messageInfoBody, view, message, message.getProperties,
                 function (message, valueBox, text) {
                     if (message.obj instanceof Element)
-                        Firebug.HTMLPanel.CompleteElement.tag.replace({object: message.obj}, valueBox);
+                        Firebug.HTMLPanel.CompleteElement.tag.replace({object: message.obj}, valueBox,
+                            Firebug.HTMLPanel.CompleteElement);
                     else
-                        Firebug.TraceModule.PropertyTree.tag.replace({object: message.obj}, valueBox);
+                        Firebug.TraceModule.PropertyTree.tag.replace({object: message.obj}, valueBox,
+                            Firebug.TraceModule.PropertyTree);
                 });
         }
         else if (hasClass(tab, "messageInfoExcTab"))
@@ -1212,7 +1223,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         if (this.props)
             return this.props;
 
-        this.props = "";
+        this.props = [];
 
         if (this.obj instanceof Array)
         {
@@ -1222,7 +1233,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                 {
                     try
                     {
-                        this.props += "[" + p + "] = " + this.obj[p] + EOF;
+                        this.props[p] = "" + this.obj[p];
                     }
                     catch (e)
                     {
@@ -1236,13 +1247,10 @@ Firebug.TraceModule.TraceMessage.prototype =
                 {
                     try
                     {
-                        this.props += "[" + p + "] = ";
-
-                        this.props += "{";
+                        var subProps = this.props[p] = [];
                         var subobj = this.obj[p];
                         for (var p1 in subobj)
-                            this.props += "'" + p1 + "': " + subobj[p1] + ", ";
-                        this.props += "}" + EOF;
+                            subProps[p1] = "" + subobj[p1];
                     }
                     catch (e)
                     {
@@ -1251,9 +1259,9 @@ Firebug.TraceModule.TraceMessage.prototype =
                 }
             }
         }
-        else if (typeof(this.obj) == 'string')
+        else if (typeof(this.obj) == "string")
         {
-            this.props = this.obj + EOF;
+            this.props = this.obj;
         }
         else if (this.obj instanceof Ci.jsdIValue)
         {
@@ -1264,7 +1272,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                 var prop = listValue.value[i];
                 try {
                     var name = prop.name.getWrappedValue();
-                    this.props += "[" + name + "] = " + prop.value.getWrappedValue() + EOF;
+                    this.props[name] = "" + prop.value.getWrappedValue();
                 } catch (e) {
                     onPanic(e);
                 }
@@ -1289,13 +1297,14 @@ Firebug.TraceModule.TraceMessage.prototype =
                         var kind = m[1];
                         if (!this.obj[p] instanceof Ci[kind])
                         {
-                            var xpobj = this.obj[p].wrappedJSObject;
-                            this.props += "[" + p + "] = " + xpobj + EOF;
+                            var xpobj = "" + this.obj[p].wrappedJSObject;
+                            this.props[p] = xpobj;
                         }
                     }
-                    this.props += "[" + p + "] = " + this.obj[p] + EOF;
+
+                    this.props[p] = "" + this.obj[p];
                 }
-                catch (e)
+                catch (err)
                 {
                 }
             }
@@ -1309,15 +1318,15 @@ Firebug.TraceModule.TraceMessage.prototype =
         if (this.ifaces)
             return this.ifaces;
 
-        this.ifaces = "";
-        for (iface in Components.interfaces)
-        {
-            if (this.obj instanceof Components.interfaces[iface]) {
-                for (p in Components.interfaces[iface])
-                    this.ifaces += "[" + iface + "." + p + "]=" + this.obj[p] + EOF;
+        for (iface in Ci) {
+            if (this.obj instanceof Ci[iface]) {
+                if (!this.ifaces)
+                    this.ifaces = [];
+                var ifaceProps = this.ifaces[iface] = [];
+                for (p in Ci[iface])
+                    ifaceProps[p] = this.obj[p];
             }
         }
-
         return this.ifaces;
     },
 
@@ -1574,8 +1583,20 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
 
     getMembers: function(object, level)
     {
-        // Implement in derived classes.
-        return [];
+        if (!level)
+            level = 0;
+
+        if (typeof(object) == "string")
+            return [this.createMember("", "", object, level)];
+
+        var members = [];
+        for (var p in object) {
+            var member = this.createMember("", p, object[p], level);
+            if (object[p] instanceof Array)
+                member.tag = FirebugReps.Nada.tag;
+            members.push(member);
+        }
+        return members;
     },
 
     createMember: function(type, name, value, level)
