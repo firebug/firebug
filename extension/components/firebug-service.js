@@ -856,10 +856,22 @@ FirebugService.prototype =
     // || interuptHook.  rv is ignored
     onBreak: function(frame, type, rv)
     {
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type));                            /*@explore*/
+        if (FBTrace.DBG_FBS_STEP) 
+        	FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+        
         try
         {
-            var debuggr = this.findDebugger(frame);
+        	// avoid step_out from web page to chrome
+        	fbs.stayInOneDebugger = true;  // XXXjjb make option in chromebug
+        	if (type==jsdIExecutionHook.TYPE_INTERRUPTED && fbs.last_debuggr && fbs.stayInOneDebugger)
+        	{
+        		var debuggr = this.reFindDebugger(frame, fbs.last_debuggr);
+        		if (!debuggr)
+        			 jsd.interruptHook = null;
+        	}
+        	else
+        		var debuggr = this.findDebugger(frame);
+        	
             if (debuggr)
                 return this.breakIntoDebugger(debuggr, frame, type);
         }
@@ -1422,9 +1434,9 @@ FirebugService.prototype =
         if (!checkFrame && FBTrace.DBG_FBS_FINDDEBUGGER)
         	FBTrace.sysout("fbs.findDebugger fell thru bottom of stack", frame);
         	
-        var deb = fbs.askDebuggersForSupport(frameWin);
-        if (deb)
-         	return deb;
+        fbs.last_debuggr = fbs.askDebuggersForSupport(frameWin);
+        if (fbs.last_debuggr)
+         	return fbs.last_debuggr;
         else
         	return null;
     },
@@ -1497,11 +1509,10 @@ FirebugService.prototype =
 
     reFindDebugger: function(frame, debuggr)
     {
-        var global = getFrameGlobal(frame);
+        var global = getFrameScopeWindowAncestor(frame); 
         if (global && debuggr.supportsGlobal(global)) return debuggr;
-
-        var win = getFrameWindow(frame);
-        if (debuggr.supportsWindow(win)) return debuggr; // for side-effect: context set on debugger.js
+        
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1878,7 +1889,8 @@ FirebugService.prototype =
                             fbs.stopStepping();
                             stepMode = STEP_SUSPEND;
                             fbs.hookInterrupts();
-                        } else
+                        } 
+                        else
                         {
                             fbs.stopStepping();
                         }
