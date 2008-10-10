@@ -23,6 +23,9 @@ const appShellService = Components.classes["@mozilla.org/appshell/appShellServic
 // ************************************************************************************************
 // Service implementation
 
+//var win = appShellService.hiddenDOMWindow;
+const win = false;
+
 function TraceConsoleService()  // singleton
 {
     this.observers = [];
@@ -31,7 +34,7 @@ function TraceConsoleService()  // singleton
     // Listen for preferences changes. Trace Options can be changed at run time.
     prefs.addObserver("extensions", this, false);
     
-    this.wrappedJSObject = this;  
+    this.wrappedJSObject = this; // why not
 }
 
 TraceConsoleService.prototype = 
@@ -40,7 +43,8 @@ TraceConsoleService.prototype =
 	{
 		if (!this.optionMaps[prefDomain])
 			this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
-		
+		if (win)
+			win.dump("TraceConsoleService.getManagedOptionMap, prefDomain: "+prefDomain+"\n");
 		return this.optionMaps[prefDomain];
 	},
 
@@ -58,7 +62,9 @@ TraceConsoleService.prototype =
 			if (m != -1)
 			{
 				var optionName = p.substr(1); // drop leading .
-				optionMap[optionName] = this.getPref(prefDomain)
+				optionMap[optionName] = this.getPref(prefDomain+p);
+				if (win)
+					win.dump("TraceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
 			}
 		}
 		
@@ -77,6 +83,8 @@ TraceConsoleService.prototype =
     				var optionName = data.substr(prefDomain.length+1); // skip dot
     				if (optionName.substr(0, DBG_.length) == DBG_)
     					gTraceService.optionMaps[prefDomain][optionName] = this.getPref(data);
+    				if (win)
+    					win.dump("TraceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
     			}
     		}
     	}
@@ -108,7 +116,8 @@ TraceConsoleService.prototype =
             obj: obj, 
             type: messageType
         };
-
+        if (win)
+			win.dump("TraceConsoleService.dispatch, prefDomain: "+messageType+"\n");
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
@@ -221,15 +230,18 @@ var TraceAPI = {
 };
 
 var TraceBase = function(prefDomain) {
-	this.prefDomain;
+	this.prefDomain = prefDomain;
+	this.sysout = function(message, obj) {
+	    TraceAPI.dump(this.prefDomain, message, obj);
+	}
 }
 //Derive all properties from TraceAPI
 for (var p in TraceAPI)
     TraceBase.prototype[p] = TraceAPI[p];
 
-TraceBase.prototype.sysout = function(message, obj) {
-    TraceAPI.dump(this.prefDomain, message, obj);
-}
+
+
+
 
 // ************************************************************************************************
 // Service factory
