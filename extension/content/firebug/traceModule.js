@@ -1494,12 +1494,15 @@ Firebug.TraceModule.TraceMessage.prototype =
 var lastPanic = null;
 function onPanic(errorMessage)
 {
-	if (lastPanic != errorMessage)
-		alert("Firebug traceModule panics: "+errorMessage);
-	else
-		window.dump("Another panic attack "+errorMessage+"\n");
+	var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+	var win = appShellService.hiddenDOMWindow;
+	// XXXjjb I cannot get these tests to work. 
+	//if (win.lastPanic && (win.lastPanic == errorMessage))
+		win.dump("Another panic attack "+errorMessage+"\n");
+	//else
+	//	alert("Firebug traceModule panics: "+errorMessage);	
 	
-	lastPanic = errorMessage;		
+	win.lastPanic = errorMessage;		
 }
 
 // ************************************************************************************************
