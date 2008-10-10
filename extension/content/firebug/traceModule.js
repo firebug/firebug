@@ -624,7 +624,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     hideProperties: function(message)
     {
-        return !message.getProperties();
+        var props = message.getProperties();
+        return !props.length;
     },
 
     hideScope: function(message)
@@ -634,7 +635,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     hideInterfaces: function(message)
     {
-        return !message.getInterfaces();
+        var ifaces = message.getInterfaces();
+        for (var name in ifaces)
+            return false;
+
+        return true;
     },
 
     hideTypes: function(message)
@@ -1318,10 +1323,9 @@ Firebug.TraceModule.TraceMessage.prototype =
         if (this.ifaces)
             return this.ifaces;
 
-        for (iface in Ci) {
+        this.ifaces = [];
+        for (var iface in Ci) {
             if (this.obj instanceof Ci[iface]) {
-                if (!this.ifaces)
-                    this.ifaces = [];
                 var ifaceProps = this.ifaces[iface] = [];
                 for (p in Ci[iface])
                     ifaceProps[p] = this.obj[p];
