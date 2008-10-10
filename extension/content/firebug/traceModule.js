@@ -1226,7 +1226,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
                     catch (e)
                     {
-                        alert(e);
+                        onPanic(e);
                     }
                 }
             }
@@ -1246,7 +1246,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
                     catch (e)
                     {
-                        alert(e);
+                        onPanic(e);
                     }
                 }
             }
@@ -1266,7 +1266,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     var name = prop.name.getWrappedValue();
                     this.props += "[" + name + "] = " + prop.value.getWrappedValue() + EOF;
                 } catch (e) {
-                    alert(e);
+                    onPanic(e);
                 }
             }
         }
@@ -1399,7 +1399,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             }
             catch (err)
             {
-                alert(e);
+                onPanic(e);
             }
         }
 
@@ -1426,7 +1426,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         catch (e)
         {
-            alert(e);
+            onPanic(e);
         }
 
         return this.types;
@@ -1466,7 +1466,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         catch (err)
         {
-            alert(err);
+            onPanic(err);
         }
 
         return this.eventInfo;
@@ -1476,6 +1476,17 @@ Firebug.TraceModule.TraceMessage.prototype =
     {
         return this.obj;
     }
+}
+
+var lastPanic = null;
+function onPanic(errorMessage)
+{
+	if (lastPanic != errorMessage)
+		alert("Firebug traceModule panics: "+errorMessage);
+	else
+		window.dump("Another panic attack "+errorMessage+"\n");
+	
+	lastPanic = errorMessage;		
 }
 
 // ************************************************************************************************
