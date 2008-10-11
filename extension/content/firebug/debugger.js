@@ -138,7 +138,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         this.haltCallback = fn;
         fbs.halt(this);
-        debugger;
+        
+        if(FBTrace.DBG_BP)
+            FBTrace.sysout("debugger.halt, issuing debugger stmt", fn);
+        
+        debugger; // For some reason this is not reliable.
+        if (this.haltCallback) // so we have a second try
+        {
+            if (Firebug.CommandLine.isNeededGetReady(FirebugContext))
+                Firebug.CommandLine.evaluate("debugger;", FirebugContext);
+        }
+        
+        if(FBTrace.DBG_BP)
+            FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
 
     stop: function(context, frame, type, rv)
