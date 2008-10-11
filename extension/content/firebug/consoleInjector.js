@@ -348,7 +348,7 @@ function FirebugConsoleHandler(context, win)
         var sourceName = win.location;
         var lineNumber = 0;
         var trace = getJSDUserStack();
-        if (trace && trace.frames[0])
+        if (trace && trace.frames && trace.frames[0])
         {
             var frame = trace.frames[0];
             sourceName = normalizeURL(frame.script.fileName);
