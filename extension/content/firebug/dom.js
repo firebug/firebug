@@ -1349,7 +1349,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
 
     if (Firebug.showDOMProps)
     {
-        domProps.sort(sortOrder);
+        domProps.sort(sortName);
         members.push.apply(members, domProps);
     }
 
