@@ -66,7 +66,7 @@ const NS_OS_TEMP_DIR = "TmpD"
 const STEP_OVER = 1;
 const STEP_INTO = 2;
 const STEP_OUT = 3;
-const STEP_SUSPEND = -1; // XXXms: find a better way
+const STEP_SUSPEND = 4;  
 
 const TYPE_ONE_SHOT = nsITimer.TYPE_ONE_SHOT;
 
@@ -906,6 +906,7 @@ FirebugService.prototype =
          }
     },
 
+    // when the onError handler returns false 
     onDebug: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_ERRORS)                                                                                               /*@explore*/
@@ -1073,8 +1074,6 @@ FirebugService.prototype =
         if (this.showStackTrace)
         {
             reportNextError = true;
-            //var theNeed = this.needToBreakForError(fileName, lineNo);
-            // fbs.hookInterruptsToTrapErrors();
             if (FBTrace.DBG_FBS_ERRORS)                                                                                        /*@explore*/
                 FBTrace.sysout("fbs.onError showStackTrace, we will try to drop into onDebug\n");       /*@explore*/
 
@@ -1282,7 +1281,6 @@ FirebugService.prototype =
                     fbs.onXScriptCreatedByTag[script.tag] = this.onTopLevelScriptCreated;
 
                 script.setBreakpoint(0);
-                fbs.clearHookInterruptsToTrackScripts(); // now we know that any nested scripts are part of our buffer, not dynamic functions
                 if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_BP)
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName);/*@explore*/
             }
@@ -1297,7 +1295,6 @@ FirebugService.prototype =
 
                 fbs.nestedScriptStack.appendElement(script, false);  // for case 2
 
-                fbs.clearHookInterruptsToTrackScripts(); // Should not have been set...?
                 if (FBTrace.DBG_FBS_CREATION)
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag="+script.tag);      /*@explore*/
             }
@@ -1305,8 +1302,6 @@ FirebugService.prototype =
             {
                 fbs.nestedScriptStack.appendElement(script, false);
                 if (FBTrace.DBG_FBS_CREATION) FBTrace.sysout("onScriptCreated: nested function named: "+script.functionName);                                         /*@explore*/
-                if (script.functionName == "anonymous")  // not no-name
-                    fbs.hookInterruptsToTrackScripts();  // if the hook is taken, then its not a eval- or top-, must be Function or ?
                 dispatch(scriptListeners,"onScriptCreated",[script, fileName, script.baseLineNumber]);
             }
         }
@@ -1884,10 +1879,10 @@ FirebugService.prototype =
                     if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN stepMode = "+getStepName(stepMode)/*@explore*/
                                         +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");    /*@explore*/
 
-                    if (hookFrameCount == 0) {
+                    if (hookFrameCount == 0) {  // stack empty
                         if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) ) {
                             fbs.stopStepping();
-                            stepMode = STEP_SUSPEND;
+                            stepMode = STEP_SUSPEND; // break on next
                             fbs.hookInterrupts();
                         } 
                         else
@@ -1895,7 +1890,7 @@ FirebugService.prototype =
                             fbs.stopStepping();
                         }
                     }
-                    else if (stepMode == STEP_OVER) //XXXnew - conflict
+                    else if (stepMode == STEP_OVER) 
                     {
                         if (hookFrameCount <= stepFrameCount)
                             fbs.hookInterrupts();
@@ -1952,59 +1947,6 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("unset scriptHook\n");                                                                   /*@explore*/
     },
 
-    hookInterruptsToTrackScripts: function()
-    {
-        if (jsd.interruptHook && !fbs.trackingScriptsHookSet)
-            fbs.saveInterruptHook = jsd.interruptHook;
-
-        jsd.interruptHook = { onExecute: handleTrackingScriptsInterrupt };
-        fbs.trackingScriptsHookSet = true;
-        if (FBTrace.DBG_FBS_CREATION) FBTrace.sysout("hookInterruptsToTrackScripts fbs.saveInterruptHook:"+fbs.saveInterruptHook);                                                                  /*@explore*/
-    },
-
-    clearHookInterruptsToTrackScripts: function()
-    {
-        if (fbs.trackingScriptsHookSet)
-        {
-            if (fbs.saveInterruptHook)
-            {
-                jsd.interruptHook = fbs.saveInterruptHook;
-                fbs.saveInterruptHook = null;
-            }
-            else
-                jsd.interruptHook = null;
-        }
-
-        fbs.trackingScriptsHookSet = false;
-        if (FBTrace.DBG_FBS_FUNCTION) FBTrace.sysout("clearHookInterruptsToTrackScripts \n");
-    },
-
-    hookInterruptsToTrapErrors: function()
-    {
-        if (jsd.interruptHook && !fbs.trappingErrorsHookSet)
-            fbs.saveInterruptHook = jsd.interruptHook;
-
-        jsd.interruptHook = { onExecute: handleTrappingErrorsInterrupt };
-        fbs.trappingErrorsHookSet = true;
-        if (FBTrace.DBG_FBS_FUNCTION) FBTrace.sysout("hookInterruptsToTrapErrors fbs.saveInterruptHook:"+fbs.saveInterruptHook);                                                                  /*@explore*/
-    },
-
-    clearHookInterruptsToTrapErrors: function()
-    {
-        if (fbs.trappingErrorsHookSet)
-        {
-            if (fbs.saveInterruptHook)
-            {
-                jsd.interruptHook = fbs.saveInterruptHook;
-                fbs.saveInterruptHook = null;
-            }
-            else
-                jsd.interruptHook = null;
-        }
-
-        fbs.trappingErrorsHookSet = false;
-        if (FBTrace.DBG_FBS_FUNCTION) FBTrace.sysout("clearHookInterruptsToTrapErrors \n");
-    }
 };
 
 function getStepName(mode)
@@ -2012,57 +1954,9 @@ function getStepName(mode)
     if (mode==STEP_OVER) return "STEP_OVER";
     if (mode==STEP_INTO) return "STEP_INTO";
     if (mode==STEP_OUT) return "STEP_OUT";
+    if (mode==STEP_SUSPEND) return "STEP_SUSPEND";
 }
 
-function handleTrackingScriptsInterrupt(frame, type, rv)
-{
-    try
-    {
-        if (FBTrace.DBG_FBS_FUNCTION) FBTrace.sysout("handleTrackingScriptsInterrupt "+(frame.callingFrame?"haveCaller":"top")+" \n");
-        // We are not interested in Function() calls at top- or eval-level, since they don't seem to have an important use case and FF2 crashes
-        if (frame.callingFrame && !isFilteredURL(frame.script.fileName) )
-        {
-            var frameLineId = frame.script.fileName + frame.line;
-            if (FBTrace.DBG_FBS_FUNCTION) FBTrace.sysout("handleTrackingScriptsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type));                              /*@explore*/
-
-            // When we are called the stack should be at the PC just after the constructor call to Function().
-            // TODO implement
-        }
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_FBS_CREATION) FBTrace.sysout("handleTrackingScriptsInterrupt FAILS: "+exc);                              /*@explore*/
-    }
-    fbs.clearHookInterruptsToTrackScripts();
-    // call restored interruptHook if present
-    if (jsd.interruptHook)
-        jsd.interruptHook.onExecute(frame, type, rv);
-    return RETURN_CONTINUE;
-}
-
-function handleTrappingErrorsInterrupt(frame, type, rv)
-{
-    try
-    {
-        if (FBTrace.DBG_FBS_ERRORS) FBTrace.sysout("handleTrappingErrorsInterrupt\n");
-        if ( !isFilteredURL(frame.script.fileName) )
-        {
-            var frameLineId = frame.script.fileName + frame.line;
-            if (FBTrace.DBG_FBS_ERRORS) FBTrace.sysout("handleTrappingErrorsInterrupt caller frameLineId: "+frameLineId+" type "+getExecutionStopNameFromType(type), frame);                              /*@explore*/
-
-            fbs.onDebug(frame, type, rv);  // TODO just call this not the other stuff
-        }
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_FBS_CREATION) FBTrace.sysout("handleTrappingErrorsInterrupt FAILS: "+exc);                              /*@explore*/
-    }
-    fbs.clearHookInterruptsToTrapErrors();
-    // call restored interruptHook if present
-    if (jsd.interruptHook)
-        jsd.interruptHook.onExecute(frame, type, rv);
-    return RETURN_CONTINUE;
-}
 // ************************************************************************************************
 
 var FirebugFactory =
