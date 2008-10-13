@@ -97,7 +97,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             // Register traceable channel listener in order to intercept all incoming data for 
             // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.3
             request.QueryInterface(Ci.nsITraceableChannel);
-            var newListener = new TracingListener(context.sourceCache);
+            var newListener = new TracingListener(context);
             newListener.listener = request.setNewListener(newListener);
         }
         catch (err)
@@ -135,6 +135,8 @@ Firebug.TabCache = function(win)
 
 Firebug.TabCache.prototype =
 {
+    listeners: [],
+
     loadText: function(url)
     {
         if (FBTrace.DBG_CACHE)
@@ -204,6 +206,27 @@ Firebug.TabCache.prototype =
     {
         var lines = this.load(url);
         return lines ? lines[lineNumber-1] : null;
+    },
+
+    // Listeners
+    addListener: function(listener)
+    {
+        this.listeners.push(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        remove(this.listeners, listener);
+    },
+
+    fireOnStoreResponse: function(context, request, responseText)
+    {
+        for (var i=0; i<this.listeners.length; i++)
+        {
+            var listener = this.listeners[i];
+            if (listener.onStoreResponse)
+                listener.onStoreResponse(context, request, responseText);
+        }
     }
 };
 
@@ -215,9 +238,9 @@ Firebug.TabCache.prototype =
  * channels (nsIHttpChannel). For every channel a new instance of this object is created and 
  * registered. See Firebug.TabCacheModel.onExamineResponse method.
  */
-function TracingListener(cache)
+function TracingListener(context)
 {
-    this.cache = cache;
+    this.context = context;
     this.listener = null;
     this.receivedData = [];
 }
@@ -291,11 +314,17 @@ TracingListener.prototype =
 
     onStopRequest: function(request, requestContext, statusCode)
     {
-        if (statusCode != Ci.nsIRequest.NS_BINDING_ABORTED)
-            this.cache.store(safeGetName(request), this.receivedData.join());
-
         try
         {
+            if (statusCode != Ci.nsIRequest.NS_BINDING_ABORTED)
+            {
+                var responseText = this.receivedData.join();
+                this.context.sourceCache.store(safeGetName(request), responseText);
+
+                // Notify listeners.
+                this.context.sourceCache.fireOnStoreResponse(this.context, request, responseText);
+            }
+
             if (this.listener)
                 this.listener.onStopRequest(request, requestContext, statusCode);
         }

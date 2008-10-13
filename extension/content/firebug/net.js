@@ -1876,7 +1876,17 @@ NetProgress.prototype =
     stateIsRequest: false,
     onLocationChange: function() {},
     onSecurityChange : function() {},
-    onLinkIconAvailable : function() {}
+    onLinkIconAvailable : function() {},
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // tabCache listener
+
+    onStoreResponse: function(context, request, responseText)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+            file.responseText = responseText;
+    }
 };
 
 var requestedFile = NetProgress.prototype.requestedFile;
@@ -2035,6 +2045,9 @@ function monitorContext(context)
 
         var listener = context.netProgress = networkContext;
 
+        if (context.sourceCache.addListener)
+            context.sourceCache.addListener(networkContext);
+
         // This listener is used to observe downlaod progress.
         context.browser.addProgressListener(listener, NOTIFY_ALL);
     }
@@ -2052,6 +2065,9 @@ function unmonitorContext(context)
 
             netProgress.pending.splice(0, netProgress.pending.length);
         }
+
+        if (context.sourceCache.removeListener)
+            context.sourceCache.removeListener(netProgress);
 
         if (context.browser.docShell)
             context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
