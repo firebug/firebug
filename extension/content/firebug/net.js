@@ -2386,7 +2386,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
         FOR("param", "$headers",
             TR(
                 TD({class: "netInfoParamName"}, "$param.name"),
-                TD({class: "netInfoParamValue"}, "$param.value")
+                TD({class: "netInfoParamValue"}, 
+                    PRE("$param.value")
+                )
             )
         ),
 
