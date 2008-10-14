@@ -182,21 +182,29 @@ top.TabWatcher =
             return context;  // we did create or find a context
         }
 
-        if (context && !context.loaded)  // then it really is still loading, we want to showContext but not too agressively
+        if (context && !context.loaded && !context.showContextTimeout)  
         {
-            setTimeout(bindFixed( function delayShowContext()
+        	// still loading, we want to showContext one time but not too agressively
+            context.showContextTimeout = setTimeout(bindFixed( function delayShowContext()
             {
-                // Sometimes context.window is not defined
-                if (context.window)
+            	FBTrace.sysout("tabWatcher delayShowContext id:"+context.showContextTimeout, context);
+                if (context.window)   // Sometimes context.window is not defined ?
                     this.watchContext(win, context);  // calls showContext
                 else
                 {
-                    if(FBTrace.DBG_ERRORS) FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
+                    if(FBTrace.DBG_ERRORS) 
+                    	FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
                 }
-            }, this), 200);
+            }, this), 400);
         }
         else
+        {
+        	if (context.showContextTimeout)
+        		clearTimeout(context.showContextTimeout);
+        	delete context.showContextTimeout;
+        	
             this.watchContext(win, context);  // calls showContext
+        }
 
         return context;  // we did create or find a context
     },
