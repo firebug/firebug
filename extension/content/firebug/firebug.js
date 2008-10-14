@@ -1918,7 +1918,7 @@ Firebug.SourceBoxPanel = extend(Firebug.AblePanel,
             this.anonSourceBoxes.push(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-            FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.href?" sourceBoxes":" anon ")); /*@explore*/
+            FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox); /*@explore*/
 
         return sourceBox;
     },
@@ -1952,7 +1952,7 @@ Firebug.SourceBoxPanel = extend(Firebug.AblePanel,
     {
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-            FBTrace.sysout("firebug.showSourceFile: ", sourceFile+(sourceBox?" has sourcebox ":" needs new sourcebox ")); /*@explore*/
+            FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);  
         if (!sourceBox)
         {
             sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
