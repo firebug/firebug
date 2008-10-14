@@ -1382,6 +1382,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
         
         updateScriptFiles(context);
+        
+        var panel = context.chrome.getSelectedPanel();
+        if (panel && panel.name == "script" && panel.restoreRetry)
+        {
+        	panel.location = null;  // the default could have been a URLOnly
+        	var state = Firebug.getPanelState(panel);
+        	panel.reShow(state);
+        	delete panel.restoreRetry;
+        }        	
     },
 
     destroyContext: function(context, persistedState)
@@ -1965,37 +1974,42 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.obeyPreferences();
 
-        // The default page with description and enable button is
-        // visible only if debugger is disabled.
-        if (enabled)
-            Firebug.ModuleManagerPage.hide(this);
-        else
-            Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
-
         // Additional debugger panels are visible only if debugger
         // is enabled.
         this.panelSplitter.collapsed = !enabled;
         this.sidePanelDeck.collapsed = !enabled;
 
-        this.selection = this.getDefaultSelection();  // set a selection so restore does not.
+        this.reShow(state);
+    },
+    
+    reShow: function(state) 
+    {
+        this.retryRestore = restoreObjects(this, state, true);  // delay the retry for loadedContext
 
-        restoreObjects(this, state);
-
-        if (enabled) // Source box is updated only if debugger is enabled.
+        if (state)  // then we are restoring
         {
-            if (state)
+            this.context.throttle(function()
             {
-                this.context.throttle(function()
-                {
-                    var sourceBox = this.selectedSourceBox;
-                    if (sourceBox)
-                        sourceBox.scrollTop = state.lastScrollTop;
-                }, this);
-            }
-
+                var sourceBox = this.selectedSourceBox;
+                if (sourceBox)
+                    sourceBox.scrollTop = state.lastScrollTop;
+            }, this);
+        }
+        
+        var enabled = Firebug.Debugger.isEnabled(this.context);
+        if (enabled)
+        {
+        	Firebug.ModuleManagerPage.hide(this); // the navigate in restoreObject remains in effect
+        
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
                 breakpointPanel.refresh();
+        }        	
+        else
+        {
+        	if (!state.persistedLocation)
+        		Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
+        	// else the navigate in restoreObject remains in effect
         }
     },
 
@@ -2155,8 +2169,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 if (context.sourceFileMap.hasOwnProperty(url))
                     return;
-                list.push(new NoScriptSourceFile(context, url));
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url);
+                var URLOnly = new NoScriptSourceFile(context, url);
+                context.sourceFileMap[url] = URLOnly;
+                list.push(URLOnly);
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url, URLOnly);
             }
         });
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList ", list); /*@explore*/

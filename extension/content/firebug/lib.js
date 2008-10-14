@@ -2895,14 +2895,15 @@ this.getSourceLineRange = function(sourceBox, min, max)
 
 this.persistObjects = function(panel, panelState)
 {
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+"\n");
     // Persist the location and selection so we can restore them in case of a reload
     if (panel.location)
         panelState.persistedLocation = this.persistObject(panel.location, panel.context);
 
     if (panel.selection)
         panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+" panelState:", panelState);
+     
 };
 
 this.persistObject = function(object, context)
@@ -2911,16 +2912,21 @@ this.persistObject = function(object, context)
     return rep ? rep.persistObject(object, context) : null;
 };
 
-this.restoreObjects = function(panel, panelState)
+this.restoreObjects = function(panel, panelState, letMeRetryLater)
 {
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+    
+    var needRetry = false;
+    
     // Persist the location and selection so we can restore them in case of a reload
     if (!panel.location && panelState && panelState.persistedLocation)
     {
         var location = panelState.persistedLocation(panel.context);
         if (location)
             panel.navigate(location);
+        else
+        	needRetry = true;
     }
 
     if (!panel.location)
@@ -2931,26 +2937,38 @@ this.restoreObjects = function(panel, panelState)
         var selection = panelState.persistedSelection(panel.context);
         if (selection)
             panel.select(selection);
+        else
+        	needRetry = true;
     }
 
-    if (!panel.selection)
-    {
-        // Couldn't restore the selection, so select the default object
+    if (!panel.selection)  // Couldn't restore the selection, so select the default object
         panel.select(null);
-
-        if (panelState && panelState.persistedSelection)
-        {
-            // If we couldn't restore the selection, wait a bit and try again
-            panel.context.setTimeout(function()
-            {
-                if (panel.selection == panel.getDefaultSelection(panel.context))
-                {
-                    var selection = panelState.persistedSelection(panel.context);
-                    if (selection)
-                        panel.select(selection);
-                }
-            }, restoreRetryTimeout);
-        }
+    
+    if (needRetry)
+    {
+    	function restoreRetry()
+    	{
+    		if (panel.selection == panel.getDefaultSelection(panel.context))
+    		{
+    			var selection = panelState.persistedSelection(panel.context);
+    			if (selection)
+    				panel.select(selection);
+    		}
+    		if (panel.location == panel.getDefaultLocation(panel.context))
+    		{
+    			var location = panelState.persistedLocation(panel.context);
+    			if (location)
+    				panel.navigate(location);
+    		}
+    	
+    		if (FBTrace.DBG_INITIALIZE)
+    			FBTrace.dumpProperties("lib.restoreRetry panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+    	}
+    	
+    	if (letMeRetryLater)
+    		return restoreRetry();
+    	else // If we couldn't restore the selection, wait a bit and try again
+            panel.context.setTimeout(restoreRetry, restoreRetryTimeout);
     }
 };
 
