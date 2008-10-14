@@ -1526,7 +1526,8 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     rowTag:
         TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
             _repObject: "$member", level: "$member.level"},
-            TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px"},
+            TD({class: "memberLabelCell", 
+                style: "padding-left: $member.indent\\px; width:1%; white-space: nowrap"},
                 DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
             ),
             TD({class: "memberValueCell", style: "width: 100%;"},
