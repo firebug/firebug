@@ -187,7 +187,8 @@ top.TabWatcher =
         	// still loading, we want to showContext one time but not too agressively
             context.showContextTimeout = setTimeout(bindFixed( function delayShowContext()
             {
-            	FBTrace.sysout("tabWatcher delayShowContext id:"+context.showContextTimeout, context);
+                if (FBTrace.DBG_WINDOWS) 
+            	    FBTrace.sysout("tabWatcher delayShowContext id:"+context.showContextTimeout, context);
                 if (context.window)   // Sometimes context.window is not defined ?
                     this.watchContext(win, context);  // calls showContext
                 else
