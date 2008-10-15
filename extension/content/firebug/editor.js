@@ -953,7 +953,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     for (var i = 0; i < values.length; ++i)
                     {
                         var name = values[i];
-                        if (name && name.indexOf(expr) == 0)
+                        if (name instanceof String && name.indexOf(expr) == 0)
                             candidates.push(name);
                     }
                 }
@@ -963,7 +963,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     for (var i = 0; i < values.length; ++i)
                     {
                         var name = values[i];
-                        if (name && name.toLowerCase().indexOf(lowerExpr) == 0)
+                        if (name instanceof String && name.toLowerCase().indexOf(lowerExpr) == 0)
                             candidates.push(name);
                     }
                 }
@@ -1005,7 +1005,12 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             else
             {
                 expr = "";
-                candidates = cloneArray(values);
+                var candidates = [];
+                for (var i = 0; i < values.length; ++i)
+                {
+                	if (values[i].substr)
+                		candidates.push(values[i]);
+                }
                 lastIndex = -1;
             }
         }
