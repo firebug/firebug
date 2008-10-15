@@ -2703,6 +2703,7 @@ this.getResource = function(aURL)
     input.close();
     return str;
 };
+
 // ************************************************************************************************
 // Network
 
@@ -2800,7 +2801,7 @@ this.getStateDescription = function(flag)
     if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW ";
 
     return state;
-}
+};
 
 this.getInputStreamFromString = function(dataString)
 {
@@ -2812,7 +2813,37 @@ this.getInputStreamFromString = function(dataString)
         stringStream.setData(dataString, dataString.length);
 
     return stringStream;
-}
+};
+
+this.getWindowForRequest = function(request) 
+{
+    var webProgress = this.getRequestWebProgress(request);
+    try {
+        if (webProgress)
+            return webProgress.DOMWindow;
+    }
+    catch (ex) {
+    }
+
+    return null;
+};
+
+this.getRequestWebProgress = function(request) 
+{
+    try
+    {
+        if (request.notificationCallbacks)
+            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
+    } catch (exc) {}
+
+    try
+    {
+        if (request.loadGroup && request.loadGroup.groupObserver)
+            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
+    } catch (exc) {}
+
+    return null;
+};
 
 // ************************************************************************************************
 // Programs

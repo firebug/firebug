@@ -642,39 +642,6 @@ var HttpObserver = extend(Object,
     }
 });
 
-function getWindowForRequest(request)
-{
-    var webProgress = getRequestWebProgress(request);
-    return webProgress ? safeGetWindow(webProgress) : null;
-}
-
-function getRequestWebProgress(request)
-{
-    try
-    {
-        if (request.notificationCallbacks)
-            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
-    } catch (exc) {}
-
-    try
-    {
-        if (request.loadGroup && request.loadGroup.groupObserver)
-            return QI(request.loadGroup.groupObserver, Ci.nsIWebProgress);
-    } catch (exc) {}
-
-    return null;
-}
-
-function safeGetWindow(webProgress)
-{
-    try {
-        return webProgress.DOMWindow;
-    }
-    catch (ex) {
-        return null;
-    }
-}
-
 // ************************************************************************************************
 // Local Helpers
 

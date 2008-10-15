@@ -2834,43 +2834,6 @@ var HttpObserver =
 }
 
 // ************************************************************************************************
-// Helper for request (window) indentification.
-
-// xxxHonza: should be part of lib.js
-function getWindowForRequest(request) 
-{
-    var webProgress = getRequestWebProgress(request);
-    return webProgress ? safeGetWindow(webProgress) : null;
-}
-
-function getRequestWebProgress(request) 
-{
-    try
-    {
-        if (request.notificationCallbacks)
-            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
-    } catch (exc) {}
-
-    try
-    {
-        if (request.loadGroup && request.loadGroup.groupObserver)
-            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
-    } catch (exc) {}
-
-    return null;
-}
-
-function safeGetWindow(webProgress) 
-{
-    try {
-        return webProgress.DOMWindow;
-    }
-    catch (ex) {
-        return null;
-    }
-}
-
-// ************************************************************************************************
 // Helper for tracing 
 
 // xxxHonza: how to put these into Firebug.TraceModule?
