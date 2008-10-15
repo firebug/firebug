@@ -1265,20 +1265,20 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             TBODY(
                 TR(
                     TD({class: "netConnectingBar timeInfoTipBar"}),
-                    TD("$file|getConnectintTime (connecting)")
+                    TD("$file|getConnectintTime : Connecting")
                 ),
                 TR(
                     TD({class: "netWaitingBar timeInfoTipBar"}),
-                    TD("$file|getWaitingTime (sending)")
+                    TD("$file|getWaitingTime : Queuing + Sending")
                 ),
                 TR(
                     TD({class: "netRespondedBar timeInfoTipBar"}),
-                    TD("$file|getResponseTime (waiting)")
+                    TD("$file|getResponseTime : Waiting for response")
                 ),
                 TR({$loaded: "$file.loaded", 
                     $fromCache: "$file.fromCache"},
                     TD({class: "netTimeBar timeInfoTipBar"}),
-                    TD("$file|getLoadingTime (receiving)")
+                    TD("$file|getLoadingTime : Receiving data")
                 )
             )
         ),
