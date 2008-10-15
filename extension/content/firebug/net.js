@@ -2404,7 +2404,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             TR(
                 TD({class: "netInfoParamName"}, "$param.name"),
                 TD({class: "netInfoParamValue"}, 
-                    PRE("$param.value")
+                    PRE("$param|getParamValue")
                 )
             )
         ),
@@ -2437,6 +2437,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
     onClickTab: function(event)
     {
         this.selectTab(event.currentTarget);
+    },
+
+    getParamValue: function(param)
+    {
+        return wrapText(param.value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

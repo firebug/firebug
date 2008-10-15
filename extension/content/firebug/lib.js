@@ -1461,7 +1461,7 @@ this.trimLeft = function(text)
     return text.replace(/^\s*|\s*$/g,"");
 }
 
-this.insertWrappedText = function (text, textBox)
+this.wrapText = function(text)
 {
     var reNonAlphaNumeric = /[^A-Za-z_$0-9'"-]/;
 
@@ -1478,18 +1478,17 @@ this.insertWrappedText = function (text, textBox)
             var wrapIndex = wrapWidth+ (m ? m.index : 0);
             var subLine = line.substr(0, wrapIndex);
             line = line.substr(wrapIndex);
-
-            html.push("<pre>");
             html.push(escapeHTML(subLine));
-            html.push("</pre>");
         }
-
-        html.push("<pre>");
         html.push(escapeHTML(line));
-        html.push("</pre>");
     }
 
-    textBox.innerHTML = html.join("");
+    return html.join("\n");
+}
+
+this.insertWrappedText = function(text, textBox)
+{
+    textBox.innerHTML = "<pre>" + this.wrapText(text) + "</pre>";
 }
 
 // ************************************************************************************************
