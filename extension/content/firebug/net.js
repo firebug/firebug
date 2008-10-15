@@ -382,23 +382,20 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                             SPAN({class: "netTimeLabel"}, "$file.elapsed|formatTime")
                         )
                     )
-                ),
-                TD({class: "netCol"},
-                    DIV({class: "netBarTimeInfo"})
                 )
             )
         ),
 
     headTag:
         TR({class: "netHeadRow"},
-            TD({class: "netHeadCol", colspan: 6},
+            TD({class: "netHeadCol", colspan: 5},
                 DIV({class: "netHeadLabel"}, "$doc.rootFile.href")
             )
         ),
 
     netInfoTag:
         TR({class: "netInfoRow"},
-            TD({class: "netInfoCol", colspan: 6})
+            TD({class: "netInfoCol", colspan: 5})
         ),
 
     summaryTag:
@@ -830,14 +827,18 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var row = getAncestorByClass(target, "netRow");
         if (row)
         {
-            if (hasClass(target, "netBarTimeInfo"))
+            if (getAncestorByClass(target, "netTimeCol"))
             {
-                var file = row.repObject;
-                return this.populateTimeInfoTip(infoTip, file);
+                var url = row.repObject.href + "-nettime";
+                if (url == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = url;
+                return this.populateTimeInfoTip(infoTip, row.repObject);
             }
             else if (hasClass(row, "category-image"))
             {
-                var url = row.repObject.href;
+                var url = row.repObject.href + "-image";
                 if (url == this.infoTipURL)
                     return true;
 
