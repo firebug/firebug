@@ -105,7 +105,14 @@ top.Firebug.Console.injector = {
             for (var i=0; i<context.consoleHandler.length; i++)
             {
                 if (context.consoleHandler[i].window == win)
+                {
+                    var element = context.consoleHandler[i].element;
+                    element.removeEventListener('firebugAppendConsole', context.consoleHandler[i].handler, true);
+                    
+                    if (FBTrace.DBG_CONSOLE)
+                        FBTrace.sysout("consoleInjector addConsoleListener removed handler("+context.consoleHandler[i].handler.handler_name+") from _firebugConsole in : "+win.location+"\n");
                     context.consoleHandler.splice(i,1);
+                }
             }   
         }
         
@@ -114,22 +121,25 @@ top.Firebug.Console.injector = {
         element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
         
         var handler = new FirebugConsoleHandler(context, win);
+        var eventHandler = bind(handler.handleEvent, handler);
         // When raised on our injected element, callback to Firebug and append to console
-        element.addEventListener('firebugAppendConsole', bind(handler.handleEvent, handler) , true); // capturing
-        context.consoleHandler.push({window:win, handler:handler});
+        element.addEventListener('firebugAppendConsole', eventHandler, true); // capturing
+        context.consoleHandler.push({window:win, element: element, handler:eventHandler});
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("consoleInjector addConsoleListener attached handler to _firebugConsole in : "+win.location+"\n");
+            FBTrace.sysout("consoleInjector addConsoleListener attached handler("+handler.handler_name+") to _firebugConsole in : "+win.location+"\n");
         return true;
     }
 }
 
+var total_handlers = 0;
 function FirebugConsoleHandler(context, win)
 {
+    this.handler_name = ++total_handlers;
     this.handleEvent = function(event)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("FirebugConsoleHandler "+event.target.getAttribute("methodName")+", event", event);
+            FBTrace.dumpProperties("FirebugConsoleHandler("+this.handler_name+") "+event.target.getAttribute("methodName")+", event", event);
         if (!Firebug.CommandLine.CommandHandler.handle(event, this, win))
         {
             if (FBTrace.DBG_CONSOLE)
