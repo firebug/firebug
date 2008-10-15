@@ -2948,13 +2948,13 @@ this.restoreObjects = function(panel, panelState, letMeRetryLater)
     {
     	function restoreRetry()
     	{
-    		if (panel.selection == panel.getDefaultSelection(panel.context))
+    		if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
     		{
     			var selection = panelState.persistedSelection(panel.context);
     			if (selection)
     				panel.select(selection);
     		}
-    		if (panel.location == panel.getDefaultLocation(panel.context))
+    		if (panel.location == panel.getDefaultLocation(panel.context) && panelState.persistedLocation)
     		{
     			var location = panelState.persistedLocation(panel.context);
     			if (location)
