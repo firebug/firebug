@@ -108,11 +108,14 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
         }
 
-        consoleHandler.evaluated = function useConsoleFunction(result)
+        if (successConsoleFunction)
         {
-            successConsoleFunction(result, context);  // result will be pass thru this function
+            consoleHandler.evaluated = function useConsoleFunction(result)
+            {
+                successConsoleFunction(result, context);  // result will be pass thru this function
+            }
         }
-
+        
         if (exceptionFunction)
         {
             consoleHandler.evaluateError = function useExceptionFunction(result)
