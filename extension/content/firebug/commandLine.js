@@ -523,7 +523,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         var methodName = element.getAttribute("methodName");
         var hosed_userObjects = (win.wrappedJSObject?win.wrappedJSObject:win)._firebug.userObjects;
 
-        var userObjects = cloneArray(hosed_userObjects);
+        var userObjects = hosed_userObjects ? cloneArray(hosed_userObjects) : [];
         if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
             FBTrace.dumpProperties("Firebug.CommandLine.CommandHandler: "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
 
