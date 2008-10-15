@@ -78,9 +78,7 @@ const prefNames =
     "showComputedStyle", "showUserAgentCSS",
 
     // Script
-
     "breakOnTopLevel",
-    "showAllSourceFiles",
 
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
@@ -98,7 +96,7 @@ const prefNames =
 const servicePrefNames = [
     "showStackTrace", // Console
     "filterSystemURLs", // Stack
-    "breakOnErrors",  "trackThrowCatch" // Script
+    "showAllSourceFiles", "breakOnErrors",  "trackThrowCatch" // Script
 ];
 
 const scriptBlockSize = 20;
