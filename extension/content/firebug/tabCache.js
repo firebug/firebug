@@ -8,7 +8,7 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsISupports);
+const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
 
 // Helper array for prematurely created contexts.
 var contexts = new Array();
@@ -30,13 +30,13 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
         // Register for HTTP events.
         if (Ci.nsITraceableChannel)
-            httpObserver.wrappedJSObject.addListener(this);
+            httpObserver.addObserver(this, "firebug-http-event", false);
     },
 
     shutdown: function()
     {
         if (Ci.nsITraceableChannel)
-            httpObserver.wrappedJSObject.removeListener(this);
+            httpObserver.removeObserver(this, "firebug-http-event");
     },
 
     initContext: function(context)
@@ -59,13 +59,33 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         }
     },
 
-    /* HTTP Event Listener */
-    onModifyRequest: function(request, win)
+    /* nsIObserver */
+    observe: function(subject, topic, data)
     {
-        var tabId = Firebug.getTabIdForWindow(win);
-        if (!tabId)
-            return;
+        try 
+        {
+            if (!(subject instanceof Ci.nsIHttpChannel))
+                return;
 
+            var win = getWindowForRequest(subject);
+            var tabId = Firebug.getTabIdForWindow(win);
+            if (!(tabId && win))
+                return;
+
+            if (topic == "http-on-modify-request")
+                this.onModifyRequest(subject, win, tabId);
+            else if (topic == "http-on-examine-response")
+                this.onExamineResponse(subject, win, tabId);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.observe EXCEPTION", err);
+        }
+    },
+
+    onModifyRequest: function(request, win, tabId)
+    {
         // Ignore redirects
         if (request.URI.spec != request.originalURI.spec)
             return;
@@ -83,12 +103,8 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         }
     },
 
-    onExamineResponse: function(request, win)
+    onExamineResponse: function(request, win, tabId)
     {
-        var tabId = Firebug.getTabIdForWindow(win);
-        if (!tabId)
-            return;
-        
         var context = contexts[tabId];
         context = context ? context : TabWatcher.getContextByWindow(win);
 

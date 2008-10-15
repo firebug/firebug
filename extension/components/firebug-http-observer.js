@@ -29,14 +29,9 @@ function HttpRequestObserver()
 {
     // Get firebug-trace service for logging (the service should be already
     // registered at this moment).
-	var obj = Cc["@joehewitt.com/firebug-trace-service;1"]
-	              .getService(Ci.nsISupports).wrappedJSObject;
-	
-	
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
        .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
-    this.wrappedJSObject = this;
-    this.listeners = [];
+
     this.observers = [];
 }
 
@@ -76,21 +71,7 @@ HttpRequestObserver.prototype =
 
         try 
         {
-            // Support for listeners that needs the window.
-            // xxxHonza: this can be eventually removed, but the window is quite useful 
-            // for listeners
-            if (subject instanceof Ci.nsIHttpChannel)
-            {
-                var win = getWindowForRequest(subject);
-                if (topic == "http-on-modify-request")
-                    this.fireOnModifyRequest(subject, win);
-                else if (topic == "http-on-examine-response")
-                    this.fireOnExamineResponse(subject, win);
-            }
-
-            // Support for nsIObserver(s). 
-            // xxxHonza: It's safer to pass the object through a defined interface 
-            // (the JS object remains the same).
+            // Notify all registered observers.
             if (topic == "http-on-modify-request" || topic == "http-on-examine-response")
                 this.notifyObservers(subject, topic, data);
         }
@@ -98,44 +79,6 @@ HttpRequestObserver.prototype =
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("httpObserver.observe EXCEPTION", err);
-        }
-    },
-
-    fireOnModifyRequest: function(request, win)
-    {
-        win = win ? win.wrappedJSObject : null;
-
-        if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.dumpProperties("httpObserver.onRequest: (" + 
-                + this.listeners.length + ") " + request.name, request);
-
-        for (var i=0; i<this.listeners.length; i++)
-            this.listeners[i].onModifyRequest(request, win);
-    },
-
-    fireOnExamineResponse: function(request, win)
-    {
-        if (FBTrace.DBG_HTTPOBSERVER)
-            FBTrace.dumpProperties("httpObserver.onResponse: (" + 
-                + this.listeners.length + ") " + request.name, request);
-
-        win = win ? win.wrappedJSObject : null;
-        for (var i=0; i<this.listeners.length; i++)
-            this.listeners[i].onExamineResponse(request, win);
-    },
-
-    addListener: function(listener)
-    {   
-        this.listeners.push(listener);
-    },	
-	
-    removeListener: function(listener)
-    {
-        for (var i=0; i<this.listeners.length; i++) {
-            if (this.listeners[i] == listener) {
-                this.listeners.splice(i, 1);
-                break;
-            }
         }
     },
 
@@ -183,42 +126,6 @@ HttpRequestObserver.prototype =
 		
 		throw Cr.NS_ERROR_NO_INTERFACE;
 	}
-}
-
-// ************************************************************************************************
-// Helper functions
-
-function getWindowForRequest(request) 
-{
-    var webProgress = getRequestWebProgress(request);
-    return webProgress ? safeGetWindow(webProgress) : null;
-}
-
-function getRequestWebProgress(request) 
-{
-    try
-    {
-        if (request.notificationCallbacks)
-            return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
-    } catch (exc) {}
-
-    try
-    {
-        if (request.loadGroup && request.loadGroup.groupObserver)
-            return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
-    } catch (exc) {}
-
-    return null;
-}
-
-function safeGetWindow(webProgress) 
-{
-    try {
-        return webProgress.DOMWindow;
-    }
-    catch (ex) {
-        return null;
-    }
 }
 
 // ************************************************************************************************
