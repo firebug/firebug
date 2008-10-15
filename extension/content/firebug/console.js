@@ -139,8 +139,8 @@ Firebug.Console = extend(ActivableConsole,
             var element = win.document.getElementById("_firebugConsole");
             if (!element) // elementForce fails
             {
-                if (FBTrace.DBG_ERRORS) FBTrace.sysout("console.getFirebugConsoleElement: no _firebugConsole!", r);
-                Firebug.Console.logFormatted(["Firebug cannot find _firebugConsole element", r], context, "error", true);
+                if (FBTrace.DBG_ERRORS) FBTrace.sysout("console.getFirebugConsoleElement: no _firebugConsole in win:", win);
+                Firebug.Console.logFormatted(["Firebug cannot find _firebugConsole element", r, win], context, "error", true);
             }
         }
         

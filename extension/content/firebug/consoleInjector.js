@@ -101,11 +101,11 @@ top.Firebug.Console.injector = {
         if (!context.consoleHandler)  // then we have not been this way before
             context.consoleHandler = [];  
         else
-        {   // we've been this way, maybe already done?
+        {   // we've been this way before...
             for (var i=0; i<context.consoleHandler.length; i++)
             {
                 if (context.consoleHandler[i].window == win)
-                    return true;
+                    context.consoleHandler.splice(i,1);
             }   
         }
         
