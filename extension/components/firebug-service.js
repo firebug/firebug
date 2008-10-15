@@ -1752,13 +1752,20 @@ FirebugService.prototype =
                 continue;
 
             var pcmap = sourceFile.pcmap_type;
+            if (!pcmap)
+            {
+            	if (FBTrace.DBG_FBS_ERRORS)
+            		FBTrace.sysout("fbs.setJSDBreakpoint pcmap undefined "+sourceFile, sourceFile);
+            	pcmap = PCMAP_SOURCETEXT;
+            }
             // we subtraced this offset when we showed the user so lineNo is a user line number; now we need to talk
             // to jsd its line world
             var jsdLine = bp.lineNo + sourceFile.getBaseLineOffset();
             // test script.isLineExecutable(jsdLineNo, pcmap) ??
             
+            var isExecutable = false;
             try {
-                var isExecutable = script.isLineExecutable(jsdLine, pcmap);
+                 isExecutable = script.isLineExecutable(jsdLine, pcmap);
             } catch(e) {
                 // guess not then...
             }
@@ -1780,12 +1787,12 @@ FirebugService.prototype =
             			sourceFile.breakOnZero = script.tag;
 
             		if (FBTrace.DBG_FBS_BP)
-            			FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable")+" sourceFile.breakOnZero: "+sourceFile.breakOnZero);                         /*@explore*/
+            			FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":" notExecutable"), sourceFile);
             	}
             }
             else
             {
-                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NO tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":"notExecutable"));                      
+                if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint NOT isExecutable tag: "+script.tag+" jsdLine@url="+jsdLine +"@"+sourceFile.href+" pcmap:"+pcmap, script);
             }    
          }
     },

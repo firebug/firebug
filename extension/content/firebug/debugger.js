@@ -924,18 +924,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated outerScript.tag="+outerScript.tag+" has fileName="+outerScript.fileName+"\n"); /*@explore*/
 
         var sourceFile = context.sourceFileMap[url];
-        if (!sourceFile)      // TODO test multiple script tags in one html file
-        {
-            sourceFile = new FBL.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
-            context.sourceFileMap[url] = sourceFile;
-            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.window.location+" ("+context.uid+")"+"\n"); /*@explore*/
-        }
-        else
+        if (sourceFile && (sourceFile instanceof FBL.TopLevelSourceFile) )      // TODO test multiple script tags in one html file
         {
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+sourceFile.toString()+" -> "+context.window.location+" ("+context.uid+")"+"\n"); /*@explore*/
             if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
                 sourceFile.outerScript = outerScript;
             FBL.addScriptsToSourceFile(sourceFile, outerScript, innerScripts);
+        }
+        else
+        {
+            sourceFile = new FBL.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
+            context.sourceFileMap[url] = sourceFile;
+            if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.window.location+" ("+context.uid+")"+"\n"); /*@explore*/
         }
 
         dispatch(listeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
