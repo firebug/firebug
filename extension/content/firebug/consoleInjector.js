@@ -313,7 +313,7 @@ function FirebugConsoleHandler(context, win)
     };
     this.evaluateError = function(result, context)
     {
-        Firebug.Console.error(result, context);
+        Firebug.Console.log(result, context, "errorMessage");
     };
 
 /*
