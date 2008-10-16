@@ -138,7 +138,10 @@ const styleGroups =
         "display",
         "visibility",
         "z-index",
-        "overflow",
+        "overflow", // http://www.w3.org/TR/2002/WD-css3-box-20021024/#overflow
+        "overflow-x",  
+        "overflow-y",
+        "overflow-clip",
         "white-space",
         "clip",
         "float",
