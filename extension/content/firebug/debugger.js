@@ -951,7 +951,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
         }
 
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length+"\n");                         /*@explore*/
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint: "+lineNo+"@"+url+" contexts:"+TabWatcher.contexts.length, props);      
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
             var panel = TabWatcher.contexts[i].getPanel("script", true);
@@ -2938,6 +2938,25 @@ function getCallingFrame(frame)
     return null;
 }
 
+
+function getFrameScopeWindowAncestor(frame)  // walk script scope chain to bottom, null unless a Window
+{
+	var scope = frame.scope;
+	if (scope)
+	{	
+		while(scope.jsParent)
+			scope = scope.jsParent;
+	
+		if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
+			return  scope.getWrappedValue();
+		
+		if (FBTrace.DBG_FBS_FINDDEBUGGER)
+			FBTrace.sysout("debugger.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
+	}
+	else
+		return null;
+}
+
 function getFrameWindow(frame)
 {
     var result = {};
@@ -2950,7 +2969,7 @@ function getFrameWindow(frame)
 
 function getFrameContext(frame)
 {
-    var win = getFrameWindow(frame);
+    var win = getFrameScopeWindowAncestor(frame);
     return win ? TabWatcher.getContextByWindow(win) : null;
 }
 
