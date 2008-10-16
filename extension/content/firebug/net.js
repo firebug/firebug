@@ -1735,6 +1735,9 @@ NetProgress.prototype =
             FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " + 
                 window.location.href);
 
+        if (!this.phases.length)
+            return;
+
         // Update all requests that belong to the first phase.
         var firstPhase = this.phases[0];
         firstPhase.windowLoadTime = time;
