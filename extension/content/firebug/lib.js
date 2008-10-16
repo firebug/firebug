@@ -2778,31 +2778,6 @@ this.readPostTextFromRequest = function(request, context)
     return null;
 };
 
-this.getStateDescription = function(flag)
-{
-    var state = "";
-    var nsIWebProgressListener = Components.interfaces.nsIWebProgressListener;
-    if (flag & nsIWebProgressListener.STATE_START) state += "STATE_START ";
-    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state += "STATE_REDIRECTING ";
-    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state += "STATE_TRANSFERRING ";
-    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state += "STATE_NEGOTIATING ";
-    else if (flag & nsIWebProgressListener.STATE_STOP) state += "STATE_STOP ";
-
-    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state += "STATE_IS_REQUEST ";
-    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state += "STATE_IS_DOCUMENT ";
-    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state += "STATE_IS_NETWORK ";
-    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state += "STATE_IS_WINDOW ";
-    if (flag & nsIWebProgressListener.STATE_RESTORING) state += "STATE_RESTORING ";
-    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state += "STATE_IS_INSECURE ";
-    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state += "STATE_IS_BROKEN ";
-    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state += "STATE_IS_SECURE ";
-    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state += "STATE_SECURE_HIGH ";
-    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state += "STATE_SECURE_MED ";
-    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state += "STATE_SECURE_LOW ";
-
-    return state;
-};
-
 this.getInputStreamFromString = function(dataString)
 {
     var stringStream = this.CCIN("@mozilla.org/io/string-input-stream;1", "nsIStringInputStream");
@@ -2843,6 +2818,49 @@ this.getRequestWebProgress = function(request)
     } catch (exc) {}
 
     return null;
+};
+
+// ************************************************************************************************
+// Network Tracing
+
+this.getStateDescription = function(flag)
+{
+    var state = [];
+    var nsIWebProgressListener = Ci.nsIWebProgressListener;
+    if (flag & nsIWebProgressListener.STATE_START) state.push("STATE_START");
+    else if (flag & nsIWebProgressListener.STATE_REDIRECTING) state.push("STATE_REDIRECTING");
+    else if (flag & nsIWebProgressListener.STATE_TRANSFERRING) state.push("STATE_TRANSFERRING");
+    else if (flag & nsIWebProgressListener.STATE_NEGOTIATING) state.push("STATE_NEGOTIATING");
+    else if (flag & nsIWebProgressListener.STATE_STOP) state.push("STATE_STOP");
+
+    if (flag & nsIWebProgressListener.STATE_IS_REQUEST) state.push("STATE_IS_REQUEST");
+    if (flag & nsIWebProgressListener.STATE_IS_DOCUMENT) state.push("STATE_IS_DOCUMENT");
+    if (flag & nsIWebProgressListener.STATE_IS_NETWORK) state.push("STATE_IS_NETWORK");
+    if (flag & nsIWebProgressListener.STATE_IS_WINDOW) state.push("STATE_IS_WINDOW");
+    if (flag & nsIWebProgressListener.STATE_RESTORING) state.push("STATE_RESTORING");
+    if (flag & nsIWebProgressListener.STATE_IS_INSECURE) state.push("STATE_IS_INSECURE");
+    if (flag & nsIWebProgressListener.STATE_IS_BROKEN) state.push("STATE_IS_BROKEN");
+    if (flag & nsIWebProgressListener.STATE_IS_SECURE) state.push("STATE_IS_SECURE");
+    if (flag & nsIWebProgressListener.STATE_SECURE_HIGH) state.push("STATE_SECURE_HIGH");
+    if (flag & nsIWebProgressListener.STATE_SECURE_MED) state.push("STATE_SECURE_MED");
+    if (flag & nsIWebProgressListener.STATE_SECURE_LOW) state.push("STATE_SECURE_LOW");
+
+    return state.join(", ");
+};
+
+this.getStatusDescription = function(status)
+{
+    var nsISocketTransport = Ci.nsISocketTransport;
+    var nsITransport = Ci.nsITransport;
+
+    if (status == nsISocketTransport.STATUS_RESOLVING) return "STATUS_RESOLVING";
+    if (status == nsISocketTransport.STATUS_CONNECTING_TO) return "STATUS_CONNECTING_TO";
+    if (status == nsISocketTransport.STATUS_CONNECTED_TO) return "STATUS_CONNECTED_TO";
+    if (status == nsISocketTransport.STATUS_SENDING_TO) return "STATUS_SENDING_TO";
+    if (status == nsISocketTransport.STATUS_WAITING_FOR) return "STATUS_WAITING_FOR";
+    if (status == nsISocketTransport.STATUS_RECEIVING_FROM) return "STATUS_RECEIVING_FROM";
+    if (status == nsITransport.STATUS_READING) return "STATUS_READING";
+    if (status == nsITransport.STATUS_WRITING) return "STATUS_WRITING";
 };
 
 // ************************************************************************************************

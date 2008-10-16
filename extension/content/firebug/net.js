@@ -1837,7 +1837,7 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " + 
-                getPrintableTime() + ", " + getPrintableState(flag) + ", " + 
+                getPrintableTime() + ", " + getStateDescription(flag) + ", " + 
                 safeGetName(request), file);
     },
 
@@ -1862,7 +1862,7 @@ NetProgress.prototype =
         {
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.onStatusChange +" + (now() - file.startTime) + " " + 
-                    getPrintableTime() + ", " + getPrintableStatus(status) + 
+                    getPrintableTime() + ", " + getStatusDescription(status) + 
                     ", " + message + ", " + request.URI.path, file);
 
             if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO || status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
@@ -2835,55 +2835,6 @@ var HttpObserver =
 
 // ************************************************************************************************
 // Helper for tracing 
-
-// xxxHonza: how to put these into Firebug.TraceModule?
-var statusMap = {
-    "STATUS_RESOLVING": Ci.nsISocketTransport.STATUS_RESOLVING,
-    "STATUS_CONNECTING_TO": Ci.nsISocketTransport.STATUS_CONNECTING_TO,
-    "STATUS_CONNECTED_TO": Ci.nsISocketTransport.STATUS_CONNECTED_TO,
-    "STATUS_SENDING_TO": Ci.nsISocketTransport.STATUS_SENDING_TO,
-    "STATUS_WAITING_FOR": Ci.nsISocketTransport.STATUS_WAITING_FOR,
-    "STATUS_RECEIVING_FROM": Ci.nsISocketTransport.STATUS_RECEIVING_FROM,
-    "STATUS_READING": Ci.nsITransport.STATUS_READING,
-    "STATUS_WRITING": Ci.nsITransport.STATUS_WRITING,
-};
-
-const stateMap = {
-  "STATE_START": Ci.nsIWebProgressListener.STATE_START,
-  "STATE_STOP": Ci.nsIWebProgressListener.STATE_STOP,
-  "STATE_TRANSFERRING": Ci.nsIWebProgressListener.STATE_TRANSFERRING,
-  "STATE_REDIRECTING": Ci.nsIWebProgressListener.STATE_REDIRECTING,
-  "STATE_IS_WINDOW": Ci.nsIWebProgressListener.STATE_IS_WINDOW,
-  "STATE_IS_DOCUMENT": Ci.nsIWebProgressListener.STATE_IS_DOCUMENT,
-  "STATE_IS_REQUEST": Ci.nsIWebProgressListener.STATE_IS_REQUEST,
-  "STATE_IS_NETWORK": Ci.nsIWebProgressListener.STATE_IS_NETWORK,
-  "STATE_IS_RESTORING": Ci.nsIWebProgressListener.STATE_IS_RESTORING,
-  "STATE_NEGOTIATING": Ci.nsIWebProgressListener.STATE_NEGOTIATING,
-};
-
-function getPrintableStatus(status)
-{
-    var result = "";    
-    for (var flag in statusMap) 
-    {
-        if (statusMap[flag] == status)
-            result += flag;
-    }
-
-    return result;
-}
-
-function getPrintableState(state)
-{
-    var result = "";    
-    for (var flag in stateMap) 
-    {
-        if (stateMap[flag] & state)
-            result += flag + " ";
-    }
-
-    return result;
-}
 
 function getPrintableTime()
 {
