@@ -16,7 +16,6 @@ const nsIChannel = Ci.nsIChannel;
 const nsIHttpChannel = Ci.nsIHttpChannel;
 const nsICacheService = Ci.nsICacheService;
 const nsICache = Ci.nsICache;
-const nsIObserverService = Ci.nsIObserverService;
 const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
 const nsISupports = Ci.nsISupports;
 const nsIIOService = Ci.nsIIOService;
@@ -57,8 +56,7 @@ const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 
 const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
 
-const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
-const httpObserver = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
+const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -2729,7 +2727,7 @@ var HttpObserver =
         if (this.registered)
             return;
 
-        httpObserver.addObserver(this, "firebug-http-event", false);
+        observerService.addObserver(this, "firebug-http-event", false);
         this.registered = true;
     },
 
@@ -2738,7 +2736,7 @@ var HttpObserver =
         if (!this.registered)
             return;
 
-        httpObserver.removeObserver(this, "firebug-http-event");
+        observerService.removeObserver(this, "firebug-http-event");
         this.registered = false;
     },
 

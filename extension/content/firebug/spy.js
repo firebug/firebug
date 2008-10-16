@@ -17,7 +17,7 @@ const nsISeekableStream = Ci.nsISeekableStream;
 const LOAD_BACKGROUND = nsIRequest.LOAD_BACKGROUND;
 const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
 
-const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 
 // ************************************************************************************************
 
@@ -104,10 +104,7 @@ Firebug.Spy = extend(Firebug.Module,
                     return;
             }
             if ( contexts.length == 0 )
-            {
-                observerService.addObserver(httpObserver, "http-on-modify-request", false);
-                observerService.addObserver(httpObserver, "http-on-examine-response", false);
-            }
+                observerService.addObserver(httpObserver, "firebug-http-event", false);
             contexts.push({ context: context, win: win });
         }
     },
@@ -122,10 +119,7 @@ Firebug.Spy = extend(Firebug.Module,
                     continue;
                 contexts.splice(i, 1);
                 if ( contexts.length == 0 )
-                {
-                    observerService.removeObserver(httpObserver, "http-on-modify-request", false);
-                    observerService.removeObserver(httpObserver, "http-on-examine-response", false);
-                }
+                    observerService.removeObserver(httpObserver, "firebug-http-event");
                 return;
             }
         }

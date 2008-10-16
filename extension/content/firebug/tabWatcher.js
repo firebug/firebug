@@ -29,7 +29,7 @@ const STOP_ALL = nsIWebNavigation.STOP_ALL;
 const dummyURI = "about:layout-dummy-request";
 const aboutBlank = "about:blank";
 
-const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -59,7 +59,7 @@ top.TabWatcher =
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
 
-        observerService.addObserver(HttpObserver, "http-on-modify-request", false);
+        observerService.addObserver(HttpObserver, "firebug-http-event", false);
     },
 
     destroy: function()
@@ -67,7 +67,7 @@ top.TabWatcher =
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher destroy\n");
 
-        observerService.removeObserver(HttpObserver, "http-on-modify-request");
+        observerService.removeObserver(HttpObserver, "firebug-http-event");
 
         if (tabBrowser)
         {
@@ -589,12 +589,16 @@ var HttpObserver = extend(Object,
     // nsIObserver
     observe: function(aSubject, aTopic, aData)
     {
-        try  {
-            aSubject = aSubject.QueryInterface(Ci.nsIHttpChannel);
-            if (aTopic == "http-on-modify-request")
+        try  
+        {
+            if (aTopic == "http-on-modify-request") 
+            {
+                aSubject = aSubject.QueryInterface(Ci.nsIHttpChannel);
                 this.onModifyRequest(aSubject);
+            }
         }
-        catch (err) {
+        catch (err) 
+        {
             ERROR(err);
         }
     },
