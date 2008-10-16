@@ -222,6 +222,27 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     initContext: function(context)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.initContext for: " + context.window.location.href, context);
+
+        var window = context.window;
+
+        // Register "load" listener in order to track window load time.
+        var onWindowLoadHandler = function() {
+            if (context.netProgress)
+                context.netProgress.post(windowLoad, [window, now()]);
+            window.removeEventListener("load", onWindowLoadHandler, true);
+        }
+        window.addEventListener("load", onWindowLoadHandler, true);
+
+        // Register "DOMContentLoaded" listener to track timing.
+        var onContentLoadHandler = function() {
+            if (context.netProgress)
+                context.netProgress.post(contentLoad, [window, now()]);
+            window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
+        }
+        window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
     },
 
     reattachContext: function(browser, context)
@@ -376,6 +397,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                         DIV({class: "netConnectingBar", style: "left: $file.offset"}),
                         DIV({class: "netWaitingBar", style: "left: $file.offset"}),
                         DIV({class: "netRespondedBar", style: "left: $file.offset"}),
+                        DIV({class: "netContentLoadBar", style: "left: $file.offset"}),
+                        DIV({class: "netWindowLoadBar", style: "left: $file.offset"}),
                         DIV({class: "netTimeBar", style: "left: $file.offset; width: $file.width"},
                             SPAN({class: "netTimeLabel"}, "$file.elapsed|formatTime")
                         )
@@ -1074,19 +1097,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var connectingBar = row.childNodes[4].firstChild.childNodes[1];
             var waitingBar = connectingBar.nextSibling;
             var respondedBar = waitingBar.nextSibling;
-            var timeBar = respondedBar.nextSibling;
-
-            // Adjust widths so, each bar is visible at least 1%.
-            // xxxHonza: is this really better experience? If the window
-            // is full screen, 1% can be quite a lot of space for 0ms.
-            /*if (this.barConnectingWidth == this.barWaitingWidth)
-                this.barWaitingWidth++; 
-
-            if (this.barRespondedWidth <= this.barWaitingWidth)
-                this.barRespondedWidth = this.barWaitingWidth + 1; 
-
-            if (this.barWidth <= this.barRespondedWidth)
-                this.barWidth = this.barRespondedWidth + 1;*/
+            var contentLoadBar = respondedBar.nextSibling;
+            var windowLoadBar = contentLoadBar.nextSibling;
+            var timeBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
             connectingBar.style.left = waitingBar.style.left = respondedBar.style.left = 
@@ -1098,10 +1111,24 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             respondedBar.style.width = this.barRespondedWidth + "%";
             timeBar.style.width = this.barWidth + "%";
 
-            //FBTrace.sysout("net.updateTimeline connecting: " + 
-            //    connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " + 
-            //    waitingBar.style.left + " : " + waitingBar.style.width + ", time: " + 
-            //    timeBar.style.left + " : " + timeBar.style.width, file);
+            if (this.contentLoadBarOffset) {
+                contentLoadBar.style.left = this.contentLoadBarOffset + "%";
+                contentLoadBar.style.display = "block";
+                this.contentLoadBarOffset = null;
+            }
+
+            if (this.windowLoadBarOffset) {
+                windowLoadBar.style.left = this.windowLoadBarOffset + "%";
+                windowLoadBar.style.display = "block";
+                this.windowLoadBarOffset = null;
+            }
+
+            FBTrace.sysout("net.updateTimeline connecting: " + 
+                connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " + 
+                waitingBar.style.left + " : " + waitingBar.style.width + ", time: " + 
+                timeBar.style.left + " : " + timeBar.style.width + ", DOMContentLoaded: " +
+                contentLoadBar.style.left + ", load: " +
+                windowLoadBar.style.left, file);
         }
     },
 
@@ -1151,11 +1178,20 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     calculateFileTimes: function(file, phase, rightNow)
     {
+        var phases = this.context.netProgress.phases;
+
         if (phase != file.phase)
         {
             phase = file.phase;
             this.phaseStartTime = phase.startTime;
             this.phaseEndTime = phase.endTime ? phase.endTime : rightNow;
+
+            // End of the first phase has to respect even the window "onload" event time, which 
+            // can occur after the last received file. This sets the extent of the timeline so, 
+            // the windowLoadBar is visible.
+            if (phase.windowLoadTime && this.phaseEndTime < phase.windowLoadTime)
+                this.phaseEndTime = phase.windowLoadTime;
+
             this.phaseElapsed = this.phaseEndTime - phase.startTime;
         }
 
@@ -1165,6 +1201,14 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100); 
+
+        // Compute also offset for the contentLoadBar and windowLoadBar, which are 
+        // displayed for the first phase.
+        if (phase.contentLoadTime)
+            this.contentLoadBarOffset = Math.floor(((phase.contentLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
+
+        if (phase.windowLoadTime)
+            this.windowLoadBarOffset = Math.floor(((phase.windowLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
 
         return phase;
     },
@@ -1277,6 +1321,18 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                     $fromCache: "$file.fromCache"},
                     TD({class: "netTimeBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : Receiving data")
+                ),
+                TR(
+                    TD({align: "center"},
+                        DIV({class: "netContentLoadBar timeInfoTipBar"})
+                    ),
+                    TD("$file|getContentLoadTime : 'DOMContentLoaded' (event)")
+                ),
+                TR(
+                    TD({align: "center"},
+                        DIV({class: "netWindowLoadBar timeInfoTipBar"})
+                    ),
+                    TD("$file|getWindowLoadTime : 'load' (event)")
                 )
             )
         ),
@@ -1299,6 +1355,24 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
     getLoadingTime: function(file)
     {
         return formatTime(file.endTime - file.respondedTime);
+    },
+
+    getWindowLoadTime: function(file)
+    {
+        if (!file.phase.windowLoadTime)
+            return "";
+
+        var time = file.phase.windowLoadTime - file.startTime;
+        return (time > 0 ? "+" : "") + formatTime(time);
+    },
+
+    getContentLoadTime: function(file)
+    {
+        if (!file.phase.contentLoadTime)
+            return "";
+
+        var time = file.phase.contentLoadTime - file.startTime;
+        return (time > 0 ? "+" : "") + formatTime(time);
     },
 });
 
@@ -1655,6 +1729,36 @@ NetProgress.prototype =
         return file;
     },
 
+    windowLoad: function windowLoad(window, time)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " + 
+                window.location.href);
+
+        // Update all requests that belong to the first phase.
+        var firstPhase = this.phases[0];
+        firstPhase.windowLoadTime = time;
+        for (var i=0; i<firstPhase.files.length; i++)
+            this.panel.updateFile(firstPhase.files[i]);
+
+        return null;
+    },
+
+    contentLoad: function contentLoad(window, time)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.contentLoad +? " + getPrintableTime() + ", " + 
+                window.location.href);
+
+        // Update all requests that belong to the first phase.
+        var firstPhase = this.phases[0];
+        firstPhase.contentLoadTime = time;
+        for (var i=0; i<firstPhase.files.length; i++)
+            this.panel.updateFile(firstPhase.files[i]);
+
+        return null;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getRequestFile: function getRequestFile(request, win, noCreate)
@@ -1805,6 +1909,7 @@ NetProgress.prototype =
     startPhase: function(file)
     {
         var phase = new NetPhase(file);
+        phase.initial = !this.currentPhase;
 
         this.currentPhase = phase;
         this.phases.push(phase);
@@ -1897,6 +2002,8 @@ var progressFile = NetProgress.prototype.progressFile;
 var stopFile = NetProgress.prototype.stopFile;
 var cacheEntryReady = NetProgress.prototype.cacheEntryReady;
 var removeFile = NetProgress.prototype.removeFile;
+var windowLoad = NetProgress.prototype.windowLoad;
+var contentLoad = NetProgress.prototype.contentLoad;
 
 // ************************************************************************************************
 

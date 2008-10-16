@@ -187,6 +187,24 @@
     z-index:10;
 }
 
+.netWindowLoadBar,
+.netContentLoadBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: red;
+    z-index:50;
+    opacity: 0.5;
+    display: none;
+    margin-bottom:-1px;
+}
+
+.netContentLoadBar {
+    background-color: Blue;
+}
+
 .netTimeLabel {
     -moz-box-sizing: padding-box;
     position: absolute;
@@ -205,6 +223,10 @@
 
 .timeInfoTipBar {
     position: relative;
+    display: block;
+    margin: 0;
+    opacity: 1;
+    height: 15px;
 }
 
 .netSummaryRow .netTimeLabel,
