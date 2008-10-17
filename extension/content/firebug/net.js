@@ -1733,7 +1733,7 @@ NetProgress.prototype =
     {
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " + 
-                window.location.href);
+                window.location.href, this.phases);
 
         if (!this.phases.length)
             return;
