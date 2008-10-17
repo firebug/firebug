@@ -1132,8 +1132,11 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
                 }
             }
         }
-        else  // Put info about the script error location into the stack.
+        else  
+        {
+            // Put info about the script error location into the stack.
             this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
+        }
     }
     else
     {
@@ -1141,11 +1144,12 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         // is available.
         for (var frame = Components.stack, i=0; frame; frame = frame.caller, i++)
         {
-            // Skip first three frames (this code).
-            if (i < 6)
+            // Skip frames related to the tracing code.
+            var fileName = unescape(frame.filename ? frame.filename : "");
+            var traceServiceFile = "firebug@software.joehewitt.com/components/firebug-trace-service.js";
+            if (i < 6 || fileName.indexOf(traceServiceFile) != -1)
                 continue;
 
-            var fileName = unescape(frame.filename ? frame.filename : "");
             var sourceLine = frame.sourceLine ? frame.sourceLine : "";
             var lineNumber = frame.lineNumber ? frame.lineNumber : "";
             this.stack.push({fileName:fileName, lineNumber:lineNumber});
