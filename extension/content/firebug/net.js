@@ -1123,12 +1123,12 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 this.windowLoadBarOffset = null;
             }
 
-            FBTrace.sysout("net.updateTimeline connecting: " + 
+            /*FBTrace.sysout("net.updateTimeline connecting: " + 
                 connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " + 
                 waitingBar.style.left + " : " + waitingBar.style.width + ", time: " + 
                 timeBar.style.left + " : " + timeBar.style.width + ", DOMContentLoaded: " +
                 contentLoadBar.style.left + ", load: " +
-                windowLoadBar.style.left, file);
+                windowLoadBar.style.left, file);*/
         }
     },
 
