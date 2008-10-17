@@ -559,14 +559,6 @@ function onHTTPSpyLoad(spy)
     if (netProgress)
         netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
-    // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
-    // simulate the requestStopped here.
-    while (spy.context.spies && spy.context.spies.length)
-    {
-        var spy = spy.context.spies[0];
-        requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
-    }
-
     // Notify registered listeners about finish of the XHR.
     dispatch(listeners, "onLoad", [spy.context, spy]);
 
