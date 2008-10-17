@@ -197,7 +197,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             TABLE({cellpadding: 0, cellspacing: 0},
                 TBODY(
                     TR({class: "spyRow"},
-                        TD({class: "spyCol", onclick: "$onToggleBody"},
+                        TD({class: "spyTitleCol spyCol", onclick: "$onToggleBody"},
                             DIV({class: "spyTitle"},
                                 "$object|getCaption"
                             ),
@@ -210,9 +210,6 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
                         ),
                         TD({class: "spyCol"},
                             IMG({class: "spyIcon", src: "blank.gif"})
-                        ),
-                        TD({class: "spyCol"},
-                            SPAN({class: "spyErrorCode"})
                         ),
                         TD({class: "spyCol"},
                             SPAN({class: "spyTime"})
@@ -237,8 +234,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getStatus: function(spy)
     {
-        if (spy.responseStatus && spy.responseStatusText)
-          return spy.responseStatus + " " + spy.responseStatusText;
+        if (spy.statusCode && spy.statusText)
+            return spy.statusCode + " " + spy.statusText;
 
         return "";
     },
@@ -471,23 +468,25 @@ function requestStopped(request, xhrRequest, context, method, url)
 
     spy.endTime = new Date().getTime();
     spy.responseTime = spy.endTime - spy.sendTime;
-
-    try 
-    {
-        // xxxHonza: weird exception in Chromebug here.
-        spy.responseStatus = request.responseStatus;
-        spy.responseStatusText = request.responseStatusText;
-    }
-    catch (err) 
-    {
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.requestStopped " + spy.href + " EXCEPTION", err);
-    }
-
     spy.loaded = true;
 
     if (!spy.responseHeaders)
         spy.responseHeaders = getResponseHeaders(spy);
+
+    if (!spy.statusText)
+    {
+        try
+        {
+            spy.statusCode = request.responseStatus;
+            spy.statusText = request.responseStatusText;
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_SPY)
+                FBTrace.dumpProperties("spy.requestStopped " + spy.href + 
+                    ", status access FAILED", exc);
+        }
+    }
 
     if (spy.logRow)
     {
@@ -497,21 +496,6 @@ function requestStopped(request, xhrRequest, context, method, url)
 
     if (spy.context.spies)
         remove(spy.context.spies, spy);
-
-    if (!spy.statusText)
-    {
-        try
-        {
-            spy.statusCode = spy.xhrRequest.status;
-            spy.statusText = spy.xhrRequest.statusText;
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_SPY)
-                FBTrace.dumpProperties("spy.requestStopped " + spy.href + 
-                    ", status access FAILED", exc);
-        }
-    }
 
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " + 
@@ -601,11 +585,7 @@ function updateLogRow(spy, responseTime)
     {
         var errorRange = Math.floor(spy.xhrRequest.status/100);
         if (errorRange == 4 || errorRange == 5)
-        {
             setClass(spy.logRow, "error");
-            var errorBox = getElementByClass(spy.logRow, "spyErrorCode");
-            errorBox.textContent = spy.xhrRequest.status;
-        }
     }
     catch (exc) { }
 }

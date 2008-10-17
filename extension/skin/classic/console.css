@@ -485,10 +485,10 @@
     white-space: nowrap;
 }
 
-.spyRow:hover > .spyCol > .objectLink-sourceLink,
-.spyRow:hover > .spyCol > .spyTime,
-.spyRow:hover > .spyCol > .spyStatus,
-.spyRow:hover > .spyCol > .spyTitle {
+.spyTitleCol:hover > .objectLink-sourceLink,
+.spyTitleCol:hover > .spyTime,
+.spyTitleCol:hover > .spyStatus,
+.spyTitleCol:hover > .spyTitle {
     display: none;
 }
 
@@ -499,7 +499,7 @@
     background-color: Transparent;
 }
 
-.spyRow:hover > .spyCol > .spyFullTitle {
+.spyTitleCol:hover > .spyFullTitle {
     display: block;
 }
 
@@ -512,18 +512,6 @@
     margin-left:4px;
     margin-right:4px;
     color: rgb(128, 128, 128);
-}
-
-.spyErrorCode {
-    display: none;
-}
-
-.error .spyErrorCode {
-    margin-left: 4px;
-    margin-right: 4px;
-    display: inline;
-    font-weight: bold;
-    color: Red;
 }
 
 .spyIcon {
@@ -558,7 +546,9 @@
     display: block;
 }
 
-.logRow-spy.error .spyTitle {
+.logRow-spy.error .spyTitle,
+.logRow-spy.error .spyStatus,
+.logRow-spy.error .spyTime {
     color: red;
 }
 
