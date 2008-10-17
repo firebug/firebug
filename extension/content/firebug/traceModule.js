@@ -625,7 +625,10 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     hideProperties: function(message)
     {
         var props = message.getProperties();
-        return !props.length;
+        for (var name in props)
+            return false;
+
+        return true;
     },
 
     hideScope: function(message)
@@ -1311,7 +1314,13 @@ Firebug.TraceModule.TraceMessage.prototype =
                         }
                     }
 
-                    this.props[p] = "" + this.obj[p];
+                    try {
+                        var value = "" + this.obj[p];
+                        this.props[p] = value;
+                    }
+                    catch (err) {
+                        this.props[p] = "{Error}";
+                    }
                 }
                 catch (err)
                 {
