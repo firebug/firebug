@@ -401,9 +401,9 @@ function getSpyForXHR(request, xhrRequest, context)
     {
         spy = context.spies[i];
         if (spy.request == request)
-          return spy;
+            return spy;
     }
-
+    
     spy = new XMLHttpRequestSpy(request, xhrRequest, context);
     context.spies.push(spy);
 
@@ -414,7 +414,10 @@ function getSpyForXHR(request, xhrRequest, context)
     // can be more network requests made by the same XHR if there
     // are redirects.
     if (name == origName)
-      spy.attach();
+        spy.attach();
+
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.getSpyForXHR new spy object created for: " + name, spy);
 
     return spy;
 }
@@ -424,9 +427,11 @@ function getSpyForXHR(request, xhrRequest, context)
 function requestStarted(request, xhrRequest, context, method, url)
 {
     var spy = getSpyForXHR(request, xhrRequest, context);
-
     spy.method = method;
     spy.href = url;
+
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.requestStarted: "+spy.href, spy);
 
     // Get "body" for POST and PUT requests. It will be displayed in
     // appropriate tab of the XHR.
@@ -452,10 +457,7 @@ function requestStarted(request, xhrRequest, context, method, url)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
     if (name == origName)
-      dispatch(listeners, "onStart", [context, spy]);
-
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.requestStarted "+spy.href+"\n", spy);
+        dispatch(listeners, "onStart", [context, spy]);
 
     // Remember the start time et the end, so it's most accurate.
     spy.sendTime = new Date().getTime();
@@ -464,6 +466,8 @@ function requestStarted(request, xhrRequest, context, method, url)
 function requestStopped(request, xhrRequest, context, method, url)
 {
     var spy = getSpyForXHR(request, xhrRequest, context);
+    if (!spy)
+        return;
 
     spy.endTime = new Date().getTime();
     spy.responseTime = spy.endTime - spy.sendTime;
@@ -477,18 +481,13 @@ function requestStopped(request, xhrRequest, context, method, url)
     catch (err) 
     {
         if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.requestStopped EXCEPTION", err);
+            FBTrace.sysout("spy.requestStopped " + spy.href + " EXCEPTION", err);
     }
 
     spy.loaded = true;
 
     if (!spy.responseHeaders)
         spy.responseHeaders = getResponseHeaders(spy);
-
-    if (FBTrace.DBG_SPY)                                                                                                   /*@explore*/
-        FBTrace.sysout("onHTTPSpyLoad responseTime=" + spy.responseTime                              /*@explore*/
-            + " spy.responseText " + (spy.reponseText?spy.responseText.length:0) + 
-            " bytes\n", spy);                      /*@explore*/
 
     if (spy.logRow)
     {
@@ -503,15 +502,21 @@ function requestStopped(request, xhrRequest, context, method, url)
     {
         try
         {
-          spy.statusCode = spy.xhrRequest.status;
-          spy.statusText = spy.xhrRequest.statusText;
+            spy.statusCode = spy.xhrRequest.status;
+            spy.statusText = spy.xhrRequest.statusText;
         }
         catch (exc)
         {
-            if (FBTrace.DBG_SPY) /*@explore*/
-                FBTrace.dumpProperties("spy.requestStopped status access FAILED:", exc); /*@explore*/
+            if (FBTrace.DBG_SPY)
+                FBTrace.dumpProperties("spy.requestStopped " + spy.href + 
+                    ", status access FAILED", exc);
         }
     }
+
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " + 
+            spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) + 
+            " bytes", request);
 }
 
 function onHTTPSpyReadyStateChange(spy, event)
@@ -522,16 +527,18 @@ function onHTTPSpyReadyStateChange(spy, event)
         if (spy.onreadystatechange)
             spy.onreadystatechange.handleEvent(event);
     }
-    catch (exc) { }
+    catch (exc) 
+    { 
+        if (FBTrace.DBG_ERROR)
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION", exc);
+    }
     finally
     {
         delete spy.context.onReadySpy;
     }
 
     if (spy.xhrRequest.readyState == 4)
-    {
         onHTTPSpyLoad(spy);
-    }
 }
 
 function onHTTPSpyLoad(spy)
@@ -550,8 +557,7 @@ function onHTTPSpyLoad(spy)
 
     var netProgress = spy.context.netProgress;
     if (netProgress)
-        netProgress.post(netProgress.stopFile,
-                [spy.request, spy.endTime, spy.postText, spy.responseText]);
+        netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
     // If there are some pending spies (i.e. the onExamineResponse never came due to a cache),
     // simulate the requestStopped here.
@@ -563,10 +569,16 @@ function onHTTPSpyLoad(spy)
 
     // Notify registered listeners about finish of the XHR.
     dispatch(listeners, "onLoad", [spy.context, spy]);
+
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
 }
 
 function onHTTPSpyError(spy)
 {
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.onHTTPSpyError: " + spy.href, spy);
+
     var now = new Date().getTime();
 
     if (spy.logRow)
@@ -580,7 +592,6 @@ function onHTTPSpyError(spy)
     if (spy.context.spies)
         remove(spy.context.spies, spy);
 }
-
 
 function updateLogRow(spy, responseTime)
 {
