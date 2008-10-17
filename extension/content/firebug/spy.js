@@ -531,8 +531,6 @@ function onHTTPSpyLoad(spy)
     if (!spy.onLoad)
         return;
 
-    spy.loaded = true;
-
     // The main XHR object has to be dettached now (i.e. listeners removed).
     spy.detach();
 
@@ -542,6 +540,21 @@ function onHTTPSpyLoad(spy)
     var netProgress = spy.context.netProgress;
     if (netProgress)
         netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
+
+    // If the response is get from FF cache the http-on-examine-response is never sent
+    // (https://bugzilla.mozilla.org/show_bug.cgi?id=449198) and so, the requestStopped 
+    // method is never called.
+    // Let's simulate the event for all spy objects that have been registered for this request.
+    // Notice that there can be more spy objects (using the same request object) in case of 
+    // redirects.
+    var spies = spy.context.spies;
+    for (var i=0; spies && i<spies.length; i++)
+    {
+        if (spy.request == spies[i].request) {
+            requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
+            i--;
+        }
+    }
 
     // Notify registered listeners about finish of the XHR.
     dispatch(listeners, "onLoad", [spy.context, spy]);
