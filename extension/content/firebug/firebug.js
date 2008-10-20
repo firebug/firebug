@@ -2412,7 +2412,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             {
                 tooltip += " activated by "+urls.length+" page(s)";
                 for (var i = 0; i < urls.length; i++)
-                    tooltip += "\n"+urls[i];
+                    tooltip += "\n"+decodeURI(urls[i]); 
             }
         }
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);

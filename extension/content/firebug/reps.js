@@ -1000,6 +1000,7 @@ this.SourceLink = domplate(Firebug.Rep,
             return "";
 
         var fileName = cropString(getFileName(sourceLink.href), 17);
+        fileName = decodeURIComponent(fileName);
         return $STRF("Line", [fileName, sourceLink.line]);
     },
 
@@ -1024,7 +1025,7 @@ this.SourceLink = domplate(Firebug.Rep,
 
     getTooltip: function(sourceLink)
     {
-        return sourceLink.href;
+        return decodeURI(sourceLink.href);
     },
 
     inspectObject: function(sourceLink, context)
