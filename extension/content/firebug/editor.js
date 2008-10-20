@@ -953,7 +953,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     for (var i = 0; i < values.length; ++i)
                     {
                         var name = values[i];
-                        if (name instanceof String && name.indexOf(expr) == 0)
+                        if (name.indexOf && name.indexOf(expr) == 0)
                             candidates.push(name);
                     }
                 }
@@ -963,7 +963,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                     for (var i = 0; i < values.length; ++i)
                     {
                         var name = values[i];
-                        if (name instanceof String && name.toLowerCase().indexOf(lowerExpr) == 0)
+                        if (name.indexOf && name.toLowerCase().indexOf(lowerExpr) == 0)
                             candidates.push(name);
                     }
                 }
