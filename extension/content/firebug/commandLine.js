@@ -99,11 +99,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         element.setAttribute("expr", expr);
 
         var consoleHandler;
-        for (var i=0; i<context.consoleHandler.length; i++)
+        for (var i=0; i<context.activeConsoleHandlers.length; i++)
         {
-            if (context.consoleHandler[i].window == win)
+            if (context.activeConsoleHandlers[i].window == win)
             {
-                consoleHandler = context.consoleHandler[i].handler;
+                consoleHandler = context.activeConsoleHandlers[i];
                 break;
             }
         }
@@ -139,7 +139,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("evaluateByEventPassing using firebugCommandLine event:", event);
+            FBTrace.sysout("evaluateByEventPassing \'"+expr+"\' using consoleHandler:", consoleHandler);
         element.dispatchEvent(event);
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("evaluateByEventPassing return after firebugCommandLine event:", event);
@@ -609,10 +609,16 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
             Firebug.CommandLine.evaluate(preExpr, context, context.thisValue, null,
                 function found(result, context)
                 {
+            		if (FBTrace.DBG_CONSOLE) 
+            			FBTrace.sysout("commandLine autoCompleteEval \'"+preExpr+"\' found result", result);
+            		
                     self.complete = keys(result).sort();
                 },
                 function failed(result, context)
-                {
+                {	
+                	if (FBTrace.DBG_CONSOLE) 
+                		FBTrace.sysout("commandLine autoCompleteEval \'"+preExpr+"\' failed result", result);
+        		
                     self.complete = [];
                 }
             );
@@ -728,9 +734,9 @@ function FirebugCommandLineAPI(context, baseWindow)
         // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper 
         // (and its wrappedJSObject member). So, look within all registered consoleHandlers for 
         // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
-        for (var i=0; i<context.consoleHandler.length; i++) {
-            if (context.consoleHandler[i].window == object) {
-                baseWindow = context.baseWindow = context.consoleHandler[i].window;
+        for (var i=0; i<context.activeConsoleHandlers.length; i++) {
+            if (context.activeConsoleHandlers[i].window == object) {
+                baseWindow = context.baseWindow = context.activeConsoleHandlers[i].window;
                 break;
             }
         }

@@ -98,20 +98,18 @@ top.Firebug.Console.injector = {
 
     addConsoleListener: function(context, win)
     {
-        if (!context.consoleHandler)  // then we have not been this way before
-            context.consoleHandler = [];  
+        if (!context.activeConsoleHandlers)  // then we have not been this way before
+            context.activeConsoleHandlers = [];  
         else
         {   // we've been this way before...
-            for (var i=0; i<context.consoleHandler.length; i++)
+            for (var i=0; i<context.activeConsoleHandlers.length; i++)
             {
-                if (context.consoleHandler[i].window == win)
+                if (context.activeConsoleHandlers[i].window == win)
                 {
-                    var element = context.consoleHandler[i].element;
-                    element.removeEventListener('firebugAppendConsole', context.consoleHandler[i].handler, true);
-                    
+                	context.activeConsoleHandlers[i].detach();
                     if (FBTrace.DBG_CONSOLE)
-                        FBTrace.sysout("consoleInjector addConsoleListener removed handler("+context.consoleHandler[i].handler.handler_name+") from _firebugConsole in : "+win.location+"\n");
-                    context.consoleHandler.splice(i,1);
+                        FBTrace.sysout("consoleInjector addConsoleListener removed handler("+context.activeConsoleHandlers[i].handler_name+") from _firebugConsole in : "+win.location+"\n");
+                    context.activeConsoleHandlers.splice(i,1);
                 }
             }   
         }
@@ -121,10 +119,9 @@ top.Firebug.Console.injector = {
         element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
         
         var handler = new FirebugConsoleHandler(context, win);
-        var eventHandler = bind(handler.handleEvent, handler);
-        // When raised on our injected element, callback to Firebug and append to console
-        element.addEventListener('firebugAppendConsole', eventHandler, true); // capturing
-        context.consoleHandler.push({window:win, element: element, handler:eventHandler});
+        handler.attachTo(element);
+        
+        context.activeConsoleHandlers.push(handler);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener attached handler("+handler.handler_name+") to _firebugConsole in : "+win.location+"\n");
@@ -135,6 +132,21 @@ top.Firebug.Console.injector = {
 var total_handlers = 0;
 function FirebugConsoleHandler(context, win)
 {
+	this.window = win;
+	
+	this.attachTo = function(element)
+	{
+		this.element = element;
+        // When raised on our injected element, callback to Firebug and append to console
+		this.boundHandler = bind(this.handleEvent, this);
+        this.element.addEventListener('firebugAppendConsole', this.boundHandler, true); // capturing
+	};
+	
+	this.detach = function()
+	{
+		this.element.removeEventListener('firebugAppendConsole', this.boundHandler, true);
+	};
+	
     this.handler_name = ++total_handlers;
     this.handleEvent = function(event)
     {
@@ -319,6 +331,9 @@ function FirebugConsoleHandler(context, win)
     // These functions are over-ridden by commandLine
     this.evaluated = function(result, context)
     {
+    	if (FBTrace.DBG_CONSOLE)
+    		FBTrace.sysout("consoleInjector.FirebugConsoleHandler evalutated default called", result);
+    	
         Firebug.Console.log(result, context);
     };
     this.evaluateError = function(result, context)
