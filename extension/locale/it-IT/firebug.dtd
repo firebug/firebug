@@ -1,14 +1,8 @@
-<!ENTITY firebug.Issues "Issue Tracker...">
-<!ENTITY firebug.About "About...">
-<!ENTITY firebug.OpenWith "Open With Editor">
-<!ENTITY firebug.Permissions "Sites...">
-<!ENTITY firebug.ConfigureEditors "Configure Editors">
-
 <!ENTITY firebug.Firebug "Firebug">
 <!ENTITY firebug.Close "Chiudi">
 <!ENTITY firebug.View "Visualizza">
 <!ENTITY firebug.Help "?">
-<!ENTITY firebug.Vertical "Pannelli verticale">
+<!ENTITY firebug.Vertical "Pannelli verticali">
 <!ENTITY firebug.Run "Esegui">
 <!ENTITY firebug.Copy "Copia">
 <!ENTITY firebug.CopyBookmarklet "Copia lo script come bookmarklet">
@@ -20,16 +14,19 @@
 <!ENTITY firebug.ShowTooltips "Mostra tooltip di anteprima">
 <!ENTITY firebug.ShadeBoxModel "Sfuma il box model">
 <!ENTITY firebug.Website "Visita il sito web">
-<!ENTITY firebug.Documentation "Documentazione...">
+<!ENTITY firebug.Documentation "Documentazione…">
 <!ENTITY firebug.KeyShortcuts "Scorciatoie da tastiera">
-<!ENTITY firebug.Forums "Gruppo di discussione...">
-<!ENTITY firebug.Donate "Effettua una donazione...">
+<!ENTITY firebug.Forums "Gruppo di discussione…">
+<!ENTITY firebug.Issues "Segnala un problema…">
+<!ENTITY firebug.Donate "Effettua una donazione…">
+<!ENTITY firebug.About "Informazioni su Firebug">
 <!ENTITY firebug.AlwaysOpenInWindow "Apri sempre in nuova finestra">
 <!ENTITY firebug.ShowFirebug "Apri Firebug">
 <!ENTITY firebug.DetachFirebug "Apri Firebug in nuova finestra">
+<!ENTITY firebug.OpenWith "Apri con">
 <!ENTITY firebug.CloseFirebug "Chiudi">
-<!ENTITY firebug.DisableFirebug "Disattiva Firebug">
-<!ENTITY firebug.AllowedSites "Siti con permesso...">
+<!ENTITY firebug.Permissions "Siti con permesso…">
+<!ENTITY firebug.ConfigureEditors "Configura editor">
 <!ENTITY firebug.CommandLine "Riga di comando">
 <!ENTITY firebug.Search "Cerca">
 <!ENTITY firebug.Continue "Continua (F5)">
@@ -43,9 +40,8 @@
 <!ENTITY firebug.Edit "Modifica">
 <!ENTITY firebug.EditHTMLTooltip "Modifica HTML">
 <!ENTITY firebug.EditCSSTooltip "Modifica foglio di stile">
-<!ENTITY firebug.Profile "Profilo">
-<!ENTITY firebug.ProfileScript "Profilo JavaScript">
-<!ENTITY firebug.ProfileTooltip "Tempo di esecuzione JavaScript">
+<!ENTITY firebug.Profile "Profila">
+<!ENTITY firebug.ProfileScript "Profila JavaScript">
 <!ENTITY firebug.Clear "Svuota">
 <!ENTITY firebug.ClearConsole "Svuota console">
 <!ENTITY firebug.ClearTooltip "Svuota la console">
