@@ -213,7 +213,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         var doc = parentMenu.ownerDocument;
         var menuItem = doc.createElement("menuitem");
-        menuItem.setAttribute("label", "Open Firebug Tracing"); // xxxHonza localization
+        menuItem.setAttribute("label", $STR("Open Firebug Tracing"));
         menuItem.setAttribute("oncommand", "Firebug.TraceModule.openConsole()");
         var firstItem = parentMenu.firstChild;
         parentMenu.insertBefore(menuItem, firstItem);
@@ -232,7 +232,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         var menuItem = doc.createElement("menuitem");
         menuItem.setAttribute("id", menuItemId);
-        menuItem.setAttribute("label", "Always Open Firebug Tracing"); // xxxHonza localization
+        menuItem.setAttribute("label", $STR("Always Open Firebug Tracing"));
         menuItem.setAttribute("type", "checkbox");
         menuItem.setAttribute("oncommand", "FirebugChrome.onToggleOption(this)");
         menuItem.setAttribute("option", "alwaysOpenTraceConsole");
@@ -418,11 +418,11 @@ Firebug.TraceModule.PanelTemplate = domplate({
                             DIV({class: "traceInfoTabs"},
                                 A({class: "traceInfoLogsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Logs"},
-                                    "Logs" //xxxHonza localization
+                                    $STR("Logs")
                                 ),
                                 A({class: "traceInfoOptionsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Options"},
-                                    "Options"  //xxxHonza localization
+                                    $STR("Options")
                                 )
                             ),
                             DIV({class: "traceInfoLogsText traceInfoText"}),
@@ -744,13 +744,13 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (getAncestorByClass(target, "messageRow"))
         {
             items.push({
-              label: "Cut",   //xxxHonza localization
+              label: $STR("Cut"),
               nol10n: true,
               command: bindFixed(this.onCutMessage, this, message)
             });
 
             items.push({
-              label: "Copy",  //xxxHonza localization
+              label: $STR("Copy"),
               nol10n: true,
               command: bindFixed(this.onCopyMessage, this, message)
             });
@@ -758,7 +758,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             items.push("-");
 
             items.push({
-              label: "Remove",  //xxxHonza localization
+              label: $STR("Remove"),
               nol10n: true,
               command: bindFixed(this.onRemoveMessage, this, message)
             });
@@ -767,7 +767,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (getAncestorByClass(target, "messageInfoStackText"))
         {
             items.push({
-              label: "Copy Stack",  //xxxHonza localization
+              label: $STR("Copy Stack"),
               nol10n: true,
               command: bindFixed(this.onCopyStack, this, message)
             });
@@ -776,7 +776,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (getAncestorByClass(target, "messageInfoExcText"))
         {
             items.push({
-              label: "Copy Exception",  //xxxHonza localization
+              label: $STR("Copy Exception"),
               nol10n: true,
               command: bindFixed(this.onCopyException, this, message)
             });
