@@ -2552,7 +2552,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
     getParamValue: function(param)
     {
-        return wrapText(param.value);
+        // This value is inserted into PRE element and so, make sure the HTML isn't escaped (1210).
+        // This is why the second parameter is true. 
+        // The PRE element preserves whitespaces so they are displayed the same, as they come from 
+        // the server (1194).
+        return wrapText(param.value, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
