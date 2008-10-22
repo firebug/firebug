@@ -249,6 +249,9 @@ Firebug.TabCache.prototype =
 // ************************************************************************************************
 // TracingListener implementation
 
+// Reuse the input stream object for all request (optimalization)
+var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+
 /**
  * This object implements nsIStreamListener interface and is intended to monitor all network 
  * channels (nsIHttpChannel). For every channel a new instance of this object is created and 
@@ -267,7 +270,6 @@ TracingListener.prototype =
     {
         try
         {
-            var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
             var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
             var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
             
@@ -278,6 +280,9 @@ TracingListener.prototype =
             // Copy received data as they come.
             var data = binaryInputStream.readBytes(count);
             this.receivedData.push(data);
+
+            binaryInputStream.QueryInterface(Ci.nsISeekableStream);
+            binaryInputStream.seek(Ci.nsISeekableStream.NS_SEEK_SET, 0);
 
             binaryOutputStream.writeBytes(data, count);
             return storageStream.newInputStream(0);
