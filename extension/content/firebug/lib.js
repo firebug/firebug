@@ -2694,14 +2694,21 @@ this.getResource = function(aURL)
     var scriptableStream=Components
         .classes["@mozilla.org/scriptableinputstream;1"]
         .getService(Components.interfaces.nsIScriptableInputStream);
-
-    var channel=ioService.newChannel(aURL,null,null);
-    var input=channel.open();
-    scriptableStream.init(input);
-    var str=scriptableStream.read(input.available());
-    scriptableStream.close();
-    input.close();
-    return str;
+    try 
+    {
+    	var channel=ioService.newChannel(aURL,null,null);
+    	var input=channel.open();
+    	scriptableStream.init(input);
+    	var str=scriptableStream.read(input.available());
+    	scriptableStream.close();
+    	input.close();
+    	return str;
+    }
+    catch (e)
+    {
+    	if (FBTrace.DBG_ERRORS)
+    		FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
+    }
 };
 
 // ************************************************************************************************
