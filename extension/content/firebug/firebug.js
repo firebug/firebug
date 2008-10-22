@@ -36,6 +36,7 @@ const contentSplitter = $("fbContentSplitter");
 const toggleCommand = $("cmd_toggleFirebug");
 const detachCommand = $("cmd_toggleDetachFirebug");
 const tabBrowser = $("content");
+const versionURL = "chrome://firebug/content/branch.properties";
 
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -187,27 +188,28 @@ top.Firebug =
         if (this.fullVersion)
             return this.fullVersion;
 
-        var versionURL = "chrome://firebug/content/branch.properties";
+        this.fullVersion = this.loadVersion(versionURL);
+    },
+    
+    loadVersion: function(versionURL)
+    {
         var content = getResource(versionURL);
+        if (!content)
+        	return "no content at "+versionURL;
+        
         var m = /RELEASE=(.*)/.exec(content);
         if (m)
-        {
             var release = m[1];
-        }
+        else
+        	return "no RELEASE in "+versionURL;
+        
         m = /VERSION=(.*)/.exec(content);
         if (m)
-        {
             var version = m[1];
-        }
-        if (release && version)
-        {
-            this.fullVersion = version+""+release;
-            return this.fullVersion;
-        }
-        else
-        {
-            FBTrace.sysout("firebug.getVersion fails with release="+release+" branch="+branch+" from content="+content+"\n");
-        }
+        else 
+        	return "no VERSION in "+versionURL;
+        	
+        return version+""+release;
     },
 
     internationalizeUI: function()  // Substitute strings in the UI with fall back to en-US
