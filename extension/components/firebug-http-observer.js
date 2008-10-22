@@ -71,6 +71,9 @@ HttpRequestObserver.prototype =
 
         try 
         {
+            if (FBTrace.DBG_HTTPOBSERVER)
+                FBTrace.sysout("httpObserver.observe " + topic, subject);
+
             // Notify all registered observers.
             if (topic == "http-on-modify-request" || topic == "http-on-examine-response")
                 this.notifyObservers(subject, topic, data);
