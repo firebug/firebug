@@ -267,7 +267,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.debugFrame || !context.debugFrame.isValid)
             return;
 
-        fbs.step(STEP_OVER, context.debugFrame);
+        fbs.step(STEP_OVER, context.debugFrame, this);
         this.resume(context);
     },
 
@@ -276,7 +276,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.debugFrame.isValid)
             return;
 
-        fbs.step(STEP_INTO, context.debugFrame);
+        fbs.step(STEP_INTO, context.debugFrame, this);
         this.resume(context);
     },
 
@@ -293,7 +293,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (context.stopped)
             return;
-        fbs.suspend();
+        fbs.suspend(this);
     },
 
     runUntil: function(context, sourceFile, lineNo)
@@ -450,9 +450,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             context.currentFrame = context.debugFrame;
 
-            // Make FirebugContext = context and sync the UI
-            var browser = context.browser;
-            browser.chrome.showContext(browser, context);
+            if (context != FirebugContext)
+            	browser.chrome.showContext(context.browser, context); // Make FirebugContext = context and sync the UI
 
             this.syncCommands(context);
             this.syncListeners(context);
@@ -515,10 +514,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 var panel = context.getPanel("script", true);
                 if (panel)
-                {
-                    panel.showNoStackFrame();
-                    panel.select(null);
-                }
+                    panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
             }
         }
         catch (exc)
@@ -1680,7 +1676,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.executionFile = null;
         this.executionLineNo = -1;
-        this.highlightExecutionLine(this.selectedSourceBox);
+        this.highlightExecutionLine(this.selectedSourceBox);  // clear highlight
+        
+        panelStatus.clear(); // clear stack on status bar
         this.updateInfoTip();
     },
 

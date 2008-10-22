@@ -117,6 +117,7 @@ var scriptListeners = [];
 var stepMode = 0;
 var stepFrame;
 var stepFrameLineId;
+var stepStayOnDebuggr; // if set, the debuggr we want to stay within
 var stepFrameCount;
 var hookFrameCount = 0;
 
@@ -385,21 +386,23 @@ FirebugService.prototype =
         haltDebugger = debuggr;
     },
 
-    step: function(mode, startFrame)
+    step: function(mode, startFrame, stayOnDebuggr)
     {
         stepMode = mode;
         stepFrame = startFrame;
         stepFrameCount = countFrames(startFrame);
         stepFrameLineId = stepFrameCount + startFrame.script.fileName + startFrame.line;
+        stepStayOnDebuggr = stayOnDebuggr;
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_FBS_STEP)
             FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount);                         /*@explore*/
     },
 
-    suspend: function()
+    suspend: function(stayOnDebuggr)
     {
         stepMode = STEP_SUSPEND;
         stepFrameLineId = null;
+        stepStayOnDebuggr = stayOnDebuggr;
         this.hookInterrupts();
     },
 
@@ -863,12 +866,11 @@ FirebugService.prototype =
         try
         {
         	// avoid step_out from web page to chrome
-        	fbs.stayInOneDebugger = true;  // XXXjjb make option in chromebug
-        	if (type==jsdIExecutionHook.TYPE_INTERRUPTED && fbs.last_debuggr && fbs.stayInOneDebugger)
+        	if (type==jsdIExecutionHook.TYPE_INTERRUPTED && stepStayOnDebuggr)
         	{
-        		var debuggr = this.reFindDebugger(frame, fbs.last_debuggr);
+        		var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
         		if (!debuggr)
-        			 jsd.interruptHook = null;
+        			return RETURN_CONTINUE;  // This means that we will continue to take interupts until  when?
         	}
         	else
         		var debuggr = this.findDebugger(frame);
@@ -1475,7 +1477,7 @@ FirebugService.prototype =
                 {
                     if (!debuggr.breakContext)
                         FBTrace.dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
-                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for global, location:"+global.location);
+                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr "+debuggr.debuggerName+" at "+i+" for global, location:"+global.location);
                     return debuggr;
                 }
             }
@@ -1508,6 +1510,8 @@ FirebugService.prototype =
         var global = getFrameScopeWindowAncestor(frame); 
         if (global && debuggr.supportsGlobal(global)) return debuggr;
         
+        if (FBTrace.DBG_FBS_FINDDEBUGGER) 
+        	FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support global ", global); 
         return null;
     },
 
