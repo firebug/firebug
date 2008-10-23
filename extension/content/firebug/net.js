@@ -850,21 +850,21 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         {
             if (getAncestorByClass(target, "netTimeCol"))
             {
-                var url = row.repObject.href + "-nettime";
-                if (url == this.infoTipURL)
+                var infoTipURL = row.repObject.href + "-nettime";
+                if (infoTipURL == this.infoTipURL)
                     return true;
 
-                this.infoTipURL = url;
+                this.infoTipURL = infoTipURL;
                 return this.populateTimeInfoTip(infoTip, row.repObject);
             }
             else if (hasClass(row, "category-image"))
             {
-                var url = row.repObject.href + "-image";
-                if (url == this.infoTipURL)
+                var infoTipURL = row.repObject.href + "-image";
+                if (infoTipURL == this.infoTipURL)
                     return true;
 
-                this.infoTipURL = url;
-                return Firebug.InfoTip.populateImageInfoTip(infoTip, url);
+                this.infoTipURL = infoTipURL;
+                return Firebug.InfoTip.populateImageInfoTip(infoTip, row.repObject.href);
             }
         }
     },
