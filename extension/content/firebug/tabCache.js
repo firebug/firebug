@@ -270,22 +270,18 @@ TracingListener.prototype =
     {
         try
         {
-            var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-            var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
-            
-            binaryInputStream.setInputStream(inputStream);
-            storageStream.init(8192, count, null);
-            binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
-
             // Copy received data as they come.
+            binaryInputStream.setInputStream(inputStream);
             var data = binaryInputStream.readBytes(count);
             this.receivedData.push(data);
 
             binaryInputStream.QueryInterface(Ci.nsISeekableStream);
             binaryInputStream.seek(Ci.nsISeekableStream.NS_SEEK_SET, 0);
 
-            binaryOutputStream.writeBytes(data, count);
-            return storageStream.newInputStream(0);
+            inputStream.QueryInterface(Ci.nsISeekableStream);
+            inputStream.seek(Ci.nsISeekableStream.NS_SEEK_SET, 0);
+
+            return inputStream;
         }
         catch (err)
         {
