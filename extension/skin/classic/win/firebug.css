@@ -6,12 +6,12 @@
     margin: 0 4px 0 0;
     padding: 0 0 0 4px;
     list-style-image: url(chrome://firebug/skin/firebug.png);
-    -moz-opacity: 0.8;
+    opacity: 0.8;
 }
 
 #fbFirebugMenu:hover,
 #fbFirebugMenu[open="true"] {
-    -moz-opacity: 1.0;
+    opacity: 1.0;
 }
 
 #fbFirebugMenu > .toolbarbutton-text,

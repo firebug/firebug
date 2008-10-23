@@ -214,7 +214,7 @@
     height: 14px;
     vertical-align: bottom;
     background: url(chrome://firebug/skin/breakpoint.png) no-repeat;
-    -moz-opacity: 0.1;
+    opacity: 0.1;
 }
 
 .hasBreakSwitch .errorBreak {
@@ -222,7 +222,7 @@
 }
 
 .breakForError .errorBreak {
-    -moz-opacity: 1;
+    opacity: 1;
 }
 
 .assertDescription {

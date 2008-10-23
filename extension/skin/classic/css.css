@@ -51,7 +51,7 @@
 
 .cssProp.disabledStyle {
     background: url(chrome://firebug/skin/disableHover.png) no-repeat 2px 1px;
-    -moz-opacity: 1;
+    opacity: 1;
     color: #CCCCCC;
 }
 

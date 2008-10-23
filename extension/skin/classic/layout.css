@@ -63,7 +63,7 @@
 .layoutBox.highlighted > .layoutCaption,
 .layoutBox.highlighted > .layoutLabel {
     color: HighlightText;
-    -moz-opacity: 1.0;
+    opacity: 1.0;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -83,7 +83,7 @@
 }
 
 .layoutLabel.v0 {
-    -moz-opacity: 0.2;
+    opacity: 0.2;
 }
 
 .layoutLabelTop {
