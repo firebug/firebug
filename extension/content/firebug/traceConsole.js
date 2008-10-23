@@ -95,6 +95,8 @@ var TraceConsole =
 
             this.dump(new Firebug.TraceModule.TraceMessage(
                 messageInfo.type, data, messageInfo.obj));
+            
+            return true;
         }
     },
 
