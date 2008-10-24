@@ -49,7 +49,7 @@
 .logRow-command > .objectBox-text {
     font-family: Monaco, monospace;
     color: #0000FF;
-    white-space: -moz-pre-wrap;
+    white-space: pre-wrap;
 }
 
 .logRow-info,
@@ -127,7 +127,7 @@
 .objectBox-string,
 .objectBox-text,
 .objectLink-textNode {
-    white-space: -moz-pre-wrap;
+    white-space: pre-wrap;
 }
 
 .objectBox-number,
@@ -338,7 +338,7 @@
     font-family: Lucida Grande, sans-serif;
     font-weight: bold;
     color: DarkGreen;
-    white-space: -moz-pre-wrap;
+    white-space: pre-wrap;
 }
 
 .objectPropValue {
