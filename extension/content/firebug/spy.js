@@ -12,10 +12,6 @@ const nsIUploadChannel = Ci.nsIUploadChannel;
 const nsIRequest = Ci.nsIRequest;
 const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
 const nsIWebProgress = Ci.nsIWebProgress;
-const nsISeekableStream = Ci.nsISeekableStream;
-
-const LOAD_BACKGROUND = nsIRequest.LOAD_BACKGROUND;
-const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
 
 const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 
@@ -31,10 +27,12 @@ const httpObserver =
     {
         try
         {
-            request = QI(request, nsIHttpChannel);
-            if (((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
-                && (request.loadFlags & LOAD_BACKGROUND))
+            // If a progress listener is set for the XHR, the loadFlags doesn't have
+            // nsIRequest.LOAD_BACKGROUND flag set. So, don't use it as a condition for displaying
+            // the XHR in Firebug console (Issue #1229).
+            if ((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
             {
+                request = QI(request, nsIHttpChannel);
                 if (request.notificationCallbacks)
                 {
                     try
