@@ -151,17 +151,12 @@ TraceConsoleService.prototype =
         { 
             if (this.observers.length > 0)
             {
-            	var someoneListenedToMe = false; // we don't want to lose messages when debugging...
                 for (var i=0; i<this.observers.length; i++)
-                	someoneListenedToMe |= this.observers[i].observe(subject, topic, someData);
-                if (someoneListenedToMe)
-                	return true;
-                else 
-                	lastResort(subject, someData);
+                	this.observers[i].observe(subject, topic, someData);
             }
             else
             {
-            	lastResort(subject, someData);
+            	lastResort(this.observers, subject, someData);
             }            
         }
         catch (err)
@@ -193,12 +188,12 @@ TraceConsoleService.prototype =
 	}
 };
 
-function lastResort(subject, someData)
+function lastResort(listeners, subject, someData)
 {
     var hiddenWindow = appShellService.hiddenDOMWindow; 
     var unwrapped = subject.wrappedJSObject;
     var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
-    hiddenWindow.dump("FTSX: "+someData+objPart+"\n");
+    hiddenWindow.dump("FTS"+listeners.length+": "+someData+objPart+"\n");
 }
 // ************************************************************************************************
 // Public TraceService API
