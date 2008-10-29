@@ -136,7 +136,7 @@ top.TabWatcher =
                     ", win.location.href: "+win.location.href+"\n");                                                   /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
-            dispatch(listeners, "initContext", [context]);
+            dispatch(listeners, "initContext", [context, persistedState]);
 
             if (!FirebugContext)
                 FirebugContext = context; // let's make sure we have something for errors to land on.

@@ -172,7 +172,7 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
-    initContext: function(context)
+    initContext: function(context, persistedState)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
 

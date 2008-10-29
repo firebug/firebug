@@ -76,6 +76,7 @@ const BP_NORMAL = 1;
 const BP_MONITOR = 2;
 const BP_UNTIL = 4;
 const BP_ONRELOAD = 8;  // XXXjjb: This is a mark for the UI to test
+const BP_ERROR = 16;
 
 const LEVEL_TOP = 1;
 const LEVEL_EVAL = 2;
@@ -547,12 +548,12 @@ FirebugService.prototype =
                         {
                             for (var j = 0; j < bp.scriptsWithBreakpoint.length; j++)
                             {
-                                var rc = cb.call(url, bp.lineNo, bp.scriptsWithBreakpoint[j], bp);
+                                var rc = cb.call(url, bp.lineNo, bp, bp.scriptsWithBreakpoint[j]);
                                 if (rc)
                                     return [bp];
                             }
                         } else {
-                            var rc = cb.call(url, bp.lineNo, null, bp);
+                            var rc = cb.call(url, bp.lineNo, bp);
                             if (rc)
                                 return [bp];
                         }
@@ -577,7 +578,7 @@ FirebugService.prototype =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index == -1)
         {
-             errorBreakpoints.push({href: url, lineNo: lineNo });
+             errorBreakpoints.push({href: url, lineNo: lineNo, type: BP_ERROR });
              dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true, debuggr]);
         }
     },
@@ -606,7 +607,7 @@ FirebugService.prototype =
             {
                 var bp = errorBreakpoints[i];
                 if (bp.href == url)
-                    cb.call(bp.href, bp.lineNo);
+                    cb.call(bp.href, bp.lineNo, bp);
             }
         }
         else
@@ -614,7 +615,7 @@ FirebugService.prototype =
             for (var i = 0; i < errorBreakpoints.length; ++i)
             {
                 var bp = errorBreakpoints[i];
-                cb.call(bp.href, bp.lineNo);
+                cb.call(bp.href, bp.lineNo, bp);
             }
         }
     },
@@ -668,14 +669,14 @@ FirebugService.prototype =
                 {
                     var bp = urlBreakpoints[i];
                     if (bp.type & BP_MONITOR)
-                        cb.call(url, bp.lineNo);
+                        cb.call(url, bp.lineNo, bp);
                 }
             }
         }
         else
         {
             for (var url in breakpoints)
-                this.enumerateBreakpoints(url, cb);
+                this.enumerateBreakpoints(url, cb, bp);
         }
     },
 
@@ -1584,7 +1585,7 @@ FirebugService.prototype =
         return bp;
     },
 
-    removeBreakpoint: function(type, url, lineNo, script) // xxxJJB script arg not used?
+    removeBreakpoint: function(type, url, lineNo) 
     {
         if (FBTrace.DBG_FBS_BP) FBTrace.sysout("removeBreakpoint for url= "+url);                                                    /*@explore*/
 
@@ -1660,7 +1661,8 @@ FirebugService.prototype =
                     return bp;
             }
         }
-
+        if (FBTrace.DBG_FBS_BP)
+        	FBTrace.sysout("findBreakpoint no find for "+lineNo+"@"+url, urlBreakpoints);
         return null;
     },
 

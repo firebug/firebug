@@ -1228,7 +1228,7 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
 
-    initContext: function(context)
+    initContext: function(context, persistedState)
     {
         context.panelName = context.browser.panelName;
         if (context.browser.sidePanelNames)
@@ -1361,7 +1361,7 @@ Firebug.Module =
     /**
      * Called when a new context is created but before the page is loaded.
      */
-    initContext: function(context)
+    initContext: function(context, persistedState)
     {
     },
 
@@ -1947,6 +1947,16 @@ Firebug.SourceBoxPanel = extend(Firebug.AblePanel,
         // if this.sourceBoxes is undefined, you need to call initializeSourceBoxes in your panel.initialize()
         return url ? this.sourceBoxes[url] : null;
     },
+    
+    renameSourceBox: function(oldURL, newURL)
+    {
+    	var sourceBox = this.sourceBoxes[oldURL];
+    	if (sourceBox)
+    	{
+    		delete this.sourceBoxes[oldURL];
+    		this.sourceBoxes[newURL] = sourceBox;
+    	}
+    },
 
     showSourceFile: function(sourceFile)
     {
@@ -2285,7 +2295,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.tabMenu = tab.initTabMenu(this);
     },
 
-    initContext: function(context)
+    initContext: function(context, persistedState)
     {
         // Add observers for permissions and preference changes so, activable modules
         // (net, script) can be properly updated.

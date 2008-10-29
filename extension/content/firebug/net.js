@@ -219,7 +219,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
 
-    initContext: function(context)
+    initContext: function(context, persistedState)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
