@@ -394,6 +394,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 TD({class: "netTimeCol netCol"},
                     DIV({class: "netBar"},
                         "&nbsp;",
+                        DIV({class: "netResolvingBar", style: "left: $file.offset"}),
                         DIV({class: "netConnectingBar", style: "left: $file.offset"}),
                         DIV({class: "netWaitingBar", style: "left: $file.offset"}),
                         DIV({class: "netRespondedBar", style: "left: $file.offset"}),
@@ -1094,7 +1095,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
-            var connectingBar = row.childNodes[4].firstChild.childNodes[1];
+            var resolvingBar = row.childNodes[4].firstChild.childNodes[1];
+            var connectingBar = resolvingBar.nextSibling;
             var waitingBar = connectingBar.nextSibling;
             var respondedBar = waitingBar.nextSibling;
             var contentLoadBar = respondedBar.nextSibling;
@@ -1102,10 +1104,11 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var timeBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
-            connectingBar.style.left = waitingBar.style.left = respondedBar.style.left = 
-                timeBar.style.left = this.barOffset + "%";
+            resolvingBar.style.left = connectingBar.style.left = waitingBar.style.left = 
+                respondedBar.style.left = timeBar.style.left = this.barOffset + "%";
 
             // Sets width of all bars (using style). The width is computed according to measured timing.
+            resolvingBar.style.width = this.barResolvingWidth ? this.barResolvingWidth + "%" : "1px";
             connectingBar.style.width = this.barConnectingWidth ? this.barConnectingWidth + "%" : "1px";
             waitingBar.style.width = this.barWaitingWidth + "%";
             respondedBar.style.width = this.barRespondedWidth + "%";
@@ -1123,7 +1126,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 this.windowLoadBarOffset = null;
             }
 
-            /*FBTrace.sysout("net.updateTimeline connecting: " + 
+            /*FBTrace.sysout("net.updateTimeline resolving: " + 
+                resolvingBar.style.left + " : "+  resolvingBar.style.width + ", connecting: " + 
                 connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " + 
                 waitingBar.style.left + " : " + waitingBar.style.width + ", time: " + 
                 timeBar.style.left + " : " + timeBar.style.width + ", DOMContentLoaded: " +
@@ -1198,6 +1202,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         this.elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
         this.barWidth = Math.floor((this.elapsed/this.phaseElapsed) * 100);
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
+        this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100); 
@@ -1306,6 +1311,10 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         TABLE({class: "timeInfoTip"},
             TBODY(
                 TR(
+                    TD({class: "netResolvingBar timeInfoTipBar"}),
+                    TD("$file|getResolvingTime : DNS Lookup")
+                ),
+                TR(
                     TD({class: "netConnectingBar timeInfoTipBar"}),
                     TD("$file|getConnectintTime : Connecting")
                 ),
@@ -1336,6 +1345,11 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                 )
             )
         ),
+
+    getResolvingTime: function(file)
+    {
+        return formatTime(file.resolvingTime - file.startTime);
+    },
 
     getConnectintTime: function(file)
     {
@@ -1556,6 +1570,7 @@ NetProgress.prototype =
             // until we get a respondedFile call later
             file.startTime = file.endTime = time;
             file.waitingForTime = time;
+            file.resolvingTime = time;
             file.connectingTime = time;
             file.respondedTime = time;
 
@@ -1648,6 +1663,17 @@ NetProgress.prototype =
         if (file)
         {
             file.endTime = time;
+        }
+
+        return file;
+    },
+
+    resolvingFile: function resolvingFile(request, time)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            file.resolvingTime = time;
         }
 
         return file;
@@ -1980,6 +2006,9 @@ NetProgress.prototype =
                 this.post(waitingForFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
                 this.post(receivingFile, [request, now()]);
+            else if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
+                this.post(resolvingFile, [request, now()]);
+            
         }
     },
 
@@ -2004,6 +2033,7 @@ var respondedFile = NetProgress.prototype.respondedFile;
 var connectingFile = NetProgress.prototype.connectingFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
 var receivingFile = NetProgress.prototype.receivingFile;
+var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
 var stopFile = NetProgress.prototype.stopFile;
 var cacheEntryReady = NetProgress.prototype.cacheEntryReady;

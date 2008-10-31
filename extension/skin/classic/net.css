@@ -146,6 +146,16 @@
     border-right: 50px solid transparent;
 }
 
+.netResolvingBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: #FFFFFF url(chrome://firebug/skin/netBarResolving.gif) repeat-x;
+    min-width: 1px;
+    z-index:30;
+}
+
 .netConnectingBar {
     position: absolute;
     left: 0;
