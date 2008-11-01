@@ -1767,8 +1767,7 @@ Firebug.AblePanel = extend(Firebug.Panel,
         if (!tab)
             tab = $("fbPanelBar1").getTab(this.name);
         return tab;
-    },
-    
+    },    
 });
 
 // ************************************************************************************************
@@ -2290,9 +2289,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     initializeUI: function(detachArgs)
     {
-        // Create activable menu within the tab.
-        var tab = this.panelBar1.getTab(this.panelName);
-        this.tabMenu = tab.initTabMenu(this);
+        this.updateTab(null);
     },
 
     initContext: function(context, persistedState)
@@ -2323,15 +2320,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     reattachContext: function(browser, context)
     {
+        this.updateTab(context);
         var persistedPanelState = this.syncPersistedPanelState(context, false);
     },
 
     showContext: function(browser, context)
     {
-        var tab = this.panelBar1.getTab(this.panelName);
-        var enabled = this.isEnabled(context);
-        tab.setAttribute("disabled", enabled ? "false" : "true");
-
+        this.updateTab(context);
     },
 
     destroyContext: function(context)
@@ -2397,11 +2392,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
             if (panel)
                 panel.disablePanel();
 
-            var panelBar1 = $("fbPanelBar1");
-            var panel = context.getPanel(this.panelName, true);
-
             // Refresh the panel only if it's currently selected.
-            if (panel && panelBar1.selectedPanel == panel)
+            if (panel && this.panelBar1.selectedPanel == panel)
             {
                 var state = Firebug.getPanelState(panel);
                 panel.show(state);
@@ -2823,6 +2815,23 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         label = this.panelName + "." + label;
         return $STRF(label, [getURIHost(location)]);
+    },
+
+    updateTab: function(context)
+    {
+        var chrome = context ? context.chrome : FirebugChrome;
+        var panelBar = chrome.$("fbPanelBar1");
+        var tab = panelBar.getTab(this.panelName);
+
+        // Update activable tab menu.
+        tab.initTabMenu(this);
+
+        // Update tab label.
+        if (context)
+        {
+            var enabled = this.isEnabled(context);
+            tab.setAttribute("disabled", enabled ? "false" : "true");
+        }
     }
 });
 
