@@ -1763,9 +1763,11 @@ Firebug.AblePanel = extend(Firebug.Panel,
     
     getTab: function()
     {
-        var tab = $("fbPanelBar2").getTab(this.name);
+        var chrome = this.context ? this.context.chrome : FirebugChrome;
+
+        var tab = chrome.$("fbPanelBar2").getTab(this.name);
         if (!tab)
-            tab = $("fbPanelBar1").getTab(this.name);
+            tab = chrome.$("fbPanelBar1").getTab(this.name);
         return tab;
     },    
 });
@@ -2392,8 +2394,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
             if (panel)
                 panel.disablePanel();
 
+            var chrome = context ? context.chrome : FirebugChrome;
+            var panelBar1 = chrome.$("fbPanelBar1");
+
             // Refresh the panel only if it's currently selected.
-            if (panel && this.panelBar1.selectedPanel == panel)
+            if (panel && panelBar1.selectedPanel == panel)
             {
                 var state = Firebug.getPanelState(panel);
                 panel.show(state);
