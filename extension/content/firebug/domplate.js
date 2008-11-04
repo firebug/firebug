@@ -76,7 +76,8 @@ DomplateTag.prototype =
         var attrs = args.length ? args[0] : null;
         var hasAttrs = typeof(attrs) == "object" && !isTag(attrs);
 
-        this.children = [];
+        // Do not clear children, they can be copied from the oldTag.
+        //this.children = [];
 
         if (domplate.topContext)
             this.context = domplate.topContext;
