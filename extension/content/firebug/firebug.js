@@ -2776,7 +2776,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     catch (exc)
                     {
                         if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("firebug.activationChange changeActivation fails for "+location, location);
+                            FBTrace.dumpProperties("firebug.activationChange changeActivation fails for "+location, exc);
                     }
                 }
             );
