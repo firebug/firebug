@@ -1,0 +1,12 @@
+<!ENTITY editors.Description "Editoare configurate pentru Firebug:">
+<!ENTITY editors.NameColumn "Editor">
+<!ENTITY editors.ExecutableColumn "Executabil">
+<!ENTITY editors.ParamsColumn "Argumente de lansare">
+<!ENTITY add.label "Adaugă">
+<!ENTITY remove.label "Elimină">
+<!ENTITY change.label "Modifică">
+<!ENTITY close.label "Închide">
+<!ENTITY browse.label "Răsfoiește...">
+<!ENTITY changeEditor.Name "Nume:">
+<!ENTITY changeEditor.Executable "Executabil:">
+<!ENTITY changeEditor.CmdLine "Argumente:">

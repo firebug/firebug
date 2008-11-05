@@ -22,6 +22,7 @@ locale  firebug tr-TR       locale/tr-TR/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 locale  firebug sv-SE       locale/sv-SE/
+locale  firebug ro-RO       locale/ro-RO/
 
 
 overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
