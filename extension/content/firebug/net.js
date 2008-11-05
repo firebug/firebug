@@ -1207,13 +1207,16 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             this.phaseElapsed = this.phaseEndTime - phase.startTime;
         }
 
-        this.elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
-        this.barWidth = Math.floor((this.elapsed/this.phaseElapsed) * 100);
+        var elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
+        this.barWidth = Math.floor((elapsed/this.phaseElapsed) * 100);
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
         this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100); 
         this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100); 
+        
+        // Total request time doesn't include the time spent in queue.
+        this.elapsed = elapsed - (file.waitingForTime - file.connectingTime);
 
         // Compute also offset for the contentLoadBar and windowLoadBar, which are 
         // displayed for the first phase.
