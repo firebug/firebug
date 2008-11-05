@@ -613,21 +613,29 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         if (!hasClass(row, "hasHeaders"))
             return;
 
-        toggleClass(row, "opened");
+        var file = row.repObject;
+        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
 
+        toggleClass(row, "opened");
         if (hasClass(row, "opened"))
         {
-            var template = Firebug.NetMonitor.NetInfoBody;
-
             var netInfoRow = this.netInfoTag.insertRows({}, row)[0];
-            var netInfo = template.tag.replace({file: row.repObject}, netInfoRow.firstChild);
-            template.selectTabByName(netInfo, "Headers");
+            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
 
-            setClass(netInfo, "category-" + getFileCategory(row.repObject));
+            // Notify listeners so additional tabs can be created.
+            dispatch(NetInfoBody.listeners, "initTabBody", [netInfoBox, file]);
+
+            NetInfoBody.selectTabByName(netInfoBox, "Headers");
+            setClass(netInfoBox, "category-" + getFileCategory(row.repObject));
         }
         else
         {
-            row.parentNode.removeChild(row.nextSibling);
+            var netInfoRow = row.nextSibling;
+            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+
+            dispatch(NetInfoBody.listeners, "destroyTabBody", [netInfoBox, file]);
+
+            row.parentNode.removeChild(netInfoRow);
         }
     },
 
@@ -2467,39 +2475,49 @@ function getFrameLevel(win)
 
 Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 {
+    listeners: [],
+
     tag:
         DIV({class: "netInfoBody", _repObject: "$file"},
-            DIV({class: "netInfoTabs"},
-                A({class: "netInfoParamsTab netInfoTab", onclick: "$onClickTab",
-                    view: "Params",
-                    $collapsed: "$file|hideParams"},
-                    $STR("URLParameters")
-                ),
-                A({class: "netInfoHeadersTab netInfoTab", onclick: "$onClickTab",
-                    view: "Headers"},
-                    $STR("Headers")
-                ),
-                A({class: "netInfoPostTab netInfoTab", onclick: "$onClickTab",
-                    view: "Post",
-                    $collapsed: "$file|hidePost"},
-                    $STR("Post")
-                ),
-                A({class: "netInfoPutTab netInfoTab", onclick: "$onClickTab",
-                    view: "Put",
-                    $collapsed: "$file|hidePut"},
-                    $STR("Put")
-                ),
-                A({class: "netInfoResponseTab netInfoTab", onclick: "$onClickTab",
-                    view: "Response",
-                    $collapsed: "$file|hideResponse"},
-                    $STR("Response")
-                ),
-                A({class: "netInfoCacheTab netInfoTab", onclick: "$onClickTab",
-                   view: "Cache",
-                   $collapsed: "$file|hideCache"},
-                   "Cache" // todo: Localization
-                )
+            TAG("$infoTabs", {file: "$file"}),
+            TAG("$infoBodies", {file: "$file"})
+        ),
+
+    infoTabs:
+        DIV({class: "netInfoTabs"},
+            A({class: "netInfoParamsTab netInfoTab", onclick: "$onClickTab",
+                view: "Params",
+                $collapsed: "$file|hideParams"},
+                $STR("URLParameters")
             ),
+            A({class: "netInfoHeadersTab netInfoTab", onclick: "$onClickTab",
+                view: "Headers"},
+                $STR("Headers")
+            ),
+            A({class: "netInfoPostTab netInfoTab", onclick: "$onClickTab",
+                view: "Post",
+                $collapsed: "$file|hidePost"},
+                $STR("Post")
+            ),
+            A({class: "netInfoPutTab netInfoTab", onclick: "$onClickTab",
+                view: "Put",
+                $collapsed: "$file|hidePut"},
+                $STR("Put")
+            ),
+            A({class: "netInfoResponseTab netInfoTab", onclick: "$onClickTab",
+                view: "Response",
+                $collapsed: "$file|hideResponse"},
+                $STR("Response")
+            ),
+            A({class: "netInfoCacheTab netInfoTab", onclick: "$onClickTab",
+               view: "Cache",
+               $collapsed: "$file|hideCache"},
+               "Cache" // todo: Localization
+            )
+        ),
+
+    infoBodies:
+        DIV({class: "netInfoBodies"},
             TABLE({class: "netInfoParamsText netInfoText netInfoParamsTable",
                     cellpadding: 0, cellspacing: 0}, TBODY()),
             TABLE({class: "netInfoHeadersText netInfoText netInfoHeadersTable",
@@ -2550,6 +2568,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             )
         ),
 
+    customTab:
+        A({class: "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab", view: "$tabId"},
+            "$tabTitle"
+        ),
+
+    customBody:
+        DIV({class: "netInfo$tabId\\Text netInfoText"}),
+
     hideParams: function(file)
     {
         return !file.urlParams || !file.urlParams.length;
@@ -2591,6 +2617,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    appendTab: function(netInfoBox, tabId, tabTitle)
+    {
+        // Create new tab and body.
+        var args = {tabId: tabId, tabTitle: tabTitle};
+        this.customTab.append(args, getElementByClass(netInfoBox, "netInfoTabs"));
+        this.customBody.append(args, getElementByClass(netInfoBox, "netInfoBodies"));
+    },
+
     selectTabByName: function(netInfoBox, tabName)
     {
         var tab = getChildByClass(netInfoBox, "netInfoTabs", "netInfo"+tabName+"Tab");
@@ -2600,7 +2634,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
     selectTab: function(tab)
     {
-        var netInfoBox = tab.parentNode.parentNode;
+        var netInfoBox = getAncestorByClass(tab, "netInfoBody");
 
         var view = tab.getAttribute("view");
         if (netInfoBox.selectedTab)
@@ -2612,7 +2646,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
         var textBodyName = "netInfo" + view + "Text";
 
         netInfoBox.selectedTab = tab;
-        netInfoBox.selectedText = getChildByClass(netInfoBox, textBodyName);
+        netInfoBox.selectedText = getElementByClass(netInfoBox, textBodyName);
 
         netInfoBox.selectedTab.setAttribute("selected", "true");
         netInfoBox.selectedText.setAttribute("selected", "true");
@@ -2747,6 +2781,10 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
         }
+
+        // Notify listeners about update so, content of custom tabs can be updated.
+        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
+        dispatch(NetInfoBody.listeners, "updateTabBody", [netInfoBox, file, context]);
     },
 
     setResponseText: function(file, netInfoBox, responseTextBox, context)
@@ -2791,6 +2829,16 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
         }
         else
             setClass(titleRow, "collapsed");
+    },
+
+    addListener: function(listener)
+    {
+        this.listeners.push(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        remove(this.listeners, listener);
     }
 });
 
