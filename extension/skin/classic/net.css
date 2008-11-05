@@ -416,3 +416,9 @@
     font-weight: bold;
     color: #565656;
 }
+
+.netInfoHtmlPreview {
+    border: 0;
+    width: 100%;
+    height:100%;
+}

@@ -2513,6 +2513,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                view: "Cache",
                $collapsed: "$file|hideCache"},
                "Cache" // todo: Localization
+            ),
+            A({class: "netInfoHtmlTab netInfoTab", onclick: "$onClickTab",
+               view: "Html",
+               $collapsed: "$file|hideHtml"},
+               "HTML"
             )
         ),
 
@@ -2555,6 +2560,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
                 TABLE({class: "netInfoCacheTable", cellpadding: 0, cellspacing: 0},
                     TBODY()
                 )
+            ),
+            DIV({class: "netInfoHtmlText netInfoText"},
+                IFRAME({class: "netInfoHtmlPreview"})
             )
         ),
 
@@ -2599,6 +2607,11 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
     hideCache: function(file)
     {
         return !file.cacheEntry || file.category=="image";
+    },
+
+    hideHtml: function(file)
+    {
+        return file.category != "html";
     },
 
     onClickTab: function(event)
@@ -2780,6 +2793,17 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             if (file.cacheEntry) {
                 this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
+        }
+
+        if (hasClass(tab, "netInfoHtmlTab") && file.loaded && !netInfoBox.htmlPresented)
+        {
+            netInfoBox.htmlPresented = true;
+
+            var text = (file.responseText != undefined) ? file.responseText
+                : context.sourceCache.loadText(file.href, file.method, file);
+
+            var iframe = getElementByClass(netInfoBox, "netInfoHtmlPreview");
+            iframe.contentWindow.document.body.innerHTML = text;
         }
 
         // Notify listeners about update so, content of custom tabs can be updated.
