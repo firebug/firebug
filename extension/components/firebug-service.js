@@ -877,7 +877,7 @@ FirebugService.prototype =
         		if (!debuggr)
         		{
         		    // This frame is not for the debugger we want
-        		    if (stepmode == STEP_OVER || stepmode == STEP_OUT)  // then we are in the debuggr we want and returned in to one we don't
+        		    if (stepMode == STEP_OVER || stepMode == STEP_OUT)  // then we are in the debuggr we want and returned in to one we don't
         		    {
         		        this.stopStepping(); // run, you are free.
         		    }
