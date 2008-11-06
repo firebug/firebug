@@ -1,14 +1,12 @@
-<!ENTITY  editors.Description       "Beállított Firebug szerkesztők:">
-<!ENTITY  editors.NameColumn        "Szerkesztő">
-<!ENTITY  editors.ExecutableColumn  "Futtatható">
-<!ENTITY  editors.ParamsColumn      "Futási paraméterek">
-
-<!ENTITY  add.label               "Add">
-<!ENTITY  remove.label            "Eltávolít">
-<!ENTITY  change.label            "Módosít">
-<!ENTITY  close.label             "Bezár">
-<!ENTITY  browse.label            "Tallóz...">
-
-<!ENTITY  changeEditor.Name       "Név:">
-<!ENTITY  changeEditor.Executable "Futtatható:">
-<!ENTITY  changeEditor.CmdLine    "Paraméterek:">
+<!ENTITY editors.Description "Beállított Firebug szerkesztők:">
+<!ENTITY editors.NameColumn "Szerkesztő">
+<!ENTITY editors.ExecutableColumn "Elérési út">
+<!ENTITY editors.ParamsColumn "Indítási paraméterek">
+<!ENTITY add.label "Hozzáadás">
+<!ENTITY remove.label "Eltávolítás">
+<!ENTITY change.label "Módosítás">
+<!ENTITY close.label "Bezárás">
+<!ENTITY browse.label "Tallózás...">
+<!ENTITY changeEditor.Name "Név:">
+<!ENTITY changeEditor.Executable "Elérési út:">
+<!ENTITY changeEditor.CmdLine "Paraméterek:">
