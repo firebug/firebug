@@ -1323,36 +1323,36 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             TBODY(
                 TR(
                     TD({class: "netResolvingBar timeInfoTipBar"}),
-                    TD("$file|getResolvingTime : DNS Lookup")
+                    TD("$file|getResolvingTime : " + $STR("requestinfo.DNS Lookup"))
                 ),
                 TR(
                     TD({class: "netConnectingBar timeInfoTipBar"}),
-                    TD("$file|getConnectintTime : Connecting")
+                    TD("$file|getConnectintTime : " + $STR("requestinfo.Connecting"))
                 ),
                 TR(
                     TD({class: "netWaitingBar timeInfoTipBar"}),
-                    TD("$file|getWaitingTime : Queuing + Sending")
+                    TD("$file|getWaitingTime : " + $STR("requestinfo.Queuing"))
                 ),
                 TR(
                     TD({class: "netRespondedBar timeInfoTipBar"}),
-                    TD("$file|getResponseTime : Waiting for response")
+                    TD("$file|getResponseTime : " + $STR("requestinfo.Waiting For Response"))
                 ),
                 TR({$loaded: "$file.loaded", 
                     $fromCache: "$file.fromCache"},
                     TD({class: "netTimeBar timeInfoTipBar"}),
-                    TD("$file|getLoadingTime : Receiving data")
+                    TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
                 ),
                 TR(
                     TD({align: "center"},
                         DIV({class: "netContentLoadBar timeInfoTipBar"})
                     ),
-                    TD("$file|getContentLoadTime : 'DOMContentLoaded' (event)")
+                    TD("$file|getContentLoadTime : " + $STR("requestinfo.DOMContentLoaded"))
                 ),
                 TR(
                     TD({align: "center"},
                         DIV({class: "netWindowLoadBar timeInfoTipBar"})
                     ),
-                    TD("$file|getWindowLoadTime : 'load' (event)")
+                    TD("$file|getWindowLoadTime : " + $STR("requestinfo.Load"))
                 )
             )
         ),
@@ -2515,12 +2515,12 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             A({class: "netInfoCacheTab netInfoTab", onclick: "$onClickTab",
                view: "Cache",
                $collapsed: "$file|hideCache"},
-               "Cache" // todo: Localization
+               $STR("Cache")
             ),
             A({class: "netInfoHtmlTab netInfoTab", onclick: "$onClickTab",
                view: "Html",
                $collapsed: "$file|hideHtml"},
-               "HTML"
+               $("HTML")
             )
         ),
 

@@ -510,37 +510,37 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             DIV({class: "messageInfoTabs"},
                 A({class: "messageInfoStackTab messageInfoTab", onclick: "$onClickTab",
                     view: "Stack"},
-                    "Stack"
+                    $STR("tracing.tab.Stack")
                 ),
                 A({class: "messageInfoExcTab messageInfoTab", onclick: "$onClickTab",
                     view: "Exc",
                     $collapsed: "$message|hideException"},
-                    "Exception"
+                    $STR("tracing.tab.Exception")
                 ),
                 A({class: "messageInfoPropsTab messageInfoTab", onclick: "$onClickTab",
                     view: "Props",
                     $collapsed: "$message|hideProperties"},
-                    "Properties"
+                    $STR("tracing.tab.Properties")
                 ),
                 A({class: "messageInfoScopeTab messageInfoTab", onclick: "$onClickTab",
                     view: "Scope",
                     $collapsed: "$message|hideScope"},
-                    "Scope"
+                    $STR("tracing.tab.Scope")
                 ),
                 A({class: "messageInfoResponseTab messageInfoTab", onclick: "$onClickTab",
                     view: "Response",
                     $collapsed: "$message|hideResponse"},
-                    "Response"
+                    $STR("tracing.tab.Response")
                 ),
                 A({class: "messageInfoSourceTab messageInfoTab", onclick: "$onClickTab",
                     view: "Source",
                     $collapsed: "$message|hideSource"},
-                    "Source"
+                    $STR("tracing.tab.Source")
                 ),
                 A({class: "messageInfoIfacesTab messageInfoTab", onclick: "$onClickTab",
                     view: "Ifaces",
                     $collapsed: "$message|hideInterfaces"},
-                    "Interfaces"
+                    $STR("tracing.tab.Interfaces")
                 ),
                 // xxxHonza: this doesn't seem to be much useful.
                 /*A({class: "messageInfoTypesTab messageInfoTab", onclick: "$onClickTab",
@@ -551,12 +551,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 A({class: "messageInfoObjectTab messageInfoTab", onclick: "$onClickTab",
                     view: "Types",
                     $collapsed: "$message|hideObject"},
-                    "Object"
+                    $STR("tracing.tab.Object")
                 ),
                 A({class: "messageInfoEventTab messageInfoTab", onclick: "$onClickTab",
                     view: "Event",
                     $collapsed: "$message|hideEvent"},
-                    "Event"
+                    $STR("tracing.tab.Event")
                 )
             ),
             DIV({class: "messageInfoStackText messageInfoText"},
@@ -785,7 +785,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (items.length > 0)
             items.push("-");
 
-        items.push(this.optionMenu("Show Scope Variables", "trace.enableScope"));
+        items.push(this.optionMenu($STR("tracing.Show Scope Variables"), "trace.enableScope"));
 
         return items;
     },
