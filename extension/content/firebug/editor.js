@@ -384,7 +384,7 @@ Firebug.Editor = extend(Firebug.Module,
 // ************************************************************************************************
 // BaseEditor
 
-Firebug.BaseEditor =
+Firebug.BaseEditor = extend(Firebug.MeasureBox, 
 {
     getValue: function()
     {
@@ -426,31 +426,7 @@ Firebug.BaseEditor =
     {
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    startMeasuring: function(target)
-    {
-        if (!this.measureBox)
-        {
-            this.measureBox = target.ownerDocument.createElement("span");
-            this.measureBox.className = "measureBox";
-        }
-
-        copyTextStyles(target, this.measureBox);
-        target.ownerDocument.body.appendChild(this.measureBox);
-    },
-
-    measureText: function(value)
-    {
-        this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
-        return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
-    },
-
-    stopMeasuring: function()
-    {
-        this.measureBox.parentNode.removeChild(this.measureBox);
-    }
-};
+});
 
 // ************************************************************************************************
 // InlineEditor
