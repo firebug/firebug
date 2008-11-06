@@ -34,6 +34,11 @@ top.SourceCache = function(context)
 
 top.SourceCache.prototype =
 {
+	isCached: function(url)
+	{
+		return this.cache.hasOwnProperty(url);
+	},
+	
     loadText: function(url, method, file)
     {
         var lines = this.load(url, method, file);
@@ -141,7 +146,6 @@ top.SourceCache.prototype =
             }
         }
 
-
         var stream;
         try
         {
@@ -185,7 +189,14 @@ top.SourceCache.prototype =
         if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
             FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
         var lines = splitLines(text);
-        return this.cache[url] = lines;
+        return this.storeSplitLines(url, lines);
+    },
+    
+    storeSplitLines: function(url, lines)  
+    {
+    	if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");
+    	return this.cache[url] = lines;
     },
 
     invalidate: function(url)
@@ -196,7 +207,15 @@ top.SourceCache.prototype =
     getLine: function(url, lineNo)
     {
         var lines = this.load(url);
-        return lines ? lines[lineNo-1] : null;
+        if (lines)
+        {
+        	if (lineNo <= lines.length)
+        		return lines[lineNo-1];
+        	else
+        		return (lines.length == 1) ? lines[0] : "("+lineNo+" out of range "+lines.length+")";
+        }
+        else
+        	return "(no source for "+url+")";
     }
 };
 
