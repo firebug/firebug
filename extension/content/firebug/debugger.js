@@ -1785,7 +1785,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     toggleBreakpoint: function(lineNo)
     {
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
-        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n");                           /*@explore*/
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);                           /*@explore*/
         if (lineNode.getAttribute("breakpoint") == "true")
             fbs.clearBreakpoint(this.location.href, lineNo);
         else
@@ -2617,7 +2617,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         {
             fbs.enumerateBreakpoints(url, {call: function(url, line, props, script)
             {
-            	FBTrace.sysout("debugger.extractBreakpoints type: "+props.type, props);
+                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.extractBreakpoints type: "+props.type, props);
             	if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
             		return;
                 
@@ -2733,7 +2733,6 @@ function SourceFileRenamer(context)
 	
 SourceFileRenamer.prototype.checkForRename = function(url, line, props)
 {
-	FBTrace.sysout("debugger.checkForRename type: "+props.type, props);
 	var sourceFile = this.context.sourceFileMap[url];
 	if (sourceFile.isEval() || sourceFile.isEvent())
 	{

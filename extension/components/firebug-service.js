@@ -396,7 +396,7 @@ FirebugService.prototype =
         stepStayOnDebuggr = stayOnDebuggr;
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount);                         /*@explore*/
+            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));                        
     },
 
     suspend: function(stayOnDebuggr)
@@ -404,6 +404,10 @@ FirebugService.prototype =
         stepMode = STEP_SUSPEND;
         stepFrameLineId = null;
         stepStayOnDebuggr = stayOnDebuggr;
+ 
+        if (FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));                        
+
         this.hookInterrupts();
     },
 
@@ -861,23 +865,37 @@ FirebugService.prototype =
     // || interuptHook.  rv is ignored
     onBreak: function(frame, type, rv)
     {
-        if (FBTrace.DBG_FBS_STEP) 
-        	FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
-        
         try
         {
         	// avoid step_out from web page to chrome
         	if (type==jsdIExecutionHook.TYPE_INTERRUPTED && stepStayOnDebuggr)
         	{
         		var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
+                if (FBTrace.DBG_FBS_STEP) 
+                    FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+
         		if (!debuggr)
-        			return RETURN_CONTINUE;  // This means that we will continue to take interupts until  when?
+        		{
+        		    // This frame is not for the debugger we want
+        		    if (stepmode == STEP_OVER || stepmode == STEP_OUT)  // then we are in the debuggr we want and returned in to one we don't
+        		    {
+        		        this.stopStepping(); // run, you are free.
+        		    }
+        		        
+        			return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
+        		}
         	}
         	else
+        	{
         		var debuggr = this.findDebugger(frame);
+        		
+                if (FBTrace.DBG_FBS_STEP) 
+                    FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+        	}
         	
-            if (debuggr)
-                return this.breakIntoDebugger(debuggr, frame, type);
+        	if (debuggr)
+        	    return this.breakIntoDebugger(debuggr, frame, type);
+        	 
         }
         catch(exc)
         {
@@ -914,8 +932,7 @@ FirebugService.prototype =
     onDebug: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_ERRORS)                                                                                               /*@explore*/
-            FBTrace.sysout("fbs.onDebug fileName="+frame.script.fileName+ " reportNextError="                							/*@explore*/
-                                 +reportNextError+" breakOnNextError="+breakOnNextError+" breakOnNext:"+this.breakOnErrors);                            /*@explore*/
+            FBTrace.sysout("fbs.onDebug fileName="+frame.script.fileName+ " reportNextError="+reportNextError+" breakOnNextError="+breakOnNextError+" breakOnNext:"+this.breakOnErrors);
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
         try
@@ -1478,7 +1495,7 @@ FirebugService.prototype =
                 {
                     if (!debuggr.breakContext)
                         FBTrace.dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
-                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr "+debuggr.debuggerName+" at "+i+" for global, location:"+global.location);
+                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for global, location:"+global.location);
                     return debuggr;
                 }
             }
@@ -1797,7 +1814,9 @@ FirebugService.prototype =
             			FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":" notExecutable"), sourceFile);
             	}
             	else
+            	{
             		if (FBTrace.DBG_FBS_BP) FBTrace.sysout("setJSDBreakpoint LINE MISMATCH for tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":" notExecutable"), sourceFile);
+            	}
             }
             else
             {
@@ -1908,7 +1927,7 @@ FirebugService.prototype =
                     }
                     else if (stepMode == STEP_OVER) 
                     {
-                        if (hookFrameCount <= stepFrameCount)
+                        if (hookFrameCount <= stepFrameCount)  
                             fbs.hookInterrupts();
                     }
                     else if (stepMode == STEP_OUT)
@@ -1930,13 +1949,13 @@ FirebugService.prototype =
     {
         function interruptHook(frame, type, rv)
         {
-            if ( isFilteredURL(frame.script.fileName) )
+            if ( isFilteredURL(frame.script.fileName) )  // TODO use JSD for this filtering
                 return RETURN_CONTINUE;
 
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
             var frameLineId = hookFrameCount + frame.script.fileName + frame.line;
-            if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("interruptHook frameLineId: "+frameLineId);                                     /*@explore*/
+            if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId);                                     /*@explore*/
             if (frameLineId != stepFrameLineId)
                 return fbs.onBreak(frame, type, rv);
             else
