@@ -23,7 +23,7 @@
 <!ENTITY firebug.AlwaysOpenInWindow "Zawsze otwieraj w nowym oknie">
 <!ENTITY firebug.ShowFirebug "Otwórz">
 <!ENTITY firebug.DetachFirebug "Otwórz w osobnym oknie">
-<!ENTITY firebug.OpenWith "Otwórz za pomocą Edytora">
+<!ENTITY firebug.OpenWith "Otwórz za pomocą edytora">
 <!ENTITY firebug.CloseFirebug "Zamknij">
 <!ENTITY firebug.Permissions "Uprawnione witryny">
 <!ENTITY firebug.ConfigureEditors "Konfiguruj edytory">
@@ -48,3 +48,5 @@
 <!ENTITY firebug.All "Wszystko">
 <!ENTITY firebug.Images "Obrazki">
 <!ENTITY firebug.Flash "Flash">
+<!ENTITY firebug.Trace.ToggleConsole "Otwórz konsolę">
+<!ENTITY firebug.Trace.ToggleConsoleTooltip "Otwiera konsolę śledzenia Firebuga">
