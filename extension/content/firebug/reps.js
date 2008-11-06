@@ -458,6 +458,8 @@ this.Arr = domplate(Firebug.Rep,
         try {
             if (!obj)
                 return false;
+            else if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors?
+            	return false;
             else if (isFinite(obj.length) && typeof obj.splice === 'function')
                 return true;
             else if (obj instanceof HTMLCollection)
@@ -1267,7 +1269,8 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-        var fromCommandLine = error.href.indexOf("XPCSafeJSObjectWrapper") != -1;
+    	var url = error.href.toString();
+        var fromCommandLine = (url.indexOf("XPCSafeJSObjectWrapper") != -1);
         return !fromCommandLine && error.trace;
     },
 
