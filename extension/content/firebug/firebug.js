@@ -2662,6 +2662,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
             Firebug.setPref(prefDomain, "enableSystemPages", (global ? "" : option));
         else if (isLocalURL(browserURI.spec))
             Firebug.setPref(prefDomain, "enableLocalFiles", (global ? "" : option));
+        else if (isDataURL(browserURI.spec))
+        	return;
 
         if (!browserURI.spec || isSystemURL(browserURI.spec) || isLocalURL(browserURI.spec))
         {
@@ -2712,6 +2714,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
         {
             var option = Firebug.getPref(prefDomain, "enableLocalFiles");
             return option ? option : (this.isAlwaysEnabled() ? "enable" : "disable");
+        }
+        else if (isDataURL(browserURI.spec))
+        {
+        	return "enable-site";
         }
 
         switch (permissionManager.testPermission(browserURI, prefDomain))

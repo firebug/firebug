@@ -1141,12 +1141,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.onReadySpy)  // coool we can get the request URL.
         {
             url = context.onReadySpy.getURL();
-            if (context.sourceFileName[url]) // oops taken
+            if (context.sourceFileName && context.sourceFileName[url]) // oops taken
             	url = null;
             else
             {
-            if (FBTrace.DBG_EVAL || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("getEvalLevelSourceFile using spy URL:"+url+"\n");
+            	if (FBTrace.DBG_EVAL || FBTrace.DBG_ERRORS)
+            		FBTrace.sysout("getEvalLevelSourceFile using spy URL:"+url+"\n");
             }
         }
         
@@ -2688,7 +2688,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         var bpCount = 0, disabledCount = 0;
         for (var url in context.sourceFileMap)
         {
-            fbs.enumerateBreakpoints(url, {call: function(url, line, script, disabled, condition)
+            fbs.enumerateBreakpoints(url, {call: function(url, line)
             {
                 ++bpCount;
                 if (fbs.isBreakpointDisabled(url, line))
@@ -3077,7 +3077,7 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
 function setLineBreakpoints(sourceFile, sourceBox)
 {
-    fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, script, props)
+    fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, script)
     {
         var scriptRow = sourceBox.getLineNode(line);
         if (scriptRow)

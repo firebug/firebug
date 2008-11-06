@@ -2446,25 +2446,53 @@ this.splitFileName = function(url)
 
 this.splitURLBase = function(url)
 {
-    this.reDataURL.lastIndex = 0;
-    var d = this.reDataURL.exec(url); // 1: fileName, 2: baseLineNumber, 3: first line
-    if (d)
-    {
-        var src_starts = this.reDataURL.lastIndex;
-        var caller_URL = decodeURIComponent(d[1]);
-        var caller_split = this.splitURLTrue(caller_URL);
+	if (this.isDataURL(url))
+		return this.splitDataURL(url);
+	return this.splitURLTrue(url);
+};
 
-        if (!d[3])
-            var hint = url.substr(src_starts);
-        else
-            var hint = decodeURIComponent(d[3]).replace(/\s*$/, "");
+this.splitDataURL = function(url)
+{
+	var mark = url.indexOf(':', 3);
+	if (mark != 4)
+		return false;	//  the first 5 chars must be 'data:'
+	
+	var point = url.indexOf(',', mark+1);
+	if (point < mark)
+		return false; // syntax error
+	
+	var props = { encodedContent: url.substr(point+1) };
+	
+	var metadataBuffer = url.substr(mark+1, point);
+	var metadata = metadataBuffer.split(';');
+	for (var i = 0; i < metadata.length; i++)
+	{
+		var nv = metadata[i].split('=');
+		if (nv.length == 2)
+			props[nv[0]] = nv[1];
+	}
+	
+	// Additional Firebug-specific properties
+	if (props.hasOwnProperty('fileName')) 
+	{
+		 var caller_URL = decodeURIComponent(props['fileName']);
+	     var caller_split = this.splitURLTrue(caller_URL);
 
-        if (!d[2])
-            return { path: caller_split.path, name: 'eval->'+hint };
+        if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
+        {
+        	props['path'] = caller_split.path;
+        	props['line'] = props['baseLineNumber'];
+        	var hint = decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+            props['name'] =  'eval->'+hint;
+        }
         else
-            return { path: caller_split.path, name: 'eval->'+hint, line: d[2] };
+        {
+        	props['name'] = caller_split.name;
+        	props['path'] = caller_split.path;
+        }
     }
-    return this.splitURLTrue(url);
+    
+	return props;
 };
 
 this.splitURLTrue = function(url)
@@ -2552,6 +2580,11 @@ this.isLocalURL = function(url)
         return true;
     else
         return false;
+};
+
+this.isDataURL = function(url)
+{
+	return (url && url.substr(0,5) == "data:");
 };
 
 this.getLocalPath = function(url)
@@ -3243,13 +3276,17 @@ this.SourceFile.prototype =
             str += (this.outerScript.isValid?this.outerScript.tag:"X") +"| ";
         if (this.innerScripts)
         {
+        	var numberInvalid = 0;
             for (var i = 0; i < this.innerScripts.length; i++)
             {
                 var script = this.innerScripts[i];
-                if (script.isValid)  str += script.tag+" ";
+                if (script.isValid)  
+                	str += script.tag+" ";
+                else
+                	numberInvalid++;
             }
         }
-        str += ")";
+        str += ")"+(numberInvalid ? "("+numberInvalid+" invalid)" : "");
         return str;
     },
 
@@ -3404,7 +3441,7 @@ this.SourceFile.prototype =
     {
         // script.isValid will be true.
         if (FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("getScriptsAtLineNumber trying "+script.tag+", is "+script.baseLineNumber+" <= "+targetLineNo +" <= "+ (script.baseLineNumber + script.lineExtent)+"? using offset = "+offset+"\n");
+            FBTrace.sysout("addScriptAtLineNumber trying "+script.tag+", is "+script.baseLineNumber+" <= "+targetLineNo +" <= "+ (script.baseLineNumber + script.lineExtent)+"? using offset = "+offset+"\n");
 
         if (targetLineNo >= script.baseLineNumber)
         {
@@ -3432,7 +3469,7 @@ this.SourceFile.prototype =
                 {
                     var checkExecutable = "";
                     if (mustBeExecutableLine)
-                        var checkExecutable = " isLineExecutable: "+script.isLineExecutable(targetLineNo, this.pcmap_type);
+                        var checkExecutable = " isLineExecutable: "+script.isLineExecutable(targetLineNo, this.pcmap_type)+"@pc:"+script.lineToPc(targetLineNo, this.pcmap_type);
                     FBTrace.sysout("getScriptsAtLineNumber found "+script.tag+", isValid: "+script.isValid+" targetLineNo:"+targetLineNo+checkExecutable+"\n");
                 }
             }

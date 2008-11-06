@@ -1847,7 +1847,7 @@ FirebugService.prototype =
         // install the necessary hooks
         hookFrameCount = countFrames(frame);
         this.startStepping();
-
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger returning "+returned);
         return returned;
     },
 
@@ -1905,14 +1905,14 @@ FirebugService.prototype =
                         jsd.interruptHook = null;
 
                     if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_CALL stepMode = "+getStepName(stepMode)/*@explore*/
-                             +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");               /*@explore*/
+                             +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+" "+frame.script.fileName+"\n");               /*@explore*/
                     break;
                 }
                 case TYPE_FUNCTION_RETURN:
                 {
                     --hookFrameCount;
                     if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN stepMode = "+getStepName(stepMode)/*@explore*/
-                                        +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");    /*@explore*/
+                                        +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+" "+frame.script.fileName+"\n");    /*@explore*/
 
                     if (hookFrameCount == 0) {  // stack empty
                         if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) ) {
@@ -1955,14 +1955,14 @@ FirebugService.prototype =
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
             var frameLineId = hookFrameCount + frame.script.fileName + frame.line;
-            if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId);                                     /*@explore*/
+            if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId);                                     /*@explore*/
             if (frameLineId != stepFrameLineId)
                 return fbs.onBreak(frame, type, rv);
             else
                 return RETURN_CONTINUE;
         }
 
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook\n");                                                                  /*@explore*/
+        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId"+stepFrameLineId);                                                                  /*@explore*/
         jsd.interruptHook = { onExecute: interruptHook };
     },
 

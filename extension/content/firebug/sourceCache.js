@@ -45,10 +45,10 @@ top.SourceCache.prototype =
         if ( this.cache.hasOwnProperty(url) )
             return this.cache[url];
 
-        var d = FBL.reDataURL.exec(url);
+        var d = FBL.splitDataURL(url);  //TODO the RE should not have baseLine
         if (d)
         {
-            var src = url.substring(FBL.reDataURL.lastIndex);
+            var src = d.encodedContent;
             var data = decodeURIComponent(src);
             var lines = data.split(/\r\n|\r|\n/);
             this.cache[url] = lines;
@@ -156,9 +156,9 @@ top.SourceCache.prototype =
                 var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";                /*@explore*/
                 FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n"); /*@explore*/
                 FBTrace.dumpProperties("sourceCache.load fails channel.open for url="+url+ " cause:", exc);                /*@explore*/
-                FBTrace.dumpStack("sourceCache.load fails channel=", channel);                                        /*@explore*/
+                FBTrace.dumpStack("sourceCache.load fails channel=", channel);
             }
-            return;
+            return ["sourceCache.load FAILS for url="+url, exc.toString()];
         }
 
         try
