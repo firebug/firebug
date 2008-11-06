@@ -1137,6 +1137,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody", 1, eval_expr);
         if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile source:"+source+"\n");                     /*@explore*/
 
+        var lines = splitLines(source);
+        
         var url = null;
         if (context.onReadySpy)  // coool we can get the request URL.
         {
@@ -1150,14 +1152,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
         }
         
-        var lines = context.sourceCache.store(url, source); 
-        
         if(!url)
         	url = this.getDynamicURL(context, frame.script.fileName, lines, "eval");
+        
+        context.sourceCache.storeSplitLines(url, lines); 
 
         var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, innerScripts);
         context.sourceFileMap[url] = sourceFile;
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getEvalLevelSourceFile sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n"); /*@explore*/
+        
+        if (FBTrace.DBG_SOURCEFILES) 
+        	FBTrace.sysout("debugger.getEvalLevelSourceFile sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n"); /*@explore*/
 
         return sourceFile;
     },
@@ -2570,11 +2574,14 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
     {
         updateScriptFiles(this.context);
 
-        var breakpoints = [];
-        var errorBreakpoints = [];
-        var monitors = [];
+        var extracted = this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
 
-        this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
+        var breakpoints = extracted.breakpoints;
+        var errorBreakpoints = extracted.errorBreakpoints;
+        var monitors = extracted.monitors;
+        
+        if (FBTrace.DBG_BP)
+        	FBTrace.sysout("debugger.breakpoints.refresh extracted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors])
 
         function sortBreakpoints(a, b)
         {
@@ -2587,6 +2594,9 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         breakpoints.sort(sortBreakpoints);
         errorBreakpoints.sort(sortBreakpoints);
         monitors.sort(sortBreakpoints);
+ 
+        if (FBTrace.DBG_BP)
+        	FBTrace.sysout("debugger.breakpoints.refresh sorted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors])
 
         var groups = [];
 
@@ -2611,6 +2621,10 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     extractBreakpoints: function(context, breakpoints, errorBreakpoints, monitors)
     {
+        var breakpoints = [];
+        var errorBreakpoints = [];
+        var monitors = [];
+
     	var renamer = new SourceFileRenamer(context);
     	
         for (var url in context.sourceFileMap)
@@ -2663,19 +2677,21 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 monitors.push({name: name, href: url, lineNumber: line, checked: true,
                         sourceLine: ""});
             }});
+            
         }
         
+        var result = null;
+        
         if (renamer.needToRename(context))
-        {
-        	// since we renamed some sourceFiles we need to refresh the breakpoints again.
-            breakpoints = [];
-            errorBreakpoints = [];
-            monitors = [];
-        	this.extractBreakpoints(context, breakpoints, errorBreakpoints, monitors);
-        }
+        	result = this.extractBreakpoints(context); // since we renamed some sourceFiles we need to refresh the breakpoints again.
+        else
+        	result = { breakpoints: breakpoints, errorBreakpoints: errorBreakpoints, monitors: monitors };
+        
         // even if we did not rename, some bp may be dynamic
         if (FBTrace.DBG_SOURCEFILES)
-			FBTrace.sysout("debugger.extractBreakpoints context.dynamicURLhasBP: "+context.dynamicURLhasBP, [breakpoints, errorBreakpoints, monitors]);
+			FBTrace.sysout("debugger.extractBreakpoints context.dynamicURLhasBP: "+context.dynamicURLhasBP, result);
+        
+        return result;
     },
     
     getOptionsMenuItems: function()
@@ -2799,6 +2815,12 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
             panel.context.invalidatePanels("breakpoints");
             panel.renameSourceBox(oldURL, newURL);
         }
+		if (context.sourceCache.isCached(oldURL))
+		{
+			var lines = context.sourceCache.load(oldURL);
+			context.sourceCache.storeSplitLines(newURL, lines);
+			context.sourceCache.invalidate(oldURL);
+		}
 		
 		if (FBTrace.DBG_SOURCEFILES)
 			FBTrace.sysout("SourceFileRenamer renamed "+oldURL +" to "+newURL, { newBP: newBP, oldBP: bp});
