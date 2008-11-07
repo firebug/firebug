@@ -49,22 +49,23 @@
     <key id="key_find" key="&findOnCmd.commandkey;" command="cmd_find" modifiers="accel"/>
     <key id="key_separateConsole" key="b" command="cmd_separateConsole" modifiers="accel"/>
     <key id="key_saveToFile" key="s" command="cmd_saveToFile" modifiers="accel"/>
+    <key id="key_clearConsole" key="l" command="cmd_clearConsole" modifiers="accel"/>
   </keyset>
 
   <toolbox id="consoleToolbox">
     <!-- Toolbar -->
     <toolbar id="consoleToolbar" align="center">
       <toolbarbutton id="clearConsole"
-        label="Clear" class="toolbar-image-button"
-        tooltiptext="Clear Console Ctrl+C" 
+        label="tracing.cmd.Clear" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Clear" 
         command="cmd_clearConsole"/>
       <toolbarbutton id="findConsole"
-        label="Find" class="toolbar-image-button"
-        tooltiptext="Find Text Ctrl+F" 
+        label="tracing.cmd.Find" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Find" 
         command="cmd_find"/>
       <toolbarbutton id="separateConsole"
-        label="Bookmark" class="toolbar-image-button"
-        tooltiptext="Insert Bookmark Ctrl+B" 
+        label="tracing.cmd.Bookmark" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Bookmark" 
         command="cmd_separateConsole"/>
       <!--<toolbarbutton id="saveToFile"
         label="Save to File" class="toolbar-image-button"
@@ -72,12 +73,12 @@
         command="cmd_saveToFile"/> -->
       <toolbarseparator flex="1"/>
       <toolbarbutton id="restartFirefox"
-        label="Restart Firefox" class="toolbar-image-button"
-        tooltiptext="Restart Firefox" 
+        label="tracing.cmd.Restart" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Restart" 
         command="cmd_restartFirefox"/>
       <toolbarbutton id="closeFirefox"
-        label="Exit Firefox" class="toolbar-image-button"
-        tooltiptext="Exit Firefox" 
+        label="tracing.cmd.Exit" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Exit"
         command="cmd_exitFirefox"/>
     </toolbar> 
   </toolbox>

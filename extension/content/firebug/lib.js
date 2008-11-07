@@ -361,12 +361,19 @@ function $STRF(name, args)
 this.$STR = $STR;
 this.$STRF = $STRF;
 
-this.internationalize = function(eltID, attr, args)  // Use the current value of the attribute as a key to look up the localized value
+/*
+ * Use the current value of the attribute as a key to look up the localized value.
+ */
+this.internationalize = function(element, attr, args)
 {
-    var elt = document.getElementById(eltID);
-    var xulString = elt.getAttribute(attr);
+    if (typeof element == "string")
+        element = document.getElementById(element);
+
+    var xulString = element.getAttribute(attr);
     var localized = args ? $STRF(xulString, args) : $STR(xulString);
-    elt.setAttribute(attr, localized);
+
+    // Set localized value of the attribute.
+    element.setAttribute(attr, localized);
 }
 
 // ************************************************************************************************
