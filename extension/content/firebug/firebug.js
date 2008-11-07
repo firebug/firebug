@@ -2229,7 +2229,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
     	// The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
     	// But our SourceBoxPanel has viewport that will change size.
     	if (this.selectedSourceBox)
+    	{
+    		delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
+    		delete this.selectedSourceBox.halfViewableLines;
     		this.reView(this.selectedSourceBox);
+    	}
     },
     
 });
