@@ -2050,7 +2050,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     
     reShow: function(state) 
     {
-        this.retryRestore = restoreObjects(this, state, true);  // delay the retry for loadedContext
+        restoreLocation(this, state);  
 
         if (state)  // then we are restoring
         {
