@@ -1,59 +1,50 @@
-<!ENTITY  firebug.Firebug               "Firebug">
-<!ENTITY  firebug.Close                 "Tancar">
-<!ENTITY  firebug.View                  "Vista">
-<!ENTITY  firebug.Help                  "Ajuda">
-<!ENTITY  firebug.Vertical              "Panells Verticals">
-<!ENTITY  firebug.Run                   "Executar">
-<!ENTITY  firebug.Copy                  "Copiar">
-<!ENTITY  firebug.CopyBookmarklet       "Copiar el codi com un 'bookmarklet'.">
-
-<!ENTITY  firebug.Options               "Opcions">
-<!ENTITY  firebug.TextSize              "Tamany del Text">
-<!ENTITY  firebug.IncreaseTextSize      "Incrementar Tamany del Text">
-<!ENTITY  firebug.DecreaseTextSize      "Reduir Tamany del Text">
-<!ENTITY  firebug.NormalTextSize        "Tamany del Text Normal">
-<!ENTITY  firebug.ShowTooltips          "Mostrar 'Tooltips' de Vista Previa">
-<!ENTITY  firebug.ShadeBoxModel         "Shade Box Model">
-<!ENTITY  firebug.Website               "Lloc Web de Firebug...">
-<!ENTITY  firebug.Documentation         "Documentació...">
-<!ENTITY  firebug.KeyShortcuts          "Tecles de funció...">
-<!ENTITY  firebug.Forums                "Grup de Discussió...">
-<!ENTITY  firebug.Issues                "Incidències...">
-<!ENTITY  firebug.Donate                "Donar...">
-<!ENTITY  firebug.About                 "Quant a...">
-<!ENTITY  firebug.AlwaysOpenInWindow    "Obrir Sempre a Nova Finestra">
-<!ENTITY  firebug.AlwaysEnableFirebug   "Sempre habilitar Firebug">
-
-<!ENTITY  firebug.ShowFirebug           "Obrir Firebug">
-<!ENTITY  firebug.DetachFirebug         "Obrir Firebug a Nova Finestra">
-<!ENTITY  firebug.OpenWith              "Obrir amb Editor">
-<!ENTITY  firebug.CloseFirebug          "Tancar Firebug">
-<!ENTITY  firebug.Permissions           "Permissos...">
-<!ENTITY  firebug.ConfigureEditors      "Configurar Editors">
-<!ENTITY  firebug.CommandLine           "Línia de Comandes">
-<!ENTITY  firebug.Search                "Cercar">
-
-<!ENTITY  firebug.Continue              "Continuar (F8)">
-<!ENTITY  firebug.StepOver              "Saltar (F10)">
-<!ENTITY  firebug.StepInto              "Entrar (F11)">
-<!ENTITY  firebug.StepOut               "Sortir">
-<!ENTITY  firebug.BreakOnErrors         "Aturar si Erorrs">
-
-<!ENTITY  firebug.Inspect               "Inspeccioneu">
-<!ENTITY  firebug.InspectElement        "Inspeccioneu Element">
-<!ENTITY  firebug.InspectTooltip        "Pitgeu un element de la plana a inspeccionar">
-
-<!ENTITY  firebug.Edit                  "Editar">
-<!ENTITY  firebug.EditHTMLTooltip       "Editar aquest HTML">
-<!ENTITY  firebug.EditCSSTooltip        "Editar aquest full d'estils">
-
-<!ENTITY  firebug.Profile               "Inspeccionar">
-<!ENTITY  firebug.ProfileScript         "Inspeccionar JavaScript">
-
-<!ENTITY  firebug.Clear                 "Netejar">
-<!ENTITY  firebug.ClearConsole          "Netejar Consola">
-<!ENTITY  firebug.ClearTooltip          "Netejar Tooltip">
-
-<!ENTITY  firebug.All                   "Tot">
-<!ENTITY  firebug.Images                "Imatges">
-<!ENTITY  firebug.Flash                 "Flash">
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Tanca">
+<!ENTITY firebug.View "Visualitza">
+<!ENTITY firebug.Help "Ajuda">
+<!ENTITY firebug.Vertical "Panells verticals">
+<!ENTITY firebug.Run "Executar">
+<!ENTITY firebug.Copy "Copia">
+<!ENTITY firebug.CopyBookmarklet "Copia el codi com un &apos;bookmarklet&apos;.">
+<!ENTITY firebug.Options "Opcions">
+<!ENTITY firebug.TextSize "Mida del Text">
+<!ENTITY firebug.IncreaseTextSize "Incrementa la mida del text">
+<!ENTITY firebug.DecreaseTextSize "Redueix la mida del text">
+<!ENTITY firebug.NormalTextSize "Mida del text normal">
+<!ENTITY firebug.ShowTooltips "Mostra els indicadors de funció">
+<!ENTITY firebug.ShadeBoxModel "Shade Box Model">
+<!ENTITY firebug.Website "Lloc Web de Firebug...">
+<!ENTITY firebug.Documentation "Documentació...">
+<!ENTITY firebug.KeyShortcuts "Tecles de funció...">
+<!ENTITY firebug.Forums "Grup de Discussió...">
+<!ENTITY firebug.Issues "Incidències...">
+<!ENTITY firebug.Donate "Donatius...">
+<!ENTITY firebug.About "Quant a...">
+<!ENTITY firebug.AlwaysOpenInWindow "Obri sempre en una nova finestra">
+<!ENTITY firebug.ShowFirebug "Obri el Firebug">
+<!ENTITY firebug.DetachFirebug "Obri el Firebug en una nova finestra">
+<!ENTITY firebug.OpenWith "Obri amb l&apos;editor">
+<!ENTITY firebug.CloseFirebug "Tanca el Firebug">
+<!ENTITY firebug.Permissions "Permisos...">
+<!ENTITY firebug.ConfigureEditors "Configura els editors">
+<!ENTITY firebug.CommandLine "Línia de comandaments">
+<!ENTITY firebug.Search "Cerca">
+<!ENTITY firebug.Continue "Continua (F8)">
+<!ENTITY firebug.StepOver "Salta (F10)">
+<!ENTITY firebug.StepInto "Entra (F11)">
+<!ENTITY firebug.StepOut "Surt">
+<!ENTITY firebug.BreakOnErrors "Atura si hi ha errors">
+<!ENTITY firebug.Inspect "Inspecciona">
+<!ENTITY firebug.InspectElement "Inspecciona l&apos;element">
+<!ENTITY firebug.InspectTooltip "Preméu damunt d&apos;un element de la pàgina per inspeccionar-lo">
+<!ENTITY firebug.Edit "Edita">
+<!ENTITY firebug.EditHTMLTooltip "Edita aquest codi HTML">
+<!ENTITY firebug.EditCSSTooltip "Edita aquest full d&apos;estils">
+<!ENTITY firebug.Profile "Inspecciona">
+<!ENTITY firebug.ProfileScript "Inspecciona el JavaScript">
+<!ENTITY firebug.Clear "Neteja">
+<!ENTITY firebug.ClearConsole "Neteja la consola">
+<!ENTITY firebug.ClearTooltip "Neteja la consola">
+<!ENTITY firebug.All "Tot">
+<!ENTITY firebug.Images "Imatges">
+<!ENTITY firebug.Flash "Flash">
