@@ -1784,7 +1784,6 @@ Firebug.MeasureBox =
             }
 
             copyTextStyles(target, this.measureBox);
-            FBTrace.sysout("Measurebox after copy", this.measureBox);
             target.ownerDocument.body.appendChild(this.measureBox);
         },
 
@@ -2002,8 +2001,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
         {
             sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
             this.panelNode.appendChild(sourceBox);
-            if (!this.setSourceBoxLineSizes(sourceBox))
-                if (FBTrace.DBG_ERRORS) FBTrace.sysout("firebug.showSourceFile FAILED to setSourceBoxLineSizes", sourceBox);
+            this.setSourceBoxLineSizes(sourceBox);
             this.buildViewAround(sourceBox, 1);
         }
 
