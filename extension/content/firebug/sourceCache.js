@@ -149,7 +149,7 @@ top.SourceCache.prototype =
         var stream;
         try
         {
-            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load url:"+url+"\n");                                             /*@explore*/
+            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load url:"+url+" with charset"+charset+"\n");                                             /*@explore*/
             stream = channel.open();
         }
         catch (exc)
