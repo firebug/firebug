@@ -17,11 +17,11 @@
 <!ENTITY firebug.Documentation "Dokumentáció...">
 <!ENTITY firebug.KeyShortcuts "Gyorsbillentyűk...">
 <!ENTITY firebug.Forums "Vita fórum...">
-<!ENTITY firebug.Issues "Hiba követő...">
+<!ENTITY firebug.Issues "Hibabejelentő...">
 <!ENTITY firebug.Donate "Támogatás...">
 <!ENTITY firebug.About "Névjegy...">
 <!ENTITY firebug.AlwaysOpenInWindow "Mindig új ablakban nyíljon meg">
-<!ENTITY firebug.ShowFirebug "Firebug megnyitás">
+<!ENTITY firebug.ShowFirebug "Firebug megnyitása">
 <!ENTITY firebug.DetachFirebug "Firebug megnyitása új ablakban">
 <!ENTITY firebug.OpenWith "Megnyitás szerkesztővel">
 <!ENTITY firebug.CloseFirebug "Firebug bezárása">
@@ -48,5 +48,3 @@
 <!ENTITY firebug.All "Mind">
 <!ENTITY firebug.Images "Képek">
 <!ENTITY firebug.Flash "Flash">
-<!ENTITY firebug.Trace.ToggleConsole "Konzol megnyitása">
-<!ENTITY firebug.Trace.ToggleConsoleTooltip "Firebug hibakövető konzol megnyitása.">
