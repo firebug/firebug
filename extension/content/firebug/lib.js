@@ -34,7 +34,7 @@ const reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
 const reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
 const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 
-const restoreRetryTimeout = 500;
+const overrideDefaultsWithPersistedValuesTimeout = 500;
 
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
 
@@ -3047,27 +3047,30 @@ this.persistObject = function(object, context)
     return rep ? rep.persistObject(object, context) : null;
 };
 
-this.restoreObjects = function(panel, panelState, letMeRetryLater)
+this.restoreLocation =  function(panel, panelState)
 {
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
-    
-    var needRetry = false;
-    
-    // Persist the location and selection so we can restore them in case of a reload
-    if (!panel.location && panelState && panelState.persistedLocation)
-    {
-        var location = panelState.persistedLocation(panel.context);
-        if (location)
-            panel.navigate(location);
-        else
-        	needRetry = true;
-    }
+	var needRetry = false;
+	
+	if (!panel.location && panelState && panelState.persistedLocation)
+	{
+	    var location = panelState.persistedLocation(panel.context);
+	    if (location)
+	        panel.navigate(location);
+	    else
+	     	needRetry = true;
+	}
 
-    if (!panel.location)
-        panel.navigate(null);
+	if (!panel.location)
+	    panel.navigate(null);
+	    
+	return needRetry;
+};
 
-    if (!panel.selection && panelState && panelState.persistedSelection)
+this.restoreSelection = function(panel, panelState)
+{
+	var needRetry = false;
+	
+	if (!panel.selection && panelState && panelState.persistedSelection)
     {
         var selection = panelState.persistedSelection(panel.context);
         if (selection)
@@ -3079,9 +3082,21 @@ this.restoreObjects = function(panel, panelState, letMeRetryLater)
     if (!panel.selection)  // Couldn't restore the selection, so select the default object
         panel.select(null);
     
-    if (needRetry)
+    return needRetry;
+};
+
+this.restoreObjects = function(panel, panelState, letMeRetryLater)
+{
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+    
+    var locationRetry = this.restoreLocation(panel, panelState);
+    
+    var selectionRetry = this.restoreSelection(panel, panelState);
+    
+    if (locationRetry || selectionRetry)
     {
-    	function restoreRetry()
+    	function overrideDefaultsWithPersistedValues()
     	{
     		if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
     		{
@@ -3097,13 +3112,13 @@ this.restoreObjects = function(panel, panelState, letMeRetryLater)
     		}
     	
     		if (FBTrace.DBG_INITIALIZE)
-    			FBTrace.dumpProperties("lib.restoreRetry panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+    			FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
     	}
     	
     	if (letMeRetryLater)
-    		return restoreRetry();
+    		return overrideDefaultsWithPersistedValues();
     	else // If we couldn't restore the selection, wait a bit and try again
-            panel.context.setTimeout(restoreRetry, restoreRetryTimeout);
+            panel.context.setTimeout(overrideDefaultsWithPersistedValues, overrideDefaultsWithPersistedValuesTimeout);
     }
 };
 
