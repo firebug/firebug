@@ -2520,7 +2520,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
             A({class: "netInfoHtmlTab netInfoTab", onclick: "$onClickTab",
                view: "Html",
                $collapsed: "$file|hideHtml"},
-               $("HTML")
+               $STR("HTML")
             )
         ),
 
