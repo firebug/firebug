@@ -48,5 +48,3 @@
 <!ENTITY firebug.All "Tot">
 <!ENTITY firebug.Images "Imagini">
 <!ENTITY firebug.Flash "Flash">
-<!ENTITY firebug.Trace.ToggleConsole "Deschide consola">
-<!ENTITY firebug.Trace.ToggleConsoleTooltip "Deschide consola Firebug de urmărire">
