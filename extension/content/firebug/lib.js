@@ -2796,8 +2796,6 @@ this.getResource = function(aURL)
 
 this.readFromStream = function(stream, charset)
 {
-    try
-    {
         var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
         sis.setInputStream(stream);
 
@@ -2807,12 +2805,6 @@ this.readFromStream = function(stream, charset)
 
         var text = segments.join("");
         return this.convertToUnicode(text, charset);
-     }
-     catch(exc)
-     {
-         if (FBTrace.DBG_ERRORS)
-             FBTrace.dumpProperties("lib.readFromStream FAILS ", exc);
-     }
 };
 
 this.readPostTextFromPage = function(url, context)
