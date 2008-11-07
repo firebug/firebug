@@ -38,7 +38,7 @@ var TraceConsole =
         // Get pref domain is used for message filtering. Only logs that belong
         // to this pref-domain will be displayed.
         this.prefDomain = args.prefDomain; 
-        window.title = "Tracing: " + this.prefDomain;
+        window.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
 
         // Initialize root node of the trace-console window.
         var consoleFrame = document.getElementById("consoleFrame");
