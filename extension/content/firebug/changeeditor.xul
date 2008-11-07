@@ -10,7 +10,7 @@
         buttons="accept,cancel"
         id="firebug-external-editors-change"
         width="400" height="200"
-        title="Editor Configuration"
+        title="editors.Editor_Configuration"
         onload="onLoad();"
         ondialogaccept="return onAccept();"
         persist="screenX screenY">
@@ -22,7 +22,9 @@
 
       function onLoad()
       {
-         item = window.arguments[0];
+         var args = window.arguments[0];
+         var item = args.item;
+         var FBL = args.FBL;
 
          document.getElementById("name").value = item.label;
          if ( item.executable )
@@ -37,6 +39,11 @@
          if ( item.cmdline )
             document.getElementById("cmdline").value = item.cmdline;
          onChange();
+         
+         // Localization
+         var element = document.getElementById("firebug-external-editors-change");
+         var xulString = element.getAttribute("title");
+         document.title = FBL.$STR(xulString);
       }
 
       function onAccept()

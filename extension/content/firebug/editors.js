@@ -133,8 +133,12 @@ var gEditorManager =
         if (selection.count != 1)
             return;
         var item = this._data[selection.currentIndex];
+        var args = {
+            item: item,
+            FBL: this._FBL
+        };
         var result = {};
-        openDialog("chrome://firebug/content/changeeditor.xul",  "_blank", "modal,centerscreen", item, result);
+        openDialog("chrome://firebug/content/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
         if (result.saveChanges)
         {
             this._saveItem(item);
