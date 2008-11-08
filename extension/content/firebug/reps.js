@@ -1034,7 +1034,7 @@ this.SourceLink = domplate(Firebug.Rep,
     {
         if (sourceLink.type == "js")
         {
-            var scriptFile = getScriptFileByHref(sourceLink.href, context);
+            var scriptFile = getSourceFileByHref(sourceLink.href, context);
             if (scriptFile)
                 return context.chrome.select(sourceLink);
         }
@@ -1085,7 +1085,7 @@ this.SourceFile = domplate(this.SourceLink,
 
     persistor: function(context, href)
     {
-        return getScriptFileByHref(href, context);
+        return getSourceFileByHref(href, context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

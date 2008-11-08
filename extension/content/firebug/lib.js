@@ -2041,7 +2041,7 @@ this.getFunctionArgValues = function(fn, frame)
 // ************************************************************************************************
 // Source Files
 
-this.getScriptFileByHref = function(url, context)
+this.getSourceFileByHref = function(url, context)
 {
     return context.sourceFileMap[url];
 };
@@ -3024,7 +3024,7 @@ this.persistObjects = function(panel, panelState)
 {
     // Persist the location and selection so we can restore them in case of a reload
     if (panel.location)
-        panelState.persistedLocation = this.persistObject(panel.location, panel.context);
+        panelState.persistedLocation = this.persistObject(panel.location, panel.context); // fn(context)->location
 
     if (panel.selection)
         panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
@@ -3054,8 +3054,27 @@ this.restoreLocation =  function(panel, panelState)
 
 	if (!panel.location)
 	    panel.navigate(null);
-	    
-	return needRetry;
+
+	if (needRetry)
+    {
+    	function overrideDefaultWithPersistedLocation()
+    	{
+    		if (panel.location == panel.getDefaultLocation(panel.context) && panelState.persistedLocation)
+    		{
+    			var location = panelState.persistedLocation(panel.context);
+    			if (location)
+    				panel.navigate(location);
+    		}
+    	
+    		if (FBTrace.DBG_INITIALIZE)
+    			FBTrace.dumpProperties("lib.overrideDefaultWithPersistedLocation panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+    	}
+    	
+    	panel.context.setTimeout(overrideDefaultWithPersistedLocation, overrideDefaultsWithPersistedValuesTimeout);
+    }
+	
+	if (FBTrace.DBG_INITIALIZE)
+        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panelState:", panelState);
 };
 
 this.restoreSelection = function(panel, panelState)
@@ -3074,21 +3093,9 @@ this.restoreSelection = function(panel, panelState)
     if (!panel.selection)  // Couldn't restore the selection, so select the default object
         panel.select(null);
     
-    return needRetry;
-};
-
-this.restoreObjects = function(panel, panelState, letMeRetryLater)
-{
-    if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
-    
-    var locationRetry = this.restoreLocation(panel, panelState);
-    
-    var selectionRetry = this.restoreSelection(panel, panelState);
-    
-    if (locationRetry || selectionRetry)
+    if (needRetry)
     {
-    	function overrideDefaultsWithPersistedValues()
+    	function overrideDefaultWithPersistedSelection()
     	{
     		if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
     		{
@@ -3096,22 +3103,23 @@ this.restoreObjects = function(panel, panelState, letMeRetryLater)
     			if (selection)
     				panel.select(selection);
     		}
-    		if (panel.location == panel.getDefaultLocation(panel.context) && panelState.persistedLocation)
-    		{
-    			var location = panelState.persistedLocation(panel.context);
-    			if (location)
-    				panel.navigate(location);
-    		}
-    	
+    		
     		if (FBTrace.DBG_INITIALIZE)
     			FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
     	}
     	
-    	if (letMeRetryLater)
-    		return overrideDefaultsWithPersistedValues();
-    	else // If we couldn't restore the selection, wait a bit and try again
-            panel.context.setTimeout(overrideDefaultsWithPersistedValues, overrideDefaultsWithPersistedValuesTimeout);
+    	// If we couldn't restore the selection, wait a bit and try again
+        panel.context.setTimeout(overrideDefaultWithPersistedSelection, overrideDefaultsWithPersistedValuesTimeout);
     }
+    
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.dumpProperties("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
+};
+
+this.restoreObjects = function(panel, panelState, letMeRetryLater)
+{
+    this.restoreLocation(panel, panelState);
+    this.restoreSelection(panel, panelState);
 };
 
 this.getPersistedState = function(context, panelName)

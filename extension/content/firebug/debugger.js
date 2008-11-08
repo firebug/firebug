@@ -1201,8 +1201,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return url;
     },
     
-    dynamicURLIndex: 1, 
-    
     getSequentialURL: function(context, callerURL, kind)
     {
     	var url = null;
@@ -1210,7 +1208,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     	{
     		// If no breakpoints live in dynamic code then we don't need to compare
     		// the previous and reloaded source. In that case let's us a cheap URL.
-    		url = callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(this.dynamicURLIndex++);
+    		url = callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++);
     		url.kind = "seq";
     	}
 		return url;
@@ -1404,7 +1402,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     initContext: function(context, persistedState)
     {
     	if (persistedState)
-    		context.dynamicURLhasBP = persistedState.dynamicURLhasBP
+    		context.dynamicURLhasBP = persistedState.dynamicURLhasBP;
+    	
+    	context.dynamicURLIndex = 1; // any dynamic urls need to be unique to the context.     		
     		
         Firebug.ActivableModule.initContext.apply(this, arguments);
     },
@@ -1478,7 +1478,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getObjectByURL: function(context, url)
     {
-        var sourceFile = getScriptFileByHref(url, context);
+        var sourceFile = getSourceFileByHref(url, context);
         if (sourceFile)
             return new SourceLink(sourceFile.href, 0, "js");
     },
@@ -1700,7 +1700,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showSourceLink: function(sourceLink)
     {
-        var sourceFile = getScriptFileByHref(sourceLink.href, this.context);
+        var sourceFile = getSourceFileByHref(sourceLink.href, this.context);
         if (sourceFile)
         {
             this.navigate(sourceFile);
@@ -1953,6 +1953,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         delete this.selection; // We want the location (sourcefile) to persist, not the selection (eg stackFrame).
         persistObjects(this, state);
+        
+        if (FBTrace.DBG_INITIALIZE)
+        	state.location = this.location;
 
         var sourceBox = this.selectedSourceBox;
         state.lastScrollTop = sourceBox  && sourceBox.scrollTop
