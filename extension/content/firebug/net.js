@@ -2756,7 +2756,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
         if (hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
         {
-            var responseTextBox = getChildByClass(netInfoBox, "netInfoResponseText");
+            var responseTextBox = getElementByClass(netInfoBox, "netInfoResponseText");
             if (file.category == "image")
             {
                 netInfoBox.responsePresented = true;
