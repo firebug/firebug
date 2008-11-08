@@ -452,14 +452,21 @@ this.getRootWindow = function(win)
 // ************************************************************************************************
 // CSS classes
 
-this.hasClass = function(node, name)
+this.hasClass = function(node, name) // className, className, ...
 {
     if (!node || node.nodeType != 1)
         return false;
     else
     {
-        var re = new RegExp("(^|\\s)"+name+"($|\\s)");
-        return re.exec(node.getAttribute("class")) != null;
+        for (var i=1; i<arguments.length; ++i)
+        {
+            var name = arguments[i];
+            var re = new RegExp("(^|\\s)"+name+"($|\\s)");
+            if (!re.exec(node.getAttribute("class")))
+                return false;
+        }
+
+        return true;
     }
 };
 
@@ -567,15 +574,17 @@ this.getAncestorByClass = function(node, className)
     return null;
 };
 
-this.getElementByClass = function(node, className)
+this.getElementByClass = function(node, className)  // className, className, ...
 {
+    var args = cloneArray(arguments); args.splice(0, 1);
     for (var child = node.firstChild; child; child = child.nextSibling)
     {
-        if (this.hasClass(child, className))
+        var args1 = cloneArray(args); args1.unshift(child);
+        if (FBL.hasClass.apply(null, args1))
             return child;
         else
         {
-            var found = this.getElementByClass(child, className);
+            var found = FBL.getElementByClass.apply(null, args1);
             if (found)
                 return found;
         }
