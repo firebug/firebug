@@ -205,7 +205,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+"\n");
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+" context.window:"+context.window);
         }
         catch (exc)
         {
@@ -483,7 +483,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else /*@explore*/
                 ERROR("Debugger UI error during debugging loop:"+exc+"\n");
         }
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+"\n");                                               /*@explore*/
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+context.window.location+"\n");                                                 /*@explore*/
     },
 
     stopDebugging: function(context)

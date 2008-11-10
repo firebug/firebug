@@ -496,7 +496,7 @@
 
             <setter><![CDATA[
                 var locator = this.getLocator();
-                if (val)
+                if (val && locator)
                     var fileName = locator.getObjectDescription(val).name;
                 else
                     var fileName = "(none)";
@@ -516,7 +516,9 @@
                     else
                     {
                         var whichBinding = this.getAttribute("id");
-                        throw "panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
+                        var msg = "panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
+                        FBTrace.sysout(msg);
+                        return null;
                     }
                 }
                 return this.locator(this);
