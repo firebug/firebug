@@ -2059,9 +2059,12 @@ this.getStyleSheetByHref = function(url, context)
 {
     function addSheet(sheet)
     {
-        if (sheet.href == null) //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
-            return sheet;
+        if (sheet.href == null && url == context.window.location.href) 
+            return sheet; //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
 
+        if (sheet.href == url)
+        	return sheet;
+        
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
             var rule = sheet.cssRules[i];
