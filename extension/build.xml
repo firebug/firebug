@@ -2,7 +2,6 @@
 
 <!-- This Ant build file was contributed by Paul McLanahan.  pmclanahan@gmail.com.
     Added template and version numbers johnjbarton@johnjbarton.com
-    Added unexplore targets to strip trace for distribution version.
 -->
 
 <project name="firebug" default="createBranchXPI">
@@ -49,7 +48,6 @@
     <property name="src_dir" location="." />
     <property name="build_dir" location="./build" />
     <property name="dist_dir" location="./dist" />
-    <property name="unexplore.dir" location="../eval" />
     <!-- relative to branches/firebug1.1 should be branches/eval -->
 
     <property name="excludes" value="**/.*, **/*.jar, **/*.db" />
@@ -215,51 +213,6 @@
     <target name="createBranchXPI" depends="clean, version, expand-templates, zipIntoXPI, release-documentation" >
         <move file="${dist_dir}/firebug.xpi" tofile="${dist_dir}/${FIREBUG-XPI}"/>
         <copy file="${build_dir}/update.rdf" tofile="${dist_dir}/update.rdf" />
-    </target>
-
-
-    <!-- Trace Removal Targets: copy this dir to ../eval, strip lines with /*@explore*/ -->
-    <target name="clean-unexplore"
-        description="Delete contents of unexplore directory" >
-        <fail>
-            <condition>
-                   <not>
-                    <isset property="unexplore.dir"/>
-               </not>
-             </condition>
-        </fail>
-        <delete includeEmptyDirs="true">
-            <fileset dir="${unexplore.dir}" includes="**/*" excludes="**/.svn"/>
-        </delete>
-    </target>
-
-    <target name="copy-to-unexplore"
-        description="copy to clean out tracing code before xpi">
-        <copy todir="${unexplore.dir}" >
-            <fileset dir=".">
-                <exclude name="build/**"/>
-                <exclude name="dist/**"/>
-                <exclude name="lite/**"/>
-                <exclude name="aptanadebugger/**"/>
-                <exclude name="**/.svn"/>
-                <exclude name="update.rdf"/>
-                <exclude name="install.rdf"/>
-            </fileset>
-        </copy>
-    </target>
-
-
-    <target name="unexplore" depends="version, expand-templates, clean-unexplore, copy-to-unexplore">
-        <replaceregexp match=".*/\*@explore\*/.*\n" replace="" flags="g">
-            <fileset dir="${unexplore.dir}" includes="**/*.js"/>
-            <fileset dir="${unexplore.dir}" includes="**/*.xul"/>
-        </replaceregexp>
-        <echo message="Removing X for explore from RELEASE in ${unexplore.dir}/branch.properties"/>
-        <replaceregexp match="(RELEASE=[^X]*)X" replace="\1" file="${unexplore.dir}/branch.properties"/>
-        <echo message="Build Distribution XPI in ${unexplore.dir}"/>
-        <ant target="createBranchXPI" dir="${unexplore.dir}" inheritAll="false"/>
-        <delete file="${unexplore.dir}/update.rdf.tpl.xml"/> <!-- Freeze update.rdf in future builds -->
-        <echo message="** Now use McCoy to sign update.rdf **"/>
     </target>
 
     <target name="createAptanaJAR" if="aptanadebugger">
