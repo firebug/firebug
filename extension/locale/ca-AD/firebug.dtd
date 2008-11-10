@@ -3,7 +3,7 @@
 <!ENTITY firebug.View "Visualitza">
 <!ENTITY firebug.Help "Ajuda">
 <!ENTITY firebug.Vertical "Panells verticals">
-<!ENTITY firebug.Run "Executar">
+<!ENTITY firebug.Run "Executa">
 <!ENTITY firebug.Copy "Copia">
 <!ENTITY firebug.CopyBookmarklet "Copia el codi com un &apos;bookmarklet&apos;.">
 <!ENTITY firebug.Options "Opcions">
@@ -20,10 +20,10 @@
 <!ENTITY firebug.Issues "Incidències...">
 <!ENTITY firebug.Donate "Donatius...">
 <!ENTITY firebug.About "Quant a...">
-<!ENTITY firebug.AlwaysOpenInWindow "Obri sempre en una nova finestra">
-<!ENTITY firebug.ShowFirebug "Obri el Firebug">
+<!ENTITY firebug.AlwaysOpenInWindow "Obre sempre en una nova finestra">
+<!ENTITY firebug.ShowFirebug "Obre el Firebug">
 <!ENTITY firebug.DetachFirebug "Obri el Firebug en una nova finestra">
-<!ENTITY firebug.OpenWith "Obri amb l&apos;editor">
+<!ENTITY firebug.OpenWith "Obre amb l&apos;editor">
 <!ENTITY firebug.CloseFirebug "Tanca el Firebug">
 <!ENTITY firebug.Permissions "Permisos...">
 <!ENTITY firebug.ConfigureEditors "Configura els editors">
