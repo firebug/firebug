@@ -496,10 +496,15 @@
 
             <setter><![CDATA[
                 var locator = this.getLocator();
-                if (val && locator)
-                    var fileName = locator.getObjectDescription(val).name;
+                
+                var fileName = null;
+                if (!locator)
+                    fileName = "no locator!";
+                else if (val)
+                    fileName = locator.getObjectDescription(val).name;
                 else
-                    var fileName = "(none)";
+                    fileName = "(none)";
+                    
                 this.repObject = val;
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
