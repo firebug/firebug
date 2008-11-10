@@ -2763,7 +2763,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
                 var responseImage = netInfoBox.ownerDocument.createElement("img");
                 responseImage.src = file.href;
-                responseTextBox.replaceChild(responseImage, responseTextBox.firstChild);
+
+                clearNode(responseTextBox);
+                responseTextBox.appendChild(responseImage, responseTextBox);
             }
             else if (!(binaryCategoryMap.hasOwnProperty(file.category)))
             {
