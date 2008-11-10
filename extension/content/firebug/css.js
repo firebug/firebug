@@ -614,29 +614,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getLocationList: function()
     {
-        var styleSheets = [];
-
-        function addSheet(sheet)
-        {
-            var sheetLocation = getURLForStyleSheet(sheet);
-
-            if (isSystemURL(sheetLocation) && Firebug.filterSystemURLs)
-                return;
-
-            styleSheets.push(sheet);
-
-            for (var i = 0; i < sheet.cssRules.length; ++i)
-            {
-                var rule = sheet.cssRules[i];
-                if (rule instanceof CSSImportRule)
-                    addSheet(rule.styleSheet);
-            }
-        }
-
-        var rootSheets = this.context.window.document.styleSheets;
-        for (var i = 0; i < rootSheets.length; ++i)
-            addSheet(rootSheets[i]);
-
+        var styleSheets = getAllStyleSheets(this.context);
         return styleSheets;
     },
 

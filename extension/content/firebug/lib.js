@@ -1361,6 +1361,7 @@ this.getElementCSSSelector = function(element)
 
 this.getURLForStyleSheet= function(styleSheet)
 {
+	//http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
     return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
@@ -2055,14 +2056,42 @@ this.getSourceFileByHref = function(url, context)
     return context.sourceFileMap[url];
 };
 
+this.getAllStyleSheets = function(context)
+{
+	var styleSheets = [];
+	 
+    function addSheet(sheet)
+    {
+        var sheetLocation =  FBL.getURLForStyleSheet(sheet);
+
+        if (FBL.isSystemURL(sheetLocation) && Firebug.filterSystemURLs)
+            return;
+
+        styleSheets.push(sheet);
+
+        for (var i = 0; i < sheet.cssRules.length; ++i)
+        {
+            var rule = sheet.cssRules[i];
+            if (rule instanceof CSSImportRule)
+                addSheet(rule.styleSheet);
+        }
+    }
+
+    this.iterateWindows(context.window, function(subwin)
+    {
+    	var rootSheets = subwin.document.styleSheets;
+    	for (var i = 0; i < rootSheets.length; ++i)
+    		addSheet(rootSheets[i]);
+    });
+
+    return styleSheets;
+};
+
 this.getStyleSheetByHref = function(url, context)
 {
     function addSheet(sheet)
     {
-        if (sheet.href == null && url == context.window.location.href) 
-            return sheet; //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
-
-        if (sheet.href == url)
+        if (FBL.getURLForStyleSheet(sheet) == url)
         	return sheet;
         
         for (var i = 0; i < sheet.cssRules.length; ++i)
@@ -2077,14 +2106,21 @@ this.getStyleSheetByHref = function(url, context)
         }
     }
 
-    var rootSheets = context.window.document.styleSheets;
-    for (var i = 0; i < rootSheets.length; ++i)
+    var sheetIfFound = null;
+    this.iterateWindows(context.window, function(subwin)
     {
-        var found = addSheet(rootSheets[i]);
-        if (found)
-            return found;
-    }
+    	var rootSheets = context.window.document.styleSheets;
+    	for (var i = 0; i < rootSheets.length; ++i)
+    	{
+    		sheetIfFound = addSheet(rootSheets[i]);
+    		if (sheetIfFound)
+    			return sheetIfFound;
+    	}
+    });
+    
+    return sheetIfFound;
 };
+
 
 this.sourceFilesAsArray = function(context)
 {

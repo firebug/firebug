@@ -462,7 +462,7 @@ function getErrorContext(object)
                     return errorContext = context;
             }
              
-            if (getStyleSheetByHref(url, context))
+            if (FBL.getStyleSheetByHref(url, context))
             	return errorContext = context;
         }
     );
