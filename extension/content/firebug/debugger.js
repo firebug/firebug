@@ -715,7 +715,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             delete this.breakContext;
 
             if (!context)
+            {
                 context = getFrameContext(frame);
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_BP)
+                    FBTrace.dumpProperties("debugger.onBreak no breakContext, trying getFrameContext ", context);
+            }
             if (!context)
                 return RETURN_CONTINUE;
 
@@ -965,7 +969,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     var row = sourceBox.getLineNode(lineNo);
                     if (FBTrace.DBG_BP)                                                                                /*@explore*/
-                        FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+"\n"); /*@explore*/
+                        FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+" context:"+context.window.location+"\n"); /*@explore*/
                     if (!row)
                         continue;  // we *should* only be called for lines in the viewport...
 
@@ -1465,7 +1469,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.abort(context);
         }
         
-        persistedState.dynamicURLhasBP = context.dynamicURLhasBP;
+        if (context.dynamicURLhasBP)
+            persistedState.dynamicURLhasBP = context.dynamicURLhasBP;
+        else
+            delete persistedState.dynamicURLhasBP;
     },
 
     updateOption: function(name, value)
@@ -1782,7 +1789,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (lineNode)
             lineNode.setAttribute("exeLine", "true");
                                                                                                                        /*@explore*/
-        if (FBTrace.DBG_BP || FBTrace.DBG_STACK) FBTrace.sysout("debugger.highlightExecutionLine lineNode="+lineNode+"\n"); /*@explore*/
+        if (FBTrace.DBG_BP || FBTrace.DBG_STACK) FBTrace.sysout("debugger.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+"\n"); /*@explore*/
         return true; // sticky
     },
 
