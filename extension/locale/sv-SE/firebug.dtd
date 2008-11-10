@@ -5,7 +5,7 @@
 <!ENTITY firebug.Vertical "Vertikala paneler">
 <!ENTITY firebug.Run "Kör">
 <!ENTITY firebug.Copy "Kopiera">
-<!ENTITY firebug.CopyBookmarklet "Kopiera skript som bokmärke">
+<!ENTITY firebug.CopyBookmarklet "Kopiera skript som bookmarklet.">
 <!ENTITY firebug.Options "Inställningar">
 <!ENTITY firebug.TextSize "Textstorlek">
 <!ENTITY firebug.IncreaseTextSize "Öka textstorlek">
@@ -36,10 +36,10 @@
 <!ENTITY firebug.BreakOnErrors "Bryt vid fel">
 <!ENTITY firebug.Inspect "Inspektera">
 <!ENTITY firebug.InspectElement "Inspektera element">
-<!ENTITY firebug.InspectTooltip "Klicka ett element på sidan för att inspektera">
+<!ENTITY firebug.InspectTooltip "Klicka ett element på sidan för att inspektera det">
 <!ENTITY firebug.Edit "Redigera">
 <!ENTITY firebug.EditHTMLTooltip "Redigera denna HTML">
-<!ENTITY firebug.EditCSSTooltip "Redigera denna stilmall">
+<!ENTITY firebug.EditCSSTooltip "Redigera denna style sheet">
 <!ENTITY firebug.Profile "Profilera">
 <!ENTITY firebug.ProfileScript "Profilera JavaScript">
 <!ENTITY firebug.Clear "Rensa">

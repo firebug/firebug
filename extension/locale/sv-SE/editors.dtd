@@ -1,4 +1,4 @@
-<!ENTITY editors.Description "Konfigurera Firebug redigerare:">
+<!ENTITY editors.Description "Konfigurera Firebugs redigerare:">
 <!ENTITY editors.NameColumn "Redigerare">
 <!ENTITY editors.ExecutableColumn "Program">
 <!ENTITY editors.ParamsColumn "Argument">
@@ -9,4 +9,4 @@
 <!ENTITY browse.label "Bläddra...">
 <!ENTITY changeEditor.Name "Namn:">
 <!ENTITY changeEditor.Executable "Program:">
-<!ENTITY changeEditor.CmdLine "Argument">
+<!ENTITY changeEditor.CmdLine "Argument:">
