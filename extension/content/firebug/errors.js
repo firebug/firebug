@@ -144,16 +144,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         
         try
         {
-            var context = null;
-            if (FirebugContext)
-                context = FirebugContext;
-
-            if (FBTrace.DBG_ERRORS && !FirebugContext)
-                FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
-
-
-            if (object instanceof nsIScriptError)
+            if (object instanceof nsIScriptError)  // all branches should trace 'object'
             {
+                if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
+                    FBTrace.dumpProperties("errors.observe nsIScriptError:", object);             /*@explore*/
+
+            	var context = getErrorContext(object);  // after instanceof
                 var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
                 context = this.logScriptError(context, object, isWarning)
                 if(!context)
@@ -164,19 +160,30 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 var isWarning = object.flags & WARNING_FLAG;
                 if (Firebug.showChromeMessages)
                 {
-                    if (lessTalkMoreAction(context, object, isWarning))
-                        return;
-                    if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
-                        FBTrace.dumpProperties("errors.observe showChromeMessages message:", object);             /*@explore*/
-
-                    if (context) // Must be an nsIConsoleMessage
-                        Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
-                    else
+                    if (object instanceof nsIConsoleMessage)
                     {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("errors.observe, no context for message, FirebugContext:", FirebugContext);
-                        return;
+                        if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
+                            FBTrace.dumpProperties("errors.observe nsIConsoleMessage:", object); 
+                        
+                    	var context = getErrorContext(object);  // after instanceof
+                        if (lessTalkMoreAction(context, object, isWarning))
+                            return;
+                    	if (context)  
+                    		Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                     }
+                    else if (object.message)
+                    {
+                        if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
+                            FBTrace.dumpProperties("errors.observe object.message:", object); 
+
+                    	var context = getErrorContext(object);   
+                    	if (context)  // maybe just FirebugContext
+                    		Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                    	else
+                            FBTrace.dumpProperties("errors.observe, no context for message", object);
+                    }
+                    else
+                    	FBTrace.dumpProperties("errors.observe, no message in object", object);
                 }
                 else
                 {
@@ -219,12 +226,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
-
-        var errorContext = getErrorContext(object);
-        if (FBTrace.DBG_ERRORS && !errorContext)
-                FBTrace.sysout("errors.observe no context from error filename\n");
-        if (errorContext)
-            context = errorContext;
 
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
@@ -447,6 +448,9 @@ function getErrorContext(object)
     TabWatcher.iterateContexts(
         function findContextByURL(context)
         {
+        	if (errorContext) // is it faster to keep iterating or throw to abort iterator?
+        		return;
+        	
             if (!context.window || !context.window.location)
                 return;
 
@@ -457,8 +461,20 @@ function getErrorContext(object)
                 if (context.sourceFileMap && context.sourceFileMap[url])
                     return errorContext = context;
             }
+             
+            if (getStyleSheetByHref(url, context))
+            	return errorContext = context;
         }
     );
+    
+    if (FBTrace.DBG_ERRORS && !errorContext)
+        FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
+    
+    if (!errorContext)
+    	errorContext = FirebugContext;  // this is problem if the user isn't viewing the page with errors
+
+    if (FBTrace.DBG_ERRORS && !FirebugContext)
+        FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
 
     return errorContext; // we looked everywhere...
 }
