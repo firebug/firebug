@@ -1,0 +1,41 @@
+Release Notes for Firebug 1.4
+Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, and more to come.
+Firebug 1.3 is Firebug 1.2 with additions by John J. Barton, Jan Odvarko.
+Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
+Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
+
+== Not Panel Specific ==
+    
+    Supports Firefox 3.1
+
+== Javascript Debugging ==
+    * Implement stepStayOnDebuggr to keep chrome out of firebug and vice versa
+    * Implement dynamicURLhasBP to avoid MD5 on eval unless breakpoints are set on evals
+    * skipScrolling if the lines are still in view.
+
+== Net Panel ==
+    * tabCache optimizations. (incl contribution by Malte Klaus)
+    * support for STATUS_RESOLVING 
+    * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel. 
+		
+== Locales ==
+	* No more entites, all properties
+	* de-DE locale update (contribution by Team erweiterungen.de, ReinekeFux, Monoman)
+	* it-IT locale update (contribution by l0stintranslation, gonzalopirobutirro)
+	* New Locale ro-RO, Romanian (contribution by alexxed)
+	* Locale update fr-FR (contribution by martin© and fmarcia)
+	* Locale update hu-HU (contribution by gLes)
+	* Update locale pl-PL (contribution by teo)
+	* ca-AD locale updated (contribution by xavivars, toniher)
+	* sv-SE locale update (contribution by peter3)
+	
+== Bug Fixes ==
+	* Issue 700: HTML preview for net responses
+	* Issue 749: Hungarian Locale
+	* Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
+	* Issue 1210: 1.3b1 post message display is screwed up
+	* Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
+	* Issue 1229: console tab does not display XHR with xhr.onprogress.
+	* Issue 1231:  	 console object has wrong version number
+	* Issue 1248:   Console does not filter errors from other browser tabs.
+	* Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
