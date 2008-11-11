@@ -14,6 +14,25 @@ const IOService = Cc["@mozilla.org/network/io-service;1"];
 const ioService = IOService.getService(nsIIOService);
 const chromeReg = CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
+// List of text content types.
+const contentTypes =
+{
+    "text/plain": 1,
+    "text/html": 1,
+    "text/html": 1,
+    "text/html": 1,
+    "text/xml": 1,
+    "text/css": 1,
+    "application/x-javascript": 1,
+    "application/x-javascript": 1,
+    "image/jpeg": 0,
+    "image/jpeg": 0,
+    "image/gif": 0,
+    "image/png": 0,
+    "image/bmp": 0,
+    "application/x-shockwave-flash": 0
+};
+
 // Helper array for prematurely created contexts.
 var contexts = new Array();
 
@@ -349,6 +368,11 @@ TracingListener.prototype =
             if (statusCode != Ci.nsIRequest.NS_BINDING_ABORTED)
             {
                 var responseText = this.receivedData.join();
+
+                // Convert text types.
+                if (contentTypes[request.contentType])
+                    responseText = FBL.convertToUnicode(responseText);
+
                 this.context.sourceCache.store(safeGetName(request), responseText);
 
                 // Notify listeners.
