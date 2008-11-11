@@ -2614,7 +2614,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
     hideHtml: function(file)
     {
-        return file.category != "html";
+        return (file.category != "html") && (file.category != "xhtml") && 
+            (file.category != "htm");
     },
 
     onClickTab: function(event)
