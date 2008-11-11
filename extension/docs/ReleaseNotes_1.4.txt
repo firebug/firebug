@@ -14,7 +14,6 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * skipScrolling if the lines are still in view.
 
 == Net Panel ==
-    * tabCache optimizations. (incl contribution by Malte Klaus)
     * support for STATUS_RESOLVING 
     * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel. 
 		
