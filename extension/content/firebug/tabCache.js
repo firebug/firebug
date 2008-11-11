@@ -9,6 +9,10 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
+const nsIIOService = Ci.nsIIOService;
+const IOService = Cc["@mozilla.org/network/io-service;1"];
+const ioService = IOService.getService(nsIIOService);
+const chromeReg = CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 // Helper array for prematurely created contexts.
 var contexts = new Array();
@@ -200,6 +204,16 @@ Firebug.TabCache.prototype =
                 FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
             url = localURI.spec;
         }
+        
+        // if we get this far then we have either a file: or chrome: url converted to file:
+        var src = getResource(url);
+        if (src)
+        {
+        	var lines = src.split(/\r\n|\r|\n/);
+            this.cache[url] = lines;
+
+            return lines;
+        }  
 
         return null;
     },
