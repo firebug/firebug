@@ -1874,7 +1874,9 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
     {
         var lines = loadScriptLines(sourceFile, this.context);
         if (!lines)
-            return null;
+        {
+            lines = ["Failed to load source for sourceFile "+sourceFile];
+        }
 
         var sourceBox = this.document.createElement("div");
         sourceBox.repObject = sourceFile;
