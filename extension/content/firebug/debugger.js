@@ -2251,7 +2251,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url, URLOnly);
             }
         });
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList ", list); /*@explore*/
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList ", list);  
         return list;
     },
 
@@ -2591,7 +2591,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         var monitors = extracted.monitors;
         
         if (FBTrace.DBG_BP)
-        	FBTrace.sysout("debugger.breakpoints.refresh extracted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors])
+        	FBTrace.sysout("debugger.breakpoints.refresh extracted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         function sortBreakpoints(a, b)
         {
