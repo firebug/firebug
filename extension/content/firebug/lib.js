@@ -2819,20 +2819,13 @@ this.parseURLEncodedText = function(text)
 
 this.getResource = function(aURL)
 {
-    var ioService=Components.classes["@mozilla.org/network/io-service;1"]
-        .getService(Components.interfaces.nsIIOService);
-    var scriptableStream=Components
-        .classes["@mozilla.org/scriptableinputstream;1"]
-        .getService(Components.interfaces.nsIScriptableInputStream);
+    var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
+
     try 
     {
     	var channel=ioService.newChannel(aURL,null,null);
     	var input=channel.open();
-    	scriptableStream.init(input);
-    	var str=scriptableStream.read(input.available());
-    	scriptableStream.close();
-    	input.close();
-    	return str;
+        return FBL.readFromStream(input);
     }
     catch (e)
     {
@@ -2846,15 +2839,15 @@ this.getResource = function(aURL)
 
 this.readFromStream = function(stream, charset)
 {
-        var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-        sis.setInputStream(stream);
+    var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+    sis.setInputStream(stream);
 
-        var segments = [];
-        for (var count = stream.available(); count; count = stream.available())
-            segments.push(sis.readBytes(count));
+    var segments = [];
+    for (var count = stream.available(); count; count = stream.available())
+        segments.push(sis.readBytes(count));
 
-        var text = segments.join("");
-        return this.convertToUnicode(text, charset);
+    var text = segments.join("");
+    return this.convertToUnicode(text, charset);
 };
 
 this.readPostTextFromPage = function(url, context)
