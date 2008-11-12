@@ -41,7 +41,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 {
     clear: function(context)
     {
-        this.setCount(context, 0)
+        this.setCount(context, 0); // reset the UI counter
+        delete context.errorMap;   // clear the duplication-removal table 
     },
 
     increaseCount: function(context)
