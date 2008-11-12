@@ -2334,7 +2334,7 @@ Firebug.Rep = domplate(
 
     toLowerCase: function(text)
     {
-        return text.toLowerCase();
+        return text ? text.toLowerCase() : text;
     },
 
     plural: function(n)
