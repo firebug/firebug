@@ -9,10 +9,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
-const nsIIOService = Ci.nsIIOService;
-const IOService = Cc["@mozilla.org/network/io-service;1"];
-const ioService = IOService.getService(nsIIOService);
-const chromeReg = CCSV("@mozilla.org/chrome/chrome-registry;1", "nsIToolkitChromeRegistry");
 
 // List of text content types.
 const contentTypes =
