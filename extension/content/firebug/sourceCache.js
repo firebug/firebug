@@ -26,8 +26,9 @@ const NS_BINDING_ABORTED = 0x804b0002;
 
 // ************************************************************************************************
 
-top.SourceCache = function(context)
+top.SourceCache = function(window, context)
 {
+    this.window = window;
     this.context = context;
     this.cache = {};
 };
@@ -84,6 +85,24 @@ top.SourceCache.prototype =
             url = localURI.spec;
         }
 
+        // if we get this far then we have either a file: or chrome: url converted to file:
+        var src = getResource(url);
+        if (src)
+        {
+        	var lines = src.split(/\r\n|\r|\n/);
+            this.cache[url] = lines;
+
+            return lines;
+        }  
+
+        // Unfortunately, the URL isn't available so, let's try to use FF cache. 
+        // Notice that additional network request to the server can be made in 
+        // this method (double-load).
+        this.loadFromCache(url, method, file);
+    },
+
+    loadFromCache: function(url, method, file)
+    {
         var doc = this.context.window.document;
         if (doc)
             var charset = doc.characterSet;
@@ -187,7 +206,7 @@ top.SourceCache.prototype =
     store: function(url, text)
     {
         if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
-            FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
+            FBTrace.sysout("sourceCache for window="+this.window.location.href+" store url="+url+"\n");        /*@explore*/
         var lines = splitLines(text);
         return this.storeSplitLines(url, lines);
     },
@@ -195,7 +214,7 @@ top.SourceCache.prototype =
     storeSplitLines: function(url, lines)  
     {
     	if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("sourceCache for window="+this.context.window.location.href+" store url="+url+"\n");
+            FBTrace.sysout("sourceCache for window="+this.window.location.href+" store url="+url+"\n");
     	return this.cache[url] = lines;
     },
 

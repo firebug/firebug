@@ -117,6 +117,8 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         {
             if (win == win.parent)
             {
+                // Create temporary context so no request is missed. The real one is created 
+                // later by tabWatcher. Merge is done in Firebug.TabCacheModel.initContext.
                 var context = {sourceCache: new Firebug.TabCache(win)};
                 contexts[tabId] = context;
 
@@ -134,7 +136,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         try 
         {
             // Register traceable channel listener in order to intercept all incoming data for 
-            // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.3
+            // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
             request.QueryInterface(Ci.nsITraceableChannel);
             var newListener = new TracingListener(context);
             newListener.listener = request.setNewListener(newListener);
@@ -156,124 +158,37 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 /**
  * This cache object is intended to cache all responses made by a specific tab.
  * The implementation is based on nsITraceableChannel interface introduced in 
- * Firefox 3.0.3. This interface allows to intercept all incoming HTTP data.
+ * Firefox 3.0.4. This interface allows to intercept all incoming HTTP data.
  *
  * This object replaces the SourceCache, which still exist only for backward 
  * compatibility.
+ *
+ * The object is derived from SourceCache so, the same interface and most of the
+ * implementation is used.
  */
 Firebug.TabCache = function(win)
 {
     if (FBTrace.DBG_CACHE)
         FBTrace.dumpProperties("tabCache.TabCache Created for: " + win.location.href);
 
-    // Map with all responses where: 
-    // key => request URL.
-    // value => array lines of the response source.
-    this.cache = new Array();
+    top.SourceCache.call(this, win, null);
 };
 
-Firebug.TabCache.prototype =
+Firebug.TabCache.prototype = extend(top.SourceCache.prototype,
 {
     listeners: [],
 
-	isCached: function(url)
-	{
-		return this.cache.hasOwnProperty(url);
-	},
-    
-    loadText: function(url)
+    loadFromCache: function(url, method, file)
     {
+        // The ancestor implementation (SourceCache) uses ioService.newChannel, which 
+        // can result in additional request to the server (in case the response can't 
+        // be loaded from the Firefox cache) - known as double-load problem.
+        // This new implementation (TabCache) uses nsITraceableListener so, all responses
+        // should be already cached.
+
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.TabCache loadText: " + url);
-
-        var lines = this.load(url);
-        return lines ? lines.join("\n") : null;
-    },
-
-    load: function(url)
-    {
-        if (this.cache.hasOwnProperty(url))
-            return this.cache[url];
-
-        var d = FBL.splitDataURL(url);  
-        if (d)
-        {
-            var src = d.encodedContent;
-            var data = decodeURIComponent(src);
-            var lines = data.split(/\r\n|\r|\n/);
-            this.cache[url] = lines;
-
-            return lines;
-        }
-
-        var j = FBL.reJavascript.exec(url);
-        if (j)
-        {
-            var src = url.substring(FBL.reJavascript.lastIndex);
-            var lines = src.split(/\r\n|\r|\n/);
-            this.cache[url] = lines;
-
-            return lines;
-        }
-
-        var c = FBL.reChrome.test(url);
-        if (c)
-        {
-            if (Firebug.filterSystemURLs)
-                return;  // ignore chrome
-
-            var chromeURI = ioService.newURI(url, null, null);
-            var localURI = chromeReg.convertChromeURL(chromeURI);
-            if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
-            url = localURI.spec;
-        }
-        
-        // if we get this far then we have either a file: or chrome: url converted to file:
-        var src = getResource(url);
-        if (src)
-        {
-        	var lines = src.split(/\r\n|\r|\n/);
-            this.cache[url] = lines;
-
-            return lines;
-        }  
-
-        return null;
-    },
-
-    store: function(url, text)
-    {
-        if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
-            FBTrace.sysout("tabCache.store for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
-        var lines = splitLines(text);
-        return this.storeSplitLines(url, lines);
-    },
-    
-    storeSplitLines: function(url, lines)  
-    {
-    	if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.store for window="+this.context.window.location.href+" store url="+url+"\n");
-    	return this.cache[url] = lines;
-    },
-
-    invalidate: function(url)
-    {
-        delete this.cache[url];
-    },
-
-    getLine: function(url, lineNo)
-    {
-        var lines = this.load(url);
-        if (lines)
-        {
-        	if (lineNo <= lines.length)
-        		return lines[lineNo-1];
-        	else
-        		return (lines.length == 1) ? lines[0] : "( line "+lineNo+" out of range "+lines.length+" for "+url+")";
-        }
-        else
-        	return "(no source for "+url+")";
+            FBTrace.dumpProperties("tabCache.loadFromCache: FAILED" + 
+                this.window.location.href, this.cache);
     },
 
     // Listeners
@@ -296,7 +211,7 @@ Firebug.TabCache.prototype =
                 listener.onStoreResponse(context, request, responseText);
         }
     }
-};
+});
 
 // ************************************************************************************************
 // TracingListener implementation
