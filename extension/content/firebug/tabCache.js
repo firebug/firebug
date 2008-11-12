@@ -176,6 +176,11 @@ Firebug.TabCache.prototype =
 {
     listeners: [],
 
+	isCached: function(url)
+	{
+		return this.cache.hasOwnProperty(url);
+	},
+    
     loadText: function(url)
     {
         if (FBTrace.DBG_CACHE)
@@ -190,10 +195,10 @@ Firebug.TabCache.prototype =
         if (this.cache.hasOwnProperty(url))
             return this.cache[url];
 
-        var d = FBL.reDataURL.exec(url);
+        var d = FBL.splitDataURL(url);  
         if (d)
         {
-            var src = url.substring(FBL.reDataURL.lastIndex);
+            var src = d.encodedContent;
             var data = decodeURIComponent(src);
             var lines = data.split(/\r\n|\r|\n/);
             this.cache[url] = lines;
@@ -239,11 +244,17 @@ Firebug.TabCache.prototype =
 
     store: function(url, text)
     {
-        if (FBTrace.DBG_CACHE)
-            FBTrace.dumpProperties("tabCache.store: " + url, {value: text});
-
+        if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
+            FBTrace.sysout("tabCache.store for window="+this.context.window.location.href+" store url="+url+"\n");        /*@explore*/
         var lines = splitLines(text);
-        return this.cache[url] = lines;
+        return this.storeSplitLines(url, lines);
+    },
+    
+    storeSplitLines: function(url, lines)  
+    {
+    	if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.store for window="+this.context.window.location.href+" store url="+url+"\n");
+    	return this.cache[url] = lines;
     },
 
     invalidate: function(url)
@@ -251,10 +262,18 @@ Firebug.TabCache.prototype =
         delete this.cache[url];
     },
 
-    getLine: function(url, lineNumber)
+    getLine: function(url, lineNo)
     {
         var lines = this.load(url);
-        return lines ? lines[lineNumber-1] : null;
+        if (lines)
+        {
+        	if (lineNo <= lines.length)
+        		return lines[lineNo-1];
+        	else
+        		return (lines.length == 1) ? lines[0] : "( line "+lineNo+" out of range "+lines.length+" for "+url+")";
+        }
+        else
+        	return "(no source for "+url+")";
     },
 
     // Listeners
