@@ -603,6 +603,7 @@ top.Firebug =
                 externalEditors.push(item);
             }
         }
+        return externalEditors;
     },
 
     get registeredEditors()
