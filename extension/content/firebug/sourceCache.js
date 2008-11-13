@@ -26,14 +26,14 @@ const NS_BINDING_ABORTED = 0x804b0002;
 
 // ************************************************************************************************
 
-top.SourceCache = function(window, context)
+Firebug.SourceCache = function(window, context)
 {
     this.window = window;
     this.context = context;
     this.cache = {};
 };
 
-top.SourceCache.prototype =
+Firebug.SourceCache.prototype =
 {
 	isCached: function(url)
 	{

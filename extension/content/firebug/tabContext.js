@@ -40,7 +40,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     if (Components.interfaces.nsITraceableChannel)
         this.sourceCache = new Firebug.TabCache(win);
     else
-        this.sourceCache = new top.SourceCache(win, this);
+        this.sourceCache = new Firebug.SourceCache(win, this);
 };
 
 Firebug.TabContext.prototype =

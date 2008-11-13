@@ -167,10 +167,10 @@ Firebug.TabCache = function(win)
     if (FBTrace.DBG_CACHE)
         FBTrace.dumpProperties("tabCache.TabCache Created for: " + win.location.href);
 
-    top.SourceCache.call(this, win, null);
+    Firebug.SourceCache.call(this, win, null);
 };
 
-Firebug.TabCache.prototype = extend(top.SourceCache.prototype,
+Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 {
     listeners: [],
 
