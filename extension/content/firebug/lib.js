@@ -2797,6 +2797,10 @@ this.parseURLEncodedText = function(text)
 
     var params = [];
 
+    // Unescape '+' characters that are used to encode a space.
+    // See section 2.2.in RFC 3986: http://www.ietf.org/rfc/rfc3986.txt
+    text = text.replace(/\+/g, " ");
+
     var args = text.split("&");
     for (var i = 0; i < args.length; ++i)
     {
