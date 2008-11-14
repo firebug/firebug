@@ -88,7 +88,7 @@ var TraceConsole =
     unregisterModule: function(module)
     {
         for (var i=0; i<this.modules.length; ++i) {
-            if (this.modules[i] == item) {
+            if (this.modules[i] == module) {
                 this.modules.splice(i, 1);
                 break;
             }

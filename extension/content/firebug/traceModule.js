@@ -330,7 +330,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         this.listeners.push(listener);
     },
 
-    removeListener: function()
+    removeListener: function(listener)
     {
         remove(this.listeners, listener);
     },
