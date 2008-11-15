@@ -2626,7 +2626,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
         
         if (FBTrace.DBG_BP)
-        	FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors])
+        	FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
     },
 
     extractBreakpoints: function(context, breakpoints, errorBreakpoints, monitors)
