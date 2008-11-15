@@ -633,7 +633,11 @@
             var locator = this.getLocator();
             var objects = locator.getLocationList();
             if (!objects)
+            {
+                this.setAttribute("label", "");
+                this.setAttribute("location", null);
                 return false;
+            }
 
             var groupNames = [];
             var groups = {};
