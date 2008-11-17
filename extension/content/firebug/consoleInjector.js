@@ -302,10 +302,12 @@ function FirebugConsoleHandler(context, win)
         if (!this.timeCounters)
             this.timeCounters = {};
 
-        if (!reset && this.timeCounters[name])
+        var key = "KEY"+name.toString();
+        
+        if (!reset && this.timeCounters[key])
             return;
 
-        this.timeCounters[name] = time;
+        this.timeCounters[key] = time;
     };
 
     this.timeEnd = function(name)
@@ -315,7 +317,9 @@ function FirebugConsoleHandler(context, win)
         if (!this.timeCounters)
             return;
 
-        var timeCounter = this.timeCounters[name];
+        var key = "KEY"+name.toString();
+        
+        var timeCounter = this.timeCounters[key];
         if (timeCounter)
         {
             var diff = time - timeCounter;
@@ -323,7 +327,7 @@ function FirebugConsoleHandler(context, win)
 
             this.info(label);
 
-            delete this.timeCounters[name];
+            delete this.timeCounters[key];
         }
         return diff;
     };
