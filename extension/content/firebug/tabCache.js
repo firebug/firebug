@@ -126,26 +126,32 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
     onExamineResponse: function(request, win, tabId)
     {
-        var context = contexts[tabId];
-        context = context ? context : TabWatcher.getContextByWindow(win);
-
         try 
         {
+            var context = contexts[tabId];
+            
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache:onExamineResponse: checking contexts found: " + (context && context.window?context.window.location:"none"), tabId);
+            
+            context = context ? context : TabWatcher.getContextByWindow(win);
+
             // Register traceable channel listener in order to intercept all incoming data for 
             // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
             request.QueryInterface(Ci.nsITraceableChannel);
             var newListener = new TracingListener(context);
             newListener.listener = request.setNewListener(newListener);
+            if (FBTrace.DBG_CACHE)
+            {
+            	var loc = (context && context.window) ? context.window.location : "no context or no context.window";
+                FBTrace.dumpProperties("tabCache:onExamineResponse: Traceable Listener in context "+loc+" Registered for: " + 
+                    safeGetName(request), request);
+            }
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.dumpProperties("tabCache: Register Traceable Listener EXCEPTION", err);
         }
-
-        if (FBTrace.DBG_CACHE)
-            FBTrace.dumpProperties("tabCache:onExamineResponse: Traceable Listener Registered for: " + 
-                safeGetName(request), request);
     },
 });
 
