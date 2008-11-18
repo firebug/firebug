@@ -1144,17 +1144,18 @@ FirebugService.prototype =
                 }
                 else
                 {
-                    if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName);
+                    if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) 
+                    	FBTrace.sysout("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName);
                 }
             } catch(exc) {
                 FBTrace.dumpProperties("onEventScriptCreated failed: ", exc);
                 ERROR("onEventScriptCreated failed: "+exc);
             }
+            if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) 
+            	FBTrace.sysout("onEventScriptCreated frame.script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile"), sourceFile); 
         }
 
         fbs.clearNestedScripts();
-        if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("onEventScriptCreated frame.script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile"));  /*@explore*/
-
         return sourceFile;
     },
 
