@@ -28,6 +28,7 @@ this.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),(
 this.reJavascript = /\s*javascript:\s*(.*)/;
 this.reChrome = /chrome:\/\/([^\/]*)\//;
 this.reCSS = /\.css$/;
+this.reFile = /file:\/\/([^\/]*)\//;
 
 const reSplitLines = /\r\n|\r|\n/;
 const reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
