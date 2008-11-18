@@ -1953,7 +1953,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
             sourceBox.viewableLines = Math.round(panelHeight / sourceBox.lineHeight);  // eg 17
 
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("setSourceBoxLineSizes panelHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ sourceBox.viewableLines+"\n");
+                FBTrace.sysout("setViewableLines panelHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ sourceBox.viewableLines+"\n");
 
             var halfViewableLines = Math.round(sourceBox.viewableLines/2.0);  //eg 8
             sourceBox.halfViewableLines = halfViewableLines;
