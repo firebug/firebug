@@ -140,6 +140,21 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 			FBTrace.sysout("TraceOptionsController owner needs to implement prefEventToUser Event", {name: optionName, value: optionValue});
 		};
 	}
+	
+	this.clearOptions = function()
+	{
+		var optionMap = this.traceService.getTracer(prefDomain);
+		var items = [];
+		for (var p in optionMap) 
+		{ 
+			var m = p.indexOf("DBG_");
+			if (m != 0)
+				continue;
+
+			Firebug.setPref(this.prefDomain, p, false);
+		}
+		prefService.savePrefFile(null);
+	};
   
 };
 
