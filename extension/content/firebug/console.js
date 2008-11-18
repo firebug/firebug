@@ -82,7 +82,8 @@ Firebug.ConsoleBase =
         if (!context)
             context = FirebugContext;
 
-        Firebug.Errors.clear(context);
+        if (context)
+        	Firebug.Errors.clear(context);
 
         var panel = this.getPanel(context, true);
         if (panel)
