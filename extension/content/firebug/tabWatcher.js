@@ -168,8 +168,8 @@ top.TabWatcher =
             if (context.loaded)
                 dispatch(listeners, "loadedContext", [context]);
 
-            if (FBTrace.DBG_WINDOWS && context.loaded)                                                                     /*@explore*/
-                FBTrace.sysout("-> tabWatcher context *** LOADED *** in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/
+            if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
+                FBTrace.sysout("-> tabWatcher context "+(context.loaded ? '*** LOADED ***' : 'isLoadingDocument')+" in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");                                                         /*@explore*/
         }
 
@@ -687,26 +687,39 @@ function onLoadWindowContent(event)
         win.removeEventListener("pageshow", onLoadWindowContent, true);
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener\n");  /*@explore*/
     }
-    catch (exc) {}
-
+    catch (exc) 
+    {
+    	if (FBTrace.DBG_ERRORS)
+    		FBTrace.sysout("tabWatcher.onLoadWindowContent removeEventListener pageshow fails", exc);
+    }
+    
     try
     {
         win.removeEventListener("DOMContentLoaded", onLoadWindowContent, true);
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener\n"); /*@explore*/
     }
-    catch (exc) {}
+    catch (exc) 
+    {
+    	if (FBTrace.DBG_ERRORS)
+    		FBTrace.sysout("tabWatcher.onLoadWindowContent removeEventListener DOMContentLoaded fails", exc);
+    }
 
     // Signal that we got the onLoadWindowContent event. This prevents the FrameProgressListener from sending it.
     var context = TabWatcher.getContextByWindow(win);
     if (context)
         context.onLoadWindowContent = true;
 
+    if (FBTrace.DBG_WINDOWS) 
+	    FBTrace.sysout("tabWatcher onLoadWindowContent, delaying watchLoadedTopWindow:"+win.location, win);
+    
     // Calling this after a timeout because I'm finding some cases where calling
     // it here causes freezeup when this results in loading a script file. This fixes that.
-    setTimeout(function()
+    setTimeout(function delayWatchLoadedTopWindow()
     {
         try
         {
+            if (FBTrace.DBG_WINDOWS) 
+        	    FBTrace.sysout("tabWatcher delayWatchLoadedTopWindow:"+win.location, win);
             TabWatcher.watchLoadedTopWindow(win);
         }
         catch(exc)
@@ -729,7 +742,12 @@ function onUnloadWindow(event)
 
 function delayBrowserLoad(browser, uri)
 {
-    setTimeout(function() { browser.loadURI(uri); }, 100);
+    setTimeout(function delayBrowserLoad100() 
+    { 
+        if (FBTrace.DBG_WINDOWS) 
+    	    FBTrace.sysout("tabWatcher delayBrowserLoad100:"+uri, browser);
+    	browser.loadURI(uri); 
+    }, 100);
 }
 
 function safeGetName(request)
