@@ -179,6 +179,55 @@ Firebug.TabCache = function(win)
 Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 {
     listeners: [],
+    requests: [],       // requests in progress.
+
+    storePartialResponse: function(request, responseText)
+    {
+        var url = safeGetName(request);
+
+        if (!this.requests[url])
+        {
+            this.invalidate(url);
+            this.requests[url] = request;
+        }
+
+        // Convert text types.
+        if (contentTypes[request.contentType])
+            responseText = FBL.convertToUnicode(responseText);
+
+        // Store partial content into the cache.
+        this.store(url, responseText);
+
+        // Notify listeners.
+        this.fireOnStoreResponse(this.context, request, responseText);
+    },
+
+    stopRequest: function(request)
+    {
+        var url = safeGetName(request);
+        delete this.requests[url];
+    },
+
+    storeSplitLines: function(url, lines)  
+    {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.storeSplitLines: " + url, lines);
+
+        var currLines = this.cache[url];
+        if (!currLines)
+            currLines = this.cache[url] = [];
+
+        // Join the last line with the new first one so, the source code 
+        // lines are properly formatted.
+        if (currLines.length)
+            currLines[currLines.length-1] += lines.shift();
+
+        // Append new lines (if any) into the array for specified url.
+        if (lines.length)
+            this.cache[url] = currLines.concat(lines);
+
+    	return this.cache[url];
+    },
 
     loadFromCache: function(url, method, file)
     {
@@ -189,7 +238,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         // should be already cached.
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.dumpProperties("tabCache.loadFromCache: FAILED" + 
+            FBTrace.dumpProperties("tabCache.loadFromCache: FAILED " + 
                 this.window.location.href, this.cache);
     },
 
@@ -227,12 +276,12 @@ function TracingListener(context)
 {
     this.context = context;
     this.listener = null;
-    this.receivedData = [];
+    this.endOfLine = false;
 }
 
 TracingListener.prototype = 
 {
-    onCollectData: function(inputStream, offset, count)
+    onCollectData: function(request, inputStream, offset, count)
     {
         try
         {
@@ -244,11 +293,23 @@ TracingListener.prototype =
             storageStream.init(8192, count, null);
             binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
 
-            // Copy received data as they come.
             var data = binaryInputStream.readBytes(count);
-            this.receivedData.push(data);
-
             binaryOutputStream.writeBytes(data, count);
+
+            // Avoid creating additional empty line if response comes in more pieces 
+            // and the split is made just between "\r" and "\n" (Win line-end).
+            // So, if the response starts with "\n" while the previous part ended with "\r",
+            // remove the first character.
+            if (this.endOfLine && data.length && data[0] == "\n")
+                data = data.substring(1);
+
+            if (data.length)
+                this.endOfLine = data[data.length-1] == "\r";
+
+            // Store received data into the cache as they come.
+            this.context.sourceCache.storePartialResponse(request, data);
+
+            // Let other listeners use the stream.
             return storageStream.newInputStream(0);
         }
         catch (err)
@@ -264,7 +325,7 @@ TracingListener.prototype =
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
         // xxxHonza: all content types should be cached?
-        var newStream = this.onCollectData(inputStream, offset, count);
+        var newStream = this.onCollectData(request, inputStream, offset, count);
         if (newStream)
             inputStream = newStream;
 
@@ -301,19 +362,7 @@ TracingListener.prototype =
     {
         try
         {
-            if (statusCode != Ci.nsIRequest.NS_BINDING_ABORTED)
-            {
-                var responseText = this.receivedData.join();
-
-                // Convert text types.
-                if (contentTypes[request.contentType])
-                    responseText = FBL.convertToUnicode(responseText);
-
-                this.context.sourceCache.store(safeGetName(request), responseText);
-
-                // Notify listeners.
-                this.context.sourceCache.fireOnStoreResponse(this.context, request, responseText);
-            }
+            this.context.sourceCache.stopRequest(request);
 
             if (this.listener)
                 this.listener.onStopRequest(request, requestContext, statusCode);
