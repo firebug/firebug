@@ -197,15 +197,15 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
         // Store partial content into the cache.
         this.store(url, responseText);
-
-        // Notify listeners.
-        this.fireOnStoreResponse(this.context, request, responseText);
     },
 
     stopRequest: function(request)
     {
         var url = safeGetName(request);
         delete this.requests[url];
+
+        // Notify listeners.
+        dispatch(this.listeners, "onStoreResponse", [this.context, request, this.cache[url]]);
     },
 
     storeSplitLines: function(url, lines)  
@@ -251,16 +251,6 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
     removeListener: function(listener)
     {
         remove(this.listeners, listener);
-    },
-
-    fireOnStoreResponse: function(context, request, responseText)
-    {
-        for (var i=0; i<this.listeners.length; i++)
-        {
-            var listener = this.listeners[i];
-            if (listener.onStoreResponse)
-                listener.onStoreResponse(context, request, responseText);
-        }
     }
 });
 
