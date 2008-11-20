@@ -2990,6 +2990,28 @@ this.getStatusDescription = function(status)
     if (status == nsITransport.STATUS_WRITING) return "STATUS_WRITING";
 };
 
+this.getLoadFlagsDescription = function(loadFlags)
+{
+    var flags = [];
+    var nsIChannel = Ci.nsIChannel;
+    var nsICachingChannel = Ci.nsICachingChannel;
+
+    if (loadFlags & nsIChannel.LOAD_DOCUMENT_URI) flags.push("LOAD_DOCUMENT_URI");
+    if (loadFlags & nsIChannel.LOAD_RETARGETED_DOCUMENT_URI) flags.push("LOAD_RETARGETED_DOCUMENT_URI");
+    if (loadFlags & nsIChannel.LOAD_REPLACE) flags.push("LOAD_REPLACE");
+    if (loadFlags & nsIChannel.LOAD_INITIAL_DOCUMENT_URI) flags.push("LOAD_INITIAL_DOCUMENT_URI");
+    if (loadFlags & nsIChannel.LOAD_TARGETED) flags.push("LOAD_TARGETED");
+    if (loadFlags & nsIChannel.LOAD_CALL_CONTENT_SNIFFERS) flags.push("LOAD_CALL_CONTENT_SNIFFERS");
+    if (loadFlags & nsICachingChannel.LOAD_NO_NETWORK_IO) flags.push("LOAD_NO_NETWORK_IO");
+    if (loadFlags & nsICachingChannel.LOAD_CHECK_OFFLINE_CACHE) flags.push("LOAD_CHECK_OFFLINE_CACHE");
+    if (loadFlags & nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE) flags.push("LOAD_BYPASS_LOCAL_CACHE");
+    if (loadFlags & nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY) flags.push("LOAD_BYPASS_LOCAL_CACHE_IF_BUSY");
+    if (loadFlags & nsICachingChannel.LOAD_ONLY_FROM_CACHE) flags.push("LOAD_ONLY_FROM_CACHE");
+    if (loadFlags & nsICachingChannel.LOAD_ONLY_IF_MODIFIED) flags.push("LOAD_ONLY_IF_MODIFIED");
+
+    return flags.join(", ");
+};
+
 // ************************************************************************************************
 // Programs
 
