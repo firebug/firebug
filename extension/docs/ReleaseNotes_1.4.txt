@@ -35,6 +35,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1210: 1.3b1 post message display is screwed up
 	* Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
 	* Issue 1229: console tab does not display XHR with xhr.onprogress.
-	* Issue 1231:  	 console object has wrong version number
-	* Issue 1248:   Console does not filter errors from other browser tabs.
+	* Issue 1231: console object has wrong version number
+	* Issue 1248: Console does not filter errors from other browser tabs.
 	* Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
+	* Issue 1267: console.time('toString') returns `NaN`;
