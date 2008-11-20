@@ -29,9 +29,6 @@ const contentTypes =
     "application/x-shockwave-flash": 0
 };
 
-// Helper array for prematurely created contexts.
-var contexts = new Array();
-
 // ************************************************************************************************
 // Model implementation
 
@@ -62,20 +59,6 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.dumpProperties("tabCache.initContext for: " + context.window.location.href);
-
-        // See if a temp context is available.
-        var tabId = Firebug.getTabIdForWindow(context.window);
-
-        var tempContext = contexts[tabId];
-        if (tempContext)
-        {
-            context.sourceCache.cache = tempContext.sourceCache.cache;
-            delete contexts[tabId];
-
-            if (FBTrace.DBG_CACHE)
-                FBTrace.dumpProperties("tabCache.Temporary context used for: " + 
-                    context.window.location.href, context.sourceCache.cache);
-        }
     },
 
     /* nsIObserver */
@@ -105,47 +88,17 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
     onModifyRequest: function(request, win, tabId)
     {
-        // Ignore redirects
-        if (request.URI.spec != request.originalURI.spec)
-            return;
-
-        if (request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI)
-        {
-            if (win == win.parent)
-            {
-                // Create temporary context so no request is missed. The real one is created 
-                // later by tabWatcher. Merge is done in Firebug.TabCacheModel.initContext.
-                var context = {sourceCache: new Firebug.TabCache(win)};
-                contexts[tabId] = context;
-
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.Temporary context created for: " + win.location.href);
-            }
-        }
     },
 
     onExamineResponse: function(request, win, tabId)
     {
         try 
         {
-            var context = contexts[tabId];
-            
-            if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache:onExamineResponse: checking contexts found: " + (context && context.window?context.window.location:"none"), tabId);
-            
-            context = context ? context : TabWatcher.getContextByWindow(win);
-
             // Register traceable channel listener in order to intercept all incoming data for 
             // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
             request.QueryInterface(Ci.nsITraceableChannel);
-            var newListener = new TracingListener(context);
+            var newListener = new TracingListener(win);
             newListener.listener = request.setNewListener(newListener);
-            if (FBTrace.DBG_CACHE)
-            {
-            	var loc = (context && context.window) ? context.window.location : "no context or no context.window";
-                FBTrace.dumpProperties("tabCache:onExamineResponse: Traceable Listener in context "+loc+" Registered for: " + 
-                    safeGetName(request), request);
-            }
         }
         catch (err)
         {
@@ -205,7 +158,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         delete this.requests[url];
 
         // Notify listeners.
-        dispatch(this.listeners, "onStoreResponse", [this.context, request, this.cache[url]]);
+        dispatch(this.listeners, "onStoreResponse", [this.window, request, this.cache[url]]);
     },
 
     storeSplitLines: function(url, lines)  
@@ -262,9 +215,9 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
  * channels (nsIHttpChannel). For every channel a new instance of this object is created and 
  * registered. See Firebug.TabCacheModel.onExamineResponse method.
  */
-function TracingListener(context)
+function TracingListener(win)
 {
-    this.context = context;
+    this.window = win;
     this.listener = null;
     this.endOfLine = false;
 }
@@ -296,8 +249,19 @@ TracingListener.prototype =
             if (data.length)
                 this.endOfLine = data[data.length-1] == "\r";
 
-            // Store received data into the cache as they come.
-            this.context.sourceCache.storePartialResponse(request, data);
+            // At this moment, initContext is alredy called so, the context is
+            // ready and associated with the window.
+            var context = TabWatcher.getContextByWindow(this.window);
+            if (context) 
+            {
+                // Store received data into the cache as they come.
+                context.sourceCache.storePartialResponse(request, data);
+            }
+            else 
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.dumpProperties("tabCache.onCollectData NO CONTEXT for: " + this.window.location.href);
+            }
 
             // Let other listeners use the stream.
             return storageStream.newInputStream(0);
@@ -352,7 +316,16 @@ TracingListener.prototype =
     {
         try
         {
-            this.context.sourceCache.stopRequest(request);
+            var context = TabWatcher.getContextByWindow(this.window);
+            if (context) 
+            {
+                context.sourceCache.stopRequest(request);
+            }
+            else 
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
+            }
 
             if (this.listener)
                 this.listener.onStopRequest(request, requestContext, statusCode);

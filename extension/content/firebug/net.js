@@ -2031,7 +2031,7 @@ NetProgress.prototype =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // tabCache listener
 
-    onStoreResponse: function(context, request, responseText)
+    onStoreResponse: function(win, request, responseText)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
