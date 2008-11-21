@@ -1799,7 +1799,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             	{
             		sourceBox.breakingError = this.document.createElement("span");
             		sourceBox.breakingError.setAttribute("class", "breakingError");
-            		sourceBox.breakingError.innerHTML = error.message;
+            		sourceBox.breakingError.setAttribute("title", error.message);
+            		sourceBox.breakingError.innerHTML = cropString(error.message, 40);
             		lineNode.insertBefore(sourceBox.breakingError, lineNode.firstChild);
             	}
             }
