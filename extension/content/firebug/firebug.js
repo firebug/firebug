@@ -2028,46 +2028,48 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
+        	if (!this.selectedSourceBox)
+        	{
+        		if (FBTrace.DBG_SOURCEFILES) 
+        			FBTrace.sysout("SourceBoxPanel.scrollTimeout no selectedSourceBox");
+        		return;
+        	}
             // At this time we know which sourcebox is selected but the viewport is not selected.
             // We need to scroll, let the scroll handler set the viewport, then highlight any lines visible.
-            if (this.selectedSourceBox)
+            var skipScrolling = false;
+            if (this.selectedSourceBox.firstViewableLine && this.selectedSourceBox.lastViewableLine)
             {
-                var skipScrolling = false;
-                if (this.selectedSourceBox.firstViewableLine && this.selectedSourceBox.lastViewableLine)
-                {
-                    var linesFromTop = lineNo - this.selectedSourceBox.firstViewableLine;
-                    var linesFromBot = this.selectedSourceBox.lastViewableLine - lineNo;
-                    skipScrolling = (linesFromTop > 3 && linesFromBot > 3);
-                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
-                }
-                else  // the selectedSourceBox has not been built
-                {
-                    if (FBTrace.DBG_SOURCEFILES) 
-                    	FBTrace.sysout("SourceBoxPanel.scrollTimeout, no viewable lines", this.selectedSourceBox);
-                }
+                var linesFromTop = lineNo - this.selectedSourceBox.firstViewableLine;
+                var linesFromBot = this.selectedSourceBox.lastViewableLine - lineNo;
+                skipScrolling = (linesFromTop > 3 && linesFromBot > 3);
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
+            }
+            else  // the selectedSourceBox has not been built
+            {
+                if (FBTrace.DBG_SOURCEFILES) 
+                	FBTrace.sysout("SourceBoxPanel.scrollTimeout, no viewable lines", this.selectedSourceBox);
+            }
                         
-                if (highlighter) 
-                	this.selectedSourceBox.highlighter = highlighter;
+            if (highlighter) 
+             	this.selectedSourceBox.highlighter = highlighter;
                 
-                if (!skipScrolling)
-                {
-                    var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
-                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight);
-                    var newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight        
-                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+newScrollTop);
-                    this.selectedSourceBox.scrollTop = newScrollTop; // cause scrolling
-                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
-                }
-                else
-                {	
-                	if (highlighter) this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll 
-                }
+            if (!skipScrolling)
+            {
+                var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight);
+                var newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight        
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+newScrollTop);
+                this.selectedSourceBox.scrollTop = newScrollTop; // *may* cause scrolling
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
+            }
+            
+            if (this.selectedSourceBox.highlighter) 
+            	this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll 
                 
-                if (uiListeners.length > 0)
-                {
-                    var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
-                    dispatch(uiListeners, "onLineSelect", [link]);
-                }
+            if (uiListeners.length > 0)
+            {
+                var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
+                dispatch(uiListeners, "onLineSelect", [link]);
             }
         }, this));
     },

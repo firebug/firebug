@@ -102,6 +102,14 @@
     background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
+.breakingError {
+	text-align: right;
+	float:right;
+	color: red;
+	margin-right: 1ex;
+}
+
+
 /************************************************************************************************/
 
 .conditionEditor {

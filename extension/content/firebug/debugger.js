@@ -834,7 +834,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\nFirebug.errorStackTrace:\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
             if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError: ",error); /*@explore*/
             if (Firebug.breakOnErrors)
-                Firebug.Errors.showMessageOnStatusBar(error);
+                context.breakingError = error;
+            else
+            	delete context.breakingError;
         }
         catch (exc) {
             if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError getStackTrace FAILED:", exc);             /*@explore*/
@@ -1733,7 +1735,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var url = this.executionFile.href;
             var analyzer = this.executionFile.getScriptAnalyzer(frame.script);
             this.executionLineNo = analyzer.getSourceLineFromFrame(this.context, frame);  // TODo implement for each type
-               if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n"); /*@explore*/
+            
+            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n"); /*@explore*/
 
             this.navigate(this.executionFile);
             this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
@@ -1787,7 +1790,28 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.executionLine = lineNode;  // if null, clears
 
         if (lineNode)
+        {
             lineNode.setAttribute("exeLine", "true");
+            if (this.context.breakingError)
+            {
+            	var error = this.context.breakingError;
+            	if (error.message)
+            	{
+            		sourceBox.breakingError = this.document.createElement("span");
+            		sourceBox.breakingError.setAttribute("class", "breakingError");
+            		sourceBox.breakingError.innerHTML = error.message;
+            		lineNode.insertBefore(sourceBox.breakingError, lineNode.firstChild);
+            	}
+            }
+        }
+        else
+        {
+        	if (sourceBox.breakingError)
+        	{
+        		sourceBox.breakingError.parentNode.removeChild(sourceBox.breakingError);
+        		delete sourceBox.breakingError;
+        	}
+        }
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_BP || FBTrace.DBG_STACK) FBTrace.sysout("debugger.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+"\n"); /*@explore*/
         return true; // sticky
