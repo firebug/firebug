@@ -546,11 +546,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         else
         {
-            chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
+            chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "false"); 
             chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
+            
+            var panel = context.chrome.getSelectedPanel();
+            if (panel && panel.name != "script") // take down the disabled buttons altogether
+                panel.showToolbarButtons("fbDebuggerButtons", false);
         }
     },
 
@@ -2122,7 +2126,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hide: function(state)
     {
-        this.showToolbarButtons("fbDebuggerButtons", false);
+        if (!this.context.stopped) // leave the buttons so we can see that we are stopped
+            this.showToolbarButtons("fbDebuggerButtons", false);
+        
         this.showToolbarButtons("fbScriptButtons", false);
         FBL.hide(panelStatus, false);
 
