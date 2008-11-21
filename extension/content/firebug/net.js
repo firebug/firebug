@@ -2705,7 +2705,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
         if (hasClass(tab, "netInfoPostTab"))
         {
-            var postTextBox = getChildByClass(netInfoBox, "netInfoPostText");
+            var postTextBox = getElementByClass(netInfoBox, "netInfoPostText");
             if (!netInfoBox.postPresented)
             {
                 netInfoBox.postPresented  = true;
@@ -2731,7 +2731,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
         if (hasClass(tab, "netInfoPutTab"))
         {
-            var putTextBox = getChildByClass(netInfoBox, "netInfoPutText");
+            var putTextBox = getElementByClass(netInfoBox, "netInfoPutText");
             if (!netInfoBox.putPresented)
             {
                 netInfoBox.putPresented  = true;
@@ -2795,7 +2795,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
         {
             netInfoBox.cachePresented = true;
 
-            var responseTextBox = getChildByClass(netInfoBox, "netInfoCacheText");
+            var responseTextBox = getElementByClass(netInfoBox, "netInfoCacheText");
             if (file.cacheEntry) {
                 this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
