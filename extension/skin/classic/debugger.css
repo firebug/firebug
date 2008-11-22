@@ -107,10 +107,12 @@
 	float:right;
 	color: red;
 	margin-right: 1ex;
+	cursor: pointer;
 }
 
 .breakingError:hover {
-    display: none;	
+    display: none;
+    cursor: pointer;	
 	}
 
 /************************************************************************************************/
