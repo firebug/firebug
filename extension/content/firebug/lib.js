@@ -202,7 +202,7 @@ this.safeToString = function(ob)
     }
     catch (exc)
     {
-        return "";
+        return "[an object with no toString() function]";
     }
 };
 
@@ -3731,10 +3731,13 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 
     while (innerScripts.hasMoreElements())
     {
-        sourceFile.innerScripts.push(innerScripts.getNext());
+    	var script = innerScripts.getNext();
+    	if (FBTrace.DBG_SOURCEFILES && !script.isValid)
+    		FBTrace.sysout("FBL.addScriptsToSourceFile script "+script.tag+".isValid:"+script.isValid);
+        sourceFile.innerScripts.push(script);
     }
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
-        FBTrace.sysout("FBL.addScriptsToSourceFile "+sourceFile.innerScripts.length+" scripts, sourcefile="+sourceFile.toString()+"\n");
+        FBTrace.sysout("FBL.addScriptsToSourceFile "+sourceFile.innerScripts.length+" scripts, sourcefile="+sourceFile.toString(), sourceFile);
 }
 
 //------------
