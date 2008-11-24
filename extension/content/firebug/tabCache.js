@@ -10,23 +10,20 @@ const Ci = Components.interfaces;
 
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
 
-// List of text content types.
+// List of text content types. These content-types are cached.
 const contentTypes =
 {
     "text/plain": 1,
     "text/html": 1,
-    "text/html": 1,
-    "text/html": 1,
     "text/xml": 1,
     "text/css": 1,
+    "text/sgml": 1,
+    "text/rtf": 1,
+    "text/richtext": 1,
+    "text/x-setext": 1,
+    "text/rtf": 1,
+    "text/tab-separated-values": 1,
     "application/x-javascript": 1,
-    "application/x-javascript": 1,
-    "image/jpeg": 0,
-    "image/jpeg": 0,
-    "image/gif": 0,
-    "image/png": 0,
-    "image/bmp": 0,
-    "application/x-shockwave-flash": 0
 };
 
 // ************************************************************************************************
@@ -144,9 +141,8 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
             this.requests[url] = request;
         }
 
-        // Convert text types.
-        if (contentTypes[request.contentType])
-            responseText = FBL.convertToUnicode(responseText);
+        // Convert
+        responseText = FBL.convertToUnicode(responseText);
 
         // Store partial content into the cache.
         this.store(url, responseText);
@@ -278,10 +274,13 @@ TracingListener.prototype =
     /* nsIStreamListener */
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
-        // xxxHonza: all content types should be cached?
-        var newStream = this.onCollectData(request, inputStream, offset, count);
-        if (newStream)
-            inputStream = newStream;
+        // Cache only text responses for now.
+        if (contentTypes[request.contentType])
+        {
+            var newStream = this.onCollectData(request, inputStream, offset, count);
+            if (newStream)
+                inputStream = newStream;
+        }
 
         try
         {
