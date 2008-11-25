@@ -29,6 +29,7 @@ this.reJavascript = /\s*javascript:\s*(.*)/;
 this.reChrome = /chrome:\/\/([^\/]*)\//;
 this.reCSS = /\.css$/;
 this.reFile = /file:\/\/([^\/]*)\//;
+this.reUpperCase = /[A-Z]/;
 
 const reSplitLines = /\r\n|\r|\n/;
 const reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
@@ -3300,11 +3301,18 @@ this.TextSearch = function(rootNode, rowFinder)
 // ************************************************************************************************
 this.SourceBoxTextSearch = function(sourceBox)
 {
+    
     this.find = function(text)
     {
         this.text = text;
-
-        this.re = new RegExp(text, 'g');
+        
+        var regExpOptions = null;
+        if (FBL.reUpperCase.test(text))
+            regExpOptions = "g";
+        else
+            regExpOptions = "gi";  // ignore case unless the user explicitly uses uppercase
+        
+        this.re = new RegExp(text, regExpOptions);
         return this.findNext(false);
     };
 
