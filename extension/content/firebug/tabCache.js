@@ -24,6 +24,7 @@ const contentTypes =
     "text/rtf": 1,
     "text/tab-separated-values": 1,
     "application/x-javascript": 1,
+    "application/x-httpd-php": 1,
 };
 
 // ************************************************************************************************
@@ -280,6 +281,12 @@ TracingListener.prototype =
             var newStream = this.onCollectData(request, inputStream, offset, count);
             if (newStream)
                 inputStream = newStream;
+        }
+        else
+        {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.dumpProperties("tabCache.onDataAvailable Content-Type not cached: " +
+                    request.contentType + ", " + safeGetName(request));
         }
 
         try
