@@ -399,7 +399,7 @@ FirebugService.prototype =
             FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));                        
     },
 
-    suspend: function(stayOnDebuggr)
+    suspend: function(stayOnDebuggr, context)
     {
         stepMode = STEP_SUSPEND;
         stepFrameLineId = null;
@@ -409,6 +409,8 @@ FirebugService.prototype =
             FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));                        
 
         this.hookInterrupts();
+        
+        dispatch(debuggers, "onBreakingNext", [stayOnDebuggr, context]);
     },
 
     runUntil: function(sourceFile, lineNo, startFrame, debuggr)
@@ -871,7 +873,7 @@ FirebugService.prototype =
         	if (type==jsdIExecutionHook.TYPE_INTERRUPTED && stepStayOnDebuggr)
         	{
         		var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
-                if (FBTrace.DBG_FBS_STEP) 
+                if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) ) 
                     FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
 
         		if (!debuggr)
@@ -1462,7 +1464,7 @@ FirebugService.prototype =
     {
     	var location = fbs.getLocationSafe(global);
 		// TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
-		if (location && location.indexOf("chrome://chromebug/") == -1)
+		if (location && location.indexOf("chrome://chromebug/") == -1 && location.indexOf("chrome://fb4cb/") == -1)
 			return location;
 		else
 			return null;
@@ -1950,20 +1952,21 @@ FirebugService.prototype =
     {
         function interruptHook(frame, type, rv)
         {
-            if ( isFilteredURL(frame.script.fileName) )  // TODO use JSD for this filtering
+            if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing
                 return RETURN_CONTINUE;
 
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
             var frameLineId = hookFrameCount + frame.script.fileName + frame.line;
-            if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId);                                     /*@explore*/
+            if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) ) 
+                FBTrace.sysout("interruptHook pc:"+frame.pc+" frameLineId: "+frameLineId+" vs "+stepFrameLineId);                                     /*@explore*/
             if (frameLineId != stepFrameLineId)
                 return fbs.onBreak(frame, type, rv);
             else
                 return RETURN_CONTINUE;
         }
 
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId"+stepFrameLineId);                                                                  /*@explore*/
+        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set InterruptHook with stepFrameLineId: "+stepFrameLineId);                                                                  /*@explore*/
         jsd.interruptHook = { onExecute: interruptHook };
     },
 

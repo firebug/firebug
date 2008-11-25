@@ -145,16 +145,42 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     -moz-image-region: rect(auto,auto,auto,auto) !important;
 }
 
-#fbContinueButton {
+/*
+fbContinueButton has three states:
+   breakable true: default.
+   breakable false: breakOnNext is armed. 
+   breakable off: we are stopped in debugger. always goes to true
+   true -> false: onBreakingNext
+   true -> off: syncCommands with context.stopped true
+   false -> true: resume w/!context.stopped and !breakable
+   false -> off: syncCommands with context.stopped true
+   off -> true:  resume w/context.stopped
+   off -> false: not allowed
+*/
+#fbContinueButton[breakable="off"] {
     list-style-image: url(chrome://firebug/skin/continue.png);
 }
-
+/*
 #fbContinueButton:hover:active {
     list-style-image: url(chrome://firebug/skin/continueActive.png);
 }
 
-#fbContinueButton[disabled="true"] {
+#fbContinueButton[disabled="true"] {   no longer used
     list-style-image: url(chrome://firebug/skin/continueDisabled.png) !important;
+}
+ */
+
+#fbContinueButton[breakable="true"] {  
+    list-style-image: url(chrome://firebug/skin/breakNext.png);
+}
+#fbContinueButton:hover:active[breakable="true"] {
+   list-style-image: url(chrome://firebug/skin/breakNextActive.png)  
+}
+#fbContinueButton:hover:active[breakable="false"] {
+   list-style-image: url(chrome://firebug/skin/breakNextActive.png)  
+}
+#fbContinueButton[breakable="false"] {
+   list-style-image: url(chrome://firebug/skin/breakNextArmed.gif)  
 }
 
 #fbStepOverButton {

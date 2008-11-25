@@ -237,13 +237,29 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     resume: function(context)
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
-        if (!context.stopped)
+        if (FBTrace.DBG_UI_LOOP) 
+            FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
+        
+        if (!context.stopped) // then resume means breakOnNext
         {
+            var chrome = context.chrome;0
+            var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+            
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.resume "+context.window.location+ " breakable: "+breakable, breakable);
+
+            if (breakable == "true")
+                this.suspend(context);  // arm breakOnNext
+            else
+                chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
+            
             this.syncCommands(context);
             return;
         }
 
+        // in fbs we stopStepping() so allow breakOnNext again
+        context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+        
         delete context.stopped;
         delete context.debugFrame;
         delete context.currentFrame;
@@ -253,6 +269,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
 
+    onBreakingNext: function(debuggr, context)
+    {
+        var chrome = context.chrome;
+        chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");  // mark armed
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("debugger.onBreakingNext "+context.window.location+ " breakable: "+chrome.getGlobalAttribute("cmd_resumeExecution", "breakable"));
+    },
+    
     abort: function(context)
     {
         if (context.stopped)
@@ -293,7 +317,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (context.stopped)
             return;
-        fbs.suspend(this);
+        fbs.suspend(this, context);
     },
 
     runUntil: function(context, sourceFile, lineNo)
@@ -304,6 +328,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.runUntil(sourceFile, lineNo, context.debugFrame, this);
         this.resume(context);
     },
+
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
@@ -539,7 +564,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.stopped)
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "off");
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
@@ -547,7 +572,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "false"); 
-            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
@@ -726,7 +750,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
             if (!context)
                 return RETURN_CONTINUE;
-
+            
             return this.stop(context, frame, type);
         }
         catch (exc)

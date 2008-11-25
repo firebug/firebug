@@ -684,7 +684,12 @@ top.FirebugChrome =
     {
         var elt = $(id);
         if (elt)
-            elt.setAttribute(name, value);
+        {
+            if (value == null)
+                elt.removeAttribute(name);
+            else
+                elt.setAttribute(name, value);
+        }
 
         if (externalMode && FirebugContext && FirebugContext.originalChrome)
             FirebugContext.originalChrome.setGlobalAttribute(id, name, value);
