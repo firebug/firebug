@@ -75,7 +75,8 @@ const mimeExtensionMap =
     "gif": "image/gif",
     "png": "image/png",
     "bmp": "image/bmp",
-    "swf": "application/x-shockwave-flash"
+    "swf": "application/x-shockwave-flash",
+    "flv": "video/x-flv"
 };
 
 const fileCategories =
@@ -120,7 +121,8 @@ const mimeCategoryMap =
     "image/gif": "image",
     "image/png": "image",
     "image/bmp": "image",
-    "application/x-shockwave-flash": "flash"
+    "application/x-shockwave-flash": "flash",
+    "video/x-flv": "flash"
 };
 
 const binaryCategoryMap =
