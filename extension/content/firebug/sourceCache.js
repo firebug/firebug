@@ -94,7 +94,7 @@ Firebug.SourceCache.prototype =
         // Unfortunately, the URL isn't available so, let's try to use FF cache. 
         // Notice that additional network request to the server can be made in 
         // this method (double-load).
-        this.loadFromCache(url, method, file);
+        return this.loadFromCache(url, method, file);
     },
 
     loadFromLocal: function(url)

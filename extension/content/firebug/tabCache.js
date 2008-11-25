@@ -24,6 +24,7 @@ const contentTypes =
     "text/rtf": 1,
     "text/javascript": 1,
     "text/tab-separated-values": 1,
+    "application/javascript": 1,
     "application/x-javascript": 1,
     "application/x-httpd-php": 1,
 };
