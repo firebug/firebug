@@ -628,7 +628,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             dispatch(NetInfoBody.listeners, "initTabBody", [netInfoBox, file]);
 
             NetInfoBody.selectTabByName(netInfoBox, "Headers");
-            setClass(netInfoBox, "category-" + getFileCategory(row.repObject));
+            var category = getFileCategory(row.repObject);
+            if (category)
+                setClass(netInfoBox, "category-" + category);
         }
         else
         {
