@@ -24,6 +24,13 @@
     <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+    <script type="application/x-javascript">
+        // To avoid error messages when Firebug extensions are loaded into this window.
+        // All necessary JS objects are already created in the browser window space and 
+        // shared here (see FirebugChrome.initialize). It's not desirable to create 
+        // these objects again.
+        top.FBL = { ns: function(fn) {} }
+    </script>
     
     <stringbundleset id="stringbundleset"/>
     <commandset id="baseMenuCommandSet"/>
