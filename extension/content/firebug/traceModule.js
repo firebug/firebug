@@ -255,10 +255,13 @@ Firebug.TraceModule = extend(Firebug.Module,
         parentMenu.appendChild(menuItem);
     },
 
-    openConsole: function()
+    openConsole: function(prefDomain)
     {
+        if (!prefDomain)
+            prefDomain = this.prefDomain;
+
         this.consoleWindow = windowMediator.getMostRecentWindow(
-            "FBTraceConsole." + this.prefDomain);
+            "FBTraceConsole." + prefDomain);
 
         // Try to connect an existing trace-console window first.
         if (this.consoleWindow) {
@@ -268,25 +271,25 @@ Firebug.TraceModule = extend(Firebug.Module,
         }
 
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceModule.openConsole, prefDomain: " + this.prefDomain);
+            FBTrace.sysout("traceModule.openConsole, prefDomain: " + prefDomain);
 
         var self = this;
         var args = {
             FBL: FBL,
             Firebug: Firebug,
             traceModule: self,
-            prefDomain: this.prefDomain,
+            prefDomain: prefDomain,
         };
 
         if (FBTrace.DBG_OPTIONS) {
             for (var p in args)
                 FBTrace.sysout("tracePanel.openConsole prefDomain:" +
-                    this.prefDomain +" args["+p+"]= "+ args[p]+"\n");
+                    prefDomain +" args["+p+"]= "+ args[p]+"\n");
         }
 
         this.consoleWindow = window.openDialog(
             "chrome://firebug/content/traceConsole.xul",
-            "FBTraceConsole." + this.prefDomain,
+            "FBTraceConsole." + prefDomain,
             "chrome,resizable,scrollbars=auto,minimizable,dialog=no",
             args);
     },
