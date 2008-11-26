@@ -9,9 +9,12 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     Supports Firefox 3.1
 
 == Javascript Debugging ==
+    * Implement breakOnNext UI for STEP_SUSPEND
+    * Leave the debugger controls visible if the js is stopped
     * Implement stepStayOnDebuggr to keep chrome out of firebug and vice versa
     * Implement dynamicURLhasBP to avoid MD5 on eval unless breakpoints are set on evals
     * skipScrolling if the lines are still in view.
+    * search in source boxes now ignores case unless the user puts an upper case character in the search request box
 
 == Net Panel ==
     * support for STATUS_RESOLVING 
@@ -29,6 +32,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* sv-SE locale update (contribution by peter3)
 	
 == Bug Fixes ==
+	* Issue 176: net flash tab not recognising flv files
+	* Issue 199:   CSS priority with '!important'
 	* Issue 700: HTML preview for net responses
 	* Issue 749: Hungarian Locale
 	* Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
@@ -39,3 +44,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1248: Console does not filter errors from other browser tabs.
 	* Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
 	* Issue 1267: console.time('toString') returns `NaN`;
+	* Issue 1276: Break on error without message in status bar
+	* Issue 1278: console create unclickable, 4px-high log entries
