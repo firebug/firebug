@@ -255,7 +255,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         parentMenu.appendChild(menuItem);
     },
 
-    openConsole: function(prefDomain)
+    openConsole: function(prefDomain, windowURL)
     {
         if (!prefDomain)
             prefDomain = this.prefDomain;
@@ -270,6 +270,9 @@ Firebug.TraceModule = extend(Firebug.Module,
             return;
         }
 
+        if (!windowURL)
+            windowURL = "chrome://firebug/content/traceConsole.xul";
+        
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.openConsole, prefDomain: " + prefDomain);
 
@@ -288,7 +291,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         }
 
         this.consoleWindow = window.openDialog(
-            "chrome://firebug/content/traceConsole.xul",
+            windowURL,
             "FBTraceConsole." + prefDomain,
             "chrome,resizable,scrollbars=auto,minimizable,dialog=no",
             args);
