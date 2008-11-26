@@ -71,8 +71,9 @@ HttpRequestObserver.prototype =
 
         try 
         {
-            if (FBTrace.DBG_HTTPOBSERVER)
-                FBTrace.sysout("httpObserver.observe " + topic, subject);
+            if (FBTrace.DBG_HTTPOBSERVER) 
+                FBTrace.sysout("httpObserver.observe " + topic + ", " + 
+                    ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
 
             // Notify all registered observers.
             if (topic == "http-on-modify-request" || topic == "http-on-examine-response")
@@ -129,6 +130,18 @@ HttpRequestObserver.prototype =
 		
 		throw Cr.NS_ERROR_NO_INTERFACE;
 	}
+}
+
+function safeGetName(request)
+{
+    try
+    {
+        return request.name;
+    }
+    catch (exc)
+    {
+        return null;
+    }
 }
 
 // ************************************************************************************************
