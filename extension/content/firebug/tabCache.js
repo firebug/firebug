@@ -11,7 +11,7 @@ const Ci = Components.interfaces;
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
 
 // List of text content types. These content-types are cached.
-const contentTypes =
+var contentTypes =
 {
     "text/plain": 1,
     "text/html": 1,
@@ -58,6 +58,17 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache. Cache model initialized.");
+
+        // Read additional text mime-types from preferences.
+        var mimeTypes = Firebug.getPref(Firebug.prefDomain, "cache.mimeTypes");
+        if (mimeTypes) {
+            var list = mimeTypes.split(" ");
+            for (var i=0; i<list.length; i++)
+                contentTypes[list[i]] = 1;
+
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.initializeUI, custom mime-types added", list);
+        }
 
         // Register for HTTP events.
         if (Ci.nsITraceableChannel)

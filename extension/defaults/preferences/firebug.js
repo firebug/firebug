@@ -76,6 +76,9 @@ pref("extensions.firebug.net.enableLocalFiles", "");
 pref("extensions.firebug.net.enableSystemPages", "");
 pref("extensions.firebug.net.enableSites", false);
 
+// Cache
+pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.
+
 // External Editors
 pref("extensions.firebug.externalEditors", "");
 
