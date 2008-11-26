@@ -977,7 +977,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 if (inheritMode && !props.length)
                     continue;
 
-                this.markOverridenProps(props, usedProps);
+                this.markOverridenProps(props, usedProps, inheritMode);
 
                 var line = domUtils.getRuleLine(rule);
                 var ruleId = rule.selectorText+"/"+line;
@@ -989,29 +989,33 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
 
         this.getStyleProperties(element, rules, usedProps, inheritMode);
+        
+        if (FBTrace.DBG_CSS)
+        	FBTrace.sysout("getElementRules "+rules.length+" rules for "+getElementXPath(element), rules);
     },
 
-    markOverridenProps: function(props, usedProps)
+    markOverridenProps: function(props, usedProps, inheritMode)
     {
         for (var i = 0; i < props.length; ++i)
         {
             var prop = props[i];
             if ( usedProps.hasOwnProperty(prop.name) )
             {
-                var deadProps = usedProps[prop.name];
+                var deadProps = usedProps[prop.name]; // all previous occurances of this property
                 for (var j = 0; j < deadProps.length; ++j)
                 {
                     var deadProp = deadProps[j];
-                    if (!deadProp.disabled && deadProp.important && !prop.important)
-                        prop.overridden = true;
+                    if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important && !prop.important)
+                        prop.overridden = true;  // new occurance overridden
                     else if (!prop.disabled)
-                        deadProp.overridden = true;
+                        deadProp.overridden = true;  // previous occurances overridden
                 }
             }
             else
                 usedProps[prop.name] = [];
 
-            usedProps[prop.name].push(prop);
+            prop.wasInherited = inheritMode ? true : false;
+            usedProps[prop.name].push(prop);  // all occurances of a property seen so far, by name
         }
     },
 
@@ -1032,7 +1036,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         this.addOldProperties(this.context, getElementXPath(element), inheritMode, props);
 
         sortProperties(props);
-        this.markOverridenProps(props, usedProps);
+        this.markOverridenProps(props, usedProps, inheritMode);
 
         if (props.length)
             rules.splice(0, 0,
