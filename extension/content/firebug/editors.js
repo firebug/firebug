@@ -78,7 +78,11 @@ var gEditorManager =
     {
         var item = { label: "", executable: null, cmdline: "" };
         var result = {};
-        openDialog("chrome://firebug/content/changeeditor.xul",  "_blank", "modal,centerscreen", item, result);
+        var args = {
+            item: item,
+            FBL: this._FBL
+        };
+        openDialog("chrome://firebug/content/changeeditor.xul",  "_blank", "modal,centerscreen", args, result);
         if (result.saveChanges)
         {
             item.id = item.label.replace(/\W/g, "_");

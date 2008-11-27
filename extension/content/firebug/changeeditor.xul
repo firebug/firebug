@@ -19,12 +19,13 @@
   <script><![CDATA[
 
       var item;
+      var FBL;
 
       function onLoad()
       {
          var args = window.arguments[0];
-         var item = args.item;
-         var FBL = args.FBL;
+         item = args.item;
+         FBL = args.FBL;
 
          document.getElementById("name").value = item.label;
          if ( item.executable )
