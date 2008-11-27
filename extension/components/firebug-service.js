@@ -886,6 +886,15 @@ FirebugService.prototype =
         		        
         			return RETURN_CONTINUE;  // This means that we will continue to take interrupts until  when?
         		}
+        		else
+        		{
+        			if (stepMode == STEP_SUSPEND) // then we have interrupted the outerFunction
+        			{
+        				var scriptTag = frame.script.tag;
+        				if (scriptTag in this.onXScriptCreatedByTag) // yes, we have to create the sourceFile
+        					this.onBreakpoint(frame, type, rv);  // TODO refactor so we don't get mixed up
+        			}
+        		}
         	}
         	else
         	{
