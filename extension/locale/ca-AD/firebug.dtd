@@ -20,9 +20,9 @@
 <!ENTITY firebug.Issues "Incidències...">
 <!ENTITY firebug.Donate "Donatius...">
 <!ENTITY firebug.About "Quant a...">
-<!ENTITY firebug.AlwaysOpenInWindow "Obre sempre en una nova finestra">
+<!ENTITY firebug.AlwaysOpenInWindow "Obre sempre en en una finestra nova">
 <!ENTITY firebug.ShowFirebug "Obre el Firebug">
-<!ENTITY firebug.DetachFirebug "Obri el Firebug en una nova finestra">
+<!ENTITY firebug.DetachFirebug "Obre el Firebug en una finestra nova">
 <!ENTITY firebug.OpenWith "Obre amb l&apos;editor">
 <!ENTITY firebug.CloseFirebug "Tanca el Firebug">
 <!ENTITY firebug.Permissions "Permisos...">
