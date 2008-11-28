@@ -1545,9 +1545,9 @@ this.wrapText = function(text, noEscapeHTML)
     return html.join("\n");
 }
 
-this.insertWrappedText = function(text, textBox)
+this.insertWrappedText = function(text, textBox, noEscapeHTML)
 {
-    textBox.innerHTML = "<pre>" + this.wrapText(text) + "</pre>";
+    textBox.innerHTML = "<pre>" + this.wrapText(text, noEscapeHTML) + "</pre>";
 }
 
 // ************************************************************************************************
