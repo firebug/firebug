@@ -1,7 +1,7 @@
-<!ENTITY editors.Description "Opsatte Firebug redigeringsprogrammer:">
+<!ENTITY editors.Description "Opsatte Firebug editorer:">
 <!ENTITY editors.NameColumn "Navn">
 <!ENTITY editors.ExecutableColumn "Programfil">
-<!ENTITY editors.ParamsColumn "Kommandolinjeargumenter">
+<!ENTITY editors.ParamsColumn "Start-argumenter">
 <!ENTITY add.label "Tilføj">
 <!ENTITY remove.label "Fjern">
 <!ENTITY change.label "Rediger">
