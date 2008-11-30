@@ -1579,12 +1579,17 @@ Firebug.Panel =
     navigate: function(object)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("navigate "+object+"\n");
+            FBTrace.sysout("navigate "+object+" when this.location="+this.location+"\n");
         if (!object)
             object = this.getDefaultLocation(this.context);
+        if (!object)
+        	object = null;  // not undefined.
 
-        if (object != this.location)
+        if ( !this.location || (object != this.location) )  // if this.location undefined, may set to null
         {
+            if (FBTrace.DBG_PANELS)
+                FBTrace.sysout("navigate to location "+object+"\n");
+            
             this.location = object;
             this.updateLocation(object);
 
@@ -1594,16 +1599,17 @@ Firebug.Panel =
         }
     },
 
-    updateLocation: function(object)
+    updateLocation: function(object)  // if the module can return null from getDefaultLocation, then it must handle it here.
     {
     },
 
     select: function(object, forceUpdate)
     {
-        if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.sysout("firebug.select forceUpdate: "+forceUpdate+" (object != this.selection)? "+(object != this.selection), " object: "+object);  /*@explore*/
         if (!object)
             object = this.getDefaultSelection(this.context);
+
+        if(FBTrace.DBG_PANELS)    /*@explore*/
+            FBTrace.sysout("firebug.select forceUpdate: "+forceUpdate+" "+object+" !=("+(object != this.selection)+ ") "+this.selection);  
 
         if (forceUpdate || object != this.selection)
         {

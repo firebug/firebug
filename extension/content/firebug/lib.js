@@ -3130,13 +3130,24 @@ this.restoreLocation =  function(panel, panelState)
     {
     	function overrideDefaultWithPersistedLocation()
     	{
-    		if (panel.location == panel.getDefaultLocation(panel.context) && panelState.persistedLocation)
+    		var defaultLocation = panel.getDefaultLocation(panel.context);
+    		if (panelState.persistedLocation)
     		{
-    			var location = panelState.persistedLocation(panel.context);
-    			if (location)
-    				panel.navigate(location);
+    			if ( (!panel.location) || (panel.location == defaultLocation))
+    			{
+    				var location = panelState.persistedLocation(panel.context);
+    				if (location)
+    					panel.navigate(location);
+    			}
     		}
-    	
+    		else
+    		{
+    			if (!defaultLocation)  // no persisted and no default locations, erase 
+    			{
+    					panel.navigate();
+    			}
+    		}
+
     		if (FBTrace.DBG_INITIALIZE)
     			FBTrace.dumpProperties("lib.overrideDefaultWithPersistedLocation panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
     	}
@@ -6083,10 +6094,10 @@ const invisibleTags = this.invisibleTags =
 
 this.ERROR = function(exc)
 {
-    if (FBTrace) {                                              /*@explore*/
-        FBTrace.dumpProperties("lib.ERROR:", exc);  /*@explore*/
+    if (FBTrace) {                                               
+        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);   
     }
-    else                                                      /*@explore*/
+    else                                                       
         ddd("FIREBUG WARNING: " + exc);
 }
 
