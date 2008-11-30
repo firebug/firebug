@@ -915,9 +915,17 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var script = frame.script;
         var creatorURL = normalizeURL(frame.script.fileName);
-
+        var innerScriptArray = [];
         try {
             var source = script.functionSource;
+            
+            while (innerScripts.hasMoreElements())
+            {
+            	var inner = innerScripts.getNext(); 
+                source += "\n"+inner.functionSource;
+                innerScriptArray.push(inner);
+            }
+            
         } catch (exc) {
             /*Bug 426692 */
             var source = creatorURL + "/"+getUniqueId();
@@ -926,7 +934,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var url = this.getDynamicURL(context, frame.script.fileName, source, "event");
 
         var lines = context.sourceCache.store(url, source);
-        var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, innerScripts);
+        var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
         context.sourceFileMap[url] = sourceFile;
 
         if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScriptCreated url="+sourceFile.href+"\n");   /*@explore*/
@@ -1782,7 +1790,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.executionFile = null;
         this.executionLineNo = -1;
-        this.highlightExecutionLine(this.selectedSourceBox);  // clear highlight
+        
+        if (this.selectedSourceBox)
+        	this.highlightExecutionLine(this.selectedSourceBox);  // clear highlight
         
         panelStatus.clear(); // clear stack on status bar
         this.updateInfoTip();
@@ -2133,7 +2143,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (breakpointPanel)
                 breakpointPanel.refresh();
         }        	
-        else
+        else  // Not enabled but showing source in HTML pages.
         {
         	if (!state.persistedLocation)
         		Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
@@ -2225,6 +2235,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!Firebug.Debugger.isEnabled(this.context))
             Firebug.ModuleManagerPage.hide(this);
 
+        if (!sourceFile)
+        	return;  // XXXjjb do we need to show a blank?
+        
         // Since our last use of the sourceFile we may have compiled or recompiled the source
         var updatedSourceFile = this.context.sourceFileMap[sourceFile.href];
         if (!updatedSourceFile)
@@ -3254,7 +3267,20 @@ function countBreakpoints(context)
     }
     return count;
 }
-                                                                                                                     /*@explore*/
+                     
+function ArrayEnumerator(array)
+{
+	this.index = 0;
+	this.array = array;
+	this.hasMoreElements = function()
+	{
+		return (this.index < array.length);
+	}
+	this.getNext = function()
+	{
+		return this.array[++this.index];
+	}
+}
 
 // ************************************************************************************************
 
