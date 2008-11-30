@@ -45,44 +45,23 @@
          var element = document.getElementById("firebug-external-editors-change");
          var xulString = element.getAttribute("title");
          document.title = FBL.$STR(xulString);
-
-         if (document.getAnonymousElementByAttribute && !document.getElementById("executable").file) {
-           setTimeout(function() {
-             internalFilefieldTextbox = document.getAnonymousElementByAttribute(document.getElementById("executable"), "class", "fileFieldLabel");
-             if (internalFilefieldTextbox) {
-               internalFilefieldTextbox.readOnly = false;
-               internalFilefieldTextbox.addEventListener("input", function(e) {
-                 browseButton.disabled = true;
-                 onChange();
-               }, false);
-             }
-           }, 100);
-         }
       }
 
       function onAccept()
       {
           item.label = document.getElementById("name").value;
-          if (!browseButton.disabled) {
-            var file = document.getElementById("executable").file;
-            item.executable = "";
-            if (file)
-                item.executable = file.path;
-          } else {
-            item.executable = internalFilefieldTextbox.value.replace(/^\s+|\s+$/g, '');
-          }
+          var file = document.getElementById("executable").file;
+          item.executable = "";
+          if (file)
+              item.executable = file.path;
           item.cmdline = document.getElementById("cmdline").value;
           window.arguments[1].saveChanges = true;
       }
 
       function onChange()
       {
-          document.documentElement.getButton("accept").disabled = !(
-              document.getElementById("name").value && (
-                (browseButton.disabled && internalFilefieldTextbox && internalFilefieldTextbox.value && internalFilefieldTextbox.value.replace(/^\s+|\s+$/g, '')) ||
-                (!browseButton.disabled && document.getElementById("executable").file)
-              )
-          );
+          document.documentElement.getButton("accept")
+              .disabled = !( document.getElementById("name").value && document.getElementById("executable").file);
       }
 
       function onBrowse()
@@ -96,11 +75,6 @@
         {
           var execField = document.getElementById("executable");
           execField.file = picker.file;
-
-          if (internalFilefieldTextbox) {
-            internalFilefieldTextbox.readOnly = true;
-          }
-
           onChange();
           return true;
         }
@@ -118,7 +92,7 @@
       <hbox>
          <label control="executable" align="baseline">&changeEditor.Executable;</label>
          <filefield id="executable" flex="1"/>
-         <button id="browse-button" oncommand="onBrowse();" label="&browse.label;"/>
+         <button oncommand="onBrowse();" label="&browse.label;"/>
 
       </hbox>
       <separator class="thin"/>
