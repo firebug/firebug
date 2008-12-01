@@ -609,7 +609,7 @@
                 }
                 else if (event.keyCode == 8) // Backspace
                 {
-                    this.searchString = this.searchString.substr(0, this.searchString.length-2);
+                    this.searchString = this.searchString.substr(0, this.searchString.length-1);
                     this.filterList(this.searchString);
                 }
                 else if (event.charCode)
