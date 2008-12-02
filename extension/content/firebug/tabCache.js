@@ -31,6 +31,7 @@ var contentTypes =
     "text/xif": 1,
     "text/ecmascript": 1,
     "text/vnd.curl": 1,
+    "text/x-json": 1,
     "view-source": 1,
     "view-fragment": 1,
     "application/xml": 1,
@@ -42,6 +43,7 @@ var contentTypes =
     "application/rdf+xml": 1,
     "application/ecmascript": 1,
     "application/http-index-format": 1,
+    "application/json": 1,
 };
 
 // ************************************************************************************************
