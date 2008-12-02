@@ -929,7 +929,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     getStylesheetURL: function(style)
     {
-        if (style && style.parentRule)
+    	// if the parentStyleSheet.href is null, CSS std says its inline style
+        if (style && style.parentRule && style.parentRule.parentStyleSheet.href)
             return style.parentRule.parentStyleSheet.href;
         else
             return this.selection.ownerDocument.location.href;
