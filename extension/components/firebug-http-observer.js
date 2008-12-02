@@ -42,6 +42,7 @@ HttpRequestObserver.prototype =
         observerService.addObserver(this, "quit-application", false);
         observerService.addObserver(this, "http-on-modify-request", false);
         observerService.addObserver(this, "http-on-examine-response", false);
+        observerService.addObserver(this, "http-on-cached-response", false);
 
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.initialize OK");
@@ -52,6 +53,7 @@ HttpRequestObserver.prototype =
         observerService.removeObserver(this, "quit-application");
         observerService.removeObserver(this, "http-on-modify-request");
         observerService.removeObserver(this, "http-on-examine-response");
+        observerService.removeObserver(this, "http-on-cached-response");
 
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.shutdown OK");
@@ -76,8 +78,12 @@ HttpRequestObserver.prototype =
                     ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
 
             // Notify all registered observers.
-            if (topic == "http-on-modify-request" || topic == "http-on-examine-response")
+            if (topic == "http-on-modify-request" || 
+                topic == "http-on-examine-response" ||
+                topic == "http-on-cached-response") 
+            {
                 this.notifyObservers(subject, topic, data);
+            }
         }
         catch (err)
         {

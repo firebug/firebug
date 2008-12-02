@@ -106,6 +106,8 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 this.onModifyRequest(subject, win, tabId);
             else if (topic == "http-on-examine-response")
                 this.onExamineResponse(subject, win, tabId);
+            else if (topic == "http-on-cached-response")
+                this.onCachedResponse(subject, win, tabId);
         }
         catch (err)
         {
@@ -134,6 +136,12 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 FBTrace.dumpProperties("tabCache: Register Traceable Listener EXCEPTION", err);
         }
     },
+
+    onCachedResponse: function(request, win, tabId)
+    {
+        // Make sure cached responses are observed with nsITraceableChannel too.
+        this.onExamineResponse(request, win, tabId);
+    }
 });
 
 // ************************************************************************************************
