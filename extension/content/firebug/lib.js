@@ -3764,6 +3764,7 @@ this.EvalLevelSourceFile = function(url, script, eval_expr, source, innerScriptE
 {
     this.href = url;
     this.outerScript = script;
+    this.containingURL = script.fileName;
     this.evalExpression = eval_expr;
     this.sourceLength = source.length;
     this.source = source;
@@ -3804,7 +3805,7 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
     if (this.href.kind == "source")
-        return FBL.splitURL(this.href);
+        return FBL.splitURLBase(this.href); 
 
     if (!this.summary)
     {
@@ -3815,15 +3816,17 @@ this.EvalLevelSourceFile.prototype.getObjectDescription = function()
         if (this.summary.length < 120)
             this.summary = "eval("+this.summary + "...)=" + FBL.summarizeSourceLineArray(this.source, 120 - this.summary.length);
     }
+    var containingFileDescription = FBL.splitURLBase(this.containingURL);
     if (FBTrace.DBG_SOURCEFILES) /*@explore*/
         FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+(this.evalExpression?this.evalExpression.substr(0, 240):"null")+" summary", this.summary); /*@explore*/
-    return {path: this.href.replace(/\/eval\/[^\/]+$/, "/eval"), name: this.summary };
+    return {path: containingFileDescription.path, name: containingFileDescription.name+"/eval: "+this.summary };
 }
 //------------
 this.EventSourceFile = function(url, script, title, source, innerScriptEnumerator)
 {
     this.href = url;
     this.outerScript = script;
+    this.containingURL = script.fileName;
     this.title = title;
     this.sourceLines = source; // points to the sourceCache lines
     this.sourceLength = source.length;
@@ -3890,8 +3893,10 @@ this.EventSourceFile.prototype.getObjectDescription = function()
     {
         this.summary = FBL.summarizeSourceLineArray(this.sourceLines, 120);
     }
-
-    return {path: this.href.replace(/\/event\/[^\/]+$/, "/event"), name: this.summary };
+    
+    var containingFileDescription = FBL.splitURLBase(this.containingURL);
+    
+    return {path: containingFileDescription.path, name: containingFileDescription.name+"/event: "+this.summary };
 }
 
 //-----------
