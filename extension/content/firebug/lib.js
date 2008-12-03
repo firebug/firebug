@@ -3686,10 +3686,10 @@ this.SourceFile.prototype.NestedScriptAnalyzer.prototype =
     // Adjust JSD line numbers based on origin of script
     getSourceLineFromFrame: function(context, frame)
     {
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("NestedScriptAnalyzer in "+this.sourceFile.compilation_unit_type+": frame.line  - this.sourceFile.getBaseLineOffset()",
-             frame.line +" - "+this.sourceFile.getBaseLineOffset());
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("NestedScriptAnalyzer in "+this.sourceFile.compilation_unit_type+": frame.line  - this.getBaseLineNumberByScript()",
+             frame.line +" - "+this.getBaseLineNumberByScript(frame.script));
 
-        return frame.line - (this.sourceFile.getBaseLineOffset());
+        return frame.line - (this.getBaseLineNumberByScript(frame.script));
     },
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
