@@ -171,6 +171,7 @@ Firebug.Console = extend(ActivableConsole,
         this.description = $STR("console.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
+        Firebug.Debugger.addListener(this);
     },
 
     initContext: function(context, persistedState)
@@ -264,7 +265,15 @@ Firebug.Console = extend(ActivableConsole,
             Firebug.Errors.startObserving(); // safe for multiple calls
     },
     // ----------------------------------------------------------------------------------------------------
+    // Firebug.Debugger listener
+    
+    onCall: function(context, frame)
+    {
+    	Firebug.Console.log(frame, context);
+    },
+    
 
+    // ----------------------------------------------------------------------------------------------------
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
         if (!context)

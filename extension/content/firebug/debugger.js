@@ -848,7 +848,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return RETURN_CONTINUE;
 
         frame = getStackFrame(frame, context);
-        Firebug.Console.log(frame, context);
+        
+        dispatch(listeners,"onCall",[context, frame]);
     },
 
     onError: function(frame, error)
