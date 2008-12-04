@@ -507,6 +507,12 @@ Firebug.CommandLine = extend(Firebug.Module,
     	        Firebug.CommandLine.injector.attachCommandLine(context, context.windows[i]);
     	}
     	
+    	if (!context.window.wrappedJSObject)
+    	{
+    	    FBTrace.sysout("context.window with no wrappedJSObject!", context.window);
+    	    return false;
+    	}
+    	
     	// the attach is asynchronous, we can report when it is complete:
     	if (context.window.wrappedJSObject._FirebugCommandLine)
     		return true;
