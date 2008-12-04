@@ -837,7 +837,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
        return false;
     },
 
-    onCall: function(frame)
+    onMonitorScript: function(frame)
     {
         var context = this.breakContext;
         delete this.breakContext;
@@ -849,7 +849,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         frame = getStackFrame(frame, context);
         
-        dispatch(listeners,"onCall",[context, frame]);
+        dispatch(listeners,"onMonitorScript",[context, frame]);
     },
 
     onError: function(frame, error)

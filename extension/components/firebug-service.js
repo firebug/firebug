@@ -1023,7 +1023,7 @@ FirebugService.prototype =
                 }
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
-                    bp.debugger.onCall(frame);
+                    bp.debugger.onMonitorScript(frame);
 
                 if (bp.type & BP_UNTIL)
                 {

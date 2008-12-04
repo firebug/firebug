@@ -267,7 +267,7 @@ Firebug.Console = extend(ActivableConsole,
     // ----------------------------------------------------------------------------------------------------
     // Firebug.Debugger listener
     
-    onCall: function(context, frame)
+    onMonitorScript: function(context, frame)
     {
     	Firebug.Console.log(frame, context);
     },
