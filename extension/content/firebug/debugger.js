@@ -420,39 +420,39 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging and monitoring
 
-    trace: function(fn, object, mode)
+    monitorFunction: function(fn, mode)
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
             var script = findScriptForFunctionInContext(FirebugContext, fn);
             if (script)
-                this.traceFunction(fn, script, mode);
+                this.monitorScript(fn, script, mode);
         }
     },
 
-    untrace: function(fn, object, mode)
+    unmonitorFunction: function(fn, mode)
     {
         if (typeof(fn) == "function" || fn instanceof Function)
         {
             var script = findScriptForFunctionInContext(FirebugContext, fn);
             if (script)
-                this.untraceFunction(fn, script, mode);
+                this.unmonitorScript(fn, script, mode);
         }
     },
 
-    traceFunction: function(fn, script, mode)
+    monitorScript: function(fn, script, mode)
     {
         var scriptInfo = getSourceFileAndLineByScript(FirebugContext, script);
         if (scriptInfo)
         {
             if (mode == "debug")
                 this.setBreakpoint(scriptInfo.sourceFile, scriptInfo.lineNo, null, this);
-               else if (mode == "monitor")
+            else if (mode == "monitor")
                 fbs.monitor(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
         }
     },
 
-    untraceFunction: function(fn, script, mode)
+    unmonitorScript: function(fn, script, mode)
     {
         var scriptInfo = getSourceFileAndLineByScript(FirebugContext, script);
         if (scriptInfo)

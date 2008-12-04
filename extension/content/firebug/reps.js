@@ -157,9 +157,9 @@ this.Func = domplate(Firebug.Rep,
     monitor: function(fn, script, monitored)
     {
         if (monitored)
-            Firebug.Debugger.untraceFunction(fn, script, "monitor");
+            Firebug.Debugger.unmonitorScript(fn, script, "monitor");
         else
-            Firebug.Debugger.traceFunction(fn, script, "monitor");
+            Firebug.Debugger.monitorScript(fn, script, "monitor");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

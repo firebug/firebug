@@ -766,22 +766,22 @@ function FirebugCommandLineAPI(context, baseWindow)
 
     this.debug = function(fn)
     {
-        Firebug.Debugger.trace(fn, null, "debug");
+        Firebug.Debugger.monitorFunction(fn, "debug");
     };
 
     this.undebug = function(fn)
     {
-        Firebug.Debugger.untrace(fn, null, "debug");
+        Firebug.Debugger.unmonitorFunction(fn, "debug");
     };
 
     this.monitor = function(fn)
     {
-        Firebug.Debugger.trace(fn, null, "monitor");
+        Firebug.Debugger.monitorFunction(fn, "monitor");
     };
 
     this.unmonitor = function(fn)
     {
-        Firebug.Debugger.untrace(fn, null, "monitor");
+        Firebug.Debugger.unmonitorFunction(fn, "monitor");
     };
 
     this.monitorEvents = function(object, types)
