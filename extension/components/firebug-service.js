@@ -77,6 +77,7 @@ const BP_MONITOR = 2;
 const BP_UNTIL = 4;
 const BP_ONRELOAD = 8;  // XXXjjb: This is a mark for the UI to test
 const BP_ERROR = 16;
+const BP_TRACE = 32; // BP used to initiate traceCalls
 
 const LEVEL_TOP = 1;
 const LEVEL_EVAL = 2;
@@ -537,7 +538,6 @@ FirebugService.prototype =
          }
     },
 
-
     enumerateBreakpoints: function(url, cb)  // url is sourceFile.href, not jsd script.fileName
     {
         if (url)
@@ -640,13 +640,35 @@ FirebugService.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    traceCalls: function(sourceFile, lineNo, debuggr)
+    {
+    	var bp = this.monitor(sourceFile, lineNo, debuggr); // set a breakpoint on the starting point
+    	bp.type |= BP_TRACE;
+    	// when we hit the bp in onBreakPoint we being tracing.
+    },
+    
+    untraceCalls: function(sourceFile, lineNo, debuggr)
+    {
+    	var bp = lineNo != -1 ? this.findBreakpoint(url, lineNo) : null;
+    	if (bp)
+    	{
+    		bp.type &= ~BP_TRACE;
+    		this.unmonitor(sourceFile, lineNo);
+    	}
+    },
+    
     monitor: function(sourceFile, lineNo, debuggr)
     {
-        if (lineNo != -1 && this.addBreakpoint(BP_MONITOR, sourceFile, lineNo, null, debuggr))
+    	if (lineNo == -1)
+    		return null;
+    	
+    	var bp = this.addBreakpoint(BP_MONITOR, sourceFile, lineNo, null, debuggr);
+    	if (bp)
         {
             ++monitorCount;
             dispatch(debuggers, "onToggleMonitor", [sourceFile.href, lineNo, true]);
         }
+        return bp;
     },
 
     unmonitor: function(sourceFile, lineNo)
@@ -1023,7 +1045,12 @@ FirebugService.prototype =
                 }
 
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
-                    bp.debugger.onMonitorScript(frame);
+                {
+                	if (bp.type & BP_TRACE && !(bp.disabled & BP_TRACE) )
+                		this.hookCalls(bp);
+                	else
+                		bp.debugger.onMonitorScript(frame);
+                }
 
                 if (bp.type & BP_UNTIL)
                 {
@@ -1995,6 +2022,54 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("unset scriptHook\n");                                                                   /*@explore*/
     },
 
+    hookCalls: function(bp)
+    {
+        function callHook(frame, type)
+        {
+            switch (type)
+            {
+                case TYPE_FUNCTION_CALL:
+                {
+                    ++hookFrameCount;
+
+                    if (FBTrace.DBG_FBS_STEP) 
+                    	FBTrace.sysout("callHook TYPE_FUNCTION_CALL "+frame.script.fileName+"\n");
+                    
+                    bp.context = bp.debugger.onFunctionCall(bp.context, frame, hookFrameCount, true);
+                    
+                    break;
+                }
+                case TYPE_FUNCTION_RETURN:
+                {
+                    --hookFrameCount;
+                    if (FBTrace.DBG_FBS_STEP) 
+                    	FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN "+frame.script.fileName+"\n"); 
+
+                    if (hookFrameCount == 0) {  // stack empty
+                       jsd.functionHook = null;
+                    }
+                  
+                    bp.context = bp.debugger.onFunctionCall(bp.context, frame, hookFrameCount, false);
+                    
+                    break;
+                }
+            }
+        }
+
+        if (jsd.functionHook)
+        {
+        	if (FBTrace.DBG_FBS_ERRORS)
+        		FBTrace.sysout("fbs.hookCalls cannot set functionHook, one is already set");
+        	return;
+        }
+        
+        if (FBTrace.DBG_FBS_STEP) 
+        	FBTrace.sysout("set callHook\n");
+        
+        hookFrameCount = 0;
+        jsd.functionHook = { onCall: callHook };
+    },
+    
 };
 
 function getStepName(mode)

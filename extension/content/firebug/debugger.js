@@ -463,6 +463,45 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 fbs.unmonitor(scriptInfo.sourceFile, scriptInfo.lineNo);
         }
     },
+    
+    traceCalls: function(context, fn)
+    {
+    	if (typeof(fn) == "function" || fn instanceof Function)
+        {
+            var script = findScriptForFunctionInContext(context, fn);
+            if (script)
+                this.traceScriptCalls(context, script);
+            else
+            {
+            	if (FBTrace.DBG_ERRORS)
+            		FBTrace.sysout("debugger.traceCalls no script found for "+fn, fn);
+            }
+        }
+    },
+    
+    untraceCalls: function(context, fn)
+    {
+    	if (typeof(fn) == "function" || fn instanceof Function)
+        {
+            var script = findScriptForFunctionInContext(context, fn);
+            if (script)
+                this.untraceScriptCalls(context, script);
+        }
+    },
+    
+    traceScriptCalls: function(context, script)
+    {
+    	var scriptInfo = getSourceFileAndLineByScript(context, script);
+        if (scriptInfo)
+        	fbs.traceCalls(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
+    },
+    
+    untraceScriptCalls: function(context, script)
+    {
+    	var scriptInfo = getSourceFileAndLineByScript(context, script);
+        if (scriptInfo)
+        	fbs.untraceCalls(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Stuff
@@ -850,6 +889,20 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         frame = getStackFrame(frame, context);
         
         dispatch(listeners,"onMonitorScript",[context, frame]);
+    },
+    
+    onFunctionCall: function(context, frame, depth, calling)
+    {
+        if (!context)
+            context = getFrameContext(frame);
+        if (!context)
+            return RETURN_CONTINUE;
+
+        frame = getStackFrame(frame, context);
+        
+        dispatch(listeners,"onFunctionCall",[context, frame, depth, calling]);
+        
+        return context;  // returned as first arg on next call from same trace 
     },
 
     onError: function(frame, error)

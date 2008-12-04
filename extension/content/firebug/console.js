@@ -271,7 +271,14 @@ Firebug.Console = extend(ActivableConsole,
     {
     	Firebug.Console.log(frame, context);
     },
-    
+
+    onFunctionCall: function(context, frame, depth, calling)
+    {
+    	if (calling) 
+    		Firebug.Console.openGroup([frame, "depth:"+depth], context);
+    	else
+    		Firebug.Console.closeGroup(context);
+    },
 
     // ----------------------------------------------------------------------------------------------------
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)

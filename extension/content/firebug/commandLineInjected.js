@@ -6,7 +6,7 @@ var _FirebugCommandLine =
     {
         // Define console functions.
         var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys", 
-            "values", "debug", "undebug", "monitor", "unmonitor", 
+            "values", "debug", "undebug", "monitor", "unmonitor", "traceCalls", "untraceCalls",
             "monitorEvents", "unmonitorEvents", "profile", "profileEnd", "copy"];
         for (var i=0; i<commands.length; i++)
         {

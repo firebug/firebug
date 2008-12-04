@@ -3643,6 +3643,9 @@ this.SourceFile.prototype =
         // XXXjjb Don't use indexOf or similar tests that rely on ===, since we are really working with
         // wrappers around jsdIScript, not script themselves.  I guess.
 
+        if (!this.innerScripts || !this.innerScripts.length)
+        	return false;
+        
         for (var j = 0; j < this.innerScripts.length; j++)
         {
             if (script.tag == this.innerScripts[j].tag)
