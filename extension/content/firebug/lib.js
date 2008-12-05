@@ -220,7 +220,8 @@ this.convertToUnicode = function(text, charset)
     }
     catch (exc)
     {
-        this.ERROR("lib.convertToUnicode: fails"+exc);
+    	if (FBTrace.DBG_ERRORS)
+    		FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+": "+exc, exc);
         return text;
     }
 };
