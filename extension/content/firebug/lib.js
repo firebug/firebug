@@ -3754,6 +3754,12 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
     while (innerScripts.hasMoreElements())
     {
     	var script = innerScripts.getNext();
+    	if (!script)
+    	{
+    	    if (FBTrace.DBG_SOURCEFILES)
+    	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext is null! ");
+    	    continue;    	    
+        }
     	if (FBTrace.DBG_SOURCEFILES && !script.isValid)
     		FBTrace.sysout("FBL.addScriptsToSourceFile script "+script.tag+".isValid:"+script.isValid);
         sourceFile.innerScripts.push(script);
