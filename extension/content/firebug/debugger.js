@@ -420,6 +420,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging and monitoring
 
+    traceAll: function(context)
+    {
+    	fbs.traceAll(sourceURLsAsArray(context), this);
+    },
+    
+    untraceAll: function(context)
+    {
+    	fbs.untraceAll(this);
+    },
+    
     monitorFunction: function(fn, mode)
     {
         if (typeof(fn) == "function" || fn instanceof Function)

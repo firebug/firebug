@@ -28,6 +28,7 @@ const jsdIStackFrame = Ci.jsdIStackFrame;
 const jsdICallHook = Ci.jsdICallHook;
 const jsdIExecutionHook = Ci.jsdIExecutionHook;
 const jsdIErrorHook = Ci.jsdIErrorHook;
+const jsdIFilter = Components.interfaces.jsdIFilter;
 const nsISupports = Ci.nsISupports;
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
@@ -35,6 +36,7 @@ const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
 const nsIFactory = Ci.nsIFactory;
 const nsIConsoleService = Ci.nsIConsoleService;
 const nsITimer = Ci.nsITimer;
+
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -640,6 +642,69 @@ FirebugService.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    traceAll: function(urls, debuggr)
+    {
+    	if (urls.length < 1)
+    		return;
+
+    	if (debuggr.jsdFilters) // one at a time please
+    		return;
+    	
+    	debuggr.jsdFilters = [];  // save for untraceAll
+    	
+    	for (var i = 0; i < urls.length; i++) 
+    	{
+    		var urlFilter = {
+                    globalObject: null,
+                    flags: jsdIFilter.FLAG_ENABLED | jsdIFilter.FLAG_PASS,
+                    urlPattern: urls[i],
+                    startLine: 0,
+                    endLine: 0
+                };
+    		debuggr.jsdFilters.push(urlFilter);
+    		jsd.appendFilter(urlFilter);  // pass all of our urls
+    	}
+    	var blockAll = {  
+                globalObject: null,
+                flags: jsdIFilter.FLAG_ENABLED ,
+                urlPattern: "*",
+                startLine: 0,
+                endLine: 0
+            };
+		debuggr.jsdFilters.push(blockAll);
+		jsd.appendFilter(blockAll);  // block everyone else
+		
+		if (FBTrace.DBG_BP)
+		{
+	        jsd.enumerateFilters({ enumerateFilter: function(filter)
+	            {
+	                FBTrace.sysout("traceAll filter "+filter.urlPattern, filter);
+	            }});
+		}
+		
+		this.hookCalls(debuggr.onFunctionCall, false);  // call on all passed urls
+    },
+    
+    untraceAll: function(debuggr)
+    {
+    	jsd.functionHook = null; // undo hookCalls()
+    	
+    	for (var i = 0; i < debuggr.jsdFilters.length; i++)
+    	{
+    		jsd.removeFilter(debuggr.jsdFilters[i]);
+    	}
+    	
+		if (FBTrace.DBG_BP)
+		{
+	        jsd.enumerateFilters({ enumerateFilter: function(filter)
+	            {
+	                FBTrace.sysout("traceAll filter "+filter.urlPattern, filter);
+	            }});
+		}
+    	
+    	delete debuggr.jsdFilters;
+    },
+    
     traceCalls: function(sourceFile, lineNo, debuggr)
     {
     	var bp = this.monitor(sourceFile, lineNo, debuggr); // set a breakpoint on the starting point
@@ -1047,7 +1112,7 @@ FirebugService.prototype =
                 if (bp.type & BP_MONITOR && !(bp.disabled & BP_MONITOR))
                 {
                 	if (bp.type & BP_TRACE && !(bp.disabled & BP_TRACE) )
-                		this.hookCalls(bp);
+                		this.hookCalls(bp.debugger.onFunctionCall, true);
                 	else
                 		bp.debugger.onMonitorScript(frame);
                 }
@@ -1097,7 +1162,7 @@ FirebugService.prototype =
 
         if (fbs.trackThrowCatch)
         {
-            if (FBTrace.DBG_FBS_ERRORS) FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc);
+            if (FB.DBG_FBS_ERRORS) FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc);
 
             var debuggr = this.findDebugger(frame);
             if (debuggr)
@@ -2022,8 +2087,10 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("unset scriptHook\n");                                                                   /*@explore*/
     },
 
-    hookCalls: function(bp)
+    hookCalls: function(callBack, unhookAtBottom)
     {
+    	var contextCached = null;
+    	
         function callHook(frame, type)
         {
             switch (type)
@@ -2035,21 +2102,24 @@ FirebugService.prototype =
                     if (FBTrace.DBG_FBS_STEP) 
                     	FBTrace.sysout("callHook TYPE_FUNCTION_CALL "+frame.script.fileName+"\n");
                     
-                    bp.context = bp.debugger.onFunctionCall(bp.context, frame, hookFrameCount, true);
+                    contextCached = callBack(contextCached, frame, hookFrameCount, true);
                     
                     break;
                 }
                 case TYPE_FUNCTION_RETURN:
                 {
+                	if(hookFrameCount <= 0)  // ignore returns until we have started back in 
+                		return;
+                	
                     --hookFrameCount;
                     if (FBTrace.DBG_FBS_STEP) 
                     	FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN "+frame.script.fileName+"\n"); 
 
-                    if (hookFrameCount == 0) {  // stack empty
+                    if (unhookAtBottom && hookFrameCount == 0) {  // stack empty
                        jsd.functionHook = null;
                     }
                   
-                    bp.context = bp.debugger.onFunctionCall(bp.context, frame, hookFrameCount, false);
+                    contextCached = callBack(contextCached, frame, hookFrameCount, false);
                     
                     break;
                 }

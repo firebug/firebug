@@ -2125,6 +2125,17 @@ this.getStyleSheetByHref = function(url, context)
     return sheetIfFound;
 };
 
+this.sourceURLsAsArray = function(context)
+{
+    var urls = [];
+    var sourceFileMap = context.sourceFileMap;
+    for (var url in sourceFileMap)
+        urls.push(url);
+    
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.window.location+"\n");
+
+    return urls;
+};
 
 this.sourceFilesAsArray = function(context)
 {

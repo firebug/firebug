@@ -790,6 +790,16 @@ function FirebugCommandLineAPI(context, baseWindow)
         Firebug.Debugger.unmonitorFunction(fn, "monitor");
     };
 
+    this.traceAll = function()
+    {
+    	Firebug.Debugger.traceAll(FirebugContext);
+    };
+    
+    this.untraceAll = function()
+    {
+    	Firebug.Debugger.untraceAll(FirebugContext);
+    };
+    
     this.traceCalls = function(fn)
     {
         Firebug.Debugger.traceCalls(FirebugContext, fn);
