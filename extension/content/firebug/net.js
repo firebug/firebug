@@ -1563,11 +1563,11 @@ function NetProgress(context)
 
     // tabCache listener. This must be property of the object itself (not of the prototype).
     // So the FBL.dispatch method can find it (using hasOwnProperty).
-    this.onStoreResponse = function(win, request, responseText)
+    this.onStoreResponse = function(win, request, lines)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
-            file.responseText = responseText;
+            file.responseText = lines ? lines.join("\n") : null;
     };
 
     this.clear();
