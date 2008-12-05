@@ -9,6 +9,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
+const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
 // List of text content types. These content-types are cached.
 var contentTypes =
@@ -214,7 +215,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         if (lines.length)
             this.cache[url] = currLines.concat(lines);
 
-    	return this.cache[url];
+        return this.cache[url];
     },
 
     loadFromCache: function(url, method, file)
@@ -225,9 +226,38 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         // This new implementation (TabCache) uses nsITraceableListener so, all responses
         // should be already cached.
 
-        if (FBTrace.DBG_CACHE)
-            FBTrace.dumpProperties("tabCache.loadFromCache: FAILED " + 
-                this.window.location.href, this.cache);
+        // xxxHonza: let's try to get the response from the cache till #449198 is fixed.
+        var stream;
+        var responseText;
+        try 
+        {
+            var channel = ioService.newChannel(url, null, null);
+
+            // These flag combination doesn't repost the request.	
+            channel.loadFlags = Ci.nsIRequest.LOAD_FROM_CACHE |
+                Ci.nsICachingChannel.LOAD_ONLY_FROM_CACHE |
+                Ci.nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
+
+            stream = channel.open();
+            responseText = readFromStream(stream);
+
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +  
+                    url, responseText);
+
+            responseText = this.store(url, responseText);
+        }
+        catch (err) 
+        {
+            if (FBTrace.DBG_ERROR || FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.loadFromCache EXCEPTION " + url, err);
+        }
+        finally
+        {
+            stream.close();	
+        }
+
+        return responseText;
     },
 
     // Listeners
