@@ -79,7 +79,7 @@ const prefNames =
     "showComputedStyle", "showUserAgentCSS",
 
     // Script
-    "breakOnTopLevel",
+    "decompileEvals",
 
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",

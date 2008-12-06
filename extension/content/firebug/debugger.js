@@ -15,6 +15,7 @@ const nsICryptoHash = Ci.nsICryptoHash;
 const nsIURI = Ci.nsIURI;
 
 const PCMAP_SOURCETEXT = jsdIScript.PCMAP_SOURCETEXT;
+const PCMAP_PRETTYPRINT = jsdIScript.PCMAP_PRETTYPRINT;
 
 const RETURN_VALUE = jsdIExecutionHook.RETURN_RET_WITH_VAL;
 const RETURN_THROW_WITH_VAL = jsdIExecutionHook.RETURN_THROW_WITH_VAL;
@@ -161,6 +162,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!this.isEnabled(context))
             return RETURN_CONTINUE;
 
+        if (FBTrace.DBG_UI_LOOP) 
+            FBTrace.sysout("debugger.stop "+context.window.location+" frame",frame); 
+        
         var executionContext;
         try
         {
@@ -1239,31 +1243,28 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     getEvalLevelSourceFile: function(frame, context, innerScripts)
     {
         var eval_expr = this.getEvalExpression(frame, context);
-        if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile eval_expr:"+eval_expr+"\n");                     /*@explore*/
-        var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody", 1, eval_expr);
-        if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile source:"+source+"\n");                     /*@explore*/
+        if (FBTrace.DBG_EVAL) FBTrace.sysout("getEvalLevelSourceFile eval_expr:"+eval_expr+"\n"); 
+        
+        if (eval_expr && !Firebug.decompileEvals)
+        {    
+            var source  = this.getEvalBody(frame, "lib.getEvalLevelSourceFile.getEvalBody", 1, eval_expr);
+            var mapType = PCMAP_SOURCETEXT;
+        }
+        else
+        {
+            var source = frame.script.functionSource; // XXXms - possible crash on OSX FF2
+            var mapType = PCMAP_PRETTYPRINT;
+        }
+        if (FBTrace.DBG_EVAL) 
+            FBTrace.sysout("getEvalLevelSourceFile mapType:"+(mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY"+" source:"+source+"\n");                     /*@explore*/
 
         var lines = splitLines(source);
         
-        var url = null;
-        if (context.onReadySpy)  // coool we can get the request URL.
-        {
-            url = context.onReadySpy.getURL();
-            if (context.sourceFileName && context.sourceFileName[url]) // oops taken
-            	url = null;
-            else
-            {
-            	if (FBTrace.DBG_EVAL || FBTrace.DBG_ERRORS)
-            		FBTrace.sysout("getEvalLevelSourceFile using spy URL:"+url+"\n");
-            }
-        }
-        
-        if(!url)
-        	url = this.getDynamicURL(context, frame.script.fileName, lines, "eval");
+        var url = this.getDynamicURL(context, frame.script.fileName, lines, "eval");
         
         context.sourceCache.storeSplitLines(url, lines); 
 
-        var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, innerScripts);
+        var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
         context.sourceFileMap[url] = sourceFile;
         
         if (FBTrace.DBG_SOURCEFILES) 
@@ -1274,6 +1275,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getDynamicURL: function(context, callerURL, lines, kind)
     {
+        if (kind == "eval")
+        {
+            var url = this.getURLFromSpy(context);
+            if (url)
+                return url;
+        }
+        
         var url = this.getURLFromLastLine(lines);
         if (url)
             return url;
@@ -1293,6 +1301,25 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return url;
     },
 
+    getURLFromSpy: function(context)
+    {
+        var url = null;
+        if (context.onReadySpy)  // coool we can get the request URL.
+        {
+            url = new String(context.onReadySpy.getURL());
+            if (context.sourceFileName && context.sourceFileName[url]) // oops taken
+                url = null;
+            else
+            {
+            	url.kind = "data";
+                if (FBTrace.DBG_SOURCEFILES) 
+                    FBTrace.sysout("debugger.getURLFromSpy "+url, url); 
+            }
+        }
+        
+        return url;
+    },
+    
     getURLFromLastLine: function(lines)
     {
     	var url = null;
@@ -1301,8 +1328,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var m = reURIinComment.exec(lines[lines.length - 1]);
         if (m)
         {
-        	url = m[1];
+        	url = new String(m[1]);
         	url.kind = "source";
+        	if (FBTrace.DBG_SOURCEFILES) 
+                FBTrace.sysout("debugger.getURLFromLastLine "+url, url); 
+        }
+        else
+        {
+            if (FBTrace.DBG_SOURCEFILES) 
+                FBTrace.sysout("debugger.getURLFromLastLine no match"+lines[lines.length - 1]); 
         }
         return url;
     },
@@ -1314,8 +1348,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     	{
     		// If no breakpoints live in dynamic code then we don't need to compare
     		// the previous and reloaded source. In that case let's us a cheap URL.
-    		url = callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++);
+    		url = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++));
     		url.kind = "seq";
+    		if (FBTrace.DBG_SOURCEFILES) 
+                FBTrace.sysout("debugger.getSequentialURL "+url, url); 
     	}
 		return url;
     },
@@ -1333,8 +1369,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var hash = this.hash_service.finish(true);
 
         // encoding the hash should be ok, it should be information-preserving? Or at least reversable?
-        var url = callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"MD5/" + encodeURIComponent(hash);
+        var url = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"MD5/" + encodeURIComponent(hash));
         url.kind = "MD5";
+        if (FBTrace.DBG_SOURCEFILES) 
+            FBTrace.sysout("debugger.getURLFromMD5 "+url, url); 
         return url;
     },
 
@@ -1346,13 +1384,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else 
         {
         	// data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
-        	var url = "data:text/javascript;";
+        	var url = new String("data:text/javascript;");
         	url += "fileName="+encodeURIComponent(callerURL);
         	var source = lines.join('\n'); 
         	//url +=  ";"+ "baseLineNumber="+encodeURIComponent(script.baseLineNumber) + 
         	url +="," + encodeURIComponent(source);
         }
         url.kind = "data";
+        if (FBTrace.DBG_SOURCEFILES) 
+            FBTrace.sysout("debugger.getDataURLForScript "+url, url);
         return url;
     },
 
@@ -1438,7 +1478,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getEvalBody: function(frame, asName, asLine, evalExpr)
     {
-        if (evalExpr)
+        if (evalExpr  && !Firebug.decompileEvals)
         {
             var result_src = {};
             var evalThis = "new String("+evalExpr+");";
@@ -1461,7 +1501,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         else
         {
-            return frame.script.functionSource; // XXXms - possible crash on OSX
+            return frame.script.functionSource; // XXXms - possible crash on OSX FF2
         }
     },
 
@@ -1480,7 +1520,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.hash_service = CCSV("@mozilla.org/security/hash;1", "nsICryptoHash");
 
         $("cmd_breakOnErrors").setAttribute("checked", Firebug.breakOnErrors);
-        $("cmd_breakOnTopLevel").setAttribute("checked", Firebug.breakOnTopLevel);
+        $("cmd_decompileEvals").setAttribute("checked", Firebug.decompileEvals);
 
         this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
@@ -1581,8 +1621,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (name == "breakOnErrors")
             $("cmd_breakOnErrors").setAttribute("checked", value);
-        else if (name == "breakOnTopLevel")
-            $("cmd_breakOnTopLevel").setAttribute("checked", value);
+        else if (name == "decompileEvals")
+            $("cmd_decompileEvals").setAttribute("checked", value);
     },
 
     getObjectByURL: function(context, url)
@@ -2501,7 +2541,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         return [
             serviceOptionMenu("BreakOnAllErrors", "breakOnErrors"),
-            // wait 1.2 optionMenu("BreakOnTopLevel", "breakOnTopLevel"),
+            optionMenu("DecompileEvals", "decompileEvals"), 
             serviceOptionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),
             // 1.2: always use MD5 optionMenu("UseMD5ForEvalName", "useMD5ForEvalName")

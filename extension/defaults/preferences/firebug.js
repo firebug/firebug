@@ -52,6 +52,7 @@ pref("extensions.firebug-service.trackThrowCatch", false);
 pref("extensions.firebug.script.enableLocalFiles", "");
 pref("extensions.firebug.script.enableSystemPages", "");
 pref("extensions.firebug.script.enableSites", false);
+pref("extensions.firebug.decompileEvals", false);
 pref("extensions.firebug-service.scriptsFilter", "all");
 
 // Stack

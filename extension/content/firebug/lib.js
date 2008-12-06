@@ -3781,7 +3781,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 }
 
 //------------
-this.EvalLevelSourceFile = function(url, script, eval_expr, source, innerScriptEnumerator) // ctor
+this.EvalLevelSourceFile = function(url, script, eval_expr, source, mapType, innerScriptEnumerator) // ctor
 {
     this.href = url;
     this.outerScript = script;
@@ -3789,7 +3789,7 @@ this.EvalLevelSourceFile = function(url, script, eval_expr, source, innerScriptE
     this.evalExpression = eval_expr;
     this.sourceLength = source.length;
     this.source = source;
-    this.pcmap_type = PCMAP_SOURCETEXT;
+    this.pcmap_type = mapType;
     FBL.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
@@ -3859,7 +3859,7 @@ this.EventSourceFile = function(url, script, title, source, innerScriptEnumerato
 this.EventSourceFile.prototype = new this.SourceFile("event"); // prototypical inheritance
 
 
-this.EvalLevelSourceFile.prototype.getLine = function(context, lineNo)
+this.EventSourceFile.prototype.getLine = function(context, lineNo)
 {
     return this.sourceLines[lineNo - 1];
 },
