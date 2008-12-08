@@ -333,6 +333,8 @@
             <body><![CDATA[
                 var menu = event.target;
                 this.module.setHostPermission(FirebugContext, menu.value);
+                if (menu.value.indexOf("disable") == 0)
+                    Firebug.ModuleManagerPage.refresh();
             ]]></body>
         </method>
         <method name="openPermissions">

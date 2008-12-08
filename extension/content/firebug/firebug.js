@@ -2955,7 +2955,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
                 )
             ),
             DIV({class: "moduleManagerRow"},
-                BUTTON({class: "moduleMangerApplyButton", onclick: "$onEnable"},
+                BUTTON({class: "moduleManagerApplyButton", onclick: "$onEnable"},
                     SPAN("$enableHostLabel")
                 )
             )
@@ -2974,8 +2974,20 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     getModuleState: function(module)
     {
-        var enabled = module.isEnabled(this.context);
-        return enabled ? "" : $STR("moduleManager.disabled");
+        var currentURI = FirebugChrome.getBrowserURI(this.context);
+        var hostURI = getURIHost(currentURI);
+        var option = module.getHostPermission(this.context);
+
+        switch (option) {
+        case "disable-site":
+            return $STRF("moduleManager.Disabled For Site", [hostURI]);
+        case "enable-site":
+            return $STRF("moduleManager.Enabled For Site", [hostURI]);
+        case "enable":
+            return $STR("moduleManager.Enabled Always");
+        case "disable":
+            return $STR("moduleManager.Disabled Always");
+        }
     },
 
     isModuleDisabled: function(module)
@@ -3035,6 +3047,9 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             }
             else
                 this.disableModule(model);
+
+            // Update panel's tab so, it reflects the current module state.
+            model.updateTab(this.context);
         }
 
         this.refresh();
@@ -3116,11 +3131,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
             // Set the checkboxes to cause the big button to return the panels to a state the user has liked.
             var module = Firebug.getRepObject(input);
-            var prefName = "preferEnabled."+this.getModuleName(module);
-            var preferEnable = Firebug.getPref(this.prefDomain, prefName);
-            var isSiteEnabled = (module.getHostPermission(this.context) == "enable-site");
-
-            if (preferEnable || isSiteEnabled)
+            if (this.isModuleEnabled(module))
                 input.originalValue = true;
             else
                 input.originalValue = false;
@@ -3128,7 +3139,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             input.checked = input.originalValue;
         }
 
-        this.applyButton = getElementByClass(this.panelNode, "moduleMangerApplyButton");
+        this.applyButton = getElementByClass(this.panelNode, "moduleManagerApplyButton");
     }
 });
 
