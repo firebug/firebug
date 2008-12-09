@@ -646,17 +646,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     copyParams: function(file)
     {
         var text = getPostText(file, this.context);
-
-        var lines = text.split("\n");
-        var params = parseURLEncodedText(lines[lines.length-1]);
-
-        var args = [];
-        for (var i = 0; i < params.length; ++i)
-            args.push(escape(params[i].name)+"="+escape(params[i].value));
-
-        var url = file.href;
-        url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
-
+        var url = reEncodeURL(file, text);
         copyToClipboard(url);
     },
 

@@ -268,15 +268,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         if (!text)
             return;
 
-        var lines = text.split("\n");
-        var params = parseURLEncodedText(lines[lines.length-1]);
-
-        var args = [];
-        for (var i = 0; i < params.length; ++i)
-            args.push(escape(params[i].name)+"="+escape(params[i].value));
-
-        var url = spy.getURL();
-        url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
+        var url = reEncodeURL(spy, text);
         copyToClipboard(url);
     },
 

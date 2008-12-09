@@ -2824,15 +2824,30 @@ this.parseURLEncodedText = function(text)
             if (parts[1].length > maxValueLength)
                 parts[1] = this.$STR("LargeData");
 
-            params.push({name: unescape(parts[0]), value: unescape(parts[1])});
+            params.push({name: decodeURIComponent(parts[0]), value: decodeURIComponent(parts[1])});
         }
         else
-            params.push({name: unescape(parts[0]), value: ""});
+            params.push({name: decodeURIComponent(parts[0]), value: ""});
     }
 
     params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
 
     return params;
+};
+
+this.reEncodeURL= function(file, text)
+{
+    var lines = text.split("\n");
+    var params = this.parseURLEncodedText(lines[lines.length-1]);
+
+    var args = [];
+    for (var i = 0; i < params.length; ++i)
+        args.push(encodeURIComponent(params[i].name)+"="+encodeURIComponent(params[i].value));
+
+    var url = file.href;
+    url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
+    
+    return url;
 };
 
 this.getResource = function(aURL)
