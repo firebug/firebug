@@ -1282,7 +1282,9 @@ function getMembers(object, level)  // we expect object to be user-level object 
             var val;
             try
             {
-                val = insecureObject[name];  // getter is safe
+            	val = insecureObject.__lookupGetter__(name);
+            	if (!val)
+            		val = insecureObject[name];  // getter is safe
             }
             catch (exc)
             {
