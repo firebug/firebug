@@ -2731,7 +2731,7 @@ this.getURLPath = function(url)
 
 this.getPrettyDomain = function(url)
 {
-    var m = /[^:]+:\/{1,3}(www.)?([^\/]+)/.exec(url);
+    var m = /[^:]+:\/{1,3}(www\.)?([^\/]+)/.exec(url);
     return m ? m[2] : "";
 };
 
