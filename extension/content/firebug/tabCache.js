@@ -254,7 +254,8 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         }
         finally
         {
-            stream.close();	
+            if(stream)
+            	stream.close();	
         }
 
         return responseText;
