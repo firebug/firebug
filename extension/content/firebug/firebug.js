@@ -1435,6 +1435,21 @@ Firebug.Module =
 };
 
 // ************************************************************************************************
+Firebug.Listener = 
+{
+		listeners: [],
+		
+	    addListener: function(listener)
+	    {
+	        listeners.push(listener);
+	    },
+
+	    removeListener: function(listener)
+	    {
+	        remove(listeners, listener);
+	    },
+};
+//************************************************************************************************
 
 Firebug.Extension =
 {

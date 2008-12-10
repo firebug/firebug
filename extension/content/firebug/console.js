@@ -9,23 +9,22 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
 
 // ************************************************************************************************
-
-var listeners = [];
+ 
 var maxQueueRequests = 500;
 
 // ************************************************************************************************
 
-Firebug.ConsoleBase =
+Firebug.ConsoleBase = extend(Firebug.Listener,
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
     {
-        dispatch(listeners,"log",[context, object, className, sourceLink]);
+        dispatch(this.listeners,"log",[context, object, className, sourceLink]);
         return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
     },
 
     logFormatted: function(objects, context, className, noThrottle, sourceLink)
     {
-        dispatch(listeners,"logFormatted",[context, objects, className, sourceLink]);
+        dispatch(this.listeners,"logFormatted",[context, objects, className, sourceLink]);
         return this.logRow(appendFormatted, objects, context, className, null, sourceLink, noThrottle);
     },
 
@@ -96,18 +95,7 @@ Firebug.ConsoleBase =
         return context.getPanel("console", noCreate);
     },
 
-    addListener: function(listener)
-    {
-        listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(listeners, listener);
-    },
-
-
-}
+});
 
 var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
