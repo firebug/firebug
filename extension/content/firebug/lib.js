@@ -2363,9 +2363,10 @@ this.isShift = function(event)
 
 this.dispatch = function(listeners, name, args)
 {
-    if (FBTrace.DBG_DISPATCH) FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
-                                                                                                                       /*@explore*/
     try {
+        if (FBTrace.DBG_DISPATCH) 
+        	FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
+
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
