@@ -1435,20 +1435,22 @@ Firebug.Module =
 };
 
 // ************************************************************************************************
-Firebug.Listener = 
+Firebug.Listener = function () 
 {
-		listeners: [],
-		
+		this.fbListeners = [];
+}
+Firebug.Listener.prototype = extend(Firebug.Listener.prototype,
+{
 	    addListener: function(listener)
 	    {
-	        listeners.push(listener);
+	        this.fbListeners.push(listener);
 	    },
 
 	    removeListener: function(listener)
 	    {
-	        remove(listeners, listener);
+	        remove(this.fbListeners, listener);
 	    },
-};
+});
 //************************************************************************************************
 
 Firebug.Extension =

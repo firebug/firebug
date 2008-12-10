@@ -14,17 +14,17 @@ var maxQueueRequests = 500;
 
 // ************************************************************************************************
 
-Firebug.ConsoleBase = extend(Firebug.Listener,
+Firebug.ConsoleBase = extend(new Firebug.Listener(),
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
     {
-        dispatch(this.listeners,"log",[context, object, className, sourceLink]);
+        dispatch(this.fbListeners,"log",[context, object, className, sourceLink]);
         return this.logRow(appendObject, object, context, className, rep, sourceLink, noThrottle);
     },
 
     logFormatted: function(objects, context, className, noThrottle, sourceLink)
     {
-        dispatch(this.listeners,"logFormatted",[context, objects, className, sourceLink]);
+        dispatch(this.fbListeners,"logFormatted",[context, objects, className, sourceLink]);
         return this.logRow(appendFormatted, objects, context, className, null, sourceLink, noThrottle);
     },
 

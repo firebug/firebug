@@ -42,12 +42,9 @@ const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 const panelStatus = $("fbPanelStatus");
 
 // ************************************************************************************************
+var ActivableListenerModule = extend(Firebug.ActivableModule, new Firebug.Listener());
 
-var listeners = [];
-
-// ************************************************************************************************
-
-Firebug.Debugger = extend(Firebug.ActivableModule,
+Firebug.Debugger = extend(ActivableListenerModule,
 {
     fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -179,7 +176,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.debugFrame = frame;
         context.stopped = true;
 
-        var hookReturn = dispatch2(listeners,"onStop",[context,frame, type,rv]);
+        var hookReturn = dispatch2(this.fbListeners,"onStop",[context,frame, type,rv]);
         if ( hookReturn && hookReturn >= 0 )
         {
             delete context.stopped;
@@ -228,7 +225,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.stopDebugging(context);
 
-        dispatch(listeners,"onResume",[context]);
+        dispatch(this.fbListeners,"onResume",[context]);
 
         if (this.aborted)
         {
@@ -703,13 +700,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.onJSDActivate "+active+"\n");
 
-        dispatch2(listeners,"onJSDActivate",[fbs]);
+        dispatch2(this.fbListeners,"onJSDActivate",[fbs]);
     },
 
     onJSDDeactivate: function(jsd)
     {
         this.setIsJSDActive();
-        dispatch2(listeners,"onJSDDeactivate",[fbs]);
+        dispatch2(this.fbListeners,"onJSDDeactivate",[fbs]);
     },
 
     setIsJSDActive: function()
@@ -861,7 +858,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("onThrow FAILS: "+exc+"\n");
         }
 
-        if (dispatch2(listeners,"onThrow",[context, frame, rv]))
+        if (dispatch2(this.fbListeners,"onThrow",[context, frame, rv]))
             return this.stop(context, frame, TYPE_THROW, rv);
         return RETURN_CONTINUE_THROW;
     },
@@ -902,7 +899,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         frame = getStackFrame(frame, context);
         
-        dispatch(listeners,"onMonitorScript",[context, frame]);
+        dispatch(this.fbListeners,"onMonitorScript",[context, frame]);
     },
     
     onFunctionCall: function(context, frame, depth, calling)
@@ -914,7 +911,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         frame = getStackFrame(frame, context);
         
-        dispatch(listeners,"onFunctionCall",[context, frame, depth, calling]);
+        dispatch(this.fbListeners,"onFunctionCall",[context, frame, depth, calling]);
         
         return context;  // returned as first arg on next call from same trace 
     },
@@ -938,7 +935,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError getStackTrace FAILED:", exc);             /*@explore*/
         }
 
-        var hookReturn = dispatch2(listeners,"onError",[context, frame, error]);
+        var hookReturn = dispatch2(this.fbListeners,"onError",[context, frame, error]);
 
         if (Firebug.breakOnErrors)
             return -1;  // break
@@ -965,7 +962,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout( traceToString(FBL.getStackTrace(frame, context))+"\n" );                               /*@explore*/
             }                                                                                                          /*@explore*/
 
-            dispatch(listeners,"onEvalScriptCreated",[context, frame, sourceFile.href]);
+            dispatch(this.fbListeners,"onEvalScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
         }
         catch (e)
@@ -1012,7 +1009,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_SOURCEFILES)                                                                               /*@explore*/
             FBTrace.sysout("debugger.onEventScriptCreated sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n");                       /*@explore*/
 
-        dispatch(listeners,"onEventScriptCreated",[context, frame, url]);
+        dispatch(this.fbListeners,"onEventScriptCreated",[context, frame, url]);
         return sourceFile;
     },
 
@@ -1044,7 +1041,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.window.location+" ("+context.uid+")"+"\n"); /*@explore*/
         }
 
-        dispatch(listeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
+        dispatch(this.fbListeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
         return sourceFile;
     },
 
@@ -1170,7 +1167,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout( traceToString(FBL.getStackTrace(frame, context))+"\n" );                               /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
-            dispatch(listeners,"onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
+            dispatch(this.fbListeners,"onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);
             return sourceFile.href;
         }
         catch(exc)
@@ -1630,16 +1627,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var sourceFile = getSourceFileByHref(url, context);
         if (sourceFile)
             return new SourceLink(sourceFile.href, 0, "js");
-    },
-
-    addListener: function(listener)
-    {
-        listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(listeners, listener);
     },
 
     shutdown: function()
