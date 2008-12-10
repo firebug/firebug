@@ -28,8 +28,9 @@ var invalidEditor = false;
 var ignoreNextInput = false;
 
 // ************************************************************************************************
+var ListeningModule = extend(Firebug.Module, new Firebug.Listener());
 
-Firebug.Editor = extend(Firebug.Module,
+Firebug.Editor = extend(ListeningModule,
 {
     tabCharacter: "    ",
 
@@ -75,6 +76,7 @@ Firebug.Editor = extend(Firebug.Module,
             setClass(currentGroup, "editing");
 
         currentEditor.show(target, currentPanel, value, targetSize);
+        dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
 
         this.attachListeners(currentEditor, panel.context);
@@ -106,14 +108,14 @@ Firebug.Editor = extend(Firebug.Module,
             if (cancel)
             {
                 if (value != originalValue)
-                    currentEditor.saveEdit(currentTarget, originalValue, previousValue);
+                    this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
                 if (removeGroup && !originalValue && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);
             }
             else if (!value)
             {
-                currentEditor.saveEdit(currentTarget, null, previousValue);
+                this.saveEditAndNotifyListeners(currentTarget, null, previousValue);
 
                 if (removeGroup && currentGroup)
                     currentGroup.parentNode.removeChild(currentGroup);
@@ -172,7 +174,7 @@ Firebug.Editor = extend(Firebug.Module,
 
         try
         {
-            currentEditor.saveEdit(currentTarget, value, previousValue);
+            this.saveEditAndNotifyListeners(currentTarget, value, previousValue);
 
             previousValue = value;
             invalidEditor = false;
@@ -183,6 +185,12 @@ Firebug.Editor = extend(Firebug.Module,
         }
     },
 
+    saveEditAndNotifyListeners: function(currentTarget, value, previousValue)
+    {
+        currentEditor.saveEdit(currentTarget, value, previousValue);
+        dispatch("onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
+    },
+    
     setEditTarget: function(element)
     {
         if (!element)
@@ -407,11 +415,12 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    // Editor Module listeners will get "onBeginEditing" just before this call
     beginEditing: function(target, value)
     {
     },
-
+    
+    // Editor Module listeners will get "onSaveEdit" just after this call
     saveEdit: function(target, value, previousValue)
     {
     },
