@@ -8,6 +8,7 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const nsIScriptError = Ci.nsIScriptError;
+const nsIConsoleMessage = Ci.nsIConsoleMessage;
 
 const WARNING_FLAG = nsIScriptError.warningFlag;
 
