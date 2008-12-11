@@ -17,6 +17,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * search in source boxes now ignores case unless the user puts an upper case character in the search request box
     * group eval and events together under path to parent file
     * implement traceCalls/untraceCalls
+    * implement decompileEvals
 
 == Net Panel ==
     * support for STATUS_RESOLVING 
@@ -55,3 +56,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1284: Unable to add new editor to external editors
 	* Issue 1285: Enhancement patch: filefield is editable in add external editor dialog; contribution by antonin.hildebrand
 	* Issue 1290: Using backspace when searching in open files menu deletes two characters instead of one, contribution by splintor
+	* Issue 1305: lib.ERROR with 1.3X.0b5 while debugging Google language API
+	* Issue 1306: console create unclickable, 4px-high log entries (revisited)
+	* Issue 1308: Missing URL-Encoding of reserved characters when using 'Copy Location with Parameters' from Net Panel
+	* Issue 1310: Net Panel - Wrong domain display
