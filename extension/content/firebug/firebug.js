@@ -798,7 +798,7 @@ top.Firebug =
         detachCommand.setAttribute("checked", !!browser.detached);
         this.showKeys(shouldShow);
 
-        dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
+        // no such method dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
     },
 
     showKeys: function(shouldShow)
@@ -1686,13 +1686,6 @@ Firebug.Panel =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    // An array of objects that answer to getObjectLocation.
-    // Only shown if panel.location defined and supportsObject true
-    getLocationList: function()
-    {
-        return null;
-    },
-
     // Called when "Options" clicked. Return array of
     // {label: 'name', nol10n: true,  type: "checkbox", checked: <value>, command:function to set <value>}
     getOptionsMenuItems: function()
@@ -1710,11 +1703,6 @@ Firebug.Panel =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    getDefaultLocation: function(context)
-    {
-        return null;
-    },
 
     getDefaultSelection: function(context)
     {
@@ -1745,11 +1733,25 @@ Firebug.Panel =
         return null;
     },
 
+    // An array of objects that can be passed to getObjectLocation.
+    // The list of things a panel can show, eg sourceFiles.
+    // Only shown if panel.location defined and supportsObject true
+    getLocationList: function()
+    {
+        return null;
+    },
+
+    getDefaultLocation: function(context)
+    {
+        return null;
+    },
+
     getObjectLocation: function(object)
     {
         return "";
     },
 
+    // Text for the location list menu eg script panel source file list
     // return.path: group/category label, return.name: item label
     getObjectDescription: function(object)
     {
