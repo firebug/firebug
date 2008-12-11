@@ -188,7 +188,7 @@ Firebug.Editor = extend(ListeningModule,
     saveEditAndNotifyListeners: function(currentTarget, value, previousValue)
     {
         currentEditor.saveEdit(currentTarget, value, previousValue);
-        dispatch("onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
+        dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
     },
     
     setEditTarget: function(element)
