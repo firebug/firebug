@@ -1605,7 +1605,7 @@ this.setItemIntoElement = function(element, item)
 
     if (item.command)
         element.addEventListener("command", item.command, false);
-
+    
     return element;
 }
 
@@ -2374,8 +2374,13 @@ this.dispatch = function(listeners, name, args)
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
-            if ( listener.hasOwnProperty(name) )
+            if ( listener[name] )
                 listener[name].apply(listener, args);
+            else
+            {
+            	if (FBTrace.DBG_DISPATCH)
+            		FBTrace.sysout("FBL.dispatch, listener "+i+" has no method "+name, listener);
+            }
         }
     }
     catch (exc)
