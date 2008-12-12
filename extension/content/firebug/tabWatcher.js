@@ -355,7 +355,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         iterateWindows(context.window, function(win)
         {
-            dispatch(this.fbListeners, "unwatchWindow", [context, win]);
+            dispatch(TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
 
         dispatch(this.fbListeners, "destroyContext", [context, persistedState]);
