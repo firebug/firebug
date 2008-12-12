@@ -144,11 +144,11 @@ var contexts = new Array();
 var panelName = "net";
 var maxQueueRequests = 500;
 var panelBar1 = $("fbPanelBar1");
-var listeners = [];
 
 // ************************************************************************************************
 
-Firebug.NetMonitor = extend(Firebug.ActivableModule,
+var ActivableListenerModule = extend(Firebug.ActivableModule, new Firebug.Listener());
+Firebug.NetMonitor = extend(ActivableListenerModule,
 {
     clear: function(context)
     {
@@ -335,16 +335,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         if (Firebug.NetMonitor.isEnabled(this.context))
             $('fbStatusIcon').setAttribute("net", "on");
-    },
-
-    addListener: function(listener)
-    {
-        listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(listeners, listener);
     }
 });
 
@@ -625,7 +615,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
 
             // Notify listeners so additional tabs can be created.
-            dispatch(NetInfoBody.listeners, "initTabBody", [netInfoBox, file]);
+            dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
 
             NetInfoBody.selectTabByName(netInfoBox, "Headers");
             var category = getFileCategory(row.repObject);
@@ -637,7 +627,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var netInfoRow = row.nextSibling;
             var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
 
-            dispatch(NetInfoBody.listeners, "destroyTabBody", [netInfoBox, file]);
+            dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
 
             row.parentNode.removeChild(netInfoRow);
         }
@@ -1633,7 +1623,7 @@ NetProgress.prototype =
             if (file.fromCache)
                 getCacheEntry(file, this);
 
-            dispatch(listeners, "onLoad", [this.context, file]);
+            dispatch(Firebug.NetMonitor.fbListeners, "onLoad", [this.context, file]);
 
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.respondedFile +" + (now() - file.startTime) + " " +
@@ -2469,10 +2459,8 @@ function getFrameLevel(win)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
+Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 {
-    listeners: [],
-
     tag:
         DIV({class: "netInfoBody", _repObject: "$file"},
             TAG("$infoTabs", {file: "$file"}),
@@ -2806,7 +2794,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
 
         // Notify listeners about update so, content of custom tabs can be updated.
         var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
-        dispatch(NetInfoBody.listeners, "updateTabBody", [netInfoBox, file, context]);
+        dispatch(NetInfoBody.fbListeners, "updateTabBody", [netInfoBox, file, context]);
     },
 
     setResponseText: function(file, netInfoBox, responseTextBox, context)
@@ -2851,16 +2839,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep,
         }
         else
             setClass(titleRow, "collapsed");
-    },
-
-    addListener: function(listener)
-    {
-        this.listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(this.listeners, listener);
     }
 });
 
