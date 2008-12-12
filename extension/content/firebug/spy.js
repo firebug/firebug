@@ -74,19 +74,16 @@ const httpObserver =
     }
 };
 
-// List of listeners that can be registerd by other FB extensions.
-// See Firebug.Spy.addListener and Firebug.Spy.removeListener.
-var listeners = [];
-
 // ************************************************************************************************
 
-Firebug.Spy = extend(Firebug.Module,
+var ListeningModule = extend(Firebug.Module, new Firebug.Listener());
+Firebug.Spy = extend(ListeningModule,
 {
     skipSpy: function(win)
     {
         var uri = win.location.href; // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
-                return true;
+            return true;
     },
 
     attachSpy: function(context, win)
@@ -173,16 +170,6 @@ Firebug.Spy = extend(Firebug.Module,
                 });
             }
         }
-    },
-
-    addListener: function(listener)
-    {
-        listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(listeners, listener);
     }
 });
 
@@ -444,7 +431,7 @@ function requestStarted(request, xhrRequest, context, method, url)
     var name = request.URI.asciiSpec;
     var origName = request.originalURI.asciiSpec;
     if (name == origName)
-        dispatch(listeners, "onStart", [context, spy]);
+        dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
 
     // Remember the start time et the end, so it's most accurate.
     spy.sendTime = new Date().getTime();
@@ -547,7 +534,7 @@ function onHTTPSpyLoad(spy)
     }
 
     // Notify registered listeners about finish of the XHR.
-    dispatch(listeners, "onLoad", [spy.context, spy]);
+    dispatch(Firebug.Spy.fbListeners, "onLoad", [spy.context, spy]);
 
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
