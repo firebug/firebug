@@ -161,11 +161,9 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 // ***********************************************************************************
 // Trace Module
 
-
-Firebug.TraceModule = extend(Firebug.Module,
+var ListeningModule = extend(Firebug.Module, new Firebug.Listener());
+Firebug.TraceModule = extend(ListeningModule,
 {
-    listeners: [],
-
     initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
     {
         FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
@@ -300,60 +298,17 @@ Firebug.TraceModule = extend(Firebug.Module,
     // Trace console listeners
     onLoadConsole: function(win, rootNode)
     {
-        try
-        {
-            for (var i=0; i<this.listeners.length; i++) {
-                if (this.listeners[i].onLoadConsole)
-                    this.listeners[i].onLoadConsole(win, rootNode);
-            }
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || DBG_OPTIONS)
-                FBTrace.sysout("traceModule.onLoadConsole EXCEPTION", err);
-        }
+        dispatch(this.fbListeners, "onLoadConsole", [win, rootNode]);
     },
 
     onUnloadConsole: function(win)
     {
-        try
-        {
-            for (var i=0; i<this.listeners.length; i++) {
-                if (this.listeners[i].onUnloadConsole)
-                    this.listeners[i].onUnloadConsole(win);
-            }
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || DBG_OPTIONS)
-                FBTrace.sysout("traceModule.onUnloadConsole EXCEPTION", err);
-        }
+        dispatch(this.fbListeners, "onUnloadConsole", [win]);
     },
 
     onDump: function(message)
     {
-        try
-        {
-            for (var i=0; i<this.listeners.length; i++) {
-                if (this.listeners[i].onDump)
-                    this.listeners[i].onDump(message);
-            }
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_ERRORS || DBG_OPTIONS)
-                FBTrace.sysout("traceModule.onDump EXCEPTION", err);
-        }
-    },
-
-    addListener: function(listener)
-    {
-        this.listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(this.listeners, listener);
+        dispatch(this.fbListeners, "onDump", [message]);
     },
 
     dump: function(message, parentNode)
