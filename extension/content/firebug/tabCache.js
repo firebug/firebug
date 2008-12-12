@@ -166,9 +166,9 @@ Firebug.TabCache = function(win)
     Firebug.SourceCache.call(this, win, null);
 };
 
-Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
+var ListeningCache = extend(Firebug.SourceCache.prototype, new Firebug.Listener());
+Firebug.TabCache.prototype = extend(ListeningCache,
 {
-    listeners: [],
     requests: [],       // requests in progress.
 
     storePartialResponse: function(request, responseText)
@@ -193,8 +193,11 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         var url = safeGetName(request);
         delete this.requests[url];
 
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.stopRequest: " + url);
+
         // Notify listeners.
-        dispatch(this.listeners, "onStoreResponse", [this.window, request, this.cache[url]]);
+        dispatch(this.fbListeners, "onStoreResponse", [this.window, request, this.cache[url]]);
     },
 
     storeSplitLines: function(url, lines)  
@@ -259,17 +262,6 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         }
 
         return responseText;
-    },
-
-    // Listeners
-    addListener: function(listener)
-    {
-        this.listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(this.listeners, listener);
     }
 });
 

@@ -2181,7 +2181,7 @@ function monitorContext(context)
 
         var listener = context.netProgress = networkContext;
 
-        if (context.sourceCache.addListener)
+        if ("addListener" in context.sourceCache)
             context.sourceCache.addListener(networkContext);
 
         // This listener is used to observe downlaod progress.
