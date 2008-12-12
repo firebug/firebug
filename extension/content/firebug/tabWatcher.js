@@ -39,11 +39,10 @@ const tabBrowser = $("content");
 // Globals
 
 var contexts = [];
-var listeners = [];
 
 // ************************************************************************************************
 
-top.TabWatcher =
+top.TabWatcher = extend(new Firebug.Listener(),
 {
     initialize: function(owner)
     {
@@ -136,7 +135,7 @@ top.TabWatcher =
                     ", win.location.href: "+win.location.href+"\n");                                                   /*@explore*/
             }                                                                                                          /*@explore*/
                                                                                                                        /*@explore*/
-            dispatch(listeners, "initContext", [context, persistedState]);
+            dispatch(this.fbListeners, "initContext", [context, persistedState]);
 
             if (!FirebugContext)
                 FirebugContext = context; // let's make sure we have something for errors to land on.
@@ -166,7 +165,7 @@ top.TabWatcher =
 
             // If the loaded flag is set, the proper event should be dispatched.
             if (context.loaded)
-                dispatch(listeners, "loadedContext", [context]);
+                dispatch(this.fbListeners, "loadedContext", [context]);
 
             if (FBTrace.DBG_WINDOWS)                                                                     /*@explore*/
                 FBTrace.sysout("-> tabWatcher context "+(context.loaded ? '*** LOADED ***' : 'isLoadingDocument')+" in watchTopWindow, id: "+context.uid+", uri: "+                                   /*@explore*/
@@ -241,7 +240,7 @@ top.TabWatcher =
                 FBTrace.sysout("-> Context *** LOADED *** in watchLoadedTopWindow, id: "+context.uid+                    /*@explore*/
                     ", uri: "+win.location.href+"\n");                                                                /*@explore*/
                                                                                                                         /*@explore*/
-            dispatch(listeners, "loadedContext", [context]);
+            dispatch(this.fbListeners, "loadedContext", [context]);
         }
     },
 
@@ -269,7 +268,7 @@ top.TabWatcher =
             win.addEventListener(eventType, onUnloadWindow, false);
             if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.watchWindow "+eventType+" addEventListener\n");     /*@explore*/
 
-            dispatch(listeners, "watchWindow", [context, win]);
+            dispatch(this.fbListeners, "watchWindow", [context, win]);
 
             if (FBTrace.DBG_WINDOWS) {                                                                                     /*@explore*/
                 FBTrace.sysout("-> watchWindow for: "+href+", context: "+context.uid+"\n");                                    /*@explore*/
@@ -303,7 +302,7 @@ top.TabWatcher =
         if (index != -1)
         {
             context.windows.splice(index, 1);
-            dispatch(listeners, "unwatchWindow", [context, win]);
+            dispatch(this.fbListeners, "unwatchWindow", [context, win]);
         }
     },
 
@@ -337,7 +336,7 @@ top.TabWatcher =
             FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: " +        /*@explore*/
                 (context?context.uid:"null")+", uri: "+win.location.href+"\n");                                                         /*@explore*/
 
-        dispatch(listeners, "showContext", [browser, context]); // context is null for unwatchContext
+        dispatch(this.fbListeners, "showContext", [browser, context]); // context is null for unwatchContext
     },
 
     unwatchContext: function(win, context)
@@ -356,10 +355,10 @@ top.TabWatcher =
 
         iterateWindows(context.window, function(win)
         {
-            dispatch(listeners, "unwatchWindow", [context, win]);
+            dispatch(this.fbListeners, "unwatchWindow", [context, win]);
         });
 
-        dispatch(listeners, "destroyContext", [context, persistedState]);
+        dispatch(this.fbListeners, "destroyContext", [context, persistedState]);
 
         if (FirebugContext == context)
             FirebugContext = null;
@@ -439,19 +438,7 @@ top.TabWatcher =
         for (var i = 0; i < contexts.length; ++i)
             fn(contexts[i]);
     },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    addListener: function(listener)
-    {
-        listeners.push(listener);
-    },
-
-    removeListener: function(listener)
-    {
-        remove(listeners, listener);
-    }
-};
+});
 
 // ************************************************************************************************
 
