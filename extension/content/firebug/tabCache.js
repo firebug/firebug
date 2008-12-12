@@ -200,7 +200,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         dispatch(this.fbListeners, "onStoreResponse", [this.window, request, this.cache[url]]);
     },
 
-    storeSplitLines: function(url, lines)  
+    storeSplitLines: function(url, lines)
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.storeSplitLines: " + url, lines);
@@ -236,7 +236,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         {
             var channel = ioService.newChannel(url, null, null);
 
-            // These flag combination doesn't repost the request.	
+            // These flag combination doesn't repost the request.
             channel.loadFlags = Ci.nsIRequest.LOAD_FROM_CACHE |
                 Ci.nsICachingChannel.LOAD_ONLY_FROM_CACHE |
                 Ci.nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
@@ -245,7 +245,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
             responseText = readFromStream(stream);
 
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +  
+                FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +
                     url, responseText);
 
             responseText = this.store(url, responseText);
@@ -258,7 +258,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         finally
         {
             if(stream)
-            	stream.close();	
+                stream.close();	
         }
 
         return responseText;
