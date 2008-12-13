@@ -1236,9 +1236,17 @@ Firebug.TraceModule.TraceMessage.prototype =
                     try
                     {
                         var subProps = this.props[p] = [];
-                        var subobj = this.obj[p];
+                        var subobj = this.obj.__lookupGetter__(p);
+                        if (!subobj)
+                        	subobj = this.obj[p];
                         for (var p1 in subobj)
-                            subProps[p1] = "" + subobj[p1];
+                        {
+                        	var getter = subobj.lookupGetter__(p1);
+                        	if (getter)
+                        		subProps[p1] = "" + getter;
+                        	else
+                        		subProps[p1] = "" + subobj[p1];
+                        }
                     }
                     catch (e)
                     {
@@ -1291,7 +1299,11 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
 
                     try {
-                        var value = "" + this.obj[p];
+                    	var getter = this.obj[p];
+                    	if (getter)
+                    		var value = "" + getter;
+                    	else
+                    		var value = "" + this.obj[p];
                         this.props[p] = value;
                     }
                     catch (err) {
