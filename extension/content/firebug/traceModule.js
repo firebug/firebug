@@ -1221,7 +1221,11 @@ Firebug.TraceModule.TraceMessage.prototype =
                 {
                     try
                     {
-                        this.props[p] = "" + this.obj[p];
+                    	var getter = this.obj.__lookupGetter__(p);
+                    	if (getter)
+                    		this.props[p] = "" + getter;
+                    	else
+                    		this.props[p] = "" + this.obj[p];
                     }
                     catch (e)
                     {
@@ -1299,7 +1303,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
 
                     try {
-                    	var getter = this.obj[p];
+                    	var getter = this.obj.__lookupGetter__(p);
                     	if (getter)
                     		var value = "" + getter;
                     	else
