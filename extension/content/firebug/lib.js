@@ -269,8 +269,9 @@ this.addScript = function(doc, id, src)
     var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "script");
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
-    element.firebugIgnore = true;
-    element.setAttribute("style", "display:none");
+    if (!FBTrace.DBG_CONSOLE)
+    	element.firebugIgnore = true;
+
     element.innerHTML = src;
     if (doc.documentElement)
         doc.documentElement.appendChild(element);
@@ -280,6 +281,7 @@ this.addScript = function(doc, id, src)
         if (FBTrace.DBG_ERRORS)
             FBTrace.dumpProperties("lib.addScript doc has no documentElement:", doc);
     }
+    return element;
 }
 
 // ************************************************************************************************
@@ -1719,7 +1721,9 @@ this.getStackFrame = function(frame, context)
         }
         else
         {
-            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:", frame.script.tag+"@"+frame.script.fileName);
+            if (FBTrace.DBG_STACK) 
+            	FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:"+frame.script.tag+"@"+frame.script.fileName, frame.script.functionSource);
+
             var script = frame.script;
 
             return new this.StackFrame(context, script.functionName, frame.script, FBL.normalizeURL(script.fileName), frame.line, [], frame.pc);

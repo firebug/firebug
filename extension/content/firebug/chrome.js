@@ -1273,7 +1273,7 @@ function getRealObject(object)
 function onCommandLineFocus(event)
 {
     // User has decided to use the command line, but the web page may not have the console if the page has no javascript
-    if (Firebug.Console.isNeededGetReady(FirebugContext, FirebugContext.window))
+    if (Firebug.Console.isReadyElsePreparing(FirebugContext))
     {
         Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
 
@@ -1293,7 +1293,7 @@ function onCommandLineFocus(event)
 
     if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._FirebugCommandLine)
     {
-        Firebug.CommandLine.isNeededGetReady(FirebugContext);
+        Firebug.CommandLine.isReadyElsePreparing(FirebugContext);
     }
     else
     {

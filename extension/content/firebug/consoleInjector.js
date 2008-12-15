@@ -12,9 +12,20 @@ const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
 
 top.Firebug.Console.injector = {
 
-        isAttached: function(win)  // win needs to be a XPCSafeJSObjectWrapper
+        isAttached: function(win)   
         {
-            return (win._getFirebugConsoleElement ? true : false);
+			if (win.wrappedJSObject)
+			{
+				if (FBTrace.DBG_CONSOLE)
+					FBTrace.sysout("Console.isAttached to win.wrappedJSObject "+win.wrappedJSObject.location+" fnc:"+win.wrappedJSObject._getFirebugConsoleElement);
+				return (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
+			}
+			else
+			{
+				if (FBTrace.DBG_CONSOLE)
+					FBTrace.sysout("Console.isAttached to win "+win.location+" fnc:"+win._getFirebugConsoleElement);
+				return (win._getFirebugConsoleElement ? true : false);
+			}
         },
         
         attachIfNeeded: function(context, win)
@@ -38,7 +49,7 @@ top.Firebug.Console.injector = {
             Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("attachConsoleInjector evaluation completed\n");
+                FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
         },
 
         getConsoleInjectionScript: function() {
@@ -60,6 +71,9 @@ top.Firebug.Console.injector = {
                 if (!ff3)
                     script += " window.console = window._firebug;\n";
 
+                if (FBTrace.DBG_CONSOLE)
+                	script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
+                
                 script += " return window._firebug };\n";
                 
                 var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
@@ -88,6 +102,9 @@ top.Firebug.Console.injector = {
             Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
         else
             Firebug.CommandLine.evaluateInSandbox(consoleForcer, context, null, win);
+        
+        if (FBTrace.DBG_CONSOLE)    
+        	FBTrace.sysout("forceConsoleCompilationInPage "+win.location, consoleForcer);
     },
 
     evaluateConsoleScript: function(context)

@@ -112,7 +112,7 @@ Firebug.Debugger = extend(ActivableListenerModule,
         var watchPanel = context.getPanel("watches", true);
         if (watchPanel)
         {
-        	Firebug.CommandLine.isNeededGetReady(context);
+        	Firebug.CommandLine.isReadyElsePreparing(context);
             watchPanel.editNewWatch();
         }
     },
@@ -143,7 +143,7 @@ Firebug.Debugger = extend(ActivableListenerModule,
         debugger; // For some reason this is not reliable.
         if (this.haltCallback) // so we have a second try
         {
-            if (Firebug.CommandLine.isNeededGetReady(FirebugContext))
+            if (Firebug.CommandLine.isReadyElsePreparing(FirebugContext))
                 Firebug.CommandLine.evaluate("debugger;", FirebugContext);
         }
         
@@ -757,7 +757,7 @@ Firebug.Debugger = extend(ActivableListenerModule,
             {
                 if (Firebug.Console.isEnabled(context))
                 {
-                    var consoleReady = Firebug.Console.isNeededGetReady(context, global);
+                    var consoleReady = Firebug.Console.isReadyElsePreparing(context, global);
                     if (FBTrace.DBG_CONSOLE)
                         FBTrace.sysout("debugger.supportsGlobal !global._getFirebugConsoleElement consoleReady:"+consoleReady, global);
                 }
@@ -924,8 +924,9 @@ Firebug.Debugger = extend(ActivableListenerModule,
         try
         {
             Firebug.errorStackTrace = getStackTrace(frame, context);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+"\nFirebug.errorStackTrace:\n"+traceToString(Firebug.errorStackTrace)+"\n"); /*@explore*/
-            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError: ",error); /*@explore*/
+            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("debugger.onError: "+error.message ,error); /*@explore*/
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace); /*@explore*/
+
             if (Firebug.breakOnErrors)
                 context.breakingError = error;
             else
@@ -1568,7 +1569,7 @@ Firebug.Debugger = extend(ActivableListenerModule,
     	var needPersistent = watchPanelState && watchPanelState.watches;
     	if (needNow || needPersistent) 
     	{
-    		Firebug.CommandLine.isNeededGetReady(context);
+    		Firebug.CommandLine.isReadyElsePreparing(context);
     		if (watchPanel)
     		{
     		    context.setTimeout(function refreshWatchesAfterCommandLineReady() 

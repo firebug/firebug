@@ -136,18 +136,22 @@ Firebug.Console = extend(ActivableConsole,
         return element;
     },
     
-    isNeededGetReady: function(context, win) 
+    isReadyElsePreparing: function(context, win) 
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.isNeededGetReady "+(win?win.location:context.window.location), context);
+            FBTrace.sysout("console.isReadyElsePreparing "+(win?win.location:context.window.location), (win?win:context.window));
         
         if (win)
             return this.injector.attachIfNeeded(context, win);
         else
         {
+        	var attached = true;
             for (var i = 0; i < context.windows.length; i++)
-                this.injector.attachIfNeeded(context, context.windows[i]);
-            return this.injector.attachIfNeeded(context, context.window);
+                attached = attached && this.injector.attachIfNeeded(context, context.windows[i]);
+            // already in the list above attached = attached && this.injector.attachIfNeeded(context, context.window);
+            if (context.windows.indexOf(context.window) == -1)
+            	FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
+            return attached;
         }
     },
     

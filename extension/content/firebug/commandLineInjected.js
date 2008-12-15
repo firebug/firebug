@@ -45,18 +45,24 @@ var _FirebugCommandLine =
     
     attachCommandLine: function()
     {
+    	// DBG window.dump("attachCommandLine "+window.location+"\n");
+    	if (!window.console)
+    	{
+    		// DBG 	debugger;
+    		window.loadFirebugConsole();
+    	}
         var element = window.console.getFirebugElement();
         var self = this;
         element.addEventListener("firebugCommandLine", function _firebugEvalEvent(event)
         {
-        	//window.dump("_firebugEvalEvent firebugCommandLine\n");
+        	// DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
             var element = event.target;
             var expr = element.getAttribute("expr"); // see commandLine.js
             self.evaluate(expr);
-            //window.dump("_firebugEvalEvent did evaluate on "+expr+"\n");
+            // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
         }, true);
         element.setAttribute("firebugCommandLineAttached", "true")
-        //window.dump("Added listener for firebugCommandLine event");
+        // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
     },
 
     evaluate: function(expr)
@@ -76,4 +82,17 @@ var _FirebugCommandLine =
     },
 };
 
-_FirebugCommandLine.init();
+try 
+{
+	// DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
+	_FirebugCommandLine.init();
+}
+catch(exc)
+{
+	var wrappedException = {
+		cause: exc, 
+		message: "_FirebugCommandLine init failed in "+window.location+" because "+exc, 
+		toString: function() { return this.message; }
+	};
+	throw wrappedException;
+}

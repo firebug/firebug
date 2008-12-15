@@ -493,10 +493,10 @@ Firebug.CommandLine = extend(Firebug.Module,
     
     // called by users of command line, currently:
     // 1) Console on focus command line, 2) Watch onfocus, and 3) debugger loadedContext if watches exist
-    isNeededGetReady: function(context, win) 
+    isReadyElsePreparing: function(context, win) 
     {
     	if (FBTrace.DBG_CONSOLE)
-    		FBTrace.sysout("command line isNeededGetReady ", context);
+    		FBTrace.sysout("command line isReadyElsePreparing ", context);
     	
     	if (win)
     	    Firebug.CommandLine.injector.attachCommandLine(context, win);
@@ -530,12 +530,20 @@ Firebug.CommandLine.CommandHandler = extend(Object,
     {
         var element = event.target;
         var methodName = element.getAttribute("methodName");
+        
         var hosed_userObjects = (win.wrappedJSObject?win.wrappedJSObject:win)._firebug.userObjects;
 
         var userObjects = hosed_userObjects ? cloneArray(hosed_userObjects) : [];
-        if (FBTrace.DBG_CONSOLE)                                                                                                    /*@explore*/
-            FBTrace.dumpProperties("Firebug.CommandLine.CommandHandler: "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
-
+        
+        if (FBTrace.DBG_CONSOLE) 
+        {
+        	var uid = element.getAttribute('uid');  // set if // DBG removed from Injected
+        	FBTrace.dumpProperties("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
+        	FBTrace.sysout("Firebug.CommandLine.CommandHandler: "+(win.wrappedJSObject?"win.wrappedJSObject._firebug":"win._firebug"), (win.wrappedJSObject?win.wrappedJSObject._firebug:win._firebug));
+        	if (!userObjects)
+        		debugger;
+        }
+        	
         var subHandler = api[methodName];
         if (!subHandler)
             return false;
@@ -868,7 +876,9 @@ Firebug.CommandLine.injector = {
     {
         // Inject command line script into the page.
         var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
-        addScript(doc, "_firebugCommandLineInjector", scriptSource);
+        var addedElement = addScript(doc, "_firebugCommandLineInjector", scriptSource);
+        if (FBTrace.DBG_CONSOLE)
+        	FBTrace.sysout("injectCommandLineScript ", addedElement);
     },
 
     addCommandLineListener: function(context, win, doc)
@@ -878,7 +888,7 @@ Firebug.CommandLine.injector = {
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
         element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("addCommandLineListener to element", element);
+            FBTrace.sysout("addCommandLineListener to element in window with console "+win.location, win.console);
     }
 };
 

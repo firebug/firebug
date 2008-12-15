@@ -20,6 +20,8 @@ function _FirebugConsole()
     this.count = function() { this.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
     this.clear = function() { this.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
 
+    // DBG this.uid = Math.random();
+    
     this.notifyFirebug = function(objs, methodName, eventID)
     {
         var element = this.getFirebugElement();
@@ -27,15 +29,27 @@ function _FirebugConsole()
         var event = document.createEvent("Events");
         event.initEvent(eventID, true, false);
 
-        this.userObjects = [];
+        window._firebug.userObjects = [];
         for (var i=0; i<objs.length; i++)
-            this.userObjects.push(objs[i]);
+        	window._firebug.userObjects.push(objs[i]);
 
-        var length = this.userObjects.length;
+        var length = window._firebug.userObjects.length;
         element.setAttribute("methodName", methodName);
+        
+        // DBG element.setAttribute("uid", this.uid); 
+        
+        // DBG if (length > 0)
+        // DBG 	element.setAttribute("checkUserObjects", this.userObjects[0].toString());
+        // DBG else 
+        // DBG 	element.setAttribute("checkUserObjects", "no userObjects");
+        
+        // DBG dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
+        //debugger;
+        
         element.dispatchEvent(event);
 
-        //dump("FirebugConsole dispatched event "+methodName+" via "+eventID+"\n");
+        // DBG dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
+         
         var result;
         if (element.getAttribute("retValueType") == "array")
             result = [];

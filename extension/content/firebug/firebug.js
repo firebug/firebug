@@ -1429,7 +1429,7 @@ Firebug.Module =
     
     // caller needs module. win maybe context.window or iframe in context.window.
     // true means module is ready now, else getting ready
-    isNeededGetReady: function(context, win) 
+    isReadyElsePreparing: function(context, win) 
     {
     },
 };
