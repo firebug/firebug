@@ -234,9 +234,9 @@ const ToolboxPlate = domplate(
 
 // ************************************************************************************************
 
-function DOMBasePanel() {}
+Firebug.DOMBasePanel = function() {}
 
-DOMBasePanel.prototype = extend(Firebug.AblePanel,
+Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
 {
     tag: DirTablePlate.tableTag,
 
@@ -804,12 +804,15 @@ DOMBasePanel.prototype = extend(Firebug.AblePanel,
 });
 
 // ************************************************************************************************
-
+if (Firebug.DOMBasePanel)
+{
+        window.dump(" From DOM Firebug.DOMBasePanel: "+window.location+"\n");
+}
 var DOMMainPanel = Firebug.DOMPanel = function () {};
 
 Firebug.DOMPanel.DirTable = DirTablePlate;
 
-DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
+DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 {
     selectRow: function(row, target)
     {
@@ -863,7 +866,7 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
     {
         this.onClick = bind(this.onClick, this);
 
-        DOMBasePanel.prototype.initialize.apply(this, arguments);
+        Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
 
     initializeNode: function(oldPanelNode)
@@ -934,7 +937,7 @@ DOMMainPanel.prototype = extend(DOMBasePanel.prototype,
 
 function DOMSidePanel() {}
 
-DOMSidePanel.prototype = extend(DOMBasePanel.prototype,
+DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
@@ -948,7 +951,7 @@ DOMSidePanel.prototype = extend(DOMBasePanel.prototype,
 
 function WatchPanel() {}
 
-WatchPanel.prototype = extend(DOMBasePanel.prototype,
+WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 {
     tag: DirTablePlate.watchTag,
 
@@ -1081,7 +1084,7 @@ WatchPanel.prototype = extend(DOMBasePanel.prototype,
         this.onMouseOver = bind(this.onMouseOver, this);
         this.onMouseOut = bind(this.onMouseOut, this);
 
-        DOMBasePanel.prototype.initialize.apply(this, arguments);
+        Firebug.DOMBasePanel.prototype.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -1512,3 +1515,4 @@ Firebug.registerPanel(WatchPanel);
 // ************************************************************************************************
 
 }});
+ 
