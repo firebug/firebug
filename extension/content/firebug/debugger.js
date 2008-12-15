@@ -2795,6 +2795,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         var monitors = [];
 
     	var renamer = new SourceFileRenamer(context);
+    	var self = this;
     	
         for (var url in context.sourceFileMap)
         {
@@ -2812,7 +2813,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
                     else
-                        var name = guessFunctionName(url, 1, context);
+                        var name = self.guessFunctionName(url, 1, context);
                     var isFuture = false;
                 }
                 else
@@ -2831,7 +2832,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
             	if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
             		return;
             	
-                var name = guessEnclosingFunctionName(url, line);
+                var name = self.guessEnclosingFunctionName(url, line);
                 var source = context.sourceCache.getLine(url, line);
                 errorBreakpoints.push({name: name, href: url, lineNumber: line, checked: true,
                     sourceLine: source});
@@ -2842,7 +2843,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
             	if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
             		return;
             	
-                var name = guessEnclosingFunctionName(url, line);
+                var name = self.guessEnclosingFunctionName(url, line);
                 monitors.push({name: name, href: url, lineNumber: line, checked: true,
                         sourceLine: ""});
             }});
