@@ -14,6 +14,7 @@ const Ci = Components.interfaces;
 this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
+const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 
 const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
 const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
@@ -2227,8 +2228,6 @@ this.openNewTab = function(url)
 
 this.openWindow = function(windowType, url, features, params)
 {
-    var wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
-
     var win = windowType ? wm.getMostRecentWindow(windowType) : null;
     if (win) {
       if ("initWithParams" in win)
@@ -2247,6 +2246,22 @@ this.viewSource = function(url, lineNo)
 {
     window.openDialog("chrome://global/content/viewSource.xul", "_blank",
         "all,dialog=no", url, null, null, lineNo);
+};
+
+// Iterate over all opened firefox windows of the given type. If the callback returns true
+// the iteration is stopped.
+this.iterateBrowserWindows = function(windowType, callback)
+{
+    var windowList = wm.getZOrderDOMWindowEnumerator(windowType, true);
+    if (!windowList.hasMoreElements())
+        windowList = wm.getEnumerator(windowType);
+
+    while (windowList.hasMoreElements()) {
+        if (callback(windowList.getNext()))
+            return true;
+    }
+
+    return false;
 };
 
 // ************************************************************************************************

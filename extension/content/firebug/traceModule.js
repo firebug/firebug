@@ -11,7 +11,6 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
-const windowMediator = CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 const clipboard = CCSV("@mozilla.org/widget/clipboard;1", "nsIClipboard");
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
@@ -258,8 +257,13 @@ Firebug.TraceModule = extend(ListeningModule,
         if (!prefDomain)
             prefDomain = this.prefDomain;
 
-        this.consoleWindow = windowMediator.getMostRecentWindow(
-            "FBTraceConsole." + prefDomain);
+        var self = this;
+        iterateBrowserWindows("FBTraceConsole", function(win) {
+            if (win.TraceConsole.prefDomain == prefDomain) {
+                self.consoleWindow = win;
+                return true;
+            }
+        });
 
         // Try to connect an existing trace-console window first.
         if (this.consoleWindow) {
