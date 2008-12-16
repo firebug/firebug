@@ -7,6 +7,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Not Panel Specific ==
     
     Supports Firefox 3.1
+    All modules support Firebug.Listener
+    auto-suspend
 
 == Javascript Debugging ==
     * Implement breakOnNext UI for STEP_SUSPEND
@@ -43,6 +45,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 749: Hungarian Locale
 	* Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
 	* Issue 1122: can't copy or open image background from css viewer
+	* Issue 1176: Firebug should preserve Suspend state across sessions (after restart)
 	* Issue 1210: 1.3b1 post message display is screwed up
 	* Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
 	* Issue 1229: console tab does not display XHR with xhr.onprogress.
@@ -53,6 +56,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1267: console.time('toString') returns `NaN`;
 	* Issue 1276: Break on error without message in status bar
 	* Issue 1278: console create unclickable, 4px-high log entries
+	* Issue 1281: Watch tab: New Watch expression fails if Firebug is not stopped on a breakpoint
 	* Issue 1284: Unable to add new editor to external editors
 	* Issue 1285: Enhancement patch: filefield is editable in add external editor dialog; contribution by antonin.hildebrand
 	* Issue 1290: Using backspace when searching in open files menu deletes two characters instead of one, contribution by splintor
@@ -60,3 +64,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1306: console create unclickable, 4px-high log entries (revisited)
 	* Issue 1308: Missing URL-Encoding of reserved characters when using 'Copy Location with Parameters' from Net Panel
 	* Issue 1310: Net Panel - Wrong domain display
+	* Issue 1316: window.console is undefined, then console create empty log entries after clicking on the command line
+	* Issue 1317: Scrollbar in "Edit" view rendered half-invisible
