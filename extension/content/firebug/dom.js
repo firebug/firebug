@@ -374,7 +374,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
     {
         if (hasClass(row, "watchNewRow"))
         {
-            if (Firebug.Console.isEnabled(this.context))
+            if (Firebug.Console.isEnabled(this.context) && Firebug.CommandLine.isReadyElsePreparing(this.context))
                 Firebug.Editor.startEditing(row, "");
         }
         else if (hasClass(row, "watchRow"))
