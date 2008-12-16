@@ -14,7 +14,7 @@ var maxQueueRequests = 500;
 
 // ************************************************************************************************
 
-Firebug.ConsoleBase = extend(new Firebug.Listener(),
+Firebug.ConsoleBase =
 {
     log: function(object, context, className, rep, noThrottle, sourceLink)
     {
@@ -95,7 +95,7 @@ Firebug.ConsoleBase = extend(new Firebug.Listener(),
         return context.getPanel("console", noCreate);
     },
 
-});
+};
 
 var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 

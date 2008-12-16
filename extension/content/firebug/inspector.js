@@ -312,6 +312,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
     initialize: function()
     {
+        Firebug.Module.initialize.apply(this, arguments);
+
         this.onInspectingMouseOver = bind(this.onInspectingMouseOver, this);
         this.onInspectingMouseDown = bind(this.onInspectingMouseDown, this);
         this.onInspectingClick = bind(this.onInspectingClick, this);

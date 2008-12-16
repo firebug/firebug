@@ -42,9 +42,8 @@ const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 const panelStatus = $("fbPanelStatus");
 
 // ************************************************************************************************
-var ActivableListenerModule = extend(Firebug.ActivableModule, new Firebug.Listener());
 
-Firebug.Debugger = extend(ActivableListenerModule,
+Firebug.Debugger = extend(Firebug.ActivableModule,
 {
     fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

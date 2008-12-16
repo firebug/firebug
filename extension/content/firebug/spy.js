@@ -76,8 +76,7 @@ const httpObserver =
 
 // ************************************************************************************************
 
-var ListeningModule = extend(Firebug.Module, new Firebug.Listener());
-Firebug.Spy = extend(ListeningModule,
+Firebug.Spy = extend(Firebug.Module,
 {
     skipSpy: function(win)
     {

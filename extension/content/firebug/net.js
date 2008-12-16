@@ -147,8 +147,7 @@ var panelBar1 = $("fbPanelBar1");
 
 // ************************************************************************************************
 
-var ActivableListenerModule = extend(Firebug.ActivableModule, new Firebug.Listener());
-Firebug.NetMonitor = extend(ActivableListenerModule,
+Firebug.NetMonitor = extend(Firebug.ActivableModule,
 {
     clear: function(context)
     {

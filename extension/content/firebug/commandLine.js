@@ -442,6 +442,8 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     initialize: function()
     {
+        Firebug.Module.initialize.apply(this, arguments);
+
         this.autoCompleter = new Firebug.AutoCompleter(getExpressionOffset, getDot,
             autoCompleteEval, false, true);
 

@@ -1328,18 +1328,44 @@ top.Firebug =
 
         return null;
     },
-
 };
 
 // ************************************************************************************************
 
-Firebug.Module =
+/**
+ * Support for listeners registration. This object also extended by Firebug.Module so, 
+ * all modules supports listening automatically. Notice that array of listeners 
+ * is created for each intance of a module within initialize method. Thus all derived
+ * module classes must ensure that Firebug.Module.initialize method is called for the
+ * super class.
+ */
+Firebug.Listener = function()
+{
+    this.fbListeners = [];
+}
+Firebug.Listener.prototype =
+{
+    addListener: function(listener)
+    {
+        this.fbListeners.push(listener);
+    },
+
+    removeListener: function(listener)
+    {
+        remove(this.fbListeners, listener);
+    }
+};
+
+// ************************************************************************************************
+
+Firebug.Module = extend(new Firebug.Listener(),
 {
     /**
      * Called when the window is opened.
      */
     initialize: function()
     {
+        this.fbListeners = [];
     },
 
     /**
@@ -1432,25 +1458,8 @@ Firebug.Module =
     isReadyElsePreparing: function(context, win) 
     {
     },
-};
-
-// ************************************************************************************************
-Firebug.Listener = function () 
-{
-		this.fbListeners = [];
-}
-Firebug.Listener.prototype = extend(Firebug.Listener.prototype,
-{
-	    addListener: function(listener)
-	    {
-	        this.fbListeners.push(listener);
-	    },
-
-	    removeListener: function(listener)
-	    {
-	        remove(this.fbListeners, listener);
-	    },
 });
+
 //************************************************************************************************
 
 Firebug.Extension =
@@ -2384,6 +2393,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     initialize: function()
     {
+        Firebug.Module.initialize.apply(this, arguments);
+
         this.activeContexts = [];
     },
 

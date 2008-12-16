@@ -28,9 +28,8 @@ var invalidEditor = false;
 var ignoreNextInput = false;
 
 // ************************************************************************************************
-var ListeningModule = extend(Firebug.Module, new Firebug.Listener());
 
-Firebug.Editor = extend(ListeningModule,
+Firebug.Editor = extend(Firebug.Module,
 {
     tabCharacter: "    ",
 
@@ -369,6 +368,8 @@ Firebug.Editor = extend(ListeningModule,
 
     initialize: function()
     {
+        Firebug.Module.initialize.apply(this, arguments);
+
         this.onResize = bindFixed(this.onResize, this);
         this.onBlur = bind(this.onBlur, this);
     },

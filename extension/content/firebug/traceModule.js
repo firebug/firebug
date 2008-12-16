@@ -160,11 +160,12 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 // ***********************************************************************************
 // Trace Module
 
-var ListeningModule = extend(Firebug.Module, new Firebug.Listener());
-Firebug.TraceModule = extend(ListeningModule,
+Firebug.TraceModule = extend(Firebug.Module,
 {
     initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
     {
+        Firebug.Module.initialize.apply(this, arguments);
+
         FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
 
         if (FBTrace.DBG_OPTIONS)
