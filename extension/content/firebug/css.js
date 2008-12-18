@@ -571,6 +571,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(styleSheet)
     {
+    	if (!styleSheet)
+    		return;
+    	
         if (styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 

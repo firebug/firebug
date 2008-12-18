@@ -816,23 +816,12 @@ top.Firebug =
         if (Firebug.openInWindow)
             return this.toggleDetachBar(true);
 
-        var browser = FirebugChrome.getCurrentBrowser();
-        if (!browser.chrome) // then a page without a context
-        {
-            // Check to see if the context was skipped while suspended.
-            if (this.getSuspended() && TabWatcher.watchBrowser(browser))
-                this.resume();
-            else
-                return;
-        }
-
         var toggleOff = (forceOpen == undefined) ? !contentBox.collapsed : !forceOpen;
         if (toggleOff == contentBox.collapsed)
             return;
 
-        if (this.getSuspended())
-            this.resume();
-
+        var browser = FirebugChrome.getCurrentBrowser();
+        
         if (panelName)
             browser.chrome.selectPanel(panelName);
 

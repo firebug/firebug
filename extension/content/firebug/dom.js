@@ -804,10 +804,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
 });
 
 // ************************************************************************************************
-if (Firebug.DOMBasePanel)
-{
-        window.dump(" From DOM Firebug.DOMBasePanel: "+window.location+"\n");
-}
+
 var DOMMainPanel = Firebug.DOMPanel = function () {};
 
 Firebug.DOMPanel.DirTable = DirTablePlate;

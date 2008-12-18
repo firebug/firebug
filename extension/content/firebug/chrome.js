@@ -496,9 +496,35 @@ top.FirebugChrome =
 
     syncPanel: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                     /*@explore*/
-                (FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                     /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                      
+                (FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                     
+           
+        var resumed = false;
+        if (Firebug.getSuspended())
+        {
+			Firebug.resume();
+			resumed = true;
+        }
+        
+        if(!FirebugContext)
+        {
+        	var browser = FirebugChrome.getCurrentBrowser();
+        	var context = TabWatcher.getContextByWindow(browser.contentWindow);
+        	if (!context) // then a page without a context
+        	{
+        		// Check to see if the context was skipped while suspended.
+        		if (resumed)
+        		{
+        			TabWatcher.watchBrowser(browser);
+        	
+        			if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel prepared for resume FirebugContext="+                                      
+        					(FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                      
+        		}
+        	}
+        }
+        
+
+        
         panelStatus.clear();
 
         if (FirebugContext)
