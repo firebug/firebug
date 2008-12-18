@@ -225,15 +225,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         return null;
     },
 
-    getDataURLForContent: function(content, url)
-    {
-        // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
-        var uri = "data:text/html;";
-        uri += "fileName="+encodeURIComponent(url)+ ","
-        uri += encodeURIComponent(content);
-        return uri;
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     enter: function(context, command)

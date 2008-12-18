@@ -984,6 +984,72 @@ this.Event = domplate(Firebug.Rep,
     }
 });
 
+this.EventHandlerInfo = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTBLOCK(
+                OBJECTBOX( "$object:getElement"),
+                OBJECTLINK({$collapsed: "$object|hideHandler"}, "$object|getHandlerSummary")
+        ),
+
+    hideHandler: function(handler)
+    {
+        //return sourceLink ? sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1 : true;
+        return handler ? false: true;
+    },
+
+    getHandlerSummary: function(handler)
+    {
+        if (!handler)
+            return "";
+        
+        var fncName = cropString(handler.fnAsString, 27);
+        return fncName;
+    },
+    
+    getElement: function(handler)
+    {
+        if (handler)
+            return handler.element;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "eventHandler",
+
+    supportsObject: function(object)
+    {
+        return object instanceof EventHandlerInfo;
+    },
+
+    getTooltip: function(handler)
+    {
+        return handler.fnAsString;
+    },
+
+    inspectObject: function(handler, context)
+    {
+        var script = findScriptForFunctionInContext(context, handler.fnAsString);
+        
+        if (script)
+            return context.chrome.select(script);
+
+        // Fallback is to just open the view-source window on the file
+        var dataURL = getDataURLForContent(handler.fnAsString, context.window.location.toString());
+        viewSource(dataURL, 1);
+    },
+
+    getContextMenuItems: function(sourceLink, target, context)
+    {
+        return [
+            {label: "CopyLocation", command: bindFixed(this.copyLink, this, sourceLink) },
+            "-",
+            {label: "OpenInTab", command: bindFixed(this.openInTab, this, sourceLink) }
+        ];
+    }
+
+});
+
 // ************************************************************************************************
 
 this.SourceLink = domplate(Firebug.Rep,
@@ -1537,6 +1603,7 @@ Firebug.registerRep(
     this.Document,
     this.StyleSheet,
     this.Event,
+    this.EventHandlerInfo,
     this.SourceLink,
     this.SourceFile,
     this.StackTrace,

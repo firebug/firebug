@@ -435,7 +435,7 @@ this.iterateWindows = function(win, handler)
 
     handler(win);
 
-    if (win == top) return; // XXXjjb hack for chromeBug
+    if (win == top || !win.frames) return; // XXXjjb hack for chromeBug
 
     for (var i = 0; i < win.frames.length; ++i)
     {
@@ -1870,11 +1870,37 @@ this.findScriptForFunctionInContext = function(context, fn)
 {
     var found = null;
 
+    if (!fn.toString)
+        return found;
+
+    var fns = fn.toString();
+    this.forEachFunction(context, function findMatchingScript(script, aFunction)
+    {
+        if (!aFunction.toString)
+            return;
+        try {
+            var tfs = aFunction.toString();
+        } catch (etfs) {
+            FBTrace.dumpProperties("unwrapped.toString fails for unwrapped: "+etfs, aFunction);
+        }
+
+        if (tfs == fns)
+            found = script;
+    });
+    
+    if (FBTrace.DBG_FUNCTION_NAMES)
+        FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
+
+    return found;
+}
+
+this.forEachFunction = function(context, cb)
+{
     for (var url in context.sourceFileMap)
     {
         var sourceFile = context.sourceFileMap[url];
         if (FBTrace.DBG_FUNCTION_NAMES)
-            FBTrace.sysout("lib.findScriptForFunctionInContext Looking for "+fn+" in "+sourceFile+"\n");
+            FBTrace.sysout("lib.forEachFunction Looking in "+sourceFile+"\n");
         sourceFile.forEachScript(function seekFn(script)
         {
             if (!script.isValid)
@@ -1884,39 +1910,22 @@ this.findScriptForFunctionInContext = function(context, fn)
                 var testFunctionObject = script.functionObject;
                 if (!testFunctionObject.isValid)
                     return;
-                var unwrapped = testFunctionObject.getWrappedValue();
-                if (!unwrapped.toString)
-                    return;
-                try {
-                    var tfs = unwrapped.toString();
-                } catch (etfs) {
-                    FBTrace.dumpProperties("unwrapped.toString fails for unwrapped: "+etfs, unwrapped);
-                }
+                var theFunction = testFunctionObject.getWrappedValue();
 
-                if (!fn.toString)
-                    return;
-
-                var fns = fn.toString();
-                if (tfs == fns)
-                    found = script;
+                cb(script, theFunction);
             }
             catch(exc)
             {
                 if (FBTrace.DBG_ERRORS)
                 {
                     if (exc.name == "NS_ERROR_NOT_AVAILABLE")
-                        FBTrace.sysout("lib.findScriptForFunctionInContext no functionObject for "+script.tag+"_"+script.fileName+"\n");
+                        FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
                     else
-                       FBTrace.dumpProperties("lib.findScriptForFunctionInContext FAILS ",exc);
+                       FBTrace.dumpProperties("lib.forEachFunction FAILS ",exc);
                 }
             }
         });
     }
-
-    if (FBTrace.DBG_FUNCTION_NAMES)
-        FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
-
-    return found;
 }
 
 this.findScriptForFunction = function(fn)
@@ -2554,6 +2563,15 @@ this.detachFamilyListeners = function(family, object, listener)
         object.removeEventListener(types[i], listener, false);
 };
 
+this.EventHandlerInfo = function(element, type, listenerString, capturing)
+{
+    this.element = element;
+    this.fnAsString = listenerString;
+    this.capturing = capturing;
+    this.type = type;
+}
+
+
 // ************************************************************************************************
 // URLs
 
@@ -2745,6 +2763,15 @@ this.getURLFromLocalFile = function(file)
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;
 };
+
+this.getDataURLForContent = function(content, url)
+{
+    // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
+    var uri = "data:text/html;";
+    uri += "fileName="+encodeURIComponent(url)+ ","
+    uri += encodeURIComponent(content);
+    return uri;
+},
 
 this.getDomain = function(url)
 {

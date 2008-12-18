@@ -33,7 +33,7 @@ var _FirebugCommandLine =
         for (var j=0; j<props.length; j++)
         {
             var prop = props[j];
-            if (top[prop])
+            if (window[prop])
                 continue;
 
             this.__defineGetter__(prop, new Function(
