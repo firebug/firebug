@@ -498,7 +498,14 @@ top.FirebugChrome =
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                      
                 (FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                     
-            
+           
+        var resumed = false;
+        if (Firebug.getSuspended())
+        {
+			Firebug.resume();
+			resumed = true;
+        }
+        
         if(!FirebugContext)
         {
         	var browser = FirebugChrome.getCurrentBrowser();
@@ -506,7 +513,7 @@ top.FirebugChrome =
         	if (!context) // then a page without a context
         	{
         		// Check to see if the context was skipped while suspended.
-        		if (Firebug.getSuspended())
+        		if (resumed)
         		{
         			TabWatcher.watchBrowser(browser);
         	
@@ -516,8 +523,7 @@ top.FirebugChrome =
         	}
         }
         
-        if (Firebug.getSuspended())
-			Firebug.resume();
+
         
         panelStatus.clear();
 
