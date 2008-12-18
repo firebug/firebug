@@ -330,7 +330,15 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     onResumeFirebug: function(context)
     {
         HttpObserver.registerObserver();  // safe for multiple calls
-        context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
+        try 
+        {
+        	context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
+        }
+        catch(e)
+        {
+        	if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.onResumeFirebug could not addProgressListener: ", e);
+        }
 
         if (Firebug.NetMonitor.isEnabled(this.context))
             $('fbStatusIcon').setAttribute("net", "on");
