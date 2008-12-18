@@ -2640,6 +2640,13 @@ this.splitDataURL = function(url)
         	props['path'] = caller_split.path;
         }
     }
+	else
+	{
+		if (!props.hasOwnProperty('path'))
+			props['path'] = "data:";
+		if (!props.hasOwnProperty('name'))
+			props['name'] =  decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+	}
     
 	return props;
 };
