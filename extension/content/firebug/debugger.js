@@ -2233,12 +2233,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
                 breakpointPanel.refresh();
-        }        	
+        }
         else  // Not enabled but showing source in HTML pages.
         {
-        	if (!state.persistedLocation)
-        		Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
-        	// else the navigate in restoreObject remains in effect
+            // xxxHonza: ModuleManagerPage should be always displayed if 
+            // debugger is disabled. 
+            //if (!state.persistedLocation)
+                Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
+            // else the navigate in restoreObject remains in effect
         }
     },
 
