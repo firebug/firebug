@@ -970,9 +970,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
             return this.textEditor;
         }
-    }, 
+    },
     
-    getInspectorVars()
+    getInspectorVars: function()
     {
         var vars = {};
         for (var i=0; i<2; i++)
