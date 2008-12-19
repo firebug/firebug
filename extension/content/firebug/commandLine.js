@@ -155,9 +155,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context.commandLineAPI)
             context.commandLineAPI = new FirebugCommandLineAPI(context, (win.wrappedJSObject?win.wrappedJSObject:win));  // TODO should be baseWindow
 
+        var htmlPanel = context.getPanel("html", true);
         var scope = {
             api       : context.commandLineAPI,
-            vars      : getInspectorVars(context),
+            vars      : htmlPanel.getInspectorVars(),
             thisValue : thisValue
         };
 
@@ -654,16 +655,6 @@ function injectScript(script, win)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function getInspectorVars(context)
-{
-    var htmlPanel = context.getPanel("html", true);
-    var vars = {};
-    for (var i=0; i<2; i++)
-        vars["$"+i] = htmlPanel ? htmlPanel.inspectorHistory[i] : null;
-
-    return vars;
-}
-
 function getCommandLine(context)
 {
     return Firebug.largeCommandLine
@@ -896,7 +887,8 @@ function CommandLineHandler(context, win)
             FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand') event in baseWindow "+baseWindow.location, event);
          
         // Appends variables into the api.
-        var vars = getInspectorVars(context);
+        var htmlPanel = context.getPanel("html", true);
+        var vars = htmlPanel.getInspectorVars();
         for (var prop in vars)
         {
             function createHandler(p) {
