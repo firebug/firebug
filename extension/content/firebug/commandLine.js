@@ -158,7 +158,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var htmlPanel = context.getPanel("html", true);
         var scope = {
             api       : context.commandLineAPI,
-            vars      : htmlPanel.getInspectorVars(),
+            vars      : htmlPanel?htmlPanel.getInspectorVars():null,
             thisValue : thisValue
         };
 
@@ -888,7 +888,7 @@ function CommandLineHandler(context, win)
          
         // Appends variables into the api.
         var htmlPanel = context.getPanel("html", true);
-        var vars = htmlPanel.getInspectorVars();
+        var vars = htmlPanel?htmlPanel.getInspectorVars():null;
         for (var prop in vars)
         {
             function createHandler(p) {
