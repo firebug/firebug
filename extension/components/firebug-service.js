@@ -2155,6 +2155,11 @@ FirebugService.prototype =
         jsd.functionHook = { onCall: callHook };
     },
     
+    getJSD: function()
+    {
+    	return jsd; // for debugging fbs
+    },
+    
 };
 
 function getStepName(mode)
