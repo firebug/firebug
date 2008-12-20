@@ -148,9 +148,6 @@ top.FirebugChrome =
 
             locationList.addEventListener("selectObject", onSelectLocation, false);
 
-            $("fbLargeCommandLine").addEventListener('focus', onCommandLineFocus, true);
-            $("fbCommandLine").addEventListener('focus', onCommandLineFocus, true);
-
             for (var i = 0; i < Firebug.panelTypes.length; ++i)
             {
                 var panelType = Firebug.panelTypes[i];
@@ -1294,48 +1291,6 @@ function getRealObject(object)
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
     var realRep = realObject ? Firebug.getRep(realObject) : rep;
     return realObject ? realObject : object;
-}
-
-function onCommandLineFocus(event)
-{
-    // User has decided to use the command line, but the web page may not have the console if the page has no javascript
-    if (Firebug.Console.isReadyElsePreparing(FirebugContext))
-    {
-        Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("onCommandLineFocus, attachConsole "+FirebugContext.window.location+"\n");
-    }
-    else  // the page had _firebug so we know that consoleInjected.js compiled and ran. 
-    {
-        if (FBTrace.DBG_CONSOLE)
-        {
-            if (FirebugContext)
-                FBTrace.sysout("onCommandLineFocus: ", (FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window"));
-            else
-                FBTrace.sysout("onCommandLineFocus: No FirebugContext\n");
-        }
-    }
-
-    if (FirebugContext && FirebugContext.window && FirebugContext.window.wrappedJSObject && !FirebugContext.window.wrappedJSObject._FirebugCommandLine)
-    {
-        Firebug.CommandLine.isReadyElsePreparing(FirebugContext);
-    }
-    else
-    {
-        if (FBTrace.DBG_CONSOLE)
-        {
-            try
-            {
-                var cmdLine = FirebugContext.window.wrappedJSObject._FirebugCommandLine
-                FBTrace.sysout("onCommandLineFocus, attachCommandLine ", cmdLine);
-            }
-            catch (e)
-            {
-                FBTrace.sysout("onCommandLineFocus, did NOT attachCommandLine ", e);
-            }
-        }
-    }
 }
 
 // ************************************************************************************************
