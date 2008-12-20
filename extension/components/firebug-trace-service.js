@@ -23,8 +23,8 @@ const appShellService = Components.classes["@mozilla.org/appshell/appShellServic
 // ************************************************************************************************
 // Service implementation
 
-//var win = appShellService.hiddenDOMWindow;
-const win = false;
+
+var win = false;
 
 function TraceConsoleService()  // singleton
 {
@@ -41,6 +41,11 @@ TraceConsoleService.prototype =
 {
 	getTracer: function(prefDomain)  
 	{
+		if (this.getPref("extensions.firebug-tracing-service.toOSConsole"))
+		{
+			 win = appShellService.hiddenDOMWindow;  // also need browser.dom.window.dump.enabled true
+		}
+		
 		if (!this.optionMaps[prefDomain])
 			this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
 		if (win)
@@ -129,6 +134,9 @@ TraceConsoleService.prototype =
         if (topic != "firebug-trace-on-message")
             throw Cr.NS_ERROR_INVALID_ARG;
     
+        if (this.observers.length == 0) // mark where trace begins.
+        	lastResort(this.observers, topic, "addObserver");
+
         this.observers.push(observer);
     },
 
@@ -192,7 +200,11 @@ function lastResort(listeners, subject, someData)
 {
     var hiddenWindow = appShellService.hiddenDOMWindow; 
     var unwrapped = subject.wrappedJSObject;
-    var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
+    if (unwrapped)
+    	var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
+    else
+    	var objPart = subject; 
+    
     hiddenWindow.dump("FTS"+listeners.length+": "+someData+objPart+"\n");
 }
 // ************************************************************************************************
