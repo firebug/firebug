@@ -133,15 +133,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     halt: function(fn)
     {
-        this.haltCallback = fn;
+        this.haltCallback = fn; // called in this.onHalt as fn(frame);
         fbs.halt(this);
         
-        if(FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.halt, issuing debugger stmt", fn);
+        debuggerHalter(); // a function with a URL that passes jdsIFilter
         
-        debugger; // For some reason this is not reliable.
         if (this.haltCallback) // so we have a second try
         {
+        	FBTrace.sysout("debugger did not halt jsd: ", jsd);
             if (Firebug.CommandLine.isReadyElsePreparing(FirebugContext))
                 Firebug.CommandLine.evaluate("debugger;", FirebugContext);
         }
@@ -525,7 +524,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.currentFrame = context.debugFrame;
 
             if (context != FirebugContext)
-            	browser.chrome.showContext(context.browser, context); // Make FirebugContext = context and sync the UI
+            	context.browser.chrome.showContext(context.browser, context); // Make FirebugContext = context and sync the UI
 
             this.syncCommands(context);
             this.syncListeners(context);
