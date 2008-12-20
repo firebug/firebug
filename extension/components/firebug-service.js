@@ -37,7 +37,8 @@ const nsIFactory = Ci.nsIFactory;
 const nsIConsoleService = Ci.nsIConsoleService;
 const nsITimer = Ci.nsITimer;
 
-
+const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const NS_ERROR_NO_INTERFACE = Components.results.NS_ERROR_NO_INTERFACE;
@@ -187,6 +188,7 @@ function FirebugService()
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
     this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
                         .createInstance(Components.interfaces.nsIMutableArray);  // scripts contained in leveledScript that have not been drained
+    this.ff3p1 = versionChecker.compare(appInfo.version, "3.1*") >= 0;
 }
 
 FirebugService.prototype =
@@ -1381,7 +1383,7 @@ FirebugService.prototype =
             {
                 try {
                 if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) 											/*@explore*/
-                    FBTrace.sysout("onScriptCreated: filename filtered:"+fileName);  	/*@explore*/
+                    FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'");  	/*@explore*/
                 } catch (exc) { /*Bug 426692 */ } /*@explore*/
                 return;
             }
@@ -1439,11 +1441,24 @@ FirebugService.prototype =
 
     createdScriptHasCaller: function()
     {
+        if (FBTrace.DBG_FBS_SRCUNITS) 
+        {
+            var msg = [];
+            for (var frame = Components.stack; frame; frame = frame.caller)
+                msg.push( frame.filename + "@" + frame.lineNumber +": "+frame.sourceLine  );
+            FBTrace.sysout("createdScriptHasCaller "+msg.length+" FF3.1:"+this.ff3p1, msg);
+        }
+        
         var frame = Components.stack; // createdScriptHasCaller
+        
         frame = frame.caller;         // onScriptCreated
         if (!frame) return frame;
-        frame = frame.caller;         // native jsd?
-        if (!frame) return frame;
+        
+        if (!this.ff3p1)
+        {
+            frame = frame.caller;         // native jsd?
+            if (!frame) return frame;
+        }
         frame = frame.caller;         // hook apply
         if (!frame) return frame;
         frame = frame.caller;         // native interpret?
