@@ -3026,9 +3026,9 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         var hostURI = getURIHost(currentURI);
 
         if (isSystemURL(currentURI.spec))
-            hostURI = $STR("moduleManager.System Page");
+            hostURI = $STR("moduleManager.systempages");
         else if (!hostURI)
-            hostURI = $STR("moduleManager.Local File");
+            hostURI = $STR("moduleManager.localfiles");
 
         // Prepare arguments for the template (list of activableModules and
         // title for the apply button).
