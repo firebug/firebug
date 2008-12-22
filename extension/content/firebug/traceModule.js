@@ -320,13 +320,13 @@ Firebug.TraceModule = extend(Firebug.Module,
     {
         // xxxHonza: find better solution for checking an ERROR messages
         // (setup some rules).
-        var index = message.text.indexOf("ERROR");
-        if (index != -1)
+        var text = message.text;
+        if (text.indexOf("ERROR") != -1 ||
+            text.indexOf("EXCEPTION") != -1 ||
+            text.indexOf("FAILS") != -1)
+        {
             message.type = "DBG_ERROR";
-
-        index = message.text.indexOf("EXCEPTION");
-        if (index != -1)
-            message.type = "DBG_ERROR";
+        }
 
         Firebug.TraceModule.MessageTemplate.dump(message, parentNode);
     },
