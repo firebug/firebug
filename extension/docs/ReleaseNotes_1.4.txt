@@ -30,7 +30,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* de-DE locale update (contribution by Team erweiterungen.de, ReinekeFux, Monoman)
 	* it-IT locale update (contribution by l0stintranslation, gonzalopirobutirro)
 	* New Locale ro-RO, Romanian (contribution by alexxed)
-	* Locale update fr-FR (contribution by martin© and fmarcia)
+	* Locale update fr-FR (contribution by martinï¿½ and fmarcia)
 	* Locale update hu-HU (contribution by gLes)
 	* Update locale pl-PL (contribution by teo)
 	* ca-AD locale updated (contribution by xavivars, toniher)
@@ -48,7 +48,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1176: Firebug should preserve Suspend state across sessions (after restart)
 	* Issue 1210: 1.3b1 post message display is screwed up
 	* Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
-	* Issue 1229: console tab does not display XHR with xhr.onprogress.
+    * Issue 1226: FB 1.4 tabCache optimalization prevents webpages from being viewied in FF3.1 nighlies
+    * Issue 1263: Script error downloading files
+ 	* Issue 1229: console tab does not display XHR with xhr.onprogress.
 	* Issue 1231: console object has wrong version number
 	* Issue 1248: Console does not filter errors from other browser tabs.
 	* Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
