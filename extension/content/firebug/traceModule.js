@@ -1234,7 +1234,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
                     catch (e)
                     {
-                        onPanic(e);
+                        onPanic("instanceof Array with length, item "+p, e);
                     }
                 }
             }
@@ -1259,7 +1259,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
                     catch (e)
                     {
-                        onPanic(e);
+                        onPanic("instanceof Array, item "+p, e);
                     }
                 }
             }
@@ -1279,7 +1279,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     var name = prop.name.getWrappedValue();
                     this.props[name] = "" + prop.value.getWrappedValue();
                 } catch (e) {
-                    onPanic(e);
+                    onPanic("instanceof jsdIValue, i="+i, e);
                 }
             }
         }
@@ -1422,7 +1422,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             }
             catch (err)
             {
-                onPanic(e);
+                onPanic("instanceof Error or nsIExcpetion", e);
             }
         }
 
@@ -1449,7 +1449,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         catch (e)
         {
-            onPanic(e);
+            onPanic("getTypes "+this.types, e);
         }
 
         return this.types;
@@ -1489,7 +1489,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         catch (err)
         {
-            onPanic(err);
+            onPanic("event", err);
         }
 
         return this.eventInfo;
@@ -1502,13 +1502,13 @@ Firebug.TraceModule.TraceMessage.prototype =
 }
 
 var lastPanic = null;
-function onPanic(errorMessage)
+function onPanic(contextMessage, errorMessage)
 {
     var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
     var win = appShellService.hiddenDOMWindow;
     // XXXjjb I cannot get these tests to work. 
     //if (win.lastPanic && (win.lastPanic == errorMessage))
-        win.dump("Another panic attack "+errorMessage+"\n");
+        win.dump("traceModule: "+contextMessage +" panic attack "+errorMessage+"\n");
     //else
     //alert("Firebug traceModule panics: "+errorMessage);
 
