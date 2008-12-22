@@ -72,13 +72,13 @@ this.initialize = function()
 // ************************************************************************************************
 // Basics
 
-this.bind = function()
+this.bind = function()  // fn, thisObject, args => thisObject.fn(args, arguments);
 {
    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
    return function() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
 };
 
-this.bindFixed = function()
+this.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
     var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
     return function() { return fn.apply(object, args); }
@@ -1054,7 +1054,7 @@ this.getViewOffset = function(elt, singleFrame)
 
         if (p)
         {
-            if (p.nodeType == 1)
+            if (p.nodeType == 1) // element node
             {
                 var parentStyle = view.getComputedStyle(p, "");
                 if (parentStyle.position != "static")
@@ -1090,7 +1090,7 @@ this.getViewOffset = function(elt, singleFrame)
                 addOffset(p, coords, view);
             }
         }
-        else
+        else  // no offsetParent
         {
             if (elt.localName == "BODY")
             {
@@ -1345,6 +1345,8 @@ this.readBoxStyles = function(style)
     var styles = {};
     for (var styleName in styleNames)
         styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText);
+    if (FBTrace.DBG_INSPECT)
+    	FBTrace.sysout("readBoxStyles ", styles);
     return styles;
 };
 
