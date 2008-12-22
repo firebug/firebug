@@ -413,9 +413,9 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_STEP)
             FBTrace.sysout("step stepMode = "+getStepName(stepMode) +" stepFrameLineId="+stepFrameLineId+" stepFrameCount="+stepFrameCount+" stepStayOnDebuggr:"+(stepStayOnDebuggr?stepStayOnDebuggr:"null"));                        
 
-        this.hookInterrupts();
-        
         dispatch(debuggers, "onBreakingNext", [stayOnDebuggr, context]);
+        
+        this.hookInterrupts();
     },
 
     runUntil: function(sourceFile, lineNo, startFrame, debuggr)
