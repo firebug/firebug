@@ -241,19 +241,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         
         if (!context.stopped) // then resume means breakOnNext
         {
-            var chrome = context.chrome;0
-            var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-            
-            if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.resume "+context.window.location+ " breakable: "+breakable, breakable);
-
-            if (breakable == "true")
-                this.suspend(context);  // arm breakOnNext
-            else
-                chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
-            
-            this.syncCommands(context);
-            return;
+        	this.breakOnNext(context);
+        	return;
         }
 
         // in fbs we stopStepping() so allow breakOnNext again
@@ -268,6 +257,23 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
 
+    breakOnNext: function(context)
+    {
+        var chrome = context.chrome;
+        var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("debugger.resume "+context.window.location+ " breakable: "+breakable, breakable);
+
+        if (breakable == "true")
+            this.suspend(context);  // arm breakOnNext
+        else
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
+        
+        this.syncCommands(context);
+        return;
+    },
+    
     onBreakingNext: function(debuggr, context)
     {
         var chrome = context.chrome;
