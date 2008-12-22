@@ -293,6 +293,11 @@ h1.groupHeader {
     width: 75%;
 }
 
+.moduleManagerDescription.applyDesc{
+    font-size: 11px;
+    color: gray;
+}
+
 .moduleManagerRow {
     margin: 5px 0;
     font-size: 13px;
@@ -315,39 +320,8 @@ h1.groupHeader {
     margin-right: 1em;
 }
 
+.moduleManagerApplyButton .host {
+    color: blue;
+}
+
 /************************************************************************************************/
-
-.activableModuleTable {
-    border: 0 !important;
-    font-size: 13px;
-    border-top: 1px solid threedlightshadow !important;    
-    margin:8px;
-}
-
-.activableModuleCell {
-    padding: 0 20px 0 0;
-    border-bottom: 1px solid threedlightshadow !important;    
-}
-
-.activableModuleRow:hover {
-    background-color: #EFEFEF;
-}
-
-.panelDisabled {
-    color:gray !important;
-}
-    
-.activableModuleState {
-    padding: 0 5px 0 20px;
-}
-
-.activableModuleName {
-    padding-right:20px;    
-    font-weight:bold;
-}
-
-.activableModuleName:hover {
-    text-decoration:underline;
-    color:Blue;
-    cursor: pointer;
-}

@@ -215,6 +215,7 @@ top.Firebug =
     internationalizeUI: function()  // Substitute strings in the UI with fall back to en-US
     {
         FBL.internationalize('menu_toggleSuspendFirebug', 'label');
+        FBL.internationalize('menu_disablePanels', 'label');
     },
 
     broadcast: function(message, args)
@@ -311,6 +312,11 @@ top.Firebug =
         }
     },
 
+    disablePanels: function(context)
+    {
+        Firebug.ModuleManager.disableModules(context);
+    },
+    
     suspend: function()  // dispatch suspendFirebug to all windows
     {
         this.broadcast('suspendFirebug', []);
@@ -2956,29 +2962,22 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
                 SPAN("$pageTitle")
             ),
             P({class: "moduleManagerDescription"},
-                $STR("moduleManager.description")
+                $STR("moduleManager.desc1")
             ),
-            TABLE({class: "activableModuleTable", cellpadding: 0, cellspacing: 0},
-                TBODY(
-                    FOR("module", "$modules",
-                        TR({class: "activableModuleRow", _repObject: "$module",
-                            $panelDisabled: "$module|isModuleDisabled"},
-                            TD({class: "activableModuleCell activableModuleState"},
-                                INPUT({class: "activableModuleCheckBox", type: "checkbox",
-                                    onchange: "$onModuleStateChanged"})
-                            ),
-                            TD({class: "activableModuleCell activableModuleName",
-                                onclick: "$onModuleNameClick"}, "$module|getModuleName"),
-                            TD({class: "activableModuleCell activableModuleDesc"}, "$module|getModuleDesc"),
-                            TD({class: "activableModuleCell"}, "$module|getModuleState")
-                        )
-                    )
-                )
+            P({class: "moduleManagerDescription", align: "center"},
+                BUTTON({class: "moduleManagerApplyButton", onclick: "$onEnable"})
             ),
-            DIV({class: "moduleManagerRow"},
-                BUTTON({class: "moduleManagerApplyButton", onclick: "$onEnable"},
-                    SPAN("$enableHostLabel")
-                )
+            P({class: "moduleManagerDescription applyDesc", style:"font-size:11px", align: "center"}),
+            //xxxHonza: there is no help page available yet. 
+            /*P({class: "moduleManagerDescription", align: "center"},
+                A({href:"#" },
+                    "Help")
+            ),*/
+            P({class: "moduleManagerDescription", style: "margin-top: 15px;"},
+                $STR("moduleManager.desc3"),
+                SPAN("&nbsp;"),
+                IMG({style: "margin-top: 5px; margin-left:0; margin-bottom: 5px; vertical-align:middle", 
+                    src: "chrome://firebug/skin/activation-menu.png"})
             )
          ),
 
@@ -2988,111 +2987,14 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         return Firebug.getPanelTitle(panelType);
     },
 
-    getModuleDesc: function(module)
-    {
-        return module.description;
-    },
-
-    getModuleState: function(module)
-    {
-        var currentURI = FirebugChrome.getBrowserURI(this.context);
-        var hostURI = getURIHost(currentURI);
-        var option = module.getHostPermission(this.context);
-
-        switch (option) {
-        case "disable-site":
-            return $STRF("moduleManager.Disabled For Site", [hostURI]);
-        case "enable-site":
-            return $STRF("moduleManager.Enabled For Site", [hostURI]);
-        case "enable":
-            return $STR("moduleManager.Enabled Always");
-        case "disable":
-            return $STR("moduleManager.Disabled Always");
-        }
-    },
-
-    isModuleDisabled: function(module)
-    {
-        return !module.isEnabled(this.context);
-    },
-
-    isModuleEnabled: function(module)
-    {
-        return module.isEnabled(this.context);
-    },
-
-    onModuleStateChanged: function(event)
-    {
-        this.updateApplyButton();
-    },
-
-    updateApplyButton: function()
-    {
-        var disabled = true;
-        for (var i=0; i<this.inputs.length; i++)
-        {
-            var input = this.inputs[i];
-            if (input.checked != input.originalValue)
-            {
-                disabled = false;
-                break;
-            }
-        }
-
-        this.applyButton.disabled = disabled;
-    },
-
-    onModuleNameClick: function(event)
-    {
-        var moduleRow = Firebug.getRepNode(event.target);
-        var checkBox = getElementByClass(moduleRow, "activableModuleCheckBox");
-        checkBox.checked = checkBox.checked ? false : true;
-
-        this.updateApplyButton();
-    },
-
     onEnable: function(event)
     {
-        var needReload = false;
-        for (var i=0; i<this.inputs.length; i++)
-        {
-            var input = this.inputs[i];
-            if (!hasClass(input, "activableModuleCheckBox"))
-                continue;
-
-            var model = Firebug.getRepObject(input);
-            if (input.checked)
-            {
-                var oneReload = this.enableModule(model);
-                needReload = needReload || oneReload;
-            }
-            else
-                this.disableModule(model);
-
-            // Update panel's tab so, it reflects the current module state.
-            model.updateTab(this.context);
-        }
+        var needReload = Firebug.ModuleManager.enableModules(this.context);
 
         this.refresh();
 
         if (needReload)
             this.context.window.location.reload();
-    },
-
-    enableModule: function(module)
-    {
-        if (!this.isModuleEnabled(module))
-        {
-            module.setHostPermission(this.context, "enable-site");
-            return true;
-        }
-        return false;
-    },
-
-    disableModule: function(module)
-    {
-        if (this.isModuleEnabled(module))
-            module.setHostPermission(this.context, "disable-site");
     },
 
     show: function(panel, module)
@@ -3102,6 +3004,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             this.module = module;
             this.context = panel.context;
             this.panelNode = panel.panelNode;
+            this.panel = panel;
             this.refresh();
         }
         catch(e)
@@ -3123,48 +3026,82 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         var hostURI = getURIHost(currentURI);
 
         if (isSystemURL(currentURI.spec))
-            label = "moduleManager.systempages";
+            hostURI = $STR("moduleManager.System Page");
         else if (!hostURI)
-            label = "moduleManager.localfiles";
-
-        hostURI = hostURI ? hostURI : $STR(label);
+            hostURI = $STR("moduleManager.Local File");
 
         // Prepare arguments for the template (list of activableModules and
         // title for the apply button).
         var args = {
             modules: activableModules,
             pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
-            enableHostLabel: $STRF("moduleManager.apply.title", [hostURI])
         };
 
         // Render panel HTML
         this.box = this.tag.replace(args, this.panelNode, this);
         this.panelNode.scrollTop = 0;
 
-        // Update value of all checkboxes
-        // xxxHonza: is there a better domplate way how to set default value for a checkbox?
-        this.inputs = this.panelNode.getElementsByTagName("input");
-        for (var i=0; i<this.inputs.length; i++)
-        {
-            var input = this.inputs[i];
-            if (!hasClass(input, "activableModuleCheckBox"))
-                continue;
-
-            // Set the checkboxes to cause the big button to return the panels to a state the user has liked.
-            var module = Firebug.getRepObject(input);
-            if (this.isModuleEnabled(module))
-                input.originalValue = true;
-            else
-                input.originalValue = false;
-
-            input.checked = input.originalValue;
-        }
-
         this.applyButton = getElementByClass(this.panelNode, "moduleManagerApplyButton");
+        this.applyButton.innerHTML = $STRF("moduleManager.apply", [hostURI]);
+
+        var desc2 = getElementByClass(this.panelNode, "moduleManagerDescription", "applyDesc");
+        desc2.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
     }
 });
 
 // ************************************************************************************************
 
+Firebug.ModuleManager =
+{
+    disableModules: function(context)
+    {
+        for (var i=0; i<activableModules.length; i++)
+        {
+            var module = activableModules[i];
+            this.disableModule(context, module);
+            module.updateTab(context);
+        }
+    },
+
+    enableModules: function(context)
+    {
+        var needReload = false;
+        for (var i=0; i<activableModules.length; i++)
+        {
+            var module = activableModules[i];
+            needReload = this.enableModule(context, module) || needReload;
+            module.updateTab(context);
+        }
+
+        return needReload;
+    },
+
+    disableModule: function(context, module)
+    {
+        if (this.isModuleEnabled(context, module))
+        {
+            module.setHostPermission(context, "disable");
+            return true;
+        }
+        return false;
+    },
+
+    enableModule: function(context, module)
+    {
+        if (!this.isModuleEnabled(context, module))
+        {
+            module.setHostPermission(context, "enable-site");
+            return true;
+        }
+        return false;
+    },
+
+    isModuleEnabled: function(context, module)
+    {
+        return module.isEnabled(context);
+    },
+} 
+
+// ************************************************************************************************
 
 }});

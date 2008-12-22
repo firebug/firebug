@@ -227,6 +227,7 @@
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
             <menuseparator/>
             <menuitem id="menu_toggleSuspendFirebug" label="Suspend Firebug" command="cmd_toggleSuspendFirebug"/>
+            <menuitem id="menu_disablePanels" label="Reset Panels To Disabled" command="cmd_disablePanels"/>
         </menupopup>
     </statusbar>
 
