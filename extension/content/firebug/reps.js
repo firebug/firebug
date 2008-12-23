@@ -1229,6 +1229,8 @@ this.jsdStackFrame = domplate(Firebug.Rep,
         var sourceInfo = FBL.getSourceFileAndLineByScript(context, frame.script, frame);
         if (sourceInfo)
             return $STRF("Line", [sourceInfo.sourceFile.href, sourceInfo.lineNo]);
+        else
+            return $STRF("Line", [frame.script.fileName, frame.line]);
     },
 
     getContextMenuItems: function(frame, target, context)
