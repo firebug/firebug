@@ -375,11 +375,19 @@ this.internationalize = function(element, attr, args)
     if (typeof element == "string")
         element = document.getElementById(element);
 
-    var xulString = element.getAttribute(attr);
-    var localized = args ? $STRF(xulString, args) : $STR(xulString);
+    if (element)
+    {
+        var xulString = element.getAttribute(attr);
+        var localized = args ? $STRF(xulString, args) : $STR(xulString);
 
-    // Set localized value of the attribute.
-    element.setAttribute(attr, localized);
+        // Set localized value of the attribute.
+        element.setAttribute(attr, localized);
+    }
+    else
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Failed to internationalize element with attr "+attr+' args:'+args);
+    }
 }
 
 // ************************************************************************************************
