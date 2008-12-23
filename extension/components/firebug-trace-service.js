@@ -18,7 +18,7 @@ const prefs = PrefService.getService(Ci.nsIPrefBranch2);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 
-const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       
 
 // ************************************************************************************************
 // Service implementation
@@ -205,7 +205,7 @@ function lastResort(listeners, subject, someData)
     else
     	var objPart = subject; 
     
-    hiddenWindow.dump("FTS"+listeners.length+": "+someData+objPart+"\n");
+    hiddenWindow.dump("FTS"+listeners.length+": "+someData+" "+objPart+"\n");
 }
 // ************************************************************************************************
 // Public TraceService API
