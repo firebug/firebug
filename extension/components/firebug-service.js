@@ -154,8 +154,10 @@ var FBTrace = null;
 
 function FirebugService()
 {
-	FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
+	 
+    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
 	             .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
+	
     FBTrace.sysout("FirebugService Starting");
     
     fbs = this;
@@ -208,7 +210,6 @@ FirebugService.prototype =
             do
             {
                 var depth = jsd.exitNestedEventLoop();
-                //FBTrace.sysout("FirebugService.shutdown exitNestedEventLoop "+depth); // just in case we are not making progress...
             }
             while(depth > 0);
         }
@@ -219,7 +220,6 @@ FirebugService.prototype =
 
         jsd.off();
         jsd = null;
-        //FBTrace.sysout("FirebugService.shutdown\n");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -386,7 +386,8 @@ FirebugService.prototype =
         }
         catch (exc)
         {
-            FBTrace.sysout("fbs: jsd.exitNestedEventLoop FAILS "+exc);
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("fbs: jsd.exitNestedEventLoop FAILS "+exc);
         }
     },
 
@@ -448,7 +449,8 @@ FirebugService.prototype =
             dispatch(debuggers, "onToggleBreakpoint", [url, lineNo, false, bp]);
         else 
         {
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.clearBreakpoint no find for "+lineNo+"@"+url); 
+            if (FBTrace.DBG_FBS_BP) 
+                FBTrace.sysout("fbs.clearBreakpoint no find for "+lineNo+"@"+url); 
         }
     },
 
@@ -462,7 +464,8 @@ FirebugService.prototype =
             --disabledCount;
         }
         else {
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.enableBreakpoint no find for "+lineNo+"@"+url);
+            if (FBTrace.DBG_FBS_BP) 
+                FBTrace.sysout("fbs.enableBreakpoint no find for "+lineNo+"@"+url);
         }
     },
 
@@ -477,7 +480,8 @@ FirebugService.prototype =
         }
         else
         {
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.disableBreakpoint no find for "+lineNo+"@"+url);
+            if (FBTrace.DBG_FBS_BP) 
+                FBTrace.sysout("fbs.disableBreakpoint no find for "+lineNo+"@"+url);
         }
 
     },
@@ -890,7 +894,7 @@ FirebugService.prototype =
                 FBTrace.DBG_BP = true;
                 FBTrace.DBG_FBS_CREATION = true;
             }
-            else
+            if (!FBTrace.DBG_FF_START)
             {
                 fbs.resetBP = FBTrace.DBG_BP;
                 FBTrace.DBG_BP = false;
