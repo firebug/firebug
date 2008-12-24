@@ -441,7 +441,11 @@ function FirebugConsoleHandler(context, win)
         {
             var bottom = frames.length - 1;
             for (var i = 0; i < frames.length; i++)
+            {
                 if (frames[bottom - i].href.indexOf("chrome:") == 0) break;
+                var fn = frames[bottom - i].fn + "";
+                if (fn && (fn.indexOf("_firebugEvalEvent") != -1) ) break;
+            }
 
             trace.frames = trace.frames.slice(bottom - i + 1);
             return trace;
