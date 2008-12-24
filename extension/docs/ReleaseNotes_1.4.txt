@@ -5,10 +5,9 @@ Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
 
 == Not Panel Specific ==
-    
-    Supports Firefox 3.1
-    All modules support Firebug.Listener
-    auto-suspend
+    * Improved and simplified Activation UI.
+    * Supports Firefox 3.1
+    * auto-suspend
 
 == Javascript Debugging ==
     * Implement breakOnNext UI for STEP_SUSPEND
@@ -24,6 +23,12 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Net Panel ==
     * support for STATUS_RESOLVING 
     * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel. 
+
+== For Extensions ==
+    * All modules support Firebug.Listener
+  	* add option extensions.firebug-tracing-service.toOSConsole for debugging tracing or early FF
+	
+    
 		
 == Locales ==
 	* No more entites, all properties
@@ -40,6 +45,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	
 == Bug Fixes ==
 	* Issue 176: net flash tab not recognising flv files
+	* Issue 241:  Does not reload javascript content when dynamically removed and added from page.
+	* Issue 369: Inspect JSON data in HTTP responses (contribution by Ashish Datta)
 	* Issue 199:   CSS priority with '!important'
 	* Issue 700: HTML preview for net responses
 	* Issue 749: Hungarian Locale
