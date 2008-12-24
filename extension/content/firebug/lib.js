@@ -1726,6 +1726,8 @@ this.getStackFrame = function(frame, context)
 
             var lineNo = analyzer.getSourceLineFromFrame(context, frame);
             var fncSpec = analyzer.getFunctionDescription(frame.script, context, frame);
+            if (!fncSpec.name)
+                fncSpec.name = frame.script.functionName;
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame for sourceFile", sourceFile);
             return new this.StackFrame(context, fncSpec.name, frame.script, url, lineNo, fncSpec.args, frame.pc);
