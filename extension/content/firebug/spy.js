@@ -233,10 +233,15 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             toggleClass(logRow, "opened");
 
+            var spy = getChildByClass(logRow, "spyHead").repObject;
             if (hasClass(logRow, "opened"))
             {
-                var spy = getChildByClass(logRow, "spyHead").repObject;
                 updateHttpSpyInfo(spy);
+            }
+            else
+            {
+                var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+                dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
             }
         }
     },
@@ -600,6 +605,7 @@ function updateHttpSpyInfo(spy)
     {
         var head = getChildByClass(spy.logRow, "spyHead");
         netInfoBox = template.tag.append({"file": spy}, head);
+        dispatch(template.fbListeners, "initTabBody", [netInfoBox, spy]);
         template.selectTabByName(netInfoBox, "Response");
     }
     else
