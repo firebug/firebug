@@ -45,6 +45,25 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
 
 Firebug.TabContext.prototype =
 {
+	getLocation: function()
+	{
+		if (this.window)
+			if (this.window.location)
+				return this.window.location.toString();
+			else
+				return "(no window.location)";
+		else 
+			return "(no window)";
+	},
+	
+	getTitle: function()
+	{
+		if (this.browser)
+			return this.browser.contentDocument.title;
+		else
+			return "(no browser)";
+	},
+	
     reattach: function(chrome)
     {
         var oldChrome = this.chrome;
