@@ -160,7 +160,6 @@ Firebug.Console = extend(ActivableConsole,
     initialize: function()
     {
         this.panelName = "console";
-        this.description = $STR("console.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);

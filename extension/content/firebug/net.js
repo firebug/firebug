@@ -1,4 +1,3 @@
-/* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
 
@@ -207,7 +206,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     initialize: function()
     {
         this.panelName = panelName;
-        this.description = $STR("net.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },

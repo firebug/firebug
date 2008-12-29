@@ -1526,7 +1526,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
-        this.description = $STR("script.modulemanager.description");
 
         // This is a service operation, a way of encapsulating fbs which is in turn implementing this
         // simple service. We could implment a whole component for this service, but it hardly makes sense.
