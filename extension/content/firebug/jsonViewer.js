@@ -27,7 +27,6 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
 
         const maybeHarmful = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
         const jsonStrings = /"(\\.|[^"\\\n\r])*"/g;
-        var jsonString = new String(file.responseText);
 
         // xxxadatta02: not every JSON response is going to have this header...
         // need some way to override this
@@ -38,10 +37,13 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
             contentType != "text/javascript"))
             return;
 
+        file.jsonObject = this.parseJSON(file);
+
         // Check the file.request content-type and display
         // the tab only when appropriate.
-        Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
-            $STR("jsonviewer.tab.JSON"));
+        if (file.jsonObject)
+            Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
+                $STR("jsonviewer.tab.JSON"));
     },
 
     // Update listener for TabView
@@ -54,29 +56,37 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
 
         tabBody.updated = true;
 
+        if (file.jsonObject) {
+            Firebug.DOMPanel.DirTable.tag.replace(
+                 {object: file.jsonObject, toggles: this.toggles}, tabBody);
+        }
+    },
+    
+    parseJSON: function(file)
+    {
         var jsonString = new String(file.responseText);
-        var e = null;
 
-        // see if this is a Prototype style *-secure request
+        // See if this is a Prototype style *-secure request.
         var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
         var matches = regex.exec(jsonString);
 
-        if ( matches ) {
+        if (matches)
+        {
             jsonString = matches[1];
 
-            if(jsonString[0] == "\\" && jsonString[1] == "n")
+            if (jsonString[0] == "\\" && jsonString[1] == "n")
                 jsonString = jsonString.substr(2);
 
-            if(jsonString[jsonString.length-2] == "\\" && jsonString[jsonString.length-1] == "n")
+            if (jsonString[jsonString.length-2] == "\\" && jsonString[jsonString.length-1] == "n")
                 jsonString = jsonString.substr(0, jsonString.length-2);
         }
 
-        if(jsonString.indexOf("&&&START&&&")){
+        if (jsonString.indexOf("&&&START&&&"))
+        {
             regex = new RegExp(/&&&START&&& (.+) &&&END&&&/);
             matches = regex.exec(jsonString);
-            if(matches){
+            if (matches)
                 jsonString = matches[1];
-            }
         }
 
         // throw on the extra parentheses
@@ -94,30 +104,24 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
             if (e.message.indexOf("is not defined"))
             {
                 var parts = e.message.split(" ");
-
                 s[parts[0]] = function(str){ return str; };
-
                 try {
                     jsonObject = Components.utils.evalInSandbox(jsonString, s);
                 } catch(ex) {
                     if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
-                        FBTrace.sysout("jsonviewer.updateTabBody EXCEPTION", e);
+                        FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+                    return null;
                 }
-
             }
             else
             {
-                // xxxadatta02: maybe remove the tab if parsing failed?
                 if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
-                    FBTrace.sysout("jsonviewer.updateTabBody EXCEPTION", e);
-                return;
+                    FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+                return null;
             }
         }
 
-        if(jsonObject) {
-            Firebug.DOMPanel.DirTable.tag.replace(
-                 {object: jsonObject, toggles: this.toggles}, tabBody);
-        }
+        return jsonObject;
     }
 }); 
 
