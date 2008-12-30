@@ -51,6 +51,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 700: HTML preview for net responses
 	* Issue 749: Hungarian Locale
 	* Issue 834: Not displayed POST variables in NET tab
+	* Issue 895: Firebug toolbar button should behave the same way as clicking on status bar icon.
 	* Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
 	* Issue 1122: can't copy or open image background from css viewer
 	* Issue 1176: Firebug should preserve Suspend state across sessions (after restart)
