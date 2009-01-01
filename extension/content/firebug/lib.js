@@ -318,11 +318,14 @@ this.addScript = function(doc, id, src)
  *   are inserted at specified places (%S) in the same order as they are passed. If the 
  *   key doesn't exist the method returns "Request Time".
  */
-function $STR(name) 
+function $STR(name, bundleId) 
 {
+    if (!bundleId)
+        bundleId = "strings_firebug";
+        
     try
     {
-        return document.getElementById("strings_firebug").getString(name.replace(' ', '_', "g"));
+        return document.getElementById(bundleId).getString(name.replace(' ', '_', "g"));
     }
     catch (err)
     {
@@ -341,11 +344,14 @@ function $STR(name)
     return name;
 }
 
-function $STRF(name, args)
+function $STRF(name, args, bundleId)
 {
+    if (!bundleId)
+        bundleId = "strings_firebug";
+
     try
     {
-        return document.getElementById("strings_firebug").getFormattedString(name.replace(' ', '_', "g"), args);
+        return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
     }
     catch (err)
     {
