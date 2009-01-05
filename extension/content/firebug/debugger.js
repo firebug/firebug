@@ -370,7 +370,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     clearAllBreakpoints: function(context)
     {
-        var sourceFiles = sourceFilesAsArray(context);
+        var sourceFiles = sourceFilesAsArray(context.sourceFileMap);
         fbs.clearAllBreakpoints(sourceFiles, Firebug.Debugger);
     },
 
@@ -2378,7 +2378,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getLocationList: function()
     {
         var context = this.context;
-        var allSources = sourceFilesAsArray(context);
+        var allSources = sourceFilesAsArray(context.sourceFileMap);
 
         if (Firebug.showAllSourceFiles)
         {

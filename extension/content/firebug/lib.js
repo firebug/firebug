@@ -2174,14 +2174,12 @@ this.sourceURLsAsArray = function(context)
     return urls;
 };
 
-this.sourceFilesAsArray = function(context)
+this.sourceFilesAsArray = function(sourceFileMap)
 {
     var sourceFiles = [];
-    var sourceFileMap = context.sourceFileMap;
     for (var url in sourceFileMap)
         sourceFiles.push(sourceFileMap[url]);
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+" in context "+context.window.location+"\n"); /*@explore*/
-
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+"\n"); 
     return sourceFiles;
 };
 
@@ -2192,7 +2190,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
     if (FBTrace.DBG_SOURCEFILES)
     {
         FBTrace.sysout("updateScriptFiles oldMap "+oldMap+"\n");
-        this.sourceFilesAsArray(context);  // just for length trace
+        this.sourceFilesAsArray(context.sourceFileMap);  // just for length trace
     }
 
     function addFile(url, scriptTagNumber, dependentURL)
@@ -2240,7 +2238,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
     }, this));
     if (FBTrace.DBG_SOURCEFILES)
     {
-        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context));
+        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
     }
 };
 
@@ -3853,10 +3851,10 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
     while (innerScripts.hasMoreElements())
     {
     	var script = innerScripts.getNext();
-    	if (!script)
+    	if (!script || !script.tag)
     	{
     	    if (FBTrace.DBG_SOURCEFILES)
-    	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext is null! ");
+    	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext FAILS "+sourceFile, script);
     	    continue;    	    
         }
     	if (FBTrace.DBG_SOURCEFILES && !script.isValid)
@@ -4088,10 +4086,9 @@ this.ReusedSourceFile = function(sourceFile, outerScript, innerScriptEnumerator)
 }
 
 //-------
-this.EnumeratedSourceFile = function(context, url) // we don't have the outer script and we delay source load.
+this.EnumeratedSourceFile = function(url) // we don't have the outer script and we delay source load.
 {
-    this.context = context;  // XXXjjb the context of the enumeration, not useful
-    this.href = url;  // may not be outerScript file name, eg this could be an enumerated eval
+    this.href = new String(url);  // may not be outerScript file name, eg this could be an enumerated eval
     this.innerScripts = [];
     this.pcmap_type = PCMAP_SOURCETEXT;
 }

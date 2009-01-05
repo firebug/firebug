@@ -170,7 +170,7 @@ function FirebugService()
                     getService(Components.interfaces.nsIAppShellService);						
     this.hiddenWindow = appShellService.hiddenDOMWindow;										
 
-    this.hiddenWindow.dump("FirebugService Starting, FBTrace should be up");
+    this.hiddenWindow.dump("FirebugService Starting, FBTrace should be up\n");
     
     this.enabled = false;
     this.profiling = false;
@@ -1517,12 +1517,11 @@ FirebugService.prototype =
         }
     },
 
-    dumpContexts: function()
+    getJSContexts: function()
     {
-
+    	var enumeratedContexts = [];
         jsd.enumerateContexts( {enumerateContext: function(jscontext)
         {
-                FBTrace.sysout("\n");
                 try
                 {
                     var global = jscontext.globalObject.getWrappedValue();
@@ -1537,9 +1536,10 @@ FirebugService.prototype =
                         }
                         else
                         {
-                            FBTrace.sysout("global without document\n");
-                            FBTrace.sysout("global type: "+typeof(global));
-                            FBTrace.sysout("global properties and interfaces", global);
+                        	var total = 0;
+                        	for(var p in global)
+                        		total++;
+                            FBTrace.sysout("global  without document type: "+typeof(global)+" with "+total+" properties and interfaces", global);
                         }
                     }
                     else
@@ -1550,26 +1550,29 @@ FirebugService.prototype =
                     {
                         FBTrace.dumpProperties("jscontext.privateData", jscontext.privateData);
                     }
-
+                    /*
+                     * jsdIContext has jsdIEphemeral, nsISupports, jsdIContext
+                     * jsdIContext.wrappedContext has nsISupports and nsITimerCallback, nothing interesting
+                     * jsdIContext.JSContext is undefined
+                     */
+                    var nsITimerCallback = Components.interfaces["nsITimerCallback"];
+                    var wContext = jscontext.wrappedContext;
+                    if (wContext instanceof nsITimerCallback)
+                    {
+                        var asTimer = wContext.QueryInterface(nsITimerCallback);
+                        FBTrace.sysout("jsContext.wrappedContext ", asTimer);
+                    }
+                    var c = jscontext.JSContext;
+                    FBTrace.sysout("jsContext.JSContext", c);
+                    enumeratedContexts.push(jscontext);
                 }
                 catch(e)
                 {
                     FBTrace.sysout("jscontext dump FAILED "+e);
                 }
-                /*
-                 * jsdIContext has jsdIEphemeral, nsISupports, jsdIContext
-                 * jsdIContext.wrappedContext has nsISupports and nsITimerCallback, nothing interesting
-                 * jsdIContext.JSContext is undefined
-                 */
-                /*
-                var nsITimerCallback = Components.interfaces["nsITimerCallback"];
-                if (context instanceof nsITimerCallback)
-                {
-                    var asTimer = context.QueryInterface(nsITimerCallback);
-                    FBTrace.dumpProperties(nsITimerCallback, asTimer );
-                }
-                FBTrace.sysout("\n\n");*/
+                
         }});
+        return enumeratedContexts;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1594,8 +1597,9 @@ FirebugService.prototype =
         
         if (!checkFrame && FBTrace.DBG_FBS_FINDDEBUGGER)
         	FBTrace.sysout("fbs.findDebugger fell thru bottom of stack", frame);
-        	
-        fbs.last_debuggr = fbs.askDebuggersForSupport(frameWin);
+        
+        // frameWin should be the top window for the scope of the frame function
+        fbs.last_debuggr = fbs.askDebuggersForSupport(frameWin, frame);
         if (fbs.last_debuggr)
          	return fbs.last_debuggr;
         else
@@ -1626,7 +1630,7 @@ FirebugService.prototype =
 		return null;
     },
     
-    askDebuggersForSupport: function(global)
+    askDebuggersForSupport: function(global, frame)
     {
     	if (!global || !fbs.getLocationFiltered(global))
         	return false;
@@ -1636,11 +1640,11 @@ FirebugService.prototype =
             try
             {
                 var debuggr = debuggers[i];
-                if (debuggr.supportsGlobal(global))
+                if (debuggr.supportsGlobal(global, frame))
                 {
                     if (!debuggr.breakContext)
                         FBTrace.dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
-                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for global, location:"+global.location);
+                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for location:"+global.location+" while processing "+frame.script.fileName);
                     return debuggr;
                 }
             }
