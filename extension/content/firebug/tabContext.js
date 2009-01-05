@@ -63,6 +63,11 @@ Firebug.TabContext.prototype =
 		else
 			return "";
 	},
+ 
+	getName: function()
+	{
+		return this.getWindowLocation();  // override in chromebug
+	},
 	
     reattach: function(chrome)
     {
