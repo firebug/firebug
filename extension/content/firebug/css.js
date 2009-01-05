@@ -212,7 +212,10 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStylesheetURL: function(style)
     {
-        return this.location.href;
+        if (this.location.href)
+            return this.location.href;
+        else
+            return this.context.window.location.href;
     },
 
     getRuleByLine: function(styleSheet, line)
