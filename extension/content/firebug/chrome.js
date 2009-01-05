@@ -168,7 +168,7 @@ top.FirebugChrome =
 
     shutdown: function()
     {
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_INITIALIZE || !panelBar1)
             FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");                                       /*@explore*/
                                                                                                                        /*@explore*/
         var doc1 = panelBar1.browser.contentDocument;
@@ -1126,6 +1126,7 @@ function browser1Loaded()
     var browser1 = panelBar1.browser;
     browser1.removeEventListener("load", browser1Loaded, true);
 
+    browser1.contentDocument.title = "Firebug Main Panel";
     browser1Loaded.complete = true;
 
     if (browser1Loaded.complete && browser2Loaded.complete)
@@ -1139,6 +1140,7 @@ function browser2Loaded()
     var browser2 = panelBar2.browser;
     browser2.removeEventListener("load", browser2Loaded, true);
 
+    browser2.contentDocument.title = "Firebug Side Panel";
     browser2Loaded.complete = true;
 
     if (browser1Loaded.complete && browser2Loaded.complete)
