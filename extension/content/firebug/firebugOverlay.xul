@@ -5,8 +5,8 @@
 <!DOCTYPE window [
 <!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
 %firebugDTD;
-<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
-%browserDTD;
+<!ENTITY % chromebugDTD SYSTEM "chrome://global/locale/editMenuOverlay.dtd">
+%chromebugDTD;
 ]>
 
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
