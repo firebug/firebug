@@ -644,19 +644,26 @@
             var groupNames = [];
             var groups = {};
 
+            var currentDescription = null;
+            if (this.repObject)
+                currentDescription = locator.getObjectDescription(this.repObject);
+                
             for (var i = 0; i < objects.length; ++i)
             {
                 var object = objects[i];
-                var splitName = locator.getObjectDescription(object);
+                var description = locator.getObjectDescription(object);
 
-                var entry = {object: object, fileName: splitName.name};
-
-                if (groups.hasOwnProperty(splitName.path))
-                    groups[splitName.path].push(entry);
+                var entry = {object: object, fileName: description.name};
+                
+                if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
+                    entry.selected = true;
+                    
+                if (groups.hasOwnProperty(description.path))
+                    groups[description.path].push(entry);
                 else
                 {
-                    groups[splitName.path] = [entry];
-                    groupNames.push(splitName.path);
+                    groups[description.path] = [entry];
+                    groupNames.push(description.path);
                 }
             }
 
@@ -670,11 +677,12 @@
 
                 var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
                 FBL.setClass(menuHeader, "fbURLMenuItem");
-
+                 
                 for (var j = 0; j < urls.length; ++j)
                 {
                     var menuInfo = {label: urls[j].fileName, nol10n: true};
-                    if (urls[j].object == locator.location)
+
+                    if (urls[j].selected)
                     {
                         menuInfo.type = "checkbox";
                         menuInfo.checked = true;
