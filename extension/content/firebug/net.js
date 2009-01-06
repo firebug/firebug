@@ -1983,7 +1983,6 @@ NetProgress.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsISupports
 
     QueryInterface: function(iid)
     {
@@ -2108,6 +2107,11 @@ NetFile.prototype =
     endTime: null,
     waitingForTime: null,
     connectingTime: null,
+    
+    getFileLink: function()
+    {
+        return new FBL.NetFileLink(this.href, this.request);
+    }
 };
 
 Firebug.NetFile = NetFile;
