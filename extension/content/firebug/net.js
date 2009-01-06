@@ -774,6 +774,33 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         }
     },
 
+    supportsObject: function(object)
+    {
+        return (object instanceof NetFileLink ? 2 : 0);
+    },
+
+    updateSelection: function(object)
+    {
+        var netProgress = this.context.netProgress;
+        var file = netProgress.getRequestFile(object.request);
+        if (!file)
+        {
+            for (var i=0; i<netProgress.requests.length; i++) {
+                if (safeGetName(netProgress.requests[i]) == object.href) {
+                   file = netProgress.files[i];
+                   break;
+                }
+            }
+        }
+
+        if (file) 
+        {
+            scrollIntoCenterView(file.row);
+            if (!hasClass(file.row, "opened"))
+                this.toggleHeadersRow(file.row);
+        }
+    },
+    
     getOptionsMenuItems: function()
     {
         return [];
@@ -2159,6 +2186,26 @@ NetPhase.prototype =
     get endTime()
     {
       return this.lastFinishedFile ? this.lastFinishedFile.endTime : null;
+    }
+};
+
+// ************************************************************************************************
+
+/*
+ * Use this object to automatically select Net panel and inspect a network request.
+ * context.chrome.select(new FBL.NetFileLink(url [, request]));
+ */
+FBL.NetFileLink = function(href, request)
+{
+    this.href = href;
+    this.request = request;
+}
+
+FBL.NetFileLink.prototype =
+{
+    toString: function()
+    {
+        return this.href;
     }
 };
 
