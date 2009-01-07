@@ -2424,7 +2424,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceFiles = this.getLocationList();
         if (context)
         {
-            var url = context.window.location.toString();
+            var url = context.getWindowLocation();
             for (var i = 0; i < sourceFiles.length; i++)
             {
                 if (url == sourceFiles[i].href)

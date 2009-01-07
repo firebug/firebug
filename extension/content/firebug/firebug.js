@@ -2546,7 +2546,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     try
                     {
                         var cw = module.activeContexts[ic].window;
-                        if (cw.location && cw.location.toString)
+                        if (cw && cw.location && cw.location.toString)
                         {
                             var url = cw.location.toString();
                             if (contextURLSet.indexOf(url) == -1)

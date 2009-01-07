@@ -58,7 +58,7 @@ Firebug.TabContext.prototype =
 	
 	getTitle: function()
 	{
-		if (this.window)
+		if (this.window && this.window.document)
 			return this.window.document.title;
 		else
 			return "";
