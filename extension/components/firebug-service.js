@@ -969,6 +969,22 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    normalizeURL: function(url)
+    {
+        // For some reason, JSD reports file URLs like "file:/" instead of "file:///", so they
+        // don't match up with the URLs we get back from the DOM
+        return url ? url.replace(/file:\/([^/])/, "file:///$1") : "";
+    },
+
+    denormalizeURL: function(url)
+    {
+        // This should not be called.
+        return url ? url.replace(/file:\/\/\//, "file:/") : "";
+    },
+
+    
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // jsd Hooks
 
     // When (debugger keyword and not halt)||(bp and BP_UNTIL) || (onBreakPoint && no conditions)
@@ -1398,11 +1414,12 @@ FirebugService.prototype =
         try
         {
             var fileName = script.fileName;
+            // special tracing for chromebug: tmpout(fileName+"\n");
             if (isFilteredURL(fileName))
             {
                 try {
-                if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) 											
-                    FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'");  	
+                	if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) 											
+                		FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'");  	
                 } catch (exc) { /*Bug 426692 */ } 
                 return;
             }
@@ -1599,21 +1616,32 @@ FirebugService.prototype =
         	FBTrace.sysout("fbs.findDebugger fell thru bottom of stack", frame);
         
         // frameWin should be the top window for the scope of the frame function
-        fbs.last_debuggr = fbs.askDebuggersForSupport(frameWin, frame);
+        var frameGlobal = frameWin;
+        if (!frameGlobal)  // should be for chromebug only
+        { 
+        	var jscontext = frame.executionContext;
+        	if (jscontext)
+        		frameGlobal = jscontext.globalObject.getWrappedValue();
+        }
+        
+        fbs.last_debuggr = fbs.askDebuggersForSupport(frameGlobal, frame);
         if (fbs.last_debuggr)
          	return fbs.last_debuggr;
         else
         	return null;
     },
 
-    getLocationFiltered: function(global)
+    isChromebug: function(global)
     {
+    	// TODO this is a kludge: isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
+		
     	var location = fbs.getLocationSafe(global);
-		// TODO this is kludge isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
-		if (location && location.indexOf("chrome://chromebug/") == -1 && location.indexOf("chrome://fb4cb/") == -1)
-			return location;
-		else
-			return null;
+		if (location)
+		{
+			if (location.indexOf("chrome://chromebug/") >= 0 || location.indexOf("chrome://fb4cb/") >= 0)
+				return true;
+		}
+		return false;
     },
 
     getLocationSafe: function(global)
@@ -1632,9 +1660,13 @@ FirebugService.prototype =
     
     askDebuggersForSupport: function(global, frame)
     {
-    	if (!global || !fbs.getLocationFiltered(global))
+    	if (FBTrace.DBG_FBS_FINDDEBUGGER)
+    		FBTrace.sysout("askDebuggersForSupport using global "+global+" for "+frame.script.fileName);
+    	if (global && fbs.isChromebug(global))
         	return false;
     	
+    	if (FBTrace.DBG_FBS_FINDDEBUGGER)
+    		FBTrace.sysout("askDebuggersForSupport "+debuggers.length+ " debuggers to check for "+frame.script.fileName);
         for ( var i = debuggers.length - 1; i >= 0; i--)
         {
             try
@@ -1644,7 +1676,8 @@ FirebugService.prototype =
                 {
                     if (!debuggr.breakContext)
                         FBTrace.dumpProperties("Debugger with no breakContext:",debuggr.supportsGlobal);
-                    if (FBTrace.DBG_FBS_FINDDEBUGGER) FBTrace.sysout(" findDebugger found debuggr at "+i+" for location:"+global.location+" while processing "+frame.script.fileName);
+                    if (FBTrace.DBG_FBS_FINDDEBUGGER) 
+                    	FBTrace.sysout(" findDebugger found debuggr at "+i+" for global "+global+" while processing "+frame.script.fileName);
                     return debuggr;
                 }
             }
@@ -2003,7 +2036,7 @@ FirebugService.prototype =
     needToBreakForError: function(fileName, lineNo)
     {
         return breakOnNextError =
-            this.breakOnErrors || this.findErrorBreakpoint(normalizeURL(fileName), lineNo) != -1;
+            this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(fileName), lineNo) != -1;
     },
 
     startStepping: function()
@@ -2275,19 +2308,6 @@ function NSGetModule(compMgr, fileSpec)
 // ************************************************************************************************
 // Local Helpers
 
-function normalizeURL(url)
-{
-    // For some reason, JSD reports file URLs like "file:/" instead of "file:///", so they
-    // don't match up with the URLs we get back from the DOM
-    return url ? url.replace(/file:\/([^/])/, "file:///$1") : "";
-}
-
-function denormalizeURL(url)
-{
-    // This should not be called.
-    return url ? url.replace(/file:\/\/\//, "file:/") : "";
-}
-
 function isFilteredURL(rawJSD_script_filename)
 {
     if (!rawJSD_script_filename)
@@ -2550,3 +2570,44 @@ function getExecutionStopNameFromType(type)
         default: return "unknown("+type+")";                                                                           
     }                                                                                                                  
 }                                                                                                                      
+// For special chromebug tracing
+function getTmpFile() 
+{
+	var file = Components.classes["@mozilla.org/file/directory_service;1"].
+    	getService(Components.interfaces.nsIProperties).
+    	get("TmpD", Components.interfaces.nsIFile);
+	file.append("fbs.tmp");
+	file.createUnique(Components.interfaces.nsIFile.NORMAL_FILE_TYPE, 0666);
+	FBTrace.sysout("FBS opened tmp file "+file.path);
+	return file;
+}
+
+function getTmpStream(file)
+{
+	// file is nsIFile, data is a string
+	var foStream = Components.classes["@mozilla.org/network/file-output-stream;1"].
+	                         createInstance(Components.interfaces.nsIFileOutputStream);
+
+	// use 0x02 | 0x10 to open file for appending.
+	foStream.init(file, 0x02 | 0x08 | 0x20, 0666, 0); 
+	// write, create, truncate
+	// In a c file operation, we have no need to set file mode with or operation,
+	// directly using "r" or "w" usually.
+	
+	return foStream;
+}
+
+function tmpout(text)
+{
+	if (!fbs.foStream)
+		fbs.foStream = getTmpStream(getTmpFile());
+	
+	if (!fbs.uniqueURLs)
+		fbs.uniqueURLs = {};
+	
+	if (fbs.uniqueURLs.hasOwnProperty(text))
+		return;
+	fbs.uniqueURLs[text] = text.length;
+	fbs.foStream.write(text, text.length);
+	
+}
