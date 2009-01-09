@@ -1533,7 +1533,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             fbs.broadcast(message, args);
         }
-
+        
+        this.onFunctionCall = bind(this.onFunctionCall, this);
+        
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
