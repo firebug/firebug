@@ -47,13 +47,22 @@ Firebug.TabContext.prototype =
 {
 	getWindowLocation: function()
 	{
-		if (this.window)
-			if (this.window.location)
-				return this.window.location.toString();
-			else
-				return "(no window.location)";
-		else 
-			return "(no window)";
+		try 
+		{
+			if (this.window)
+				if (this.window.location)
+					return this.window.location.toString();
+				else
+					return "(no window.location)";
+			else 
+				return "(no window)";
+		}
+		catch(e)
+		{
+			if (FBTrace.DBG_WINDOWS)
+				FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
+			return "(bad window)";
+		}
 	},
 	
 	getTitle: function()
