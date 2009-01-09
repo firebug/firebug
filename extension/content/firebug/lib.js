@@ -1919,7 +1919,7 @@ this.forEachFunction = function(context, cb)
         var sourceFile = context.sourceFileMap[url];
         if (FBTrace.DBG_FUNCTION_NAMES)
             FBTrace.sysout("lib.forEachFunction Looking in "+sourceFile+"\n");
-        sourceFile.forEachScript(function seekFn(script)
+        var rc = sourceFile.forEachScript(function seekFn(script)
         {
             if (!script.isValid)
                 return;
@@ -1927,10 +1927,12 @@ this.forEachFunction = function(context, cb)
             {
                 var testFunctionObject = script.functionObject;
                 if (!testFunctionObject.isValid)
-                    return;
+                    return false;
                 var theFunction = testFunctionObject.getWrappedValue();
 
-                cb(script, theFunction);
+                var rc = cb(script, theFunction);
+                if (rc)
+                    return rc;
             }
             catch(exc)
             {
@@ -1943,7 +1945,10 @@ this.forEachFunction = function(context, cb)
                 }
             }
         });
+        if (rc)
+            return rc;
     }
+    return false;
 }
 
 this.findScriptForFunction = function(fn)
@@ -3547,7 +3552,9 @@ this.SourceFile.prototype =
             for (var i = 0; i < this.innerScripts.length; i++)
             {
                 var script = this.innerScripts[i];
-                callback(script);
+                var rc = callback(script);
+                if (rc)
+                    return rc;
             }
         }
     },
