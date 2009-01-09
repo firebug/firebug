@@ -439,12 +439,12 @@ DomplateTag.prototype =
                     parent = parent.childNodes[index];
             }
 
-            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate: "+arguments[2]+", root: "+ root+", parent: "+ parent+"\n");
+            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate __path__: arguments[2] "+arguments[2]+", root: "+ root+", parent: "+ parent+"\n");
             return parent;
         }
-
+        if (FBTrace.DBG_DOM) 
+            FBTrace.sysout("compileDOM fnBlock", fnBlock);
         var js = fnBlock.join("");
-        if (FBTrace.DBG_DOM) FBTrace.sysout(js.replace(/(\;|\{)/g, "$1\n"));
         this.renderDOM = eval(js);
     },
 
