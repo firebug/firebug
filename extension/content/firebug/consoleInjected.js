@@ -1,24 +1,24 @@
 /* See license.txt for terms of usage */
 function _FirebugConsole()
 {
-    this.log = function() { this.notifyFirebug(arguments, 'log', 'firebugAppendConsole'); }
-    this.debug = function() { this.notifyFirebug(arguments, 'debug', 'firebugAppendConsole'); }
-    this.info = function() { this.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
-    this.warn = function() { this.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
-    this.error = function() { this.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
-    this.assert = function() { this.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
-    this.dir = function() { this.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
-    this.dirxml = function() { this.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
-    this.trace = function() { this.notifyFirebug(arguments, 'trace', 'firebugAppendConsole'); }
-    this.group = function() { this.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
-    this.groupEnd = function() { this.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
-    this.groupCollapsed = function() { this.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
-    this.time = function() { this.notifyFirebug(arguments, 'time', 'firebugAppendConsole'); }
-    this.timeEnd = function() { this.notifyFirebug(arguments, 'timeEnd', 'firebugAppendConsole'); }
-    this.profile = function() { this.notifyFirebug(arguments, 'profile', 'firebugAppendConsole'); }
-    this.profileEnd = function() { this.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
-    this.count = function() { this.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
-    this.clear = function() { this.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
+    this.log = function() { window._firebug.notifyFirebug(arguments, 'log', 'firebugAppendConsole'); }
+    this.debug = function() { window._firebug.notifyFirebug(arguments, 'debug', 'firebugAppendConsole'); }
+    this.info = function() { window._firebug.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
+    this.warn = function() { window._firebug.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
+    this.error = function() { window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
+    this.assert = function() { window._firebug.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
+    this.dir = function() { window._firebug.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
+    this.dirxml = function() { window._firebug.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
+    this.trace = function() { window._firebug.notifyFirebug(arguments, 'trace', 'firebugAppendConsole'); }
+    this.group = function() { window._firebug.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
+    this.groupEnd = function() { window._firebug.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
+    this.groupCollapsed = function() { window._firebug.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
+    this.time = function() { window._firebug.notifyFirebug(arguments, 'time', 'firebugAppendConsole'); }
+    this.timeEnd = function() { window._firebug.notifyFirebug(arguments, 'timeEnd', 'firebugAppendConsole'); }
+    this.profile = function() { window._firebug.notifyFirebug(arguments, 'profile', 'firebugAppendConsole'); }
+    this.profileEnd = function() { window._firebug.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
+    this.count = function() { window._firebug.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
+    this.clear = function() { window._firebug.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
 
     // DBG this.uid = Math.random();
     
