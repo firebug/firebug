@@ -1599,6 +1599,11 @@ Firebug.Panel =
         return 0;
     },
 
+    hasObject: function(object)  // beyond type testing, is this object selectable?
+    {
+        return false;
+    },
+    
     navigate: function(object)
     {
         if (FBTrace.DBG_PANELS)

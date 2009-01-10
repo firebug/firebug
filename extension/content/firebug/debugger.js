@@ -2329,6 +2329,18 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         else return 0;
     },
 
+    hasObject: function(object)
+    {
+        if (object instanceof SourceFile)
+            return this.context.sourceFileMap.hasOwnProperty(object.href);
+        else if (object instanceof SourceLink)
+            return this.context.sourceFileMap.hasOwnProperty(object.href);
+        else if (object instanceof jsdIStackFrame)
+            return this.context.sourceFileMap.hasOwnProperty(object.script.fileName);  // normalize??
+        else if (object instanceof "function")
+            return false; //TODO
+    },
+    
     updateLocation: function(sourceFile)
     {
         if (!Firebug.Debugger.isEnabled(this.context))

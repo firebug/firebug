@@ -429,7 +429,7 @@ top.FirebugChrome =
         if (panelName && sidePanelName)
             FirebugContext.sidePanelNames[panelName] = sidePanelName;
 
-        return panelBar1.selectPanel(panelName, false, noRefresh);
+        return panelBar1.selectPanel(panelName, false, noRefresh);  // cause panel visibility changes and events 
     },
 
     selectSidePanel: function(panelName)
@@ -459,7 +459,8 @@ top.FirebugChrome =
 
     getLocationProvider: function()
     {
-        return function getSelectedPanelFromCurrentContext()
+        // a function that returns an object with .getObjectDescription() and .getLocationList()
+        return function getSelectedPanelFromCurrentContext() 
         {
             return FirebugContext.chrome.getSelectedPanel();  // panels provide location, use the selected panel
         }
