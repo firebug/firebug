@@ -40,8 +40,8 @@
 <!ENTITY firebug.Edit "Bearbeiten">
 <!ENTITY firebug.EditHTMLTooltip "Dieses HTML bearbeiten">
 <!ENTITY firebug.EditCSSTooltip "Dieses Stylesheet bearbeiten">
-<!ENTITY firebug.Profile "Profilieren">
-<!ENTITY firebug.ProfileScript "JavaScript profilieren">
+<!ENTITY firebug.Profile "Zeitmessung">
+<!ENTITY firebug.ProfileScript "JavaScript-Ausführungszeit messen">
 <!ENTITY firebug.Clear "Leeren">
 <!ENTITY firebug.ClearConsole "Konsole leeren">
 <!ENTITY firebug.ClearTooltip "Leert die Konsole">
