@@ -2893,16 +2893,21 @@ this.parseURLEncodedText = function(text)
     var args = text.split("&");
     for (var i = 0; i < args.length; ++i)
     {
-        var parts = args[i].split("=");
-        if (parts.length == 2)
-        {
-            if (parts[1].length > maxValueLength)
-                parts[1] = this.$STR("LargeData");
+        try {
+            var parts = args[i].split("=");
+            if (parts.length == 2)
+            {
+                if (parts[1].length > maxValueLength)
+                    parts[1] = this.$STR("LargeData");
 
-            params.push({name: decodeURIComponent(parts[0]), value: decodeURIComponent(parts[1])});
+                params.push({name: decodeURIComponent(parts[0]), value: decodeURIComponent(parts[1])});
+            }
+            else
+                params.push({name: decodeURIComponent(parts[0]), value: ""});
+        } catch (e) {
+            FBTrace.sysout("parseURLEncodedText EXCEPTION ", e);
+            FBTrace.sysout("parseURLEncodedText EXCEPTION URI", args[i]);
         }
-        else
-            params.push({name: decodeURIComponent(parts[0]), value: ""});
     }
 
     params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });

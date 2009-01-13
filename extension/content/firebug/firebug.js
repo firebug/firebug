@@ -2532,7 +2532,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
             {
                 tooltip += " activated by "+urls.length+" page(s)";
                 for (var i = 0; i < urls.length; i++)
-                    tooltip += "\n"+decodeURI(urls[i]); 
+                {
+                    try {
+                        tooltip += "\n"+decodeURI(urls[i]); 
+                    } catch (e) {
+                        // xxxHonza: from some reaason FBTrace is undefined here.
+                        dump("Firebug.ActivableModule.resetTooltip EXCEPTION " + e + "\n");
+                    }
+                }
             }
         }
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
