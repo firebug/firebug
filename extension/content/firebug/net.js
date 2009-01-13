@@ -223,25 +223,29 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.initContext for: " + context.window.location.href, context);
+            FBTrace.sysout("net.initContext for: " + context.getName(), context);
 
-        var window = context.window;
+        if (context.window)
+        {	
+        	var window = context.window;
 
-        // Register "load" listener in order to track window load time.
-        var onWindowLoadHandler = function() {
-            if (context.netProgress)
-                context.netProgress.post(windowLoad, [window, now()]);
-            window.removeEventListener("load", onWindowLoadHandler, true);
+        	// Register "load" listener in order to track window load time.
+        	var onWindowLoadHandler = function() {
+        		if (context.netProgress)
+        			context.netProgress.post(windowLoad, [window, now()]);
+        		window.removeEventListener("load", onWindowLoadHandler, true);
+        	}
+        	window.addEventListener("load", onWindowLoadHandler, true);
+
+        	// Register "DOMContentLoaded" listener to track timing.
+        	var onContentLoadHandler = function() {
+        		if (context.netProgress)
+        			context.netProgress.post(contentLoad, [window, now()]);
+        		window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
+        	}
+        
+        	window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
         }
-        window.addEventListener("load", onWindowLoadHandler, true);
-
-        // Register "DOMContentLoaded" listener to track timing.
-        var onContentLoadHandler = function() {
-            if (context.netProgress)
-                context.netProgress.post(contentLoad, [window, now()]);
-            window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
-        }
-        window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
     },
 
     reattachContext: function(browser, context)
