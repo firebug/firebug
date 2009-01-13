@@ -1,0 +1,12 @@
+<!ENTITY editors.Description "Configurar Editores de Firebug:">
+<!ENTITY editors.NameColumn "Editor">
+<!ENTITY editors.ExecutableColumn "Ejecutable">
+<!ENTITY editors.ParamsColumn "Parámetros de inicialización">
+<!ENTITY add.label "Agregar">
+<!ENTITY remove.label "Quitar">
+<!ENTITY change.label "Cambiar">
+<!ENTITY close.label "Cerrar">
+<!ENTITY browse.label "Examinar...">
+<!ENTITY changeEditor.Name "Nombre:">
+<!ENTITY changeEditor.Executable "Ejecutable:">
+<!ENTITY changeEditor.CmdLine "Parámetros:">
