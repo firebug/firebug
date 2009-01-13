@@ -1095,12 +1095,13 @@ var HelperDomplate = (function()
 // ************************************************************************************************
 // Trace Message Object
 
-Firebug.TraceModule.TraceMessage = function(type, text, obj)
+Firebug.TraceModule.TraceMessage = function(type, text, obj, scope)
 {
     this.type = type;
     this.text = text;
     this.obj = obj;
     this.stack = [];
+    this.scope = scope;
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
@@ -1312,7 +1313,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     	if (getter)
                     		var value = "" + getter;
                     	else
-                    		var value = "" + this.obj[p];
+                    		var value = "" + this.obj[p]; // script takes too much time error
                         this.props[p] = value;
                     }
                     catch (err) {

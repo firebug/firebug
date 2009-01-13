@@ -107,7 +107,7 @@ TraceConsoleService.prototype =
     },
 
     // Prepare trace-object and dispatch to all observers.
-    dispatch: function(messageType, message, obj)
+    dispatch: function(messageType, message, obj, scope)
     {
         // Translate string object.
         if (typeof(obj) == "string") {
@@ -119,10 +119,9 @@ TraceConsoleService.prototype =
         // Create wrapper with message type info.
         var messageInfo = {
             obj: obj, 
-            type: messageType
+            type: messageType,
+            scope: scope
         };
-        if (win)
-			win.dump("TraceConsoleService.dispatch, prefDomain: "+messageType+" message: "+message+"\n");
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
@@ -159,7 +158,7 @@ TraceConsoleService.prototype =
         { 
             if (this.observers.length > 0)
             {
-                for (var i=0; i<this.observers.length; i++)
+                for (var i=0; i < this.observers.length; i++)
                 	this.observers[i].observe(subject, topic, someData);
             }
             else
@@ -242,19 +241,30 @@ var TraceAPI = {
 
     dumpInterfaces: function(message, eventObj) {
         this.sysout(message, eventObj);
-    }
+    },
+    
+    setScope: function(scope)
+    {
+    	this.scopeOfFBTrace = scope;
+    },
+     
 };
 
 var TraceBase = function(prefDomain) {
 	this.prefDomain = prefDomain;
-	this.sysout = function(message, obj) {
-	    TraceAPI.dump(this.prefDomain, message, obj);
-	}
 }
 //Derive all properties from TraceAPI
 for (var p in TraceAPI)
     TraceBase.prototype[p] = TraceAPI[p];
 
+TraceBase.prototype.sysout = function(message, obj) {
+        if (noTrace)
+            return;
+
+        noTrace = true;
+        gTraceService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
+        noTrace = false;
+}
 
 
 

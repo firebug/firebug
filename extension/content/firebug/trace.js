@@ -4,7 +4,7 @@
 
 var FBTrace = Components.classes["@joehewitt.com/firebug-trace-service;1"]
                  .getService(Components.interfaces.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
-
+FBTrace.setScope(window);
 // ************************************************************************************************
 // Some examples of tracing APIs
 
