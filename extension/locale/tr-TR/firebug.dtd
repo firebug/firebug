@@ -1,62 +1,50 @@
-<!ENTITY firebug.Permissions "Sites...">
-
-<!ENTITY  firebug.Firebug               "Firebug">
-<!ENTITY  firebug.Close                 "Kapat">
-<!ENTITY  firebug.View                  "G�ster">
-<!ENTITY  firebug.Help                  "Yardim">
-<!ENTITY  firebug.Vertical              "Dikey Pencereler">
-<!ENTITY  firebug.Run                   "�alistir">
-<!ENTITY  firebug.Copy                  "Kopyala">
-<!ENTITY  firebug.CopyBookmarklet       "Betigi kisayol olarak ekle.">
-
-<!ENTITY  firebug.Options               "Se�enekler">
-<!ENTITY  firebug.TextSize              "Metin Boyutu">
-<!ENTITY  firebug.IncreaseTextSize      "Metin boyutunu arttir">
-<!ENTITY  firebug.DecreaseTextSize      "Metin boyutunu azalt">
-<!ENTITY  firebug.NormalTextSize        "Normal Metin Boyutu">
-<!ENTITY  firebug.ShowTooltips          "�nizleme kisayollarini g�ster">
-<!ENTITY  firebug.ShadeBoxModel         "G�lgeli Kutu Modeli">
-<!ENTITY  firebug.Website               "Firebug Anasayfasi...">
-<!ENTITY  firebug.Documentation         "Belgeler...">
-<!ENTITY  firebug.KeyShortcuts          "Klavye kisayollari...">
-<!ENTITY  firebug.Forums                "Tartisma gruplari...">
-<!ENTITY  firebug.Issues                "Isler...">
-<!ENTITY  firebug.Donate                "Destekle...">
-<!ENTITY  firebug.About                 "Hakkinda...">
-<!ENTITY  firebug.AlwaysOpenInWindow    "Herzaman yeni pencerede a�">
-
-<!ENTITY  firebug.ShowFirebug           "Firebug'i a�">
-<!ENTITY  firebug.DetachFirebug         "Firebug'i yeni pencerede a�">
-<!ENTITY  firebug.OpenWith              "Birlikte A�">
-<!ENTITY  firebug.CloseFirebug          "Firebug'i kapat">
-<!ENTITY  firebug.DisableFirebug        "Firebug'i etkisiz kil">
-<!ENTITY  firebug.AllowedSites          "Etkin Siteler...">
-<!ENTITY  firebug.ConfigureEditors      "Editorleri Ayarla">
-<!ENTITY  firebug.CommandLine           "Komut Satiri">
-<!ENTITY  firebug.Search                "Ara">
-
-<!ENTITY  firebug.Continue              "Devam (F8)">
-<!ENTITY  firebug.StepOver              "Satiri �alistir (F10)">
-<!ENTITY  firebug.StepInto              "Alt adimlarina git (F11)">
-<!ENTITY  firebug.StepOut               "�st adima �ik">
-<!ENTITY  firebug.BreakOnErrors         "Hatalarda dur">
-
-<!ENTITY  firebug.Inspect               "Incele">
-<!ENTITY  firebug.InspectElement        "Elemani incele">
-<!ENTITY  firebug.InspectTooltip        "Inceleyeceginiz elamanin �zerine tiklayin">
-
-<!ENTITY  firebug.Edit                  "D�zenle">
-<!ENTITY  firebug.EditHTMLTooltip       "HTML olarak d�zenle">
-<!ENTITY  firebug.EditCSSTooltip        "CSS d�zenle">
-
-<!ENTITY  firebug.Profile               "Takip">
-<!ENTITY  firebug.ProfileScript         "JavaScript takip et">
-<!ENTITY  firebug.ProfileTooltip        "JavaScript �alisma zamanlarini takip et">
-
-<!ENTITY  firebug.Clear                 "Temizle">
-<!ENTITY  firebug.ClearConsole          "Konsolu temizle">
-<!ENTITY  firebug.ClearTooltip          "Konsolu temizle">
-
-<!ENTITY  firebug.All                   "Hepsi">
-<!ENTITY  firebug.Images                "Resimler">
-<!ENTITY  firebug.Flash                 "Flash">
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Kapat">
+<!ENTITY firebug.View "Görünüm">
+<!ENTITY firebug.Help "Yardım">
+<!ENTITY firebug.Vertical "Dikey Çerçeveler">
+<!ENTITY firebug.Run "Çalıştır">
+<!ENTITY firebug.Copy "Kopyala">
+<!ENTITY firebug.CopyBookmarklet "Betiği yer imi olarak kopyala.">
+<!ENTITY firebug.Options "Seçenekler">
+<!ENTITY firebug.TextSize "Metin Boyutu">
+<!ENTITY firebug.IncreaseTextSize "Metin Boyutunu Artır">
+<!ENTITY firebug.DecreaseTextSize "Metin Boyutunu Küçült">
+<!ENTITY firebug.NormalTextSize "Normal Metin Boyutu">
+<!ENTITY firebug.ShowTooltips "Önizleme Araç İpuçlarını Göster">
+<!ENTITY firebug.ShadeBoxModel "Gölgeli Kutu Modeli">
+<!ENTITY firebug.Website "Firebug Anasayfası...">
+<!ENTITY firebug.Documentation "Belgeler...">
+<!ENTITY firebug.KeyShortcuts "Klavye Kısayolları...">
+<!ENTITY firebug.Forums "Tartışma Grubu...">
+<!ENTITY firebug.Issues "Sorun Takipçisi...">
+<!ENTITY firebug.Donate "Katkıda Bulun...">
+<!ENTITY firebug.About "Hakkında...">
+<!ENTITY firebug.AlwaysOpenInWindow "Her Zaman Yeni Pencerede Aç">
+<!ENTITY firebug.ShowFirebug "Firebug&apos;ı Aç">
+<!ENTITY firebug.DetachFirebug "Firebug&apos;ı Yeni Pencerede Aç">
+<!ENTITY firebug.OpenWith "Düzenleyiciyle Aç">
+<!ENTITY firebug.CloseFirebug "Firebug&apos;ı Kapat">
+<!ENTITY firebug.Permissions "Siteler...">
+<!ENTITY firebug.ConfigureEditors "Düzenleyicileri Yapılandır">
+<!ENTITY firebug.CommandLine "Komut Satırı">
+<!ENTITY firebug.Search "Ara">
+<!ENTITY firebug.Continue "Devam (F8)">
+<!ENTITY firebug.StepOver "Satırı Çalıştır (F10)">
+<!ENTITY firebug.StepInto "Alt Adımlarına Git (F11)">
+<!ENTITY firebug.StepOut "Üst Adıma Çık">
+<!ENTITY firebug.BreakOnErrors "Hatalarda Dur">
+<!ENTITY firebug.Inspect "Teftiş Et">
+<!ENTITY firebug.InspectElement "Elemanı Teftiş Et">
+<!ENTITY firebug.InspectTooltip "Teftiş edilecek elemana tıklayınız">
+<!ENTITY firebug.Edit "Düzenle">
+<!ENTITY firebug.EditHTMLTooltip "Bu HTML&apos;i Düzenle">
+<!ENTITY firebug.EditCSSTooltip "Bu Stil Sayfasını Düzenle">
+<!ENTITY firebug.Profile "Takip">
+<!ENTITY firebug.ProfileScript "JavaScript Takip Et">
+<!ENTITY firebug.Clear "Temizle">
+<!ENTITY firebug.ClearConsole "Konsolu Temizle">
+<!ENTITY firebug.ClearTooltip "Konsolu temizler">
+<!ENTITY firebug.All "Tümü">
+<!ENTITY firebug.Images "Resimler">
+<!ENTITY firebug.Flash "Flash">
