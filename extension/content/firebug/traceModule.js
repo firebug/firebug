@@ -168,9 +168,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
 
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceModule.initialize: " + prefDomain);
-
         this.prefDomain = prefDomain;
 
         // Create menu items for Trace Console 
@@ -180,6 +177,9 @@ Firebug.TraceModule = extend(Firebug.Module,
         // Open console automatically if the pref says so.
         if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
+        
+        if (FBTrace.DBG_OPTIONS)
+        	FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
     },
 
     shutdown: function()
@@ -267,7 +267,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         });
 
         // Try to connect an existing trace-console window first.
-        if (this.consoleWindow) {
+        if (this.consoleWindow && this.consoleWindow.TraceConsole) {
             this.consoleWindow.TraceConsole.registerModule(this);
             this.consoleWindow.focus();
             return;
