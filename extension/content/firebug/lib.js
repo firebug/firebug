@@ -2959,6 +2959,8 @@ this.readFromStream = function(stream, charset)
     for (var count = stream.available(); count; count = stream.available())
         segments.push(sis.readBytes(count));
 
+    sis.close();
+
     var text = segments.join("");
     return this.convertToUnicode(text, charset);
 };
