@@ -794,9 +794,16 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             }
         }
         else if (Firebug.Inspector.inspecting)
+        {
             this.ioBox.highlight(object);
+        }
         else
+        {
             this.ioBox.select(object, true, false, this.noScrollIntoView);
+            this.inspectorHistory.unshift(object);
+            if (this.inspectorHistory.length > 5)
+                this.inspectorHistory.pop();
+        }
     },
 
     stopInspecting: function(object, cancelled)
