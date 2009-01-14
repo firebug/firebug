@@ -122,6 +122,8 @@ TraceConsoleService.prototype =
             type: messageType,
             scope: scope
         };
+        if (win)
+			win.dump("TraceConsoleService.dispatch, prefDomain: "+messageType+" message: "+message+"\n");
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
