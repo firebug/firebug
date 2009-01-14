@@ -523,11 +523,14 @@
                     else
                     {
                         var whichBinding = this.getAttribute("id");
-                        var msg = "panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
+                        var msg = "ERROR: panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
                         FBTrace.sysout(msg);
                         return null;
                     }
                 }
+                // The locator needs 
+                //     getObjectDescription(object): return {path, name}
+                //     getLocationList(), a list of objects that can be fed into getObjectDescription
                 return this.locator(this);
             ]]></body>
         </method>
@@ -652,7 +655,8 @@
             {
                 var object = objects[i];
                 var description = locator.getObjectDescription(object);
-
+				if (!description)
+					FBTrace.sysout("binding.xml popupshowing Fails" , object);
                 var entry = {object: object, fileName: description.name};
                 
                 if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
