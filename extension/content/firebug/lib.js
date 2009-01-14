@@ -41,6 +41,8 @@ const overrideDefaultsWithPersistedValuesTimeout = 500;
 
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
 
+const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
+
 // ************************************************************************************************
 // Namespaces
 
@@ -3358,23 +3360,37 @@ this.ErrorMessage.prototype =
 this.TextSearch = function(rootNode, rowFinder)
 {
     var doc = rootNode.ownerDocument;
-    var count, searchRange, startPt, endPt;
+    var count, searchRange, startPt;
 
-    this.find = function(text)
+    this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
 
-        var range = this.range = finder.Find(text, searchRange, startPt, endPt);
+        finder.findBackwards = !!reverse;
+        finder.caseSensitive = !!caseSensitive;
+
+        var range = this.range = finder.Find(
+                text, searchRange,
+                startPt || searchRange,
+                searchRange);
         var match = range ?  range.startContainer : null;
         return this.currentNode = (rowFinder && match ? rowFinder(match) : match);
     };
 
-    this.findNext = function(wrapAround, sameNode)
+    this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
     {
+        var curNode = this.currentNode ? this.currentNode : rootNode;
         startPt = doc.createRange();
         try
         {
-            startPt.setStartAfter(this.currentNode ? this.currentNode : rootNode);
+            if (reverse)
+            {
+                startPt.setStartBefore(curNode);
+            }
+            else
+            {
+                startPt.setStartAfter(curNode);
+            }
         }
         catch (e)
         {
@@ -3382,18 +3398,18 @@ this.TextSearch = function(rootNode, rowFinder)
                 FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
             try {
                 FBTrace.sysout("setStart try\n");
-                startPt.setStart(this.currentNode ? this.currentNode : rootNode);
+                startPt.setStart(curNode);
                 FBTrace.sysout("setStart success\n");
             } catch (exc) {
                 return;
             }
         }
 
-        var match = this.find(this.text);
+        var match = this.find(this.text, reverse, caseSensitive);
         if (!match && wrapAround)
         {
             this.reset();
-            return this.find(this.text);
+            return this.find(this.text, reverse, caseSensitive);
         }
 
         return match;
@@ -3405,14 +3421,8 @@ this.TextSearch = function(rootNode, rowFinder)
         searchRange = doc.createRange();
         searchRange.setStart(rootNode, 0);
         searchRange.setEnd(rootNode, count);
-
-        startPt = doc.createRange();
-        startPt.setStart(rootNode, 0);
-        startPt.setEnd(rootNode, 0);
-
-        endPt = doc.createRange();
-        endPt.setStart(rootNode, count);
-        endPt.setEnd(rootNode, count);
+        
+        startPt = searchRange;
     };
 
     this.reset();
@@ -3421,38 +3431,33 @@ this.TextSearch = function(rootNode, rowFinder)
 // ************************************************************************************************
 this.SourceBoxTextSearch = function(sourceBox)
 {
-    
-    this.find = function(text)
+    this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
         
-        var regExpOptions = null;
-        if (FBL.reUpperCase.test(text))
-            regExpOptions = "g";
-        else
-            regExpOptions = "gi";  // ignore case unless the user explicitly uses uppercase
+        this.re = new FBL.ReversibleRegExp(text);
         
-        this.re = new RegExp(text, regExpOptions);
-        return this.findNext(false);
+        return this.findNext(false, reverse, caseSensitive);
     };
 
-    this.findNext = function(wrapAround)
+    this.findNext = function(wrapAround, reverse, caseSensitive)
     {
+        var lines = sourceBox.lines;
         var match = null;
-        for (var point = this.mark; point < sourceBox.lines.length; point++)
+        for (var iter = new FBL.ReversibleIterator(lines.length, this.mark, reverse); iter.next();)
         {
-            match = this.re.exec(sourceBox.lines[point]);
+            match = this.re.exec(lines[iter.index], false, caseSensitive);
             if (match)
             {
-                this.mark = point;
-                return point;
+                this.mark = iter.index;
+                return iter.index;
             }
         }
 
         if (!match && wrapAround)
         {
             this.reset();
-            return this.findNext(false);
+            return this.findNext(false, reverse, caseSensitive);
         }
 
         return match;
@@ -3460,7 +3465,7 @@ this.SourceBoxTextSearch = function(sourceBox)
 
     this.reset = function()
     {
-        this.mark = 1;
+        delete this.mark;
     };
 
     this.reset();
@@ -3792,6 +3797,14 @@ this.SourceFile.prototype =
     isEvent: function()
     {
         return (this.compilation_unit_type == "event");
+    },
+
+    loadScriptLines: function(context)  // array of lines
+    {
+        if (this.source)
+            return this.source;
+        else
+            return context.sourceCache.load(this.href);
     }
 }
 
@@ -6241,6 +6254,193 @@ this.formatTime = function(elapsed)
 }
 
 // ************************************************************************************************
+
+this.ReversibleIterator = function(length, start, reverse)
+{
+    this.length = length;
+    this.index = start;
+    this.reversed = !!reverse;
+    
+    this.next = function() {
+        if (this.index === undefined || this.index === null) {
+            this.index = this.reversed ? length : -1;
+        }
+        this.index += this.reversed ? -1 : 1;
+        
+        return 0 <= this.index && this.index < length;
+    };
+    this.reverse = function() {
+        this.reversed = !this.reversed;
+    };
+};
+
+this.ReversibleRegExp = function(regex, flags)
+{
+    var re = {};
+    
+    function expression(text, reverse) {
+        return text + (reverse ? "(?![\\s\\S]*" + text + ")" : "");
+    }
+    function flag(flags, caseSensitive) {
+        return (flags || "") + (caseSensitive ? "" : "i");
+    }
+    
+    this.exec = function(text, reverse, caseSensitive, lastMatch)
+    {
+        // Ensure we have a regex
+        var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i");
+        if (!re[key])
+        {
+            re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+        }
+        
+        // Modify as needed to all for iterative searches
+        var indexOffset = 0;
+        var searchText = text;
+        if (lastMatch) {
+            if (reverse) {
+                searchText = text.substr(0, lastMatch.index);
+            } else {
+                indexOffset = lastMatch.index+lastMatch[0].length;
+                searchText = text.substr(indexOffset);
+            }
+        }
+        
+        var ret = re[key].exec(searchText);
+        if (ret) {
+            ret.input = text;
+            ret.index = ret.index + indexOffset;
+            ret.reverse = reverse;
+            ret.caseSensitive = caseSensitive;
+        }
+        return ret;
+    };
+};
+
+/**
+ * Implements an ordered traveral of the document, including attributes and
+ * iframe contents within the results.
+ * 
+ * Note that the order for attributes is not defined. This will follow the
+ * same order as the Element.attributes accessor.
+ */
+this.DOMWalker = function(doc, root)
+{
+    var walker;
+    var currentNode, attrIndex;
+    var pastStart, pastEnd;
+    
+    function createWalker(docElement) {
+        var walk = doc.createTreeWalker(docElement, SHOW_ALL, null, true);
+        walker.unshift(walk);
+    }
+    function getLastAncestor() {
+        while (walker[0].lastChild()) {}
+        return walker[0].currentNode;
+    }
+    
+    this.previousNode = function() {
+        if (pastStart) {
+            return undefined;
+        }
+        
+        if (attrIndex) {
+            attrIndex--;
+        } else {
+            var prevNode;
+            if (currentNode == walker[0].root) {
+                if (walker.length > 1) {
+                    walker.shift();
+                    prevNode = walker[0].currentNode;
+                } else {
+                    prevNode = undefined;
+                }
+            } else {
+                if (!currentNode) {
+                    prevNode = getLastAncestor();
+                } else {
+                    prevNode = walker[0].previousNode();
+                }
+                if (!prevNode) {    // Really shouldn't occur, but to be safe
+                    prevNode = walker[0].root;
+                }
+                while ((prevNode.nodeName || "").toUpperCase() == "IFRAME") {
+                    createWalker(prevNode.contentDocument.documentElement);
+                    prevNode = getLastAncestor();
+                }
+            }
+            currentNode = prevNode;
+            attrIndex = ((prevNode || {}).attributes || []).length;
+        }
+        
+        if (!currentNode) {
+            pastStart = true;
+        } else {
+            pastEnd = false;
+        }
+        
+        return this.currentNode();
+    };
+    this.nextNode = function() {
+        if (pastEnd) {
+            return undefined;
+        }
+        
+        if (!currentNode) {
+            // We are working with a new tree walker
+            currentNode = walker[0].root;
+            attrIndex = 0;
+        } else {
+            // First check attributes
+            var attrs = currentNode.attributes || [];
+            if (attrIndex < attrs.length) {
+                attrIndex++;
+            } else if ((currentNode.nodeName || "").toUpperCase() == "IFRAME") {
+                // Attributes have completed, check for iframe contents
+                createWalker(currentNode.contentDocument.documentElement);
+                currentNode = walker[0].root;
+                attrIndex = 0;
+            } else {
+                // Next node
+                var nextNode = walker[0].nextNode();
+                while (!nextNode && walker.length > 1) {
+                    walker.shift();
+                    nextNode = walker[0].nextNode();
+                }
+                currentNode = nextNode;
+                attrIndex = 0;
+            }
+        }
+        
+        if (!currentNode) {
+            pastEnd = true;
+        } else {
+            pastStart = false;
+        }
+        
+        return this.currentNode();
+    };
+    
+    this.currentNode = function() {
+        if (!attrIndex) {
+            return currentNode;
+        } else {
+            return currentNode.attributes[attrIndex-1];
+        }
+    };
+    
+    this.reset = function() {
+        pastStart = false;
+        pastEnd = false;
+        walker = [];
+        currentNode = undefined;
+        attrIndex = 0;
+        
+        createWalker(root);
+    };
+    
+    this.reset();
+};
 
 }).apply(FBL);
 } catch(e) {																			/*@explore*/

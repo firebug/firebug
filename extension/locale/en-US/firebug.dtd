@@ -48,3 +48,7 @@
 <!ENTITY firebug.All "All">
 <!ENTITY firebug.Images "Images">
 <!ENTITY firebug.Flash "Flash">
+<!ENTITY firebug.Next "Next">
+<!ENTITY firebug.Prev "Prev">
+<!ENTITY firebug.SearchCaseSensitive "Case Sensitive">
+<!ENTITY firebug.SearchGlobal "Search All Files">

@@ -712,6 +712,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     name: panelName,
     searchable: true,
+    extSearch: true,
     editable: false,
 
     initialize: function(context, doc)
@@ -904,7 +905,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         return true;
     },
 
-    search: function(text)
+    search: function(text, reverse)
     {
         if (!text)
         {
@@ -914,12 +915,12 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
-            row = this.currentSearch.findNext(true);
+            row = this.currentSearch.findNext(true, false, reverse, Firebug.searchCaseSensitive);
         else
         {
             function findRow(node) { return getAncestorByClass(node, "netRow"); }
             this.currentSearch = new TextSearch(this.panelNode, findRow);
-            row = this.currentSearch.find(text);
+            row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
         }
 
         if (row)
@@ -933,6 +934,11 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         }
         else
             return false;
+    },
+
+    getSearchCapabilities: function()
+    {
+        return [ "searchCaseSensitive" ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

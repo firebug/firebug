@@ -2099,6 +2099,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     name: "script",
     searchable: true,
+    extSearch: true,
 
     initialize: function(context, doc)
     {
@@ -2271,7 +2272,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             state.lastScrollTop = sourceBox.scrollTop;
     },
 
-    search: function(text)
+    search: function(text, reverse)
     {
         var sourceBox = this.selectedSourceBox;
         if (!text || !sourceBox)
@@ -2294,29 +2295,66 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 return true;
             }
         }
+        
+        var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
+        if (!curDoc && Firebug.searchGlobal)
+        {
+            return this.searchOtherDocs(text, reverse);
+        }
+        return curDoc;
+    },
 
+    searchOtherDocs: function(text, reverse)
+    {
+        var scanRE = new RegExp(text, Firebug.searchCaseSensitive ? "g" : "gi");
+        
+        var self = this;
+
+        function scanDoc(script) {
+            var lines = script.loadScriptLines(self.context);
+            // we don't care about reverse here as we are just looking for existence,
+            // if we do have a result we will handle the reverse logic on display
+            for (var i = 0; i < lines.length; i++) {
+                if (scanRE.test(lines[i]))
+                {
+                    return true;
+                }
+            }
+        }
+
+        if (this.navigateToNextDocument(scanDoc, reverse))
+        {
+            return this.searchCurrentDoc(true, text, reverse);
+        }
+    },
+
+    searchCurrentDoc: function(wrapSearch, text, reverse)
+    {
+        var sourceBox = this.selectedSourceBox;
+        
         var lineNo = null;
         if (this.currentSearch && text == this.currentSearch.text)
-            lineNo = this.currentSearch.findNext(true);
+            lineNo = this.currentSearch.findNext(wrapSearch, reverse, !!Firebug.searchCaseSensitive);
         else
         {
             this.currentSearch = new SourceBoxTextSearch(sourceBox);
-            lineNo = this.currentSearch.find(text);
+            lineNo = this.currentSearch.find(text, reverse, !!Firebug.searchCaseSensitive);
         }
 
-        if (lineNo)
+        if (lineNo || lineNo === 0)
         {
             // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
             this.scrollToLine(sourceBox.repObject.href, lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
-            //var sel = this.document.defaultView.getSelection();
-            //sel.removeAllRanges();
-            //sel.addRange(this.currentSearch.range);
 
-            //scrollIntoCenterView(row, sourceBox);
             return true;
         }
         else
             return false;
+    },
+
+    getSearchCapabilities: function()
+    {
+        return [ "searchCaseSensitive", "searchGlobal" ];
     },
 
     supportsObject: function(object)

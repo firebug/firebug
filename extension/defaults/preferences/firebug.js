@@ -16,6 +16,10 @@ pref("extensions.firebug.preferEnabled.Net", false);
 
 pref("extensions.firebug.allowDoublePost", false);
 
+// Search
+pref("extensions.firebug.searchCaseSensitive", false);
+pref("extensions.firebug.searchGlobal", true);
+
 // Console
 pref("extensions.firebug.showJSErrors", true);
 pref("extensions.firebug.showJSWarnings", false);

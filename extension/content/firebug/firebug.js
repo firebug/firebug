@@ -66,6 +66,9 @@ const prefNames =
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
 
+    // Search
+    "searchCaseSensitive", "searchGlobal",
+
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
     "showChromeErrors", "showChromeMessages", "showExternalErrors",
@@ -1477,6 +1480,7 @@ Firebug.Extension =
 Firebug.Panel =
 {
     searchable: false,
+    extSearch: false,
     editable: true,
     order: 2147483647,
     statusSeparator: "<",
@@ -1631,6 +1635,50 @@ Firebug.Panel =
     {
     },
 
+    /**
+     * Navigates to the next document whose match parameter returns true.
+     */
+    navigateToNextDocument: function(match, reverse)
+    {
+        // This is an approximation of the UI that is displayed by the location
+        // selector. This should be close enough, although it may be better
+        // to simply generate the sorted list within the module, rather than
+        // sorting within the UI.
+        var self = this;
+        function compare(a, b) {
+            var locA = self.getObjectLocation(a);
+            var locB = self.getObjectLocation(b);
+            if(locA > locB)
+                return 1;
+            if(locA < locB)
+                return -1;
+            return 0;
+        }
+        var allLocs = this.getLocationList().sort(compare);
+        for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
+        
+        function transformIndex(index) {
+            if (reverse) {
+                // For the reverse case we need to implement wrap around.
+                var intermediate = curPos - index - 1;
+                return (intermediate < 0 ? allLocs.length : 0) + intermediate;
+            } else {
+                return (curPos + index + 1) % allLocs.length;
+            }
+        };
+        
+        for (var next = 0; next < allLocs.length - 1; next++)
+        {
+            var object = allLocs[transformIndex(next)];
+            
+            if (match(object))
+            {
+                this.navigate(object);
+                return object;
+            }
+        }
+    },
+
     select: function(object, forceUpdate)
     {
         if (!object)
@@ -1691,8 +1739,23 @@ Firebug.Panel =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    search: function(text)
+    search: function(text, reverse)
     {
+    },
+
+    /**
+     * Retrieves the search options that this modules supports.
+     * This is used by the search UI to present the proper options.
+     * 
+     * Implementors should return an array containing the constants supported
+     * by the search algorithm. The supported options are defined in the search
+     * section of the prefNames array.
+     * 
+     * Currently these are "searchCaseSensitive" and "searchGlobal".
+     */
+    getSearchCapabilities: function()
+    {
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1909,7 +1972,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
     createSourceBox: function(sourceFile, sourceBoxDecorator)  // decorator(sourceFile, sourceBox)
     {
-        var lines = loadScriptLines(sourceFile, this.context);
+        var lines = sourceFile.loadScriptLines(this.context);
         if (!lines)
         {
             lines = ["Failed to load source for sourceFile "+sourceFile];
@@ -2281,14 +2344,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
     },
     
 });
-
-function loadScriptLines(sourceFile, context)  // array of lines
-{
-    if (sourceFile.source)
-        return sourceFile.source;
-    else
-        return context.sourceCache.load(sourceFile.href);
-}
 
 function appendScriptLines(sourceBox, min, max, panelNode)
 {

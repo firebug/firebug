@@ -50,6 +50,8 @@
         <command id="cmd_decompileEvals" oncommand="Firebug.togglePref('decompileEvals')"/>
         
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
+        <command id="cmd_searchNext" oncommand="Firebug.Search.update(FirebugContext, true, false)"/>
+        <command id="cmd_searchPrev" oncommand="Firebug.Search.update(FirebugContext, true, true)"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -188,6 +190,24 @@
             </hbox>
 
             <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1"/>
+            <hbox id="fbSearchButtons">
+                <toolbarbutton id="fbSearchNext" command="cmd_searchNext"
+                            label="&firebug.Next;" class="toolbar-text-button" />
+                <toolbarbutton id="fbSearchPrev" command="cmd_searchPrev"
+                            label="&firebug.Prev;" class="toolbar-text-button" />
+                <toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" id="fbSearchOptions">
+                    <menupopup id="searchOptionsPopup"
+                            onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                        <menuitem type="checkbox" label="&firebug.SearchCaseSensitive;"
+                                   oncommand="FirebugChrome.onToggleOption(this)"
+                                   option="searchCaseSensitive"/>
+
+                        <menuitem type="checkbox" label="&firebug.SearchGlobal;"
+                                  oncommand="FirebugChrome.onToggleOption(this)"
+                                  option="searchGlobal"/>
+                    </menupopup>
+                </toolbarbutton>
+            </hbox>
         </hbox>
     </toolbar>
 

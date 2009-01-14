@@ -506,6 +506,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     name: "stylesheet",
     parentPanel: null,
     searchable: true,
+    extSearch: true,
     dependents: ["css", "stylesheet", "dom", "domSide", "layout"],
 
     initialize: function()
@@ -778,7 +779,39 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         return getURLForStyleSheet(styleSheet);
     },
 
-    search: function(text)
+    search: function(text, reverse)
+    {
+        var curDoc = this.searchCurrentDoc(!Firebug.searchGlobal, text, reverse);
+        if (!curDoc && Firebug.searchGlobal)
+        {
+            return this.searchOtherDocs(text, reverse);
+        }
+        return curDoc;
+    },
+    
+    searchOtherDocs: function(text, reverse)
+    {
+        var scanRE = new RegExp(text, Firebug.searchCaseSensitive ? "g" : "gi");
+
+        function scanDoc(styleSheet) {
+            // we don't care about reverse here as we are just looking for existence,
+            // if we do have a result we will handle the reverse logic on display
+            for (var i = 0; i < styleSheet.cssRules.length; i++)
+            {
+                if (scanRE.test(styleSheet.cssRules[i].cssText))
+                {
+                    return true;
+                }
+            }
+        }
+        
+        if (this.navigateToNextDocument(scanDoc, reverse))
+        {
+            return this.searchCurrentDoc(true, text, reverse);
+        }
+    },
+    
+    searchCurrentDoc: function(wrapSearch, text, reverse)
     {
         if (!text)
         {
@@ -789,14 +822,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
         {
-            row = this.currentSearch.findNext(true);
+            row = this.currentSearch.findNext(wrapSearch, false, reverse, Firebug.searchCaseSensitive);
         }
         else
         {
             if (this.editing)
             {
                 this.currentSearch = new TextSearch(this.stylesheetEditor.box);
-                row = this.currentSearch.find(text);
+                row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
 
                 if (row)
                 {
@@ -813,7 +846,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
                 this.currentSearch = new TextSearch(this.panelNode, findRow);
-                row = this.currentSearch.find(text);
+                row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
             }
         }
 
@@ -825,6 +858,11 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
             return false;
+    },
+
+    getSearchCapabilities: function()
+    {
+        return [ "searchCaseSensitive", "searchGlobal" ];
     }
 });
 

@@ -857,6 +857,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     name: "dom",
     searchable: true,
+    extSearch: true,
     statusSeparator: ">",
 
     initialize: function()
@@ -876,7 +877,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.removeEventListener("click", this.onClick, false);
     },
 
-    search: function(text, visit)
+    search: function(text, reverse)
     {
         if (!text)
         {
@@ -885,48 +886,34 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             return false;
         }
 
-        if (visit && this.currentSearch && this.currentSearch.currentNode)
+        var row;
+        if (this.currentSearch && text == this.currentSearch.text)
+            row = this.currentSearch.findNext(true, undefined, reverse, Firebug.searchCaseSensitive);
+        else
         {
-            Firebug.Search.clear(this.context);
-            this.selectRow(this.currentSearch.currentNode);
-            delete this.currentSearch;
+            function findRow(node) { return getAncestorByClass(node, "memberRow"); }
+            this.currentSearch = new TextSearch(this.panelNode, findRow);
+            row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
+        }
+
+        if (row)
+        {
+            var sel = this.document.defaultView.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this.currentSearch.range);
+
+            scrollIntoCenterView(row, this.panelNode);
+
+            this.highlightRow(row);
             return true;
         }
         else
-        {
-            var row;
-            if (this.currentSearch && text == this.currentSearch.text)
-                row = this.currentSearch.findNext(true);
-            else
-            {
-                function findRow(node) { return getAncestorByClass(node, "memberRow"); }
-                this.currentSearch = new TextSearch(this.panelNode, findRow);
-                row = this.currentSearch.find(text);
-            }
+            return false;
+    },
 
-            if (row)
-            {
-                if (visit)
-                {
-                    Firebug.Search.clear(this.context);
-                    this.selectRow(row);
-                    delete this.currentSearch;
-                }
-                else
-                {
-                    var sel = this.document.defaultView.getSelection();
-                    sel.removeAllRanges();
-                    sel.addRange(this.currentSearch.range);
-
-                    scrollIntoCenterView(row, this.panelNode);
-
-                    this.highlightRow(row);
-                }
-                return true;
-            }
-            else
-                return false;
-        }
+    getSearchCapabilities: function()
+    {
+        return [ "searchCaseSensitive" ];
     }
 });
 

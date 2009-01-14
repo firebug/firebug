@@ -65,7 +65,7 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.select();
     },
 
-    update: function(context, immediate)
+    update: function(context, immediate, reverse)
     {
         var panel = context.chrome.getSelectedPanel();
         if (!panel.searchable)
@@ -87,10 +87,21 @@ Firebug.Search = extend(Firebug.Module,
 
         if (immediate)
         {
-            var found = panel.search(value);
+            var found = panel.search(value, reverse);
             if (!found && value)
                 beep();
 
+            if (value)
+            {
+                // Hides all nodes that didn't pass the filter
+                setClass(panelNode, "searching");
+            }
+            else
+            {
+                // Makes all nodes visible again
+                removeClass(panelNode, "searching");
+            }
+            
             panel.searchText = value;
         }
         else
@@ -98,6 +109,10 @@ Firebug.Search = extend(Firebug.Module,
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
+                var found = panel.search(value, reverse);
+                if (!found && value)
+                    beep();
+
                 if (value)
                 {
                     // Hides all nodes that didn't pass the filter
@@ -108,11 +123,7 @@ Firebug.Search = extend(Firebug.Module,
                     // Makes all nodes visible again
                     removeClass(panelNode, "searching");
                 }
-
-                var found = panel.search(value);
-                if (!found && value)
-                    beep();
-
+                
                 panel.searchText = value;
             }, searchDelay);
         }
@@ -141,6 +152,31 @@ Firebug.Search = extend(Firebug.Module,
         var searchBox = chrome.$("fbSearchBox");
         searchBox.value = panel && panel.searchText ? panel.searchText : "";
         searchBox.disabled = !panel || !panel.searchable;
+        
+        var extSearch = panel && panel.extSearch;
+        var searchButtons = chrome.$("fbSearchButtons");
+        searchButtons.style.display = extSearch ? "" : "none";
+        if (extSearch)
+        {
+            var caps = panel.getSearchCapabilities() || [];
+            var keyCaps = {};
+            for (var i = 0; i < caps.length; i++) {
+                keyCaps[caps[i]] = true;
+            }
+            
+            // Hide the whole menu if no options are supported
+            var searchOptions = chrome.$("fbSearchOptions");
+            searchOptions.style.display = caps.length ? "" : "none";
+            
+            // Handle individual menu elements
+            var searchPopup = chrome.$("searchOptionsPopup");
+            var curMenuItem = searchPopup.firstChild;
+            while (curMenuItem) {
+                curMenuItem.style.display =
+                    keyCaps[curMenuItem.getAttribute("option")] ? "" : "none";
+                curMenuItem = curMenuItem.nextSibling;
+            }
+        }
     }
 });
 
