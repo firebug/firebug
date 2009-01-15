@@ -48,6 +48,8 @@ top.Firebug.Console.injector = {
 
             Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
 
+            dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
+
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
         },
