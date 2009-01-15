@@ -1108,6 +1108,8 @@ FirebugService.prototype =
 
         if (scriptTag in this.onXScriptCreatedByTag)
         {
+        	if (FBTrace.DBG_FBS_TRACKFILES) 
+                trackFiles.def(frame);
             var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
             if (FBTrace.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="          
                                       +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
@@ -1414,16 +1416,19 @@ FirebugService.prototype =
         try
         {
             var fileName = script.fileName;
-            // special tracing for chromebug: tmpout(fileName+"\n");
+            if (FBTrace.DBG_FBS_TRACKFILES) 
+            	trackFiles.add(fileName);
             if (isFilteredURL(fileName))
             {
                 try {
                 	if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS) 											
                 		FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'");  	
                 } catch (exc) { /*Bug 426692 */ } 
+                if (FBTrace.DBG_FBS_TRACKFILES) 
+                    trackFiles.drop(fileName);
                 return;
             }
-            
+
             // reset tracing flags on first unfiltered filename
             if (!FBTrace.DBG_FF_START)
             {
@@ -1650,6 +1655,8 @@ FirebugService.prototype =
 		{
 			if (global && global.location)  // then we have a window, it will be an nsIDOMWindow, right?
 				return global.location.toString();
+			else if (global && global.tag)
+				return "global_tag_"+global.tag;
 		}
 		catch (exc)
     	{
@@ -2223,6 +2230,11 @@ FirebugService.prototype =
     	return jsd; // for debugging fbs
     },
     
+    dumpFileTrack: function()
+    {
+    	trackFiles.dump();
+    },
+    
 };
 
 function getStepName(mode)
@@ -2597,17 +2609,60 @@ function getTmpStream(file)
 	return foStream;
 }
 
+var trackFiles  = {
+	allFiles: {},
+	add: function(fileName)
+	{
+		var name = new String(fileName);
+		this.allFiles[name] = [];
+	},
+	drop: function(fileName)
+	{
+		var name = new String(fileName);
+		this.allFiles[name].push("dropped");
+	},
+	def: function(frame)
+	{
+		var jscontext = frame.executionContext;
+    	if (jscontext)
+    		frameGlobal = jscontext.globalObject.getWrappedValue();
+    	
+		var scopeName = fbs.getLocationSafe(frameGlobal);
+		if (!scopeName) 
+			scopeName = "noJSContext";
+		
+		var name = new String(frame.script.fileName);
+		if (! (name in this.allFiles))
+			this.allFiles[name]=["not added"];
+		this.allFiles[name].push(scopeName);
+	},
+	dump: function()
+	{
+		var n = 0;
+		for (var p in this.allFiles)
+		{
+			tmpout( (++n) + ") "+p);
+			var where = this.allFiles[p];
+			if (where.length > 0)
+			{
+				for (var i = 0; i < where.length; i++)
+				{
+					tmpout(", "+where[i]);
+				}
+				tmpout("\n");
+			}
+			else
+				tmpout("     none\n");
+			
+		}
+	},
+}
+
 function tmpout(text)
 {
 	if (!fbs.foStream)
 		fbs.foStream = getTmpStream(getTmpFile());
-	
-	if (!fbs.uniqueURLs)
-		fbs.uniqueURLs = {};
-	
-	if (fbs.uniqueURLs.hasOwnProperty(text))
-		return;
-	fbs.uniqueURLs[text] = text.length;
+
 	fbs.foStream.write(text, text.length);
 	
 }

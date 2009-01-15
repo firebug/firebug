@@ -100,6 +100,7 @@ pref("extensions.firebug.DBG_FBS_SRCUNITS", false); // firebug script creation  
 pref("extensions.firebug.DBG_FBS_ERRORS", false);   // firebug errors                    /*@explore*/
 pref("extensions.firebug.DBG_FBS_FINDDEBUGGER", false);   // firebug findDebugger        /*@explore*/
 pref("extensions.firebug.DBG_FBS_STEP", false);     // firebug stepping                  /*@explore*/
+pref("extensions.firebug.DBG_FBS_TRACKFILES", false); // dump all js files to disk
 pref("extensions.firebug.DBG_FBS_FUNCTION", false); // firebug new Function              /*@explore*/
 pref("extensions.firebug.DBG_BP", false); 			// debugger.js and firebug-services.js; lots of output   /*@explore*/
 pref("extensions.firebug.DBG_TOPLEVEL", false); 	// top level jsd scripts                     /*@explore*/
@@ -119,7 +120,7 @@ pref("extensions.firebug.DBG_DISPATCH", false);     //                          
 pref("extensions.firebug.DBG_HTML", false);         //                                          /*@explore*/
 pref("extensions.firebug.DBG_LINETABLE", false);    // /*@explore*/
 pref("extensions.firebug.DBG_LOCATIONS", false);    // panelFileList
-pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/
+pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/ 
 pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
 pref("extensions.firebug.DBG_NET", false);        	// net.js                                    /*@explore*/
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
