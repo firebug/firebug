@@ -95,7 +95,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         element.setAttribute("methodName", "evaluate");
 
         expr = expr.toString();
-        expr = "with(_FirebugCommandLine){" + expr + "};";
+        expr = "with(_FirebugCommandLine){" + expr + "\n};";
         element.setAttribute("expr", expr);
 
         var consoleHandler;
