@@ -2957,7 +2957,7 @@ this.getResource = function(aURL)
 // ************************************************************************************************
 // Network
 
-this.readFromStream = function(stream, charset)
+this.readFromStream = function(stream, charset, noClose)
 {
     var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
     sis.setInputStream(stream);
@@ -2966,7 +2966,8 @@ this.readFromStream = function(stream, charset)
     for (var count = stream.available(); count; count = stream.available())
         segments.push(sis.readBytes(count));
 
-    sis.close();
+    if (!noClose)
+        sis.close();
 
     var text = segments.join("");
     return this.convertToUnicode(text, charset);
@@ -2987,7 +2988,7 @@ this.readPostTextFromPage = function(url, context)
                 postStream.seek(NS_SEEK_SET, 0);
 
                 var charset = context.window.document.characterSet;
-                return this.readFromStream(postStream, charset);
+                return this.readFromStream(postStream, charset, true);
             }
          }
          catch (exc)
@@ -3008,7 +3009,7 @@ this.readPostTextFromRequest = function(request, context)
             var ss = this.QI(is, Ci.nsISeekableStream);
             if (ss) ss.seek(NS_SEEK_SET, 0);
             var charset = context.window.document.characterSet;
-            var text = this.readFromStream(is, charset);
+            var text = this.readFromStream(is, charset, true);
             if (ss) ss.seek(NS_SEEK_SET, 0);
             return text;
         }
