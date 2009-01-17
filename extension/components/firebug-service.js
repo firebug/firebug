@@ -36,6 +36,7 @@ const nsIComponentRegistrar = Ci.nsIComponentRegistrar;
 const nsIFactory = Ci.nsIFactory;
 const nsIConsoleService = Ci.nsIConsoleService;
 const nsITimer = Ci.nsITimer;
+const nsITimerCallback = Ci.nsITimerCallback;
 
 const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
 const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
@@ -1540,52 +1541,68 @@ FirebugService.prototype =
     },
 
     getJSContexts: function()
-    {
+    { 
     	var enumeratedContexts = [];
         jsd.enumerateContexts( {enumerateContext: function(jscontext)
         {
                 try
                 {
                     var global = jscontext.globalObject.getWrappedValue();
-                    FBTrace.sysout("jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
-                    //FBTrace.dumpProperties("global object:\n", global);
+                    
+                    if (FBTrace.DBG_FBS_JSCONTEXTS)
+                        FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
+                     
                     if (global)
                     {
                         var document = global.document;
                         if (document)
                         {
-                            FBTrace.sysout("global document.location: "+document.location);
+                            if (FBTrace.DBG_FBS_JSCONTEXTS)
+                                FBTrace.sysout("getJSContexts global document.location: "+document.location);
                         }
                         else
                         {
-                        	var total = 0;
-                        	for(var p in global)
-                        		total++;
-                            FBTrace.sysout("global  without document type: "+typeof(global)+" with "+total+" properties and interfaces", global);
+                            if (FBTrace.DBG_FBS_JSCONTEXTS)
+                            {
+                                var total = 0;
+                                for(var p in global)
+                                    total++;
+                        	
+                                FBTrace.sysout("getJSContexts global  without document type: "+typeof(global)+" with "+total+" properties and interfaces", global);
+                            }
+                            return; // skip these
                         }
                     }
                     else
-                        FBTrace.sysout("no global object\n");
-
-
-                    if (jscontext.privateData)
                     {
-                        FBTrace.dumpProperties("jscontext.privateData", jscontext.privateData);
+                        if (FBTrace.DBG_FBS_JSCONTEXTS)
+                            FBTrace.sysout("getJSContexts no global object tag:"+jscontext.tag);
+                        return; // skip this
                     }
+                    
+                    if (FBTrace.DBG_FBS_JSCONTEXTS)
+                    {    
+                        if (jscontext.privateData)
+                        {
+                            var isTimer = (jscontext.privateData instanceof nsITimerCallback);
+                            if (FBTrace.DBG_FBS_JSCONTEXTS)
+                                FBTrace.dumpProperties("jscontext.privateData isTimer:"+isTimer, jscontext.privateData);
+                        }
                     /*
                      * jsdIContext has jsdIEphemeral, nsISupports, jsdIContext
                      * jsdIContext.wrappedContext has nsISupports and nsITimerCallback, nothing interesting
                      * jsdIContext.JSContext is undefined
                      */
-                    var nsITimerCallback = Components.interfaces["nsITimerCallback"];
-                    var wContext = jscontext.wrappedContext;
-                    if (wContext instanceof nsITimerCallback)
-                    {
-                        var asTimer = wContext.QueryInterface(nsITimerCallback);
-                        FBTrace.sysout("jsContext.wrappedContext ", asTimer);
+                        var wContext = jscontext.wrappedContext;
+                        if (wContext instanceof nsITimerCallback)
+                        {
+                            var asTimer = wContext.QueryInterface(nsITimerCallback);
+                            FBTrace.sysout("jsContext.wrappedContext ", asTimer);
+                        }
+                        var c = jscontext.JSContext;
+                        FBTrace.sysout("jsContext.JSContext", c);
                     }
-                    var c = jscontext.JSContext;
-                    FBTrace.sysout("jsContext.JSContext", c);
+                    
                     enumeratedContexts.push(jscontext);
                 }
                 catch(e)
