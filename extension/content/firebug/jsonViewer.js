@@ -65,64 +65,9 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
     parseJSON: function(file)
     {
         var jsonString = new String(file.responseText);
-
-        // See if this is a Prototype style *-secure request.
-        var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
-        var matches = regex.exec(jsonString);
-
-        if (matches)
-        {
-            jsonString = matches[1];
-
-            if (jsonString[0] == "\\" && jsonString[1] == "n")
-                jsonString = jsonString.substr(2);
-
-            if (jsonString[jsonString.length-2] == "\\" && jsonString[jsonString.length-1] == "n")
-                jsonString = jsonString.substr(0, jsonString.length-2);
-        }
-
-        if (jsonString.indexOf("&&&START&&&"))
-        {
-            regex = new RegExp(/&&&START&&& (.+) &&&END&&&/);
-            matches = regex.exec(jsonString);
-            if (matches)
-                jsonString = matches[1];
-        }
-
-        // throw on the extra parentheses
-        jsonString = "(" + jsonString + ")";
-
-        var s = Components.utils.Sandbox("http://" + file.request.originalURI.host);
-        var jsonObject = null;
-
-        try
-        {
-            jsonObject = Components.utils.evalInSandbox(jsonString, s);
-        }
-        catch(e)
-        {
-            if (e.message.indexOf("is not defined"))
-            {
-                var parts = e.message.split(" ");
-                s[parts[0]] = function(str){ return str; };
-                try {
-                    jsonObject = Components.utils.evalInSandbox(jsonString, s);
-                } catch(ex) {
-                    if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
-                        FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
-                    return null;
-                }
-            }
-            else
-            {
-                if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
-                    FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
-                return null;
-            }
-        }
-
-        return jsonObject;
-    }
+        return parseJSONString(jsonString, "http://" + file.request.originalURI.host);
+    },
+    
 }); 
 
 // ************************************************************************************************

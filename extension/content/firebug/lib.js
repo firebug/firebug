@@ -2206,14 +2206,14 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             {
                 var sourceFile = oldMap[url];
                 sourceFile.dependentURL = dependentURL;
-                context.sourceFileMap[url] = sourceFile;
+                context.addSourceFile(sourceFile);
                 return false;
             }
             else
             {
                 var sourceFile = new FBL.ScriptTagSourceFile(context, url, scriptTagNumber);
                 sourceFile.dependentURL = dependentURL;
-                context.sourceFileMap[url] = sourceFile;
+                context.addSourceFile(sourceFile);
                 return true;
             }
     }
@@ -2952,6 +2952,66 @@ this.getResource = function(aURL)
     	if (FBTrace.DBG_ERRORS)
     		FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
     }
+};
+
+this.parseJSONString = function(jsonString, originURL)
+{
+    // See if this is a Prototype style *-secure request.
+    var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
+    var matches = regex.exec(jsonString);
+
+    if (matches)
+    {
+        jsonString = matches[1];
+
+        if (jsonString[0] == "\\" && jsonString[1] == "n")
+            jsonString = jsonString.substr(2);
+
+        if (jsonString[jsonString.length-2] == "\\" && jsonString[jsonString.length-1] == "n")
+            jsonString = jsonString.substr(0, jsonString.length-2);
+    }
+
+    if (jsonString.indexOf("&&&START&&&"))
+    {
+        regex = new RegExp(/&&&START&&& (.+) &&&END&&&/);
+        matches = regex.exec(jsonString);
+        if (matches)
+            jsonString = matches[1];
+    }
+
+    // throw on the extra parentheses
+    jsonString = "(" + jsonString + ")";
+
+    var s = Components.utils.Sandbox(originURL);
+    var jsonObject = null;
+
+    try
+    {
+        jsonObject = Components.utils.evalInSandbox(jsonString, s);
+    }
+    catch(e)
+    {
+        if (e.message.indexOf("is not defined"))
+        {
+            var parts = e.message.split(" ");
+            s[parts[0]] = function(str){ return str; };
+            try {
+                jsonObject = Components.utils.evalInSandbox(jsonString, s);
+            } catch(ex) {
+                if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
+                    FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+                return null;
+            }
+        }
+        else
+        {
+            if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
+                FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+            return null;
+        }
+    }
+
+    return jsonObject;
 };
 
 // ************************************************************************************************
