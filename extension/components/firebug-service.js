@@ -2247,8 +2247,10 @@ FirebugService.prototype =
     	return jsd; // for debugging fbs
     },
     
-    dumpFileTrack: function()
+    dumpFileTrack: function(moreFiles)
     {
+    	if (moreFiles)
+    		trackFiles.merge(moreFiles);
     	trackFiles.dump();
     },
     
@@ -2646,12 +2648,22 @@ var trackFiles  = {
     	
 		var scopeName = fbs.getLocationSafe(frameGlobal);
 		if (!scopeName) 
-			scopeName = "noJSContext";
+			scopeName = "noGlobalObjectLocationInJSContext:"+(jscontext?jscontext.tag:"none");
 		
 		var name = new String(frame.script.fileName);
 		if (! (name in this.allFiles))
 			this.allFiles[name]=["not added"];
 		this.allFiles[name].push(scopeName);
+	},
+	merge: function(moreFiles)
+	{
+		for (var p in moreFiles)
+		{
+			if (p in this.allFiles)
+				this.allFiles[p] = this.allFiles[p].concat(moreFiles[p]);
+			else
+				this.allFiles[p] = moreFiles[p];
+		}
 	},
 	dump: function()
 	{
