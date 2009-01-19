@@ -28,6 +28,8 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.externalChrome = chrome;
     }
 
+    this.name = this.getWindowLocation();
+    
     this.windows = [];
     this.panelMap = {};
     this.sidePanelNames = {};
@@ -61,7 +63,7 @@ Firebug.TabContext.prototype =
 		{
 			if (FBTrace.DBG_WINDOWS)
 				FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
-			return "(bad window)";
+			return "(getWindowLocation: "+e+")";
 		}
 	},
 	
@@ -75,9 +77,18 @@ Firebug.TabContext.prototype =
  
 	getName: function()
 	{
-		return this.getWindowLocation();  // override in chromebug
+		return this.name;  
 	},
-	
+
+	addSourceFile: function(sourceFile)
+	{
+		this.sourceFileMap[sourceFile.href] = sourceFile;
+		sourceFile.context = this;
+		// Not ideal, but the Debugger.fbListeners will be the ones interested and tabContext 
+		// events are dispatch by others already (eg initContext etc).  XXXjjb
+		dispatch(Firebug.Debugger.fbListeners, "onSourceFileCreated",[this, sourceFile]);
+	},
+	// ***************************************************************************
     reattach: function(chrome)
     {
         var oldChrome = this.chrome;

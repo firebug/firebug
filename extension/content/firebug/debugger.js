@@ -1005,7 +1005,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var lines = context.sourceCache.store(url, source);
         var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
-        context.sourceFileMap[url] = sourceFile;
+        context.addSourceFile(sourceFile);
 
         if (FBTrace.DBG_EVENTS) FBTrace.sysout("debugger.onEventScriptCreated url="+sourceFile.href+"\n");   /*@explore*/
 
@@ -1042,7 +1042,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
         {
             sourceFile = new FBL.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
-            context.sourceFileMap[url] = sourceFile;
+            context.addSourceFile(sourceFile);
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.window.location+" ("+context.uid+")"+"\n"); /*@explore*/
         }
 
@@ -1198,7 +1198,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var lines =	context.sourceCache.store(url, source);
         var sourceFile = new FBL.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
-        context.sourceFileMap[url] = sourceFile;
+        context.addSourceFile(sourceFile);
 
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onNewFunction sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n"); /*@explore*/
 
@@ -1267,7 +1267,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.sourceCache.storeSplitLines(url, lines); 
 
         var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
-        context.sourceFileMap[url] = sourceFile;
+        context.addSourceFile(sourceFile);
         
         if (FBTrace.DBG_SOURCEFILES) 
         	FBTrace.sysout("debugger.getEvalLevelSourceFile sourcefile="+sourceFile.toString()+" -> "+context.window.location+"\n"); /*@explore*/
@@ -2369,6 +2369,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hasObject: function(object)
     {
+    	FBTrace.sysout("debugger.hasObject in "+this.context.getName()+" SourceLink: "+(object instanceof SourceLink), object);
         if (object instanceof SourceFile)
             return (object.href in this.context.sourceFileMap);
         else if (object instanceof SourceLink)
@@ -2462,7 +2463,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (context.sourceFileMap.hasOwnProperty(url))
                     return;
                 var URLOnly = new NoScriptSourceFile(context, url);
-                context.sourceFileMap[url] = URLOnly;
+                context.addSourceFile(URLOnly);
+                
                 list.push(URLOnly);
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url, URLOnly);
             }
@@ -3033,7 +3035,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
 		fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
 		delete context.sourceFileMap[oldURL];
 		
-		context.sourceFileMap[newURL] = sourceFile;
+		context.addSourceFile(sourceFile);
 		var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);
 		
         var panel = context.getPanel("script", true);
@@ -3084,19 +3086,19 @@ Firebug.DebuggerListener =
     {
     },
 
-    onEventScriptCreated: function(context, frame, url)
+    onEventScriptCreated: function(context, frame, url, sourceFile)
     {
     },
 
-    onTopLevelScriptCreated: function(context, frame, url)
+    onTopLevelScriptCreated: function(context, frame, url, sourceFile)
     {
     },
 
-    onEvalScriptCreated: function(context, frame, url)
+    onEvalScriptCreated: function(context, frame, url, sourceFile)
     {
     },
 
-    onFunctionConstructor: function(context, frame, ctor_script, url)
+    onFunctionConstructor: function(context, frame, ctor_script, url, sourceFile)
     {
     },
 };
