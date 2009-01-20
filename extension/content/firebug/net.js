@@ -698,10 +698,20 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     openResponseInTab: function(file)
     {
-        var encodedResponse = btoa(getResponseText(file, this.context));
-        var contentType = file.request.contentType;
-        var dataURI = "data:" + contentType + ";base64," + encodedResponse;
-        gBrowser.selectedTab = gBrowser.addTab(dataURI);
+        try {
+            var response = getResponseText(file, this.context);
+            var inputStream = getInputStreamFromString(response);
+            var stream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+            stream.setInputStream(inputStream);
+            var encodedResponse = btoa(stream.readBytes(stream.available()));
+            var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
+            gBrowser.selectedTab = gBrowser.addTab(dataURI);
+        }
+        catch (err) 
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.openResponseInTab EXCEPTION", err);
+        }
     },
     
     stopLoading: function(file)
