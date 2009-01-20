@@ -5,22 +5,22 @@
 <!ENTITY firebug.Vertical "垂直面板">
 <!ENTITY firebug.Run "运行">
 <!ENTITY firebug.Copy "复制">
-<!ENTITY firebug.CopyBookmarklet "复制脚本为书签。">
+<!ENTITY firebug.CopyBookmarklet "复制脚本为书签">
 <!ENTITY firebug.Options "选项">
-<!ENTITY firebug.TextSize "文本尺寸">
-<!ENTITY firebug.IncreaseTextSize "加大文本尺寸">
-<!ENTITY firebug.DecreaseTextSize "减小文本尺寸">
-<!ENTITY firebug.NormalTextSize "普通文本尺寸">
+<!ENTITY firebug.TextSize "文本大小">
+<!ENTITY firebug.IncreaseTextSize "放大">
+<!ENTITY firebug.DecreaseTextSize "缩小">
+<!ENTITY firebug.NormalTextSize "重置">
 <!ENTITY firebug.ShowTooltips "显示预览提示">
-<!ENTITY firebug.ShadeBoxModel "显示预览遮罩">
+<!ENTITY firebug.ShadeBoxModel "盒模型上显示阴影">
 <!ENTITY firebug.Website "Firebug 官网...">
 <!ENTITY firebug.Documentation "文档...">
 <!ENTITY firebug.KeyShortcuts "快捷键...">
 <!ENTITY firebug.Forums "论坛...">
-<!ENTITY firebug.Issues "问题追踪...">
+<!ENTITY firebug.Issues "问题跟踪...">
 <!ENTITY firebug.Donate "贡献...">
 <!ENTITY firebug.About "关于...">
-<!ENTITY firebug.AlwaysOpenInWindow "总是在新窗口中开启">
+<!ENTITY firebug.AlwaysOpenInWindow "总在新窗口中打开">
 <!ENTITY firebug.ShowFirebug "打开 Firebug">
 <!ENTITY firebug.DetachFirebug "在新窗口中打开 Firebug">
 <!ENTITY firebug.OpenWith "在编辑器中打开">
@@ -43,10 +43,8 @@
 <!ENTITY firebug.Profile "概况">
 <!ENTITY firebug.ProfileScript "JavaScript 概况">
 <!ENTITY firebug.Clear "清除">
-<!ENTITY firebug.ClearConsole "清除控制台">
-<!ENTITY firebug.ClearTooltip "清除控制台的输出">
+<!ENTITY firebug.ClearConsole "清空控制台">
+<!ENTITY firebug.ClearTooltip "清空控制台">
 <!ENTITY firebug.All "所有">
 <!ENTITY firebug.Images "图片">
 <!ENTITY firebug.Flash "Flash">
-<!ENTITY firebug.Trace.ToggleConsole "打开控制台">
-<!ENTITY firebug.Trace.ToggleConsoleTooltip "打开 Firebug 跟踪控制台">

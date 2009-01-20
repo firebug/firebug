@@ -9,4 +9,4 @@
 <!ENTITY browse.label "浏览...">
 <!ENTITY changeEditor.Name "名字：">
 <!ENTITY changeEditor.Executable "可执行文件：">
-<!ENTITY changeEditor.CmdLine "运行参数：">
+<!ENTITY changeEditor.CmdLine "参数：">
