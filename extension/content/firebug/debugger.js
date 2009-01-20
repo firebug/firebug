@@ -1850,7 +1850,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
         }
     },
-
+    
     showStackFrame: function(frame)
     {
         this.context.currentFrame = frame;
@@ -2400,17 +2400,20 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger updateSelection object:"+object+"\n");
-        if (object instanceof jsdIStackFrame)
-        	FBTrace.sysout("debugger updateSelection this.showStackFrame(object)");
-        else if (object instanceof SourceFile)
-        	FBTrace.sysout("debugger updateSelection this.navigate(object)");
-        else if (object instanceof SourceLink)
-        	FBTrace.sysout("debugger updateSelection this.showSourceLink(object)");
-        else if (typeof(object) == "function")
-        	FBTrace.sysout("debugger updateSelection this.showFunction(object)");
-        else
-        	FBTrace.sysout("debugger updateSelection this.showStackFrame(null)");
+        if (FBTrace.DBG_PANELS) 
+        {
+        	FBTrace.sysout("debugger updateSelection object:"+object+" of type "+typeof(object)+"\n");
+        	if (object instanceof jsdIStackFrame)
+        		FBTrace.sysout("debugger updateSelection this.showStackFrame(object)");
+        	else if (object instanceof SourceFile)
+        		FBTrace.sysout("debugger updateSelection this.navigate(object)");
+        	else if (object instanceof SourceLink)
+        		FBTrace.sysout("debugger updateSelection this.showSourceLink(object)");
+        	else if (typeof(object) == "function")
+        		FBTrace.sysout("debugger updateSelection this.showFunction(object)");
+        	else
+        		FBTrace.sysout("debugger updateSelection this.showStackFrame(null)");
+        }
         	
         if (object instanceof jsdIStackFrame)
             this.showStackFrame(object);
