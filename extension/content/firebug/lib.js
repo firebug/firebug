@@ -3577,7 +3577,15 @@ this.SourceLink.prototype =
     toString: function()
     {
         return this.href;
+    },
+    toJSON: function() // until 3.1...
+    {
+    	return "{\"href\":\""+this.href+"\", "+
+    		(this.line?("\"line\":"+this.line+","):"")+
+    		(this.type?(" \"type\":\""+this.type+"\","):"")+
+    				"}";
     }
+    
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3944,7 +3952,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
     while (innerScripts.hasMoreElements())
     {
     	var script = innerScripts.getNext();
-    	if (!script || !script.tag)
+    	if (!script || ( (script instanceof Ci.jsdIScript) && !script.tag) )
     	{
     	    if (FBTrace.DBG_SOURCEFILES)
     	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext FAILS "+sourceFile, script);
