@@ -303,7 +303,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             	if (errorContext) // is it faster to keep iterating or throw to abort iterator?
             		return;
             	
-                if (!context.window || !context.window.location)
+                if (!context.window || !context.getWindowLocation())
                     return;
 
                 if (context.window.location.toString() == url)
