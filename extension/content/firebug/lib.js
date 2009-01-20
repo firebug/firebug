@@ -4227,8 +4227,33 @@ this.NoScriptSourceFile.prototype.getSourceLength = function()
         this.sourceLength = this.context.sourceCache.load(this.href).length;
     return this.sourceLength;
 }
-//---------
+//---------// javascript in a .xul or .xml file, no outerScript
+this.XULSourceFile = function(url, innerScriptEnumerator)
+{
+    this.href = url;
+    this.pcmap_type = PCMAP_SOURCETEXT;
 
+    FBL.addScriptsToSourceFile(this, null, innerScriptEnumerator);
+}
+
+this.XULSourceFile.prototype = new this.SourceFile("xul");
+
+this.XULSourceFile.prototype.OuterScriptAnalyzer.prototype =
+    this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype;
+
+this.XULSourceFile.prototype.getBaseLineOffset = function()
+{
+    // The outer script is gone, that is what the frame.line is relative to?
+    return 0;  // TODO
+}
+
+this.XULSourceFile.prototype.getSourceLength = function()
+{
+    if (!this.sourceLength)
+        this.sourceLength = this.context.sourceCache.load(this.href).length;
+    return this.sourceLength;
+}
+//---------
 this.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't have the outer script and we delay source load
 {
     this.context = context;

@@ -100,6 +100,7 @@ const COMPONENTS_FILTERS = [
 const COMPONENTS_RE =  new RegExp("/components/[^/]*\\.js$");
 
 const reDBG = /DBG_(.*)/;
+const reXUL = /\.xul$|\.xml$/;
 
 // ************************************************************************************************
 // Globals
@@ -1445,6 +1446,9 @@ FirebugService.prototype =
                 } catch (exc) { /*Bug 426692 */ } 
             }                                                                                                          
 
+            if (fbs.pendingXULFileName && fbs.pendingXULFileName != script.fileName)
+                fbs.flushXUL();
+            
             if (!script.functionName) // top or eval-level
             {
                 // We need to detect eval() and grab its source.
@@ -1474,6 +1478,11 @@ FirebugService.prototype =
                 if (FBTrace.DBG_FBS_CREATION)
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag="+script.tag);      
             }
+            else if( reXUL.test(script.fileName) )
+            {
+                fbs.pendingXULFileName = script.fileName;  // if these were different, we would already have called flushXUL()
+                fbs.nestedScriptStack.appendElement(script, false);
+            }            
             else
             {
                 fbs.nestedScriptStack.appendElement(script, false);
@@ -1486,6 +1495,25 @@ FirebugService.prototype =
             ERROR("onScriptCreated failed: "+exc);
             FBTrace.dumpProperties("onScriptCreated failed: ", exc);
         }
+    },
+    
+    flushXUL: function()
+    {
+        for ( var i = debuggers.length - 1; i >= 0; i--)
+        {
+            try
+            {
+                var debuggr = debuggers[i];
+                if (debuggr.onXULScriptCreated)
+                    debuggr.onXULScriptCreated(fbs.pendingXULFileName, fbs.nestedScriptStack.enumerate());
+            }
+            catch (exc)
+            {
+                FBTrace.sysout("firebug-service flushXUL FAILS: ",exc);
+            }
+        } 
+        delete fbs.pendingXULFileName;
+        fbs.clearNestedScripts();
     },
 
     createdScriptHasCaller: function()
