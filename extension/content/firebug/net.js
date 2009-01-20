@@ -674,12 +674,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 return;
         }
 
-        // The response text can be empty so, test against undefined.
-        var text = (file.responseText != undefined)
-            ? file.responseText
-            : this.context.sourceCache.loadText(file.href, file.method, file);
-
-        copyToClipboard(text);
+        // Copy response to the clipboard
+        copyToClipboard(getResponseText(file, this.context));
 
         // Try to update file.cacheEntry flag.
         getCacheEntry(file, this.context.netProgress);
@@ -700,6 +696,14 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         gBrowser.selectedTab = gBrowser.addTab(file.href, null, null, postData);
     },
 
+    openResponseInTab: function(file)
+    {
+        var encodedResponse = btoa(getResponseText(file, this.context));
+        var contentType = file.request.contentType;
+        var dataURI = "data:" + contentType + ";base64," + encodedResponse;
+        gBrowser.selectedTab = gBrowser.addTab(dataURI);
+    },
+    
     stopLoading: function(file)
     {
         const NS_BINDING_ABORTED = 0x804b0002;
@@ -851,6 +855,13 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             "-",
             {label: "OpenInTab", command: bindFixed(this.openRequestInTab, this, file) }
         );
+
+        if (textFileCategories.hasOwnProperty(file.category))
+        {
+            items.push(
+                {label: "Open Response In New Tab", command: bindFixed(this.openResponseInTab, this, file) }
+            );
+        }
 
         if (!file.loaded)
         {
@@ -2849,9 +2860,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             netInfoBox.htmlPresented = true;
 
-            var text = (file.responseText != undefined) ? file.responseText
-                : context.sourceCache.loadText(file.href, file.method, file);
-
+            var text = getResponseText(file, context);
             var iframe = getElementByClass(netInfoBox, "netInfoHtmlPreview");
             iframe.contentWindow.document.body.innerHTML = text;
         }
@@ -2863,11 +2872,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     setResponseText: function(file, netInfoBox, responseTextBox, context)
     {
-        // The response text can be empty so, test against undefined.
-        var text = (file.responseText != undefined)
-            ? file.responseText
-            : context.sourceCache.loadText(file.href, file.method, file);
-
+        // Get response text.
+        var text = getResponseText(file, context);
         if (text)
             insertWrappedText(text, responseTextBox);
         else
@@ -2949,6 +2955,12 @@ function getPostText(file, context)
         file.postText = readPostTextFromRequest(file.request, context);
 
     return file.postText;
+}
+
+function getResponseText(file, context)
+{
+    return (file.responseText != undefined) ? file.responseText : 
+        this.context.sourceCache.loadText(file.href, file.method, file);
 }
 
 function isURLEncodedFile(file, text)
