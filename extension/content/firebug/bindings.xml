@@ -501,9 +501,14 @@
                 
                 var fileName = null;
                 if (!locator)
+                {
                     fileName = "no locator!";
+                }
                 else if (val)
-                    fileName = locator.getObjectDescription(val).name;
+                {
+                    var description = locator.getObjectDescription(val);
+                    fileName = (description.label?description.label:description.name);
+                }
                 else
                     fileName = "(none)";
                     
