@@ -476,7 +476,7 @@ top.FirebugChrome =
             FirebugContext = context;  // the other place the FirebugContext is set is in firebug.js
 
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("chrome.showContext set FirebugContext to: "+(context?context.window.location:"null ")+"\n");
+                FBTrace.sysout("chrome.showContext set FirebugContext to: "+(context?context.getWindowLocation():"null ")+"\n");
 
             if (externalBrowser || (context.browser && context.browser.showFirebug) )
                 this.syncPanel();
@@ -495,7 +495,7 @@ top.FirebugChrome =
     syncPanel: function()
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                      
-                (FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                     
+                (FirebugContext && FirebugContext.window ? FirebugContext.getWindowLocation() : "undefined")+"\n");                                     
            
         var resumed = false;
         if (Firebug.getSuspended())
@@ -516,7 +516,7 @@ top.FirebugChrome =
         			TabWatcher.watchBrowser(browser);
         	
         			if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel prepared for resume FirebugContext="+                                      
-        					(FirebugContext && FirebugContext.window ? FirebugContext.window.location : "undefined")+"\n");                                      
+        					(FirebugContext && FirebugContext.window ? FirebugContext.getWindowLocation() : "undefined")+"\n");                                      
         		}
         	}
         }
@@ -1167,7 +1167,7 @@ function onSelectingPanel(event)
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
     if (FBTrace.DBG_PANELS) 																													/*@explore*/
-        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext && FirebugContext.window?FirebugContext.window.location:"undefined")+"\n"); /*@explore*/
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext && FirebugContext.window?FirebugContext.getWindowLocation():"undefined")+"\n"); /*@explore*/
 
     if (FirebugContext)
     {

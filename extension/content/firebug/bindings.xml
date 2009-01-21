@@ -515,6 +515,8 @@
                 this.repObject = val;
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
+                if (FBTrace.DBG_LOCATIONS)
+                	FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName);
             ]]></setter>
         </property>
 

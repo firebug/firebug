@@ -2134,6 +2134,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
     getSourceLink: function(lineNo)
     {
+        if (!this.selectedSourceBox)
+            return;
     	if (!lineNo)
     		lineNo = this.selectedSourceBox.firstViewableLine + this.selectedSourceBox.halfViewableLines;
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
