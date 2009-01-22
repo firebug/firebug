@@ -2969,8 +2969,8 @@ function getPostText(file, context)
 
 function getResponseText(file, context)
 {
-    return (file.responseText != undefined) ? file.responseText : 
-        this.context.sourceCache.loadText(file.href, file.method, file);
+    return file.responseText ? file.responseText : 
+        context.sourceCache.loadText(file.href, file.method, file);
 }
 
 function isURLEncodedFile(file, text)
