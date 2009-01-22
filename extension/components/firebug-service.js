@@ -1374,6 +1374,7 @@ FirebugService.prototype =
             }
             else
             {
+            	// modules end up here?
                 if (FBTrace.DBG_FBS_SRCUNITS)
                     FBTrace.sysout("FBS.onTopLevelScriptCreated no debuggr for "+frame.script.tag);
             }
@@ -1456,7 +1457,10 @@ FirebugService.prototype =
                 if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("createdScriptHasCaller "+hasCaller);
 
                 if (hasCaller)
+                {
+                	// components end up here
                     fbs.onXScriptCreatedByTag[script.tag] = this.onEvalScriptCreated;
+                }
                 else
                     fbs.onXScriptCreatedByTag[script.tag] = this.onTopLevelScriptCreated;
 
@@ -1666,15 +1670,8 @@ FirebugService.prototype =
         	FBTrace.sysout("fbs.findDebugger fell thru bottom of stack", frame);
         
         // frameWin should be the top window for the scope of the frame function
-        var frameGlobal = frameWin;
-        if (!frameGlobal)  // should be for chromebug only
-        { 
-        	var jscontext = frame.executionContext;
-        	if (jscontext)
-        		frameGlobal = jscontext.globalObject.getWrappedValue();
-        }
-        
-        fbs.last_debuggr = fbs.askDebuggersForSupport(frameGlobal, frame);
+        // or null
+        fbs.last_debuggr = fbs.askDebuggersForSupport(frameWin, frame);
         if (fbs.last_debuggr)
          	return fbs.last_debuggr;
         else
@@ -1719,6 +1716,7 @@ FirebugService.prototype =
     	
     	if (FBTrace.DBG_FBS_FINDDEBUGGER)
     		FBTrace.sysout("askDebuggersForSupport "+debuggers.length+ " debuggers to check for "+frame.script.fileName);
+    	
         for ( var i = debuggers.length - 1; i >= 0; i--)
         {
             try
@@ -1759,11 +1757,11 @@ FirebugService.prototype =
 
     reFindDebugger: function(frame, debuggr)
     {
-        var global = getFrameScopeWindowAncestor(frame); 
-        if (global && debuggr.supportsGlobal(global)) return debuggr;
+        var frameWin = getFrameScopeWindowAncestor(frame); 
+        if (frameWin && debuggr.supportsGlobal(frameWin)) return debuggr;
         
         if (FBTrace.DBG_FBS_FINDDEBUGGER) 
-        	FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support global ", global); 
+        	FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameWin ", frameWin); 
         return null;
     },
 
