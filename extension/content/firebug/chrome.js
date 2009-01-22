@@ -941,7 +941,7 @@ top.FirebugChrome =
             return false;
     },
 
-    onEditorsShowing: function(popup)
+    onEditorsShowing: function(popup)  // TODO move to Firebug.Editors module in editors.js
     {
         var editors = Firebug.registeredEditors;
         if ( editors.length > 0 )

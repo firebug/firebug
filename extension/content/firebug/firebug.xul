@@ -135,7 +135,7 @@
                     </menu>
 
                     <menuseparator/>
-                    <menu label="&firebug.OpenWith;">
+                    <menu label="&firebug.OpenWith;"> <!-- TODO Firebug.Editors -->
                         <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                             <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
                         </menupopup>

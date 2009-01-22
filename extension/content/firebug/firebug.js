@@ -583,6 +583,10 @@ top.Firebug =
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
     },
 
+    // *******************************************************************************
+    // External editors
+    // TODO move to editors.js as Firebug.Editors module
+    
     loadExternalEditors: function()
     {
         const prefName = "externalEditors";
@@ -720,7 +724,7 @@ top.Firebug =
         }catch(exc) { ERROR(exc); }
     },
 
-    getLocalSourceFile: function(context, href)
+    getLocalSourceFile: function(context, href) 
     {
         if ( isLocalURL(href) )
             return getLocalPath(href);
@@ -770,7 +774,7 @@ top.Firebug =
         return file.path;
     },
 
-    deleteTemporaryFiles: function()
+    deleteTemporaryFiles: function()  // TODO call on "shutdown" event to modules
     {
         try {
             var file = CCIN("@mozilla.org/file/local;1", "nsILocalFile");

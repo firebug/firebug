@@ -68,6 +68,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/editorToContextMenu.js"/>
 
     <popup id="contentAreaContextMenu">
+        <!-- TODO Firebug.Editors. -->
         <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor" insertbefore="context-viewsource">
             <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                 <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>

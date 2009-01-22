@@ -16,9 +16,10 @@
     </stringbundleset>
 
     <commandset id="mainCommandSet">
+        <!-- TODO Firebug.Editors. -->
         <command id="cmd_openFirebugEditors" oncommand="Firebug.openEditors()"/>
         <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
-
+        <!-- end TODO Firebug.Editors. -->
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
