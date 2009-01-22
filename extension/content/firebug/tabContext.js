@@ -61,7 +61,7 @@ Firebug.TabContext.prototype =
 		}
 		catch(e)
 		{
-			if (FBTrace.DBG_WINDOWS)
+			if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
 				FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
 			return "(getWindowLocation: "+e+")";
 		}

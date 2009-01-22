@@ -393,7 +393,7 @@ top.Firebug =
                 catch (e)
                 {
                     if (FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("Firebug.resumeFirebug FAILS for context: "+context.window.location, e);
+                        FBTrace.dumpProperties("Firebug.resumeFirebug FAILS for context: "+context.getName(), e);
                 }
 
                 if (context.browser.detached && context.originalChrome)
@@ -1255,7 +1255,7 @@ top.Firebug =
             FirebugContext = context;
 
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("firebug.showContext set FirebugContext: "+context.window.location+"\n");
+                FBTrace.sysout("firebug.showContext set FirebugContext: "+context.getName()+"\n");
 
             if (this.isDisabledFor(FirebugContext))  // then auto-suspend
             {
@@ -2552,7 +2552,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         else
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("panelDeactivate "+context.window.location +" not in activeContexts\n");
+                FBTrace.sysout("panelDeactivate "+context.getName() +" not in activeContexts\n");
             return;
         }
 
