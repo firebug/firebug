@@ -225,7 +225,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.initContext for: " + context.getName(), context);
 
-        if (context.window)
+        if (context.window && 'addEventListener' in context.window)
         {	
         	var window = context.window;
 
