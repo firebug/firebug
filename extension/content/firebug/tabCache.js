@@ -173,19 +173,28 @@ Firebug.TabCache.prototype = extend(ListeningCache,
 
     storePartialResponse: function(request, responseText)
     {
-        var url = safeGetName(request);
+        try
+        {
+            responseText = FBL.convertToUnicode(responseText);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERROR || FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " + 
+                    safeGetName(request), err);
+            return false;
+        }
 
+        var url = safeGetName(request);
         if (!this.requests[url])
         {
             this.invalidate(url);
             this.requests[url] = request;
         }
 
-        // Convert
-        responseText = FBL.convertToUnicode(responseText);
-
         // Store partial content into the cache.
         this.store(url, responseText);
+        return true;
     },
 
     stopRequest: function(request)
@@ -278,6 +287,7 @@ function TracingListener(win)
     this.window = win;
     this.listener = null;
     this.endOfLine = false;
+    this.ignore = false;
 }
 
 TracingListener.prototype = 
@@ -313,7 +323,8 @@ TracingListener.prototype =
             if (context) 
             {
                 // Store received data into the cache as they come.
-                context.sourceCache.storePartialResponse(request, data);
+                if (!context.sourceCache.storePartialResponse(request, data))
+                    this.ignore = true;
             }
             else 
             {
@@ -336,18 +347,21 @@ TracingListener.prototype =
     /* nsIStreamListener */
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
-        // Cache only text responses for now.
-        if (contentTypes[request.contentType])
+        if (!this.ignore) 
         {
-            var newStream = this.onCollectData(request, inputStream, offset, count);
-            if (newStream)
-                inputStream = newStream;
-        }
-        else
-        {
-            if (FBTrace.DBG_CACHE)
-                FBTrace.dumpProperties("tabCache.onDataAvailable Content-Type not cached: " +
-                    request.contentType + ", " + safeGetName(request));
+            // Cache only text responses for now.
+            if (contentTypes[request.contentType])
+            {
+                var newStream = this.onCollectData(request, inputStream, offset, count);
+                if (newStream)
+                    inputStream = newStream;
+            }
+            else
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.dumpProperties("tabCache.onDataAvailable Content-Type not cached: " +
+                        request.contentType + ", " + safeGetName(request));
+            }
         }
 
         try
@@ -383,15 +397,18 @@ TracingListener.prototype =
     {
         try
         {
-            var context = TabWatcher.getContextByWindow(this.window);
-            if (context) 
+            if (!this.ignore)
             {
-                context.sourceCache.stopRequest(request);
-            }
-            else 
-            {
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
+                var context = TabWatcher.getContextByWindow(this.window);
+                if (context) 
+                {
+                    context.sourceCache.stopRequest(request);
+                }
+                else 
+                {
+                    if (FBTrace.DBG_CACHE)
+                        FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
+                }
             }
 
             if (this.listener)
