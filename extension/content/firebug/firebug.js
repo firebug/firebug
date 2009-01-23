@@ -2455,6 +2455,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelName: null,
     panelBar1: $("fbPanelBar1"),
     activeContexts: null,
+    activeContextURLs: null,
 
     initialize: function()
     {
@@ -2530,6 +2531,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onFirstPanelActivate(context, init);
 
         this.activeContexts.push(context);
+        this.activeContextURLs = null;
         this.resetTooltip();
         
         var panel = context.getPanel(this.panelName, true);
@@ -2551,6 +2553,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (i != -1)
         {
             this.activeContexts.splice(i, 1);
+            this.activeContextURLs = null;
             this.resetTooltip();
         }
         else
@@ -2610,6 +2613,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     getURLsForAllActiveContexts: function()
     {
+    	if (this.activeContextURLs)
+    		return this.activeContextURLs;
         var contextURLSet = [];  // create a list of all unique activeContexts in all modules
         for (var i = 0; i < modules.length; i++)
         {
@@ -2621,6 +2626,19 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     try
                     {
                         var cw = module.activeContexts[ic].window;
+                        /*
+                        try 
+                        {
+                        	if ( cw && ('location' in cw) && ('toString' in cw.location) )
+                        		FBTrace.sysout("1) Found object with location: "+cw.location.toString()+"\n");
+                        	if (cw && cw.location)
+                        		FBTrace.sysout("2) Found object with location: "+cw.location.toString()+"\n");
+                        }
+                        catch(e)
+                        {
+                        	FBTrace.sysout("Trying to find location in object gave "+e+"\n");
+                        }
+                         */
                         if (cw)  
                         {
                             try 
@@ -2646,7 +2664,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 }
             }
         }
-        return contextURLSet;
+        return this.activeContextURLs = contextURLSet;
     },
     // ---------------------------------------------------------------------------------------
 
