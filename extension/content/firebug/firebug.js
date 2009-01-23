@@ -2599,7 +2599,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     try {
                         tooltip += "\n"+decodeURI(urls[i]); 
                     } catch (e) {
-                        // xxxHonza: from some reaason FBTrace is undefined here.
+                        // xxxHonza: from some reason FBTrace is undefined here.
                         dump("Firebug.ActivableModule.resetTooltip EXCEPTION " + e + "\n");
                     }
                 }
@@ -2621,11 +2621,21 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     try
                     {
                         var cw = module.activeContexts[ic].window;
-                        if (cw && cw.location && cw.location.toString)
+                        if (cw)  
                         {
-                            var url = cw.location.toString();
-                            if (contextURLSet.indexOf(url) == -1)
-                                contextURLSet.push(url);
+                            try 
+                            {
+                                var url = cw.location.toString(); // force it all the way to strings so we don't fight nsIDOMLocation.toString()
+                                if (url)
+                                {
+                                    if (contextURLSet.indexOf(url) == -1)
+                                        contextURLSet.push(url);
+                                }
+                            }
+                            catch(exc)
+                            {
+                            // there does not seem to be a way to avoid this exception   
+                            }
                         }
                     }
                     catch(e)

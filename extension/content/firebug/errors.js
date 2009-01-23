@@ -306,7 +306,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return;
 
-                if (context.window.location.toString() == url)
+                if (context.getWindowLocation() == url)
                     return errorContext = context;
                 else
                 {
