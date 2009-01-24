@@ -2178,7 +2178,7 @@ this.sourceURLsAsArray = function(context)
     for (var url in sourceFileMap)
         urls.push(url);
     
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.window.location+"\n");
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName()+"\n");
 
     return urls;
 };
@@ -2242,7 +2242,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             url = this.normalizeURL(url ? url : win.location.href);
             var added = addFile(url, i, (scriptSrc?win.location.href:null));
             if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.window.location+"\n");  /*@explore*/
+                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");  /*@explore*/
         }
     }, this));
     if (FBTrace.DBG_SOURCEFILES)
@@ -4307,7 +4307,7 @@ this.getSourceFileByScript = function(context, script)
     if (lucky && lucky.hasScript(script))
         return lucky;
 
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.getName()); /*@explore*/
 
     for (var url in context.sourceFileMap)
     {

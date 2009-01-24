@@ -1303,7 +1303,7 @@ top.Firebug =
     },
 
     loadedContext: function(context)
-    {
+    {if (!context.browser.currentURI) FBTrace.sysout("firebug.loadedContext problem browser ", context.browser);
         // re-synchronize after load if this context is showing
         if (this.tabBrowser.currentURI.spec == context.browser.currentURI.spec)
             context.browser.chrome.showContext(context.browser, context);

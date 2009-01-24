@@ -208,7 +208,7 @@ Firebug.TraceModule = extend(Firebug.Module,
     {
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.reattachContext for: " +
-                context ? context.window.location.href : "null context",
+                context ? context.getName() : "null context",
                 [browser, context]);
 
         // Create proper menu items for Firebug Tracing window in the new Firebug window.

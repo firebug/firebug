@@ -80,6 +80,11 @@ Firebug.TabContext.prototype =
 		return this.name;  
 	},
 
+	getGlobalScope: function()
+	{
+		return this.window;
+	},
+	
 	addSourceFile: function(sourceFile)
 	{
 		this.sourceFileMap[sourceFile.href] = sourceFile;

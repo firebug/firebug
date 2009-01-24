@@ -495,7 +495,7 @@ top.FirebugChrome =
     syncPanel: function()
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                      
-                (FirebugContext && FirebugContext.window ? FirebugContext.getWindowLocation() : "undefined")+"\n");                                     
+                (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");                                     
            
         var resumed = false;
         if (Firebug.getSuspended())
@@ -516,7 +516,7 @@ top.FirebugChrome =
         			TabWatcher.watchBrowser(browser);
         	
         			if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel prepared for resume FirebugContext="+                                      
-        					(FirebugContext && FirebugContext.window ? FirebugContext.getWindowLocation() : "undefined")+"\n");                                      
+        					(FirebugContext ? FirebugContext.getName() : "undefined")+"\n");                                      
         		}
         	}
         }
@@ -577,11 +577,7 @@ top.FirebugChrome =
     {
         if (FirebugContext)
         {
-            var win = FirebugContext.window;
-            var title = win.document.title;
-            if (!title)
-                title = win.location.href;
-
+            var title = FirebugContext.getTitle();
             window.document.title = FBL.$STRF("WindowTitle", [title]);
         }
         else
@@ -1167,7 +1163,7 @@ function onSelectingPanel(event)
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
     if (FBTrace.DBG_PANELS) 																													/*@explore*/
-        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext && FirebugContext.window?FirebugContext.getWindowLocation():"undefined")+"\n"); /*@explore*/
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext?FirebugContext.getName():"undefined")+"\n"); /*@explore*/
 
     if (FirebugContext)
     {

@@ -77,7 +77,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getCurrentFrameKeys: function(context)
     {
-        var globals = keys(context.window.wrappedJSObject);  // return is safe
+        var globals = keys(context.getGlobalScope().wrappedJSObject);  // return is safe
 
         if (context.currentFrame)
             return this.getFrameKeys(context.currentFrame, globals);
@@ -204,7 +204,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+" context.window:"+context.window);
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+" context.getGlobalScope():"+context.getGlobalScope());
         }
         catch (exc)
         {
@@ -567,7 +567,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     stopDebugging: function(context)
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.window+"\n");
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.getGlobalScope()+"\n");
         try
         {
             fbs.unlockDebugger();
@@ -611,7 +611,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!chrome)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpStack("debugger.syncCommand, context with no chrome: "+context.window);
+                FBTrace.dumpStack("debugger.syncCommand, context with no chrome: "+context.getGlobalScope());
             return;
         }
 
@@ -2008,7 +2008,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var self = this;
         // If the evaluate fails, then we report an error and don't show the infoTip
-        Firebug.CommandLine.evaluate(expr, this.context, null, this.context.window,
+        Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
             function success(result, context)
             {
                 var rep = Firebug.getRep(result);

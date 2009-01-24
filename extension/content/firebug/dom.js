@@ -444,7 +444,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
         if (object && !(object instanceof jsdIStackFrame))
         {
              // unwrappedJSObject.property = unwrappedJSObject
-             Firebug.CommandLine.evaluate(value, this.context, object, this.context.window,
+             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
                  function success(result, context)
                  {
                      object[name] = result;
@@ -676,7 +676,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
             {
                 this.toggles = {};
 
-                var win = this.context.window;
+                var win = this.context.getGlobalScope();
                 if (object == win)
                 {
                     this.pathIndex = 0;
@@ -722,7 +722,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
 
     getDefaultSelection: function()
     {
-        return this.context.window;
+        return this.context.getGlobalScope();
     },
 
     updateOption: function(name, value)
@@ -1123,7 +1123,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             {
                 var expr = this.watches[i];
                 var value = null;
-                Firebug.CommandLine.evaluate(expr, this.context, null, this.context.window,
+                Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
                     function success(result, context)
                     {
                         value = result;
