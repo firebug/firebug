@@ -35,8 +35,12 @@ top.Firebug.Console.injector = {
             
             this.attachConsoleInjector(context, win);
             this.addConsoleListener(context, win);
-        
-            return this.isAttached(win);
+            
+            var attached =  this.isAttached(win);
+            if (attached)
+                dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
+            
+            return attached;
         },
         
         attachConsoleInjector: function(context, win)
@@ -47,8 +51,6 @@ top.Firebug.Console.injector = {
                 FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
 
             Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
-
-            dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
 
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
