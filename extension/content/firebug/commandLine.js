@@ -447,6 +447,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         $("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         $("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
+        
+        Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
     
     showContext: function(browser, context)
@@ -558,18 +560,30 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("onCommandLineFocus, attachConsole "+FirebugContext.window.location+"\n");
+                FBTrace.sysout("attachConsoleOnFocus, attachConsole "+FirebugContext.window.location+"\n");
         }
         else  // the page had _firebug so we know that consoleInjected.js compiled and ran. 
         {
             if (FBTrace.DBG_CONSOLE)
             {
                 if (FirebugContext)
-                    FBTrace.sysout("onCommandLineFocus: ", (FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window"));
+                    FBTrace.sysout("attachConsoleOnFocus: ", (FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window"));
                 else
-                    FBTrace.sysout("onCommandLineFocus: No FirebugContext\n");
+                    FBTrace.sysout("attachConsoleOnFocus: No FirebugContext\n");
             }
         }
+    },
+    
+    // *********************************************************************************************
+    // Firebug.Console listener
+    onConsoleInjected: function(context, win)
+    {
+        // for some reason the console has been injected. If the user had focus in the command line they want it added in the page also.
+        // If the user has the cursor in the command line and reloads, the focus will already be there. issue 1339
+        var isFocused = ($("fbLargeCommandLine").getAttribute("focused") == "true");
+        isFocused = isFocused || ($("fbCommandLine").getAttribute("focused") == "true");
+        if (isFocused)  
+            setTimeout(this.onCommandLineFocus);
     },
 });
 
