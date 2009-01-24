@@ -1290,12 +1290,13 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         else
         {
-            var propsTotal = 0;
-            for (var p in this.obj)
+            try
             {
-                propsTotal++;
-                try
+                var propsTotal = 0;
+                for (var p in this.obj)
                 {
+                    propsTotal++;
+
                     var pAsString = p + "";
                     var m = this.reXPConnect.exec(pAsString);
                     if (m)
@@ -1320,9 +1321,9 @@ Firebug.TraceModule.TraceMessage.prototype =
                         this.props[p] = "{Error}";
                     }
                 }
-                catch (err)
-                {
-                }
+            }
+            catch (err)
+            {
             }
         }
 
