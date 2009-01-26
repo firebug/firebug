@@ -294,6 +294,8 @@
 }
 
 #saveToFile {
+    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 96px 16px 80px);
 }
 
 #closeFirefox {

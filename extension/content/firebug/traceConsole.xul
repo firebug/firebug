@@ -66,10 +66,10 @@
         label="tracing.cmd.Bookmark" class="toolbar-image-button"
         tooltiptext="tracing.cmd.tip.Bookmark" 
         command="cmd_separateConsole"/>
-      <!--<toolbarbutton id="saveToFile"
-        label="Save to File" class="toolbar-image-button"
-        tooltiptext="Save to File Ctrl+S" 
-        command="cmd_saveToFile"/> -->
+      <toolbarbutton id="saveToFile"
+        label="tracing.cmd.Save" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Save" 
+        command="cmd_saveToFile"/>
       <toolbarseparator flex="1"/>
       <toolbarbutton id="restartFirefox"
         label="tracing.cmd.Restart" class="toolbar-image-button"

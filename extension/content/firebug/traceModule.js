@@ -475,7 +475,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         ),
 
     separatorTag:
-        TR({class: "messageRow separatorRow"},
+        TR({class: "messageRow separatorRow", _repObject: "$message"},
             TD({class: "messageCol", colspan: "2"},
                 DIV("$message|getMessageIndex")
             )
