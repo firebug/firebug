@@ -1583,11 +1583,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     		    });
     		}
     	}
-    	else
-    	{
-    	    if (FBTrace.DBG_ERRORS)
-    	        FBTrace.sysout("debugger loadedContext watchPanelState", watchPanelState);
-    	}
     	
         if (FBTrace.DBG_SOURCEFILES) 
             FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
@@ -1595,12 +1590,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         updateScriptFiles(context);
         
         var panel = context.chrome.getSelectedPanel();
-        if (panel && panel.name == "script" && panel.restoreRetry)
+        if (panel && panel.name == "script")
         {
         	panel.location = null;  // the default could have been a URLOnly
         	var state = Firebug.getPanelState(panel);
         	panel.reShow(state);
-        	delete panel.restoreRetry;
         }        	
     },
 
@@ -2214,8 +2208,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // is enabled.
         this.panelSplitter.collapsed = !enabled;
         this.sidePanelDeck.collapsed = !enabled;
-
-        this.reShow(state);
     },
     
     reShow: function(state) 
