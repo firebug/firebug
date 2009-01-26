@@ -510,7 +510,7 @@ this.Property = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-this.NetFile = domplate(Firebug.Rep,
+this.NetFile = domplate(this.Obj,
 {
     supportsObject: function(object)
     {
