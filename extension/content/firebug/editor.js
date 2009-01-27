@@ -991,7 +991,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             else
             {
                 expr = "";
-                var candidates = [];
+                candidates = [];
                 for (var i = 0; i < values.length; ++i)
                 {
                 	if (values[i].substr)
