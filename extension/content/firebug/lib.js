@@ -1776,9 +1776,9 @@ this.getStackSourceLink = function()
         {
             for (; frame; frame = frame.caller)
             {
-                var httpObserverFile = "firebug@software.joehewitt.com/components/firebug-http-observer.js";
+                var firebugComponent = "/components/firebug-";
                 if (frame.filename && frame.filename.indexOf("chrome://firebug/") != 0 &&
-                    frame.filename.indexOf(httpObserverFile) == -1)
+                    frame.filename.indexOf(firebugComponent) == -1)
                     break;
             }
             break;
