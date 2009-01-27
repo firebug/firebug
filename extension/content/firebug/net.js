@@ -893,7 +893,16 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var row = getAncestorByClass(target, "netRow");
         if (row)
         {
-            if (getAncestorByClass(target, "netSizeCol")) 
+            if (getAncestorByClass(target, "netTotalSizeCol")) 
+            {
+                var infoTipURL = "netTotalSize";
+                if (infoTipURL == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = infoTipURL;
+                return this.populateTotalSizeInfoTip(infoTip, row);
+            }
+            else if (getAncestorByClass(target, "netSizeCol")) 
             {
                 var infoTipURL = row.repObject.href + "-netsize";
                 if (infoTipURL == this.infoTipURL)
@@ -931,6 +940,14 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     populateSizeInfoTip: function(infoTip, file)
     {
+        Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
+        return true;
+    },
+
+    populateTotalSizeInfoTip: function(infoTip, row)
+    {
+        var totalSizeLabel = getElementByClass(row, "netTotalSizeLabel");
+        var file = {size: totalSizeLabel.getAttribute("totalSize")};
         Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
         return true;
     },
@@ -1236,6 +1253,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             : $STRF("RequestCount", [fileCount]);
 
         var sizeLabel = row.childNodes[3].firstChild;
+        sizeLabel.setAttribute("totalSize", totalSize);
         sizeLabel.firstChild.nodeValue = this.formatSize(totalSize);
 
         var cacheSizeLabel = row.lastChild.firstChild.firstChild;
