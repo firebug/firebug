@@ -550,14 +550,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     formatSize: function(bytes)
     {
-        if (bytes == -1 || bytes == undefined)
-            return "?";
-        else if (bytes < 1024)
-            return bytes + " B";
-        else if (bytes < 1024*1024)
-            return Math.ceil(bytes/1024) + " KB";
-        else
-            return (Math.ceil(bytes/(1024*1024))) + " MB";
+        return formatSize(bytes);
     },
 
     formatTime: function(elapsed)
@@ -899,7 +892,16 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var row = getAncestorByClass(target, "netRow");
         if (row)
         {
-            if (getAncestorByClass(target, "netTimeCol"))
+            if (getAncestorByClass(target, "netSizeCol")) 
+            {
+                var infoTipURL = row.repObject.href + "-netsize";
+                if (infoTipURL == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = infoTipURL;
+                return this.populateSizeInfoTip(infoTip, row.repObject);
+            }
+            else if (getAncestorByClass(target, "netTimeCol"))
             {
                 var infoTipURL = row.repObject.href + "-nettime";
                 if (infoTipURL == this.infoTipURL)
@@ -923,6 +925,12 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     populateTimeInfoTip: function(infoTip, file)
     {
         Firebug.NetMonitor.TimeInfoTip.tag.replace({file: file}, infoTip);
+        return true;
+    },
+
+    populateSizeInfoTip: function(infoTip, file)
+    {
+        Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
         return true;
     },
 
@@ -1447,6 +1455,20 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
         var time = file.phase.contentLoadTime - file.startTime;
         return (time > 0 ? "+" : "") + formatTime(time);
+    },
+});
+
+// ************************************************************************************************
+
+Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
+{
+    tag: 
+        DIV({class: "sizeInfoTip"}, "$file|getSize"),
+
+    getSize: function(file)
+    {
+        return $STRF("net.file.SizeInfotip", [formatSize(file.size),
+            (file.size < 0) ? "?" : formatNumber(file.size)]);
     },
 });
 

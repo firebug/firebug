@@ -6340,6 +6340,36 @@ this.ERROR = function(exc)
 }
 
 // ************************************************************************************************
+// Math Utils
+
+this.formatNumber = function(number)
+{
+    number += "";
+    var x = number.split(".");
+    var x1 = x[0];
+    var x2 = x.length > 1 ? "." + x[1] : "";
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1))
+        x1 = x1.replace(rgx, "$1" + "," + "$2");
+    return x1 + x2;
+}
+
+// ************************************************************************************************
+// File Size Utils
+
+this.formatSize = function(bytes)
+{
+    if (bytes == -1 || bytes == undefined)
+        return "?";
+    else if (bytes < 1024)
+        return bytes + " B";
+    else if (bytes < 1024*1024)
+        return Math.ceil(bytes/1024) + " KB";
+    else
+        return (Math.ceil(bytes/(1024*1024))) + " MB";
+}
+
+// ************************************************************************************************
 // Time Utils
 
 this.formatTime = function(elapsed)
