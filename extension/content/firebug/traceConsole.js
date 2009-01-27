@@ -166,11 +166,13 @@ var TraceConsole =
                 foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
 
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
+                var currLocale = Firebug.getPref("general.useragent", "locale");
 
                 // Store head info.
                 var head = "Firebug: " + Firebug.version + "\n" + 
-                    appInfo.name + ": " + appInfo.version + ", " + appInfo.platformVersion + ", " + 
-                    appInfo.appBuildID + "\n" + 
+                    appInfo.name + ": " + appInfo.version + ", " + 
+                    appInfo.platformVersion + ", " + 
+                    appInfo.appBuildID + ", " + currLocale + "\n" +
                     "Export Date: " + (new Date()).toGMTString() + 
                     "\n==========================================\n\n";
                 foStream.write(head, head.length);
