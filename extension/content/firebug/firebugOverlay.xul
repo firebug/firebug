@@ -193,17 +193,18 @@
             <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1"/>
             <hbox id="fbSearchButtons">
                 <toolbarbutton id="fbSearchNext" command="cmd_searchNext"
-                            label="&firebug.Next;" class="toolbar-text-button" />
+                            label="search.Next" class="toolbar-text-button" />
                 <toolbarbutton id="fbSearchPrev" command="cmd_searchPrev"
-                            label="&firebug.Prev;" class="toolbar-text-button" />
+                            label="search.Prev" class="toolbar-text-button" />
                 <toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" id="fbSearchOptions">
                     <menupopup id="searchOptionsPopup"
                             onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                        <menuitem type="checkbox" label="&firebug.SearchCaseSensitive;"
-                                   oncommand="FirebugChrome.onToggleOption(this)"
-                                   option="searchCaseSensitive"/>
-
-                        <menuitem type="checkbox" label="&firebug.SearchGlobal;"
+                        <menuitem id="menu_searchCaseSensitive" type="checkbox" 
+                                  label="search.Search Case Sensitive"
+                                  oncommand="FirebugChrome.onToggleOption(this)"
+                                  option="searchCaseSensitive"/>
+                        <menuitem id="menu_searchAllFiles" type="checkbox" 
+                                  label="search.Search All Files"
                                   oncommand="FirebugChrome.onToggleOption(this)"
                                   option="searchGlobal"/>
                     </menupopup>

@@ -219,6 +219,12 @@ top.Firebug =
     {
         FBL.internationalize('menu_toggleSuspendFirebug', 'label');
         FBL.internationalize('menu_disablePanels', 'label');
+
+        // Search
+        FBL.internationalize('fbSearchNext', 'label');
+        FBL.internationalize('fbSearchPrev', 'label');
+        FBL.internationalize('menu_searchCaseSensitive', 'label');
+        FBL.internationalize('menu_searchAllFiles', 'label');
     },
 
     broadcast: function(message, args)
