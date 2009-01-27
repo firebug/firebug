@@ -1269,9 +1269,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
             var val;
             try
             {
-            	val = insecureObject.__lookupGetter__(name);
-            	if (!val)
-            		val = insecureObject[name];  // getter is safe
+            	val = insecureObject[name];  // getter is safe
             }
             catch (exc)
             {
@@ -1296,12 +1294,13 @@ function getMembers(object, level)  // we expect object to be user-level object 
             }
             else
             {
+                var getterFunction = insecureObject.__lookupGetter__(name);
                 if (name in domMembers)
-                    addMember("dom", domProps, name, val, level, domMembers[name]);
+                    addMember("dom", domProps, (getterFunction?"get "+name:name), val, level, domMembers[name]);
                 else if (name in domConstantMap)
-                    addMember("dom", domConstants, name, val, level);
+                    addMember("dom", domConstants, (getterFunction?"get "+name:name), val, level);
                 else
-                    addMember("user", userProps, name, val, level);
+                    addMember("user", userProps, (getterFunction?"get "+name:name), val, level);
             }
         }
     }
