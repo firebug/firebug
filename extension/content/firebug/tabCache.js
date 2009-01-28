@@ -76,6 +76,9 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 FBTrace.sysout("tabCache.initializeUI, custom mime-types added", list);
         }
 
+        // Read maximum size limit for cached response from preferences.
+        responseSizeLimit = Firebug.getPref(Firebug.prefDomain, "cache.responseLimit");
+
         // Register for HTTP events.
         if (Ci.nsITraceableChannel)
             httpObserver.addObserver(this, "firebug-http-event", false);

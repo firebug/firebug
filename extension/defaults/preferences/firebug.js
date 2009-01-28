@@ -83,6 +83,7 @@ pref("extensions.firebug.net.enableSites", false);
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.
+pref("extensions.firebug.cache.responseLimit", 5242880); // maximum size limit for cached response.
 
 // External Editors
 pref("extensions.firebug.externalEditors", "");
