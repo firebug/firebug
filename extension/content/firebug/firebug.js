@@ -1314,6 +1314,11 @@ top.Firebug =
         if (this.tabBrowser.currentURI.spec == context.browser.currentURI.spec)
             context.browser.chrome.showContext(context.browser, context);
     },
+    
+    onSourceFileCreated: function(context, sourceFile)
+    {
+        dispatch(modules, "onSourceFileCreated", [context, sourceFile]);
+    },
     //***********************************************************************
 
     getTabIdForWindow: function(aWindow)
@@ -2595,6 +2600,23 @@ Firebug.ActivableModule = extend(Firebug.Module,
     resetTooltip: function()
     {
         var tooltip = "Firebug "+ Firebug.getVersion();
+        
+        var fbStatusIcon = $('fbStatusIcon');
+        if (fbStatusIcon.getAttribute("errors") == "on")
+            tooltip +=" console: on,";
+        else
+        	tooltip +=" console: off,";
+        
+        if (fbStatusIcon.getAttribute("net") == "on")
+            tooltip +=" net: on,";
+        else
+        	tooltip +=" net: off,";
+        
+        if (fbStatusIcon.getAttribute("jsd") == "on")
+            tooltip +=" script: on";
+        else
+        	tooltip +=" script: off,";
+       
         if (Firebug.getSuspended())
             tooltip += ": " + Firebug.getSuspended();
         else
@@ -2612,6 +2634,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
                         dump("Firebug.ActivableModule.resetTooltip EXCEPTION " + e + "\n");
                     }
                 }
+            }
+            else
+            {
+                if(FBTrace.DBG_ERRORS)
+                	FBTrace.sysout("Firebug.ActivableModule.resetTooltip not suspended but no active modules!\n ");
             }
         }
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);

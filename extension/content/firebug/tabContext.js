@@ -89,9 +89,8 @@ Firebug.TabContext.prototype =
 	{
 		this.sourceFileMap[sourceFile.href] = sourceFile;
 		sourceFile.context = this;
-		// Not ideal, but the Debugger.fbListeners will be the ones interested and tabContext 
-		// events are dispatch by others already (eg initContext etc).  XXXjjb
-		dispatch(Firebug.Debugger.fbListeners, "onSourceFileCreated",[this, sourceFile]);
+		
+		Firebug.onSourceFileCreated(this, sourceFile);
 	},
 	// ***************************************************************************
     reattach: function(chrome)
