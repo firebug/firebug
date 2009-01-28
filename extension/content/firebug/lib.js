@@ -6313,7 +6313,8 @@ const invisibleTags = this.invisibleTags =
 
 this.ERROR = function(exc)
 {
-    if (FBTrace) {                                               
+    if (FBTrace) {
+        if (exc.stack) exc.stack = exc.stack.split('/n');
         FBTrace.dumpProperties("lib.ERROR: "+exc, exc);   
     }
     else                                                       
