@@ -2421,8 +2421,8 @@ this.isShift = function(event)
 this.dispatch = function(listeners, name, args)
 {
     try {
-        if (FBTrace.DBG_DISPATCH) 
-        	FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
+        if (FBTrace.DBG_DISPATCH)
+            var noMethods = [];
 
         for (var i = 0; i < listeners.length; ++i)
         {
@@ -2432,14 +2432,17 @@ this.dispatch = function(listeners, name, args)
             else
             {
             	if (FBTrace.DBG_DISPATCH)
-            		FBTrace.sysout("FBL.dispatch, listener "+i+" has no method "+name, listener);
+            	    noMethods.push(listener);
             }
         }
+        if (FBTrace.DBG_DISPATCH) 
+            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);              /*@explore*/
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
         {
+            exc.stack = exc.stack.split('/n');
             FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
             //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
         }
@@ -3291,51 +3294,25 @@ this.persistObject = function(object, context)
 
 this.restoreLocation =  function(panel, panelState)
 {
-	var needRetry = false;
+    var restored = false;
 	
 	if (!panel.location && panelState && panelState.persistedLocation)
 	{
 	    var location = panelState.persistedLocation(panel.context);
 	    if (location)
+	    {
 	        panel.navigate(location);
-	    else
-	     	needRetry = true;
+	        restored = true;
+	    }
 	}
 
 	if (!panel.location)
 	    panel.navigate(null);
-
-	if (needRetry)
-    {
-    	function overrideDefaultWithPersistedLocation()
-    	{
-    		var defaultLocation = panel.getDefaultLocation(panel.context);
-    		if (panelState.persistedLocation)
-    		{
-    			if ( (!panel.location) || (panel.location == defaultLocation))
-    			{
-    				var location = panelState.persistedLocation(panel.context);
-    				if (location)
-    					panel.navigate(location);
-    			}
-    		}
-    		else
-    		{
-    			if (!defaultLocation)  // no persisted and no default locations, erase 
-    			{
-    					panel.navigate();
-    			}
-    		}
-
-    		if (FBTrace.DBG_INITIALIZE)
-    			FBTrace.dumpProperties("lib.overrideDefaultWithPersistedLocation panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
-    	}
-    	
-    	panel.context.setTimeout(overrideDefaultWithPersistedLocation, overrideDefaultsWithPersistedValuesTimeout);
-    }
 	
 	if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panelState:", panelState);
+        FBTrace.dumpProperties("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
+	
+	return restored;
 };
 
 this.restoreSelection = function(panel, panelState)
@@ -3377,7 +3354,7 @@ this.restoreSelection = function(panel, panelState)
         FBTrace.dumpProperties("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
 };
 
-this.restoreObjects = function(panel, panelState, letMeRetryLater)
+this.restoreObjects = function(panel, panelState)
 {
     this.restoreLocation(panel, panelState);
     this.restoreSelection(panel, panelState);
