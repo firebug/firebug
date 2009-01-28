@@ -2442,7 +2442,7 @@ this.dispatch = function(listeners, name, args)
     {
         if (FBTrace.DBG_ERRORS)
         {
-            exc.stack = exc.stack.split('/n');
+            if (exc.stack) exc.stack = exc.stack.split('/n');
             FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
             //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
         }
@@ -3299,6 +3299,10 @@ this.restoreLocation =  function(panel, panelState)
 	if (!panel.location && panelState && panelState.persistedLocation)
 	{
 	    var location = panelState.persistedLocation(panel.context);
+	    
+		if (FBTrace.DBG_INITIALIZE)
+	        FBTrace.dumpProperties("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
+
 	    if (location)
 	    {
 	        panel.navigate(location);
