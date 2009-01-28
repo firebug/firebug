@@ -1638,7 +1638,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             var panelState = Firebug.getPanelState({name: this.panelName, context: context});
             var restored = restoreLocation(panel, panelState);
-            FBTrace.sysout("Debugger.onSourceFileCreated restored "+(restored?panel.location:"nothing"));
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("Debugger.onSourceFileCreated restored "+(restored?panel.location:"nothing"));
         }
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
