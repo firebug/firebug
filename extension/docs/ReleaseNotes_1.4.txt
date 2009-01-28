@@ -8,6 +8,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Improved and simplified Activation UI.
     * Supports Firefox 3.1
     * auto-suspend
+    * Adds tab switching shortcut. Currently hardcoded to ctrl + shift + pgup/pgdown 
+    * search across all files (contribution by kpdecker)
 
 == Javascript Debugging ==
     * Implement breakOnNext UI for STEP_SUSPEND
@@ -22,7 +24,10 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Net Panel ==
     * support for STATUS_RESOLVING 
-    * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel. 
+    * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel.
+    * Json tab is available even for XHR entries in Console panel.
+    * Limit for cached responses in tabCache. 
+    * Maximum size limit for cached responses can be specified in preferences.
 
 == For Extensions ==
     * All modules support Firebug.Listener
@@ -42,6 +47,11 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* sv-SE locale update (contribution by peter3)
 	* da-DK locale update (contribution by AlleyKat)
 	* nl-NL locale update (contribution by markh)
+	* Update tr-TR locale (contribution by gezmen)
+	* New Locale es-AR (contribution by eternoendless)
+	* Update locale ro-RO (contribution by alexxed)
+	* Update zh-CN locale (contribution by lovelywcm)
+	* Update cs-CZ locale (contribution by lordfrikk and mik)
 	
 == Bug Fixes ==
 	* Issue 176: net flash tab not recognising flv files
@@ -54,7 +64,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 895: Firebug toolbar button should behave the same way as clicking on status bar icon.
 	* Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
 	* Issue 1122: can't copy or open image background from css viewer
+	* Issue 1143: Inspected element variables ( $1, $2 ) command-line regression (contribution by urkle0)
 	* Issue 1176: Firebug should preserve Suspend state across sessions (after restart)
+	* Issue 1184: Search across all Javascript sources, not just one. contribution by kpdecker.
 	* Issue 1210: 1.3b1 post message display is screwed up
 	* Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
     * Issue 1226: FB 1.4 tabCache optimalization prevents webpages from being viewied in FF3.1 nighlies
@@ -71,9 +83,20 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 	* Issue 1284: Unable to add new editor to external editors
 	* Issue 1285: Enhancement patch: filefield is editable in add external editor dialog; contribution by antonin.hildebrand
 	* Issue 1290: Using backspace when searching in open files menu deletes two characters instead of one, contribution by splintor
+	* Issue 1303: console.log with wrong output -- scope of commandline
 	* Issue 1305: lib.ERROR with 1.3X.0b5 while debugging Google language API
 	* Issue 1306: console create unclickable, 4px-high log entries (revisited)
 	* Issue 1308: Missing URL-Encoding of reserved characters when using 'Copy Location with Parameters' from Net Panel
 	* Issue 1310: Net Panel - Wrong domain display
 	* Issue 1316: window.console is undefined, then console create empty log entries after clicking on the command line
 	* Issue 1317: Scrollbar in "Edit" view rendered half-invisible
+	* Issue 1323: img preview in CSS tab not working.
+	* Issue 1339: Command line becomes unusable after reload
+	* Issue 1347: Firebug 1.3 re-introduce "this.notifyFirebug is not a function" issue
+	* Issue 1352: All xmlhttprequest's appear to come from firebug-http-observer.js when looking at console view
+	* Issue 1367: Save as TXT/HTML or view in another tab ajax response
+	* Issue 1369: URL params parsing: omniture gifs no longer show params properly
+	* Issue 1381: Autocompletion only shows the first match
+	* Issue 1382: Add event dispatch when console is injected so extensions can know when console is available (contribution by collins.mike)
+	* Issue 1383: 1.3: if the last line is a comment throws Syntax Error: missing }
+	* Issue 1409:  Selected source file does not persist on reload
