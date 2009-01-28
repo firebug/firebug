@@ -1544,6 +1544,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
+        
         fbs.registerClient(this);   // allow callbacks for jsd
         fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
     },
@@ -1587,15 +1588,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_SOURCEFILES) 
             FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
         
-        updateScriptFiles(context);
-        
-        var panel = context.chrome.getSelectedPanel();
-        if (panel && panel.name == "script")
-        {
-        	panel.location = null;  // the default could have been a URLOnly
-        	var state = Firebug.getPanelState(panel);
-        	panel.reShow(state);
-        }        	
+        updateScriptFiles(context);  // scripts have not been compiled by DOMContentLoaded so these are URL only for now               	
     },
 
     destroyContext: function(context, persistedState)
@@ -1635,6 +1628,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.unregisterClient(this);
     },
 
+    onSourceFileCreated: function(context, sourceFile) 
+    { 
+        var panel = context.chrome.getSelectedPanel();
+        if (panel && (panel.name == this.panelName) )
+        {
+            var panelState = Firebug.getPanelState({name: this.panelName, context: context});
+            var restored = restoreLocation(panel, panelState);
+            FBTrace.sysout("Debugger.onSourceFileCreated restored "+(restored?panel.location:"nothing"));
+        }
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
     onFirstPanelActivate: function(context, init)
@@ -1800,7 +1803,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateSourceBox: function(sourceBox)
     {
-
+        if (this.scrollInfo && (this.scrollInfo.location == this.location))
+            sourceBox.scrollTop = this.scrollInfo.lastScrollTop;
+        delete this.scrollInfo;
     },
 
     getSourceType: function()
@@ -2208,21 +2213,17 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // is enabled.
         this.panelSplitter.collapsed = !enabled;
         this.sidePanelDeck.collapsed = !enabled;
+        
+        if ( (this.context.loaded && !this.location) || this.retryRestoreLocation)
+            this.reShow(state);
     },
     
     reShow: function(state) 
     {
         restoreLocation(this, state);  
 
-        if (state)  // then we are restoring
-        {
-            this.context.throttle(function()
-            {
-                var sourceBox = this.selectedSourceBox;
-                if (sourceBox)
-                    sourceBox.scrollTop = state.lastScrollTop;
-            }, this);
-        }
+        if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+            this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
         
         var enabled = Firebug.Debugger.isEnabled(this.context);
         if (enabled)
@@ -2262,6 +2263,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceBox = this.selectedSourceBox;
         if (sourceBox && state)
             state.lastScrollTop = sourceBox.scrollTop;
+        
+        this.location = null; // clear the location so we start fresh
     },
 
     search: function(text, reverse)
