@@ -43,6 +43,8 @@
         <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(FirebugContext)"/>
 
         <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
+        <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>
+        <command id="cmd_rightFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(true)"/>
         <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
 
@@ -83,6 +85,10 @@
                 command="cmd_previousFirebugTab"/>
         <key id="key_previousFirebugTab" key="`" modifiers="control" class="fbOnlyKey"
                 command="cmd_previousFirebugTab"/>
+        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift"
+                command="cmd_leftFirebugTab"/>
+        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift"
+                command="cmd_rightFirebugTab"/>
     </keyset>
 
     <popupset id="mainPopupSet">

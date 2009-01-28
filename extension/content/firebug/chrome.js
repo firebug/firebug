@@ -370,7 +370,29 @@ top.FirebugChrome =
         if (FirebugContext.previousPanelName)
             this.selectPanel(FirebugContext.previousPanelName);
     },
-
+    gotoSiblingTab : function(goRight)
+    {
+	    if ($('fbContentBox').collapsed) 
+	    	return;
+    	var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
+	    var panelTypes = Firebug.getMainPanelTypes(FirebugContext);
+	    /*get current panel's index (is there a simpler way for this?*/
+	    for (i = 0; i < panelTypes.length; i++) {
+		    if (panelTypes[i].prototype.name === currentPanel.name) {
+			    currentIndex = i;
+			    break;
+		    }
+	    }
+	    if (currentIndex != -1) {
+		    newIndex = goRight ? (currentIndex == panelTypes.length - 1 ? 0 : ++currentIndex) : 
+		    	(currentIndex == 0 ? panelTypes.length - 1 : --currentIndex);
+		    newPanel = panelTypes[newIndex].prototype;
+		    if (newPanel && newPanel.name) {
+			    this.selectPanel(newPanel.name);
+		    }
+	    }
+	    
+    },
     getNextObject: function(reverse)
     {
         var panel = FirebugContext.getPanel(FirebugContext.panelName);
