@@ -297,7 +297,7 @@ top.Firebug =
             $('menu_toggleSuspendFirebug').setAttribute("label", $STR("Suspend Firebug"));
         }
 
-        Firebug.ActivableModule.resetTooltip();
+        Firebug.resetTooltip();
     },
 
     toggleSuspend: function()
@@ -417,6 +417,107 @@ top.Firebug =
         this.setSuspended(null);
     },
 
+    resetTooltip: function()
+    {
+        var tooltip = "Firebug "+ Firebug.getVersion();
+        
+        var fbStatusIcon = $('fbStatusIcon');
+        if (fbStatusIcon.getAttribute("errors") == "on")
+            tooltip +=" console: on,";
+        else
+            tooltip +=" console: off,";
+        
+        if (fbStatusIcon.getAttribute("net") == "on")
+            tooltip +=" net: on,";
+        else
+            tooltip +=" net: off,";
+        
+        if (fbStatusIcon.getAttribute("jsd") == "on")
+            tooltip +=" script: on";
+        else
+            tooltip +=" script: off,";
+       
+        if (Firebug.getSuspended())
+            tooltip += ": " + Firebug.getSuspended();
+        else
+        {
+            var urls = Firebug.getURLsForAllActiveContexts();
+            if (urls.length > 0)
+            {
+                tooltip += " activated by "+urls.length+" page(s)";
+                for (var i = 0; i < urls.length; i++)
+                {
+                    try {
+                        tooltip += "\n"+decodeURI(urls[i]); 
+                    } catch (e) {
+                        // xxxHonza: from some reason FBTrace is undefined here.
+                        dump("Firebug.resetTooltip EXCEPTION " + e + "\n");
+                    }
+                }
+            }
+            else
+            {
+                if(FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Firebug.resetTooltip not suspended but no active modules!\n ");
+            }
+        }
+        $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
+    },
+
+    getURLsForAllActiveContexts: function()
+    {
+        var contextURLSet = [];  // create a list of all unique activeContexts in all modules
+        for (var i = 0; i < modules.length; i++)
+        {
+            var module = modules[i];
+            if (module.activeContexts)
+            {
+                for (var ic = 0; ic < module.activeContexts.length; ic++)
+                {
+                    try
+                    {
+                        var cw = module.activeContexts[ic].window;
+                        /*
+                        try 
+                        {
+                            if ( cw && ('location' in cw) && ('toString' in cw.location) )
+                                FBTrace.sysout("1) Found object with location: "+cw.location.toString()+"\n");
+                            if (cw && cw.location)
+                                FBTrace.sysout("2) Found object with location: "+cw.location.toString()+"\n");
+                        }
+                        catch(e)
+                        {
+                            FBTrace.sysout("Trying to find location in object gave "+e+"\n");
+                        }
+                         */
+                        if (cw)  
+                        {
+                            try 
+                            {
+                                var url = cw.location.toString(); // force it all the way to strings so we don't fight nsIDOMLocation.toString()
+                                if (url)
+                                {
+                                    if (contextURLSet.indexOf(url) == -1)
+                                        contextURLSet.push(url);
+                                }
+                            }
+                            catch(exc)
+                            {
+                            // there does not seem to be a way to avoid this exception   
+                            }
+                        }
+                    }
+                    catch(e)
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                            FBTrace.dumpProperties("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
+                    }
+                }
+            }
+        }
+        return this.activeContextURLs = contextURLSet;
+    },
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Dead Windows
 
@@ -2542,8 +2643,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onFirstPanelActivate(context, init);
 
         this.activeContexts.push(context);
-        this.activeContextURLs = null;
-        this.resetTooltip();
+        Firebug.resetTooltip();
         
         var panel = context.getPanel(this.panelName, true);
         if (panel)
@@ -2564,8 +2664,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (i != -1)
         {
             this.activeContexts.splice(i, 1);
-            this.activeContextURLs = null;
-            this.resetTooltip();
+            Firebug.resetTooltip();
         }
         else
         {
@@ -2597,108 +2696,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onLastPanelDeactivate(context, destroy);
     },
 
-    resetTooltip: function()
-    {
-        var tooltip = "Firebug "+ Firebug.getVersion();
-        
-        var fbStatusIcon = $('fbStatusIcon');
-        if (fbStatusIcon.getAttribute("errors") == "on")
-            tooltip +=" console: on,";
-        else
-        	tooltip +=" console: off,";
-        
-        if (fbStatusIcon.getAttribute("net") == "on")
-            tooltip +=" net: on,";
-        else
-        	tooltip +=" net: off,";
-        
-        if (fbStatusIcon.getAttribute("jsd") == "on")
-            tooltip +=" script: on";
-        else
-        	tooltip +=" script: off,";
-       
-        if (Firebug.getSuspended())
-            tooltip += ": " + Firebug.getSuspended();
-        else
-        {
-            var urls = Firebug.ActivableModule.getURLsForAllActiveContexts();
-            if (urls.length > 0)
-            {
-                tooltip += " activated by "+urls.length+" page(s)";
-                for (var i = 0; i < urls.length; i++)
-                {
-                    try {
-                        tooltip += "\n"+decodeURI(urls[i]); 
-                    } catch (e) {
-                        // xxxHonza: from some reason FBTrace is undefined here.
-                        dump("Firebug.ActivableModule.resetTooltip EXCEPTION " + e + "\n");
-                    }
-                }
-            }
-            else
-            {
-                if(FBTrace.DBG_ERRORS)
-                	FBTrace.sysout("Firebug.ActivableModule.resetTooltip not suspended but no active modules!\n ");
-            }
-        }
-        $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
-    },
 
-    getURLsForAllActiveContexts: function()
-    {
-    	if (this.activeContextURLs)
-    		return this.activeContextURLs;
-        var contextURLSet = [];  // create a list of all unique activeContexts in all modules
-        for (var i = 0; i < modules.length; i++)
-        {
-            var module = modules[i];
-            if (module.activeContexts)
-            {
-                for (var ic = 0; ic < module.activeContexts.length; ic++)
-                {
-                    try
-                    {
-                        var cw = module.activeContexts[ic].window;
-                        /*
-                        try 
-                        {
-                        	if ( cw && ('location' in cw) && ('toString' in cw.location) )
-                        		FBTrace.sysout("1) Found object with location: "+cw.location.toString()+"\n");
-                        	if (cw && cw.location)
-                        		FBTrace.sysout("2) Found object with location: "+cw.location.toString()+"\n");
-                        }
-                        catch(e)
-                        {
-                        	FBTrace.sysout("Trying to find location in object gave "+e+"\n");
-                        }
-                         */
-                        if (cw)  
-                        {
-                            try 
-                            {
-                                var url = cw.location.toString(); // force it all the way to strings so we don't fight nsIDOMLocation.toString()
-                                if (url)
-                                {
-                                    if (contextURLSet.indexOf(url) == -1)
-                                        contextURLSet.push(url);
-                                }
-                            }
-                            catch(exc)
-                            {
-                            // there does not seem to be a way to avoid this exception   
-                            }
-                        }
-                    }
-                    catch(e)
-                    {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
-                    }
-                }
-            }
-        }
-        return this.activeContextURLs = contextURLSet;
-    },
     // ---------------------------------------------------------------------------------------
 
     onFirstPanelActivate: function(context, init)
