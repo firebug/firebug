@@ -47,6 +47,9 @@ var contentTypes =
     "application/json": 1,
 };
 
+// Maximum cached size of a signle response (bytes)
+var responseSizeLimit = 1024 * 1024 * 5;
+
 // ************************************************************************************************
 // Model implementation
 
@@ -169,7 +172,7 @@ Firebug.TabCache = function(win)
 var ListeningCache = extend(Firebug.SourceCache.prototype, new Firebug.Listener());
 Firebug.TabCache.prototype = extend(ListeningCache,
 {
-    requests: [],       // requests in progress.
+    responses: [],       // responses in progress.
 
     storePartialResponse: function(request, responseText)
     {
@@ -185,22 +188,41 @@ Firebug.TabCache.prototype = extend(ListeningCache,
             return false;
         }
 
+        // If this is the first part of the response make sure the appropriate
+        // entry in the cache is clean (thi.invalidate).
         var url = safeGetName(request);
-        if (!this.requests[url])
+        var response = this.responses[url];
+        if (!response)
         {
             this.invalidate(url);
-            this.requests[url] = request;
+            this.responses[url] = response = {
+                request: request,
+                size: 0
+            };
         }
+
+        // Size of each response is limited.
+        var limitNotReached = true;
+        if (response.size + responseText.length >= responseSizeLimit)
+        {
+            limitNotReached = false;
+            responseText = responseText.substr(0, responseSizeLimit - response.size);
+            FBTrace.sysout("tabCache.storePartialResponse Max size limit reached for: " + url);
+        }
+
+        response.size += responseText.length;
 
         // Store partial content into the cache.
         this.store(url, responseText);
-        return true;
+
+        // Return false if furhter parts of this response should be ignored.
+        return limitNotReached;
     },
 
     stopRequest: function(request)
     {
         var url = safeGetName(request);
-        delete this.requests[url];
+        delete this.responses[url];
 
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.stopRequest: " + url);
@@ -397,18 +419,15 @@ TracingListener.prototype =
     {
         try
         {
-            if (!this.ignore)
+            var context = TabWatcher.getContextByWindow(this.window);
+            if (context) 
             {
-                var context = TabWatcher.getContextByWindow(this.window);
-                if (context) 
-                {
-                    context.sourceCache.stopRequest(request);
-                }
-                else 
-                {
-                    if (FBTrace.DBG_CACHE)
-                        FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
-                }
+                context.sourceCache.stopRequest(request);
+            }
+            else 
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
             }
 
             if (this.listener)

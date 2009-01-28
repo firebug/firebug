@@ -516,7 +516,7 @@ function onHTTPSpyLoad(spy)
     spy.detach();
 
     if (!spy.responseText)
-        spy.responseText = spy.xhrRequest.responseText;
+        spy.responseText = spy.context.sourceCache.loadText(spy.href);
 
     var netProgress = spy.context.netProgress;
     if (netProgress)
