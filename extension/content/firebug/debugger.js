@@ -1601,10 +1601,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.abort(context);
         }
         
-        if (context.dynamicURLhasBP)
-            persistedState.dynamicURLhasBP = context.dynamicURLhasBP;
-        else
-            delete persistedState.dynamicURLhasBP;
+        if(persistedState)
+        {
+            if (context.dynamicURLhasBP)
+                persistedState.dynamicURLhasBP = context.dynamicURLhasBP;
+            else
+                delete persistedState.dynamicURLhasBP;
+        }
     },
 
     updateOption: function(name, value)
