@@ -388,7 +388,7 @@
     padding: 8px;
     background-color: #FFFFFF;
     font-family: Monaco, monospace;
-    overflow-x: auto;
+    /*overflow-x: auto; HTML is damaged in case of big (2-3MB) responses */  
 }
 
 .netInfoText[selected="true"] {
