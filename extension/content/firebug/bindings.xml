@@ -19,7 +19,7 @@
 
 <binding id="panelBar">
     <content>
-        <xul:hbox anonid="tabBox" class="panelTabBox" collapsed="true">
+        <xul:hbox anonid="tabBox" class="panelTabBox" collapsed="true" role="tablist">
             <children includes="panelTab"/>
             <xul:spacer flex="1"/>
             <children/>
@@ -61,6 +61,7 @@
             <body><![CDATA[
             var tab = document.createElement("panelTab");
             tab.panelType = panelType;
+            tab.setAttribute('role', 'tab');
 
             var title = Firebug.getPanelTitle(panelType);
             tab.setAttribute("label", title);
@@ -145,16 +146,20 @@
                 else
                     this.tabBox.removeAttribute("collapsed");
 
-                if (this.selectedTab)
+                if (this.selectedTab) {
                     this.selectedTab.removeAttribute("selected");
+                    this.selectedTab.removeAttribute("aria-selected");
+                }
 
                 this.hideSelectedPanel();
 
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
 
-                if (tab)
+                if (tab) {
                     tab.setAttribute("selected", "true");
+                    tab.setAttribute("aria-selected", "true");
+                }
 
                 if (panel)
                 {
@@ -278,6 +283,46 @@
                 }, this));
             }
         ]]></handler>
+        <handler event="keypress"><![CDATA[
+        	var tab = event.target;
+        	var siblingTab, forward, keyCode;
+        	if (tab.nodeName.toLowerCase() == "paneltab") 
+        	{
+        		keyCode = event.keyCode || event.charCode;
+	        	switch (keyCode)
+	        	{
+		        	case KeyEvent.DOM_VK_LEFT:
+		        	case KeyEvent.DOM_VK_RIGHT:	        
+		        		forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+		        		// will only work as long as siblings only consist of paneltab elements
+		        		siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
+		        		if (!siblingTab) 
+		        			siblingTab = this[forward ? 'firstChild' : 'lastChild'];
+		        		if (siblingTab)
+		        			siblingTab.focus();
+		        	break;
+		        	case KeyEvent.DOM_VK_RETURN:
+		        	case KeyEvent.DOM_VK_SPACE: //copied from mouse handler
+			            for (; tab && !tab.panelType; tab = tab.parentNode);
+			            if (tab)
+			            {
+			                // Select after a timeout to increase teh snappy
+			                setTimeout(FBL.bindFixed(function()
+			                {
+			                    this.selectTab(tab);
+			                }, this));
+			            }
+			        break
+			        case KeyEvent.DOM_VK_DOWN:
+			        	if (tab.tabMenu) {
+			        	tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+			        	}
+		        	break;
+	        	} 
+	        }
+        ]]>
+        
+        </handler>
     </handlers>
 </binding>
 
@@ -296,6 +341,7 @@
             if (!this.tabMenu)
             {
                 this.tabMenu = document.createElement("panelTabMenu");
+                this.setAttribute('aria-haspopup', 'true'); // not picked up by AT atm. How to indicate dropdown menu on tab?
                 this.tabMenu.module = module;
                 return this.appendChild(this.tabMenu);
             }

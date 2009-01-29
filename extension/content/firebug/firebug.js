@@ -1961,8 +1961,10 @@ Firebug.AblePanel = extend(Firebug.Panel,
         persistedPanelState.enabled = true;
 
         var tab = this.getTab();
-        if (tab)
-            tab.removeAttribute("disabled");
+        if (tab) {
+            //tab.removeAttribute("disabled");
+        	tab.removeAttribute('aria-disabled');
+        }
     },
 
     disablePanel: function()
@@ -1971,9 +1973,10 @@ Firebug.AblePanel = extend(Firebug.Panel,
         persistedPanelState.enabled = false;
 
         var tab = this.getTab();
-        if (tab)
-            tab.setAttribute("disabled", "true");
-
+        if (tab) {
+            //tab.setAttribute("disabled", "true");
+        	tab.setAttribute('aria-disabled', 'true');
+        }
         clearNode(this.panelNode);
     },
     
@@ -3081,7 +3084,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (context)
         {
             var enabled = this.isEnabled(context);
-            tab.setAttribute("disabled", enabled ? "false" : "true");
+            //tab.setAttribute("disabled", enabled ? "false" : "true");
+            tab.setAttribute('aria-disabled', enabled ? "false" : "true");
         }
     }
 });

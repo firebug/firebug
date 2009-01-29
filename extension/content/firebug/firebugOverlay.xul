@@ -196,7 +196,7 @@
                             tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
             </hbox>
 
-            <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1"/>
+            <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1" label="Search Firebug Panel"/>
             <hbox id="fbSearchButtons">
                 <toolbarbutton id="fbSearchNext" command="cmd_searchNext"
                             label="search.Next" class="toolbar-text-button" />

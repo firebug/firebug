@@ -73,7 +73,21 @@ panelTab > panelTabMenu .menuTarget {
     visibility:collapse;
 }
 
-panelTab[selected="true"] > panelTabMenu .menuTarget {
+panelTab[selected="true"]{
+	-moz-user-focus: normal;
+}
+
+panelTab:focus {
+	text-decoration: underline;
+	background-color: cyan;
+	color: black;
+}
+
+panelTab[aria-disabled='true'] {
+	color: #808080;	
+}
+
+panelTab[selected="true"] > panelTabMenu .menuTarget, panelTab:focus > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTarget.png) no-repeat center;
     width: 11px;
     height: 10px;
