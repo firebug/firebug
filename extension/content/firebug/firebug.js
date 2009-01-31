@@ -28,6 +28,8 @@ const prefService = PrefService.getService(nsIPrefService);
 const nsIPermissionManager = Ci.nsIPermissionManager;
 const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
+const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
+const stringBundleService = CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -126,6 +128,10 @@ var deadWindowTimeout = 0;
 var clearContextTimeout = 0;
 var temporaryFiles = [];
 var temporaryDirectory = null;
+
+// Register default Firebug string bundle (yet before domplate templates).
+categoryManager.addCategoryEntry("strings_firebug", 
+    "chrome://firebug/locale/firebug.properties", "", true, true);
 
 // ************************************************************************************************
 
@@ -603,6 +609,22 @@ top.Firebug =
     registerEditor: function()
     {
         editors.push.apply(editors, arguments);
+    },
+
+    registerStringBundle: function(bundleUri)
+    {
+        categoryManager.addCategoryEntry("strings_firebug", bundleUri, "", true, true);
+        this.stringBundle = null;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Localization
+
+    getStringBundle: function()
+    {
+        if (!this.stringBundle)
+            this.stringBundle = stringBundleService.createExtensibleBundle("strings_firebug");
+        return this.stringBundle;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

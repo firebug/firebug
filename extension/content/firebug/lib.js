@@ -324,12 +324,12 @@ this.addScript = function(doc, id, src)
  */
 function $STR(name, bundleId) 
 {
-    if (!bundleId)
-        bundleId = "strings_firebug";
-        
     try
     {
-        return document.getElementById(bundleId).getString(name.replace(' ', '_', "g"));
+        if (bundleId)
+            return document.getElementById(bundleId).getString(name.replace(' ', '_', "g"));
+        else
+            return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
     }
     catch (err)
     {
@@ -350,12 +350,12 @@ function $STR(name, bundleId)
 
 function $STRF(name, args, bundleId)
 {
-    if (!bundleId)
-        bundleId = "strings_firebug";
-
     try
     {
-        return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
+        if (bundleId)
+            return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
+        else
+            return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
     }
     catch (err)
     {
