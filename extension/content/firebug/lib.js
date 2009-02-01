@@ -3239,7 +3239,7 @@ this.getIconURLForFile = function(path)
     return null;
 }
 
-this.makeURI() = function(urlString)
+this.makeURI = function(urlString)
 {
 	return ioService.newURI(urlString, null, null);
 }
