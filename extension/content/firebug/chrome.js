@@ -148,13 +148,8 @@ top.FirebugChrome =
 
             locationList.addEventListener("selectObject", onSelectLocation, false);
 
-            for (var i = 0; i < Firebug.panelTypes.length; ++i)
-            {
-                var panelType = Firebug.panelTypes[i];
-                if (!panelType.prototype.parentPanel)
-                    panelBar1.addTab(panelType);
-            }
-
+            this.updatePanelBar1(Firebug.panelTypes);
+            
             if (externalMode)
                 this.attachBrowser(externalBrowser, FirebugContext);
             else
@@ -334,7 +329,19 @@ top.FirebugChrome =
         return file.path;
     },
 
+    updatePanelBar1: function(panelTypes)
+    {
+    	var mainPanelTypes = [];
+        for (var i = 0; i < panelTypes.length; ++i)
+        {
+            var panelType = panelTypes[i];
+            if (!panelType.prototype.parentPanel && !panelType.hidden)
+            	mainPanelTypes.push(panelType);
+        }
+        panelBar1.updatePanels(mainPanelTypes);
+    },
 
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     close: function()
