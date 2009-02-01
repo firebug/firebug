@@ -940,7 +940,7 @@ top.Firebug =
         detachCommand.setAttribute("checked", !!browser.detached);
         this.showKeys(shouldShow);
 
-        // no such method dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
+        dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
     },
 
     showKeys: function(shouldShow)
@@ -2651,6 +2651,20 @@ Firebug.ActivableModule = extend(Firebug.Module,
         prefs.removeObserver(this.getPrefDomain(), this);
 
         this.panelDeactivate(context, true);
+    },
+    
+    showUI: function(browser, context)  // Firebug is open, in browser or detached
+    {
+    	// if we are enabled, activate the context
+        if (this.isHostEnabled(context))
+            this.panelActivate(context, false);
+    },
+    
+    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+    {
+    	// if we are active, deactivate
+    	if (this.isEnabled(context))
+    		this.panelDeactivate(context, false);
     },
 
     panelActivate: function(context, init)
