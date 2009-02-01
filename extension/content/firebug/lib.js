@@ -15,6 +15,7 @@ this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
 
 const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
 const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
@@ -2775,7 +2776,6 @@ this.getLocalPath = function(url)
 {
     if (this.isLocalURL(url))
     {
-        var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
         var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
         var file = fileHandler.getFileFromURLSpec(url);
         return file.path;
@@ -2784,7 +2784,6 @@ this.getLocalPath = function(url)
 
 this.getURLFromLocalFile = function(file)
 {
-    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");  // TODO cache?
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;
@@ -2944,8 +2943,6 @@ this.reEncodeURL= function(file, text)
 
 this.getResource = function(aURL)
 {
-    var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-
     try 
     {
     	var channel=ioService.newChannel(aURL,null,null);
@@ -3224,7 +3221,6 @@ this.launchProgram = function(exePath, args)
 
 this.getIconURLForFile = function(path)
 {
-    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     try {
         var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
@@ -3241,6 +3237,11 @@ this.getIconURLForFile = function(path)
         this.ERROR(exc);
     }
     return null;
+}
+
+this.makeURI() = function(urlString)
+{
+	return ioService.newURI(urlString, null, null);
 }
 
 // ************************************************************************************************
