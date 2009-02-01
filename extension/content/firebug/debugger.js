@@ -1680,8 +1680,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" for debuggerName "+this.debuggerName+" on "+context.getName()+"\n"); /*@explore*/
 
-        if (!init)
-            context.window.location.reload();
+        // if (!init)
+        //    context.window.location.reload();  // 1.4a13
     },
 
     onPanelDeactivate: function(context, destroy, panelName)

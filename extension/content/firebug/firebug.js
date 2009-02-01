@@ -3168,7 +3168,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         this.refresh();
 
         if (needReload)
-            this.context.window.location.reload();
+            this.context.window.location.reload();  
     },
 
     show: function(panel, module)
@@ -3247,7 +3247,7 @@ Firebug.ModuleManager =
             module.updateTab(context);
         }
 
-        return needReload;
+        return false; // needReload;  // 1.4a13
     },
 
     disableModule: function(context, module)

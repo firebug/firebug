@@ -293,8 +293,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         $('fbStatusIcon').setAttribute("net", "on");
 
-        if (!init)
-            context.window.location.reload();
+        //if (!init)
+        //    context.window.location.reload(); // 1.4a13
     },
 
     onPanelDeactivate: function(context, destroy, deactivatedPanelName)

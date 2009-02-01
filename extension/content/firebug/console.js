@@ -230,8 +230,8 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onPanelActivate**************> activeContexts: "+this.activeContexts.length+"\n");
 
-        if (!init)
-            context.window.location.reload();
+        //if (!init)
+        //    context.window.location.reload(); // 1.4a13
     },
 
     onLastPanelDeactivate: function(context, destroy)
