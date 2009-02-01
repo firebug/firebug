@@ -286,10 +286,10 @@ FirebugService.prototype =
         if (debuggr)
         {
             debuggers.push(debuggr);
-            if (FBTrace.DBG_FBS_FINDDEBUGGER) 
-                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"); 
             if (debuggers.length == 1)
                 this.enableDebugger();
+            if (FBTrace.DBG_FBS_FINDDEBUGGER)  // 1.3.1 report after enableDebugger op
+            	FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd")); /*@explore*/
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";
@@ -304,7 +304,7 @@ FirebugService.prototype =
                 scriptListeners.push(debuggr);
         } catch(exc) {
         }
-        return  enabledDebugger;
+        return  debuggers.length;  // 1.3.1 return to allow Debugger to check progress
     },
 
     unregisterDebugger: function(debuggrWrapper)
@@ -319,8 +319,6 @@ FirebugService.prototype =
                 break;
             }
         }
-        if (FBTrace.DBG_FBS_FINDDEBUGGER) 
-            FBTrace.sysout("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" with "+debuggr.activeContexts.length+" active contexts"); 
 
         for (var i = 0; i < netDebuggers.length; ++i)
         {
@@ -341,6 +339,11 @@ FirebugService.prototype =
 
         if (debuggers.length == 0)
             this.disableDebugger();
+        
+        if (FBTrace.DBG_FBS_FINDDEBUGGER)  // 1.3.1 move below disableDebugger
+        	FBTrace.sysout("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
+
+        return debuggers.length;
     },
 
     lockDebugger: function()
@@ -854,9 +857,10 @@ FirebugService.prototype =
             if (!jsd.isOn)
                 jsd.on();
 
+            while(jsd.pauseDepth)  // 1.3.1 unwind completely before dispatch (port to 1.4)
+                jsd.unPause();
+            
             dispatch(clients, "onJSDActivate", [jsd]);
-
-            jsd.unPause();
             this.hookScripts();
         }
         else
@@ -914,26 +918,26 @@ FirebugService.prototype =
 
     disableDebugger: function()
     {
-        if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger);
-
         if (!enabledDebugger)
             return;
 
         if (!timer)  // then we probably shutdown
             return;
 
-        timer.init({observe: function()
-        {
+ // 1.3.1 timer is confusing and seems unnecessary here Port 1.4
+//        timer.init({observe: function()  
+//        {
             enabledDebugger = false;
 
             jsd.pause();
             fbs.unhookScripts();
             jsd.off();
             dispatch(clients, "onJSDDeactivate", [jsd]);
-        }}, 1000, TYPE_ONE_SHOT);
+ //       }}, 500, TYPE_ONE_SHOT);
 
-        waitingForTimer = true;
+        //waitingForTimer = true;
+        if (FBTrace.DBG_FBS_FINDDEBUGGER) // 1.3.1 report after the work
+        	FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger+" waitingForTimer:"+waitingForTimer);
     },
 
     pause: function()  // must support multiple calls
