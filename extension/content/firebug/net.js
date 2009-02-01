@@ -18,7 +18,6 @@ const nsICacheService = Ci.nsICacheService;
 const nsICache = Ci.nsICache;
 const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
 const nsISupports = Ci.nsISupports;
-const nsIIOService = Ci.nsIIOService;
 const imgIRequest = Ci.imgIRequest;
 const nsIUploadChannel = Ci.nsIUploadChannel;
 const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;

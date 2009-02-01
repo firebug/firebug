@@ -20,7 +20,6 @@ const nsIURI = Ci.nsIURI;
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const PermManager = Cc["@mozilla.org/permissionmanager;1"];
 const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
-const ioService = CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
 
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
