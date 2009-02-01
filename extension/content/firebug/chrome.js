@@ -158,7 +158,8 @@ top.FirebugChrome =
         } catch (exc) {
             FBTrace.dumpProperties("chrome.initializeUI fails", exc);
         }
-
+        var toolbar = $('fbToolbar');
+        toolbar.addEventListener('keypress', handleFbToolbarKeyPress, true);
     },
 
     shutdown: function()
@@ -398,12 +399,21 @@ top.FirebugChrome =
 			    this.selectPanel(newPanel.name);
 		    }
 	    }
-	    
+    },
+    focusFbToolbar : function() {
+    	Firebug.focusAnchor = document.commandDispatcher.focusedElement;
+    	if (!$('fbContentBox').collapsed) {
+    		$(FirebugContext.detached ? 'fbInspectButton' : 'fbFirebugMenu').focus();
+    		$('fbToolbar').className = "focused";
+		}
+    },
+    openPanelOptionsMenu : function() {
+    	FBTrace.sysout('test');
     },
     getNextObject: function(reverse)
     {
         var panel = FirebugContext.getPanel(FirebugContext.panelName);
-        if (panel)
+        if (panel)	
         {
             var item = panelStatus.getItemByObject(panel.selection);
             if (item)
@@ -1319,6 +1329,28 @@ function getRealObject(object)
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
     var realRep = realObject ? Firebug.getRep(realObject) : rep;
     return realObject ? realObject : object;
+}
+
+function handleFbToolbarKeyPress(event) {
+	var keyCode = event.keyCode || event.charCode;
+	var target = event.target;
+	switch(keyCode) {
+		case KeyEvent.DOM_VK_UP:
+		case KeyEvent.DOM_VK_DOWN:
+		case KeyEvent.DOM_VK_RETURN:
+		case KeyEvent.DOM_VK_SPACE:	
+			if (target.getAttribute('type') == "menu" && !event.altKey) {
+				target.getElementsByTagName('menupopup')[0].showPopup();
+			}
+			event.stopPropagation();
+		break;
+		case KeyEvent.DOM_VK_ESCAPE:
+			if (Firebug.focusAnchor && Firebug.focusAnchor.focus) {
+				Firebug.focusAnchor.focus();
+			}
+			$('fbToolbar').className = "";
+		break;
+	}
 }
 
 // ************************************************************************************************

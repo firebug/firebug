@@ -23,7 +23,7 @@
             <children includes="panelTab"/>
             <xul:spacer flex="1"/>
             <children/>
-            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" anonid="panelOptions">
+            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" anonid="panelOptions" role="button" aria-haspopup="true" >
                 <xul:menupopup anonid="optionsPopup"/>
             </xul:toolbarbutton>
         </xul:hbox>
@@ -148,7 +148,7 @@
 
                 if (this.selectedTab) {
                     this.selectedTab.removeAttribute("selected");
-                    this.selectedTab.removeAttribute("aria-selected");
+                    this.selectedTab.removeAttribute("aria-expanded");
                 }
 
                 this.hideSelectedPanel();
@@ -158,7 +158,7 @@
 
                 if (tab) {
                     tab.setAttribute("selected", "true");
-                    tab.setAttribute("aria-selected", "true");
+                    tab.setAttribute("aria-expanded", "true");
                 }
 
                 if (panel)
@@ -283,10 +283,12 @@
                 }, this));
             }
         ]]></handler>
-        <handler event="keypress"><![CDATA[
-        	var tab = event.target;
+        <handler event="keydown" phase="capturing"><![CDATA[
+        	var tab = event.originalTarget;
+        	var isTab = tab.nodeName.toLowerCase() == "paneltab";
+        	var isOptionsMenu = tab.nodeName.toLowerCase() == "xul:toolbarbutton";
         	var siblingTab, forward, keyCode;
-        	if (tab.nodeName.toLowerCase() == "paneltab") 
+        	if (isTab || isOptionsMenu ) 
         	{
         		keyCode = event.keyCode || event.charCode;
 	        	switch (keyCode)
@@ -294,30 +296,33 @@
 		        	case KeyEvent.DOM_VK_LEFT:
 		        	case KeyEvent.DOM_VK_RIGHT:	        
 		        		forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+		        		if (isTab) {
+		        			FirebugChrome.gotoSiblingTab(forward);
 		        		// will only work as long as siblings only consist of paneltab elements
 		        		siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
 		        		if (!siblingTab) 
 		        			siblingTab = this[forward ? 'firstChild' : 'lastChild'];
 		        		if (siblingTab)
 		        			siblingTab.focus();
+		        		}
 		        	break;
 		        	case KeyEvent.DOM_VK_RETURN:
-		        	case KeyEvent.DOM_VK_SPACE: //copied from mouse handler
-			            for (; tab && !tab.panelType; tab = tab.parentNode);
-			            if (tab)
-			            {
-			                // Select after a timeout to increase teh snappy
-			                setTimeout(FBL.bindFixed(function()
-			                {
-			                    this.selectTab(tab);
-			                }, this));
-			            }
-			        break
+		        	case KeyEvent.DOM_VK_SPACE:
+			        case KeyEvent.DOM_VK_UP:
 			        case KeyEvent.DOM_VK_DOWN:
-			        	if (tab.tabMenu) {
-			        	tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+			        	if (isTab && tab.tabMenu) {
+			        		tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+			        	}
+			        	else if (isOptionsMenu && this.optionsPopup && !event.altKey) {
+			        		this.optionsPopup.showPopup();
+			        		
 			        	}
 		        	break;
+		        	case KeyEvent.DOM_VK_F4:
+			        	if (isTab && tab.tabMenu) {
+			        		tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+			        	}
+			        break;
 	        	} 
 	        }
         ]]>
@@ -432,9 +437,9 @@
                     this.appendChild(sep);
                 }
 
-                var item = document.createElement("label");
+                var item = document.createElement("toolbarbutton");
                 item.setAttribute("class", "panelStatusLabel");
-                item.setAttribute("value", label);
+                item.setAttribute("label", label);
                 item.repObject = object;
                 item.rep = rep;
                 this.appendChild(item);
@@ -519,14 +524,20 @@
     </handlers>
 </binding>
 
-<binding id="panelFileList" display="xul:menu">
+<binding id="panelFileList" >
+    
     <content popup="_child">
+	    <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
+	    	<xul:menupopup anonid="popup" position="after_start"/>
+	    </xul:toolbarbutton>
+	<!--
         <xul:label class="toolbarbutton-text"
              xbl:inherits="value=label,tooltip=labeltooltip,contextmenu=labelcontextmenu"/>
         <xul:image class="toolbarbutton-menu-dropmarker"/>
         <xul:menupopup anonid="popup" position="after_start"/>
+    -->
     </content>
-
+	
     <resources>
         <stylesheet src="chrome://global/skin/toolbarbutton.css"/>
     </resources>
@@ -833,6 +844,9 @@
         ]]></handler>
 
         <handler event="keypress" keycode="VK_TAB"><![CDATA[
+            if (this.value == "") {
+        		return;
+        	}
             Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
             event.preventDefault();
         ]]></handler>

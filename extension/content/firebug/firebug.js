@@ -230,6 +230,9 @@ top.Firebug =
         FBL.internationalize('fbSearchPrev', 'label');
         FBL.internationalize('menu_searchCaseSensitive', 'label');
         FBL.internationalize('menu_searchAllFiles', 'label');
+        FBL.internationalize('fbFirebugMenu', 'label');
+        FBL.internationalize('fbCommandLine', 'label');
+        
     },
 
     broadcast: function(message, args)

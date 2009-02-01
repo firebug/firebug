@@ -134,7 +134,7 @@
         <vbox id="fbContentBox" collapsed="true" persist="height">
             <toolbox id="fbToolbox">
                 <toolbar id="fbToolbar">
-                    <toolbarbutton id="fbFirebugMenu" type="menu">
+                    <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
                         <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup">
 
                             <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
@@ -199,10 +199,10 @@
     <!-- Extend Firefox status bar -->
 
     <statusbar id="status-bar">
-        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu"
+        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button" aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
                         onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon" tooltiptext="Firebug"/>
-            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);"/>
+            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);" role="button" />
         </statusbarpanel>
 
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">

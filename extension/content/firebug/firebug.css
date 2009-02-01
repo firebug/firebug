@@ -64,7 +64,6 @@ panelStatus {
 }
 
 /************************************************************************************************/
-
 panelTabMenu {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelTabMenu");
 }
@@ -73,18 +72,8 @@ panelTab > panelTabMenu .menuTarget {
     visibility:collapse;
 }
 
-panelTab[selected="true"]{
-	-moz-user-focus: normal;
-}
-
-panelTab:focus {
-	text-decoration: underline;
-	background-color: cyan;
-	color: black;
-}
-
 panelTab[aria-disabled='true'] {
-	color: #808080;	
+	color: graytext;	
 }
 
 panelTab[selected="true"] > panelTabMenu .menuTarget, panelTab:focus > panelTabMenu .menuTarget {
@@ -98,3 +87,32 @@ panelTab[selected="true"] > panelTabMenu .menuTarget, panelTab:focus > panelTabM
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTargetHover.png) no-repeat center;
 }
+
+/**** focus related ****/
+
+panelTab[selected="true"], 
+toolbar.focused toolbarbutton, 
+toolbar.focused checkbox, 
+toolbar.focused input, 
+#fbPanelBar1 .panelOptionsButton, 
+#fbPanelBar2 .panelOptionsButton, 
+#fbStatusBar {
+	-moz-user-focus: normal; 	
+}
+
+#fbToolbar toolbarbutton:focus, 
+#fbToolbar label:focus, 
+.panelOptionsButton:focus, 
+#fbStatusBar:focus {
+	outline: 2px solid yellow;
+}
+
+panelTab:focus {
+	background-color: cyan;
+}
+
+panelTab:focus > label {
+	text-decoration: underline;
+	color: black;
+}
+/**** end focus related ****/

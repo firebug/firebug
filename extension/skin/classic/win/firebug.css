@@ -30,7 +30,7 @@
 
 .toolbar-text-button > .toolbarbutton-icon,
 .toolbar-text-menubutton > .toolbarbutton-icon {
-    display: none;
+    /*display: none;*/
 }
 
 .toolbar-text-menubutton:hover:active,

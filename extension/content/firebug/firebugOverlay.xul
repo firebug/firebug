@@ -35,6 +35,7 @@
         <command id="cmd_focusFirebugSearch" oncommand="Firebug.Search.focus(FirebugContext)"/>
         <command id="cmd_focusWatchEditor" oncommand="Firebug.Debugger.focusWatch(FirebugContext)"/>
         <command id="cmd_focusLocation" oncommand="FirebugChrome.focusLocationList(FirebugContext)"/>
+		<command id="cmd_focusFbMenu" oncommand="FirebugChrome.focusFbToolbar()"/>
 
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" breakable="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
@@ -43,7 +44,7 @@
         <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(FirebugContext)"/>
 
         <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
-        <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>
+        <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>        
         <command id="cmd_rightFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(true)"/>
         <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
@@ -75,7 +76,8 @@
                 command="cmd_focusLocation"/>
         <key id="key_focusLocation" key=" " modifiers="control" class="fbOnlyKey"
                 command="cmd_focusLocation"/>
-
+		<key id="key_focusFbMenu" key="o" modifiers="accel shift" class="fbOnlyKey"
+                command="cmd_focusFbMenu"/>
         <key id="key_nextObject" key="." modifiers="control" class="fbOnlyKey"
                 command="cmd_nextObject"/>
         <key id="key_previousObject" key="," modifiers="control" class="fbOnlyKey"
@@ -126,7 +128,7 @@
                 <toolbarseparator/>
                 <tooltip id="fbScriptFilterMenuTooltip"
                     onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
-                <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip">
+                <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">
                     <menupopup
                         oncommand="return Firebug.Debugger.onScriptFilterMenuCommand(event, FirebugContext)"
                         onpopupshowing="return Firebug.Debugger.onScriptFilterMenuPopupShowing(this, FirebugContext)"
@@ -177,9 +179,9 @@
             </hbox>
             
             <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
-            <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                            class="toolbar-text-menubutton" collapsed="true"
-                            labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"/>
+            <hbox id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
+                            collapsed="true" 
+                            labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"></hbox>
 
             <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
             <panelStatus id="fbPanelStatus" flex="1"
@@ -249,7 +251,7 @@
 
     <hbox id="fbCommandBox">
         <label id="fbCommandArow" value=">>>"/>
-        <textbox id="fbCommandLine" multiline="true" flex="1"/>
+        <textbox id="fbCommandLine" multiline="true" flex="1" label="console command line"/>
         <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                        oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
     </hbox>
