@@ -366,18 +366,6 @@ function FirebugConsoleHandler(context, win)
         Firebug.Console.log(result, context, "errorMessage");
     };
 
-/*
-    this.addTab = function(url, title, parentPanel)
-    {
-        context.chrome.addTab(context, url, title, parentPanel);
-    };
-
-    this.removeTab = function(url)
-    {
-        context.chrome.removeTab(context, url);
-    };
-*/
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     function logFormatted(args, className, linkToSource, noThrottle)
