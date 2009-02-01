@@ -356,7 +356,7 @@ function $STRF(name, args, bundleId)
         if (bundleId)
             return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
         else
-            return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
+            return Firebug.getStringBundle().formatStringFromName(name.replace(' ', '_', "g"), args, args.length);
     }
     catch (err)
     {
