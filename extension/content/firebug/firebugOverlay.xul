@@ -102,7 +102,7 @@
 
     <!-- Main UI -->
 
-    <toolbar id="fbToolbar" align="center">
+    <toolbar id="fbToolbar" align="center" role="toolbar">
         <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">
             <toolbarbutton id="fbInspectButton" label="&firebug.Inspect;" class="toolbar-text-button"
                            tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting"/>
@@ -229,7 +229,7 @@
             <panelBar id="fbPanelBar2" paneltooltip="fbTooltip" panelcontextmenu="fbContextMenu"/>
 
             <vbox id="fbLargeCommandBox">
-                <textbox id="fbLargeCommandLine" multiline="true" flex="1"/>
+                <textbox id="fbLargeCommandLine" multiline="true" flex="1" label="LargeCommandLine" />
                 <hbox id="fbCommandToolbar">
                     <toolbarbutton label="&firebug.Run;" class="toolbar-text-button"
                                    oncommand="Firebug.CommandLine.enter(FirebugContext)"/>

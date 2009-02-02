@@ -146,7 +146,8 @@
                 else
                     this.tabBox.removeAttribute("collapsed");
 
-                if (this.selectedTab) {
+                if (this.selectedTab) 
+                {
                     this.selectedTab.removeAttribute("selected");
                     this.selectedTab.removeAttribute("aria-expanded");
                 }
@@ -156,7 +157,8 @@
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
 
-                if (tab) {
+                if (tab) 
+                {
                     tab.setAttribute("selected", "true");
                     tab.setAttribute("aria-expanded", "true");
                 }
@@ -284,49 +286,53 @@
             }
         ]]></handler>
         <handler event="keydown" phase="capturing"><![CDATA[
-        	var tab = event.originalTarget;
-        	var isTab = tab.nodeName.toLowerCase() == "paneltab";
-        	var isOptionsMenu = tab.nodeName.toLowerCase() == "xul:toolbarbutton";
-        	var siblingTab, forward, keyCode;
-        	if (isTab || isOptionsMenu ) 
-        	{
-        		keyCode = event.keyCode || event.charCode;
-	        	switch (keyCode)
-	        	{
-		        	case KeyEvent.DOM_VK_LEFT:
-		        	case KeyEvent.DOM_VK_RIGHT:	        
-		        		forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
-		        		// will only work as long as long as siblings only consist of paneltab elements
-		        		siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
-		        		if (!siblingTab) 
-		        			siblingTab = this[forward ? 'firstChild' : 'lastChild'];
-		        		if (siblingTab) {
-		        			setTimeout(FBL.bindFixed(function()
-                			{
-                    			this.selectTab(siblingTab);
-                    			siblingTab.focus();
-                			}, this));
-		        		}
-		        	break;
-		        	case KeyEvent.DOM_VK_RETURN:
-		        	case KeyEvent.DOM_VK_SPACE:
-			        case KeyEvent.DOM_VK_UP:
-			        case KeyEvent.DOM_VK_DOWN:
-			        	if (isTab && tab.tabMenu) {
-			        		tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
-			        	}
-			        	else if (isOptionsMenu && this.optionsPopup && !event.altKey) {
-			        		this.optionsPopup.showPopup();
-			        		
-			        	}
-		        	break;
-		        	case KeyEvent.DOM_VK_F4:
-			        	if (isTab && tab.tabMenu) {
-			        		tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
-			        	}
-			        break;
-	        	} 
-	        }
+            var tab = event.originalTarget;
+            var isTab = tab.nodeName.toLowerCase() == "paneltab";
+            var isOptionsMenu = tab.nodeName.toLowerCase() == "xul:toolbarbutton";
+            var siblingTab, forward, keyCode;
+            if (isTab || isOptionsMenu )
+            {
+                keyCode = event.keyCode || event.charCode;
+                switch (keyCode)
+                {
+                    case KeyEvent.DOM_VK_LEFT:
+                    case KeyEvent.DOM_VK_RIGHT:
+                        forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+                        // will only work as long as long as siblings only consist of paneltab elements
+                        siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
+                        if (!siblingTab) 
+                            siblingTab = this[forward ? 'firstChild' : 'lastChild'];
+                        if (siblingTab) 
+                        {
+                            setTimeout(FBL.bindFixed(function()
+                            {
+                                this.selectTab(siblingTab);
+                                siblingTab.focus();
+                            }, this));
+                        }
+                    break;
+                    case KeyEvent.DOM_VK_RETURN:
+                    case KeyEvent.DOM_VK_SPACE:
+                    case KeyEvent.DOM_VK_UP:
+                    case KeyEvent.DOM_VK_DOWN:
+                        if (isTab && tab.tabMenu) 
+                        {
+                            tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+                        }
+                        else if (isOptionsMenu && this.optionsPopup && !event.altKey) 
+                        {
+                            this.optionsPopup.showPopup();
+                            
+                        }
+                    break;
+                    case KeyEvent.DOM_VK_F4:
+                        if (isTab && tab.tabMenu) 
+                        {
+                            tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+                        }
+                    break;
+                } 
+            }
         ]]>
         
         </handler>
@@ -529,17 +535,17 @@
 <binding id="panelFileList" >
     
     <content popup="_child">
-	    <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
-	    	<xul:menupopup anonid="popup" position="after_start"/>
-	    </xul:toolbarbutton>
-	<!--
+        <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
+            <xul:menupopup anonid="popup" position="after_start"/>
+        </xul:toolbarbutton>
+    <!--
         <xul:label class="toolbarbutton-text"
              xbl:inherits="value=label,tooltip=labeltooltip,contextmenu=labelcontextmenu"/>
         <xul:image class="toolbarbutton-menu-dropmarker"/>
         <xul:menupopup anonid="popup" position="after_start"/>
     -->
     </content>
-	
+    
     <resources>
         <stylesheet src="chrome://global/skin/toolbarbutton.css"/>
     </resources>
@@ -575,7 +581,7 @@
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
                 if (FBTrace.DBG_LOCATIONS)
-                	FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName);
+                    FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName);
             ]]></setter>
         </property>
 
@@ -721,8 +727,8 @@
             {
                 var object = objects[i];
                 var description = locator.getObjectDescription(object);
-				if (!description)
-					FBTrace.sysout("binding.xml popupshowing Fails" , object);
+                if (!description)
+                    FBTrace.sysout("binding.xml popupshowing Fails" , object);
                 var entry = {object: object, fileName: description.name};
                 
                 if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
@@ -846,9 +852,10 @@
         ]]></handler>
 
         <handler event="keypress" keycode="VK_TAB"><![CDATA[
-            if (this.value == "") {
-        		return;
-        	}
+            if (this.value == "")
+            {
+                return;
+            }
             Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
             event.preventDefault();
         ]]></handler>

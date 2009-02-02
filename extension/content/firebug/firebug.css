@@ -73,7 +73,7 @@ panelTab > panelTabMenu .menuTarget {
 }
 
 panelTab[aria-disabled='true'] {
-	color: graytext;	
+    color: graytext;
 }
 
 panelTab[selected="true"] > panelTabMenu .menuTarget, panelTab:focus > panelTabMenu .menuTarget {
@@ -97,22 +97,22 @@ toolbar.focused input,
 #fbPanelBar1 .panelOptionsButton, 
 #fbPanelBar2 .panelOptionsButton, 
 #fbStatusBar {
-	-moz-user-focus: normal; 	
+    -moz-user-focus: normal;
 }
 
 #fbToolbar toolbarbutton:focus, 
 #fbToolbar label:focus, 
 .panelOptionsButton:focus, 
 #fbStatusBar:focus {
-	outline: 2px solid yellow;
+    outline: 2px solid yellow;
 }
 
 panelTab:focus {
-	background-color: cyan;
+    background-color: cyan;
 }
 
 panelTab:focus > label {
-	text-decoration: underline;
-	color: black;
+    text-decoration: underline;
+    color: black;
 }
 /**** end focus related ****/

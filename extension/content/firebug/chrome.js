@@ -332,12 +332,12 @@ top.FirebugChrome =
 
     updatePanelBar1: function(panelTypes)
     {
-    	var mainPanelTypes = [];
+        var mainPanelTypes = [];
         for (var i = 0; i < panelTypes.length; ++i)
         {
             var panelType = panelTypes[i];
             if (!panelType.prototype.parentPanel && !panelType.hidden)
-            	mainPanelTypes.push(panelType);
+                mainPanelTypes.push(panelType);
         }
         panelBar1.updatePanels(mainPanelTypes);
     },
@@ -380,34 +380,40 @@ top.FirebugChrome =
     },
     gotoSiblingTab : function(goRight)
     {
-	    if ($('fbContentBox').collapsed) 
-	    	return;
-    	var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
-	    var panelTypes = Firebug.getMainPanelTypes(FirebugContext);
-	    /*get current panel's index (is there a simpler way for this?*/
-	    for (i = 0; i < panelTypes.length; i++) {
-		    if (panelTypes[i].prototype.name === currentPanel.name) {
-			    currentIndex = i;
-			    break;
-		    }
-	    }
-	    if (currentIndex != -1) {
-		    newIndex = goRight ? (currentIndex == panelTypes.length - 1 ? 0 : ++currentIndex) : 
-		    	(currentIndex == 0 ? panelTypes.length - 1 : --currentIndex);
-		    newPanel = panelTypes[newIndex].prototype;
-		    if (newPanel && newPanel.name) {
-			    this.selectPanel(newPanel.name);
-		    }
-	    }
+        if ($('fbContentBox').collapsed)
+            return;
+        var i, currentIndex = newIndex = -1, currentPanel = this.getSelectedPanel(), newPanel;
+        var panelTypes = Firebug.getMainPanelTypes(FirebugContext);
+        /*get current panel's index (is there a simpler way for this?*/
+        for (i = 0; i < panelTypes.length; i++)
+        {
+            if (panelTypes[i].prototype.name === currentPanel.name)
+            {
+                currentIndex = i;
+                break;
+            }
+        }
+        if (currentIndex != -1)
+        {
+            newIndex = goRight ? (currentIndex == panelTypes.length - 1 ? 0 : ++currentIndex) : (currentIndex == 0 ? panelTypes.length - 1 : --currentIndex);
+            newPanel = panelTypes[newIndex].prototype;
+            if (newPanel && newPanel.name)
+            {
+                this.selectPanel(newPanel.name);
+            }
+        }
     },
-    focusFbToolbar : function() {
-    	Firebug.focusAnchor = document.commandDispatcher.focusedElement;
-    	if (!$('fbContentBox').collapsed) {
-    		$(FirebugContext.detached ? 'fbInspectButton' : 'fbFirebugMenu').focus();
-    		$('fbToolbar').className = "focused";
-		}
+    focusFbToolbar : function()
+    {
+        Firebug.focusAnchor = document.commandDispatcher.focusedElement;
+        if (!$('fbContentBox').collapsed)
+        {
+            $(FirebugContext.detached ? 'fbInspectButton' : 'fbFirebugMenu').focus();
+            $('fbToolbar').className = "focused";
+        }
     },
-    openPanelOptionsMenu : function() {
+    openPanelOptionsMenu : function()
+    {
     	FBTrace.sysout('test');
     },
     getNextObject: function(reverse)
