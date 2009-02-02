@@ -296,14 +296,16 @@
 		        	case KeyEvent.DOM_VK_LEFT:
 		        	case KeyEvent.DOM_VK_RIGHT:	        
 		        		forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
-		        		if (isTab) {
-		        			FirebugChrome.gotoSiblingTab(forward);
-		        		// will only work as long as siblings only consist of paneltab elements
+		        		// will only work as long as long as siblings only consist of paneltab elements
 		        		siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
 		        		if (!siblingTab) 
 		        			siblingTab = this[forward ? 'firstChild' : 'lastChild'];
-		        		if (siblingTab)
-		        			siblingTab.focus();
+		        		if (siblingTab) {
+		        			setTimeout(FBL.bindFixed(function()
+                			{
+                    			this.selectTab(siblingTab);
+                    			siblingTab.focus();
+                			}, this));
 		        		}
 		        	break;
 		        	case KeyEvent.DOM_VK_RETURN:
