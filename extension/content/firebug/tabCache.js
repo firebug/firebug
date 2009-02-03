@@ -185,7 +185,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERROR || FBTrace.DBG_CACHE)
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " + 
                     safeGetName(request), err);
             return false;
