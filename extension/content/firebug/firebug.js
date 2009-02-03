@@ -1307,21 +1307,6 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Owner
 
-    enableContext: function(win, uri)  // currently this can be called with nsIURI or a string URL.
-    {
-        if (FBTrace.DBG_WINDOWS)                       														/*@explore*/
-            FBTrace.sysout("-> enableContext for: ", ((uri instanceof nsIURI)?uri.spec:uri)+"\n");                             				/*@explore*/
-
-        if ( dispatch2(extensions, "acceptContext", [win, uri]) )
-            return true;
-        if ( dispatch2(extensions, "declineContext", [win, uri]) )
-            return false;
-
-        if (Firebug.getSuspended())  // during suspend we will not create new contexts
-            return false;
-        return true;
-    },
-
     createTabContext: function(win, browser, chrome, state)
     {
         return new Firebug.TabContext(win, browser, chrome, state);
