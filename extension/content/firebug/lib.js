@@ -2452,16 +2452,35 @@ this.dispatch = function(listeners, name, args)
 
 this.dispatch2 = function(listeners, name, args)
 {
-    if (FBTrace.DBG_DISPATCH) FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
-
-    for (var i = 0; i < listeners.length; ++i)
+    try 
     {
-        var listener = listeners[i];
-        if ( listener.hasOwnProperty(name) )
+        if (FBTrace.DBG_DISPATCH)
+            var noMethods = [];
+        
+        for (var i = 0; i < listeners.length; ++i)
         {
-            var result = listener[name].apply(listener, args);
-            if ( result )
-                return result;
+        	var listener = listeners[i];
+        	if ( listener.hasOwnProperty(name) )
+        	{
+        		var result = listener[name].apply(listener, args);
+        		if ( result )
+        			return result;
+        	}
+        	else 
+        	{
+        		if (FBTrace.DBG_DISPATCH)
+            	    noMethods.push(listener);
+        	}
+        }
+        if (FBTrace.DBG_DISPATCH) 
+            FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);          
+    } 
+    catch (exc)
+    {
+    	if (FBTrace.DBG_ERRORS)
+        {
+            if (exc.stack) exc.stack = exc.stack.split('/n');
+            FBTrace.dumpProperties(" Exception in lib.dispatch2 "+ name, exc);
         }
     }
 };
@@ -3600,11 +3619,11 @@ this.SourceFile.prototype =
         if (this.innerScripts)
         {
         	var numberInvalid = 0;
-            for (var i = 0; i < this.innerScripts.length; i++)
+            for (var p in this.innerScripts)
             {
-                var script = this.innerScripts[i];
+                var script = this.innerScripts[p];
                 if (script.isValid)  
-                	str += script.tag+" ";
+                	str += p+" ";
                 else
                 	numberInvalid++;
             }
@@ -3619,9 +3638,9 @@ this.SourceFile.prototype =
             callback(this.outerScript);
         if (this.innerScripts)
         {
-            for (var i = 0; i < this.innerScripts.length; i++)
+            for (var p in this.innerScripts)
             {
-                var script = this.innerScripts[i];
+                var script = this.innerScripts[p];
                 var rc = callback(script);
                 if (rc)
                     return rc;
@@ -3739,14 +3758,12 @@ this.SourceFile.prototype =
         if (!this.innerScripts)
             return; // eg URLOnly
 
-        if (FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("getScriptsAtLineNumber "+this.innerScripts.length+" innerScripts, offset "+offset+" for sourcefile: "+this.toString()+"\n");
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         var scripts = [];
-        for (var j = 0; j < this.innerScripts.length; j++)
+        for (var p in this.innerScripts)
         {
-            var script = this.innerScripts[j];
+            var script = this.innerScripts[p];
             if (mustBeExecutableLine && !script.isValid) continue;
             this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
         }
@@ -3757,6 +3774,11 @@ this.SourceFile.prototype =
         {
             FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
             return false;
+        }
+        else
+        {
+            if (FBTrace.DBG_LINETABLE)
+                FBTrace.sysout("getScriptsAtLineNumber offset "+offset+" for sourcefile: "+this.toString()+"\n");
         }
 
         return (scripts.length > 0) ? scripts : false;
@@ -3817,15 +3839,7 @@ this.SourceFile.prototype =
         // XXXjjb Don't use indexOf or similar tests that rely on ===, since we are really working with
         // wrappers around jsdIScript, not script themselves.  I guess.
 
-        if (!this.innerScripts || !this.innerScripts.length)
-        	return false;
-        
-        for (var j = 0; j < this.innerScripts.length; j++)
-        {
-            if (script.tag == this.innerScripts[j].tag)
-                return this.innerScripts[j];
-        }
-        return false;
+       return ( this.innerScripts && this.innerScripts.hasOwnProperty(script.tag) );
     },
 
     // these objects map JSD's values to correct values
@@ -3931,8 +3945,9 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 
     // Attach the innerScripts for use later
     if (!sourceFile.innerScripts)
-        sourceFile.innerScripts = [];
+        sourceFile.innerScripts = {};
 
+    var total = 0;
     while (innerScripts.hasMoreElements())
     {
     	var script = innerScripts.getNext();
@@ -3942,12 +3957,16 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
     	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext FAILS "+sourceFile, script);
     	    continue;    	    
         }
-    	if (FBTrace.DBG_SOURCEFILES && !script.isValid)
-    		FBTrace.sysout("FBL.addScriptsToSourceFile script "+script.tag+".isValid:"+script.isValid);
-        sourceFile.innerScripts.push(script);
+    	if (FBTrace.DBG_SOURCEFILES)
+    	{
+    		total++;
+    		FBTrace.sysout("FBL.addScriptsToSourceFile "+total+" script: "+script.tag+".isValid:"+script.isValid);
+    	}
+        sourceFile.innerScripts[script.tag] = script;
+        total++
     }
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
-        FBTrace.sysout("FBL.addScriptsToSourceFile "+sourceFile.innerScripts.length+" scripts, sourcefile="+sourceFile.toString(), sourceFile);
+        FBTrace.sysout("FBL.addScriptsToSourceFile "+ total +" scripts, sourcefile="+sourceFile.toString(), sourceFile);
 }
 
 //------------
@@ -4174,7 +4193,7 @@ this.ReusedSourceFile = function(sourceFile, outerScript, innerScriptEnumerator)
 this.EnumeratedSourceFile = function(url) // we don't have the outer script and we delay source load.
 {
     this.href = new String(url);  // may not be outerScript file name, eg this could be an enumerated eval
-    this.innerScripts = [];
+    this.innerScripts = {};
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
@@ -4199,7 +4218,7 @@ this.EnumeratedSourceFile.prototype.getSourceLength = function()
 this.NoScriptSourceFile = function(context, url) // Somehow we got the URL, but not the script
 {
      this.href = url;  // we know this much
-     this.innerScripts = [];
+     this.innerScripts = {};
 }
 
 this.NoScriptSourceFile.prototype = new this.SourceFile("URLOnly");
@@ -4251,7 +4270,7 @@ this.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't h
     this.context = context;
     this.href = url;  // we know this is not an eval
     this.scriptTagNumber = scriptTagNumber;
-    this.innerScripts = [];
+    this.innerScripts = {};
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
@@ -6315,7 +6334,7 @@ const invisibleTags = this.invisibleTags =
 this.ERROR = function(exc)
 {
     if (FBTrace) {
-        if (exc.stack) exc.stack = exc.stack.split('/n');
+        if (exc.stack) exc.stack = exc.stack.split('\n');
         FBTrace.dumpProperties("lib.ERROR: "+exc, exc);   
     }
     else                                                       
