@@ -832,7 +832,7 @@ top.FirebugChrome =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // UI Event Listeners uilisteners
+    // UI Event Listeners uilisteners  or "panelListeners"
 
     onPanelNavigate: function(object, panel)
     {
@@ -856,6 +856,14 @@ top.FirebugChrome =
     },
     
     onLineSelect: function(sourceLink) // called on scrollTo, passing in the selected line
+    {
+    },
+    
+    showUI: function(browser, context) // called when the Firebug UI comes up in browser or detached
+    {
+    },
+    
+    hideUI: function(brower, context)  // called when the Firebug UI comes down
     {
     },
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
