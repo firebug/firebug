@@ -179,6 +179,7 @@ top.Firebug =
         prefs.addObserver(this.servicePrefDomain, this, false);
 
         var basePrefNames = prefNames.length;
+        
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
@@ -944,7 +945,7 @@ top.Firebug =
         detachCommand.setAttribute("checked", !!browser.detached);
         this.showKeys(shouldShow);
 
-        dispatch(modules, show ? "showUI" : "hideUI", [browser, FirebugContext]);
+        dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
     },
 
     showKeys: function(shouldShow)
@@ -2592,6 +2593,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     initializeUI: function(detachArgs)
     {
+        Firebug.URLSelector.initialize(this);
+        TabWatcher.addListener(Firebug.URLSelector);
+        uiListeners.push(Firebug.URLSelector); // TODO something nicer for this
+        
         this.updateTab(null);
     },
 
@@ -2642,20 +2647,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.panelDeactivate(context, true);
     },
     
-    showUI: function(browser, context)  // Firebug is open, in browser or detached
-    {
-    	// if we are enabled, activate the context
-        if (this.isHostEnabled(context))
-            this.panelActivate(context, false);
-    },
-    
-    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
-    {
-    	// if we are active, deactivate
-    	if (this.isEnabled(context))
-    		this.panelDeactivate(context, false);
-    },
-
     panelActivate: function(context, init)
     {
         if (FBTrace.DBG_PANELS)
@@ -3263,6 +3254,67 @@ Firebug.ModuleManager =
         return module.isEnabled(context);
     },
 } 
+//************************************************************************************************
+//A TabWatch listener and a uiListener
+Firebug.URLSelector = 
+{
+		initialize: function(activableModule)  // called once 
+		{
+			this.activableModule = activableModule;
+			this.taggingSvc = Components.classes["@mozilla.org/browser/tagging-service;1"]
+		                                    .getService(Components.interfaces.nsITaggingService);
+			this.tempURI = makeURI("http://getfirebug.com");
+		},
+		
+		shouldCreateContext: function(win, uri)  // true if the Places tags the URI "firebugged"
+		{
+			var taggedURI = uri;
+			if ( !(uri instanceof nsIURI) )
+			{
+				try 
+				{
+					this.tempURI.spec = uri;
+					taggedURI = this.tempURI;
+				}
+				catch(e)
+				{
+					if(FBTrace.DBG_ERRORS)
+						FBTrace.sysout("shouldCreateContext failed for "+uri);
+					return false;
+				}
+			}
+			
+			var tags = this.taggingSvc.getTagsForURI(taggedURI); 
+			if (tags.indexOf('firebugged') != -1) 
+				return true;
+			else
+				return false;
+		},
+		
+	    showUI: function(browser, context)  // Firebug is opened, in browser or detached
+	    {
+	    	// if we are enabled, activate the context
+	        if (this.activableModule.isHostEnabled(context))
+	        	this.activableModule.panelActivate(context, false);
+	        
+	    	// mark this URI as firebugged
+			this.tempURI.spec = context.getWindowLocation();
+			this.taggingSvc.tagURI(this.tempURI, ["firebugged"]);
+			FBTrace.sysout("showUI tagged "+context.getWindowLocation());
+	    },
+	    
+	    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+	    {
+	    	// if we are active, deactivate
+	    	if (this.activableModule.isEnabled(context))
+	    		this.activableModule.panelDeactivate(context, false);
+
+	    	// unmark this URI
+	    	this.tempURI.spec = context.getWindowLocation();
+	    	this.taggingSvc.untagURI(this.tempURI, ["firebugged"]);
+	    	FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
+	    },
+}
 
 // ************************************************************************************************
 
