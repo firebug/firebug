@@ -2671,13 +2671,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onFirstPanelActivate(context, init);
 
         this.activeContexts.push(context);
-        Firebug.resetTooltip();
         
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.enablePanel();
 
         dispatch(modules, "onPanelActivate", [context, init, this.panelName]);
+        Firebug.resetTooltip();
     },
 
     panelDeactivate: function(context, destroy)
@@ -2690,10 +2690,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         var i = this.activeContexts.indexOf(context);
         if (i != -1)
-        {
             this.activeContexts.splice(i, 1);
-            Firebug.resetTooltip();
-        }
         else
         {
             if (FBTrace.DBG_ERRORS)
@@ -2722,6 +2719,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         if (this.activeContexts.length == 0)
             this.onLastPanelDeactivate(context, destroy);
+
+        Firebug.resetTooltip();
     },
 
 
