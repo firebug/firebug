@@ -3258,23 +3258,25 @@ Firebug.ModuleManager =
 //A TabWatch listener and a uiListener
 Firebug.URLSelector = 
 {
+		annotationName: "firebug/history",
+		
 		initialize: function(activableModule)  // called once 
 		{
 			this.activableModule = activableModule;
-			this.taggingSvc = Components.classes["@mozilla.org/browser/tagging-service;1"]
-		                                    .getService(Components.interfaces.nsITaggingService);
+			this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
+		                                    .getService(Components.interfaces.nsIAnnotationService);
 			this.tempURI = makeURI("http://getfirebug.com");
 		},
 		
-		shouldCreateContext: function(win, uri)  // true if the Places tags the URI "firebugged"
+		shouldCreateContext: function(win, uri)  // true if the Places annotation the URI "firebugged"
 		{
-			var taggedURI = uri;
+			var annotatedURI = uri;
 			if ( !(uri instanceof nsIURI) )
 			{
 				try 
 				{
 					this.tempURI.spec = uri;
-					taggedURI = this.tempURI;
+					annotatedURI = this.tempURI;
 				}
 				catch(e)
 				{
@@ -3284,8 +3286,8 @@ Firebug.URLSelector =
 				}
 			}
 			
-			var tags = this.taggingSvc.getTagsForURI(taggedURI); 
-			if (tags.indexOf('firebugged') != -1) 
+			var annotation = this.annotationSvc.getPageAnnotation(annotatedURI, this.annotationName); 
+			if (annotation) 
 				return true;
 			else
 				return false;
@@ -3299,7 +3301,7 @@ Firebug.URLSelector =
 	        
 	    	// mark this URI as firebugged
 			this.tempURI.spec = context.getWindowLocation();
-			this.taggingSvc.tagURI(this.tempURI, ["firebugged"]);
+			this.annotationSvc.setPageAnnotation(this.tempURI, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
 			FBTrace.sysout("showUI tagged "+context.getWindowLocation());
 	    },
 	    
@@ -3311,7 +3313,7 @@ Firebug.URLSelector =
 
 	    	// unmark this URI
 	    	this.tempURI.spec = context.getWindowLocation();
-	    	this.taggingSvc.untagURI(this.tempURI, ["firebugged"]);
+	    	this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
 	    	FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
 	    },
 }
