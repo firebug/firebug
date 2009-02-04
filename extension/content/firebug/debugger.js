@@ -1632,24 +1632,20 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
-        FBTrace.sysout(">>registerDebugger this.registered: "+this.registered );
         if (this.registered)
             return;
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
         this.registered = true;
-        FBTrace.sysout(">>registerDebugger this.registered: "+this.registered +" check: "+((check == 0)?"FAILED":"OK"));
     },
     
     unregisterDebugger: function() // 1.3.1 safe for multiple calls
     {
-        FBTrace.sysout("<<unregisterDebugger this.registered: "+this.registered );
         if (!this.registered)
             return;
         if (Firebug.Debugger.activeContexts.length > 0 || Firebug.Console.activeContexts.length > 0)
             return;  // don't turn off JSD unless both console and script panels are done.
         var check = fbs.unregisterDebugger(this);   
         this.registered = false;
-        FBTrace.sysout("<<unregisterDebugger this.registered: "+this.registered+" check: "+((check == 0)?"OK":"FAILED") );
     },
     onSourceFileCreated: function(context, sourceFile) 
     { 
