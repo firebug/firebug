@@ -276,7 +276,7 @@ this.addScript = function(doc, id, src)
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
-    	element.firebugIgnore = true;
+        element.firebugIgnore = true;
 
     element.innerHTML = src;
     if (doc.documentElement)
@@ -296,34 +296,34 @@ this.addScript = function(doc, id, src)
 /*
  * $STR - intended for localization of a static string.
  * $STRF - intended for localization of a string with dynamically inserted values.
- * 
+ *
  * Notes:
  * 1) Name with _ in place of spaces is the key in the firebug.properties file.
  * 2) If the specified key isn't localized for particular language, both methods use
  *    the part after the last dot (in the specified name) as the return value.
  *
  * Examples:
- * $STR("Label"); - search for key "Label" within the firebug.properties file 
+ * $STR("Label"); - search for key "Label" within the firebug.properties file
  *                 and returns its value. If the key doesn't exist returns "Label".
- * 
+ *
  * $STR("Button Label"); - search for key "Button_Label" withing the firebug.properties
  *                        file. If the key doesn't exist returns "Button Label".
  *
- * $STR("net.Response Header"); - search for key "net.Response_Header". If the key doesn't 
+ * $STR("net.Response Header"); - search for key "net.Response_Header". If the key doesn't
  *                               exist returns "Response Header".
  *
  * firebug.properties:
  * net.timing.Request_Time=Request Time: %S [%S]
- * 
+ *
  * var param1 = 10;
  * var param2 = "ms";
  * $STRF("net.timing.Request Time", param1, param2);  -> "Request Time: 10 [ms]"
- *                                          
- * - search for key "net.timing.Request_Time" within the firebug.properties file. Parameters 
- *   are inserted at specified places (%S) in the same order as they are passed. If the 
+ *
+ * - search for key "net.timing.Request_Time" within the firebug.properties file. Parameters
+ *   are inserted at specified places (%S) in the same order as they are passed. If the
  *   key doesn't exist the method returns "Request Time".
  */
-function $STR(name, bundleId) 
+function $STR(name, bundleId)
 {
     try
     {
@@ -1365,7 +1365,7 @@ this.readBoxStyles = function(style)
     for (var styleName in styleNames)
         styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText);
     if (FBTrace.DBG_INSPECT)
-    	FBTrace.sysout("readBoxStyles ", styles);
+        FBTrace.sysout("readBoxStyles ", styles);
     return styles;
 };
 
@@ -1392,7 +1392,7 @@ this.getElementCSSSelector = function(element)
 
 this.getURLForStyleSheet= function(styleSheet)
 {
-	//http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
+    //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
     return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
@@ -1629,7 +1629,7 @@ this.setItemIntoElement = function(element, item)
 
     if (item.command)
         element.addEventListener("command", item.command, false);
-    
+
     return element;
 }
 
@@ -1745,8 +1745,8 @@ this.getStackFrame = function(frame, context)
         }
         else
         {
-            if (FBTrace.DBG_STACK) 
-            	FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:"+frame.script.tag+"@"+frame.script.fileName, frame.script.functionSource);
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:"+frame.script.tag+"@"+frame.script.fileName, frame.script.functionSource);
 
             var script = frame.script;
 
@@ -1910,7 +1910,7 @@ this.findScriptForFunctionInContext = function(context, fn)
         if (tfs == fns)
             found = script;
     });
-    
+
     if (FBTrace.DBG_FUNCTION_NAMES)
         FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
 
@@ -2109,8 +2109,8 @@ this.getSourceFileByHref = function(url, context)
 
 this.getAllStyleSheets = function(context)
 {
-	var styleSheets = [];
-	 
+    var styleSheets = [];
+
     function addSheet(sheet)
     {
         var sheetLocation =  FBL.getURLForStyleSheet(sheet);
@@ -2130,9 +2130,9 @@ this.getAllStyleSheets = function(context)
 
     this.iterateWindows(context.window, function(subwin)
     {
-    	var rootSheets = subwin.document.styleSheets;
-    	for (var i = 0; i < rootSheets.length; ++i)
-    		addSheet(rootSheets[i]);
+        var rootSheets = subwin.document.styleSheets;
+        for (var i = 0; i < rootSheets.length; ++i)
+            addSheet(rootSheets[i]);
     });
 
     return styleSheets;
@@ -2143,8 +2143,8 @@ this.getStyleSheetByHref = function(url, context)
     function addSheet(sheet)
     {
         if (FBL.getURLForStyleSheet(sheet) == url)
-        	return sheet;
-        
+            return sheet;
+
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
             var rule = sheet.cssRules[i];
@@ -2160,15 +2160,15 @@ this.getStyleSheetByHref = function(url, context)
     var sheetIfFound = null;
     this.iterateWindows(context.window, function(subwin)
     {
-    	var rootSheets = context.window.document.styleSheets;
-    	for (var i = 0; i < rootSheets.length; ++i)
-    	{
-    		sheetIfFound = addSheet(rootSheets[i]);
-    		if (sheetIfFound)
-    			return sheetIfFound;
-    	}
+        var rootSheets = context.window.document.styleSheets;
+        for (var i = 0; i < rootSheets.length; ++i)
+        {
+            sheetIfFound = addSheet(rootSheets[i]);
+            if (sheetIfFound)
+                return sheetIfFound;
+        }
     });
-    
+
     return sheetIfFound;
 };
 
@@ -2178,7 +2178,7 @@ this.sourceURLsAsArray = function(context)
     var sourceFileMap = context.sourceFileMap;
     for (var url in sourceFileMap)
         urls.push(url);
-    
+
     if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName()+"\n");
 
     return urls;
@@ -2189,7 +2189,7 @@ this.sourceFilesAsArray = function(sourceFileMap)
     var sourceFiles = [];
     for (var url in sourceFileMap)
         sourceFiles.push(sourceFileMap[url]);
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+"\n"); 
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+"\n");
     return sourceFiles;
 };
 
@@ -2432,11 +2432,11 @@ this.dispatch = function(listeners, name, args)
                 listener[name].apply(listener, args);
             else
             {
-            	if (FBTrace.DBG_DISPATCH)
-            	    noMethods.push(listener);
+                if (FBTrace.DBG_DISPATCH)
+                    noMethods.push(listener);
             }
         }
-        if (FBTrace.DBG_DISPATCH) 
+        if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);              /*@explore*/
     }
     catch (exc)
@@ -2452,32 +2452,32 @@ this.dispatch = function(listeners, name, args)
 
 this.dispatch2 = function(listeners, name, args)
 {
-    try 
+    try
     {
         if (FBTrace.DBG_DISPATCH)
             var noMethods = [];
-        
+
         for (var i = 0; i < listeners.length; ++i)
         {
-        	var listener = listeners[i];
-        	if ( listener.hasOwnProperty(name) )
-        	{
-        		var result = listener[name].apply(listener, args);
-        		if ( result )
-        			return result;
-        	}
-        	else 
-        	{
-        		if (FBTrace.DBG_DISPATCH)
-            	    noMethods.push(listener);
-        	}
+            var listener = listeners[i];
+            if ( listener.hasOwnProperty(name) )
+            {
+                var result = listener[name].apply(listener, args);
+                if ( result )
+                    return result;
+            }
+            else
+            {
+                if (FBTrace.DBG_DISPATCH)
+                    noMethods.push(listener);
+            }
         }
-        if (FBTrace.DBG_DISPATCH) 
-            FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);          
-    } 
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);
+    }
     catch (exc)
     {
-    	if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_ERRORS)
         {
             if (exc.stack) exc.stack = exc.stack.split('/n');
             FBTrace.dumpProperties(" Exception in lib.dispatch2 "+ name, exc);
@@ -2643,60 +2643,60 @@ this.splitFileName = function(url)
 
 this.splitURLBase = function(url)
 {
-	if (this.isDataURL(url))
-		return this.splitDataURL(url);
-	return this.splitURLTrue(url);
+    if (this.isDataURL(url))
+        return this.splitDataURL(url);
+    return this.splitURLTrue(url);
 };
 
 this.splitDataURL = function(url)
 {
-	var mark = url.indexOf(':', 3);
-	if (mark != 4)
-		return false;	//  the first 5 chars must be 'data:'
-	
-	var point = url.indexOf(',', mark+1);
-	if (point < mark)
-		return false; // syntax error
-	
-	var props = { encodedContent: url.substr(point+1) };
-	
-	var metadataBuffer = url.substr(mark+1, point);
-	var metadata = metadataBuffer.split(';');
-	for (var i = 0; i < metadata.length; i++)
-	{
-		var nv = metadata[i].split('=');
-		if (nv.length == 2)
-			props[nv[0]] = nv[1];
-	}
-	
-	// Additional Firebug-specific properties
-	if (props.hasOwnProperty('fileName')) 
-	{
-		 var caller_URL = decodeURIComponent(props['fileName']);
-	     var caller_split = this.splitURLTrue(caller_URL);
+    var mark = url.indexOf(':', 3);
+    if (mark != 4)
+        return false;	//  the first 5 chars must be 'data:'
+
+    var point = url.indexOf(',', mark+1);
+    if (point < mark)
+        return false; // syntax error
+
+    var props = { encodedContent: url.substr(point+1) };
+
+    var metadataBuffer = url.substr(mark+1, point);
+    var metadata = metadataBuffer.split(';');
+    for (var i = 0; i < metadata.length; i++)
+    {
+        var nv = metadata[i].split('=');
+        if (nv.length == 2)
+            props[nv[0]] = nv[1];
+    }
+
+    // Additional Firebug-specific properties
+    if (props.hasOwnProperty('fileName'))
+    {
+         var caller_URL = decodeURIComponent(props['fileName']);
+         var caller_split = this.splitURLTrue(caller_URL);
 
         if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
         {
-        	props['path'] = caller_split.path;
-        	props['line'] = props['baseLineNumber'];
-        	var hint = decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+            props['path'] = caller_split.path;
+            props['line'] = props['baseLineNumber'];
+            var hint = decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
             props['name'] =  'eval->'+hint;
         }
         else
         {
-        	props['name'] = caller_split.name;
-        	props['path'] = caller_split.path;
+            props['name'] = caller_split.name;
+            props['path'] = caller_split.path;
         }
     }
-	else
-	{
-		if (!props.hasOwnProperty('path'))
-			props['path'] = "data:";
-		if (!props.hasOwnProperty('name'))
-			props['name'] =  decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
-	}
-    
-	return props;
+    else
+    {
+        if (!props.hasOwnProperty('path'))
+            props['path'] = "data:";
+        if (!props.hasOwnProperty('name'))
+            props['name'] =  decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+    }
+
+    return props;
 };
 
 this.splitURLTrue = function(url)
@@ -2726,7 +2726,7 @@ this.isSystemURL = function(url)
     else if (url.substr(0, 17) == "chrome://firebug/")
         return true;
     else if (url  == "XPCSafeJSObjectWrapper.cpp")
-    	return true;
+        return true;
     else if (url.substr(0, 6) == "about:")
         return true;
     else if (url.indexOf("firebug-service.js") != -1)
@@ -2788,7 +2788,7 @@ this.isLocalURL = function(url)
 
 this.isDataURL = function(url)
 {
-	return (url && url.substr(0,5) == "data:");
+    return (url && url.substr(0,5) == "data:");
 };
 
 this.getLocalPath = function(url)
@@ -2929,8 +2929,8 @@ this.parseURLEncodedText = function(text)
             }
             else
                 params.push({name: decodeURIComponent(parts[0]), value: ""});
-        } 
-        catch (e) 
+        }
+        catch (e)
         {
             if (FBTrace.DBG_ERRORS)
             {
@@ -2956,22 +2956,22 @@ this.reEncodeURL= function(file, text)
 
     var url = file.href;
     url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
-    
+
     return url;
 };
 
 this.getResource = function(aURL)
 {
-    try 
+    try
     {
-    	var channel=ioService.newChannel(aURL,null,null);
-    	var input=channel.open();
+        var channel=ioService.newChannel(aURL,null,null);
+        var input=channel.open();
         return FBL.readFromStream(input);
     }
     catch (e)
     {
-    	if (FBTrace.DBG_ERRORS)
-    		FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
     }
 };
 
@@ -3116,7 +3116,7 @@ this.getInputStreamFromString = function(dataString)
     return stringStream;
 };
 
-this.getWindowForRequest = function(request) 
+this.getWindowForRequest = function(request)
 {
     var webProgress = this.getRequestWebProgress(request);
     try {
@@ -3129,7 +3129,7 @@ this.getWindowForRequest = function(request)
     return null;
 };
 
-this.getRequestWebProgress = function(request) 
+this.getRequestWebProgress = function(request)
 {
     try
     {
@@ -3260,7 +3260,7 @@ this.getIconURLForFile = function(path)
 
 this.makeURI = function(urlString)
 {
-	return ioService.newURI(urlString, null, null);
+    return ioService.newURI(urlString, null, null);
 }
 
 // ************************************************************************************************
@@ -3303,7 +3303,7 @@ this.persistObjects = function(panel, panelState)
         panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+" panelState:", panelState);
-     
+
 };
 
 this.persistObject = function(object, context)
@@ -3315,65 +3315,65 @@ this.persistObject = function(object, context)
 this.restoreLocation =  function(panel, panelState)
 {
     var restored = false;
-	
-	if (!panel.location && panelState && panelState.persistedLocation)
-	{
-	    var location = panelState.persistedLocation(panel.context);
-	    
-		if (FBTrace.DBG_INITIALIZE)
-	        FBTrace.dumpProperties("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
 
-	    if (location)
-	    {
-	        panel.navigate(location);
-	        restored = true;
-	    }
-	}
+    if (!panel.location && panelState && panelState.persistedLocation)
+    {
+        var location = panelState.persistedLocation(panel.context);
 
-	if (!panel.location)
-	    panel.navigate(null);
-	
-	if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.dumpProperties("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
+
+        if (location)
+        {
+            panel.navigate(location);
+            restored = true;
+        }
+    }
+
+    if (!panel.location)
+        panel.navigate(null);
+
+    if (FBTrace.DBG_INITIALIZE)
         FBTrace.dumpProperties("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
-	
-	return restored;
+
+    return restored;
 };
 
 this.restoreSelection = function(panel, panelState)
 {
-	var needRetry = false;
-	
-	if (!panel.selection && panelState && panelState.persistedSelection)
+    var needRetry = false;
+
+    if (!panel.selection && panelState && panelState.persistedSelection)
     {
         var selection = panelState.persistedSelection(panel.context);
         if (selection)
             panel.select(selection);
         else
-        	needRetry = true;
+            needRetry = true;
     }
 
     if (!panel.selection)  // Couldn't restore the selection, so select the default object
         panel.select(null);
-    
+
     if (needRetry)
     {
-    	function overrideDefaultWithPersistedSelection()
-    	{
-    		if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
-    		{
-    			var selection = panelState.persistedSelection(panel.context);
-    			if (selection)
-    				panel.select(selection);
-    		}
-    		
-    		if (FBTrace.DBG_INITIALIZE)
-    			FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
-    	}
-    	
-    	// If we couldn't restore the selection, wait a bit and try again
+        function overrideDefaultWithPersistedSelection()
+        {
+            if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
+            {
+                var selection = panelState.persistedSelection(panel.context);
+                if (selection)
+                    panel.select(selection);
+            }
+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+        }
+
+        // If we couldn't restore the selection, wait a bit and try again
         panel.context.setTimeout(overrideDefaultWithPersistedSelection, overrideDefaultsWithPersistedValuesTimeout);
     }
-    
+
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.dumpProperties("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
 };
@@ -3490,7 +3490,7 @@ this.TextSearch = function(rootNode, rowFinder)
         searchRange = doc.createRange();
         searchRange.setStart(rootNode, 0);
         searchRange.setEnd(rootNode, count);
-        
+
         startPt = searchRange;
     };
 
@@ -3503,9 +3503,9 @@ this.SourceBoxTextSearch = function(sourceBox)
     this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
-        
+
         this.re = new FBL.ReversibleRegExp(text);
-        
+
         return this.findNext(false, reverse, caseSensitive);
     };
 
@@ -3583,12 +3583,12 @@ this.SourceLink.prototype =
     },
     toJSON: function() // until 3.1...
     {
-    	return "{\"href\":\""+this.href+"\", "+
-    		(this.line?("\"line\":"+this.line+","):"")+
-    		(this.type?(" \"type\":\""+this.type+"\","):"")+
-    				"}";
+        return "{\"href\":\""+this.href+"\", "+
+            (this.line?("\"line\":"+this.line+","):"")+
+            (this.type?(" \"type\":\""+this.type+"\","):"")+
+                    "}";
     }
-    
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3618,14 +3618,14 @@ this.SourceFile.prototype =
             str += (this.outerScript.isValid?this.outerScript.tag:"X") +"| ";
         if (this.innerScripts)
         {
-        	var numberInvalid = 0;
+            var numberInvalid = 0;
             for (var p in this.innerScripts)
             {
                 var script = this.innerScripts[p];
-                if (script.isValid)  
-                	str += p+" ";
+                if (script.isValid)
+                    str += p+" ";
                 else
-                	numberInvalid++;
+                    numberInvalid++;
             }
         }
         str += ")"+(numberInvalid ? "("+numberInvalid+" invalid)" : "");
@@ -3950,20 +3950,16 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
     var total = 0;
     while (innerScripts.hasMoreElements())
     {
-    	var script = innerScripts.getNext();
-    	if (!script || ( (script instanceof Ci.jsdIScript) && !script.tag) )
-    	{
-    	    if (FBTrace.DBG_SOURCEFILES)
-    	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext FAILS "+sourceFile, script);
-    	    continue;    	    
+        var script = innerScripts.getNext();
+        if (!script || ( (script instanceof Ci.jsdIScript) && !script.tag) )
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext FAILS "+sourceFile, script);
+            continue;
         }
-    	if (FBTrace.DBG_SOURCEFILES)
-    	{
-    		total++;
-    		FBTrace.sysout("FBL.addScriptsToSourceFile "+total+" script: "+script.tag+".isValid:"+script.isValid);
-    	}
         sourceFile.innerScripts[script.tag] = script;
-        total++
+        if (FBTrace.DBG_SOURCEFILES)
+            total++;
     }
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
         FBTrace.sysout("FBL.addScriptsToSourceFile "+ total +" scripts, sourcefile="+sourceFile.toString(), sourceFile);
@@ -4015,7 +4011,7 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
     if (this.href.kind == "source")
-        return FBL.splitURLBase(this.href); 
+        return FBL.splitURLBase(this.href);
 
     if (!this.summary)
     {
@@ -4103,9 +4099,9 @@ this.EventSourceFile.prototype.getObjectDescription = function()
     {
         this.summary = FBL.summarizeSourceLineArray(this.sourceLines, 120);
     }
-    
+
     var containingFileDescription = FBL.splitURLBase(this.containingURL);
-    
+
     return {path: containingFileDescription.path, name: containingFileDescription.name+"/event: "+this.summary };
 }
 
@@ -6335,9 +6331,9 @@ this.ERROR = function(exc)
 {
     if (FBTrace) {
         if (exc.stack) exc.stack = exc.stack.split('\n');
-        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);   
+        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);
     }
-    else                                                       
+    else
         ddd("FIREBUG WARNING: " + exc);
 }
 
@@ -6393,13 +6389,13 @@ this.ReversibleIterator = function(length, start, reverse)
     this.length = length;
     this.index = start;
     this.reversed = !!reverse;
-    
+
     this.next = function() {
         if (this.index === undefined || this.index === null) {
             this.index = this.reversed ? length : -1;
         }
         this.index += this.reversed ? -1 : 1;
-        
+
         return 0 <= this.index && this.index < length;
     };
     this.reverse = function() {
@@ -6410,14 +6406,14 @@ this.ReversibleIterator = function(length, start, reverse)
 this.ReversibleRegExp = function(regex, flags)
 {
     var re = {};
-    
+
     function expression(text, reverse) {
         return text + (reverse ? "(?![\\s\\S]*" + text + ")" : "");
     }
     function flag(flags, caseSensitive) {
         return (flags || "") + (caseSensitive ? "" : "i");
     }
-    
+
     this.exec = function(text, reverse, caseSensitive, lastMatch)
     {
         // Ensure we have a regex
@@ -6426,7 +6422,7 @@ this.ReversibleRegExp = function(regex, flags)
         {
             re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
         }
-        
+
         // Modify as needed to all for iterative searches
         var indexOffset = 0;
         var searchText = text;
@@ -6438,7 +6434,7 @@ this.ReversibleRegExp = function(regex, flags)
                 searchText = text.substr(indexOffset);
             }
         }
-        
+
         var ret = re[key].exec(searchText);
         if (ret) {
             ret.input = text;
@@ -6453,7 +6449,7 @@ this.ReversibleRegExp = function(regex, flags)
 /**
  * Implements an ordered traveral of the document, including attributes and
  * iframe contents within the results.
- * 
+ *
  * Note that the order for attributes is not defined. This will follow the
  * same order as the Element.attributes accessor.
  */
@@ -6462,7 +6458,7 @@ this.DOMWalker = function(doc, root)
     var walker;
     var currentNode, attrIndex;
     var pastStart, pastEnd;
-    
+
     function createWalker(docElement) {
         var walk = doc.createTreeWalker(docElement, SHOW_ALL, null, true);
         walker.unshift(walk);
@@ -6471,12 +6467,12 @@ this.DOMWalker = function(doc, root)
         while (walker[0].lastChild()) {}
         return walker[0].currentNode;
     }
-    
+
     this.previousNode = function() {
         if (pastStart) {
             return undefined;
         }
-        
+
         if (attrIndex) {
             attrIndex--;
         } else {
@@ -6505,20 +6501,20 @@ this.DOMWalker = function(doc, root)
             currentNode = prevNode;
             attrIndex = ((prevNode || {}).attributes || []).length;
         }
-        
+
         if (!currentNode) {
             pastStart = true;
         } else {
             pastEnd = false;
         }
-        
+
         return this.currentNode();
     };
     this.nextNode = function() {
         if (pastEnd) {
             return undefined;
         }
-        
+
         if (!currentNode) {
             // We are working with a new tree walker
             currentNode = walker[0].root;
@@ -6544,16 +6540,16 @@ this.DOMWalker = function(doc, root)
                 attrIndex = 0;
             }
         }
-        
+
         if (!currentNode) {
             pastEnd = true;
         } else {
             pastStart = false;
         }
-        
+
         return this.currentNode();
     };
-    
+
     this.currentNode = function() {
         if (!attrIndex) {
             return currentNode;
@@ -6561,17 +6557,17 @@ this.DOMWalker = function(doc, root)
             return currentNode.attributes[attrIndex-1];
         }
     };
-    
+
     this.reset = function() {
         pastStart = false;
         pastEnd = false;
         walker = [];
         currentNode = undefined;
         attrIndex = 0;
-        
+
         createWalker(root);
     };
-    
+
     this.reset();
 };
 
