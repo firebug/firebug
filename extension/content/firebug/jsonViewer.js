@@ -31,10 +31,10 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         // xxxadatta02: not every JSON response is going to have this header...
         // need some way to override this
         var contentType = new String(file.request.contentType).toLowerCase();
-        if ((contentType != "application/json" &&
-            contentType != "text/plain" &&
-            contentType != "text/x-json" &&
-            contentType != "text/javascript"))
+        if ((contentType.indexOf("application/json") != 0) &&
+            (contentType.indexOf("text/plain") != 0) &&
+            (contentType.indexOf("text/x-json") != 0) &&
+            (contentType.indexOf("text/javascript") != 0))
             return;
 
         file.jsonObject = this.parseJSON(file);
