@@ -665,7 +665,6 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     onClickStackFrame: function(event)
     {
         var winType = "FBTraceConsole-SourceView";
-        var url = event.target.innerHTML;
         var lineNumber = event.target.getAttribute("lineNumber");
 
         openDialog("chrome://global/content/viewSource.xul",
