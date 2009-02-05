@@ -172,8 +172,6 @@ top.Firebug =
         for (var i = 0; i < servicePrefNames.length; ++i)
             this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
 
-        this.internationalizeUI();
-
         this.loadExternalEditors();
         prefs.addObserver(this.prefDomain, this, false);
         prefs.addObserver(this.servicePrefDomain, this, false);
@@ -221,21 +219,24 @@ top.Firebug =
         return version+""+release;
     },
 
-    internationalizeUI: function()  // Substitute strings in the UI with fall back to en-US
+    internationalizeUI: function(doc)  // Substitute strings in the UI with fall back to en-US
     {
-        FBL.internationalize('menu_toggleSuspendFirebug', 'label');
-        FBL.internationalize('menu_disablePanels', 'label');
+        if (!doc)
+            return;
 
-        // Search
-        FBL.internationalize('fbSearchNext', 'label');
-        FBL.internationalize('fbSearchPrev', 'label');
-        FBL.internationalize('menu_searchCaseSensitive', 'label');
-        FBL.internationalize('menu_searchAllFiles', 'label');
-        
-        //A11Y
-        FBL.internationalize('fbCommandLine', 'label');
-        FBL.internationalize('fbFirebugMenu', 'label');
-        FBL.internationalize('fbLargeCommandLine', 'label');
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.dumpProperties("Firebug.internationalizeUI");
+
+        var elements = ["menu_toggleSuspendFirebug", "menu_disablePanels", 
+            "fbSearchNext", "fbSearchPrev", "menu_searchCaseSensitive", 
+            "menu_searchAllFiles", "fbCommandLine", "fbFirebugMenu", 
+            "fbLargeCommandLine"];
+
+        for (var i=0; i<elements.length; i++)
+        {
+            var element = doc.getElementById(elements[i]);
+            FBL.internationalize(element, "label");
+        }
     },
 
     broadcast: function(message, args)

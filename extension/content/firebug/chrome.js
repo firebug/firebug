@@ -96,6 +96,8 @@ top.FirebugChrome =
         else
             Firebug.initialize();
 
+        Firebug.internationalizeUI(window.document);
+
         panelBox = $("fbPanelBox");
         panelSplitter = $("fbPanelSplitter");
         sidePanelDeck = $("fbSidePanelDeck");
