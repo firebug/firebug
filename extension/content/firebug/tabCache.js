@@ -177,11 +177,11 @@ Firebug.TabCache.prototype = extend(ListeningCache,
 {
     responses: [],       // responses in progress.
 
-    storePartialResponse: function(request, responseText)
+    storePartialResponse: function(request, responseText, win)
     {
         try
         {
-            responseText = FBL.convertToUnicode(responseText);
+            responseText = FBL.convertToUnicode(responseText, win.document.characterSet);
         }
         catch (err)
         {
@@ -348,7 +348,7 @@ TracingListener.prototype =
             if (context) 
             {
                 // Store received data into the cache as they come.
-                if (!context.sourceCache.storePartialResponse(request, data))
+                if (!context.sourceCache.storePartialResponse(request, data, this.window))
                     this.ignore = true;
             }
             else 
