@@ -164,12 +164,12 @@ Firebug.TabCacheModel = extend(Firebug.Module,
  * The object is derived from SourceCache so, the same interface and most of the
  * implementation is used.
  */
-Firebug.TabCache = function(win)
+Firebug.TabCache = function(win, context)
 {
     if (FBTrace.DBG_CACHE)
         FBTrace.dumpProperties("tabCache.TabCache Created for: " + win.location.href);
 
-    Firebug.SourceCache.call(this, win, null);
+    Firebug.SourceCache.call(this, win, context);
 };
 
 var ListeningCache = extend(Firebug.SourceCache.prototype, new Firebug.Listener());
@@ -188,7 +188,9 @@ Firebug.TabCache.prototype = extend(ListeningCache,
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " + 
                     safeGetName(request), err);
-            return false;
+
+            // Even responses that are not converted are stored into the cache.
+            // return false;
         }
 
         // If this is the first part of the response make sure the appropriate
