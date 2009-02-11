@@ -3051,7 +3051,18 @@ this.readFromStream = function(stream, charset, noClose)
         sis.close();
 
     var text = segments.join("");
-    return this.convertToUnicode(text, charset);
+
+    try
+    {
+        return this.convertToUnicode(text, charset);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("LIB.readFromStream EXCEPTION charset: " + charset, err);
+    }
+
+    return text;
 };
 
 this.readPostTextFromPage = function(url, context)
