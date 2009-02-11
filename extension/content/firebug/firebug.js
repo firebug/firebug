@@ -129,7 +129,7 @@ var temporaryFiles = [];
 var temporaryDirectory = null;
 
 // Register default Firebug string bundle (yet before domplate templates).
-categoryManager.addCategoryEntry("strings_firebug", 
+categoryManager.addCategoryEntry("strings_firebug",
     "chrome://firebug/locale/firebug.properties", "", true, true);
 
 // ************************************************************************************************
@@ -177,7 +177,7 @@ top.Firebug =
         prefs.addObserver(this.servicePrefDomain, this, false);
 
         var basePrefNames = prefNames.length;
-        
+
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
@@ -193,29 +193,29 @@ top.Firebug =
     getVersion: function()
     {
         if (!this.fullVersion)
-        	this.fullVersion = this.loadVersion(versionURL);
-        
+            this.fullVersion = this.loadVersion(versionURL);
+
         return this.fullVersion;
     },
-    
+
     loadVersion: function(versionURL)
     {
         var content = getResource(versionURL);
         if (!content)
-        	return "no content at "+versionURL;
-        
+            return "no content at "+versionURL;
+
         var m = /RELEASE=(.*)/.exec(content);
         if (m)
             var release = m[1];
         else
-        	return "no RELEASE in "+versionURL;
-        
+            return "no RELEASE in "+versionURL;
+
         m = /VERSION=(.*)/.exec(content);
         if (m)
             var version = m[1];
-        else 
-        	return "no VERSION in "+versionURL;
-        	
+        else
+            return "no VERSION in "+versionURL;
+
         return version+""+release;
     },
 
@@ -227,9 +227,9 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
-        var elements = ["menu_toggleSuspendFirebug", "menu_disablePanels", 
-            "fbSearchNext", "fbSearchPrev", "menu_searchCaseSensitive", 
-            "menu_searchAllFiles", "fbCommandLine", "fbFirebugMenu", 
+        var elements = ["menu_toggleSuspendFirebug", "menu_disablePanels",
+            "fbSearchNext", "fbSearchPrev", "menu_searchCaseSensitive",
+            "menu_searchAllFiles", "fbCommandLine", "fbFirebugMenu",
             "fbLargeCommandLine"];
 
         for (var i=0; i<elements.length; i++)
@@ -337,7 +337,7 @@ top.Firebug =
     {
         Firebug.ModuleManager.disableModules(context);
     },
-    
+
     suspend: function()  // dispatch suspendFirebug to all windows
     {
         this.broadcast('suspendFirebug', []);
@@ -432,23 +432,23 @@ top.Firebug =
     resetTooltip: function()
     {
         var tooltip = "Firebug "+ Firebug.getVersion();
-        
+
         var fbStatusIcon = $('fbStatusIcon');
         if (fbStatusIcon.getAttribute("errors") == "on")
             tooltip +=" console: on,";
         else
             tooltip +=" console: off,";
-        
+
         if (fbStatusIcon.getAttribute("net") == "on")
             tooltip +=" net: on,";
         else
             tooltip +=" net: off,";
-        
+
         if (fbStatusIcon.getAttribute("jsd") == "on")
             tooltip +=" script: on";
         else
             tooltip +=" script: off,";
-       
+
         if (Firebug.getSuspended())
             tooltip += ": " + Firebug.getSuspended();
         else
@@ -460,7 +460,7 @@ top.Firebug =
                 for (var i = 0; i < urls.length; i++)
                 {
                     try {
-                        tooltip += "\n"+decodeURI(urls[i]); 
+                        tooltip += "\n"+decodeURI(urls[i]);
                     } catch (e) {
                         // xxxHonza: from some reason FBTrace is undefined here.
                         dump("Firebug.resetTooltip EXCEPTION " + e + "\n");
@@ -490,7 +490,7 @@ top.Firebug =
                     {
                         var cw = module.activeContexts[ic].window;
                         /*
-                        try 
+                        try
                         {
                             if ( cw && ('location' in cw) && ('toString' in cw.location) )
                                 FBTrace.sysout("1) Found object with location: "+cw.location.toString()+"\n");
@@ -502,9 +502,9 @@ top.Firebug =
                             FBTrace.sysout("Trying to find location in object gave "+e+"\n");
                         }
                          */
-                        if (cw)  
+                        if (cw)
                         {
-                            try 
+                            try
                             {
                                 var url = cw.location.toString(); // force it all the way to strings so we don't fight nsIDOMLocation.toString()
                                 if (url)
@@ -515,7 +515,7 @@ top.Firebug =
                             }
                             catch(exc)
                             {
-                            // there does not seem to be a way to avoid this exception   
+                            // there does not seem to be a way to avoid this exception
                             }
                         }
                     }
@@ -529,7 +529,7 @@ top.Firebug =
         }
         return this.activeContextURLs = contextURLSet;
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Dead Windows
 
@@ -588,6 +588,16 @@ top.Firebug =
 
         for (var j = 0; j < arguments.length; j++)
             uiListeners.push(arguments[j]);
+    },
+
+    unregisterExtension: function()
+    {
+        for (var i = 0; i < arguments.length; ++i)
+        {
+            TabWatcher.removeListener(arguments[i]);
+            remove(uiListeners, arguments[i]);
+            remove(extensions, arguments[i])
+        }
     },
 
     registerPanel: function()
@@ -721,7 +731,7 @@ top.Firebug =
     // *******************************************************************************
     // External editors
     // TODO move to editors.js as Firebug.Editors module
-    
+
     loadExternalEditors: function()
     {
         const prefName = "externalEditors";
@@ -859,7 +869,7 @@ top.Firebug =
         }catch(exc) { ERROR(exc); }
     },
 
-    getLocalSourceFile: function(context, href) 
+    getLocalSourceFile: function(context, href)
     {
         if ( isLocalURL(href) )
             return getLocalPath(href);
@@ -969,7 +979,7 @@ top.Firebug =
             return;
 
         var browser = FirebugChrome.getCurrentBrowser();
-        
+
         if (panelName)
             browser.chrome.selectPanel(panelName);
 
@@ -1392,7 +1402,7 @@ top.Firebug =
                 if (Firebug.getSuspended())
                     Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
             }
-            
+
             this.syncBar();
         }
     },
@@ -1428,7 +1438,7 @@ top.Firebug =
         if (this.tabBrowser.currentURI.spec == context.browser.currentURI.spec)
             context.browser.chrome.showContext(context.browser, context);
     },
-    
+
     onSourceFileCreated: function(context, sourceFile)
     {
         dispatch(modules, "onSourceFileCreated", [context, sourceFile]);
@@ -1462,8 +1472,8 @@ top.Firebug =
 // ************************************************************************************************
 
 /**
- * Support for listeners registration. This object also extended by Firebug.Module so, 
- * all modules supports listening automatically. Notice that array of listeners 
+ * Support for listeners registration. This object also extended by Firebug.Module so,
+ * all modules supports listening automatically. Notice that array of listeners
  * is created for each intance of a module within initialize method. Thus all derived
  * module classes must ensure that Firebug.Module.initialize method is called for the
  * super class.
@@ -1581,10 +1591,10 @@ Firebug.Module = extend(new Firebug.Listener(),
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // intermodule dependency
-    
+
     // caller needs module. win maybe context.window or iframe in context.window.
     // true means module is ready now, else getting ready
-    isReadyElsePreparing: function(context, win) 
+    isReadyElsePreparing: function(context, win)
     {
     },
 });
@@ -1702,8 +1712,8 @@ Firebug.Panel =
         {
             if (!this.context.browser) // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
             {
-            	if (FBTrace.DBG_ERRORS)
-            		FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this:", this)
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this:", this)
                 return;
             }
             var buttons = this.context.browser.chrome.$(buttonsId);
@@ -1736,7 +1746,7 @@ Firebug.Panel =
     {
         return false;
     },
-    
+
     navigate: function(object)
     {
         if (FBTrace.DBG_PANELS)
@@ -1744,13 +1754,13 @@ Firebug.Panel =
         if (!object)
             object = this.getDefaultLocation(this.context);
         if (!object)
-        	object = null;  // not undefined.
+            object = null;  // not undefined.
 
         if ( !this.location || (object != this.location) )  // if this.location undefined, may set to null
         {
             if (FBTrace.DBG_PANELS)
                 FBTrace.sysout("navigate to location "+object+"\n");
-            
+
             this.location = object;
             this.updateLocation(object);
 
@@ -1785,7 +1795,7 @@ Firebug.Panel =
         }
         var allLocs = this.getLocationList().sort(compare);
         for (var curPos = 0; curPos < allLocs.length && allLocs[curPos] != this.location; curPos++);
-        
+
         function transformIndex(index) {
             if (reverse) {
                 // For the reverse case we need to implement wrap around.
@@ -1795,11 +1805,11 @@ Firebug.Panel =
                 return (curPos + index + 1) % allLocs.length;
             }
         };
-        
+
         for (var next = 0; next < allLocs.length - 1; next++)
         {
             var object = allLocs[transformIndex(next)];
-            
+
             if (match(object))
             {
                 this.navigate(object);
@@ -1814,7 +1824,7 @@ Firebug.Panel =
             object = this.getDefaultSelection(this.context);
 
         if(FBTrace.DBG_PANELS)    /*@explore*/
-            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+((object==this.selection)?"==":"!=")+this.selection);  
+            FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+((object==this.selection)?"==":"!=")+this.selection);
 
         if (forceUpdate || object != this.selection)
         {
@@ -1875,11 +1885,11 @@ Firebug.Panel =
     /**
      * Retrieves the search options that this modules supports.
      * This is used by the search UI to present the proper options.
-     * 
+     *
      * Implementors should return an array containing the constants supported
      * by the search algorithm. The supported options are defined in the search
      * section of the prefNames array.
-     * 
+     *
      * Currently these are "searchCaseSensitive" and "searchGlobal".
      */
     getSearchCapabilities: function()
@@ -1966,7 +1976,7 @@ Firebug.Panel =
 
 //************************************************************************************************
 
-Firebug.AblePanel = extend(Firebug.Panel, 
+Firebug.AblePanel = extend(Firebug.Panel,
 {
     enablePanel: function()
     {
@@ -1976,7 +1986,7 @@ Firebug.AblePanel = extend(Firebug.Panel,
         var tab = this.getTab();
         if (tab) {
             //tab.removeAttribute("disabled");
-        	tab.removeAttribute('aria-disabled');
+            tab.removeAttribute('aria-disabled');
         }
     },
 
@@ -1988,11 +1998,11 @@ Firebug.AblePanel = extend(Firebug.Panel,
         var tab = this.getTab();
         if (tab) {
             //tab.setAttribute("disabled", "true");
-        	tab.setAttribute('aria-disabled', 'true');
+            tab.setAttribute('aria-disabled', 'true');
         }
         clearNode(this.panelNode);
     },
-    
+
     getTab: function()
     {
         var chrome = this.context ? this.context.chrome : FirebugChrome;
@@ -2001,11 +2011,11 @@ Firebug.AblePanel = extend(Firebug.Panel,
         if (!tab)
             tab = chrome.$("fbPanelBar1").getTab(this.name);
         return tab;
-    },    
+    },
 });
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-Firebug.MeasureBox = 
+Firebug.MeasureBox =
 {
         startMeasuring: function(target)
         {
@@ -2024,7 +2034,7 @@ Firebug.MeasureBox =
             this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
             return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
         },
-        
+
         getBox: function(target)
         {
             var style = this.measureBox.ownerDocument.defaultView.getComputedStyle(this.measureBox, "");
@@ -2035,7 +2045,7 @@ Firebug.MeasureBox =
         stopMeasuring: function()
         {
             this.measureBox.parentNode.removeChild(this.measureBox);
-        } 
+        }
 };
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2043,20 +2053,20 @@ Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can
 
 Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 {
-     
-	initialize: function(context, doc)
+
+    initialize: function(context, doc)
     {
-		Firebug.Panel.initialize.apply(this, arguments);
-		this.onResize =  bind(this.onResize, this);
+        Firebug.Panel.initialize.apply(this, arguments);
+        this.onResize =  bind(this.onResize, this);
         contentBox.addEventListener("resize", this.onResize, true);
     },
-	
+
     destroy: function(state)
     {
         Firebug.Panel.destroy.apply(this, arguments);
         contentBox.removeEventListener("resize", this.onResize, true);
     },
-    
+
     // ******* override in extenders ********
     updateSourceBox: function(sourceBox)
     {
@@ -2078,7 +2088,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
         // eg "js" or "css"
         throw "Need to override in extender";
     },
-    
+
     // **************************************
 
     initializeSourceBoxes: function()
@@ -2129,21 +2139,21 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
         sourceBox.decorator = sourceBoxDecorator;
         sourceBox.getLineNode = getLineNodeIfViewable;
-        	
-        var paddedSource = 
-        	"<div class='topSourcePadding'>" +
-        		"<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
-        	"</div>"+
+
+        var paddedSource =
+            "<div class='topSourcePadding'>" +
+                "<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
+            "</div>"+
             "<div class='sourceViewport'></div>"+
             "<div class='bottomSourcePadding'>"+
-            	"<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
+                "<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
             "<div>";
         appendInnerHTML(sourceBox, paddedSource);
 
         sourceBox.viewport = getChildByClass(sourceBox, 'sourceViewport');
- 
+
         delete this.lastScrollTop;
-        
+
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
         else
@@ -2158,33 +2168,33 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
     setSourceBoxLineSizes: function(sourceBox)
     {
         var view = sourceBox.viewport;
- 
+
         var lineNoCharsSpacer = "";
         for (var i = 0; i < sourceBox.maxLineNoChars; i++)
-          	lineNoCharsSpacer += "0";
+              lineNoCharsSpacer += "0";
 
         this.startMeasuring(view);
         var size = this.measureText(lineNoCharsSpacer);
         this.stopMeasuring();
-           
+
         sourceBox.lineHeight = size.height + 1; //view.firstChild.clientHeight;  // sourceRow
         sourceBox.lineNoWidth = size.width;
- 
+
         if (FBTrace.DBG_SOURCEFILES)
         {
             FBTrace.sysout("setSourceBoxLineSizes size", size);
             FBTrace.sysout("firebug.setSourceBoxLineSizes, sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
         }
     },
-    
+
     setViewableLines: function(sourceBox)
-    {            
-        var scrollStep = sourceBox.lineHeight;  
+    {
+        var scrollStep = sourceBox.lineHeight;
         if (!scrollStep || scrollStep < 1)
         {
             this.setSourceBoxLineSizes(sourceBox);
             scrollStep = sourceBox.lineHeight;
-            
+
             if (!scrollStep || scrollStep < 1)
             {
                 if (FBTrace.DBG_SOURCEFILES)
@@ -2192,27 +2202,27 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
                 return null;
             }
         }
-        
+
         var panelHeight = this.panelNode.clientHeight;
-    	var newTopLine = Math.round(sourceBox.scrollTop/scrollStep);
-    	var newBottomLine = Math.round((sourceBox.scrollTop + panelHeight)/scrollStep);
+        var newTopLine = Math.round(sourceBox.scrollTop/scrollStep);
+        var newBottomLine = Math.round((sourceBox.scrollTop + panelHeight)/scrollStep);
 
         sourceBox.viewableLines = newBottomLine - newTopLine;  // eg 17
 
         var halfViewableLines = Math.round(sourceBox.viewableLines/2.0);  //eg 8
         sourceBox.halfViewableLines = halfViewableLines;
-        
+
         var newCenterLine = newTopLine + halfViewableLines;
-        
-    	if (FBTrace.DBG_SOURCEFILES)
-    	{
-    		FBTrace.sysout("setViewableLines scrollTop: "+sourceBox.scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
+
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("setViewableLines scrollTop: "+sourceBox.scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
             FBTrace.sysout("setViewableLines clientHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ sourceBox.viewableLines+"\n");
-    	}
-      
+        }
+
         return newCenterLine;
     },
-    
+
     getSourceBoxBySourceFile: function(sourceFile)
     {
         if (sourceFile.href)
@@ -2237,22 +2247,22 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
         // if this.sourceBoxes is undefined, you need to call initializeSourceBoxes in your panel.initialize()
         return url ? this.sourceBoxes[url] : null;
     },
-    
+
     renameSourceBox: function(oldURL, newURL)
     {
-    	var sourceBox = this.sourceBoxes[oldURL];
-    	if (sourceBox)
-    	{
-    		delete this.sourceBoxes[oldURL];
-    		this.sourceBoxes[newURL] = sourceBox;
-    	}
+        var sourceBox = this.sourceBoxes[oldURL];
+        if (sourceBox)
+        {
+            delete this.sourceBoxes[oldURL];
+            this.sourceBoxes[newURL] = sourceBox;
+        }
     },
 
     showSourceFile: function(sourceFile)
     {
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-            FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);  
+            FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
         if (!sourceBox)
         {
             sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
@@ -2268,8 +2278,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
     {
         if (!this.selectedSourceBox)
             return;
-    	if (!lineNo)
-    		lineNo = this.selectedSourceBox.firstViewableLine + this.selectedSourceBox.halfViewableLines;
+        if (!lineNo)
+            lineNo = this.selectedSourceBox.firstViewableLine + this.selectedSourceBox.halfViewableLines;
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
 
@@ -2285,12 +2295,12 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
         {
-        	if (!this.selectedSourceBox)
-        	{
-        		if (FBTrace.DBG_SOURCEFILES) 
-        			FBTrace.sysout("SourceBoxPanel.scrollTimeout no selectedSourceBox");
-        		return;
-        	}
+            if (!this.selectedSourceBox)
+            {
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("SourceBoxPanel.scrollTimeout no selectedSourceBox");
+                return;
+            }
             // At this time we know which sourcebox is selected but the viewport is not selected.
             // We need to scroll, let the scroll handler set the viewport, then highlight any lines visible.
             var skipScrolling = false;
@@ -2303,26 +2313,26 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
             }
             else  // the selectedSourceBox has not been built
             {
-                if (FBTrace.DBG_SOURCEFILES) 
-                	FBTrace.sysout("SourceBoxPanel.scrollTimeout, no viewable lines", this.selectedSourceBox);
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("SourceBoxPanel.scrollTimeout, no viewable lines", this.selectedSourceBox);
             }
-                        
-            if (highlighter) 
-             	this.selectedSourceBox.highlighter = highlighter;
-                
+
+            if (highlighter)
+                 this.selectedSourceBox.highlighter = highlighter;
+
             if (!skipScrolling)
             {
                 var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight);
-                var newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight        
+                var newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+newScrollTop);
                 this.selectedSourceBox.scrollTop = newScrollTop; // *may* cause scrolling
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
             }
-            
-            if (this.selectedSourceBox.highlighter) 
-            	this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll 
-                
+
+            if (this.selectedSourceBox.highlighter)
+                this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll
+
             if (uiListeners.length > 0)
             {
                 var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
@@ -2354,14 +2364,14 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
         var view = sourceBox.viewport;
         if (!view)
         {
-        	if (FBTrace.DBG_ERRORS)
-        		FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
-        	return;
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+            return;
         }
 
-     	var lineNo = this.setViewableLines(sourceBox);
-     	if (!lineNo)
-     		return;
+         var lineNo = this.setViewableLines(sourceBox);
+         if (!lineNo)
+             return;
 
         var topLine = 1; // will be view.firstChild
         if (lineNo)
@@ -2388,15 +2398,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
         var newScrollTop = (topLine - 1) * sourceBox.lineHeight;
         view.previousSibling.style.height = newScrollTop + "px";
         view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
-        
+
         //sourceRow
         view.previousSibling.firstChild.style.height = newScrollTop + "px";
         view.nextSibling.firstChild.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
-        
+
         //sourceLine
         view.previousSibling.firstChild.firstChild.style.height = newScrollTop + "px";
         view.nextSibling.firstChild.firstChild.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
-        
+
         view.previousSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
         view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth +"px";
 
@@ -2430,7 +2440,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
                 {
                     var sticky = sourceBox.highlighter(sourceBox);
                     if (FBTrace.DBG_SOURCEFILES)
-                    	FBTrace.sysout("sourceBoxDecoratorTimeout highlighter sticky:"+sticky, sourceBox.highlighter);
+                        FBTrace.sysout("sourceBoxDecoratorTimeout highlighter sticky:"+sticky, sourceBox.highlighter);
                     if (!sticky)
                         delete sourceBox.highlighter;
                 }
@@ -2438,7 +2448,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
                 if (uiListeners.length > 0) dispatch(uiListeners, "onApplyDecorator", [sourceBox]);
                 if (FBTrace.DBG_SOURCEFILES)
-                	FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);
+                    FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);
             }
             catch (exc)
             {
@@ -2454,8 +2464,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
         if (scrollTop == this.lastScrollTop)
         {
-        	if (FBTrace.DBG_SOURCEFILES)
-        		FBTrace.sysout("reView no change to scrollTop ", sourceBox);
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("reView no change to scrollTop ", sourceBox);
             return;
         }
 
@@ -2463,22 +2473,22 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
             this.lastScrollTop = 0;
 
         this.buildViewAround(sourceBox);
-        
+
         this.lastScrollTop = scrollTop;
     },
 
-    onResize: function(event)   
+    onResize: function(event)
     {
-    	// The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
-    	// But our SourceBoxPanel has viewport that will change size.
-    	if (this.selectedSourceBox)
-    	{
-    		delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
-    		delete this.selectedSourceBox.halfViewableLines;
-    		this.reView(this.selectedSourceBox);
-    	}
+        // The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
+        // But our SourceBoxPanel has viewport that will change size.
+        if (this.selectedSourceBox)
+        {
+            delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
+            delete this.selectedSourceBox.halfViewableLines;
+            this.reView(this.selectedSourceBox);
+        }
     },
-    
+
 });
 
 function appendScriptLines(sourceBox, min, max, panelNode)
@@ -2597,7 +2607,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         Firebug.URLSelector.initialize(this);
         TabWatcher.addListener(Firebug.URLSelector);
         uiListeners.push(Firebug.URLSelector); // TODO something nicer for this
-        
+
         this.updateTab(null);
     },
 
@@ -2647,7 +2657,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         this.panelDeactivate(context, true);
     },
-    
+
     panelActivate: function(context, init)
     {
         if (FBTrace.DBG_PANELS)
@@ -2663,7 +2673,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             this.onFirstPanelActivate(context, init);
 
         this.activeContexts.push(context);
-        
+
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.enablePanel();
@@ -2860,7 +2870,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         else if (isLocalURL(browserURI.spec))
             Firebug.setPref(prefDomain, "enableLocalFiles", (global ? "" : option));
         else if (isDataURL(browserURI.spec))
-        	return;
+            return;
 
         if (!browserURI.spec || isSystemURL(browserURI.spec) || isLocalURL(browserURI.spec))
         {
@@ -2914,7 +2924,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
         else if (isDataURL(browserURI.spec))
         {
-        	return "enable-site";
+            return "enable-site";
         }
 
         switch (permissionManager.testPermission(browserURI, prefDomain))
@@ -3122,7 +3132,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
                 BUTTON({class: "moduleManagerApplyButton", onclick: "$onEnable"})
             ),
             P({class: "moduleManagerDescription applyDesc", style:"font-size:11px", align: "center"}),
-            //xxxHonza: there is no help page available yet. 
+            //xxxHonza: there is no help page available yet.
             /*P({class: "moduleManagerDescription", align: "center"},
                 A({href:"#" },
                     "Help")
@@ -3130,7 +3140,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
             P({class: "moduleManagerDescription", style: "margin-top: 15px;"},
                 $STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
-                IMG({style: "margin-top: 5px; margin-left:0; margin-bottom: 5px; vertical-align:middle", 
+                IMG({style: "margin-top: 5px; margin-left:0; margin-bottom: 5px; vertical-align:middle",
                     src: "chrome://firebug/skin/activation-menu.png"})
             )
          ),
@@ -3148,7 +3158,7 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         this.refresh();
 
         if (needReload)
-            this.context.window.location.reload();  
+            this.context.window.location.reload();
     },
 
     show: function(panel, module)
@@ -3254,69 +3264,69 @@ Firebug.ModuleManager =
     {
         return module.isEnabled(context);
     },
-} 
+}
 //************************************************************************************************
 //A TabWatch listener and a uiListener
-Firebug.URLSelector = 
+Firebug.URLSelector =
 {
-		annotationName: "firebug/history",
-		
-		initialize: function(activableModule)  // called once 
-		{
-			this.activableModule = activableModule;
-			this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
-		                                    .getService(Components.interfaces.nsIAnnotationService);
-			this.tempURI = makeURI("http://getfirebug.com");
-		},
-		
-		shouldCreateContext: function(win, uri)  // true if the Places annotation the URI "firebugged"
-		{
-			var annotatedURI = uri;
-			if ( !(uri instanceof nsIURI) )
-			{
-				try 
-				{
-					this.tempURI.spec = uri;
-					annotatedURI = this.tempURI;
-				}
-				catch(e)
-				{
-					if(FBTrace.DBG_ERRORS)
-						FBTrace.sysout("shouldCreateContext failed for "+uri);
-					return false;
-				}
-			}
-			
-			var annotation = this.annotationSvc.getPageAnnotation(annotatedURI, this.annotationName); 
-			if (annotation) 
-				return true;
-			else
-				return false;
-		},
-		
-	    showUI: function(browser, context)  // Firebug is opened, in browser or detached
-	    {
-	    	// if we are enabled, activate the context
-	        if (this.activableModule.isHostEnabled(context))
-	        	this.activableModule.panelActivate(context, false);
-	        
-	    	// mark this URI as firebugged
-			this.tempURI.spec = context.getWindowLocation();
-			this.annotationSvc.setPageAnnotation(this.tempURI, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
-			FBTrace.sysout("showUI tagged "+context.getWindowLocation());
-	    },
-	    
-	    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
-	    {
-	    	// if we are active, deactivate
-	    	if (this.activableModule.isEnabled(context))
-	    		this.activableModule.panelDeactivate(context, false);
+        annotationName: "firebug/history",
 
-	    	// unmark this URI
-	    	this.tempURI.spec = context.getWindowLocation();
-	    	this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
-	    	FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
-	    },
+        initialize: function(activableModule)  // called once
+        {
+            this.activableModule = activableModule;
+            this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
+                                            .getService(Components.interfaces.nsIAnnotationService);
+            this.tempURI = makeURI("http://getfirebug.com");
+        },
+
+        shouldCreateContext: function(win, uri)  // true if the Places annotation the URI "firebugged"
+        {
+            var annotatedURI = uri;
+            if ( !(uri instanceof nsIURI) )
+            {
+                try
+                {
+                    this.tempURI.spec = uri;
+                    annotatedURI = this.tempURI;
+                }
+                catch(e)
+                {
+                    if(FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("shouldCreateContext failed for "+uri);
+                    return false;
+                }
+            }
+
+            var annotation = this.annotationSvc.getPageAnnotation(annotatedURI, this.annotationName);
+            if (annotation)
+                return true;
+            else
+                return false;
+        },
+
+        showUI: function(browser, context)  // Firebug is opened, in browser or detached
+        {
+            // if we are enabled, activate the context
+            if (this.activableModule.isHostEnabled(context))
+                this.activableModule.panelActivate(context, false);
+
+            // mark this URI as firebugged
+            this.tempURI.spec = context.getWindowLocation();
+            this.annotationSvc.setPageAnnotation(this.tempURI, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+            FBTrace.sysout("showUI tagged "+context.getWindowLocation());
+        },
+
+        hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+        {
+            // if we are active, deactivate
+            if (this.activableModule.isEnabled(context))
+                this.activableModule.panelDeactivate(context, false);
+
+            // unmark this URI
+            this.tempURI.spec = context.getWindowLocation();
+            this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
+            FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
+        },
 }
 
 // ************************************************************************************************
