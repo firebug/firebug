@@ -275,8 +275,13 @@ Firebug.TabCache.prototype = extend(ListeningCache,
                 Ci.nsICachingChannel.LOAD_ONLY_FROM_CACHE |
                 Ci.nsICachingChannel.LOAD_BYPASS_LOCAL_CACHE_IF_BUSY;
 
+            var charset = "UTF-8";
+            var doc = this.context.window.document;
+            if (doc)
+                charset = doc.characterSet;
+
             stream = channel.open();
-            responseText = readFromStream(stream);
+            responseText = readFromStream(stream, charset);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache (response coming from FF Cache) " +
