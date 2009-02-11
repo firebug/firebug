@@ -2443,7 +2443,7 @@ this.dispatch = function(listeners, name, args)
     {
         if (FBTrace.DBG_ERRORS)
         {
-            if (exc.stack) exc.stack = exc.stack.split('/n');
+            if (exc.stack) exc.stack = exc.stack.split('\n');
             FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
             //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
         }
