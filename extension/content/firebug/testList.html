@@ -1,0 +1,33 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Firebug Test Console</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <link rel="stylesheet" href="chrome://fbtest/skin/tabView.css" type="text/css"/>
+</head>
+<body>
+<div id="testList"></div>
+<script type="text/javascript">
+/**
+ * Root directory of the test tree. If it's empty, the parent directory of this file
+ * is used as the test root directory.
+ */
+var baseURI = "chrome://firebugTests/content/";
+
+/**
+ * List of registered tests.
+ * @param: {String} category    Name of the category where the test belongs to.
+ * @param: {String} uri         Relative location of the test file.
+ * @param: {String} desc        Test description.
+ */
+var testList = [
+    {category: "examples", uri: "examples/exampleTest.html",    desc: "Simple test example." },
+    {category: "net", uri: "net/1256/issue1256.js",                  desc: "Issue1256: Firebug displays spaces as plus signs in POST fields" },
+    {category: "net", uri: "net/1275/issue1275.js",                  desc: "Issue1275: firebug does not show JSON answers from server" },
+    {category: "examples", uri: "examples/exampleNetTest.js",   desc: "Example of a Net panel test." },
+];
+</script>
+</body>
+</html>
