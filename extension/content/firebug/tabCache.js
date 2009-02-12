@@ -379,21 +379,36 @@ TracingListener.prototype =
     /* nsIStreamListener */
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
-        if (!this.ignore) 
+        try
         {
-            // Cache only text responses for now.
-            if (contentTypes[request.contentType])
+            if (!this.ignore) 
             {
-                var newStream = this.onCollectData(request, inputStream, offset, count);
-                if (newStream)
-                    inputStream = newStream;
+                // Cache only text responses for now.
+                var contentType = request.contentType;
+                if (contentType)
+                    contentType = contentType.split(";")[0];
+
+                if (contentTypes[contentType])
+                {
+                    var newStream = this.onCollectData(request, inputStream, offset, count);
+                    if (newStream)
+                        inputStream = newStream;
+                }
+                else
+                {
+                    if (FBTrace.DBG_CACHE)
+                        FBTrace.dumpProperties("tabCache.onDataAvailable Content-Type not cached: " +
+                            request.contentType + ", " + safeGetName(request));
+                }
             }
-            else
-            {
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.dumpProperties("tabCache.onDataAvailable Content-Type not cached: " +
-                        request.contentType + ", " + safeGetName(request));
-            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("tabCache.TracingListener.onDataAvailable" +
+                    "(" + request + ", " + requestContext + ", " + 
+                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " + 
+                    safeGetName(request), err);
         }
 
         try
@@ -404,7 +419,7 @@ TracingListener.prototype =
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onDataAvailable" +
+                FBTrace.dumpProperties("tabCache.OriginalListener.onDataAvailable" +
                     "(" + request + ", " + requestContext + ", " + 
                     inputStream + ", " + offset + ", " + count + ") EXCEPTION: " + 
                     safeGetName(request), err);
