@@ -113,7 +113,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 this.onModifyRequest(subject, win, tabId);
             else if (topic == "http-on-examine-response")
                 this.onExamineResponse(subject, win, tabId);
-            else if (topic == "http-on-cached-response")
+            else if (topic == "http-on-examine-cached-response")
                 this.onCachedResponse(subject, win, tabId);
         }
         catch (err)

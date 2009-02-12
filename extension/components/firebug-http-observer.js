@@ -80,7 +80,7 @@ HttpRequestObserver.prototype =
             // Notify all registered observers.
             if (topic == "http-on-modify-request" || 
                 topic == "http-on-examine-response" ||
-                topic == "http-on-cached-response") 
+                topic == "http-on-examine-cached-response") 
             {
                 this.notifyObservers(subject, topic, data);
             }
