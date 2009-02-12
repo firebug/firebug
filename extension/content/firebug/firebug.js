@@ -3296,9 +3296,7 @@ Firebug.URLSelector =
                     return false;
                 }
             }
-
-            var annotation = this.annotationSvc.getPageAnnotation(annotatedURI, this.annotationName);
-            if (annotation)
+            if (this.annotationSvc.pageHasAnnotation(annotatedURI, this.annotationName))
                 return true;
             else
                 return false;
