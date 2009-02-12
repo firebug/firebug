@@ -516,11 +516,11 @@ top.FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Synchronization
 
-    showContext: function(browser, context)
+    showContext: function(browser, context)   
     {
         if (context)
         {
-            FirebugContext = context;  // the other place the FirebugContext is set is in firebug.js
+            FirebugContext = context;  // we set FirebugContext here and in Firebug.initContext only
 
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("chrome.showContext set FirebugContext to: "+(context?context.getWindowLocation():"null ")+"\n");
@@ -539,37 +539,11 @@ top.FirebugChrome =
             panelBar2.hideSelectedPanel()
     },
 
-    syncPanel: function()
+    syncPanel: function()  // we've decided to have Firebug open
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                      
                 (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");                                     
            
-        var resumed = false;
-        if (Firebug.getSuspended())
-        {
-			Firebug.resume();
-			resumed = true;
-        }
-        
-        if(!FirebugContext)
-        {
-        	var browser = FirebugChrome.getCurrentBrowser();
-        	var context = TabWatcher.getContextByWindow(browser.contentWindow);
-        	if (!context) // then a page without a context
-        	{
-        		// Check to see if the context was skipped while suspended.
-        		if (resumed)
-        		{
-        			TabWatcher.watchBrowser(browser);
-        	
-        			if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel prepared for resume FirebugContext="+                                      
-        					(FirebugContext ? FirebugContext.getName() : "undefined")+"\n");                                      
-        		}
-        	}
-        }
-        
-
-        
         panelStatus.clear();
 
         if (FirebugContext)

@@ -1630,6 +1630,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.unregisterDebugger(this);
         fbs.unregisterClient(this);
     },
+    
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
         if (this.registered)
@@ -1642,8 +1643,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (!this.registered)
             return;
-        if (Firebug.Debugger.activeContexts.length > 0 || Firebug.Console.activeContexts.length > 0)
-            return;  // don't turn off JSD unless both console and script panels are done.
+        //if (Firebug.Debugger.activeContexts.length > 0 || Firebug.Console.activeContexts.length > 0)
+        //    return;  // don't turn off JSD unless both console and script panels are done.
         var check = fbs.unregisterDebugger(this);   
         this.registered = false;
     },
