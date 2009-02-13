@@ -90,25 +90,25 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 /**** focus related ****/
 
-panelTab[selected="true"], 
-toolbar.focused toolbarbutton, 
-toolbar.focused checkbox, 
-toolbar.focused input, 
-#fbPanelBar1 .panelOptionsButton, 
-#fbPanelBar2 .panelOptionsButton, 
+panelTab[selected="true"],
+toolbar.focused toolbarbutton,
+toolbar.focused checkbox,
+toolbar.focused input,
+#fbPanelBar1 .panelOptionsButton,
+#fbPanelBar2 .panelOptionsButton,
 #fbStatusBar {
     -moz-user-focus: normal;
 }
 
-#fbToolbar toolbarbutton:focus, 
-#fbToolbar label:focus, 
-.panelOptionsButton:focus, 
+#fbToolbar toolbarbutton:focus,
+#fbToolbar label:focus,
+.panelOptionsButton:focus,
 #fbStatusBar:focus {
-    outline: 2px solid yellow;
+    outline: 2px solid #FF9933;
 }
 
 panelTab:focus {
-    background-color: cyan;
+    background-color: #FF9933;
 }
 
 panelTab:focus > label {
