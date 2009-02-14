@@ -11,6 +11,7 @@ const searchDelay = 150;
 
 Firebug.Search = extend(Firebug.Module,
 {
+    dispatchName: "search",
     search: function(text, context)
     {
         var searchBox = context.chrome.$("fbSearchBox");
@@ -101,7 +102,7 @@ Firebug.Search = extend(Firebug.Module,
                 // Makes all nodes visible again
                 removeClass(panelNode, "searching");
             }
-            
+
             panel.searchText = value;
         }
         else
@@ -123,7 +124,7 @@ Firebug.Search = extend(Firebug.Module,
                     // Makes all nodes visible again
                     removeClass(panelNode, "searching");
                 }
-                
+
                 panel.searchText = value;
             }, searchDelay);
         }
@@ -152,7 +153,7 @@ Firebug.Search = extend(Firebug.Module,
         var searchBox = chrome.$("fbSearchBox");
         searchBox.value = panel && panel.searchText ? panel.searchText : "";
         searchBox.disabled = !panel || !panel.searchable;
-        
+
         var extSearch = panel && panel.extSearch;
         var searchButtons = chrome.$("fbSearchButtons");
         searchButtons.style.display = extSearch ? "" : "none";
@@ -163,11 +164,11 @@ Firebug.Search = extend(Firebug.Module,
             for (var i = 0; i < caps.length; i++) {
                 keyCaps[caps[i]] = true;
             }
-            
+
             // Hide the whole menu if no options are supported
             var searchOptions = chrome.$("fbSearchOptions");
             searchOptions.style.display = caps.length ? "" : "none";
-            
+
             // Handle individual menu elements
             var searchPopup = chrome.$("searchOptionsPopup");
             var curMenuItem = searchPopup.firstChild;

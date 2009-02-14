@@ -9,6 +9,7 @@ var toggleProfiling = $("fbToggleProfiling");
 
 Firebug.Profiler = extend(Firebug.Module,
 {
+    dispatchName: "profiler",
     showContext: function(browser, context)
     {
         this.setEnabled(context);

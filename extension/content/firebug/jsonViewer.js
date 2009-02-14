@@ -7,7 +7,8 @@ FBL.ns(function() { with (FBL) {
 
 Firebug.JSONViewerModel = extend(Firebug.Module,
 {
-    initialize: function() 
+    dispatchName: "jsonViewer",
+    initialize: function()
     {
         Firebug.NetMonitor.NetInfoBody.addListener(this);
 
@@ -15,7 +16,7 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         this.toggles = {};
     },
 
-    shutdown: function() 
+    shutdown: function()
     {
         Firebug.NetMonitor.NetInfoBody.removeListener(this);
     },
@@ -61,14 +62,14 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
                  {object: file.jsonObject, toggles: this.toggles}, tabBody);
         }
     },
-    
+
     parseJSON: function(file)
     {
         var jsonString = new String(file.responseText);
         return parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
-    
-}); 
+
+});
 
 // ************************************************************************************************
 // Registration

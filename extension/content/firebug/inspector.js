@@ -25,6 +25,7 @@ var popupHighlighter = null;
 
 Firebug.Inspector = extend(Firebug.Module,
 {
+    dispatchName: "inspector",
     inspecting: false,
 
     highlightObject: function(element, context, highlightType, boxFrame)

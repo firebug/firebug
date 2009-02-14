@@ -9,7 +9,7 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
 
 // ************************************************************************************************
- 
+
 var maxQueueRequests = 500;
 
 // ************************************************************************************************
@@ -82,7 +82,7 @@ Firebug.ConsoleBase =
             context = FirebugContext;
 
         if (context)
-        	Firebug.Errors.clear(context);
+            Firebug.Errors.clear(context);
 
         var panel = this.getPanel(context, true);
         if (panel)
@@ -101,6 +101,7 @@ var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
 Firebug.Console = extend(ActivableConsole,
 {
+    dispatchName: "console",
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
@@ -116,15 +117,15 @@ Firebug.Console = extend(ActivableConsole,
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element");
             var elementForcer = "var r=null; try { r = window._getFirebugConsoleElement();}catch(exc){r=exc;} r;";  // we could just add the elements here
-            
+
             if (context.stopped)
                 Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
             else
                 var r = Firebug.CommandLine.evaluateInSandbox(elementForcer, context, null, win);
-            
+
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element result ", r);
-            
+
             var element = win.document.getElementById("_firebugConsole");
             if (!element) // elementForce fails
             {
@@ -132,29 +133,29 @@ Firebug.Console = extend(ActivableConsole,
                 Firebug.Console.logFormatted(["Firebug cannot find _firebugConsole element", r, win], context, "error", true);
             }
         }
-        
+
         return element;
     },
-    
-    isReadyElsePreparing: function(context, win) 
+
+    isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.isReadyElsePreparing "+(win?win.location:context.window.location), (win?win:context.window));
-        
+
         if (win)
             return this.injector.attachIfNeeded(context, win);
         else
         {
-        	var attached = true;
+            var attached = true;
             for (var i = 0; i < context.windows.length; i++)
                 attached = attached && this.injector.attachIfNeeded(context, context.windows[i]);
             // already in the list above attached = attached && this.injector.attachIfNeeded(context, context.window);
             if (context.windows.indexOf(context.window) == -1)
-            	FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
+                FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
             return attached;
         }
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
     initialize: function()
@@ -194,16 +195,16 @@ Firebug.Console = extend(ActivableConsole,
         if (this.isEnabled(context))
         {
             this.injector.attachConsoleInjector(context, win);
-            this.injector.addConsoleListener(context, win); 
+            this.injector.addConsoleListener(context, win);
         }
 
-        if (FBTrace.DBG_CONSOLE)                                                                                        
-        {                                                                                                              
-            if (win.wrappedJSObject._firebug)                                                                                           
-                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          
-            else                                                                                                       
-                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n");  
-        }                                                                                                               
+        if (FBTrace.DBG_CONSOLE)
+        {
+            if (win.wrappedJSObject._firebug)
+                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");
+            else
+                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n");
+        }
     },
 */
     showContext: function(browser, context)
@@ -259,18 +260,18 @@ Firebug.Console = extend(ActivableConsole,
     },
     // ----------------------------------------------------------------------------------------------------
     // Firebug.Debugger listener
-    
+
     onMonitorScript: function(context, frame)
     {
-    	Firebug.Console.log(frame, context);
+        Firebug.Console.log(frame, context);
     },
 
     onFunctionCall: function(context, frame, depth, calling)
     {
-    	if (calling) 
-    		Firebug.Console.openGroup([frame, "depth:"+depth], context);
-    	else
-    		Firebug.Console.closeGroup(context);
+        if (calling)
+            Firebug.Console.openGroup([frame, "depth:"+depth], context);
+        else
+            Firebug.Console.closeGroup(context);
     },
 
     // ----------------------------------------------------------------------------------------------------

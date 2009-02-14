@@ -31,6 +31,7 @@ var ignoreNextInput = false;
 
 Firebug.Editor = extend(Firebug.Module,
 {
+    dispatchName: "editor",
     tabCharacter: "    ",
 
     startEditing: function(target, value, editor)
@@ -189,7 +190,7 @@ Firebug.Editor = extend(Firebug.Module,
         currentEditor.saveEdit(currentTarget, value, previousValue);
         dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
     },
-    
+
     setEditTarget: function(element)
     {
         if (!element)
@@ -393,7 +394,7 @@ Firebug.Editor = extend(Firebug.Module,
 // ************************************************************************************************
 // BaseEditor
 
-Firebug.BaseEditor = extend(Firebug.MeasureBox, 
+Firebug.BaseEditor = extend(Firebug.MeasureBox,
 {
     getValue: function()
     {
@@ -420,7 +421,7 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     beginEditing: function(target, value)
     {
     },
-    
+
     // Editor Module listeners will get "onSaveEdit" just after this call
     saveEdit: function(target, value, previousValue)
     {
@@ -994,8 +995,8 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
                 candidates = [];
                 for (var i = 0; i < values.length; ++i)
                 {
-                	if (values[i].substr)
-                		candidates.push(values[i]);
+                    if (values[i].substr)
+                        candidates.push(values[i]);
                 }
                 lastIndex = -1;
             }

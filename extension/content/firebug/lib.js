@@ -2429,7 +2429,10 @@ this.dispatch = function(listeners, name, args)
         {
             var listener = listeners[i];
             if ( listener[name] )
+            {
+                //FBTrace.sysout("FBL.dispatch "+i+") "+name+" to "+listener.dispatchName);
                 listener[name].apply(listener, args);
+            }
             else
             {
                 if (FBTrace.DBG_DISPATCH)
@@ -2443,8 +2446,12 @@ this.dispatch = function(listeners, name, args)
     {
         if (FBTrace.DBG_ERRORS)
         {
-            if (exc.stack) exc.stack = exc.stack.split('\n');
-            FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
+            if (exc.stack)
+            {
+                var stack = exc.stack;
+                exc.stack = stack.split('\n');
+            }
+            FBTrace.dumpProperties(" Exception in lib.dispatch "+ name+": "+exc, exc);
             //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
         }
     }

@@ -26,7 +26,7 @@ var EOF = "<br/>";
 //The controller for the prefDomain Model.
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
 //  base for trace viewers like tracePanel and traceConsole
-//  binds  to the branch 'prefDomain' of prefs  
+//  binds  to the branch 'prefDomain' of prefs
 
 Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 {
@@ -129,7 +129,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceConsole.setOption: new value "+ this.prefDomain+"."+category+ " = " + newValue, menuitem);
     };
- 
+
     if (onPrefChangeHandler)
         this.prefEventToUserEvent = onPrefChangeHandler;
     else
@@ -145,7 +145,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         var optionMap = this.traceService.getTracer(prefDomain);
         var items = [];
         for (var p in optionMap)
-        { 
+        {
             var m = p.indexOf("DBG_");
             if (m != 0)
                 continue;
@@ -162,6 +162,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
 Firebug.TraceModule = extend(Firebug.Module,
 {
+    dispatchName: "traceModule",
     initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
     {
         Firebug.Module.initialize.apply(this, arguments);
@@ -170,16 +171,16 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         this.prefDomain = prefDomain;
 
-        // Create menu items for Trace Console 
+        // Create menu items for Trace Console
         // (Open Console and a new option Always Open Console)
         this.initMenu();
 
         // Open console automatically if the pref says so.
         if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
-        
+
         if (FBTrace.DBG_OPTIONS)
-        	FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
+            FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
     },
 
     shutdown: function()
@@ -448,7 +449,7 @@ Firebug.TraceModule.PanelTemplate = domplate({
 });
 
 // ************************************************************************************************
-// Trace message 
+// Trace message
 
 Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 {
@@ -1116,7 +1117,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope)
                 }
             }
         }
-        else  
+        else
         {
             // Put info about the script error location into the stack.
             this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
@@ -1161,8 +1162,8 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope)
         }
     }
 
-    if (this.obj instanceof Error || 
-        this.obj instanceof Ci.nsIException || 
+    if (this.obj instanceof Error ||
+        this.obj instanceof Ci.nsIException ||
         this.obj instanceof Ci.nsIScriptError)
     {
         // Put the error message into the title so, it's immediately visible.
@@ -1226,11 +1227,11 @@ Firebug.TraceModule.TraceMessage.prototype =
                 {
                     try
                     {
-                    	var getter = this.obj.__lookupGetter__(p);
-                    	if (getter)
-                    		this.props[p] = "" + getter;
-                    	else
-                    		this.props[p] = "" + this.obj[p];
+                        var getter = this.obj.__lookupGetter__(p);
+                        if (getter)
+                            this.props[p] = "" + getter;
+                        else
+                            this.props[p] = "" + this.obj[p];
                     }
                     catch (e)
                     {
@@ -1247,14 +1248,14 @@ Firebug.TraceModule.TraceMessage.prototype =
                         var subProps = this.props[p] = [];
                         var subobj = this.obj.__lookupGetter__(p);
                         if (!subobj)
-                        	subobj = this.obj[p];
+                            subobj = this.obj[p];
                         for (var p1 in subobj)
                         {
-                        	var getter = subobj.lookupGetter__(p1);
-                        	if (getter)
-                        		subProps[p1] = "" + getter;
-                        	else
-                        		subProps[p1] = "" + subobj[p1];
+                            var getter = subobj.lookupGetter__(p1);
+                            if (getter)
+                                subProps[p1] = "" + getter;
+                            else
+                                subProps[p1] = "" + subobj[p1];
                         }
                     }
                     catch (e)
@@ -1309,11 +1310,11 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
 
                     try {
-                    	var getter = this.obj.__lookupGetter__(p);
-                    	if (getter)
-                    		var value = "" + getter;
-                    	else
-                    		var value = "" + this.obj[p]; // script takes too much time error
+                        var getter = this.obj.__lookupGetter__(p);
+                        if (getter)
+                            var value = "" + getter;
+                        else
+                            var value = "" + this.obj[p]; // script takes too much time error
                         this.props[p] = value;
                     }
                     catch (err) {
@@ -1507,7 +1508,7 @@ function onPanic(contextMessage, errorMessage)
 {
     var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
     var win = appShellService.hiddenDOMWindow;
-    // XXXjjb I cannot get these tests to work. 
+    // XXXjjb I cannot get these tests to work.
     //if (win.lastPanic && (win.lastPanic == errorMessage))
         win.dump("traceModule: "+contextMessage +" panic attack "+errorMessage+"\n");
     //else
@@ -1537,7 +1538,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     rowTag:
         TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
             _repObject: "$member", level: "$member.level"},
-            TD({class: "memberLabelCell", 
+            TD({class: "memberLabelCell",
                 style: "padding-left: $member.indent\\px; width:1%; white-space: nowrap"},
                 DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
             ),

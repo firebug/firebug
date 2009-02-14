@@ -54,12 +54,13 @@ var responseSizeLimit = 1024 * 1024 * 5;
 // Model implementation
 
 /**
- * Implementation of cache model. The only purpose of this object is to register an HTTP 
+ * Implementation of cache model. The only purpose of this object is to register an HTTP
  * observer so, HTTP communication can be interecepted and all incoming data stored within
  * a cache.
  */
-Firebug.TabCacheModel = extend(Firebug.Module, 
+Firebug.TabCacheModel = extend(Firebug.Module,
 {
+    dispatchName: "tabCache",
     initializeUI: function(owner)
     {
         if (FBTrace.DBG_CACHE)
@@ -99,7 +100,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     /* nsIObserver */
     observe: function(subject, topic, data)
     {
-        try 
+        try
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
@@ -129,9 +130,9 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
     onExamineResponse: function(request, win, tabId)
     {
-        try 
+        try
         {
-            // Register traceable channel listener in order to intercept all incoming data for 
+            // Register traceable channel listener in order to intercept all incoming data for
             // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
             request.QueryInterface(Ci.nsITraceableChannel);
             var newListener = new TracingListener(win);
@@ -155,10 +156,10 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
 /**
  * This cache object is intended to cache all responses made by a specific tab.
- * The implementation is based on nsITraceableChannel interface introduced in 
+ * The implementation is based on nsITraceableChannel interface introduced in
  * Firefox 3.0.4. This interface allows to intercept all incoming HTTP data.
  *
- * This object replaces the SourceCache, which still exist only for backward 
+ * This object replaces the SourceCache, which still exist only for backward
  * compatibility.
  *
  * The object is derived from SourceCache so, the same interface and most of the
@@ -186,7 +187,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " + 
+                FBTrace.sysout("tabCache.storePartialResponse EXCEPTION " +
                     safeGetName(request), err);
 
             // Even responses that are not converted are stored into the cache.
@@ -245,7 +246,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         if (!currLines)
             currLines = this.cache[url] = [];
 
-        // Join the last line with the new first one so, the source code 
+        // Join the last line with the new first one so, the source code
         // lines are properly formatted.
         if (currLines.length)
             currLines[currLines.length-1] += lines.shift();
@@ -259,8 +260,8 @@ Firebug.TabCache.prototype = extend(ListeningCache,
 
     loadFromCache: function(url, method, file)
     {
-        // The ancestor implementation (SourceCache) uses ioService.newChannel, which 
-        // can result in additional request to the server (in case the response can't 
+        // The ancestor implementation (SourceCache) uses ioService.newChannel, which
+        // can result in additional request to the server (in case the response can't
         // be loaded from the Firefox cache) - known as double-load problem.
         // This new implementation (TabCache) uses nsITraceableListener so, all responses
         // should be already cached.
@@ -268,7 +269,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         // xxxHonza: let's try to get the response from the cache till #449198 is fixed.
         var stream;
         var responseText;
-        try 
+        try
         {
             var channel = ioService.newChannel(url, null, null);
 
@@ -291,7 +292,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
 
             responseText = this.store(url, responseText);
         }
-        catch (err) 
+        catch (err)
         {
             if (FBTrace.DBG_ERROR || FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache EXCEPTION " + url, err);
@@ -299,7 +300,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         finally
         {
             if(stream)
-                stream.close();	
+                stream.close();
         }
 
         return responseText;
@@ -310,8 +311,8 @@ Firebug.TabCache.prototype = extend(ListeningCache,
 // TracingListener implementation
 
 /**
- * This object implements nsIStreamListener interface and is intended to monitor all network 
- * channels (nsIHttpChannel). For every channel a new instance of this object is created and 
+ * This object implements nsIStreamListener interface and is intended to monitor all network
+ * channels (nsIHttpChannel). For every channel a new instance of this object is created and
  * registered. See Firebug.TabCacheModel.onExamineResponse method.
  */
 function TracingListener(win)
@@ -322,7 +323,7 @@ function TracingListener(win)
     this.ignore = false;
 }
 
-TracingListener.prototype = 
+TracingListener.prototype =
 {
     onCollectData: function(request, inputStream, offset, count)
     {
@@ -331,7 +332,7 @@ TracingListener.prototype =
             var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
             var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
             var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
-            
+
             binaryInputStream.setInputStream(inputStream);
             storageStream.init(8192, count, null);
             binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
@@ -339,7 +340,7 @@ TracingListener.prototype =
             var data = binaryInputStream.readBytes(count);
             binaryOutputStream.writeBytes(data, count);
 
-            // Avoid creating additional empty line if response comes in more pieces 
+            // Avoid creating additional empty line if response comes in more pieces
             // and the split is made just between "\r" and "\n" (Win line-end).
             // So, if the response starts with "\n" while the previous part ended with "\r",
             // remove the first character.
@@ -352,13 +353,13 @@ TracingListener.prototype =
             // At this moment, initContext is alredy called so, the context is
             // ready and associated with the window.
             var context = TabWatcher.getContextByWindow(this.window);
-            if (context) 
+            if (context)
             {
                 // Store received data into the cache as they come.
                 if (!context.sourceCache.storePartialResponse(request, data, this.window))
                     this.ignore = true;
             }
-            else 
+            else
             {
                 if (FBTrace.DBG_CACHE)
                     FBTrace.dumpProperties("tabCache.onCollectData NO CONTEXT for: " + this.window.location.href);
@@ -381,7 +382,7 @@ TracingListener.prototype =
     {
         try
         {
-            if (!this.ignore) 
+            if (!this.ignore)
             {
                 // Cache only text responses for now.
                 var contentType = request.contentType;
@@ -406,8 +407,8 @@ TracingListener.prototype =
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.dumpProperties("tabCache.TracingListener.onDataAvailable" +
-                    "(" + request + ", " + requestContext + ", " + 
-                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " + 
+                    "(" + request + ", " + requestContext + ", " +
+                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
                     safeGetName(request), err);
         }
 
@@ -420,8 +421,8 @@ TracingListener.prototype =
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.dumpProperties("tabCache.OriginalListener.onDataAvailable" +
-                    "(" + request + ", " + requestContext + ", " + 
-                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " + 
+                    "(" + request + ", " + requestContext + ", " +
+                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
                     safeGetName(request), err);
         }
     },
@@ -445,11 +446,11 @@ TracingListener.prototype =
         try
         {
             var context = TabWatcher.getContextByWindow(this.window);
-            if (context) 
+            if (context)
             {
                 context.sourceCache.stopRequest(request);
             }
-            else 
+            else
             {
                 if (FBTrace.DBG_CACHE)
                     FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
@@ -487,7 +488,7 @@ function safeGetName(request)
     try {
         return request.name;
     }
-    catch (exc) { 
+    catch (exc) {
     }
 
     return null;

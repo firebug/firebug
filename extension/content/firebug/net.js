@@ -148,6 +148,7 @@ var panelBar1 = $("fbPanelBar1");
 
 Firebug.NetMonitor = extend(Firebug.ActivableModule,
 {
+    dispatchName: "netMonitor",
     clear: function(context)
     {
         // The user pressed a Clear button so, remove content of the panel...
@@ -226,25 +227,25 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             FBTrace.sysout("net.initContext for: " + context.getName(), context);
 
         if (context.window && 'addEventListener' in context.window)
-        {	
-        	var window = context.window;
+        {
+            var window = context.window;
 
-        	// Register "load" listener in order to track window load time.
-        	var onWindowLoadHandler = function() {
-        		if (context.netProgress)
-        			context.netProgress.post(windowLoad, [window, now()]);
-        		window.removeEventListener("load", onWindowLoadHandler, true);
-        	}
-        	window.addEventListener("load", onWindowLoadHandler, true);
+            // Register "load" listener in order to track window load time.
+            var onWindowLoadHandler = function() {
+                if (context.netProgress)
+                    context.netProgress.post(windowLoad, [window, now()]);
+                window.removeEventListener("load", onWindowLoadHandler, true);
+            }
+            window.addEventListener("load", onWindowLoadHandler, true);
 
-        	// Register "DOMContentLoaded" listener to track timing.
-        	var onContentLoadHandler = function() {
-        		if (context.netProgress)
-        			context.netProgress.post(contentLoad, [window, now()]);
-        		window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
-        	}
-        
-        	window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
+            // Register "DOMContentLoaded" listener to track timing.
+            var onContentLoadHandler = function() {
+                if (context.netProgress)
+                    context.netProgress.post(contentLoad, [window, now()]);
+                window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
+            }
+
+            window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
         }
     },
 
@@ -332,13 +333,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     onResumeFirebug: function(context)
     {
         HttpObserver.registerObserver();  // safe for multiple calls
-        try 
+        try
         {
-        	context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
+            context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
         }
         catch(e)
         {
-        	if (FBTrace.DBG_ERRORS)
+            if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("net.onResumeFirebug could not addProgressListener: ", e);
         }
 
@@ -700,13 +701,13 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
             gBrowser.selectedTab = gBrowser.addTab(dataURI);
         }
-        catch (err) 
+        catch (err)
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("net.openResponseInTab EXCEPTION", err);
         }
     },
-    
+
     stopLoading: function(file)
     {
         const NS_BINDING_ABORTED = 0x804b0002;
@@ -805,14 +806,14 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             }
         }
 
-        if (file) 
+        if (file)
         {
             scrollIntoCenterView(file.row);
             if (!hasClass(file.row, "opened"))
                 this.toggleHeadersRow(file.row);
         }
     },
-    
+
     getOptionsMenuItems: function()
     {
         return [];
@@ -892,7 +893,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var row = getAncestorByClass(target, "netRow");
         if (row)
         {
-            if (getAncestorByClass(target, "netTotalSizeCol")) 
+            if (getAncestorByClass(target, "netTotalSizeCol"))
             {
                 var infoTipURL = "netTotalSize";
                 if (infoTipURL == this.infoTipURL)
@@ -901,7 +902,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 this.infoTipURL = infoTipURL;
                 return this.populateTotalSizeInfoTip(infoTip, row);
             }
-            else if (getAncestorByClass(target, "netSizeCol")) 
+            else if (getAncestorByClass(target, "netSizeCol"))
             {
                 var infoTipURL = row.repObject.href + "-netsize";
                 if (infoTipURL == this.infoTipURL)
@@ -1186,7 +1187,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var timeBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
-            resolvingBar.style.left = connectingBar.style.left = waitingBar.style.left = 
+            resolvingBar.style.left = connectingBar.style.left = waitingBar.style.left =
                 respondedBar.style.left = timeBar.style.left = this.barOffset + "%";
 
             // Sets width of all bars (using style). The width is computed according to measured timing.
@@ -1208,10 +1209,10 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 this.windowLoadBarOffset = null;
             }
 
-            /*FBTrace.sysout("net.updateTimeline resolving: " + 
-                resolvingBar.style.left + " : "+  resolvingBar.style.width + ", connecting: " + 
-                connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " + 
-                waitingBar.style.left + " : " + waitingBar.style.width + ", time: " + 
+            /*FBTrace.sysout("net.updateTimeline resolving: " +
+                resolvingBar.style.left + " : "+  resolvingBar.style.width + ", connecting: " +
+                connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " +
+                waitingBar.style.left + " : " + waitingBar.style.width + ", time: " +
                 timeBar.style.left + " : " + timeBar.style.width + ", DOMContentLoaded: " +
                 contentLoadBar.style.left + ", load: " +
                 windowLoadBar.style.left, file);*/
@@ -1273,8 +1274,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             this.phaseStartTime = phase.startTime;
             this.phaseEndTime = phase.endTime ? phase.endTime : rightNow;
 
-            // End of the first phase has to respect even the window "onload" event time, which 
-            // can occur after the last received file. This sets the extent of the timeline so, 
+            // End of the first phase has to respect even the window "onload" event time, which
+            // can occur after the last received file. This sets the extent of the timeline so,
             // the windowLoadBar is visible.
             if (phase.windowLoadTime && this.phaseEndTime < phase.windowLoadTime)
                 this.phaseEndTime = phase.windowLoadTime;
@@ -1285,15 +1286,15 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
         this.barWidth = Math.floor((elapsed/this.phaseElapsed) * 100);
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
-        this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100); 
-        this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100); 
-        this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100); 
-        this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100); 
-        
+        this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100);
+
         // Total request time doesn't include the time spent in queue.
         this.elapsed = elapsed - (file.waitingForTime - file.connectingTime);
 
-        // Compute also offset for the contentLoadBar and windowLoadBar, which are 
+        // Compute also offset for the contentLoadBar and windowLoadBar, which are
         // displayed for the first phase.
         if (phase.contentLoadTime)
             this.contentLoadBarOffset = Math.floor(((phase.contentLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
@@ -1393,7 +1394,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
 Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 {
-    tag: 
+    tag:
         TABLE({class: "timeInfoTip"},
             TBODY(
                 TR(
@@ -1412,7 +1413,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                     TD({class: "netRespondedBar timeInfoTipBar"}),
                     TD("$file|getResponseTime : " + $STR("requestinfo.Waiting For Response"))
                 ),
-                TR({$loaded: "$file.loaded", 
+                TR({$loaded: "$file.loaded",
                     $fromCache: "$file.fromCache"},
                     TD({class: "netTimeBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
@@ -1480,7 +1481,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
 Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 {
-    tag: 
+    tag:
         DIV({class: "sizeInfoTip"}, "$file|getSize"),
 
     getSize: function(file)
@@ -1740,7 +1741,7 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (!file.receivingStarted) 
+            if (!file.receivingStarted)
             {
                 file.waitingForTime = time;
                 file.receivingStarted = true;
@@ -1806,7 +1807,7 @@ NetProgress.prototype =
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.stopFile +" + (now() - file.startTime) + " " + 
+                FBTrace.sysout("net.stopFile +" + (now() - file.startTime) + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
             file.endTime = time;
@@ -1864,7 +1865,7 @@ NetProgress.prototype =
     windowLoad: function windowLoad(window, time)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " + 
+            FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " +
                 window.location.href, this.phases);
 
         if (!this.phases.length)
@@ -1882,7 +1883,7 @@ NetProgress.prototype =
     contentLoad: function contentLoad(window, time)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.contentLoad +? " + getPrintableTime() + ", " + 
+            FBTrace.sysout("net.contentLoad +? " + getPrintableTime() + ", " +
                 window.location.href);
 
         if (!this.phases.length)
@@ -2014,7 +2015,7 @@ NetProgress.prototype =
     endLoad: function(file)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.endLoad +" + (now() - file.startTime) + " " + 
+            FBTrace.sysout("net.endLoad +" + (now() - file.startTime) + " " +
                 getPrintableTime() + ", " + file.request.URI.path, file);
 
         // Set file as loaded.
@@ -2072,12 +2073,12 @@ NetProgress.prototype =
 
     onStateChange: function(progress, request, flag, status)
     {
-        // For image files we can't get the nsIHttpChannel (the request object is imgIRequest 
+        // For image files we can't get the nsIHttpChannel (the request object is imgIRequest
         // in such a case). So, this method is not much useful.
         var file = this.getRequestFile(request, null, true);
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " + 
-                getPrintableTime() + ", " + getStateDescription(flag) + ", " + 
+            FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " +
+                getPrintableTime() + ", " + getStateDescription(flag) + ", " +
                 safeGetName(request), file);
     },
 
@@ -2087,22 +2088,22 @@ NetProgress.prototype =
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onProgressChange +" + (now() - file.startTime) + " " + 
-                    getPrintableTime() + ", " + "progress: " + current + 
+                FBTrace.sysout("net.onProgressChange +" + (now() - file.startTime) + " " +
+                    getPrintableTime() + ", " + "progress: " + current +
                     ", expectedSize: " + max + ", " + request.URI.path, file);
 
             this.post(progressFile, [request, current, max, now()]);
         }
     },
 
-    onStatusChange: function(progress, request, status, message) 
+    onStatusChange: function(progress, request, status, message)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onStatusChange +" + (now() - file.startTime) + " " + 
-                    getPrintableTime() + ", " + getStatusDescription(status) + 
+                FBTrace.sysout("net.onStatusChange +" + (now() - file.startTime) + " " +
+                    getPrintableTime() + ", " + getStatusDescription(status) +
                     ", " + message + ", " + request.URI.path, file);
 
             if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO || status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
@@ -2113,7 +2114,7 @@ NetProgress.prototype =
                 this.post(receivingFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
                 this.post(resolvingFile, [request, now()]);
-            
+
         }
     },
 
@@ -2178,7 +2179,7 @@ NetFile.prototype =
     endTime: null,
     waitingForTime: null,
     connectingTime: null,
-    
+
     getFileLink: function()
     {
         return new FBL.NetFileLink(this.href, this.request);
@@ -2679,7 +2680,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         FOR("param", "$headers",
             TR(
                 TD({class: "netInfoParamName"}, "$param.name"),
-                TD({class: "netInfoParamValue"}, 
+                TD({class: "netInfoParamValue"},
                     PRE("$param|getParamValue")
                 )
             )
@@ -2731,8 +2732,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     getParamValue: function(param)
     {
         // This value is inserted into PRE element and so, make sure the HTML isn't escaped (1210).
-        // This is why the second parameter is true. 
-        // The PRE element preserves whitespaces so they are displayed the same, as they come from 
+        // This is why the second parameter is true.
+        // The PRE element preserves whitespaces so they are displayed the same, as they come from
         // the server (1194).
         return wrapText(param.value, true);
     },
@@ -3009,7 +3010,7 @@ function getPostText(file, context)
 
 function getResponseText(file, context)
 {
-    return file.responseText ? file.responseText : 
+    return file.responseText ? file.responseText :
         context.sourceCache.loadText(file.href, file.method, file);
 }
 
@@ -3064,7 +3065,7 @@ var HttpObserver =
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
-        try 
+        try
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
@@ -3112,7 +3113,7 @@ var HttpObserver =
         if (!networkContext)
             networkContext = context ? context.netProgress : null;
 
-        if (networkContext) 
+        if (networkContext)
         {
             var xhr = isXHR(request);
             networkContext.post(requestedFile, [request, now(), win, xhr]);
@@ -3140,20 +3141,20 @@ var HttpObserver =
             networkContext.post(respondedFile, [request, now(), info]);
     },
 
-	/* nsISupports */
-	QueryInterface: function(iid) 
-	{
-        if (iid.equals(Ci.nsISupports) || 
-			iid.equals(Ci.nsIObserver)) {
- 		    return this;
- 		}
-		
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+    /* nsISupports */
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsIObserver)) {
+             return this;
+         }
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 }
 
 // ************************************************************************************************
-// Helper for tracing 
+// Helper for tracing
 
 function getPrintableTime()
 {

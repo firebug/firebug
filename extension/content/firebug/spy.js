@@ -78,6 +78,7 @@ const httpObserver =
 
 Firebug.Spy = extend(Firebug.Module,
 {
+    dispatchName: "spy",
     skipSpy: function(win)
     {
         var uri = win.location.href; // don't attach spy to chrome
@@ -381,7 +382,7 @@ function getSpyForXHR(request, xhrRequest, context)
         if (spy.request == request)
             return spy;
     }
-    
+
     spy = new XMLHttpRequestSpy(request, xhrRequest, context);
     context.spies.push(spy);
 
@@ -464,7 +465,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         catch (exc)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.dumpProperties("spy.requestStopped " + spy.href + 
+                FBTrace.dumpProperties("spy.requestStopped " + spy.href +
                     ", status access FAILED", exc);
         }
     }
@@ -479,8 +480,8 @@ function requestStopped(request, xhrRequest, context, method, url)
         remove(spy.context.spies, spy);
 
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " + 
-            spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) + 
+        FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
+            spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) +
             " bytes", request);
 }
 
@@ -492,8 +493,8 @@ function onHTTPSpyReadyStateChange(spy, event)
         if (spy.onreadystatechange)
             spy.onreadystatechange.handleEvent(event);
     }
-    catch (exc) 
-    { 
+    catch (exc)
+    {
         if (FBTrace.DBG_ERROR)
             FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION", exc);
     }
@@ -523,10 +524,10 @@ function onHTTPSpyLoad(spy)
         netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
     // If the response is get from FF cache the http-on-examine-response is never sent
-    // (https://bugzilla.mozilla.org/show_bug.cgi?id=449198) and so, the requestStopped 
+    // (https://bugzilla.mozilla.org/show_bug.cgi?id=449198) and so, the requestStopped
     // method is never called.
     // Let's simulate the event for all spy objects that have been registered for this request.
-    // Notice that there can be more spy objects (using the same request object) in case of 
+    // Notice that there can be more spy objects (using the same request object) in case of
     // redirects.
     var spies = spy.context.spies;
     for (var i=0; spies && i<spies.length; i++)
