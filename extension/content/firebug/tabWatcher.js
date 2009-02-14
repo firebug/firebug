@@ -109,17 +109,17 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = this.getContextByWindow(win);
         if (!context) // then we've not looked this window in this session
         {
-        	// decide whether this window will be debugged or not
-            if (!this.shouldCreateContext(win, uri, userCommands)) 
+            // decide whether this window will be debugged or not
+            if (!this.shouldCreateContext(win, uri, userCommands))
             {
-            	if (FBTrace.DBG_WINDOWS)
-            		FBTrace.sysout("-> tabWatcher will not create context ");
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("-> tabWatcher will not create context ");
                 this.watchContext(win, null);
                 return false;  // we did not create a context
             }
-            
+
             context = this.createContext(win);
-       } 
+       }
 
         // Dispatch watchWindow for the outer most DOM window
         this.watchWindow(win, context);
@@ -141,33 +141,33 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // Call showContext only for currently active context.
         if (tabBrowser.currentURI.spec != context.browser.currentURI.spec)
         {
-            if (FBTrace.DBG_WINDOWS)                                                                     
-                FBTrace.sysout("-> watchTopWindow: Do not show context as it's not the active tab: " +         
-                    context.browser.currentURI.spec + "\n");                                                    
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("-> watchTopWindow: Do not show context as it's not the active tab: " +
+                    context.browser.currentURI.spec + "\n");
             return context;  // we did create or find a context
         }
 
         if (context && !context.loaded && !context.showContextTimeout)
         {
-        	// still loading, we want to showContext one time but not too agressively
+            // still loading, we want to showContext one time but not too agressively
             context.showContextTimeout = setTimeout(bindFixed( function delayShowContext()
             {
                 if (FBTrace.DBG_WINDOWS)
-            	    FBTrace.sysout("tabWatcher delayShowContext id:"+context.showContextTimeout, context);
+                    FBTrace.sysout("tabWatcher delayShowContext id:"+context.showContextTimeout, context);
                 if (context.window)   // Sometimes context.window is not defined ?
                     this.watchContext(win, context);  // calls showContext
                 else
                 {
                     if(FBTrace.DBG_ERRORS)
-                    	FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
+                        FBTrace.sysout("tabWatcher watchTopWindow no context.window "+(context.browser? context.browser.currentURI.spec : " and no context.browser")+"\n");
                 }
             }, this), 400);
         }
         else
         {
-        	if (context.showContextTimeout)
-        		clearTimeout(context.showContextTimeout);
-        	delete context.showContextTimeout;
+            if (context.showContextTimeout)
+                clearTimeout(context.showContextTimeout);
+            delete context.showContextTimeout;
 
             this.watchContext(win, context);  // calls showContext
         }
@@ -179,12 +179,12 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     shouldCreateContext: function(win, uri, userCommands)  // currently this can be called with nsIURI or a string URL.
     {
-    	// called when win has no context, answers the question: create one, true or false?
+        // called when win has no context, answers the question: create one, true or false?
 
         // Create if any listener says true to showCreateContext
         if ( dispatch2(this.fbListeners, "shouldCreateContext", [win, uri, userCommands]) )
             return true;
-        
+
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ ((uri instanceof nsIURI)?uri.spec:uri));
 
@@ -213,22 +213,26 @@ top.TabWatcher = extend(new Firebug.Listener(),
         context = new Firebug.TabContext(win, browser, browser.chrome, persistedState);
         contexts.push(context);
 
-        context.uid = FBL.getUniqueId();                                                                       
-        if (FBTrace.DBG_WINDOWS) {                                                                                 
-            FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+                           
-                ", win.location.href: "+win.location.href+"\n");                                                   
-        }                                                                                                          
-                                                                                                                   
+        context.uid = FBL.getUniqueId();
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_INITIALIZE) {
+            FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
+                ", "+context.getName()+" browser "+browser.currentURI+"\n");
+            window.dump("\n"+getStackDump()+"\n");
+        }
+
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
 
-        win.addEventListener("pagehide", onPageHideTopWindow, true);
-        win.addEventListener("pageshow", onLoadWindowContent, true);
-        win.addEventListener("DOMContentLoaded", onLoadWindowContent, true);
-        if (FBTrace.DBG_INITIALIZE)                                                                                
-            FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pagehide, pageshow, DomContentLoaded \n");   
+        if (win instanceof Ci.nsIDOMWindow && win.top == win)
+        {
+            win.addEventListener("pagehide", onPageHideTopWindow, false);
+            win.addEventListener("pageshow", onLoadWindowContent, false);
+            win.addEventListener("DOMContentLoaded", onLoadWindowContent, false);
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pagehide, pageshow, DomContentLoaded \n");
+        }
         return context;
     },
-    
+
     /**
      * Called once the document within a tab is completely loaded.
      */
@@ -426,7 +430,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
         return null;
     },
 
-
     getBrowserByWindow: function(win)
     {
         for (var i = 0; i < tabBrowser.browsers.length; ++i)
@@ -537,7 +540,7 @@ var FrameProgressListener = extend(BaseProgressListener,
                 if (win.parent == win && (win.location.href == "about:blank"))
                 {
                     TabWatcher.watchTopWindow(win, win.location.href);
-                    return;   
+                    return;
                 }
                 else
                     TabWatcher.watchWindow(win);
@@ -639,8 +642,17 @@ var HttpObserver = extend(Object,
 
 function onPageHideTopWindow(event)
 {
-    var win = event.currentTarget;
-    win.removeEventListener("pagehide", onPageHideTopWindow, true);
+    var win = event.currentTarget;  // we set the handler on a window
+    var doc = event.target; // the pagehide is sent to the document.
+    if (doc.defaultView != win)
+        return; // ignore page hides on interior windows
+    FBTrace.sysout("ppppppppppppppppppageHide event.currentTarget "+win.location, event);
+    FBTrace.sysout("ppppppppppppppppppageHide event.target "+event.target, event);
+    FBTrace.sysout("ppppppppppppppppppageHide event.currentTarget "+event.currentTarget, event);
+    FBTrace.sysout("ppppppppppppppppppageHide event.originalTarget "+event.originalTarget, event);
+    FBTrace.sysout("ppppppppppppppppppageHide event.explicitOriginalTarget "+event.explicitOriginalTarget, event);
+
+    win.removeEventListener("pagehide", onPageHideTopWindow, false);
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
     if (event.persisted) // then the page is cached and there cannot be an unload handler
     {
@@ -677,8 +689,8 @@ function onLoadWindowContent(event)
     }
     catch (exc)
     {
-    	if (FBTrace.DBG_ERRORS)
-    		FBTrace.sysout("tabWatcher.onLoadWindowContent removeEventListener pageshow fails", exc);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("tabWatcher.onLoadWindowContent removeEventListener pageshow fails", exc);
     }
 
     try
@@ -688,8 +700,8 @@ function onLoadWindowContent(event)
     }
     catch (exc)
     {
-    	if (FBTrace.DBG_ERRORS)
-    		FBTrace.sysout("tabWatcher.onLoadWindowContent removeEventListener DOMContentLoaded fails", exc);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("tabWatcher.onLoadWindowContent removeEventListener DOMContentLoaded fails", exc);
     }
 
     // Signal that we got the onLoadWindowContent event. This prevents the FrameProgressListener from sending it.
@@ -733,7 +745,7 @@ function delayBrowserLoad(browser, uri)
     setTimeout(function delayBrowserLoad100()
     {
         if (FBTrace.DBG_WINDOWS)
-    	    FBTrace.sysout("tabWatcher delayBrowserLoad100:"+uri, browser);
+            FBTrace.sysout("tabWatcher delayBrowserLoad100:"+uri, browser);
         browser.loadURI(uri);
     }, 100);
 }
