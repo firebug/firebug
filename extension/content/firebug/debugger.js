@@ -45,6 +45,8 @@ const panelStatus = $("fbPanelStatus");
 
 Firebug.Debugger = extend(Firebug.ActivableModule,
 {
+    dispatchName: "debugger",
+
     fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
@@ -1535,7 +1537,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         this.onFunctionCall = bind(this.onFunctionCall, this);
-
+        fbs.registerClient(this);   // allow callbacks for jsd
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
@@ -1545,7 +1547,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
 
-        fbs.registerClient(this);   // allow callbacks for jsd
         // 1.3.1 move fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
     },
 
