@@ -1653,7 +1653,7 @@ function NetProgress(context)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
-            file.responseText = lines ? lines.join("\n") : null;
+            file.responseText = lines ? lines.join("\n") : "";
     };
 
     this.clear();
@@ -3010,7 +3010,8 @@ function getPostText(file, context)
 
 function getResponseText(file, context)
 {
-    return file.responseText ? file.responseText :
+    // The response can be also empty string so, check agains "undefined".
+    return (typeof(file.responseText) != "undefined")? file.responseText :
         context.sourceCache.loadText(file.href, file.method, file);
 }
 
