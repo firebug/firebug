@@ -238,7 +238,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         var response = this.getResponse(request);
 
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.startRequest: " + url);
+            FBTrace.sysout("tabCache.startRequest: " + safeGetName(request));
     },
 
     stopRequest: function(request)
