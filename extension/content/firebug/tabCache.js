@@ -194,18 +194,8 @@ Firebug.TabCache.prototype = extend(ListeningCache,
             // return false;
         }
 
-        // If this is the first part of the response make sure the appropriate
-        // entry in the cache is clean (thi.invalidate).
         var url = safeGetName(request);
-        var response = this.responses[url];
-        if (!response)
-        {
-            this.invalidate(url);
-            this.responses[url] = response = {
-                request: request,
-                size: 0
-            };
-        }
+        var response = this.getResponse(request);
 
         // Size of each response is limited.
         var limitNotReached = true;
@@ -223,6 +213,32 @@ Firebug.TabCache.prototype = extend(ListeningCache,
 
         // Return false if furhter parts of this response should be ignored.
         return limitNotReached;
+    },
+
+    getResponse: function(request)
+    {
+        var url = safeGetName(request);
+        var response = this.responses[url];
+        if (!response)
+        {
+            this.invalidate(url);
+            this.responses[url] = response = {
+                request: request,
+                size: 0
+            };
+        }
+
+        return response;
+    },
+
+    startRequest: function(request)
+    {
+        // Make sure the response-entry (used to count total response size) is properly 
+        // initialized (cleared) now. If no data is received, the response entry remains empty.
+        var response = this.getResponse(request);
+
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.startRequest: " + url);
     },
 
     stopRequest: function(request)
@@ -431,13 +447,32 @@ TracingListener.prototype =
     {
         try
         {
+            var context = TabWatcher.getContextByWindow(this.window);
+            if (context)
+            {
+                context.sourceCache.startRequest(request);
+            }
+            else
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.dumpProperties("tabCache.onStartRequest NO CONTEXT for: " + this.window.location.href);
+            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("tabCache.TracingListener.onStartRequest EXCEPTION\n", err);
+        }
+
+        try
+        {
             if (this.listener)
                 this.listener.onStartRequest(request, requestContext);
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onStartRequest EXCEPTION\n", err);
+                FBTrace.dumpProperties("tabCache.OriginalListener.onStartRequest EXCEPTION\n", err);
         }
     },
 
@@ -455,14 +490,22 @@ TracingListener.prototype =
                 if (FBTrace.DBG_CACHE)
                     FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
             }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("tabCache.TracingListener.onStopRequest EXCEPTION\n", err);
+        }
 
+        try
+        {
             if (this.listener)
                 this.listener.onStopRequest(request, requestContext, statusCode);
         }
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onStopRequest EXCEPTION\n", err);
+                FBTrace.dumpProperties("tabCache.OriginalListener.onStopRequest EXCEPTION\n", err);
         }
     },
 
