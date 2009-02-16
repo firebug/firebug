@@ -176,9 +176,6 @@ top.Firebug =
 
         this.loadExternalEditors();
 
-        TabWatcher.initialize(this);
-        TabWatcher.addListener(this);
-
         prefs.addObserver(this.prefDomain, this, false);
         prefs.addObserver(this.servicePrefDomain, this, false);
 
@@ -260,6 +257,9 @@ top.Firebug =
             FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+					   /*@explore*/
                     " detachArgs:", detachArgs);                      												   /*@explore*/
                                                                                                                        /*@explore*/
+        TabWatcher.initialize(this);
+        TabWatcher.addListener(this);
+
         Firebug.URLSelector.initialize();
         TabWatcher.addListener(Firebug.URLSelector);  // listen for shouldCreateContext
         uiListeners.push(Firebug.URLSelector); // listen for showUI
@@ -274,6 +274,8 @@ top.Firebug =
 
     shutdown: function()
     {
+    	TabWatcher.removeListener(Firebug.URLSelector);
+    	TabWatcher.removeListener(this);
         TabWatcher.destroy();
 
         dispatch(modules, "disable");
@@ -497,34 +499,20 @@ top.Firebug =
                     try
                     {
                         var cw = module.activeContexts[ic].window;
-                        /*
-                        try
-                        {
-                            if ( cw && ('location' in cw) && ('toString' in cw.location) )
-                                FBTrace.sysout("1) Found object with location: "+cw.location.toString()+"\n");
-                            if (cw && cw.location)
-                                FBTrace.sysout("2) Found object with location: "+cw.location.toString()+"\n");
-                        }
-                        catch(e)
-                        {
-                            FBTrace.sysout("Trying to find location in object gave "+e+"\n");
-                        }
-                         */
                         if (cw)
                         {
-                            try
-                            {
-                                var url = cw.location.toString(); // force it all the way to strings so we don't fight nsIDOMLocation.toString()
-                                if (url)
-                                {
-                                    if (contextURLSet.indexOf(url) == -1)
-                                        contextURLSet.push(url);
-                                }
-                            }
-                            catch(exc)
-                            {
-                            // there does not seem to be a way to avoid this exception
-                            }
+                        	if (cw.closed)
+                        		url = "about:closed";
+                        	else
+                        		if ('location' in cw)
+                        			var url = cw.location.toString(); 
+                        		else
+                        			var url = module.activeContexts[ic].getName();
+                        	if (url)
+                        	{
+                        		if (contextURLSet.indexOf(url) == -1)
+                        			contextURLSet.push(url);
+                        	}
                         }
                     }
                     catch(e)
@@ -1566,7 +1554,7 @@ Firebug.Listener.prototype =
     addListener: function(listener)
     {
         if (!this.fbListeners)
-            this.fbListeners = []; // delay the creation until the objects are created 'this' cause new array for each module
+            this.fbListeners = []; // delay the creation until the objects are created so 'this' causes new array for each module
 
         this.fbListeners.push(listener);
     },

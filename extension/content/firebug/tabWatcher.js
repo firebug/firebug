@@ -44,16 +44,13 @@ var contexts = [];
 
 top.TabWatcher = extend(new Firebug.Listener(),
 {
-    initialize: function(theFirebug)
+    initialize: function()
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher initialize\n");
 
         // Store contexts where they can be accessed externally
         this.contexts = contexts;
-
-        this.theFirebug = theFirebug;  // Firebug object
-        this.addListener(theFirebug);
 
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
@@ -78,9 +75,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 this.unwatchTopWindow(browser.contentWindow);
             }
         }
-
-        this.removeListener(this.theFirebug);
-        this.theFirebug = null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
