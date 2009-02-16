@@ -43,6 +43,8 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.sourceCache = new Firebug.TabCache(win, this);
     else
         this.sourceCache = new Firebug.SourceCache(win, this);
+    
+    this.global = win;  // used by chromebug
 };
 
 Firebug.TabContext.prototype =
@@ -52,6 +54,9 @@ Firebug.TabContext.prototype =
         try
         {
             if (this.window)
+            {
+            	if (this.window.closed)
+            		return "about:closed";
                 if ("location" in this.window)
                 {
                     if ("toString" in this.window.location)
@@ -61,6 +66,7 @@ Firebug.TabContext.prototype =
                 }
                 else
                     return "(no window.location)";
+            }
             else
                 return "(no window)";
         }
@@ -83,6 +89,8 @@ Firebug.TabContext.prototype =
 
     getName: function()
     {
+    	if (!this.name)
+    		this.name = this.getWindowLocation();
         return this.name;
     },
 
