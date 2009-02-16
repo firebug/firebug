@@ -44,13 +44,13 @@ var contexts = [];
 
 top.TabWatcher = extend(new Firebug.Listener(),
 {
+    // Store contexts where they can be accessed externally
+    contexts: contexts,
+    
     initialize: function()
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher initialize\n");
-
-        // Store contexts where they can be accessed externally
-        this.contexts = contexts;
 
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
