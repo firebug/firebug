@@ -2421,6 +2421,9 @@ this.isShift = function(event)
 
 this.dispatch = function(listeners, name, args)
 {
+	if (!listeners)
+		return;
+	
     try {
         if (FBTrace.DBG_DISPATCH)
             var noMethods = [];
@@ -2452,7 +2455,7 @@ this.dispatch = function(listeners, name, args)
                 exc.stack = stack.split('\n');
             }
             FBTrace.dumpProperties(" Exception in lib.dispatch "+ name+": "+exc, exc);
-            //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
+            window.dump(FBL.getStackDump());
         }
     }
 };
