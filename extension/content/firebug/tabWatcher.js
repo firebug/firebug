@@ -336,6 +336,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");
         }
 
+        if (!browser.chrome)
+            registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
+
         return this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
     },
 
