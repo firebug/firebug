@@ -2454,7 +2454,8 @@ this.dispatch = function(listeners, name, args)
                 var stack = exc.stack;
                 exc.stack = stack.split('\n');
             }
-            FBTrace.dumpProperties(" Exception in lib.dispatch "+ name+": "+exc, exc);
+            var culprit = listeners[i] ? listeners[i].dispatchName : null;
+            FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
             window.dump(FBL.getStackDump());
         }
     }
