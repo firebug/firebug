@@ -175,6 +175,10 @@ top.Firebug =
             this[servicePrefNames[i]] = this.getPref(this.servicePrefDomain, servicePrefNames[i]);
 
         this.loadExternalEditors();
+
+        TabWatcher.initialize(this);
+        TabWatcher.addListener(this);
+
         prefs.addObserver(this.prefDomain, this, false);
         prefs.addObserver(this.servicePrefDomain, this, false);
 
@@ -256,8 +260,6 @@ top.Firebug =
             FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+					   /*@explore*/
                     " detachArgs:", detachArgs);                      												   /*@explore*/
                                                                                                                        /*@explore*/
-        TabWatcher.initialize(this);
-        TabWatcher.addListener(this);
         Firebug.URLSelector.initialize();
         TabWatcher.addListener(Firebug.URLSelector);  // listen for shouldCreateContext
         uiListeners.push(Firebug.URLSelector); // listen for showUI
