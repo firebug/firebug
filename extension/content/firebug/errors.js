@@ -152,7 +152,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (object instanceof nsIScriptError)  // all branches should trace 'object'
             {
                 if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
-                    FBTrace.dumpProperties("errors.observe nsIScriptError: "+errorMessage, object);             
+                    FBTrace.dumpProperties("errors.observe nsIScriptError: "+object.errorMessage, object);
 
                 var context = this.getErrorContext(object);  // after instanceof
                 var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
