@@ -46,7 +46,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 {
     // Store contexts where they can be accessed externally
     contexts: contexts,
-    
+
     initialize: function()
     {
         if (FBTrace.DBG_WINDOWS)
@@ -211,7 +211,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_INITIALIZE) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
                 ", "+context.getName()+" browser "+browser.currentURI+"\n");
-            window.dump("\n"+getStackDump()+"\n");
         }
 
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -303,7 +302,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
     unwatchTopWindow: function(win)
     {
         var context = this.getContextByWindow(win);
-        if (FBTrace.DBG_WINDOWS) FBTrace.dumpStack("-> tabWatcher.unwatchTopWindow for: "+win.location.href+", context: "+context+"\n");
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.unwatchTopWindow for: "+win.location.href+", context: "+context+"\n");
         this.unwatchContext(win, context);
     },
 
@@ -643,11 +642,8 @@ function onPageHideTopWindow(event)
     var doc = event.target; // the pagehide is sent to the document.
     if (doc.defaultView != win)
         return; // ignore page hides on interior windows
-    FBTrace.sysout("ppppppppppppppppppageHide event.currentTarget "+win.location, event);
-    FBTrace.sysout("ppppppppppppppppppageHide event.target "+event.target, event);
-    FBTrace.sysout("ppppppppppppppppppageHide event.currentTarget "+event.currentTarget, event);
-    FBTrace.sysout("ppppppppppppppppppageHide event.originalTarget "+event.originalTarget, event);
-    FBTrace.sysout("ppppppppppppppppppageHide event.explicitOriginalTarget "+event.explicitOriginalTarget, event);
+    if (FBTrace.DBG_WINDOWS)
+        FBTrace.sysout("-> tabWatcher pagehide event.currentTarget "+win.location, event);
 
     win.removeEventListener("pagehide", onPageHideTopWindow, false);
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
