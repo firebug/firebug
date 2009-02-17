@@ -254,7 +254,10 @@ Firebug.TabContext.prototype =
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.
     {
-        this.panelMap[panel.name] = panel;
+    	if (panel)
+    		this.panelMap[panelName] = panel;
+    	else
+    		delete this.panelMap[panelName];
     },
 
     invalidatePanels: function()
