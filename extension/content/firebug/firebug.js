@@ -1469,7 +1469,7 @@ top.Firebug =
             browser.panelName = context.panelName;
             browser.sidePanelNames = context.sidePanelNames;
 
-            if (browser.detached || context == FirebugContext)
+            if (browser.detached)
             {
                 clearContextTimeout = setTimeout(function delayClearContext()
                 {
