@@ -341,8 +341,10 @@ top.XMLHttpRequestSpy.prototype =
         this.xhrRequest.addEventListener("load", this.onLoad, true);
         this.xhrRequest.addEventListener("error", this.onError, true);
 
-        // Use tabCache to get XHR response.
-        this.context.sourceCache.addListener(this);
+        // Use tabCache to get XHR response. Notice that the tabCache isn't 
+        // supported till Firefox 3.0.4
+        if (this.context.sourceCache.addListener)
+            this.context.sourceCache.addListener(this);
     },
 
     detach: function()
@@ -355,7 +357,8 @@ top.XMLHttpRequestSpy.prototype =
         this.onLoad = null;
         this.onError = null;
 
-        this.context.sourceCache.removeListener(this);
+        if (this.context.sourceCache.removeListener)
+            this.context.sourceCache.removeListener(this);
     },
 
     getURL: function()
@@ -527,11 +530,13 @@ function onHTTPSpyLoad(spy)
     // The main XHR object has to be dettached now (i.e. listeners removed).
     spy.detach();
 
-    // If the requst is aborted at this time the spy.xhrRequest.responseText 
-    // is truncated even if there actually was some response. So, the tabCache 
-    // listener is used to get the actuall response.
-    //if (!spy.responseText)
-    //    spy.responseText = spy.xhrRequest.responseText;
+    // The tabCache listener is used to get the actuall response since the
+    // spy.xhrRequest.responseText is empty if the request is aborted at this
+    // moment. Anyway, this way is used also for following cases:
+    // (a) nsITraceableChannel is not available until FF 3.0.4
+    // (b) specified response content-type doesn't have to be cached.
+    if (!spy.responseText)
+        spy.responseText = spy.xhrRequest.responseText;
 
     var netProgress = spy.context.netProgress;
     if (netProgress)
