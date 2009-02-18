@@ -97,6 +97,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
             delete tabBrowser.selectedBrowser.cancelNextLoad;
             tabBrowser.selectedBrowser.webNavigation.stop(STOP_ALL);
             delayBrowserLoad(tabBrowser.selectedBrowser, win.location.href);
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("-> tabWatcher.watchTopWindow **CANCEL&RETRY** for: "+win.location.href+
+                    ", tab: "+Firebug.getTabIdForWindow(win)+"\n");
             return;
         }
 
@@ -376,17 +379,17 @@ top.TabWatcher = extend(new Firebug.Listener(),
             dispatch(TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
 
+        dispatch(this.fbListeners, "destroyContext", [context, persistedState]);
+
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context for: "+
-                (context.window?context.window.location:"no window")+"\n");
+                (context.window?context.window.location:"no window")+" this.cancelNextLoad: "+this.cancelNextLoad+"\n");
 
         if (this.cancelNextLoad)
         {
             delete this.cancelNextLoad;
             context.browser.cancelNextLoad = true;
         }
-
-        dispatch(this.fbListeners, "destroyContext", [context, persistedState]);
 
         context.destroy(persistedState);
         remove(contexts, context);
