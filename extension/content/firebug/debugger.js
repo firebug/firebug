@@ -206,7 +206,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+" context.getGlobalScope():"+context.getGlobalScope());
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, depth:"+depth+" context:"+context.getName());
         }
         catch (exc)
         {
@@ -569,7 +569,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     stopDebugging: function(context)
     {
-        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.getGlobalScope()+"\n");
+        if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.getName()+"\n");
         try
         {
             fbs.unlockDebugger();
@@ -2906,7 +2906,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
                     else
-                        var name = self.guessFunctionName(url, 1, context);
+                        var name = FBL.guessFunctionName(url, 1, context);
                     var isFuture = false;
                 }
                 else
