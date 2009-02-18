@@ -2421,9 +2421,9 @@ this.isShift = function(event)
 
 this.dispatch = function(listeners, name, args)
 {
-	if (!listeners)
-		return;
-	
+    if (!listeners)
+        return;
+
     try {
         if (FBTrace.DBG_DISPATCH)
             var noMethods = [];
@@ -2434,12 +2434,31 @@ this.dispatch = function(listeners, name, args)
             if ( listener[name] )
             {
                 //FBTrace.sysout("FBL.dispatch "+i+") "+name+" to "+listener.dispatchName);
-                listener[name].apply(listener, args);
+                try
+                {
+                    listener[name].apply(listener, args);
+                }
+                catch(exc)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                    {
+                        if (exc.stack)
+                        {
+                            var stack = exc.stack;
+                            exc.stack = stack.split('\n');
+                        }
+                        var culprit = listeners[i] ? listeners[i].dispatchName : null;
+                        FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+                    }
+                }
             }
             else
             {
                 if (FBTrace.DBG_DISPATCH)
+                {
+                    //FBTrace.sysout("FBL.dispatch noMethod in "+i+"/"+listeners.length+") "+name+" to "+listener.dispatchName);
                     noMethods.push(listener);
+                }
             }
         }
         if (FBTrace.DBG_DISPATCH)
@@ -2475,7 +2494,11 @@ this.dispatch2 = function(listeners, name, args)
             {
                 var result = listener[name].apply(listener, args);
                 if ( result )
+                {
+                    if (FBTrace.DBG_DISPATCH)
+                        FBTrace.sysout("dispatch2 result "+result, result);
                     return result;
+                }
             }
             else
             {
@@ -4192,7 +4215,7 @@ this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return SourceLink(FBL.normalizeURL(script.fileName), script.baseLineNumber, "js")
+        return FBL.SourceLink(FBL.normalizeURL(script.fileName), script.baseLineNumber, "js")
     }
 }
 
