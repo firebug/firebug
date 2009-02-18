@@ -151,7 +151,7 @@ top.FirebugChrome =
             locationList.addEventListener("selectObject", onSelectLocation, false);
 
             this.updatePanelBar1(Firebug.panelTypes);
-            
+
             if (externalMode)
                 this.attachBrowser(externalBrowser, FirebugContext);
             else
@@ -344,7 +344,7 @@ top.FirebugChrome =
         panelBar1.updatePanels(mainPanelTypes);
     },
 
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     close: function()
@@ -416,12 +416,12 @@ top.FirebugChrome =
     },
     openPanelOptionsMenu : function()
     {
-    	FBTrace.sysout('test');
+        FBTrace.sysout('test');
     },
     getNextObject: function(reverse)
     {
         var panel = FirebugContext.getPanel(FirebugContext.panelName);
-        if (panel)	
+        if (panel)
         {
             var item = panelStatus.getItemByObject(panel.selection);
             if (item)
@@ -476,7 +476,7 @@ top.FirebugChrome =
         if (panelName && sidePanelName)
             FirebugContext.sidePanelNames[panelName] = sidePanelName;
 
-        return panelBar1.selectPanel(panelName, false, noRefresh);  // cause panel visibility changes and events 
+        return panelBar1.selectPanel(panelName, false, noRefresh);  // cause panel visibility changes and events
     },
 
     selectSidePanel: function(panelName)
@@ -507,7 +507,7 @@ top.FirebugChrome =
     getLocationProvider: function()
     {
         // a function that returns an object with .getObjectDescription() and .getLocationList()
-        return function getSelectedPanelFromCurrentContext() 
+        return function getSelectedPanelFromCurrentContext()
         {
             return FirebugContext.chrome.getSelectedPanel();  // panels provide location, use the selected panel
         }
@@ -516,7 +516,7 @@ top.FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Synchronization
 
-    showContext: function(browser, context)   
+    showContext: function(browser, context)
     {
         if (context)
         {
@@ -541,9 +541,9 @@ top.FirebugChrome =
 
     syncPanel: function()  // we've decided to have Firebug open
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+                                      
-                (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");                                     
-           
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+
+                (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");
+
         panelStatus.clear();
 
         if (FirebugContext)
@@ -830,20 +830,20 @@ top.FirebugChrome =
     onApplyDecorator: function(sourceBox) // called on setTimeout after sourceBox viewport has been repainted
     {
     },
-    
+
     onLineSelect: function(sourceLink) // called on scrollTo, passing in the selected line
     {
     },
-    
+
     showUI: function(browser, context) // called when the Firebug UI comes up in browser or detached
     {
     },
-    
-    hideUI: function(brower, context)  // called when the Firebug UI comes down
+
+    hideUI: function(brower, context)  // called when the Firebug UI comes down; context may be null
     {
     },
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    
+
     onOptionsShowing: function(popup)
     {
         for (var child = popup.firstChild; child; child = child.nextSibling)
@@ -1322,25 +1322,25 @@ function getRealObject(object)
 }
 
 function handleFbToolbarKeyPress(event) {
-	var keyCode = event.keyCode || event.charCode;
-	var target = event.target;
-	switch(keyCode) {
-		case KeyEvent.DOM_VK_UP:
-		case KeyEvent.DOM_VK_DOWN:
-		case KeyEvent.DOM_VK_RETURN:
-		case KeyEvent.DOM_VK_SPACE:	
-			if (target.getAttribute('type') == "menu" && !event.altKey) {
-				target.getElementsByTagName('menupopup')[0].showPopup();
-			}
-			event.stopPropagation();
-		break;
-		case KeyEvent.DOM_VK_ESCAPE:
-			if (Firebug.focusAnchor && Firebug.focusAnchor.focus) {
-				Firebug.focusAnchor.focus();
-			}
-			$('fbToolbar').className = "";
-		break;
-	}
+    var keyCode = event.keyCode || event.charCode;
+    var target = event.target;
+    switch(keyCode) {
+        case KeyEvent.DOM_VK_UP:
+        case KeyEvent.DOM_VK_DOWN:
+        case KeyEvent.DOM_VK_RETURN:
+        case KeyEvent.DOM_VK_SPACE:
+            if (target.getAttribute('type') == "menu" && !event.altKey) {
+                target.getElementsByTagName('menupopup')[0].showPopup();
+            }
+            event.stopPropagation();
+        break;
+        case KeyEvent.DOM_VK_ESCAPE:
+            if (Firebug.focusAnchor && Firebug.focusAnchor.focus) {
+                Firebug.focusAnchor.focus();
+            }
+            $('fbToolbar').className = "";
+        break;
+    }
 }
 
 // ************************************************************************************************
