@@ -274,8 +274,8 @@ top.Firebug =
 
     shutdown: function()
     {
-    	TabWatcher.removeListener(Firebug.URLSelector);
-    	TabWatcher.removeListener(this);
+        TabWatcher.removeListener(Firebug.URLSelector);
+        TabWatcher.removeListener(this);
         TabWatcher.destroy();
 
         dispatch(modules, "disable");
@@ -501,18 +501,18 @@ top.Firebug =
                         var cw = module.activeContexts[ic].window;
                         if (cw)
                         {
-                        	if (cw.closed)
-                        		url = "about:closed";
-                        	else
-                        		if ('location' in cw)
-                        			var url = cw.location.toString(); 
-                        		else
-                        			var url = module.activeContexts[ic].getName();
-                        	if (url)
-                        	{
-                        		if (contextURLSet.indexOf(url) == -1)
-                        			contextURLSet.push(url);
-                        	}
+                            if (cw.closed)
+                                url = "about:closed";
+                            else
+                                if ('location' in cw)
+                                    var url = cw.location.toString();
+                                else
+                                    var url = module.activeContexts[ic].getName();
+                            if (url)
+                            {
+                                if (contextURLSet.indexOf(url) == -1)
+                                    contextURLSet.push(url);
+                            }
                         }
                     }
                     catch(e)
@@ -572,13 +572,19 @@ top.Firebug =
         }
     },
 
+    unregisterModule: function()
+    {
+        for (var i = 0; i < arguments.length; ++i)
+            remove(modules, arguments[i]);
+    },
+
     registerActivableModule: function()
     {
         activableModules.push.apply(activableModules, arguments);
         this.registerModule.apply(this, arguments);
     },
 
-    registerExtension: function()
+    registerExtension: function()  // TODO remove
     {
         extensions.push.apply(extensions, arguments);
 
@@ -589,7 +595,7 @@ top.Firebug =
             uiListeners.push(arguments[j]);
     },
 
-    unregisterExtension: function()
+    unregisterExtension: function()  // TODO remove
     {
         for (var i = 0; i < arguments.length; ++i)
         {
@@ -597,6 +603,18 @@ top.Firebug =
             remove(uiListeners, arguments[i]);
             remove(extensions, arguments[i])
         }
+    },
+
+    registerUIListener: function()
+    {
+        for (var j = 0; j < arguments.length; j++)
+            uiListeners.push(arguments[j]);
+    },
+
+    unregisterUIListener: function()
+    {
+        for (var i = 0; i < arguments.length; ++i)
+            remove(uiListeners, arguments[i]);
     },
 
     registerPanel: function()
@@ -948,6 +966,9 @@ top.Firebug =
         var browser = FirebugChrome.getCurrentBrowser();
         browser.showFirebug = show;
 
+        if (show)
+            browser.chrome.syncPanel();
+
         var shouldShow = show && !browser.detached;
         contentBox.setAttribute("collapsed", !shouldShow);
         contentSplitter.setAttribute("collapsed", !shouldShow);
@@ -1011,11 +1032,9 @@ top.Firebug =
                     var created = TabWatcher.watchBrowser(browser);  // create a context for this page
                     if (!created)
                         throw new Error("Rejected page should explain to user");
-
-                    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel prepared for resume FirebugContext="+
-                                    (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");
+                    else
+                        return;  // context creation will trigger showBar
                 }
-                browser.chrome.syncPanel();
             }
 
             this.showBar(!toggleOff);
@@ -1408,9 +1427,11 @@ top.Firebug =
 
             if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
                 FBTrace.sysout("firebug.showContext set FirebugContext: "+context.getName()+"\n");
-
-            this.syncBar();  // show the now-synced UI
         }
+        else
+            browser.showFirebug = false;
+
+        this.syncBar();  // show the now-synced UI
 
         dispatch(modules, "showContext", [browser, context]);
     },
@@ -2803,9 +2824,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
     {
-        // if we are active, deactivate
-        if (this.isEnabled(context))
-            this.panelDeactivate(context, false);
+        if (context)
+        {
+            // if we are active, deactivate
+            if (this.isEnabled(context))
+                this.panelDeactivate(context, false);
+        }
     },
 
     // ---------------------------------------------------------------------------------------
@@ -3393,10 +3417,13 @@ Firebug.URLSelector =
 
         hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
         {
-            // unmark this URI
-            this.tempURI.spec = context.getWindowLocation();
-            this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
-            FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
+            if (context)
+            {
+                // unmark this URI
+                this.tempURI.spec = context.getWindowLocation();
+                this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
+                FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
+            }
         },
 }
 
