@@ -19,7 +19,22 @@ function addOpenEditorShowHide(event)
     
     var contextMenu = document.getElementById("contentAreaContextMenu");
     if (contextMenu)
+    {
+    	addContextToForms();
         contextMenu.addEventListener("popupshowing", OpenEditorShowHide, false);
+    }
 };
     
+function addContextToForms(contextMenu)
+{
+	// https://bugzilla.mozilla.org/show_bug.cgi?id=433168
+	let setTargetOriginal = nsContextMenu.prototype.setTarget;
+	nsContextMenu.prototype.setTarget = function(aNode, aRangeParent, aRangeOffset) 
+	{
+		setTargetOriginal.apply(this, arguments);
+		if (this.isTargetAFormControl(aNode))
+			this.shouldDisplay = true;
+	};
+}
+
 window.addEventListener("load", addOpenEditorShowHide, false);
