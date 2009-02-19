@@ -27,12 +27,16 @@ var contentTypes =
     "text/rtf": 1,
     "text/richtext": 1,
     "text/javascript": 1,
+    "text/jscript": 1,
     "text/tab-separated-values": 1,
     "text/rdf": 1,
     "text/xif": 1,
     "text/ecmascript": 1,
     "text/vnd.curl": 1,
     "text/x-json": 1,
+    "text/x-js": 1,
+    "text/js": 1,
+    "text/vbscript": 1,
     "view-source": 1,
     "view-fragment": 1,
     "application/xml": 1,
@@ -45,6 +49,7 @@ var contentTypes =
     "application/ecmascript": 1,
     "application/http-index-format": 1,
     "application/json": 1,
+    "application/x-js": 1,
 };
 
 // Maximum cached size of a signle response (bytes)
