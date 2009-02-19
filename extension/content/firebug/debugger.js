@@ -576,7 +576,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             // If the user reloads the page while the debugger is stopped, then
             // the current context will be destroyed just before
-            if (context)
+            if (context && context.window && !context.aborted)
             {
                 var chrome = context.chrome;
                 if (!chrome)
