@@ -23,7 +23,7 @@ const reDBG_FBS = /DBG_FBS_(.*)/;
 var EOF = "<br/>";
 
 //************************************************************************************************
-//The controller for the prefDomain Model.
+//  The controller for the prefDomain Model.
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
 //  base for trace viewers like tracePanel and traceConsole
 //  binds  to the branch 'prefDomain' of prefs
@@ -767,6 +767,19 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             items.push("-");
 
         items.push(this.optionMenu($STR("tracing.Show Scope Variables"), "trace.enableScope"));
+        items.push("-");
+
+        items.push({
+          label: $STR("tracing.cmd.Expand All"),
+          nol10n: true,
+          command: bindFixed(this.onExpandAll, this, message)
+        });
+
+        items.push({
+          label: $STR("tracing.cmd.Collapse All"),
+          nol10n: true,
+          command: bindFixed(this.onCollapseAll, this, message)
+        });
 
         return items;
     },
@@ -810,6 +823,22 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     onCopyException: function(message)
     {
         copyToClipboard(message.getException());
+    },
+
+    onExpandAll: function(message)
+    {
+        var table = getAncestorByClass(message.row, "messageTable");
+        var rows = cloneArray(table.firstChild.childNodes);
+        for (var i=0; i<rows.length; i++)
+            this.expandRow(rows[i]);
+    },
+
+    onCollapseAll: function(message)
+    {
+        var table = getAncestorByClass(message.row, "messageTable");
+        var rows = cloneArray(table.firstChild.childNodes);
+        for (var i=0; i<rows.length; i++)
+            this.collapseRow(rows[i]);
     },
 
     // Clipboard helpers
@@ -892,6 +921,18 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 cancelEvent(event);
             }
         }
+    },
+
+    collapseRow: function(row)
+    {
+        if (hasClass(row, "messageRow", "opened"))
+            this.toggleRow(row);
+    },
+
+    expandRow: function(row)
+    {
+        if (hasClass(row, "messageRow"))
+            this.toggleRow(row, true);
     },
 
     toggleRow: function(row, forceOpen)
