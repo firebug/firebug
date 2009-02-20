@@ -384,7 +384,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context for: "+
                 (context.window?context.window.location:"no window")+" this.cancelNextLoad: "+this.cancelNextLoad+"\n");
-
+		
+		// this flag may be set by the debugger.destroyContext
         if (this.cancelNextLoad)
         {
             delete this.cancelNextLoad;

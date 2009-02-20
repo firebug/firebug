@@ -1473,7 +1473,7 @@ top.Firebug =
         if (this.tabBrowser.currentURI.spec == context.browser.currentURI.spec)
             context.browser.chrome.showContext(context.browser, context);
 
-        dispatch(modules, "loadContext", [context]);
+        dispatch(modules, "loadedContext", [context]);
     },
 
     destroyContext: function(context, persistedState)
@@ -3206,6 +3206,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
     updateTab: function(context)
     {
         var chrome = context ? context.chrome : FirebugChrome;
+        if (!chrome)
+            return;
         var panelBar = chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(this.panelName);
 
