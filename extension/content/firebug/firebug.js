@@ -3388,13 +3388,17 @@ Firebug.URLSelector =
 
         shouldCreateContext: function(win, uri)  // true if the Places annotation the URI "firebugged"
         {
-            var annotatedURI = uri;
-            if ( !(uri instanceof nsIURI) )
+            if (uri instanceof nsIURI)
+            {
+            	this.tempURI.spec = uri.spec;
+            	if (this.tempURI.spec != uri.spec)
+            		FBTrace.sysout("nsIURI parse FAILS: "+this.tempURI.spec +"!="+uri.spec);
+            }
+            else 
             {
                 try
                 {
                     this.tempURI.spec = uri;
-                    annotatedURI = this.tempURI;
                 }
                 catch(e)
                 {
@@ -3403,10 +3407,11 @@ Firebug.URLSelector =
                     return false;
                 }
             }
-            if (this.annotationSvc.pageHasAnnotation(annotatedURI, this.annotationName))
-                return true;
-            else
-                return false;
+            var hasAnnotation = this.annotationSvc.pageHasAnnotation(this.tempURI, this.annotationName);
+            if (FBTrace.DBG_WINDOWS)
+            	FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+this.tempURI.spec);
+            
+            return hasAnnotation;   // if annotated, shouldCreateContext true
         },
 
         showUI: function(browser, context)  // Firebug is opened, in browser or detached
@@ -3415,7 +3420,11 @@ Firebug.URLSelector =
             this.tempURI.spec = context.getWindowLocation();
             this.annotationSvc.setPageAnnotation(this.tempURI, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("showUI tagged "+context.getWindowLocation());
+            {
+                if (!this.annotationSvc.pageHasAnnotation(this.tempURI, this.annotationName))
+                	FBTrace.sysout("nsIAnnotationService FAILS for "+this.tempURI.spec);
+                FBTrace.sysout("showUI tagged "+this.tempURI.spec);
+            }
         },
 
         hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
