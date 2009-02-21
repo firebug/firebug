@@ -2061,8 +2061,10 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
                 if (m)
                     return m[1];
                 else
+                {
                     if (FBTrace.DBG_FUNCTION_NAMES)                                                                    /*@explore*/
                         FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");    /*@explore*/
+                }
                 m = reFunctionArgNames.exec(line);
                 if (m && m[1])
                     return m[1];
@@ -3815,15 +3817,17 @@ this.SourceFile.prototype =
         if (this.outerScript && !(mustBeExecutableLine && !this.outerScript.isValid) )
             this.addScriptAtLineNumber(scripts, this.outerScript, targetLineNo, mustBeExecutableLine, offset);
 
-        if (FBTrace.DBG_LINETABLE && scripts.length < 1)
+        if (FBTrace.DBG_LINETABLE)
         {
-            FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
-            return false;
-        }
-        else
-        {
-            if (FBTrace.DBG_LINETABLE)
-                FBTrace.sysout("getScriptsAtLineNumber offset "+offset+" for sourcefile: "+this.toString()+"\n");
+        	if (scripts.length < 1)
+        	{
+            	FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
+            	return false;
+        	}
+        	else
+        	{
+            	FBTrace.sysout("getScriptsAtLineNumber offset "+offset+" for sourcefile: "+this.toString()+"\n");
+            }
         }
 
         return (scripts.length > 0) ? scripts : false;
@@ -6378,7 +6382,7 @@ this.ERROR = function(exc)
         if (exc.stack) exc.stack = exc.stack.split('\n');
         FBTrace.dumpProperties("lib.ERROR: "+exc, exc);
     }
-    else
+     
         ddd("FIREBUG WARNING: " + exc);
 }
 

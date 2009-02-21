@@ -160,7 +160,8 @@ function FirebugService()
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
                  .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
-    FBTrace.sysout("FirebugService Starting");
+    if (FBTrace.DBG_FBS_ERRORS)
+        FBTrace.sysout("FirebugService Starting");
 
     fbs = this;
 
@@ -172,7 +173,8 @@ function FirebugService()
                     getService(Components.interfaces.nsIAppShellService);
     this.hiddenWindow = appShellService.hiddenDOMWindow;
 
-    this.hiddenWindow.dump("FirebugService Starting, FBTrace should be up\n");
+    if(FBTrace.DBG_FBS_ERRORS)
+        this.hiddenWindow.dump("FirebugService Starting, FBTrace should be up\n");
 
     this.enabled = false;
     this.profiling = false;
@@ -1063,8 +1065,8 @@ FirebugService.prototype =
          {
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.dumpProperties("onDebugger failed: ",exc);
-            else
-                ERROR("onDebugger failed: "+exc);
+
+            ERROR("onDebugger failed: "+exc);
             return RETURN_CONTINUE;
          }
     },

@@ -1374,7 +1374,7 @@ top.Firebug =
         if (!FirebugContext)  // then no previous context
             FirebugContext = context; // let's make sure we have something for errors to land on.
 
-        //if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
+        if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
             FBTrace.dumpProperties("firebug.initContext sidePanelNames:",context.sidePanelNames);
 
         dispatch(modules, "initContext", [context, persistedState]);
@@ -3414,7 +3414,8 @@ Firebug.URLSelector =
             // mark this URI as firebugged
             this.tempURI.spec = context.getWindowLocation();
             this.annotationSvc.setPageAnnotation(this.tempURI, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
-            FBTrace.sysout("showUI tagged "+context.getWindowLocation());
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("showUI tagged "+context.getWindowLocation());
         },
 
         hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
@@ -3424,7 +3425,8 @@ Firebug.URLSelector =
                 // unmark this URI
                 this.tempURI.spec = context.getWindowLocation();
                 this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
-                FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
             }
         },
 }
