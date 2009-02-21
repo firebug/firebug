@@ -290,12 +290,13 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             dispatch(this.fbListeners, "watchWindow", [context, win]);
 
-            if (FBTrace.DBG_WINDOWS) {
+            if (FBTrace.DBG_WINDOWS) 
+            {
                 FBTrace.sysout("-> watchWindow for: "+href+", context: "+context.uid+"\n");
                 if (context)
                     for (var i = 0; i < context.windows.length; i++)
                         FBTrace.sysout("   context: "+context.uid+", window in context: "+context.windows[i].location.href+"\n");
-        }
+            }
         }
     },
 
