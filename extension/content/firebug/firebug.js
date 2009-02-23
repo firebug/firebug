@@ -3383,47 +3383,28 @@ Firebug.URLSelector =
         {
             this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
                                             .getService(Components.interfaces.nsIAnnotationService);
-            this.tempURI = makeURI("http://getfirebug.com");
         },
 
-        shouldCreateContext: function(win, uri)  // true if the Places annotation the URI "firebugged"
+        shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
         {
-            if (uri instanceof nsIURI)
-            {
-            	this.tempURI.spec = uri.spec;
-            	if (this.tempURI.spec != uri.spec)
-            		FBTrace.sysout("nsIURI parse FAILS: "+this.tempURI.spec +"!="+uri.spec);
-            }
-            else 
-            {
-                try
-                {
-                    this.tempURI.spec = uri;
-                }
-                catch(e)
-                {
-                    if(FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("shouldCreateContext failed for "+uri);
-                    return false;
-                }
-            }
-            var hasAnnotation = this.annotationSvc.pageHasAnnotation(this.tempURI, this.annotationName);
+            var uri = makeURI(url);
+            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_WINDOWS)
-            	FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+this.tempURI.spec);
-            
+                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+
             return hasAnnotation;   // if annotated, shouldCreateContext true
         },
 
         showUI: function(browser, context)  // Firebug is opened, in browser or detached
         {
             // mark this URI as firebugged
-            this.tempURI.spec = context.getWindowLocation();
-            this.annotationSvc.setPageAnnotation(this.tempURI, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+            var uri = makeURI(context.getWindowLocation());
+            this.annotationSvc.setPageAnnotation(uri, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
             if (FBTrace.DBG_WINDOWS)
             {
                 if (!this.annotationSvc.pageHasAnnotation(this.tempURI, this.annotationName))
-                	FBTrace.sysout("nsIAnnotationService FAILS for "+this.tempURI.spec);
-                FBTrace.sysout("showUI tagged "+this.tempURI.spec);
+                    FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
+                FBTrace.sysout("showUI tagged "+uri.spec);
             }
         },
 
@@ -3431,11 +3412,10 @@ Firebug.URLSelector =
         {
             if (context)
             {
-                // unmark this URI
-                this.tempURI.spec = context.getWindowLocation();
-                this.annotationSvc.removePageAnnotation(this.tempURI, this.annotationName);
+                var uri  = makeURI(context.getWindowLocation());
+                this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
                 if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("hideUI untagged "+context.getWindowLocation());
+                    FBTrace.sysout("hideUI untagged "+uri.spec);
             }
         },
 }
