@@ -3307,7 +3307,16 @@ this.getIconURLForFile = function(path)
 
 this.makeURI = function(urlString)
 {
-    return ioService.newURI(urlString, null, null);
+    try
+    {
+        return ioService.newURI(urlString, null, null);
+    }
+    catch(exc)
+    {
+        //var explain = {message: "Firebug.lib.makeURI FAILS", url: urlString, exception: exc};
+        // todo convert explain to json and then to data url
+        throw new Error("makeURI FAILS for "+urlString+" "+exc);
+    }
 }
 
 // ************************************************************************************************
@@ -3819,14 +3828,14 @@ this.SourceFile.prototype =
 
         if (FBTrace.DBG_LINETABLE)
         {
-        	if (scripts.length < 1)
-        	{
-            	FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
-            	return false;
-        	}
-        	else
-        	{
-            	FBTrace.sysout("getScriptsAtLineNumber offset "+offset+" for sourcefile: "+this.toString()+"\n");
+            if (scripts.length < 1)
+            {
+                FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
+                return false;
+            }
+            else
+            {
+                FBTrace.sysout("getScriptsAtLineNumber offset "+offset+" for sourcefile: "+this.toString()+"\n");
             }
         }
 
@@ -6382,7 +6391,7 @@ this.ERROR = function(exc)
         if (exc.stack) exc.stack = exc.stack.split('\n');
         FBTrace.dumpProperties("lib.ERROR: "+exc, exc);
     }
-     
+
         ddd("FIREBUG WARNING: " + exc);
 }
 
