@@ -107,7 +107,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!context) // then we've not looked this window in this session
         {
             // decide whether this window will be debugged or not
-            if (!this.shouldCreateContext(win, uri, userCommands))
+            var url = (uri instanceof nsIURI) ? uri.spec : uri;
+            if (!this.shouldCreateContext(win, url, userCommands))
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> tabWatcher will not create context ");
@@ -174,23 +175,23 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     // Listeners given force-in and veto on URIs/Window.
 
-    shouldCreateContext: function(win, uri, userCommands)  // currently this can be called with nsIURI or a string URL.
+    shouldCreateContext: function(win, url, userCommands)
     {
         // called when win has no context, answers the question: create one, true or false?
 
         // Create if any listener says true to showCreateContext
-        if ( dispatch2(this.fbListeners, "shouldCreateContext", [win, uri, userCommands]) )
+        if ( dispatch2(this.fbListeners, "shouldCreateContext", [win, url, userCommands]) )
             return true;
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ ((uri instanceof nsIURI)?uri.spec:uri));
+            FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
 
         // Do not Create if any Listener says true to shouldNotCreateContext
-        if ( dispatch(this.fbListeners, "shouldNotCreateContext", [win, uri, userCommands]) )
+        if ( dispatch(this.fbListeners, "shouldNotCreateContext", [win, url, userCommands]) )
             return false;
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> shouldNotCreateContext no opinion for: "+ ((uri instanceof nsIURI)?uri.spec:uri));
+            FBTrace.sysout("-> shouldNotCreateContext no opinion for: "+ url);
 
         // create if user said so and no one else has an opinion.
         return userCommands;
@@ -290,7 +291,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             dispatch(this.fbListeners, "watchWindow", [context, win]);
 
-            if (FBTrace.DBG_WINDOWS) 
+            if (FBTrace.DBG_WINDOWS)
             {
                 FBTrace.sysout("-> watchWindow for: "+href+", context: "+context.uid+"\n");
                 if (context)
@@ -385,8 +386,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context for: "+
                 (context.window?context.window.location:"no window")+" this.cancelNextLoad: "+this.cancelNextLoad+"\n");
-		
-		// this flag may be set by the debugger.destroyContext
+
+        // this flag may be set by the debugger.destroyContext
         if (this.cancelNextLoad)
         {
             delete this.cancelNextLoad;
