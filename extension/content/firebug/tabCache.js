@@ -69,7 +69,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     initializeUI: function(owner)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache. Cache model initialized.");
+            FBTrace.sysout("tabCache.initializeUI; Cache model initialized.");
 
         // Read additional text mime-types from preferences.
         var mimeTypes = Firebug.getPref(Firebug.prefDomain, "cache.mimeTypes");
@@ -79,7 +79,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 contentTypes[list[i]] = 1;
 
             if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.initializeUI, custom mime-types added", list);
+                FBTrace.sysout("tabCache.initializeUI; Custom mime-types added", list);
         }
 
         // Read maximum size limit for cached response from preferences.
@@ -92,6 +92,9 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
     shutdown: function()
     {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.shutdown; Cache model destroyed.");
+
         if (Ci.nsITraceableChannel)
             httpObserver.removeObserver(this, "firebug-http-event");
     },
@@ -350,6 +353,15 @@ TracingListener.prototype =
     {
         try
         {
+            // At this moment, initContext should be alredy called so, the context is
+            // ready and associated with the window.
+            var context = this.getContext(this.window);
+            if (!context)
+            {
+                this.info("tabCache.onCollectData NO CONTEXT for: " + this.window.location.href);
+                return inputStream;
+            }
+
             var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
             var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
             var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
@@ -371,28 +383,16 @@ TracingListener.prototype =
             if (data.length)
                 this.endOfLine = data[data.length-1] == "\r";
 
-            // At this moment, initContext is alredy called so, the context is
-            // ready and associated with the window.
-            var context = TabWatcher.getContextByWindow(this.window);
-            if (context)
-            {
-                // Store received data into the cache as they come.
-                if (!context.sourceCache.storePartialResponse(request, data, this.window))
-                    this.ignore = true;
-            }
-            else
-            {
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.dumpProperties("tabCache.onCollectData NO CONTEXT for: " + this.window.location.href);
-            }
+            // Store received data into the cache as they come.
+            if (!context.sourceCache.storePartialResponse(request, data, this.window))
+                this.ignore = true;
 
             // Let other listeners use the stream.
             return storageStream.newInputStream(0);
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onCollectData EXCEPTION\n", err);
+            this.error("tabCache.TracingListener.onCollectData EXCEPTION\n", err);
         }
 
         return null;
@@ -418,19 +418,17 @@ TracingListener.prototype =
                 }
                 else
                 {
-                    if (FBTrace.DBG_CACHE)
-                        FBTrace.dumpProperties("tabCache.onDataAvailable Content-Type not cached: " +
-                            request.contentType + ", " + safeGetName(request));
+                    this.info("tabCache.onDataAvailable Content-Type not cached: " +
+                        request.contentType + ", " + safeGetName(request));
                 }
             }
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onDataAvailable" +
-                    "(" + request + ", " + requestContext + ", " +
-                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
-                    safeGetName(request), err);
+            this.error("tabCache.TracingListener.onDataAvailable" +
+                "(" + request + ", " + requestContext + ", " +
+                inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
+                safeGetName(request), err);
         }
 
         try
@@ -440,11 +438,10 @@ TracingListener.prototype =
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.OriginalListener.onDataAvailable" +
-                    "(" + request + ", " + requestContext + ", " +
-                    inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
-                    safeGetName(request), err);
+            this.error("tabCache.OriginalListener.onDataAvailable" +
+                "(" + request + ", " + requestContext + ", " +
+                inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
+                safeGetName(request), err);
         }
     },
 
@@ -452,21 +449,19 @@ TracingListener.prototype =
     {
         try
         {
-            var context = TabWatcher.getContextByWindow(this.window);
+            var context = this.getContext(this.window);
             if (context)
             {
                 context.sourceCache.startRequest(request);
             }
             else
             {
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.dumpProperties("tabCache.onStartRequest NO CONTEXT for: " + this.window.location.href);
+                this.info("tabCache.onStartRequest; NO CONTEXT for: " + this.window.location.href);
             }
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onStartRequest EXCEPTION\n", err);
+            this.error("tabCache.TracingListener.onStartRequest EXCEPTION\n", err);
         }
 
         try
@@ -476,8 +471,7 @@ TracingListener.prototype =
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.OriginalListener.onStartRequest EXCEPTION\n", err);
+            this.error("tabCache.OriginalListener.onStartRequest EXCEPTION\n", err);
         }
     },
 
@@ -485,21 +479,19 @@ TracingListener.prototype =
     {
         try
         {
-            var context = TabWatcher.getContextByWindow(this.window);
+            var context = this.getContext(this.window);
             if (context)
             {
                 context.sourceCache.stopRequest(request);
             }
             else
             {
-                if (FBTrace.DBG_CACHE)
-                    FBTrace.dumpProperties("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
+                this.info("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
             }
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.TracingListener.onStopRequest EXCEPTION\n", err);
+            this.error("tabCache.TracingListener.onStopRequest EXCEPTION\n", err);
         }
 
         try
@@ -509,8 +501,7 @@ TracingListener.prototype =
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache.OriginalListener.onStopRequest EXCEPTION\n", err);
+            this.error("tabCache.OriginalListener.onStopRequest EXCEPTION\n", err);
         }
     },
 
@@ -525,6 +516,33 @@ TracingListener.prototype =
         }
 
         throw Components.results.NS_NOINTERFACE;
+    },
+
+    // All these helpers keep in mind that the parent window can be already unloaded
+    // at this momement and global objects like FBTrace or TabWatcher doesn't have
+    // to be available.
+    // xxxHonza: Entire TracingListener should be probably implemented as a XPCOM so
+    // the scope is correct even if the window is unloaded. The problem is how to get the
+    // context from within the component. Notice that the context doesn't have to exist yet
+    // (or the old one is there) when the listener is instanciated within onExamineResponse.
+    info: function(message, obj)
+    {
+        if (typeof(FBTrace) != "undefined" && FBTrace.DBG_CACHE)
+            FBTrace.sysout(message, obj);
+    },
+
+    error: function(message, obj)
+    {
+        if (typeof(FBTrace) != "undefined" && (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS))
+            FBTrace.sysout(message, obj);
+    },
+
+    getContext: function(win)
+    {
+        if (typeof(TabWatcher) != "undefined")
+            return TabWatcher.getContextByWindow(this.window);
+
+        return null;
     }
 }
 
