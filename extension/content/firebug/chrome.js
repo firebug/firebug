@@ -831,7 +831,7 @@ top.FirebugChrome =
     {
     },
 
-    onLineSelect: function(sourceLink) // called on scrollTo, passing in the selected line
+    onViewportChange: function(sourceLink) // called on scrollTo, passing in the selected line
     {
     },
 

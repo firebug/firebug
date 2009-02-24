@@ -2424,18 +2424,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
             if (this.selectedSourceBox.highlighter)
                 this.applyDecorator(this.selectedSourceBox); // may need to highlight even if we don't scroll
 
-            if (uiListeners.length > 0)
-            {
-                var link = new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
-                dispatch(uiListeners, "onLineSelect", [link]);
-            }
         }, this));
     },
 
     jumpHighlightFactory: function(lineNo, context)
     {
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("jumpHighlightFactory on line "+lineNo+"\n");
         return function jumpHighlightIfInView(sourceBox)
         {
             var  lineNode = sourceBox.getLineNode(lineNo);
@@ -2512,6 +2505,12 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+" prev height: "+view.previousSibling.style.height+" next height: "+view.nextSibling.style.height+"\n");
+
+        if (uiListeners.length > 0)
+        {
+            var link = new SourceLink(sourceBox.repObject.href, lineNo, this.getSourceType());
+            dispatch(uiListeners, "onViewportChange", [link]);
+        }
 
         return;
     },
@@ -3402,7 +3401,7 @@ Firebug.URLSelector =
             this.annotationSvc.setPageAnnotation(uri, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
             if (FBTrace.DBG_WINDOWS)
             {
-                if (!this.annotationSvc.pageHasAnnotation(this.tempURI, this.annotationName))
+                if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
                     FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
                 FBTrace.sysout("showUI tagged "+uri.spec);
             }
