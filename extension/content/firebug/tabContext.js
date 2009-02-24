@@ -43,7 +43,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.sourceCache = new Firebug.TabCache(win, this);
     else
         this.sourceCache = new Firebug.SourceCache(win, this);
-    
+
     this.global = win;  // used by chromebug
 };
 

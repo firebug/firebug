@@ -11,47 +11,6 @@ const Ci = Components.interfaces;
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 
-// List of text content types. These content-types are cached.
-var contentTypes =
-{
-    "text/plain": 1,
-    "text/html": 1,
-    "text/xml": 1,
-    "text/xsl": 1,
-    "text/xul": 1,
-    "text/css": 1,
-    "text/sgml": 1,
-    "text/rtf": 1,
-    "text/richtext": 1,
-    "text/x-setext": 1,
-    "text/rtf": 1,
-    "text/richtext": 1,
-    "text/javascript": 1,
-    "text/jscript": 1,
-    "text/tab-separated-values": 1,
-    "text/rdf": 1,
-    "text/xif": 1,
-    "text/ecmascript": 1,
-    "text/vnd.curl": 1,
-    "text/x-json": 1,
-    "text/x-js": 1,
-    "text/js": 1,
-    "text/vbscript": 1,
-    "view-source": 1,
-    "view-fragment": 1,
-    "application/xml": 1,
-    "application/xhtml+xml": 1,
-    "application/vnd.mozilla.xul+xml": 1,
-    "application/javascript": 1,
-    "application/x-javascript": 1,
-    "application/x-httpd-php": 1,
-    "application/rdf+xml": 1,
-    "application/ecmascript": 1,
-    "application/http-index-format": 1,
-    "application/json": 1,
-    "application/x-js": 1,
-};
-
 // Maximum cached size of a signle response (bytes)
 var responseSizeLimit = 1024 * 1024 * 5;
 
@@ -70,17 +29,6 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.initializeUI; Cache model initialized.");
-
-        // Read additional text mime-types from preferences.
-        var mimeTypes = Firebug.getPref(Firebug.prefDomain, "cache.mimeTypes");
-        if (mimeTypes) {
-            var list = mimeTypes.split(" ");
-            for (var i=0; i<list.length; i++)
-                contentTypes[list[i]] = 1;
-
-            if (FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.initializeUI; Custom mime-types added", list);
-        }
 
         // Read maximum size limit for cached response from preferences.
         responseSizeLimit = Firebug.getPref(Firebug.prefDomain, "cache.responseLimit");
@@ -140,11 +88,24 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         try
         {
+            request.QueryInterface(Ci.nsITraceableChannel);
+
             // Register traceable channel listener in order to intercept all incoming data for
             // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
-            request.QueryInterface(Ci.nsITraceableChannel);
-            var newListener = new TracingListener(win);
-            newListener.listener = request.setNewListener(newListener);
+            var newListener = CCIN("@joehewitt.com/firebug-channel-listener;1", "nsIStreamListener");
+            newListener.wrappedJSObject.window = win;
+            newListener.wrappedJSObject.listener = request.setNewListener(newListener);
+
+            //xxxHonza: this is a workaround for the tracing-listener to get the 
+            // right context. Notice that if the window (parent browser) is closed
+            // the TabWatcher is undefined. But in such a case no cache is needed anyway.
+            newListener.wrappedJSObject.getContext = function(win)
+            {
+                try {
+                    return TabWatcher.getContextByWindow(win);
+                } catch (err){}
+                return null;
+            }
         }
         catch (err)
         {
@@ -287,7 +248,7 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         // The ancestor implementation (SourceCache) uses ioService.newChannel, which
         // can result in additional request to the server (in case the response can't
         // be loaded from the Firefox cache) - known as double-load problem.
-        // This new implementation (TabCache) uses nsITraceableListener so, all responses
+        // This new implementation (TabCache) uses nsITraceableChannel so, all responses
         // should be already cached.
 
         // xxxHonza: let's try to get the response from the cache till #449198 is fixed.
@@ -330,221 +291,6 @@ Firebug.TabCache.prototype = extend(ListeningCache,
         return responseText;
     }
 });
-
-// ************************************************************************************************
-// TracingListener implementation
-
-/**
- * This object implements nsIStreamListener interface and is intended to monitor all network
- * channels (nsIHttpChannel). For every channel a new instance of this object is created and
- * registered. See Firebug.TabCacheModel.onExamineResponse method.
- */
-function TracingListener(win)
-{
-    this.window = win;
-    this.listener = null;
-    this.endOfLine = false;
-    this.ignore = false;
-}
-
-TracingListener.prototype =
-{
-    onCollectData: function(request, inputStream, offset, count)
-    {
-        try
-        {
-            // At this moment, initContext should be alredy called so, the context is
-            // ready and associated with the window.
-            var context = this.getContext(this.window);
-            if (!context)
-            {
-                this.info("tabCache.onCollectData NO CONTEXT for: " + this.window.location.href);
-                return inputStream;
-            }
-
-            var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-            var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-            var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
-
-            binaryInputStream.setInputStream(inputStream);
-            storageStream.init(8192, count, null);
-            binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
-
-            var data = binaryInputStream.readBytes(count);
-            binaryOutputStream.writeBytes(data, count);
-
-            // Avoid creating additional empty line if response comes in more pieces
-            // and the split is made just between "\r" and "\n" (Win line-end).
-            // So, if the response starts with "\n" while the previous part ended with "\r",
-            // remove the first character.
-            if (this.endOfLine && data.length && data[0] == "\n")
-                data = data.substring(1);
-
-            if (data.length)
-                this.endOfLine = data[data.length-1] == "\r";
-
-            // Store received data into the cache as they come.
-            if (!context.sourceCache.storePartialResponse(request, data, this.window))
-                this.ignore = true;
-
-            // Let other listeners use the stream.
-            return storageStream.newInputStream(0);
-        }
-        catch (err)
-        {
-            this.error("tabCache.TracingListener.onCollectData EXCEPTION\n", err);
-        }
-
-        return null;
-    },
-
-    /* nsIStreamListener */
-    onDataAvailable: function(request, requestContext, inputStream, offset, count)
-    {
-        try
-        {
-            if (!this.ignore)
-            {
-                // Cache only text responses for now.
-                var contentType = request.contentType;
-                if (contentType)
-                    contentType = contentType.split(";")[0];
-
-                if (contentTypes[contentType])
-                {
-                    var newStream = this.onCollectData(request, inputStream, offset, count);
-                    if (newStream)
-                        inputStream = newStream;
-                }
-                else
-                {
-                    this.info("tabCache.onDataAvailable Content-Type not cached: " +
-                        request.contentType + ", " + safeGetName(request));
-                }
-            }
-        }
-        catch (err)
-        {
-            this.error("tabCache.TracingListener.onDataAvailable" +
-                "(" + request + ", " + requestContext + ", " +
-                inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
-                safeGetName(request), err);
-        }
-
-        try
-        {
-            if (this.listener)
-                this.listener.onDataAvailable(request, requestContext, inputStream, offset, count);
-        }
-        catch (err)
-        {
-            this.error("tabCache.OriginalListener.onDataAvailable" +
-                "(" + request + ", " + requestContext + ", " +
-                inputStream + ", " + offset + ", " + count + ") EXCEPTION: " +
-                safeGetName(request), err);
-        }
-    },
-
-    onStartRequest: function(request, requestContext)
-    {
-        try
-        {
-            var context = this.getContext(this.window);
-            if (context)
-            {
-                context.sourceCache.startRequest(request);
-            }
-            else
-            {
-                this.info("tabCache.onStartRequest; NO CONTEXT for: " + this.window.location.href);
-            }
-        }
-        catch (err)
-        {
-            this.error("tabCache.TracingListener.onStartRequest EXCEPTION\n", err);
-        }
-
-        try
-        {
-            if (this.listener)
-                this.listener.onStartRequest(request, requestContext);
-        }
-        catch (err)
-        {
-            this.error("tabCache.OriginalListener.onStartRequest EXCEPTION\n", err);
-        }
-    },
-
-    onStopRequest: function(request, requestContext, statusCode)
-    {
-        try
-        {
-            var context = this.getContext(this.window);
-            if (context)
-            {
-                context.sourceCache.stopRequest(request);
-            }
-            else
-            {
-                this.info("tabCache.onStopRequest NO CONTEXT for: " + this.window.location.href);
-            }
-        }
-        catch (err)
-        {
-            this.error("tabCache.TracingListener.onStopRequest EXCEPTION\n", err);
-        }
-
-        try
-        {
-            if (this.listener)
-                this.listener.onStopRequest(request, requestContext, statusCode);
-        }
-        catch (err)
-        {
-            this.error("tabCache.OriginalListener.onStopRequest EXCEPTION\n", err);
-        }
-    },
-
-    /* nsISupports */
-    QueryInterface: function(iid)
-    {
-        if (iid.equals(Ci.nsIStreamListener) ||
-            iid.equals(Ci.nsISupportsWeakReference) ||
-            iid.equals(Ci.nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-    },
-
-    // All these helpers keep in mind that the parent window can be already unloaded
-    // at this momement and global objects like FBTrace or TabWatcher doesn't have
-    // to be available.
-    // xxxHonza: Entire TracingListener should be probably implemented as a XPCOM so
-    // the scope is correct even if the window is unloaded. The problem is how to get the
-    // context from within the component. Notice that the context doesn't have to exist yet
-    // (or the old one is there) when the listener is instanciated within onExamineResponse.
-    info: function(message, obj)
-    {
-        if (typeof(FBTrace) != "undefined" && FBTrace.DBG_CACHE)
-            FBTrace.sysout(message, obj);
-    },
-
-    error: function(message, obj)
-    {
-        if (typeof(FBTrace) != "undefined" && (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS))
-            FBTrace.sysout(message, obj);
-    },
-
-    getContext: function(win)
-    {
-        if (typeof(TabWatcher) != "undefined")
-            return TabWatcher.getContextByWindow(this.window);
-
-        return null;
-    }
-}
 
 // ************************************************************************************************
 // Helpers
