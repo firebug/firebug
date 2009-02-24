@@ -209,14 +209,16 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         this.panelName = panelName;
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
+
+        Firebug.TraceModule.addListener(this.TraceListener);
     },
 
     shutdown: function()
     {
         // Unregister HTTP observer. This is done when the FB UI is closed.
         HttpObserver.unregisterObserver();
-
         prefs.removeObserver(Firebug.prefDomain, this, false);
+        Firebug.TraceModule.removeListener(this.TraceListener);
     },
 
     initContext: function(context, persistedState)
@@ -1689,6 +1691,8 @@ NetProgress.prototype =
             this.awaitFile(request, file);
             this.extendPhase(file);
 
+            dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
+
             return file;
         }
         else                                                                                          /*@explore*/
@@ -1726,7 +1730,7 @@ NetProgress.prototype =
             if (file.fromCache)
                 getCacheEntry(file, this);
 
-            dispatch(Firebug.NetMonitor.fbListeners, "onLoad", [this.context, file]);
+            dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
 
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.respondedFile +" + (now() - file.startTime) + " " +
@@ -1796,6 +1800,8 @@ NetProgress.prototype =
             file.endTime = time;
 
             //this.endLoad(file);
+
+            dispatch(Firebug.NetMonitor.fbListeners, "onProgress", [this.context, file]);
         }
 
         return file;
@@ -2114,7 +2120,6 @@ NetProgress.prototype =
                 this.post(receivingFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
                 this.post(resolvingFile, [request, now()]);
-
         }
     },
 
@@ -3162,6 +3167,28 @@ function getPrintableTime()
     var date = new Date();
     return "(" + date.getSeconds() + ":" + date.getMilliseconds() + ")";
 }
+
+// ************************************************************************************************
+
+Firebug.NetMonitor.TraceListener = 
+{
+    // Called when console window is loaded.
+    onLoadConsole: function(win, rootNode)
+    {
+    },
+
+    // Called when a new message is logged in to the trace-console window.
+    onDump: function(message)
+    {
+        var index = message.text.indexOf("net.");
+        if (index == 0)
+        {
+            message.text = message.text.substr("net.".length);
+            message.text = trimLeft(message.text);
+            message.type = "DBG_NET";
+        }
+    }
+};
 
 // ************************************************************************************************
 
