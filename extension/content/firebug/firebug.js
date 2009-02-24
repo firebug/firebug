@@ -568,7 +568,6 @@ top.Firebug =
         {
             for (var i = 0; i < arguments.length; ++i)
                 FBTrace.dumpProperties("registerModule "+arguments[i].dispatchName);
-
         }
     },
 
@@ -2432,12 +2431,19 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
         return function jumpHighlightIfInView(sourceBox)
         {
             var  lineNode = sourceBox.getLineNode(lineNo);
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+lineNode.innerHTML+"\n");
             if (lineNode)
             {
                 setClassTimed(lineNode, "jumpHighlight", context);
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+lineNode.innerHTML+"\n");
+
             }
+            else
+            {
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("jumpHighlightFactory no node at line "+lineNo);
+            }
+
             return false; // not sticky
         }
     },
