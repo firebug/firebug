@@ -1655,7 +1655,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     unregisterDebugger: function() // 1.3.1 safe for multiple calls
     {
-        FBTrace.sysout("debugger.unregisterDebugger this.registered: "+this.registered);
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("debugger.unregisterDebugger this.registered: "+this.registered);
+
         if (!this.registered)
             return;
 
