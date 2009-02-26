@@ -1599,9 +1599,9 @@ Firebug.NetMonitor.NetEnableMessage = domplate(Firebug.Rep,
         TABLE({class: "netEnableMessageTable", cellpadding: 0, cellspacing: 0},
             TBODY(
                 TR({class: "netRow netEnableMessageRow"},
-                    TD({class: "netCol"},
-                        SPAN({class: "netEnableMessageLabel"},
-                            $STR("net.EnableMessage"))
+                    TD({class: "netCol netEnableMessageIcon"}),
+                    TD({class: "netCol netEnableMessageLabel"},
+                        $STR("net.EnableMessage")
                     )
                 )
             )

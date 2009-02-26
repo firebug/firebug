@@ -435,8 +435,13 @@
     color: black;
 }
 
+.netEnableMessageIcon {
+    width: 18px;
+    background: url(chrome://firebug/skin/infoIcon.png) no-repeat 3px 2px;
+}
+
 .netEnableMessageLabel {
-    padding-left: 18px;
+    padding-left: 4px;
 }
 
 .netEnableMessageRow > .netCol {
