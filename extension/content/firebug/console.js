@@ -469,7 +469,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
         prefs.addObserver(Firebug.prefDomain, this, false);
     },
 
-    shutdown: function() {
+    shutdown: function() 
+    {
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
 

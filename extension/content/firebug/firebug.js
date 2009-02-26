@@ -2078,6 +2078,9 @@ Firebug.AblePanel = extend(Firebug.Panel,
             //tab.removeAttribute("disabled");
             tab.removeAttribute('aria-disabled');
         }
+
+        // The panel was just enabled so, hide the disable message.
+        Firebug.ModuleManagerPage.hide(this);
     },
 
     disablePanel: function()
@@ -3386,50 +3389,51 @@ Firebug.ModuleManager =
     },
 }
 //************************************************************************************************
-//A TabWatch listener and a uiListener
+// A TabWatch listener and a uiListener
+
 Firebug.URLSelector =
 {
-        annotationName: "firebug/history",
+    annotationName: "firebug/history",
 
-        initialize: function()  // called once
-        {
-            this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
-                                            .getService(Components.interfaces.nsIAnnotationService);
-        },
+    initialize: function()  // called once
+    {
+        this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
+                                        .getService(Components.interfaces.nsIAnnotationService);
+    },
 
-        shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
+    shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
+    {
+        var uri = makeURI(url);
+        var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+
+        return hasAnnotation;   // if annotated, shouldCreateContext true
+    },
+
+    showUI: function(browser, context)  // Firebug is opened, in browser or detached
+    {
+        // mark this URI as firebugged
+        var uri = makeURI(context.getWindowLocation());
+        this.annotationSvc.setPageAnnotation(uri, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+        if (FBTrace.DBG_WINDOWS)
         {
-            var uri = makeURI(url);
-            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+            if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
+                FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
+            FBTrace.sysout("showUI tagged "+uri.spec);
+        }
+    },
+
+    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+    {
+        if (context)
+        {
+            var uri  = makeURI(context.getWindowLocation());
+            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
-
-            return hasAnnotation;   // if annotated, shouldCreateContext true
-        },
-
-        showUI: function(browser, context)  // Firebug is opened, in browser or detached
-        {
-            // mark this URI as firebugged
-            var uri = makeURI(context.getWindowLocation());
-            this.annotationSvc.setPageAnnotation(uri, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
-            if (FBTrace.DBG_WINDOWS)
-            {
-                if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
-                    FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-                FBTrace.sysout("showUI tagged "+uri.spec);
-            }
-        },
-
-        hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
-        {
-            if (context)
-            {
-                var uri  = makeURI(context.getWindowLocation());
-                this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("hideUI untagged "+uri.spec);
-            }
-        },
+                FBTrace.sysout("hideUI untagged "+uri.spec);
+        }
+    },
 }
 
 // ************************************************************************************************
