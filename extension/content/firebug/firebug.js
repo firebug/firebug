@@ -633,6 +633,12 @@ top.Firebug =
         reps.push.apply(reps, arguments);
     },
 
+    unregisterRep: function()
+    {
+        for (var i = 0; i < arguments.length; ++i)
+            remove(reps, arguments[i]);
+    },
+
     setDefaultRep: function(rep)
     {
         defaultRep = rep;
