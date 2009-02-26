@@ -101,17 +101,17 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     startObserving: function()
     {
         this.contextCache = [];
-        var errorsOn = $('fbStatusIcon').getAttribute("errors"); // signal user and be a marker.
+        var errorsOn = $('fbStatusIcon').getAttribute("console"); // signal user and be a marker.
         if (!errorsOn) // need to be safe to multiple calls
         {
             consoleService.registerListener(this);
-            $('fbStatusIcon').setAttribute("errors", "on");
+            $('fbStatusIcon').setAttribute("console", "on");
         }
     },
 
     stopObserving: function()
     {
-        var errorsOn = $('fbStatusIcon').getAttribute("errors");
+        var errorsOn = $('fbStatusIcon').getAttribute("console");
         if (errorsOn)  // need to be safe to multiple calls
         {
             if (FBTrace.DBG_ERRORS)
@@ -119,7 +119,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             try
             {
                 consoleService.unregisterListener(this);
-                $('fbStatusIcon').removeAttribute("errors");
+                $('fbStatusIcon').removeAttribute("console");
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("errors.stopObserving done unregisterListener\n");
             }

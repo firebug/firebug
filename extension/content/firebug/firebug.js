@@ -444,7 +444,7 @@ top.Firebug =
         var tooltip = "Firebug "+ Firebug.getVersion();
 
         var fbStatusIcon = $('fbStatusIcon');
-        if (fbStatusIcon.getAttribute("errors") == "on")
+        if (fbStatusIcon.getAttribute("console") == "on")
             tooltip +=" console: on,";
         else
             tooltip +=" console: off,";
@@ -454,7 +454,7 @@ top.Firebug =
         else
             tooltip +=" net: off,";
 
-        if (fbStatusIcon.getAttribute("jsd") == "on")
+        if (fbStatusIcon.getAttribute("script") == "on")
             tooltip +=" script: on";
         else
             tooltip +=" script: off,";
@@ -2250,7 +2250,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
             this.anonSourceBoxes.push(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-            FBTrace.sysout("firebug.createSourceBox: ", sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox); /*@explore*/
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.lines.length+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox); /*@explore*/
 
         return sourceBox;
     },
@@ -3301,6 +3301,13 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
     {
         var currentURI = FirebugChrome.getBrowserURI(this.context);
         var hostURI = getURIHost(currentURI);
+
+        if (!currentURI)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("firebug.refresh FAILS, no currentURI in this.context ",(this.context?this.context.browser:"no this.context"));
+            return;
+        }
 
         if (isSystemURL(currentURI.spec))
             hostURI = $STR("moduleManager.systempages");

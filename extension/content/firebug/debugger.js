@@ -220,17 +220,17 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         try {
-        	if (executionContext.isValid)
-        	{
-        		executionContext.scriptsEnabled = true;
-        		if (FBTrace.DBG_UI_LOOP)
-        			FBTrace.sysout("debugger.stop "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
-        	}
-        	else
-        	{
+            if (executionContext.isValid)
+            {
+                executionContext.scriptsEnabled = true;
+                if (FBTrace.DBG_UI_LOOP)
+                    FBTrace.sysout("debugger.stop "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+            }
+            else
+            {
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("debugger.stop "+executionContext.tag+" executionContext is not valid");
-        	}
+            }
 
         } catch (exc) {
             if (FBTrace.DBG_UI_LOOP) FBTrace.dumpProperties("debugger.stop, scriptsEnabled = true exception:", exc);
@@ -732,9 +732,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var active = fbs.isJSDActive();
         if (active)
-            $('fbStatusIcon').setAttribute("jsd", "on");
+            $('fbStatusIcon').setAttribute("script", "on");
         else
-            $('fbStatusIcon').setAttribute("jsd", "off");
+            $('fbStatusIcon').setAttribute("script", "off");
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
@@ -1655,6 +1655,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     unregisterDebugger: function() // 1.3.1 safe for multiple calls
     {
+        FBTrace.sysout("debugger.unregisterDebugger this.registered: "+this.registered);
         if (!this.registered)
             return;
 
@@ -1696,6 +1697,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         // if (!init)
         //    context.window.location.reload();  // 1.4a13
+
+        // redraw the viewport
+        delete this.lastScrollTop;
+
+        // TODO recover previous file and line number if any
+        FirebugChrome.navigate(null, 'script');
     },
 
     onPanelDeactivate: function(context, destroy, panelName)
@@ -1712,7 +1719,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onLastPanelDeactivate: function(context, destroy)
     {
-        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
+        if (FBTrace.DBG_DISPATCH || FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
             FBTrace.sysout("debugger.onLastPanelDeactivate for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
         this.unregisterDebugger(); // 1.3.1
     },
