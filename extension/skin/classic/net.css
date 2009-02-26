@@ -422,3 +422,26 @@
     width: 100%;
     height:100%;
 }
+
+/************************************************************************************************/
+
+.netEnableMessageTable {
+    width: 100%;
+}
+
+.netEnableMessageRow {
+    background: #BBBBBB !important;
+    font-weight: normal;
+    color: black;
+}
+
+.netEnableMessageLabel {
+    padding-left: 18px;
+}
+
+.netEnableMessageRow > .netCol {
+    border-bottom: 2px solid;
+    -moz-border-bottom-colors: #EFEFEF #999999;
+    padding-top: 2px;
+    padding-bottom: 3px;
+}

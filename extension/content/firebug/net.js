@@ -729,12 +729,20 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     {
         this.queue = [];
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.AblePanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
-        Firebug.Panel.destroy.apply(this, arguments);
+        Firebug.AblePanel.destroy.apply(this, arguments);
+    },
+
+    enablePanel: function()
+    {
+        Firebug.AblePanel.enablePanel.apply(this);
+
+        // Display info message
+        Firebug.NetMonitor.NetEnableMessage.insert(this); 
     },
 
     show: function(state)
@@ -1038,13 +1046,12 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".net.logLimit"])
             };
 
-            this.table = this.tableTag.replace({}, this.panelNode, this);
+            this.table = this.tableTag.append({}, this.panelNode, this);
             this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
             this.summaryRow =  this.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
         }
 
         var rightNow = now();
-
         this.updateRowData(rightNow);
         this.updateLogLimit(maxQueueRequests);
         this.updateTimeline(rightNow);
@@ -1583,6 +1590,28 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 });
 
 var NetLimit = Firebug.NetMonitor.NetLimit;
+
+// ************************************************************************************************
+
+Firebug.NetMonitor.NetEnableMessage = domplate(Firebug.Rep,
+{
+    tableTag:
+        TABLE({class: "netEnableMessageTable", cellpadding: 0, cellspacing: 0},
+            TBODY(
+                TR({class: "netRow netEnableMessageRow"},
+                    TD({class: "netCol"},
+                        SPAN({class: "netEnableMessageLabel"},
+                            $STR("net.EnableMessage"))
+                    )
+                )
+            )
+        ),
+
+    insert: function(panel)
+    {
+        return this.tableTag.append({}, panel.panelNode, this)[0];
+    },
+});
 
 // ************************************************************************************************
 
