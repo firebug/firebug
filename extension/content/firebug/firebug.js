@@ -3115,7 +3115,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                         FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
                     var host = subject.host;
                     var prefDomain = subject.type;  // eg extensions.firebug.script
-                    dispatch(modules, "activationChange", [host, prefDomain, data]); // data will be 'added' or 'deleted'
+                    dispatch(modules, "onEnablePrefChange", [host, prefDomain, data]); // data will be 'added' or 'deleted'
                 }
                 else
                 {
@@ -3132,7 +3132,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 {
                     if (FBTrace.DBG_PANELS)
                         FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
-                    dispatch(modules, "activationChange", [null, prefDomain, data]);
+                    dispatch(modules, "onEnablePrefChange", [null, prefDomain, data]);
                 }
             }
         }
@@ -3143,10 +3143,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
     },
 
-    activationChange: function(host, prefDomain, data)
+    onEnablePrefChange: function(host, prefDomain, data)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.activationChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" data:"+ data+"\n");
+            FBTrace.sysout("firebug.onEnablePrefChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" data:"+ data+"\n");
 
         if (prefDomain == this.getPrefDomain())
         {
@@ -3174,7 +3174,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     catch (exc)
                     {
                         if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("firebug.activationChange changeActivation FAILS for "+location, exc);
+                            FBTrace.dumpProperties("firebug.onEnablePrefChange changeActivation FAILS for "+location, exc);
                     }
                 }
             );
