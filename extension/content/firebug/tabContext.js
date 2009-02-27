@@ -28,7 +28,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.externalChrome = chrome;
     }
 
-    this.name = this.getWindowLocation();
+    this.name = new String(this.getWindowLocation());
 
     this.windows = [];
     this.panelMap = {};
@@ -55,8 +55,8 @@ Firebug.TabContext.prototype =
         {
             if (this.window)
             {
-            	if (this.window.closed)
-            		return "about:closed";
+                if (this.window.closed)
+                    return "about:closed";
                 if ("location" in this.window)
                 {
                     if ("toString" in this.window.location)
@@ -89,8 +89,8 @@ Firebug.TabContext.prototype =
 
     getName: function()
     {
-    	if (!this.name)
-    		this.name = this.getWindowLocation();
+        if (!this.name)
+            this.name = new String(this.getWindowLocation());
         return this.name;
     },
 
@@ -254,10 +254,10 @@ Firebug.TabContext.prototype =
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.
     {
-    	if (panel)
-    		this.panelMap[panelName] = panel;
-    	else
-    		delete this.panelMap[panelName];
+        if (panel)
+            this.panelMap[panelName] = panel;
+        else
+            delete this.panelMap[panelName];
     },
 
     invalidatePanels: function()
