@@ -136,10 +136,6 @@ DomplateTag.prototype =
 
         this.compileMarkup();
         this.compileDOM();
-
-        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate renderMarkup: ", this.renderMarkup);
-        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate renderDOM:", this.renderDOM);
-        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate domArgs:", this.domArgs);
     },
 
     compileMarkup: function()
@@ -307,6 +303,8 @@ DomplateTag.prototype =
 
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         topBlock.push(',"</', this.tagName, '>"');
+        if (FBTrace.DBG_DOM)
+        	FBTrace.sysout("generateMarkup: "+this.tagName, topBlock.join(""));
     },
 
     generateChildMarkup: function(topBlock, topOuts, blocks, info)
@@ -404,7 +402,7 @@ DomplateTag.prototype =
             var domArgs = [node, tag.tag.context, 0];
             domArgs.push.apply(domArgs, tag.tag.domArgs);
             domArgs.push.apply(domArgs, args);
-            if (FBTrace.DBG_DOM) FBTrace.dumpProperties("domplate__link__ domArgs:", domArgs);
+
             return tag.tag.renderDOM.apply(tag.tag.subject, domArgs);
         }
 
@@ -417,14 +415,12 @@ DomplateTag.prototype =
                 iter[i][0] = i;
                 iter[i][1] = nodeCount;
                 nodeCount += fn.apply(this, iter[i]);
-                if (FBTrace.DBG_DOM) FBTrace.sysout("nodeCount", nodeCount);
             }
             return nodeCount;
         }
 
         function __path__(parent, offset)
         {
-            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate __path__ offset: "+ offset+"\n");
             var root = parent;
 
             for (var i = 2; i < arguments.length; ++i)
@@ -439,11 +435,8 @@ DomplateTag.prototype =
                     parent = parent.childNodes[index];
             }
 
-            if (FBTrace.DBG_DOM) FBTrace.sysout("domplate __path__: arguments[2] "+arguments[2]+", root: "+ root+", parent: "+ parent+"\n");
             return parent;
         }
-        if (FBTrace.DBG_DOM) 
-            FBTrace.sysout("compileDOM fnBlock", fnBlock);
         var js = fnBlock.join("");
         this.renderDOM = eval(js);
     },
