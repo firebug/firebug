@@ -285,6 +285,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (activatedPanelName != panelName)
             return;
 
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onPanelActivate; init: " + init + ", " + context.getName());
+
         monitorContext(context);
 
         if (context.netProgress)
@@ -304,14 +307,26 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (deactivatedPanelName != panelName)
             return;
 
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onPanelDeactivate; destroy: " + destroy + ", " + context.getName());
+
         if (context.netProgress)
             context.netProgress.activate(null);
 
         unmonitorContext(context);
     },
 
+    onFirstPanelActivate: function(context, init)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onFirstPanelActivate; init: " + init + ", " + context.getName());
+    },
+
     onLastPanelDeactivate: function(context, destroy)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onLastPanelDeactivate; destroy: " + destroy + ", " + context.getName());
+
         $('fbStatusIcon').removeAttribute("net");
     },
 
