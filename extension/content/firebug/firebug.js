@@ -1248,15 +1248,18 @@ top.Firebug =
             try
             {
                 if (rep.supportsObject(object, type))
+                {
+                	if (FBTrace.DBG_DOM)
+                		FBTrace.sysout("getRep type: "+type+" object: "+object, rep);
                     return rep;
                 }
+            }
             catch (exc)
             {
-                if (FBTrace.dumpProperties)
+                if (FBTrace.DBG_ERRORS)
                 {
-                    FBTrace.dumpProperties("firebug.getRep FAILS at i/reps.length: "+i+"/"+reps.length+" type:"+type+" exc:", exc);
-                    FBTrace.dumpProperties("firebug.getRep reps[i]", reps[i]);
-                    FBTrace.dumpStack("firebug.getRep");
+                    FBTrace.sysout("firebug.getRep FAILS: "+ exc, exc);
+                    FBTrace.sysout("firebug.getRep reps["+i+"/"+reps.length+"]: "+(typeof(reps[i])), reps[i]);
                 }
             }
         }
@@ -3153,22 +3156,25 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 {
                     try
                     {
-                        var location = context.window.location;
+                        var location = context.getWindowLocation();
 
-                        if (FBTrace.DBG_PANELS)
-                            FBTrace.sysout("trying "+ location.href +"=="+ host+((location.host.indexOf(host)!=-1)?" ***FOUND***":" no match")+"\n");
+                        if (location.href)
+                        {
+                        	if (FBTrace.DBG_PANELS)
+                        		FBTrace.sysout("trying "+ location.href +"=="+ host+((location.host.indexOf(host)!=-1)?" ***FOUND***":" no match")+"\n");
 
-                        if (isLocalURL(location.href) || isSystemURL(location.href))
-                            module.syncPersistedPanelState(context, false);
-                        else if (location.host.indexOf(host) != -1)
-                            module.syncPersistedPanelState(context, false);
-                        else if ((prefDomain + ".enableSites") == data)
-                            module.syncPersistedPanelState(context, false);
+                        	if (isLocalURL(location.href) || isSystemURL(location.href))
+                        		module.syncPersistedPanelState(context, false);
+                        	else if (location.host.indexOf(host) != -1)
+                        		module.syncPersistedPanelState(context, false);
+                        	else if ((prefDomain + ".enableSites") == data)
+                        		module.syncPersistedPanelState(context, false);
+                        }
                     }
                     catch (exc)
                     {
                         if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("firebug.activationChange changeActivation fails for "+location, exc);
+                            FBTrace.dumpProperties("firebug.activationChange changeActivation FAILS for "+location, exc);
                     }
                 }
             );
