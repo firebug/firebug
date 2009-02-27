@@ -1670,6 +1670,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
     onSourceFileCreated: function(context, sourceFile)
     {
+    	/*  XXXjjb not the right place / time to do this.
         var panel = context.chrome.getSelectedPanel();
         if (panel && (panel.name == this.panelName) )
         {
@@ -1678,6 +1679,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("Debugger.onSourceFileCreated restored "+(restored?panel.location:"nothing"));
         }
+        */
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
@@ -1703,8 +1705,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // redraw the viewport
         delete this.lastScrollTop;
 
-        // TODO recover previous file and line number if any
-        FirebugChrome.navigate(null, 'script');
     },
 
     onPanelDeactivate: function(context, destroy, panelName)
