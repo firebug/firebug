@@ -2771,6 +2771,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (Firebug.getSuspended())
             Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
 
+        if (this.isEnabled(context)) // really isActiveContext()
+            return;
+
         if (this.activeContexts.length == 0)
             this.onFirstPanelActivate(context, init);
 
@@ -2789,7 +2792,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("panelDeactivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
 
-        if (!this.isEnabled(context))
+        if (!this.isEnabled(context)) // really isActiveContext()
             return;
 
         var i = this.activeContexts.indexOf(context);
@@ -3311,20 +3314,16 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
 
     refresh: function()
     {
-        var currentURI = FirebugChrome.getBrowserURI(this.context);
-        var hostURI = getURIHost(currentURI);
+    	if (this.context)
+    	{
+    		var currentURI = FirebugChrome.getBrowserURI(this.context);
+    		var hostURI = getURIHost(currentURI);
 
-        if (!currentURI)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("firebug.refresh FAILS, no currentURI in this.context ",(this.context?this.context.browser:"no this.context"));
-            return;
-        }
-
-        if (isSystemURL(currentURI.spec))
-            hostURI = $STR("moduleManager.systempages");
-        else if (!hostURI)
-            hostURI = $STR("moduleManager.localfiles");
+    		if (!currentURI || isSystemURL(currentURI.spec))
+    			hostURI = $STR("moduleManager.systempages");
+    		else if (!hostURI)
+    			hostURI = $STR("moduleManager.localfiles");
+    	}
 
         // Prepare arguments for the template (list of activableModules and
         // title for the apply button).
@@ -3338,7 +3337,10 @@ Firebug.ModuleManagerPage = domplate(Firebug.Rep,
         this.panelNode.scrollTop = 0;
 
         this.applyButton = getElementByClass(this.panelNode, "moduleManagerApplyButton");
-        this.applyButton.innerHTML = $STRF("moduleManager.apply", [hostURI]);
+        if (hostURI)
+        	this.applyButton.innerHTML = $STRF("moduleManager.apply", [hostURI]);
+        else
+        	this.applyButton.innerHTML = ""; // I think this button will be removed soon
 
         var desc2 = getElementByClass(this.panelNode, "moduleManagerDescription", "applyDesc");
         desc2.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
