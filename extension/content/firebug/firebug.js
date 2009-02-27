@@ -1249,7 +1249,7 @@ top.Firebug =
             {
                 if (rep.supportsObject(object, type))
                     return rep;
-            }
+                }
             catch (exc)
             {
                 if (FBTrace.dumpProperties)
@@ -2760,16 +2760,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.panelDeactivate(context, true);
     },
 
-    panelActivate: function(context, init)
+    panelActivate: function(context, init) // We have decided to activate this module and any panel
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("panelActivate "+this.getPrefDomain()+" isEnabled:"+this.isEnabled(context)+"\n");
 
         if (Firebug.getSuspended())
             Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
-
-        if (this.isEnabled(context))
-            return;
 
         if (this.activeContexts.length == 0)
             this.onFirstPanelActivate(context, init);
@@ -3399,47 +3396,55 @@ Firebug.ModuleManager =
 
 Firebug.URLSelector =
 {
-    annotationName: "firebug/history",
+        annotationName: "firebug/history",
 
-    initialize: function()  // called once
-    {
-        this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
-                                        .getService(Components.interfaces.nsIAnnotationService);
-    },
-
-    shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
-    {
-        var uri = makeURI(url);
-        var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
-
-        return hasAnnotation;   // if annotated, shouldCreateContext true
-    },
-
-    showUI: function(browser, context)  // Firebug is opened, in browser or detached
-    {
-        // mark this URI as firebugged
-        var uri = makeURI(context.getWindowLocation());
-        this.annotationSvc.setPageAnnotation(uri, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
-        if (FBTrace.DBG_WINDOWS)
+        initialize: function()  // called once
         {
-            if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
-                FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-            FBTrace.sysout("showUI tagged "+uri.spec);
-        }
-    },
+            this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
+                                            .getService(Components.interfaces.nsIAnnotationService);
+        },
 
-    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
-    {
-        if (context)
+        shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
         {
-            var uri  = makeURI(context.getWindowLocation());
-            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+        	try
+        	{
+        		var uri = makeURI(url);
+        		var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+        		if (FBTrace.DBG_WINDOWS)
+        			FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+
+        		return hasAnnotation;   // if annotated, shouldCreateContext true
+        	}
+        	catch (exc)
+        	{
+        		if (FBTrace.DBG_ERRORS)
+        			FBTrace.sysout("pageHasAnnoation FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
+        	}
+        },
+
+        showUI: function(browser, context)  // Firebug is opened, in browser or detached
+        {
+            // mark this URI as firebugged
+            var uri = makeURI(context.getWindowLocation());
+            this.annotationSvc.setPageAnnotation(uri, this.annotationName, "firebugged", null, this.annotationSvc.EXPIRE_WITH_HISTORY);
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("hideUI untagged "+uri.spec);
-        }
-    },
+            {
+                if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
+                    FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
+                FBTrace.sysout("showUI tagged "+uri.spec);
+            }
+        },
+
+        hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+        {
+            if (context)
+            {
+                var uri  = makeURI(context.getWindowLocation());
+                this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("hideUI untagged "+uri.spec);
+            }
+        },
 }
 
 // ************************************************************************************************
