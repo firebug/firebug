@@ -60,7 +60,7 @@ Firebug.TabContext.prototype =
                 if ("location" in this.window)
                 {
                     if ("toString" in this.window.location)
-                        return this.window.location.toString();
+                        return this.window.location;
                     else
                         return "(window.location has no toString)";
                 }
