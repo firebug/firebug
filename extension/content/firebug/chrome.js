@@ -1331,8 +1331,9 @@ function handleFbToolbarKeyPress(event) {
         case KeyEvent.DOM_VK_SPACE:
             if (target.getAttribute('type') == "menu" && !event.altKey) {
                 target.getElementsByTagName('menupopup')[0].showPopup();
+                event.stopPropagation();
             }
-            event.stopPropagation();
+            
         break;
         case KeyEvent.DOM_VK_ESCAPE:
             if (Firebug.focusAnchor && Firebug.focusAnchor.focus) {
