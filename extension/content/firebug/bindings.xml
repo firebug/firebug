@@ -42,7 +42,8 @@
             this.deck = document.getAnonymousElementByAttribute(this, "anonid", "deck");
             this.browser = document.getAnonymousElementByAttribute(this, "anonid", "browser");
             this.tabMap = {};
-
+            this.tabFocused = false;
+            that = this;
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
@@ -54,6 +55,8 @@
                 dump("bindings panelBar ctor FAILs: "+ e+"\n");
                 dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
             }
+            this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
+            this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
         ]]></constructor>
 
         <method name="createTab">
@@ -125,6 +128,8 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
+                if (this.tabFocused) 
+                    tab.focus();   
             ]]></body>
         </method>
 
@@ -246,6 +251,18 @@
                 return this.tabMap[panelName];
             ]]></body>
         </method>
+        <method name="handleTabBarFocus">
+            <parameter name="event"/>
+            <body><![CDATA[
+                that.tabFocused = true;
+            ]]></body>
+        </method>
+        <method name="handleTabBarBlur">
+            <parameter name="event"/>
+            <body><![CDATA[
+                that.tabFocused = false;    
+            ]]></body>
+        </method>        
     </implementation>
 
     <handlers>
@@ -297,19 +314,22 @@
                 {
                     case KeyEvent.DOM_VK_LEFT:
                     case KeyEvent.DOM_VK_RIGHT:
-                        forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
-                        // will only work as long as long as siblings only consist of paneltab elements
-                        siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
-                        if (!siblingTab) 
-                            siblingTab = this[forward ? 'firstChild' : 'lastChild'];
-                        if (siblingTab) 
+                        if (isTab) 
                         {
-                            setTimeout(FBL.bindFixed(function()
-                            {
-                                this.selectTab(siblingTab);
-                                siblingTab.focus();
-                            }, this));
-                        }
+	                        forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+	                        // will only work as long as long as siblings only consist of paneltab elements
+	                        siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
+	                        if (!siblingTab) 
+	                            siblingTab = this[forward ? 'firstChild' : 'lastChild'];
+	                        if (siblingTab) 
+	                        {
+	                            setTimeout(FBL.bindFixed(function()
+	                            {
+	                                this.selectTab(siblingTab);
+	                                siblingTab.focus();
+	                            }, this));
+	                        }
+	                   }
                     break;
                     case KeyEvent.DOM_VK_RETURN:
                     case KeyEvent.DOM_VK_SPACE:
@@ -334,7 +354,6 @@
                 } 
             }
         ]]>
-        
         </handler>
     </handlers>
 </binding>
@@ -439,10 +458,13 @@
             <body><![CDATA[
                 if (this.firstChild)
                 {
+                    var box = document.createElement("hbox");  // extra box needed to fix alignment issue in Vista theme
+                    box.setAttribute('align', 'center');
                     var sep = document.createElement("label");
                     sep.setAttribute("class", "panelStatusSeparator");
                     sep.setAttribute("value", separator);
-                    this.appendChild(sep);
+                    box.appendChild(sep);
+                    this.appendChild(box);
                 }
 
                 var item = document.createElement("toolbarbutton");
