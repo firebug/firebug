@@ -2104,7 +2104,10 @@ Firebug.AblePanel = extend(Firebug.Panel,
             //tab.setAttribute("disabled", "true");
             tab.setAttribute('aria-disabled', 'true');
         }
-        clearNode(this.panelNode);
+
+        // xxxHonza: Don't clear content of the panel here. If Firebug UI is 
+        // closed and opened the content should be preserved.
+        // clearNode(this.panelNode);
     },
 
     getTab: function()
