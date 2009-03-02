@@ -294,6 +294,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         {
             var panel = context.getPanel(panelName);
             context.netProgress.activate(panel);
+
+            // Display info message
+            panel.insertActivationMessage();
         }
 
         $('fbStatusIcon').setAttribute("net", "on");
@@ -437,6 +440,13 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     netInfoTag:
         TR({class: "netInfoRow"},
             TD({class: "netInfoCol", colspan: 5})
+        ),
+
+    activationTag:
+        TR({class: "netRow netActivationRow"},
+            TD({class: "netCol netActivationLabel", colspan: 5},
+                $STR("net.ActivationMessage")
+            )
         ),
 
     summaryTag:
@@ -744,20 +754,15 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     {
         this.queue = [];
 
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.NetPanel.initialize; " + context.getName());
+
         Firebug.AblePanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
         Firebug.AblePanel.destroy.apply(this, arguments);
-    },
-
-    enablePanel: function()
-    {
-        Firebug.AblePanel.enablePanel.apply(this);
-
-        // Display info message
-        Firebug.NetMonitor.NetEnableMessage.insert(this); 
     },
 
     show: function(state)
@@ -777,6 +782,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.netPanel.show", state);
     },
 
     shouldShow: function()
@@ -791,6 +799,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     hide: function()
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.netPanel.hide");
+
         this.showToolbarButtons("fbNetButtons", false);
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
@@ -1054,6 +1065,17 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             !Firebug.NetMonitor.isEnabled(this.context))
             return;
 
+        this.initLayout();
+
+        var rightNow = now();
+        this.updateRowData(rightNow);
+        this.updateLogLimit(maxQueueRequests);
+        this.updateTimeline(rightNow);
+        this.updateSummaries(rightNow);
+    },
+
+    initLayout: function()
+    {
         if (!this.table)
         {
             var limitInfo = {
@@ -1065,12 +1087,6 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
             this.summaryRow =  this.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
         }
-
-        var rightNow = now();
-        this.updateRowData(rightNow);
-        this.updateLogLimit(maxQueueRequests);
-        this.updateTimeline(rightNow);
-        this.updateSummaries(rightNow);
     },
 
     updateRowData: function(rightNow)
@@ -1411,6 +1427,20 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         }
 
         return true;
+    },
+
+    insertActivationMessage: function()
+    {
+        // Make sure the basic structure of the table panel is there.
+        this.initLayout();
+
+        // Get the last request row before summary row.
+        var tbody = this.table.firstChild;
+        var lastRow = tbody.lastChild.previousSibling;
+
+        // Insert an activation message (if the last row isn't the message already);
+        if (!hasClass(lastRow, "netActivationRow"))
+            this.activationTag.insertRows({}, lastRow)[0];
     }
 });
 
@@ -1605,28 +1635,6 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 });
 
 var NetLimit = Firebug.NetMonitor.NetLimit;
-
-// ************************************************************************************************
-
-Firebug.NetMonitor.NetEnableMessage = domplate(Firebug.Rep,
-{
-    tableTag:
-        TABLE({class: "netEnableMessageTable", cellpadding: 0, cellspacing: 0},
-            TBODY(
-                TR({class: "netRow netEnableMessageRow"},
-                    TD({class: "netCol netEnableMessageIcon"}),
-                    TD({class: "netCol netEnableMessageLabel"},
-                        $STR("net.EnableMessage")
-                    )
-                )
-            )
-        ),
-
-    insert: function(panel)
-    {
-        return this.tableTag.append({}, panel.panelNode, this)[0];
-    },
-});
 
 // ************************************************************************************************
 
