@@ -2821,8 +2821,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
             var chrome = context ? context.chrome : FirebugChrome;
             var panelBar1 = chrome.$("fbPanelBar1");
 
-            // Refresh the panel only if it's currently selected.
-            if (panel && panelBar1.selectedPanel == panel)
+            // Refresh the panel only if it's currently selected and only if Firebug UI is up.
+            if (panel && panelBar1.selectedPanel == panel && !contentBox.collapsed)
             {
                 var state = Firebug.getPanelState(panel);
                 panel.show(state);
