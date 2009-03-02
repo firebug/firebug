@@ -3233,14 +3233,20 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var chrome = context ? context.chrome : FirebugChrome;
         if (!chrome)
             return;
+
+        if (!this.panelName && (FBTrace.DBG_PANELS || FBTrace.DBG_ERRORS))
+            FBTrace.sysout("firebug.ActivableModule.updateTab; Missing panelName in activable module", this);
+
+        // Update activable tab menu.
         var panelBar = chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(this.panelName);
 
         // Update activable tab menu.
-        tab.initTabMenu(this);
+        if (tab)
+            tab.initTabMenu(this);
 
         // Update tab label.
-        if (context)
+        if (context && tab)
         {
             var enabled = this.isEnabled(context);
             //tab.setAttribute("disabled", enabled ? "false" : "true");
