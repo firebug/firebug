@@ -971,9 +971,6 @@ top.Firebug =
         var browser = FirebugChrome.getCurrentBrowser();
         browser.showFirebug = show;
 
-        if (show)
-            browser.chrome.syncPanel();
-
         var shouldShow = show && !browser.detached;
         contentBox.setAttribute("collapsed", !shouldShow);
         contentSplitter.setAttribute("collapsed", !shouldShow);
@@ -982,6 +979,11 @@ top.Firebug =
         this.showKeys(shouldShow);
 
         dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
+
+        // Sync panel state after the showUI event is dispatched. syncPanel method calls 
+        // Panel.show method, which expects the active context to be already registered.
+        if (show)
+            browser.chrome.syncPanel();
     },
 
     showKeys: function(shouldShow)
