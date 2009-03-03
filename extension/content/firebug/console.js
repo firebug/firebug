@@ -189,24 +189,7 @@ Firebug.Console = extend(ActivableConsole,
         var container = panel.panelNode;
         container.insertBefore(nodes[0], container.firstChild);
     },
-/*
-    watchWindow: function(context, win)
-    {
-        if (this.isEnabled(context))
-        {
-            this.injector.attachConsoleInjector(context, win);
-            this.injector.addConsoleListener(context, win);
-        }
-
-        if (FBTrace.DBG_CONSOLE)
-        {
-            if (win.wrappedJSObject._firebug)
-                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");
-            else
-                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n");
-        }
-    },
-*/
+ 
     showContext: function(browser, context)
     {
         if (browser)
@@ -217,47 +200,40 @@ Firebug.Console = extend(ActivableConsole,
 
     // -----------------------------------------------------------------------------------------------------
 
-    onFirstPanelActivate: function(context, init)
+    onPanelEnable: function(context, panelName)
     {
-        Firebug.Errors.startObserving();
-        Firebug.Debugger.registerDebugger(); // 1.3.1 we inject the console during JS compiles so we need jsd
-    },
-
-    onPanelActivate: function(context, init, panelName)
-    {
-        if (panelName != this.panelName)  // no cross panel work needed
+        if (panelName != this.panelName)  // we don't care about other panels
             return;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onPanelActivate**************> activeContexts: "+this.activeContexts.length+"\n");
-
-        //if (!init)
-        //    context.window.location.reload(); // 1.4a13
+            FBTrace.sysout("console.onPanelEnable**************");
+        
+        $('fbStatusIcon').setAttribute("console", "on");
+        Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
     },
-
-    onLastPanelDeactivate: function(context, destroy)
+   
+    onPanelDisable: function(context, panelName)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onLastPanelDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
-        // last one out, turn off error observer
-        Firebug.Errors.stopObserving();
-        Firebug.Debugger.unregisterDebugger(); // 1.3.1 we inject the console during JS compiles so we need jsd, now we are done with it
+        Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
+        $('fbStatusIcon').removeAttribute("console");
     },
-
+    
     onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
-        Firebug.Errors.stopObserving();  // safe for multiple calls
+        $('fbStatusIcon').removeAttribute("console");
     },
 
     onResumeFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
-        if (this.isEnabled(context))
-            Firebug.Errors.startObserving(); // safe for multiple calls
+        if (Firebug.Console.isAlwaysEnabled())
+        	$('fbStatusIcon').setAttribute("console", "on");
     },
+    
+   
     // ----------------------------------------------------------------------------------------------------
     // Firebug.Debugger listener
 
@@ -282,7 +258,7 @@ Firebug.Console = extend(ActivableConsole,
 
         if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
 
-        if (this.isEnabled(context))
+        // if (this.isEnabled(context)) XXXjjb I don't think we should test this every time
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     }
 });
@@ -481,11 +457,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
                                                    /*@explore*/
         // The default page with description and enable button is
         // visible only if debugger is disabled.
-        var enabled = Firebug.Console.isEnabled(this.context);
+        var enabled = Firebug.Console.isAlwaysEnabled();
         if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show enabled:"+ enabled+"\n");
         if (enabled)
         {
-            Firebug.ModuleManagerPage.hide(this);
+            //Firebug.Console.disabledPanelPage.hide(this);
 
             FirebugContext.chrome.$("fbCommandBox").collapsed = false;
             if (Firebug.largeCommandLine)
@@ -499,7 +475,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
             Firebug.CommandLine.setMultiLine(false);
             FirebugContext.chrome.$("fbCommandBox").collapsed = true;
 
-            Firebug.ModuleManagerPage.show(this, Firebug.Console);
+            //Firebug.Console.disabledPanelPage.show(this);
         }
     },
 
@@ -532,7 +508,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
     getShowStackTraceMenuItem: function()
     {
         var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
-        if (FirebugContext && !Firebug.Debugger.isEnabled(FirebugContext))
+        if (FirebugContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
     },

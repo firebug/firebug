@@ -104,7 +104,12 @@ top.TabWatcher = extend(new Firebug.Listener(),
         }
 
         var context = this.getContextByWindow(win);
-        if (!context) // then we've not looked this window in this session
+        if (context) // then we've looked at this window before in this FF session
+        {
+        	if (!this.shouldShowContext(context))
+        		return;
+        }
+        else // then we've not looked this window in this session
         {
             // decide whether this window will be debugged or not
             var url = (uri instanceof nsIURI) ? uri.spec : uri;
@@ -136,7 +141,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");
         }
 
-        // Call showContext only for currently active context.
+        // Call showContext only for currently active tab.
         if (tabBrowser.currentURI.spec != context.browser.currentURI.spec)
         {
             if (FBTrace.DBG_WINDOWS)
@@ -151,7 +156,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             context.showContextTimeout = setTimeout(bindFixed( function delayShowContext()
             {
                 if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("tabWatcher delayShowContext id:"+context.showContextTimeout, context);
+                    FBTrace.sysout("-> watchTopWindow delayShowContext id:"+context.showContextTimeout, context);
                 if (context.window)   // Sometimes context.window is not defined ?
                     this.watchContext(win, context);  // calls showContext
                 else
@@ -163,6 +168,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         }
         else
         {
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("-> watchTopWindow context.loaded:"+context.loaded);
             if (context.showContextTimeout)
                 clearTimeout(context.showContextTimeout);
             delete context.showContextTimeout;
@@ -173,6 +180,15 @@ top.TabWatcher = extend(new Firebug.Listener(),
         return context;  // we did create or find a context
     },
 
+    // Listeners decide to show or not
+    shouldShowContext: function(context)
+    {
+    	if ( dispatch2(this.fbListeners, "shouldShowContext", [context]))
+    		return true;
+    	else
+    		return false;
+    },
+    
     // Listeners given force-in and veto on URIs/Window.
 
     shouldCreateContext: function(win, url, userCommands)
@@ -303,6 +319,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     /**
      * Detaches from a top-level window. Destroys context
+     * Called when windows are hidden or closed, or user closes firebug
      */
     unwatchTopWindow: function(win)
     {
@@ -346,6 +363,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
         return this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
     },
 
+    /*
+     * User closes Firebug
+     */
+    
     unwatchBrowser: function(browser)
     {
         this.unwatchTopWindow(browser.contentWindow);

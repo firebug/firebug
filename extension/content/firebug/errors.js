@@ -101,34 +101,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     startObserving: function()
     {
         this.contextCache = [];
-        var errorsOn = $('fbStatusIcon').getAttribute("console"); // signal user and be a marker.
-        if (!errorsOn) // need to be safe to multiple calls
-        {
-            consoleService.registerListener(this);
-            $('fbStatusIcon').setAttribute("console", "on");
-        }
+        consoleService.registerListener(this);
     },
 
     stopObserving: function()
     {
-        var errorsOn = $('fbStatusIcon').getAttribute("console");
-        if (errorsOn)  // need to be safe to multiple calls
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("errors.stopObserving try unregisterListener\n");
-            try
-            {
-                consoleService.unregisterListener(this);
-                $('fbStatusIcon').removeAttribute("console");
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("errors.stopObserving done unregisterListener\n");
-            }
-            catch (e)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("errors.disable FAILS: ", e);
-            }
-        }
+        consoleService.unregisterListener(this);
         delete this.contextCache;
     },
 
@@ -307,7 +285,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (!context.window || !context.getWindowLocation())
                     return;
 
-                if (context.getWindowLocation() == url)
+                if (context.getWindowLocation().toString() == url)
                     return errorContext = context;
                 else
                 {
@@ -454,7 +432,7 @@ function lessTalkMoreAction(context, object, isWarning)
         return true;
     }
 
-    var enabled = Firebug.Console.isEnabled(context);
+    var enabled = Firebug.Console.isAlwaysEnabled();
     if (!enabled) {
         FBTrace.sysout("errors.observe not enabled for context "+(context.window?context.window.location:"no window")+"\n");
         return true;

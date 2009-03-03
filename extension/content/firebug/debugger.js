@@ -156,7 +156,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.stopped)
             return RETURN_CONTINUE;
 
-        if (!this.isEnabled(context))
+        if (!this.isAlwaysEnabled())
             return RETURN_CONTINUE;
 
         if (FBTrace.DBG_UI_LOOP)
@@ -545,7 +545,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             context.currentFrame = context.debugFrame;
 
             if (context != FirebugContext)
-                context.browser.chrome.showContext(context.browser, context); // Make FirebugContext = context and sync the UI
+            {
+                Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
+            }
 
             this.syncCommands(context);
             this.syncListeners(context);
@@ -562,7 +564,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
                 context.chrome.focus();
             }
-            if ( !context.hideDebuggerUI || (FirebugChrome.getCurrentBrowser() && FirebugChrome.getCurrentBrowser().showFirebug))
+            if ( !context.hideDebuggerUI || Firebug.isContextActive(context))
                  updateViewOnShowHook();
             else {
                  context.chrome.updateViewOnShowHook = updateViewOnShowHook;
@@ -699,7 +701,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             updateViewOnShowHook();
         }
 
-        if (panel)
+        if (panel && panel.name == "script")
         {
             this.syncCommands(panel.context);
             this.ableWatchSidePanel(panel.context);
@@ -755,10 +757,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     supportsWindow: function(win)
     {
-        var context = ( (win && TabWatcher) ? TabWatcher.getContextByWindow(win) : null);
-
-        if (!this.isEnabled(context))
+        if (!this.isAlwaysEnabled())
             return false;
+
+        var context = ( (win && TabWatcher) ? TabWatcher.getContextByWindow(win) : null);
 
         this.breakContext = context;
         return !!context;
@@ -766,7 +768,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     supportsGlobal: function(frameWin) // This is call from fbs for almost all fbs operations
     {
-        var context = ( (frameWin && TabWatcher) ? TabWatcher.getContextByWindow(frameWin) : null);
+    	var context = ( (frameWin && TabWatcher) ? TabWatcher.getContextByWindow(frameWin) : null);
 
         if (context)
         {
@@ -774,7 +776,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
             if (!frameWin._getFirebugConsoleElement)
             {
-                if (Firebug.Console.isEnabled(context))
+                if (Firebug.Console.isAlwaysEnabled())
                 {
                     var consoleReady = Firebug.Console.isReadyElsePreparing(context, frameWin);
                     if (FBTrace.DBG_CONSOLE)
@@ -786,9 +788,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement console NOT enabled ", frameWin);
                 }
             }
-
-            if (!this.isEnabled(context))
-                return false;
         }
 
         this.breakContext = context;
@@ -1644,7 +1643,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.unregisterDebugger(this);
         fbs.unregisterClient(this);
     },
-
+    
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
         if (this.registered)
@@ -1668,27 +1667,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.registered = false;
     },
+    
     onSourceFileCreated: function(context, sourceFile)
     {
-    	/*  XXXjjb not the right place / time to do this.
-        var panel = context.chrome.getSelectedPanel();
-        if (panel && (panel.name == this.panelName) )
-        {
-            var panelState = Firebug.getPanelState({name: this.panelName, context: context});
-            var restored = restoreLocation(panel, panelState);
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("Debugger.onSourceFileCreated restored "+(restored?panel.location:"nothing"));
-        }
-        */
+
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
-    onFirstPanelActivate: function(context, init)
-    {
-        this.registerDebugger(); // 1.3.1
-    },
 
-    onPanelActivate: function(context, init, panelName)
+    onPanelEnable: function(context, panelName)
     {
         //if (panelName == "console" || panelName == this.panelName)
         //    this.ableWatchSidePanel(context);
@@ -1696,34 +1683,50 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (panelName != this.panelName)
             return;
 
-        if (FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onPanelActivate **************> activeContexts: "+this.activeContexts.length+" for debuggerName "+this.debuggerName+" on "+context.getName()+"\n"); /*@explore*/
-
-        // if (!init)
-        //    context.window.location.reload();  // 1.4a13
-
+        this.registerDebugger();
+        
         // redraw the viewport
         delete this.lastScrollTop;
 
+        var panel = context.chrome.getSelectedPanel();
+        if (panel && (panel.name == this.panelName) )
+        {
+            var panelState = Firebug.getPanelState({name: this.panelName, context: context});
+            var restored = restoreLocation(panel, panelState);
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("Debugger.onPanelEnable restored "+(restored?panel.location:"nothing"));
+        }   
     },
 
-    onPanelDeactivate: function(context, destroy, panelName)
+    onPanelDisable: function(context, panelName)
     {
         if (panelName != this.panelName)
             return;
 
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDeactivate destroy: "+destroy+" for "+context.getName()+"\n");
+        if (this.dependents.length > 0)
+        {
+        	//ToDo better UI?
+        	var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
+        	Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
+        	return;
+        }
+        
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable destroy: "+destroy+" for "+context.getName()+"\n");
 
-        if (!destroy)  // then the user is saying no to debugging
-            this.clearAllBreakpoints(context);
-        // else the context is being torn down, possibly to reload
+        this.clearAllBreakpoints(context);
     },
-
-    onLastPanelDeactivate: function(context, destroy)
+    
+    onDependentModuleChange: function(dependnentAddedOrRemoved)
     {
-        if (FBTrace.DBG_DISPATCH || FBTrace.DBG_STACK || FBTrace.DBG_LINETABLE || FBTrace.DBG_SOURCEFILES || FBTrace.DBG_FBS_FINDDEBUGGER) /*@explore*/
-            FBTrace.sysout("debugger.onLastPanelDeactivate for "+this.debuggerName+" with destroy:"+destroy+" on"+context.window.location+"\n"); /*@explore*/
-        this.unregisterDebugger(); // 1.3.1
+    	if (this.dependents.length > 0) // then we have dependents now
+    	{
+    		if (!this.isAlwaysEnabled()) // then we need to enable
+    		{
+    			var prefDomain = this.getPrefDomain();
+    			Firebug.setPref(prefDomain, "enableSites", true);
+    			Firebug.Console.log("enabling javascript debugger to support "+dependnentAddedOrRemoved.dispatchName);
+    		}
+    	}
     },
 
     onSuspendFirebug: function(context)
@@ -1732,7 +1735,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var active = this.setIsJSDActive();  // update ui
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("debugger.onSuspendFirebug active:"+active+" isEnabled " +Firebug.Debugger.isEnabled(context)+ " for "+context.getName()+"\n");
+            FBTrace.sysout("debugger.onSuspendFirebug active:"+active+" isEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
     },
 
     onResumeFirebug: function(context)
@@ -1741,25 +1744,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var active = this.setIsJSDActive();  // update ui
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("debugger.onResumeFirebug active:"+active+" isEnabled " +Firebug.Debugger.isEnabled(context)+ " for "+context.getName()+"\n");
+            FBTrace.sysout("debugger.onResumeFirebug active:"+active+" isEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
     },
 
     ableWatchSidePanel: function(context)
     {
-        if (Firebug.Console.isEnabled(context))
+        if (Firebug.Console.isAlwaysEnabled())
         {
             var watchPanel = context.getPanel("watches", true);
             if (watchPanel)
-                watchPanel.enablePanel();
-            return watchPanel;
+            	return watchPanel;
         }
         else
-        {
-            var watchPanel = context.getPanel("watches", true);
-            if (watchPanel)
-                watchPanel.disablePanel();
-            return false;
-        }
+        	return false;
     },
 
     //---------------------------------------------------------------------------------------------
@@ -2242,7 +2239,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
-        var enabled = Firebug.Debugger.isEnabled(this.context);
+        var enabled = Firebug.Debugger.isAlwaysEnabled();
 
         // The "enable/disable" button is always visible.
         this.showToolbarButtons("fbScriptButtons", true);
@@ -2262,20 +2259,17 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.sidePanelDeck.collapsed = !enabled;
 
         if ( (this.context.loaded && !this.location) || this.retryRestoreLocation)
-            this.reShow(state);
-    },
+        {
+        	restoreLocation(this, state);
 
-    reShow: function(state)
-    {
-        restoreLocation(this, state);
+        	if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+        		this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
+        }
 
-        if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-            this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
-
-        var enabled = Firebug.Debugger.isEnabled(this.context);
+        var enabled = Firebug.Debugger.isAlwaysEnabled();
         if (enabled)
         {
-            Firebug.ModuleManagerPage.hide(this); // the navigate in restoreObject remains in effect
+        	//Firebug.Debugger.disabledPanelPage.hide(this); // the navigate in restoreObject remains in effect
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
@@ -2283,11 +2277,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else  // Not enabled but showing source in HTML pages.
         {
-            // xxxHonza: ModuleManagerPage should be always displayed if
-            // debugger is disabled.
-            //if (!state.persistedLocation)
-                Firebug.ModuleManagerPage.show(this, Firebug.Debugger);
-            // else the navigate in restoreObject remains in effect
+        	//Firebug.Debugger.disabledPanelPage.show(this);
         }
     },
 
@@ -2424,8 +2414,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(sourceFile)
     {
-        if (!Firebug.Debugger.isEnabled(this.context))
-            Firebug.ModuleManagerPage.hide(this);
+        if (!Firebug.Debugger.isAlwaysEnabled())
+        	Firebug.Debugger.disabledPanelPage.hide(this);
 
         if (!sourceFile)
             return;  // XXXjjb do we need to show a blank?

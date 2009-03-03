@@ -127,7 +127,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         context.spies = [];
 
-        if (Firebug.showXMLHttpRequests  && Firebug.Console.isEnabled(context))
+        if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
             this.attachSpy(context, context.window);
     },
 
@@ -140,7 +140,7 @@ Firebug.Spy = extend(Firebug.Module,
 
     watchWindow: function(context, win)
     {
-        if (Firebug.showXMLHttpRequests && Firebug.Console.isEnabled(context))
+        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
             this.attachSpy(context, win);
     },
 
@@ -438,7 +438,7 @@ function requestStarted(request, xhrRequest, context, method, url)
         spy.requestHeaders = getRequestHeaders(spy);
 
     // If it's enabled log the request into the console tab.
-    if (Firebug.showXMLHttpRequests && Firebug.Console.isEnabled(context))
+    if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
     {
         spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
         setClass(spy.logRow, "loading");

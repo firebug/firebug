@@ -15,19 +15,19 @@ Firebug.Profiler = extend(Firebug.Module,
         this.setEnabled(context);
     },
 
-    onPanelActivate: function(context, init, panelName)
+    onPanelEnable: function(context, panelName)
     {
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Profiler.onPanelActivate panelName: "+panelName+"\n");
+            FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
 
         if (panelName == "net" || panelName == "script")
             this.setEnabled(context);
     },
 
-    onPanelDeactivate: function(context, init, panelName)
+    onPanelDisable: function(context, panelName)
     {
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Profiler.onPanelDeactivate panelName: "+panelName+"\n");
+            FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
 
        if (panelName == "net" || panelName == "script")
             this.setEnabled(context);
@@ -36,8 +36,8 @@ Firebug.Profiler = extend(Firebug.Module,
     setEnabled: function(context)
     {
         // The profiler is available only if the debugger (script panel) and console are enabled.
-        var debuggerEnabled = Firebug.Debugger.isEnabled(context);
-        var consoleEnabled = Firebug.Console.isEnabled(context);
+        var debuggerEnabled = Firebug.Debugger.isAlwaysEnabled();
+        var consoleEnabled = Firebug.Console.isAlwaysEnabled();
         toggleProfiling.disabled = !debuggerEnabled || !consoleEnabled;
 
         // Update button's tooltip.

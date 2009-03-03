@@ -516,20 +516,6 @@ top.FirebugChrome =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Synchronization
 
-    showContext: function(browser, context)
-    {
-        if (context)
-        {
-            FirebugContext = context;  // we set FirebugContext here and in Firebug.initContext only
-
-            if (FBTrace.DBG_DISPATCH || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("chrome.showContext set FirebugContext to: "+(context?context.getWindowLocation():"null ")+"\n");
-
-            if (externalBrowser || (context.browser && context.browser.showFirebug) )
-                this.syncPanel();
-        }
-    },
-
     hidePanel: function()
     {
         if (panelBar1.selectedPanel)

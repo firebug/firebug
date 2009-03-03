@@ -280,13 +280,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    onPanelActivate: function(context, init, activatedPanelName)
+    onPanelEnable: function(context, activatedPanelName)
     {
         if (activatedPanelName != panelName)
             return;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelActivate; init: " + init + ", " + context.getName());
+            FBTrace.sysout("net.onPanelEnable: "+ context.getName());
 
         monitorContext(context);
 
@@ -301,35 +301,21 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         $('fbStatusIcon').setAttribute("net", "on");
 
-        //if (!init)
-        //    context.window.location.reload(); // 1.4a13
     },
 
-    onPanelDeactivate: function(context, destroy, deactivatedPanelName)
+    onPanelDisable: function(context, deactivatedPanelName)
     {
         if (deactivatedPanelName != panelName)
             return;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelDeactivate; destroy: " + destroy + ", " + context.getName());
+            FBTrace.sysout("net.onPanelDisable; destroy: " + destroy + ", " + context.getName());
 
         if (context.netProgress)
             context.netProgress.activate(null);
 
         unmonitorContext(context);
-    },
-
-    onFirstPanelActivate: function(context, init)
-    {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onFirstPanelActivate; init: " + init + ", " + context.getName());
-    },
-
-    onLastPanelDeactivate: function(context, destroy)
-    {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onLastPanelDeactivate; destroy: " + destroy + ", " + context.getName());
-
+        
         $('fbStatusIcon').removeAttribute("net");
     },
 
@@ -346,7 +332,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("net.onSuspendFirebug could not removeProgressListener: ", e);
         }
-
+        
         $('fbStatusIcon').removeAttribute("net");
     },
 
@@ -363,7 +349,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
                 FBTrace.sysout("net.onResumeFirebug could not addProgressListener: ", e);
         }
 
-        if (Firebug.NetMonitor.isEnabled(this.context))
+        if (Firebug.NetMonitor.isAlwaysEnabled())
             $('fbStatusIcon').setAttribute("net", "on");
     }
 });
@@ -789,10 +775,10 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     shouldShow: function()
     {
-        if (Firebug.NetMonitor.isEnabled(this.context))
+        if (Firebug.NetMonitor.isAlwaysEnabled())
             return true;
 
-        Firebug.ModuleManagerPage.show(this, Firebug.NetMonitor);
+        //Firebug.NetMonitor.disabledPanelPage.show(this);
 
         return false;
     },
@@ -1062,7 +1048,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     layout: function()
     {
         if (!this.queue.length || !this.context.netProgress ||
-            !Firebug.NetMonitor.isEnabled(this.context))
+            !Firebug.NetMonitor.isAlwaysEnabled())
             return;
 
         this.initLayout();
@@ -1349,6 +1335,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     {
         var netProgress = this.context.netProgress;
 
+        if (!netProgress)  // XXXjjb Honza, please check, I guess we are getting here with the context not setup
+        	return; 
+        
         // Must be positive number;
         limit = Math.max(0, limit) + netProgress.pending.length;
 
@@ -3130,7 +3119,7 @@ var HttpObserver =
 
             var win = getWindowForRequest(subject);
             var context = TabWatcher.getContextByWindow(win);
-            if (!Firebug.NetMonitor.isEnabled(context))
+            if (!context)
                 return;
 
             // Some requests are not associted with any page (e.g. favicon).
