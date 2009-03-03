@@ -18,14 +18,11 @@ const nsISafeOutputStream = Ci.nsISafeOutputStream;
 const nsIURI = Ci.nsIURI;
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const PermManager = Cc["@mozilla.org/permissionmanager;1"];
 const DirService =  CCSV("@mozilla.org/file/directory_service;1", "nsIDirectoryServiceProvider");
 
 const nsIPrefService = Ci.nsIPrefService;
 const prefService = PrefService.getService(nsIPrefService);
 
-const nsIPermissionManager = Ci.nsIPermissionManager;
-const permissionManager = CCSV("@mozilla.org/permissionmanager;1", "nsIPermissionManager");
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
 const stringBundleService = CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
@@ -39,14 +36,9 @@ const detachCommand = $("cmd_toggleDetachFirebug");
 const tabBrowser = $("content");
 const versionURL = "chrome://firebug/content/branch.properties";
 
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const prefs = PrefService.getService(nsIPrefBranch2);
-const pm = PermManager.getService(nsIPermissionManager);
-
-const DENY_ACTION = nsIPermissionManager.DENY_ACTION;
-const ALLOW_ACTION = nsIPermissionManager.ALLOW_ACTION;
 const NS_OS_TEMP_DIR = "TmpD"
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1385,11 +1377,11 @@ top.Firebug =
 
     setFirebugContext: function(context)
     {
-    	FirebugContext = context;
-    	if (FBTrace.DBG_DISPATCH)
-    		FBTrace.sysout("FirebugContext set "+FirebugContext.getName());
+        FirebugContext = context;
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("FirebugContext set "+FirebugContext.getName());
     },
-    
+
     showContext: function(browser, context)  // TabWatcher showContext. null context means we don't debug that browser
     {
         if (clearContextTimeout)
@@ -1407,10 +1399,13 @@ top.Firebug =
             Firebug.setFirebugContext(context);
         }
 
-        this.syncBar();   
+        // signal that this browser is one that shows the firebug
+        browser.showFirebug = !!context;
 
-    	if (Firebug.isContextActive(context)) // then we need to show the ui
-    		dispatch(modules, "showContext", [browser, context]);
+        this.syncBar();
+
+        if (Firebug.isContextActive(context)) // then we need to show the ui
+            dispatch(modules, "showContext", [browser, context]);
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
@@ -2660,6 +2655,9 @@ Firebug.Rep = domplate(
 
 // ************************************************************************************************
 
+/**
+ * Implementation of ActivableModule.
+ */
 Firebug.ActivableModule = extend(Firebug.Module,
 {
     panelName: null,
@@ -2667,15 +2665,18 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     initialize: function()
     {
+        this.dependents = [];
+
         Firebug.Module.initialize.apply(this, arguments);
+
         // activable modules listen for enable/disable
         prefs.addObserver(this.getPrefDomain(), this, false);
     },
 
     initializeUI: function(detachArgs)
     {
-    	this.disabledPanelPage = new Firebug.ModuleManagerPage(this);
-    	
+        this.disabledPanelPage = new Firebug.ModuleManagerPage(this);
+
         uiListeners.push(this);  // we listen for showUI/hideUI for panel activation
 
         this.updateTab(null);
@@ -2701,15 +2702,15 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     isEnabled: function()
     {
-    	return this.enabled;
+        return this.enabled;
     },
-    
+
     panelEnable: function(context, becameActive) // panel Disabled -> Enabled
     {
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.enablePanel(this);
-            
+
         this.enabled = true;
 
         dispatch(modules, "onPanelEnable", [context, becameActive, this.panelName]);
@@ -2722,7 +2723,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             FBTrace.sysout("panelDisable "+this.getPrefDomain()+" isEnabled:"+this.isAlwaysEnabled()+"\n");
 
         this.enabled = false;
-        
+
         dispatch(modules, "onPanelDisable", [context, this.panelName]);
 
         var panel = context.getPanel(this.panelName, true);
@@ -2738,30 +2739,32 @@ Firebug.ActivableModule = extend(Firebug.Module,
             var state = Firebug.getPanelState(panel);
             panel.show(state);
         }
-            
+
         Firebug.resetTooltip();
     },
-    
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Cross module dependencies.
-    //
+
     addDependentModule: function(dependent)
     {
-    	this.dependents.push(dependent);
-    	this.onDependentModuleChange(dependent);  // not dispatched.
+        this.dependents.push(dependent);
+        this.onDependentModuleChange(dependent);  // not dispatched.
     },
-    
+
     removeDependentModule: function(dependent)
     {
         remove(this.dependents, dependent);
         this.onDependentModuleChange(dependent);  // not dispatched
     },
-    
+
     onDependentModuleChange: function(dependent)
     {
-    	if (FBTrace.DBG_WINDOWS)
-    		FBTrace.sysout("onDependentModuleChange no-op for "+dependent.dispatchName);
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("onDependentModuleChange no-op for "+dependent.dispatchName);
     },
-    // --------------------------------------------------------------------------------------
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // uiListener
 
     showUI: function(browser, context)  // Firebug is opened, in browser or detached
@@ -2776,7 +2779,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             FBTrace.sysout("Firebug.hideUI no-op")
     },
 
-    // ---------------------------------------------------------------------------------------
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onPanelEnable: function(context, init, panelName)
     {
@@ -2797,7 +2800,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         // When the number of activeContexts increases from zero. Modules should undo the work done in onSuspendFirebug
     },
-    // ---------------------------------------------------------------------------------------
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getPrefDomain: function()
     {
@@ -2807,228 +2811,37 @@ Firebug.ActivableModule = extend(Firebug.Module,
         return this.prefDomain;
     },
 
-    getHostForURI: function(browserURI)
+    setDefaultState: function(enable)
     {
-        if (Firebug.filterSystemURLs)
-            return isSystemURL(browserURI.spec) ? "" : browserURI.host;
-        else
-        {
-            if (browserURI.spec.substr(0, 6) == "about:")
-                return "";
-            else
-            {
-                try
-                {
-                    return browserURI.host;
-                }
-                catch (exc)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("openPermissions browserURI.host fails for browserURI: "+safeToString(browserURI.wrappedJSObject)+" spec: "+browserURI.spec, exc);
-                    return "";
-                }
-            }
-        }
-    },
-
-    /**
-     * Returns true if the module can be enabled for the specified host.
-     * Returns false otherwise.
-     */
-    isHostEnabled: function(context)
-    {
-        var option = this.getHostPermission(context);
-        switch (option)
-        {
-            case "enable":
-            case "enable-site":
-                return true;
-
-            case "disable":
-            case "disable-site":
-                return false;
-        }
-
-        if (FBTrace.DBG_PANELS)
-        {
-            FBTrace.sysout("firebug.isHostEnabled UNKNOWN option: " + option +
-                ", location: " + (context ? context.window.location : "null") +
-                "\n");
-        }
-    },
-
-    /**
-     * Sets host permission for the module.
-     * There are three types of permissions that can be specified in the option:
-     * "enable" - the module should be enabled for all sites.
-     * "disable" - the module should be disbled for all sites.
-     * "enable-site" - the module should be enabled for this site.
-     * "disable-site" - the module should be disabled for this site.
-     */
-    setHostPermission: function(context, option)
-    {
-        var browserURI = FirebugChrome.getBrowserURI(context);
         var prefDomain = this.getPrefDomain();
-        var enable = (option.indexOf("enable") == 0) ? true : false;
-        var global = (option.indexOf("site") == -1) ? true : false;
-
-        if (FBTrace.DBG_OPTIONS)
-        {
-            FBTrace.sysout("firebug.setHostPermission option:"+option+" prefDomain:"+
-                prefDomain+" for "+browserURI.spec+"\n");
-        }
-
-        // The preferences for both system and local pages is three-state.
-        // So, it's the same logic as for site-permissions, which can
-        // be set to true/false or not set at all.
-        //
-        // "enable" - enables system/local pages
-        // "disable" - disales system/local pages
-        // "" - if not set the global option is used.
-        if (!browserURI.spec || isSystemURL(browserURI.spec))
-            Firebug.setPref(prefDomain, "enableSystemPages", (global ? "" : option));
-        else if (isLocalURL(browserURI.spec))
-            Firebug.setPref(prefDomain, "enableLocalFiles", (global ? "" : option));
-        else if (isDataURL(browserURI.spec))
-            return;
-
-        if (!browserURI.spec || isSystemURL(browserURI.spec) || isLocalURL(browserURI.spec))
-        {
-            // If the global option is set while system or local page is displayed
-            // not to forget to update the global preference.
-            if (global)
-                Firebug.setPref(prefDomain, "enableSites", enable);
-
-            return;
-        }
-
-        switch(option)
-        {
-            case "enable-site":
-                permissionManager.add(browserURI, prefDomain, permissionManager.ALLOW_ACTION);
-                break;
-
-            case "disable-site":
-                permissionManager.add(browserURI, prefDomain, permissionManager.DENY_ACTION);
-                break;
-
-            default:
-                permissionManager.remove(browserURI.host, prefDomain);
-                Firebug.setPref(prefDomain, "enableSites", enable);
-                break;
-        }
+        Firebug.setPref(prefDomain, "enableSites", enable);
     },
 
-    /*
-     * Returns current host permision for the module.
-     * Return value: "enable", "disable", "enable-site" or "disable-site".
-     */
-    getHostPermission: function(context)
-    {
-        var browserURI = FirebugChrome.getBrowserURI(context);
-        var prefDomain = this.getPrefDomain();
-
-        // If it's a local-file or a system-page see preferences.
-        // In case of eg resource://gre/res/hiddenWindow.html the spec can be null.
-        if (!browserURI || !browserURI.spec || isSystemURL(browserURI.spec))
-        {
-            var option = Firebug.getPref(prefDomain, "enableSystemPages");
-
-            // If the preference isn't set use the global option.
-            return option ? option : (this.isAlwaysEnabled() ? "enable" : "disable");
-        }
-        else if (isLocalURL(browserURI.spec))
-        {
-            var option = Firebug.getPref(prefDomain, "enableLocalFiles");
-            return option ? option : (this.isAlwaysEnabled() ? "enable" : "disable");
-        }
-        else if (isDataURL(browserURI.spec))
-        {
-            return "enable-site";
-        }
-
-        switch (permissionManager.testPermission(browserURI, prefDomain))
-        {
-            case nsIPermissionManager.ALLOW_ACTION:
-                return "enable-site";
-            case nsIPermissionManager.DENY_ACTION:
-                return "disable-site";
-
-            default:
-                return this.isAlwaysEnabled() ? "enable" : "disable";
-        }
-    },
-
-    /**
-     * Return true if the module should be enabled by default.
-     */
     isAlwaysEnabled: function()
     {
         var prefDomain = this.getPrefDomain();
         return Firebug.getPref(prefDomain, "enableSites");
     },
 
-    /**
-     * Opens a dialog with list of created permissions for this module.
-     */
-    openPermissions: function(event, context)
-    {
-        cancelEvent(event);
-
-        var browserURI = FirebugChrome.getBrowserURI(context);
-        var host = this.getHostForURI(browserURI);
-
-        var params = {
-            permissionType: this.getPrefDomain(),
-            windowTitle: $STR(this.panelName + ".Permissions"),
-            introText: $STR(this.panelName + ".PermissionsIntro"),
-            blockVisible: true,
-            sessionVisible: false,
-            allowVisible: true,
-            prefilledHost: host,
-        };
-
-        openWindow("Browser:Permissions", "chrome://browser/content/preferences/permissions.xul",
-            "", params);
-    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     observe: function(subject, topic, data)
     {
         try
         {
-            // This methods observes two events:
-            // perm-changed - fired when permissions are changed.
             // nsPref:changed - fired when preferences are changed.
             if (FBTrace.DBG_PANELS)
             {
-                if ((topic != "perm-changed") && (topic != "nsPref:changed"))
+                if (topic != "nsPref:changed")
                     FBTrace.sysout("firebug.ActivableModule.observe UNKNOWN topic "+topic+" data: "+data+"\n");
                 else
                     FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+" data: "+data+"\n");
             }
 
-            if (topic == 'perm-changed')
-            {
-                if (subject instanceof Ci.nsIPermission)
-                {
-                    if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
-                    var host = subject.host;
-                    var prefDomain = subject.type;  // eg extensions.firebug.script
-                    dispatch(modules, "onEnablePrefChange", [host, prefDomain, data]); // data will be 'added' or 'deleted'
-                }
-                else
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("!firebug.observe perm-changed subject is not an nsIPermission", subject);
-                }
-            }
-            else if (topic == "nsPref:changed")
+            if (topic == "nsPref:changed")
             {
                 var prefDomain = this.getPrefDomain();
-                if (data == prefDomain + ".enableLocalFiles" ||
-                    data == prefDomain + ".enableSystemPages" ||
-                    data == prefDomain + ".enableSites")
+                if (data == prefDomain + ".enableSites")
                 {
                     if (FBTrace.DBG_PANELS)
                         FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
@@ -3058,10 +2871,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
                     {
                         if ((prefDomain + ".enableSites") == data)
                         {
-                        	if (module.isAlwaysEnabled())
-                        		module.panelEnable(context);
-                        	else
-                        		module.panelDisable(context);
+                            if (module.isAlwaysEnabled())
+                                module.panelEnable(context);
+                            else
+                                module.panelDisable(context);
                         }
                     }
                     catch (exc)
@@ -3072,45 +2885,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 }
             );
         }
-    },
-
-    getMenuLabel: function(option, location)
-    {
-        var label = "";
-        var host = "";
-
-        switch (option)
-        {
-        case "disable-site":
-            if (isSystemURL(location.spec))
-                label = "SystemPagesDisable";
-            else if (!getURIHost(location))
-                label = "LocalFilesDisable";
-            else
-                label = "HostDisable";
-            break;
-
-        case "enable-site":
-            if (isSystemURL(location.spec))
-                label = "SystemPagesEnable";
-            else if (!getURIHost(location))
-                label = "LocalFilesEnable";
-            else
-                label = "HostEnable";
-            break;
-
-        case "enable":
-            return $STR("panel.Enabled");
-
-        case "disable":
-            return $STR("panel.Disabled");
-        }
-
-        if (!label)
-            return null;
-
-        label = this.panelName + "." + label;
-        return $STRF(label, [getURIHost(location)]);
     },
 
     updateTab: function(context)
@@ -3143,7 +2917,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
 Firebug.ModuleManagerPage = function(module)
 {
-        this.module = module;
+    this.module = module;
 }
 
 Firebug.ModuleManagerPage.prototype = domplate(Firebug.Rep,
@@ -3282,98 +3056,99 @@ Firebug.ModuleManager =
     {
         if (!module.isAlwaysEnabled())
         {
-            module.setHostPermission(context, "enable-site");
+            module.setHostPermission(context, "enable");
             return true;
         }
         return false;
     },
 }
-//************************************************************************************************
+
+//*************************************************************************************************
 // A TabWatch listener and a uiListener
 
 Firebug.URLSelector =
 {
-        annotationName: "firebug/history",
+    annotationName: "firebug/history",
 
-        initialize: function()  // called once
-        {
-            this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
-                                            .getService(Components.interfaces.nsIAnnotationService);
-        },
+    initialize: function()  // called once
+    {
+        this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
+            .getService(Components.interfaces.nsIAnnotationService);
+    },
 
-        shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
+    shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
+    {
+        try
         {
-        	try
-        	{
-        		var uri = makeURI(url);
-        		var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
-        		if (FBTrace.DBG_WINDOWS)
-        			FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
-        		
-        		return hasAnnotation;   // if annotated, shouldCreateContext true
-        	}
-        	catch (exc)
-        	{
-        		if (FBTrace.DBG_ERRORS)
-        			FBTrace.sysout("pageHasAnnoation FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
-        	}
-        },
-        
-        shouldShowContext: function(context)
-        {
-        	try
-        	{
-        		var url = context.getWindowLocation().toString();
-        		var uri = makeURI(url);
-        		var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
-        		if (FBTrace.DBG_WINDOWS)
-        			FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
-        		
-        		var annotation = null;
-        		if (hasAnnotation)
-        		{
-        			annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
-        			if (annotation.indexOf("detached") > 0)
-        				FBTrace.sysout('initContext should detach');
-        			else
-        				context.browser.showFirebug = true;
-        			if (FBTrace.DBG_WINDOWS)
-        				FBTrace.sysout("initContext read back annotation "+annotation);
-        			return true;
-        		}
-        		return false;
-        	}
-        	catch (exc)
-        	{
-        		if (FBTrace.DBG_ERRORS)
-        			FBTrace.sysout("initContext FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
-        	}
-        },
-
-        showUI: function(browser, context)  // Firebug is opened, in browser or detached
-        {
-            // mark this URI as firebugged
-            var uri = makeURI(context.getWindowLocation());
-            var annotation = "firebugged."+(browser.detached?"detached":"showFirebug");
-            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+            var uri = makeURI(url);
+            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_WINDOWS)
-            {
-                if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
-                    FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-                FBTrace.sysout("showUI tagged "+uri.spec);
-            }
-        },
+                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
 
-        hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+            return hasAnnotation;   // if annotated, shouldCreateContext true
+        }
+        catch (exc)
         {
-            if (context)
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("pageHasAnnoation FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
+        }
+    },
+
+    shouldShowContext: function(context)
+    {
+        try
+        {
+            var url = context.getWindowLocation().toString();
+            var uri = makeURI(url);
+            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+
+            var annotation = null;
+            if (hasAnnotation)
             {
-                var uri  = makeURI(context.getWindowLocation());
-                this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+                annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
+                if (annotation.indexOf("detached") > 0)
+                    FBTrace.sysout('initContext should detach');
+                else
+                    context.browser.showFirebug = true;
                 if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("hideUI untagged "+uri.spec+" browser.showFirebug: "+browser.showFirebug+" browser.detached:"+browser.detached);
+                    FBTrace.sysout("initContext read back annotation "+annotation);
+                return true;
             }
-        },
+            return false;
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("initContext FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
+        }
+    },
+
+    showUI: function(browser, context)  // Firebug is opened, in browser or detached
+    {
+        // mark this URI as firebugged
+        var uri = makeURI(context.getWindowLocation());
+        var annotation = "firebugged."+(browser.detached?"detached":"showFirebug");
+        this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+        if (FBTrace.DBG_WINDOWS)
+        {
+            if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
+                FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
+            FBTrace.sysout("showUI tagged "+uri.spec);
+        }
+    },
+
+    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+    {
+        if (context)
+        {
+            var uri  = makeURI(context.getWindowLocation());
+            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("hideUI untagged "+uri.spec+" browser.showFirebug: "+browser.showFirebug+" browser.detached:"+browser.detached);
+        }
+    },
 }
 
 // ************************************************************************************************

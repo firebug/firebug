@@ -15,7 +15,7 @@ Firebug.Profiler = extend(Firebug.Module,
         this.setEnabled(context);
     },
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(context, init, panelName)
     {
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");

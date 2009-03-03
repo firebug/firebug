@@ -385,23 +385,21 @@
 
 <binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
     <content>
-        <xul:menupopup anonid="popup"
-                       oncommand="return this.parentNode.onCommand(event)">
+        <xul:menupopup anonid="popup" oncommand="return this.parentNode.onCommand(event)">
             <xul:menuitem type="radio" value="enable"/>
             <xul:menuitem type="radio" value="disable"/>
-            <xul:menuitem type="radio" value="enable-site"/>
-            <xul:menuitem type="radio" value="disable-site"/>
-            <xul:menuseparator />
-            <xul:menuitem label="&firebug.Permissions;"
-                          oncommand="this.parentNode.parentNode.openPermissions(event)"/>
         </xul:menupopup>
         <xul:image anonid="menuTarget" class="menuTarget"/>
     </content>
     <implementation>
         <constructor>
         <![CDATA[
-           this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
-           this.popup.tooltip
+            this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
+
+            // Internationalize
+            var items = this.popup.getElementsByTagNameNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
+            items[0].label = FBL.$STR("panel.Enabled");
+            items[1].label = FBL.$STR("panel.Disabled");
         ]]>
         </constructor>
         <field name="value"/>
@@ -409,17 +407,10 @@
         <method name="onCommand">
             <parameter name="event"/>
             <body><![CDATA[
+                // Firebug.ActivableModule registers pref observer so, the UI
+                // is updated automatically.
                 var menu = event.target;
-                this.module.setHostPermission(FirebugContext, menu.value);
-                //XXXjjb, let the pref update do this....
-                // if (menu.value.indexOf("disable") == 0)  
-                //    Firebug.ModuleManagerPage.refresh();
-            ]]></body>
-        </method>
-        <method name="openPermissions">
-            <parameter name="event"/>
-            <body><![CDATA[
-                this.module.openPermissions(event, FirebugContext);
+                this.module.setDefaultState(menu.value == "enable" ? true : false);
             ]]></body>
         </method>
     </implementation>
@@ -430,20 +421,12 @@
         <handler event="popupshowing"><![CDATA[
             // XXXjjb getElementsByTagName("xul:menuitem"); fails 2.0.0.16
             var items = this.popup.getElementsByTagNameNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
-            var location = FirebugChrome.getBrowserURI(FirebugContext);
-            var value = this.module.getHostPermission(FirebugContext);
+            var enabled = this.module.isAlwaysEnabled();
 
-            for (var i=0; i<items.length; i++)
-            {
-                var option = items[i].value;
-                if (!option)
-                    continue;
+            // Update menu items.
+            items[0].setAttribute("checked", enabled ? "true" : "false");
+            items[1].setAttribute("checked", enabled ? "false" : "true");
 
-                if (option == value)
-                    items[i].setAttribute("checked", "true");
-
-                items[i].label = this.module.getMenuLabel(option, location);
-            }
             return true;
         ]]></handler>
     </handlers>

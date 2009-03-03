@@ -200,7 +200,7 @@ Firebug.Console = extend(ActivableConsole,
 
     // -----------------------------------------------------------------------------------------------------
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(context, init, panelName)
     {
         if (panelName != this.panelName)  // we don't care about other panels
             return;

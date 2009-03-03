@@ -280,7 +280,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    onPanelEnable: function(context, activatedPanelName)
+    onPanelEnable: function(context, init, activatedPanelName)
     {
         if (activatedPanelName != panelName)
             return;

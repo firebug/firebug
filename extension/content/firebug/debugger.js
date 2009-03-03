@@ -1675,7 +1675,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(context, init, panelName)
     {
         //if (panelName == "console" || panelName == this.panelName)
         //    this.ableWatchSidePanel(context);
