@@ -2675,11 +2675,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         Firebug.Module.initialize.apply(this, arguments);
 
-        if (this.isAlwaysEnabled())
-            module.panelEnable(context);
-        else
-            module.panelDisable(context);
-
         // activable modules listen for enable/disable
         prefs.addObserver(this.getPrefDomain(), this, false);
     },
@@ -2707,7 +2702,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.destroyContext panelName "+this.panelName+"\n");
-        observerService.removeObserver(this, "perm-changed");
         prefs.removeObserver(this.getPrefDomain(), this);
     },
 
