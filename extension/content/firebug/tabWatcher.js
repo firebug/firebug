@@ -107,7 +107,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (context) // then we've looked at this window before in this FF session
         {
         	if (!this.shouldShowContext(context))
-        		return;
+        	{	
+        		this.watchContext(win, null);
+        		return;  // did not create a context
+        	}
         }
         else // then we've not looked this window in this session
         {
