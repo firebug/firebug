@@ -441,7 +441,10 @@ top.Firebug =
     {
         var contextURLSet = [];  // create a list of all unique activeContexts
         this.eachActiveContext( function createActiveContextList(context)
-        {FBTrace.sysout("active context "+context.getName());
+        {
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("active context "+context.getName());
+
             try
             {
                 var cw = context.window;
@@ -467,7 +470,10 @@ top.Firebug =
                     FBTrace.dumpProperties("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
             }
         });
-        FBTrace.sysout("active contexts urls "+contextURLSet.length);
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("active contexts urls "+contextURLSet.length);
+
         return contextURLSet;
     },
 
@@ -2760,12 +2766,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     showUI: function(browser, context)  // Firebug is opened, in browser or detached
     {
-        FBTrace.sysout("Firebug.showUI no-op")
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("Firebug.showUI no-op")
     },
 
     hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
     {
-        FBTrace.sysout("Firebug.hideUI no-op")
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("Firebug.hideUI no-op")
     },
 
     // ---------------------------------------------------------------------------------------
