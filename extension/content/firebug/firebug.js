@@ -2687,6 +2687,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.updateTab(null);
     },
 
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+
+        prefs.removeObserver(this.getPrefDomain(), this);
+    },
+
     reattachContext: function(browser, context)
     {
         this.updateTab(context);
@@ -2701,7 +2708,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.destroyContext panelName "+this.panelName+"\n");
-        prefs.removeObserver(this.getPrefDomain(), this);
     },
 
     isEnabled: function()
