@@ -358,7 +358,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
 function NetPanel() {}
 
-NetPanel.prototype = domplate(Firebug.AblePanel,
+NetPanel.prototype = domplate(Firebug.ActivablePanel,
 {
     tableTag:
         TABLE({class: "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
@@ -743,12 +743,12 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.NetPanel.initialize; " + context.getName());
 
-        Firebug.AblePanel.initialize.apply(this, arguments);
+        Firebug.ActivablePanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
-        Firebug.AblePanel.destroy.apply(this, arguments);
+        Firebug.ActivablePanel.destroy.apply(this, arguments);
     },
 
     show: function(state)

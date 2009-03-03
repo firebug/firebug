@@ -236,7 +236,7 @@ const ToolboxPlate = domplate(
 
 Firebug.DOMBasePanel = function() {}
 
-Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
+Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 {
     tag: DirTablePlate.tableTag,
 

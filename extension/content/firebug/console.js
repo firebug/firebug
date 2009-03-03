@@ -278,7 +278,7 @@ Firebug.ConsoleListener =
 
 Firebug.ConsolePanel = function () {} // XXjjb attach Firebug so this panel can be extended.
 
-Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
+Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 {
     wasScrolledToBottom: true,
     messageCount: 0,

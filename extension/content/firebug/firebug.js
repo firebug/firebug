@@ -2035,7 +2035,7 @@ Firebug.Panel =
 
 //************************************************************************************************
 
-Firebug.AblePanel = extend(Firebug.Panel,
+Firebug.ActivablePanel = extend(Firebug.Panel,
 {
     enablePanel: function(module)
     {
@@ -2118,7 +2118,7 @@ Firebug.MeasureBox =
 
 Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can be extended.
 
-Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
+Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePanel),
 {
 
     initialize: function(context, doc)
@@ -2675,13 +2675,18 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         Firebug.Module.initialize.apply(this, arguments);
 
+        if (this.isAlwaysEnabled())
+            module.panelEnable(context);
+        else
+            module.panelDisable(context);
+
         // activable modules listen for enable/disable
         prefs.addObserver(this.getPrefDomain(), this, false);
     },
 
     initializeUI: function(detachArgs)
     {
-        this.disabledPanelPage = new Firebug.ModuleManagerPage(this);
+        this.disabledPanelPage = new Firebug.DisabledPanelPage(this);
 
         uiListeners.push(this);  // we listen for showUI/hideUI for panel activation
 
@@ -2915,12 +2920,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
 // ************************************************************************************************
 
-Firebug.ModuleManagerPage = function(module)
+Firebug.DisabledPanelPage = function(module)
 {
     this.module = module;
 }
 
-Firebug.ModuleManagerPage.prototype = domplate(Firebug.Rep,
+Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 {
     tag:
         DIV({class: "moduleManagerBox"},
