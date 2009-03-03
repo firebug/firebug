@@ -768,7 +768,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     supportsGlobal: function(frameWin) // This is call from fbs for almost all fbs operations
     {
-    	var context = ( (frameWin && TabWatcher) ? TabWatcher.getContextByWindow(frameWin) : null);
+        var context = ( (frameWin && TabWatcher) ? TabWatcher.getContextByWindow(frameWin) : null);
 
         if (context)
         {
@@ -1643,7 +1643,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.unregisterDebugger(this);
         fbs.unregisterClient(this);
     },
-    
+
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
         if (this.registered)
@@ -1667,7 +1667,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.registered = false;
     },
-    
+
     onSourceFileCreated: function(context, sourceFile)
     {
 
@@ -1684,7 +1684,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
 
         this.registerDebugger();
-        
+
         // redraw the viewport
         delete this.lastScrollTop;
 
@@ -1695,7 +1695,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var restored = restoreLocation(panel, panelState);
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("Debugger.onPanelEnable restored "+(restored?panel.location:"nothing"));
-        }   
+        }
     },
 
     onPanelDisable: function(context, panelName)
@@ -1705,28 +1705,28 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (this.dependents.length > 0)
         {
-        	//ToDo better UI?
-        	var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
-        	Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
-        	return;
+            //ToDo better UI?
+            var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
+            Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
+            return;
         }
-        
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable destroy: "+destroy+" for "+context.getName()+"\n");
+
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName+" for "+context.getName()+"\n");
 
         this.clearAllBreakpoints(context);
     },
-    
+
     onDependentModuleChange: function(dependnentAddedOrRemoved)
     {
-    	if (this.dependents.length > 0) // then we have dependents now
-    	{
-    		if (!this.isAlwaysEnabled()) // then we need to enable
-    		{
-    			var prefDomain = this.getPrefDomain();
-    			Firebug.setPref(prefDomain, "enableSites", true);
-    			Firebug.Console.log("enabling javascript debugger to support "+dependnentAddedOrRemoved.dispatchName);
-    		}
-    	}
+        if (this.dependents.length > 0) // then we have dependents now
+        {
+            if (!this.isAlwaysEnabled()) // then we need to enable
+            {
+                var prefDomain = this.getPrefDomain();
+                Firebug.setPref(prefDomain, "enableSites", true);
+                Firebug.Console.log("enabling javascript debugger to support "+dependnentAddedOrRemoved.dispatchName);
+            }
+        }
     },
 
     onSuspendFirebug: function(context)
@@ -1753,10 +1753,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             var watchPanel = context.getPanel("watches", true);
             if (watchPanel)
-            	return watchPanel;
+                return watchPanel;
         }
         else
-        	return false;
+            return false;
     },
 
     //---------------------------------------------------------------------------------------------
@@ -2260,16 +2260,16 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if ( (this.context.loaded && !this.location) || this.retryRestoreLocation)
         {
-        	restoreLocation(this, state);
+            restoreLocation(this, state);
 
-        	if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-        		this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
+            if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+                this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
         }
 
         var enabled = Firebug.Debugger.isAlwaysEnabled();
         if (enabled)
         {
-        	//Firebug.Debugger.disabledPanelPage.hide(this); // the navigate in restoreObject remains in effect
+            //Firebug.Debugger.disabledPanelPage.hide(this); // the navigate in restoreObject remains in effect
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
@@ -2277,7 +2277,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else  // Not enabled but showing source in HTML pages.
         {
-        	//Firebug.Debugger.disabledPanelPage.show(this);
+            //Firebug.Debugger.disabledPanelPage.show(this);
         }
     },
 
@@ -2415,7 +2415,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     updateLocation: function(sourceFile)
     {
         if (!Firebug.Debugger.isAlwaysEnabled())
-        	Firebug.Debugger.disabledPanelPage.hide(this);
+            Firebug.Debugger.disabledPanelPage.hide(this);
 
         if (!sourceFile)
             return;  // XXXjjb do we need to show a blank?
