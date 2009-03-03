@@ -986,7 +986,10 @@ top.Firebug =
                         return;  // context creation will trigger showBar
                 }
                 else
+                {
+                    Firebug.setFirebugContext(context);
                     Firebug.updateActiveContexts(context); // now the top tab is active
+                }
             }
 
             this.showBar(!toggleOff);
@@ -1348,7 +1351,9 @@ top.Firebug =
         if (!context)
             return false;
 
-        return (context.browser.detached || context.browser.showFirebug);
+        // A context is active if it is visible, either because its in a Firebug window or its the selected tab.
+
+        return (context.browser.detached || (context.browser.showFirebug && (context.browser == Firebug.tabBrowser.selectedBrowser) ) );
     },
 
     updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
@@ -1380,9 +1385,15 @@ top.Firebug =
 
     setFirebugContext: function(context)  // this is the only place we should set FirebugContext
     {
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():FirebugContext)+" was active? "+this.isContextActive(FirebugContext));
+
+        if (FirebugContext && !this.isContextActive(FirebugContext) && FirebugContext != context)
+            this.updateActiveContexts(FirebugContext);
+
         FirebugContext = context;
-        if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("FirebugContext set "+(FirebugContext?FirebugContext.getName():FirebugContext));
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("setFirebugContext set "+(FirebugContext?FirebugContext.getName():FirebugContext));
     },
 
     showContext: function(browser, context)  // TabWatcher showContext. null context means we don't debug that browser
@@ -3101,7 +3112,7 @@ Firebug.URLSelector =
 
     shouldShowContext: function(context)
     {
-        return shouldCreateContext(context.window, context.getWindowLocation().toString());
+        return Firebug.URLSelector.shouldCreateContext(context.window, context.getWindowLocation().toString());
     },
 
     markContextActive: function(context)
