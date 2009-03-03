@@ -3046,7 +3046,7 @@ Firebug.ModuleManager =
     {
         if (module.isAlwaysEnabled())
         {
-            module.setHostPermission(context, "disable");
+            module.setDefaultState(false);
             return true;
         }
         return false;
@@ -3056,7 +3056,7 @@ Firebug.ModuleManager =
     {
         if (!module.isAlwaysEnabled())
         {
-            module.setHostPermission(context, "enable");
+            module.setDefaultState(true);
             return true;
         }
         return false;
