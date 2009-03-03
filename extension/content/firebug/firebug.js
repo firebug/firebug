@@ -1491,7 +1491,7 @@ top.Firebug =
                 if (browser.firebugReload)
                     delete browser.firebugReload;
                 else
-                    browser.showFirebug = false; // ok we are done debugging
+                    delete browser.showFirebug; // ok we are done debugging
             }
         }
         else
@@ -3092,7 +3092,7 @@ Firebug.URLSelector =
             .getService(Components.interfaces.nsIAnnotationService);
     },
 
-    shouldCreateContext: function(win, url)  // true if the Places annotation the URI "firebugged"
+    shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
     {
         try
         {
@@ -3100,6 +3100,17 @@ Firebug.URLSelector =
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+
+            if(hasAnnotation)
+            {
+                var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
+                if (annotation.indexOf("detached") > 0)
+                    FBTrace.sysout('initContext should detach');
+                else
+                    browser.showFirebug = true;
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("shouldCreateContext read back annotation "+annotation);
+            }
 
             return hasAnnotation;   // if annotated, shouldCreateContext true
         }
@@ -3112,28 +3123,7 @@ Firebug.URLSelector =
 
     shouldShowContext: function(context)
     {
-        return Firebug.URLSelector.shouldCreateContext(context.window, context.getWindowLocation().toString());
-    },
-
-    markContextActive: function(context)
-    {
-        try
-        {
-            var url = context.getWindowLocation().toString();
-            var uri = makeURI(url);
-            var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
-            if (annotation.indexOf("detached") > 0)
-                FBTrace.sysout('initContext should detach');
-            else
-                context.browser.showFirebug = true;  // side effect
-            if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("markContextActive read back annotation "+annotation);
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("markContextActive FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
-        }
+        return Firebug.URLSelector.shouldCreateContext(context.browser, context.getWindowLocation().toString());
     },
 
     showUI: function(browser, context)  // Firebug is opened, in browser or detached

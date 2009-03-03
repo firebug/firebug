@@ -112,13 +112,13 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 return;  // did not create a context
             }
             // else we should show
-            this.markContextActive(context);
+
         }
         else // then we've not looked this window in this session
         {
             // decide whether this window will be debugged or not
             var url = (uri instanceof nsIURI) ? uri.spec : uri;
-            if (!this.shouldCreateContext(win, url, userCommands))
+            if (!this.shouldCreateContext(tabBrowser.selectedBrowser, url, userCommands))
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> tabWatcher will not create context ");
@@ -127,12 +127,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
             }
 
             context = this.createContext(win);
-
-            if (!this.shouldShowContext(context, true))  // need call this for side effects, I don't like this way.
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("-> TabWatcher created a context but was told not to show it");
-            }
        }
 
         // Dispatch watchWindow for the outer most DOM window
@@ -202,19 +196,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     // Listeners given force-in and veto on URIs/Window.
 
-    shouldCreateContext: function(win, url, userCommands)
+    shouldCreateContext: function(browser, url, userCommands)
     {
         // called when win has no context, answers the question: create one, true or false?
 
         // Create if any listener says true to showCreateContext
-        if ( dispatch2(this.fbListeners, "shouldCreateContext", [win, url, userCommands]) )
+        if ( dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]) )
             return true;
 
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
 
         // Do not Create if any Listener says true to shouldNotCreateContext
-        if ( dispatch(this.fbListeners, "shouldNotCreateContext", [win, url, userCommands]) )
+        if ( dispatch(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]) )
             return false;
 
         if (FBTrace.DBG_WINDOWS)
@@ -222,11 +216,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         // create if user said so and no one else has an opinion.
         return userCommands;
-    },
-
-    markContextActive: function(context)
-    {
-        dispatch(this.fbListeners, "markContextActive", [context]);
     },
 
     createContext: function(win)
@@ -244,8 +233,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
         contexts.push(context);
 
         context.uid = FBL.getUniqueId();
-
-        this.markContextActive(context);
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_INITIALIZE) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
