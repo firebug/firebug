@@ -921,7 +921,7 @@ top.Firebug =
         detachCommand.setAttribute("checked", !!browser.detached);
         this.showKeys(shouldShow);
 
-        dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);        
+        dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
 
         // Sync panel state after the showUI event is dispatched. syncPanel method calls 
         // Panel.show method, which expects the active context to be already registered.
@@ -1282,8 +1282,9 @@ top.Firebug =
         throw Components.results.NS_NOINTERFACE;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
     // nsIPrefObserver
+
     observe: function(subject, topic, data)
     {
         if (data.indexOf("extensions.") == -1)
@@ -1303,7 +1304,7 @@ top.Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
     // nsIFireBugClient  These are per XUL window callbacks
 
     enable: function()  // Called by firebug-service when the first context is created.
@@ -1315,7 +1316,6 @@ top.Firebug =
     {
         dispatch(modules, "disable");
     },
-
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
@@ -1339,15 +1339,18 @@ top.Firebug =
 
     eachActiveContext: function(fnOfContext)
     {
-    	for (var i = 0; i < activeContexts.length; i++)
-    		fnOfContext(activeContexts[i]);
+        for (var i = 0; i < activeContexts.length; i++)
+            fnOfContext(activeContexts[i]);
     },
-    
+
     isContextActive: function(context)
     {
-    	return (context && context.browser.detached || context.browser.showFirebug);
+        if (!context)
+            return false;
+
+        return (context.browser.detached || context.browser.showFirebug);
     },
-    
+
     updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
     {
         var isActiveContext = this.isContextActive(context);
@@ -2045,7 +2048,8 @@ Firebug.AblePanel = extend(Firebug.Panel,
             tab.removeAttribute('aria-disabled');
         }
 
-        // The panel was just enabled so, hide the disable message.
+        // The panel was just enabled so, hide the disable message. Notice that
+        // displaying this page replaces content of the panel.
         module.disabledPanelPage.hide(this);
     },
 
@@ -2060,8 +2064,8 @@ Firebug.AblePanel = extend(Firebug.Panel,
             tab.setAttribute('aria-disabled', 'true');
         }
 
-        // xxxHonza: Don't clear content of the panel here. If Firebug UI is 
-        // clearNode(this.panelNode);
+        // The panel was disabled so, show the disabled page.
+        module.disabledPanelPage.show(this);
     },
 
     getTab: function()
@@ -2076,40 +2080,42 @@ Firebug.AblePanel = extend(Firebug.Panel,
 });
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 Firebug.MeasureBox =
 {
-        startMeasuring: function(target)
+    startMeasuring: function(target)
+    {
+        if (!this.measureBox)
         {
-            if (!this.measureBox)
-            {
-                this.measureBox = target.ownerDocument.createElement("span");
-                this.measureBox.className = "measureBox";
-            }
-
-            copyTextStyles(target, this.measureBox);
-            target.ownerDocument.body.appendChild(this.measureBox);
-        },
-
-        measureText: function(value)
-        {
-            this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
-            return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
-        },
-
-        getBox: function(target)
-        {
-            var style = this.measureBox.ownerDocument.defaultView.getComputedStyle(this.measureBox, "");
-            var box = getBoxFromStyles(style, this.measureBox);
-            return box;
-        },
-
-        stopMeasuring: function()
-        {
-            this.measureBox.parentNode.removeChild(this.measureBox);
+            this.measureBox = target.ownerDocument.createElement("span");
+            this.measureBox.className = "measureBox";
         }
+
+        copyTextStyles(target, this.measureBox);
+        target.ownerDocument.body.appendChild(this.measureBox);
+    },
+
+    measureText: function(value)
+    {
+        this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
+        return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
+    },
+
+    getBox: function(target)
+    {
+        var style = this.measureBox.ownerDocument.defaultView.getComputedStyle(this.measureBox, "");
+        var box = getBoxFromStyles(style, this.measureBox);
+        return box;
+    },
+
+    stopMeasuring: function()
+    {
+        this.measureBox.parentNode.removeChild(this.measureBox);
+    }
 };
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
 Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can be extended.
 
 Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.AblePanel),
@@ -2707,6 +2713,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     panelEnable: function(context, becameActive) // panel Disabled -> Enabled
     {
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
+                " isEnabled:"+this.isAlwaysEnabled()+"\n");
+
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.enablePanel(this);
@@ -2720,26 +2730,16 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelDisable: function(context)  // panel Enabled -> Disabled
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("panelDisable "+this.getPrefDomain()+" isEnabled:"+this.isAlwaysEnabled()+"\n");
-
-        this.enabled = false;
-
-        dispatch(modules, "onPanelDisable", [context, this.panelName]);
+            FBTrace.sysout("firebug..ActivableModulepanelDisable "+this.getPrefDomain()+
+                " isEnabled:"+this.isAlwaysEnabled()+"\n");
 
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.disablePanel(this);
 
-        var chrome = context ? context.chrome : FirebugChrome;
-        var panelBar1 = chrome.$("fbPanelBar1");
+        this.enabled = false;
 
-        // Refresh the panel only if it's currently selected and only if Firebug UI is up.
-        if (panel && panelBar1.selectedPanel == panel && !contentBox.collapsed)
-        {
-            var state = Firebug.getPanelState(panel);
-            panel.show(state);
-        }
-
+        dispatch(modules, "onPanelDisable", [context, this.panelName]);
         Firebug.resetTooltip();
     },
 
@@ -2965,20 +2965,21 @@ Firebug.ModuleManagerPage.prototype = domplate(Firebug.Rep,
 
     show: function(panel)
     {
-    	FBTrace.sysout("disabledPanelPage.show box ", this.box);
-    	if (!this.box)
-    		this.render(panel);
-    	FirebugChrome.clearPanels();
-    	this.panelNode.setAttribute("collapsed", "false");
-    	this.panelNode.setAttribute('active', "true");
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("disabledPanelPage.show box ", this.box);
+        if (!this.box)
+            this.render(panel);
+        FirebugChrome.clearPanels();
+        this.panelNode.setAttribute("collapsed", "false");
+        this.panelNode.setAttribute('active', "true");
     },
 
     hide: function(panel)
     {
         if (this.box)
         {
-        	this.panelNode.setAttribute("collapsed", "true");
-        	this.panelNode.removeAttribute('active');             
+            this.panelNode.setAttribute("collapsed", "true");
+            this.panelNode.removeAttribute('active');             
         }
         FirebugChrome.selectPanel(panel.name, true);  // forceUpdate I guess since we were disabled
     },
@@ -2997,7 +2998,7 @@ Firebug.ModuleManagerPage.prototype = domplate(Firebug.Rep,
 
         setClass(this.panelNode, "panelNode panelNode-disable-"+this.module.dispatchName);
         panel.document.body.appendChild(this.panelNode);
-        
+
         // Render panel HTML
         this.box = this.tag.replace(args, this.panelNode, this);
         this.panelNode.scrollTop = 0;
@@ -3005,9 +3006,9 @@ Firebug.ModuleManagerPage.prototype = domplate(Firebug.Rep,
         this.applyButton = getElementByClass(this.panelNode, "moduleManagerApplyButton");
         var hostURI = FirebugContext.getWindowLocation().toString();
         if (hostURI)
-        	this.applyButton.innerHTML = $STRF("moduleManager.apply", [hostURI]);
+            this.applyButton.innerHTML = $STRF("moduleManager.apply", [hostURI]);
         else
-        	this.applyButton.innerHTML = "Is this still needed?"; // I think this button will be removed soon
+            this.applyButton.innerHTML = "Is this still needed?"; // I think this button will be removed soon
 
         var desc2 = getElementByClass(this.panelNode, "moduleManagerDescription", "applyDesc");
         desc2.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);

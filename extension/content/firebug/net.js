@@ -315,7 +315,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.activate(null);
 
         unmonitorContext(context);
-        
+
         $('fbStatusIcon').removeAttribute("net");
     },
 
