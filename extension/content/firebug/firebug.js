@@ -3128,11 +3128,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         // Update activable tab menu.
         if (tab)
-        tab.initTabMenu(this);
+            tab.initTabMenu(this);
 
         // Update tab label.
-        var enabled = this.isAlwaysEnabled();
-        tab.setAttribute('aria-disabled', enabled ? "false" : "true");
+        if (context && tab)
+        {
+            var enabled = this.isAlwaysEnabled();
+            tab.setAttribute('aria-disabled', enabled ? "false" : "true");
+        }
     }
 });
 
