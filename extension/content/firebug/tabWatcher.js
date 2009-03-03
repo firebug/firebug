@@ -106,11 +106,13 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session
         {
-        	if (!this.shouldShowContext(context))
-        	{	
-        		this.watchContext(win, null);
-        		return;  // did not create a context
-        	}
+            if (!this.shouldShowContext(context))
+            {
+                this.watchContext(win, null);
+                return;  // did not create a context
+            }
+            // else we should show
+            this.markContextActive(context);
         }
         else // then we've not looked this window in this session
         {
@@ -125,6 +127,12 @@ top.TabWatcher = extend(new Firebug.Listener(),
             }
 
             context = this.createContext(win);
+
+            if (!this.shouldShowContext(context, true))  // need call this for side effects, I don't like this way.
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("-> TabWatcher created a context but was told not to show it");
+            }
        }
 
         // Dispatch watchWindow for the outer most DOM window
@@ -186,12 +194,12 @@ top.TabWatcher = extend(new Firebug.Listener(),
     // Listeners decide to show or not
     shouldShowContext: function(context)
     {
-    	if ( dispatch2(this.fbListeners, "shouldShowContext", [context]))
-    		return true;
-    	else
-    		return false;
+        if ( dispatch2(this.fbListeners, "shouldShowContext", [context]))
+            return true;
+        else
+            return false;
     },
-    
+
     // Listeners given force-in and veto on URIs/Window.
 
     shouldCreateContext: function(win, url, userCommands)
@@ -216,6 +224,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
         return userCommands;
     },
 
+    markContextActive: function(context)
+    {
+        dispatch(this.fbListeners, "markContextActive", [context]);
+    },
+
     createContext: function(win)
     {
         var browser = this.getBrowserByWindow(win);  // sets browser.chrome to FirebugChrome
@@ -231,6 +244,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
         contexts.push(context);
 
         context.uid = FBL.getUniqueId();
+
+        this.markContextActive(context);
+
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_INITIALIZE) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
                 ", "+context.getName()+" browser "+browser.currentURI+"\n");
@@ -369,7 +385,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
     /*
      * User closes Firebug
      */
-    
+
     unwatchBrowser: function(browser)
     {
         this.unwatchTopWindow(browser.contentWindow);

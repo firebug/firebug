@@ -262,7 +262,7 @@ top.Firebug =
         dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         dispatch(modules, "initializeUI", [detachArgs]);
-        
+
         this.suspend(); // oh, what a let down, all ready but now we suspend until we have an activeContext
     },
 
@@ -353,7 +353,7 @@ top.Firebug =
         Firebug.eachActiveContext(
             function suspendContext(context)
             {
-            	dispatch(activableModules, 'onSuspendFirebug', [context]);
+                dispatch(activableModules, 'onSuspendFirebug', [context]);
             }
         );
 
@@ -371,7 +371,7 @@ top.Firebug =
         Firebug.eachActiveContext(
                 function resumeContext(context)
                 {
-                	dispatch(activableModules, 'onResumeFirebug', [context]);
+                    dispatch(activableModules, 'onResumeFirebug', [context]);
                 }
             );
 
@@ -412,11 +412,11 @@ top.Firebug =
                         tooltip += "\n"+decodeURI(urls[i]);
                     } catch (e) {
                         // xxxHonza: from some reason FBTrace is undefined here.
-                    	// xxxJJB I put it back so we can see if this is a case of window.closed
-                    	if (!window.closed)
-                    		FBTrace.sysout("Firebug.resetTooltip EXCEPTION " + e + "\n");
-                    	else
-                    		throw new Error("Firebug Exception in a closed window!");
+                        // xxxJJB I put it back so we can see if this is a case of window.closed
+                        if (!window.closed)
+                            FBTrace.sysout("Firebug.resetTooltip EXCEPTION " + e + "\n");
+                        else
+                            throw new Error("Firebug Exception in a closed window!");
                     }
                 }
             }
@@ -923,7 +923,7 @@ top.Firebug =
 
         dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
 
-        // Sync panel state after the showUI event is dispatched. syncPanel method calls 
+        // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
         if (show)
             browser.chrome.syncPanel();
@@ -970,23 +970,23 @@ top.Firebug =
                 delete browser.showFirebug;
                 var context = TabWatcher.getContextByWindow(browser.contentWindow);
                 if (context)
-                	Firebug.updateActiveContexts(context); // now the top tab is inactive
+                    Firebug.updateActiveContexts(context); // now the top tab is inactive
             }
             else
             {
-            	browser.showFirebug = true;
-                
+                browser.showFirebug = true;
+
                 var context = TabWatcher.getContextByWindow(browser.contentWindow);
                 if (!context) // then a page without a context
                 {
-                	var created = TabWatcher.watchBrowser(browser);  // create a context for this page
+                    var created = TabWatcher.watchBrowser(browser);  // create a context for this page
                     if (!created)
                         throw new Error("Rejected page should explain to user");
                     else
                         return;  // context creation will trigger showBar
                 }
                 else
-                	Firebug.updateActiveContexts(context); // now the top tab is active
+                    Firebug.updateActiveContexts(context); // now the top tab is active
             }
 
             this.showBar(!toggleOff);
@@ -1196,8 +1196,8 @@ top.Firebug =
             {
                 if (rep.supportsObject(object, type))
                 {
-                	if (FBTrace.DBG_DOM)
-                		FBTrace.sysout("getRep type: "+type+" object: "+object, rep);
+                    if (FBTrace.DBG_DOM)
+                        FBTrace.sysout("getRep type: "+type+" object: "+object, rep);
                     return rep;
                 }
             }
@@ -1282,7 +1282,7 @@ top.Firebug =
         throw Components.results.NS_NOINTERFACE;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIPrefObserver
 
     observe: function(subject, topic, data)
@@ -1304,7 +1304,7 @@ top.Firebug =
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugClient  These are per XUL window callbacks
 
     enable: function()  // Called by firebug-service when the first context is created.
@@ -1356,7 +1356,7 @@ top.Firebug =
         var isActiveContext = this.isContextActive(context);
         var indexOfActiveContext = activeContexts.indexOf(context);
         if (FBTrace.DBG_WINDOWS)
-        	FBTrace.sysout("updateActiveContexts isActiveContext: "+isActiveContext+" index:"+indexOfActiveContext+" "+context.getName());
+            FBTrace.sysout("updateActiveContexts isActiveContext: "+isActiveContext+" index:"+indexOfActiveContext+" "+context.getName());
         if (indexOfActiveContext == -1) // then this context was not marked active
         {
             if (isActiveContext) // but now it is
@@ -1400,7 +1400,7 @@ top.Firebug =
             this.updateActiveContexts(context);  // a revisited page with a context is activeContext
 
         Firebug.setFirebugContext(context);  // may set the FirebugContext to null
-        
+
         // signal that this browser is one that shows the firebug
         browser.showFirebug = !!context;
 
@@ -2983,7 +2983,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
         if (this.box)
         {
             this.panelNode.setAttribute("collapsed", "true");
-            this.panelNode.removeAttribute('active');             
+            this.panelNode.removeAttribute('active');
         }
         FirebugChrome.selectPanel(panel.name, true);  // forceUpdate I guess since we were disabled
     },
@@ -3101,32 +3101,27 @@ Firebug.URLSelector =
 
     shouldShowContext: function(context)
     {
+        return shouldCreateContext(context.window, context.getWindowLocation().toString());
+    },
+
+    markContextActive: function(context)
+    {
         try
         {
             var url = context.getWindowLocation().toString();
             var uri = makeURI(url);
-            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+            var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
+            if (annotation.indexOf("detached") > 0)
+                FBTrace.sysout('initContext should detach');
+            else
+                context.browser.showFirebug = true;  // side effect
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("shouldShowContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
-
-            var annotation = null;
-            if (hasAnnotation)
-            {
-                annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
-                if (annotation.indexOf("detached") > 0)
-                    FBTrace.sysout('initContext should detach');
-                else
-                    context.browser.showFirebug = true;
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("initContext read back annotation "+annotation);
-                return true;
-            }
-            return false;
+                FBTrace.sysout("markContextActive read back annotation "+annotation);
         }
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("initContext FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
+                FBTrace.sysout("markContextActive FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
         }
     },
 
