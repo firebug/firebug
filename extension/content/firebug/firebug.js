@@ -1378,11 +1378,11 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
-    setFirebugContext: function(context)
+    setFirebugContext: function(context)  // this is the only place we should set FirebugContext
     {
         FirebugContext = context;
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("FirebugContext set "+FirebugContext.getName());
+            FBTrace.sysout("FirebugContext set "+(FirebugContext?FirebugContext.getName():FirebugContext));
     },
 
     showContext: function(browser, context)  // TabWatcher showContext. null context means we don't debug that browser
@@ -1397,11 +1397,10 @@ top.Firebug =
             this.rescueWindow(browser);
 
         if (context)  // then we are debugging this context
-        {
             this.updateActiveContexts(context);  // a revisited page with a context is activeContext
-            Firebug.setFirebugContext(context);
-        }
 
+        Firebug.setFirebugContext(context);  // may set the FirebugContext to null
+        
         // signal that this browser is one that shows the firebug
         browser.showFirebug = !!context;
 
@@ -3102,7 +3101,7 @@ Firebug.URLSelector =
             var uri = makeURI(url);
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+                FBTrace.sysout("shouldShowContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
 
             var annotation = null;
             if (hasAnnotation)
