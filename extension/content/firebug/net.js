@@ -714,6 +714,15 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         Firebug.ActivablePanel.destroy.apply(this, arguments);
     },
 
+    disablePanel: function(module)
+    {
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+
+        // The panel was disabled and the content is removed so, don't forget
+        // to reset the basice request table.
+        this.table = null;
+    },
+
     show: function(state)
     {
         this.showToolbarButtons("fbNetButtons", true);
