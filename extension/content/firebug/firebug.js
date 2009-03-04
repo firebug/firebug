@@ -2066,6 +2066,11 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         // The panel was just enabled so, hide the disable message. Notice that
         // displaying this page replaces content of the panel.
         module.disabledPanelPage.hide(this);
+
+        // xxxHonza: not sure if this should be here.
+        // The panel has been enabled so, show the content.
+        var state = Firebug.getPanelState(this);
+        this.show(state);
     },
 
     disablePanel: function(module)
@@ -2081,6 +2086,11 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         // The panel was disabled so, show the disabled page.
         module.disabledPanelPage.show(this);
+
+        // xxxHonza: Clean panel content. This was here before the activation refactoring anyway.
+        // XXXjjb: I think that this should be done by the disabledPanelPage that should replace 
+        // the panel content (using the same panelNode) not create a new node.
+        clearNode(this.panelNode);
     },
 
     getTab: function()
