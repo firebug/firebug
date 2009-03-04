@@ -2860,7 +2860,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
                 {
                     if (FBTrace.DBG_PANELS)
                         FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
-                    dispatch(modules, "onEnablePrefChange", [null, prefDomain, data]);
+                    dispatch(modules, "onEnablePrefChange", [prefDomain, data]);
                 }
             }
         }
@@ -2871,10 +2871,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
     },
 
-    onEnablePrefChange: function(host, prefDomain, data)
+    onEnablePrefChange: function(prefDomain, data)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.onEnablePrefChange for this.getPrefDomain:"+this.getPrefDomain()+" host:"+host+" prefDomain: "+prefDomain+" data:"+ data+"\n");
+            FBTrace.sysout("firebug.onEnablePrefChange for this.getPrefDomain:"+this.getPrefDomain()+" prefDomain: "+prefDomain+" data:"+ data+"\n");
 
         if (prefDomain == this.getPrefDomain())
         {
