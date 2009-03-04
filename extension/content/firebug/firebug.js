@@ -1364,9 +1364,14 @@ top.Firebug =
             FBTrace.sysout("updateActiveContexts isActiveContext: "+isActiveContext+" index:"+indexOfActiveContext+" "+context.getName());
         if (indexOfActiveContext == -1) // then this context was not marked active
         {
-            if (isActiveContext) // but now it is
+            if (isActiveContext) // but now it is.
             {
-                activeContexts.push(context);
+                activeContexts.push(context); 
+                if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
+                {
+                	this.hadFirstContext = true;
+                	Firebug.ModuleManager.enableModules(context);
+                }
                 if (Firebug.getSuspended())
                     Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
             }
