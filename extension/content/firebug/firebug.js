@@ -3042,7 +3042,6 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
         var desc2 = getElementByClass(this.panelNode, "moduleManagerDescription", "applyDesc");
         desc2.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
-        FBTrace.sysout("disabledPanelPage render into ",this.panelNode);
     }
 });
 
