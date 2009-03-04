@@ -2244,12 +2244,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // The "enable/disable" button is always visible.
         this.showToolbarButtons("fbScriptButtons", true);
 
-        // static scripts can be shown
-        this.showToolbarButtons("fbLocationList", true);
 
         // These buttons are visible only if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", enabled);
         this.showToolbarButtons("fbDebuggerButtons", enabled);
+        this.showToolbarButtons("fbLocationList", enabled);
 
         this.obeyPreferences();
 
@@ -2258,26 +2257,19 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelSplitter.collapsed = !enabled;
         this.sidePanelDeck.collapsed = !enabled;
 
-        if ( (this.context.loaded && !this.location) || this.retryRestoreLocation)
-        {
-            restoreLocation(this, state);
-
-            if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
-        }
-
-        var enabled = Firebug.Debugger.isAlwaysEnabled();
         if (enabled)
         {
-            //Firebug.Debugger.disabledPanelPage.hide(this); // the navigate in restoreObject remains in effect
+            if ( (this.context.loaded && !this.location) || this.retryRestoreLocation)
+            {
+                restoreLocation(this, state);
+
+                if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+                    this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
+            }
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
                 breakpointPanel.refresh();
-        }
-        else  // Not enabled but showing source in HTML pages.
-        {
-            //Firebug.Debugger.disabledPanelPage.show(this);
         }
     },
 
