@@ -1366,11 +1366,11 @@ top.Firebug =
         {
             if (isActiveContext) // but now it is.
             {
-                activeContexts.push(context); 
+                activeContexts.push(context);
                 if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
                 {
-                	this.hadFirstContext = true;
-                	Firebug.ModuleManager.enableModules(context);
+                    this.hadFirstContext = true;
+                    Firebug.ModuleManager.obeyPrefs();
                 }
                 if (Firebug.getSuspended())
                     Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
@@ -2058,10 +2058,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         persistedPanelState.enabled = true;
 
         var tab = this.getTab();
-        if (tab) {
-            //tab.removeAttribute("disabled");
+        if (tab)
             tab.removeAttribute('aria-disabled');
-        }
 
         // The panel was just enabled so, hide the disable message. Notice that
         // displaying this page replaces content of the panel.
@@ -2079,12 +2077,10 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         persistedPanelState.enabled = false;
 
         var tab = this.getTab();
-        if (tab) {
-            //tab.setAttribute("disabled", "true");
+        if (tab)
             tab.setAttribute('aria-disabled', 'true');
-        }
 
-        // The panel was disabled so, show the disabled page. This page also replaces the 
+        // The panel was disabled so, show the disabled page. This page also replaces the
         // old content so, the panel is fresh empty after it's enabled again.
         module.disabledPanelPage.show(this);
     },
@@ -3026,7 +3022,7 @@ Firebug.ModuleManager =
         for (var i=0; i<activableModules.length; i++)
         {
             var module = activableModules[i];
-            this.disableModule(context, module);
+            this.disableModule(module);
             module.updateTab(context);
         }
     },
@@ -3037,14 +3033,14 @@ Firebug.ModuleManager =
         for (var i=0; i<activableModules.length; i++)
         {
             var module = activableModules[i];
-            needReload = this.enableModule(context, module) || needReload;
+            needReload = this.enableModule(module) || needReload;
             module.updateTab(context);
         }
 
         return false; // needReload;  // 1.4a13
     },
 
-    disableModule: function(context, module)
+    disableModule: function(module)
     {
         if (module.isAlwaysEnabled())
         {
@@ -3054,7 +3050,7 @@ Firebug.ModuleManager =
         return false;
     },
 
-    enableModule: function(context, module)
+    enableModule: function(module)
     {
         if (!module.isAlwaysEnabled())
         {
@@ -3062,6 +3058,19 @@ Firebug.ModuleManager =
             return true;
         }
         return false;
+    },
+
+    obeyPrefs: function()
+    {
+        for (var i=0; i<activableModules.length; i++)
+        {
+            var module = activableModules[i];
+            if (module.isAlwaysEnabled())
+                this.enableModule(module);
+            else
+                this.disableModule(module);
+            module.updateTab(context);
+        }
     },
 }
 
