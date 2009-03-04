@@ -1,6 +1,6 @@
 <!ENTITY editors.Description "Editores Configurados no Firebug:">
 <!ENTITY editors.NameColumn "Editor">
-<!ENTITY editors.ExecutableColumn "Executável">
+<!ENTITY editors.ExecutableColumn "ExecutÃ¡vel">
 <!ENTITY editors.ParamsColumn "Exibir argumentos">
 <!ENTITY add.label "Adicionar">
 <!ENTITY remove.label "Remover">
@@ -8,5 +8,5 @@
 <!ENTITY close.label "Fechar">
 <!ENTITY browse.label "Procurar...">
 <!ENTITY changeEditor.Name "Nome:">
-<!ENTITY changeEditor.Executable "Executável:">
+<!ENTITY changeEditor.Executable "ExecutÃ¡vel:">
 <!ENTITY changeEditor.CmdLine "Argumentos:">
