@@ -282,21 +282,19 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!m)
             return props;
 
-        var propRE = /\s*([^:\s]*?)\s*:\s*(.*?)\s*(! important)?$/;
+			var lines = m[1].match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
+			var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(! important)?;?$/;
+			var line,i=0;
+			while(line=lines[i++]){
+				m = propRE.exec(line);
+				if(!m)
+					continue;
+				//var name = m[1], value = m[2], important = !!m[3];
+				if (m[2])
+					this.addProperty(m[1], m[2], !!m[3], false, inheritMode, props);
+			};
 
-        var lines = m[1].split(";");
-        for (var i = 0; i < lines.length-1; ++i)
-        {
-            var m = propRE.exec(lines[i]);
-            if (!m)
-                continue;
-
-            var name = m[1], value = m[2], important = !!m[3];
-            if (value)
-                this.addProperty(name, value, important, false, inheritMode, props);
-        }
-
-        var line = domUtils.getRuleLine(rule);
+        line = domUtils.getRuleLine(rule);
         var ruleId = rule.selectorText+"/"+line;
         this.addOldProperties(context, ruleId, inheritMode, props);
         sortProperties(props);
@@ -737,7 +735,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     var style = Firebug.getRepObject(target);
                     var baseURL = this.getStylesheetURL(style);
                     var relURL = parseURLValue(cssValue.value);
-                    var absURL = absoluteURL(relURL, baseURL);
+					var absURL = isDataURL(relURL) ? relURL:absoluteURL(relURL, baseURL);
                     var repeat = parseRepeatValue(text);
 
                     this.infoTipType = "image";
