@@ -2143,6 +2143,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         Firebug.Panel.initialize.apply(this, arguments);
         this.onResize =  bind(this.onResize, this);
         contentBox.addEventListener("resize", this.onResize, true);
+        this.initializeSourceBoxes();
     },
 
     destroy: function(state)
@@ -2174,6 +2175,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     },
 
     // **************************************
+    disablePanel: function(module)
+    {
+        this.initializeSourceBoxes();  // clear so we start fresh if enabled
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+    },
 
     initializeSourceBoxes: function()
     {

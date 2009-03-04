@@ -282,17 +282,17 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (!m)
             return props;
 
-			var lines = m[1].match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
-			var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(! important)?;?$/;
-			var line,i=0;
-			while(line=lines[i++]){
-				m = propRE.exec(line);
-				if(!m)
-					continue;
-				//var name = m[1], value = m[2], important = !!m[3];
-				if (m[2])
-					this.addProperty(m[1], m[2], !!m[3], false, inheritMode, props);
-			};
+            var lines = m[1].match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
+            var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(! important)?;?$/;
+            var line,i=0;
+            while(line=lines[i++]){
+                m = propRE.exec(line);
+                if(!m)
+                    continue;
+                //var name = m[1], value = m[2], important = !!m[3];
+                if (m[2])
+                    this.addProperty(m[1], m[2], !!m[3], false, inheritMode, props);
+            };
 
         line = domUtils.getRuleLine(rule);
         var ruleId = rule.selectorText+"/"+line;
@@ -512,9 +512,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.onMouseDown = bind(this.onMouseDown, this);
         this.onClick = bind(this.onClick, this);
 
-        Firebug.Panel.initialize.apply(this, arguments);
-        this.initializeSourceBoxes();
-
+        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
@@ -573,9 +571,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(styleSheet)
     {
-    	if (!styleSheet)
-    		return;
-    	
+        if (!styleSheet)
+            return;
+
         if (styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 
@@ -735,7 +733,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     var style = Firebug.getRepObject(target);
                     var baseURL = this.getStylesheetURL(style);
                     var relURL = parseURLValue(cssValue.value);
-					var absURL = isDataURL(relURL) ? relURL:absoluteURL(relURL, baseURL);
+                    var absURL = isDataURL(relURL) ? relURL:absoluteURL(relURL, baseURL);
                     var repeat = parseRepeatValue(text);
 
                     this.infoTipType = "image";
@@ -786,7 +784,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         return curDoc;
     },
-    
+
     searchOtherDocs: function(text, reverse)
     {
         var scanRE = new RegExp(text, Firebug.searchCaseSensitive ? "g" : "gi");
@@ -802,13 +800,13 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
             }
         }
-        
+
         if (this.navigateToNextDocument(scanDoc, reverse))
         {
             return this.searchCurrentDoc(true, text, reverse);
         }
     },
-    
+
     searchCurrentDoc: function(wrapSearch, text, reverse)
     {
         if (!text)
@@ -971,7 +969,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     getStylesheetURL: function(style)
     {
-    	// if the parentStyleSheet.href is null, CSS std says its inline style
+        // if the parentStyleSheet.href is null, CSS std says its inline style
         if (style && style.parentRule && style.parentRule.parentStyleSheet.href)
             return style.parentRule.parentStyleSheet.href;
         else
@@ -1010,8 +1008,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var href = rule.parentStyleSheet.href;  // Null means inline
-                
-                if (href && !Firebug.showUserAgentCSS && isSystemURL(href)) // This removes user agent rules 
+
+                if (href && !Firebug.showUserAgentCSS && isSystemURL(href)) // This removes user agent rules
                     continue;
                 if (!href)
                     href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
@@ -1032,9 +1030,9 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
 
         this.getStyleProperties(element, rules, usedProps, inheritMode);
-        
+
         if (FBTrace.DBG_CSS)
-        	FBTrace.sysout("getElementRules "+rules.length+" rules for "+getElementXPath(element), rules);
+            FBTrace.sysout("getElementRules "+rules.length+" rules for "+getElementXPath(element), rules);
     },
 
     markOverridenProps: function(props, usedProps, inheritMode)
@@ -1142,7 +1140,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             {label: "ShowComputedStyle", type: "checkbox", checked: Firebug.showComputedStyle,
                 command: bindFixed(Firebug.togglePref, Firebug, "showComputedStyle") },
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
-                    command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }    
+                    command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }
         ];
     }
 });

@@ -1558,8 +1558,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
-
-        // 1.3.1 move fbs.registerDebugger(this);  // this will eventually set 'jsd' on the statusIcon
     },
 
     initContext: function(context, persistedState)
@@ -1660,8 +1658,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!this.registered)
             return;
 
-        //if (Firebug.Debugger.activeContexts.length > 0 || Firebug.Console.activeContexts.length > 0)
-        //    return;  // don't turn off JSD unless both console and script panels are done.
         var check = fbs.unregisterDebugger(this);
 
 
@@ -1696,6 +1692,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_INITIALIZE)
                 FBTrace.sysout("Debugger.onPanelEnable restored "+(restored?panel.location:"nothing"));
         }
+        var active = this.setIsJSDActive();  // update ui
     },
 
     onPanelDisable: function(context, panelName)
@@ -1710,9 +1707,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
             return;
         }
+        else  // no dependents, disable
+        {
+            this.unregisterDebugger();
+        }
 
         if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName+" for "+context.getName()+"\n");
-
+        var active = this.setIsJSDActive();  // update ui
         this.clearAllBreakpoints(context);
     },
 
@@ -2211,8 +2212,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 
-        this.initializeSourceBoxes();
-
         this.panelNode.addEventListener("mousedown", this.onMouseDown, true);
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
@@ -2258,7 +2257,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
-            if ( (this.context.loaded && !this.location) || this.retryRestoreLocation)
+            if (this.context.loaded && !this.location)
             {
                 restoreLocation(this, state);
 
@@ -2352,8 +2351,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var self = this;
 
-        function scanDoc(script) {
-            var lines = script.loadScriptLines(self.context);
+        function scanDoc(sourceFile) {
+            var lines = sourceFile.loadScriptLines(self.context);
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
             for (var i = 0; i < lines.length; i++) {
@@ -2424,9 +2423,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(sourceFile)
     {
-        if (!Firebug.Debugger.isAlwaysEnabled())
-            Firebug.Debugger.disabledPanelPage.hide(this);
-
         if (!sourceFile)
             return;  // XXXjjb do we need to show a blank?
 
