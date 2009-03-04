@@ -2244,7 +2244,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         // The "enable/disable" button is always visible.
         this.showToolbarButtons("fbScriptButtons", true);
 
-
         // These buttons are visible only if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", enabled);
         this.showToolbarButtons("fbDebuggerButtons", enabled);
@@ -2271,6 +2270,25 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (breakpointPanel)
                 breakpointPanel.refresh();
         }
+
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            Firebug.Debugger.disabledPanelPage.show(this);
+    },
+
+    enablePanel: function(module)
+    {
+        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
+
+        this.panelSplitter.collapsed = false;
+        this.sidePanelDeck.collapsed = false;
+    },
+
+    disablePanel: function(module)
+    {
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+
+        this.panelSplitter.collapsed = true;
+        this.sidePanelDeck.collapsed = true;
     },
 
     obeyPreferences: function()

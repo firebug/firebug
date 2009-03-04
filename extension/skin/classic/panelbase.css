@@ -273,7 +273,7 @@ h1.groupHeader {
 
 /************************************************************************************************/
 
-.moduleManagerBox {
+.disabledPanelBox {
     width: 100%;
     position: relative;
     padding: 10px 10px 0px 90px;
@@ -282,46 +282,31 @@ h1.groupHeader {
     font: message-box;
 }
 
-.moduleManagerLink:hover {
+.disabledPanelLink:hover {
     text-decoration: underline;
     cursor: pointer;
 }
 
-.moduleManagerDescription {
+.disabledPanelDescription {
     margin: 8px 0;
     font-size: 13px;
     width: 75%;
 }
 
-.moduleManagerDescription.applyDesc{
+.disabledPanelDescription.applyDesc{
     font-size: 11px;
     color: gray;
 }
 
-.moduleManagerRow {
-    margin: 5px 0;
-    font-size: 13px;
-}
-
-.moduleManagerRow td {
-    vertical-align:middle;
-}
-
-.moduleManagerBox table {
-    border: solid 1px Gray;
-}
-
-.moduleManagerRow span {
-    margin: 1em;
-}
-
-.moduleManagerRow button {
-    margin-left: 4em;
-    margin-right: 1em;
-}
-
-.moduleManagerApplyButton .host {
+.disabledPanelApplyButton .host {
     color: blue;
+}
+
+.disabledPanelDescription img {
+    margin-top: 5px; 
+    margin-left: 0; 
+    margin-bottom: 5px; 
+    vertical-align: middle;
 }
 
 /************************************************************************************************/

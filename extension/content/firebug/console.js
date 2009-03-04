@@ -438,7 +438,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     initialize: function()
     {
-        Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.ActivablePanel.initialize.apply(this, arguments);
 
         // Initialize log limit and listen for changes.
         this.updateMaxLimit();
@@ -452,31 +452,32 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
-        // The "enable/disable" button is always visible.
-        this.showToolbarButtons("fbConsoleButtons", true); // TODO, only enable/disable menu here
-                                                   /*@explore*/
-        // The default page with description and enable button is
-        // visible only if debugger is disabled.
-        var enabled = Firebug.Console.isAlwaysEnabled();
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show enabled:"+ enabled+"\n");
-        if (enabled)
-        {
-            //Firebug.Console.disabledPanelPage.hide(this);
+        if (!Firebug.Console.isAlwaysEnabled())
+            Firebug.Console.disabledPanelPage.show(this);
 
-            FirebugContext.chrome.$("fbCommandBox").collapsed = false;
-            if (Firebug.largeCommandLine)
-                Firebug.CommandLine.setMultiLine(true);
+        this.showToolbarButtons("fbConsoleButtons", true);
+    },
 
-            if (this.wasScrolledToBottom)
-                scrollToBottom(this.panelNode);
-        }
-        else
-        {
-            Firebug.CommandLine.setMultiLine(false);
-            FirebugContext.chrome.$("fbCommandBox").collapsed = true;
+    enablePanel: function(module)
+    {
+        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
 
-            //Firebug.Console.disabledPanelPage.show(this);
-        }
+        FirebugContext.chrome.$("fbCommandBox").collapsed = false;
+        if (Firebug.largeCommandLine)
+            Firebug.CommandLine.setMultiLine(true);
+
+        if (this.wasScrolledToBottom)
+            scrollToBottom(this.panelNode);
+    },
+
+    disablePanel: function(module)
+    {
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+
+        // Make sure that entire content of the Console panel is hidden when 
+        // the panel is disabled.
+        Firebug.CommandLine.setMultiLine(false);
+        FirebugContext.chrome.$("fbCommandBox").collapsed = true;
     },
 
     hide: function()

@@ -750,7 +750,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (Firebug.NetMonitor.isAlwaysEnabled())
             return true;
 
-        //Firebug.NetMonitor.disabledPanelPage.show(this);
+        Firebug.NetMonitor.disabledPanelPage.show(this);
 
         return false;
     },

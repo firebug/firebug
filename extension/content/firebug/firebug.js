@@ -2084,13 +2084,9 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
             tab.setAttribute('aria-disabled', 'true');
         }
 
-        // The panel was disabled so, show the disabled page.
+        // The panel was disabled so, show the disabled page. This page also replaces the 
+        // old content so, the panel is fresh empty after it's enabled again.
         module.disabledPanelPage.show(this);
-
-        // xxxHonza: Clean panel content. This was here before the activation refactoring anyway.
-        // XXXjjb: I think that this should be done by the disabledPanelPage that should replace 
-        // the panel content (using the same panelNode) not create a new node.
-        clearNode(this.panelNode);
     },
 
     getTab: function()
@@ -2953,27 +2949,23 @@ Firebug.DisabledPanelPage = function(module)
 Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 {
     tag:
-        DIV({class: "moduleManagerBox"},
-            H1({class: "moduleManagerHead"},
+        DIV({class: "disabledPanelBox"},
+            H1({class: "disabledPanelHead"},
                 SPAN("$pageTitle")
             ),
-            P({class: "moduleManagerDescription"},
+            P({class: "disabledPanelDescription"},
                 $STR("moduleManager.desc1")
             ),
-            P({class: "moduleManagerDescription", align: "center"},
-                BUTTON({class: "moduleManagerApplyButton", onclick: "$onEnable"})
+            P({class: "disabledPanelDescription", align: "center"},
+                BUTTON({class: "disabledPanelApplyButton", onclick: "$onEnable"})
             ),
-            P({class: "moduleManagerDescription applyDesc", style:"font-size:11px", align: "center"}),
-            //xxxHonza: there is no help page available yet.
-            /*P({class: "moduleManagerDescription", align: "center"},
-                A({href:"#" },
-                    "Help")
-            ),*/
-            P({class: "moduleManagerDescription", style: "margin-top: 15px;"},
+            P({class: "disabledPanelDescription applyDesc", style:"font-size:11px",
+                align: "center"}
+            ),
+            P({class: "disabledPanelDescription", style: "margin-top: 15px;"},
                 $STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
-                IMG({style: "margin-top: 5px; margin-left:0; margin-bottom: 5px; vertical-align:middle",
-                    src: "chrome://firebug/skin/activation-menu.png"})
+                IMG({src: "chrome://firebug/skin/activation-menu.png"})
             )
          ),
 
@@ -2985,63 +2977,43 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
     onEnable: function(event)
     {
-        var needReload = Firebug.ModuleManager.enableModules(this.context);
-
-        this.refresh();
-
-        if (needReload)
-            this.context.window.location.reload();
+        Firebug.ModuleManager.enableModules(this.context);
     },
 
     show: function(panel)
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("disabledPanelPage.show box ", this.box);
-        if (!this.box)
-            this.render(panel);
-        FirebugChrome.clearPanels();
-        this.panelNode.setAttribute("collapsed", "false");
-        this.panelNode.setAttribute('active', "true");
+
+        this.render(panel);
     },
 
     hide: function(panel)
     {
-        if (this.box)
-        {
-            this.panelNode.setAttribute("collapsed", "true");
-            this.panelNode.removeAttribute('active');
-        }
-        FirebugChrome.selectPanel(panel.name, true);  // forceUpdate I guess since we were disabled
+        // Remove entire disabled page.
+        clearNode(panel.panelNode);
+        this.box = null;
     },
 
     render: function(panel)
     {
-        // Prepare arguments for the template (list of activableModules and
-        // title for the apply button).
+        // Prepare arguments for the template.
         var args = {
-            modules: activableModules,
             pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
         };
 
-        this.panelNode = panel.document.createElement("div");
-        this.panelNode.ownerPanel = this;
-
-        setClass(this.panelNode, "panelNode panelNode-disable-"+this.module.dispatchName);
-        panel.document.body.appendChild(this.panelNode);
-
         // Render panel HTML
-        this.box = this.tag.replace(args, this.panelNode, this);
-        this.panelNode.scrollTop = 0;
+        this.box = this.tag.replace(args, panel.panelNode, this);
+        panel.panelNode.scrollTop = 0;
 
-        this.applyButton = getElementByClass(this.panelNode, "moduleManagerApplyButton");
+        // These contents must be provided this ways since there is HTML and
+        // domplate would automatically escape it.
         var hostURI = FirebugContext.getWindowLocation().toString();
-        if (hostURI)
-            this.applyButton.innerHTML = $STRF("moduleManager.apply", [hostURI]);
-        else
-            this.applyButton.innerHTML = "Is this still needed?"; // I think this button will be removed soon
+        var button = getElementByClass(this.box, "disabledPanelApplyButton");
+        button.innerHTML = $STRF("moduleManager.apply", [hostURI]);
 
-        var desc2 = getElementByClass(this.panelNode, "moduleManagerDescription", "applyDesc");
-        desc2.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
+        var applyDesc = getElementByClass(this.box, "disabledPanelDescription", "applyDesc");
+        applyDesc.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
     }
 });
 
