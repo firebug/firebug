@@ -197,10 +197,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(FirebugChrome);
 
-        // Register HTTP observer for all net-request monitoring and time measuring.
-        // This is done as soon as the FB UI is loaded.
-        HttpObserver.registerObserver();
-
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
 
@@ -215,8 +211,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
-        // Unregister HTTP observer. This is done when the FB UI is closed.
-        HttpObserver.unregisterObserver();
         prefs.removeObserver(Firebug.prefDomain, this, false);
         Firebug.TraceModule.removeListener(this.TraceListener);
     },
@@ -286,21 +280,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             return;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelEnable: "+ context.getName());
+            FBTrace.sysout("net.onPanelEnable; " + context.getName());
 
         monitorContext(context);
-
-        if (context.netProgress)
-        {
-            var panel = context.getPanel(panelName);
-            context.netProgress.activate(panel);
-
-            // Display info message
-            panel.insertActivationMessage();
-        }
-
-        $('fbStatusIcon').setAttribute("net", "on");
-
     },
 
     onPanelDisable: function(context, deactivatedPanelName)
@@ -309,49 +291,30 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             return;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelDisable; destroy: " + destroy + ", " + context.getName());
-
-        if (context.netProgress)
-            context.netProgress.activate(null);
+            FBTrace.sysout("net.onPanelDisable; " + context.getName());
 
         unmonitorContext(context);
-
-        $('fbStatusIcon').removeAttribute("net");
-    },
-
-    onSuspendFirebug: function(context)
-    {
-        HttpObserver.unregisterObserver();  // safe for multiple calls
-        try
-        {
-            if (context.browser.removeProgressListener)  // XXXjjb often false?
-                context.browser.removeProgressListener(context.netProgress, NOTIFY_ALL);
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.onSuspendFirebug could not removeProgressListener: ", e);
-        }
-        
-        $('fbStatusIcon').removeAttribute("net");
     },
 
     onResumeFirebug: function(context)
     {
-        HttpObserver.registerObserver();  // safe for multiple calls
-        try
-        {
-            context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
-        }
-        catch(e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.onResumeFirebug could not addProgressListener: ", e);
-        }
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onResumeFirebug; " + context.getName()); 
 
+        // Resume only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
-            $('fbStatusIcon').setAttribute("net", "on");
-    }
+            monitorContext(context);
+    },
+
+    onSuspendFirebug: function(context)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onSuspendFirebug; " + context.getName()); 
+
+        // Suspend only if enabled.
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            unmonitorContext(context);
+    },
 });
 
 // ************************************************************************************************
@@ -2336,53 +2299,88 @@ FBL.NetFileLink.prototype =
 
 function monitorContext(context)
 {
-    if (!context.netProgress)
+    if (context.netProgress)
     {
-        var networkContext = null;
-
-        // Use an existing context associated with the browser tab if any
-        // or create a pure new network context.
-        var tabId = Firebug.getTabIdForWindow(context.window);
-        networkContext = contexts[tabId];
-        if (networkContext) {
-          networkContext.context = context;
-          delete contexts[tabId];
-        }
-        else {
-          networkContext = new NetProgress(context);
-        }
-
-        var listener = context.netProgress = networkContext;
-
-        if ("addListener" in context.sourceCache)
-            context.sourceCache.addListener(networkContext);
-
-        // This listener is used to observe downlaod progress.
-        context.browser.addProgressListener(listener, NOTIFY_ALL);
+        if (FBTrace.DBG_NET || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("net.monitorContext; Trying to monitor already monitored context");
+        return;
     }
+
+    var networkContext = null;
+
+    // Use an existing context associated with the browser tab if any
+    // or create a pure new network context.
+    var tabId = Firebug.getTabIdForWindow(context.window);
+    networkContext = contexts[tabId];
+    if (networkContext) 
+    {
+        networkContext.context = context;
+        delete contexts[tabId];
+    }
+    else 
+    {
+        networkContext = new NetProgress(context);
+    }
+
+    var listener = context.netProgress = networkContext;
+
+    // Register for HTTP events. 
+    HttpObserver.registerObserver();
+
+    // Add cache listener so, net panel has alwas fresh responses. 
+    context.sourceCache.addListener(networkContext);
+
+    // This listener is used to observe downlaod progress.
+    context.browser.addProgressListener(listener, NOTIFY_ALL);
+
+    // Activate net panel sub-context.
+    var panel = context.getPanel(panelName);
+    context.netProgress.activate(panel);
+
+    // Display info message
+    panel.insertActivationMessage();
+
+    // Update status bar icon.
+    $('fbStatusIcon').setAttribute("net", "on");
 }
 
 function unmonitorContext(context)
 {
     var netProgress = context.netProgress;
-    if (netProgress)
+    if (!netProgress)
     {
-        if (netProgress.pendingInterval)
-        {
-            context.clearInterval(netProgress.pendingInterval);
-            delete netProgress.pendingInterval;
-
-            netProgress.pending.splice(0, netProgress.pending.length);
-        }
-
-        if (context.sourceCache.removeListener)
-            context.sourceCache.removeListener(netProgress);
-
-        if (context.browser.docShell)
-            context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
-
-        delete context.netProgress;
+        if (FBTrace.DBG_NET || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("net.unmonitorContext; Trying to unmonitor context that is not monitored");
+        return;
     }
+
+    // Remove all files waiting for cache response.
+    if (netProgress.pendingInterval)
+    {
+        context.clearInterval(netProgress.pendingInterval);
+        delete netProgress.pendingInterval;
+
+        netProgress.pending.splice(0, netProgress.pending.length);
+    }
+
+    // Remove cache listener
+    context.sourceCache.removeListener(netProgress);
+
+    // Remove progress listener.
+    if (context.browser.docShell)
+        context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
+
+    // Unregister HTTP events.
+    HttpObserver.unregisterObserver();
+
+    // Deactivate net sub-context.
+    context.netProgress.activate(null);
+
+    // Update status bar icon.
+    $('fbStatusIcon').removeAttribute("net");
+
+    // And finaly destroy the net panel sub context.
+    delete context.netProgress;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3237,9 +3235,4 @@ Firebug.registerActivableModule(Firebug.NetMonitor);
 Firebug.registerPanel(NetPanel);
 
 // ************************************************************************************************
-
 }});
-
-
-
-
