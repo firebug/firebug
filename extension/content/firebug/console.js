@@ -207,17 +207,17 @@ Firebug.Console = extend(ActivableConsole,
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onPanelEnable**************");
-        
+
         $('fbStatusIcon').setAttribute("console", "on");
         Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
     },
-   
+
     onPanelDisable: function(context, panelName)
     {
         Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
         $('fbStatusIcon').removeAttribute("console");
     },
-    
+
     onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
@@ -232,8 +232,7 @@ Firebug.Console = extend(ActivableConsole,
         if (Firebug.Console.isAlwaysEnabled())
         	$('fbStatusIcon').setAttribute("console", "on");
     },
-    
-   
+
     // ----------------------------------------------------------------------------------------------------
     // Firebug.Debugger listener
 
@@ -452,14 +451,22 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
-        if (!Firebug.Console.isAlwaysEnabled())
+        this.showToolbarButtons("fbConsoleButtons", true);
+
+        var enabled = Firebug.Console.isAlwaysEnabled();
+        if (!enabled)
             Firebug.Console.disabledPanelPage.show(this);
 
-        this.showToolbarButtons("fbConsoleButtons", true);
+        FirebugContext.chrome.$("fbCommandBox").collapsed = !enabled;
+        if (Firebug.largeCommandLine)
+            Firebug.CommandLine.setMultiLine(enabled);
     },
 
     enablePanel: function(module)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.ConsolePanel.enablePanel; " + this.context.getName());
+
         Firebug.ActivablePanel.enablePanel.apply(this, arguments);
 
         FirebugContext.chrome.$("fbCommandBox").collapsed = false;
@@ -472,6 +479,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     disablePanel: function(module)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.ConsolePanel.disablePanel; " + this.context.getName());
+
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
 
         // Make sure that entire content of the Console panel is hidden when 
