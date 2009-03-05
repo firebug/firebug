@@ -262,8 +262,6 @@ top.Firebug =
         dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         dispatch(modules, "initializeUI", [detachArgs]);
-
-        this.suspend(); // oh, what a let down, all ready but now we suspend until we have an activeContext
     },
 
     shutdown: function()
