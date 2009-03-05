@@ -725,6 +725,9 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
     show: function(state)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.netPanel.show; " + this.context.getName(), state);
+
         this.showToolbarButtons("fbNetButtons", true);
 
         var shouldShow = this.shouldShow();
@@ -740,9 +743,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
-
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.netPanel.show", state);
     },
 
     shouldShow: function()
@@ -758,7 +758,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
     hide: function()
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.netPanel.hide");
+            FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
         this.showToolbarButtons("fbNetButtons", false);
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
@@ -2308,12 +2308,11 @@ FBL.NetFileLink.prototype =
 
 function monitorContext(context)
 {
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.monitorContext; (" + context.netProgress + ") " + context.getName());
+
     if (context.netProgress)
-    {
-        if (FBTrace.DBG_NET || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("net.monitorContext; Trying to monitor already monitored context");
         return;
-    }
 
     var networkContext = null;
 
@@ -2355,13 +2354,12 @@ function monitorContext(context)
 
 function unmonitorContext(context)
 {
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.unmonitorContext; (" + context.netProgress + ") " + context.getName());
+
     var netProgress = context.netProgress;
     if (!netProgress)
-    {
-        if (FBTrace.DBG_NET || FBTrace.DBG_ERRORS)
-            FBTrace.sysout("net.unmonitorContext; Trying to unmonitor context that is not monitored");
         return;
-    }
 
     // Remove all files waiting for cache response.
     if (netProgress.pendingInterval)

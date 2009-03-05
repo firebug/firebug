@@ -2743,7 +2743,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
-                " isEnabled:"+this.isAlwaysEnabled()+"\n");
+                " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
 
         var panel = context.getPanel(this.panelName, true);
         if (panel)
@@ -2758,8 +2758,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelDisable: function(context)  // panel Enabled -> Disabled
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug..ActivableModulepanelDisable "+this.getPrefDomain()+
-                " isEnabled:"+this.isAlwaysEnabled()+"\n");
+            FBTrace.sysout("firebug.ActivableModulepanelDisable "+this.getPrefDomain()+
+                " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
 
         var panel = context.getPanel(this.panelName, true);
         if (panel)
