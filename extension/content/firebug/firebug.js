@@ -3016,7 +3016,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
         // These contents must be provided this ways since there is HTML and
         // domplate would automatically escape it.
-        var hostURI = FirebugContext.getWindowLocation().toString();
+        var hostURI = cropString(FirebugContext.getWindowLocation().toString(), 50);
         var button = getElementByClass(this.box, "disabledPanelApplyButton");
         button.innerHTML = $STRF("moduleManager.apply", [hostURI]);
 
