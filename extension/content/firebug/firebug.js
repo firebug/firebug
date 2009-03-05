@@ -2979,13 +2979,15 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
     onEnable: function(event)
     {
-        Firebug.ModuleManager.enableModules(this.context);
+        var context = this.context;
+        Firebug.ModuleManager.enableModules(context);
+        context.window.location.reload();
     },
 
     show: function(panel)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("disabledPanelPage.show box ", this.box);
+            FBTrace.sysout("firebug.DisabledPanelPage.show; box", this.box);
 
         this.render(panel);
     },
@@ -2995,10 +2997,14 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
         // Remove entire disabled page.
         clearNode(panel.panelNode);
         this.box = null;
+        this.context = null;
     },
 
     render: function(panel)
     {
+        // The enable button needs the context to reload the current page.
+        this.context = panel.context;
+
         // Prepare arguments for the template.
         var args = {
             pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
@@ -3035,35 +3041,24 @@ Firebug.ModuleManager =
 
     enableModules: function(context)
     {
-        var needReload = false;
         for (var i=0; i<activableModules.length; i++)
         {
             var module = activableModules[i];
-            needReload = this.enableModule(module) || needReload;
+            this.enableModule(module);
             module.updateTab(context);
         }
-
-        return false; // needReload;  // 1.4a13
     },
 
     disableModule: function(module)
     {
         if (module.isAlwaysEnabled())
-        {
             module.setDefaultState(false);
-            return true;
-        }
-        return false;
     },
 
     enableModule: function(module)
     {
         if (!module.isAlwaysEnabled())
-        {
             module.setDefaultState(true);
-            return true;
-        }
-        return false;
     },
 
     obeyPrefs: function()
