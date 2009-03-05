@@ -442,6 +442,9 @@ this.Arr = domplate(Firebug.Rep,
     {
         if (this.isArray(object)) return true;
 
+        if (object instanceof Ci.nsIDOMHistory)  // to avoid NS_ERROR_FAILURE
+        	return false; 
+        
         // Don't use propertyIsEnumerable("length") as "arguments" array isn't real JS array,
         // "arguments" have .length but do not respond to object property enumeration.
         if ("length" in object && typeof(object.length) == "number")
@@ -1485,11 +1488,35 @@ this.SourceText = domplate(Firebug.Rep,
     }
 });
 
+//************************************************************************************************
+this.nsIDOMHistory = domplate(Firebug.Rep,
+{
+    tag:OBJECTBOX({onclick: "$showHistory"},
+            OBJECTLINK("$object|summarizeHistory")
+        ),
+      
+    summarizeHistory: function(history)
+    {
+		return "nsIDOMHistory is broken";
+    },
+    
+    showHistory: function(history)
+    {
+    },
+	
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "nsIDOMHistory",
+
+    supportsObject: function(object, type)
+    {
+    	return (object instanceof Ci.nsIDOMHistory);
+    }
+});
+
 // ************************************************************************************************
 this.ApplicationCache = domplate(Firebug.Rep,
 {
-
-
     tag:OBJECTBOX({onclick: "$showApplicationCache"},
             OBJECTLINK("$object|summarizeCache")
         ),
@@ -1526,6 +1553,7 @@ this.ApplicationCache = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 Firebug.registerRep(
+	this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,
     this.Null,
     this.Number,
