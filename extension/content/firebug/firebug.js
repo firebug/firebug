@@ -2952,48 +2952,56 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
     onEnable: function(event)
     {
-        var context = this.context;
-        Firebug.ModuleManager.enableModules(context);
-        context.window.location.reload();
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.DisabledPanelPage.onEnable; " + 
+                FirebugContext ? FirebugContext.getName() : "NO CONTEXT");
+
+        Firebug.ModuleManager.enableModules(FirebugContext);
+        FirebugContext.window.location.reload();
     },
 
     show: function(panel)
     {
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.show; box", this.box);
+        if (panel.disabledBox)
+            return;
 
         this.render(panel);
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.DisabledPanelPage.show; box", panel.disabledBox);
     },
 
     hide: function(panel)
     {
+        if (!panel.disabledBox)
+            return;
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("firebug.DisabledPanelPage.hide; box", panel.disabledBox);
+
         // Remove entire disabled page.
         clearNode(panel.panelNode);
-        this.box = null;
-        this.context = null;
+        delete panel.disabledBox;
     },
 
     render: function(panel)
     {
-        // The enable button needs the context to reload the current page.
-        this.context = panel.context;
-
         // Prepare arguments for the template.
         var args = {
             pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
         };
 
         // Render panel HTML
-        this.box = this.tag.replace(args, panel.panelNode, this);
+        panel.disabledBox = this.tag.replace(args, panel.panelNode, this);
         panel.panelNode.scrollTop = 0;
 
         // These contents must be provided this ways since there is HTML and
         // domplate would automatically escape it.
         var hostURI = cropString(FirebugContext.getWindowLocation().toString(), 50);
-        var button = getElementByClass(this.box, "disabledPanelApplyButton");
+        var button = getElementByClass(panel.disabledBox, "disabledPanelApplyButton");
         button.innerHTML = $STRF("moduleManager.apply", [hostURI]);
 
-        var applyDesc = getElementByClass(this.box, "disabledPanelDescription", "applyDesc");
+        var applyDesc = getElementByClass(panel.disabledBox, "disabledPanelDescription", "applyDesc");
         applyDesc.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
     }
 });
