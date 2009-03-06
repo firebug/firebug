@@ -224,6 +224,8 @@ FirebugService.prototype =
 
         jsd.off();
         jsd = null;
+        if (!jsd)
+            FBTrace.sysout("*********************** SHUTDOWN JSD NULL ");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -944,9 +946,13 @@ FirebugService.prototype =
 
     pause: function()  // must support multiple calls
     {
+        if (!enabledDebugger)
+            return "not enabled";
         if (!this.suspended)  // marker only UI in debugger.js
             this.suspended = jsd.pause();
         dispatch(clients, "onJSDDeactivate", [jsd]);
+        if (!jsd)
+            FBTrace.sysout("*********************** deactivate JSD NULL ");
         return this.suspended;
     },
 
@@ -959,6 +965,8 @@ FirebugService.prototype =
                 FBTrace.sysout("fbs.resume unpause mismatch this.suspended "+this.suspended+" unpause depth "+depth);
             delete this.suspended;
             dispatch(clients, "onJSDActivate", [jsd]);
+            if (!jsd)
+                FBTrace.sysout("*********************** activate JSD NULL ");
             return depth;
         }
         return null;
