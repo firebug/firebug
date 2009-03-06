@@ -189,7 +189,7 @@ Firebug.Console = extend(ActivableConsole,
         var container = panel.panelNode;
         container.insertBefore(nodes[0], container.firstChild);
     },
- 
+
     showContext: function(browser, context)
     {
         if (browser)
@@ -200,7 +200,7 @@ Firebug.Console = extend(ActivableConsole,
 
     // -----------------------------------------------------------------------------------------------------
 
-    onPanelEnable: function(context, init, panelName)
+    onPanelEnable: function(context, panelName)
     {
         if (panelName != this.panelName)  // we don't care about other panels
             return;
@@ -230,7 +230,7 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
         if (Firebug.Console.isAlwaysEnabled())
-        	$('fbStatusIcon').setAttribute("console", "on");
+            $('fbStatusIcon').setAttribute("console", "on");
     },
 
     // ----------------------------------------------------------------------------------------------------
@@ -444,7 +444,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         prefs.addObserver(Firebug.prefDomain, this, false);
     },
 
-    shutdown: function() 
+    shutdown: function()
     {
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
@@ -484,7 +484,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
 
-        // Make sure that entire content of the Console panel is hidden when 
+        // Make sure that entire content of the Console panel is hidden when
         // the panel is disabled.
         Firebug.CommandLine.setMultiLine(false);
         FirebugContext.chrome.$("fbCommandBox").collapsed = true;

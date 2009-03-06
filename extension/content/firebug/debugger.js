@@ -713,9 +713,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onJSDActivate: function(jsd)  // just before hooks are set
     {
-        // this is just to get the timing right.
-        // we called by fbs as a "debuggr", (one per window) and we are re-dispatching to our listeners,
-        // Firebug.DebugListeners.
         var active = this.setIsJSDActive();
 
         if (FBTrace.DBG_INITIALIZE)
@@ -730,7 +727,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         dispatch2(this.fbListeners,"onJSDDeactivate",[fbs]);
     },
 
-    setIsJSDActive: function()
+    setIsJSDActive: function()  // should only be call on the jsd activation events, so it correctly reflects jsd state
     {
         var active = fbs.isJSDActive();
         if (active)
@@ -1644,6 +1641,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("registerDebugger this.registered: "+this.registered)
         if (this.registered)
             return;
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
@@ -1671,11 +1670,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 
-    onPanelEnable: function(context, init, panelName)
+    onPanelEnable: function(context, panelName)
     {
-        //if (panelName == "console" || panelName == this.panelName)
-        //    this.ableWatchSidePanel(context);
-
         if (panelName != this.panelName)
             return;
 
@@ -1684,15 +1680,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // redraw the viewport
         delete this.lastScrollTop;
 
-        var panel = context.chrome.getSelectedPanel();
-        if (panel && (panel.name == this.panelName) )
-        {
-            var panelState = Firebug.getPanelState({name: this.panelName, context: context});
-            var restored = restoreLocation(panel, panelState);
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("Debugger.onPanelEnable restored "+(restored?panel.location:"nothing"));
-        }
-        var active = this.setIsJSDActive();  // update ui
+
+        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
     },
 
     onPanelDisable: function(context, panelName)
@@ -1713,7 +1702,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName+" for "+context.getName()+"\n");
-        var active = this.setIsJSDActive();  // update ui
         this.clearAllBreakpoints(context);
     },
 
@@ -1732,20 +1720,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onSuspendFirebug: function(context)
     {
-        fbs.pause();  // can be called multiple times.
-        var active = this.setIsJSDActive();  // update ui
+        var paused = fbs.pause();  // can be called multiple times.
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("debugger.onSuspendFirebug active:"+active+" isEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
+            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
     },
 
     onResumeFirebug: function(context)
     {
-        fbs.unPause();
-        var active = this.setIsJSDActive();  // update ui
+        var unpaused = fbs.unPause();
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("debugger.onResumeFirebug active:"+active+" isEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
+            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
     },
 
     ableWatchSidePanel: function(context)

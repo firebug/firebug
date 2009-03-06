@@ -274,7 +274,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    onPanelEnable: function(context, init, activatedPanelName)
+    onPanelEnable: function(context, activatedPanelName)
     {
         if (activatedPanelName != panelName)
             return;
@@ -299,7 +299,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     onResumeFirebug: function(context)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onResumeFirebug; " + context.getName()); 
+            FBTrace.sysout("net.onResumeFirebug; " + context.getName());
 
         // Resume only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
@@ -309,7 +309,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onSuspendFirebug; " + context.getName()); 
+            FBTrace.sysout("net.onSuspendFirebug; " + context.getName());
 
         // Suspend only if enabled.
         if (Firebug.NetMonitor.isAlwaysEnabled())
@@ -1308,8 +1308,8 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         var netProgress = this.context.netProgress;
 
         if (!netProgress)  // XXXjjb Honza, please check, I guess we are getting here with the context not setup
-        	return; 
-        
+            return;
+
         // Must be positive number;
         limit = Math.max(0, limit) + netProgress.pending.length;
 
@@ -2320,22 +2320,22 @@ function monitorContext(context)
     // or create a pure new network context.
     var tabId = Firebug.getTabIdForWindow(context.window);
     networkContext = contexts[tabId];
-    if (networkContext) 
+    if (networkContext)
     {
         networkContext.context = context;
         delete contexts[tabId];
     }
-    else 
+    else
     {
         networkContext = new NetProgress(context);
     }
 
     var listener = context.netProgress = networkContext;
 
-    // Register for HTTP events. 
+    // Register for HTTP events.
     HttpObserver.registerObserver();
 
-    // Add cache listener so, net panel has alwas fresh responses. 
+    // Add cache listener so, net panel has alwas fresh responses.
     context.sourceCache.addListener(networkContext);
 
     // This listener is used to observe downlaod progress.
@@ -3216,7 +3216,7 @@ function getPrintableTime()
 
 // ************************************************************************************************
 
-Firebug.NetMonitor.TraceListener = 
+Firebug.NetMonitor.TraceListener =
 {
     // Called when console window is loaded.
     onLoadConsole: function(win, rootNode)

@@ -182,7 +182,9 @@ top.Firebug =
         {                                                                                                              /*@explore*/
              for (var i = 0; i < prefNames.length; ++i)                                                                /*@explore*/
                 FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");                 /*@explore*/
-        }                                                                                                              /*@explore*/
+        }
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("firebug.initialize prefDomain "+this.prefDomain);
     },
 
     getVersion: function()
@@ -1287,7 +1289,7 @@ top.Firebug =
     // nsIPrefObserver
 
     observe: function(subject, topic, data)
-    {
+    {FBTrace.sysout("Firebug.observe subject: "+subject+" topic "+topic+" data: "+data+"\n");
         if (data.indexOf("extensions.") == -1)
             return;
 
@@ -1302,6 +1304,16 @@ top.Firebug =
             var value = this.getPref(domain, name);
             if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");                /*@explore*/
             this.updatePref(name, value);
+        }
+
+        if (topic == "nsPref:changed")
+        {
+            if (data.indexOf(".enableSites") != -1)
+            {
+                if (FBTrace.DBG_PANELS)
+                    FBTrace.sysout("Firebug.observe subject: "+subject+" topic "+topic+" data: "+data+"\n");
+                dispatch(modules, "onEnablePrefChange", [data]);
+            }
         }
     },
 
@@ -1785,7 +1797,7 @@ Firebug.Panel =
             if (!this.context.browser) // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this:", this)
+                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this.context", this.context.getName())
                 return;
             }
             var buttons = this.context.browser.chrome.$(buttonsId);
@@ -2695,9 +2707,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.dependents = [];
 
         Firebug.Module.initialize.apply(this, arguments);
-
-        // activable modules listen for enable/disable
-        prefs.addObserver(this.getPrefDomain(), this, false);
     },
 
     initializeUI: function(detachArgs)
@@ -2712,8 +2721,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-
-        prefs.removeObserver(this.getPrefDomain(), this);
     },
 
     reattachContext: function(browser, context)
@@ -2737,7 +2744,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         return this.enabled;
     },
 
-    panelEnable: function(context, becameActive) // panel Disabled -> Enabled
+    panelEnable: function(context) // panel Disabled -> Enabled
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
@@ -2749,7 +2756,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
         this.enabled = true;
 
-        dispatch(modules, "onPanelEnable", [context, becameActive, this.panelName]);
+        dispatch(modules, "onPanelEnable", [context, this.panelName]);
         Firebug.resetTooltip();
     },
 
@@ -2807,12 +2814,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    onPanelEnable: function(context, init, panelName)
+    onPanelEnable: function(context, panelName)
     {
         // Module activation code. Just added to activeContexts (init == true) OR just enabled
     },
 
-    onPanelDisable: function(context, destroy, panelName)
+    onPanelDisable: function(context,  panelName)
     {
         // Module deactivation code. Just removed from activeContexts (destroy==true) OR just disabled
     },
@@ -2840,6 +2847,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
     setDefaultState: function(enable)
     {
         var prefDomain = this.getPrefDomain();
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("setDefaultState for "+prefDomain+" to "+enable);
         Firebug.setPref(prefDomain, "enableSites", enable);
     },
 
@@ -2851,65 +2860,16 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    observe: function(subject, topic, data)
+    onEnablePrefChange: function(pref)
     {
-        try
-        {
-            // nsPref:changed - fired when preferences are changed.
-            if (FBTrace.DBG_PANELS)
-            {
-                if (topic != "nsPref:changed")
-                    FBTrace.sysout("firebug.ActivableModule.observe UNKNOWN topic "+topic+" data: "+data+"\n");
-                else
-                    FBTrace.sysout("firebug.ActivableModule.observe topic "+topic+" data: "+data+"\n");
-            }
+        var panelPref = this.getPrefDomain()+".enableSites";
 
-            if (topic == "nsPref:changed")
-            {
-                var prefDomain = this.getPrefDomain();
-                if (data == prefDomain + ".enableSites")
-                {
-                    if (FBTrace.DBG_PANELS)
-                        FBTrace.sysout("firebug.ActivableModule.observe subject:"+subject+" topic "+topic+" data: "+data+"\n");
-                    dispatch(modules, "onEnablePrefChange", [prefDomain, data]);
-                }
-            }
-        }
-        catch (exc)
-        {
-            if (FBTrace.dumpProperties)
-                FBTrace.dumpProperties("firebug.observe permisssions FAILS", exc);
-        }
-    },
-
-    onEnablePrefChange: function(prefDomain, data)
-    {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.onEnablePrefChange for this.getPrefDomain:"+this.getPrefDomain()+" prefDomain: "+prefDomain+" data:"+ data+"\n");
+            FBTrace.sysout("firebug.onEnablePrefChange for:"+panelPref +" pref:"+ pref+"\n");
 
-        if (prefDomain == this.getPrefDomain())
+        if (pref == panelPref)
         {
-            var module = this;
-            Firebug.eachActiveContext(
-                function changeActivation(context)
-                {
-                    try
-                    {
-                        if ((prefDomain + ".enableSites") == data)
-                        {
-                            if (module.isAlwaysEnabled())
-                                module.panelEnable(context);
-                            else
-                                module.panelDisable(context);
-                        }
-                    }
-                    catch (exc)
-                    {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("firebug.onEnablePrefChange changeActivation FAILS for "+location, exc);
-                    }
-                }
-            );
+            Firebug.ModuleManager.changeActivation(this);
         }
     },
 
@@ -3049,14 +3009,39 @@ Firebug.ModuleManager =
 
     disableModule: function(module)
     {
-        if (module.isAlwaysEnabled())
-            module.setDefaultState(false);
+        if (module.isAlwaysEnabled())  // if we are enabled,
+            module.setDefaultState(false);  // change the pref, triggering disable
+        else
+            this.changeActivation(module); // pref is ok, just disable
     },
 
     enableModule: function(module)
     {
         if (!module.isAlwaysEnabled())
             module.setDefaultState(true);
+        else
+            this.changeActivation(module);
+    },
+
+    changeActivation: function(module)
+    {
+        Firebug.eachActiveContext(
+            function changeActivation(context)
+            {
+                try
+                {
+                    if (module.isAlwaysEnabled())
+                        module.panelEnable(context);
+                    else
+                        module.panelDisable(context);
+                }
+                catch (exc)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("ModuleManager.changeActivation FAILS for "+context.getName(), exc);
+                }
+            }
+        );
     },
 
     obeyPrefs: function()
@@ -3067,7 +3052,7 @@ Firebug.ModuleManager =
             if (module.isAlwaysEnabled())
                 this.enableModule(module);
             else
-                this.disableModule(module);
+                this.enableModule(module);
             module.updateTab(context);
         }
     },
