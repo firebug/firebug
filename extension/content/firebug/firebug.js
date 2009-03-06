@@ -1289,7 +1289,8 @@ top.Firebug =
     // nsIPrefObserver
 
     observe: function(subject, topic, data)
-    {FBTrace.sysout("Firebug.observe subject: "+subject+" topic "+topic+" data: "+data+"\n");
+    {
+        FBTrace.sysout("Firebug.observe subject: "+subject+" topic "+topic+" data: "+data+"\n");
         if (data.indexOf("extensions.") == -1)
             return;
 
@@ -2838,6 +2839,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     getPrefDomain: function()
     {
+        if (!this.panelName)
+            return null;
+
         if (!this.prefDomain)
             this.prefDomain = Firebug.prefDomain + "." + this.panelName;
 
@@ -2847,14 +2851,25 @@ Firebug.ActivableModule = extend(Firebug.Module,
     setDefaultState: function(enable)
     {
         var prefDomain = this.getPrefDomain();
+        if (!prefDomain)
+        {
+            if (FBTrace.DBG_PANELS)
+                FBTrace.sysout("Firebug.ActivableModule.setDefaultState; There is no prefDomain.");
+            return;
+        }
+
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("setDefaultState for "+prefDomain+" to "+enable);
+
         Firebug.setPref(prefDomain, "enableSites", enable);
     },
 
     isAlwaysEnabled: function()
     {
         var prefDomain = this.getPrefDomain();
+        if (!prefDomain)
+            return false;
+
         return Firebug.getPref(prefDomain, "enableSites");
     },
 
