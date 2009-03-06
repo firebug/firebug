@@ -1495,13 +1495,31 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
             OBJECTLINK("$object|summarizeHistory")
         ),
       
+    className: "nsIDOMHistory",    
+        
     summarizeHistory: function(history)
     {
-		return "object does not support history (nsIDOMHistory)";
+		try
+		{
+			var items = history.length;
+			return items + " history entries";
+		}
+		catch(exc)
+		{
+			return "object does not support history (nsIDOMHistory)";
+		}
     },
     
     showHistory: function(history)
     {
+    	try 
+    	{
+    		var items = history.length;  // if this throws, then unsupported
+    		FirebugChrome.select(history);
+    	}
+    	catch (exc)
+    	{
+    	}
     },
 	
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
