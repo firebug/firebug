@@ -109,6 +109,7 @@ var uiListeners = [];
 var panelTypes = [];
 var reps = [];
 var defaultRep = null;
+var defaultFuncRep = null;
 var editors = [];
 var externalEditors = [];
 
@@ -582,9 +583,10 @@ top.Firebug =
             remove(reps, arguments[i]);
     },
 
-    setDefaultRep: function(rep)
+    setDefaultReps: function(funcRep, rep)
     {
         defaultRep = rep;
+        defaultFuncRep = funcRep;
     },
 
     registerEditor: function()
@@ -1214,7 +1216,7 @@ top.Firebug =
             }
         }
 
-        return defaultRep;
+        return (type == 'function')?defaultFuncRep:defaultRep;
     },
 
     getRepObject: function(node)
