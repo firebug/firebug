@@ -761,6 +761,8 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
         this.showToolbarButtons("fbNetButtons", false);
+        this.showToolbarButtons("fbNetButtonsFilter", false);
+
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 

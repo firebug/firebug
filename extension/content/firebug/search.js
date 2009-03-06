@@ -110,9 +110,11 @@ Firebug.Search = extend(Firebug.Module,
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
+                Firebug.Search.showState();
+
                 var found = panel.search(value, reverse);
                 if (!found && value)
-                    beep();
+                    Firebug.Search.onNotFound(value);
 
                 if (value)
                 {
@@ -130,14 +132,79 @@ Firebug.Search = extend(Firebug.Module,
         }
     },
 
+    onNotFound: function()
+    {
+        beep();
+    },
+
+    showState: function()
+    {
+        var panel = FirebugChrome.getSelectedPanel();
+        if (!panel.searchable)
+            return;
+
+        var searchOptions = FirebugChrome.$("fbSearchButtons");
+
+        var searchBox = FirebugChrome.$("fbSearchBox");
+        var ability = panel.getSearchCapabilities();
+
+        var searchString = searchBox.value;
+        var showSearch = "Find "+searchString;   // NLS
+        if (ability.indexOf("searchCaseSensitive") != -1)  // then the panel support case sensitive
+        {
+            var lower = searchString.toLowerCase();
+            if (searchString == lower)
+            {
+                Firebug.searchCaseSensitive = false;
+                showSearch += ", ..., "+searchString.toUpperCase();
+            }
+            else
+                Firebug.searchCaseSensitive = true;
+
+            $('menu_searchCaseSensitive').label = showSearch;
+        }
+
+        searchOptions.openPopup(searchBox, "before_start", 0, -5, false, false);
+    },
+
+    hideState: function()
+    {
+        var searchOptions = FirebugChrome.$("fbSearchButtons");
+        if (searchOptions)
+            searchOptions.hidePopup();
+    },
+
+    onSearchBoxFocus: function(event)
+    {
+        FBTrace.sysout("onSearchBoxFocus no-op");
+        //this.showState();
+    },
+
+    onSearchButtonKey: function(event)
+    {
+        FBTrace.sysout("onSearchButtonKey ", event);
+        var searchBox = FirebugChrome.$("fbSearchBox");
+        searchBox.dispatchEvent(event);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
+
+    initialize: function()
+    {
+        this.onSearchBoxFocus =  bind(this.onSearchBoxFocus, this);
+        this.onSearchButtonKey = bind(this.onSearchButtonKey, this);
+    },
 
     enable: function()
     {
         var searchBox = FirebugChrome.$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = false;
+        searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
+
+        var searchOptions = FirebugChrome.$("fbSearchButtons");
+        searchOptions.addEventListener('keypress', this.onSearchButtonKey, true);
     },
 
     disable: function()
@@ -145,10 +212,15 @@ Firebug.Search = extend(Firebug.Module,
         var searchBox = FirebugChrome.$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = true;
+        searchBox.removeEventListener('focus', this.onSearchBoxFocus, true);
+
+        var searchOptions = FirebugChrome.$("fbSearchButtons");
+        searchOptions.removeEventListener('keypress', this.onSearchButtonKey, true);
     },
 
     showPanel: function(browser, panel)
     {
+        return;
         var chrome = browser.chrome;
         var searchBox = chrome.$("fbSearchBox");
         searchBox.value = panel && panel.searchText ? panel.searchText : "";
@@ -159,15 +231,15 @@ Firebug.Search = extend(Firebug.Module,
         searchButtons.style.display = extSearch ? "" : "none";
         if (extSearch)
         {
-            var caps = panel.getSearchCapabilities() || [];
+            var capabilities = panel.getSearchCapabilities() || [];
             var keyCaps = {};
-            for (var i = 0; i < caps.length; i++) {
-                keyCaps[caps[i]] = true;
+            for (var i = 0; i < capabilities.length; i++) {
+                keyCaps[capabilities[i]] = true;
             }
 
             // Hide the whole menu if no options are supported
             var searchOptions = chrome.$("fbSearchOptions");
-            searchOptions.style.display = caps.length ? "" : "none";
+            searchOptions.style.display = capabilities.length ? "" : "none";
 
             // Handle individual menu elements
             var searchPopup = chrome.$("searchOptionsPopup");

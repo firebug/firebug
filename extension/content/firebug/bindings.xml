@@ -128,8 +128,8 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
-                if (this.tabFocused) 
-                    tab.focus();   
+                if (this.tabFocused)
+                    tab.focus();
             ]]></body>
         </method>
 
@@ -151,7 +151,7 @@
                 else
                     this.tabBox.removeAttribute("collapsed");
 
-                if (this.selectedTab) 
+                if (this.selectedTab)
                 {
                     this.selectedTab.removeAttribute("selected");
                     this.selectedTab.removeAttribute("aria-expanded");
@@ -162,7 +162,7 @@
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
 
-                if (tab) 
+                if (tab)
                 {
                     tab.setAttribute("selected", "true");
                     tab.setAttribute("aria-expanded", "true");
@@ -260,9 +260,9 @@
         <method name="handleTabBarBlur">
             <parameter name="event"/>
             <body><![CDATA[
-                that.tabFocused = false;    
+                that.tabFocused = false;
             ]]></body>
-        </method>        
+        </method>
     </implementation>
 
     <handlers>
@@ -314,44 +314,44 @@
                 {
                     case KeyEvent.DOM_VK_LEFT:
                     case KeyEvent.DOM_VK_RIGHT:
-                        if (isTab) 
+                        if (isTab)
                         {
-	                        forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
-	                        // will only work as long as long as siblings only consist of paneltab elements
-	                        siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
-	                        if (!siblingTab) 
-	                            siblingTab = this[forward ? 'firstChild' : 'lastChild'];
-	                        if (siblingTab) 
-	                        {
-	                            setTimeout(FBL.bindFixed(function()
-	                            {
-	                                this.selectTab(siblingTab);
-	                                siblingTab.focus();
-	                            }, this));
-	                        }
-	                   }
+                            forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+                            // will only work as long as long as siblings only consist of paneltab elements
+                            siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
+                            if (!siblingTab)
+                                siblingTab = this[forward ? 'firstChild' : 'lastChild'];
+                            if (siblingTab)
+                            {
+                                setTimeout(FBL.bindFixed(function()
+                                {
+                                    this.selectTab(siblingTab);
+                                    siblingTab.focus();
+                                }, this));
+                            }
+                       }
                     break;
                     case KeyEvent.DOM_VK_RETURN:
                     case KeyEvent.DOM_VK_SPACE:
                     case KeyEvent.DOM_VK_UP:
                     case KeyEvent.DOM_VK_DOWN:
-                        if (isTab && tab.tabMenu) 
+                        if (isTab && tab.tabMenu)
                         {
                             tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
                         }
-                        else if (isOptionsMenu && this.optionsPopup && !event.altKey) 
+                        else if (isOptionsMenu && this.optionsPopup && !event.altKey)
                         {
                             this.optionsPopup.showPopup();
-                            
+
                         }
                     break;
                     case KeyEvent.DOM_VK_F4:
-                        if (isTab && tab.tabMenu) 
+                        if (isTab && tab.tabMenu)
                         {
                             tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
                         }
                     break;
-                } 
+                }
             }
         ]]>
         </handler>
@@ -539,7 +539,7 @@
 </binding>
 
 <binding id="panelFileList" >
-    
+
     <content popup="_child">
         <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
             <xul:menupopup anonid="popup" position="after_start"/>
@@ -551,7 +551,7 @@
         <xul:menupopup anonid="popup" position="after_start"/>
     -->
     </content>
-    
+
     <resources>
         <stylesheet src="chrome://global/skin/toolbarbutton.css"/>
     </resources>
@@ -569,7 +569,7 @@
 
             <setter><![CDATA[
                 var locator = this.getLocator();
-                
+
                 var fileName = null;
                 if (!locator)
                 {
@@ -582,7 +582,7 @@
                 }
                 else
                     fileName = "(none)";
-                    
+
                 this.repObject = val;
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
@@ -606,7 +606,7 @@
                         return null;
                     }
                 }
-                // The locator needs 
+                // The locator needs
                 //     getObjectDescription(object): return {path, name}
                 //     getLocationList(), a list of objects that can be fed into getObjectDescription
                 return this.locator(this);
@@ -728,7 +728,7 @@
             var currentDescription = null;
             if (this.repObject)
                 currentDescription = locator.getObjectDescription(this.repObject);
-                
+
             for (var i = 0; i < objects.length; ++i)
             {
                 var object = objects[i];
@@ -736,10 +736,10 @@
                 if (!description)
                     FBTrace.sysout("binding.xml popupshowing Fails" , object);
                 var entry = {object: object, fileName: description.name};
-                
+
                 if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
                     entry.selected = true;
-                    
+
                 if (groups.hasOwnProperty(description.path))
                     groups[description.path].push(entry);
                 else
@@ -759,7 +759,7 @@
 
                 var menuHeader = FBL.createMenuHeader(this.popup, {label: path, nol10n: true});
                 FBL.setClass(menuHeader, "fbURLMenuItem");
-                 
+
                 for (var j = 0; j < urls.length; ++j)
                 {
                     var menuInfo = {label: urls[j].fileName, nol10n: true};
@@ -825,6 +825,7 @@
 <binding id="searchBox" extends="chrome://global/content/bindings/autocomplete.xml#autocomplete">
     <handlers>
         <handler event="keypress"><![CDATA[
+        FBTrace.sysout("searchBox handler ", event);
             if (event.keyCode == 13)
             {
                 if (FBL.isControl(event))

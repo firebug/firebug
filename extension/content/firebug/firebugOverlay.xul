@@ -35,7 +35,7 @@
         <command id="cmd_focusFirebugSearch" oncommand="Firebug.Search.focus(FirebugContext)"/>
         <command id="cmd_focusWatchEditor" oncommand="Firebug.Debugger.focusWatch(FirebugContext)"/>
         <command id="cmd_focusLocation" oncommand="FirebugChrome.focusLocationList(FirebugContext)"/>
-		<command id="cmd_focusFbMenu" oncommand="FirebugChrome.focusFbToolbar()"/>
+        <command id="cmd_focusFbMenu" oncommand="FirebugChrome.focusFbToolbar()"/>
 
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" breakable="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
@@ -44,7 +44,7 @@
         <command id="cmd_reenterCommand" oncommand="Firebug.CommandLine.reenter(FirebugContext)"/>
 
         <command id="cmd_previousFirebugTab" oncommand="FirebugChrome.gotoPreviousTab()"/>
-        <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>        
+        <command id="cmd_leftFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(false)"/>
         <command id="cmd_rightFirebugTab" oncommand="FirebugChrome.gotoSiblingTab(true)"/>
         <command id="cmd_nextObject" oncommand="FirebugChrome.gotoNextObject()"/>
         <command id="cmd_previousObject" oncommand="FirebugChrome.gotoNextObject(true)"/>
@@ -52,7 +52,7 @@
         <command id="cmd_clearAllBreakpoints" oncommand="Firebug.Debugger.clearAllBreakpoints(FirebugContext)"/>
         <command id="cmd_breakOnErrors" oncommand="Firebug.togglePref('breakOnErrors')"/>
         <command id="cmd_decompileEvals" oncommand="Firebug.togglePref('decompileEvals')"/>
-        
+
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
         <command id="cmd_searchNext" oncommand="Firebug.Search.update(FirebugContext, true, false)"/>
         <command id="cmd_searchPrev" oncommand="Firebug.Search.update(FirebugContext, true, true)"/>
@@ -76,7 +76,7 @@
                 command="cmd_focusLocation"/>
         <key id="key_focusLocation" key=" " modifiers="control" class="fbOnlyKey"
                 command="cmd_focusLocation"/>
-		<key id="key_focusFbMenu" key="o" modifiers="accel shift" class="fbOnlyKey"
+        <key id="key_focusFbMenu" key="o" modifiers="accel shift" class="fbOnlyKey"
                 command="cmd_focusFbMenu"/>
         <key id="key_nextObject" key="." modifiers="control" class="fbOnlyKey"
                 command="cmd_nextObject"/>
@@ -174,13 +174,13 @@
             <hbox id="fbTraceButtons" collapsed="true">
                 <toolbarseparator/>
                 <toolbarbutton id="fbTraceOpenConsole" class="toolbar-text-button"
-                               label="Open Console" tooltiptext="Open Console Tooltip" 
+                               label="Open Console" tooltiptext="Open Console Tooltip"
                                command="cmd_toggleTraceConsole"/>
             </hbox>
-            
+
             <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
             <hbox id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                            collapsed="true" 
+                            collapsed="true"
                             labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"></hbox>
 
             <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
@@ -198,26 +198,19 @@
                             tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
             </hbox>
 
-            <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1" label="Search Firebug Panel"/>
-            <hbox id="fbSearchButtons">
-                <toolbarbutton id="fbSearchNext" command="cmd_searchNext"
-                            label="search.Next" class="toolbar-text-button" />
-                <toolbarbutton id="fbSearchPrev" command="cmd_searchPrev"
-                            label="search.Prev" class="toolbar-text-button" />
-                <toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" id="fbSearchOptions">
-                    <menupopup id="searchOptionsPopup"
-                            onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                        <menuitem id="menu_searchCaseSensitive" type="checkbox" 
-                                  label="search.Search Case Sensitive"
+            <menupopup id="fbSearchButtons" position="before_start" open="true" ignorekeys="true">
+                <menuitem id="menu_searchCaseSensitive" type="checkbox"
+                                  label="search.Match A or a"
                                   oncommand="FirebugChrome.onToggleOption(this)"
                                   option="searchCaseSensitive"/>
-                        <menuitem id="menu_searchAllFiles" type="checkbox" 
-                                  label="search.Search All Files"
+               <menuitem id="menu_searchAllFiles" type="checkbox"
+                                  label="search.Multiple Files"
                                   oncommand="FirebugChrome.onToggleOption(this)"
                                   option="searchGlobal"/>
-                    </menupopup>
-                </toolbarbutton>
-            </hbox>
+            </menupopup>
+
+            <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1" label="Search Firebug Panel"/>
+
         </hbox>
     </toolbar>
 
