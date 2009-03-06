@@ -175,14 +175,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
         {
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> watchTopWindow context.loaded:"+context.loaded);
-            if (context.showContextTimeout)
-                clearTimeout(context.showContextTimeout);
-            delete context.showContextTimeout;
-
-            this.watchContext(win, context);  // calls showContext
+            this.rushShowContext(win, context);
         }
 
         return context;  // we did create or find a context
+    },
+
+    rushShowContext: function(win, context)
+    {
+        if (context.showContextTimeout)
+            clearTimeout(context.showContextTimeout);
+        delete context.showContextTimeout;
+
+        this.watchContext(win, context);  // calls showContext
     },
 
     // Listeners decide to show or not
@@ -279,6 +284,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (context && !context.loaded)
         {
             context.loaded = true;
+
+            if (context.showContextTimeout)
+                this.rushShowContext(win, context);
+
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> Context *** LOADED *** in watchLoadedTopWindow, id: "+context.uid+
                     ", uri: "+win.location.href+"\n");
