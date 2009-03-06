@@ -717,9 +717,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
     disablePanel: function(module)
     {
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
-
-        // The panel was disabled and the content is removed so, don't forget
-        // to reset the basice request table.
         this.table = null;
     },
 
@@ -730,29 +727,32 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         this.showToolbarButtons("fbNetButtons", true);
 
-        var shouldShow = this.shouldShow();
-        this.showToolbarButtons("fbNetButtonsFilter", shouldShow);
-        if (!shouldShow)
+        var enabled = Firebug.NetMonitor.isAlwaysEnabled();
+        this.showToolbarButtons("fbNetButtonsFilter", enabled);
+
+        if (enabled)
+        {
+            Firebug.NetMonitor.disabledPanelPage.hide(this);
+        }
+        else
+        {
+            Firebug.NetMonitor.disabledPanelPage.show(this);
+            this.table = null;
+        }
+
+        if (!enabled)
             return;
 
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
+
+        monitorContext(this.context);
 
         this.layout();
         this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
-    },
-
-    shouldShow: function()
-    {
-        if (Firebug.NetMonitor.isAlwaysEnabled())
-            return true;
-
-        Firebug.NetMonitor.disabledPanelPage.show(this);
-
-        return false;
     },
 
     hide: function()
@@ -763,6 +763,8 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         this.showToolbarButtons("fbNetButtons", false);
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+
+        unmonitorContext(this.context);
 
         clearInterval(this.layoutInterval);
         delete this.layoutInterval;
