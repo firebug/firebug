@@ -1497,7 +1497,7 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
       
     summarizeHistory: function(history)
     {
-		return "nsIDOMHistory is broken";
+		return "object does not support history (nsIDOMHistory)";
     },
     
     showHistory: function(history)
@@ -1558,7 +1558,6 @@ Firebug.registerRep(
     this.Null,
     this.Number,
     this.String,
-    this.Func,
     this.Window,
     this.ApplicationCache, // must come before Arr (array) else exceptions.
     this.ErrorMessage,
@@ -1579,7 +1578,7 @@ Firebug.registerRep(
     this.Arr
 );
 
-Firebug.setDefaultRep(this.Obj);
+Firebug.setDefaultReps(this.Func, this.Obj);
 
 }});
 
