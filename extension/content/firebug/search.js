@@ -176,13 +176,15 @@ Firebug.Search = extend(Firebug.Module,
 
     onSearchBoxFocus: function(event)
     {
-        FBTrace.sysout("onSearchBoxFocus no-op");
+        if (FBTrace.DBG_SEARCH)
+            FBTrace.sysout("onSearchBoxFocus no-op");
         //this.showState();
     },
 
     onSearchButtonKey: function(event)
     {
-        FBTrace.sysout("onSearchButtonKey ", event);
+        if (FBTrace.DBG_SEARCH)
+            FBTrace.sysout("onSearchButtonKey ", event);
         var searchBox = FirebugChrome.$("fbSearchBox");
         searchBox.dispatchEvent(event);
     },

@@ -1292,7 +1292,6 @@ top.Firebug =
 
     observe: function(subject, topic, data)
     {
-        FBTrace.sysout("Firebug.observe subject: "+subject+" topic "+topic+" data: "+data+"\n");
         if (data.indexOf("extensions.") == -1)
             return;
 
@@ -2955,7 +2954,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
     onEnable: function(event)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.onEnable; " + 
+            FBTrace.sysout("firebug.DisabledPanelPage.onEnable; " +
                 FirebugContext ? FirebugContext.getName() : "NO CONTEXT");
 
         Firebug.ModuleManager.enableModules(FirebugContext);

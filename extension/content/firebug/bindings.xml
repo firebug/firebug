@@ -825,7 +825,6 @@
 <binding id="searchBox" extends="chrome://global/content/bindings/autocomplete.xml#autocomplete">
     <handlers>
         <handler event="keypress"><![CDATA[
-        FBTrace.sysout("searchBox handler ", event);
             if (event.keyCode == 13)
             {
                 if (FBL.isControl(event))
