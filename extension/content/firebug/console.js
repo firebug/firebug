@@ -456,6 +456,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var enabled = Firebug.Console.isAlwaysEnabled();
         if (!enabled)
             Firebug.Console.disabledPanelPage.show(this);
+        else
+            Firebug.Console.disabledPanelPage.hide(this);
 
         FirebugContext.chrome.$("fbCommandBox").collapsed = !enabled;
         if (Firebug.largeCommandLine)
