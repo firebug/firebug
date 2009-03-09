@@ -1492,9 +1492,10 @@ top.Firebug =
                         Firebug.showContext(browser, null);
                     }
                 }, 100);
-
-                browser.chrome.clearPanels();
             }
+
+            // Hide the current selected panel now when its context is still valid object.
+            browser.chrome.clearPanels();
 
             if (context.externalChrome)
             {
@@ -1796,7 +1797,12 @@ Firebug.Panel =
     {
         try
         {
-            if (!this.context.browser) // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
+            // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
+            // xxxHonza: this should be fixed, the problem was that selectedPanel was
+            // removed from panelBar (binding) after the context was destroyed.
+            // So, the panel.hide() method used invalid context object.
+            // The selected panel is now removed wihint Firebug.destroyContext(); 
+            if (!this.context.browser)
             {
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this.context", this.context.getName())

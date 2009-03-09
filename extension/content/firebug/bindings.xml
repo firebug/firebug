@@ -58,7 +58,7 @@
             this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
             this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
         ]]></constructor>
-
+        
         <method name="createTab">
             <parameter name="panelType"/>
             <body><![CDATA[

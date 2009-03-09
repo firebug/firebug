@@ -538,7 +538,7 @@ var TabProgressListener = extend(BaseProgressListener,
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> TabProgressListener.onStateChange to: "
-                +safeGetName(request)+"\n"+getStateDescription(flag)+"\n");
+                +safeGetName(request)+" "+getStateDescription(flag)+"\n");
 
         /*if (flag & STATE_STOP)
         {
