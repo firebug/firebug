@@ -2812,14 +2812,16 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     showUI: function(browser, context)  // Firebug is opened, in browser or detached
     {
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("Firebug.showUI no-op")
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("Firebug.showUI; " + this.panelName + ", " + 
+                (context ? context.getName() : "No Context"));
     },
 
     hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
     {
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("Firebug.hideUI no-op")
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("Firebug.hideUI; " + this.panelName + ", " + 
+                (context ? context.getName() : "No Context"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

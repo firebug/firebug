@@ -706,18 +706,34 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.NetPanel.initialize; " + context.getName());
 
+        // we listen for showUI/hideUI for panel activation
+        Firebug.registerUIListener(this);
+
         Firebug.ActivablePanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
         Firebug.ActivablePanel.destroy.apply(this, arguments);
+
+        Firebug.unregisterUIListener(this);
     },
 
     disablePanel: function(module)
     {
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
         this.table = null;
+    },
+
+    // UI Listener
+    showUI: function(browser, context)
+    {
+        monitorContext(context);
+    },
+
+    hideUI: function(browser, context)
+    {
+        unmonitorContext(context);
     },
 
     show: function(state)
@@ -746,8 +762,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
-        monitorContext(this.context);
-
         this.layout();
         this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
 
@@ -765,8 +779,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
-
-        unmonitorContext(this.context);
 
         clearInterval(this.layoutInterval);
         delete this.layoutInterval;
@@ -2331,6 +2343,9 @@ function monitorContext(context)
     networkContext = contexts[tabId];
     if (networkContext)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.monitorContext; Use temporary context.");
+
         networkContext.context = context;
         delete contexts[tabId];
     }
@@ -2378,6 +2393,12 @@ function unmonitorContext(context)
 
         netProgress.pending.splice(0, netProgress.pending.length);
     }
+
+    // Since the print into the UI is done by timeout asynchronously, 
+    // make sure there are no requests left.
+    var panel = context.getPanel(panelName, true);
+    if (panel)
+        panel.updateLayout();
 
     // Remove cache listener
     context.sourceCache.removeListener(netProgress);
