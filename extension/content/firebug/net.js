@@ -1404,8 +1404,13 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         var lastRow = tbody.lastChild.previousSibling;
 
         // Insert an activation message (if the last row isn't the message already);
-        if (!hasClass(lastRow, "netActivationRow"))
-            this.activationTag.insertRows({}, lastRow)[0];
+        if (hasClass(lastRow, "netActivationRow"))
+            return;
+
+        var message = this.activationTag.insertRows({}, lastRow)[0];
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.insertActivationMessage; ", message);
     }
 });
 
@@ -2435,7 +2440,7 @@ function getCacheEntry(file, netProgress)
 {
     if (FBTrace.DBG_NET)
         FBTrace.sysout("net.getCacheEntry for file.href: " + file.href + "\n");
-
+    
     // Pause first because this is usually called from stopFile, at which point
     // the file's cache entry is locked
     setTimeout(function delayGetCacheEntry()
