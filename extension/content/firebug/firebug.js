@@ -2721,7 +2721,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         this.disabledPanelPage = new Firebug.DisabledPanelPage(this);
 
-        uiListeners.push(this);  // we listen for showUI/hideUI for panel activation
+        Firebug.registerUIListener(this);  // we listen for showUI/hideUI for panel activation
 
         this.updateTab(null);
     },
@@ -2729,6 +2729,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
+
+        Firebug.unregisterUIListener(this);
     },
 
     reattachContext: function(browser, context)
