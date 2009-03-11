@@ -1683,14 +1683,7 @@ function NetProgress(context)
         requestQueue = [];
     };
 
-    // tabCache listener. This must be property of the object itself (not of the prototype).
-    // So the FBL.dispatch method can find it (using hasOwnProperty).
-    this.onStoreResponse = function(win, request, lines)
-    {
-        var file = this.getRequestFile(request, null, true);
-        if (file)
-            file.responseText = lines ? lines.join("\n") : "";
-    };
+    this.cacheListener = new NetCacheListener(this);
 
     this.clear();
 }
@@ -1721,6 +1714,8 @@ NetProgress.prototype =
             file.respondedTime = time;
             file.isXHR = xhr;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
+            file.method = request.requestMethod;
+            file.urlParams = parseURLParams(file.href);
 
             this.awaitFile(request, file);
             this.extendPhase(file);
@@ -1752,6 +1747,8 @@ NetProgress.prototype =
             else if (!file.fromCache)
                 file.fromCache = false;
 
+            dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [context, request]);
+
             getHttpHeaders(request, file);
 
             file.responseStatus = info.responseStatus;
@@ -1764,12 +1761,11 @@ NetProgress.prototype =
             if (file.fromCache)
                 getCacheEntry(file, this);
 
-            dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
-
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.respondedFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
 
+            dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
             return file;
         }
     },
@@ -1834,8 +1830,6 @@ NetProgress.prototype =
             file.endTime = time;
 
             //this.endLoad(file);
-
-            dispatch(Firebug.NetMonitor.fbListeners, "onProgress", [this.context, file]);
         }
 
         return file;
@@ -1969,7 +1963,6 @@ NetProgress.prototype =
             file.request = request;
             this.requests.push(request);
             this.files.push(file);
-
             return file;
         }
 
@@ -2179,6 +2172,38 @@ var contentLoad = NetProgress.prototype.contentLoad;
 // ************************************************************************************************
 
 /**
+ * TabCache listner implementation. Net panel uses this listner to remember all
+ * responses stored into the cache. There can be more requests to the same URL that
+ * returns different responses. The Net panels must remember all of them (tab cache
+ * remembers only the last one)
+ */
+function NetCacheListener(netProgress)
+{
+    this.netProgress = netProgress;
+}
+
+NetCacheListener.prototype = 
+{
+    onStartRequest: function(context, request)
+    {
+        // Keep in mind tha the file object (representing the request) doesn't have to be 
+        // created at this moment (top document request).
+    },
+
+    onStopRequest: function(context, request, responseText)
+    {
+        // Remember the response for this request.
+        var file = this.netProgress.getRequestFile(request, null, true);
+        if (file)
+            file.responseText = responseText;
+
+        dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
+    }
+}
+
+// ************************************************************************************************
+
+/**
  * A Document is a helper object that represents a document (window) on the page.
  * This object is created for main page document and for every embedded document (iframe)
  * for which a request is made.
@@ -2360,7 +2385,7 @@ function monitorContext(context)
     HttpObserver.registerObserver();
 
     // Add cache listener so, net panel has alwas fresh responses.
-    context.sourceCache.addListener(networkContext);
+    context.sourceCache.addListener(networkContext.cacheListener);
 
     // This listener is used to observe downlaod progress.
     context.browser.addProgressListener(listener, NOTIFY_ALL);
@@ -2381,7 +2406,7 @@ function unmonitorContext(context)
     if (FBTrace.DBG_NET)
         FBTrace.sysout("net.unmonitorContext; (" + context.netProgress + ") " + context.getName());
 
-    var netProgress = context.netProgress;
+    var netProgress = context ? context.netProgress : null;
     if (!netProgress)
         return;
 
@@ -2401,7 +2426,7 @@ function unmonitorContext(context)
         panel.updateLayout();
 
     // Remove cache listener
-    context.sourceCache.removeListener(netProgress);
+    context.sourceCache.removeListener(netProgress.cacheListener);
 
     // Remove progress listener.
     if (context.browser.docShell)
@@ -2558,8 +2583,10 @@ function getHttpHeaders(request, file)
     try
     {
         var http = QI(request, nsIHttpChannel);
-        file.method = http.requestMethod;
         file.status = request.responseStatus;
+
+        // xxxHonza: is there any problem to do this in requestedFile method?
+        file.method = http.requestMethod;
         file.urlParams = parseURLParams(file.href);
         file.mimeType = getMimeType(request.contentType, request.name);
 

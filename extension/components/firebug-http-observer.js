@@ -125,17 +125,17 @@ HttpRequestObserver.prototype =
         return null;
     },
 
-	/* nsISupports */
-	QueryInterface: function(iid) 
-	{
-        if (iid.equals(Ci.nsISupports) || 
+    /* nsISupports */
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService) ||
-			iid.equals(Ci.nsIObserver)) {
- 		    return this;
- 		}
-		
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+            iid.equals(Ci.nsIObserver)) {
+            return this;
+        }
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 }
 
 function safeGetName(request)
@@ -163,25 +163,25 @@ var HttpRequestObserverFactory =
 
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService) ||
-			iid.equals(Ci.nsIObserver))
-		{
+            iid.equals(Ci.nsIObserver))
+        {
             if (!gHttpObserverSingleton)
                 gHttpObserverSingleton = new HttpRequestObserver();
             return gHttpObserverSingleton.QueryInterface(iid);
         }
-        
+
         throw Cr.NS_ERROR_NO_INTERFACE;
     },
-    
-	QueryInterface: function(iid) 
-	{
-		if (iid.equals(Ci.nsISupports) ||
-		    iid.equals(Ci.nsISupportsWeakReference) ||
-		    iid.equals(Ci.nsIFactory))
-			return this;
-			
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsISupportsWeakReference) ||
+            iid.equals(Ci.nsIFactory))
+            return this;
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 };
 
 // ************************************************************************************************

@@ -343,8 +343,7 @@ top.XMLHttpRequestSpy.prototype =
 
         // Use tabCache to get XHR response. Notice that the tabCache isn't 
         // supported till Firefox 3.0.4
-        if (this.context.sourceCache.addListener)
-            this.context.sourceCache.addListener(this);
+        this.context.sourceCache.addListener(this);
     },
 
     detach: function()
@@ -357,8 +356,7 @@ top.XMLHttpRequestSpy.prototype =
         this.onLoad = null;
         this.onError = null;
 
-        if (this.context.sourceCache.removeListener)
-            this.context.sourceCache.removeListener(this);
+        this.context.sourceCache.removeListener(this);
     },
 
     getURL: function()
@@ -366,10 +364,11 @@ top.XMLHttpRequestSpy.prototype =
         return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
     },
 
-    onStoreResponse: function(win, request, lines)
+    // Cache listener
+    onStopRequest: function(context, request, responseText)
     {
         if (request == this.request)
-            this.responseText = lines ? lines.join("\n") : "";
+            this.responseText = responseText
     },
 };
 

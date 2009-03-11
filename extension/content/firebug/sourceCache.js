@@ -33,7 +33,7 @@ Firebug.SourceCache = function(window, context)
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype =
+Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 {
 	isCached: function(url)
 	{
@@ -247,7 +247,7 @@ Firebug.SourceCache.prototype =
         else
         	return "(no source for "+url+")";
     }
-};
+});
 
 // xxxHonza getPostText and readPostTextFromRequest are copied from
 // net.js. These functions should be removed when this cache is
