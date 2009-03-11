@@ -1014,10 +1014,12 @@ top.Firebug =
     {
         var browser = FirebugChrome.getCurrentBrowser();
         if (!browser.chrome)
-            return;
+            return null;
 
         if (browser.detached)
+        {
             browser.chrome.focus();
+        }
         else
         {
             if (FirebugContext)
@@ -1026,17 +1028,19 @@ top.Firebug =
             browser.detached = true;
 
             var args = {
-                    FBL: FBL,
-                    Firebug: this,
-                    browser: browser,
-                    context: FirebugContext
+                FBL: FBL,
+                Firebug: this,
+                browser: browser,
+                context: FirebugContext
             };
-            openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+            var window = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
             detachCommand.setAttribute("checked", true);
-
             FirebugChrome.clearPanels();
             this.syncBar();
+            return window;
         }
+
+        return null;
     },
 
     syncBar: function()  // show firebug if we should
