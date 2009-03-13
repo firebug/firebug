@@ -1733,6 +1733,8 @@ NetProgress.prototype =
 
     respondedFile: function respondedFile(request, time, info)
     {
+        dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [context, request]);
+
         var file = this.getRequestFile(request);
         if (file)
         {
@@ -1746,8 +1748,6 @@ NetProgress.prototype =
                 file.fromCache = true;
             else if (!file.fromCache)
                 file.fromCache = false;
-
-            dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [context, request]);
 
             getHttpHeaders(request, file);
 
