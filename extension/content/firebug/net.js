@@ -1408,6 +1408,9 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
     insertActivationMessage: function()
     {
+        if (!Firebug.NetMonitor.isAlwaysEnabled())
+            return;
+
         // Make sure the basic structure of the table panel is there.
         this.initLayout();
 
