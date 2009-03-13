@@ -213,7 +213,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
 
         // Do not Create if any Listener says true to shouldNotCreateContext
-        if ( dispatch(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]) )
+        if ( dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]) )
             return false;
 
         if (FBTrace.DBG_WINDOWS)
