@@ -7,7 +7,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Not Panel Specific ==
     * Improved and simplified "natural" Activation UI.
     * Firebug remembers which pages you had opened Firebug on.
-    * Supports Firefox 3.1
+    * Supports Firefox 3.5
     * auto-suspend
     * Adds tab switching shortcut. Currently hardcoded to ctrl + shift + pgup/pgdown
     * search across all files (contribution by kpdecker)
