@@ -326,7 +326,7 @@ Firebug.TraceModule = extend(Firebug.Module,
             text.indexOf("EXCEPTION") != -1 ||
             text.indexOf("FAILS") != -1)
         {
-            message.type = "DBG_ERROR";
+            message.type = "DBG_ERRORS";
         }
 
         Firebug.TraceModule.MessageTemplate.dump(message, parentNode);

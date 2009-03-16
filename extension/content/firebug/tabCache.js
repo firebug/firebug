@@ -360,7 +360,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         }
         catch (err)
         {
-            if (FBTrace.DBG_ERROR || FBTrace.DBG_CACHE)
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.loadFromCache EXCEPTION " + url, err);
         }
         finally

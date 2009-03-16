@@ -3055,14 +3055,14 @@ this.parseJSONString = function(jsonString, originURL)
             try {
                 jsonObject = Components.utils.evalInSandbox(jsonString, s);
             } catch(ex) {
-                if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
                     FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
                 return null;
             }
         }
         else
         {
-            if (FBTrace.DBG_ERROR || FBTrace.DBG_JSONVIEWER)
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
                 FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
             return null;
         }

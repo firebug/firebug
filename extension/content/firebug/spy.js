@@ -508,7 +508,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERROR)
+        if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION", exc);
     }
     finally
