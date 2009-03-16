@@ -97,30 +97,31 @@ pref("extensions.firebug.DBG_FBS_FINDDEBUGGER", false);   // firebug findDebugge
 pref("extensions.firebug.DBG_FBS_STEP", false);     // firebug stepping                  /*@explore*/
 pref("extensions.firebug.DBG_FBS_TRACKFILES", false); // dump all js files to disk
 pref("extensions.firebug.DBG_FBS_FUNCTION", false); // firebug new Function              /*@explore*/
-pref("extensions.firebug.DBG_BP", false); 			// debugger.js and firebug-services.js; lots of output   /*@explore*/
-pref("extensions.firebug.DBG_TOPLEVEL", false); 	// top level jsd scripts                     /*@explore*/
-pref("extensions.firebug.DBG_STACK", false);  		// call stack, mostly debugger.js            /*@explore*/
-pref("extensions.firebug.DBG_UI_LOOP", false); 		// debugger.js                               /*@explore*/
-pref("extensions.firebug.DBG_ERRORS", false);  		// error.js                                  /*@explore*/
-pref("extensions.firebug.DBG_EVENTS", false);  		// debugger.js for event handlers, need more /*@explore*/
+pref("extensions.firebug.DBG_BP", false);           // debugger.js and firebug-services.js; lots of output   /*@explore*/
+pref("extensions.firebug.DBG_TOPLEVEL", false);     // top level jsd scripts                     /*@explore*/
+pref("extensions.firebug.DBG_STACK", false);        // call stack, mostly debugger.js            /*@explore*/
+pref("extensions.firebug.DBG_UI_LOOP", false);      // debugger.js                               /*@explore*/
+pref("extensions.firebug.DBG_ERRORS", false);       // error.js                                  /*@explore*/
+pref("extensions.firebug.DBG_EVENTS", false);       // debugger.js for event handlers, need more /*@explore*/
 pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon functions          /*@explore*/
-pref("extensions.firebug.DBG_EVAL", false);    		// debugger.js and firebug-service.js        /*@explore*/
-pref("extensions.firebug.DBG_PANELS", false);  		// panel selection                           /*@explore*/
-pref("extensions.firebug.DBG_CACHE", false);   		// sourceCache                               /*@explore*/
-pref("extensions.firebug.DBG_CONSOLE", false);        // console                                   /*@explore*/
+pref("extensions.firebug.DBG_EVAL", false);         // debugger.js and firebug-service.js        /*@explore*/
+pref("extensions.firebug.DBG_PANELS", false);       // panel selection                           /*@explore*/
+pref("extensions.firebug.DBG_CACHE", false);        // sourceCache                               /*@explore*/
+pref("extensions.firebug.DBG_CONSOLE", false);      // console                                   /*@explore*/
 pref("extensions.firebug.DBG_CSS", false);          //                                             /*@explore*/
 pref("extensions.firebug.DBG_DBG2FIREBUG", false);  //                                             /*@explore*/
-pref("extensions.firebug.DBG_DOM", false);  //                                             /*@explore*/
+pref("extensions.firebug.DBG_DOM", false);          //                                             /*@explore*/
 pref("extensions.firebug.DBG_DISPATCH", false);     //                                          /*@explore*/
 pref("extensions.firebug.DBG_HTML", false);         //                                          /*@explore*/
 pref("extensions.firebug.DBG_LINETABLE", false);    // /*@explore*/
 pref("extensions.firebug.DBG_LOCATIONS", false);    // panelFileList
-pref("extensions.firebug.DBG_SOURCEFILES", false); 	// debugger and sourceCache                  /*@explore*/ 
-pref("extensions.firebug.DBG_WINDOWS", false);    	// tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
-pref("extensions.firebug.DBG_NET", false);        	// net.js                                    /*@explore*/
+pref("extensions.firebug.DBG_SOURCEFILES", false);  // debugger and sourceCache                  /*@explore*/ 
+pref("extensions.firebug.DBG_WINDOWS", false);      // tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
+pref("extensions.firebug.DBG_NET", false);          // net.js                                    /*@explore*/
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
-pref("extensions.firebug.DBG_INSPECT", false);   // inspector  /*@explore*/
+pref("extensions.firebug.DBG_INSPECT", false);      // inspector  /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/
-pref("extensions.firebug.DBG_FBS_FLUSH", false); // /*@explore*/
+pref("extensions.firebug.DBG_FBS_FLUSH", false);    // /*@explore*/
 pref("extensions.firebug.DBG_HTTPOBSERVER", false); // Centralized HTTP Observer /*@explore*/
 pref("extensions.firebug.DBG_SPY", false);          // spy.js
+pref("extensions.firebug.DBG_JSONVIEWER", false);   // spy.js
