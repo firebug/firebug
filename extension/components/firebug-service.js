@@ -2328,7 +2328,7 @@ var FirebugFactory =
         try
         {
             var jsd = DebuggerService.getService(jsdIDebuggerService);
-            jsd.initAtStartup = true;
+            jsd.initAtStartup = false;
         }
         catch (exc)
         {
