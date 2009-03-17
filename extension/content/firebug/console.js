@@ -222,6 +222,7 @@ Firebug.Console = extend(ActivableConsole,
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
+        Firebug.Errors.stopObserving();
         $('fbStatusIcon').removeAttribute("console");
     },
 
@@ -230,7 +231,10 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
         if (Firebug.Console.isAlwaysEnabled())
+        {
+            Firebug.Errors.startObserving();
             $('fbStatusIcon').setAttribute("console", "on");
+        }
     },
 
     // ----------------------------------------------------------------------------------------------------
