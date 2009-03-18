@@ -148,27 +148,6 @@ const styleGroups =
         "-moz-box-sizing"
     ],
 
-    display: [
-        "none",
-        "block",
-        "inline",
-        "list-item",
-        "run-in",
-        "compact",
-        "marker",
-        "table",
-        "inline-table",
-        "inline-block",
-        "table-row-group",
-        "table-header-group",
-        "table-footer-group",
-        "table-row",
-        "table-column-group",
-        "table-column",
-        "table-cell",
-        "table-caption"
-    ],
-
     other: [
         "cursor",
         "list-style-image",

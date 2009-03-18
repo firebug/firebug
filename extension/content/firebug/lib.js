@@ -6172,6 +6172,7 @@ this.cssKeywords =
     [
         "block",
         "inline",
+        "inline-block",
         "list-item",
         "marker",
         "run-in",
