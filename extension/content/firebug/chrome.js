@@ -380,6 +380,7 @@ top.FirebugChrome =
         if (FirebugContext.previousPanelName)
             this.selectPanel(FirebugContext.previousPanelName);
     },
+    
     gotoSiblingTab : function(goRight)
     {
         if ($('fbContentBox').collapsed)
@@ -405,6 +406,7 @@ top.FirebugChrome =
             }
         }
     },
+    
     focusFbToolbar : function()
     {
         Firebug.focusAnchor = document.commandDispatcher.focusedElement;
@@ -414,10 +416,12 @@ top.FirebugChrome =
             $('fbToolbar').className = "focused";
         }
     },
+    
     openPanelOptionsMenu : function()
     {
         FBTrace.sysout('test');
     },
+    
     getNextObject: function(reverse)
     {
         var panel = FirebugContext.getPanel(FirebugContext.panelName);

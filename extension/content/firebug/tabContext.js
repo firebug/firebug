@@ -28,7 +28,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.externalChrome = chrome;
     }
 
-    this.name = this.getWindowLocation().toString();
+    this.name = normalizeURL(this.getWindowLocation().toString());
 
     this.windows = [];
     this.panelMap = {};
@@ -90,7 +90,7 @@ Firebug.TabContext.prototype =
     getName: function()
     {
     	if (!this.name)
-    		this.name = this.getWindowLocation().toString();
+    		this.name = normalizeURL(this.getWindowLocation().toString());
         return this.name;
     },
 

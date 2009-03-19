@@ -2907,16 +2907,22 @@ this.absoluteURLWithDots = function(url, baseURL)
     }
 }
 
-this.normalizeURL = function(url)
+this.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
 {
     if (!url)
         return "";
     // Replace one or more characters that are not forward-slash followed by /.., by space.
     if (url.length < 255) // guard against monsters.
-        url = url.replace(/[^/]+\/\.\.\//, "", "g");
-    // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
-    // don't match up with the URLs we get back from the DOM
-    return url ? url.replace(/file:\/([^/])/g, "file:///$1") : "";
+    {
+        // Replace one or more characters that are not forward-slash followed by /.., by space.
+    	url = url.replace(/[^/]+\/\.\.\//, "", "g");
+    	// Issue 1496, avoid #
+    	url = url.replace(/#.*/,"");
+    	// For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
+    	// don't match up with the URLs we get back from the DOM
+    	url = url.replace(/file:\/([^/])/g, "file:///$1");
+    }
+    return url;
 };
 
 this.denormalizeURL = function(url)

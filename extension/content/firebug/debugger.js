@@ -1012,7 +1012,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var source = creatorURL + "/"+getUniqueId();
         }
 
-        var url = this.getDynamicURL(context, frame.script.fileName, source, "event");
+        var url = this.getDynamicURL(context, normalizeURL(frame.script.fileName), source, "event");
 
         var lines = context.sourceCache.store(url, source);
         var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
@@ -1205,9 +1205,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var source = " bah createSourceFileForFunctionConstructor"; //ctor_script.functionSource;
 
         if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");                     /*@explore*/
-        var url = this.getDynamicURL(context, caller_frame.script.fileName, source, "Function");
+        var url = this.getDynamicURL(context, normalizeURL(caller_frame.script.fileName), source, "Function");
 
-        var lines =	context.sourceCache.store(url, source);
+        var lines = context.sourceCache.store(url, source);
         var sourceFile = new FBL.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
         context.addSourceFile(sourceFile);
 
@@ -1273,7 +1273,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var lines = splitLines(source);
 
-        var url = this.getDynamicURL(context, frame.script.fileName, lines, "eval");
+        var url = this.getDynamicURL(context, normalizeURL(frame.script.fileName), lines, "eval");
 
         context.sourceCache.storeSplitLines(url, lines);
 
@@ -2490,22 +2490,23 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList BEFORE iterateWindows ", list); /*@explore*/
 
-       iterateWindows(context.window, function(win) {
-            if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-                FBTrace.sysout("getLocationList iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);  /*@explore*/
-            if (!win.document.documentElement)
+       iterateWindows(context.window, function(win) 
+       {
+           var url = normalizeURL(win.location.href); 
+           if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
+                FBTrace.sysout("getLocationList iterateWindows: "+url, " documentElement: "+win.document.documentElement);  /*@explore*/
+           if (!win.document.documentElement)
                 return;
-            var url = win.location.href;
-            if (url)
-            {
-                if (context.sourceFileMap.hasOwnProperty(url))
-                    return;
-                var URLOnly = new NoScriptSourceFile(context, url);
-                context.addSourceFile(URLOnly);
-
+            
+           if (url)
+           {
+               if (context.sourceFileMap.hasOwnProperty(url))
+                   return;
+               var URLOnly = new NoScriptSourceFile(context, url);
+               context.addSourceFile(URLOnly);
                 list.push(URLOnly);
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url, URLOnly);
-            }
+               if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url, URLOnly);
+           }
         });
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList ", list);
         return list;
