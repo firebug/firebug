@@ -1448,8 +1448,9 @@ FirebugService.prototype =
             }
 
             // reset tracing flags on first unfiltered filename
-            if (!FBTrace.DBG_FF_START)
+            if (!FBTrace.DBG_FF_START && !fbs.firstUnfilteredFilename)
             {
+            	fbs.firstUnfilteredFilename = true;
                 FBTrace.DBG_FBS_BP = fbs.resetBP ? true : false;
                 FBTrace.DBG_FBS_CREATION = fbs.resetCreation ? true : false;
             }
