@@ -1217,7 +1217,8 @@ FirebugService.prototype =
 
         if (fbs.trackThrowCatch)
         {
-            if (FB.DBG_FBS_ERRORS) FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc);
+            if (FBTrace.DBG_FBS_ERRORS) 
+            	FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc);
 
             var debuggr = this.findDebugger(frame);
             if (debuggr)
@@ -1729,7 +1730,7 @@ FirebugService.prototype =
             return false;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("askDebuggersForSupport "+debuggers.length+ " debuggers to check for "+frame.script.fileName);
+            FBTrace.sysout("askDebuggersForSupport "+debuggers.length+ " debuggers to check for "+frame.script.fileName, debuggers);
 
         for ( var i = debuggers.length - 1; i >= 0; i--)
         {
