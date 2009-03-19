@@ -728,12 +728,14 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
     // UI Listener
     showUI: function(browser, context)
     {
-        monitorContext(context);
+        if (Firebug.NetMonitor.isAlwaysEnabled())  // XXXjjb Honza I wonder if this should be done here or only in onPanelEnable and onResume?
+            monitorContext(context);
     },
 
     hideUI: function(browser, context)
     {
-        unmonitorContext(context);
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            unmonitorContext(context);
     },
 
     show: function(state)
@@ -2185,11 +2187,11 @@ function NetCacheListener(netProgress)
     this.netProgress = netProgress;
 }
 
-NetCacheListener.prototype = 
+NetCacheListener.prototype =
 {
     onStartRequest: function(context, request)
     {
-        // Keep in mind tha the file object (representing the request) doesn't have to be 
+        // Keep in mind tha the file object (representing the request) doesn't have to be
         // created at this moment (top document request).
     },
 
@@ -2422,7 +2424,7 @@ function unmonitorContext(context)
         netProgress.pending.splice(0, netProgress.pending.length);
     }
 
-    // Since the print into the UI is done by timeout asynchronously, 
+    // Since the print into the UI is done by timeout asynchronously,
     // make sure there are no requests left.
     var panel = context.getPanel(panelName, true);
     if (panel)
@@ -2489,7 +2491,7 @@ function getCacheEntry(file, netProgress)
 {
     if (FBTrace.DBG_NET)
         FBTrace.sysout("net.getCacheEntry for file.href: " + file.href + "\n");
-    
+
     // Pause first because this is usually called from stopFile, at which point
     // the file's cache entry is locked
     setTimeout(function delayGetCacheEntry()
