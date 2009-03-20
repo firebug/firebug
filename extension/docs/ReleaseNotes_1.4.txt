@@ -13,6 +13,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * search across all files (contribution by kpdecker)
     * Accessiblity by Hans Hillen, incl. tabbing and focus identification.
     * (some) Testing before shipping!
+    * jsd.initAtStartup set false not true
 
 == Javascript Debugging ==
     * Implement breakOnNext UI for STEP_SUSPEND
@@ -113,6 +114,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1479: Horizontal scroll bar appears and disappears when scrolling vertically in script tab (contribution by kpdecker)
     * Issue 1483: Scripts fail to load when page reloaded during paused execution
     * Issue 1495: No more ajax response for a while
+    * Issue 1496: Hash Character Links ( the # or fragement identifier for a URL) Creates Seperate Script View
     * issue 1508: Problems with some downloads.
     * Issue 1547: &editors.Description;
     * Issue 1592: Added display: autocompletions to CSS editor
+    * Issue 1591: Firebug cannot find _firebugConsole element
