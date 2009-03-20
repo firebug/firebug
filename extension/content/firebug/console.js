@@ -464,10 +464,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             Firebug.Console.disabledPanelPage.show(this);
         else
             Firebug.Console.disabledPanelPage.hide(this);
-
-        FirebugContext.chrome.$("fbCommandBox").collapsed = !enabled;
-        if (Firebug.largeCommandLine)
-            Firebug.CommandLine.setMultiLine(enabled);
     },
 
     enablePanel: function(module)
