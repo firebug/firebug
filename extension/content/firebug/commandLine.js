@@ -183,13 +183,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context.sandboxes)
             context.sandboxes = [];
 
-        var sandbox = this.getSandboxByWindow(context, win);
-        if (!sandbox)
-        {
-            sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-            sandbox.__proto__ = (win.wrappedJSObject?win.wrappedJSObject:win); //  XPCNativeWrapper vs  XPCSafeJSObjectWrapper
-            context.sandboxes.push(sandbox); // XXXdolske does this get cleared?  LEAK?
-        }
+        var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
+        sandbox.__proto__ = (win.wrappedJSObject?win.wrappedJSObject:win); //  XPCNativeWrapper vs  XPCSafeJSObjectWrapper
 
         var scriptToEval = expr;
 
