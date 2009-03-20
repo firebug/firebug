@@ -209,9 +209,15 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         try {
             result = Components.utils.evalInSandbox(scriptToEval, sandbox);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("commandLine.evaluateInSandbox success for "+win.location, scriptToEval);
         } catch (e) {
-            if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("commandLine.evaluate FAILED:", e);  /*@explore*/
-            result = new FBL.ErrorMessage("commandLine.evaluate FAILED: " + e, FBL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("commandLine.evaluateInSandbox FAILED:"+e, e);
+                FBTrace.sysout("commandLine.evaluateInSandbox FAILED with [win, scriptToEval, sandbox]: "+win.location, [win, scriptToEval, sandbox]);
+            }
+            result = new FBL.ErrorMessage("commandLine.evaluateInSandbox FAILED: " + e, FBL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
         }
         return result;
     },
@@ -557,13 +563,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         // User has decided to use the command line, but the web page may not have the console if the page has no javascript
         if (Firebug.Console.isReadyElsePreparing(FirebugContext))
         {
-            Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("attachConsoleOnFocus, attachConsole "+FirebugContext.window.location+"\n");
-        }
-        else  // the page had _firebug so we know that consoleInjected.js compiled and ran.
-        {
+            // the page had _firebug so we know that consoleInjected.js compiled and ran.
             if (FBTrace.DBG_CONSOLE)
             {
                 if (FirebugContext)
@@ -571,6 +571,13 @@ Firebug.CommandLine = extend(Firebug.Module,
                 else
                     FBTrace.sysout("attachConsoleOnFocus: No FirebugContext\n");
             }
+        }
+        else
+        {
+            Firebug.Console.injector.forceConsoleCompilationInPage(FirebugContext, FirebugContext.window);
+
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("attachConsoleOnFocus, attachConsole "+FirebugContext.window.location+"\n");
         }
     },
 
@@ -604,7 +611,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         if (FBTrace.DBG_CONSOLE)
         {
             var uid = element.getAttribute('uid');  // set if // DBG removed from Injected
-            FBTrace.dumpProperties("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
+            FBTrace.sysout("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
             FBTrace.sysout("Firebug.CommandLine.CommandHandler: "+(win.wrappedJSObject?"win.wrappedJSObject._firebug":"win._firebug"), (win.wrappedJSObject?win.wrappedJSObject._firebug:win._firebug));
             if (!userObjects)
                 debugger;
@@ -715,7 +722,7 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS) /*@explore*/
-            FBTrace.dumpProperties("commandLine.autoCompleteEval FAILED", exc); /*@explore*/
+            FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc); /*@explore*/
         return [];
     }
 }
@@ -956,7 +963,7 @@ function CommandLineHandler(context, win)
         this.api = new FirebugCommandLineAPI(context,  baseWindow.wrappedJSObject);
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("commandline.handleEvent('firebugExecuteCommand') event in baseWindow "+baseWindow.location, event);
+            FBTrace.sysout("commandline.handleEvent('firebugExecuteCommand') event in baseWindow "+baseWindow.location, event);
 
         // Appends variables into the api.
         var htmlPanel = context.getPanel("html", true);
@@ -966,7 +973,7 @@ function CommandLineHandler(context, win)
             function createHandler(p) {
                 return function() {
                     if (FBTrace.DBG_CONSOLE)
-                        FBTrace.dumpProperties("commandline.getInspectorHistory: " + p, vars);
+                        FBTrace.sysout("commandline.getInspectorHistory: " + p, vars);
                     return vars[p] ? vars[p].wrappedJSObject : null;
                 }
             }
@@ -979,7 +986,7 @@ function CommandLineHandler(context, win)
             Firebug.Console.log($STRF("commandline.MethodNotSupported", [methodName]));
         }
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.dumpProperties("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+(context.baseWindow?context.baseWindow.location:"no basewindow"), context.baseWindow);
+            FBTrace.sysout("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+(context.baseWindow?context.baseWindow.location:"no basewindow"), context.baseWindow);
     };
 }
 

@@ -140,7 +140,7 @@ Firebug.Console = extend(ActivableConsole,
     isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.isReadyElsePreparing "+(win?win.location:context.window.location), (win?win:context.window));
+            FBTrace.sysout("console.isReadyElsePreparing, win is "+(win?"an argument: ":"null, context.window: ")+(win?win.location:context.window.location), (win?win:context.window));
 
         if (win)
             return this.injector.attachIfNeeded(context, win);
@@ -152,6 +152,8 @@ Firebug.Console = extend(ActivableConsole,
             // already in the list above attached = attached && this.injector.attachIfNeeded(context, context.window);
             if (context.windows.indexOf(context.window) == -1)
                 FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("console.isReadyElsePreparing attached to "+context.windows.length+" and returns "+attached);
             return attached;
         }
     },
