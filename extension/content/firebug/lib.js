@@ -272,7 +272,7 @@ this.addStyleSheet = function(doc, style)
 
 this.addScript = function(doc, id, src)
 {
-    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "script");
+    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
