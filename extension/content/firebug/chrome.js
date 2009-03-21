@@ -158,7 +158,7 @@ top.FirebugChrome =
                 Firebug.initializeUI(detachArgs);
 
         } catch (exc) {
-            FBTrace.dumpProperties("chrome.initializeUI fails", exc);
+            FBTrace.dumpProperties("chrome.initializeUI fails "+exc, exc);
         }
         var toolbar = $('fbToolbar');
         toolbar.addEventListener('keypress', handleFbToolbarKeyPress, true);

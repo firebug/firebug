@@ -255,9 +255,17 @@ top.Firebug =
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
 
-        Firebug.URLSelector.initialize();
-        TabWatcher.addListener(Firebug.URLSelector);  // listen for shouldCreateContext
-        uiListeners.push(Firebug.URLSelector); // listen for showUI
+        try
+        {
+        	Firebug.URLSelector.initialize();
+        	TabWatcher.addListener(Firebug.URLSelector);  // listen for shouldCreateContext
+        	uiListeners.push(Firebug.URLSelector); // listen for showUI
+        }
+        catch (exc)
+        {
+        	if (FBTrace.DBG_ERRORS)
+        		FBTrace.sysout("Firebug.initialzeUI failed to connect to URLSelector "+exc, exc);
+        }
 
         // If another window is opened, then the creation of our first context won't
         // result in calling of enable, so we have to enable our modules ourself
