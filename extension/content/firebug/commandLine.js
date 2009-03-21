@@ -174,6 +174,16 @@ Firebug.CommandLine = extend(Firebug.Module,
         return result;
     },
 
+    //
+    evaluateInWebPage: function(expr, context, targetWindow)
+    {
+        var win = targetWindow ? targetWindow : context.window;
+        var doc = (win.wrappedJSObject ? win.wrappedJSObject.document : win.document);
+        var element = addScript(doc, "_firebugInWebPage", expr);
+        element.parentNode.removeChild(element);  // we don't need the script element, result is in DOM object
+        return "true";
+    },
+
     // TODO: strip down to minimum, have one global sandbox that is reused.
     evaluateInSandbox: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
     {
@@ -183,8 +193,19 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context.sandboxes)
             context.sandboxes = [];
 
-        var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-        sandbox.__proto__ = (win.wrappedJSObject?win.wrappedJSObject:win); //  XPCNativeWrapper vs  XPCSafeJSObjectWrapper
+        if (win.wrappedJSObject) //  XPCNativeWrapper vs  XPCSafeJSObjectWrapper
+        {
+            // in FF3.1, this path fails.
+            var sandbox = new Components.utils.Sandbox(win.location.toString());
+            //sandbox.__proto__ = win.wrappedJSObject;
+            sandbox.__proto__ = win;
+        }
+        else
+        {
+            // in FF3.1, this path works
+            var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
+            sandbox.__proto__ = win;
+        }
 
         var scriptToEval = expr;
 

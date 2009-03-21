@@ -56,7 +56,7 @@ top.Firebug.Console.injector = {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
 
-            Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
+            Firebug.CommandLine.evaluateInWebPage(consoleInjection, context, win);
 
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
@@ -111,7 +111,7 @@ top.Firebug.Console.injector = {
         if (context.stopped)
             Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
         else
-            Firebug.CommandLine.evaluateInSandbox(consoleForcer, context, null, win);
+            Firebug.CommandLine.evaluateInWebPage(consoleForcer, context, win);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("forceConsoleCompilationInPage "+win.location, consoleForcer);

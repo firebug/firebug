@@ -121,7 +121,7 @@ Firebug.Console = extend(ActivableConsole,
             if (context.stopped)
                 Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
             else
-                var r = Firebug.CommandLine.evaluateInSandbox(elementForcer, context, null, win);
+                var r = Firebug.CommandLine.evaluateInWebPage(elementForcer, context, win);
 
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element result ", r);
