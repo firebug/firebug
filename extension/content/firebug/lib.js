@@ -3141,10 +3141,22 @@ this.readPostTextFromRequest = function(request, context)
         if (is)
         {
             var ss = this.QI(is, Ci.nsISeekableStream);
-            if (ss) ss.seek(NS_SEEK_SET, 0);
+            var prevOffset;
+            if (ss)
+            {
+                prevOffset = ss.tell();
+                ss.seek(NS_SEEK_SET, 0);
+            }
+
+            // Read data from the stream..
             var charset = context.window.document.characterSet;
             var text = this.readFromStream(is, charset, true);
-            if (ss) ss.seek(NS_SEEK_SET, 0);
+
+            // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
+            // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
+            if (ss && prevOffset == 0) 
+                ss.seek(NS_SEEK_SET, 0);
+
             return text;
         }
     }
