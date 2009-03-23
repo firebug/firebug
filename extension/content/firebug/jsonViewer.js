@@ -31,7 +31,10 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
 
         // xxxadatta02: not every JSON response is going to have this header...
         // need some way to override this
-        var contentType = new String(file.request.contentType).toLowerCase();
+        var contentType = safeGetContentType(file);
+        if (!contentType)
+            return;
+
         if ((contentType.indexOf("application/json") != 0) &&
             (contentType.indexOf("text/plain") != 0) &&
             (contentType.indexOf("text/x-json") != 0) &&
@@ -70,6 +73,19 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
     },
 
 });
+
+function safeGetContentType(file)
+{
+    try
+    {
+        return new String(file.request.contentType).toLowerCase();
+    }
+    catch (err)
+    {
+    }
+
+    return null;
+}
 
 // ************************************************************************************************
 // Registration
