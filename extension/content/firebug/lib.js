@@ -389,10 +389,13 @@ this.internationalize = function(element, attr, args)
     if (element)
     {
         var xulString = element.getAttribute(attr);
-        var localized = args ? $STRF(xulString, args) : $STR(xulString);
+        if (xulString)
+        {
+            var localized = args ? $STRF(xulString, args) : $STR(xulString);
 
-        // Set localized value of the attribute.
-        element.setAttribute(attr, localized);
+            // Set localized value of the attribute.
+            element.setAttribute(attr, localized);
+        }
     }
     else
     {
