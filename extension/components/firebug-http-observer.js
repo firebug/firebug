@@ -73,9 +73,9 @@ HttpRequestObserver.prototype =
 
         try 
         {
-            if (FBTrace.DBG_HTTPOBSERVER) 
-                FBTrace.sysout("httpObserver.observe " + topic + ", " + 
-                    ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+            if (FBTrace.DBG_HTTPOBSERVER)
+                FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) + 
+                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
 
             // Notify all registered observers.
             if (topic == "http-on-modify-request" || 
