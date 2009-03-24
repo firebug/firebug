@@ -169,6 +169,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         catch (exc)
         {
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.stop no executionContext, exit");
+        	
             // Can't proceed with an execution context - it happens sometimes.
             return RETURN_CONTINUE;
         }
@@ -182,6 +185,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             delete context.stopped;
             delete context.debugFrame;
             delete context;
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.stop extension vetoed stop with hookReturn "+hookReturn);
+
             return hookReturn;
         }
 
@@ -543,7 +549,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             fbs.lockDebugger();
 
             context.currentFrame = context.debugFrame;
-
+            
+            context.executingSourceFile = FBL.getSourceFileByScript(context, context.currentFrame.script);
+            
+            if (!context.executingSourceFile)  // bail out, we don't want the user stuck in debug with out source.
+            {
+            	if (FBTrace.DBG_UI_LOOP) 
+            		FBTrace.sysout("startDebugging exiting, no sourceFile for "+context.debugFrame.script.fileName);
+            	return; 
+            }
+            
             if (context != FirebugContext)
             {
                 Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
@@ -611,6 +626,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var panel = context.getPanel("script", true);
                 if (panel)
                     panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
+                
+                context.executingSourceFile = null;
             }
         }
         catch (exc)
@@ -1892,7 +1909,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
 
-        this.executionFile = FBL.getSourceFileByScript(this.context, frame.script);
+        this.executionFile = this.context.executingSourceFile;
         if (this.executionFile)
         {
             var url = this.executionFile.href;
@@ -3072,7 +3089,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         sourceFile.href = newURL;
 
         fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
-        delete context.sourceFileMap[oldURL];
+        delete context.sourceFileMap[oldURL];  // SourceFile delete
 
         context.addSourceFile(sourceFile);
         var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);
