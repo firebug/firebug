@@ -1856,7 +1856,7 @@ Firebug.Panel =
     navigate: function(object)
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("navigate "+object+" when this.location="+this.location+"\n");
+            FBTrace.sysout("navigate "+this.name+" to "+object+" when this.location="+this.location+"\n");
         if (!object)
             object = this.getDefaultLocation(this.context);
         if (!object)
@@ -1865,7 +1865,7 @@ Firebug.Panel =
         if ( !this.location || (object != this.location) )  // if this.location undefined, may set to null
         {
             if (FBTrace.DBG_PANELS)
-                FBTrace.sysout("navigate to location "+object+"\n");
+                FBTrace.sysout("navigate "+this.name+" to location "+object+"\n");
 
             this.location = object;
             this.updateLocation(object);
@@ -2473,7 +2473,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             else
             {
                 if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("jumpHighlightFactory no node at line "+lineNo);
+                    FBTrace.sysout("jumpHighlightFactory no node at line "+lineNo, sourceBox);
             }
 
             return false; // not sticky
@@ -2611,6 +2611,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         // But our SourceBoxPanel has viewport that will change size.
         if (this.selectedSourceBox)
         {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("onResize will clear viewable lines, event:", event);
             delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
             delete this.selectedSourceBox.halfViewableLines;
             this.reView(this.selectedSourceBox);
