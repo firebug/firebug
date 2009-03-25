@@ -1333,6 +1333,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         {
             try
             {
+                this.props = {};
                 var propsTotal = 0;
                 for (var p in this.obj)
                 {
@@ -1351,7 +1352,8 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
 
                     try {
-                        var getter = this.obj.__lookupGetter__(p);
+                        if (this.obj.__lookupGetter__)
+                            var getter = this.obj.__lookupGetter__(p);
                         if (getter)
                             var value = "" + getter;
                         else
@@ -1363,8 +1365,9 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
                 }
             }
-            catch (err)
+            catch (exc)
             {
+                window.dump("traceModule getProperties "+exc);
             }
         }
 
