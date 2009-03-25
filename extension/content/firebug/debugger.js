@@ -171,7 +171,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.stop no executionContext, exit");
-        	
+
             // Can't proceed with an execution context - it happens sometimes.
             return RETURN_CONTINUE;
         }
@@ -549,16 +549,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             fbs.lockDebugger();
 
             context.currentFrame = context.debugFrame;
-            
+
             context.executingSourceFile = FBL.getSourceFileByScript(context, context.currentFrame.script);
-            
+
             if (!context.executingSourceFile)  // bail out, we don't want the user stuck in debug with out source.
             {
-            	if (FBTrace.DBG_UI_LOOP) 
-            		FBTrace.sysout("startDebugging exiting, no sourceFile for "+context.debugFrame.script.fileName);
-            	return; 
+                if (FBTrace.DBG_UI_LOOP)
+                    FBTrace.sysout("startDebugging exiting, no sourceFile for "+context.debugFrame.script.fileName);
+                return;
             }
-            
+
             if (context != FirebugContext)
             {
                 Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
@@ -626,7 +626,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 var panel = context.getPanel("script", true);
                 if (panel)
                     panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
-                
+
                 context.executingSourceFile = null;
             }
         }
@@ -722,6 +722,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             this.syncCommands(panel.context);
             this.ableWatchSidePanel(panel.context);
+            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel this.location:"+this.location);
         }
     },
 
@@ -2168,8 +2169,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         delete this.selection; // We want the location (sourcefile) to persist, not the selection (eg stackFrame).
         persistObjects(this, state);
 
-        if (FBTrace.DBG_INITIALIZE)
-            state.location = this.location;
+        state.location = this.location;
 
         var sourceBox = this.selectedSourceBox;
         state.lastScrollTop = sourceBox  && sourceBox.scrollTop
@@ -2272,9 +2272,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (breakpointPanel)
                 breakpointPanel.refresh();
         }
-
-        if (!Firebug.Debugger.isAlwaysEnabled())
+        else
+        {
             Firebug.Debugger.disabledPanelPage.show(this);
+        }
     },
 
     enablePanel: function(module)
@@ -2312,8 +2313,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceBox = this.selectedSourceBox;
         if (sourceBox && state)
             state.lastScrollTop = sourceBox.scrollTop;
-
-        this.location = null; // clear the location so we start fresh
     },
 
     search: function(text, reverse)
@@ -2507,14 +2506,14 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList BEFORE iterateWindows ", list); /*@explore*/
 
-       iterateWindows(context.window, function(win) 
+       iterateWindows(context.window, function(win)
        {
-           var url = normalizeURL(win.location.href); 
+           var url = normalizeURL(win.location.href);
            if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
                 FBTrace.sysout("getLocationList iterateWindows: "+url, " documentElement: "+win.document.documentElement);  /*@explore*/
            if (!win.document.documentElement)
                 return;
-            
+
            if (url)
            {
                if (context.sourceFileMap.hasOwnProperty(url))
