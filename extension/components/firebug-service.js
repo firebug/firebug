@@ -1217,8 +1217,8 @@ FirebugService.prototype =
 
         if (fbs.trackThrowCatch)
         {
-            if (FBTrace.DBG_FBS_ERRORS) 
-            	FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc);
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("onThrow from tag:"+frame.script.tag+":"+frame.script.fileName+"@"+frame.line+": "+frame.pc);
 
             var debuggr = this.findDebugger(frame);
             if (debuggr)
@@ -1249,7 +1249,11 @@ FirebugService.prototype =
         errorInfo = { message: message, fileName: fileName, lineNo: lineNo, pos: pos, flags: flags, errnum: errnum, exc: exc };
 
         if (message=="out of memory")  // bail
+        {
+            if (FBTrace.DBG_FBS_ERRORS)
+                fbs.hiddenWindow.dump("fbs.onError sees out of memory "+fileName+":"+lineNo+"\n");
             return true;
+        }
 
         if (this.showStackTrace)
         {
@@ -1450,7 +1454,7 @@ FirebugService.prototype =
             // reset tracing flags on first unfiltered filename
             if (!FBTrace.DBG_FF_START && !fbs.firstUnfilteredFilename)
             {
-            	fbs.firstUnfilteredFilename = true;
+                fbs.firstUnfilteredFilename = true;
                 FBTrace.DBG_FBS_BP = fbs.resetBP ? true : false;
                 FBTrace.DBG_FBS_CREATION = fbs.resetCreation ? true : false;
             }
@@ -2145,6 +2149,7 @@ FirebugService.prototype =
         {
             switch (type)
             {
+                case TYPE_TOPLEVEL_START: // fall through
                 case TYPE_FUNCTION_CALL:
                 {
                     ++hookFrameCount;
@@ -2152,15 +2157,15 @@ FirebugService.prototype =
                     if (stepMode == STEP_OVER)
                         jsd.interruptHook = null;
 
-                    if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_CALL stepMode = "+getStepName(stepMode)
-                             +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+" "+frame.script.fileName+"\n");
+                    if (stepMode == STEP_INTO)
+                        fbs.stopStepping();
+
                     break;
                 }
+                case TYPE_TOPLEVEL_END: // fall through
                 case TYPE_FUNCTION_RETURN:
                 {
                     --hookFrameCount;
-                    if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("functionHook TYPE_FUNCTION_RETURN stepMode = "+getStepName(stepMode)
-                                        +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+" "+frame.script.fileName+"\n");
 
                     if (hookFrameCount == 0) {  // stack empty
                         if ( (stepMode == STEP_INTO) || (stepMode == STEP_OVER) ) {
@@ -2186,6 +2191,19 @@ FirebugService.prototype =
 
                     break;
                 }
+            }
+            if (FBTrace.DBG_FBS_STEP)
+            {
+                var typeName = type;
+                switch(type)
+                {
+                    case TYPE_FUNCTION_RETURN: { typeName = "TYPE_FUNCTION_RETURN"; break; }
+                    case TYPE_FUNCTION_CALL:   { typeName = "TYPE_FUNCTION_CALL"; break; }
+                    case TYPE_TOPLEVEL_START: { typeName = "TYPE_TOPLEVEL_START"; break; }
+                    case TYPE_TOPLEVEL_END:   { typeName = "TYPE_TOPLEVEL_START"; break; }
+                }
+                FBTrace.sysout("functionHook "+typeName+" stepMode = "+getStepName(stepMode)
+                    +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+" "+frame.script.fileName);
             }
         }
 
