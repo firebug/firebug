@@ -257,14 +257,14 @@ top.Firebug =
 
         try
         {
-        	Firebug.URLSelector.initialize();
-        	TabWatcher.addListener(Firebug.URLSelector);  // listen for shouldCreateContext
-        	uiListeners.push(Firebug.URLSelector); // listen for showUI
+            Firebug.URLSelector.initialize();
+            TabWatcher.addListener(Firebug.URLSelector);  // listen for shouldCreateContext
+            uiListeners.push(Firebug.URLSelector); // listen for showUI
         }
         catch (exc)
         {
-        	if (FBTrace.DBG_ERRORS)
-        		FBTrace.sysout("Firebug.initialzeUI failed to connect to URLSelector "+exc, exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.initialzeUI failed to connect to URLSelector "+exc, exc);
         }
 
         // If another window is opened, then the creation of our first context won't
@@ -941,12 +941,14 @@ top.Firebug =
 
     showKeys: function(shouldShow)
     {
-        var keyset = document.getElementById("mainKeyset");
-        var keys = FBL.getElementByClass(keyset, "fbOnlyKey");
-        for (var i = 0; i < keys.length; i++)
+        if (!this.fbOnlyKeys)
         {
-            keys[i].setAttribute("disabled", !!shouldShow);
+            var keyset = document.getElementById("mainKeyset");
+            this.fbOnlyKeys = FBL.getElementByClass(keyset, "fbOnlyKey");
         }
+        var keys = this.fbOnlyKeys;
+        for (var i = 0; i < keys.length; i++)
+            keys[i].setAttribute("disabled", !!shouldShow);
     },
 
     forceBarOff: function()
@@ -1813,7 +1815,7 @@ Firebug.Panel =
             // xxxHonza: this should be fixed, the problem was that selectedPanel was
             // removed from panelBar (binding) after the context was destroyed.
             // So, the panel.hide() method used invalid context object.
-            // The selected panel is now removed wihint Firebug.destroyContext(); 
+            // The selected panel is now removed wihint Firebug.destroyContext();
             if (!this.context.browser)
             {
                 if (FBTrace.DBG_ERRORS)
@@ -2825,14 +2827,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
     showUI: function(browser, context)  // Firebug is opened, in browser or detached
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("Firebug.showUI; " + this.panelName + ", " + 
+            FBTrace.sysout("Firebug.showUI; " + this.panelName + ", " +
                 (context ? context.getName() : "No Context"));
     },
 
     hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
     {
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("Firebug.hideUI; " + this.panelName + ", " + 
+            FBTrace.sysout("Firebug.hideUI; " + this.panelName + ", " +
                 (context ? context.getName() : "No Context"));
     },
 
