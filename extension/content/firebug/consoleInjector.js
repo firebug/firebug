@@ -65,21 +65,12 @@ top.Firebug.Console.injector = {
         getConsoleInjectionScript: function() {
             if (!this.consoleInjectionScript)
             {
-                var ff3 = versionChecker.compare(appInfo.version, "3.0*") >= 0;
-
-                // There is a "console" getter defined for FF3.
                 var script = "";
-                if (ff3)
-                {
-                    script += "window.__defineGetter__('console', function() {\n";
-                    script += " return window.loadFirebugConsole(); })\n\n";
-                }
+                script += "window.__defineGetter__('console', function() {\n";
+                script += " return (window._firebug ? window._firebug : window.loadFirebugConsole()); })\n\n";
 
                 script += "window.loadFirebugConsole = function() {\n";
                 script += "window._firebug =  new _FirebugConsole();";
-                // If not ff3 initialize "console" property.
-                if (!ff3)
-                    script += " window.console = window._firebug;\n";
 
                 if (FBTrace.DBG_CONSOLE)
                     script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
@@ -89,8 +80,6 @@ top.Firebug.Console.injector = {
                 var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
                 script += theFirebugConsoleScript;
 
-                if (!ff3)
-                    script += " window.loadFirebugConsole();\n";
 
                 this.consoleInjectionScript = script;
             }
