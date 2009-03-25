@@ -380,7 +380,7 @@ top.FirebugChrome =
         if (FirebugContext.previousPanelName)
             this.selectPanel(FirebugContext.previousPanelName);
     },
-    
+
     gotoSiblingTab : function(goRight)
     {
         if ($('fbContentBox').collapsed)
@@ -406,7 +406,7 @@ top.FirebugChrome =
             }
         }
     },
-    
+
     focusFbToolbar : function()
     {
         Firebug.focusAnchor = document.commandDispatcher.focusedElement;
@@ -416,12 +416,12 @@ top.FirebugChrome =
             $('fbToolbar').className = "focused";
         }
     },
-    
+
     openPanelOptionsMenu : function()
     {
         FBTrace.sysout('test');
     },
-    
+
     getNextObject: function(reverse)
     {
         var panel = FirebugContext.getPanel(FirebugContext.panelName);
@@ -1222,12 +1222,8 @@ function onSelectedSidePanel(event)
     }
     if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n"); /*@explore*/
 
-    var panel = panelBar1.selectedPanel;
-    if (panel && sidePanel)
-        sidePanel.select(panel.selection);
-
     var browser = sidePanel ? sidePanel.context.browser : FirebugChrome.getCurrentBrowser();
-    Firebug.showSidePanel(browser, sidePanel);
+    Firebug.showSidePanel(browser, sidePanel);  // dispatch to modules
 }
 
 function onPanelMouseOver(event)
@@ -1323,7 +1319,7 @@ function handleFbToolbarKeyPress(event) {
                 target.getElementsByTagName('menupopup')[0].showPopup();
                 event.stopPropagation();
             }
-            
+
         break;
         case KeyEvent.DOM_VK_ESCAPE:
             if (Firebug.focusAnchor && Firebug.focusAnchor.focus) {
