@@ -328,9 +328,13 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
         // See issue: 1565 Site loading is slow or broken with Firebug 1.3.3 and Firefox 3.0.7
         // xxxHonza: There is a bug in 3.0.7 that causes deadlock if FF cache is accessed by
-        // the following code.
-        if (ff307)
-            return "";
+        // the following code during the page load.
+        if (ff307 && !context.loaded)
+        {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.loadFromCache; FF307 context NOT LOADED " + url);
+            return;
+        }
 
         // xxxHonza: let's try to get the response from the cache till #449198 is fixed.
         var stream;
