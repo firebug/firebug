@@ -58,7 +58,7 @@
             this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
             this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
         ]]></constructor>
-        
+
         <method name="createTab">
             <parameter name="panelType"/>
             <body><![CDATA[
@@ -564,6 +564,8 @@
 
         <property name="location">
             <getter><![CDATA[
+                if (FBTrace.DBG_LOCATIONS)
+                    FBTrace.sysout("location getter label:"+this.getAttribute('label')+" location: "+this.getAttribute('location'));
                 return this.getAttribute("location");
             ]]></getter>
 
@@ -587,7 +589,7 @@
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
                 if (FBTrace.DBG_LOCATIONS)
-                    FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName);
+                    FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName+ " val: "+val);
             ]]></setter>
         </property>
 
