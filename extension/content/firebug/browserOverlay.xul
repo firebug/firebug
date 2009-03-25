@@ -56,6 +56,8 @@
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleBar()"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules(FirebugContext)"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules(FirebugContext)"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -211,8 +213,8 @@
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
             <menuseparator/>
-            <menuitem id="menu_toggleSuspendFirebug" label="Suspend Firebug" command="cmd_toggleSuspendFirebug"/>
-            <menuitem id="menu_disablePanels" label="Reset Panels To Disabled" command="cmd_disablePanels"/>
+            <menuitem id="menu_enablePanels" label="Enable All Panels" command="cmd_enablePanels"/>
+            <menuitem id="menu_disablePanels" label="Disable All Panels" command="cmd_disablePanels"/>
         </menupopup>
     </statusbar>
 

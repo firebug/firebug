@@ -2955,7 +2955,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
             H1({class: "disabledPanelHead"},
                 SPAN("$pageTitle")
             ),
-            P({class: "disabledPanelDescription"},
+            /* P({class: "disabledPanelDescription"},
                 $STR("moduleManager.desc1")
             ),
             P({class: "disabledPanelDescription", align: "center"},
@@ -2963,7 +2963,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
             ),
             P({class: "disabledPanelDescription applyDesc", style:"font-size:11px",
                 align: "center"}
-            ),
+            ),*/
             P({class: "disabledPanelDescription", style: "margin-top: 15px;"},
                 $STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
@@ -3102,7 +3102,7 @@ Firebug.ModuleManager =
             if (module.isAlwaysEnabled())
                 this.enableModule(module);
             else
-                this.enableModule(module);
+                this.disableModule(module);
             module.updateTab(context);
         }
     },
