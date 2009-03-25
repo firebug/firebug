@@ -87,6 +87,7 @@ pref("extensions.firebug.enableTraceConsole", true);     /*@explore*/
 pref("extensions.firebug.alwaysOpenTraceConsole", false);     /*@explore*/
 pref("extensions.firebug.trace.maxMessageLength", 400);     /*@explore*/
 pref("extensions.firebug.trace.enableScope", false);     /*@explore*/
+pref("extensions.firebug.trace.showTime", false);     /*@explore*/
 pref("extensions.firebug.DBG_FBS_JSDCONTEXT", false);// firebug trace scriptinfo(huge) /*@explore*/
 pref("extensions.firebug.DBG_FBS_FF_START", false); // firebug trace from FF start(huge) /*@explore*/
 pref("extensions.firebug.DBG_FBS_CREATION", false); // firebug script creation           /*@explore*/

@@ -120,7 +120,8 @@ TraceConsoleService.prototype =
         var messageInfo = {
             obj: obj,
             type: messageType,
-            scope: scope
+            scope: scope,
+            time: (new Date()).getTime()
         };
         if (win)
             win.dump(messageType+": "+message+"\n");

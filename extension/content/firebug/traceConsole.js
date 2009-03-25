@@ -48,6 +48,7 @@ var TraceConsole =
 
         // Register listeners and observers
         traceService.addObserver(this, "firebug-trace-on-message", false);
+        prefs.addObserver(this.prefDomain, this, false);
 
         gFindBar = document.getElementById("FindToolbar");
 
@@ -57,6 +58,7 @@ var TraceConsole =
 
         // Make sure the UI is localized.
         this.internationalizeUI();
+        this.updateTimeInfo();
     },
 
     internationalizeUI: function()
@@ -72,9 +74,19 @@ var TraceConsole =
         }
     },
 
+    updateTimeInfo: function()
+    {
+        var showTime = Firebug.getPref(this.prefDomain, "trace.showTime");
+        if (showTime)
+            FBL.setClass(this.logs.firstChild, "showTime");
+        else
+            FBL.removeClass(this.logs.firstChild, "showTime");
+    },
+
     shutdown: function()
     {
         traceService.removeObserver(this, "firebug-trace-on-message");
+        prefs.removeObserver(this.prefDomain, this, false);
 
         // Notify listeners
         for (var i=0; i<this.modules.length; ++i)
@@ -112,9 +124,15 @@ var TraceConsole =
                 return;
 
             this.dump(new Firebug.TraceModule.TraceMessage(
-                messageInfo.type, data, messageInfo.obj, messageInfo.scope));
+                messageInfo.type, data, messageInfo.obj, messageInfo.scope,
+                messageInfo.time));
             
             return true;
+        }
+        else if (topic == "nsPref:changed")
+        {
+            if (data == this.prefDomain + ".trace.showTime")
+                this.updateTimeInfo();
         }
     },
 

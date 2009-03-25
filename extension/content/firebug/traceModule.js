@@ -50,8 +50,8 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
     // nsIObserver
     this.observe = function(subject, topic, data)
     {
-    if (topic == "nsPref:changed")
-    {
+        if (topic == "nsPref:changed")
+        {
             var m = reDBG.exec(data);
             if (m)
             {
@@ -469,6 +469,10 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 DIV({class: "messageNameLabel messageLabel"},
                     "$message|getMessageIndex")
             ),
+            TD({class: "messageTimeCol messageCol"},
+                DIV({class: "messageTimeLabel messageLabel"},
+                    "$message|getMessageTime")
+            ),
             TD({class: "messageCol"},
                 DIV({class: "messageLabel", title: "$message|getMessageTitle"},
                     "$message|getMessageLabel")
@@ -477,7 +481,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     separatorTag:
         TR({class: "messageRow separatorRow", _repObject: "$message"},
-            TD({class: "messageCol", colspan: "2"},
+            TD({class: "messageCol", colspan: "3"},
                 DIV("$message|getMessageIndex")
             )
         ),
@@ -585,6 +589,17 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     getMessageIndex: function(message)
     {
         return message.index + 1;
+    },
+
+    getMessageTime: function(message)
+    {
+        var date = new Date(message.time);
+        var m = date.getMinutes() + "";
+        var s = date.getSeconds() + "";
+        var ms = date.getMilliseconds() + "";
+        return "[" + ((m.length > 1) ? m : "0" + m) + ":" + 
+            ((s.length > 1) ? s : "0" + s) + ":" + 
+            ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
     },
 
     getMessageLabel: function(message)
@@ -766,6 +781,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (items.length > 0)
             items.push("-");
 
+        items.push(this.optionMenu($STR("tracing.Show Time"), "trace.showTime"));
         items.push(this.optionMenu($STR("tracing.Show Scope Variables"), "trace.enableScope"));
         items.push("-");
 
@@ -1136,13 +1152,14 @@ var HelperDomplate = (function()
 // ************************************************************************************************
 // Trace Message Object
 
-Firebug.TraceModule.TraceMessage = function(type, text, obj, scope)
+Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
 {
     this.type = type;
     this.text = text;
     this.obj = obj;
     this.stack = [];
     this.scope = scope;
+    this.time = time;
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
