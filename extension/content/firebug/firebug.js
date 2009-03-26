@@ -3015,15 +3015,6 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
         // Render panel HTML
         panel.disabledBox = this.tag.replace(args, panel.panelNode, this);
         panel.panelNode.scrollTop = 0;
-
-        // These contents must be provided this ways since there is HTML and
-        // domplate would automatically escape it.
-        var hostURI = cropString(FirebugContext.getWindowLocation().toString(), 50);
-        var button = getElementByClass(panel.disabledBox, "disabledPanelApplyButton");
-        button.innerHTML = $STRF("moduleManager.apply", [hostURI]);
-
-        var applyDesc = getElementByClass(panel.disabledBox, "disabledPanelDescription", "applyDesc");
-        applyDesc.innerHTML = $STRF("moduleManager.desc2", [$STR("Reset Panels To Disabled")]);
     }
 });
 
