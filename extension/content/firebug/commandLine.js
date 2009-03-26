@@ -597,6 +597,25 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
     },
 
+    onPanelEnable: function(context, panelName)
+    {
+        if (panelName != 'console')
+            return;
+
+        this.setMultiLine(Firebug.largeCommandLine);
+    },
+
+    onPanelDisable: function(context, panelName)
+    {
+        if (panelName != 'console')  // we don't care about other panels
+            return;
+
+        var chrome = context ? context.chrome : FirebugChrome;
+        chrome.$("fbCommandBox").collapsed = true;
+        chrome.$("fbPanelSplitter").collapsed = true;
+        chrome.$("fbSidePanelDeck").collapsed = true;
+    },
+
     // *********************************************************************************************
     // Firebug.Console listener
     onConsoleInjected: function(context, win)

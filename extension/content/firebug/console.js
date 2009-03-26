@@ -216,6 +216,9 @@ Firebug.Console = extend(ActivableConsole,
 
     onPanelDisable: function(context, panelName)
     {
+        if (panelName != this.panelName)  // we don't care about other panels
+            return;
+
         Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
         $('fbStatusIcon').removeAttribute("console");
     },
