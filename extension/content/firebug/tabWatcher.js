@@ -587,7 +587,17 @@ function registerFrameListener(browser)
         return;
 
     browser.chrome = FirebugChrome;
-    browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
+
+    // xxxHonza, XXXjjb: why the following addProgressListener fires and exception?
+    try
+    {
+        browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("-> tabWatcher.registerFrameListener; EXCEPTION", err);
+    }
 
     if (FBTrace.DBG_WINDOWS)
     {
