@@ -3024,6 +3024,9 @@ Firebug.ModuleManager =
 {
     disableModules: function(context)
     {
+        if (!context)
+            context = FirebugContext;
+
         for (var i=0; i<activableModules.length; i++)
         {
             var module = activableModules[i];
@@ -3034,6 +3037,9 @@ Firebug.ModuleManager =
 
     enableModules: function(context)
     {
+        if (!context)
+            context = FirebugContext;
+
         for (var i=0; i<activableModules.length; i++)
         {
             var module = activableModules[i];
