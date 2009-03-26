@@ -42,7 +42,7 @@ HttpRequestObserver.prototype =
         observerService.addObserver(this, "quit-application", false);
         observerService.addObserver(this, "http-on-modify-request", false);
         observerService.addObserver(this, "http-on-examine-response", false);
-        observerService.addObserver(this, "http-on-cached-response", false);
+        observerService.addObserver(this, "http-on-examine-cached-response", false);
 
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.initialize OK");
