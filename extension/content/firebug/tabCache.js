@@ -393,7 +393,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
     onStopRequest: function(request, requestContext, statusCode)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + url);
+            FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetName(request));
 
         // The response is finally received so, remove the request from the list of 
         // current responses.
