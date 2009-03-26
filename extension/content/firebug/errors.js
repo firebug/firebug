@@ -529,6 +529,9 @@ function correctLineNumbersOnExceptions(context, object)
         lineNumber = m[4];
 
         var correctedError = object.init(errorMessage, sourceName, object.sourceLine, lineNumber, object.columnNumber, object.flags, object.category);
+        if (FBTrace.DBG_ERRORS)                                                                            
+            FBTrace.sysout("errors.correctLineNumbersOnExceptions corrected message with sourceName: "+sourceName);
+        
     }
 }
 
