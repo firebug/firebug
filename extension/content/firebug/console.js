@@ -460,13 +460,14 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
-        this.showToolbarButtons("fbConsoleButtons", true);
-
         var enabled = Firebug.Console.isAlwaysEnabled();
-        if (!enabled)
-            Firebug.Console.disabledPanelPage.show(this);
+        if (enabled)
+        {
+             this.showCommandLine(true);
+             this.showToolbarButtons("fbConsoleButtons", true);
+        }
         else
-            Firebug.Console.disabledPanelPage.hide(this);
+            this.hide();
     },
 
     enablePanel: function(module)
@@ -476,9 +477,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         Firebug.ActivablePanel.enablePanel.apply(this, arguments);
 
-        FirebugContext.chrome.$("fbCommandBox").collapsed = false;
-        if (Firebug.largeCommandLine)
-            Firebug.CommandLine.setMultiLine(true);
+        this.showCommandLine(true);
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
@@ -491,17 +490,16 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
 
-        // Make sure that entire content of the Console panel is hidden when
-        // the panel is disabled.
-        Firebug.CommandLine.setMultiLine(false);
-        FirebugContext.chrome.$("fbCommandBox").collapsed = true;
+        this.showCommandLine(false);
     },
 
     hide: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("Console.panel hide\n");
 
         this.showToolbarButtons("fbConsoleButtons", false);
+        this.showCommandLine(false);
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
     },
 
@@ -646,7 +644,23 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         var value = Firebug.getPref(Firebug.prefDomain, "console.logLimit");
         maxQueueRequests =  value ? value : maxQueueRequests;
-    }
+    },
+
+    showCommandLine: function(shouldShow)
+    {
+        if (shouldShow)
+        {
+            this.context.chrome.$("fbCommandBox").collapsed = false;
+            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine);
+        }
+        else
+        {
+            // Make sure that entire content of the Console panel is hidden when
+            // the panel is disabled.
+            Firebug.CommandLine.setMultiLine(false);
+            this.context.chrome.$("fbCommandBox").collapsed = true;
+        }
+    },
 });
 
 // ************************************************************************************************
