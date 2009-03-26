@@ -2918,12 +2918,12 @@ this.normalizeURL = function(url)  // this gets called a lot, any performance im
     if (url.length < 255) // guard against monsters.
     {
         // Replace one or more characters that are not forward-slash followed by /.., by space.
-    	url = url.replace(/[^/]+\/\.\.\//, "", "g");
-    	// Issue 1496, avoid #
-    	url = url.replace(/#.*/,"");
-    	// For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
-    	// don't match up with the URLs we get back from the DOM
-    	url = url.replace(/file:\/([^/])/g, "file:///$1");
+        url = url.replace(/[^/]+\/\.\.\//, "", "g");
+        // Issue 1496, avoid #
+        url = url.replace(/#.*/,"");
+        // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
+        // don't match up with the URLs we get back from the DOM
+        url = url.replace(/file:\/([^/])/g, "file:///$1");
     }
     return url;
 };
@@ -3157,7 +3157,7 @@ this.readPostTextFromRequest = function(request, context)
 
             // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
             // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
-            if (ss && prevOffset == 0) 
+            if (ss && prevOffset == 0)
                 ss.seek(NS_SEEK_SET, 0);
 
             return text;
@@ -4084,7 +4084,7 @@ this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 {
-    return this.outerScript.baseLineNumber - 1; // baseLineNumber always valid even after jsdIscript isValid false
+    return this.outerScript.baseLineNumber; // baseLineNumber always valid even after jsdIscript isValid false
 }
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
