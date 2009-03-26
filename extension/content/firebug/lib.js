@@ -3215,6 +3215,31 @@ this.getRequestWebProgress = function(request)
 };
 
 // ************************************************************************************************
+
+this.BaseProgressListener =
+{
+    QueryInterface : function(iid)
+    {
+        if (iid.equals(nsIWebProgressListener) ||
+            iid.equals(nsISupportsWeakReference) ||
+            iid.equals(nsISupports))
+        {
+            return this;
+        }
+
+        throw Components.results.NS_NOINTERFACE;
+    },
+
+    stateIsRequest: false,
+    onLocationChange: function() {},
+    onStateChange : function() {},
+    onProgressChange : function() {},
+    onStatusChange : function() {},
+    onSecurityChange : function() {},
+    onLinkIconAvailable : function() {}
+};
+
+// ************************************************************************************************
 // Network Tracing
 
 this.getStateDescription = function(flag)

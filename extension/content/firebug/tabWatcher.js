@@ -503,31 +503,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
 // ************************************************************************************************
 
-var BaseProgressListener =
-{
-    QueryInterface : function(iid)
-    {
-        if (iid.equals(nsIWebProgressListener) ||
-            iid.equals(nsISupportsWeakReference) ||
-            iid.equals(nsISupports))
-        {
-            return this;
-        }
-
-        throw Components.results.NS_NOINTERFACE;
-    },
-
-    stateIsRequest: false,
-    onLocationChange: function() {},
-    onStateChange : function() {},
-    onProgressChange : function() {},
-    onStatusChange : function() {},
-    onSecurityChange : function() {},
-    onLinkIconAvailable : function() {}
-};
-
-// ************************************************************************************************
-
 var TabProgressListener = extend(BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
