@@ -3220,9 +3220,9 @@ this.BaseProgressListener =
 {
     QueryInterface : function(iid)
     {
-        if (iid.equals(nsIWebProgressListener) ||
-            iid.equals(nsISupportsWeakReference) ||
-            iid.equals(nsISupports))
+        if (iid.equals(Ci.nsIWebProgressListener) ||
+            iid.equals(Ci.nsISupportsWeakReference) ||
+            iid.equals(Ci.nsISupports))
         {
             return this;
         }
