@@ -299,28 +299,22 @@ top.Firebug =
 
     getSuspended: function()
     {
-        var suspendMenuItem = $("menu_toggleSuspendFirebug");
-        if (suspendMenuItem.hasAttribute("suspended"))
-            return suspendMenuItem.getAttribute("suspended");
+        var suspendMarker = $("fbStatusIcon");
+        if (suspendMarker.hasAttribute("suspended"))
+            return suspendMarker.getAttribute("suspended");
         return null;
     },
 
     setSuspended: function(value)
     {
-        var suspendMenuItem = $("menu_toggleSuspendFirebug");
+        var suspendMarker = $("fbStatusIcon");
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("Firebug.setSuspended to "+value+"\n");
 
         if (value)
-        {
-            suspendMenuItem.setAttribute("suspended", value);
-            $('menu_toggleSuspendFirebug').setAttribute("label", $STR("Resume Firebug"));
-        }
+            suspendMarker.setAttribute("suspended", value);
         else
-        {
-            suspendMenuItem.removeAttribute("suspended");
-            $('menu_toggleSuspendFirebug').setAttribute("label", $STR("Suspend Firebug"));
-        }
+            suspendMarker.removeAttribute("suspended");
 
         Firebug.resetTooltip();
     },
