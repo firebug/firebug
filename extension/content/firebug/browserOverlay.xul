@@ -56,8 +56,8 @@
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleBar()"/>
-        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules(FirebugContext)"/>
-        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules(FirebugContext)"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
     </commandset>
 
     <keyset id="mainKeyset">
