@@ -353,6 +353,9 @@ function $STRF(name, args, bundleId)
 {
     try
     {
+        // xxxHonza: Workaround for #485511
+        bundleId = "strings_firebug";
+
         if (bundleId)
             return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
         else
