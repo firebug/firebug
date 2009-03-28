@@ -2114,8 +2114,10 @@ FirebugService.prototype =
         if (!stepMode && !runningUntil)
             return;
 
-         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("startStepping stepMode = "+getStepName(stepMode)
-                 +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");
+         if (FBTrace.DBG_FBS_STEP)
+         {
+             FBTrace.sysout("startStepping stepMode = "+getStepName(stepMode) +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");
+         }
 
         this.hookFunctions();
 

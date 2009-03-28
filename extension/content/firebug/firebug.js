@@ -1813,7 +1813,8 @@ Firebug.Panel =
             if (!this.context.browser)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this.context", this.context.getName())
+                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this.context", this.context.getName());
+
                 return;
             }
             var buttons = this.context.browser.chrome.$(buttonsId);

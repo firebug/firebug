@@ -1660,7 +1660,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     registerDebugger: function() // 1.3.1 safe for multiple calls
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("registerDebugger this.registered: "+this.registered)
+            FBTrace.sysout("registerDebugger this.registered: "+this.registered);
+
         if (this.registered)
             return;
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
@@ -2879,7 +2880,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         monitors.sort(sortBreakpoints);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh sorted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors])
+            FBTrace.sysout("debugger.breakpoints.refresh sorted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         var groups = [];
 
