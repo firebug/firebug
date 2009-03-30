@@ -75,7 +75,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         if (c)
         {
             if (Firebug.filterSystemURLs)
-                return;  // ignore chrome
+                return ["Filtered chrome url "+url];  // ignore chrome
 
             var chromeURI = makeURI(url);
             var localURI = chromeReg.convertChromeURL(chromeURI);

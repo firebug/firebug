@@ -106,7 +106,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     initContext: function(context)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.dumpProperties("tabCache.initContext for: " + context.window.location.href);
+            FBTrace.dumpProperties("tabCache.initContext for: " + context.getName());
     },
 
     /* nsIObserver */
