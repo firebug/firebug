@@ -14,13 +14,6 @@ const nsISelectionController = Ci.nsISelectionController;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-var domUtils = null;
-try {
-    domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
-} catch (exc) {
-    // We can try to live without "dom-utils", since it only comes with DOM Inspector
-}
-
 var CSSPropTag =
     DIV({class: "cssProp editGroup", $disabledStyle: "$prop.disabled"},
         SPAN({class: "cssPropName editable"}, "$prop.name"),
@@ -509,6 +502,15 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     initialize: function()
     {
+        if (!domUtils)
+        {
+            try {
+                domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
+            } catch (exc) {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("@mozilla.org/inspector/dom-utils;1 FAILED to load: "+exc, exc);
+            }
+        }
         this.onMouseDown = bind(this.onMouseDown, this);
         this.onClick = bind(this.onClick, this);
 
