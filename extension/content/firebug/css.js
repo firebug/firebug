@@ -14,6 +14,8 @@ const nsISelectionController = Ci.nsISelectionController;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+var domUtils = null;
+
 var CSSPropTag =
     DIV({class: "cssProp editGroup", $disabledStyle: "$prop.disabled"},
         SPAN({class: "cssPropName editable"}, "$prop.name"),
