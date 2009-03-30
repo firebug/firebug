@@ -82,7 +82,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
         // Read additional text mime-types from preferences.
         var mimeTypes = Firebug.getPref(Firebug.prefDomain, "cache.mimeTypes");
-        if (mimeTypes) 
+        if (mimeTypes)
         {
             var list = mimeTypes.split(" ");
             for (var i=0; i<list.length; i++)
@@ -169,11 +169,11 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             newListener.QueryInterface(Ci.nsITraceableChannel);
             newListener.setNewListener(new ChannelListenerProxy(win));
 
-            // xxxHonza: this is a workaround for the tracing-listener to get the 
+            // xxxHonza: this is a workaround for the tracing-listener to get the
             // right context. Notice that if the window (parent browser) is closed
             // during the response download the TabWatcher (used within this method)
             // is undefined. But in such a case no cache is needed anyway.
-            // Another thing is that the context isn't available now, but will be 
+            // Another thing is that the context isn't available now, but will be
             // as soon as this method is used from the stream listener.
             newListener.wrappedJSObject.getContext = function(win)
             {
@@ -194,7 +194,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         request.QueryInterface(Ci.nsIHttpChannel);
 
-        // Allow to customize caching rules. 
+        // Allow to customize caching rules.
         if (dispatch2(this.fbListeners, "shouldCacheRequest", [request]))
             return true;
 
@@ -227,12 +227,12 @@ Firebug.TabCacheModel = extend(Firebug.Module,
  * The object is derived from SourceCache so, the same interface and most of the
  * implementation is used.
  */
-Firebug.TabCache = function(win, context)
+Firebug.TabCache = function(context)
 {
     if (FBTrace.DBG_CACHE)
-        FBTrace.dumpProperties("tabCache.TabCache Created for: " + win.location.href);
+        FBTrace.dumpProperties("tabCache.TabCache Created for: " + context.getName());
 
-    Firebug.SourceCache.call(this, win, context);
+    Firebug.SourceCache.call(this, context);
 };
 
 Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
@@ -376,13 +376,13 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         return responseText;
     },
 
-    // nsIStreamListener - callbacks from channel stream listener component. 
+    // nsIStreamListener - callbacks from channel stream listener component.
     onStartRequest: function(request, requestContext)
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.channel.startRequest: " + safeGetName(request));
 
-        // Make sure the response-entry (used to count total response size) is properly 
+        // Make sure the response-entry (used to count total response size) is properly
         // initialized (cleared) now. If no data is received, the response entry remains empty.
         var response = this.getResponse(request);
 
@@ -395,7 +395,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetName(request));
 
-        // The response is finally received so, remove the request from the list of 
+        // The response is finally received so, remove the request from the list of
         // current responses.
         var url = safeGetName(request);
         delete this.responses[url];

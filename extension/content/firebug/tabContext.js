@@ -40,9 +40,9 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     // Anyway, keep the previous cache implementation for backward compatibility
     // (with Firefox 3.0.3 and lower)
     if (Components.interfaces.nsITraceableChannel)
-        this.sourceCache = new Firebug.TabCache(win, this);
+        this.sourceCache = new Firebug.TabCache(this);
     else
-        this.sourceCache = new Firebug.SourceCache(win, this);
+        this.sourceCache = new Firebug.SourceCache(this);
 
     this.global = win;  // used by chromebug
 };
@@ -55,8 +55,8 @@ Firebug.TabContext.prototype =
         {
             if (this.window)
             {
-            	if (this.window.closed)
-            		return "about:closed";
+                if (this.window.closed)
+                    return "about:closed";
                 if ("location" in this.window)
                 {
                     if ("toString" in this.window.location)
@@ -89,8 +89,8 @@ Firebug.TabContext.prototype =
 
     getName: function()
     {
-    	if (!this.name)
-    		this.name = normalizeURL(this.getWindowLocation().toString());
+        if (!this.name)
+            this.name = normalizeURL(this.getWindowLocation().toString());
         return this.name;
     },
 
@@ -254,10 +254,10 @@ Firebug.TabContext.prototype =
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.
     {
-    	if (panel)
-    		this.panelMap[panelName] = panel;
-    	else
-    		delete this.panelMap[panelName];
+        if (panel)
+            this.panelMap[panelName] = panel;
+        else
+            delete this.panelMap[panelName];
     },
 
     invalidatePanels: function()
