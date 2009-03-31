@@ -2092,8 +2092,9 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         // xxxHonza: not sure if this should be here.
         // The panel has been enabled so, show the content.
-        var state = Firebug.getPanelState(this);
-        this.show(state);
+        // xxxHonza: commenting out, this is inappropriate place and way how to show a panel.
+        //var state = Firebug.getPanelState(this);
+        //this.show(state);
     },
 
     disablePanel: function(module)
