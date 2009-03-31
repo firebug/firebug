@@ -463,11 +463,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var enabled = Firebug.Console.isAlwaysEnabled();
         if (enabled)
         {
+             Firebug.Console.disabledPanelPage.hide(this);
              this.showCommandLine(true);
              this.showToolbarButtons("fbConsoleButtons", true);
         }
         else
+        {
             this.hide();
+            Firebug.Console.disabledPanelPage.show(this);
+        }
     },
 
     enablePanel: function(module)
