@@ -2084,7 +2084,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         var tab = this.getTab();
         if (tab)
-            tab.removeAttribute('aria-disabled');
+            tab.setAttribute('aria-disabled', 'false');
 
         // The panel was just enabled so, hide the disable message. Notice that
         // displaying this page replaces content of the panel.
@@ -2949,20 +2949,12 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
             H1({class: "disabledPanelHead"},
                 SPAN("$pageTitle")
             ),
-            /* P({class: "disabledPanelDescription"},
-                $STR("moduleManager.desc1")
-            ),
-            P({class: "disabledPanelDescription", align: "center"},
-                BUTTON({class: "disabledPanelApplyButton", onclick: "$onEnable"})
-            ),
-            P({class: "disabledPanelDescription applyDesc", style:"font-size:11px",
-                align: "center"}
-            ),*/
             P({class: "disabledPanelDescription", style: "margin-top: 15px;"},
                 $STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
                 IMG({src: "chrome://firebug/skin/activation-menu.png"})
             )
+            /* need something here that pushes down any thing appended to the panel */
          ),
 
     getModuleName: function(module)
@@ -2983,13 +2975,14 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
     show: function(panel)
     {
-        if (panel.disabledBox)
-            return;
+        if (!panel.disabledBox)
+            this.render(panel);
 
-        this.render(panel);
+        panel.disabledBox.setAttribute("collapsed", false);
+        panel.panelNode.scrollTop = 0;
 
         if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.DisabledPanelPage.show; box", panel.disabledBox);
+            FBTrace.sysout("firebug.DisabledPanelPage.show:"+panel.disabledBox.getAttribute('collapsed')+" box", panel.disabledBox);
     },
 
     hide: function(panel)
@@ -3000,9 +2993,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.DisabledPanelPage.hide; box", panel.disabledBox);
 
-        // Remove entire disabled page.
-        clearNode(panel.panelNode);
-        delete panel.disabledBox;
+        panel.disabledBox.setAttribute("collapsed", true);
     },
 
     render: function(panel)
