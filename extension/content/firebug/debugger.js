@@ -283,8 +283,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var chrome = context.chrome;
         var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
 
-        if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("debugger.resume "+context.getName()+ " breakable: "+breakable, breakable);
+        if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("debugger.breakOnNext "+context.getName()+ " breakable: "+breakable, breakable);
 
         if (breakable == "true")
             this.suspend(context);  // arm breakOnNext
