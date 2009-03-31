@@ -66,7 +66,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             statusText.setAttribute("value", error.message);
             statusBar.setAttribute("errors", "true");
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.showMessageOnStatusBar error.message:"+error.message+"\n"); /*@explore*/
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.showMessageOnStatusBar error.message:"+error.message+"\n");
         }
     },
 
@@ -115,6 +115,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     observe: function(object)
     {
+        window.dump("errors.observer object: "+object.message+"\n");
         try
         {
             if (!FBTrace)
@@ -129,12 +130,13 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (object instanceof nsIScriptError)  // all branches should trace 'object'
             {
-                if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
+                window.dump("errors.observer after instanceof object: "+object.message+"\n");
+                if (FBTrace.DBG_ERRORS)
                     FBTrace.dumpProperties("errors.observe nsIScriptError: "+object.errorMessage, object);
 
                 var context = this.getErrorContext(object);  // after instanceof
                 var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
-                context = this.logScriptError(context, object, isWarning)
+                context = this.logScriptError(context, object, isWarning);
                 if(!context)
                     return;
             }
@@ -145,7 +147,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 {
                     if (object instanceof nsIConsoleMessage)
                     {
-                        if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
+                        if (FBTrace.DBG_ERRORS)
                             FBTrace.dumpProperties("errors.observe nsIConsoleMessage: "+object.message, object);
 
                         var context = this.getErrorContext(object);  // after instanceof
@@ -156,7 +158,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     }
                     else if (object.message)
                     {
-                        if (FBTrace.DBG_ERRORS)                                                                               /*@explore*/
+                        if (FBTrace.DBG_ERRORS)
                             FBTrace.dumpProperties("errors.observe object.message:", object);
 
                         var context = this.getErrorContext(object);
@@ -170,8 +172,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 }
                 else
                 {
-                    if (FBTrace.DBG_ERRORS)                                                                                /*@explore*/
-                        FBTrace.dumpProperties("errors.observe showChromeMessages off, dropped:", object);                                 /*@explore*/
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.dumpProperties("errors.observe showChromeMessages off, dropped:", object);
                     return;
                 }
             }
@@ -194,9 +196,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         catch (exc)
         {
             // Errors prior to console init will come out here, eg error message from Firefox startup jjb.
-            if (FBTrace.DBG_ERRORS)                                                                                     /*@explore*/
+            if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.dumpProperties("errors.observe FAILS", exc);                                                   /*@explore*/
+                FBTrace.dumpProperties("errors.observe FAILS", exc);
                 FBTrace.dumpProperties("errors.observe object", object);
             }
         }
@@ -204,8 +206,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     logScriptError: function(context, object, isWarning)
     {
-        if (FBTrace.DBG_ERRORS)                                                                                    /*@explore*/
-            FBTrace.dumpProperties("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);/*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.dumpProperties("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);
 
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
@@ -256,14 +258,25 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             sourceName = stack_frame.href;
             lineNumber = stack_frame.lineNo;
-            // XXXjjb Seems to change the message seen in Firefox Error Console
-            var correctedError = object.init(object.errorMessage, sourceName, object.sourceLine,lineNumber, object.columnNumber, object.flags, object.category);
-            if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-                FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());                          /*@explore*/
+
+            var correctedError =
+            {
+                    errorMessage: object.errorMessage,
+                    dsourceName: sourceName,
+                    sourceLine: object.sourceLine,
+                    lineNumber: lineNumber,
+                    columnNumber: object.columnNumber,
+                    flags: object.flags,
+                    categor: object.category
+            };
+            object = correctedError;
+
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());
             return true;
         }
-        if (FBTrace.DBG_ERRORS)                                                                            /*@explore*/
-            FBTrace.dumpProperties("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);                          /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.dumpProperties("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);
 
         return false;
     },
@@ -298,6 +311,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
         );
 
+        if (errorContext)
+            this.contextCache[url] = errorContext;
+
         if (FBTrace.DBG_ERRORS && !errorContext)
             FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
 
@@ -307,7 +323,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (FBTrace.DBG_ERRORS && !FirebugContext)
             FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
 
-        this.contextCache[url] = errorContext;
         return errorContext; // we looked everywhere...
     },
 
@@ -359,41 +374,41 @@ function getBaseCategory(categories)
     }
 }
 
-function isShownCategory(url, category, isWarning)
+function whyNotShown(url, category, isWarning)
 {
     var m = urlRe.exec(url);
     var errorScheme = m ? m[1] : "";
     if (errorScheme == "javascript")
-        return true;
+        return null;
 
     var isChrome = false;
 
     if (!category)
-        return Firebug.showChromeErrors;
+        return Firebug.showChromeErrors ? null :"no category, assume chrome, showChromeErrors false";
 
     var categories = category.split(" ");
     for (var i = 0 ; i < categories.length; ++i)
     {
         var category = categories[i];
         if (category == "CSS" && !Firebug.showCSSErrors)
-            return false;
+            return "showCSSErrors";
         else if ((category == "XML" || category == "malformed-xml" ) && !Firebug.showXMLErrors)
-            return false;
+            return "showXMLErors";
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
                     && !isWarning && !Firebug.showJSErrors)
-            return false;
+            return "showJSErrors";
         else if ((category == "javascript" || category == "JavaScript" || category == "DOM")
                     && isWarning && !Firebug.showJSWarnings)
-            return false;
+            return "showJSWarnings";
         else if (errorScheme == "chrome" || category == "XUL" || category == "chrome" || category == "XBL"
                 || category == "component")
             isChrome = true;
     }
 
     if ((isChrome && !Firebug.showChromeErrors))
-        return false;
+        return "showChromeErrors";
 
-    return true;
+    return null;
 }
 
 function domainFilter(url)  // never called?
@@ -423,18 +438,24 @@ function domainFilter(url)  // never called?
 
 function lessTalkMoreAction(context, object, isWarning)
 {
-    if (!context || !isShownCategory(object.sourceName, object.category, isWarning))
+    if (!context)
     {
         if (FBTrace.DBG_ERRORS)
-        {                                                         /*@explore*/
-            FBTrace.sysout("errors.observe dropping "+object.category+(context?" isShownCategory:"+isShownCategory(object.sourceName, object.category, isWarning):" no context")+"\n");           /*@explore*/
-        }
-        return true;
+            FBTrace.sysout("errors.observe dropping "+object.category+" no context");
     }
 
     var enabled = Firebug.Console.isAlwaysEnabled();
     if (!enabled) {
         FBTrace.sysout("errors.observe not enabled for context "+(context.window?context.window.location:"no window")+"\n");
+        return true;
+    }
+
+    var why = whyNotShown(object.sourceName, object.category, isWarning);
+
+    if (why)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.observe dropping "+object.category+" because: "+why);
         return true;
     }
 
@@ -461,8 +482,8 @@ function lessTalkMoreAction(context, object, isWarning)
     if (context.errorMap && msgId in context.errorMap)
     {
         context.errorMap[msgId] += 1;
-        if (FBTrace.DBG_ERRORS)                                                                             /*@explore*/
-            FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");             /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");
         return true;
     }
 
@@ -507,8 +528,8 @@ function getExceptionContext(context)
     if (errorWin)
     {
         var errorContext = TabWatcher.getContextByWindow(errorWin);
-        if (FBTrace.DBG_ERRORS)                                                                    /*@explore*/
-            FBTrace.sysout("errors.observe exception context:"+errorContext+" errorWin"+errorWin+"\n");           /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.observe exception context:"+errorContext+" errorWin"+errorWin+"\n");
         return errorContext;
     }
     return context;
@@ -528,10 +549,21 @@ function correctLineNumbersOnExceptions(context, object)
         sourceName = m[3];
         lineNumber = m[4];
 
-        var correctedError = object.init(errorMessage, sourceName, object.sourceLine, lineNumber, object.columnNumber, object.flags, object.category);
-        if (FBTrace.DBG_ERRORS)                                                                            
+        var correctedError =
+        {
+                errorMessage: object.errorMessage,
+                dsourceName: sourceName,
+                sourceLine: object.sourceLine,
+                lineNumber: lineNumber,
+                columnNumber: object.columnNumber,
+                flags: object.flags,
+                categor: object.category
+        };
+        object = correctedError;
+
+        if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.correctLineNumbersOnExceptions corrected message with sourceName: "+sourceName);
-        
+
     }
 }
 
