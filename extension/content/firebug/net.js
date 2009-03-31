@@ -3371,8 +3371,8 @@ var NetPanelSearch = function(panel, rowFinder)
         if (!file)
             return null;
 
-        // xxxHonza: caseSensitive
-        if (file.responseText && file.responseText.indexOf(this.text) >= 0)
+        var scanRE = new RegExp(this.text, Firebug.searchCaseSensitive ? "g" : "gi");
+        if (scanRE.test(file.responseText))
         {
             if (!hasClass(this.currentRow, "opened"))
                 panel.toggleHeadersRow(this.currentRow);
