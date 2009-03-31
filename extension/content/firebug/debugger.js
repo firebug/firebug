@@ -2261,6 +2261,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (enabled)
         {
+            Firebug.Debugger.disabledPanelPage.hide(this);
             if (this.context.loaded && !this.location)
             {
                 restoreLocation(this, state);
