@@ -60,7 +60,8 @@ const prefNames =
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
 
     // Search
-    "searchCaseSensitive", "searchGlobal",
+    "searchCaseSensitive", "searchGlobal", "net.searchHeaders", "net.searchParameters",
+    "net.searchResponseBody",
 
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
@@ -1991,7 +1992,7 @@ Firebug.Panel =
     {
         // Return default search option.
         return [
-            optionMenu($STR("search.Match A or a"), "searchCaseSensitive"),
+            optionMenu("search.Match A or a", "searchCaseSensitive"),
         ];
     },
 

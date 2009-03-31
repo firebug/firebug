@@ -1580,6 +1580,9 @@ this.wrapText = function(text, noEscapeHTML)
     var html = [];
     var wrapWidth = Firebug.textWrapWidth;
 
+    // Split long text into lines and put every line into an <pre> element (only in case
+    // if noEscapeHTML is false). This is useful for automatic scrolling when searching
+    // within response body (in order to scroll we need an element).
     var lines = this.splitLines(text);
     for (var i = 0; i < lines.length; ++i)
     {
@@ -1590,12 +1593,18 @@ this.wrapText = function(text, noEscapeHTML)
             var wrapIndex = wrapWidth+ (m ? m.index : 0);
             var subLine = line.substr(0, wrapIndex);
             line = line.substr(wrapIndex);
+
+            if (!noEscapeHTML) html.push("<pre>");
             html.push(noEscapeHTML ? subLine : escapeHTML(subLine));
+            if (!noEscapeHTML) html.push("</pre>");
         }
+
+        if (!noEscapeHTML) html.push("<pre>");
         html.push(noEscapeHTML ? line : escapeHTML(line));
+        if (!noEscapeHTML) html.push("</pre>");
     }
 
-    return html.join("\n");
+    return html.join(noEscapeHTML ? "\n" : "");
 }
 
 this.insertWrappedText = function(text, textBox, noEscapeHTML)

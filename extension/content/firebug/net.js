@@ -3312,9 +3312,6 @@ var NetPanelSearch = function(panel, rowFinder)
     var doc = panelNode.ownerDocument;
     var searchRange, startPt;
 
-    // Options
-    var searchResponses = Firebug.getPref(Firebug.prefDomain, "net.searchResponseBody");
-
     // Common search object methods.
     this.find = function(text, reverse, caseSensitive)
     {
@@ -3337,15 +3334,14 @@ var NetPanelSearch = function(panel, rowFinder)
             if (match)
                 return match;
 
-            if (searchResponses)
+            if (this.shouldSearchResponses())
             {
                 match = this.findNextInResponse(reverse, caseSensitive);
                 if (match)
                     return match;
             }
 
-            var firstRow = wrapAround ? this.getFirstRow() : null;
-            this.currentRow = this.currentRow.nextSibling ? this.currentRow.nextSibling : firstRow;
+            this.currentRow = this.getNextRow(wrapAround, reverse);
 
             if (this.currentRow)
                 this.resetRange();
@@ -3403,6 +3399,25 @@ var NetPanelSearch = function(panel, rowFinder)
     {
         var table = getElementByClass(panelNode, "netTable");
         return table.firstChild.firstChild;
+    }
+
+    this.getNextRow = function(wrapAround, reverse)
+    {
+        // xxxHonza: reverse searching missing.
+        for (var sib = this.currentRow.nextSibling; sib; sib = sib.nextSibling)
+        {
+            if (this.shouldSearchResponses())
+                return sib;
+            else if (hasClass(sib, "netRow"))
+                return sib;
+        }
+
+        return wrapAround ? this.getFirstRow() : null;;
+    }
+
+    this.shouldSearchResponses = function()
+    {
+        return Firebug["net.searchResponseBody"];
     }
 };
 
