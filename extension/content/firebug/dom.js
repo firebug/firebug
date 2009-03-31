@@ -909,11 +909,6 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         }
         else
             return false;
-    },
-
-    getSearchCapabilities: function()
-    {
-        return [ "searchCaseSensitive" ];
     }
 });
 

@@ -860,9 +860,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             return false;
     },
 
-    getSearchCapabilities: function()
+    getSearchOptionsMenuItems: function()
     {
-        return [ "searchCaseSensitive", "searchGlobal" ];
+        return [
+            optionMenu("search.Match A or a", "searchCaseSensitive"),
+            optionMenu("search.Multiple Files", "searchGlobal")
+        ];
     }
 });
 

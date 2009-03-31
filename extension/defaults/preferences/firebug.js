@@ -20,6 +20,10 @@ pref("extensions.firebug.allowDoublePost", false);
 pref("extensions.firebug.searchCaseSensitive", false);
 pref("extensions.firebug.searchGlobal", true);
 
+pref("extensions.firebug.net.searchHeaders", false);
+pref("extensions.firebug.net.searchParameters", false);
+pref("extensions.firebug.net.searchResponseBody", false);
+
 // Console
 pref("extensions.firebug.showJSErrors", true);
 pref("extensions.firebug.showJSWarnings", false);

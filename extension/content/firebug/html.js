@@ -846,11 +846,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         return !search.noMatch;
     },
 
-    getSearchCapabilities: function()
-    {
-        return [ "searchCaseSensitive" ];
-    },
-
     getDefaultSelection: function()
     {
         try

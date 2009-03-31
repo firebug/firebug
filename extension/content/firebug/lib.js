@@ -644,6 +644,24 @@ this.getElementsByClass = function(node, className)  // className, className, ..
     return result;
 };
 
+this.getElementsByAttribute = function(node, attrName, attrValue)
+{
+    function iteratorHelper(node, attrName, attrValue, result)
+    {
+        for (var child = node.firstChild; child; child = child.nextSibling)
+        {
+            if (child.getAttribute(attrName) == attrValue)
+                result.push(child);
+
+            iteratorHelper(child, attrName, attrValue, result);
+        }
+    }
+
+    var result = [];
+    iteratorHelper(node, attrName, attrValue, result);
+    return result;
+}
+
 this.isAncestor = function(node, potentialAncestor)
 {
     for (var parent = node; parent; parent = parent.parentNode)
@@ -1636,6 +1654,9 @@ this.setItemIntoElement = function(element, item)
     if (item.command)
         element.addEventListener("command", item.command, false);
 
+    if (item.option)
+        element.setAttribute("option", item.option);
+
     return element;
 }
 
@@ -1668,13 +1689,13 @@ this.createMenuSeparator = function(popup, before)
 
 this.optionMenu = function(label, option)
 {
-    return {label: label, type: "checkbox", checked: Firebug[option],
+    return {label: label, type: "checkbox", checked: Firebug[option], option: option,
         command: this.bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, option, !Firebug[option]) };
 };
 
 this.serviceOptionMenu = function(label, option)
 {
-    return {label: label, type: "checkbox", checked: Firebug[option],
+    return {label: label, type: "checkbox", checked: Firebug[option], option: option,
         command: this.bindFixed(Firebug.setPref, Firebug, Firebug.servicePrefDomain, option, !Firebug[option]) };
 };
 
@@ -3603,6 +3624,7 @@ this.TextSearch = function(rootNode, rowFinder)
 };
 
 // ************************************************************************************************
+
 this.SourceBoxTextSearch = function(sourceBox)
 {
     this.find = function(text, reverse, caseSensitive)

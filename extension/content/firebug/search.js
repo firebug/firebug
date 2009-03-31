@@ -110,7 +110,7 @@ Firebug.Search = extend(Firebug.Module,
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
-                Firebug.Search.showState();
+                Firebug.Search.showOptions();
 
                 var found = panel.search(value, reverse);
                 if (!found && value)
@@ -137,39 +137,56 @@ Firebug.Search = extend(Firebug.Module,
         beep();
     },
 
-    showState: function()
+    showOptions: function()
     {
         var panel = FirebugChrome.getSelectedPanel();
         if (!panel.searchable)
             return;
 
-        var searchOptions = FirebugChrome.$("fbSearchButtons");
-
         var searchBox = FirebugChrome.$("fbSearchBox");
-        var ability = panel.getSearchCapabilities();
 
-        var searchString = searchBox.value;
-        var showSearch = "Find "+searchString;   // NLS
-        if (ability.indexOf("searchCaseSensitive") != -1)  // then the panel support case sensitive
+        // Get search options popup menu.
+        var optionsPopup = FirebugChrome.$("fbSearchOptionsPopup");
+        if (optionsPopup.state == "closed")
         {
+            FBL.eraseNode(optionsPopup);
+
+            // The list of options is provided by the current panel.
+            var menuItems = panel.getSearchOptionsMenuItems();
+            if (menuItems)
+            {
+                for (var i=0; i<menuItems.length; i++)
+                    FBL.createMenuItem(optionsPopup, menuItems[i]);
+            }
+
+            optionsPopup.openPopup(searchBox, "before_start", 0, -5, false, false);
+        }
+
+        // Update label of the searchCaseSensitive option.
+        var items = optionsPopup.getElementsByAttribute("option", "searchCaseSensitive");
+        if (items.length > 0)
+        {
+            var searchString = searchBox.value;
+            var showSearch = "Find " + searchString;   // NLS xxxHonza: localization
+
             var lower = searchString.toLowerCase();
             if (searchString == lower)
             {
                 Firebug.searchCaseSensitive = false;
-                showSearch += ", ..., "+searchString.toUpperCase();
+                showSearch += ", ..., " + searchString.toUpperCase();
             }
             else
+            {
                 Firebug.searchCaseSensitive = true;
+            }
 
-            $('menu_searchCaseSensitive').label = showSearch;
+            items[0].label = showSearch;
         }
-
-        searchOptions.openPopup(searchBox, "before_start", 0, -5, false, false);
     },
 
-    hideState: function()
+    hideOptions: function()
     {
-        var searchOptions = FirebugChrome.$("fbSearchButtons");
+        var searchOptions = FirebugChrome.$("fbSearchOptionsPopup");
         if (searchOptions)
             searchOptions.hidePopup();
     },
@@ -178,7 +195,7 @@ Firebug.Search = extend(Firebug.Module,
     {
         if (FBTrace.DBG_SEARCH)
             FBTrace.sysout("onSearchBoxFocus no-op");
-        //this.showState();
+        //this.showOptions();
     },
 
     onSearchButtonKey: function(event)
@@ -218,40 +235,6 @@ Firebug.Search = extend(Firebug.Module,
 
         var searchOptions = FirebugChrome.$("fbSearchButtons");
         searchOptions.removeEventListener('keypress', this.onSearchButtonKey, true);
-    },
-
-    showPanel: function(browser, panel)
-    {
-        return;
-        var chrome = browser.chrome;
-        var searchBox = chrome.$("fbSearchBox");
-        searchBox.value = panel && panel.searchText ? panel.searchText : "";
-        searchBox.disabled = !panel || !panel.searchable;
-
-        var extSearch = panel && panel.extSearch;
-        var searchButtons = chrome.$("fbSearchButtons");
-        searchButtons.style.display = extSearch ? "" : "none";
-        if (extSearch)
-        {
-            var capabilities = panel.getSearchCapabilities() || [];
-            var keyCaps = {};
-            for (var i = 0; i < capabilities.length; i++) {
-                keyCaps[capabilities[i]] = true;
-            }
-
-            // Hide the whole menu if no options are supported
-            var searchOptions = chrome.$("fbSearchOptions");
-            searchOptions.style.display = capabilities.length ? "" : "none";
-
-            // Handle individual menu elements
-            var searchPopup = chrome.$("searchOptionsPopup");
-            var curMenuItem = searchPopup.firstChild;
-            while (curMenuItem) {
-                curMenuItem.style.display =
-                    keyCaps[curMenuItem.getAttribute("option")] ? "" : "none";
-                curMenuItem = curMenuItem.nextSibling;
-            }
-        }
     }
 });
 

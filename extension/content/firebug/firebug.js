@@ -1986,16 +1986,13 @@ Firebug.Panel =
     /**
      * Retrieves the search options that this modules supports.
      * This is used by the search UI to present the proper options.
-     *
-     * Implementors should return an array containing the constants supported
-     * by the search algorithm. The supported options are defined in the search
-     * section of the prefNames array.
-     *
-     * Currently these are "searchCaseSensitive" and "searchGlobal".
      */
-    getSearchCapabilities: function()
+    getSearchOptionsMenuItems: function()
     {
-        return null;
+        // Return default search option.
+        return [
+            optionMenu($STR("search.Match A or a"), "searchCaseSensitive"),
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

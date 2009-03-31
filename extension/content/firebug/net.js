@@ -974,11 +974,12 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
+        {
             row = this.currentSearch.findNext(true, false, reverse, Firebug.searchCaseSensitive);
+        }
         else
         {
-            function findRow(node) { return getAncestorByClass(node, "netRow"); }
-            this.currentSearch = new TextSearch(this.panelNode, findRow);
+            this.currentSearch = new NetPanelSearch(this);
             row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
         }
 
@@ -995,9 +996,14 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             return false;
     },
 
-    getSearchCapabilities: function()
+    getSearchOptionsMenuItems: function()
     {
-        return [ "searchCaseSensitive" ];
+        return [
+            optionMenu("search.Search Case Sensitive", "searchCaseSensitive"),
+            //optionMenu("search.net.Headers", "net.searchHeaders"),
+            //optionMenu("search.net.Parameters", "net.searchParameters"),
+            optionMenu("search.net.Response Bodies", "net.searchResponseBody")
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3295,6 +3301,108 @@ Firebug.NetMonitor.TraceListener =
             message.text = trimLeft(message.text);
             message.type = "DBG_NET";
         }
+    }
+};
+
+// ************************************************************************************************
+
+var NetPanelSearch = function(panel, rowFinder)
+{
+    var panelNode = panel.panelNode;
+    var doc = panelNode.ownerDocument;
+    var searchRange, startPt;
+
+    // Options
+    var searchResponses = Firebug.getPref(Firebug.prefDomain, "net.searchResponseBody");
+
+    // Common search object methods.
+    this.find = function(text, reverse, caseSensitive)
+    {
+        this.text = text;
+
+        finder.findBackwards = !!reverse;
+        finder.caseSensitive = !!caseSensitive;
+
+        this.currentRow = this.getFirstRow();
+        this.resetRange();
+
+        return this.findNext(false, false, reverse, caseSensitive);
+    };
+
+    this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
+    {
+        while (this.currentRow)
+        {
+            var match = this.findNextInRange(reverse, caseSensitive);
+            if (match)
+                return match;
+
+            if (searchResponses)
+            {
+                match = this.findNextInResponse(reverse, caseSensitive);
+                if (match)
+                    return match;
+            }
+
+            var firstRow = wrapAround ? this.getFirstRow() : null;
+            this.currentRow = this.currentRow.nextSibling ? this.currentRow.nextSibling : firstRow;
+
+            if (this.currentRow)
+                this.resetRange();
+        }
+    };
+
+    // Internal search helpers.
+    this.findNextInRange = function(reverse, caseSensitive)
+    {
+        if (this.currentNode)
+        {
+            startPt = doc.createRange();
+            if (reverse)
+                startPt.setStartBefore(this.currentNode);
+            else
+                startPt.setStartAfter(this.currentNode);
+        }
+
+        var range = this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+        this.currentNode = range ? range.startContainer : null;
+        return this.currentNode ? this.currentNode.parentNode : null;
+    },
+
+    this.findNextInResponse = function(reveres, caseSensitive)
+    {
+        var file = Firebug.getRepObject(this.currentRow);
+        if (!file)
+            return null;
+
+        // xxxHonza: caseSensitive
+        if (file.responseText && file.responseText.indexOf(this.text) >= 0)
+        {
+            if (!hasClass(this.currentRow, "opened"))
+                panel.toggleHeadersRow(this.currentRow);
+
+            var netInfoRow = this.currentRow.nextSibling;
+            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+            Firebug.NetMonitor.NetInfoBody.selectTabByName(netInfoBox, "Response");
+        }
+
+        return null;
+    },
+
+    // Helpers
+    this.resetRange = function()
+    {
+        searchRange = doc.createRange();
+        searchRange.setStart(this.currentRow, 0);
+        searchRange.setEnd(this.currentRow, this.currentRow.childNodes.length);
+
+        startPt = searchRange;
+    }
+
+    this.getFirstRow = function()
+    {
+        var table = getElementByClass(panelNode, "netTable");
+        return table.firstChild.firstChild;
     }
 };
 

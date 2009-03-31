@@ -198,19 +198,9 @@
                             tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
             </hbox>
 
-            <menupopup id="fbSearchButtons" position="before_start" open="true" ignorekeys="true">
-                <menuitem id="menu_searchCaseSensitive" type="checkbox"
-                                  label="search.Match A or a"
-                                  oncommand="FirebugChrome.onToggleOption(this)"
-                                  option="searchCaseSensitive"/>
-               <menuitem id="menu_searchAllFiles" type="checkbox"
-                                  label="search.Multiple Files"
-                                  oncommand="FirebugChrome.onToggleOption(this)"
-                                  option="searchGlobal"/>
-            </menupopup>
-
+            <menupopup id="fbSearchOptionsPopup" position="before_start" open="true" ignorekeys="true" />
+            <!-- xxxHonza: should the label be localized or not because ARIA? -->
             <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1" label="Search Firebug Panel"/>
-
         </hbox>
     </toolbar>
 
