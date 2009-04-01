@@ -262,7 +262,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (!context.stopped) // then resume means breakOnNext
         {
-            this.breakOnNext(context);
+            try
+            {
+                this.breakOnNext(context);
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("debugger.resume breakOnNext FAILS "+exc, exc);
+            }
             return;
         }
 
@@ -280,7 +288,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     breakOnNext: function(context)
     {
-        var chrome = context.chrome;
+        var chrome = context.chrome ? context.chrome : FirebugChrome;
         var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
 
         if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
