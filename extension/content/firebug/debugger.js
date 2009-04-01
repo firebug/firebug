@@ -2400,8 +2400,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            optionMenu("search.Match A or a", "searchCaseSensitive"),
-            optionMenu("search.Multiple Files", "searchGlobal")
+            optionMenu("search.script.Multiple_Files", "searchGlobal")
         ];
     },
 

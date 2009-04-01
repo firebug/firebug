@@ -162,27 +162,9 @@ Firebug.Search = extend(Firebug.Module,
             optionsPopup.openPopup(searchBox, "before_start", 0, -5, false, false);
         }
 
-        // Update label of the searchCaseSensitive option.
-        var items = optionsPopup.getElementsByAttribute("option", "searchCaseSensitive");
-        if (items.length > 0)
-        {
-            var searchString = searchBox.value;
-            var showSearch = "Find " + searchString;   // NLS xxxHonza: localization
-
-            var lower = searchString.toLowerCase();
-            if (searchString == lower)
-            {
-                Firebug.searchCaseSensitive = false;
-                showSearch += ", ..., " + searchString.toUpperCase();
-            }
-            else
-            {
-                Firebug.searchCaseSensitive = true;
-            }
-
-            items[0].setAttribute("checked", Firebug.searchCaseSensitive);
-            items[0].setAttribute("label", showSearch);
-        }
+        // Update search caseSensitive option according to the current capitalization.
+        var searchString = searchBox.value;
+        Firebug.searchCaseSensitive = (searchString != searchString.toLowerCase());
     },
 
     hideOptions: function()

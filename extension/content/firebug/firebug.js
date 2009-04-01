@@ -1990,10 +1990,7 @@ Firebug.Panel =
      */
     getSearchOptionsMenuItems: function()
     {
-        // Return default search option.
-        return [
-            optionMenu("search.Match A or a", "searchCaseSensitive"),
-        ];
+        return null;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
