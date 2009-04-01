@@ -149,7 +149,7 @@ Firebug.Search = extend(Firebug.Module,
         var optionsPopup = FirebugChrome.$("fbSearchOptionsPopup");
         if (optionsPopup.state == "closed")
         {
-            FBL.eraseNode(optionsPopup);
+            eraseNode(optionsPopup);
 
             // The list of options is provided by the current panel.
             var menuItems = panel.getSearchOptionsMenuItems();
@@ -180,7 +180,8 @@ Firebug.Search = extend(Firebug.Module,
                 Firebug.searchCaseSensitive = true;
             }
 
-            items[0].label = showSearch;
+            items[0].setAttribute("checked", Firebug.searchCaseSensitive);
+            items[0].setAttribute("label", showSearch);
         }
     },
 
