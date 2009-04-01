@@ -4442,7 +4442,7 @@ this.getSourceFileByScript = function(context, script)
     if (lucky && lucky.hasScript(script))
         return lucky;
 
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.getName()); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.getName()+": ", context.sourceFileMap); /*@explore*/
 
     for (var url in context.sourceFileMap)
     {
