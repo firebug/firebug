@@ -106,6 +106,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session
         {
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("-> tabWatcher.watchTopWindow context exists "+context.getName());
             if (!this.shouldShowContext(context))
             {
                 this.watchContext(win, null);
@@ -129,11 +131,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
             context = this.createContext(win);
        }
 
-        if (win instanceof Ci.nsIDOMWindow && win.top == win)
+        if (win instanceof Ci.nsIDOMWindow && win.parent == win)
         {
             win.addEventListener("pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
             win.addEventListener("DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
-            if (FBTrace.DBG_INITIALIZE)
+            if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pageshow, DomContentLoaded "+win.location);
         }
 
@@ -182,7 +184,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         else
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> watchTopWindow context.loaded:"+context.loaded);
+                FBTrace.sysout("-> watchTopWindow context.loaded:"+context.loaded+ " for "+context.getName());
             this.rushShowContext(win, context);
         }
 
@@ -247,7 +249,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         context.uid = FBL.getUniqueId();
 
-        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_INITIALIZE) {
+        if (FBTrace.DBG_WINDOWS) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
                 ", "+context.getName()+" browser "+browser.currentURI+"\n");
         }
@@ -320,13 +322,13 @@ top.TabWatcher = extend(new Firebug.Listener(),
             if (win.parent == win)
             {
                 win.addEventListener("pagehide", onPageHideTopWindow, false);
-                if (FBTrace.DBG_INITIALIZE)
+                if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for pagehide");
             }
             else
             {
                 win.addEventListener("unload", onUnloadWindow, false);
-                if (FBTrace.DBG_INITIALIZE)
+                if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for unload");
             }
 
@@ -512,7 +514,7 @@ var TabProgressListener = extend(BaseProgressListener,
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> TabProgressListener.onLocationChange to: "
+                FBTrace.sysout("-> TabProgressListener.onLocationChange "+progress.DOMWindow.location+" to: "
                                           +(uri?uri.spec:"null location")+"\n");
 
             TabWatcher.watchTopWindow(progress.DOMWindow, uri);
@@ -678,7 +680,11 @@ function onPageHideTopWindow(event)
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
     if (event.persisted) // then the page is cached and there cannot be an unload handler
     {
-        // no-op see Bug 484710 -  add pageIgnore event for pages that are ejected from the bfcache
+        //  see Bug 484710 -  add pageIgnore event for pages that are ejected from the bfcache
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher onPageHideTopWindow for: "+win.location+"\n");
+        TabWatcher.unwatchTopWindow(win);
     }
     else
     {
@@ -707,7 +713,7 @@ function onLoadWindowContent(event)
     try
     {
         win.removeEventListener("pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener "+win.location);
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.onLoadWindowContent pageshow removeEventListener "+win.location);
     }
     catch (exc)
     {
@@ -718,7 +724,7 @@ function onLoadWindowContent(event)
     try
     {
         win.removeEventListener("DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener "+win.location);
+        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.onLoadWindowContent DOMContentLoaded removeEventListener "+win.location);
     }
     catch (exc)
     {
@@ -751,7 +757,7 @@ function onUnloadWindow(event)
     var win = event.currentTarget;
     var eventType = "unload";
     win.removeEventListener(eventType, onUnloadWindow, false);
-    if (FBTrace.DBG_INITIALIZE)
+    if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+win.location.href +" removeEventListener: "+ eventType+"\n");
     TabWatcher.unwatchWindow(win);
 }
