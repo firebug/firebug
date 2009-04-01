@@ -3365,7 +3365,7 @@ var NetPanelSearch = function(panel, rowFinder)
         return this.currentNode ? this.currentNode.parentNode : null;
     },
 
-    this.findNextInResponse = function(reveres, caseSensitive)
+    this.findNextInResponse = function(reverse, caseSensitive)
     {
         var file = Firebug.getRepObject(this.currentRow);
         if (!file)
