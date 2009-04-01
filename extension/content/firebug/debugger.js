@@ -563,7 +563,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (!context.executingSourceFile)  // bail out, we don't want the user stuck in debug with out source.
             {
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("startDebugging exiting, no sourceFile for "+context.debugFrame.script.fileName);
+                    FBTrace.sysout("startDebugging resuming, no sourceFile for "+context.debugFrame.script.fileName);
+                this.resume(context);
                 return;
             }
 
