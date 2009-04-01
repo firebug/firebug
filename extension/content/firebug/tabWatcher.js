@@ -129,6 +129,14 @@ top.TabWatcher = extend(new Firebug.Listener(),
             context = this.createContext(win);
        }
 
+        if (win instanceof Ci.nsIDOMWindow && win.top == win)
+        {
+            win.addEventListener("pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
+            win.addEventListener("DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pageshow, DomContentLoaded "+win.location);
+        }
+
         // Dispatch watchWindow for the outer most DOM window
         this.watchWindow(win, context);
 
@@ -246,13 +254,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
 
-        if (win instanceof Ci.nsIDOMWindow && win.top == win)
-        {
-            win.addEventListener("pageshow", onLoadWindowContent, onLoadWindowContent.capturing);
-            win.addEventListener("DOMContentLoaded", onLoadWindowContent, onLoadWindowContent.capturing);
-            if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("-> tabWatcher.watchTopWindow addEventListener for pageshow, DomContentLoaded "+win.location);
-        }
         return context;
     },
 
