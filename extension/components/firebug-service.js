@@ -180,6 +180,8 @@ function FirebugService()
     this.profiling = false;
 
     prefs = PrefService.getService(nsIPrefBranch2);
+    fbs.prefDomain = "extensions.firebug-service."
+    prefs.addObserver(fbs.prefDomain, fbs, false);
 
     var observerService = Cc["@mozilla.org/observer-service;1"]
         .getService(Ci.nsIObserverService);
@@ -222,6 +224,16 @@ FirebugService.prototype =
             // Seems to be the normal path...FBTrace.sysout("FirebugService, attempt to exitNestedEventLoop fails "+exc);
         }
 
+
+        try
+        {
+            prefs.removeObserver(fbs.prefDomain, fbs);
+        }
+        catch (exc)
+        {
+            FBTrace.sysout("fbs prefs.removeObserver fails "+exc, exc);
+        }
+
         jsd.off();
         jsd = null;
         if (!jsd)
@@ -239,6 +251,12 @@ FirebugService.prototype =
         return this;
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // nsIObserver
+    observe: function(subject, topic, data)
+    {
+        fbs.obeyPrefs();
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     get lastErrorWindow()
@@ -913,6 +931,8 @@ FirebugService.prototype =
                 if (fbs.resetBP || fbs.resetCreation)
                     FBTrace.sysout("firebug-service has DBG_FF_START:"+FBTrace.DBG_FF_START+" delaying BP and CREATION");
             }
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+this.showStackTrace+" breakOnErrors:"+this.breakOnErrors+" trackThrowCatch:"+this.trackThrowCatch+" scriptFilter:"+this.scriptsFilter+" filterSystemURLs:"+this.filterSystemURLs);
         }
         catch (exc)
         {
