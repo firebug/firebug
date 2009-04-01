@@ -115,7 +115,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     observe: function(object)
     {
-        window.dump("errors.observer object: "+object.message+"\n");
         try
         {
             if (!FBTrace)
@@ -130,7 +129,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (object instanceof nsIScriptError)  // all branches should trace 'object'
             {
-                window.dump("errors.observer after instanceof object: "+object.message+"\n");
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.dumpProperties("errors.observe nsIScriptError: "+object.errorMessage, object);
 
