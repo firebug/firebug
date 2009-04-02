@@ -31,6 +31,8 @@ var ignoreNextInput = false;
 
 Firebug.Editor = extend(Firebug.Module,
 {
+    supportsStopEvent: true,
+    
     dispatchName: "editor",
     tabCharacter: "    ",
 
@@ -130,6 +132,8 @@ Firebug.Editor = extend(Firebug.Module,
 
         currentEditor.hide();
         currentPanel.editing = false;
+
+        dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
 
         currentTarget = null;
         currentGroup = null;

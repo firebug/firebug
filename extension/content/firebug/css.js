@@ -156,6 +156,33 @@ const styleGroups =
     ]
 };
 
+Firebug.CSSModule = extend(Firebug.Module, {
+    setProperty: function(style, propName, propValue, propPriority) {
+        var prevValue = style.getPropertyValue(propName);
+        var prevPriority = style.getPropertyPriority(propName);
+        
+        // XXXjoe Gecko bug workaround: Just changing priority doesn't have any effect
+        // unless we remove the property first
+        style.removeProperty(propName);
+        
+        style.setProperty(propName, propValue, propPriority);
+        
+        if (propName) {
+            dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue, propPriority, prevValue, prevPriority]);
+        }
+    },
+    removeProperty: function(style, propName) {
+        var prevValue = style.getPropertyValue(propName);
+        var prevPriority = style.getPropertyPriority(propName);
+        
+        style.removeProperty(propName);
+        
+        if (propName) {
+            dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority]);
+        }
+    }
+});
+
 // ************************************************************************************************
 
 Firebug.CSSStyleSheetPanel = function() {}
@@ -400,7 +427,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var style = Firebug.getRepObject(row);
         var propName = getChildByClass(row, "cssPropName").textContent;
-        style.removeProperty(propName);
+        Firebug.CSSModule.removeProperty(style, propName);
 
         // Remove the property from the selector map, if it was disabled
         var ruleId = Firebug.getRepNode(row).getAttribute("ruleId");
@@ -443,14 +470,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (hasClass(row, "disabledStyle"))
         {
-            style.removeProperty(propName);
+            Firebug.CSSModule.removeProperty(style, propName);
 
             map.push({"name": propName, "value": parsedValue.value,
                 "important": parsedValue.priority});
         }
         else
         {
-            style.setProperty(propName, parsedValue.value, parsedValue.priority);
+            Firebug.CSSModule.setProperty(style, propName, parsedValue.value, parsedValue.priority);
 
             var index = findPropByName(map, propName);
             map.splice(index, 1);
@@ -1196,7 +1223,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 }
             }
             else if (!value) // name of the property has been deleted, so remove the property.
-                style.removeProperty(previousValue);
+                Firebug.CSSModule.removeProperty(style, previousValue);
         }
         else if (getAncestorByClass(target, "cssPropValue"))
         {
@@ -1211,15 +1238,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
             if (propValue)
             {
-                // XXXjoe Gecko bug workaround: Just changing priority doesn't have any effect
-                // unless we remove the property first
-                style.removeProperty(propName);
-
                 var parsedValue = parsePriority(propValue);
-                style.setProperty(propName, parsedValue.value, parsedValue.priority);
+                Firebug.CSSModule.setProperty(style, propName, parsedValue.value, parsedValue.priority);
             }
             else
-                style.removeProperty(propName);
+                Firebug.CSSModule.removeProperty(style, propName);
         }
 
         this.panel.markChange(this.panel.name == "stylesheet");
@@ -1232,11 +1255,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             // this was a name edit. 1) new name->do nothing 2) change previous name->remove old, set new
             if (this.previousPropertyValue)
             {
-                this.cleanUpStyle.removeProperty(this.previousPropertyName);
+                Firebug.CSSModule.removeProperty(this.cleanUpStyle, this.previousPropertyName);
                 if (FBTrace.DBG_CSS)  /*@explore*/
                     FBTrace.sysout("CSSEditor.endEditing removed:"+this.previousPropertyName+"\n"); /*@explore*/
                 var parsedValue = parsePriority(this.previousPropertyValue);
-                this.cleanUpStyle.setProperty(this.newPropertyName, parsedValue.value, parsedValue.priority);
+                Firebug.CSSModule.setProperty(this.cleanUpStyle, this.newPropertyName, parsedValue.value, parsedValue.priority);
                 if (FBTrace.DBG_CSS)  /*@explore*/
                     FBTrace.sysout("CSSEditor.endEditing set:"+this.newPropertyName+"="+this.previousPropertyValue.value+"\n"); /*@explore*/
 
@@ -1530,6 +1553,7 @@ function getSelectionController(panel)
 
 // ************************************************************************************************
 
+Firebug.registerModule(Firebug.CSSModule);
 Firebug.registerPanel(Firebug.CSSStyleSheetPanel);
 Firebug.registerPanel(CSSElementPanel);
 
