@@ -3104,7 +3104,7 @@ Firebug.URLSelector =
     {
         try
         {
-            var uri = makeURI(url);
+            var uri = makeURI(normalizeURL(url));
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
@@ -3137,7 +3137,7 @@ Firebug.URLSelector =
     showUI: function(browser, context)  // Firebug is opened, in browser or detached
     {
         // mark this URI as firebugged
-        var uri = makeURI(context.getWindowLocation());
+        var uri = makeURI(normalizeURL(context.getWindowLocation()));
         var annotation = "firebugged."+(browser.detached?"detached":"showFirebug");
         this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
         if (FBTrace.DBG_WINDOWS)
@@ -3152,7 +3152,7 @@ Firebug.URLSelector =
     {
         if (context)
         {
-            var uri  = makeURI(context.getWindowLocation());
+            var uri  = makeURI(normalizeURL(context.getWindowLocation()));
             this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("hideUI untagged "+uri.spec+" browser.showFirebug: "+browser.showFirebug+" browser.detached:"+browser.detached);
