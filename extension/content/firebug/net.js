@@ -1139,8 +1139,9 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             {
                 // Force update category.
                 file.category = null;
-                removeClass(row, "category-undefined");
-                setClass(row, "category-"+getFileCategory(file));
+                for (var category in fileCategories)
+                    removeClass(row, "category-" + category);
+                setClass(row, "category-" + getFileCategory(file));
             }
 
             if (file.responseHeaders)
@@ -1433,7 +1434,18 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.insertActivationMessage; ", message);
-    }
+    },
+
+    iterateEntries: function(fn)
+    {
+        var rows = getElementsByClass(this.table, "netRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var file = Firebug.getRepObject(rows[i]);
+            if (file)
+                fn(file);
+        }
+    },
 });
 
 // ************************************************************************************************
@@ -2663,6 +2675,10 @@ function getFileCategory(file)
         if (ext)
             file.mimeType = mimeExtensionMap[ext.toLowerCase()];
     }
+
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.getFileCategory " + mimeCategoryMap[file.mimeType] +
+            ", mimeType: " + file.mimeType + " for: " + file.href, file);
 
     return (file.category = mimeCategoryMap[file.mimeType]);
 }
