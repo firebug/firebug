@@ -1,4 +1,134 @@
-<?xml version="1.0"?><?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?><!DOCTYPE window [<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">%firebugDTD;<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >%browserDTD;]><overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/firebug.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/tabWatcher.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/sourceCache.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/tabContext.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/tabCache.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/reps.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/editor.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/infotip.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/commandLine.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/search.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/inspector.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/plugin.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/console.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/html.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/css.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/layout.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/debuggerHalter.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/debugger.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/dom.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/net.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/profiler.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/errors.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/spy.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/consoleInjector.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/jsonViewer.js"/>    <script type="application/x-javascript" src="chrome://firebug/content/traceModule.js"/> <!-- /*@explore*/ -->    <!-- Extend Firefox menus -->    <commandset id="mainCommandSet">        <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>        <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleBar()"/>        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>    </commandset>    <keyset id="mainKeyset">        <key id="key_toggleFirebug" keycode="VK_F12"                command="cmd_toggleFirebug"/>        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel"                command="cmd_detachFirebug"/>    </keyset>    <script type="application/x-javascript" src="chrome://firebug/content/editorToContextMenu.js"/>    <popup id="contentAreaContextMenu">        <!-- TODO Firebug.Editors. -->        <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor" insertbefore="context-viewsource">            <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>            </menupopup>    </menu>        <menuseparator/>        <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"                    oncommand="Firebug.toggleBar(true); FirebugChrome.select(document.popupNode, 'html'); "/>    </popup>    <menupopup id="menu_viewPopup">        <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"            label="&firebug.Firebug;" type="checkbox"            key="key_toggleFirebug" command="cmd_toggleFirebug"/>    </menupopup>    <menupopup id="menu_ToolsPopup">        <menu id="menu_firebug" class="menuitem-iconic" image="chrome://firebug/skin/firebug16.png"              label="&firebug.Firebug;" insertbefore="javascriptConsole">            <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">                <menuitem id="menu_toggleFirebug" type="checkbox"                    label="&firebug.ShowFirebug;" command="cmd_toggleFirebug"/>                <menuitem id="menu_detachFirebug"                    label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>                <menuseparator/>                <menu label="&firebug.OpenWith;">                    <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">                                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>                    </menupopup>                </menu>                <menuseparator/>                <menuitem id="menu_inspectElement" label="&firebug.InspectElement;"                          command="cmd_toggleInspecting" key="key_toggleInspecting"/>                <menuitem label="&firebug.ProfileScript;"                          command="cmd_toggleProfiling" key="key_toggleProfiling"/>                 <menuitem label="&firebug.ClearConsole;"                           command="cmd_clearConsole" key="key_clearConsole"/>                <menuseparator/>                <menuitem id="menu_focusCommandLine" label="&firebug.CommandLine;"                        command="cmd_focusCommandLine" key="key_focusCommandLine"/>                <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"                        command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>            </menupopup>        </menu>    </menupopup>    <toolbarpalette id="BrowserToolbarPalette">        <toolbarbutton id="inspector-button" label="&firebug.Inspect;"                       class="toolbarbutton-1 chromeclass-toolbar-additional"                       observes="cmd_toggleInspecting" tooltiptext="&firebug.InspectElement;"/>        <toolbarbutton id="firebug-button" label="&firebug.Firebug;"                      class="toolbarbutton-1 chromeclass-toolbar-additional"                      observes="cmd_toggleDetachFirebug" tooltiptext="&firebug.DetachFirebug;"/>    </toolbarpalette>
+<?xml version="1.0"?>
+
+<?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
+
+<!DOCTYPE window [
+<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
+%firebugDTD;
+<!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
+%browserDTD;
+]>
+
+<overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+
+    <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/firebug.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/tabWatcher.js"/>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/sourceCache.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/tabContext.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/tabCache.js"/>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/reps.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/editor.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/infotip.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/commandLine.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/search.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/inspector.js"/>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/plugin.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/console.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/html.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/css.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/layout.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/debuggerHalter.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/debugger.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/dom.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/net.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/profiler.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/errors.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/spy.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/consoleInjector.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/jsonViewer.js"/>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/traceModule.js"/> <!-- /*@explore*/ -->
+
+    <!-- Extend Firefox menus -->
+
+    <commandset id="mainCommandSet">
+        <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>
+        <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleBar()"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
+    </commandset>
+
+    <keyset id="mainKeyset">
+        <key id="key_toggleFirebug" keycode="VK_F12"
+                command="cmd_toggleFirebug"/>
+        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel"
+                command="cmd_detachFirebug"/>
+    </keyset>
+
+    <script type="application/x-javascript" src="chrome://firebug/content/editorToContextMenu.js"/>
+
+    <popup id="contentAreaContextMenu">
+        <!-- TODO Firebug.Editors. -->
+        <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor" insertbefore="context-viewsource">
+            <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
+            </menupopup>
+    </menu>
+        <menuseparator/>
+        <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
+                    oncommand="Firebug.toggleBar(true); FirebugChrome.select(document.popupNode, 'html'); "/>
+    </popup>
+
+    <menupopup id="menu_viewPopup">
+        <menuitem id="menu_viewToggleFirebug" insertbefore="toggle_taskbar"
+            label="&firebug.Firebug;" type="checkbox"
+            key="key_toggleFirebug" command="cmd_toggleFirebug"/>
+    </menupopup>
+
+    <menupopup id="menu_ToolsPopup">
+        <menu id="menu_firebug" class="menuitem-iconic" image="chrome://firebug/skin/firebug16.png"
+              label="&firebug.Firebug;" insertbefore="javascriptConsole">
+            <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                <menuitem id="menu_toggleFirebug" type="checkbox"
+                    label="&firebug.ShowFirebug;" command="cmd_toggleFirebug"/>
+                <menuitem id="menu_detachFirebug"
+                    label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
+                <menuseparator/>
+
+                <menu label="&firebug.OpenWith;">
+                    <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                                <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
+                    </menupopup>
+                </menu>
+                <menuseparator/>
+
+                <menuitem id="menu_inspectElement" label="&firebug.InspectElement;"
+                          command="cmd_toggleInspecting" key="key_toggleInspecting"/>
+                <menuitem label="&firebug.ProfileScript;"
+                          command="cmd_toggleProfiling" key="key_toggleProfiling"/>
+                 <menuitem label="&firebug.ClearConsole;"
+                           command="cmd_clearConsole" key="key_clearConsole"/>
+                <menuseparator/>
+
+                <menuitem id="menu_focusCommandLine" label="&firebug.CommandLine;"
+                        command="cmd_focusCommandLine" key="key_focusCommandLine"/>
+                <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"
+                        command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>
+            </menupopup>
+        </menu>
+    </menupopup>
+
+    <toolbarpalette id="BrowserToolbarPalette">
+        <toolbarbutton id="inspector-button" label="&firebug.Inspect;"
+                       class="toolbarbutton-1 chromeclass-toolbar-additional"
+                       observes="cmd_toggleInspecting" tooltiptext="&firebug.InspectElement;"/>
+        <toolbarbutton id="firebug-button" label="&firebug.Firebug;"
+                      class="toolbarbutton-1 chromeclass-toolbar-additional"
+                      observes="cmd_toggleDetachFirebug" tooltiptext="&firebug.DetachFirebug;"/>
+    </toolbarpalette>
+
     <!-- Firebug panel -->
 
     <vbox id="appcontent">
@@ -6,4 +136,25 @@
         <vbox id="fbContentBox" collapsed="true" persist="height">
         </vbox>
     </vbox>
-    <!-- Extend Firefox status bar -->    <statusbar id="status-bar">        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button" aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"                        onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">            <image id="fbStatusIcon" tooltiptext="Firebug"/>            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);" role="button" />        </statusbarpanel>        <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">            <menuitem id="menu_detachFirebug"                label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>            <menuseparator/>            <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>            <menuseparator/>            <menuitem id="menu_enablePanels" label="Enable All Panels" command="cmd_enablePanels"/>            <menuitem id="menu_disablePanels" label="Disable All Panels" command="cmd_disablePanels"/>        </menupopup>    </statusbar></overlay>
+
+    <!-- Extend Firefox status bar -->
+
+    <statusbar id="status-bar">
+        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button" aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
+                        onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">
+            <image id="fbStatusIcon" tooltiptext="Firebug"/>
+            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);" role="button" />
+        </statusbarpanel>
+
+        <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
+            <menuitem id="menu_detachFirebug"
+                label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
+            <menuseparator/>
+            <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
+            <menuseparator/>
+            <menuitem id="menu_enablePanels" label="Enable All Panels" command="cmd_enablePanels"/>
+            <menuitem id="menu_disablePanels" label="Disable All Panels" command="cmd_disablePanels"/>
+        </menupopup>
+    </statusbar>
+
+</overlay>
