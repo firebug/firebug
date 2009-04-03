@@ -5,6 +5,7 @@ Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
 
 == Not Panel Specific ==
+    * Curtis Bartley's Tabs-on-top UI reordering
     * Improved and simplified "natural" Activation UI.
     * Firebug remembers which pages you had opened Firebug on.
     * Supports Firefox 3.5
