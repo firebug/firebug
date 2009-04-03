@@ -160,7 +160,7 @@ Firebug.CSSModule = extend(Firebug.Module, {
     setProperty: function(style, propName, propValue, propPriority) {
         var prevValue = style.getPropertyValue(propName);
         var prevPriority = style.getPropertyPriority(propName);
-        
+
         // XXXjoe Gecko bug workaround: Just changing priority doesn't have any effect
         // unless we remove the property first
         style.removeProperty(propName);
