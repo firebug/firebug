@@ -72,7 +72,7 @@
 
 #fbSearchBox {
     -moz-appearance: none;
-    margin: 0 6px 1px 6px;
+    margin: 4px 6px 1px 6px;
     border: none !important;
     padding: 2px 8px 4px 20px;
     background: url(chrome://firebug/skin/mac/searchBox.png) no-repeat;
@@ -157,14 +157,14 @@
 }
 
 panelTab {
-    margin: 0 1px 0 3px;
+    margin: 2px 1px 0 3px;
     font-size: 11px;
     font-weight: bold;
     color: #565656;
 }
 panelTab:hover,
 panelTab[selected="true"] {
-    margin-bottom: 1px;
+    margin-bottom: 0px;
 }
 
 panelTab:hover > .panelTab-text,
@@ -186,35 +186,35 @@ panelTab[selected="true"] > .panelTab-text {
 }
 
 panelTab:hover > .panelTab-left {
-    background: url(chrome://firebug/skin/mac/tabLeftHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabLeftHover.png) no-repeat top;
 }
 
 panelTab:hover > .panelTab-text {
-    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > panelTabMenu {
-    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > .panelTab-right {
-    background: url(chrome://firebug/skin/mac/tabRightHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabRightHover.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-left {
-    background: url(chrome://firebug/skin/mac/tabLeft.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabLeft.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-text {
-    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > panelTabMenu {
-    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > .panelTab-right {
-    background: url(chrome://firebug/skin/mac/tabRight.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabRight.png) no-repeat top;
 }
 
 /************************************************************************************************/

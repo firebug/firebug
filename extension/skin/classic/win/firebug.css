@@ -59,6 +59,10 @@
     margin-top: 1px;
 }
 
+#fbSearchButtons {
+    margin-bottom: 2px;
+}
+
 #fbCloseButton {
     margin: 0 4px 0 0;
     -moz-image-region: rect(auto, auto, auto, auto);
@@ -165,14 +169,18 @@
 /************************************************************************************************/
 
 .panelTabBox {
-    background: url(chrome://firebug/skin/win/tabBg.png) repeat-x top;
+    background: url(chrome://firebug/skin/win/tabBg.png) repeat-x bottom;
     border-bottom: 1px solid threedshadow;
     padding: 0 4px;
     overflow: hidden;
 }
 
+.panelTabs {
+    -moz-box-align: end;
+}
+
 panelTab {
-    margin: 0 0 1px 0;
+    margin: 1px 0 0 0;
     border: none;
     font-weight: bold;
     color: #565656;
@@ -201,35 +209,35 @@ panelTab[selected="true"] {
 }
 
 panelTab:hover > .panelTab-left {
-    background: url(chrome://firebug/skin/win/tabLeftHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabLeftHover.png) no-repeat top;
 }
 
 panelTab:hover > .panelTab-text {
-    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > panelTabMenu {
-    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > .panelTab-right {
-    background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-left {
-    background: url(chrome://firebug/skin/win/tabLeft.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabLeft.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-text {
-    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > panelTabMenu {
-    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > .panelTab-right {
-    background: url(chrome://firebug/skin/win/tabRight.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabRight.png) no-repeat top;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */

@@ -159,11 +159,19 @@
             </menu>
         </menubar>
 
-        <toolbar id="fbToolbar"/>
     </toolbox>
 
     <vbox id="fbContentBox" flex="1">
-        <box id="fbPanelBox" flex="1"/>
+        <box id="fbPanelBox" flex="1">
+            <panelBar id="fbPanelBar1">
+                <hbox id="fbPanelBar1-tabBox">
+                    <!-- Some of the buttons don't make sense in the stand-alone window - hide them. -->
+                    <toolbarbutton id="fbFirebugMenu" collapsed="true"/>
+                    <toolbarbutton id="fbDetachButton" collapsed="true"/>
+                    <toolbarbutton id="fbCloseButton" collapsed="true"/>
+                </hbox>
+            </panelBar>
+        </box>
         <hbox id="fbCommandBox"/>
     </vbox>
 

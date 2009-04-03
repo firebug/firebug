@@ -18,29 +18,23 @@
 </binding>
 
 <binding id="panelBar">
+
+    <!-- The XUL structure for the panel bar is specified in the XUL source
+         inside each "panelBar" element.  This allows us to have panel bars
+         with substantially different layous, including the ability to embed
+         one panel bar within another - albeit at some cost in maintainability.
+    -->
     <content>
-        <xul:hbox anonid="tabBox" class="panelTabBox" collapsed="true" role="tablist">
-            <children includes="panelTab"/>
-            <xul:spacer flex="1"/>
-            <children/>
-            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" anonid="panelOptions" role="button" aria-haspopup="true" >
-                <xul:menupopup anonid="optionsPopup"/>
-            </xul:toolbarbutton>
-        </xul:hbox>
-        <xul:deck anonid="deck" flex="1">
-            <xul:browser anonid="browser"
-                     xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"
-                     disablehistory="true"
-                     src="chrome://firebug/content/panel.html"/>
-        </xul:deck>
+        <children/>
     </content>
 
     <implementation>
         <constructor><![CDATA[
-            this.tabBox = document.getAnonymousElementByAttribute(this, "anonid", "tabBox");
-            this.optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "optionsPopup");
-            this.deck = document.getAnonymousElementByAttribute(this, "anonid", "deck");
-            this.browser = document.getAnonymousElementByAttribute(this, "anonid", "browser");
+            this.tabBox = this.getChildElement("tabBox");
+            this.optionsPopup = this.getChildElement("optionsPopup");
+            this.deck = this.getChildElement("deck");
+            this.browser = this.getChildElement("browser");
+            this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
             this.tabFocused = false;
             that = this;
@@ -58,6 +52,17 @@
             this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
             this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
         ]]></constructor>
+        
+        <method name="getChildElement">
+            <parameter name="id"/>
+            <body><![CDATA[
+                // Construct a unique ID from the panel bar ID and the child element ID,
+                // for example: "panelBar1-panelTabs".  This allows us to define children
+                // in the XUL source, which in turn allows us to have panel bars with
+                // substantially different layouts.
+                return document.getElementById(this.id + "-" + id);
+            ]]></body>
+        </method>
 
         <method name="createTab">
             <parameter name="panelType"/>
@@ -77,7 +82,7 @@
             <parameter name="panelType"/>
             <body><![CDATA[
             var tab = this.createTab(panelType);
-            this.appendChild(tab);
+            this.panelTabs.appendChild(tab);
             ]]></body>
         </method>
 
@@ -88,14 +93,14 @@
 
                 // Replace tabs at the same position if type has changed
                 var i = 0;
-                var tab = this.firstChild;
+                var tab = this.panelTabs.firstChild;
                 for (; i < panelTypes.length && tab; tab = tab.nextSibling)
                 {
                     var panelType = panelTypes[i++];
                     if (tab.panelType.prototype.name != panelType.prototype.name)
                     {
                         var newTab = this.createTab(panelType);
-                        this.replaceChild(newTab, tab);
+                        this.panelTabs.replaceChild(newTab, tab);
                         tab = newTab;
                     }
                     else
@@ -106,7 +111,7 @@
                 while (tab)
                 {
                     var nextTab = tab.nextSibling;
-                    this.removeChild(tab);
+                    this.panelTabs.removeChild(tab);
                     tab = nextTab;
                 }
 
@@ -115,7 +120,7 @@
                 {
                     var panelType = panelTypes[i];
                     var newTab = this.createTab(panelType);
-                    this.appendChild(newTab);
+                    this.panelTabs.appendChild(newTab);
                 }
             ]]></body>
         </method>
@@ -226,7 +231,7 @@
                     panel.show(state);
 
                     var menu = panel.getOptionsMenuItems(FirebugContext);
-                    var panelOptions = document.getAnonymousElementByAttribute(this, "anonid", "panelOptions");
+                    var panelOptions = this.getChildElement("panelOptions");
                     panelOptions.disabled = (!menu || !menu.length);
                 }
             ]]></body>
@@ -267,7 +272,7 @@
 
     <handlers>
         <handler event="popupshowing"><![CDATA[
-            if (!this.selectedPanel || (event.target != this))
+            if (!this.selectedPanel || (event.target != this.optionsPopup))
                 return;
 
             var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
@@ -290,6 +295,7 @@
         ]]></handler>
 
         <handler event="mousedown" button="0"><![CDATA[
+            event.stopPropagation();
             var tab = event.target;
             for (; tab && !tab.panelType; tab = tab.parentNode);
 

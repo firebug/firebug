@@ -134,6 +134,7 @@
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
         <vbox id="fbContentBox" collapsed="true" persist="height">
+            <!--
             <toolbox id="fbToolbox">
                 <toolbar id="fbToolbar">
                     <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
@@ -195,6 +196,8 @@
 
             <hbox id="fbPanelBox" flex="1"/>
             <hbox id="fbCommandBox"/>
+            
+            -->
         </vbox>
     </vbox>
 

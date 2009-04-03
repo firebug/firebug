@@ -148,6 +148,12 @@ top.FirebugChrome =
             doc2.addEventListener("mousedown", onPanelMouseDown, false);
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
+            // The side panel bar doesn't care about this event.  It must, however,
+            // prevent it from bubbling now that we allow the side panel bar to be
+            // *inside* the main panel bar.
+            function stopBubble(event) { event.stopPropagation(); }
+            panelBar2.addEventListener("selectingPanel", stopBubble, false);
+
             locationList.addEventListener("selectObject", onSelectLocation, false);
 
             this.updatePanelBar1(Firebug.panelTypes);
@@ -672,10 +678,11 @@ top.FirebugChrome =
 
     toggleOrient: function()
     {
-        panelSplitter.orient = panelBox.orient
-            = panelBox.orient == "vertical" ? "horizontal" : "vertical";
+        var panelPane = $("fbPanelPane");
+        panelSplitter.orient = panelPane.orient
+            = panelPane.orient == "vertical" ? "horizontal" : "vertical";
         var option = $('menu_toggleOrient').getAttribute("option");
-        Firebug.setPref(Firebug.prefDomain, option, panelBox.orient != "vertical");
+        Firebug.setPref(Firebug.prefDomain, option, panelPane.orient != "vertical");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
