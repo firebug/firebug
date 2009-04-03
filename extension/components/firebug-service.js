@@ -2180,8 +2180,12 @@ FirebugService.prototype =
                     if (stepMode == STEP_OVER)
                         jsd.interruptHook = null;
 
-                    if (stepMode == STEP_INTO)
+                    if (stepMode == STEP_INTO)  // normally step into will break in the interrupt handler, but not in event handlers.
+                    {
                         fbs.stopStepping();
+                        stepMode = STEP_SUSPEND; // break on next
+                        fbs.hookInterrupts();
+                    }
 
                     break;
                 }
