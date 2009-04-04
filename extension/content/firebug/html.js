@@ -635,6 +635,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     show: function(state)
     {
         this.showToolbarButtons("fbHTMLButtons", true);
+        this.showToolbarButtons("fbInspectButton", true);
 
         if (!this.ioBox)
             this.ioBox = new InsideOutBox(this, this.panelNode);
@@ -664,6 +665,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     hide: function()
     {
         this.showToolbarButtons("fbHTMLButtons", false);
+        this.showToolbarButtons("fbInspectButton", false);
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
     },
@@ -813,7 +815,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             // Manage history of selection for later access in the command line.
             this.inspectorHistory.unshift(object);
             if (this.inspectorHistory.length > 5)
-                this.inspectorHistory.pop();            
+                this.inspectorHistory.pop();
 
             if (FBTrace.DBG_HTML)
                 FBTrace.dumpProperties("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
@@ -975,7 +977,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             return this.textEditor;
         }
     },
-    
+
     getInspectorVars: function()
     {
         var vars = {};
@@ -1536,7 +1538,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
 
     this.findNextMatch = function(reverse, caseSensitive)
     {
-        
+
         var innerMatch = this.findNextInnerMatch(reverse, caseSensitive);
         if (innerMatch)
             return innerMatch;
@@ -1575,7 +1577,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
                     match: m
                 };
             }
-            
+
             // May need to check the pair for attributes
             if (lastMatchNode.nodeType == Node.ATTRIBUTE_NODE
                     && this.lastMatch.isValue == reverse)
@@ -1584,7 +1586,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
             }
         }
     };
-    
+
     this.checkNode = function(node, reverse, caseSensitive, firstStep)
     {
         var checkOrder;

@@ -1821,6 +1821,11 @@ Firebug.Panel =
             var buttons = this.context.browser.chrome.$(buttonsId);
             if (buttons)
                 collapse(buttons, show ? "false" : "true");
+            else
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("showToolBarButtons failed to find buttons for "+buttonsId, this.context.browser.chrome)
+            }
         }
         catch (exc)
         {

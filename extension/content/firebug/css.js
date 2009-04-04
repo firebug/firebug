@@ -164,9 +164,9 @@ Firebug.CSSModule = extend(Firebug.Module, {
         // XXXjoe Gecko bug workaround: Just changing priority doesn't have any effect
         // unless we remove the property first
         style.removeProperty(propName);
-        
+
         style.setProperty(propName, propValue, propPriority);
-        
+
         if (propName) {
             dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue, propPriority, prevValue, prevPriority]);
         }
@@ -174,9 +174,9 @@ Firebug.CSSModule = extend(Firebug.Module, {
     removeProperty: function(style, propName) {
         var prevValue = style.getPropertyValue(propName);
         var prevPriority = style.getPropertyPriority(propName);
-        
+
         style.removeProperty(propName);
-        
+
         if (propName) {
             dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority]);
         }
@@ -571,6 +571,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     show: function(state)
     {
         this.showToolbarButtons("fbCSSButtons", true);
+        this.showToolbarButtons("fbInspectButton", true);
 
         if (this.context.loaded && !this.location)
         {
@@ -584,6 +585,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     hide: function()
     {
         this.showToolbarButtons("fbCSSButtons", false);
+        this.showToolbarButtons("fbInspectButton", false);
 
         this.lastScrollTop = this.panelNode.scrollTop;
     },
