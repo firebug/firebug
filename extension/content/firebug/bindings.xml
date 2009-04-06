@@ -31,7 +31,6 @@
     <implementation>
         <constructor><![CDATA[
             this.tabBox = this.getChildElement("tabBox");
-            this.optionsPopup = this.getChildElement("optionsPopup");
             this.deck = this.getChildElement("deck");
             this.browser = this.getChildElement("browser");
             this.panelTabs = this.getChildElement("panelTabs");
@@ -229,10 +228,6 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
-
-                    var menu = panel.getOptionsMenuItems(FirebugContext);
-                    var panelOptions = this.getChildElement("panelOptions");
-                    panelOptions.disabled = (!menu || !menu.length);
                 }
             ]]></body>
         </method>
@@ -271,29 +266,6 @@
     </implementation>
 
     <handlers>
-        <handler event="popupshowing"><![CDATA[
-            if (!this.selectedPanel || (event.target != this.optionsPopup))
-                return;
-
-            var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
-
-            if (this.selectedTab.getAttribute("disabled") == "true")
-            {
-                for (var i = 0; i < menu.length; i++)
-                    menu[i].disabled = true;
-            }
-
-            if (menu)
-            {
-                for (var i = 0; i < menu.length; ++i)
-                    FBL.createMenuItem(this.optionsPopup, menu[i]);
-            }
-        ]]></handler>
-
-        <handler event="popuphidden"><![CDATA[
-            FBL.eraseNode(this.optionsPopup);
-        ]]></handler>
-
         <handler event="mousedown" button="0"><![CDATA[
             event.stopPropagation();
             var tab = event.target;
@@ -345,11 +317,6 @@
                         {
                             tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
                         }
-                        else if (isOptionsMenu && this.optionsPopup && !event.altKey)
-                        {
-                            this.optionsPopup.showPopup();
-
-                        }
                     break;
                     case KeyEvent.DOM_VK_F4:
                         if (isTab && tab.tabMenu)
@@ -391,32 +358,35 @@
 
 <binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
     <content>
-        <xul:menupopup anonid="popup" oncommand="return this.parentNode.onCommand(event)">
-            <xul:menuitem type="radio" value="enable"/>
-            <xul:menuitem type="radio" value="disable"/>
-        </xul:menupopup>
+        <xul:menupopup anonid="popup" />
         <xul:image anonid="menuTarget" class="menuTarget"/>
     </content>
     <implementation>
         <constructor>
         <![CDATA[
+            this.panelBar = document.getElementById("fbPanelBar1");
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
-
-            // Internationalize
-            var items = this.popup.getElementsByTagNameNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
-            items[0].label = FBL.$STR("panel.Enabled");
-            items[1].label = FBL.$STR("panel.Disabled");
         ]]>
         </constructor>
         <field name="value"/>
         <field name="module"/>
-        <method name="onCommand">
-            <parameter name="event"/>
+        <method name="onEnable">
             <body><![CDATA[
-                // Firebug.ActivableModule registers pref observer so, the UI
-                // is updated automatically.
-                var menu = event.target;
-                this.module.setDefaultState(menu.value == "enable" ? true : false);
+            this.module.setDefaultState(true);
+            ]]></body>
+        </method>
+        <method name="onDisable">
+            <body><![CDATA[
+            this.module.setDefaultState(false);
+            ]]></body>
+        </method>
+        <method name="optionMenu">
+            <parameter name="label"/>
+            <parameter name="checked"/>
+            <parameter name="command"/>
+            <body><![CDATA[
+            return {label: label, type: "radio", checked: checked, 
+                command: FBL.bindFixed(command, this)};
             ]]></body>
         </method>
     </implementation>
@@ -425,15 +395,35 @@
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
         ]]></handler>
         <handler event="popupshowing"><![CDATA[
-            // XXXjjb getElementsByTagName("xul:menuitem"); fails 2.0.0.16
-            var items = this.popup.getElementsByTagNameNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
+            if (!this.panelBar.selectedPanel)
+                return false;
+
             var enabled = this.module.isAlwaysEnabled();
 
-            // Update menu items.
-            items[0].setAttribute("checked", enabled ? "true" : "false");
-            items[1].setAttribute("checked", enabled ? "false" : "true");
+            // Create default menu items for activation.
+            var items = [];
+            items.push(this.optionMenu("panel.Enabled", enabled, this.onEnable));
+            items.push(this.optionMenu("panel.Disabled", !enabled, this.onDisable));
+
+            // Get panel's option items.
+            var panelItems = this.panelBar.selectedPanel.getOptionsMenuItems(FirebugContext);
+            if (!enabled)
+            {
+                for (var i = 0; i < panelItems.length; i++)
+                    panelItems[i].disabled = true;
+            }
+
+            if (panelItems.length > 0)
+                items.push("-");
+
+            var menu = FBL.extendArray(items, panelItems);
+            for (var i = 0; i < menu.length; ++i)
+                FBL.createMenuItem(this.popup, menu[i]);
 
             return true;
+        ]]></handler>
+        <handler event="popuphidden"><![CDATA[
+            FBL.eraseNode(this.popup);
         ]]></handler>
     </handlers>
 </binding>
