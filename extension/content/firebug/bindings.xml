@@ -51,7 +51,7 @@
             this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
             this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
         ]]></constructor>
-        
+
         <method name="getChildElement">
             <parameter name="id"/>
             <body><![CDATA[
@@ -341,13 +341,18 @@
     </content>
     <implementation>
         <method name="initTabMenu">
+            <parameter name="panelBar"/>
             <parameter name="module"/>
             <body><![CDATA[
             if (!this.tabMenu)
             {
                 this.tabMenu = document.createElement("panelTabMenu");
                 this.setAttribute('aria-haspopup', 'true'); // not picked up by AT atm. How to indicate dropdown menu on tab?
-                this.tabMenu.module = module;
+                this.tabMenu.panelBar = panelBar;
+                if (module)
+                    this.tabMenu.module = module;
+                else
+                    this.tabMenu.module = null;
                 return this.appendChild(this.tabMenu);
             }
             return this.tabMenu;
@@ -364,7 +369,6 @@
     <implementation>
         <constructor>
         <![CDATA[
-            this.panelBar = document.getElementById("fbPanelBar1");
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
         ]]>
         </constructor>
@@ -372,12 +376,14 @@
         <field name="module"/>
         <method name="onEnable">
             <body><![CDATA[
-            this.module.setDefaultState(true);
+            if (this.module)
+                this.module.setDefaultState(true);
             ]]></body>
         </method>
         <method name="onDisable">
             <body><![CDATA[
-            this.module.setDefaultState(false);
+            if (this.module)
+                this.module.setDefaultState(false);
             ]]></body>
         </method>
         <method name="optionMenu">
@@ -385,7 +391,7 @@
             <parameter name="checked"/>
             <parameter name="command"/>
             <body><![CDATA[
-            return {label: label, type: "radio", checked: checked, 
+            return {label: label, type: "radio", checked: checked,
                 command: FBL.bindFixed(command, this)};
             ]]></body>
         </method>
@@ -398,12 +404,15 @@
             if (!this.panelBar.selectedPanel)
                 return false;
 
-            var enabled = this.module.isAlwaysEnabled();
-
-            // Create default menu items for activation.
             var items = [];
-            items.push(this.optionMenu("panel.Enabled", enabled, this.onEnable));
-            items.push(this.optionMenu("panel.Disabled", !enabled, this.onDisable));
+
+            // Create menu items for activation.
+            if (this.module)
+            {
+                var enabled = this.module.isAlwaysEnabled();
+                items.push(this.optionMenu("panel.Enabled", enabled, this.onEnable));
+                items.push(this.optionMenu("panel.Disabled", !enabled, this.onDisable));
+            }
 
             // Get panel's option items.
             var panelItems = this.panelBar.selectedPanel.getOptionsMenuItems(FirebugContext);

@@ -2938,9 +2938,9 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var panelBar = chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(this.panelName);
 
-        // Update activable tab menu.
+        // create activable tab menu.
         if (tab)
-            tab.initTabMenu(this);
+            tab.initTabMenu(panelBar, this);
 
         // Update tab label.
         if (context && tab)
