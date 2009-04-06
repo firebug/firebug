@@ -1623,7 +1623,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
 
-        updateScriptFiles(context);  // scripts have not been compiled by DOMContentLoaded so these are URL only for now
+        if (!Firebug.Debugger.isAlwaysEnabled(context))
+            updateScriptFiles(context);  // scripts have not been compiled by DOMContentLoaded so these are URL only for now
     },
 
     destroyContext: function(context, persistedState)
@@ -2868,7 +2869,8 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     refresh: function()
     {
-        updateScriptFiles(this.context);
+        if (!Firebug.Debugger.isAlwaysEnabled(context))
+            updateScriptFiles(this.context);
 
         var extracted = this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
 
@@ -2996,7 +2998,8 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
         var items = [];
 
         var context = this.context;
-        updateScriptFiles(context);
+        if (!Firebug.Debugger.isAlwaysEnabled(context))
+            updateScriptFiles(context);
 
         var bpCount = 0, disabledCount = 0;
         for (var url in context.sourceFileMap)
