@@ -39,7 +39,6 @@ var waitingPanelBarCount = 2;
 var externalMode = (window.location == "chrome://firebug/content/firebug.xul");
 var externalBrowser = null;
 
-var disabledBox = null;
 var disabledHead = null;
 var disabledCaption = null;
 var enableSiteLink = null;
@@ -1228,6 +1227,10 @@ function onSelectedSidePanel(event)
         }
     }
     if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n"); /*@explore*/
+
+    var panel = panelBar1.selectedPanel;
+    if (panel && sidePanel)
+        sidePanel.select(panel.selection);
 
     var browser = sidePanel ? sidePanel.context.browser : FirebugChrome.getCurrentBrowser();
     Firebug.showSidePanel(browser, sidePanel);  // dispatch to modules
