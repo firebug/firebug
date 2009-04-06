@@ -490,6 +490,8 @@ top.Firebug =
             if (deadWindows[i].browser == browser)
             {
                 deadWindows.splice(i, 1);
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("rescued "+browser.currentURI);
                 break;
             }
         }
@@ -1038,11 +1040,15 @@ top.Firebug =
                 browser: browser,
                 context: FirebugContext
             };
-            var window = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+            var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+
+            if (FirebugContext)
+                FirebugContext.detached = win;
+
             detachCommand.setAttribute("checked", true);
             FirebugChrome.clearPanels();
             this.syncBar();
-            return window;
+            return win;
         }
 
         return null;
@@ -1174,9 +1180,9 @@ top.Firebug =
         dispatch(modules, "showPanel", [browser, panel]);
     },
 
-    showSidePanel: function(browser, panel)
+    showSidePanel: function(browser, sidePanel)
     {
-        dispatch(modules, "showSidePanel", [browser, panel]);
+        dispatch(modules, "showSidePanel", [browser, sidePanel]);
     },
 
     reattachContext: function(browser, context)
@@ -1359,6 +1365,12 @@ top.Firebug =
         dispatch(modules, "initContext", [context, persistedState]);
 
         this.updateActiveContexts(context); // a newly created context is active
+
+        if (context.browser.showDetached)
+        {
+            delete context.browser.showDetached;
+            Firebug.detachBar();
+        }
     },
 
     eachActiveContext: function(fnOfContext)
@@ -1508,6 +1520,8 @@ top.Firebug =
 
             if (context.externalChrome)
             {
+                if (FBTrace.DBG_WINDOWS)
+                    FBTrace.sysout("Firebug.destroyConext context.externalChrome: "+context.externalChrome+" browser.firebugReload: "+browser.firebugReload);
                 if (browser.firebugReload)
                     delete browser.firebugReload; // and don't killWindow
                 else
@@ -1672,7 +1686,7 @@ Firebug.Module = extend(new Firebug.Listener(),
     {
     },
 
-    showSidePanel: function(browser, panel)
+    showSidePanel: function(browser, sidePanel)
     {
     },
 
@@ -2972,7 +2986,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
                 FirebugContext ? FirebugContext.getName() : "NO CONTEXT");
 
         Firebug.ModuleManager.enableModules(FirebugContext);
-        FirebugContext.window.location.reload();
+        // XXX jjb this was supposed to go away? FirebugContext.window.location.reload();
     },
 
     show: function(panel)
@@ -3117,15 +3131,22 @@ Firebug.URLSelector =
             if(hasAnnotation)
             {
                 var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
-                if (annotation.indexOf("detached") > 0)
-                    FBTrace.sysout('initContext should detach');
-                else
-                    browser.showFirebug = true;
+
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("shouldCreateContext read back annotation "+annotation);
-            }
 
-            return hasAnnotation;   // if annotated, shouldCreateContext true
+                if (annotation.indexOf("detached") > 0)  // then the previous use was detached.
+                {
+                    if (!browser.detached) // then it is not now detached
+                        browser.showDetached = true; // mark to detach
+                }
+                else
+                    browser.showFirebug = true;  // mark to stay in browser
+
+                return true;    // annotated, createContext
+            }
+            else
+                return false;   // not annotated, don't createContext
         }
         catch (exc)
         {
