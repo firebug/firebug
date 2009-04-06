@@ -110,6 +110,7 @@
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true" role="tablist">
 
                     <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
+
                         <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup">
 
                             <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
@@ -158,6 +159,9 @@
                         </menupopup>
                     </toolbarbutton>
 
+                    <toolbarbutton id="fbInspectButton" label="&firebug.Inspect;" class="toolbar-text-button"
+                               tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting" collapsed="false"/>
+
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs"/>
                     <spacer flex="1"/>
 
@@ -184,9 +188,6 @@
                             <toolbar id="fbToolbar" align="center" role="toolbar">
 
                                 <hbox id="fbToolbarInner" insertbefore="fbDetachButton" flex="1" align="center">
-
-                                    <toolbarbutton id="fbInspectButton" label="&firebug.Inspect;" class="toolbar-text-button"
-                                                    tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting" collapsed="true"/>
 
                                     <hbox id="fbConsoleButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"

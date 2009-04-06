@@ -571,7 +571,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     show: function(state)
     {
         this.showToolbarButtons("fbCSSButtons", true);
-        this.showToolbarButtons("fbInspectButton", true);
 
         if (this.context.loaded && !this.location)
         {
@@ -585,7 +584,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     hide: function()
     {
         this.showToolbarButtons("fbCSSButtons", false);
-        this.showToolbarButtons("fbInspectButton", false);
 
         this.lastScrollTop = this.panelNode.scrollTop;
     },
