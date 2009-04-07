@@ -32,7 +32,7 @@
     <em:contributor>1.1 and 1.2 enhancements: John J. Barton (IBM Almaden)</em:contributor>
     <em:contributor>Jan Odvarko (All Peers Inc.)</em:contributor>
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
-    <em:contributor>Rob Campbell (Mozilla Corp.)</em:conributor>
+    <em:contributor>Rob Campbell (Mozilla Corp.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
