@@ -122,3 +122,4 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1547: &editors.Description;
     * Issue 1592: Added display: autocompletions to CSS editor
     * Issue 1591: Firebug cannot find _firebugConsole element
+    * Issue 1640: Fixed install.rdf typo
