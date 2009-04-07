@@ -91,18 +91,14 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /**** focus related ****/
 
 panelTab[selected="true"],
-toolbar.focused toolbarbutton,
-toolbar.focused checkbox,
-toolbar.focused input,
-#fbPanelBar1 .panelOptionsButton,
-#fbPanelBar2 .panelOptionsButton,
+#fbFirebugMenu,
+#fbToolbarInner .panelButtons[collapsed="false"] > toolbarbutton:first-of-type,
+.innerToolbar.hasTabOrder toolbarbutton, 
 #fbStatusBar {
     -moz-user-focus: normal;
 }
 
-#fbToolbar toolbarbutton:focus,
-#fbToolbar label:focus,
-.panelOptionsButton:focus,
+#fbPanelBar1 toolbarbutton:focus,
 #fbStatusBar:focus {
     outline: 2px solid #FF9933;
 }

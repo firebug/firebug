@@ -139,7 +139,9 @@ top.FirebugChrome =
             doc1.addEventListener("mousedown", onPanelMouseDown, false);
             doc1.addEventListener("click", onPanelClick, false);
             panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
-
+            
+            panelBar1.addEventListener("keypress", handlePanelBarKeyPress , true);
+            
             var doc2 = panelBar2.browser.contentDocument;
             doc2.addEventListener("mouseover", onPanelMouseOver, false);
             doc2.addEventListener("mouseout", onPanelMouseOut, false);
@@ -166,7 +168,6 @@ top.FirebugChrome =
             FBTrace.dumpProperties("chrome.initializeUI fails "+exc, exc);
         }
         var toolbar = $('fbToolbar');
-        toolbar.addEventListener('keypress', handleFbToolbarKeyPress, true);
     },
 
     shutdown: function()
@@ -189,7 +190,7 @@ top.FirebugChrome =
         locationList.removeEventListener("selectObject", onSelectLocation, false);
 
         window.removeEventListener("blur", onBlur, true);
-
+        panelBar1.removeEventListener("keypress", handlePanelBarKeyPress , true);
         if (externalMode)
             this.detachBrowser(externalBrowser, FirebugContext);
         else
@@ -411,17 +412,6 @@ top.FirebugChrome =
             }
         }
     },
-
-    focusFbToolbar : function()
-    {
-        Firebug.focusAnchor = document.commandDispatcher.focusedElement;
-        if (!$('fbContentBox').collapsed)
-        {
-            $(FirebugContext.detached ? 'fbInspectButton' : 'fbFirebugMenu').focus();
-            $('fbToolbar').className = "focused";
-        }
-    },
-
     openPanelOptionsMenu : function()
     {
         FBTrace.sysout('test');
@@ -1317,26 +1307,80 @@ function getRealObject(object)
     return realObject ? realObject : object;
 }
 
-function handleFbToolbarKeyPress(event) {
-    var keyCode = event.keyCode || event.charCode;
-    var target = event.target;
-    switch(keyCode) {
-        case KeyEvent.DOM_VK_UP:
-        case KeyEvent.DOM_VK_DOWN:
-        case KeyEvent.DOM_VK_RETURN:
-        case KeyEvent.DOM_VK_SPACE:
-            if (target.getAttribute('type') == "menu" && !event.altKey) {
-                target.getElementsByTagName('menupopup')[0].showPopup();
-                event.stopPropagation();
-            }
-
-        break;
-        case KeyEvent.DOM_VK_ESCAPE:
-            if (Firebug.focusAnchor && Firebug.focusAnchor.focus) {
-                Firebug.focusAnchor.focus();
-            }
-            $('fbToolbar').className = "";
-        break;
+function handlePanelBarKeyPress(event)
+{
+    var target = event.originalTarget;
+    var isTab = target.nodeName.toLowerCase() == "paneltab";
+    var isButton = target.nodeName == "toolbarbutton";
+    var isDropDownMenu = isButton && target.getAttribute('type') == "menu";
+    var siblingTab, forward, keyCode, toolbar, buttons;
+    if (isTab || isButton )
+    {
+        keyCode = event.keyCode || event.charCode;
+        switch (keyCode)
+        {
+            case KeyEvent.DOM_VK_LEFT:
+            case KeyEvent.DOM_VK_RIGHT:
+                forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+                if (isTab)
+                {
+                    //will only work as long as long as siblings only consist of paneltab elements
+                    siblingTab = target[forward ? 'nextSibling' : 'previousSibling'];
+                    if (!siblingTab)
+                        siblingTab = target.parentNode[forward ? 'firstChild' : 'lastChild'];
+                    if (siblingTab)
+                    {
+                        var panelBar = FBL.getAncestorByClass(target, 'panelBar')
+                        setTimeout(FBL.bindFixed(function()
+                        {
+                            panelBar.selectTab(siblingTab);
+                            siblingTab.focus();
+                        }, this));
+                    }
+               }
+               else if (isButton)
+               {
+                   if (target.id=="fbFirebugMenu" && !forward)
+                   {
+                        FBL.cancelEvent(event);
+                        return;
+                   }
+                   toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
+                   if (toolbar) 
+                   {
+                       FBL.setClass(toolbar, 'hasTabOrder');
+                       document.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
+                       FBL.removeClass(toolbar, 'hasTabOrder');
+                   }
+                    FBL.cancelEvent(event);
+                    return;
+               }
+            break;
+            case KeyEvent.DOM_VK_RETURN:
+            case KeyEvent.DOM_VK_SPACE:
+            case KeyEvent.DOM_VK_UP:
+            case KeyEvent.DOM_VK_DOWN:
+                if (isTab && target.tabMenu)
+                {
+                    target.tabMenu.popup.showPopup(target.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+                }
+                else if (isButton)
+                {
+                    if (isDropDownMenu)
+                    {
+                        target.open = true;
+                    }
+                    FBL.cancelEvent(event);
+                    return false;
+                }
+            break;
+            case KeyEvent.DOM_VK_F4:
+                if (isTab && target.tabMenu)
+                {
+                    target.tabMenu.popup.showPopup(target.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
+                }
+            break;
+        }
     }
 }
 

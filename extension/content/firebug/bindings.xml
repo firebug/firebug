@@ -36,7 +36,7 @@
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
             this.tabFocused = false;
-            that = this;
+            
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
@@ -48,7 +48,9 @@
                 dump("bindings panelBar ctor FAILs: "+ e+"\n");
                 dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
             }
+            this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
             this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
+            this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
             this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
         ]]></constructor>
 
@@ -260,7 +262,7 @@
         <method name="handleTabBarBlur">
             <parameter name="event"/>
             <body><![CDATA[
-                that.tabFocused = false;
+                this.tabFocused = false;
             ]]></body>
         </method>
     </implementation>
@@ -280,54 +282,6 @@
                 }, this));
             }
         ]]></handler>
-        <handler event="keydown" phase="capturing"><![CDATA[
-            var tab = event.originalTarget;
-            var isTab = tab.nodeName.toLowerCase() == "paneltab";
-            var isOptionsMenu = tab.nodeName.toLowerCase() == "xul:toolbarbutton";
-            var siblingTab, forward, keyCode;
-            if (isTab || isOptionsMenu )
-            {
-                keyCode = event.keyCode || event.charCode;
-                switch (keyCode)
-                {
-                    case KeyEvent.DOM_VK_LEFT:
-                    case KeyEvent.DOM_VK_RIGHT:
-                        if (isTab)
-                        {
-                            forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
-                            // will only work as long as long as siblings only consist of paneltab elements
-                            siblingTab = tab[forward ? 'nextSibling' : 'previousSibling'];
-                            if (!siblingTab)
-                                siblingTab = this[forward ? 'firstChild' : 'lastChild'];
-                            if (siblingTab)
-                            {
-                                setTimeout(FBL.bindFixed(function()
-                                {
-                                    this.selectTab(siblingTab);
-                                    siblingTab.focus();
-                                }, this));
-                            }
-                       }
-                    break;
-                    case KeyEvent.DOM_VK_RETURN:
-                    case KeyEvent.DOM_VK_SPACE:
-                    case KeyEvent.DOM_VK_UP:
-                    case KeyEvent.DOM_VK_DOWN:
-                        if (isTab && tab.tabMenu)
-                        {
-                            tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
-                        }
-                    break;
-                    case KeyEvent.DOM_VK_F4:
-                        if (isTab && tab.tabMenu)
-                        {
-                            tab.tabMenu.popup.showPopup(tab.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
-                        }
-                    break;
-                }
-            }
-        ]]>
-        </handler>
     </handlers>
 </binding>
 
@@ -347,7 +301,7 @@
             if (!this.tabMenu)
             {
                 this.tabMenu = document.createElement("panelTabMenu");
-                this.setAttribute('aria-haspopup', 'true'); // not picked up by AT atm. How to indicate dropdown menu on tab?
+                this.setAttribute('aria-haspopup', 'true');
                 this.tabMenu.panelBar = panelBar;
                 if (module)
                     this.tabMenu.module = module;
