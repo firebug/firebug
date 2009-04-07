@@ -290,26 +290,20 @@
         <xul:image class="panelTab-left"/>
         <xul:label class="panelTab-text" crop="right" flex="1"
                    xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle,disabled"/>
-        <children includes="panelTabMenu"/>
+        <panelTabMenu anonid="tabMenu" aria-haspopup="true" />
         <xul:image class="panelTab-right"/>
     </content>
     <implementation>
-        <method name="initTabMenu">
-            <parameter name="panelBar"/>
+        <constructor>
+        <![CDATA[
+            this.tabMenu = document.getAnonymousElementByAttribute(this, "anonid", "tabMenu");
+        ]]>
+        </constructor>
+        <method name="setModule">
             <parameter name="module"/>
             <body><![CDATA[
-            if (!this.tabMenu)
-            {
-                this.tabMenu = document.createElement("panelTabMenu");
-                this.setAttribute('aria-haspopup', 'true');
-                this.tabMenu.panelBar = panelBar;
-                if (module)
-                    this.tabMenu.module = module;
-                else
-                    this.tabMenu.module = null;
-                return this.appendChild(this.tabMenu);
-            }
-            return this.tabMenu;
+            // Make sure the property exists.
+            this.tabMenu.module = module ? module : null;
             ]]></body>
         </method>
     </implementation>
@@ -328,6 +322,18 @@
         </constructor>
         <field name="value"/>
         <field name="module"/>
+        <property name="selectedPanel">
+            <getter><![CDATA[
+                var parentNode = this.parentNode;
+                while (parentNode)
+                {
+                    if (parentNode.hasOwnProperty("selectedPanel"))
+                        return parentNode.selectedPanel;
+                    parentNode = parentNode.parentNode;
+                }
+                return null;
+            ]]></getter>
+        </property>
         <method name="onEnable">
             <body><![CDATA[
             if (this.module)
@@ -355,12 +361,12 @@
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
         ]]></handler>
         <handler event="popupshowing"><![CDATA[
-            if (!this.panelBar.selectedPanel)
+            if (!this.selectedPanel)
                 return false;
 
             var items = [];
 
-            // Create menu items for activation.
+            // Create menu items for activation. The module is set only for activable modules.
             if (this.module)
             {
                 var enabled = this.module.isAlwaysEnabled();
@@ -369,8 +375,10 @@
             }
 
             // Get panel's option items.
-            var panelItems = this.panelBar.selectedPanel.getOptionsMenuItems(FirebugContext);
-            if (!enabled)
+            var panelItems = this.selectedPanel.getOptionsMenuItems(FirebugContext);
+
+            // If the module is disabled, gray out all the options.
+            if (!enabled && this.module)
             {
                 for (var i = 0; i < panelItems.length; i++)
                     panelItems[i].disabled = true;

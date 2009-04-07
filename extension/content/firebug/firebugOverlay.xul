@@ -293,10 +293,6 @@
                         <panelBar id="fbPanelBar2" class="panelBar">
                             <hbox id="fbPanelBar2-tabBox" class="panelTabBox" collapsed="true">
                                 <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist" />
-                                <spacer flex="1"/>
-                                <toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" id="fbPanelBar2-panelOptions" role="button" aria-haspopup="true" >
-                                    <menupopup id="fbPanelBar2-optionsPopup"/>
-                                </toolbarbutton>
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">
                                 <browser id="fbPanelBar2-browser"

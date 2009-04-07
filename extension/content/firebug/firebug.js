@@ -2934,13 +2934,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
         if (!this.panelName && (FBTrace.DBG_PANELS || FBTrace.DBG_ERRORS))
             FBTrace.sysout("firebug.ActivableModule.updateTab; Missing panelName in activable module", this);
 
-        // Update activable tab menu.
+        // Set activable module to mini tab menu so, the menu can get the actual state.
         var panelBar = chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(this.panelName);
-
-        // create activable tab menu.
         if (tab)
-            tab.initTabMenu(panelBar, this);
+            tab.setModule(this);
 
         // Update tab label.
         if (context && tab)
