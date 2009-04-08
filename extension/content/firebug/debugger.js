@@ -2212,10 +2212,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         Firebug.SourceBoxPanel.reattach.apply(this, arguments);
 
-        setTimeout(bind(function()
+        setTimeout(bind(function delayScrollToLastTop()
         {
-            this.selectedSourceBox.scrollTop = this.lastSourceScrollTop;
-            delete this.lastSourceScrollTop;
+            if (this.lastSourceScrollTop)
+            {
+                this.selectedSourceBox.scrollTop = this.lastSourceScrollTop;
+                delete this.lastSourceScrollTop;
+            }
         }, this));
     },
 
