@@ -198,15 +198,23 @@ Firebug.Search = extend(Firebug.Module,
         this.onSearchButtonKey = bind(this.onSearchButtonKey, this);
     },
 
-    enable: function()
+    reattachContext: function(browser, context)
     {
-        var searchBox = FirebugChrome.$("fbSearchBox");
+        FBTrace.sysout("search.reattachContext");
+        this.enable(browser.chrome);
+    },
+
+    enable: function(chrome)
+    {
+        FBTrace.sysout("search.enable");
+        var searchBox = (chrome?chrome:FirebugChrome).$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = false;
         searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
 
-        var searchOptions = FirebugChrome.$("fbSearchButtons");
-        searchOptions.addEventListener('keypress', this.onSearchButtonKey, true);
+        // XXXjjb seems like these are not used?
+        //var searchOptions = FirebugChrome.$("fbSearchButtons");
+        //searchOptions.addEventListener('keypress', this.onSearchButtonKey, true);
     },
 
     disable: function()
@@ -216,8 +224,8 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.disabled = true;
         searchBox.removeEventListener('focus', this.onSearchBoxFocus, true);
 
-        var searchOptions = FirebugChrome.$("fbSearchButtons");
-        searchOptions.removeEventListener('keypress', this.onSearchButtonKey, true);
+        //var searchOptions = FirebugChrome.$("fbSearchButtons");
+        //searchOptions.removeEventListener('keypress', this.onSearchButtonKey, true);
     }
 });
 
