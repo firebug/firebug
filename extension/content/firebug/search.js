@@ -110,7 +110,7 @@ Firebug.Search = extend(Firebug.Module,
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
-                Firebug.Search.showOptions();
+                Firebug.Search.showOptions(context);
 
                 var found = panel.search(value, reverse);
                 if (!found && value)
@@ -137,16 +137,16 @@ Firebug.Search = extend(Firebug.Module,
         beep();
     },
 
-    showOptions: function()
+    showOptions: function(context)
     {
-        var panel = this.context.chrome.getSelectedPanel();
+        var panel = context.chrome.getSelectedPanel();
         if (!panel.searchable)
             return;
 
-        var searchBox = this.context.chrome.$("fbSearchBox");
+        var searchBox = context.chrome.$("fbSearchBox");
 
         // Get search options popup menu.
-        var optionsPopup = this.context.chrome.$("fbSearchOptionsPopup");
+        var optionsPopup = context.chrome.$("fbSearchOptionsPopup");
         if (optionsPopup.state == "closed")
         {
             eraseNode(optionsPopup);
@@ -174,28 +174,11 @@ Firebug.Search = extend(Firebug.Module,
             searchOptions.hidePopup();
     },
 
-    onSearchBoxFocus: function(event)
-    {
-        if (FBTrace.DBG_SEARCH)
-            FBTrace.sysout("onSearchBoxFocus no-op");
-        //this.showOptions();
-    },
-
-    onSearchButtonKey: function(event)
-    {
-        if (FBTrace.DBG_SEARCH)
-            FBTrace.sysout("onSearchButtonKey ", event);
-        var searchBox = this.context.chrome.$("fbSearchBox");
-        searchBox.dispatchEvent(event);
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
     initialize: function()
     {
-        this.onSearchBoxFocus =  bind(this.onSearchBoxFocus, this);
-        this.onSearchButtonKey = bind(this.onSearchButtonKey, this);
     },
 
     reattachContext: function(browser, context)
@@ -211,10 +194,6 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.value = "";
         searchBox.disabled = false;
         searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
-
-        // XXXjjb seems like these are not used?
-        //var searchOptions = this.context.chrome.$("fbSearchButtons");
-        //searchOptions.addEventListener('keypress', this.onSearchButtonKey, true);
     },
 
     disable: function(chrome)
@@ -223,9 +202,6 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.value = "";
         searchBox.disabled = true;
         searchBox.removeEventListener('focus', this.onSearchBoxFocus, true);
-
-        //var searchOptions = this.context.chrome.$("fbSearchButtons");
-        //searchOptions.removeEventListener('keypress', this.onSearchButtonKey, true);
     }
 });
 
