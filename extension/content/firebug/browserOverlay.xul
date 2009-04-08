@@ -152,8 +152,8 @@
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
             <menuseparator/>
-            <menuitem id="menu_enablePanels" label="Enable All Panels" command="cmd_enablePanels"/>
-            <menuitem id="menu_disablePanels" label="Disable All Panels" command="cmd_disablePanels"/>
+            <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
+            <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>
         </menupopup>
     </statusbar>
 
