@@ -61,13 +61,16 @@ top.FirebugChrome =
             // Wait until all panelBar bindings are ready before initializing
             if (--waitingPanelBarCount == 0)
                 this.initialize();
+            else
+                return false;
         }
         catch (exc)
         {
             if (FBTrace.dumpProperties)
                 FBTrace.dumpProperties("chrome.panelBarReady FAILS", exc);
+            return false;
         }
-
+        return true; // the panel bar is ready
     },
 
     initialize: function()
@@ -78,8 +81,8 @@ top.FirebugChrome =
         if (!detachArgs)
             detachArgs = {};
 
-        if (FBTrace.DBG_INITIALIZE) FBTrace.dumpProperties("chrome.initialize w/detachArgs=", detachArgs);             /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_INITIALIZE) FBTrace.dumpProperties("chrome.initialize w/detachArgs=", detachArgs);
+
         if (detachArgs.FBL)
             top.FBL = detachArgs.FBL;
         else
@@ -139,9 +142,9 @@ top.FirebugChrome =
             doc1.addEventListener("mousedown", onPanelMouseDown, false);
             doc1.addEventListener("click", onPanelClick, false);
             panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
-            
+
             panelBar1.addEventListener("keypress", handlePanelBarKeyPress , true);
-            
+
             var doc2 = panelBar2.browser.contentDocument;
             doc2.addEventListener("mouseover", onPanelMouseOver, false);
             doc2.addEventListener("mouseout", onPanelMouseOut, false);
@@ -173,8 +176,8 @@ top.FirebugChrome =
     shutdown: function()
     {
         if (FBTrace.DBG_INITIALIZE || !panelBar1)
-            FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");                                       /*@explore*/
-                                                                                                                       /*@explore*/
+            FBTrace.sysout("chrome.shutdown entered for "+window.location+"\n");
+
         var doc1 = panelBar1.browser.contentDocument;
         doc1.removeEventListener("mouseover", onPanelMouseOver, false);
         doc1.removeEventListener("mouseout", onPanelMouseOut, false);
@@ -213,10 +216,10 @@ top.FirebugChrome =
 
     attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and externalMode == true
     {
-        if (FBTrace.DBG_INITIALIZE)                                                                                    /*@explore*/
-            FBTrace.sysout("chrome.attachBrowser with externalMode="+externalMode+" context="+context                  /*@explore*/
-                               +" context==FirebugContext: "+(context==FirebugContext)+"\n");                          /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.attachBrowser with externalMode="+externalMode+" context="+context
+                               +" context==FirebugContext: "+(context==FirebugContext)+" in window: "+window.location);
+
         if (externalMode)
         {
             browser.detached = true;
@@ -462,8 +465,8 @@ top.FirebugChrome =
 
     select: function(object, panelName, sidePanelName, forceUpdate)
     {
-        if (FBTrace.DBG_PANELS)																														  /*@explore*/
-            FBTrace.sysout("chrome.select object:"+object+" panelName:"+panelName+" sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");  /*@explore*/
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("chrome.select object:"+object+" panelName:"+panelName+" sidePanelName:"+sidePanelName+" forceUpdate:"+forceUpdate+"\n");
         var bestPanelName = getBestPanelName(object, FirebugContext, panelName);
         var panel = this.selectPanel(bestPanelName, sidePanelName, true);
         if (panel)
@@ -1104,8 +1107,8 @@ function getBestPanelName(object, context, panelName)
                 bestLevel = level;
                 bestPanel = panelType;
             }
-            if (FBTrace.DBG_PANELS)                                                                                                                      /*@explore*/
-                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType.prototype.name+" level: "+level+" bestPanel: "+ (bestPanel ? bestPanel.prototype.name : "null")+" bestLevel: "+bestLevel+"\n"); /*@explore*/
+            if (FBTrace.DBG_PANELS)
+                FBTrace.sysout("chrome.getBestPanelName panelType: "+panelType.prototype.name+" level: "+level+" bestPanel: "+ (bestPanel ? bestPanel.prototype.name : "null")+" bestLevel: "+bestLevel+"\n");
         }
     }
 
@@ -1133,8 +1136,8 @@ function getBestSidePanelName(sidePanelName, panelTypes)
 
 function browser1Loaded()
 {
-    if (FBTrace.DBG_INITIALIZE)  /*@explore*/
-        FBTrace.sysout("browse1Loaded\n"); /*@explore*/
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("browse1Loaded\n");
     var browser1 = panelBar1.browser;
     browser1.removeEventListener("load", browser1Loaded, true);
 
@@ -1147,8 +1150,8 @@ function browser1Loaded()
 
 function browser2Loaded()
 {
-    if (FBTrace.DBG_INITIALIZE)  /*@explore*/
-        FBTrace.sysout("browse2Loaded\n"); /*@explore*/
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("browse2Loaded\n");
     var browser2 = panelBar2.browser;
     browser2.removeEventListener("load", browser2Loaded, true);
 
@@ -1157,8 +1160,8 @@ function browser2Loaded()
 
     if (browser1Loaded.complete && browser2Loaded.complete)
         FirebugChrome.initializeUI();
-    if (FBTrace.DBG_INITIALIZE)  /*@explore*/
-        FBTrace.sysout("browse2Loaded complete\n"); /*@explore*/
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("browse2Loaded complete\n");
 }
 
 function onBlur(event)
@@ -1177,8 +1180,8 @@ function onSelectingPanel(event)
 {
     var panel = panelBar1.selectedPanel;
     var panelName = panel ? panel.name : null;
-    if (FBTrace.DBG_PANELS) 																													/*@explore*/
-        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext?FirebugContext.getName():"undefined")+"\n"); /*@explore*/
+    if (FBTrace.DBG_PANELS)
+        FBTrace.sysout("chrome.onSelectingPanel="+panelName+" FirebugContext="+(FirebugContext?FirebugContext.getName():"undefined")+"\n");
 
     if (FirebugContext)
     {
@@ -1216,7 +1219,7 @@ function onSelectedSidePanel(event)
                 FBTrace.dumpProperties("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
         }
     }
-    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n"); /*@explore*/
+    if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n");
 
     var panel = panelBar1.selectedPanel;
     if (panel && sidePanel)
@@ -1346,7 +1349,7 @@ function handlePanelBarKeyPress(event)
                         return;
                    }
                    toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
-                   if (toolbar) 
+                   if (toolbar)
                    {
                        FBL.setClass(toolbar, 'hasTabOrder');
                        document.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
