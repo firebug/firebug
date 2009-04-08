@@ -422,7 +422,7 @@ this.Arr = domplate(Firebug.Rep,
     },
 
     shortPropIterator:    this.Obj.propIterator,
-    
+
     getItemIndex: function(child)
     {
         var arrayIndex = 0;
@@ -443,8 +443,8 @@ this.Arr = domplate(Firebug.Rep,
         if (this.isArray(object)) return true;
 
         if (object instanceof Ci.nsIDOMHistory)  // to avoid NS_ERROR_FAILURE
-        	return false; 
-        
+            return false;
+
         // Don't use propertyIsEnumerable("length") as "arguments" array isn't real JS array,
         // "arguments" have .length but do not respond to object property enumeration.
         if ("length" in object && typeof(object.length) == "number")
@@ -462,7 +462,7 @@ this.Arr = domplate(Firebug.Rep,
             if (!obj)
                 return false;
             else if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors?
-            	return false;
+                return false;
             else if (isFinite(obj.length) && typeof obj.splice === 'function')
                 return true;
             else if (obj instanceof HTMLCollection)
@@ -1274,7 +1274,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-    	var url = error.href.toString();
+        var url = error.href.toString();
         var fromCommandLine = (url.indexOf("XPCSafeJSObjectWrapper") != -1);
         return !fromCommandLine && error.trace;
     },
@@ -1494,41 +1494,41 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
     tag:OBJECTBOX({onclick: "$showHistory"},
             OBJECTLINK("$object|summarizeHistory")
         ),
-      
-    className: "nsIDOMHistory",    
-        
+
+    className: "nsIDOMHistory",
+
     summarizeHistory: function(history)
     {
-		try
-		{
-			var items = history.length;
-			return items + " history entries";
-		}
-		catch(exc)
-		{
-			return "object does not support history (nsIDOMHistory)";
-		}
+        try
+        {
+            var items = history.length;
+            return items + " history entries";
+        }
+        catch(exc)
+        {
+            return "object does not support history (nsIDOMHistory)";
+        }
     },
-    
+
     showHistory: function(history)
     {
-    	try 
-    	{
-    		var items = history.length;  // if this throws, then unsupported
-    		FirebugChrome.select(history);
-    	}
-    	catch (exc)
-    	{
-    	}
+        try
+        {
+            var items = history.length;  // if this throws, then unsupported
+            FirebugChrome.select(history);  // XXXjjb context.chrome??
+        }
+        catch (exc)
+        {
+        }
     },
-	
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     className: "nsIDOMHistory",
 
     supportsObject: function(object, type)
     {
-    	return (object instanceof Ci.nsIDOMHistory);
+        return (object instanceof Ci.nsIDOMHistory);
     }
 });
 
@@ -1571,7 +1571,7 @@ this.ApplicationCache = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 Firebug.registerRep(
-	this.nsIDOMHistory, // make this early to avoid exceptions
+    this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,
     this.Null,
     this.Number,

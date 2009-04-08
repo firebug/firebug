@@ -116,7 +116,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
             {
-                FirebugChrome.select(object, "script");
+                this.context.chrome.select(object, "script");
                 cancelEvent(event);
             }
             else if (event.detail == 2 && !object)
@@ -1194,7 +1194,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         return ret;
     },
-    
+
 });
 
 // ************************************************************************************************
@@ -1264,7 +1264,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
             var val;
             try
             {
-            	val = insecureObject[name];  // getter is safe
+                val = insecureObject[name];  // getter is safe
             }
             catch (exc)
             {
@@ -1493,4 +1493,4 @@ Firebug.registerPanel(WatchPanel);
 // ************************************************************************************************
 
 }});
- 
+

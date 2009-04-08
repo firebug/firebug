@@ -288,8 +288,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     breakOnNext: function(context)
     {
-        var chrome = context.chrome ? context.chrome : FirebugChrome;
-        var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        var breakable = context.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
 
         if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
             FBTrace.sysout("debugger.breakOnNext "+context.getName()+ " breakable: "+breakable, breakable);
@@ -297,7 +296,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (breakable == "true")
             this.suspend(context);  // arm breakOnNext
         else
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
+            context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
 
         this.syncCommands(context);
         return;
@@ -580,7 +579,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 Firebug.toggleBar(true);
 
-                FirebugChrome.select(context.currentFrame, "script");
+                context.chrome.select(context.currentFrame, "script");
 
                 var stackPanel = context.getPanel("callstack");
                 if (stackPanel)
@@ -618,17 +617,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (context && context.window && !context.aborted)
             {
                 var chrome = context.chrome;
-                if (!chrome)
-                    chrome = FirebugChrome;
 
                 if ( chrome.updateViewOnShowHook )
                     delete chrome.updateViewOnShowHook;
 
                 this.syncCommands(context);
                 this.syncListeners(context);
-
-                if (FirebugContext && !FirebugContext.panelName) // XXXjjb all I know is that syncSidePanels() needs this set
-                    FirebugContext.panelName = "script";
 
                 chrome.syncSidePanels();
 
@@ -682,8 +676,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     syncListeners: function(context)
     {
         var chrome = context.chrome;
-        if (!chrome)
-            chrome = FirebugChrome;
 
         if (context.stopped)
             this.attachListeners(context, chrome);
@@ -1596,8 +1588,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     reattachContext: function(browser, context)
     {
-        var chrome = context ? context.chrome : FirebugChrome;
-        this.filterButton = chrome.$("fbScriptFilterMenu");  // connect to the button in the new window, not 'window'
+        this.filterButton = context.chrome.$("fbScriptFilterMenu");  // connect to the button in the new window, not 'window'
         this.filterMenuUpdate();
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
     },

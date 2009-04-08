@@ -271,18 +271,18 @@ top.Firebug =
         // If another window is opened, then the creation of our first context won't
         // result in calling of enable, so we have to enable our modules ourself
         //if (fbs.enabled)
-        dispatch(modules, "enable");  // allows errors to flow thru fbs and callbacks to supportWindow to begin
+        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         dispatch(modules, "initializeUI", [detachArgs]);
     },
 
-    shutdown: function()
+    shutdown: function()  // never called in externalMode
     {
         TabWatcher.removeListener(Firebug.URLSelector);
         TabWatcher.removeListener(this);
         TabWatcher.destroy();
 
-        dispatch(modules, "disable");
+        dispatch(modules, "disable", [FirebugChrome]);
 
         prefService.savePrefFile(null);
         prefs.removeObserver(this.prefDomain, this, false);
@@ -1339,12 +1339,12 @@ top.Firebug =
 
     enable: function()  // Called by firebug-service when the first context is created.
     {
-        dispatch(modules, "enable");
+        dispatch(modules, "enable", [FirebugChrome]);
     },
 
     disable: function()
     {
-        dispatch(modules, "disable");
+        dispatch(modules, "disable", [FirebugChrome]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2129,7 +2129,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
     getTab: function()
     {
-        var chrome = this.context ? this.context.chrome : FirebugChrome;
+        var chrome = this.context.chrome;
 
         var tab = chrome.$("fbPanelBar2").getTab(this.name);
         if (!tab)
@@ -2927,7 +2927,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     updateTab: function(context)
     {
-        var chrome = context ? context.chrome : FirebugChrome;
+        var chrome = context ? context.chrome : null;
         if (!chrome)
             return;
 

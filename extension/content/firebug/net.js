@@ -248,8 +248,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     reattachContext: function(browser, context)
     {
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
-        var chrome = context ? context.chrome : FirebugChrome;
-        this.syncFilterButtons(chrome);
+        this.syncFilterButtons(context.chrome);
     },
 
     destroyContext: function(context)
@@ -889,7 +888,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         if (object)
         {
-            var subItems = FirebugChrome.getInspectMenuItems(object);
+            var subItems = FirebugChrome.getInspectMenuItems(object); // XXXjjb context.chrome?
             if (subItems.length)
             {
                 items.push("-");

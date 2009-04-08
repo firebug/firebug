@@ -2231,7 +2231,7 @@ this.sourceFilesAsArray = function(sourceFileMap)
     return sourceFiles;
 };
 
-this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows for 'script' tags
+this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows for 'script' tags (only if debugger is not enabled)
 {
     var oldMap = eraseSourceFileMap ? null : context.sourceFileMap;
 

@@ -1350,8 +1350,6 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
     hide: function()
     {
         var chrome = this.panel.context.chrome;
-        if (!chrome)
-            chrome = FirebugChrome;
 
         var command = chrome.$("cmd_toggleCSSEditing");
         command.setAttribute("checked", false);

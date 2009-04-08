@@ -139,14 +139,14 @@ Firebug.Search = extend(Firebug.Module,
 
     showOptions: function()
     {
-        var panel = FirebugChrome.getSelectedPanel();
+        var panel = this.context.chrome.getSelectedPanel();
         if (!panel.searchable)
             return;
 
-        var searchBox = FirebugChrome.$("fbSearchBox");
+        var searchBox = this.context.chrome.$("fbSearchBox");
 
         // Get search options popup menu.
-        var optionsPopup = FirebugChrome.$("fbSearchOptionsPopup");
+        var optionsPopup = this.context.chrome.$("fbSearchOptionsPopup");
         if (optionsPopup.state == "closed")
         {
             eraseNode(optionsPopup);
@@ -169,7 +169,7 @@ Firebug.Search = extend(Firebug.Module,
 
     hideOptions: function()
     {
-        var searchOptions = FirebugChrome.$("fbSearchOptionsPopup");
+        var searchOptions = this.context.chrome.$("fbSearchOptionsPopup");
         if (searchOptions)
             searchOptions.hidePopup();
     },
@@ -185,7 +185,7 @@ Firebug.Search = extend(Firebug.Module,
     {
         if (FBTrace.DBG_SEARCH)
             FBTrace.sysout("onSearchButtonKey ", event);
-        var searchBox = FirebugChrome.$("fbSearchBox");
+        var searchBox = this.context.chrome.$("fbSearchBox");
         searchBox.dispatchEvent(event);
     },
 
@@ -207,24 +207,24 @@ Firebug.Search = extend(Firebug.Module,
     enable: function(chrome)
     {
         FBTrace.sysout("search.enable");
-        var searchBox = (chrome?chrome:FirebugChrome).$("fbSearchBox");
+        var searchBox = chrome.$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = false;
         searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
 
         // XXXjjb seems like these are not used?
-        //var searchOptions = FirebugChrome.$("fbSearchButtons");
+        //var searchOptions = this.context.chrome.$("fbSearchButtons");
         //searchOptions.addEventListener('keypress', this.onSearchButtonKey, true);
     },
 
-    disable: function()
+    disable: function(chrome)
     {
-        var searchBox = FirebugChrome.$("fbSearchBox");
+        var searchBox = chrome.$("fbSearchBox");
         searchBox.value = "";
         searchBox.disabled = true;
         searchBox.removeEventListener('focus', this.onSearchBoxFocus, true);
 
-        //var searchOptions = FirebugChrome.$("fbSearchButtons");
+        //var searchOptions = this.context.chrome.$("fbSearchButtons");
         //searchOptions.removeEventListener('keypress', this.onSearchButtonKey, true);
     }
 });

@@ -366,12 +366,11 @@ Firebug.CommandLine = extend(Firebug.Module,
         context.commandLineText = commandLine.value;
     },
 
-    setMultiLine: function(multiLine)
+    setMultiLine: function(multiLine, chrome)
     {
         if (FirebugContext && FirebugContext.panelName != "console")
             return;
 
-        var chrome = FirebugContext ? FirebugContext.chrome : FirebugChrome;
         chrome.$("fbCommandBox").collapsed = multiLine;
         chrome.$("fbPanelSplitter").collapsed = !multiLine;
         chrome.$("fbSidePanelDeck").collapsed = !multiLine;
@@ -462,7 +461,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             autoCompleteEval, false, true);
 
         if (Firebug.largeCommandLine)
-            this.setMultiLine(true);
+            this.setMultiLine(true, FirebugChrome);
     },
 
     initializeUI: function()
@@ -487,12 +486,8 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         if (context)  // null for eg about:crashes
         {
-            var chrome = context ? context.chrome : FirebugChrome;
-            if (chrome)
-            {
-                var command = chrome.$("cmd_focusCommandLine");
-                command.setAttribute("disabled", !context);
-            }
+            var command = context.chrome.$("cmd_focusCommandLine");
+            command.setAttribute("disabled", !context);
         }
     },
 
@@ -522,7 +517,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     updateOption: function(name, value)
     {
         if (name == "largeCommandLine")
-            this.setMultiLine(value);
+            this.setMultiLine(value, FirebugChrome);
     },
 
     // called by users of command line, currently:
@@ -612,7 +607,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (panelName != 'console')
             return;
 
-        this.setMultiLine(Firebug.largeCommandLine);
+        this.setMultiLine(Firebug.largeCommandLine, context.chrome);
     },
 
     onPanelDisable: function(context, panelName)
@@ -620,10 +615,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (panelName != 'console')  // we don't care about other panels
             return;
 
-        var chrome = context ? context.chrome : FirebugChrome;
-        chrome.$("fbCommandBox").collapsed = true;
-        chrome.$("fbPanelSplitter").collapsed = true;
-        chrome.$("fbSidePanelDeck").collapsed = true;
+        context.chrome.$("fbCommandBox").collapsed = true;
+        context.chrome.$("fbPanelSplitter").collapsed = true;
+        context.chrome.$("fbSidePanelDeck").collapsed = true;
     },
 
     // *********************************************************************************************
