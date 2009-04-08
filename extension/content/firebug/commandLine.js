@@ -467,6 +467,16 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     initializeUI: function()
     {
+        this.attachListeners();
+    },
+
+    reattachContext: function(browser, context)
+    {
+        this.attachListeners();
+    },
+
+    attachListeners: function()
+    {
         $("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
         $("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
 
