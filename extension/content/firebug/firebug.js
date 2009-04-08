@@ -226,14 +226,15 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
-        var elements = ["menu_toggleSuspendFirebug", "menu_disablePanels",
-            "fbSearchNext", "fbSearchPrev", "menu_searchCaseSensitive",
-            "menu_searchAllFiles", "fbCommandLine", "fbFirebugMenu",
+        var elements = ["menu_disablePanels", "fbCommandLine", "fbFirebugMenu", 
             "fbLargeCommandLine"];
 
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);
+            if (!element && FBTrace.DBG_ERRORS)
+                FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
+
             FBL.internationalize(element, "label");
         }
     },
@@ -265,7 +266,7 @@ top.Firebug =
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.initialzeUI failed to connect to URLSelector "+exc, exc);
+                FBTrace.sysout("Firebug.initializeUI failed to connect to URLSelector "+exc, exc);
         }
 
         // If another window is opened, then the creation of our first context won't
