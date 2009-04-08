@@ -293,13 +293,16 @@
         <xul:image class="panelTab-left"/>
         <xul:label class="panelTab-text" crop="right" flex="1"
                    xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle,disabled"/>
-        <panelTabMenu anonid="tabMenu" aria-haspopup="true" />
+        <children includes="panelTabMenu"/>
         <xul:image class="panelTab-right"/>
     </content>
     <implementation>
         <constructor>
         <![CDATA[
-            this.tabMenu = document.getAnonymousElementByAttribute(this, "anonid", "tabMenu");
+            this.tabMenu = document.createElement("panelTabMenu");
+            this.setAttribute('aria-haspopup', 'true'); // not picked up by AT atm. How to indicate dropdown menu on tab?
+            this.appendChild(this.tabMenu);
+            return this.tabMenu;
         ]]>
         </constructor>
         <method name="setModule">
