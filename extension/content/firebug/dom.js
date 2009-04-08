@@ -857,7 +857,6 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     name: "dom",
     searchable: true,
-    extSearch: true,
     statusSeparator: ">",
 
     initialize: function()

@@ -2149,7 +2149,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     name: "script",
     searchable: true,
-    extSearch: true,
 
     initialize: function(context, doc)
     {

@@ -526,7 +526,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     name: "stylesheet",
     parentPanel: null,
     searchable: true,
-    extSearch: true,
     dependents: ["css", "stylesheet", "dom", "domSide", "layout"],
 
     initialize: function()

@@ -695,7 +695,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
     name: panelName,
     searchable: true,
-    extSearch: true,
     editable: false,
 
     initialize: function(context, doc)

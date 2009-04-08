@@ -1730,7 +1730,6 @@ Firebug.Extension =
 Firebug.Panel =
 {
     searchable: false,
-    extSearch: false,
     editable: true,
     order: 2147483647,
     statusSeparator: "<",
