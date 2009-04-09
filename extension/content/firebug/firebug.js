@@ -228,7 +228,7 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
-        var elements = ["menu_disablePanels", "fbCommandLine", "fbFirebugMenu", 
+        var elements = ["menu_disablePanels", "fbCommandLine", "fbFirebugMenu",
             "fbLargeCommandLine"];
 
         for (var i=0; i<elements.length; i++)
@@ -494,7 +494,7 @@ top.Firebug =
             {
                 deadWindows.splice(i, 1);
                 if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("rescued "+browser.currentURI);
+                    FBTrace.sysout("rescued "+browser.currentURI.spec);
                 break;
             }
         }
@@ -1074,8 +1074,6 @@ top.Firebug =
         {
             if (FirebugContext)
                 FirebugContext.detached = true;
-
-            browser.detached = true;
 
             var args = {
                 FBL: FBL,
