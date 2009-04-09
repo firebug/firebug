@@ -36,7 +36,12 @@
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
             this.tabFocused = false;
-
+            
+            this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
+            this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
+            this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
+            this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
+            
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
@@ -44,10 +49,6 @@
             {
                 if(FirebugChrome.panelBarReady(this))
                 {
-                    this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
-                    this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
-                    this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
-                    this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
                 }
             }
             catch (e)
@@ -259,7 +260,7 @@
         <method name="handleTabBarFocus">
             <parameter name="event"/>
             <body><![CDATA[
-                that.tabFocused = true;
+                this.tabFocused = true;
             ]]></body>
         </method>
         <method name="handleTabBarBlur">
