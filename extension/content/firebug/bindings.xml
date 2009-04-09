@@ -35,11 +35,11 @@
             this.browser = this.getChildElement("browser");
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
-            this.tabFocused = false;
+            that = this;
+            that.tabFocused = false;
             
-            this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
+            
             this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
-            this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
             this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
             
             // We initialize Firebug from here instead of from the onload event because
@@ -138,7 +138,7 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
-                if (this.tabFocused)
+                if (that.tabFocused)
                     tab.focus();
             ]]></body>
         </method>
@@ -260,13 +260,13 @@
         <method name="handleTabBarFocus">
             <parameter name="event"/>
             <body><![CDATA[
-                this.tabFocused = true;
+                that.tabFocused = true;
             ]]></body>
         </method>
         <method name="handleTabBarBlur">
             <parameter name="event"/>
             <body><![CDATA[
-                this.tabFocused = false;
+                that.tabFocused = false;
             ]]></body>
         </method>
     </implementation>
