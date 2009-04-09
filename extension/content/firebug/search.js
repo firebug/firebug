@@ -190,10 +190,21 @@ Firebug.Search = extend(Firebug.Module,
     enable: function(chrome)
     {
         FBTrace.sysout("search.enable");
-        var searchBox = chrome.$("fbSearchBox");
-        searchBox.value = "";
-        searchBox.disabled = false;
-        searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
+        try
+        {
+            var searchBox = chrome.$("fbSearchBox");
+            if (searchBox)
+            {
+                searchBox.value = "";
+                searchBox.disabled = false;
+                searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
+            }
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("search.enable FAILS "+exc, exc);
+        }
     },
 
     disable: function(chrome)
