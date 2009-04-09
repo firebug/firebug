@@ -567,7 +567,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 return;
             }
 
-            if (context != FirebugContext)
+            if (context != FirebugContext || context.detached)
             {
                 Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
             }
@@ -575,32 +575,26 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.syncCommands(context);
             this.syncListeners(context);
 
-            const updateViewOnShowHook = function()
-            {
-                Firebug.toggleBar(true);
-
-                context.chrome.select(context.currentFrame, "script");
-
-                var stackPanel = context.getPanel("callstack");
-                if (stackPanel)
-                    stackPanel.refresh(context);
-
+            // XXXjjb the updateViewOnShowHook is for some problem Max Stepanov had, need to check with him
+            // and find a better solution
+            //const updateViewOnShowHook = function()
+            //{
+                Firebug.toggleBar(true, 'script'); // force open firebug XXXjjb may not be needed in 1.4+
+                context.chrome.select(context.currentFrame, "script", "callstack", true);
                 context.chrome.focus();
-            }
-            if ( !context.hideDebuggerUI || Firebug.isContextActive(context))
-                 updateViewOnShowHook();
-            else {
-                 context.chrome.updateViewOnShowHook = updateViewOnShowHook;
-                 if (FBTrace.DBG_PANELS) FBTrace.sysout("startDebugging: set updateViewOnShowHook \n");                          /*@explore*/
-            }
+            //}
+            //if ( !context.hideDebuggerUI || Firebug.isContextActive(context))
+            //     updateViewOnShowHook();
+            //else {
+            //     context.chrome.updateViewOnShowHook = updateViewOnShowHook;
+            //     if (FBTrace.DBG_PANELS) FBTrace.sysout("startDebugging: set updateViewOnShowHook \n");                          /*@explore*/
+            //}
 
         }
         catch(exc)
         {
-            if (FBTrace.DBG_UI_LOOP)
-                FBTrace.dumpProperties("Debugger UI error during debugging loop:", exc);          /*@explore*/
-            else /*@explore*/
-                ERROR("Debugger UI error during debugging loop:"+exc+"\n");
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Debugger UI error during debugging loop: "+exc, exc);
         }
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");                                                 /*@explore*/
     },
@@ -3213,7 +3207,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     refresh: function()
     {
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.callstackPanel.refresh uid="+this.uid+"\n");                   /*@explore*/
+            FBTrace.sysout("debugger.callstackPanel.refresh for this.context:"+this.context?this.context.getName():"none");
         var mainPanel = this.context.getPanel("script", true);
         if (mainPanel.selection instanceof jsdIStackFrame)
             this.showStackFrame(mainPanel.selection);
