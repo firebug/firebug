@@ -39,10 +39,13 @@ const ignoreVars =
 const RowTag =
     TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
         level: "$member.level"},
-        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px"},
-            DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
+        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px", role : "gridcell", 
+            "aria-expanded" : "false",  "aria-level" : "$member.level", tabindex : "-1" },
+            DIV({class: "memberLabel $member.type\\Label"}, 
+                SPAN({}, "$member.name")
+            )
         ),
-        TD({class: "memberValueCell"},
+        TD({class: "memberValueCell", role : "gridcell", tabindex :"-1"},
             TAG("$member.tag", {object: "$member.value"})
         )
     );
@@ -65,7 +68,7 @@ const SizerRow =
 const DirTablePlate = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
+        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"grid"},
             TBODY(
                 SizerRow,
                 FOR("member", "$object|memberIterator", RowTag)

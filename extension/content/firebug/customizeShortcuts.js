@@ -77,7 +77,7 @@ function saveChanges()
     if (window.confirm($STR('keybindConfirmMsg', fbStrings)))
     {
         shortcutNames.forEach(saveShortcut);
-        window.opener.Firebug.initShortcuts();
+        window.opener.Firebug.shortcutsModel.initShortcuts();
         return true;
     }
     return false;
