@@ -659,10 +659,14 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            // Make sure that entire content of the Console panel is hidden when
-            // the panel is disabled.
-            Firebug.CommandLine.setMultiLine(false, this.context.chrome);
-            this.context.chrome.$("fbCommandBox").collapsed = true;
+            if (this.context.chrome)
+            {
+                // Make sure that entire content of the Console panel is hidden when
+                // the panel is disabled.
+                Firebug.CommandLine.setMultiLine(false, this.context.chrome);
+                this.context.chrome.$("fbCommandBox").collapsed = true;
+            }
+            // else the context is not setup, ok we aren't showing it.
         }
     },
 });
