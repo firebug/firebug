@@ -1897,8 +1897,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     showStackFrame: function(frame)
     {
-        this.context.currentFrame = frame;
-
         if (!frame || (frame && !frame.isValid))
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no valid frame\n");
@@ -1906,14 +1904,25 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
         }
 
-        this.executionFile = this.context.executingSourceFile;
+        this.context.currentFrame = frame;
+        var sourceFile = FBL.getSourceFileByScript(context, context.currentFrame.script);
+        if (!sourceFile)
+        {
+            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile for currentFrame.script: "+frame.script.fileName);
+            this.showNoStackFrame()
+            return;
+        }
+
+        this.context.executingSourceFile = sourceFile;
+        this.executionFile = sourceFile;
         if (this.executionFile)
         {
             var url = this.executionFile.href;
             var analyzer = this.executionFile.getScriptAnalyzer(frame.script);
             this.executionLineNo = analyzer.getSourceLineFromFrame(this.context, frame);  // TODo implement for each type
 
-            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n"); /*@explore*/
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n"); /*@explore*/
 
             this.navigate(this.executionFile);
             this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
