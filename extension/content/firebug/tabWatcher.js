@@ -251,7 +251,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         if (FBTrace.DBG_WINDOWS) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
-                ", "+context.getName()+" browser "+browser.currentURI+"\n");
+                ", "+context.getName()+" browser "+browser.currentURI.spec+" browser.chrome.window: "+browser.chrome.window.location);
         }
 
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -526,13 +526,6 @@ var TabProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> TabProgressListener.onStateChange to: "
                 +safeGetName(request)+" "+getStateDescription(flag)+"\n");
-
-        /*if (flag & STATE_STOP)
-        {
-            var win = progress.DOMWindow;
-            if (win && win.parent == win)
-                TabWatcher.watchLoadedTopWindow(progress.DOMWindow);
-        }*/
     }
 });
 
@@ -545,7 +538,7 @@ var FrameProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)
         {
             FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+
-                ", win: "+progress.DOMWindow.location.href+ "\n"+getStateDescription(flag)+"\n");
+                ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
         }
 
         if (flag & STATE_IS_REQUEST && flag & STATE_START)

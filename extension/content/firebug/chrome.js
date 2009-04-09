@@ -225,6 +225,8 @@ top.FirebugChrome =
             browser.detached = true;
             browser.originalChrome = browser.chrome;
             browser.chrome = this;
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("attachBrowser externalMode and browser.detached, browser.chrome.window: "+browser.chrome.window.location);
         }
 
         if (context)
