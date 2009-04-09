@@ -187,7 +187,7 @@ top.Firebug =
         }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize prefDomain "+this.prefDomain);
-        
+
         this.initShortcuts();
     },
 
@@ -702,7 +702,7 @@ top.Firebug =
         if (FBTrace.DBG_OPTIONS)  /*@explore*/
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
     },
-    
+
     initShortcuts : function() {
         var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
         var shortcutNames = branch.getChildList("", {});
@@ -726,18 +726,18 @@ top.Firebug =
             $('mainKeyset').appendChild(keyElem);
         }
         keyElem.setAttribute('modifiers', modifiers);
-        var keyChar = key.replace('VK_', "").toLowerCase(); 
+        var keyChar = key.replace('VK_', "").toLowerCase();
         //choose between key or keycode attribute
-        if (keyChar.length == 1) 
+        if (keyChar.length == 1)
         {
             keyElem.setAttribute('key', keyChar);
             keyElem.removeAttribute('keycode');
         }
-        else 
+        else
         {
             keyElem.setAttribute('keycode', key);
             keyElem.removeAttribute('key'); //in case default shortcut was key rather than keycode
-        }    
+        }
     },
 
     // *******************************************************************************
@@ -986,11 +986,12 @@ top.Firebug =
         var keys = this.fbOnlyKeys;
         for (var i = 0; i < keys.length; i++)
             keys[i].setAttribute("disabled", !!shouldShow);
-    },    
+    },
     customizeShortcuts: function()
     {
         window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "", "chrome,centerscreen,dialog,modal,resizable=yes");
     },
+
     forceBarOff: function()
     {
         var browser = FirebugChrome.getCurrentBrowser();
@@ -1066,7 +1067,7 @@ top.Firebug =
         if (!browser.chrome)
             return null;
 
-        if (browser.detached)
+        if (browser.detached)  // can be set true by detachBar or attachBrowser
         {
             browser.chrome.focus();
         }
@@ -1088,7 +1089,7 @@ top.Firebug =
 
             detachCommand.setAttribute("checked", true);
             FirebugChrome.clearPanels();
-            this.syncBar();
+            this.showBar(false);  // don't show in browser now
             return win;
         }
 
@@ -1492,7 +1493,7 @@ top.Firebug =
         Firebug.setFirebugContext(context);  // may set the FirebugContext to null
 
         // signal that this browser is one that shows the firebug
-        browser.showFirebug = !!context;
+        browser.showFirebug = !!context && !context.detached;
 
         this.syncBar();
 
@@ -1557,7 +1558,7 @@ top.Firebug =
             }
 
             // Hide the current selected panel now when its context is still valid object.
-            browser.chrome.clearPanels();
+            //browser.chrome.clearPanels();
 
             if (context.externalChrome)
             {
