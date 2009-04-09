@@ -104,59 +104,64 @@
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
-					<hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar">
-	                    <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
-	
-	                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup" role="menu">
-	
-	                            <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
-	                                <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-	                                        <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
-	                                </menupopup>
-	                            </menu>
-	
-	                            <menuseparator/>
-	
-	                            <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
-	                                <menupopup>
-	                                    <menuitem label="&firebug.IncreaseTextSize;"
-	                                              oncommand="Firebug.increaseTextSize(1)"/>
-	                                    <menuitem label="&firebug.DecreaseTextSize;"
-	                                              oncommand="Firebug.increaseTextSize(-1)"/>
-	                                    <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
-	                                </menupopup>
-	                            </menu>
-	
-	                            <menu label="&firebug.Options;" id="FirebugMenu_Options">
-	                                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
-	                                    <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
-	                                                oncommand="FirebugChrome.onToggleOption(this)"
-	                                                option="openInWindow"/>
-	
-	                                    <menuitem type="checkbox" label="&firebug.ShowTooltips;"
-	                                                oncommand="FirebugChrome.onToggleOption(this)"
-	                                                option="showInfoTips"/>
-	
-	                                    <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
-	                                              oncommand="FirebugChrome.onToggleOption(this)"
-	                                              option="shadeBoxModel"/>
-	                                </menupopup>
-	                            </menu>
-	                            <menuseparator id="FirebugBetweenOptionsAndSites"/>
-	
-	                            <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
-	                            <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
-	                            <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
-	                            <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
-	                            <menuseparator/>
-	                            <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
-	                            <menuseparator/>
-	                            <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
-	                        </menupopup>
-	                    </toolbarbutton>
-						
-	                    <toolbarbutton id="fbInspectButton" label="&firebug.Inspect;" class="toolbar-text-button"
-	                               tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting" collapsed="false"/>
+                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar">
+                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
+                            <image src="chrome://firebug/skin/firebug.png"/>
+                            <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup" role="menu">
+    
+                                <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
+                                    <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                                            <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
+                                    </menupopup>
+                                </menu>
+    
+                                <menuseparator/>
+    
+                                <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
+                                    <menupopup>
+                                        <menuitem label="&firebug.IncreaseTextSize;"
+                                                  oncommand="Firebug.increaseTextSize(1)"/>
+                                        <menuitem label="&firebug.DecreaseTextSize;"
+                                                  oncommand="Firebug.increaseTextSize(-1)"/>
+                                        <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
+                                    </menupopup>
+                                </menu>
+    
+                                <menu label="&firebug.Options;" id="FirebugMenu_Options">
+                                    <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
+                                        <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
+                                                    oncommand="FirebugChrome.onToggleOption(this)"
+                                                    option="openInWindow"/>
+    
+                                        <menuitem type="checkbox" label="&firebug.ShowTooltips;"
+                                                    oncommand="FirebugChrome.onToggleOption(this)"
+                                                    option="showInfoTips"/>
+    
+                                        <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
+                                                  oncommand="FirebugChrome.onToggleOption(this)"
+                                                  option="shadeBoxModel"/>
+                                    </menupopup>
+                                </menu>
+                                <menuseparator id="FirebugBetweenOptionsAndSites"/>
+    
+                                <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
+                                <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
+                                <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
+                                <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
+                                <menuseparator/>
+                                <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
+                                <menuseparator/>
+                                <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
+                            </menupopup>
+                        </toolbarbutton>
+                        
+                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting" collapsed="false">
+                            <image src="chrome://firebug/skin/flashlight.png"/>
+                        </toolbarbutton>
+
+                        <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
+                                   tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
+
                     </hbox>
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"/>
                     <spacer flex="1"/>
@@ -263,9 +268,7 @@
                                     <panelStatus id="fbPanelStatus" flex="1"
                                                   tooltip="fbTooltip" contextmenu="fbContextMenu" class="panelButtons"/>
 
-                                    <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true">
-                                        <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                                    tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
+                                    <hbox id="fbDebuggerButtons" minwidth="94" collapsed="true">
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
                                                     tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"

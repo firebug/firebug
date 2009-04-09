@@ -3,10 +3,27 @@
 // ***********************************************************************************************/
 
 #fbFirebugMenu {
-    margin: 0 4px 0 0;
-    padding: 0 0 0 4px;
-    list-style-image: url(chrome://firebug/skin/firebug.png);
+    margin-bottom: 1px;
     opacity: 0.8;
+}
+
+#fbInspectButton {
+    margin-bottom: 1px;
+    padding: 0px;
+    opacity: 0.8;
+
+    /* The default styling does not always keep button size contant or image
+       position constant, e.g. when [checked="true"].  These numbers were 
+       chosen to keep them constant against the default winstripe styling. */
+    padding-top: 4px;
+    padding-bottom: 2px;
+    -moz-padding-start: 4px;
+    -moz-padding-end: 2px;
+}
+
+#fbInspectButton image {
+    margin-right: 3px;
+    margin-bottom: 1px;
 }
 
 #fbFirebugMenu:hover,
