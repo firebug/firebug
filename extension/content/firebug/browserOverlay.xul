@@ -58,6 +58,7 @@
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
+        <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -92,9 +93,9 @@
               label="&firebug.Firebug;" insertbefore="javascriptConsole">
             <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
                 <menuitem id="menu_toggleFirebug" type="checkbox"
-                    label="&firebug.ShowFirebug;" command="cmd_toggleFirebug"/>
+                    label="&firebug.ShowFirebug;" command="cmd_toggleFirebug" key="key_toggleFirebug" />
                 <menuitem id="menu_detachFirebug"
-                    label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
+                    label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox" key="key_detachFirebug"/>
                 <menuseparator/>
 
                 <menu label="&firebug.OpenWith;">
@@ -116,6 +117,9 @@
                         command="cmd_focusCommandLine" key="key_focusCommandLine"/>
                 <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"
                         command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>
+                <menuseparator/>
+                <menuitem id="menu_customizeShortcuts" label="&firebug.KeyShortcuts;"
+                        command="cmd_customizeFBKeys" key="key_customizeFBKeys" />                        
             </menupopup>
         </menu>
     </menupopup>

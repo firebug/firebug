@@ -79,15 +79,15 @@
                 command="cmd_nextObject"/>
         <key id="key_previousObject" key="," modifiers="control" class="fbOnlyKey"
                 command="cmd_previousObject"/>
-
-        <key id="key_previousFirebugTab" keycode="VK_TAB" modifiers="alt" class="fbOnlyKey"
-                command="cmd_previousFirebugTab"/>
         <key id="key_previousFirebugTab" key="`" modifiers="control" class="fbOnlyKey"
                 command="cmd_previousFirebugTab"/>
         <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift"
                 command="cmd_leftFirebugTab"/>
         <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift"
                 command="cmd_rightFirebugTab"/>
+                
+        <key id="key_customizeFBKeys" keycode="VK_B" modifiers="accel shift alt" 
+                command="cmd_customizeFBKeys"/>                
     </keyset>
 
     <popupset id="mainPopupSet">
