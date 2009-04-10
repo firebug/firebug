@@ -239,7 +239,7 @@ top.FirebugChrome =
 
         if (context == FirebugContext)
         {
-            Firebug.reattachContext(browser, context);
+            Firebug.reattachContext(browser, context); // called when the external window is closed also
 
             this.syncPanel();
 
@@ -519,6 +519,19 @@ top.FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Synchronization
+
+    setFirebugContext: function(context)
+    {
+         // This sets the global value of FirebugContext in the window that this chrome is compiled into.
+         // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and FirebugContext
+         FirebugContext = context;
+
+         if (FBTrace.DBG_WINDOWS)
+             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():FirebugContext) + " in "+window.location);
+
+         if (externalBrowser || (context && context.browser && context.browser.showFirebug) )
+             this.syncPanel();
+    },
 
     hidePanel: function()
     {

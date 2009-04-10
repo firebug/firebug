@@ -1040,7 +1040,7 @@ top.Firebug =
                 }
                 else
                 {
-                    Firebug.setFirebugContext(context);
+                    browser.chrome.setFirebugContext(context);
                     Firebug.updateActiveContexts(context); // now the top tab is active
                 }
             }
@@ -1229,6 +1229,7 @@ top.Firebug =
 
     reattachContext: function(browser, context)
     {
+        dispatch(uiListeners, browser.detached ? "showExternalUI" : "hideExternalUI", [browser, context]);
         dispatch(modules, "reattachContext", [browser, context]);
     },
 
@@ -1398,8 +1399,8 @@ top.Firebug =
         if (context.browser.sidePanelNames)
             context.sidePanelNames = context.browser.sidePanelNames;
 
-        if (!FirebugContext)  // then no previous context
-            Firebug.setFirebugContext(context); // let's make sure we have something for errors to land on.
+        if (!FirebugContext && context.browser.chrome)  // then no previous context
+            context.browser.chrome.setFirebugContext(context); // let's make sure we have something for errors to land on.
 
         if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
             FBTrace.dumpProperties("firebug.initContext sidePanelNames:",context.sidePanelNames);
@@ -1463,19 +1464,6 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
-    setFirebugContext: function(context)  // this is the only place we should set FirebugContext
-    {
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():FirebugContext)+" was active? "+this.isContextActive(FirebugContext));
-
-        if (FirebugContext && !this.isContextActive(FirebugContext) && FirebugContext != context)
-            this.updateActiveContexts(FirebugContext);
-
-        FirebugContext = context;
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("setFirebugContext set "+(FirebugContext?FirebugContext.getName():FirebugContext));
-    },
-
     showContext: function(browser, context)  // TabWatcher showContext. null context means we don't debug that browser
     {
         if (clearContextTimeout)
@@ -1490,7 +1478,7 @@ top.Firebug =
         if (context)  // then we are debugging this context
             this.updateActiveContexts(context);  // a revisited page with a context is activeContext
 
-        Firebug.setFirebugContext(context);  // may set the FirebugContext to null
+        browser.chrome.setFirebugContext(context);  // may set the FirebugContext to null
 
         // signal that this browser is one that shows the firebug
         browser.showFirebug = !!context && !context.detached;
@@ -3199,21 +3187,21 @@ Firebug.URLSelector =
         return Firebug.URLSelector.shouldCreateContext(context.browser, context.getWindowLocation().toString());
     },
 
-    showUI: function(browser, context)  // Firebug is opened, in browser or detached
+    showUI: function(browser, context)  // Firebug is opened in browser
     {
         // mark this URI as firebugged
         var uri = makeURI(normalizeURL(context.getWindowLocation()));
-        var annotation = "firebugged."+(browser.detached?"detached":"showFirebug");
+        var annotation = "firebugged.showFirebug";
         this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
         if (FBTrace.DBG_WINDOWS)
         {
             if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
                 FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-            FBTrace.sysout("showUI tagged "+uri.spec);
+            FBTrace.sysout("showUI tagged "+uri.spec+" with: "+annotation);
         }
     },
 
-    hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
+    hideUI: function(browser, context)  // Firebug closes in browser
     {
         if (context)
         {
@@ -3221,6 +3209,31 @@ Firebug.URLSelector =
             this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("hideUI untagged "+uri.spec+" browser.showFirebug: "+browser.showFirebug+" browser.detached:"+browser.detached);
+        }
+    },
+
+    showExternalUI: function(browser, context)  // Firebug is opened detached
+    {
+        // mark this URI as firebugged
+        var uri = makeURI(normalizeURL(context.getWindowLocation()));
+        var annotation = "firebugged.detached";
+        this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+        if (FBTrace.DBG_WINDOWS)
+        {
+            if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
+                FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
+            FBTrace.sysout("showExternalUI tagged "+uri.spec+" with: "+annotation);
+        }
+    },
+
+    hideExternalUI: function(browser, context)  // Firebug closed detached.
+    {
+        if (context)
+        {
+            var uri  = makeURI(normalizeURL(context.getWindowLocation()));
+            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("hideExternalUI untagged "+uri.spec+" browser.showFirebug: "+browser.showFirebug+" browser.detached:"+browser.detached);
         }
     },
 }
