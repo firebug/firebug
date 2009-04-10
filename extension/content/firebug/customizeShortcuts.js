@@ -10,6 +10,23 @@ var gLocaleKeys = [];
 var gPlatformKeys = new Object();
 var updatedShortcuts = {}
 var modified = false;
+var mustBeKeyChars = {
+                      VK_SEMICOLON      : ";",
+                      VK_EQUALS         : "=",
+                      VK_MULTIPLY       : "*",
+                      VK_ADD            : "+",
+                      VK_SUBTRACT       : "-",
+                      VK_DECIMAL        : ".",
+                      VK_DIVIDE         : "/",
+                      VK_COMMA          : ",",
+                      VK_PERIOD         : ".",
+                      VK_SLASH          : "/",
+                      VK_BACK_QUOTE     : "`",
+                      VK_OPEN_BRACKET   : "[",
+                      VK_BACK_SLASH     : "\\",
+                      VK_CLOSE_BRACKET  : "]",
+                      VK_QUOTE          : "'"
+                    };
 
 function init()
 {
@@ -152,12 +169,13 @@ function addShortcutRow(element, index, array)
 
 function recognizeShortcut(event)
 {
-    //we're using keydown so that we can always work with keycode
+    
+    //we're using keydown, so we always start with keycode
     var shortcut = "";
     if ( [9, 16, 17, 18].indexOf(event.keyCode) != -1 || 
         ((!event.shiftKey && !event.altKey && !event.ctrlKey) && [ 8, 13, 27].indexOf(event.keyCode) != -1))
     {
-        //Always let pass tab. Let enter, escape & backspace pass if no modifiers are used
+        //Always let tab pass. Let enter, escape & backspace pass if no modifiers are used
         return;
     }
     modified = true;
@@ -175,29 +193,54 @@ function recognizeShortcut(event)
         modifiers.push("shift");
     
     modifiers = modifiers.join("+");
-   
-    var keycode = null;
-    keycode = gVKNames[event.keyCode];
-    if (!keycode)
+    var keyConstant = key = null;
+    
+    keyConstant = gVKNames[event.keyCode];
+    
+    if (!keyConstant) //should not happen
         return;
-    target.value = getFormattedKey(modifiers, null, keycode);
+    
+    //check if the keycode is actually a printable character
+    
+    //1. convert some of the punctuation keyConstants (e.g. VK_COMMA) back to actual characters 
+    if (mustBeKeyChars[keyConstant])
+    {
+        key = mustBeKeyChars[keyConstant]; 
+    }
+    else    
+	{
+        //2. detect basic alphanumeric keys
+        var keyNameGuess = keyConstant.replace("VK_", "");
+        if (keyNameGuess.length == 1)
+            key = keyNameGuess;
+    }
     
     if (modifiers.length > 0)
     {
         shortcut += modifiers;
         shortcut += "+";
     }
+    shortcut += (key ? key : keyConstant);
     
-    shortcut += keycode;
     updatedShortcuts[target.id.replace('_shortcut', "")] = shortcut;
+
+    //show formatted shortcut in textbox
+    var formatted = getFormattedKey(modifiers, key, keyConstant);;
+    
+    formatted = formatted.replace(/\b([a-z])/g, function($0)
+    {
+        return $0.toUpperCase()
+    });
+    
+    target.value = formatted;
     return false;
 }
 
-function getFormattedKey(modifiers, key, keycode)
+function getFormattedKey(modifiers, key, keyConstant)
 {
-    if (modifiers == "shift,alt,control,accel" && keycode == "VK_SCROLL_LOCK")
+    if (modifiers == "shift,alt,control,accel" && keyConstant == "VK_SCROLL_LOCK")
         return "";
-    if (key == "" || (!key && keycode == ""))
+    if (key == "" || (!key && keyConstant == ""))
         return "";
     
     var val = "";
@@ -207,21 +250,20 @@ function getFormattedKey(modifiers, key, keycode)
         gPlatformKeys.ctrl).replace("meta", gPlatformKeys.meta).replace("accel", gPlatformKeys.accel)
         + gPlatformKeys.sep;
     if (key)
-        val += key;
-    if (keycode)
+        return val += key;
+    if (keyConstant)
+    {
         try
         {
-            val += gLocaleKeys.getString(keycode);
+            //see if a localized version for keyConstant exists (F keys, arrow, enter, pgup, etc.)
+            val += gLocaleKeys.getString(keyConstant);
         }
         catch (e)
         {
-            var keyNameGuess = keycode.replace("VK_", "").replace("_", " ").toLowerCase();
-            
-            val += keyNameGuess.replace(/\b([a-z])/g, function($0)
-            {
-                return $0.toUpperCase()
-            });
+            //create human friendly alternative ourself
+            val += keyConstant.replace("VK_", "").replace("_", " ").toLowerCase();
         }
+    }
     return val;
 }
 

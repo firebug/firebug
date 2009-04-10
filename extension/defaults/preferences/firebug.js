@@ -132,21 +132,21 @@ pref("extensions.firebug.DBG_SPY", false);          // spy.js
 pref("extensions.firebug.DBG_JSONVIEWER", false);   // spy.js
 
 //Keyboard
-pref("extensions.firebug.key.shortcut.reenterCommand", "accel+shift+VK_E");
-pref("extensions.firebug.key.shortcut.toggleInspecting", "accel+shift+VK_C");
-pref("extensions.firebug.key.shortcut.toggleProfiling", "accel+shift+VK_P");
-pref("extensions.firebug.key.shortcut.focusCommandLine", "accel+shift+VK_L");
-pref("extensions.firebug.key.shortcut.focusFirebugSearch", "accel+shift+VK_K");
-pref("extensions.firebug.key.shortcut.focusWatchEditor", "accel+shift+VK_N");
+pref("extensions.firebug.key.shortcut.reenterCommand", "accel+shift+e");
+pref("extensions.firebug.key.shortcut.toggleInspecting", "accel+shift+c");
+pref("extensions.firebug.key.shortcut.toggleProfiling", "accel+shift+p");
+pref("extensions.firebug.key.shortcut.focusCommandLine", "accel+shift+l");
+pref("extensions.firebug.key.shortcut.focusFirebugSearch", "accel+shift+k");
+pref("extensions.firebug.key.shortcut.focusWatchEditor", "accel+shift+n");
 pref("extensions.firebug.key.shortcut.focusLocation", "accel+shift+VK_SPACE");
-pref("extensions.firebug.key.shortcut.nextObject", "accel+VK_PERIOD");
-pref("extensions.firebug.key.shortcut.previousObject", "accel+VK_COMMA");
+pref("extensions.firebug.key.shortcut.nextObject", "accel+.");
+pref("extensions.firebug.key.shortcut.previousObject", "accel+,");
 pref("extensions.firebug.key.shortcut.toggleFirebug", "VK_F12");
 pref("extensions.firebug.key.shortcut.detachFirebug", "accel+VK_F12");
 pref("extensions.firebug.key.shortcut.leftFirebugTab", "accel+shift+VK_PAGE_UP");
 pref("extensions.firebug.key.shortcut.rightFirebugTab", "accel+shift+VK_PAGE_DOWN");
-pref("extensions.firebug.key.shortcut.previousFirebugTab", "accel+VK_BACK_QUOTE");
-pref("extensions.firebug.key.shortcut.customizeFBKeys", "alt+accel+shift+VK_K");
+pref("extensions.firebug.key.shortcut.previousFirebugTab", "accel+`");
+pref("extensions.firebug.key.shortcut.customizeFBKeys", "alt+accel+shift+k");
 
 
 

@@ -3,7 +3,7 @@ FBL.ns( function()
     with (FBL)
     {      
         Firebug.shortcutsModel = extend(Firebug.Module, { 
-            initialize: function()
+            initializeUI: function()
             {
                 this.initShortcuts();
             },
@@ -29,18 +29,19 @@ FBL.ns( function()
                     keyElem.command = "cmd_" + element;
                     $('mainKeyset').appendChild(keyElem);
                 }
-                keyElem.setAttribute('modifiers', modifiers);
-                var keyChar = key.replace('VK_', "").toLowerCase();
+                
                 //choose between key or keycode attribute
-                if (keyChar.length == 1)
+                if (key.length == 1)
                 {
-                    keyElem.setAttribute('key', keyChar);
+                    keyElem.setAttribute('modifiers', modifiers);
+                    keyElem.setAttribute('key', key);
                     keyElem.removeAttribute('keycode');
                 }
-                else
+                else if (KeyEvent['DOM_' + key]) //only set valid keycodes
                 {
+                    keyElem.setAttribute('modifiers', modifiers);
                     keyElem.setAttribute('keycode', key);
-                    keyElem.removeAttribute('key'); //in case default shortcut was key rather than keycode
+                    keyElem.removeAttribute('key'); //in case default shortcut uses key rather than keycode
                 }
             },
         }); 
