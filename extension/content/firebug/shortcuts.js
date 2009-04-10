@@ -16,7 +16,7 @@ FBL.ns( function()
             initShortcut : function(element, index, array) {
                 var branch = prefs.getBranch("extensions.firebug.key.");
                 var shortcut = branch.getCharPref("shortcut." + element);
-                var tokens = shortcut.split('+');
+                var tokens = shortcut.split(' ');
                 var key = tokens.pop();
                 var modifiers = tokens.join(',')
                 var keyElem = document.getElementById("key_" + element);

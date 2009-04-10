@@ -124,9 +124,12 @@ function handleResetBtn(event)
 function getHumanShortcut(element)
 {
     var shortcut = branch.getCharPref(element);
-    var tokens = shortcut.split('+');
+    var tokens = shortcut.split(' ');
     var keyCode = tokens.pop();
-    return getFormattedKey(tokens.join('+'), null, keyCode);
+    if (keyCode.length == 1)
+        return getFormattedKey(tokens.join(','), keyCode, null);
+    else 
+        return getFormattedKey(tokens.join(','), null, keyCode);
 }
 
 function addShortcutRow(element, index, array)
@@ -192,7 +195,7 @@ function recognizeShortcut(event)
     if (event.shiftKey)
         modifiers.push("shift");
     
-    modifiers = modifiers.join("+");
+    modifiers = modifiers.join(" ");
     var keyConstant = key = null;
     
     keyConstant = gVKNames[event.keyCode];
@@ -212,25 +215,22 @@ function recognizeShortcut(event)
         //2. detect basic alphanumeric keys
         var keyNameGuess = keyConstant.replace("VK_", "");
         if (keyNameGuess.length == 1)
-            key = keyNameGuess;
+            key = keyNameGuess.toLowerCase();
     }
     
     if (modifiers.length > 0)
     {
         shortcut += modifiers;
-        shortcut += "+";
+        shortcut += " ";
     }
     shortcut += (key ? key : keyConstant);
     
     updatedShortcuts[target.id.replace('_shortcut', "")] = shortcut;
 
     //show formatted shortcut in textbox
-    var formatted = getFormattedKey(modifiers, key, keyConstant);;
-    
-    formatted = formatted.replace(/\b([a-z])/g, function($0)
-    {
-        return $0.toUpperCase()
-    });
+    modifiers = modifiers.replace(" ",",")
+    var formatted = getFormattedKey(modifiers, key, keyConstant);
+
     
     target.value = formatted;
     return false;
