@@ -288,6 +288,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     breakOnNext: function(context)
     {
+        if (!context || !context.chrome)
+            return;
+
         var breakable = context.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
 
         if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
