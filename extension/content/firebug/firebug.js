@@ -227,7 +227,7 @@ top.Firebug =
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
         var elements = ["menu_disablePanels", "fbCommandLine", "fbFirebugMenu",
-            "fbLargeCommandLine"];
+            "fbLargeCommandLine", "menu_customizeShortcuts", "menu_enableA11y"];
 
         for (var i=0; i<elements.length; i++)
         {

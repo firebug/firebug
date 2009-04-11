@@ -1,12 +1,15 @@
+/* See license.txt for terms of usage */
 FBL.ns( function()
 {
     with (FBL)
     {      
         Firebug.shortcutsModel = extend(Firebug.Module, { 
+            
             initializeUI: function()
             {
                 this.initShortcuts();
             },
+            
             initShortcuts : function() {
                 var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
                 var shortcutNames = branch.getChildList("", {});
@@ -43,7 +46,7 @@ FBL.ns( function()
                     keyElem.setAttribute('keycode', key);
                     keyElem.removeAttribute('key'); //in case default shortcut uses key rather than keycode
                 }
-            },
+            }
         }); 
         Firebug.registerModule(Firebug.shortcutsModel);
     }

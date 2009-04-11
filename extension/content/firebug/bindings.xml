@@ -35,12 +35,6 @@
             this.browser = this.getChildElement("browser");
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
-            that = this;
-            that.tabFocused = false;
-            
-            
-            this.tabBox.addEventListener('focus', this.handleTabBarFocus, true);
-            this.tabBox.addEventListener('blur', this.handleTabBarBlur, true);
             
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
@@ -138,7 +132,7 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
-                if (that.tabFocused)
+                if (Firebug.a11yModel.enabled && Firebug.a11yModel.tabFocused)
                     tab.focus();
             ]]></body>
         </method>
@@ -257,18 +251,6 @@
                 return this.tabMap[panelName];
             ]]></body>
         </method>
-        <method name="handleTabBarFocus">
-            <parameter name="event"/>
-            <body><![CDATA[
-                that.tabFocused = true;
-            ]]></body>
-        </method>
-        <method name="handleTabBarBlur">
-            <parameter name="event"/>
-            <body><![CDATA[
-                that.tabFocused = false;
-            ]]></body>
-        </method>
     </implementation>
 
     <handlers>
@@ -301,7 +283,7 @@
         <constructor>
         <![CDATA[
             this.tabMenu = document.createElement("panelTabMenu");
-            this.setAttribute('aria-haspopup', 'true'); // not picked up by AT atm. How to indicate dropdown menu on tab?
+            this.setAttribute('aria-haspopup', 'true');
             this.appendChild(this.tabMenu);
             return this.tabMenu;
         ]]>

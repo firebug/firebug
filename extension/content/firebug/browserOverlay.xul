@@ -48,6 +48,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/consoleInjector.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/jsonViewer.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/shortcuts.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
 
     <script type="application/x-javascript" src="chrome://firebug/content/traceModule.js"/> <!-- /*@explore*/ -->
 
@@ -60,6 +61,8 @@
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
+        <command id="cmd_enableA11y" oncommand="Firebug.a11yModel.toggle(); " />
+        
     </commandset>
 
     <keyset id="mainKeyset">
@@ -119,7 +122,9 @@
                 <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"
                         command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>
                 <menuseparator/>
-                <menuitem id="menu_customizeShortcuts" label="&firebug.KeyShortcuts;"
+                <menuitem id="menu_enableA11y" label="Firebug.menu.Enable Accessibility Enhancements"
+                        command="cmd_enableA11y" type="checkbox" autocheck="false" /> 
+                <menuitem id="menu_customizeShortcuts" label="Firebug.menu.Customize shortcuts"
                         command="cmd_customizeFBKeys" key="key_customizeFBKeys" />                        
             </menupopup>
         </menu>

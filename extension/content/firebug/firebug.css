@@ -90,24 +90,24 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 /**** focus related ****/
 
-panelTab[selected="true"],
-#fbFirebugMenu,
-#fbToolbarInner .panelButtons[collapsed="false"] > toolbarbutton:first-of-type,
-.innerToolbar.hasTabOrder toolbarbutton, 
-#fbStatusBar {
+.useA11y panelTab[selected="true"],
+.useA11y #fbFirebugMenu,
+.useA11y #fbToolbarInner .panelButtons[collapsed="false"] > toolbarbutton:first-of-type,
+.useA11y .innerToolbar.hasTabOrder toolbarbutton, 
+#fbStatusBar.useA11y {
     -moz-user-focus: normal;
 }
 
-#fbPanelBar1 toolbarbutton:focus,
-#fbStatusBar:focus {
+.useA11y #fbPanelBar1 toolbarbutton:focus,
+#fbStatusBar.useA11y:focus {
     outline: 2px solid #FF9933;
 }
 
-panelTab:focus {
+.useA11y panelTab:focus {
     background-color: #FF9933;
 }
 
-panelTab:focus > label {
+.useA11y panelTab:focus > label {
     text-decoration: underline;
     color: black;
 }
