@@ -1375,6 +1375,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
             var editStyleSheet = this.editStyleSheet;
             editStyleSheet = ownerNode.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml",
                 "style");
+            editStyleSheet.firebugIgnore = true;
             editStyleSheet.setAttribute("type", "text/css");
             editStyleSheet.setAttributeNS("http://www.w3.org/XML/1998/namespace", "base",
                 url.directory);
