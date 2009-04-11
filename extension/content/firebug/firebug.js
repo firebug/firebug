@@ -699,7 +699,7 @@ top.Firebug =
                                                                                                                        /*@explore*/
         if (FBTrace.DBG_OPTIONS)  /*@explore*/
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
-    },    
+    },
     // *******************************************************************************
     // External editors
     // TODO move to editors.js as Firebug.Editors module
@@ -1033,8 +1033,17 @@ top.Firebug =
         }
         else
         {
-            if (FirebugContext)
-                FirebugContext.detached = true;
+            if (!FirebugContext)
+            {
+                throw new Error("Firebug.detachBar, no FirebugContext in "+window.location);
+            }
+
+            FirebugContext.detached = true;
+
+            Firebug.updateActiveContexts(FirebugContext); // now the top tab is active because the Firebug is detached
+
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+FirebugContext.getName() );
 
             var args = {
                 FBL: FBL,
@@ -1044,8 +1053,8 @@ top.Firebug =
             };
             var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
-            if (FirebugContext)
-                FirebugContext.detached = win;
+            FirebugContext.detached = win;
+            FirebugChrome.setFirebugContext(null); // this window no longer has a FirebugContext.
 
             detachCommand.setAttribute("checked", true);
             FirebugChrome.clearPanels();
@@ -1384,12 +1393,12 @@ top.Firebug =
 
     isContextActive: function(context)
     {
-        if (!context)
+        if (!context || !context.window)
             return false;
 
         // A context is active if it is visible, either because its in a Firebug window or its the selected tab.
 
-        return (context.browser.detached || (context.browser.showFirebug && (context.browser == Firebug.tabBrowser.selectedBrowser) ) );
+        return (context.detached || (context.browser.showFirebug && (context.browser == Firebug.tabBrowser.selectedBrowser) ) );
     },
 
     updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
@@ -1437,8 +1446,6 @@ top.Firebug =
 
         if (context)  // then we are debugging this context
             this.updateActiveContexts(context);  // a revisited page with a context is activeContext
-
-        browser.chrome.setFirebugContext(context);  // may set the FirebugContext to null
 
         // signal that this browser is one that shows the firebug
         browser.showFirebug = !!context && !context.detached;
