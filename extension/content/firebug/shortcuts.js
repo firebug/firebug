@@ -3,7 +3,7 @@ FBL.ns( function()
 {
     with (FBL)
     {      
-        Firebug.shortcutsModel = extend(Firebug.Module, { 
+        Firebug.ShortcutsModel = extend(Firebug.Module, { 
             
             initializeUI: function()
             {
@@ -48,6 +48,6 @@ FBL.ns( function()
                 }
             }
         }); 
-        Firebug.registerModule(Firebug.shortcutsModel);
+        Firebug.registerModule(Firebug.ShortcutsModel);
     }
 });

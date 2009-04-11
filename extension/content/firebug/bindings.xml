@@ -132,7 +132,7 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
-                if (Firebug.a11yModel.enabled && Firebug.a11yModel.tabFocused)
+                if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused)
                     tab.focus();
             ]]></body>
         </method>

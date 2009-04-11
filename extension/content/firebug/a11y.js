@@ -4,7 +4,7 @@ FBL.ns( function()
 {
     with (FBL)
     {      
-        Firebug.a11yModel = extend(Firebug.Module, { 
+        Firebug.A11yModel = extend(Firebug.Module, { 
             
             enabled : false,
             
@@ -147,6 +147,6 @@ FBL.ns( function()
             
         }); 
         
-        Firebug.registerModule(Firebug.a11yModel);
+        Firebug.registerModule(Firebug.A11yModel);
     }
 });
