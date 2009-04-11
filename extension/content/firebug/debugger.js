@@ -582,7 +582,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // and find a better solution
             //const updateViewOnShowHook = function()
             //{
-                Firebug.toggleBar(true, 'script'); // force open firebug XXXjjb may not be needed in 1.4+
                 context.chrome.select(context.currentFrame, "script", "callstack", true);
                 context.chrome.focus();
             //}
@@ -597,7 +596,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Debugger UI error during debugging loop: "+exc, exc);
+                FBTrace.sysout("Resuming debugger: error during debugging loop: "+exc, exc);
+            Firebug.Console.log("Resuming debugger: error during debugging loop: "+exc);
+            this.resume(context);
         }
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");                                                 /*@explore*/
     },
