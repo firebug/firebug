@@ -177,43 +177,9 @@ Firebug.Search = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
-    initialize: function()
-    {
-    },
 
-    reattachContext: function(browser, context)
-    {
-        FBTrace.sysout("search.reattachContext");
-        this.enable(browser.chrome);
-    },
 
-    enable: function(chrome)
-    {
-        FBTrace.sysout("search.enable");
-        try
-        {
-            var searchBox = chrome.$("fbSearchBox");
-            if (searchBox)
-            {
-                searchBox.value = "";
-                searchBox.disabled = false;
-                searchBox.addEventListener('focus', this.onSearchBoxFocus, true);
-            }
-        }
-        catch(exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("search.enable FAILS "+exc, exc);
-        }
-    },
 
-    disable: function(chrome)
-    {
-        var searchBox = chrome.$("fbSearchBox");
-        searchBox.value = "";
-        searchBox.disabled = true;
-        searchBox.removeEventListener('focus', this.onSearchBoxFocus, true);
-    }
 });
 
 // ************************************************************************************************

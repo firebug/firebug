@@ -170,7 +170,7 @@
                         <spacer flex="1"/>
                         <menupopup id="fbSearchOptionsPopup" position="before_start" open="true" ignorekeys="true" />
                         <!-- xxxHonza: should the label be localized or not because ARIA? -->
-                        <textbox id="fbSearchBox" autocomplete="true" disabled="true" rows="1" label="Search Firebug Panel"/>
+                        <textbox id="fbSearchBox" autocomplete="true" rows="1" label="Search Firebug Panel"/>
                         <spacer flex="1"/>
                     </vbox>
                     <hbox role="toolbar">
