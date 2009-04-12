@@ -64,7 +64,7 @@ FBL.ns( function()
             {
                 var target = event.originalTarget;
                 var isTab = target.nodeName.toLowerCase() == "paneltab";
-                var isButton = target.nodeName == "toolbarbutton";
+                var isButton = target.nodeName.search(/(xul:)?toolbarbutton/) != -1;
                 var isDropDownMenu = isButton && target.getAttribute('type') == "menu";
                 var siblingTab, forward, keyCode, toolbar, buttons;
                 if (isTab || isButton )
@@ -101,8 +101,18 @@ FBL.ns( function()
                                toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
                                if (toolbar)
                                {
+                                   //temporarily make all buttons in the toolbar part of the tab order,
+                                   //to allow smooth, native focus advancement
                                    FBL.setClass(toolbar, 'hasTabOrder');
                                    document.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
+                                   //Very ugly hack, but it works well. This prevents focus to 'spill out' of a 
+                                   //toolbar when using the left and right arrow keys 
+                                   if (!FBL.isAncestor(document.commandDispatcher.focusedElement, toolbar))
+                                   {
+                                       //we moved focus to somewhere out of the toolbar: not good. Move it back to where it was.
+                                       document.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
+                                   }
+                                   //remove the buttons from the tab order again, so that it will remain uncluttered
                                    FBL.removeClass(toolbar, 'hasTabOrder');
                                }
                                 FBL.cancelEvent(event);

@@ -189,24 +189,24 @@
                             <toolbar id="fbToolbar" align="center" role="toolbar">
 
                                 <hbox id="fbToolbarInner" class="innerToolbar" insertbefore="fbDetachButton" flex="1" align="center">
-                                    <hbox id="fbConsoleButtons" collapsed="true" class="panelButtons">
+                                    <hbox id="fbConsoleButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                                         tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button"
                                                         type="checkbox" command="cmd_toggleProfiling"/>
                                     </hbox>
 
-                                    <hbox id="fbHTMLButtons" collapsed="true" class="panelButtons">
+                                    <hbox id="fbHTMLButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Edit;" class="toolbar-text-button"
                                                         tooltiptext="&firebug.EditHTMLTooltip;" command="cmd_toggleHTMLEditing"/>
                                     </hbox>
 
-                                    <hbox id="fbCSSButtons" collapsed="true" class="panelButtons">
+                                    <hbox id="fbCSSButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Edit;" class="toolbar-text-button"
                                                         tooltiptext="&firebug.EditCSSTooltip;" command="cmd_toggleCSSEditing"/>
                                     </hbox>
 
-                                    <hbox id="fbScriptButtons" collapsed="true" class="panelButtons">
+                                    <hbox id="fbScriptButtons" collapsed="true">
                                         <tooltip id="fbScriptFilterMenuTooltip"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
                                         <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">
@@ -222,10 +222,10 @@
                                         </toolbarbutton>
                                     </hbox>
 
-                                    <hbox id="fbNetButtons" collapsed="true" class="panelButtons">
+                                    <hbox id="fbNetButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                                         tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
-                                        <hbox id="fbNetButtonsFilter" collapsed="true">
+                                        <hbox id="fbNetButtonsFilter" collapsed="true" class="noTabStop">
                                             <toolbarseparator/>
                                             <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
                                                         group="firebugNetFilter" checked="true"
@@ -252,7 +252,7 @@
                                         </hbox>
                                     </hbox>
 
-                                    <hbox id="fbTraceButtons" collapsed="true" class="panelButtons">
+                                    <hbox id="fbTraceButtons" collapsed="true">
                                         <toolbarseparator/>
                                         <toolbarbutton id="fbTraceOpenConsole" class="toolbar-text-button"
                                                         label="Open Console" tooltiptext="Open Console Tooltip"
@@ -262,13 +262,13 @@
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
                                     <hbox id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
                                                     collapsed="true"
-                                                    labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"></hbox>
+                                                    labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu" class="noTabStop"></hbox>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
                                     <panelStatus id="fbPanelStatus" flex="1"
-                                                  tooltip="fbTooltip" contextmenu="fbContextMenu" class="panelButtons"/>
+                                                  tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
 
-                                    <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true">
+                                    <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
                                                     tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
