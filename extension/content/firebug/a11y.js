@@ -3,23 +3,25 @@
 FBL.ns( function()
 {
     with (FBL)
-    {      
-        Firebug.A11yModel = extend(Firebug.Module, { 
-            
+    {
+        Firebug.A11yModel = extend(Firebug.Module, {
+
+            dispatchName: "a11y",
+
             enabled : false,
-            
+
             tabFocused : false,
-            
+
             initializeUI: function()
             {
                 this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'));
             },
-            
+
             toggle : function()
             {
                 this.set(!this.enabled);
             },
-            
+
             set : function(enable)
             {
                 this.enabled = enable;
@@ -30,23 +32,23 @@ FBL.ns( function()
                 else
                     this.performDisable();
             },
-            
+
             performEnable : function()
             {
                 //add class used by all a11y related css styles (e.g. :focus and -moz-user-focus styles)
                 FBL.setClass($('fbContentBox'), 'useA11y');
                 FBL.setClass($('fbStatusBar'), 'useA11y');
-                
+
                 $("fbPanelBar1").addEventListener("keypress", this.handlePanelBarKeyPress , true);
                 this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
-                this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);                
+                this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
                 $('fbPanelBar1-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
                 $('fbPanelBar1-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
                 $('fbPanelBar2-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
                 $('fbPanelBar2-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
-                
+
             },
-            
+
             performDisable : function()
             {
                 FBL.removeClass($('fbContentBox'), 'useA11y');
@@ -57,7 +59,7 @@ FBL.ns( function()
                 $('fbPanelBar2-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
                 $('fbPanelBar2-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
             },
-            
+
             handlePanelBarKeyPress : function (event)
             {
                 var target = event.originalTarget;
@@ -134,19 +136,19 @@ FBL.ns( function()
                     }
                 }
             },
-            
+
             handleTabBarFocus: function(event)
             {
                 this.tabFocused = true;
             },
-            
+
             handleTabBarBlur: function(event)
             {
                 this.tabFocused = false;
             }
-            
-        }); 
-        
+
+        });
+
         Firebug.registerModule(Firebug.A11yModel);
     }
 });
