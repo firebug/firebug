@@ -132,8 +132,6 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
-                if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused)
-                    tab.focus();
             ]]></body>
         </method>
 
@@ -170,6 +168,9 @@
                 {
                     tab.setAttribute("selected", "true");
                     tab.setAttribute("aria-expanded", "true");
+                    if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused &&!forceUpdate)
+                        tab.focus();
+                    
                 }
 
                 if (panel)

@@ -25,7 +25,7 @@ FBL.ns( function()
             set : function(enable)
             {
                 //This needs a fix, how to get a correct reference to either Browser.xml or Firebug.xml chrome here?
-                var chrome = context.chrome;
+                var chrome = typeof context != "undefined" ? context.chrome : FirebugChrome;
                 this.enabled = enable;
                 Firebug.setPref(Firebug.prefDomain, 'enableA11y', enable);
                 $('cmd_enableA11y').setAttribute('checked', enable + '');
@@ -45,8 +45,10 @@ FBL.ns( function()
                 //add class used by all a11y related css styles (e.g. :focus and -moz-user-focus styles)
                 FBL.setClass(chrome.$('fbContentBox'), 'useA11y');
                 FBL.setClass(chrome.$('fbStatusBar'), 'useA11y');
-
+                //manage all key events in toolbox (including tablists)
                 chrome.$("fbPanelBar1").addEventListener("keypress", this.handlePanelBarKeyPress , true);
+                //make focus stick to inspect button when clicked
+                chrome.$("fbInspectButton").addEventListener("mousedown", this.focusTarget, true);
                 this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
                 this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
                 chrome.$('fbPanelBar1-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
@@ -57,16 +59,22 @@ FBL.ns( function()
             },
 
             performDisable : function(chrome)
-            {
+            {	//undo everything we did in performEnable
                 FBL.removeClass(chrome.$('fbContentBox'), 'useA11y');
                 FBL.removeClass(chrome.$('fbStatusBar'), 'useA11y');
                 chrome.$("fbPanelBar1").removeEventListener("keypress", this.handlePanelBarKeyPress , true);
+                chrome.$("fbInspectButton").removeEventListener("mousedown", this.focusTarget, true);
                 chrome.$('fbPanelBar1-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
                 chrome.$('fbPanelBar1-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
                 chrome.$('fbPanelBar2-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
                 chrome.$('fbPanelBar2-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
             },
-
+            
+            focusTarget : function(event)
+            {
+                event.target.focus();
+            },
+            
             handlePanelBarKeyPress : function (event)
             {
                 var target = event.originalTarget;
