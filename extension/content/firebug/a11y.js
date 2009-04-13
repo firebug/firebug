@@ -14,50 +14,58 @@ FBL.ns( function()
 
             initializeUI: function()
             {
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'));
+                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), FirebugContext);
             },
 
             toggle : function()
             {
-                this.set(!this.enabled);
+             // How to get the right 'context' reference here, so that context.chrome will actually point to the detached chrome? 
+                this.set(!this.enabled, FirebugContext); 
             },
 
-            set : function(enable)
+            set : function(enable, context)
             {
+                //This needs a fix, how to get a correct reference to either Browser.xml or Firebug.xml chrome here?
+                var chrome = context ? context.chrome : FirebugChrome;
                 this.enabled = enable;
                 Firebug.setPref(Firebug.prefDomain, 'enableA11y', enable);
                 $('cmd_enableA11y').setAttribute('checked', enable + '');
                 if (enable)
-                    this.performEnable();
+                    this.performEnable(chrome);
                 else
-                    this.performDisable();
+                    this.performDisable(chrome);
             },
-
-            performEnable : function()
+            
+            reattachContext: function(browser, context)
+            {
+                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), context);
+            },
+            
+            performEnable : function(chrome)
             {
                 //add class used by all a11y related css styles (e.g. :focus and -moz-user-focus styles)
-                FBL.setClass($('fbContentBox'), 'useA11y');
-                FBL.setClass($('fbStatusBar'), 'useA11y');
+                FBL.setClass(chrome.$('fbContentBox'), 'useA11y');
+                FBL.setClass(chrome.$('fbStatusBar'), 'useA11y');
 
-                $("fbPanelBar1").addEventListener("keypress", this.handlePanelBarKeyPress , true);
+                chrome.$("fbPanelBar1").addEventListener("keypress", this.handlePanelBarKeyPress , true);
                 this.handleTabBarFocus = FBL.bind(this.handleTabBarFocus, this);
                 this.handleTabBarBlur = FBL.bind(this.handleTabBarBlur, this);
-                $('fbPanelBar1-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
-                $('fbPanelBar1-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
-                $('fbPanelBar2-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
-                $('fbPanelBar2-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
+                chrome.$('fbPanelBar1-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
+                chrome.$('fbPanelBar1-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
+                chrome.$('fbPanelBar2-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
+                chrome.$('fbPanelBar2-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
 
             },
 
-            performDisable : function()
+            performDisable : function(chrome)
             {
-                FBL.removeClass($('fbContentBox'), 'useA11y');
-                FBL.removeClass($('fbStatusBar'), 'useA11y');
-                $("fbPanelBar1").removeEventListener("keypress", this.handlePanelBarKeyPress , true);
-                $('fbPanelBar1-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
-                $('fbPanelBar1-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
-                $('fbPanelBar2-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
-                $('fbPanelBar2-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
+                FBL.removeClass(chrome.$('fbContentBox'), 'useA11y');
+                FBL.removeClass(chrome.$('fbStatusBar'), 'useA11y');
+                chrome.$("fbPanelBar1").removeEventListener("keypress", this.handlePanelBarKeyPress , true);
+                chrome.$('fbPanelBar1-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
+                chrome.$('fbPanelBar1-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
+                chrome.$('fbPanelBar2-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
+                chrome.$('fbPanelBar2-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
             },
 
             handlePanelBarKeyPress : function (event)
@@ -101,16 +109,17 @@ FBL.ns( function()
                                toolbar = FBL.getAncestorByClass(target, 'innerToolbar');
                                if (toolbar)
                                {
+                                   var doc = target.ownerDocument;
                                    //temporarily make all buttons in the toolbar part of the tab order,
                                    //to allow smooth, native focus advancement
                                    FBL.setClass(toolbar, 'hasTabOrder');
-                                   document.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
+                                   doc.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
                                    //Very ugly hack, but it works well. This prevents focus to 'spill out' of a 
                                    //toolbar when using the left and right arrow keys 
-                                   if (!FBL.isAncestor(document.commandDispatcher.focusedElement, toolbar))
+                                   if (!FBL.isAncestor(doc.commandDispatcher.focusedElement, toolbar))
                                    {
                                        //we moved focus to somewhere out of the toolbar: not good. Move it back to where it was.
-                                       document.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
+                                       doc.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
                                    }
                                    //remove the buttons from the tab order again, so that it will remain uncluttered
                                    FBL.removeClass(toolbar, 'hasTabOrder');
