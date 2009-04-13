@@ -14,19 +14,18 @@ FBL.ns( function()
 
             initializeUI: function()
             {
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), FirebugContext);
+                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'));
             },
 
             toggle : function()
             {
-             // How to get the right 'context' reference here, so that context.chrome will actually point to the detached chrome? 
-                this.set(!this.enabled, FirebugContext); 
+                this.set(!this.enabled); 
             },
 
-            set : function(enable, context)
+            set : function(enable)
             {
                 //This needs a fix, how to get a correct reference to either Browser.xml or Firebug.xml chrome here?
-                var chrome = context ? context.chrome : FirebugChrome;
+                var chrome = context.chrome;
                 this.enabled = enable;
                 Firebug.setPref(Firebug.prefDomain, 'enableA11y', enable);
                 $('cmd_enableA11y').setAttribute('checked', enable + '');
@@ -38,7 +37,7 @@ FBL.ns( function()
             
             reattachContext: function(browser, context)
             {
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), context);
+                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'));
             },
             
             performEnable : function(chrome)
