@@ -600,6 +600,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             Firebug.Console.log("Resuming debugger: error during debugging loop: "+exc);
             this.resume(context);
         }
+
+        dispatch(this.fbListeners, "onStartDebugging", [context]);
+
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");                                                 /*@explore*/
     },
 
@@ -616,8 +619,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 var chrome = context.chrome;
 
-                if ( chrome.updateViewOnShowHook )
-                    delete chrome.updateViewOnShowHook;
+                //if ( chrome.updateViewOnShowHook )
+                //    delete chrome.updateViewOnShowHook;
 
                 this.syncCommands(context);
                 this.syncListeners(context);
