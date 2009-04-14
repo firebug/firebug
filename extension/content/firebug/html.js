@@ -19,6 +19,22 @@ var AttrTag =
 
 // ************************************************************************************************
 
+Firebug.HTMLModule = extend(Firebug.Module,
+{
+    deleteNode: function(node, context)
+    {
+        dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
+        node.parentNode.removeChild(node);
+        dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
+    },
+    deleteAttribute: function(node, attr, context)
+    {
+        dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
+        node.removeAttribute(attr);
+        dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
+    }
+});
+
 Firebug.HTMLPanel = function() {};
 
 Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
@@ -105,9 +121,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     deleteAttribute: function(elt, attrName)
     {
-        elt.removeAttribute(attrName);
-
-        //this.markChange();
+        Firebug.HTMLModule.deleteAttribute(elt, attrName, this.context);
     },
 
     editNode: function(node)
@@ -130,9 +144,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     deleteNode: function(node)
     {
-        node.parentNode.removeChild(node);
-
-        //this.markChange();
+        Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
