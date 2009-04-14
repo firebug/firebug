@@ -68,7 +68,7 @@ Firebug.TabContext.prototype =
                     return "(no window.location)";
             }
             else
-                return "(no window)";
+                return "(no context.window)";
         }
         catch(exc)
         {
@@ -162,7 +162,7 @@ Firebug.TabContext.prototype =
             panel.destroy(panelState);
 
             // Remove the panel node from the DOM
-            var panelNode = panel.panelNode;
+            var panelNode = panel.panelNode;  // delete panel content
             if (panelNode && panelNode.parentNode)
                 panelNode.parentNode.removeChild(panelNode);
         }

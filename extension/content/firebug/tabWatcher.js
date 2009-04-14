@@ -89,6 +89,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> tabWatcher.watchTopWindow for: "+(uri instanceof nsIURI?uri.spec:uri)+
                 ", tab: "+Firebug.getTabIdForWindow(win)+"\n");
 
+        if (!win)
+            throw new Error("tabWatcher.watchTopWindow should not have a nulel window")
+
         if (tabBrowser.selectedBrowser.cancelNextLoad)
         {
             // We need to cancel this load and try again after a delay... this is used
@@ -436,8 +439,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!context)
         {
             var browser = this.getBrowserByWindow(win);
-            browser.persistedState = {};
-            dispatch(this.fbListeners, "destroyContext", [null, browser.persistedState, browser]);
+            if (browser)
+                browser.persistedState = {};
+            dispatch(this.fbListeners, "destroyContext", [null, browser?browser.persistedState:null, browser]);
             return;
         }
 
