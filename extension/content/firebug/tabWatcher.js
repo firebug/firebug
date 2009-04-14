@@ -353,6 +353,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = this.getContextByWindow(win);
         if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.unwatchTopWindow for: "+win.location.href+", context: "+context+"\n");
         this.unwatchContext(win, context);
+        return true; // we might later allow extensions to reject unwatch
     },
 
     /**
@@ -387,7 +388,13 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!browser.chrome)
             registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
 
-        return this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
+
+        if (this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true))
+        {
+            dispatch(this.fbListeners, "watchBrowser", [browser]);
+            return true;
+        }
+        return false;
     },
 
     /*
@@ -396,7 +403,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     unwatchBrowser: function(browser)
     {
-        this.unwatchTopWindow(browser.contentWindow);
+        if (FBTrace.DBG_WINDOWS)
+        {
+            var uri = safeGetURI(browser);
+            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");
+        }
+
+        var detached = browser.detached;
+        if (this.unwatchTopWindow(browser.contentWindow))
+        {
+            dispatch(this.fbListeners, "unwatchBrowser", [browser, detached]);
+            return true;
+        }
+        return false;
     },
 
     watchContext: function(win, context, isSystem)  // called when tabs change in firefox
@@ -417,7 +436,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!context)
         {
             var browser = this.getBrowserByWindow(win);
-            dispatch(this.fbListeners, "destroyContext", [browser, null]);
+            browser.persistedState = {};
+            dispatch(this.fbListeners, "destroyContext", [null, browser.persistedState, browser]);
             return;
         }
 
@@ -429,7 +449,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             dispatch(TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
 
-        dispatch(this.fbListeners, "destroyContext", [context, persistedState]);
+        dispatch(this.fbListeners, "destroyContext", [context, persistedState, context.browser]);
 
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context for: "+
@@ -513,9 +533,14 @@ var TabProgressListener = extend(BaseProgressListener,
         // Only watch windows that are their own parent - e.g. not frames
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
+            var srcWindow = getWindowForRequest(request);
+            if (srcWindow)
+                var browser = TabWatcher.getBrowserByWindow(srcWindow);
+            var requestFromFirebuggedWindow = browser && (browser.showFirebug || browser.detached);
+
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> TabProgressListener.onLocationChange "+progress.DOMWindow.location+" to: "
-                                          +(uri?uri.spec:"null location")+"\n");
+                                          +(uri?uri.spec:"null location")+(requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
 
             TabWatcher.watchTopWindow(progress.DOMWindow, uri);
         }

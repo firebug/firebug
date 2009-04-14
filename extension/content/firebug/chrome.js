@@ -143,8 +143,6 @@ top.FirebugChrome =
             doc1.addEventListener("click", onPanelClick, false);
             panelBar1.addEventListener("selectingPanel", onSelectingPanel, false);
 
-            
-
             var doc2 = panelBar2.browser.contentDocument;
             doc2.addEventListener("mouseover", onPanelMouseOver, false);
             doc2.addEventListener("mouseout", onPanelMouseOut, false);
@@ -194,10 +192,12 @@ top.FirebugChrome =
 
         window.removeEventListener("blur", onBlur, true);
         if (externalMode)
+        {
             this.detachBrowser(externalBrowser, FirebugContext);
+            Firebug.onDetachedWindowClose(externalBrowser);
+        }
         else
             Firebug.shutdown();
-
     },
 
     updateOption: function(name, value)
@@ -526,7 +526,7 @@ top.FirebugChrome =
          FirebugContext = context;
 
          if (FBTrace.DBG_WINDOWS)
-             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():FirebugContext) + " in "+window.location);
+             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location);
 
          if (externalBrowser || (context && context.browser && context.browser.showFirebug) )
              this.syncPanel();

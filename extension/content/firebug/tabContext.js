@@ -109,7 +109,7 @@ Firebug.TabContext.prototype =
     // ***************************************************************************
     reattach: function(chrome)
     {
-        var oldChrome = this.chrome;
+        var oldChrome = this.chrome;  // ie context.chrome
         this.chrome = chrome;
 
         for (var panelName in this.panelMap)
@@ -118,7 +118,7 @@ Firebug.TabContext.prototype =
             panel.detach(oldChrome, chrome);
             panel.invalid = true;
 
-            var panelNode = panel.panelNode;
+            var panelNode = panel.panelNode;  // delete panel content
             if (panelNode && panelNode.parentNode)
                 panelNode.parentNode.removeChild(panelNode);
         }
