@@ -3393,6 +3393,11 @@ var NetPanelSearch = function(panel, rowFinder)
             var netInfoRow = this.currentRow.nextSibling;
             var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
             Firebug.NetMonitor.NetInfoBody.selectTabByName(netInfoBox, "Response");
+
+            // Before the search is started, the new content must be properly
+            // layouted within the page. The layout is executed by reading
+            // the following property.
+            doc.body.offsetWidth;
         }
 
         return null;
