@@ -1912,7 +1912,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
 
         this.context.currentFrame = frame;
-        var sourceFile = FBL.getSourceFileByScript(context, context.currentFrame.script);
+        var sourceFile = FBL.getSourceFileByScript(this.context, this.context.currentFrame.script);
         if (!sourceFile)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile for currentFrame.script: "+frame.script.fileName);
