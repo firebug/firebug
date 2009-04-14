@@ -2,14 +2,16 @@
 FBL.ns( function()
 {
     with (FBL)
-    {      
-        Firebug.ShortcutsModel = extend(Firebug.Module, { 
-            
+    {
+        Firebug.ShortcutsModel = extend(Firebug.Module, {
+
+            dispatchName: "shortcuts",
+
             initializeUI: function()
             {
                 this.initShortcuts();
             },
-            
+
             initShortcuts : function() {
                 var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
                 var shortcutNames = branch.getChildList("", {});
@@ -32,7 +34,7 @@ FBL.ns( function()
                     keyElem.command = "cmd_" + element;
                     $('mainKeyset').appendChild(keyElem);
                 }
-                
+
                 //choose between key or keycode attribute
                 if (key.length == 1)
                 {
@@ -47,7 +49,7 @@ FBL.ns( function()
                     keyElem.removeAttribute('key'); //in case default shortcut uses key rather than keycode
                 }
             }
-        }); 
+        });
         Firebug.registerModule(Firebug.ShortcutsModel);
     }
 });
