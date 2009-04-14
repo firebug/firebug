@@ -272,7 +272,7 @@ top.Firebug =
         // If another window is opened, then the creation of our first context won't
         // result in calling of enable, so we have to enable our modules ourself
         //if (fbs.enabled)
-        dispatch(modules, "enable", [chrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
+        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         dispatch(modules, "initializeUI", [detachArgs]);
     },
