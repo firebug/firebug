@@ -1391,11 +1391,11 @@ top.Firebug =
         if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
             FBTrace.dumpProperties("firebug.initContext sidePanelNames:",context.sidePanelNames);
 
-        context.browser.chrome.setFirebugContext(context);
-
         dispatch(modules, "initContext", [context, persistedState]);
 
         this.updateActiveContexts(context); // a newly created context is active
+
+        context.browser.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
 
         if (context.browser.showDetached)
         {
@@ -1430,6 +1430,9 @@ top.Firebug =
         {
             if (isActiveContext) // but now it is.
             {
+                if (!context.window)
+                    throw new Error("updateActiveContext gets context with no window!");
+
                 activeContexts.push(context);
                 if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
                 {
@@ -1537,11 +1540,14 @@ top.Firebug =
             if (context.externalChrome)
             {
                 if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("Firebug.destroyConext context.externalChrome: "+context.externalChrome+" browser.firebugReload: "+browser.firebugReload);
+                    FBTrace.sysout("Firebug.destroyContext context.externalChrome: "+context.externalChrome+" browser.firebugReload: "+browser.firebugReload);
                 if (browser.firebugReload)
                     delete browser.firebugReload; // and don't killWindow
                 else
+                {
                     this.killWindow(browser, context.externalChrome);
+                    delete context.detached; // a destroyed context cannot be detached
+                }
             }
             else
             {
@@ -1554,8 +1560,16 @@ top.Firebug =
         }
         else
         {
-            if (browser.detached)
-                this.killWindow(browser, browser.chrome);
+            if(browser)
+            {
+                if (browser.detached)
+                    this.killWindow(browser, browser.chrome);
+            }
+            else
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Firebug.destroyContext, browser is null");
+            }
         }
 
     },
@@ -1843,7 +1857,7 @@ Firebug.Panel =
             if (!this.context.browser)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context has no browser, this.context", this.context.getName());
+                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser, this.context", this.context);
 
                 return;
             }
