@@ -1412,11 +1412,8 @@ top.Firebug =
 
     isContextActive: function(context)
     {
-        if (!context || !context.window)
+        if (!context || !context.window || context.window.closed)
             return false;
-
-        if (context.window.closed)
-            throw new Error("ERROR: Firebug.isContextActive sees context.window.closed!");
 
         // A context is active if it is visible, either because its in a Firebug window or its the selected tab.
 
