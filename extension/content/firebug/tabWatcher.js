@@ -391,8 +391,12 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!browser.chrome)
             registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
 
+        var detached = browser.detached; // XXXjjb I guess we need different functions for detached?
+        var shouldDispatch = true;
+        if (!detached)
+            var shouldDispatch = this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
 
-        if (this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true))
+        if (shouldDispatch)
         {
             dispatch(this.fbListeners, "watchBrowser", [browser]);
             return true;
@@ -413,7 +417,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
         }
 
         var detached = browser.detached;
-        if (this.unwatchTopWindow(browser.contentWindow))
+        var shouldDispatch = true;
+        if (!detached)
+            var shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
+
+        if (shouldDispatch)
         {
             dispatch(this.fbListeners, "unwatchBrowser", [browser, detached]);
             return true;
@@ -428,7 +436,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             browser.isSystemPage = isSystem;
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchTopWindow), id: " +
+            FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchContext), id: " +
                 (context?context.uid:"null")+", uri: "+win.location.href+"\n");
 
         dispatch(this.fbListeners, "showContext", [browser, context]); // context is null if we don't want to debug this browser

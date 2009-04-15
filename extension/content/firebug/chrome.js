@@ -527,9 +527,6 @@ top.FirebugChrome =
 
          if (FBTrace.DBG_WINDOWS)
              FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location);
-
-         if (externalBrowser || (context && context.browser && context.browser.showFirebug) )
-             this.syncPanel();
     },
 
     hidePanel: function()

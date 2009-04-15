@@ -919,6 +919,9 @@ top.Firebug =
     showBar: function(show)
     {
         var browser = FirebugChrome.getCurrentBrowser();
+        if (FBTrace.DBG_WINDOWS)
+        	FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
+        	
         browser.showFirebug = show;
 
         var shouldShow = show && !browser.detached;
@@ -991,7 +994,7 @@ top.Firebug =
             }
             else
             {
-                browser.showFirebug = true;
+                browser.showFirebug = true;  // user said show
 
                 var context = TabWatcher.getContextByWindow(browser.contentWindow);
                 if (!context) // then a page without a context
@@ -1072,16 +1075,6 @@ top.Firebug =
         }
 
         return null;
-    },
-
-    showExternalUI: function(browser, context)
-    {
-        dispatch(uiListeners, "showExternalUI", [browser, context]);
-    },
-
-    hideExternalUI: function(browser, context)
-    {
-        dispatch(uiListeners, "hideExternalUI", [browser, context]);
     },
 
     syncBar: function()  // show firebug if we should
@@ -1217,7 +1210,8 @@ top.Firebug =
 
     reattachContext: function(browser, context)
     {
-        dispatch(uiListeners, browser.detached ? "showExternalUI" : "hideExternalUI", [browser, context]);
+        TabWatcher.watchBrowser(browser);  // re-watch browser not that we are detached or reattached
+
         dispatch(modules, "reattachContext", [browser, context]);
     },
 
@@ -1469,13 +1463,10 @@ top.Firebug =
         if (context)  // then we are debugging this context
             this.updateActiveContexts(context);  // a revisited page with a context is activeContext
 
-        // signal that this browser is one that shows the firebug
-        browser.showFirebug = !!context && !context.detached;
-
-        this.syncBar();
-
         if (Firebug.isContextActive(context)) // then we need to show the ui
             dispatch(modules, "showContext", [browser, context]);
+
+        this.syncBar();  // either showUI based on context or hideUI without context,
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
@@ -1765,6 +1756,9 @@ Firebug.Panel =
 
     initialize: function(context, doc)
     {
+        if (!context.browser)
+            throw new Error("attempt to create panel with dud context!");
+            
         this.context = context;
         this.document = doc;
 
@@ -3208,7 +3202,7 @@ Firebug.URLSelector =
         {
             if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
                 FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-            FBTrace.sysout("showUI tagged "+uri.spec+" with: "+annotation+" while browser has "+getFirebuginess(browser));
+            FBTrace.sysout("Firebug.URLSelector.watchBrowser tagged "+uri.spec+" with: "+annotation+" while browser has "+getFirebuginess(browser));
         }
     },
 
@@ -3218,7 +3212,7 @@ Firebug.URLSelector =
         this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("hideUI untagged "+uri.spec+" while browser has "+getFirebuginess(browser));
+            FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec+" while browser has "+getFirebuginess(browser));
     },
 
 }
