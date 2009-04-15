@@ -35,7 +35,7 @@ function HttpRequestObserver()
     this.observers = [];
 }
 
-HttpRequestObserver.prototype = 
+HttpRequestObserver.prototype =
 {
     initialize: function()
     {
@@ -71,16 +71,18 @@ HttpRequestObserver.prototype =
             return;
         }
 
-        try 
+        try
         {
             if (FBTrace.DBG_HTTPOBSERVER)
-                FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) + 
+            {
+                FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) +
                     ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+            }
 
             // Notify all registered observers.
-            if (topic == "http-on-modify-request" || 
+            if (topic == "http-on-modify-request" ||
                 topic == "http-on-examine-response" ||
-                topic == "http-on-examine-cached-response") 
+                topic == "http-on-examine-cached-response")
             {
                 this.notifyObservers(subject, topic, data);
             }
@@ -154,7 +156,7 @@ function safeGetName(request)
 // Service factory
 
 var gHttpObserverSingleton = null;
-var HttpRequestObserverFactory = 
+var HttpRequestObserverFactory =
 {
     createInstance: function (outer, iid)
     {
@@ -195,7 +197,7 @@ var HttpRequestObserverModule =
         compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
             CONTRACT_ID, fileSpec, location, type);
 
-        categoryManager.addCategoryEntry("app-startup", CLASS_NAME, 
+        categoryManager.addCategoryEntry("app-startup", CLASS_NAME,
             "service," + CONTRACT_ID, true, true);
     },
 

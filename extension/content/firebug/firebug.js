@@ -1890,7 +1890,7 @@ Firebug.Panel =
             else
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("showToolBarButtons failed to find buttons for "+buttonsId, this.context.browser.chrome)
+                    FBTrace.sysout("showToolBarButtons failed to find buttons for "+buttonsId, this.context.browser.chrome);
             }
         }
         catch (exc)

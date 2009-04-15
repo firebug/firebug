@@ -2147,8 +2147,11 @@ FirebugService.prototype =
 
     stopStepping: function()
     {
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("stopStepping stepMode = "+getStepName(stepMode)
+        if (FBTrace.DBG_FBS_STEP)
+        {
+            FBTrace.sysout("stopStepping stepMode = "+getStepName(stepMode)
                  +" hookFrameCount="+hookFrameCount+" stepFrameCount="+stepFrameCount+"\n");
+        }
         stepMode = 0;
         stepFrame = null;
         stepFrameCount = 0;
