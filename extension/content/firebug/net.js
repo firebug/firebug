@@ -997,9 +997,9 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            //optionMenu("search.net.Headers", "net.searchHeaders"),
-            //optionMenu("search.net.Parameters", "net.searchParameters"),
-            optionMenu("search.net.Response Bodies", "net.searchResponseBody")
+            //optionMenu("search.net.Headers", "netSearchHeaders"),
+            //optionMenu("search.net.Parameters", "netSearchParameters"),
+            optionMenu("search.net.Response Bodies", "netSearchResponseBody")
         ];
     },
 
@@ -3446,7 +3446,7 @@ var NetPanelSearch = function(panel, rowFinder)
 
     this.shouldSearchResponses = function()
     {
-        return Firebug["net.searchResponseBody"];
+        return Firebug["netSearchResponseBody"];
     }
 };
 

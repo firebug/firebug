@@ -60,8 +60,8 @@ const prefNames =
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
 
     // Search
-    "searchCaseSensitive", "searchGlobal", "net.searchHeaders", "net.searchParameters",
-    "net.searchResponseBody",
+    "searchCaseSensitive", "searchGlobal", "netSearchHeaders", "netSearchParameters",
+    "netSearchResponseBody",
 
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
