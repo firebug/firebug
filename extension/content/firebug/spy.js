@@ -135,8 +135,6 @@ Firebug.Spy = extend(Firebug.Module,
         if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
             this.attachSpy(context, context.window);
 
-        FBTrace.sysout("comparator " + versionChecker.compare(appInfo.version, "3.1"));
-
         // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
         if (versionChecker.compare(appInfo.version, "3.1") >= 0)
         {
