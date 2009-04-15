@@ -90,7 +90,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 ", tab: "+Firebug.getTabIdForWindow(win)+"\n");
 
         if (!win)
-            throw new Error("tabWatcher.watchTopWindow should not have a nulel window")
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("-> tabWatcher.watchTopWindow should not have a null window!");
+            return false;
+        }
 
         if (tabBrowser.selectedBrowser.cancelNextLoad)
         {

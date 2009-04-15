@@ -422,7 +422,11 @@ top.Firebug =
                         if (!window.closed)
                             FBTrace.sysout("Firebug.resetTooltip EXCEPTION " + e + "\n");
                         else
-                            throw new Error("Firebug Exception in a closed window!");
+                        {
+                            if (FBTrace.DBG_ERRORS)
+                                FBTrace.sysout("Firebug Exception in a closed window!");
+                            return false;
+                        }
                     }
                 }
             }
@@ -441,7 +445,7 @@ top.Firebug =
         this.eachActiveContext( function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("active context "+context.getName());
+                FBTrace.sysout("active context "+context.getName()+" browser: "+getFirebuginess(context.browser));
 
             try
             {
@@ -492,6 +496,8 @@ top.Firebug =
             if (deadWindows[i].browser == browser)
             {
                 deadWindows.splice(i, 1);
+                delete browser.showDetached; // we are detached and we rescued the window.
+                browser.detached = true;
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("rescued "+browser.currentURI.spec);
                 break;
@@ -921,8 +927,8 @@ top.Firebug =
     {
         var browser = FirebugChrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS)
-        	FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
-        	
+            FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
+
         browser.showFirebug = show;
 
         var shouldShow = show && !browser.detached;
@@ -985,13 +991,6 @@ top.Firebug =
             if (toggleOff)
             {
                 TabWatcher.unwatchBrowser(browser);
-                /* the rest here should happen from unwatch calls
-                browser.chrome.hidePanel();
-                delete browser.showFirebug;
-                var context = TabWatcher.getContextByWindow(browser.contentWindow);
-                if (context)
-                    Firebug.updateActiveContexts(context); // now the top tab is inactive
-                    */
             }
             else
             {
@@ -1002,7 +1001,11 @@ top.Firebug =
                 {
                     var created = TabWatcher.watchBrowser(browser);  // create a context for this page
                     if (!created)
-                        throw new Error("Rejected page should explain to user");
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                            FBTrace.sysout("Rejected page should explain to user!");
+                        return false;
+                    }
                     else
                         return;  // context creation will trigger showBar
                 }
@@ -1027,7 +1030,7 @@ top.Firebug =
             detachCommand.setAttribute("checked", false);
         }
         else
-            this.detachBar();
+            this.detachBar(FirebugContext);
     },
 
     onDetachedWindowClose: function(browser)
@@ -1035,39 +1038,42 @@ top.Firebug =
         TabWatcher.unwatchBrowser(browser);
     },
 
-    detachBar: function()
+    detachBar: function(context)
     {
-        var browser = FirebugChrome.getCurrentBrowser();
+        if (!context)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
+            return null;
+        }
+
+        var browser = context.browser;
+
         if (!browser.chrome)
             return null;
 
-        if (browser.detached)  // can be set true by detachBar or attachBrowser
+        if (browser.detached)  // can be set true attachBrowser
         {
             browser.chrome.focus();
         }
         else
         {
-            if (!FirebugContext)
-            {
-                throw new Error("Firebug.detachBar, no FirebugContext in "+window.location);
-            }
+            context.detached = true;
 
-            FirebugContext.detached = true;
-
-            Firebug.updateActiveContexts(FirebugContext); // now the top tab is active because the Firebug is detached
+            Firebug.updateActiveContexts(context); // now the top tab is active because the Firebug is detached
 
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+FirebugContext.getName() );
+                FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+context.getName() );
 
             var args = {
                 FBL: FBL,
                 Firebug: this,
                 browser: browser,
-                context: FirebugContext
+                context: context
             };
             var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
-            FirebugContext.detached = win;
+            context.detached = win;
 
             detachCommand.setAttribute("checked", true);
             FirebugChrome.clearPanels();
@@ -1392,10 +1398,13 @@ top.Firebug =
 
         context.browser.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
 
+        if (deadWindowTimeout)
+            this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
+
         if (context.browser.showDetached)
         {
             delete context.browser.showDetached;
-            Firebug.detachBar();
+            Firebug.detachBar(context);
         }
     },
 
@@ -1420,13 +1429,17 @@ top.Firebug =
         var isActiveContext = this.isContextActive(context);
         var indexOfActiveContext = activeContexts.indexOf(context);
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("updateActiveContexts isActiveContext: "+isActiveContext+" index:"+indexOfActiveContext+" "+context.getName());
+            FBTrace.sysout("updateActiveContexts isActiveContext: "+isActiveContext+" index:"+indexOfActiveContext+" "+context.getName()+" browser:"+getFirebuginess(context.browser));
         if (indexOfActiveContext == -1) // then this context was not marked active
         {
             if (isActiveContext) // but now it is.
             {
                 if (!context.window)
-                    throw new Error("updateActiveContext gets context with no window!");
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("updateActiveContext gets context with no window!");
+                    return;
+                }
 
                 activeContexts.push(context);
                 if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
@@ -1457,9 +1470,6 @@ top.Firebug =
             clearTimeout(clearContextTimeout);
             clearContextTimeout = 0;
         }
-
-        if (deadWindowTimeout)
-            this.rescueWindow(browser);
 
         if (context)  // then we are debugging this context
             this.updateActiveContexts(context);  // a revisited page with a context is activeContext
@@ -1758,8 +1768,12 @@ Firebug.Panel =
     initialize: function(context, doc)
     {
         if (!context.browser)
-            throw new Error("attempt to create panel with dud context!");
-            
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("attempt to create panel with dud context!");
+            return false;
+        }
+
         this.context = context;
         this.document = doc;
 
@@ -1848,11 +1862,11 @@ Firebug.Panel =
             // xxxHonza: this should be fixed, the problem was that selectedPanel was
             // removed from panelBar (binding) after the context was destroyed.
             // So, the panel.hide() method used invalid context object.
-            // The selected panel is now removed wihint Firebug.destroyContext();
+            // The selected panel is now removed with in Firebug.destroyContext();
             if (!this.context.browser)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser, this.context", this.context);
+                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser in window "+window.location, this.context", this.context);
 
                 return;
             }
@@ -3156,10 +3170,15 @@ Firebug.URLSelector =
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("shouldCreateContext read back annotation "+annotation);
 
+                delete browser.showDetached;
+                delete browser.showFirebug;
+
                 if (annotation.indexOf("detached") > 0)  // then the previous use was detached.
                 {
                     if (!browser.detached) // then it is not now detached
                         browser.showDetached = true; // mark to detach
+                    if (FBTrace.DBG_WINDOWS)
+                        FBTrace.sysout("shouldCreateContext set showDetached ");
                 }
                 else if (annotation.indexOf("closed") > 0) // then the user closed Firebug on this page last time
                 {
@@ -3172,7 +3191,9 @@ Firebug.URLSelector =
             }
             else  // not annotated
             {
-                if (browser.showFirebug)  // tab is firebugged, leave it up and create a context
+                delete browser.showDetached;
+
+                if (browser.showFirebug || browser.detached)  // tab is firebugged, leave it up and create a context
                     return true;
                 return false;   // don't createContext
             }
@@ -3221,6 +3242,9 @@ Firebug.URLSelector =
 // ************************************************************************************************
 function getFirebuginess(browser)
 {
+    if (!browser)
+        return "null";
+
     if (browser.showFirebug)
         return "showFirebug";
     else if (browser.detached)
