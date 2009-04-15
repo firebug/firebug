@@ -1087,7 +1087,7 @@ top.Firebug =
     syncBar: function()  // show firebug if we should
     {
         var browser = FirebugChrome.getCurrentBrowser();
-        this.showBar(browser && browser.showFirebug);
+        this.showBar(browser && browser.showFirebug);  // implicitly this is operating in the chrome of browser.xul
     },
 
     onClickStatusIcon: function(context, event)
@@ -1478,6 +1478,12 @@ top.Firebug =
             dispatch(modules, "showContext", [browser, context]);
 
         this.syncBar();  // either showUI based on context or hideUI without context,
+
+        if (context && context.detached)
+        {
+            context.chrome.focus();
+            context.chrome.syncPanel();
+        }
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
