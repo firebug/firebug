@@ -1866,7 +1866,7 @@ Firebug.Panel =
             if (!this.context.browser)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser in window "+window.location, this.context", this.context);
+                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser in window "+window.location+" this.context", this.context);
 
                 return;
             }
