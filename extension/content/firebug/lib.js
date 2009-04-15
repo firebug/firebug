@@ -11,8 +11,12 @@ try { /*@explore*/
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
 this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
+this.versionChecker = this.CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
+this.appInfo = this.CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
+
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
@@ -1665,6 +1669,9 @@ this.setItemIntoElement = function(element, item)
 
     if (item.option)
         element.setAttribute("option", item.option);
+
+    if (item.tooltiptext)
+        element.setAttribute("tooltiptext", item.tooltiptext);
 
     return element;
 }
