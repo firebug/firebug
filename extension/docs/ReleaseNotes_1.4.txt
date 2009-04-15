@@ -33,6 +33,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Json tab is available even for XHR entries in Console panel.
     * Limit for cached responses in tabCache.
     * Maximum size limit for cached responses can be specified in preferences.
+    * Console panel ShowXHRDisabled for FF3.5 until bugzilla 483672 is fixed.
+    * Search response bodies
 
 == For Extensions ==
     * All modules support Firebug.Listener
