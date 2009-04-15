@@ -3397,6 +3397,7 @@ var NetPanelSearch = function(panel, rowFinder)
             // Before the search is started, the new content must be properly
             // layouted within the page. The layout is executed by reading
             // the following property.
+            // xxxHonza: This workaround can be removed as soon as #488427 is fixed.
             doc.body.offsetWidth;
         }
 
