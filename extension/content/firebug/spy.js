@@ -79,10 +79,15 @@ const httpObserver =
 Firebug.Spy = extend(Firebug.Module,
 {
     dispatchName: "spy",
+
     skipSpy: function(win)
     {
         var uri = win.location.href; // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+            return true;
+
+        // Don't attach spy in Firefox > 3.1 till #483672 is fixed.
+        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
             return true;
     },
 
@@ -129,6 +134,18 @@ Firebug.Spy = extend(Firebug.Module,
 
         if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
             this.attachSpy(context, context.window);
+
+        FBTrace.sysout("comparator " + versionChecker.compare(appInfo.version, "3.1"));
+
+        // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
+        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
+        {
+            setTimeout(function()
+            {
+                Firebug.Console.log("'Show XMLHttpRequests' option (Console panel) is disabled " +
+                    "in Firefox 3.1 and higher till bug #483672 is fixed."); 
+            });
+        }
     },
 
     destroyContext: function(context)
