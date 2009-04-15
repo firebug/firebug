@@ -212,6 +212,16 @@ Firebug.Console = extend(ActivableConsole,
 
         $('fbStatusIcon').setAttribute("console", "on");
         Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
+
+        // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
+        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
+        {
+            setTimeout(function()
+            {
+                Firebug.Console.log("'Show XMLHttpRequests' option (Console panel) is disabled " +
+                    "in Firefox 3.1 and higher till bug #483672 is fixed."); 
+            });
+        }
     },
 
     onPanelDisable: function(context, panelName)
