@@ -3348,11 +3348,7 @@ var NetPanelSearch = function(panel, rowFinder)
                 return match;
 
             if (this.shouldSearchResponses())
-            {
-                match = this.findNextInResponse(reverse, caseSensitive);
-                if (match)
-                    return match;
-            }
+                this.findNextInResponse(reverse, caseSensitive);
 
             this.currentRow = this.getNextRow(wrapAround, reverse);
 
@@ -3364,6 +3360,22 @@ var NetPanelSearch = function(panel, rowFinder)
     // Internal search helpers.
     this.findNextInRange = function(reverse, caseSensitive)
     {
+        if (this.range)
+        {
+            startPt = doc.createRange();
+            if (reverse)
+                startPt.setStartBefore(this.currentNode);
+            else
+                startPt.setStart(this.currentNode, this.range.endOffset);
+
+            this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+            if (this.range)
+            {
+                this.currentNode = this.range ? this.range.startContainer : null;
+                return this.currentNode ? this.currentNode.parentNode : null;
+            }
+        }
+
         if (this.currentNode)
         {
             startPt = doc.createRange();
@@ -3373,8 +3385,8 @@ var NetPanelSearch = function(panel, rowFinder)
                 startPt.setStartAfter(this.currentNode);
         }
 
-        var range = this.range = finder.Find(this.text, searchRange, startPt, searchRange);
-        this.currentNode = range ? range.startContainer : null;
+        this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+        this.currentNode = this.range ? this.range.startContainer : null;
         return this.currentNode ? this.currentNode.parentNode : null;
     },
 
@@ -3382,7 +3394,7 @@ var NetPanelSearch = function(panel, rowFinder)
     {
         var file = Firebug.getRepObject(this.currentRow);
         if (!file)
-            return null;
+            return;
 
         var scanRE = new RegExp(this.text, Firebug.searchCaseSensitive ? "g" : "gi");
         if (scanRE.test(file.responseText))
@@ -3400,8 +3412,6 @@ var NetPanelSearch = function(panel, rowFinder)
             // xxxHonza: This workaround can be removed as soon as #488427 is fixed.
             doc.body.offsetWidth;
         }
-
-        return null;
     },
 
     // Helpers
