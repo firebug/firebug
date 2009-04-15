@@ -1472,10 +1472,18 @@ top.Firebug =
         }
 
         if (context)  // then we are debugging this context
-            this.updateActiveContexts(context);  // a revisited page with a context is activeContext
-
-        if (Firebug.isContextActive(context)) // then we need to show the ui
-            dispatch(modules, "showContext", [browser, context]);
+        {
+            this.updateActiveContexts(context);
+            if (Firebug.isContextActive(context)) // then we need to show the ui
+                dispatch(modules, "showContext", [browser, context]);
+        }
+        else  // then we are not debugging on this browser, may need to suspend
+        {
+            this.eachActiveContext(function checkContext(context)
+            {
+                Firebug.updateActiveContexts(context);
+            });
+        }
 
         this.syncBar();  // either showUI based on context or hideUI without context,
 
