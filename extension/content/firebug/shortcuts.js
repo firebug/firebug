@@ -5,6 +5,8 @@ FBL.ns( function() { with (FBL) {
 // ************************************************************************************************
 // Constants
 
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 
 /**
