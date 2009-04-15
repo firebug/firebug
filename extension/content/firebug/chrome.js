@@ -215,7 +215,7 @@ top.FirebugChrome =
 
     attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and externalMode == true
     {
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("chrome.attachBrowser with externalMode="+externalMode+" context="+context
                                +" context==FirebugContext: "+(context==FirebugContext)+" in window: "+window.location);
 
