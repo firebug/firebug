@@ -11,8 +11,6 @@ const Ci = Components.interfaces;
 const httpObserver = Cc["@joehewitt.com/firebug-http-observer;1"].getService(Ci.nsIObserverService);
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
-const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
-const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
 
 // Maximum cached size of a signle response (bytes)
 var responseSizeLimit = 1024 * 1024 * 5;

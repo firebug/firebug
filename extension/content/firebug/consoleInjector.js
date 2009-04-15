@@ -2,89 +2,88 @@
 
 //
 FBL.ns(function() { with (FBL) {
+
 // ************************************************************************************************
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
-const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
 
-top.Firebug.Console.injector = {
-
-        isAttached: function(win)
-        {
-            if (win.wrappedJSObject)
-            {
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("Console.isAttached? to win.wrappedJSObject "+win.wrappedJSObject.location+" fnc:"+win.wrappedJSObject._getFirebugConsoleElement);
-                return (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
-            }
-            else
-            {
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("Console.isAttached? to win "+win.location+" fnc:"+win._getFirebugConsoleElement);
-                return (win._getFirebugConsoleElement ? true : false);
-            }
-        },
-
-        attachIfNeeded: function(context, win)
+top.Firebug.Console.injector =
+{
+    isAttached: function(win)
+    {
+        if (win.wrappedJSObject)
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.attachIfNeeded has win "+(win? ((win.wrappedJSObject?"YES":"NO")+" wrappedJSObject"):"null") );
-
-            if (this.isAttached(win))
-                return true;
-
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.attachIfNeeded found isAttached false ");
-
-            this.attachConsoleInjector(context, win);
-            this.addConsoleListener(context, win);
-
-            var attached =  this.isAttached(win);
-            if (attached)
-                dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
-
-            return attached;
-        },
-
-        attachConsoleInjector: function(context, win)
+                FBTrace.sysout("Console.isAttached? to win.wrappedJSObject "+win.wrappedJSObject.location+" fnc:"+win.wrappedJSObject._getFirebugConsoleElement);
+            return (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
+        }
+        else
         {
-            var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Console.isAttached? to win "+win.location+" fnc:"+win._getFirebugConsoleElement);
+            return (win._getFirebugConsoleElement ? true : false);
+        }
+    },
+
+    attachIfNeeded: function(context, win)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.attachIfNeeded has win "+(win? ((win.wrappedJSObject?"YES":"NO")+" wrappedJSObject"):"null") );
+
+        if (this.isAttached(win))
+            return true;
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.attachIfNeeded found isAttached false ");
+
+        this.attachConsoleInjector(context, win);
+        this.addConsoleListener(context, win);
+
+        var attached =  this.isAttached(win);
+        if (attached)
+            dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
+
+        return attached;
+    },
+
+    attachConsoleInjector: function(context, win)
+    {
+        var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
+
+        Firebug.CommandLine.evaluateInWebPage(consoleInjection, context, win);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
+    },
+
+    getConsoleInjectionScript: function() {
+        if (!this.consoleInjectionScript)
+        {
+            var script = "";
+            script += "window.__defineGetter__('console', function() {\n";
+            script += " return (window._firebug ? window._firebug : window.loadFirebugConsole()); })\n\n";
+
+            script += "window.loadFirebugConsole = function() {\n";
+            script += "window._firebug =  new _FirebugConsole();";
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
+                script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
 
-            Firebug.CommandLine.evaluateInWebPage(consoleInjection, context, win);
+            script += " return window._firebug };\n";
 
-            if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
-        },
-
-        getConsoleInjectionScript: function() {
-            if (!this.consoleInjectionScript)
-            {
-                var script = "";
-                script += "window.__defineGetter__('console', function() {\n";
-                script += " return (window._firebug ? window._firebug : window.loadFirebugConsole()); })\n\n";
-
-                script += "window.loadFirebugConsole = function() {\n";
-                script += "window._firebug =  new _FirebugConsole();";
-
-                if (FBTrace.DBG_CONSOLE)
-                    script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
-
-                script += " return window._firebug };\n";
-
-                var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
-                script += theFirebugConsoleScript;
+            var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
+            script += theFirebugConsoleScript;
 
 
-                this.consoleInjectionScript = script;
-            }
-            return this.consoleInjectionScript;
-        },
+            this.consoleInjectionScript = script;
+        }
+        return this.consoleInjectionScript;
+    },
 
     forceConsoleCompilationInPage: function(context, win)
     {
