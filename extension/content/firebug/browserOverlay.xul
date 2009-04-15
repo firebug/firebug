@@ -56,13 +56,13 @@
 
     <commandset id="mainCommandSet">
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
-        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar(FirebugContext)"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
         <command id="cmd_enableA11y" oncommand="Firebug.A11yModel.toggle(); " />
-        
+
     </commandset>
 
     <keyset id="mainKeyset">
@@ -123,9 +123,9 @@
                         command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>
                 <menuseparator/>
                 <menuitem id="menu_enableA11y" label="Firebug.menu.Enable Accessibility Enhancements"
-                        command="cmd_enableA11y" type="checkbox" autocheck="false" /> 
+                        command="cmd_enableA11y" type="checkbox" autocheck="false" />
                 <menuitem id="menu_customizeShortcuts" label="Firebug.menu.Customize shortcuts"
-                        command="cmd_customizeFBKeys" key="key_customizeFBKeys" />                        
+                        command="cmd_customizeFBKeys" key="key_customizeFBKeys" />
             </menupopup>
         </menu>
     </menupopup>
