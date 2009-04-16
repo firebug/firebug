@@ -2264,6 +2264,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbLocationSeparator", enabled);
         this.showToolbarButtons("fbDebuggerButtons", enabled);
         this.showToolbarButtons("fbLocationList", enabled);
+        this.showToolbarButtons("fbScriptButtons", enabled);
 
         this.obeyPreferences();
 

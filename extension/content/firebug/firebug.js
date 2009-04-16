@@ -2861,6 +2861,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
         this.enabled = false;
 
         dispatch(modules, "onPanelDisable", [context, this.panelName]);
+
+        if (panel)
+        {
+            var state = Firebug.getPanelState(panel);
+            panel.show(state);
+        }
+
         Firebug.resetTooltip();
     },
 
