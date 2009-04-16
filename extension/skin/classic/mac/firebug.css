@@ -156,6 +156,10 @@
     overflow: hidden;
 }
 
+.panelTabs {
+    -moz-box-align: end; 
+}
+
 panelTab {
     margin: 2px 1px 0 3px;
     font-size: 11px;
