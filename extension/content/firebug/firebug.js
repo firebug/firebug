@@ -1474,6 +1474,8 @@ top.Firebug =
         if (context)  // then we are debugging this context
         {
             this.updateActiveContexts(context);
+            context.browser.chrome.setFirebugContext(context); // the context becomes the default for its view
+
             if (Firebug.isContextActive(context)) // then we need to show the ui
                 dispatch(modules, "showContext", [browser, context]);
         }
