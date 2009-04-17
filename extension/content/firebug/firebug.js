@@ -2697,6 +2697,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         while(currentSourceRow && (currentSourceRow != focusSourceRow) && hasClass(currentSourceRow, "sourceRow"))
         {
             buf += "\n" + this.getSourceLine(currentSourceRow);
+            currentSourceRow = currentSourceRow.nextSibling;
         }
         buf += "\n" + this.getSourceLine(focusSourceRow, 0, selection.focusOffset);
         return buf;
