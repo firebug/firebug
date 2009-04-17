@@ -2273,6 +2273,19 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
         if (!win.document.documentElement)
             return;
 
+        var url = this.normalizeURL(win.location.href);
+
+        if (url)
+        {
+            if (!context.sourceFileMap.hasOwnProperty(url))
+            {
+                var URLOnly = new this.NoScriptSourceFile(context, url);
+                context.addSourceFile(URLOnly);
+                list.push(URLOnly);
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
+            }
+        }
+
         var baseUrl = win.location.href;
         var bases = win.document.documentElement.getElementsByTagName("base");
         if (bases && bases[0])
@@ -2291,6 +2304,12 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
                 FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");  /*@explore*/
         }
     }, this));
+
+    var notificationURL = "firebug:// Warning. Script Panel was inactive during page load/Reload to see all sources";
+    var dummySourceFile = new this.NoScriptSourceFile(context, notificationURL);
+    context.sourceCache.store(notificationURL, 'reload to see all source files');
+    context.addSourceFile(dummySourceFile);
+
     if (FBTrace.DBG_SOURCEFILES)
     {
         FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));

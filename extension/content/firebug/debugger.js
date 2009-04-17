@@ -1613,10 +1613,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext context.sourceFileMap", context.sourceFileMap);
-
-        if (!Firebug.Debugger.isAlwaysEnabled(context))
-            updateScriptFiles(context);  // scripts have not been compiled by DOMContentLoaded so these are URL only for now
+            FBTrace.dumpProperties("debugger("+this.debuggerName+").loadedContext enabled on load: "+context.onLoadWindowContent+" context.sourceFileMap", context.sourceFileMap);
     },
 
     destroyContext: function(context, persistedState)
@@ -2504,6 +2501,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getLocationList: function()
     {
         var context = this.context;
+
+        if (!context.onLoadWindowContent) // then context was not active during load
+            updateScriptFiles(context);
+
         var allSources = sourceFilesAsArray(context.sourceFileMap);
 
         if (Firebug.showAllSourceFiles)
@@ -2523,27 +2524,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 list.push(allSources[i]);
         }
 
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList BEFORE iterateWindows ", list); /*@explore*/
-
-       iterateWindows(context.window, function(win)
-       {
-           var url = normalizeURL(win.location.href);
-           if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-                FBTrace.sysout("getLocationList iterateWindows: "+url, " documentElement: "+win.document.documentElement);  /*@explore*/
-           if (!win.document.documentElement)
-                return;
-
-           if (url)
-           {
-               if (context.sourceFileMap.hasOwnProperty(url))
-                   return;
-               var URLOnly = new NoScriptSourceFile(context, url);
-               context.addSourceFile(URLOnly);
-                list.push(URLOnly);
-               if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList created NoScriptSourceFile for URL:"+url, URLOnly);
-           }
-        });
-        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList ", list);
+        if (FBTrace.DBG_SOURCEFILES) FBTrace.dumpProperties("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
         return list;
     },
 
