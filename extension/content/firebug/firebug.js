@@ -2683,6 +2683,36 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
+    getSourceLinesFrom: function(selection)
+    {
+        // https://developer.mozilla.org/en/DOM/Selection
+        if (selection.isCollapsed)
+            return "";
+
+        var anchorSourceRow = getAncestorByClass(selection.anchorNode, "sourceRow");
+        var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
+        var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
+
+        var currentSourceRow = anchorSourceRow.nextSibling;
+        while(currentSourceRow && (currentSourceRow != focusSourceRow) && hasClass(currentSourceRow, "sourceRow"))
+        {
+            buf += "\n" + this.getSourceLine(currentSourceRow);
+        }
+        buf += "\n" + this.getSourceLine(focusSourceRow, 0, selection.focusOffset);
+        return buf;
+    },
+
+    getSourceLine: function(sourceRow, beginOffset, endOffset)
+    {
+        var source = getChildByClass(sourceRow, "sourceRowText").innerHTML;
+        if (endOffset)
+            return source.substring(beginOffset, endOffset);
+        else if (beginOffset)
+            return source.substring(beginOffset);
+        else
+            return source;
+    },
+
 });
 
 function appendScriptLines(sourceBox, min, max, panelNode)

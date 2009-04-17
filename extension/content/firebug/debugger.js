@@ -2047,8 +2047,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var watchPanel = this.context.getPanel("watches", true);
         if (watchPanel)
         {
-            var selection = this.document.defaultView.getSelection().toString();
-            watchPanel.addWatch(selection);
+            var selection = this.document.defaultView.getSelection();
+            var source = this.getSourceLinesFrom(selection);
+            watchPanel.addWatch(source);
         }
     },
 
