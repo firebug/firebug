@@ -889,11 +889,13 @@ top.FirebugChrome =
 
         FBL.eraseNode(popup);
 
+        /*
         if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled"))
         {
             var menuitem = FBL.createMenuItem(popup, {label: "Copy"});
             menuitem.setAttribute("command", "cmd_copy");
         }
+        */
 
         var object;
         if (this.contextMenuObject)

@@ -92,7 +92,7 @@
 
     <popupset id="mainPopupSet">
         <popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
-            <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
+            <!-- <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/> -->
         </popup>
         <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
     </popupset>
