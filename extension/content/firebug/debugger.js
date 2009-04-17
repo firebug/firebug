@@ -2050,6 +2050,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    copySource: function()
+    {
+        var selection = this.document.defaultView.getSelection();
+        var source = this.getSourceLinesFrom(selection);
+        copyToClipboard(source);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     updateInfoTip: function()
@@ -2678,6 +2685,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (selection.toString())
         {
             items.push(
+                {label: "CopySourceCode", command: bind(this.copySource, this) },
                 "-",
                 {label: "AddWatch", command: bind(this.addSelectionWatch, this) }
             );
