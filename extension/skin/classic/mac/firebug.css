@@ -70,6 +70,10 @@
     border-bottom: none;
 }
 
+.innerToolbar {
+    margin-right: 5px;   /* add some space between last button and first tab */
+}
+
 #fbSearchBox {
     -moz-appearance: none;
     margin: 4px 6px 1px 6px;
@@ -169,11 +173,6 @@ panelTab {
 panelTab:hover,
 panelTab[selected="true"] {
     margin-bottom: 0px;
-}
-
-panelTab:hover > .panelTab-text,
-panelTab[selected="true"] > .panelTab-text {
-    padding-bottom: 3px;
 }
 
 .panelTab-left {
