@@ -13,7 +13,7 @@
     opacity: 0.8;
 
     /* The default styling does not always keep button size contant or image
-       position constant, e.g. when [checked="true"].  These numbers were 
+       position constant, e.g. when [checked="true"].  These numbers were
        chosen to keep them constant against the default winstripe styling. */
     padding-top: 4px;
     padding-bottom: 2px;
@@ -79,6 +79,19 @@
 #fbSearchButtons {
     margin-bottom: 2px;
 }
+
+#fbMinimizeButton {
+    list-style-image: url(chrome://firebug/skin/win/min.png);
+}
+
+#fbMinimizeButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/minHover.png);
+}
+
+#fbMinimizeButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/minActive.png);
+}
+
 
 #fbCloseButton {
     margin: 0 4px 0 0;
@@ -268,7 +281,7 @@ panelTab[selected="true"] > .panelTab-right {
 .panelOptionsButton:hover:active,
 .panelOptionsButton[open="true"] {
     margin: 2px;
-    padding: 0 6px; 
+    padding: 0 6px;
 }
 
 .panelOptionsButton:hover {

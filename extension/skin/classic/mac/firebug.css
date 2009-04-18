@@ -65,7 +65,7 @@
 }
 
 #fbToolbar {
-    padding-left: 4px;    
+    padding-left: 4px;
     background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
     border-bottom: none;
 }
@@ -101,6 +101,18 @@
 
 .toolbarbutton-iconic > .toolbarbutton-text {
     display: none;
+}
+
+#fbMinimizeButton {
+    list-style-image: url(chrome://firebug/skin/mac/min.png) !important;
+}
+
+#fbMinimizeButton:hover {
+    list-style-image: url(chrome://firebug/skin/mac/minHover.png) !important;
+}
+
+#fbMinimizeButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/minActive.png) !important;
 }
 
 #fbCloseButton {
@@ -161,7 +173,7 @@
 }
 
 .panelTabs {
-    -moz-box-align: end; 
+    -moz-box-align: end;
 }
 
 panelTab {
@@ -257,7 +269,7 @@ panelTab[selected="true"] > .panelTab-right {
 
 .toolbar-text-button,
 .toolbar-text-menubutton {
-    -moz-appearance: none;    
+    -moz-appearance: none;
     margin: 0 1px;
     padding: 1px 0px 1px 7px;
     min-width: 0;
@@ -322,7 +334,7 @@ panelTab[selected="true"] > .panelTab-right {
 
 .toolbar-text-button .toolbarbutton-text,
 .toolbar-text-menubutton .toolbarbutton-text {
-  font-size: 100% !important; 
+  font-size: 100% !important;
   margin: 0px !important;
 }
 

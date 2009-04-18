@@ -1020,6 +1020,32 @@ top.Firebug =
         }
     },
 
+    minimizeBar: function(context)  // just pull down the UI, but don't deactivate the context
+    {
+        if (!context)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
+            return null;
+        }
+
+        var browser = context.browser;
+
+        if (!browser.chrome)
+            return null;
+
+        if (browser.detached)  // TODO disable minimize on externalMode
+        {
+            browser.chrome.focus();
+        }
+        else
+        {
+            this.showBar(false);
+            browser.chrome.showMinimized(context);
+        }
+    },
+
+
     toggleDetachBar: function(forceOpen)
     {
         var browser = FirebugChrome.getCurrentBrowser();
