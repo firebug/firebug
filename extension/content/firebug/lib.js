@@ -3259,7 +3259,7 @@ this.getRequestWebProgress = function(request)
 {
     try
     {
-        if (request.notificationCallbacks)
+        if (request && request.notificationCallbacks)
             return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
     } catch (exc) {}
 
