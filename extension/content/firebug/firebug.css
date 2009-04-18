@@ -97,7 +97,8 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /* Firebug  Menu */  
 .useA11y #fbFirebugMenu, 
 /* First toolbar button in a visible toolbar group (usually hbox)*/
-.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton:first-of-type,  
+.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton:first-of-type,
+.useA11y .innerToolbar > toolbarbutton:first-of-type,  
 /* Status bar icon*/
 #fbStatusBar.useA11y {
     -moz-user-focus: normal;

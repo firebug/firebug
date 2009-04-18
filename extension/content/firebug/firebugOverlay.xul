@@ -104,7 +104,7 @@
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
-                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar">
+                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar" aria-label="Firebug Tools">
                         <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
                             <image src="chrome://firebug/skin/firebug.png"/>
                             <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup" role="menu">
@@ -163,17 +163,16 @@
                                    tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
 
                     </hbox>
-                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"/>
+                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="Firebug Panels" />
                     <spacer flex="1"/>
 
                     <vbox>
                         <spacer flex="1"/>
                         <menupopup id="fbSearchOptionsPopup" position="before_start" open="true" ignorekeys="true" />
-                        <!-- xxxHonza: should the label be localized or not because ARIA? -->
-                        <textbox id="fbSearchBox" autocomplete="true" rows="1" label="Search Firebug Panel"/>
+                        <textbox id="fbSearchBox" autocomplete="true" rows="1" label="firebug search"/>
                         <spacer flex="1"/>
                     </vbox>
-                    <hbox role="toolbar">
+                    <hbox role="toolbar" class="innerToolbar" aria-label="Firebug Window">
 
                         <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
                                     tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
@@ -340,7 +339,7 @@
 
         <hbox id="fbCommandBox">
             <label id="fbCommandArow" value=">>>"/>
-            <textbox id="fbCommandLine" multiline="true" flex="1" label="console command line"/>
+            <textbox id="fbCommandLine" flex="1" label="console command line"/>
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                            oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
         </hbox>

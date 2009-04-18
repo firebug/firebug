@@ -226,7 +226,7 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
-        var elements = ["menu_enablePanels", "menu_disablePanels", "fbCommandLine",
+        var elements = ["fbSearchBox, menu_enablePanels", "menu_disablePanels", "fbCommandLine",
             "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y"];
 

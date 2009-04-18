@@ -68,7 +68,6 @@
             <body><![CDATA[
             var tab = document.createElement("panelTab");
             tab.panelType = panelType;
-            tab.setAttribute('role', 'tab');
 
             var title = Firebug.getPanelTitle(panelType);
             tab.setAttribute("label", title);
@@ -156,7 +155,6 @@
                 if (this.selectedTab)
                 {
                     this.selectedTab.removeAttribute("selected");
-                    this.selectedTab.removeAttribute("aria-expanded");
                 }
 
                 this.hideSelectedPanel();
@@ -167,7 +165,6 @@
                 if (tab)
                 {
                     tab.setAttribute("selected", "true");
-                    tab.setAttribute("aria-expanded", "true");
                     if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused &&!forceUpdate)
                         tab.focus();
                     
@@ -283,8 +280,9 @@
     <implementation>
         <constructor>
         <![CDATA[
-            this.tabMenu = document.createElement("panelTabMenu");
+            this.setAttribute('role', 'tab');
             this.setAttribute('aria-haspopup', 'true');
+            this.tabMenu = document.createElement("panelTabMenu");
             this.appendChild(this.tabMenu);
             return this.tabMenu;
         ]]>
@@ -307,6 +305,7 @@
     <implementation>
         <constructor>
         <![CDATA[
+            this.setAttribute('role', 'menu');
             this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
         ]]>
         </constructor>
