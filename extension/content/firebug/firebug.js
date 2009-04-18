@@ -2399,7 +2399,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    setViewableLines: function(sourceBox)
+    setViewableLines: function(sourceBox)  // called only by buildViewAround
     {
         var scrollStep = sourceBox.lineHeight;
         if (!scrollStep || scrollStep < 1)
@@ -2705,6 +2705,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                 FBTrace.sysout("onResize will clear viewable lines, event:", event);
             delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
             delete this.selectedSourceBox.halfViewableLines;
+            delete this.lastScrollTop;
             this.reView(this.selectedSourceBox);
         }
     },
