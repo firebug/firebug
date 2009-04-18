@@ -37,15 +37,14 @@ const ignoreVars =
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const RowTag =
-    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
+    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren", role : 'presentation',
         level: "$member.level"},
-        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px", role : "gridcell", 
-            "aria-expanded" : "false",  "aria-level" : "$member.level", tabindex : "-1" },
+        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px", role : 'presentation'},
             DIV({class: "memberLabel $member.type\\Label"}, 
                 SPAN({}, "$member.name")
             )
         ),
-        TD({class: "memberValueCell", role : "gridcell", tabindex :"-1"},
+        TD({class: "memberValueCell", role : 'presentation'},
             TAG("$member.tag", {object: "$member.value"})
         )
     );
@@ -68,8 +67,8 @@ const SizerRow =
 const DirTablePlate = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"grid"},
-            TBODY(
+        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"tree"},
+            TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator", RowTag)
             )
@@ -209,8 +208,12 @@ const DirTablePlate = domplate(Firebug.Rep,
                     if (lastRow.parentNode)
                         lastRow = rowTag.insertRows({members: slice}, lastRow)[1];
 
-                    if (isLast)
+                    if (isLast) 
+                    {
                         delete row.insertTimeout;
+                        if (Firebug.A11yModel.enabled)
+                            Firebug.A11yModel.onMemberRowsAdded(null, null, row, lastRow)
+                    }
                 }, delay, members.splice(0, insertSliceSize), !members.length);
 
                 delay += insertInterval;

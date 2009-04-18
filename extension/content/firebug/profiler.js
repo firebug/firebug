@@ -184,47 +184,47 @@ Firebug.Profiler.ProfileTable = domplate(
         TABLE({class: "profileTable", cellspacing: 0, cellpadding: 0, width: "100%"},
             TBODY({class: "profileTbody"},
                 TR({class: "headerRow", onclick: "$onClick"},
-                    TD({class: "headerCell alphaValue"},
+                    TH({class: "headerCell alphaValue"},
                         DIV({class: "headerCellBox"},
                             $STR("Function")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("CallsHeaderTooltip")},
                             $STR("Calls")
                         )
                     ),
-                    TD({class: "headerCell headerSorted"},
+                    TH({class: "headerCell headerSorted"},
                         DIV({class: "headerCellBox", title: $STR("PercentTooltip")},
                             $STR("Percent")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("OwnTimeHeaderTooltip")},
                             $STR("OwnTime")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("TimeHeaderTooltip")},
                             $STR("Time")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("AvgHeaderTooltip")},
                             $STR("Avg")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("MinHeaderTooltip")},
                             $STR("Min")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("MaxHeaderTooltip")},
                             $STR("Max")
                         )
                     ),
-                    TD({class: "headerCell alphaValue"},
+                    TH({class: "headerCell alphaValue"},
                         DIV({class: "headerCellBox"},
                             $STR("File")
                         )

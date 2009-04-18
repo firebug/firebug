@@ -23,7 +23,7 @@ var OBJECTBLOCK = this.OBJECTBLOCK =
 
 var OBJECTLINK = this.OBJECTLINK =
     A({
-        class: "objectLink objectLink-$className",
+        class: "objectLink objectLink-$className a11yFocus",
         _repObject: "$object"
     });
 
@@ -364,20 +364,20 @@ this.Arr = domplate(Firebug.Rep,
 {
     tag:
         OBJECTBOX({_repObject: "$object"},
-            SPAN({class: "arrayLeftBracket"}, "["),
+            SPAN({class: "arrayLeftBracket", role : "presentation"}, "["),
             FOR("item", "$object|arrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
-                SPAN({class: "arrayComma"}, "$item.delim")
+                SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
             ),
-            SPAN({class: "arrayRightBracket"}, "]")
+            SPAN({class: "arrayRightBracket", role : "presentation"}, "]")
         ),
 
     shortTag:
         OBJECTBOX({_repObject: "$object"},
-            SPAN({class: "arrayLeftBracket"}, "["),
+            SPAN({class: "arrayLeftBracket", role : "presentation"}, "["),
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
-                SPAN({class: "arrayComma"}, "$item.delim")
+                SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
             ),
             FOR("prop", "$object|shortPropIterator",
                     " $prop.name=",
@@ -1121,7 +1121,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            A({class: "objectLink", _repObject: "$object"}, "$object|getCallName"),
+            A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             "(",
             FOR("arg", "$object|argIterator",
                 TAG("$arg.tag", {object: "$arg.value"}),
@@ -1256,13 +1256,13 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 _stackTrace: "$object|getLastErrorStackTrace",
                 onclick: "$onToggleError"},
 
-            DIV({class: "errorTitle"},
+            DIV({class: "errorTitle a11yFocus", role : 'checkbox', 'aria-checked' : 'false'},
                 "$object.message|getMessage"
             ),
             DIV({class: "errorTrace"}),
             DIV({class: "errorSourceBox errorSource-$object|getSourceType"},
-                IMG({class: "errorBreak", src:"blank.gif", title: "Break on this error"}),
-                SPAN({class: "errorSource"}, "$object|getLine")
+                IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':'false', title: "Break on this error"}),
+                A({class: "errorSource a11yFocus"}, "$object|getLine")
             ),
             TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
         ),
@@ -1345,11 +1345,16 @@ this.ErrorMessage = domplate(Firebug.Rep,
         {
             var traceBox = target.childNodes[1];
             toggleClass(target, "opened");
-
+            event.target.setAttribute('aria-checked', hasClass(target, "opened"));
             if (hasClass(target, "opened"))
             {
                 if (target.stackTrace)
-                    FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                    var node = FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                if (Firebug.A11yModel.enabled)
+                {
+                    var panel = Firebug.getElementPanel(event.target);
+                    dispatch([Firebug.A11yModel], "onLogRowContentCreated", [panel , traceBox]);
+                }
             }
             else
                 clearNode(traceBox);

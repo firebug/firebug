@@ -46,7 +46,6 @@ Firebug.ConsoleBase =
             if (panel)
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
-
                 var container = panel.panelNode;
                 var template = Firebug.NetMonitor.NetLimit;
 
@@ -56,7 +55,8 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-
+                if (Firebug.A11yModel.enabled)
+                    dispatch([Firebug.A11yModel], "onLogRowCreated", [panel , row]);
                 return row;
             }
         }
@@ -417,15 +417,18 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         setClass(row, "opened");
 
         var innerRow = this.createRow("logRow");
+        setClass(innerRow, "logGroupLabel");
         if (rep)
             rep.tag.replace({"objects": objects}, innerRow);
         else
             this.appendFormatted(objects, innerRow, rep);
         row.appendChild(innerRow);
-
+        innerRow.setAttribute('aria-expanded', 'true');
+        if (Firebug.A11yModel.enabled)
+            dispatch([Firebug.A11yModel], 'onLogRowCreated', [this, innerRow]);
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
-
+        groupBody.setAttribute('role', 'group');
         this.groups.push(groupBody);
 
         innerRow.addEventListener("mousedown", function(event)
@@ -434,9 +437,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             {
                 var groupRow = event.currentTarget.parentNode;
                 if (hasClass(groupRow, "opened"))
+                {
                     removeClass(groupRow, "opened");
+                    event.target.setAttribute('aria-expanded', 'false');
+                }
                 else
+                {
                     setClass(groupRow, "opened");
+                    event.target.setAttribute('aria-expanded', 'true');
+                }
             }
         }, false);
     },
@@ -461,6 +470,16 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         // Initialize log limit and listen for changes.
         this.updateMaxLimit();
         prefs.addObserver(Firebug.prefDomain, this, false);
+    },
+    
+    initializeNode : function()
+    {
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
+    },
+    
+    destroyNode : function()
+    {
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
     },
 
     shutdown: function()
