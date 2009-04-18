@@ -582,7 +582,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // and find a better solution
             //const updateViewOnShowHook = function()
             //{
-                context.chrome.select(context.currentFrame, "script", "callstack", true);
+                context.chrome.select(context.currentFrame, "script", null, true);
                 context.chrome.focus();
             //}
             //if ( !context.hideDebuggerUI || Firebug.isContextActive(context))
