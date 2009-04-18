@@ -2281,7 +2281,6 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             {
                 var URLOnly = new this.NoScriptSourceFile(context, url);
                 context.addSourceFile(URLOnly);
-                list.push(URLOnly);
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
             }
         }
@@ -3266,7 +3265,7 @@ this.getRequestWebProgress = function(request)
 
     try
     {
-        if (request.loadGroup && request.loadGroup.groupObserver)
+        if (request && request.loadGroup && request.loadGroup.groupObserver)
             return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
     } catch (exc) {}
 
