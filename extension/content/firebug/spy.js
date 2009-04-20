@@ -91,7 +91,7 @@ Firebug.Spy = extend(Firebug.Module,
             return true;
     },
 
-    attachSpy: function(context, win)
+    attachSpy: function(context, win)  // XXXjjb these names confuse me, they seem to be "attachObserver".
     {
         if (win)
         {
@@ -346,7 +346,7 @@ top.XMLHttpRequestSpy.prototype =
         this.xhrRequest.addEventListener("load", this.onLoad, true);
         this.xhrRequest.addEventListener("error", this.onError, true);
 
-        // Use tabCache to get XHR response. Notice that the tabCache isn't 
+        // Use tabCache to get XHR response. Notice that the tabCache isn't
         // supported till Firefox 3.0.4
         this.context.sourceCache.addListener(this);
     },
@@ -361,7 +361,7 @@ top.XMLHttpRequestSpy.prototype =
         this.onLoad = null;
         this.onError = null;
 
-        this.context.sourceCache.removeListener(this);
+        this.context.sourceCache.removeListener(this);  // XXXjjb I see null sourceCache errors here, from onReadyStateChange
     },
 
     getURL: function()
@@ -494,7 +494,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         updateHttpSpyInfo(spy);
     }
 
-    if (spy.context.spies)
+    if (spy.context.spies)  // XXXjjb don't we need to spy.detach() ?
         remove(spy.context.spies, spy);
 
     if (FBTrace.DBG_SPY)
