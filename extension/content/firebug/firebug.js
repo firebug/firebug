@@ -1847,7 +1847,7 @@ Firebug.Panel =
         this.lastScrollTop = this.panelNode.scrollTop;
     },
 
-    reattach: function(doc)
+    reattach: function(doc)  // this is how a panel in one window reappears in another window; lazy called
     {
         this.document = doc;
 
@@ -1861,7 +1861,7 @@ Firebug.Panel =
         }
     },
 
-    // Called after module.initialize; addEventListener-s here
+    // Called at the end of module.initialize; addEventListener-s here
     initializeNode: function(myPanelNode)
     {
     },
@@ -2262,16 +2262,31 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     initialize: function(context, doc)
     {
-        Firebug.Panel.initialize.apply(this, arguments);
-        this.onResize =  bind(this.onResize, this);
-        contentBox.addEventListener("resize", this.onResize, true);
+        this.onResize =  bind(this.resizer, this);
+
         this.initializeSourceBoxes();
+        Firebug.Panel.initialize.apply(this, arguments);
     },
 
-    destroy: function(state)
+    initializeNode: function(panelNode)
     {
-        Firebug.Panel.destroy.apply(this, arguments);
-        contentBox.removeEventListener("resize", this.onResize, true);
+        this.resizeEventTarget = this.context.chrome.$('fbContentBox');
+        this.resizeEventTarget.addEventListener("resize", this.onResize, true);
+    },
+
+    reattach: function(doc)
+    {
+        var oldEventTarget = this.resizeEventTarget;
+        oldEventTarget.removeEventListener("resize", this.onResize, true);
+        Firebug.Panel.reattach.apply(this, arguments);
+        this.resizeEventTarget = this.context.chrome.$('fbContentBox');
+        this.resizeEventTarget.addEventListener("resize", this.onResize, true);
+    },
+
+    destroyNode: function()
+    {
+        Firebug.Panel.destroyNode.apply(this, arguments);
+        this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
     },
 
     // ******* override in extenders ********
@@ -2695,14 +2710,14 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.lastScrollTop = scrollTop;
     },
 
-    onResize: function(event)
+    resizer: function(event)
     {
         // The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
         // But our SourceBoxPanel has viewport that will change size.
         if (this.selectedSourceBox)
         {
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("onResize will clear viewable lines, event:", event);
+                FBTrace.sysout("resizer will clear viewable lines, event:", event);
             delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
             delete this.selectedSourceBox.halfViewableLines;
             delete this.lastScrollTop;
