@@ -26,7 +26,6 @@ var contentTypes =
     "text/css": 1,
     "text/sgml": 1,
     "text/rtf": 1,
-    "text/richtext": 1,
     "text/x-setext": 1,
     "text/rtf": 1,
     "text/richtext": 1,
