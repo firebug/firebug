@@ -2239,6 +2239,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
+        Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
     },
 
     destroyNode: function()
@@ -2251,6 +2252,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
+        Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
     },
 
     clear: function()
