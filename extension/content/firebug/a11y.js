@@ -20,6 +20,7 @@ FBL.ns( function()
                 this.handlePanelBarKeyPress = bind(this.handlePanelBarKeyPress, this);
                 this.onConsoleKeyPress = bind(this.onConsoleKeyPress, this);
                 this.onLayoutKeyPress = bind(this.onLayoutKeyPress, this);
+                this.onHTMLKeyPress = bind(this.onHTMLKeyPress, this);
                 this.onConsoleFocus = bind(this.onConsoleFocus, this);
                 this.onLayoutFocus = bind(this.onLayoutFocus, this);
                 this.onLayoutBlur = bind(this.onLayoutBlur, this);
@@ -124,6 +125,10 @@ FBL.ns( function()
                         panel.panelNode.setAttribute('id', panel.name + '_logRows');
                         panel.panelNode.addEventListener("keypress", this.onConsoleKeyPress, false);
                         panel.panelNode.addEventListener("focus", this.onConsoleFocus, true);
+                        break;
+                    case 'html':
+                        panel.panelNode.setAttribute('role', 'tree');
+                        panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
                         break;
                     case 'script':
                         this.makeFocusable(panel.panelNode, true);
@@ -567,79 +572,73 @@ FBL.ns( function()
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-            // Dom Panel
+            // HTML Panel
             
-            onMemberRowsAdded: function(panel, rows)
+            onHTMLKeyPress: function(event)
             {
-                if (!this.enabled || !rows)
+                var target = event.target;
+                var keyCode = event.keyCode || event.charCode;   
+                if ([13, 32, KeyEvent.DOM_VK_F2].indexOf(keyCode) == -1)
                     return;
-                if (!panel)
-                    panel = Firebug.getElementPanel(rows[0]);
-                var panelA11y = panel.context.a11yPanels[panel.name];
-                if (!panel || !panelA11y)
+                if (!hasClass(target, "nodeLabel"))
                     return;
-                var setSize
-                var posInset;
-                var setSize = rows.length;
-                var posInset = 0;
-                for (var i = 0; i < rows.length; i++)
+                var panel = Firebug.getElementPanel(target);
+                switch(keyCode)
                 {
-                    var makeTab = (panelA11y.lastIsDefault && i === rows.length - 1) || (!panelA11y.lastIsDefault && i === 0)
-                    this.makeMemberRowAccessible(panel, rows[i], makeTab, ++posInset, setSize);
+                    case 13:
+                    case 32:
+                        var isEnter = keyCode == 13;
+                        var nodeLabels = null;
+                        if (isEnter)
+                        {
+                            var nodeLabels = target.getElementsByClassName('nodeName');
+                            if (nodeLabels.length > 0)
+                            {
+                                this.dispatchMouseEvent(nodeLabels[0], 'mousedown');
+                                cancelEvent(event);
+                            }
+                        }    
+                        if (!isEnter || nodeLabels.length == 0)
+                        {
+                            if (target.parentNode.repObject && panel.editNewAttribute) 
+                            {
+                                panel.editNewAttribute(target.parentNode.repObject)
+                                cancelEvent(event);
+                            }
+                        }
+                        break;
+                    case KeyEvent.DOM_VK_F2:
+                        if (hasClass(target.parentNode, 'textNodeBox'))
+                        {
+                            var textNode = getNextByClass(target, 'nodeText');
+                            if (textNode)
+                                this.dispatchMouseEvent(textNode, 'mousedown');
+                        }
+                        break;
                 }
             },
-                  
-            onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
+            
+            onObjectBoxSelected: function(objectBox)
             {
                 if (!this.enabled)
                     return;
-                var startRow = borderRows[0];
-                var endRow = borderRows[1];
-                if (!panel)
-                    panel = Firebug.getElementPanel(startRow);
-                if (!panel || !panel.context.a11yPanels[panel.name])
-                    return;
-                
-                var row = startRow;
-                do
-                {
-                    this.makeMemberRowAccessible(panel, row, false, posInSet++, setSize)
-                    if (row === endRow)
-                        break;
-                } 
-                while (row = row.nextSibling);
-            },
-            
-            makeMemberRowAccessible : function(panel, row, makeTab, posInSet, setSize, toggleOnly)
-            {
-                var labelCell = row.cells[0];
-                var valueCell = row.cells[1];
-                if (!valueCell)
-                    return;
-                var cellChild = valueCell.firstChild;
-                if (cellChild)
-                {
-                    if (hasClass(row, 'hasChildren'))
-                        cellChild.setAttribute('aria-expanded', hasClass(row, 'opened'));
-                    var type = this.getObjectType(cellChild)
-                    if (makeTab)
-                        this.setPanelTabStop(panel, cellChild);
-                    else 
-                        this.makeFocusable(cellChild, false);
-                    
-                    cellChild.setAttribute('role', 'treeitem');
-                    cellChild.setAttribute('aria-level', parseInt(row.getAttribute('level')) + 1);
-                    cellChild.setAttribute('aria-label', labelCell.textContent + 
-                         ": " + " " + valueCell.textContent + (type ? " (" + type + ")" : "" )) ;
-                    if (posInSet && setSize)
-                    {
-                        cellChild.setAttribute('aria-setsize', setSize);
-                        cellChild.setAttribute('aria-posinset', posInSet);
-                    }
-                    setClass(cellChild, 'focusRow');
+                var label = objectBox.firstChild;
+                if (label) {
+                    this.makeFocusable(label, true);
+                    this.focus(label);
                 }
             },
             
+            onObjectBoxUnselected: function(objectBox)
+            {
+                if (!this.enabled)
+                    return;
+                var label = objectBox.firstChild;
+                if (label) {
+                    this.makeUnfocusable(label, true);
+                }
+            },
+
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Layout Panel
             
@@ -664,6 +663,7 @@ FBL.ns( function()
             
             getLayoutBoxLabel : function(elem, detailsObj )
             {
+                //TODO: uncessesarily big, make smaller
                 var className = elem.className.match(/\b(\w+)LayoutBox\b/);
                 if (!className)
                     return "";
@@ -771,9 +771,38 @@ FBL.ns( function()
             {  
                 switch (panel.name)
                 {
+                    case 'html':
+                        var tagName= nodeName = null;
+                        var setSize = posInSet = 0; var setElems;
+                        var label = $STR("inline editor") + ": ";
+                        if (hasClass(target, 'nodeName') || hasClass(target, 'nodeValue'))
+                        {
+                            var isName = hasClass(target, 'nodeName');
+                            setElems = target.parentNode.parentNode.getElementsByClassName(isName ? 'nodeName' : 'nodeValue');
+                            setSize = (setElems.length * 2);
+                            posInSet = ((Array.indexOf(setElems, target) + 1) * 2) - (isName ? 1 : 0);
+                            editor.input.setAttribute('role', 'listitem');
+                            editor.input.setAttribute('aria-editable', 'true');
+                            editor.input.setAttribute('aria-setsize', setSize);
+                            editor.input.setAttribute('aria-posinset', posInSet);
+                            nodeTag = getPreviousByClass(target, 'nodeTag');
+                            if (!isName)
+                            {
+                                nodeName = getPreviousByClass(target, 'nodeName');
+                                label += $STRF('value for attribute in element', [nodeName.textContent, nodeTag.textContent]);
+                            }
+                            else
+                                label += $STRF("attribute for element", [nodeTag.textContent]);
+                        }
+                        else if (hasClass(target, 'nodeText'))
+                        {
+                            nodeTag = getPreviousByClass(target, 'nodeTag');
+                            label += $STRF("text contents for element", [nodeTag.textContent]);
+                        }
+                        editor.input.setAttribute('aria-label', label);
+                        break;
                     case 'layout':
                         editor.input.setAttribute('aria-label', target.getAttribute('aria-label'));
-                        this.focus(editor.input); //xxxHH not sure why this doesn't already happens by default
                         break;
                     case 'dom':   
                     case 'domSide':
@@ -781,6 +810,9 @@ FBL.ns( function()
                             editor.input.setAttribute('aria-label', target.cells[0].textContent);
                         break;
                 }
+                //not sure why I need to do this. Focus doesn't seem to be picked up properly for inline editors
+                editor.input.blur()
+                editor.input.focus(); //NVDA still doesn't get this
             },
             
             onStopEdit : function(panel, editor, target)
@@ -791,6 +823,10 @@ FBL.ns( function()
                         var tabStop = this.getPanelTabStop(panel);
                         if  (tabStop)
                             this.focus(tabStop);
+                        break;
+                    case 'html':
+                        var box = panel.ioBox.createObjectBox(panel.selection);
+                        panel.ioBox.selectObjectBox(box);
                         break;
                 }
             },
@@ -810,6 +846,80 @@ FBL.ns( function()
                     this.chrome.$('fbContextMenu').openPopup(node, 'after_pointer');  
                     cancelEvent(event); //no need for default handlers anymore
                 }   
+            },
+            
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            // Dom Panel
+            
+            onMemberRowsAdded: function(panel, rows)
+            {
+                if (!this.enabled || !rows)
+                    return;
+                if (!panel)
+                    panel = Firebug.getElementPanel(rows[0]);
+                var panelA11y = panel.context.a11yPanels[panel.name];
+                if (!panel || !panelA11y)
+                    return;
+                var setSize
+                var posInset;
+                var setSize = rows.length;
+                var posInset = 0;
+                for (var i = 0; i < rows.length; i++)
+                {
+                    var makeTab = (panelA11y.lastIsDefault && i === rows.length - 1) || (!panelA11y.lastIsDefault && i === 0)
+                    this.makeMemberRowAccessible(panel, rows[i], makeTab, ++posInset, setSize);
+                }
+            },
+                  
+            onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
+            {
+                if (!this.enabled)
+                    return;
+                var startRow = borderRows[0];
+                var endRow = borderRows[1];
+                if (!panel)
+                    panel = Firebug.getElementPanel(startRow);
+                if (!panel || !panel.context.a11yPanels[panel.name])
+                    return;
+                
+                var row = startRow;
+                do
+                {
+                    this.makeMemberRowAccessible(panel, row, false, posInSet++, setSize)
+                    if (row === endRow)
+                        break;
+                } 
+                while (row = row.nextSibling);
+            },
+            
+            makeMemberRowAccessible : function(panel, row, makeTab, posInSet, setSize, toggleOnly)
+            {
+                var labelCell = row.cells[0];
+                var valueCell = row.cells[1];
+                if (!valueCell)
+                    return;
+                var cellChild = valueCell.firstChild;
+                if (cellChild)
+                {
+                    if (hasClass(row, 'hasChildren'))
+                        cellChild.setAttribute('aria-expanded', hasClass(row, 'opened'));
+                    var type = this.getObjectType(cellChild)
+                    if (makeTab)
+                        this.setPanelTabStop(panel, cellChild);
+                    else 
+                        this.makeFocusable(cellChild, false);
+                    
+                    cellChild.setAttribute('role', 'treeitem');
+                    cellChild.setAttribute('aria-level', parseInt(row.getAttribute('level')) + 1);
+                    cellChild.setAttribute('aria-label', labelCell.textContent + 
+                         ": " + " " + valueCell.textContent + (type ? " (" + type + ")" : "" )) ;
+                    if (posInSet && setSize)
+                    {
+                        cellChild.setAttribute('aria-setsize', setSize);
+                        cellChild.setAttribute('aria-posinset', posInSet);
+                    }
+                    setClass(cellChild, 'focusRow');
+                }
             },
                          
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -871,6 +981,12 @@ FBL.ns( function()
             {
                 if (elem)
                     elem.setAttribute('tabindex', inTabOrder ? '0' : '-1');
+            },
+            
+            makeUnfocusable : function(elem)
+            {
+                if (elem)
+                    elem.removeAttribute('tabindex');
             },
             
             reportFocus : function(event)

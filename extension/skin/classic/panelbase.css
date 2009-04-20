@@ -309,4 +309,7 @@ h1.groupHeader {
     vertical-align: middle;
 }
 
+.useA11y .textEditorInner:focus {
+    outline: 2px solid #FF9933;
+}
 /************************************************************************************************/

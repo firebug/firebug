@@ -28,7 +28,7 @@
 }
 
 .useA11y .a11yFocus:focus, .useA11y .objectBox:focus {
-    outline: 2px solid #684B2E;
+    outline: 2px solid #FF9933;
     background-color: #FFFFAD;
 }
 

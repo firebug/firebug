@@ -159,3 +159,7 @@
 .soloElement > .nodeBox  {
     padding-left: 0;
 }
+
+.useA11y .nodeBox.selected > .nodeLabel:focus {
+    outline: 2px solid #FF9933;
+}
