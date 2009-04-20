@@ -103,6 +103,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1310: Net Panel - Wrong domain display
     * Issue 1316: window.console is undefined, then console create empty log entries after clicking on the command line
     * Issue 1317: Scrollbar in "Edit" view rendered half-invisible
+    * Issue 1319: Selecting multiple JavascriptLines to add watch also adds line numbers
     * Issue 1323: img preview in CSS tab not working.
     * Issue 1339: Command line becomes unusable after reload
     * Issue 1347: Firebug 1.3 re-introduce "this.notifyFirebug is not a function" issue
@@ -113,6 +114,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1382: Add event dispatch when console is injected so extensions can know when console is available (contribution by collins.mike)
     * Issue 1383: 1.3: if the last line is a comment throws Syntax Error: missing }
     * Issue 1387:  switching between Firebug's tabs (as opposed to the window's) reverts contents of larger command line
+    * Issue 1395: Script debug loads only the first 20 lines of some scripts.
     * Issue 1408: Google Docs (spreadsheets) - truncated view / not editable on inner worksheets (TracingListener implemented as XPCOM)
     * Issue 1409: Selected source file does not persist on reload
     * Issue 1468: File Locking on File upload when firebug is installed
@@ -126,4 +128,5 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1591: Firebug cannot find _firebugConsole element
     * Issue 1640: Fixed install.rdf typo
     * Issue 1649: disabling script panel doesn't disable script view in 1.4
+    * Issue 1650: 1.4a18 not picking up other JS files
     * Issue 1651: 1.4a18 panel not updating when changing tabs in firefox
