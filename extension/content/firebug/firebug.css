@@ -96,12 +96,21 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 .useA11y panelTab[selected="true"],
 /* Firebug  Menu */  
 .useA11y #fbFirebugMenu, 
-/* First toolbar button in a visible toolbar group (usually hbox)*/
-.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton:first-of-type,
-.useA11y .innerToolbar > toolbarbutton:first-of-type,  
 /* Status bar icon*/
 #fbStatusBar.useA11y {
     -moz-user-focus: normal;
+}
+
+/* Toolbar buttons in a visible toolbar group (usually hbox) */
+.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton,
+.useA11y .innerToolbar > toolbarbutton{
+   -moz-user-focus: normal;
+}
+
+/* Now override the previous selector and only leave the first button of each group in the tab order*/
+.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton ~ toolbarbutton,
+.useA11y .innerToolbar > toolbarbutton ~ toolbarbutton{
+   -moz-user-focus: ignore;
 }
 
 /* remove toolbar groups from the tab order if they have .noTabStop and are NOT the first visible group in the toolbar */
