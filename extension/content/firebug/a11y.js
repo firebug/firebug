@@ -19,14 +19,17 @@ FBL.ns( function()
                 this.handleTabBarBlur = bind(this.handleTabBarBlur, this);
                 this.handlePanelBarKeyPress = bind(this.handlePanelBarKeyPress, this);
                 this.onConsoleKeyPress = bind(this.onConsoleKeyPress, this);
+                this.onLayoutKeyPress = bind(this.onLayoutKeyPress, this);
                 this.onConsoleFocus = bind(this.onConsoleFocus, this);
+                this.onLayoutFocus = bind(this.onLayoutFocus, this);
+                this.onLayoutBlur = bind(this.onLayoutBlur, this);
                 this.onPanelContextMenu = bind(this.onPanelContextMenu, this);
             },
             
             initializeUI: function()
             {
                 this.chrome = FirebugChrome;
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), FirebugChrome);
+                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), FirebugChrome, true);
             },
 
             toggle : function()
@@ -37,23 +40,23 @@ FBL.ns( function()
             updateOption : function(name, value)
             {
                 if (name == "enableA11y")
-                    this.set(value, context.chrome); 
+                    this.set(value, context.chrome, false); 
             },
             
-            set : function(enable, chrome)
+            set : function(enable, chrome, start)
             {
                 this.enabled = enable;
                 $('cmd_enableA11y').setAttribute('checked', enable + '');
                 if (enable)
                     this.performEnable(chrome);
-                else
+                else if (!start)
                     this.performDisable(chrome);
             },
             
             reattachContext: function(browser, context)
             {
                 this.chrome = context.chrome;
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), context.chrome);
+                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), context.chrome, false);
             },
             
             performEnable : function(chrome)
@@ -72,6 +75,7 @@ FBL.ns( function()
                 chrome.$('fbPanelBar2-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
                 setClass(chrome.$("fbPanelBar1").browser.contentDocument.body, 'useA11y');
                 setClass(chrome.$("fbPanelBar2").browser.contentDocument.body, 'useA11y');
+                Firebug.Editor.addListener(this);
             },
 
             performDisable : function(chrome)
@@ -86,6 +90,7 @@ FBL.ns( function()
                 chrome.$('fbPanelBar2-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
                 removeClass(chrome.$("fbPanelBar1").browser.contentDocument.body, 'useA11y');
                 removeClass(chrome.$("fbPanelBar2").browser.contentDocument.body, 'useA11y');
+                Firebug.Editor.removeListener(this);
             },
             
              // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -97,59 +102,73 @@ FBL.ns( function()
                     return;
                 this.makeFocusable(panel.panelNode, false);
                 if (!panel.context.a11yPanels)
-                {
                     panel.context.a11yPanels = {};
-                    panel.context.a11yPanels[panel.name] = 
-                    {
-                        tabStop     : null,
-                        manageFocus : false
-                    };
-                }
+                panel.context.a11yPanels[panel.name] = 
+                {
+                    tabStop     : null,
+                    manageFocus : false,
+                    lastIsDefault: false
+                };
+                var panelA11y = panel.context.a11yPanels[panel.name];
+            
                 actAsPanel = actAsPanel ? actAsPanel : panel.name; 
+                //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
                 switch (actAsPanel)
                 {
                     case 'console':
-                        panel.context.a11yPanels[panel.name].manageFocus = true;
+                        panelA11y.manageFocus = true;
+                        if (panel.name == "console")
+                            panelA11y.lastIsDefault = true;
                         panel.panelNode.setAttribute('role', 'list');
                         panel.panelNode.setAttribute('aria-live', 'polite');
                         panel.panelNode.setAttribute('id', panel.name + '_logRows');
                         panel.panelNode.addEventListener("keypress", this.onConsoleKeyPress, false);
                         panel.panelNode.addEventListener("focus", this.onConsoleFocus, true);
-                        //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
                         break;
                     case 'script':
                         this.makeFocusable(panel.panelNode, true);
                         panel.panelNode.addEventListener('contextmenu', this.onPanelContextMenu, false);
                         break;
+                    case 'layout':
+                        panelA11y.manageFocus = true;
+                        panel.panelNode.addEventListener("keypress", this.onLayoutKeyPress, false);
+                        panel.panelNode.addEventListener("focus", this.onLayoutFocus, true);
+                        panel.panelNode.addEventListener("blur", this.onLayoutBlur, true);
+                        break;
                 }
             },
             
-            onDestroyNode : function(panel)
+            onDestroyNode : function(panel, actAsPanel)
             {
                 if (!this.enabled)
                     return;
+                actAsPanel = actAsPanel ? actAsPanel : panel.name; 
                 //remove all event handlers we added in onInitializeNode
-                switch (panel.name)
+                switch (actAsPanel)
                 {
                     case 'console':
                         panel.panelNode.removeEventListener("keypress", this.onConsoleKeyPress, false);
                         panel.panelNode.removeEventListener("focus", this.onConsoleFocus, true);
-                        //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
                         break;
                     case 'script':
                         panel.panelNode.removeEventListener('contextmenu', this.onPanelContextMenu, false);
+                        break;
+                    case 'layout':
+                        panel.panelNode.removeEventListener("keypress", this.onLayoutKeyPress, false);
+                        panel.panelNode.removeEventListener("focus", this.onLayoutFocus, true);
+                        panel.panelNode.removeEventListener("blur", this.onLayoutBlur, true);
                         break;
                 }
             },
             
             showPanel : function(browser, panel)
             {
-                panel.context.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " panel tools")
+                panel.context.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
                 return;
                 var panelBrowser = FirebugChrome.getPanelBrowser(panel);
                 if (panel.name == "script")
                     panelBrowser.setAttribute('showcaret', (panel.name == "script"));
-            },
+            },            
            
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Toolbars & Tablists
@@ -256,26 +275,10 @@ FBL.ns( function()
             },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-            // Generic Panel Handling
-             
-            onPanelContextMenu : function(event)
-            {
-                if (event.button == 0) //the event was created by keyboard, not right mouse click 
-                {
-                    // get caret location
-                    var sel = event.target.ownerDocument.defaultView.getSelection(); 
-                    var node = sel.focusNode.parentNode;
-                    //manually trigger the fbContextMenu popup 
-                    document.popupNode = node;
-                    this.chrome.$('fbContextMenu').openPopup(node, 'after_pointer'); // this is as close as I can get it to the caret 
-                    cancelEvent(event); //no need for default handlers anymore
-                }   
-            },
+            // Panel Focus & Tab Order Management
             
             getPanelTabStop : function(panel)
-            {
-                if (!panel)
-                    panel = Firebug.getElementPanel(); 
+            { 
                 return panel.context.a11yPanels[panel.name].tabStop;    
             },            
             
@@ -290,20 +293,82 @@ FBL.ns( function()
             
             ensurePanelTabStop: function(panel)
             {    
-                if (panel.context.a11yPanels[panel.name] && panel.context.a11yPanels[panel.name].manageFocus)
+                var panelA11y = panel.context.a11yPanels[panel.name];
+                if ( panelA11y && panelA11y.manageFocus)
                 {
                     var tabStop = this.getPanelTabStop(panel);
                     if (!tabStop|| !this.isVisible(tabStop))
                     {
                         this.tabStop = null;
-                        this.findTabStop(panel, 'focusRow', true);
+                        this.findPanelTabStop(panel, 'focusRow', panelA11y.lastIsDefault);
                     }
                 }
+            },
+            
+            setPanelTabStop : function (panel, elem)
+            {
+                var tabStop = this.getPanelTabStop(panel)
+                if (tabStop)
+                    this.makeFocusable(tabStop, false);
+                panel.context.a11yPanels[panel.name].tabStop = elem;
+                if (elem)
+                    this.makeFocusable(elem, true);
+            },
+            
+            findPanelTabStop : function(panel, className, last)
+            {
+                var candidates = panel.panelNode.getElementsByClassName(className);
+                if (candidates.length > 0)
+                    this.setPanelTabStop(panel, candidates[last ? candidates.length -1 : 0]);
+                else 
+                    this.setPanelTabStop(panel, null);
             },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Console Panel
             
+            onLogRowCreated : function(panel, row)
+            {
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;
+                if (hasClass(row, 'logRow-dir'))
+                {
+                    row.setAttribute('role', 'listitem');
+                    var memberRows = row.getElementsByClassName('memberRow');
+                    if (memberRows.length > 0)
+                    {
+                        this.onMemberRowsAdded(panel, memberRows);
+                    }
+                }
+                else if (hasClass(row, 'logRow-group'))
+                    row.setAttribute('role', 'presentation');
+                else 
+                {
+                    row.setAttribute('role', 'listitem');
+                    var logRowType = this.getLogRowType(row);
+                    if (logRowType)
+                        this.insertHiddenText(panel, row, logRowType + ": ")
+                    setClass(row, 'focusRow');
+                    this.setPanelTabStop(panel, row);
+                    this.onLogRowContentCreated(panel, row);
+                }
+            },
+            
+            onLogRowContentCreated : function(panel, node)
+            { 
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;
+                var focusObjects = this.getFocusObjects(node);
+                Array.forEach(focusObjects, function(e,i,a){
+                    this.makeFocusable(e);
+                    var prepend = "";
+                    var append = this.getObjectType(e);
+                    if (hasClass(e, 'errorTitle'))
+                        prepend += $STR('expand error') + ': ';
+                    e.setAttribute('aria-label', prepend + e.textContent + append);
+                    }, this);     
+            },
+                  
             onConsoleKeyPress : function(event) 
             {   
                 var target = event.target;
@@ -326,8 +391,11 @@ FBL.ns( function()
                     else if (event.ctrlKey)
                     {
                         newTarget = this.getAncestorRow(target);
-                        newTarget = [33, 38].indexOf(keyCode) == -1 ? this.getLastFocusChild(newTarget) : this.getFirstFocusChild(newTarget)
+                        if (newTarget)
+                            newTarget = [33, 38].indexOf(keyCode) == -1 ? this.getLastFocusChild(newTarget) : this.getFirstFocusChild(newTarget)
                     }
+                    if (!newTarget)
+                        newTarget = target
                 }
                 switch (keyCode) 
                 { 
@@ -417,9 +485,9 @@ FBL.ns( function()
                         this.focusSiblingPageRow(panel, newTarget, keyCode == 33);
                         break;
                     case 13://enter
-                        if (this.isFocusObject(target) && !target.hasAttribute('role', 'checkbox'))
+                        if (this.isFocusObject(target))
                             this.dispatchMouseEvent(target, 'click');
-                        break;
+                            break;
                     case 32://space
                     if (this.isFocusObject(target) && target.hasAttribute('role', 'checkbox'))
                         this.dispatchMouseEvent(target, 'click');
@@ -499,121 +567,261 @@ FBL.ns( function()
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-            // Domplate Management
+            // Dom Panel
             
-            onLogRowCreated : function(panel, row)
+            onMemberRowsAdded: function(panel, rows)
             {
-                if (hasClass(row, 'logRow-dir'))
-                {
-                    row.setAttribute('role', 'listitem');
-                    var memberRows = row.getElementsByClassName('memberRow');
-                    if (memberRows.length > 0)
-                    {
-                        this.onMemberRowsAdded(panel, memberRows);
-                    }
-                }
-                else if (hasClass(row, 'logRow-group'))
-                {
-                    row.setAttribute('role', 'presentation');
-                    FBTrace.sysout('group created', row);
-                }
-                else 
-                {
-                    row.setAttribute('role', 'listitem');
-                    var logRowType = this.getLogRowType(row);
-                    if (logRowType)
-                        this.insertHiddenText(panel, row, logRowType + ": ")
-                    setClass(row, 'focusRow');
-                    this.setPanelTabStop(panel, row);
-                    this.onLogRowContentCreated(panel, row);
-                }
-            },
-            
-            onLogRowContentCreated : function(panel, node)
-            { 
-                var focusObjects = this.getFocusObjects(node);
-                Array.forEach(focusObjects, function(e,i,a){
-                    this.makeFocusable(e);
-                    var prepend = "";
-                    var append = this.getObjectType(e);
-                    if (hasClass(e, 'errorTitle'))
-                        prepend += 'Expand error: ';
-                    e.setAttribute('aria-label', prepend + e.textContent + append);
-                    }, this);     
-            },
-            
-            onMemberRowsAdded: function(panel, rows, startRow, lastRow)
-            {
+                if (!this.enabled || !rows)
+                    return;
+                if (!panel)
+                    panel = Firebug.getElementPanel(rows[0]);
+                var panelA11y = panel.context.a11yPanels[panel.name];
+                if (!panel || !panelA11y)
+                    return;
                 var setSize
                 var posInset;
-                
-                if (rows) 
+                var setSize = rows.length;
+                var posInset = 0;
+                for (var i = 0; i < rows.length; i++)
                 {
-                    if (!panel)
-                        panel = Firebug.getElementPanel(startRow);
-                    var setSize = rows.length;
-                    var posInset = 0;
-                    for (var i = 0; i < rows.length; i++)
-                    {
-                        this.makeMemberRowAccessible(panel, rows[i], i === rows.length - 1, ++posInset, setSize);
-                    }
-                }
-                else if (startRow && lastRow)
-                {
-                    if (!panel)
-                        panel = Firebug.getElementPanel(startRow);
-                    var row = startRow; //not included in loop, this is the 'parent' row that was expanded
-                    
-                    setSize = lastRow.rowIndex - startRow.rowIndex;
-                    posInset = 0;
-                    while (row = row.nextSibling)
-                    {
-                        this.makeMemberRowAccessible(panel, row, false, ++posInset, setSize)
-                        
-                        if (row === lastRow)
-                        {
-                            break;
-                        }
-                    }    
+                    var makeTab = (panelA11y.lastIsDefault && i === rows.length - 1) || (!panelA11y.lastIsDefault && i === 0)
+                    this.makeMemberRowAccessible(panel, rows[i], makeTab, ++posInset, setSize);
                 }
             },
+                  
+            onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
+            {
+                if (!this.enabled)
+                    return;
+                var startRow = borderRows[0];
+                var endRow = borderRows[1];
+                if (!panel)
+                    panel = Firebug.getElementPanel(startRow);
+                if (!panel || !panel.context.a11yPanels[panel.name])
+                    return;
+                
+                var row = startRow;
+                do
+                {
+                    this.makeMemberRowAccessible(panel, row, false, posInSet++, setSize)
+                    if (row === endRow)
+                        break;
+                } 
+                while (row = row.nextSibling);
+            },
             
-            makeMemberRowAccessible : function(panel, row, last, posInset, setSize, toggleOnly)
+            makeMemberRowAccessible : function(panel, row, makeTab, posInSet, setSize, toggleOnly)
             {
                 var labelCell = row.cells[0];
                 var valueCell = row.cells[1];
-                
                 if (!valueCell)
                     return;
-                
                 var cellChild = valueCell.firstChild;
                 if (cellChild)
                 {
                     if (hasClass(row, 'hasChildren'))
                         cellChild.setAttribute('aria-expanded', hasClass(row, 'opened'));
                     var type = this.getObjectType(cellChild)
-                    if (last)
+                    if (makeTab)
                         this.setPanelTabStop(panel, cellChild);
                     else 
-                        this.makeFocusable(cellChild);
+                        this.makeFocusable(cellChild, false);
+                    
                     cellChild.setAttribute('role', 'treeitem');
                     cellChild.setAttribute('aria-level', parseInt(row.getAttribute('level')) + 1);
                     cellChild.setAttribute('aria-label', labelCell.textContent + 
                          ": " + " " + valueCell.textContent + (type ? " (" + type + ")" : "" )) ;
-                    if (posInset && setSize)
+                    if (posInSet && setSize)
                     {
                         cellChild.setAttribute('aria-setsize', setSize);
-                        cellChild.setAttribute('aria-posinset', posInset);
+                        cellChild.setAttribute('aria-posinset', posInSet);
                     }
                     setClass(cellChild, 'focusRow');
                 }
             },
             
-            insertHiddenText : function(panel, elem, text, asLastNode)
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            // Layout Panel
+            
+            onLayoutBoxCreated : function(panel, node, detailsObj)
+            {
+                if (!this.enabled)
+                    return;
+                var focusGroups = node.getElementsByClassName('focusGroup');
+                this.insertHiddenText(panel, node, $STR('press enter to edit values'), false, "layoutPressEnterDesc")
+                Array.forEach(focusGroups, function(e,i,a){
+                    if (hasClass(e, 'offsetLayoutBox'))
+                        this.makeFocusable(e, true);    
+                    else 
+                        this.makeFocusable(e, false);
+                    e.setAttribute('role', 'group');
+                    e.setAttribute('aria-describedby', 'layoutPressEnterDesc');
+                    e.setAttribute('aria-label', this.getLayoutBoxLabel(e, detailsObj));
+                    e.setAttribute('aria-setsize', a.length);
+                    e.setAttribute('aria-posinset', i + 1);
+                }, this);
+            },
+            
+            getLayoutBoxLabel : function(elem, detailsObj )
+            {
+                var className = elem.className.match(/\b(\w+)LayoutBox\b/);
+                if (!className)
+                    return "";
+                var styleName = className[1];
+                var output = "";
+                switch(styleName)
+                {
+                    case "offset":
+                        output += $STR("LayoutOffset");
+                        styleName = "outer";
+                        break;
+                    case "margin":
+                        output += $STR("LayoutMargin");
+                        break;
+                    case "border":
+                        output += $STR("LayoutBorder");
+                        break;
+                    case "padding":
+                        output += $STR("LayoutPadding");
+                        break;   
+                    case "content":
+                        output += $STR("LayoutSize");
+                        break;    
+                }
+                output += ": ";
+                
+                var valNames = [];
+                var vals = {};
+                if (styleName == "outer")
+                {
+                    valNames = ['top', 'left'];
+                    vals.top = detailsObj[styleName + 'Top'];
+                    vals.left = detailsObj[styleName + 'Left'];
+                }
+                else if (styleName == "content")
+                {
+                    valNames = ['width', 'height']
+                    vals.width = detailsObj['width'];
+                    vals.height = detailsObj['height'];                   
+                }
+                else
+                {
+                    valNames = ['top', 'right', 'bottom', 'left'];
+                    vals.top = detailsObj[styleName + 'Top'];
+                    vals.right = detailsObj[styleName + 'Right'];
+                    vals.bottom = detailsObj[styleName + 'Bottom'];
+                    vals.left = detailsObj[styleName + 'Left'];    
+                }
+                for (var i = 0 ; i < valNames.length; i++)
+                {
+                    output += $STR(valNames[i]) + " = " + vals[valNames[i]] + " ";
+                }
+                return output;
+            },
+            
+            onLayoutKeyPress : function(event)
+            {
+                var target = event.target;
+                var keyCode = event.keyCode || event.charCode;   
+                if ([13, 37, 38, 39, 40].indexOf(keyCode) == -1)
+                    return;
+                if (!hasClass(target, 'focusGroup'))
+                    return;
+                var panel = Firebug.getElementPanel(target);
+                switch(keyCode)
+                {
+                    case 37:
+                    case 38:
+                    case 39:
+                    case 40:
+                        var node, goLeft = keyCode == 37 || keyCode == 38;
+                        if (goLeft)
+                            node = FBL.getAncestorByClass(target.parentNode, 'focusGroup');
+                        else
+                            node = FBL.getChildByClass(target, 'focusGroup');
+                        if (node) 
+                            this.focus(node);
+                        break;
+                    case 13:
+                        var editables = target.getElementsByClassName('editable');
+                        editables = Array.filter(editables, function(e,i,a){return hasClass(e, 'focusStart');}, this);
+                        if (editables[0])
+                            this.dispatchMouseEvent(editables[0], 'mousedown');
+                        cancelEvent(event);
+                        break;
+                }
+            },
+            
+            onLayoutFocus : function(event)
+            {
+                if (hasClass(event.target, 'focusGroup'))
+                {
+                    this.dispatchMouseEvent(event.target, 'mouseover');
+                    this.setPanelTabStop(Firebug.getElementPanel(event.target), event.target);
+                }
+            },
+            
+            onLayoutBlur : function(event)
+            {
+                if (hasClass(event.target, 'focusGroup'))
+                    this.dispatchMouseEvent(event.target, 'mouseout');
+            },
+            
+            onBeginEditing : function(panel, editor, target, value)
+            {  
+                switch (panel.name)
+                {
+                    case 'layout':
+                        editor.input.setAttribute('aria-label', target.getAttribute('aria-label'));
+                        this.focus(editor.input); //xxxHH not sure why this doesn't already happens by default
+                        break;
+                    case 'dom':   
+                    case 'domSide':
+                        if (target.cells && target.cells[0])
+                            editor.input.setAttribute('aria-label', target.cells[0].textContent);
+                        break;
+                }
+            },
+            
+            onStopEdit : function(panel, editor, target)
+            {
+                switch (panel.name)
+                {
+                    case 'layout':
+                        var tabStop = this.getPanelTabStop(panel);
+                        if  (tabStop)
+                            this.focus(tabStop);
+                        break;
+                }
+            },
+            
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            // Script Panel
+            
+            onPanelContextMenu : function(event)
+            {
+                if (event.button == 0) //the event was created by keyboard, not right mouse click 
+                {
+                    // get caret location
+                    var sel = event.target.ownerDocument.defaultView.getSelection(); 
+                    var node = sel.focusNode.parentNode;
+                    //manually trigger the fbContextMenu popup 
+                    document.popupNode = node;
+                    this.chrome.$('fbContextMenu').openPopup(node, 'after_pointer');  
+                    cancelEvent(event); //no need for default handlers anymore
+                }   
+            },
+                         
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            // Domplate Management 
+            
+            insertHiddenText : function(panel, elem, text, asLastNode, id)
             {
                 var span = panel.document.createElement('span');
                 span.className ="offScreen";
                 span.textContent = text;
+                if (id)
+                    span.id = id;
                 if (asLastNode)
                     elem.appendChild(span);
                 else
@@ -642,57 +850,27 @@ FBL.ns( function()
                 else if ((type == "" || type == "object") && elem.repObject)
                 { 
                     var obj = elem.repObject;
-                    type = typeof obj;
-                    
+                    type = typeof obj;   
                     if (obj instanceof Array)
                         type = "array";
-                    else if (false) //for some reason this breaks: els if (obj.nodeType)
-                    {
-                        switch(obj.nodeType)
-                        {
-                            case Node.ATTRIBUTE_NODE:
-                                type = "attribute";
-                                break;
-                            case Node.ELEMENT_NODE:
-                                type = "element";
-                                break;
-                        }
-                    }
                 }
                 return type;
-            },
-            
-            setPanelTabStop : function (panel, elem)
-            {
-                var tabStop = this.getPanelTabStop(panel)
-                if (tabStop)
-                    this.makeFocusable(tabStop, false);
-                panel.context.a11yPanels[panel.name].tabStop = elem;
-                this.makeFocusable(elem, true);
-            },
-            
-            findTabStop : function(panel, className, last)
-            {
-                var candidates = panel.panelNode.getElementsByClassName(className);
-                if (candidates.length > 0)
-                    this.setPanelTabStop(panel, candidates[last ? candidates.length -1 : 0]);
-                else 
-                    this.setPanelTabStop(null);
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Utils
             
-            focus: function(elem)
+            focus : function(elem)
             {
                 //maybe add isFocusable check here as well?
                 if (isElement(elem) && this.isVisible(elem))
                     elem.focus();
             },
             
-            makeFocusable : function(elt, inTabOrder)
+            makeFocusable : function(elem, inTabOrder)
             {
-                elt.setAttribute('tabindex', inTabOrder ? '0' : '-1');
+                if (elem)
+                    elem.setAttribute('tabindex', inTabOrder ? '0' : '-1');
             },
             
             reportFocus : function(event)
@@ -713,8 +891,7 @@ FBL.ns( function()
             
             isVisible : function (elem)
             {
-                var styles = elem.ownerDocument.defaultView.getComputedStyle(elem, null);
-                return elem && isVisible(elem) && styles.visibility !== "hidden";
+                return elem && isVisible(elem) && elem.ownerDocument.defaultView.getComputedStyle(elem, null).visibility !== "hidden";
             },
             
             isTabWorthy : function (elem)

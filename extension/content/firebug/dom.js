@@ -201,19 +201,21 @@ const DirTablePlate = domplate(Firebug.Rep,
             var lastRow = row;
 
             var delay = 0;
+            var setSize = members.length;
+            var rowCount = 1;
             while (members.length)
             {
                 setTimeout(function(slice, isLast)
                 {
                     if (lastRow.parentNode)
-                        lastRow = rowTag.insertRows({members: slice}, lastRow)[1];
-
-                    if (isLast) 
                     {
-                        delete row.insertTimeout;
-                        if (Firebug.A11yModel.enabled)
-                            Firebug.A11yModel.onMemberRowsAdded(null, null, row, lastRow)
+                        var result = rowTag.insertRows({members: slice}, lastRow);
+                        lastRow = result[1]; 
+                        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                        rowCount += insertSliceSize;
                     }
+                    if (isLast) 
+                        delete row.insertTimeout;
                 }, delay, members.splice(0, insertSliceSize), !members.length);
 
                 delay += insertInterval;
@@ -281,9 +283,12 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         var rowTag = DirTablePlate.rowTag;
 
         // Insert the first slice immediately
+        var setSize = members.length;
         var slice = members.splice(0, insertSliceSize);
-        rowTag.insertRows({members: slice}, tbody.lastChild);
-
+        var result = rowTag.insertRows({members: slice}, tbody.lastChild);
+        var rowCount = 1;
+        var panel = this;
+        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
         var timeouts = [];
 
         var delay = 0;
@@ -291,8 +296,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         {
             timeouts.push(this.context.setTimeout(function(slice)
             {
-                rowTag.insertRows({members: slice}, tbody.lastChild);
-
+                result = rowTag.insertRows({members: slice}, tbody.lastChild);
+                rowCount += insertSliceSize;
+                dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
+                
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                     panelNode.scrollTop = priorScrollTop;
             }, delay, members.splice(0, insertSliceSize)));
@@ -320,7 +327,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 panelNode.scrollTop = scrollTop == undefined ? 0 : scrollTop;
             }, delay));
         }
-
         this.timeouts = [];
     },
 
@@ -875,11 +881,13 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     initializeNode: function(oldPanelNode)
     {
         this.panelNode.addEventListener("click", this.onClick, false);
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
     },
 
     destroyNode: function()
     {
         this.panelNode.removeEventListener("click", this.onClick, false);
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
     },
 
     search: function(text, reverse)
@@ -929,6 +937,16 @@ DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     name: "domSide",
     parentPanel: "html",
     order: 3,
+    
+    initializeNode: function(oldPanelNode)
+    {
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
+    },
+
+    destroyNode: function()
+    {
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
+    },
 });
 
 // ************************************************************************************************

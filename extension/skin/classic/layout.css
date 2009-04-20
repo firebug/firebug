@@ -215,3 +215,7 @@
     bottom: 20px;
     width: 20px;
 }
+
+.useA11y .focusGroup:focus {
+    outline: 2px solid #FF9933;
+}

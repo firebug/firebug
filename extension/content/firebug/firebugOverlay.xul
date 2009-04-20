@@ -163,7 +163,7 @@
                                    tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
 
                     </hbox>
-                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="Firebug Panels" />
+                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
                     <spacer flex="1"/>
 
                     <vbox>
@@ -172,7 +172,7 @@
                         <textbox id="fbSearchBox" autocomplete="true" rows="1" label="firebug search"/>
                         <spacer flex="1"/>
                     </vbox>
-                    <hbox role="toolbar" class="innerToolbar" aria-label="Firebug Window">
+                    <hbox role="toolbar" class="innerToolbar" aria-label="firebug window">
 
                         <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
                                     tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
@@ -300,7 +300,7 @@
                     <deck id="fbSidePanelDeck" persist="width,height">
                         <panelBar id="fbPanelBar2" class="panelBar">
                             <hbox id="fbPanelBar2-tabBox" class="panelTabBox" collapsed="true">
-                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist" />
+                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist" aria-label="firebug side panels" />
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">
                                 <browser id="fbPanelBar2-browser"

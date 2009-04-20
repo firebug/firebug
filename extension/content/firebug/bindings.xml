@@ -463,7 +463,7 @@
     </implementation>
 
     <handlers>
-        <handler event="mousedown" button="0"><![CDATA[
+        <handler event="command" ><![CDATA[
             var object = Firebug.getRepObject(event.target);
             if (object)
             {

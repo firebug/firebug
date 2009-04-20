@@ -49,6 +49,13 @@
     white-space: pre;
 }
 
+.panelNode-script:focus .sourceLine{
+    
+    background-color: #FFFFC0;
+    color: navy;	
+    border-right: 2px solid #FF9933;
+}
+
 .sourceBox > .sourceRow > .sourceLine {
     cursor: pointer;
 }

@@ -55,8 +55,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-                if (Firebug.A11yModel.enabled)
-                    dispatch([Firebug.A11yModel], "onLogRowCreated", [panel , row]);
+                dispatch([Firebug.A11yModel], "onLogRowCreated", [panel , row]);
                 return row;
             }
         }
@@ -424,8 +423,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.appendFormatted(objects, innerRow, rep);
         row.appendChild(innerRow);
         innerRow.setAttribute('aria-expanded', 'true');
-        if (Firebug.A11yModel.enabled)
-            dispatch([Firebug.A11yModel], 'onLogRowCreated', [this, innerRow]);
+        dispatch([Firebug.A11yModel], 'onLogRowCreated', [this, innerRow]);
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
         groupBody.setAttribute('role', 'group');
