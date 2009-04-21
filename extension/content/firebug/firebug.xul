@@ -166,9 +166,14 @@
             <panelBar id="fbPanelBar1">
                 <hbox id="fbPanelBar1-tabBox">
                     <!-- Some of the buttons don't make sense in the stand-alone window - hide them. -->
-                    <toolbarbutton id="fbFirebugMenu" collapsed="true"/>
-                    <toolbarbutton id="fbDetachButton" collapsed="true"/>
-                    <toolbarbutton id="fbCloseButton" collapsed="true"/>
+                    <hbox id="fbPanelBar1-buttons">
+                        <toolbarbutton id="fbFirebugMenu" collapsed="true"/>
+                    </hbox>
+                    <hbox id="fbWindowButtons">
+                        <toolbarbutton id="fbMinimizeButton" collapsed="true"/>
+                        <toolbarbutton id="fbDetachButton" collapsed="true"/>
+                        <toolbarbutton id="fbCloseButton" collapsed="true"/>
+                    </hbox>
                 </hbox>
             </panelBar>
         </box>

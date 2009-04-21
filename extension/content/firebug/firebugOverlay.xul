@@ -172,8 +172,7 @@
                         <textbox id="fbSearchBox" autocomplete="true" rows="1" label="firebug search"/>
                         <spacer flex="1"/>
                     </vbox>
-                    <hbox role="toolbar" class="innerToolbar" aria-label="firebug window">
-
+                    <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="firebug window">
                         <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
                                     tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
 
