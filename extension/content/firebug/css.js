@@ -1210,17 +1210,17 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         if (hasClass(target, "cssPropName"))
         {
-            if (value && previousValue && previousValue != value)  // name of property has changed.
+            if (value && previousValue != value)  // name of property has changed.
             {
-                // Get value from setProperty on previous edit OR from source of page OR undefined
-                this.previousPropertyValue = getChildByClass(row, "cssPropValue").textContent;
-                if (this.previousPropertyValue && this.previousPropertyValue != "undefined")
-                {
-                    this.previousPropertyName = previousValue;
-                    this.cleanUpStyle = style;
-                    this.newPropertyName = value;
+                var propValue = getChildByClass(row, "cssPropValue").textContent;
+                var parsedValue = parsePriority(propValue);
+                
+                if (propValue && propValue != "undefined") {
                     if (FBTrace.DBG_CSS)
-                        FBTrace.sysout("CSSEditor.saveEdit previousProperty: "+this.previousPropertyName+"->"+this.newPropertyName+" = "+this.previousPropertyValue+"\n");
+                        FBTrace.sysout("CSSEditor.saveEdit : "+previousValue+"->"+value+" = "+propValue+"\n");
+                    if (previousValue)
+                        Firebug.CSSModule.removeProperty(style, previousValue);
+                    Firebug.CSSModule.setProperty(style, value, parsedValue.value, parsedValue.priority);
                 }
             }
             else if (!value) // name of the property has been deleted, so remove the property.
@@ -1237,43 +1237,16 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                // FBTrace.dumpProperties("CSSEditor.saveEdit BEFORE style:",style);
             }
 
-            if (propValue)
+            if (value && value != "null")
             {
-                var parsedValue = parsePriority(propValue);
+                var parsedValue = parsePriority(value);
                 Firebug.CSSModule.setProperty(style, propName, parsedValue.value, parsedValue.priority);
             }
-            else
+            else if (previousValue && previousValue != "null")
                 Firebug.CSSModule.removeProperty(style, propName);
         }
 
         this.panel.markChange(this.panel.name == "stylesheet");
-    },
-
-    endEditing: function(currentTarget, value, cancel)
-    {
-        if (this.previousPropertyName)  // Might be cleaner to have different editors for names and values...
-        {
-            // this was a name edit. 1) new name->do nothing 2) change previous name->remove old, set new
-            if (this.previousPropertyValue)
-            {
-                Firebug.CSSModule.removeProperty(this.cleanUpStyle, this.previousPropertyName);
-                if (FBTrace.DBG_CSS)  /*@explore*/
-                    FBTrace.sysout("CSSEditor.endEditing removed:"+this.previousPropertyName+"\n"); /*@explore*/
-                var parsedValue = parsePriority(this.previousPropertyValue);
-                Firebug.CSSModule.setProperty(this.cleanUpStyle, this.newPropertyName, parsedValue.value, parsedValue.priority);
-                if (FBTrace.DBG_CSS)  /*@explore*/
-                    FBTrace.sysout("CSSEditor.endEditing set:"+this.newPropertyName+"="+this.previousPropertyValue.value+"\n"); /*@explore*/
-
-                delete this.previousPropertyName;
-                delete this.previousPropertyValue;
-            }
-        }
-        // XXXjoe We need to refresh here, but can't because it interferes
-        // with the tabbing.  The only reason to refresh is to update the
-        // overridden flag on properties when !importants are changed, so
-        // we should implement code to do this without destroying the view
-
-        return true;
     },
 
     advanceToNext: function(target, charCode)
