@@ -91,7 +91,7 @@ Firebug.Spy = extend(Firebug.Module,
             return true;
     },
 
-    attachSpy: function(context, win)  // XXXjjb these names confuse me, they seem to be "attachObserver".
+    attachObserver: function(context, win)
     {
         if (win)
         {
@@ -109,7 +109,7 @@ Firebug.Spy = extend(Firebug.Module,
         }
     },
 
-    detachSpy: function(context, win)
+    detachObserver: function(context, win)
     {
         for( var i = 0; i < contexts.length; ++i )
         {
@@ -133,27 +133,27 @@ Firebug.Spy = extend(Firebug.Module,
         context.spies = [];
 
         if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
-            this.attachSpy(context, context.window);
+            this.attachObserver(context, context.window);
     },
 
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
-        this.detachSpy(context, false);
+        this.detachObserver(context, false);
         delete context.spies;
     },
 
     watchWindow: function(context, win)
     {
         if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
-            this.attachSpy(context, win);
+            this.attachObserver(context, win);
     },
 
     unwatchWindow: function(context, win)
     {
         try {
             // This make sure that the existing context is properly removed from "contexts" array.
-            this.detachSpy(context, win);
+            this.detachObserver(context, win);
         } catch (ex) {
             // Get exceptions here sometimes, so let's just ignore them
             // since the window is going away anyhow
@@ -165,7 +165,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         if (name == "showXMLHttpRequests")  // XXXjjb Honza, if Console.isEnabled(context) false, then this can't be called, but somehow seems not correct
         {
-            var tach = value ? this.attachSpy : this.detachSpy;
+            var tach = value ? this.attachObserver : this.detachObserver;
             for (var i = 0; i < TabWatcher.contexts.length; ++i)
             {
                 var context = TabWatcher.contexts[i];
