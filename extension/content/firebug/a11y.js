@@ -20,11 +20,15 @@ FBL.ns( function()
                 this.handlePanelBarKeyPress = bind(this.handlePanelBarKeyPress, this);
                 this.onConsoleKeyPress = bind(this.onConsoleKeyPress, this);
                 this.onLayoutKeyPress = bind(this.onLayoutKeyPress, this);
+                this.onCSSKeyPress = bind(this.onCSSKeyPress, this);
                 this.onHTMLKeyPress = bind(this.onHTMLKeyPress, this);
-                this.onConsoleFocus = bind(this.onConsoleFocus, this);
+                this.onHTMLFocus = bind(this.onHTMLFocus, this);
+                this.onHTMLBlur = bind(this.onHTMLBlur, this);
+                this.onPanelFocus = bind(this.onPanelFocus, this);
                 this.onLayoutFocus = bind(this.onLayoutFocus, this);
                 this.onLayoutBlur = bind(this.onLayoutBlur, this);
                 this.onPanelContextMenu = bind(this.onPanelContextMenu, this);
+                this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
             },
             
             initializeUI: function()
@@ -114,6 +118,7 @@ FBL.ns( function()
             
                 actAsPanel = actAsPanel ? actAsPanel : panel.name; 
                 //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
+                
                 switch (actAsPanel)
                 {
                     case 'console':
@@ -122,24 +127,36 @@ FBL.ns( function()
                             panelA11y.lastIsDefault = true;
                         panel.panelNode.setAttribute('role', 'list');
                         panel.panelNode.setAttribute('aria-live', 'polite');
-                        panel.panelNode.setAttribute('id', panel.name + '_logRows');
                         panel.panelNode.addEventListener("keypress", this.onConsoleKeyPress, false);
-                        panel.panelNode.addEventListener("focus", this.onConsoleFocus, true);
+                        panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
                         break;
                     case 'html':
                         panel.panelNode.setAttribute('role', 'tree');
                         panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
+                        panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
+                        panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
                         break;
-                    case 'script':
-                        this.makeFocusable(panel.panelNode, true);
-                        panel.panelNode.addEventListener('contextmenu', this.onPanelContextMenu, false);
+                    case 'css':
+                        panelA11y.manageFocus = true;
+                        panel.panelNode.addEventListener("keypress", this.onCSSKeyPress, false);
+                        panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
+                        panel.panelNode.addEventListener('contextmenu', this.onCSSPanelContextMenu, false)
+                        this.insertHiddenText(panel, panel.panelNode, $STR('overridden'), false, "CSSOverriddenDescription");
+                        if (panel.name == "stylesheet")
+                            panel.panelNode.setAttribute('role', 'list');
                         break;
                     case 'layout':
                         panelA11y.manageFocus = true;
                         panel.panelNode.addEventListener("keypress", this.onLayoutKeyPress, false);
                         panel.panelNode.addEventListener("focus", this.onLayoutFocus, true);
                         panel.panelNode.addEventListener("blur", this.onLayoutBlur, true);
+                        this.insertHiddenText(panel, panel.panelNode, $STR('press enter to edit values'), false, "layoutPressEnterDesc");
                         break;
+                    case 'script':
+                        this.makeFocusable(panel.panelNode, true);
+                        panel.panelNode.addEventListener('contextmenu', this.onPanelContextMenu, false);
+                        break;
+
                 }
             },
             
@@ -153,16 +170,28 @@ FBL.ns( function()
                 {
                     case 'console':
                         panel.panelNode.removeEventListener("keypress", this.onConsoleKeyPress, false);
-                        panel.panelNode.removeEventListener("focus", this.onConsoleFocus, true);
+                        panel.panelNode.removeEventListener("focus", this.onPanelFocus, true);
                         break;
-                    case 'script':
-                        panel.panelNode.removeEventListener('contextmenu', this.onPanelContextMenu, false);
+                    case 'html':
+                        panel.panelNode.removeEventListener("keypress", this.onHTMLKeyPress, false);
+                        panel.panelNode.removeEventListener("focus", this.onHTMLFocus, true);
+                        panel.panelNode.removeEventListener("blur", this.onHTMLBlur, true);
+                        break;
+                    case 'css':
+                        panel.panelNode.removeEventListener("keypress", this.onCSSKeyPress, false);
+                        panel.panelNode.removeEventListener("focus", this.onPanelFocus, true);
+                        panel.panelNode.removeEventListener("blur", this.onPanelBlur, true);
+                        panel.panelNode.removeEventListener('contextmenu', this.onCSSPanelContextMenu, false)
                         break;
                     case 'layout':
                         panel.panelNode.removeEventListener("keypress", this.onLayoutKeyPress, false);
                         panel.panelNode.removeEventListener("focus", this.onLayoutFocus, true);
                         panel.panelNode.removeEventListener("blur", this.onLayoutBlur, true);
                         break;
+                    case 'script':
+                        panel.panelNode.removeEventListener('contextmenu', this.onPanelContextMenu, false);
+                        break;
+
                 }
             },
             
@@ -313,11 +342,14 @@ FBL.ns( function()
             setPanelTabStop : function (panel, elem)
             {
                 var tabStop = this.getPanelTabStop(panel)
-                if (tabStop)
+                if (tabStop && this.isVisible(tabStop))
                     this.makeFocusable(tabStop, false);
                 panel.context.a11yPanels[panel.name].tabStop = elem;
                 if (elem)
+                {
+                    panel.context.a11yPanels[panel.name].reFocusId = null;
                     this.makeFocusable(elem, true);
+                }
             },
             
             findPanelTabStop : function(panel, className, last)
@@ -487,7 +519,7 @@ FBL.ns( function()
                         break;
                     case 33://pgup
                     case 34://pgdn
-                        this.focusSiblingPageRow(panel, newTarget, keyCode == 33);
+                        this.focusPageSiblingRow(panel, newTarget, keyCode == 33);
                         break;
                     case 13://enter
                         if (this.isFocusObject(target))
@@ -502,7 +534,7 @@ FBL.ns( function()
                     event.preventDefault();
             },
             
-            onConsoleFocus : function(event)
+            onPanelFocus : function(event)
             {
                 if (this.isTabWorthy(event.target))
                     this.setPanelTabStop(Firebug.getElementPanel(event.target), event.target)
@@ -539,7 +571,7 @@ FBL.ns( function()
                 this.focusRow(panel, rows, siblingIndex, goUp);
             },
 
-            focusSiblingPageRow : function(panel, target, goUp)
+            focusPageSiblingRow : function(panel, target, goUp)
             {
                 var rows = this.getFocusRows(panel);
                 var index = this.getRowIndex(rows, target);
@@ -618,6 +650,28 @@ FBL.ns( function()
                 }
             },
             
+            onHTMLFocus : function(event)
+            {
+                
+                if (hasClass(event.target, 'nodeLabel'))
+                {
+                    var node = getChildByClass(event.target, 'nodeLabelBox')
+                    if (node)
+                        this.dispatchMouseEvent(node, 'mouseover');
+                    cancelEvent(event);
+                }
+            },
+            
+            onHTMLBlur : function(event)
+            {
+                if (hasClass(event.target, 'nodeLabel'))
+                {
+                    var node = getChildByClass(event.target, 'nodeLabelBox')
+                        this.dispatchMouseEvent(node, 'mouseout');
+                    cancelEvent(event);
+                }
+            },
+            
             onObjectBoxSelected: function(objectBox)
             {
                 if (!this.enabled)
@@ -640,6 +694,234 @@ FBL.ns( function()
             },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            // CSS Panel
+            
+            onCSSKeyPress : function(event) 
+            {   
+                var target = event.target;
+                var keyCode = event.keyCode || event.charCode;   
+                
+                if (!this.isFocusRow(target))
+                    return;
+                else if (event.altKey)
+                    return;
+                else if ([13, 32, 33, 34, 35, 36, 38,  40].indexOf(keyCode) == -1)
+                    return;//not interested in any other keys, than arrows, pg, home/end, space & enter
+                var panel = Firebug.getElementPanel(target)
+                
+                switch (keyCode) 
+                { 
+                    case 38://up
+                    case 40://down
+                        var goUp = keyCode == 38;
+                        if (event.ctrlKey)
+                        {
+                            if (event.shiftKey)
+                            {
+                                var node = FBL[goUp ? 'getPreviousByClass' : 'getNextByClass' ](target, 'cssInheritHeader');
+                                if (node)
+                                    this.focus(node);
+                                else if (goUp) 
+                                   this.focusEdgeRow(panel, target, true);
+                            }
+                            else
+                                this.focusSiblingHeadRow(panel, target, goUp);
+                        } 
+                        else
+                            this.focusSiblingRow(panel, target, goUp);
+                        break;
+                    case 35://end
+                    case 36://home
+                        if (event.ctrlKey)
+                            this.focusEdgeHeadRow(panel, target, keyCode == 36);
+                        else
+                            this.focusEdgeRow(panel, target, keyCode == 36);
+                        break;
+                    case 33://pgup
+                    case 34://pgdn
+                        if (event.ctrlKey)
+                            this.focusPageSiblingHeadRow(panel, target, keyCode == 33);
+                        else
+                            this.focusPageSiblingRow(panel, target, keyCode == 33);
+                        break;
+                    case 13://enter
+                        if (hasClass(target, 'cssProp'))
+                        {
+                            var node = getChildByClass(target, 'cssPropName');
+                            if (node)
+                                this.dispatchMouseEvent(node, 'mousedown');
+                            cancelEvent(event);
+                        }
+                        else if (hasClass(target, 'importRule'))
+                        {
+                            var node = getChildByClass(target, 'objectLink');
+                            if (node)
+                                this.dispatchMouseEvent(node, 'click');
+                        }
+                        break;
+                    case 32://space
+                        if (hasClass(target, 'cssProp'))
+                        {
+                            //our focus is about to be wiped out, we'll try to get it back after 
+                            panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(target);
+                            panel.disablePropertyRow(target);
+                            cancelEvent(event);
+                        }
+                        break;    
+                }
+                if (!event.shiftKey)
+                    event.preventDefault();
+            },
+            
+            getHeadRowsAndIndex: function(panel, elem)
+            {
+                var rows = this.getFocusRows(panel);
+                var headRow = hasClass(elem, 'cssHead') ? elem : getPreviousByClass(elem, 'cssHead');
+                var headRows = Array.filter(rows, function(e,i,a){return hasClass(e, 'cssHead')});
+                
+                var index = Array.indexOf(headRows, headRow);
+                if (index == -1)
+                    index = 0;
+                return [headRows, index]
+            },
+            
+            focusSiblingHeadRow : function(panel, elem, goUp)
+            {
+                
+                var rowInfo = this.getHeadRowsAndIndex(panel, elem);
+                this.focusRow(panel, rowInfo[0], goUp ? rowInfo[1] - 1 : rowInfo[1] + 1, goUp);
+            },
+            
+            focusPageSiblingHeadRow : function(panel, elem, goUp)
+            {
+                var rowInfo = this.getHeadRowsAndIndex(panel, elem); 
+                this.focusRow(panel, rowInfo[0], goUp ? rowInfo[1] - 10 : rowInfo[1] + 10 , goUp);
+            },
+            
+            focusEdgeHeadRow : function(panel, elem, goUp)
+            {
+                var rowInfo = this.getHeadRowsAndIndex(panel, elem);
+                this.focusRow(panel, rowInfo[0], goUp ? 0 : rowInfo[0].length , goUp);
+            },
+            
+            onCSSRulesAdded : function(panel, rootNode)
+            {
+                
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;
+                
+                var panelA11y = panel.context.a11yPanels[panel.name];
+                if (panelA11y.timeouts)
+                {
+                    for (var i = 0; i < this.timeouts.length; ++i)
+                    {
+                        panel.context.clearTimeout(this.timeouts[i]);
+                    }
+                    panelA11y.timeouts = null;
+                }
+                var rows = rootNode.getElementsByClassName('focusRow');
+                if (rows.length == 0) 
+                {
+                    if (hasClass(rootNode, 'focusRow'))
+                        rows = [rootNode];
+                    else if (hasClass(rootNode, 'warning'))
+                    {
+                        rootNode.setAttribute('role', 'listitem')
+                        this.makeFocusable(rootNode, true);
+                        return 
+                    } 
+                    else return;
+                }
+                var slice;
+                var index = 0, sliceSize = 18;
+                var delay = 0, insertInterval = 40, j=0;
+                
+                this.timeouts = [];
+                while (index < rows.length) // can't use splice on nodelist
+                {
+                    slice = [];
+                    for (j = index; j < index + sliceSize; j++)
+                    {
+                        if (rows[j])
+                            slice.push(rows[j]);
+                        else 
+                            break;
+                    }
+                    this.timeouts.push(
+                        panel.context.setTimeout(bindFixed(
+                            this.modifyCssRuleRow ,this, panel, slice, panelA11y.reFocusId)
+                            , delay, cloneArray(slice), panelA11y.reFocusId));
+
+                    delay += insertInterval;
+                    index += sliceSize;
+                }
+            },
+            
+            modifyCssRuleRow : function(panel, slice, reFocusId)
+            {
+                slice.forEach(function(row,i,a){
+                    this.makeFocusable(row, i == 0 && !reFocusId);
+                    row.style.color = "red"
+                    if (hasClass(row, 'cssHead'))
+                    {
+                        var sourceLink = getNextByClass(row, 'objectLink');
+                        if (sourceLink)
+                            row.setAttribute('aria-label', row.textContent + " " + $STRF('defined in file', [sourceLink.textContent]));
+                        var listBox = row.getElementsByClassName('cssPropertyListBox')[0];
+                        var selector = getChildByClass(row.nextSibling, 'cssSelector');
+                        if (listBox && selector)
+                            listBox.setAttribute('aria-label', $STRF("declarations for selector", [selector.textContent]));
+                    }
+                    else if (hasClass(row, 'cssProp'))
+                    {
+                        row.setAttribute('aria-checked', !hasClass(row, 'disabledStyle'));
+                        if (hasClass(row, 'cssOverridden'))
+                            row.setAttribute('aria-label', $STR('overridden') + " " + row.textContent);
+                    }
+                    if (reFocusId && getElementXPath(row) == reFocusId)
+                    {
+                        this.focus(row);
+                        this.setPanelTabStop(panel, row);
+                        panel.context.a11yPanels[panel.name].reFocusId = reFocusId = null;
+                    }
+                }, this);                        
+            },
+            
+            isCSSRow : function(elem)
+            {
+                return hasClass(elem, 'cssRule') || hasClass(elem, 'groupHeader');
+            },
+            
+            isCSSFocusRow : function(elem)
+            {
+                return hasClass(elem, 'focusRow');
+            },
+            
+            getAncestorCSSRow : function(target)
+            {
+                return getAncestorByClass(target, "focusRow");
+            },
+            
+            onCSSPanelContextMenu : function(event)
+            {
+                if (event.button == 0) //the event was created by keyboard, not right mouse click 
+                {
+                    if (hasClass(event.target, 'focusRow'))
+                    {
+                        var panel = Firebug.getElementPanel(event.target);
+                        var node = getNextByClass(event.target, 'objectLink');
+                        if (!node)
+                             node = event.target;
+                        //these context menu options are likely to destroy current focus
+                        panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(event.target);
+                    }
+                    document.popupNode = node;
+                    this.chrome.$('fbContextMenu').openPopup(node, panel.name == "stylesheet" ? 'overlap' : 'start_after');  
+                    cancelEvent(event); //no need for default handlers anymore
+                }   
+            },
+            
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Layout Panel
             
             onLayoutBoxCreated : function(panel, node, detailsObj)
@@ -647,7 +929,6 @@ FBL.ns( function()
                 if (!this.enabled)
                     return;
                 var focusGroups = node.getElementsByClassName('focusGroup');
-                this.insertHiddenText(panel, node, $STR('press enter to edit values'), false, "layoutPressEnterDesc")
                 Array.forEach(focusGroups, function(e,i,a){
                     if (hasClass(e, 'offsetLayoutBox'))
                         this.makeFocusable(e, true);    
@@ -736,9 +1017,9 @@ FBL.ns( function()
                     case 40:
                         var node, goLeft = keyCode == 37 || keyCode == 38;
                         if (goLeft)
-                            node = FBL.getAncestorByClass(target.parentNode, 'focusGroup');
+                            node = getAncestorByClass(target.parentNode, 'focusGroup');
                         else
-                            node = FBL.getChildByClass(target, 'focusGroup');
+                            node = getChildByClass(target, 'focusGroup');
                         if (node) 
                             this.focus(node);
                         break;
@@ -801,6 +1082,22 @@ FBL.ns( function()
                         }
                         editor.input.setAttribute('aria-label', label);
                         break;
+                    case 'css':
+                        
+                        var selector = getPreviousByClass(target, 'cssSelector');
+                        selector = selector ? selector.textContent : "";
+                        
+                        var label = $STR("inline editor") + ": ";
+                        if (hasClass(target, 'cssPropName'))
+                            label += $STRF('property for selector', [selector]);
+                        else if (hasClass(target, 'cssPropValue'))
+                        {
+                            var propName = getPreviousByClass(target, 'cssPropName');
+                            propName = propName ? propName.textContent : "";
+                            label += $STRF('value property in selector', [propName, selector]);
+                        }
+                        editor.input.setAttribute('aria-label', label);
+                        break;
                     case 'layout':
                         editor.input.setAttribute('aria-label', target.getAttribute('aria-label'));
                         break;
@@ -823,6 +1120,11 @@ FBL.ns( function()
                         var tabStop = this.getPanelTabStop(panel);
                         if  (tabStop)
                             this.focus(tabStop);
+                        break;
+                    case 'css':
+                    case 'stylesheet':
+                        this.focus(target.parentNode);
+                        panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(target.parentNode);
                         break;
                     case 'html':
                         var box = panel.ioBox.createObjectBox(panel.selection);
@@ -867,7 +1169,7 @@ FBL.ns( function()
                 for (var i = 0; i < rows.length; i++)
                 {
                     var makeTab = (panelA11y.lastIsDefault && i === rows.length - 1) || (!panelA11y.lastIsDefault && i === 0)
-                    this.makeMemberRowAccessible(panel, rows[i], makeTab, ++posInset, setSize);
+                    this.modifyMemberRow(panel, rows[i], makeTab, ++posInset, setSize);
                 }
             },
                   
@@ -885,14 +1187,14 @@ FBL.ns( function()
                 var row = startRow;
                 do
                 {
-                    this.makeMemberRowAccessible(panel, row, false, posInSet++, setSize)
+                    this.modifyMemberRow(panel, row, false, posInSet++, setSize)
                     if (row === endRow)
                         break;
                 } 
                 while (row = row.nextSibling);
             },
             
-            makeMemberRowAccessible : function(panel, row, makeTab, posInSet, setSize, toggleOnly)
+            modifyMemberRow : function(panel, row, makeTab, posInSet, setSize, toggleOnly)
             {
                 var labelCell = row.cells[0];
                 var valueCell = row.cells[1];
@@ -1001,7 +1303,7 @@ FBL.ns( function()
                 var doc = node.ownerDocument;
                 var event = doc.createEvent('MouseEvents');
                 event.initMouseEvent(eventType, true, true, doc.defaultView,
-                    0, 0, 0, 0, 0, false, false, false, false, 0, null);
+                    0, 0, 0, 30, 0, false, false, false, false, 0, null);
                 node.dispatchEvent(event);
             },
             
@@ -1022,7 +1324,7 @@ FBL.ns( function()
             
             isFocusRow : function(elem)
             {
-                return this.isLogRow(elem) || this.isDirCell(elem);
+                return hasClass(elem, 'focusRow');
             },
             
             isFocusObject : function(elem) {

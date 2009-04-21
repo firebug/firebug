@@ -17,7 +17,7 @@ const nsISelectionController = Ci.nsISelectionController;
 var domUtils = null;
 
 var CSSPropTag =
-    DIV({class: "cssProp editGroup", $disabledStyle: "$prop.disabled"},
+    DIV({class: "cssProp editGroup focusRow", $disabledStyle: "$prop.disabled", role : 'option'},
         SPAN({class: "cssPropName editable"}, "$prop.name"),
         SPAN({class: "cssColon"}, ":"),
         SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
@@ -28,7 +28,7 @@ var CSSRuleTag =
     TAG("$rule.tag", {rule: "$rule"});
 
 var CSSImportRuleTag =
-    DIV({class: "cssRule insertInto", _repObject: "$rule.rule"},
+    DIV({class: "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
         "@import &quot;",
         A({class: "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
         "&quot;;"
@@ -36,14 +36,18 @@ var CSSImportRuleTag =
 
 var CSSStyleRuleTag =
     DIV({class: "cssRule insertInto", _repObject: "$rule.rule.style",
-            "ruleId": "$rule.id"},
-        DIV({class: "cssHead"},
+            "ruleId": "$rule.id", role : 'presentation'},
+        DIV({class: "cssHead focusRow", role : 'listitem'},
             SPAN({class: "cssSelector"}, "$rule.selector"), " {"
         ),
-        FOR("prop", "$rule.props",
-            CSSPropTag
-        ),
-        DIV({class: "editable insertBefore"}, "}")
+        DIV({role : 'group'},
+            DIV({class : "cssPropertyListBox", role : 'listbox'},
+                FOR("prop", "$rule.props",
+                    CSSPropTag
+                )
+            )
+        ),    
+        DIV({class: "editable insertBefore", role:"presentation"}, "}")
     );
 
 const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s]+)|"(.*?)"/;
@@ -452,7 +456,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     disablePropertyRow: function(row)
     {
         toggleClass(row, "disabledStyle");
-
+        
         var style = Firebug.getRepObject(row);
         var propName = getChildByClass(row, "cssPropName").textContent;
 
@@ -467,7 +471,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         var map = this.context.selectorMap[ruleId];
         var propValue = getChildByClass(row, "cssPropValue").textContent;
         var parsedValue = parsePriority(propValue);
-
         if (hasClass(row, "disabledStyle"))
         {
             Firebug.CSSModule.removeProperty(style, propName);
@@ -560,6 +563,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("click", this.onClick, false);
         Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'css']);
     },
 
     destroyNode: function()
@@ -567,6 +571,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("click", this.onClick, false);
         Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'css']);
     },
 
     show: function(state)
@@ -605,15 +610,18 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (!styleSheet)
             return;
-
         if (styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 
         var rules = this.getStyleSheetRules(this.context, styleSheet);
-        if (rules.length)
-            this.template.tag.replace({rules: rules}, this.panelNode);
-        else
-            FirebugReps.Warning.tag.replace({object: "EmptyStyleSheet"}, this.panelNode);
+        
+        var result; 
+        if (rules.length) {
+            result = this.template.tag.replace({rules: rules}, this.panelNode);
+        }
+            else
+            result = FirebugReps.Warning.tag.replace({object: "EmptyStyleSheet"}, this.panelNode);
+        dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, this.panelNode]);
     },
 
     updateSelection: function(object)
@@ -907,50 +915,61 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({},
-                FOR("rule", "$rules",
-                    TAG("$ruleTag", {rule: "$rule"})
-                ),
-                FOR("section", "$inherited",
-                    H1({class: "cssInheritHeader groupHeader"},
-                        SPAN({class: "cssInheritLabel"}, "$inheritLabel"),
-                        TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
-                    ),
-                    FOR("rule", "$section.rules",
+                DIV({role : 'list'},
+                    FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
-                )
+                ),
+                DIV({role : "list"},
+                    FOR("section", "$inherited",
+                        
+                        H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
+                            SPAN({class: "cssInheritLabel"}, "$inheritLabel"),
+                            TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
+                        ),
+                        DIV({role : 'group'},
+                            FOR("rule", "$section.rules",
+                                TAG("$ruleTag", {rule: "$rule"})
+                            )
+                        )
+                    )
+                 )
             ),
 
         ruleTag:
             DIV({class: "cssRule insertInto", $cssInheritedRule: "$rule.inherited",
-                 _repObject: "$rule.rule.style", "ruleId": "$rule.id"},
-                DIV({class: "cssHead"},
-                    SPAN({class: "cssSelector"}, "$rule.selector"), " {",
-                    TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+                 _repObject: "$rule.rule.style", "ruleId": "$rule.id",  role : 'presentation'},
+                DIV({class: "cssHead focusRow",  role : 'listitem'},
+                    SPAN({class: "cssSelector"}, "$rule.selector"), " {"
                 ),
-                FOR("prop", "$rule.props",
-                    DIV({class: "cssProp editGroup", $disabledStyle: "$prop.disabled",
-                            $cssOverridden: "$prop.overridden"},
-                        SPAN({class: "cssPropName editable"}, "$prop.name"),
-                        SPAN({class: "cssColon"}, ":"),
-                        SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
-                        SPAN({class: "cssSemi"}, ";")
+                DIV({role : 'group'},
+                    DIV({class : "cssPropertyListBox", role : 'listbox'},
+                        FOR("prop", "$rule.props",
+                            DIV({class: "cssProp editGroup focusRow", $disabledStyle: "$prop.disabled",
+                                    $cssOverridden: "$prop.overridden", role : "option"},
+                                SPAN({class: "cssPropName editable"}, "$prop.name"),
+                                SPAN({class: "cssColon"}, ":"),
+                                SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
+                                SPAN({class: "cssSemi"}, ";")
+                            )
+                        )
                     )
                 ),
-                DIV({class: "editable insertBefore"}, "}")
+                DIV({class: "editable insertBefore", role:'presentation'}, "}"),
+                TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
             ),
 
         computedTag:
             DIV({},
                 FOR("group", "$groups",
-                    H1({class: "cssInheritHeader groupHeader"},
+                    H1({class: "cssInheritHeader groupHeader focusRow"},
                         SPAN({class: "cssInheritLabel"}, "$group.title")
                     ),
-                    TABLE({width: "100%"},
+                    TABLE({width: "100%", role : 'list'},
                         FOR("prop", "$group.props",
-                            TR(
-                                TD({class: "stylePropName"}, "$prop.name"),
-                                TD({class: "stylePropValue"}, "$prop.value")
+                            TR({class : 'focusRow', role : 'listitem'},
+                                TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
+                                TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
                             )
                         )
                     )
@@ -969,11 +988,15 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         if (rules.length || sections.length)
         {
             var inheritLabel = $STR("InheritedFrom");
-            this.template.cascadedTag.replace({rules: rules, inherited: sections,
+            var result = this.template.cascadedTag.replace({rules: rules, inherited: sections,
                 inheritLabel: inheritLabel}, this.panelNode);
+            dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
         }
-        else
-            FirebugReps.Warning.tag.replace({object: "EmptyElementCSS"}, this.panelNode);
+        else 
+        {
+            var result = FirebugReps.Warning.tag.replace({object: "EmptyElementCSS"}, this.panelNode);
+            dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
+        }
     },
 
     updateComputedView: function(element)
@@ -999,7 +1022,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             }
         }
 
-        this.template.computedTag.replace({groups: groups}, this.panelNode);
+        var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
+        dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
     },
 
     getStylesheetURL: function(style)

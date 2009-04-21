@@ -1208,7 +1208,8 @@ function browser2Loaded()
 function onBlur(event)
 {
     // XXXjjb this seems like a waste: called continuously to clear possible highlight I guess.
-    Firebug.Inspector.highlightObject(null, FirebugContext);
+    // XXXhh Is this really necessary? I disabled it for now as this was preventing me to show highlights on focus
+    //Firebug.Inspector.highlightObject(null, FirebugContext);
 }
 
 function onSelectLocation(event)
