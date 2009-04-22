@@ -1121,7 +1121,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
+            A({class: "objectLink focusRow a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             "(",
             FOR("arg", "$object|argIterator",
                 TAG("$arg.tag", {object: "$arg.value"}),
@@ -1195,7 +1195,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 this.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        FOR("frame", "$object.frames",
+        FOR("frame", "$object.frames focusRow",
             TAG(this.StackFrame.tag, {object: "$frame"})
         ),
 

@@ -118,7 +118,11 @@ FBL.ns( function()
             
                 actAsPanel = actAsPanel ? actAsPanel : panel.name; 
                 //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
-                
+                if (panel.name == "callstack")
+                {
+                    panel.panelNode.innerHTML = '<DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">isTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus" selected="true">focusTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">handleMouseDown</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">isTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus" selected="true">focusTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">handleMouseDown</DIV>'
+                    this.onLogRowsCreated(panel, panel.panelNode.getElementsByClassName('focusRow'));
+                }
                 switch (actAsPanel)
                 {
                     case 'console':
@@ -156,7 +160,6 @@ FBL.ns( function()
                         this.makeFocusable(panel.panelNode, true);
                         panel.panelNode.addEventListener('contextmenu', this.onPanelContextMenu, false);
                         break;
-
                 }
             },
             
@@ -191,7 +194,6 @@ FBL.ns( function()
                     case 'script':
                         panel.panelNode.removeEventListener('contextmenu', this.onPanelContextMenu, false);
                         break;
-
                 }
             },
             
@@ -363,6 +365,14 @@ FBL.ns( function()
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Console Panel
+            
+            onLogRowsCreated : function(panel, rows)
+            {
+                for ( var i = 0; i < rows.length; i++)
+                {
+                    this.onLogRowCreated (panel, rows[i]);
+                }
+            },
             
             onLogRowCreated : function(panel, row)
             {
@@ -606,7 +616,7 @@ FBL.ns( function()
             getFocusObjects : function(container)
             {
                 var nodes = container.getElementsByClassName("a11yFocus")
-                return Array.filter(nodes, this.isVisible, this);;
+                return Array.filter(nodes, this.isVisible, this);
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1352,7 +1362,8 @@ FBL.ns( function()
             
             isVisible : function (elem)
             {
-                return elem && isVisible(elem) && elem.ownerDocument.defaultView.getComputedStyle(elem, null).visibility !== "hidden";
+                var style = elem.ownerDocument.defaultView.getComputedStyle(elem, null);
+                return style.visibility !== "hidden" && style.display !== "none" ;
             },
             
             isTabWorthy : function (elem)

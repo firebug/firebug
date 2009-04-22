@@ -3196,7 +3196,17 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     {
         Firebug.Panel.destroy.apply(this, arguments);
     },
-
+    
+    initializeNode : function(oldPanelNode)
+    {
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);   
+    },
+    
+    destroyNode : function()
+    {
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);   
+    },
+    
     show: function(state)
     {
           this.refresh();
