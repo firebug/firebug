@@ -28,6 +28,7 @@ const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManag
 const stringBundleService = CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// There is one Firebug object per browser.xul
 
 const contentBox = $("fbContentBox");
 const contentSplitter = $("fbContentSplitter");
@@ -35,6 +36,7 @@ const toggleCommand = $("cmd_toggleFirebug");
 const detachCommand = $("cmd_toggleDetachFirebug");
 const tabBrowser = $("content");
 const versionURL = "chrome://firebug/content/branch.properties";
+const statusBarContextMenu = $("fbStatusContextMenu");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -384,57 +386,57 @@ top.Firebug =
         this.setSuspended(null);
     },
 
+    getEnablementStatus: function()
+    {
+        var status = "";
+        var fbStatusIcon = $('fbStatusIcon');
+        if (fbStatusIcon.getAttribute("console") == "on")
+            status +="console: on,";
+        else
+            status +="console: off,";
+
+        if (fbStatusIcon.getAttribute("net") == "on")
+            status +=" net: on,";
+        else
+            status +=" net: off,";
+
+        if (fbStatusIcon.getAttribute("script") == "on")
+            status +=" script: on";
+        else
+            status +=" script: off";
+
+        return status;
+    },
+
     resetTooltip: function()
     {
         var tooltip = "Firebug "+ Firebug.getVersion();
 
-        var fbStatusIcon = $('fbStatusIcon');
-        if (fbStatusIcon.getAttribute("console") == "on")
-            tooltip +=" console: on,";
-        else
-            tooltip +=" console: off,";
-
-        if (fbStatusIcon.getAttribute("net") == "on")
-            tooltip +=" net: on,";
-        else
-            tooltip +=" net: off,";
-
-        if (fbStatusIcon.getAttribute("script") == "on")
-            tooltip +=" script: on";
-        else
-            tooltip +=" script: off,";
+        tooltip += "\n"+Firebug.getEnablementStatus();
 
         if (Firebug.getSuspended())
-            tooltip += ": " + Firebug.getSuspended();
+            tooltip += "\n" + Firebug.getSuspended();
         else
         {
-            var urls = Firebug.getURLsForAllActiveContexts();
-            if (urls.length > 0)
+            var total = {detached: 0, minimized: 0, active: 0};
+            this.eachActiveContext(function countContexts(context)
             {
-                tooltip += " activated by "+urls.length+" page(s)";
-                for (var i = 0; i < urls.length; i++)
-                {
-                    try {
-                        tooltip += "\n"+decodeURI(urls[i]);
-                    } catch (e) {
-                        // xxxHonza: from some reason FBTrace is undefined here.
-                        // xxxJJB I put it back so we can see if this is a case of window.closed
-                        if (!window.closed)
-                            FBTrace.sysout("Firebug.resetTooltip EXCEPTION " + e + "\n");
-                        else
-                        {
-                            if (FBTrace.DBG_ERRORS)
-                                FBTrace.sysout("Firebug Exception in a closed window!");
-                            return false;
-                        }
-                    }
-                }
-            }
-            else
-            {
-                if(FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Firebug.resetTooltip not suspended but no active contexts!\n ");
-            }
+                if (context.detached)
+                    total.detached++;
+                else if (context.minimized)
+                    total.minimized++;
+                total.active++;
+            });
+
+            if (total.detached > 0)
+                tooltip += "\n"+total.detached+" "+$STR("detached");
+            if (total.minimized > 0)
+                tooltip += "\n"+total.minimized+" "+$STR("minimized");
+            if (total.active == 1)
+                tooltip += "\n"+total.active+" "+$STR("Firebug");
+            if (total.active > 1)
+                tooltip += "\n"+total.active+" "+$STR("Firebugs");
+
         }
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
     },
@@ -991,6 +993,7 @@ top.Firebug =
             if (toggleOff)
             {
                 TabWatcher.unwatchBrowser(browser);
+                this.showBar(false);
             }
             else
             {
@@ -1013,10 +1016,12 @@ top.Firebug =
                 {
                     browser.chrome.setFirebugContext(context);
                     Firebug.updateActiveContexts(context); // now the top tab is active
+                    if (context.minimized)
+                        context.minimized.command.call(); // unminimize
+                    else
+                        this.showBar(true);
                 }
             }
-
-            this.showBar(!toggleOff);
         }
     },
 
@@ -1041,10 +1046,57 @@ top.Firebug =
         else
         {
             this.showBar(false);
-            browser.chrome.showMinimized(context);
+            Firebug.showMinimized(context);
         }
     },
 
+    showMinimized: function(context) // put a item in the status bar context menu
+    {
+        var tab = gBrowser.selectedTab;
+        var url = context.getName();
+
+        function unminimize()
+        {
+            var tab = Firebug.getTabForWindow(context.window);
+            if (tab)
+            {
+                Firebug.tabBrowser.selectedTab = tab;
+                Firebug.showBar(true);
+            }
+            else
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("showMinimizedMenu unminimize, not tab for context "+context.getName());
+            }
+
+            statusBarContextMenu.removeChild(context.minimized);
+            delete context.minimized;
+
+            var allMinimized = getElementsByAttribute(statusBarContextMenu, name, "minimized");
+            if (!allMinimized || allMinimized.length < 1)
+            {
+                statusBarContextMenu.removeChild(Firebug.statusBarContextMenuMinimizedSeparator);
+                delete Firebug.statusBarContextMenuMinimizedSeparator;
+            }
+            Firebug.resetTooltip();
+        }
+
+        if (!Firebug.statusBarContextMenuMinimizedSeparator)
+            Firebug.statusBarContextMenuMinimizedSeparator = createMenuItem(statusBarContextMenu, '-');
+
+        var minimized =
+        {
+            type:"radio",
+            name:"minimized", // one tab in this group will be restored.
+            checked:"true", // checked should be the selected tab
+            nol10n: true,    // URL is what the use sees anyway
+            label:decodeURI(url),
+            command: unminimize
+        };
+        context.minimized = FBL.createMenuItem(statusBarContextMenu, minimized);
+        context.minimized.command = unminimize;
+        Firebug.resetTooltip();
+    },
 
     toggleDetachBar: function(forceOpen)
     {
@@ -1120,6 +1172,8 @@ top.Firebug =
     {
         if (event.button != 0)
             return;
+        else if (context && context.minimized)
+            context.minimized.command.call();  // unminimize
         else if (isControl(event))
             this.toggleDetachBar(true);
         else if (context && context.errorCount)
@@ -1624,7 +1678,7 @@ top.Firebug =
     },
     //***********************************************************************
 
-    getTabIdForWindow: function(aWindow)
+    getTabForWindow: function(aWindow)
     {
         aWindow = getRootWindow(aWindow);
 
@@ -1640,11 +1694,17 @@ top.Firebug =
             if (targetBrowserIndex != -1)
             {
                 tab = this.tabBrowser.tabContainer.childNodes[targetBrowserIndex];
-                return tab.linkedPanel;
+                return tab;
             }
         } catch (ex) {}
 
         return null;
+    },
+
+    getTabIdForWindow: function(win)
+    {
+        var tab = this.getTabForWindow(win);
+        return tab ? tab.linkedPanel : null;
     },
 };
 
@@ -1672,7 +1732,7 @@ Firebug.Listener.prototype =
 
     removeListener: function(listener)
     {
-        remove(this.fbListeners, listener);
+        remove(this.fbListeners, listener);  // if this.fbListeners is null, remove is being called with no add
     }
 };
 

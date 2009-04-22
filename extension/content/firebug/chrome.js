@@ -44,7 +44,6 @@ var disabledCaption = null;
 var enableSiteLink = null;
 var enableSystemPagesLink = null;
 var enableAlwaysLink = null;
-
 // ************************************************************************************************
 
 top.FirebugChrome =
@@ -264,34 +263,6 @@ top.FirebugChrome =
             browser.chrome.attachBrowser(browser, context);
     },
 
-    showMinimized: function(context) // put a icon in the status bar for this context
-    {
-        // <image class="fbMinimized" tooltiptext='context name' onclick="revive"/>
-        var icon = document.createElement("image");
-        setClass(icon, 'fbMinimized');
-        icon.setAttribute("src", "chrome://firebug/skin/firebugMinimized.png")
-        icon.setAttribute("tooltiptext", context.getName());
-        var statusBar = $("fbStatusBar");
-        statusBar.insertBefore(icon, statusBar.firstChild);
-
-        var tab = gBrowser.selectedTab;
-
-        FBTrace.sysout("chrome.showMinimized insertBefore ", icon);
-        function unMinimize(event)
-        {
-            FBTrace.sysout("chrome.unMinimize "+context.getName());
-            Firebug.tabBrowser.selectedTab = tab;
-            Firebug.showBar(true);
-            statusBar.removeChild(icon);
-            icon.removeEventListener(unMinimize.eventType, unMinimize, unMinimize.capturing);
-        }
-        unMinimize.eventType = 'click';
-        unMinimize.capturing = true;
-        icon.addEventListener(unMinimize.eventType, unMinimize, unMinimize.capturing);
-
-        context.unMinimizer = unMinimize;  // needed for cleanup
-    },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getCurrentBrowser: function()
@@ -444,6 +415,7 @@ top.FirebugChrome =
             }
         }
     },
+
     openPanelOptionsMenu : function()
     {
         FBTrace.sysout('test');
