@@ -411,7 +411,7 @@ FBL.ns( function()
                 var target = event.target;
                 var keyCode = event.keyCode || event.charCode;   
                 
-                if (!this.isFocusObject(target) && !this.isFocusRow(target))
+                if (!this.isTabWorthy(target) && !this.isFocusNoTabObject(target))
                     return;
                 else if (event.shiftKey || event.altKey)
                     return;
@@ -438,7 +438,11 @@ FBL.ns( function()
                 { 
                     case 38://up
                     case 40://down
+                    if (!this.isFocusNoTabObject(target))    
+                    {
                         this.focusSiblingRow(panel, newTarget, keyCode == 38);
+                        cancelEvent(event);
+                    }
                         break;
                     case 37://left
                     case 39://right
@@ -453,6 +457,7 @@ FBL.ns( function()
                                 if (focusItems.length > 0)
                                     this.focus(event.ctrlKey ? focusItems[focusItems.length -1] : focusItems[0]);
                             }
+                            cancelEvent(event);
                         }
                         else if (this.isDirCell(target))
                         {
@@ -480,21 +485,15 @@ FBL.ns( function()
                                 }
                                 else if (level > 0)
                                 {
-                                    //TODO: Make more efficient. (Now gets more costly as rows increase) 
-                                    var i = row.rowIndex - 1;
-                                    var tempRow;
-                                    while(i >= 0)
-                                    {
-                                        tempRow = row.parentNode.rows[i];
-                                        if (parseInt(tempRow.getAttribute("level")) == level -1)
-                                        {
-                                            tempRow.cells[1].firstChild.focus();
-                                            break;
-                                        }
-                                        i--;
-                                    }
+                                    var targetLevel = (level - 1) + "";
+                                    var newRows = Array.filter(row.parentNode.rows, function(e,i,a){
+                                        return e.rowIndex < row.rowIndex && e.getAttribute('level') == targetLevel;
+                                        }, this);
+                                    if (newRows.length)
+                                        this.focus(newRows[newRows.length -1].cells[1].firstChild);
                                 }
                             }
+                            cancelEvent(event);
                         }
                         else if (this.isFocusObject(target))
                         {
@@ -511,27 +510,34 @@ FBL.ns( function()
                             }
                             else 
                                 this.focus(goLeft ? parentRow : focusObjects[focusObjects.length -1]);    
+                            cancelEvent(event);
                         }
                         break;
                     case 35://end
                     case 36://home
                         this.focusEdgeRow(panel, newTarget, keyCode == 36);
+                        cancelEvent(event);
                         break;
                     case 33://pgup
                     case 34://pgdn
                         this.focusPageSiblingRow(panel, newTarget, keyCode == 33);
+                        cancelEvent(event);
                         break;
                     case 13://enter
                         if (this.isFocusObject(target))
                             this.dispatchMouseEvent(target, 'click');
+                        else if(hasClass(target, 'watchEditBox'))
+                        {
+                            this.dispatchMouseEvent(target, 'mousedown');
+                            cancelEvent(event);
+                        }
                             break;
                     case 32://space
                     if (this.isFocusObject(target) && target.hasAttribute('role', 'checkbox'))
                         this.dispatchMouseEvent(target, 'click');
                     break;    
                 }
-                if (!event.shiftKey)
-                    event.preventDefault();
+                
             },
             
             onPanelFocus : function(event)
@@ -806,10 +812,8 @@ FBL.ns( function()
             
             onCSSRulesAdded : function(panel, rootNode)
             {
-                
                 if (!this.enabled || !panel.context.a11yPanels[panel.name])
-                    return;
-                
+                    return;   
                 var panelA11y = panel.context.a11yPanels[panel.name];
                 if (panelA11y.timeouts)
                 {
@@ -861,14 +865,13 @@ FBL.ns( function()
             {
                 slice.forEach(function(row,i,a){
                     this.makeFocusable(row, i == 0 && !reFocusId);
-                    row.style.color = "red"
                     if (hasClass(row, 'cssHead'))
                     {
                         var sourceLink = getNextByClass(row, 'objectLink');
                         if (sourceLink)
                             row.setAttribute('aria-label', row.textContent + " " + $STRF('defined in file', [sourceLink.textContent]));
-                        var listBox = row.getElementsByClassName('cssPropertyListBox')[0];
-                        var selector = getChildByClass(row.nextSibling, 'cssSelector');
+                        var listBox = row.nextSibling.getElementsByClassName('cssPropertyListBox')[0];
+                        var selector = getChildByClass(row, 'cssSelector');
                         if (listBox && selector)
                             listBox.setAttribute('aria-label', $STRF("declarations for selector", [selector.textContent]));
                     }
@@ -880,7 +883,7 @@ FBL.ns( function()
                     }
                     if (reFocusId && getElementXPath(row) == reFocusId)
                     {
-                        this.focus(row);
+                        this.focus(row, true);
                         this.setPanelTabStop(panel, row);
                         panel.context.a11yPanels[panel.name].reFocusId = reFocusId = null;
                     }
@@ -1048,6 +1051,16 @@ FBL.ns( function()
                     this.dispatchMouseEvent(event.target, 'mouseout');
             },
             
+            onInlineEditorShow : function(editor)
+            {
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;                
+                //recreate the input element rather than reusing the old one, otherwise AT won't pick it up
+                editor.input.onkeypress = editor.input.oninput = editor.input.onoverflow = null;
+                editor.inputTag.replace({}, editor.box.childNodes[1].firstChild, editor);
+                editor.input = editor.box.childNodes[1].firstChild.firstChild;  
+            },
+            
             onBeginEditing : function(panel, editor, target, value)
             {  
                 switch (panel.name)
@@ -1083,7 +1096,6 @@ FBL.ns( function()
                         editor.input.setAttribute('aria-label', label);
                         break;
                     case 'css':
-                        
                         var selector = getPreviousByClass(target, 'cssSelector');
                         selector = selector ? selector.textContent : "";
                         
@@ -1107,28 +1119,33 @@ FBL.ns( function()
                             editor.input.setAttribute('aria-label', target.cells[0].textContent);
                         break;
                 }
-                //not sure why I need to do this. Focus doesn't seem to be picked up properly for inline editors
-                editor.input.blur()
-                editor.input.focus(); //NVDA still doesn't get this
             },
             
-            onStopEdit : function(panel, editor, target)
+            onInlineEditorClose  : function(panel, editor, target)
             {
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;
                 switch (panel.name)
                 {
                     case 'layout':
-                        var tabStop = this.getPanelTabStop(panel);
-                        if  (tabStop)
-                            this.focus(tabStop);
+                        var box = getAncestorByClass(target, 'focusGroup')
+                        if (box)
+                            this.focus(box, true);
                         break;
                     case 'css':
                     case 'stylesheet':
-                        this.focus(target.parentNode);
+                        this.focus(target.parentNode, true);
                         panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(target.parentNode);
                         break;
                     case 'html':
-                        var box = panel.ioBox.createObjectBox(panel.selection);
-                        panel.ioBox.selectObjectBox(box);
+                        var box = getAncestorByClass(target, 'nodeBox')
+                        if (box)
+                            panel.ioBox.selectObjectBox(box);
+                        break;
+                    case 'watches':
+                        var node = target.getElementsByClassName('watchEditBox')[0];
+                        if (node)
+                            this.focus(node, true);
                         break;
                 }
             },
@@ -1183,18 +1200,18 @@ FBL.ns( function()
                     panel = Firebug.getElementPanel(startRow);
                 if (!panel || !panel.context.a11yPanels[panel.name])
                     return;
-                
+                var reFocusId = panel.context.a11yPanels[panel.name].reFocusId;
                 var row = startRow;
                 do
                 {
-                    this.modifyMemberRow(panel, row, false, posInSet++, setSize)
+                    this.modifyMemberRow(panel, row, false, posInSet++, setSize, reFocusId)
                     if (row === endRow)
                         break;
                 } 
                 while (row = row.nextSibling);
             },
             
-            modifyMemberRow : function(panel, row, makeTab, posInSet, setSize, toggleOnly)
+            modifyMemberRow : function(panel, row, makeTab, posInSet, setSize, reFocusId)
             {
                 var labelCell = row.cells[0];
                 var valueCell = row.cells[1];
@@ -1221,9 +1238,34 @@ FBL.ns( function()
                         cellChild.setAttribute('aria-posinset', posInSet);
                     }
                     setClass(cellChild, 'focusRow');
+                    if (typeof reFocusId == "number" && row.rowIndex == reFocusId)
+                    {
+                        this.setPanelTabStop(panel, cellChild)
+                        
+                        this.focus(cellChild, true, true);
+                        panel.context.a11yPanels[panel.name].reFocusId = null;
+                    }
                 }
             },
+            
+            onBeforeDomUpdateSelection : function (panel)
+            {
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;                
+                var focusNode = panel.document.activeElement;
+                
+                if (this.isDirCell(focusNode))
+                    panel.context.a11yPanels[panel.name].reFocusId = focusNode.parentNode.parentNode.rowIndex;
+            },
                          
+            onWatchEndEditing : function(panel, row)
+            {
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return;
+                panel.context.a11yPanels[panel.name].reFocusId = 2;
+                
+            },
+            
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Domplate Management 
             
@@ -1272,11 +1314,12 @@ FBL.ns( function()
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Utils
             
-            focus : function(elem)
+            focus : function(elem, noVisiCheck, needsMoreTime)
             {
-                //maybe add isFocusable check here as well?
-                if (isElement(elem) && this.isVisible(elem))
-                    elem.focus();
+                if (isElement(elem) && (noVisiCheck || this.isVisible(elem)))
+                    FirebugContext.setTimeout(function(){ 
+                        elem.focus()
+                        }, needsMoreTime ? 500 :10);
             },
             
             makeFocusable : function(elem, inTabOrder)
@@ -1331,8 +1374,12 @@ FBL.ns( function()
                 return hasClass(elem, 'a11yFocus');
             },
             
+            isFocusNoTabObject : function(elem) {
+                return hasClass(elem, 'a11yFocusNoTab');
+            },
+            
             isDirCell : function(elem) {
-                return hasClass(elem, 'memberValueCell') || hasClass(elem.parentNode, 'memberValueCell'); 
+                return hasClass(elem.parentNode, 'memberValueCell'); 
             }
         });
         Firebug.registerModule(Firebug.A11yModel);

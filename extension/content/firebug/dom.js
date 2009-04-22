@@ -52,14 +52,14 @@ const RowTag =
 const WatchRowTag =
     TR({class: "watchNewRow", level: 0},
         TD({class: "watchEditCell", colspan: 2},
-            DIV({class: "watchEditBox"},
+            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0', 'aria-label' : $STRF('press enter to add new watch expression')},
                     $STR("NewWatch")
             )
         )
     );
 
 const SizerRow =
-    TR(
+    TR({role : 'presentation'},
         TD({width: "30%"}),
         TD({width: "70%"})
     );
@@ -76,8 +76,8 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     watchTag:
         TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
-               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick"},
-            TBODY(
+               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree'},
+            TBODY({role : 'presentation'},
                 SizerRow,
                 WatchRowTag
             )
@@ -85,8 +85,8 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tableTag:
         TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
-            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick"},
-            TBODY(
+            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree'},
+            TBODY({role : 'presentation'},
                 SizerRow
             )
         ),
@@ -250,6 +250,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     rebuild: function(update, scrollTop)
     {
+        dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
         var members = getMembers(this.selection);
         expandMembers(members, this.toggles, 0, 0);
 
@@ -1107,6 +1108,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
+        dispatch([Firebug.A11yModel], "onInitializeNode", [this, 'console']);
     },
 
     destroyNode: function()
@@ -1114,15 +1116,18 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
+        dispatch([Firebug.A11yModel], "onDestroyNode", [this, 'console']);
     },
 
     refresh: function()
     {
         this.rebuild(true);
+        
     },
 
     updateSelection: function(object)
     {
+        dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
         var frame = this.context.currentFrame;
 
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
@@ -1238,7 +1243,7 @@ function DOMEditor(doc)
 
 DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-    tag: INPUT({class: "fixedWidthEditor", type: "text",
+    tag: INPUT({class: "fixedWidthEditor a11yFocusNoTab", type: "text", title:$STR("NewWatch"),
                 oninput: "$onInput", onkeypress: "$onKeyPress"}),
 
     endEditing: function(target, value, cancel)
@@ -1250,6 +1255,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = getAncestorByClass(target, "memberRow");
+        dispatch([Firebug.A11yModel], 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
         else if (hasClass(row, "watchRow"))

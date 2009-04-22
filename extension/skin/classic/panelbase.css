@@ -312,4 +312,19 @@ h1.groupHeader {
 .useA11y .textEditorInner:focus {
     outline: 2px solid #FF9933;
 }
+
+.useA11y .a11yFocusNoTab:focus {
+    outline: 2px solid #FF9933;
+    background-color: #FFFFAD;
+}
+
+.offScreen {
+    position: absolute;
+    left: -10000px;
+    top: -100000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    }
+
 /************************************************************************************************/

@@ -109,6 +109,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             if (cancel)
             {
+                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, this, currentTarget]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -460,15 +461,18 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             ),
             DIV({class: "textEditorInner1"},
                 DIV({class: "textEditorInner2"},
-                    INPUT({class: "textEditorInner", type: "text",
-                        oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"})
+                    TAG("$inputTag")
                 )
             ),
             DIV({class: "textEditorBottom1"},
                 DIV({class: "textEditorBottom2"})
             )
         ),
-
+     
+    inputTag :   
+        INPUT({class: "textEditorInner", type: "text",
+            oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
+        ),
     expanderTag: IMG({class: "inlineExpander", src: "blank.gif"}),
 
     enterOnBlur: true,
@@ -518,6 +522,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, targetSize)
     {
+        dispatch([Firebug.A11yModel], "onInlineEditorShow", [this]);
         this.target = target;
         this.panel = panel;
 
