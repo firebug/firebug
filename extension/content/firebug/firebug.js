@@ -1069,16 +1069,7 @@ top.Firebug =
                     FBTrace.sysout("showMinimizedMenu unminimize, not tab for context "+context.getName());
             }
 
-            statusBarContextMenu.removeChild(context.minimized);
-            delete context.minimized;
-
-            var allMinimized = getElementsByAttribute(statusBarContextMenu, name, "minimized");
-            if (!allMinimized || allMinimized.length < 1)
-            {
-                statusBarContextMenu.removeChild(Firebug.statusBarContextMenuMinimizedSeparator);
-                delete Firebug.statusBarContextMenuMinimizedSeparator;
-            }
-            Firebug.resetTooltip();
+            Firebug.cleanUpMinimization(context);
         }
 
         if (!Firebug.statusBarContextMenuMinimizedSeparator)
@@ -1096,6 +1087,21 @@ top.Firebug =
         context.minimized = FBL.createMenuItem(statusBarContextMenu, minimized);
         context.minimized.command = unminimize;
         Firebug.resetTooltip();
+    },
+
+    cleanUpMinimization: function(context)
+    {
+        statusBarContextMenu.removeChild(context.minimized);
+        delete context.minimized;
+
+        var allMinimized = getElementsByAttribute(statusBarContextMenu, name, "minimized");
+        if (!allMinimized || allMinimized.length < 1)
+        {
+            statusBarContextMenu.removeChild(Firebug.statusBarContextMenuMinimizedSeparator);
+            delete Firebug.statusBarContextMenuMinimizedSeparator;
+        }
+        Firebug.resetTooltip();
+
     },
 
     toggleDetachBar: function(forceOpen)
@@ -1499,9 +1505,9 @@ top.Firebug =
         if (!context || !context.window || context.window.closed)
             return false;
 
-        // A context is active if it is visible, either because its in a Firebug window or its the selected tab.
+        // A context is active if it is minimized or visible, either because its in a Firebug window or its the selected tab.
 
-        return (context.detached || (context.browser.showFirebug && (context.browser == Firebug.tabBrowser.selectedBrowser) ) );
+        return (context.minimized || context.detached || (context.browser.showFirebug && (context.browser == Firebug.tabBrowser.selectedBrowser) ) );
     },
 
     updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
@@ -1567,7 +1573,10 @@ top.Firebug =
             });
         }
 
-        this.syncBar();  // either showUI based on context or hideUI without context,
+        if (context.minimized)
+            this.showBar(false);  // don't show, we are minimized
+        else
+            this.syncBar();  // either showUI based on context or hideUI without context,
 
         if (context && context.detached)
         {
@@ -1632,9 +1641,6 @@ top.Firebug =
                 }, 100);
             }
 
-            // Hide the current selected panel now when its context is still valid object.
-            //browser.chrome.clearPanels();
-
             if (context.externalChrome)
             {
                 if (FBTrace.DBG_WINDOWS)
@@ -1662,6 +1668,8 @@ top.Firebug =
             {
                 if (browser.detached)
                     this.killWindow(browser, browser.chrome);
+                else if (context.minimized)
+                    Firebug.cleanUpMinimization(context);
             }
             else
             {
