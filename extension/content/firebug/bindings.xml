@@ -399,10 +399,12 @@
                 if (this.firstChild)
                 {
                     var box = document.createElement("hbox");  // extra box needed to fix alignment issue in Vista theme
+                    box.setAttribute('role', 'separator');
                     box.setAttribute('align', 'center');
                     var sep = document.createElement("label");
                     sep.setAttribute("class", "panelStatusSeparator");
                     sep.setAttribute("value", separator);
+                    sep.setAttribute('role', 'presentation');
                     box.appendChild(sep);
                     this.appendChild(box);
                 }

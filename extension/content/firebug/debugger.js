@@ -2757,22 +2757,24 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 var BreakpointsTemplate = domplate(Firebug.Rep,
 {
     tag:
-        DIV({onclick: "$onClick"},
+        DIV({onclick: "$onClick", role : 'list'},
             FOR("group", "$groups",
-                DIV({class: "breakpointBlock breakpointBlock-$group.name"},
+                DIV({class: "breakpointBlock breakpointBlock-$group.name", role: 'listitem'},
                     H1({class: "breakpointHeader groupHeader"},
                         "$group.title"
                     ),
-                    FOR("bp", "$group.breakpoints",
-                        DIV({class: "breakpointRow"},
-                            DIV({class: "breakpointBlockHead"},
-                                INPUT({class: "breakpointCheckbox", type: "checkbox",
-                                    _checked: "$bp.checked"}),
-                                SPAN({class: "breakpointName"}, "$bp.name"),
-                                TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
-                                IMG({class: "closeButton", src: "blank.gif"})
-                            ),
-                            DIV({class: "breakpointCode"}, "$bp.sourceLine")
+                    DIV({class : "breakpointsGroupListBox", role: 'listbox'},
+                        FOR("bp", "$group.breakpoints",
+                            DIV({class: "breakpointRow focusRow", role : 'option', 'aria-checked' : "$bp.checked"},
+                                DIV({class: "breakpointBlockHead"},
+                                    INPUT({class: "breakpointCheckbox", type: "checkbox",
+                                        _checked: "$bp.checked", tabindex : '-1'}),
+                                    SPAN({class: "breakpointName"}, "$bp.name"),
+                                    TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
+                                    IMG({class: "closeButton", src: "blank.gif"})
+                                ),
+                                DIV({class: "breakpointCode"}, "$bp.sourceLine")
+                            )
                         )
                     )
                 )
@@ -2857,6 +2859,16 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
     {
         Firebug.Panel.destroy.apply(this, arguments);
     },
+    
+    initializeNode : function(oldPanelNode)
+    {
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);   
+    },
+    
+    destroyNode : function()
+    {
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);   
+    },
 
     show: function(state)
     {
@@ -2911,6 +2923,8 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         if (FBTrace.DBG_BP)
             FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
+        
+        dispatch([Firebug.A11yModel], 'onBreakRowsRefreshed', [this, this.panelNode]);
     },
 
     extractBreakpoints: function(context, breakpoints, errorBreakpoints, monitors)
@@ -3204,7 +3218,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     
     destroyNode : function()
     {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);   
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);   
     },
     
     show: function(state)

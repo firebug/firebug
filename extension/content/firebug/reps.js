@@ -128,7 +128,7 @@ this.Caption = domplate(Firebug.Rep,
 
 this.Warning = domplate(Firebug.Rep,
 {
-    tag: DIV({class: "warning"}, "$object|STR")
+    tag: DIV({class: "warning focusRow", role : 'listitem'}, "$object|STR")
 });
 
 // ************************************************************************************************

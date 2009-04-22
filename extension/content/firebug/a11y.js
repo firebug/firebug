@@ -118,11 +118,6 @@ FBL.ns( function()
             
                 actAsPanel = actAsPanel ? actAsPanel : panel.name; 
                 //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
-                if (panel.name == "callstack")
-                {
-                    panel.panelNode.innerHTML = '<DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">isTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus" selected="true">focusTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">handleMouseDown</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">isTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus" selected="true">focusTreeItem</DIV><DIV class="objectLink objectLink-stackFrame focusRow a11yFocus">handleMouseDown</DIV>'
-                    this.onLogRowsCreated(panel, panel.panelNode.getElementsByClassName('focusRow'));
-                }
                 switch (actAsPanel)
                 {
                     case 'console':
@@ -133,6 +128,8 @@ FBL.ns( function()
                         panel.panelNode.setAttribute('aria-live', 'polite');
                         panel.panelNode.addEventListener("keypress", this.onConsoleKeyPress, false);
                         panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
+                        if (panel.name == "breakpoints")
+                            panel.panelNode.style.overflowX = "hidden";
                         break;
                     case 'html':
                         panel.panelNode.setAttribute('role', 'tree');
@@ -333,9 +330,9 @@ FBL.ns( function()
                 if ( panelA11y && panelA11y.manageFocus)
                 {
                     var tabStop = this.getPanelTabStop(panel);
-                    if (!tabStop|| !this.isVisible(tabStop))
+                    if (!tabStop || !this.isVisbleByStyle(tabStop) || !isVisible(tabStop))
                     {
-                        this.tabStop = null;
+;                       this.tabStop = null;
                         this.findPanelTabStop(panel, 'focusRow', panelA11y.lastIsDefault);
                     }
                 }
@@ -344,9 +341,12 @@ FBL.ns( function()
             setPanelTabStop : function (panel, elem)
             {
                 var tabStop = this.getPanelTabStop(panel)
-                if (tabStop && this.isVisible(tabStop))
+                if (tabStop)
+                {
+                    FBTrace.sysout('remove from tab order: ', tabStop)
                     this.makeFocusable(tabStop, false);
-                panel.context.a11yPanels[panel.name].tabStop = elem;
+                }
+                    panel.context.a11yPanels[panel.name].tabStop = elem;
                 if (elem)
                 {
                     panel.context.a11yPanels[panel.name].reFocusId = null;
@@ -425,9 +425,8 @@ FBL.ns( function()
                     return;
                 else if (event.shiftKey || event.altKey)
                     return;
-                else if ([13, 32, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
-                    return;//not interested in any other keys, than arrows, pg, home/end, space & enter
-                
+                else if ([13, 32, 33, 34, 35, 36, 37, 38, 39, 40, 46].indexOf(keyCode) == -1)
+                    return;//not interested in any other keys, than arrows, pg, home/end, del space & enter
                 var panel = Firebug.getElementPanel(target)
                 
                 var newTarget = target
@@ -541,11 +540,40 @@ FBL.ns( function()
                             this.dispatchMouseEvent(target, 'mousedown');
                             cancelEvent(event);
                         }
-                            break;
+                        else if (hasClass(target, 'breakpointRow'))
+                        {
+                            var sourceLink = getElementByClass(target, "objectLink-sourceLink");
+                            if (sourceLink)
+                                this.dispatchMouseEvent(sourceLink, 'click');
+                        }
+                        break;
                     case 32://space
                     if (this.isFocusObject(target) && target.hasAttribute('role', 'checkbox'))
                         this.dispatchMouseEvent(target, 'click');
-                    break;    
+                    else if (hasClass(target, 'breakpointRow'))
+                    {
+                        var checkbox = getElementByClass(target, 'breakpointCheckbox');
+                        if (checkbox)
+                        {
+                            target.setAttribute('aria-checked', checkbox.checked ? "false" : "true");
+                            this.dispatchMouseEvent(checkbox, 'click');
+                        }
+                    }
+                    break;
+                    case 46://del
+                        if (hasClass(target, 'breakpointRow'))
+                        {
+                            var closeBtn = getElementByClass(target, 'closeButton');
+                            if (closeBtn)
+                            {
+                                var prevBreakpoint = getPreviousByClass(target, 'breakpointRow');
+                                if (prevBreakpoint)
+                                    this.makeFocusable(prevBreakpoint, true);
+                                panel.context.chrome.window.document.commandDispatcher.rewindFocus();
+                                this.dispatchMouseEvent(closeBtn, 'click');
+                            }
+                        }
+                        break;
                 }
                 
             },
@@ -553,13 +581,16 @@ FBL.ns( function()
             onPanelFocus : function(event)
             {
                 if (this.isTabWorthy(event.target))
+                {
+                    FBTrace.sysout('tabworthy!');
                     this.setPanelTabStop(Firebug.getElementPanel(event.target), event.target)
+                }
             },
             
             getFocusRows : function(panel)
             {
                 var nodes = panel.panelNode.getElementsByClassName('focusRow');   
-                return Array.filter(nodes, function(e,i,a){return this.isVisible(e);}, this);    
+                return Array.filter(nodes, function(e,i,a){return this.isVisbleByStyle(e);}, this);    
             },
             
             getLastFocusChild : function(target)
@@ -616,7 +647,7 @@ FBL.ns( function()
             getFocusObjects : function(container)
             {
                 var nodes = container.getElementsByClassName("a11yFocus")
-                return Array.filter(nodes, this.isVisible, this);
+                return Array.filter(nodes, this.isVisbleByStyle, this);
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -834,18 +865,7 @@ FBL.ns( function()
                     panelA11y.timeouts = null;
                 }
                 var rows = rootNode.getElementsByClassName('focusRow');
-                if (rows.length == 0) 
-                {
-                    if (hasClass(rootNode, 'focusRow'))
-                        rows = [rootNode];
-                    else if (hasClass(rootNode, 'warning'))
-                    {
-                        rootNode.setAttribute('role', 'listitem')
-                        this.makeFocusable(rootNode, true);
-                        return 
-                    } 
-                    else return;
-                }
+
                 var slice;
                 var index = 0, sliceSize = 18;
                 var delay = 0, insertInterval = 40, j=0;
@@ -880,7 +900,7 @@ FBL.ns( function()
                         var sourceLink = getNextByClass(row, 'objectLink');
                         if (sourceLink)
                             row.setAttribute('aria-label', row.textContent + " " + $STRF('defined in file', [sourceLink.textContent]));
-                        var listBox = row.nextSibling.getElementsByClassName('cssPropertyListBox')[0];
+                        var listBox = getElementByClass(row.nextSibling, 'cssPropertyListBox');
                         var selector = getChildByClass(row, 'cssSelector');
                         if (listBox && selector)
                             listBox.setAttribute('aria-label', $STRF("declarations for selector", [selector.textContent]));
@@ -1037,10 +1057,9 @@ FBL.ns( function()
                             this.focus(node);
                         break;
                     case 13:
-                        var editables = target.getElementsByClassName('editable');
-                        editables = Array.filter(editables, function(e,i,a){return hasClass(e, 'focusStart');}, this);
-                        if (editables[0])
-                            this.dispatchMouseEvent(editables[0], 'mousedown');
+                        var editable = getElementByClass(target, 'editable');
+                        if (editable)
+                            this.dispatchMouseEvent(editable, 'mousedown');
                         cancelEvent(event);
                         break;
                 }
@@ -1061,7 +1080,7 @@ FBL.ns( function()
                     this.dispatchMouseEvent(event.target, 'mouseout');
             },
             
-            onInlineEditorShow : function(editor)
+            onInlineEditorShow : function(panel, editor)
             {
                 if (!this.enabled || !panel.context.a11yPanels[panel.name])
                     return;                
@@ -1153,7 +1172,7 @@ FBL.ns( function()
                             panel.ioBox.selectObjectBox(box);
                         break;
                     case 'watches':
-                        var node = target.getElementsByClassName('watchEditBox')[0];
+                        var node = getElementByClass(target, 'watchEditBox');
                         if (node)
                             this.focus(node, true);
                         break;
@@ -1175,6 +1194,29 @@ FBL.ns( function()
                     this.chrome.$('fbContextMenu').openPopup(node, 'after_pointer');  
                     cancelEvent(event); //no need for default handlers anymore
                 }   
+            },
+            
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+            // Breakpoints Panel
+            
+            onBreakRowsRefreshed : function(panel, rootNode)
+            {
+                var rows = rootNode.getElementsByClassName('focusRow');
+                
+                for ( var i = 0; i < rows.length; i++)
+                {
+                    this.makeFocusable(rows[i], i == 0);
+                    if (i == 0)
+                        this.setPanelTabStop(panel, rows[i]);
+                }
+                var groupHeaders = rootNode.getElementsByClassName('breakpointHeader');
+                
+                for ( i = 0; i < groupHeaders.length; i++)
+                {
+                    var listBox = getNextByClass(groupHeaders[i], 'breakpointsGroupListBox');
+                    if (listBox)
+                        listBox.setAttribute('aria-label', groupHeaders[i].textContent);
+                }
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1326,7 +1368,7 @@ FBL.ns( function()
             
             focus : function(elem, noVisiCheck, needsMoreTime)
             {
-                if (isElement(elem) && (noVisiCheck || this.isVisible(elem)))
+                if (isElement(elem) && (noVisiCheck || this.isVisbleByStyle(elem)))
                     FirebugContext.setTimeout(function(){ 
                         elem.focus()
                         }, needsMoreTime ? 500 :10);
@@ -1351,16 +1393,17 @@ FBL.ns( function()
             
             dispatchMouseEvent : function (node, eventType)
             {
+                FBTrace.sysout('mouse!', node);
                 if (typeof node == "string")
                     node = $(node);
                 var doc = node.ownerDocument;
                 var event = doc.createEvent('MouseEvents');
                 event.initMouseEvent(eventType, true, true, doc.defaultView,
-                    0, 0, 0, 30, 0, false, false, false, false, 0, null);
+                    0, 0, 0, eventType == "mousedown" ? 30 : 0, 0, false, false, false, false, 0, null);
                 node.dispatchEvent(event);
             },
             
-            isVisible : function (elem)
+            isVisbleByStyle : function (elem)
             {
                 var style = elem.ownerDocument.defaultView.getComputedStyle(elem, null);
                 return style.visibility !== "hidden" && style.display !== "none" ;

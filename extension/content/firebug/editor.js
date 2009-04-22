@@ -522,7 +522,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, targetSize)
     {
-        dispatch([Firebug.A11yModel], "onInlineEditorShow", [this]);
+        dispatch([Firebug.A11yModel], "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
 

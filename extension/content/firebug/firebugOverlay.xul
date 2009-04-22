@@ -209,7 +209,7 @@
                                     </hbox>
 
                                     <hbox id="fbScriptButtons" collapsed="true">
-                                        <tooltip id="fbScriptFilterMenuTooltip"
+                                        <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
                                         <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">
                                             <menupopup
