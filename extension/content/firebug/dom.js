@@ -40,7 +40,7 @@ const RowTag =
     TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren", role : 'presentation',
         level: "$member.level"},
         TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px", role : 'presentation'},
-            DIV({class: "memberLabel $member.type\\Label"}, 
+            DIV({class: "memberLabel $member.type\\Label"},
                 SPAN({}, "$member.name")
             )
         ),
@@ -210,11 +210,11 @@ const DirTablePlate = domplate(Firebug.Rep,
                     if (lastRow.parentNode)
                     {
                         var result = rowTag.insertRows({members: slice}, lastRow);
-                        lastRow = result[1]; 
+                        lastRow = result[1];
                         dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
                         rowCount += insertSliceSize;
                     }
-                    if (isLast) 
+                    if (isLast)
                         delete row.insertTimeout;
                 }, delay, members.splice(0, insertSliceSize), !members.length);
 
@@ -300,7 +300,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 result = rowTag.insertRows({members: slice}, tbody.lastChild);
                 rowCount += insertSliceSize;
                 dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
-                
+
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                     panelNode.scrollTop = priorScrollTop;
             }, delay, members.splice(0, insertSliceSize)));
@@ -387,8 +387,17 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (hasClass(row, "watchNewRow"))
         {
-            if (Firebug.Console.isAlwaysEnabled() && Firebug.CommandLine.isReadyElsePreparing(this.context))
+            if (this.context.stopped)
                 Firebug.Editor.startEditing(row, "");
+            else if (Firebug.Console.isAlwaysEnabled())
+            {
+                if (Firebug.CommandLine.isReadyElsePreparing(this.context))
+                    Firebug.Editor.startEditing(row, "");
+                else
+                    row.innerHTML = $STR("command line blocked?");
+            }
+            else
+                row.innerHTML = $STR("Console must be enabled");
         }
         else if (hasClass(row, "watchRow"))
             Firebug.Editor.startEditing(row, getRowName(row));
@@ -938,7 +947,7 @@ DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     name: "domSide",
     parentPanel: "html",
     order: 3,
-    
+
     initializeNode: function(oldPanelNode)
     {
         dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
@@ -1122,7 +1131,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     refresh: function()
     {
         this.rebuild(true);
-        
+
     },
 
     updateSelection: function(object)
