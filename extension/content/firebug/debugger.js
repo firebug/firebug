@@ -276,7 +276,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         // in fbs we stopStepping() so allow breakOnNext again
         context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnAllErrors"));
+        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnNext"));
 
         delete context.stopped;
         delete context.debugFrame;
@@ -301,7 +301,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.suspend(context);  // arm breakOnNext
         else {
             context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
-            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnAllErrors"));
+            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnNext"));
         }
         this.syncCommands(context);
         return;
@@ -311,7 +311,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var chrome = context.chrome;
         chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");  // mark armed
-        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnAllErrors"));
+        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnNext"));
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.onBreakingNext "+context.getName()+ " breakable: "+chrome.getGlobalAttribute("cmd_resumeExecution", "breakable"));
     },
@@ -3251,11 +3251,11 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
     refresh: function()
     {
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.callstackPanel.refresh for this.context:"+this.context?this.context.getName():"none");
         var mainPanel = this.context.getPanel("script", true);
         if (mainPanel.selection instanceof jsdIStackFrame)
             this.showStackFrame(mainPanel.selection);
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("debugger.callstackPanel.refresh for mainPanel.selection "+mainPanel.selection );
     },
 
     showStackFrame: function(frame)
@@ -3267,30 +3267,23 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         {
             FBL.setClass(this.panelNode, "objectBox-stackTrace");
             // The panelStatus has the stack, lets reuse it to give the same UX as that control.
-            var labels = panelStatus.getElementsByTagName("label");
+            // TODO use domplate? Use the panel status directly?
+            var frameButtons = panelStatus.getElementsByTagName("toolbarbutton");
             var doc = this.panelNode.ownerDocument;
-            for (var i = 0; i < labels.length; i++)
+            for (var i = 0; i < frameButtons.length; i++)
             {
-                if (FBL.hasClass(labels[i], "panelStatusLabel"))
+                if (FBL.hasClass(frameButtons[i], "panelStatusLabel"))
                 {
                     var div = doc.createElement("div");
-                    var label = labels[i];
-                    div.innerHTML = label.getAttribute('value');
-                    if (label.repObject instanceof jsdIStackFrame)  // causes a downcast
-                        div.frame = label.repObject;
-                    div.label = label;
+                    var frameButton = frameButtons[i];
+                    div.innerHTML = frameButton.getAttribute('label');
+                    if (frameButton.repObject instanceof jsdIStackFrame)  // causes a downcast
+                        div.repObject = frameButton.repObject;
+                    div.frameButton = frameButton;
                     FBL.setClass(div, "objectLink");
                     FBL.setClass(div, "objectLink-stackFrame");
+                    FBL.setClass(div, "panelStatusLabel");
 
-                    div.addEventListener("click", function(event)
-                    {
-                        var revent = document.createEvent("MouseEvents");
-                        revent.initMouseEvent("mousedown", true, true, window,
-                                0, 0, 0, 0, 0, false, false, false, false, 0, null);
-                        event.target.label.dispatchEvent(revent);
-                        if (FBTrace.DBG_STACK && event.target.label.repObject instanceof jsdIStackFrame)
-                            FBTrace.sysout("debugger.showStackFrame click on "+event.target.label.repObject);
-                    }, false);
                     this.panelNode.appendChild(div);
                 }
             }
