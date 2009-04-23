@@ -428,13 +428,13 @@ top.Firebug =
             });
 
             if (total.detached > 0)
-                tooltip += "\n"+total.detached+" "+$STR("detached");
+                tooltip += "\n"+total.detached+" "+$STR("Detached");
             if (total.minimized > 0)
-                tooltip += "\n"+total.minimized+" "+$STR("minimized");
+                tooltip += "\n"+total.minimized+" "+$STR("Minimized");
             if (total.active == 1)
-                tooltip += "\n"+total.active+" "+$STR("Firebug");
+                tooltip += "\n"+total.active+" "+$STR("Total Firebug");
             if (total.active > 1)
-                tooltip += "\n"+total.active+" "+$STR("Firebugs");
+                tooltip += "\n"+total.active+" "+$STR("Total Firebugs");
 
         }
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
@@ -1072,14 +1072,15 @@ top.Firebug =
         }
 
         if (!Firebug.statusBarContextMenuMinimizedSeparator)
+        {
             Firebug.statusBarContextMenuMinimizedSeparator = createMenuItem(statusBarContextMenu, '-');
+            createMenuItem(statusBarContextMenu, {label: "Minimized:"});
+        }
 
         var minimized =
         {
-            type:"radio",
-            name:"minimized", // one tab in this group will be restored.
-            checked:"true", // checked should be the selected tab
-            nol10n: true,    // URL is what the use sees anyway
+            type:"checkbox",
+            nol10n: true,    // URL is what the user sees anyway
             label:decodeURI(url),
             command: unminimize
         };
@@ -1096,7 +1097,10 @@ top.Firebug =
         var allMinimized = getElementsByAttribute(statusBarContextMenu, name, "minimized");
         if (!allMinimized || allMinimized.length < 1)
         {
+            // maybe we should put this in static and not show it
+            var wordMinimized = Firebug.statusBarContextMenuMinimizedSeparator.nextSibling;
             statusBarContextMenu.removeChild(Firebug.statusBarContextMenuMinimizedSeparator);
+            statusBarContextMenu.removeChild(wordMinimized);
             delete Firebug.statusBarContextMenuMinimizedSeparator;
         }
         Firebug.resetTooltip();
