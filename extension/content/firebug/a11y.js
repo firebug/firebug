@@ -4,7 +4,7 @@ FBL.ns( function()
 {
     with (FBL)
     {
-        Firebug.A11yModel = extend(Firebug.Module, {
+        Firebug.A11yModel = extend(Firebug.ActivableModule, {
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Module Management
@@ -29,39 +29,63 @@ FBL.ns( function()
                 this.onLayoutBlur = bind(this.onLayoutBlur, this);
                 this.onPanelContextMenu = bind(this.onPanelContextMenu, this);
                 this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
+                this.onScriptFocus = bind(this.onScriptFocus, this);
+                this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
             },
             
             initializeUI: function()
             {
-                this.chrome = FirebugChrome;
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), FirebugChrome, true);
+                if (Firebug.getPref(Firebug.prefDomain, 'enableA11y'))
+                {
+                    $('cmd_enableA11y').setAttribute('checked', true);
+                    this.set(true, FirebugChrome);
+                    FirebugChrome.window.a11yEnabled = true;
+                }
+                else
+                    FirebugChrome.window.a11yEnabled = false;
             },
 
-            toggle : function()
+            toggle : function(currentlyChecked)
             {
-                Firebug.setPref(Firebug.prefDomain, 'enableA11y', !this.enabled);
+                FBTrace.sysout('toggling');
+                Firebug.setPref(Firebug.prefDomain, 'enableA11y', !currentlyChecked);
             },
 
             updateOption : function(name, value)
             {
                 if (name == "enableA11y")
-                    this.set(value, context.chrome, false); 
+                {
+                    $('cmd_enableA11y').setAttribute('checked', value);
+                    for (var i = 0; i < TabWatcher.contexts.length; ++i)
+                    {
+                        var context = TabWatcher.contexts[i];
+                        if (context.chrome.window.useA11y != value)
+                        {
+                            this.set(value, context.chrome);
+                            context.chrome.window.useA11y = !context.chrome.window.useA11y;
+                        }
+                    }   
+                }
             },
             
-            set : function(enable, chrome, start)
+            set : function(enable, chrome)
             {
                 this.enabled = enable;
-                $('cmd_enableA11y').setAttribute('checked', enable + '');
                 if (enable)
                     this.performEnable(chrome);
-                else if (!start)
-                    this.performDisable(chrome);
+                else
+                    this.performDisable(chrome);   
             },
             
             reattachContext: function(browser, context)
             {
-                this.chrome = context.chrome;
-                this.set(Firebug.getPref(Firebug.prefDomain, 'enableA11y'), context.chrome, false);
+                if (Firebug.getPref(Firebug.prefDomain, 'enableA11y'))
+                {
+                    this.set(true, context.chrome);
+                    context.chrome.window.useA11y = true;
+                }
+                else
+                    context.chrome.window.useA11y = false;
             },
             
             performEnable : function(chrome)
@@ -154,8 +178,9 @@ FBL.ns( function()
                         this.insertHiddenText(panel, panel.panelNode, $STR('press enter to edit values'), false, "layoutPressEnterDesc");
                         break;
                     case 'script':
-                        this.makeFocusable(panel.panelNode, true);
                         panel.panelNode.addEventListener('contextmenu', this.onPanelContextMenu, false);
+                        panel.panelNode.addEventListener('focus', this.onScriptFocus, true);
+                        panel.panelNode.addEventListener('keypress', this.onScriptKeyPress, true);
                         break;
                 }
             },
@@ -190,6 +215,8 @@ FBL.ns( function()
                         break;
                     case 'script':
                         panel.panelNode.removeEventListener('contextmenu', this.onPanelContextMenu, false);
+                        panel.panelNode.removeEventListener('focus', this.onScriptFocus, true);
+                        panel.panelNode.removeEventListener('keypress', this.onScriptKeyPress, true)
                         break;
                 }
             },
@@ -197,10 +224,8 @@ FBL.ns( function()
             showPanel : function(browser, panel)
             {
                 panel.context.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
-                return;
                 var panelBrowser = FirebugChrome.getPanelBrowser(panel);
-                if (panel.name == "script")
-                    panelBrowser.setAttribute('showcaret', (panel.name == "script"));
+                panelBrowser.setAttribute('showcaret', (panel.name == "script"));
             },            
            
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -332,7 +357,7 @@ FBL.ns( function()
                     var tabStop = this.getPanelTabStop(panel);
                     if (!tabStop || !this.isVisbleByStyle(tabStop) || !isVisible(tabStop))
                     {
-;                       this.tabStop = null;
+                        this.tabStop = null;
                         this.findPanelTabStop(panel, 'focusRow', panelA11y.lastIsDefault);
                     }
                 }
@@ -343,7 +368,6 @@ FBL.ns( function()
                 var tabStop = this.getPanelTabStop(panel)
                 if (tabStop)
                 {
-                    FBTrace.sysout('remove from tab order: ', tabStop)
                     this.makeFocusable(tabStop, false);
                 }
                     panel.context.a11yPanels[panel.name].tabStop = elem;
@@ -581,10 +605,7 @@ FBL.ns( function()
             onPanelFocus : function(event)
             {
                 if (this.isTabWorthy(event.target))
-                {
-                    FBTrace.sysout('tabworthy!');
                     this.setPanelTabStop(Firebug.getElementPanel(event.target), event.target)
-                }
             },
             
             getFocusRows : function(panel)
@@ -796,7 +817,7 @@ FBL.ns( function()
                         {
                             var node = getChildByClass(target, 'cssPropName');
                             if (node)
-                                this.dispatchMouseEvent(node, 'mousedown');
+                                this.dispatchMouseEvent(node, 'mousedown', 30);
                             cancelEvent(event);
                         }
                         else if (hasClass(target, 'importRule'))
@@ -948,8 +969,9 @@ FBL.ns( function()
                         //these context menu options are likely to destroy current focus
                         panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(event.target);
                     }
+                    var panel = Firebug.getElementPanel(event.target);
                     document.popupNode = node;
-                    this.chrome.$('fbContextMenu').openPopup(node, panel.name == "stylesheet" ? 'overlap' : 'start_after');  
+                    panel.context.chrome.$('fbContextMenu').openPopup(node, panel.name == "stylesheet" ? 'overlap' : 'start_after');  
                     cancelEvent(event); //no need for default handlers anymore
                 }   
             },
@@ -1176,14 +1198,74 @@ FBL.ns( function()
                         if (node)
                             this.focus(node, true);
                         break;
+                    case 'script':
+                        panel.selectedSourceBox.focus();
+                        break;
                 }
             },
             
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Script Panel
+            onScriptFocus : function(event)
+            { 
+                if (hasClass(event.target, "sourceViewport"))
+                {
+                    //bit ugly, but not sure how else I can get the caret into the sourcebox without a mouse
+                    var panel = Firebug.getElementPanel(event.target);
+                    var box = panel.selectedSourceBox;
+                    var line = box.getLineNode(box.firstViewableLine + 4);
+                    FBTrace.sysout('foundline:', line);
+                    if (!line)
+                        return;
+                    
+                    var node = getElementByClass(line, "sourceRowText");
+                    var sel = panel.document.defaultView.getSelection();
+                    var range = panel.document.createRange();
+                    range.selectNodeContents(node);
+                    sel.addRange(range);
+                    sel.collapseToStart(); //caret always starts at first line?
+                }
+                    this.dispatchMouseEvent(event.target, 'mousedown', 200);
+            },
+            
+            onScriptKeyPress : function(event)
+            {
+                var target = event.target;
+                var keyCode = event.keyCode || event.charCode;   
+                var panel = Firebug.getElementPanel(target);
+                if (!hasClass(target, 'sourceViewport'))
+                    return;
+                
+                if ([37, 38, 39, 40].indexOf(keyCode) != -1)
+                {
+                    switch(keyCode)
+                    {
+                        case 38:
+                        case 40:
+                            panel.reView(panel.selectedSourceBox);
+                            break;
+                    }
+                    
+                }
+            },
+            
+            onUpdateScriptLocation : function(panel)
+            {
+                
+                //FBTrace.sysout('updated script location', panel)
+                panel.selectedSourceBox.tabIndex = -1;
+                var box = getElementByClass(panel.selectedSourceBox, 'sourceViewport');
+                box.tabIndex = 0;
+                //panel.selectedSourceBox.contentEditable = true;
+                //panel.document.execCommand('contentReadOnly ',false, true)
+                box.setAttribute('role', 'textbox');
+                box.setAttribute('aria-multiline', 'true');
+                box.setAttribute('aria-readonly', 'true');
+            },
             
             onPanelContextMenu : function(event)
             {
+                var panel = Firebug.getElementPanel(event.target);
                 if (event.button == 0) //the event was created by keyboard, not right mouse click 
                 {
                     // get caret location
@@ -1191,7 +1273,7 @@ FBL.ns( function()
                     var node = sel.focusNode.parentNode;
                     //manually trigger the fbContextMenu popup 
                     document.popupNode = node;
-                    this.chrome.$('fbContextMenu').openPopup(node, 'after_pointer');  
+                    panel.context.chrome.$('fbContextMenu').openPopup(node, 'after_pointer');  
                     cancelEvent(event); //no need for default handlers anymore
                 }   
             },
@@ -1391,15 +1473,18 @@ FBL.ns( function()
                 FBTrace.sysout('focus: ' + event.target.nodeName + "#" + event.target.id + "." + event.target.className, event.target);
             },
             
-            dispatchMouseEvent : function (node, eventType)
+            dispatchMouseEvent : function (node, eventType, clientX, clientY)
             {
-                FBTrace.sysout('mouse!', node);
+                if (!clientX)
+                    clientX = 0;
+                if (!clientY)
+                    clientY = 0;
                 if (typeof node == "string")
                     node = $(node);
                 var doc = node.ownerDocument;
                 var event = doc.createEvent('MouseEvents');
                 event.initMouseEvent(eventType, true, true, doc.defaultView,
-                    0, 0, 0, eventType == "mousedown" ? 30 : 0, 0, false, false, false, false, 0, null);
+                    0, 0, 0, clientX, clientY, false, false, false, false, 0, null);
                 node.dispatchEvent(event);
             },
             
