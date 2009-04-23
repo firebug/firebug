@@ -1573,7 +1573,7 @@ top.Firebug =
             });
         }
 
-        if (context.minimized)
+        if (context && context.minimized)
             this.showBar(false);  // don't show, we are minimized
         else
             this.syncBar();  // either showUI based on context or hideUI without context,
