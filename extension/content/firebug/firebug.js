@@ -228,17 +228,16 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
-        var elements = ["fbSearchBox, menu_enablePanels", "menu_disablePanels", "fbCommandLine",
-            "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y"];
-
+            var elements = ["fbSearchBox, menu_enablePanels", "menu_disablePanels", "fbCommandLine",
+                "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
+                "menu_enableA11y", "fbContinueButton"];
+        var tooltipTextElements = ['fbContinueButton']
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);
             if (!element && FBTrace.DBG_ERRORS)
                 FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
-
-            FBL.internationalize(element, "label");
+            FBL.internationalize(element, tooltipTextElements.indexOf(elements[i]) == -1 ? "label" : "tooltiptext");
         }
     },
 
@@ -2409,6 +2408,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     createSourceBox: function(sourceFile, sourceBoxDecorator)  // decorator(sourceFile, sourceBox)
     {
+        FBTrace.sysout('creating sourcebox:', [sourceFile, sourceBoxDecorator]);
         var lines = sourceFile.loadScriptLines(this.context);
         if (!lines)
         {

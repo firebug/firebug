@@ -160,7 +160,7 @@
                         </toolbarbutton>
 
                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                   tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
+                                   tooltiptext="BreakOnAllErrors" class="toolbar-image-button"/>
 
                     </hbox>
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
@@ -174,7 +174,7 @@
                     </vbox>
                     <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="firebug window">
                         <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
-                                    tooltiptext="Minimize Firebug to Status Bar Context Menu" command="cmd_minimizeFirebug"/>
+                                    tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
 
                         <toolbarbutton id="fbDetachButton" class="toolbarbutton-iconic"
                                     tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>

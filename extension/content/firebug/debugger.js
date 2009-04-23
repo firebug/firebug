@@ -276,6 +276,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         // in fbs we stopStepping() so allow breakOnNext again
         context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnAllErrors"));
 
         delete context.stopped;
         delete context.debugFrame;
@@ -298,9 +299,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (breakable == "true")
             this.suspend(context);  // arm breakOnNext
-        else
+        else {
             context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
-
+            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnAllErrors"));
+        }
         this.syncCommands(context);
         return;
     },
@@ -309,6 +311,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var chrome = context.chrome;
         chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");  // mark armed
+        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnAllErrors"));
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.onBreakingNext "+context.getName()+ " breakable: "+chrome.getGlobalAttribute("cmd_resumeExecution", "breakable"));
     },
@@ -657,6 +660,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
             chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "off");
+            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("Continue"));
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
@@ -2245,6 +2249,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.addEventListener("scroll", this.onScroll, true);
         Firebug.SourceBoxPanel.initializeNode.apply(this, arguments);
+        dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
     },
 
     destroyNode: function()
@@ -2258,6 +2263,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
         this.panelNode.removeEventListener("scroll", this.onScroll, true);
         Firebug.SourceBoxPanel.destroyNode.apply(this, arguments);
+        dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
     },
 
     clear: function()
@@ -2466,6 +2472,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         this.showSourceFile(updatedSourceFile);
+        dispatch([Firebug.A11yModel], "onUpdateScriptLocation", [this]);
     },
 
     updateSelection: function(object)
@@ -3348,7 +3355,7 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 DIV({class: "conditionEditorInner2"},
                     DIV({class: "conditionEditorInner"},
                         DIV({class: "conditionCaption"}, $STR("ConditionInput")),
-                        INPUT({class: "conditionInput", type: "text"})
+                        INPUT({class: "conditionInput", type: "text", 'aria-label' : $STR("ConditionInput")})
                     )
                 )
             ),
