@@ -168,6 +168,7 @@ function FirebugService()
     this.wrappedJSObject = this;
     this.timeStamp = new Date();  /* explore */
     this.breakpoints = breakpoints; // so chromebug can see it /* explore */
+    this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
 
     var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
                     getService(Components.interfaces.nsIAppShellService);
@@ -1103,7 +1104,10 @@ FirebugService.prototype =
     onDebug: function(frame, type, rv)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("fbs.onDebug fileName="+frame.script.fileName+ " reportNextError="+reportNextError+" breakOnNextError="+breakOnNextError+" breakOnNext:"+this.breakOnErrors);
+        {
+            fbs.onDebugRequests--;
+            FBTrace.sysout("fbs.onDebug ("+fbs.onDebugRequests+") fileName="+frame.script.fileName+ " reportNextError="+reportNextError+" breakOnNextError="+breakOnNextError+" breakOnNext:"+this.breakOnErrors);
+        }
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE;
         try
@@ -1261,7 +1265,7 @@ FirebugService.prototype =
                 messageKind = "Uncaught-Exception";
             if (flags & jsdIErrorHook.REPORT_STRICT)
                 messageKind += "-Strict";
-            FBTrace.sysout("fbs.onError with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="
+            FBTrace.sysout("fbs.onError ("+fbs.onDebugRequests+") with this.showStackTrace="+this.showStackTrace+" and this.breakOnErrors="
                    +this.breakOnErrors+" kind="+messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");
         }
 
@@ -1279,8 +1283,10 @@ FirebugService.prototype =
         {
             reportNextError = true;
             if (FBTrace.DBG_FBS_ERRORS)
+            {
                 FBTrace.sysout("fbs.onError showStackTrace, we will try to drop into onDebug\n");
-
+                fbs.onDebugRequests++;
+            }
             return false; // Drop into onDebug, sometimes only
         }
         else
