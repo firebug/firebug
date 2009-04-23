@@ -47,6 +47,9 @@ Firebug.Editor = extend(Firebug.Module,
         if (!panel.editable)
             return;
 
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("editor.startEditing " + value, target);
+
         defaultValue = target.getAttribute("defaultValue");
         if (value == undefined)
         {
@@ -88,6 +91,9 @@ Firebug.Editor = extend(Firebug.Module,
     {
         if (!currentTarget)
             return;
+
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("editor.stopEditing " + cancel);
 
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;

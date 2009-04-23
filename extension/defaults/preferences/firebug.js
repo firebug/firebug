@@ -129,7 +129,8 @@ pref("extensions.firebug.DBG_OPTIONS", false);      // /*@explore*/
 pref("extensions.firebug.DBG_FBS_FLUSH", false);    // /*@explore*/
 pref("extensions.firebug.DBG_HTTPOBSERVER", false); // Centralized HTTP Observer /*@explore*/
 pref("extensions.firebug.DBG_SPY", false);          // spy.js
-pref("extensions.firebug.DBG_JSONVIEWER", false);   // spy.js
+pref("extensions.firebug.DBG_JSONVIEWER", false);   // json explorer
+pref("extensions.firebug.DBG_EDITOR", false);       // Inline editors
 
 //Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "accel shift e");
