@@ -805,6 +805,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement console NOT enabled ", frameWin);
                 }
             }
+            else
+            {
+                if (FBTrace.DBG_CONSOLE)
+                    FBTrace.sysout("debugger.supportsGlobal frameWin._getFirebugConsoleElement exists", frameWin);
+            }
         }
 
         this.breakContext = context;
@@ -2859,15 +2864,15 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
     {
         Firebug.Panel.destroy.apply(this, arguments);
     },
-    
+
     initializeNode : function(oldPanelNode)
     {
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);   
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
     },
-    
+
     destroyNode : function()
     {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);   
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
     },
 
     show: function(state)
@@ -2923,7 +2928,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         if (FBTrace.DBG_BP)
             FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
-        
+
         dispatch([Firebug.A11yModel], 'onBreakRowsRefreshed', [this, this.panelNode]);
     },
 
@@ -3210,17 +3215,17 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     {
         Firebug.Panel.destroy.apply(this, arguments);
     },
-    
+
     initializeNode : function(oldPanelNode)
     {
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);   
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
     },
-    
+
     destroyNode : function()
     {
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);   
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
     },
-    
+
     show: function(state)
     {
           this.refresh();
