@@ -2558,7 +2558,10 @@ function getFrameWindow(frame)
         var result = {};
         frame.eval("window", "", 1, result);
         var win = result.value.getWrappedValue();
-        return getRootWindow(win);
+        if (win instanceof Ci.nsIDOMWindow)
+            return getRootWindow(win);
+        else
+            return getFrameScopeWindowAncestor(checkFrame);
     }
     catch (exc)
     {
