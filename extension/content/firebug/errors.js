@@ -440,6 +440,7 @@ function lessTalkMoreAction(context, object, isWarning)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.observe dropping "+object.category+" no context");
+        return false;
     }
 
     var enabled = Firebug.Console.isAlwaysEnabled();
@@ -527,7 +528,7 @@ function getExceptionContext(context)
     {
         var errorContext = TabWatcher.getContextByWindow(errorWin);
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe exception context:"+errorContext+" errorWin"+errorWin+"\n");
+            FBTrace.sysout("errors.observe exception context:"+errorContext+" errorWin: "+errorWin+"\n");
         return errorContext;
     }
     return context;
