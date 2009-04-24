@@ -2412,7 +2412,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     createSourceBox: function(sourceFile, sourceBoxDecorator)  // decorator(sourceFile, sourceBox)
     {
-        FBTrace.sysout('creating sourcebox:', [sourceFile, sourceBoxDecorator]);
         var lines = sourceFile.loadScriptLines(this.context);
         if (!lines)
         {
@@ -2713,7 +2712,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         sourceBox.lastViewableLine = bottomLine;
 
         appendScriptLines(sourceBox, topLine, bottomLine, view);
-
+        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this, link, this.lastScrollTop > sourceBox.scrollTop]);
         this.lastScrollTop = sourceBox.scrollTop;  // prevent reView before sourceBoxDecoratorTimeout reset scrollTop
 
         this.applyDecorator(sourceBox);
@@ -2726,7 +2725,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var link = new SourceLink(sourceBox.repObject.href, lineNo, this.getSourceType());
             dispatch(uiListeners, "onViewportChange", [link]);
         }
-
+        
         return;
     },
 

@@ -1904,7 +1904,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             this.navigate(sourceFile);
             if (sourceLink.line)
+            {
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
+                dispatch([Firebug.A11yModel], "onShowSourceLink", [this, sourceLink.line]);
+            }    
         }
     },
 
@@ -2240,6 +2243,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         this.tooltip = this.document.createElement("div");
         setClass(this.tooltip, "scriptTooltip");
+        this.tooltip.setAttribute('aria-live', 'polite')
         obscure(this.tooltip, true);
         this.panelNode.appendChild(this.tooltip);
 

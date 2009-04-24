@@ -160,7 +160,7 @@
                         </toolbarbutton>
 
                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                   tooltiptext="BreakOnAllErrors" class="toolbar-image-button"/>
+                                   tooltiptext="BreakOnNextError" class="toolbar-image-button" aria-label="BreakOnNextError"/>
 
                     </hbox>
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />

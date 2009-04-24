@@ -49,11 +49,14 @@
     white-space: pre;
 }
 
-.panelNode-script:focus .sourceLine{
-    
+.useA11y .sourceBox .sourceViewport:focus .sourceLine {
     background-color: #FFFFC0;
     color: navy;	
-    border-right: 2px solid #FF9933;
+    border-right: 1px solid #FF9933;
+}
+
+.useA11y .sourceBox .sourceViewport:focus {
+	outline: none;
 }
 
 .sourceBox > .sourceRow > .sourceLine {
