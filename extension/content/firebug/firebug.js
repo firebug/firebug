@@ -964,10 +964,12 @@ top.Firebug =
         window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "", "chrome,centerscreen,dialog,modal,resizable=yes");
     },
 
-    forceBarOff: function()
+    closeFirebug: function()
     {
         var browser = FirebugChrome.getCurrentBrowser();
         browser.chrome.hidePanel();
+        TabWatcher.unwatchBrowser(browser);
+
         this.showBar(false);
     },
 
@@ -991,8 +993,14 @@ top.Firebug =
         {
             if (toggleOff)
             {
-                TabWatcher.unwatchBrowser(browser);
-                this.showBar(false);
+                var context = TabWatcher.getContextByWindow(browser.contentWindow);
+                if (context)
+                    Firebug.minimizeBar(context);
+                else
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("Firebug.toggleBar toggleOff but no context ");
+                }
             }
             else
             {
@@ -1016,7 +1024,7 @@ top.Firebug =
                     browser.chrome.setFirebugContext(context);
                     Firebug.updateActiveContexts(context); // now the top tab is active
                     if (context.minimized)
-                        context.minimized.command.call(); // unminimize
+                        context.minimized.unminimizer();
                     else
                         this.showBar(true);
                 }
@@ -1074,18 +1082,18 @@ top.Firebug =
         if (!Firebug.statusBarContextMenuMinimizedSeparator)
         {
             Firebug.statusBarContextMenuMinimizedSeparator = createMenuItem(statusBarContextMenu, '-');
-            createMenuItem(statusBarContextMenu, {label: "Minimized:"});
+            createMenuItem(statusBarContextMenu, {label: $STR("Minimized:")});
         }
 
         var minimized =
         {
             type:"checkbox",
             nol10n: true,    // URL is what the user sees anyway
-            label:decodeURI(url),
+            label: cropString(decodeURI(url), 50),
             command: unminimize
         };
         context.minimized = FBL.createMenuItem(statusBarContextMenu, minimized);
-        context.minimized.command = unminimize;
+        context.minimized.unminimizer = unminimize;
         Firebug.resetTooltip();
     },
 
@@ -1182,7 +1190,7 @@ top.Firebug =
         if (event.button != 0)
             return;
         else if (context && context.minimized)
-            context.minimized.command.call();  // unminimize
+            context.minimized.unminimizer();
         else if (isControl(event))
             this.toggleDetachBar(true);
         else if (context && context.errorCount)
@@ -2725,7 +2733,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var link = new SourceLink(sourceBox.repObject.href, lineNo, this.getSourceType());
             dispatch(uiListeners, "onViewportChange", [link]);
         }
-        
+
         return;
     },
 

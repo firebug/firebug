@@ -23,6 +23,7 @@
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
+        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(FirebugContext)"/>
         <command id="cmd_disablePanels" oncommand="Firebug.disablePanels(FirebugContext)"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"
@@ -160,7 +161,7 @@
                         </toolbarbutton>
 
                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                   tooltiptext="BreakOnNextError" class="toolbar-image-button" aria-label="BreakOnNextError"/>
+                                   tooltiptext="BreakOnNext" class="toolbar-image-button" aria-label="BreakOnNext"/>
 
                     </hbox>
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
@@ -180,7 +181,7 @@
                                     tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>
 
                         <toolbarbutton id="fbCloseButton" class="toolbarbutton-iconic"
-                                    tooltiptext="&firebug.CloseFirebug;" command="cmd_toggleFirebug"/>
+                                    tooltiptext="&firebug.CloseFirebug;" command="cmd_closeFirebug"/>
                     </hbox>
                 </hbox>
 
