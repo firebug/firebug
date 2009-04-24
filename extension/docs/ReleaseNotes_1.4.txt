@@ -6,13 +6,13 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Not Panel Specific ==
     * Curtis Bartley's Tabs-on-top UI reordering
-    * Improved and simplified "natural" Activation UI.
+    * Improved and simplified "natural" Activation UI, minimize to context menu
     * Firebug remembers which pages you had opened Firebug on.
     * Supports Firefox 3.5
     * auto-suspend
     * Adds tab switching shortcut. Currently hardcoded to ctrl + shift + pgup/pgdown
     * search across all files (contribution by kpdecker)
-    * Accessiblity by Hans Hillen, incl. tabbing and focus identification.
+    * Accessiblity by Hans Hillen, incl. tabbing and focus identification, panels Script, DOM , CSS, Breakpoints, DOM
     * (some) Testing before shipping!
     * jsd.initAtStartup set false not true
 
@@ -124,9 +124,12 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1496: Hash Character Links ( the # or fragement identifier for a URL) Creates Seperate Script View
     * issue 1508: Problems with some downloads.
     * Issue 1547: &editors.Description;
+    * Issue 1575: New watch expression can't be created when breakpoint is active
     * Issue 1592: Added display: autocompletions to CSS editor
     * Issue 1591: Firebug cannot find _firebugConsole element
     * Issue 1640: Fixed install.rdf typo
     * Issue 1649: disabling script panel doesn't disable script view in 1.4
     * Issue 1650: 1.4a18 not picking up other JS files
     * Issue 1651: 1.4a18 panel not updating when changing tabs in firefox
+    * Issue 1663: CSS Property Name Editor Does not always work (contribution by kpdecker)
+    * Issue 1679: Break On Next Statement ("pause" button): poor selection style (partial)
