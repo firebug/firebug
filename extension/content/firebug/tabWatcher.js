@@ -673,13 +673,16 @@ var HttpObserver = extend(Object,
             if (FBTrace.DBG_WINDOWS && win == win.parent)
             {
                 FBTrace.sysout("-> tabWatcher HttpObserver *** START *** " +
-                    "document request for: " + request.URI.spec + "\n");
+                    "document request for: " + request.URI.spec + " window for request is "+win.location+"\n");
             }
 
-            // Make sure the frame listener is registered for top level window so,
-            // we can get all onStateChange events and init context for all opened tabs.
             if (win == win.parent)
-                TabWatcher.getBrowserByWindow(win);
+            {
+                // Make sure the frame listener is registered for top level window so,
+                // we can get all onStateChange events and init context for all opened tabs.
+                var browser = TabWatcher.getBrowserByWindow(win);
+                // Here we know the source of the request is 'win'. TODO viral activation and web app tracking
+            }
         }
     },
 
