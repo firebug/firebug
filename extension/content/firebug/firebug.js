@@ -1991,7 +1991,7 @@ Firebug.Panel =
 
                 return;
             }
-            var buttons = this.context.browser.chrome.$(buttonsId);
+            var buttons = this.context.chrome.$(buttonsId);
             if (buttons)
                 collapse(buttons, show ? "false" : "true");
             else
@@ -3338,7 +3338,7 @@ Firebug.URLSelector =
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
 
-            if(hasAnnotation)
+            if (hasAnnotation)
             {
                 var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
 
@@ -3368,8 +3368,25 @@ Firebug.URLSelector =
             {
                 delete browser.showDetached;
 
-                if (browser.showFirebug || browser.detached)  // tab is firebugged, leave it up and create a context
-                    return true;
+                if (browser.FirebugLink) // then TabWatcher found a connection
+                {
+                    if (browser.FirebugLink.dst == uri) // and it matches us now
+                    {
+                        var hasSrcAnnotation = this.annotationSvc.pageHasAnnotation(browser.FirebugLink.src, this.annotationName);
+                        if (FBTrace.DBG_WINDOWS)
+                            FBTrace.sysout("shouldCreateContext hasSrcAnnotation "+hasSrcAnnotation+" for "+browser.FirebugLink.src.spec);
+                        if (hasSrcAnnotation)
+                        {
+                            var srcAnnotation = this.annotationSvc.getPageAnnotation(browser.FirebugLink.src, this.annotationName);
+                            if (FBTrace.DBG_WINDOWS)
+                                FBTrace.sysout("shouldCreateContext srcAnnotation "+srcAnnotation+" for "+browser.FirebugLink.src.spec);
+
+                            var srcWasClosed = (srcAnnotation.indexOf('closed') >= 0);
+                            return !srcWasClosed;
+                        }
+                    }
+                }
+
                 return false;   // don't createContext
             }
         }
@@ -3410,6 +3427,18 @@ Firebug.URLSelector =
 
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec+" while browser has "+getFirebuginess(browser));
+    },
+
+    clearAll: function()
+    {
+        var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName);
+        for (var i = 0; i < uris.length; i++)
+        {
+            var uri = uris[i];
+            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("Firebug.URLSelector.clearAll untagged "+uri.spec+" while browser has "+getFirebuginess(browser));
+        }
     },
 
 }
