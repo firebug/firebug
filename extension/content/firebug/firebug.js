@@ -3372,14 +3372,15 @@ Firebug.URLSelector =
                 {
                     if (browser.FirebugLink.dst == uri) // and it matches us now
                     {
-                        var hasSrcAnnotation = this.annotationSvc.pageHasAnnotation(browser.FirebugLink.src, this.annotationName);
+                        var srcURI = makeURI(normalizeURL(browser.FirebugLink.src.spec));
+                        var hasSrcAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
                         if (FBTrace.DBG_WINDOWS)
                             FBTrace.sysout("shouldCreateContext hasSrcAnnotation "+hasSrcAnnotation+" for "+browser.FirebugLink.src.spec);
                         if (hasSrcAnnotation)
                         {
-                            var srcAnnotation = this.annotationSvc.getPageAnnotation(browser.FirebugLink.src, this.annotationName);
+                            var srcAnnotation = this.annotationSvc.getPageAnnotation(srcURI, this.annotationName);
                             if (FBTrace.DBG_WINDOWS)
-                                FBTrace.sysout("shouldCreateContext srcAnnotation "+srcAnnotation+" for "+browser.FirebugLink.src.spec);
+                                FBTrace.sysout("shouldCreateContext srcAnnotation "+srcAnnotation+" for "+srcURI.spec);
 
                             var srcWasClosed = (srcAnnotation.indexOf('closed') >= 0);
                             return !srcWasClosed;
@@ -3409,7 +3410,7 @@ Firebug.URLSelector =
             annotation = "firebugged.detached";
 
         // mark this URI as firebugged
-        var uri = browser.currentURI;
+        var uri = makeURI(normalizeURL(browser.currentURI.spec));
         this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
 
         if (FBTrace.DBG_WINDOWS)
@@ -3422,7 +3423,7 @@ Firebug.URLSelector =
 
     unwatchBrowser: function(browser)  // Firebug closes in browser
     {
-        var uri  = browser.currentURI;
+        var uri  = makeURI(normalizeURL(browser.currentURI.spec));
         this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
 
         if (FBTrace.DBG_WINDOWS)
