@@ -1718,15 +1718,19 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (this.dependents.length > 0)
         {
-            //ToDo better UI?
-            var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
-            Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
-            return;
+            for(var i = 0; i < this.dependents.length; i++)
+            {
+                if (this.dependents[i].isAlwaysEnabled())
+                {
+                    var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
+                    Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
+                    if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable rejected: "+ name+" dependent, with panelName: "+panelName+" for "+context.getName()+"\n");
+                    return;
+                }
+            }
         }
-        else  // no dependents, disable
-        {
-            this.unregisterDebugger();
-        }
+        // else no dependents enabled:
+        this.unregisterDebugger();
 
         if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName+" for "+context.getName()+"\n");
         this.clearAllBreakpoints(context);
@@ -1907,7 +1911,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
                 dispatch([Firebug.A11yModel], "onShowSourceLink", [this, sourceLink.line]);
-            }    
+            }
         }
     },
 
