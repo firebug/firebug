@@ -1265,8 +1265,7 @@ FBL.ns( function()
 
                         if (event.ctrlKey)
                         {
-                            panelA11y.scrollUp = goUp;
-                            box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)
+                            box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)   
                             return;
                         }
                         var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
@@ -1275,16 +1274,26 @@ FBL.ns( function()
                         else if (!goUp && (lineNo < (lastLineNo -  1)))
                             return;
                         panelA11y.caretOffset = caretDetails[1];
-                        box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.scrollTop)
+                        box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)
                         break;
                     case 33://pgup
                     case 34://pgdn
+                        box.scrollTop = keyCode == 33? (box.scrollTop - (box.lineHeight * box.viewableLines)) : 
+                                (box.scrollTop + (box.lineHeight * box.viewableLines))
+                        cancelEvent(event);
                         break;
-                    case 35://home
-                    case 36://end
+                    case 36://home
+                    case 35://end
                         if (event.ctrlKey)
                         {
-                            //box.scrollTop = keyCode == 35 ? 0 : box.offsetHeight - box.scrollHeight;
+                            box.scrollTop = keyCode == 36? 0 : (box.scrollHeight - box.clientHeight);
+                            cancelEvent(event);    
+                        }
+                        if (keyCode == 36)
+                        {
+                            var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
+                            this.insertCaretIntoLine(panel, box, lineNo, 0);
+                            cancelEvent(event);
                         }
                         break;
                     case 13:
@@ -1326,25 +1335,28 @@ FBL.ns( function()
                 this.insertCaretIntoLine(panel, box,  scrolltoLine)
             },
 
-            insertCaretIntoLine : function(panel, box, line)
+            insertCaretIntoLine : function(panel, box, line, offset)
             {
                 var panelA11y = panel.context.a11yPanels[panel.name];
                 var node = box.getLineNode(line);
-                if (!node)
-                    return;
-                var offset = 0;
+                
+                if (!offset)
+                {
+                    if (panelA11y.caretOffset)
+                        offset = panelA11y.caretOffset;
+                    else 
+                        offset = 0;
+                }
                 var startNode = getElementByClass(node, 'sourceRowText')
                 if (startNode && startNode.firstChild && startNode.firstChild.nodeType == 3)
                 {
                     startNode = startNode.firstChild;
-                    if (panelA11y.caretOffset && (panelA11y.caretOffset < startNode.length))
-                        offset = panelA11y.caretOffset;
-                    else
+                    if (offset >= startNode.length)
                         offset = startNode.length - 1;
                 }
                 else
                 {
-                    startNode = node;
+                    startNode = node; // offset is now the number of nodes, not characters within a text node
                     offset = 1;
                 }
                 this.insertCaretToNode(panel, startNode, offset);
