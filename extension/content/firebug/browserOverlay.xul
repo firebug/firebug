@@ -61,6 +61,8 @@
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
+        <command id="cmd_allOn" oncommand="Firebug.toggleAll('on')"/>
+        <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
         <command id="cmd_enableA11y" oncommand="Firebug.A11yModel.toggle(this.getAttribute('checked') == 'true'); " />
 
@@ -134,7 +136,8 @@
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="inspector-button" label="&firebug.Inspect;"
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       observes="cmd_toggleInspecting" tooltiptext="&firebug.InspectElement;"/>
+                       observes="cmd_
+specting" tooltiptext="&firebug.InspectElement;"/>
         <toolbarbutton id="firebug-button" label="&firebug.Firebug;"
                       class="toolbarbutton-1 chromeclass-toolbar-additional"
                       observes="cmd_toggleDetachFirebug" tooltiptext="&firebug.DetachFirebug;"/>
@@ -165,6 +168,9 @@
             <menuseparator/>
             <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
             <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>
+            <menuseparator/>
+            <menuitem id="menu_AllOff" type="checkbox" label="Off for all web pages" command="cmd_allOff"/>
+            <menuitem id="menu_AllOn" type="checkbox" label="On for all web pages" command="cmd_allOn"/>
         </menupopup>
     </statusbar>
 

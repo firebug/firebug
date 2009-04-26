@@ -839,7 +839,7 @@ top.FirebugChrome =
     {
     },
 
-    hideUI: function(brower, context)  // called when the Firebug UI comes down; context may be null
+    hideUI: function(browser, context)  // called when the Firebug UI comes down; context may be null
     {
     },
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

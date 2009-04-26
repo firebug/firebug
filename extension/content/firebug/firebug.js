@@ -1112,7 +1112,6 @@ top.Firebug =
             delete Firebug.statusBarContextMenuMinimizedSeparator;
         }
         Firebug.resetTooltip();
-
     },
 
     toggleDetachBar: function(forceOpen)
@@ -1219,6 +1218,46 @@ top.Firebug =
         }
     },
 
+    toggleAll: function(offOrOn)
+    {
+        if (Firebug.URLSelector.allPagesActivation == offOrOn)
+            delete Firebug.URLSelector.allPagesActivation;
+        else
+            (offOrOn == "off") ? Firebug.allOff() : Firebug.allOn();
+
+        Firebug.updateAllPagesActivation();
+    },
+
+    allOn: function()
+    {
+        Firebug.URLSelector.allPagesActivation = "on";  // In future we always create contexts,
+        var browser = FirebugChrome.getCurrentBrowser();
+        if (!browser.chrome)
+            Firebug.toggleBar(true);  // and we turn on for the current page
+    },
+
+    allOff: function()
+    {
+        Firebug.URLSelector.allPagesActivation = "off";  // In future we don't create contexts,
+
+        Firebug.eachActiveContext(function turnOff(context)  // we close the current contexts,
+        {
+            if (!context.browser)
+                FBTrace.sysout("context with no browser??!! "+context.getName());
+            if (context != FirebugContext)
+                TabWatcher.unwatchBrowser(context.browser);
+        });
+
+        Firebug.closeFirebug();
+
+        Firebug.URLSelector.clearAll();  // and the past pages with contexts are forgotten.
+    },
+
+    updateAllPagesActivation: function()
+    {
+        $('menu_AllOff').setAttribute("checked", (Firebug.URLSelector.allPagesActivation=="off") );
+        $('menu_AllOn').setAttribute("checked", (Firebug.URLSelector.allPagesActivation=="on"));
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
 
@@ -3331,6 +3370,9 @@ Firebug.URLSelector =
 
     shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
     {
+        if (this.allPagesActivation == "off")
+            return false;
+
         try
         {
             var uri = makeURI(normalizeURL(url));
@@ -3355,7 +3397,7 @@ Firebug.URLSelector =
                     if (FBTrace.DBG_WINDOWS)
                         FBTrace.sysout("shouldCreateContext set showDetached ");
                 }
-                else if (annotation.indexOf("closed") > 0) // then the user closed Firebug on this page last time
+                else if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0)) // then the user closed Firebug on this page last time
                 {
                     return false; // annotated as 'closed', don't create
                 }
@@ -3366,6 +3408,12 @@ Firebug.URLSelector =
             }
             else  // not annotated
             {
+                if (this.allPagesActivation == "on")
+                {
+                    browser.showFirebug = true;
+                    return true;
+                }
+
                 delete browser.showDetached;
 
                 if (browser.FirebugLink) // then TabWatcher found a connection
@@ -3432,13 +3480,15 @@ Firebug.URLSelector =
 
     clearAll: function()
     {
-        var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName);
+        var resultCount = {};
+        var results = [];
+        var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName, resultCount, results);
         for (var i = 0; i < uris.length; i++)
         {
             var uri = uris[i];
             this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("Firebug.URLSelector.clearAll untagged "+uri.spec+" while browser has "+getFirebuginess(browser));
+                FBTrace.sysout("Firebug.URLSelector.clearAll untagged "+uri.spec);
         }
     },
 
