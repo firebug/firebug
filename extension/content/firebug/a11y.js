@@ -624,7 +624,7 @@ FBL.ns( function()
             getFocusRows : function(panel)
             {
                 var nodes = panel.panelNode.getElementsByClassName('focusRow');
-                return Array.filter(nodes, function(e,i,a){return this.isVisbleByStyle(e);}, this);
+                return Array.filter(nodes, function(e,i,a){return this.isVisbleByStyle(e) && isVisible(e);}, this);
             },
 
             getLastFocusChild : function(target)
