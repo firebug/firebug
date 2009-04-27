@@ -65,7 +65,7 @@
         <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
         <command id="cmd_enableA11y" oncommand="Firebug.A11yModel.toggle(this.getAttribute('checked') == 'true'); " />
-
+        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions();" />
     </commandset>
 
     <keyset id="mainKeyset">
@@ -165,6 +165,7 @@ specting" tooltiptext="&firebug.InspectElement;"/>
                 label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
+            <menuitem label="firebug.menu.Reset All Firebug Options" command="cmd_resetAllOptions"/>
             <menuseparator/>
             <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
             <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>

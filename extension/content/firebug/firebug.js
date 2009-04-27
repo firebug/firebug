@@ -1266,6 +1266,27 @@ top.Firebug =
         $('menu_AllOff').setAttribute("checked", (Firebug.URLSelector.allPagesActivation=="off") );
         $('menu_AllOn').setAttribute("checked", (Firebug.URLSelector.allPagesActivation=="on"));
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    resetAllOptions: function()
+    {
+        var preferences = prefs.getChildList("extensions.firebug", {});
+        for (var i = 0; i < preferences.length; i++)
+        {
+            if (preferences[i].indexOf("extensions.firebug.DBG_") == -1)
+            {
+                if (FBTrace.DBG_OPTIONS)
+                    FBTrace.sysout("Clearin option: "+i+") "+preferences[i]);
+                if (prefs.prefHasUserValue(preferences[i]))  // avoid exception
+                    prefs.clearUserPref(preferences[i]);
+            }
+            else
+            {
+                if (FBTrace.DBG_OPTIONS)
+                    FBTrace.sysout("Skipped clearing option: "+i+") "+preferences[i]);
+            }
+        }
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
 
@@ -3390,35 +3411,15 @@ Firebug.URLSelector =
 
             if (hasAnnotation)
             {
-                var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
-
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("shouldCreateContext read back annotation "+annotation);
-
-                delete browser.showDetached;
-                delete browser.showFirebug;
-
-                if (annotation.indexOf("detached") > 0)  // then the previous use was detached.
-                {
-                    if (!browser.detached) // then it is not now detached
-                        browser.showDetached = true; // mark to detach
-                    if (FBTrace.DBG_WINDOWS)
-                        FBTrace.sysout("shouldCreateContext set showDetached ");
-                }
-                else if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0)) // then the user closed Firebug on this page last time
-                {
-                    return false; // annotated as 'closed', don't create
-                }
-                else
-                    browser.showFirebug = true;  // mark to stay in browser
-
-                return true;    // annotated, createContext
+                return this.checkAnnotation(browser, uri);
             }
             else  // not annotated
             {
                 if (this.allPagesActivation == "on")
                 {
                     browser.showFirebug = true;
+                    if (FBTrace.DBG_WINDOWS)
+                        FBTrace.sysout("shouldCreateContext allPagesActivation "+this.allPagesActivation);
                     return true;
                 }
 
@@ -3426,21 +3427,17 @@ Firebug.URLSelector =
 
                 if (browser.FirebugLink) // then TabWatcher found a connection
                 {
-                    if (browser.FirebugLink.dst == uri) // and it matches us now
+                    var dst = browser.FirebugLink.dst;
+                    var dstURI = makeURI(normalizeURL(dst.spec));
+                    if (dstURI.equals(uri)) // and it matches us now
                     {
                         var srcURI = makeURI(normalizeURL(browser.FirebugLink.src.spec));
-                        var hasSrcAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
+                        return this.checkAnnotation(browser, srcURI);
+                    }
+                    else
+                    {
                         if (FBTrace.DBG_WINDOWS)
-                            FBTrace.sysout("shouldCreateContext hasSrcAnnotation "+hasSrcAnnotation+" for "+browser.FirebugLink.src.spec);
-                        if (hasSrcAnnotation)
-                        {
-                            var srcAnnotation = this.annotationSvc.getPageAnnotation(srcURI, this.annotationName);
-                            if (FBTrace.DBG_WINDOWS)
-                                FBTrace.sysout("shouldCreateContext srcAnnotation "+srcAnnotation+" for "+srcURI.spec);
-
-                            var srcWasClosed = (srcAnnotation.indexOf('closed') >= 0);
-                            return !srcWasClosed;
-                        }
+                            FBTrace.sysout("shouldCreateContext FirebugLink does not match "+uri.spec, browser.FirebugLink);
                     }
                 }
 
@@ -3452,6 +3449,33 @@ Firebug.URLSelector =
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("pageHasAnnoation FAILS for url: "+url+" which gave uri "+(uri?uri.spec:"null"), exc);
         }
+    },
+
+    checkAnnotation: function(browser, uri)
+    {
+        var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
+
+        delete browser.showDetached;
+        delete browser.showFirebug;
+
+        if (annotation.indexOf("detached") > 0)  // then the previous use was detached.
+        {
+            if (!browser.detached) // then it is not now detached
+                browser.showDetached = true; // mark to detach
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("shouldCreateContext set showDetached ");
+        }
+        else if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0)) // then the user closed Firebug on this page last time
+        {
+            return false; // annotated as 'closed', don't create
+        }
+        else
+            browser.showFirebug = true;  // mark to stay in browser
+
+        return true;    // annotated, createContext
     },
 
     shouldShowContext: function(context)
