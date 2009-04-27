@@ -435,8 +435,11 @@ top.Firebug =
                 tooltip += "\n"+total.active+" "+$STR("Total Firebug");
             if (total.active > 1)
                 tooltip += "\n"+total.active+" "+$STR("Total Firebugs");
-
         }
+
+        if (Firebug.URLSelector.allPagesActivation)
+            tooltip += "\n"+Firebug.URLSelector.allPagesActivation+" for all pages";
+
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
     },
 
@@ -1220,10 +1223,17 @@ top.Firebug =
 
     toggleAll: function(offOrOn)
     {
-        if (Firebug.URLSelector.allPagesActivation == offOrOn)
-            delete Firebug.URLSelector.allPagesActivation;
+        FBTrace.sysout("Firebug.toggleAll("+offOrOn+") with allPagesActivation: "+Firebug.URLSelector.allPagesActivation);
+
+        if (offOrOn == "on" || offOrOn == "off")
+        {
+            if (Firebug.URLSelector.allPagesActivation == offOrOn)
+                delete Firebug.URLSelector.allPagesActivation;
+            else
+                (offOrOn == "off") ? Firebug.allOff() : Firebug.allOn();
+        }
         else
-            (offOrOn == "off") ? Firebug.allOff() : Firebug.allOn();
+            delete Firebug.URLSelector.allPagesActivation;
 
         Firebug.updateAllPagesActivation();
     },
@@ -1231,9 +1241,7 @@ top.Firebug =
     allOn: function()
     {
         Firebug.URLSelector.allPagesActivation = "on";  // In future we always create contexts,
-        var browser = FirebugChrome.getCurrentBrowser();
-        if (!browser.chrome)
-            Firebug.toggleBar(true);  // and we turn on for the current page
+        Firebug.toggleBar(true);  // and we turn on for the current page
     },
 
     allOff: function()
