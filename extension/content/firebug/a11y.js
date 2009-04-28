@@ -721,6 +721,14 @@ FBL.ns( function()
                             }
                         }
                         break;
+                    case KeyEvent.DOM_VK_F2:
+                        if (hasClass(target.parentNode.parentNode, 'textNodeBox'))
+                        {
+                            var textNode = getChildByClass(target, 'nodeText');
+                            if (textNode)
+                                this.dispatchMouseEvent(textNode, 'mousedown');
+                        }
+                        break;
                 }
             },
 
