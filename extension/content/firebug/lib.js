@@ -1185,12 +1185,18 @@ this.getOverflowParent = function(element)
 
 this.isScrolledToBottom = function(element)
 {
-    return element.scrollTop + element.offsetHeight == element.scrollHeight;
+    var onBottom = element.scrollTop + element.offsetHeight == element.scrollHeight;
+    if (FBTrace.DBG_CONSOLE)
+        FBTrace.sysout("isScrolledToBottom "+onBottom+" wasScrolledToBottom: "+element.wasScrolledToBottom);
+    return onBottom;
 };
 
 this.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight - element.offsetHeight;
+    
+    if (FBTrace.DBG_CONSOLE)
+        element.wasScrolledToBottom = true;
 };
 
 this.move = function(element, x, y)
