@@ -440,19 +440,7 @@ this.Arr = domplate(Firebug.Rep,
 
     supportsObject: function(object)
     {
-        if (this.isArray(object)) return true;
-
-        if (object instanceof Ci.nsIDOMHistory)  // to avoid NS_ERROR_FAILURE
-            return false;
-
-        // Don't use propertyIsEnumerable("length") as "arguments" array isn't real JS array,
-        // "arguments" have .length but do not respond to object property enumeration.
-        if ("length" in object && typeof(object.length) == "number")
-        {
-            for (name in object)
-                return false;
-            return true;
-        }
+        return this.isArray(object);
     },
 
     // http://code.google.com/p/fbug/issues/detail?id=874
@@ -1573,6 +1561,28 @@ this.ApplicationCache = domplate(Firebug.Rep,
 
 });
 
+this.Storage = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({onclick: "$show"}, OBJECTLINK("$object|summarize")),
+
+    summarize: function(storage)
+    {
+        return storage.length +" items in Storage";
+    },
+    show: function(storage)
+    {
+        openNewTab("http://dev.w3.org/html5/webstorage/#storage-0");
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "Storage",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof Storage);
+    }
+
+});
 
 // ************************************************************************************************
 Firebug.registerRep(

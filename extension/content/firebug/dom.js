@@ -686,7 +686,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 {
                     var name = newPath[i];
                     var object = value;
-                    value = value[name];
+                    try
+                    {
+                        value = value[name];
+                    }
+                    catch(exc)
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                                FBTrace.sysout("dom.updateSelection FAILS at path_i="+i+" for name:"+name+"\n");
+                        return;
+                    }
 
                     ++this.pathIndex;
                     this.objectPath.push(new Property(object, name));
