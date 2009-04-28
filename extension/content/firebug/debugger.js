@@ -3264,6 +3264,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             this.showStackFrame(mainPanel.selection);
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("debugger.callstackPanel.refresh for mainPanel.selection "+mainPanel.selection );
+        dispatch([Firebug.A11yModel], 'onLogRowContentCreated', [this, this.panelNode]);
     },
 
     showStackFrame: function(frame)
@@ -3291,6 +3292,8 @@ CallstackPanel.prototype = extend(Firebug.Panel,
                     FBL.setClass(div, "objectLink");
                     FBL.setClass(div, "objectLink-stackFrame");
                     FBL.setClass(div, "panelStatusLabel");
+                    FBL.setClass(div, "a11yFocus");
+                    FBL.setClass(div, "focusRow");
 
                     this.panelNode.appendChild(div);
                 }
