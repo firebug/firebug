@@ -42,7 +42,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
     loadText: function(url, method, file)
     {
         var lines = this.load(url, method, file);
-        return lines ? lines.join("\n") : null;
+        return lines ? lines.join("") : null;
     },
 
     load: function(url, method, file)
@@ -217,8 +217,25 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
     {
         if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
             FBTrace.sysout("sourceCache for "+this.context.getName()+" store url="+url+"\n");        /*@explore*/
-        var lines = splitLines(text);
+        var lines = this.splitLines(text);
         return this.storeSplitLines(url, lines);
+    },
+
+    splitLines: function(text)
+    {
+        const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
+        var lines;
+        if (text.match)
+        {
+            lines = text.match(reSplitLines2);
+        }
+        else
+        {
+            var str = text+"";
+            lines = str.match(reSplitLines2);
+        }
+        lines.pop();
+        return lines;
     },
 
     storeSplitLines: function(url, lines)

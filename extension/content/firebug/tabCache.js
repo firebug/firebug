@@ -398,7 +398,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         delete this.responses[url];
 
         var lines = this.cache[url];
-        var responseText = lines ? lines.join("\n") : "";
+        var responseText = lines ? lines.join("") : "";
 
         dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest", [this.context, request, responseText]);
         dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);

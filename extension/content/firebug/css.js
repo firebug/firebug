@@ -1523,7 +1523,7 @@ function getStyleSheetCSS(sheet, context)
     if (sheet.ownerNode instanceof HTMLStyleElement)
         return sheet.ownerNode.innerHTML;
     else
-        return context.sourceCache.load(sheet.href).join("\n");
+        return context.sourceCache.load(sheet.href).join("");
 }
 
 function getStyleSheetOwnerNode(sheet) {
