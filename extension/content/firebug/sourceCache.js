@@ -55,7 +55,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         {
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
-            var lines = data.split(/\r\n|\r|\n/);
+            var lines = splitLines(data)
             this.cache[url] = lines;
 
             return lines;
@@ -65,7 +65,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         if (j)
         {
             var src = url.substring(FBL.reJavascript.lastIndex);
-            var lines = src.split(/\r\n|\r|\n/);
+            var lines = splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -102,7 +102,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         var src = getResource(url);
         if (src)
         {
-            var lines = src.split(/\r\n|\r|\n/);
+            var lines = splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -197,7 +197,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         try
         {
             var data = readFromStream(stream, charset);
-            var lines = data.split(/\r\n|\r|\n/);
+            var lines = splitLines(data);
             this.cache[url] = lines;
             return lines;
         }
