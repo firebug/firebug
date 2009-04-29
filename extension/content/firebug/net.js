@@ -1439,7 +1439,11 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         var rows = getElementsByClass(this.table, "netRow");
         for (var i=0; i<rows.length; i++)
         {
-            var file = Firebug.getRepObject(rows[i]);
+            var row = rows[i];
+            if (hasClass(row, "collapsed"))
+                continue;
+
+            var file = Firebug.getRepObject(row);
             if (file)
                 fn(file);
         }
