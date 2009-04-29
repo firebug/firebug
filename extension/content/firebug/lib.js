@@ -2368,6 +2368,20 @@ this.iterateBrowserWindows = function(windowType, callback)
     return false;
 };
 
+this.iterateBrowserTabs = function(browserWindow, callback)
+{
+    var tabBrowser = browserWindow.getBrowser();
+    var numTabs = tabBrowser.browsers.length;
+    for(var index=0; index<numTabs; index++)
+    {
+        var currentBrowser = tabBrowser.getBrowserAtIndex(index);
+        if (callback(tabBrowser.mTabs[index], currentBrowser))
+            return true;
+    }
+
+    return false;
+}
+
 // ************************************************************************************************
 // JavaScript Parsing
 
