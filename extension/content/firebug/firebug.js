@@ -3434,7 +3434,9 @@ Firebug.URLSelector =
                     if (dstURI.equals(uri)) // and it matches us now
                     {
                         var srcURI = makeURI(normalizeURL(browser.FirebugLink.src.spec));
-                        return this.checkAnnotation(browser, srcURI);
+                        hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
+                        if (hasAnnotation)
+                            return this.checkAnnotation(browser, srcURI);
                     }
                     else
                     {
