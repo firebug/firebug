@@ -89,7 +89,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         {
             var box = this.ioBox.createObjectBox(this.selection);
             if (!hasClass(box, "open"))
-                this.select(this.ioBox.getParentObjectBox(box).repObject); 
+                this.select(this.ioBox.getParentObjectBox(box).repObject);
             else
                 this.ioBox.contractObject(this.selection);
         }
@@ -172,7 +172,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         else
         {
             var text = getSourceText(node);
-            lines = text.split(/\r\n|\r|\n/);
+            lines = splitLines(text);
         }
 
         var sourceElt = new SourceText(lines, node);
