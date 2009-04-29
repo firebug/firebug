@@ -404,8 +404,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     clearAllBreakpoints: function(context)
     {
-        var sourceFiles = sourceFilesAsArray(context.sourceFileMap);
-        fbs.clearAllBreakpoints(sourceFiles, Firebug.Debugger);
+        if (context)
+        {
+            var sourceFiles = sourceFilesAsArray(context.sourceFileMap);
+            fbs.clearAllBreakpoints(sourceFiles, Firebug.Debugger);
+        }
+        else
+        {
+            fbs.enumerateBreakpoints(null, {call: function(url, lineNo) // null means all urls
+            {
+                    fbs.clearBreakpoint(url, lineNo);
+            }});
+        }
     },
 
     enableAllBreakpoints: function(context)
@@ -3254,7 +3264,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     updateSelection: function(object)
     {
         if (object instanceof jsdIStackFrame)
-            this.highlightFrame(object);
+            this.showStackFrame(object);
     },
 
     refresh: function()
@@ -3264,7 +3274,6 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             this.showStackFrame(mainPanel.selection);
         if (FBTrace.DBG_STACK)
             FBTrace.sysout("debugger.callstackPanel.refresh for mainPanel.selection "+mainPanel.selection );
-        dispatch([Firebug.A11yModel], 'onLogRowContentCreated', [this, this.panelNode]);
     },
 
     showStackFrame: function(frame)
@@ -3298,6 +3307,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
                     this.panelNode.appendChild(div);
                 }
             }
+            dispatch([Firebug.A11yModel], 'onLogRowContentCreated', [this, this.panelNode]);
         }
     },
 
