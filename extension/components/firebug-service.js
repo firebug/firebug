@@ -2561,7 +2561,7 @@ function getFrameWindow(frame)
         if (win instanceof Ci.nsIDOMWindow)
             return getRootWindow(win);
         else
-            return getFrameScopeWindowAncestor(checkFrame);
+            return getFrameScopeWindowAncestor(frame);
     }
     catch (exc)
     {
