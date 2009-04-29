@@ -164,8 +164,8 @@ specting" tooltiptext="&firebug.InspectElement;"/>
             <menuitem id="menu_detachFirebug"
                 label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
             <menuseparator/>
-            <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
-            <menuitem label="firebug.menu.Reset All Firebug Options" command="cmd_resetAllOptions"/>
+            <menuitem id="menu_clearConsole" label="firebug.menu.Clear Console" command="cmd_clearConsole"/>
+            <menuitem id="menu_resetAllOptions" label="firebug.menu.Reset All Firebug Options" command="cmd_resetAllOptions"/>
             <menuseparator/>
             <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
             <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>
