@@ -1225,7 +1225,8 @@ top.Firebug =
 
     toggleAll: function(offOrOn)
     {
-        FBTrace.sysout("Firebug.toggleAll("+offOrOn+") with allPagesActivation: "+Firebug.URLSelector.allPagesActivation);
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("Firebug.toggleAll("+offOrOn+") with allPagesActivation: "+Firebug.URLSelector.allPagesActivation);
 
         if (offOrOn == "on" || offOrOn == "off")
         {
@@ -1288,6 +1289,8 @@ top.Firebug =
                     FBTrace.sysout("Skipped clearing option: "+i+") "+preferences[i]);
             }
         }
+
+        Firebug.Debugger.clearAllBreakpoints(); // no context clears in all contexts
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
