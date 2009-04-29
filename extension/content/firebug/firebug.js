@@ -1268,12 +1268,12 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    resetAllOptions: function()
+    resetAllOptions: function()  // to default state
     {
         var preferences = prefs.getChildList("extensions.firebug", {});
         for (var i = 0; i < preferences.length; i++)
         {
-            if (preferences[i].indexOf("extensions.firebug.DBG_") == -1)
+            if (preferences[i].indexOf("DBG_") == -1 && preferences[i].indexOf("filterSystemURLs") == -1)
             {
                 if (FBTrace.DBG_OPTIONS)
                     FBTrace.sysout("Clearin option: "+i+") "+preferences[i]);
