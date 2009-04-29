@@ -806,7 +806,7 @@ FirebugService.prototype =
         else
         {
             for (var url in breakpoints)
-                this.enumerateBreakpoints(url, cb, bp);
+                this.enumerateBreakpoints(url, cb);
         }
     },
 
