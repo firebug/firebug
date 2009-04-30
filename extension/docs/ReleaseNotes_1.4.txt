@@ -136,3 +136,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1679: Break On Next Statement ("pause" button): poor selection style (partial)
     * Issue 1680: Firebug suspends on page reload.
     * Issue 1691: CSS style editor autocomplete problems
+    * Issue 1694 in fbug: Net Panel Cutsomization: file.responseText doesn't include original line breaks
+    * Issue 1695: Clicking on sessionStorage (empty array) in DOM panel causes error
+    * Issue 1700: 'Inspect in DOM panel' for variables during script suspension broken
+    * Issue 1701: Stack panel not updated immediately during script suspension
