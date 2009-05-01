@@ -2737,27 +2737,6 @@ this.getFileName = function(url)
     return split.name;
 };
 
-this.splitFileName = function(url)
-{ // Dead code
-    var d = this.reDataURL.exec(url);
-    if (d)
-    {
-        var path = decodeURIComponent(d[1]);
-        if (!d[2])
-            return { path: path, name: 'eval' };
-        else
-            return { path: path, name: 'eval', line: d[2] };
-    }
-
-    var m = reSplitFile.exec(url);
-    if (!m)
-        return {name: url, path: url};
-    else if (!m[2])
-        return {path: m[1], name: m[1]};
-    else
-        return {path: m[1], name: m[2]};
-};
-
 this.splitURLBase = function(url)
 {
     if (this.isDataURL(url))

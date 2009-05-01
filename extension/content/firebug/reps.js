@@ -992,8 +992,17 @@ this.SourceLink = domplate(Firebug.Rep,
         if (!sourceLink)
             return "";
 
-        var fileName = cropString(getFileName(sourceLink.href), 17);
-        fileName = decodeURIComponent(fileName);
+        try
+        {
+            var fileName = getFileName(sourceLink.href);
+            fileName = decodeURIComponent(fileName);
+            fileName = cropString(fileName, 17);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'"+fileName+"\': "+exc, exc);
+        }
         return $STRF("Line", [fileName, sourceLink.line]);
     },
 
