@@ -78,14 +78,20 @@ const httpObserver =
 
 Firebug.Spy = extend(Firebug.Module,
 {
+    dispatchName: "spy",
+
     skipSpy: function(win)
     {
         var uri = win.location.href; // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
             return true;
+
+        // Don't attach spy in Firefox > 3.1 till #483672 is fixed.
+        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
+            return true;
     },
 
-    attachSpy: function(context, win)
+    attachObserver: function(context, win)
     {
         if (win)
         {
@@ -103,7 +109,7 @@ Firebug.Spy = extend(Firebug.Module,
         }
     },
 
-    detachSpy: function(context, win)
+    detachObserver: function(context, win)
     {
         for( var i = 0; i < contexts.length; ++i )
         {
@@ -126,28 +132,28 @@ Firebug.Spy = extend(Firebug.Module,
     {
         context.spies = [];
 
-        if (Firebug.showXMLHttpRequests  && Firebug.Console.isEnabled(context))
-            this.attachSpy(context, context.window);
+        if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
+            this.attachObserver(context, context.window);
     },
 
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
-        this.detachSpy(context, false);
+        this.detachObserver(context, false);
         delete context.spies;
     },
 
     watchWindow: function(context, win)
     {
-        if (Firebug.showXMLHttpRequests && Firebug.Console.isEnabled(context))
-            this.attachSpy(context, win);
+        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
+            this.attachObserver(context, win);
     },
 
     unwatchWindow: function(context, win)
     {
         try {
             // This make sure that the existing context is properly removed from "contexts" array.
-            this.detachSpy(context, win);
+            this.detachObserver(context, win);
         } catch (ex) {
             // Get exceptions here sometimes, so let's just ignore them
             // since the window is going away anyhow
@@ -159,7 +165,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         if (name == "showXMLHttpRequests")  // XXXjjb Honza, if Console.isEnabled(context) false, then this can't be called, but somehow seems not correct
         {
-            var tach = value ? this.attachSpy : this.detachSpy;
+            var tach = value ? this.attachObserver : this.detachObserver;
             for (var i = 0; i < TabWatcher.contexts.length; ++i)
             {
                 var context = TabWatcher.contexts[i];
@@ -233,10 +239,15 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         {
             toggleClass(logRow, "opened");
 
+            var spy = getChildByClass(logRow, "spyHead").repObject;
             if (hasClass(logRow, "opened"))
             {
-                var spy = getChildByClass(logRow, "spyHead").repObject;
                 updateHttpSpyInfo(spy);
+            }
+            else
+            {
+                var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+                dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
             }
         }
     },
@@ -260,7 +271,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     copyResponse: function(spy)
     {
-        copyToClipboard(spy.xhrRequest.responseText);
+        copyToClipboard(spy.responseText);
     },
 
     openInTab: function(spy)
@@ -334,6 +345,10 @@ top.XMLHttpRequestSpy.prototype =
         this.xhrRequest.onreadystatechange = this.onReadyStateChange;
         this.xhrRequest.addEventListener("load", this.onLoad, true);
         this.xhrRequest.addEventListener("error", this.onError, true);
+
+        // Use tabCache to get XHR response. Notice that the tabCache isn't
+        // supported till Firefox 3.0.4
+        this.context.sourceCache.addListener(this);
     },
 
     detach: function()
@@ -345,11 +360,20 @@ top.XMLHttpRequestSpy.prototype =
         this.onreadystatechange = null;
         this.onLoad = null;
         this.onError = null;
+
+        this.context.sourceCache.removeListener(this);  // XXXjjb I see null sourceCache errors here, from onReadyStateChange
     },
 
     getURL: function()
     {
         return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
+    },
+
+    // Cache listener
+    onStopRequest: function(context, request, responseText)
+    {
+        if (request == this.request)
+            this.responseText = responseText
     },
 };
 
@@ -376,7 +400,7 @@ function getSpyForXHR(request, xhrRequest, context)
         if (spy.request == request)
             return spy;
     }
-    
+
     spy = new XMLHttpRequestSpy(request, xhrRequest, context);
     context.spies.push(spy);
 
@@ -418,7 +442,7 @@ function requestStarted(request, xhrRequest, context, method, url)
         spy.requestHeaders = getRequestHeaders(spy);
 
     // If it's enabled log the request into the console tab.
-    if (Firebug.showXMLHttpRequests && Firebug.Console.isEnabled(context))
+    if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
     {
         spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
         setClass(spy.logRow, "loading");
@@ -459,7 +483,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         catch (exc)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.dumpProperties("spy.requestStopped " + spy.href + 
+                FBTrace.dumpProperties("spy.requestStopped " + spy.href +
                     ", status access FAILED", exc);
         }
     }
@@ -470,12 +494,12 @@ function requestStopped(request, xhrRequest, context, method, url)
         updateHttpSpyInfo(spy);
     }
 
-    if (spy.context.spies)
+    if (spy.context.spies)  // XXXjjb don't we need to spy.detach() ?
         remove(spy.context.spies, spy);
 
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " + 
-            spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) + 
+        FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
+            spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) +
             " bytes", request);
 }
 
@@ -487,9 +511,9 @@ function onHTTPSpyReadyStateChange(spy, event)
         if (spy.onreadystatechange)
             spy.onreadystatechange.handleEvent(event);
     }
-    catch (exc) 
-    { 
-        if (FBTrace.DBG_ERROR)
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION", exc);
     }
     finally
@@ -510,6 +534,11 @@ function onHTTPSpyLoad(spy)
     // The main XHR object has to be dettached now (i.e. listeners removed).
     spy.detach();
 
+    // The tabCache listener is used to get the actuall response since the
+    // spy.xhrRequest.responseText is empty if the request is aborted at this
+    // moment. Anyway, this way is used also for following cases:
+    // (a) nsITraceableChannel is not available until FF 3.0.4
+    // (b) specified response content-type doesn't have to be cached.
     if (!spy.responseText)
         spy.responseText = spy.xhrRequest.responseText;
 
@@ -518,10 +547,10 @@ function onHTTPSpyLoad(spy)
         netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
     // If the response is get from FF cache the http-on-examine-response is never sent
-    // (https://bugzilla.mozilla.org/show_bug.cgi?id=449198) and so, the requestStopped 
+    // (https://bugzilla.mozilla.org/show_bug.cgi?id=449198) and so, the requestStopped
     // method is never called.
     // Let's simulate the event for all spy objects that have been registered for this request.
-    // Notice that there can be more spy objects (using the same request object) in case of 
+    // Notice that there can be more spy objects (using the same request object) in case of
     // redirects.
     var spies = spy.context.spies;
     for (var i=0; spies && i<spies.length; i++)
@@ -600,6 +629,7 @@ function updateHttpSpyInfo(spy)
     {
         var head = getChildByClass(spy.logRow, "spyHead");
         netInfoBox = template.tag.append({"file": spy}, head);
+        dispatch(template.fbListeners, "initTabBody", [netInfoBox, spy]);
         template.selectTabByName(netInfoBox, "Response");
     }
     else

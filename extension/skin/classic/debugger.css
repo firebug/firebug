@@ -20,8 +20,8 @@
 /************************************************************************************************/
 
 .sourceBox {
-    overflow: auto;
-    position: absolute;
+    overflow: scroll; /* see issue 1479 */
+     position: absolute;
     left: 0;
     top: 0;
     width: 100%;
@@ -47,6 +47,16 @@
     background: #EEEEEE no-repeat 2px 0px;
     color: #888888;
     white-space: pre;
+}
+
+.useA11y .sourceBox .sourceViewport:focus .sourceLine {
+    background-color: #FFFFC0;
+    color: navy;	
+    border-right: 1px solid #FF9933;
+}
+
+.useA11y .sourceBox .sourceViewport:focus {
+	outline: none;
 }
 
 .sourceBox > .sourceRow > .sourceLine {

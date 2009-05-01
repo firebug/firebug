@@ -5,8 +5,17 @@ Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
 
 == Not Panel Specific ==
-    
-    Supports Firefox 3.1
+    * Curtis Bartley's Tabs-on-top UI reordering
+    * Improved and simplified "natural" Activation UI, minimize to context menu, all on/off
+    * Firebug remembers which pages you had opened Firebug on.
+    * Supports Firefox 3.5
+    * auto-suspend
+    * Adds tab switching shortcut. Currently hardcoded to ctrl + shift + pgup/pgdown
+    * search across all files (contribution by kpdecker)
+    * Accessiblity by Hans Hillen, incl. tabbing and focus identification, panels Script, DOM , CSS, Breakpoints, DOM
+    * (some) Testing before shipping!
+    * jsd.initAtStartup set false not true
+    * resetAllOptions on Firebug status bar context menu
 
 == Javascript Debugging ==
     * Implement breakOnNext UI for STEP_SUSPEND
@@ -20,43 +29,114 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * implement decompileEvals
 
 == Net Panel ==
-    * support for STATUS_RESOLVING 
-    * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel. 
-		
+    * support for STATUS_RESOLVING
+    * Support for custom tabs for net requests (like Headers, Params, etc.) within net panel.
+    * Json tab is available even for XHR entries in Console panel.
+    * Limit for cached responses in tabCache.
+    * Maximum size limit for cached responses can be specified in preferences.
+    * Console panel ShowXHRDisabled for FF3.5 until bugzilla 483672 is fixed.
+    * Search response bodies
+
+== For Extensions ==
+    * All modules support Firebug.Listener
+    * add option extensions.firebug-tracing-service.toOSConsole for debugging tracing or early FF
+    * TabWatch dispatch separate from modules dispatch
+    * acceptContext/declineContext replaced by shouldCreateContext/shouldNotCreateContext
+    * function() objects default rep is next to last so function types can be trapped by supportsObject()
+
+
+
+
 == Locales ==
-	* No more entites, all properties
-	* de-DE locale update (contribution by Team erweiterungen.de, ReinekeFux, Monoman)
-	* it-IT locale update (contribution by l0stintranslation, gonzalopirobutirro)
-	* New Locale ro-RO, Romanian (contribution by alexxed)
-	* Locale update fr-FR (contribution by martin© and fmarcia)
-	* Locale update hu-HU (contribution by gLes)
-	* Update locale pl-PL (contribution by teo)
-	* ca-AD locale updated (contribution by xavivars, toniher)
-	* sv-SE locale update (contribution by peter3)
-	* da-DK locale update (contribution by AlleyKat)
-	* nl-NL locale update (contribution by markh)
-	
+    * No more entites, all properties
+    * de-DE locale update (contribution by Team erweiterungen.de, ReinekeFux, Monoman)
+    * it-IT locale update (contribution by l0stintranslation, gonzalopirobutirro)
+    * New Locale ro-RO, Romanian (contribution by alexxed)
+    * Locale update fr-FR (contribution by martinï¿½ and fmarcia)
+    * Locale update hu-HU (contribution by gLes)
+    * Update locale pl-PL (contribution by teo)
+    * ca-AD locale updated (contribution by xavivars, toniher)
+    * sv-SE locale update (contribution by peter3)
+    * da-DK locale update (contribution by AlleyKat)
+    * nl-NL locale update (contribution by markh)
+    * Update tr-TR locale (contribution by gezmen)
+    * New Locale es-AR (contribution by eternoendless)
+    * Update locale ro-RO (contribution by alexxed)
+    * Update zh-CN locale (contribution by lovelywcm)
+    * Update cs-CZ locale (contribution by lordfrikk and mik)
+
 == Bug Fixes ==
-	* Issue 176: net flash tab not recognising flv files
-	* Issue 199:   CSS priority with '!important'
-	* Issue 700: HTML preview for net responses
-	* Issue 749: Hungarian Locale
-	* Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
-	* Issue 1122: can't copy or open image background from css viewer
-	* Issue 1210: 1.3b1 post message display is screwed up
-	* Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
-	* Issue 1229: console tab does not display XHR with xhr.onprogress.
-	* Issue 1231: console object has wrong version number
-	* Issue 1248: Console does not filter errors from other browser tabs.
-	* Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
-	* Issue 1258: Enhancement patch: filefield is editable in add external editor dialog
-	* Issue 1267: console.time('toString') returns `NaN`;
-	* Issue 1276: Break on error without message in status bar
-	* Issue 1278: console create unclickable, 4px-high log entries
-	* Issue 1284: Unable to add new editor to external editors
-	* Issue 1285: Enhancement patch: filefield is editable in add external editor dialog; contribution by antonin.hildebrand
-	* Issue 1290: Using backspace when searching in open files menu deletes two characters instead of one, contribution by splintor
-	* Issue 1305: lib.ERROR with 1.3X.0b5 while debugging Google language API
-	* Issue 1306: console create unclickable, 4px-high log entries (revisited)
-	* Issue 1308: Missing URL-Encoding of reserved characters when using 'Copy Location with Parameters' from Net Panel
-	* Issue 1310: Net Panel - Wrong domain display
+    * Issue 176: net flash tab not recognising flv files
+    * Issue 241: Does not reload javascript content when dynamically removed and added from page.
+    * Issue 369: Inspect JSON data in HTTP responses (contribution by Ashish Datta)
+    * Issue 199: CSS priority with '!important'
+    * Issue 700: HTML preview for net responses
+    * Issue 749: Hungarian Locale
+    * Issue 716: Add "Inspect element" context menu element in Fx3 for button and select elements
+    * Issue 834: Not displayed POST variables in NET tab
+    * Issue 895: Firebug toolbar button should behave the same way as clicking on status bar icon.
+    * Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
+    * Issue 1113: Unresponsive when using large Data URI image replacement, contribution by  2005jimmont
+    * Issue 1122: can't copy or open image background from css viewer
+    * Issue 1143: Inspected element variables ( $1, $2 ) command-line regression (contribution by urkle0)
+    * Issue 1176: Firebug should preserve Suspend state across sessions (after restart)
+    * Issue 1184: Search across all Javascript sources, not just one. contribution by kpdecker.
+    * Issue 1210: 1.3b1 post message display is screwed up
+    * Issue 1222: incorrect localization Resume_Firebug=Suspend Firebug
+    * Issue 1226: FB 1.4 tabCache optimalization prevents webpages from being viewied in FF3.1 nighlies
+    * Issue 1263: Script error downloading files
+    * Issue 1229: console tab does not display XHR with xhr.onprogress.
+    * Issue 1231: console object has wrong version number
+    * Issue 1248: Console does not filter errors from other browser tabs.
+    * Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
+    * Issue 1258: Enhancement patch: filefield is editable in add external editor dialog
+    * Issue 1267: console.time('toString') returns `NaN`;
+    * Issue 1276: Break on error without message in status bar
+    * Issue 1278: console create unclickable, 4px-high log entries
+    * Issue 1281: Watch tab: New Watch expression fails if Firebug is not stopped on a breakpoint
+    * Issue 1284: Unable to add new editor to external editors
+    * Issue 1285: Enhancement patch: filefield is editable in add external editor dialog; contribution by antonin.hildebrand
+    * Issue 1290: Using backspace when searching in open files menu deletes two characters instead of one, contribution by splintor
+    * Issue 1303: console.log with wrong output -- scope of commandline
+    * Issue 1305: lib.ERROR with 1.3X.0b5 while debugging Google language API
+    * Issue 1306: console create unclickable, 4px-high log entries (revisited)
+    * Issue 1308: Missing URL-Encoding of reserved characters when using 'Copy Location with Parameters' from Net Panel
+    * Issue 1310: Net Panel - Wrong domain display
+    * Issue 1316: window.console is undefined, then console create empty log entries after clicking on the command line
+    * Issue 1317: Scrollbar in "Edit" view rendered half-invisible
+    * Issue 1319: Selecting multiple JavascriptLines to add watch also adds line numbers
+    * Issue 1323: img preview in CSS tab not working.
+    * Issue 1339: Command line becomes unusable after reload
+    * Issue 1347: Firebug 1.3 re-introduce "this.notifyFirebug is not a function" issue
+    * Issue 1352: All xmlhttprequest's appear to come from firebug-http-observer.js when looking at console view
+    * Issue 1367: Save as TXT/HTML or view in another tab ajax response
+    * Issue 1369: URL params parsing: omniture gifs no longer show params properly
+    * Issue 1381: Autocompletion only shows the first match
+    * Issue 1382: Add event dispatch when console is injected so extensions can know when console is available (contribution by collins.mike)
+    * Issue 1383: 1.3: if the last line is a comment throws Syntax Error: missing }
+    * Issue 1387:  switching between Firebug's tabs (as opposed to the window's) reverts contents of larger command line
+    * Issue 1395: Script debug loads only the first 20 lines of some scripts.
+    * Issue 1408: Google Docs (spreadsheets) - truncated view / not editable on inner worksheets (TracingListener implemented as XPCOM)
+    * Issue 1409: Selected source file does not persist on reload
+    * Issue 1468: File Locking on File upload when firebug is installed
+    * Issue 1479: Horizontal scroll bar appears and disappears when scrolling vertically in script tab (contribution by kpdecker)
+    * Issue 1483: Scripts fail to load when page reloaded during paused execution
+    * Issue 1495: No more ajax response for a while
+    * Issue 1496: Hash Character Links ( the # or fragement identifier for a URL) Creates Seperate Script View
+    * issue 1508: Problems with some downloads.
+    * Issue 1547: &editors.Description;
+    * Issue 1575: New watch expression can't be created when breakpoint is active
+    * Issue 1592: Added display: autocompletions to CSS editor
+    * Issue 1591: Firebug cannot find _firebugConsole element
+    * Issue 1640: Fixed install.rdf typo
+    * Issue 1649: disabling script panel doesn't disable script view in 1.4
+    * Issue 1650: 1.4a18 not picking up other JS files
+    * Issue 1651: 1.4a18 panel not updating when changing tabs in firefox
+    * Issue 1663: CSS Property Name Editor Does not always work (contribution by kpdecker)
+    * Issue 1679: Break On Next Statement ("pause" button): poor selection style (partial)
+    * Issue 1680: Firebug suspends on page reload.
+    * Issue 1691: CSS style editor autocomplete problems
+    * Issue 1694 in fbug: Net Panel Cutsomization: file.responseText doesn't include original line breaks
+    * Issue 1695: Clicking on sessionStorage (empty array) in DOM panel causes error
+    * Issue 1700: 'Inspect in DOM panel' for variables during script suspension broken
+    * Issue 1701: Stack panel not updated immediately during script suspension

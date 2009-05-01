@@ -11,10 +11,15 @@ try { /*@explore*/
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+
 this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
+this.versionChecker = this.CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
+this.appInfo = this.CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
+
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
+const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
 
 const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
 const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
@@ -40,6 +45,8 @@ const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 const overrideDefaultsWithPersistedValuesTimeout = 500;
 
 const NS_SEEK_SET = Ci.nsISeekableStream.NS_SEEK_SET;
+
+const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
 
 // ************************************************************************************************
 // Namespaces
@@ -72,13 +79,13 @@ this.initialize = function()
 // ************************************************************************************************
 // Basics
 
-this.bind = function()
+this.bind = function()  // fn, thisObject, args => thisObject.fn(args, arguments);
 {
    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
    return function() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
 };
 
-this.bindFixed = function()
+this.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
 {
     var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
     return function() { return fn.apply(object, args); }
@@ -217,13 +224,15 @@ this.convertToUnicode = function(text, charset)
     {
         var conv = this.CCSV("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
         conv.charset = charset ? charset : "UTF-8";
+        var selectedCharset = conv.charset;
         return conv.ConvertToUnicode(text);
     }
     catch (exc)
     {
-    	if (FBTrace.DBG_ERRORS)
-    		FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+": "+exc, exc);
-        return text;
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+" conv.charset:"+conv.charset+" exc: "+exc, exc);
+        // the exception is worthless, make up a new one
+        throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+" in @mozilla.org/intl/scriptableunicodeconverter");
     }
 };
 
@@ -267,11 +276,11 @@ this.addStyleSheet = function(doc, style)
 
 this.addScript = function(doc, id, src)
 {
-    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "script");
+    var element = doc.createElementNS("http://www.w3.org/1999/xhtml", "html:script");
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
-    	element.firebugIgnore = true;
+        element.firebugIgnore = true;
 
     element.innerHTML = src;
     if (doc.documentElement)
@@ -291,38 +300,41 @@ this.addScript = function(doc, id, src)
 /*
  * $STR - intended for localization of a static string.
  * $STRF - intended for localization of a string with dynamically inserted values.
- * 
+ *
  * Notes:
  * 1) Name with _ in place of spaces is the key in the firebug.properties file.
  * 2) If the specified key isn't localized for particular language, both methods use
  *    the part after the last dot (in the specified name) as the return value.
  *
  * Examples:
- * $STR("Label"); - search for key "Label" within the firebug.properties file 
+ * $STR("Label"); - search for key "Label" within the firebug.properties file
  *                 and returns its value. If the key doesn't exist returns "Label".
- * 
+ *
  * $STR("Button Label"); - search for key "Button_Label" withing the firebug.properties
  *                        file. If the key doesn't exist returns "Button Label".
  *
- * $STR("net.Response Header"); - search for key "net.Response_Header". If the key doesn't 
+ * $STR("net.Response Header"); - search for key "net.Response_Header". If the key doesn't
  *                               exist returns "Response Header".
  *
  * firebug.properties:
  * net.timing.Request_Time=Request Time: %S [%S]
- * 
+ *
  * var param1 = 10;
  * var param2 = "ms";
  * $STRF("net.timing.Request Time", param1, param2);  -> "Request Time: 10 [ms]"
- *                                          
- * - search for key "net.timing.Request_Time" within the firebug.properties file. Parameters 
- *   are inserted at specified places (%S) in the same order as they are passed. If the 
+ *
+ * - search for key "net.timing.Request_Time" within the firebug.properties file. Parameters
+ *   are inserted at specified places (%S) in the same order as they are passed. If the
  *   key doesn't exist the method returns "Request Time".
  */
-function $STR(name) 
+function $STR(name, bundleId)
 {
     try
     {
-        return document.getElementById("strings_firebug").getString(name.replace(' ', '_', "g"));
+        if (bundleId)
+            return document.getElementById(bundleId).getString(name.replace(' ', '_', "g"));
+        else
+            return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
     }
     catch (err)
     {
@@ -341,11 +353,17 @@ function $STR(name)
     return name;
 }
 
-function $STRF(name, args)
+function $STRF(name, args, bundleId)
 {
     try
     {
-        return document.getElementById("strings_firebug").getFormattedString(name.replace(' ', '_', "g"), args);
+        // xxxHonza: Workaround for #485511
+        bundleId = "strings_firebug";
+
+        if (bundleId)
+            return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
+        else
+            return Firebug.getStringBundle().formatStringFromName(name.replace(' ', '_', "g"), args, args.length);
     }
     catch (err)
     {
@@ -375,11 +393,22 @@ this.internationalize = function(element, attr, args)
     if (typeof element == "string")
         element = document.getElementById(element);
 
-    var xulString = element.getAttribute(attr);
-    var localized = args ? $STRF(xulString, args) : $STR(xulString);
+    if (element)
+    {
+        var xulString = element.getAttribute(attr);
+        if (xulString)
+        {
+            var localized = args ? $STRF(xulString, args) : $STR(xulString);
 
-    // Set localized value of the attribute.
-    element.setAttribute(attr, localized);
+            // Set localized value of the attribute.
+            element.setAttribute(attr, localized);
+        }
+    }
+    else
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("Failed to internationalize element with attr "+attr+' args:'+args);
+    }
 }
 
 // ************************************************************************************************
@@ -618,6 +647,24 @@ this.getElementsByClass = function(node, className)  // className, className, ..
     iteratorHelper(node, args, result);
     return result;
 };
+
+this.getElementsByAttribute = function(node, attrName, attrValue)
+{
+    function iteratorHelper(node, attrName, attrValue, result)
+    {
+        for (var child = node.firstChild; child; child = child.nextSibling)
+        {
+            if (child.getAttribute(attrName) == attrValue)
+                result.push(child);
+
+            iteratorHelper(child, attrName, attrValue, result);
+        }
+    }
+
+    var result = [];
+    iteratorHelper(node, attrName, attrValue, result);
+    return result;
+}
 
 this.isAncestor = function(node, potentialAncestor)
 {
@@ -1054,7 +1101,7 @@ this.getViewOffset = function(elt, singleFrame)
 
         if (p)
         {
-            if (p.nodeType == 1)
+            if (p.nodeType == 1) // element node
             {
                 var parentStyle = view.getComputedStyle(p, "");
                 if (parentStyle.position != "static")
@@ -1090,7 +1137,7 @@ this.getViewOffset = function(elt, singleFrame)
                 addOffset(p, coords, view);
             }
         }
-        else
+        else  // no offsetParent
         {
             if (elt.localName == "BODY")
             {
@@ -1138,12 +1185,18 @@ this.getOverflowParent = function(element)
 
 this.isScrolledToBottom = function(element)
 {
-    return element.scrollTop + element.offsetHeight == element.scrollHeight;
+    var onBottom = element.scrollTop + element.offsetHeight == element.scrollHeight;
+    if (FBTrace.DBG_CONSOLE)
+        FBTrace.sysout("isScrolledToBottom "+onBottom+" wasScrolledToBottom: "+element.wasScrolledToBottom);
+    return onBottom;
 };
 
 this.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight - element.offsetHeight;
+    
+    if (FBTrace.DBG_CONSOLE)
+        element.wasScrolledToBottom = true;
 };
 
 this.move = function(element, x, y)
@@ -1345,6 +1398,8 @@ this.readBoxStyles = function(style)
     var styles = {};
     for (var styleName in styleNames)
         styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText);
+    if (FBTrace.DBG_INSPECT)
+        FBTrace.sysout("readBoxStyles ", styles);
     return styles;
 };
 
@@ -1371,7 +1426,7 @@ this.getElementCSSSelector = function(element)
 
 this.getURLForStyleSheet= function(styleSheet)
 {
-	//http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
+    //http://www.w3.org/TR/DOM-Level-2-Style/stylesheets.html#StyleSheets-StyleSheet. For inline style sheets, the value of this attribute is null.
     return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
@@ -1535,6 +1590,9 @@ this.wrapText = function(text, noEscapeHTML)
     var html = [];
     var wrapWidth = Firebug.textWrapWidth;
 
+    // Split long text into lines and put every line into an <pre> element (only in case
+    // if noEscapeHTML is false). This is useful for automatic scrolling when searching
+    // within response body (in order to scroll we need an element).
     var lines = this.splitLines(text);
     for (var i = 0; i < lines.length; ++i)
     {
@@ -1545,12 +1603,18 @@ this.wrapText = function(text, noEscapeHTML)
             var wrapIndex = wrapWidth+ (m ? m.index : 0);
             var subLine = line.substr(0, wrapIndex);
             line = line.substr(wrapIndex);
+
+            if (!noEscapeHTML) html.push("<pre>");
             html.push(noEscapeHTML ? subLine : escapeHTML(subLine));
+            if (!noEscapeHTML) html.push("</pre>");
         }
+
+        if (!noEscapeHTML) html.push("<pre>");
         html.push(noEscapeHTML ? line : escapeHTML(line));
+        if (!noEscapeHTML) html.push("</pre>");
     }
 
-    return html.join("\n");
+    return html.join(noEscapeHTML ? "\n" : "");
 }
 
 this.insertWrappedText = function(text, textBox, noEscapeHTML)
@@ -1608,7 +1672,13 @@ this.setItemIntoElement = function(element, item)
 
     if (item.command)
         element.addEventListener("command", item.command, false);
-    
+
+    if (item.option)
+        element.setAttribute("option", item.option);
+
+    if (item.tooltiptext)
+        element.setAttribute("tooltiptext", item.tooltiptext);
+
     return element;
 }
 
@@ -1641,13 +1711,13 @@ this.createMenuSeparator = function(popup, before)
 
 this.optionMenu = function(label, option)
 {
-    return {label: label, type: "checkbox", checked: Firebug[option],
+    return {label: label, type: "checkbox", checked: Firebug[option], option: option,
         command: this.bindFixed(Firebug.setPref, Firebug, Firebug.prefDomain, option, !Firebug[option]) };
 };
 
 this.serviceOptionMenu = function(label, option)
 {
-    return {label: label, type: "checkbox", checked: Firebug[option],
+    return {label: label, type: "checkbox", checked: Firebug[option], option: option,
         command: this.bindFixed(Firebug.setPref, Firebug, Firebug.servicePrefDomain, option, !Firebug[option]) };
 };
 
@@ -1716,14 +1786,16 @@ this.getStackFrame = function(frame, context)
 
             var lineNo = analyzer.getSourceLineFromFrame(context, frame);
             var fncSpec = analyzer.getFunctionDescription(frame.script, context, frame);
+            if (!fncSpec.name)
+                fncSpec.name = frame.script.functionName;
 
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame for sourceFile", sourceFile);
             return new this.StackFrame(context, fncSpec.name, frame.script, url, lineNo, fncSpec.args, frame.pc);
         }
         else
         {
-            if (FBTrace.DBG_STACK) 
-            	FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:"+frame.script.tag+"@"+frame.script.fileName, frame.script.functionSource);
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("lib.getStackFrame NO sourceFile tag@file:"+frame.script.tag+"@"+frame.script.fileName, frame.script.functionSource);
 
             var script = frame.script;
 
@@ -1754,9 +1826,9 @@ this.getStackSourceLink = function()
         {
             for (; frame; frame = frame.caller)
             {
-                var httpObserverFile = "firebug@software.joehewitt.com/components/firebug-http-observer.js";
+                var firebugComponent = "/components/firebug-";
                 if (frame.filename && frame.filename.indexOf("chrome://firebug/") != 0 &&
-                    frame.filename.indexOf(httpObserverFile) == -1)
+                    frame.filename.indexOf(firebugComponent) == -1)
                     break;
             }
             break;
@@ -1887,7 +1959,7 @@ this.findScriptForFunctionInContext = function(context, fn)
         if (tfs == fns)
             found = script;
     });
-    
+
     if (FBTrace.DBG_FUNCTION_NAMES)
         FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
 
@@ -1901,7 +1973,7 @@ this.forEachFunction = function(context, cb)
         var sourceFile = context.sourceFileMap[url];
         if (FBTrace.DBG_FUNCTION_NAMES)
             FBTrace.sysout("lib.forEachFunction Looking in "+sourceFile+"\n");
-        sourceFile.forEachScript(function seekFn(script)
+        var rc = sourceFile.forEachScript(function seekFn(script)
         {
             if (!script.isValid)
                 return;
@@ -1909,10 +1981,12 @@ this.forEachFunction = function(context, cb)
             {
                 var testFunctionObject = script.functionObject;
                 if (!testFunctionObject.isValid)
-                    return;
+                    return false;
                 var theFunction = testFunctionObject.getWrappedValue();
 
-                cb(script, theFunction);
+                var rc = cb(script, theFunction);
+                if (rc)
+                    return rc;
             }
             catch(exc)
             {
@@ -1925,7 +1999,10 @@ this.forEachFunction = function(context, cb)
                 }
             }
         });
+        if (rc)
+            return rc;
     }
+    return false;
 }
 
 this.findScriptForFunction = function(fn)
@@ -2033,8 +2110,10 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
                 if (m)
                     return m[1];
                 else
+                {
                     if (FBTrace.DBG_FUNCTION_NAMES)                                                                    /*@explore*/
                         FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");    /*@explore*/
+                }
                 m = reFunctionArgNames.exec(line);
                 if (m && m[1])
                     return m[1];
@@ -2081,8 +2160,8 @@ this.getSourceFileByHref = function(url, context)
 
 this.getAllStyleSheets = function(context)
 {
-	var styleSheets = [];
-	 
+    var styleSheets = [];
+
     function addSheet(sheet)
     {
         var sheetLocation =  FBL.getURLForStyleSheet(sheet);
@@ -2102,9 +2181,9 @@ this.getAllStyleSheets = function(context)
 
     this.iterateWindows(context.window, function(subwin)
     {
-    	var rootSheets = subwin.document.styleSheets;
-    	for (var i = 0; i < rootSheets.length; ++i)
-    		addSheet(rootSheets[i]);
+        var rootSheets = subwin.document.styleSheets;
+        for (var i = 0; i < rootSheets.length; ++i)
+            addSheet(rootSheets[i]);
     });
 
     return styleSheets;
@@ -2115,8 +2194,8 @@ this.getStyleSheetByHref = function(url, context)
     function addSheet(sheet)
     {
         if (FBL.getURLForStyleSheet(sheet) == url)
-        	return sheet;
-        
+            return sheet;
+
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
             var rule = sheet.cssRules[i];
@@ -2132,15 +2211,15 @@ this.getStyleSheetByHref = function(url, context)
     var sheetIfFound = null;
     this.iterateWindows(context.window, function(subwin)
     {
-    	var rootSheets = context.window.document.styleSheets;
-    	for (var i = 0; i < rootSheets.length; ++i)
-    	{
-    		sheetIfFound = addSheet(rootSheets[i]);
-    		if (sheetIfFound)
-    			return sheetIfFound;
-    	}
+        var rootSheets = context.window.document.styleSheets;
+        for (var i = 0; i < rootSheets.length; ++i)
+        {
+            sheetIfFound = addSheet(rootSheets[i]);
+            if (sheetIfFound)
+                return sheetIfFound;
+        }
     });
-    
+
     return sheetIfFound;
 };
 
@@ -2150,31 +2229,29 @@ this.sourceURLsAsArray = function(context)
     var sourceFileMap = context.sourceFileMap;
     for (var url in sourceFileMap)
         urls.push(url);
-    
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.window.location+"\n");
+
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceURLsAsArray urls="+urls.length+" in context "+context.getName()+"\n");
 
     return urls;
 };
 
-this.sourceFilesAsArray = function(context)
+this.sourceFilesAsArray = function(sourceFileMap)
 {
     var sourceFiles = [];
-    var sourceFileMap = context.sourceFileMap;
     for (var url in sourceFileMap)
         sourceFiles.push(sourceFileMap[url]);
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+" in context "+context.window.location+"\n"); /*@explore*/
-
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("sourceFilesAsArray sourcefiles="+sourceFiles.length+"\n");
     return sourceFiles;
 };
 
-this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows for 'script' tags
+this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows for 'script' tags (only if debugger is not enabled)
 {
     var oldMap = eraseSourceFileMap ? null : context.sourceFileMap;
 
     if (FBTrace.DBG_SOURCEFILES)
     {
         FBTrace.sysout("updateScriptFiles oldMap "+oldMap+"\n");
-        this.sourceFilesAsArray(context);  // just for length trace
+        this.sourceFilesAsArray(context.sourceFileMap);  // just for length trace
     }
 
     function addFile(url, scriptTagNumber, dependentURL)
@@ -2183,14 +2260,14 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             {
                 var sourceFile = oldMap[url];
                 sourceFile.dependentURL = dependentURL;
-                context.sourceFileMap[url] = sourceFile;
+                context.addSourceFile(sourceFile);
                 return false;
             }
             else
             {
                 var sourceFile = new FBL.ScriptTagSourceFile(context, url, scriptTagNumber);
                 sourceFile.dependentURL = dependentURL;
-                context.sourceFileMap[url] = sourceFile;
+                context.addSourceFile(sourceFile);
                 return true;
             }
     }
@@ -2201,6 +2278,18 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);  /*@explore*/
         if (!win.document.documentElement)
             return;
+
+        var url = this.normalizeURL(win.location.href);
+
+        if (url)
+        {
+            if (!context.sourceFileMap.hasOwnProperty(url))
+            {
+                var URLOnly = new this.NoScriptSourceFile(context, url);
+                context.addSourceFile(URLOnly);
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
+            }
+        }
 
         var baseUrl = win.location.href;
         var bases = win.document.documentElement.getElementsByTagName("base");
@@ -2217,12 +2306,18 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             url = this.normalizeURL(url ? url : win.location.href);
             var added = addFile(url, i, (scriptSrc?win.location.href:null));
             if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.window.location+"\n");  /*@explore*/
+                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");  /*@explore*/
         }
     }, this));
+
+    var notificationURL = "firebug:// Warning. Script Panel was inactive during page load/Reload to see all sources";
+    var dummySourceFile = new this.NoScriptSourceFile(context, notificationURL);
+    context.sourceCache.store(notificationURL, 'reload to see all source files');
+    context.addSourceFile(dummySourceFile);
+
     if (FBTrace.DBG_SOURCEFILES)
     {
-        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context));
+        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
     }
 };
 
@@ -2272,6 +2367,20 @@ this.iterateBrowserWindows = function(windowType, callback)
 
     return false;
 };
+
+this.iterateBrowserTabs = function(browserWindow, callback)
+{
+    var tabBrowser = browserWindow.getBrowser();
+    var numTabs = tabBrowser.browsers.length;
+    for(var index=0; index<numTabs; index++)
+    {
+        var currentBrowser = tabBrowser.getBrowserAtIndex(index);
+        if (callback(tabBrowser.mTabs[index], currentBrowser))
+            return true;
+    }
+
+    return false;
+}
 
 // ************************************************************************************************
 // JavaScript Parsing
@@ -2395,44 +2504,100 @@ this.isShift = function(event)
 
 this.dispatch = function(listeners, name, args)
 {
+    if (!listeners)
+        return;
+
     try {
-        if (FBTrace.DBG_DISPATCH) 
-        	FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
+        if (FBTrace.DBG_DISPATCH)
+            var noMethods = [];
 
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
             if ( listener[name] )
-                listener[name].apply(listener, args);
+            {
+                //FBTrace.sysout("FBL.dispatch "+i+") "+name+" to "+listener.dispatchName);
+                try
+                {
+                    listener[name].apply(listener, args);
+                }
+                catch(exc)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                    {
+                        if (exc.stack)
+                        {
+                            var stack = exc.stack;
+                            exc.stack = stack.split('\n');
+                        }
+                        var culprit = listeners[i] ? listeners[i].dispatchName : null;
+                        FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+                    }
+                }
+            }
             else
             {
-            	if (FBTrace.DBG_DISPATCH)
-            		FBTrace.sysout("FBL.dispatch, listener "+i+" has no method "+name, listener);
+                if (FBTrace.DBG_DISPATCH)
+                {
+                    //FBTrace.sysout("FBL.dispatch noMethod in "+i+"/"+listeners.length+") "+name+" to "+listener.dispatchName);
+                    noMethods.push(listener);
+                }
             }
         }
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);              /*@explore*/
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
         {
-            FBTrace.dumpProperties(" Exception in lib.dispatch "+ name, exc);
-            //FBTrace.dumpProperties(" Exception in lib.dispatch listener", listener);
+            if (exc.stack)
+            {
+                var stack = exc.stack;
+                exc.stack = stack.split('\n');
+            }
+            var culprit = listeners[i] ? listeners[i].dispatchName : null;
+            FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+            window.dump(FBL.getStackDump());
         }
     }
 };
 
 this.dispatch2 = function(listeners, name, args)
 {
-    if (FBTrace.DBG_DISPATCH) FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners\n");              /*@explore*/
-
-    for (var i = 0; i < listeners.length; ++i)
+    try
     {
-        var listener = listeners[i];
-        if ( listener.hasOwnProperty(name) )
+        if (FBTrace.DBG_DISPATCH)
+            var noMethods = [];
+
+        for (var i = 0; i < listeners.length; ++i)
         {
-            var result = listener[name].apply(listener, args);
-            if ( result )
-                return result;
+            var listener = listeners[i];
+            if ( listener.hasOwnProperty(name) )
+            {
+                var result = listener[name].apply(listener, args);
+                if ( result )
+                {
+                    if (FBTrace.DBG_DISPATCH)
+                        FBTrace.sysout("dispatch2 result "+result, result);
+                    return result;
+                }
+            }
+            else
+            {
+                if (FBTrace.DBG_DISPATCH)
+                    noMethods.push(listener);
+            }
+        }
+        if (FBTrace.DBG_DISPATCH)
+            FBTrace.sysout("FBL.dispatch2 "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+        {
+            if (exc.stack) exc.stack = exc.stack.split('/n');
+            FBTrace.dumpProperties(" Exception in lib.dispatch2 "+ name, exc);
         }
     }
 };
@@ -2563,15 +2728,6 @@ this.detachFamilyListeners = function(family, object, listener)
         object.removeEventListener(types[i], listener, false);
 };
 
-this.EventHandlerInfo = function(element, type, listenerString, capturing)
-{
-    this.element = element;
-    this.fnAsString = listenerString;
-    this.capturing = capturing;
-    this.type = type;
-}
-
-
 // ************************************************************************************************
 // URLs
 
@@ -2581,83 +2737,62 @@ this.getFileName = function(url)
     return split.name;
 };
 
-this.splitFileName = function(url)
-{ // Dead code
-    var d = this.reDataURL.exec(url);
-    if (d)
-    {
-        var path = decodeURIComponent(d[1]);
-        if (!d[2])
-            return { path: path, name: 'eval' };
-        else
-            return { path: path, name: 'eval', line: d[2] };
-    }
-
-    var m = reSplitFile.exec(url);
-    if (!m)
-        return {name: url, path: url};
-    else if (!m[2])
-        return {path: m[1], name: m[1]};
-    else
-        return {path: m[1], name: m[2]};
-};
-
 this.splitURLBase = function(url)
 {
-	if (this.isDataURL(url))
-		return this.splitDataURL(url);
-	return this.splitURLTrue(url);
+    if (this.isDataURL(url))
+        return this.splitDataURL(url);
+    return this.splitURLTrue(url);
 };
 
 this.splitDataURL = function(url)
 {
-	var mark = url.indexOf(':', 3);
-	if (mark != 4)
-		return false;	//  the first 5 chars must be 'data:'
-	
-	var point = url.indexOf(',', mark+1);
-	if (point < mark)
-		return false; // syntax error
-	
-	var props = { encodedContent: url.substr(point+1) };
-	
-	var metadataBuffer = url.substr(mark+1, point);
-	var metadata = metadataBuffer.split(';');
-	for (var i = 0; i < metadata.length; i++)
-	{
-		var nv = metadata[i].split('=');
-		if (nv.length == 2)
-			props[nv[0]] = nv[1];
-	}
-	
-	// Additional Firebug-specific properties
-	if (props.hasOwnProperty('fileName')) 
-	{
-		 var caller_URL = decodeURIComponent(props['fileName']);
-	     var caller_split = this.splitURLTrue(caller_URL);
+    var mark = url.indexOf(':', 3);
+    if (mark != 4)
+        return false;	//  the first 5 chars must be 'data:'
+
+    var point = url.indexOf(',', mark+1);
+    if (point < mark)
+        return false; // syntax error
+
+    var props = { encodedContent: url.substr(point+1) };
+
+    var metadataBuffer = url.substr(mark+1, point);
+    var metadata = metadataBuffer.split(';');
+    for (var i = 0; i < metadata.length; i++)
+    {
+        var nv = metadata[i].split('=');
+        if (nv.length == 2)
+            props[nv[0]] = nv[1];
+    }
+
+    // Additional Firebug-specific properties
+    if (props.hasOwnProperty('fileName'))
+    {
+         var caller_URL = decodeURIComponent(props['fileName']);
+         var caller_split = this.splitURLTrue(caller_URL);
 
         if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
         {
-        	props['path'] = caller_split.path;
-        	props['line'] = props['baseLineNumber'];
-        	var hint = decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+            props['path'] = caller_split.path;
+            props['line'] = props['baseLineNumber'];
+            var hint = decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
             props['name'] =  'eval->'+hint;
         }
         else
         {
-        	props['name'] = caller_split.name;
-        	props['path'] = caller_split.path;
+            props['name'] = caller_split.name;
+            props['path'] = caller_split.path;
         }
     }
-	else
-	{
-		if (!props.hasOwnProperty('path'))
-			props['path'] = "data:";
-		if (!props.hasOwnProperty('name'))
-			props['name'] =  decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
-	}
-    
-	return props;
+    else
+    {
+        if (!props.hasOwnProperty('path'))
+            props['path'] = "data:";
+        if (!props.hasOwnProperty('name'))
+            props['name'] =  decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+    }
+
+    return props;
 };
 
 this.splitURLTrue = function(url)
@@ -2687,7 +2822,7 @@ this.isSystemURL = function(url)
     else if (url.substr(0, 17) == "chrome://firebug/")
         return true;
     else if (url  == "XPCSafeJSObjectWrapper.cpp")
-    	return true;
+        return true;
     else if (url.substr(0, 6) == "about:")
         return true;
     else if (url.indexOf("firebug-service.js") != -1)
@@ -2749,14 +2884,13 @@ this.isLocalURL = function(url)
 
 this.isDataURL = function(url)
 {
-	return (url && url.substr(0,5) == "data:");
+    return (url && url.substr(0,5) == "data:");
 };
 
 this.getLocalPath = function(url)
 {
     if (this.isLocalURL(url))
     {
-        var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
         var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
         var file = fileHandler.getFileFromURLSpec(url);
         return file.path;
@@ -2765,7 +2899,6 @@ this.getLocalPath = function(url)
 
 this.getURLFromLocalFile = function(file)
 {
-    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");  // TODO cache?
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     var URL = fileHandler.getURLSpecFromFile(file);
     return URL;
@@ -2834,16 +2967,22 @@ this.absoluteURLWithDots = function(url, baseURL)
     }
 }
 
-this.normalizeURL = function(url)
+this.normalizeURL = function(url)  // this gets called a lot, any performance improvement welcome
 {
     if (!url)
         return "";
     // Replace one or more characters that are not forward-slash followed by /.., by space.
     if (url.length < 255) // guard against monsters.
+    {
+        // Replace one or more characters that are not forward-slash followed by /.., by space.
         url = url.replace(/[^/]+\/\.\.\//, "", "g");
-    // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
-    // don't match up with the URLs we get back from the DOM
-    return url ? url.replace(/file:\/([^/])/g, "file:///$1") : "";
+        // Issue 1496, avoid #
+        url = url.replace(/#.*/,"");
+        // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
+        // don't match up with the URLs we get back from the DOM
+        url = url.replace(/file:\/([^/])/g, "file:///$1");
+    }
+    return url;
 };
 
 this.denormalizeURL = function(url)
@@ -2881,16 +3020,26 @@ this.parseURLEncodedText = function(text)
     var args = text.split("&");
     for (var i = 0; i < args.length; ++i)
     {
-        var parts = args[i].split("=");
-        if (parts.length == 2)
-        {
-            if (parts[1].length > maxValueLength)
-                parts[1] = this.$STR("LargeData");
+        try {
+            var parts = args[i].split("=");
+            if (parts.length == 2)
+            {
+                if (parts[1].length > maxValueLength)
+                    parts[1] = this.$STR("LargeData");
 
-            params.push({name: decodeURIComponent(parts[0]), value: decodeURIComponent(parts[1])});
+                params.push({name: decodeURIComponent(parts[0]), value: decodeURIComponent(parts[1])});
+            }
+            else
+                params.push({name: decodeURIComponent(parts[0]), value: ""});
         }
-        else
-            params.push({name: decodeURIComponent(parts[0]), value: ""});
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("parseURLEncodedText EXCEPTION ", e);
+                FBTrace.sysout("parseURLEncodedText EXCEPTION URI", args[i]);
+            }
+        }
     }
 
     params.sort(function(a, b) { return a.name <= b.name ? -1 : 1; });
@@ -2909,31 +3058,89 @@ this.reEncodeURL= function(file, text)
 
     var url = file.href;
     url += (url.indexOf("?") == -1 ? "?" : "&") + args.join("&");
-    
+
     return url;
 };
 
 this.getResource = function(aURL)
 {
-    var ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
-
-    try 
+    try
     {
-    	var channel=ioService.newChannel(aURL,null,null);
-    	var input=channel.open();
+        var channel=ioService.newChannel(aURL,null,null);
+        var input=channel.open();
         return FBL.readFromStream(input);
     }
     catch (e)
     {
-    	if (FBTrace.DBG_ERRORS)
-    		FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.getResource FAILS for "+aURL, e);
     }
+};
+
+this.parseJSONString = function(jsonString, originURL)
+{
+    // See if this is a Prototype style *-secure request.
+    var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
+    var matches = regex.exec(jsonString);
+
+    if (matches)
+    {
+        jsonString = matches[1];
+
+        if (jsonString[0] == "\\" && jsonString[1] == "n")
+            jsonString = jsonString.substr(2);
+
+        if (jsonString[jsonString.length-2] == "\\" && jsonString[jsonString.length-1] == "n")
+            jsonString = jsonString.substr(0, jsonString.length-2);
+    }
+
+    if (jsonString.indexOf("&&&START&&&"))
+    {
+        regex = new RegExp(/&&&START&&& (.+) &&&END&&&/);
+        matches = regex.exec(jsonString);
+        if (matches)
+            jsonString = matches[1];
+    }
+
+    // throw on the extra parentheses
+    jsonString = "(" + jsonString + ")";
+
+    var s = Components.utils.Sandbox(originURL);
+    var jsonObject = null;
+
+    try
+    {
+        jsonObject = Components.utils.evalInSandbox(jsonString, s);
+    }
+    catch(e)
+    {
+        if (e.message.indexOf("is not defined"))
+        {
+            var parts = e.message.split(" ");
+            s[parts[0]] = function(str){ return str; };
+            try {
+                jsonObject = Components.utils.evalInSandbox(jsonString, s);
+            } catch(ex) {
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
+                    FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+                return null;
+            }
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
+                FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+            return null;
+        }
+    }
+
+    return jsonObject;
 };
 
 // ************************************************************************************************
 // Network
 
-this.readFromStream = function(stream, charset)
+this.readFromStream = function(stream, charset, noClose)
 {
     var sis = this.CCSV("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
     sis.setInputStream(stream);
@@ -2942,8 +3149,22 @@ this.readFromStream = function(stream, charset)
     for (var count = stream.available(); count; count = stream.available())
         segments.push(sis.readBytes(count));
 
+    if (!noClose)
+        sis.close();
+
     var text = segments.join("");
-    return this.convertToUnicode(text, charset);
+
+    try
+    {
+        return this.convertToUnicode(text, charset);
+    }
+    catch (err)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("LIB.readFromStream EXCEPTION charset: " + charset, err);
+    }
+
+    return text;
 };
 
 this.readPostTextFromPage = function(url, context)
@@ -2961,7 +3182,7 @@ this.readPostTextFromPage = function(url, context)
                 postStream.seek(NS_SEEK_SET, 0);
 
                 var charset = context.window.document.characterSet;
-                return this.readFromStream(postStream, charset);
+                return this.readFromStream(postStream, charset, true);
             }
          }
          catch (exc)
@@ -2980,10 +3201,22 @@ this.readPostTextFromRequest = function(request, context)
         if (is)
         {
             var ss = this.QI(is, Ci.nsISeekableStream);
-            if (ss) ss.seek(NS_SEEK_SET, 0);
+            var prevOffset;
+            if (ss)
+            {
+                prevOffset = ss.tell();
+                ss.seek(NS_SEEK_SET, 0);
+            }
+
+            // Read data from the stream..
             var charset = context.window.document.characterSet;
-            var text = this.readFromStream(is, charset);
-            if (ss) ss.seek(NS_SEEK_SET, 0);
+            var text = this.readFromStream(is, charset, true);
+
+            // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
+            // since necko doesn't seek to 0 before reading (at lest not till 459384 is fixed).
+            if (ss && prevOffset == 0)
+                ss.seek(NS_SEEK_SET, 0);
+
             return text;
         }
     }
@@ -3008,7 +3241,7 @@ this.getInputStreamFromString = function(dataString)
     return stringStream;
 };
 
-this.getWindowForRequest = function(request) 
+this.getWindowForRequest = function(request)
 {
     var webProgress = this.getRequestWebProgress(request);
     try {
@@ -3021,21 +3254,46 @@ this.getWindowForRequest = function(request)
     return null;
 };
 
-this.getRequestWebProgress = function(request) 
+this.getRequestWebProgress = function(request)
 {
     try
     {
-        if (request.notificationCallbacks)
+        if (request && request.notificationCallbacks)
             return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
     } catch (exc) {}
 
     try
     {
-        if (request.loadGroup && request.loadGroup.groupObserver)
+        if (request && request.loadGroup && request.loadGroup.groupObserver)
             return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
     } catch (exc) {}
 
     return null;
+};
+
+// ************************************************************************************************
+
+this.BaseProgressListener =
+{
+    QueryInterface : function(iid)
+    {
+        if (iid.equals(Ci.nsIWebProgressListener) ||
+            iid.equals(Ci.nsISupportsWeakReference) ||
+            iid.equals(Ci.nsISupports))
+        {
+            return this;
+        }
+
+        throw Components.results.NS_NOINTERFACE;
+    },
+
+    stateIsRequest: false,
+    onLocationChange: function() {},
+    onStateChange : function() {},
+    onProgressChange : function() {},
+    onStatusChange : function() {},
+    onSecurityChange : function() {},
+    onLinkIconAvailable : function() {}
 };
 
 // ************************************************************************************************
@@ -3132,7 +3390,6 @@ this.launchProgram = function(exePath, args)
 
 this.getIconURLForFile = function(path)
 {
-    var ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
     var fileHandler = ioService.getProtocolHandler("file").QueryInterface(Ci.nsIFileProtocolHandler);
     try {
         var file = this.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
@@ -3149,6 +3406,22 @@ this.getIconURLForFile = function(path)
         this.ERROR(exc);
     }
     return null;
+}
+
+this.makeURI = function(urlString)
+{
+    try
+    {
+        return ioService.newURI(urlString, null, null);
+    }
+    catch(exc)
+    {
+        //var explain = {message: "Firebug.lib.makeURI FAILS", url: urlString, exception: exc};
+        // todo convert explain to json and then to data url
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("makeURI FAILS for "+urlString+" "+exc);
+        return false;
+    }
 }
 
 // ************************************************************************************************
@@ -3191,7 +3464,7 @@ this.persistObjects = function(panel, panelState)
         panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+" panelState:", panelState);
-     
+
 };
 
 this.persistObject = function(object, context)
@@ -3202,93 +3475,71 @@ this.persistObject = function(object, context)
 
 this.restoreLocation =  function(panel, panelState)
 {
-	var needRetry = false;
-	
-	if (!panel.location && panelState && panelState.persistedLocation)
-	{
-	    var location = panelState.persistedLocation(panel.context);
-	    if (location)
-	        panel.navigate(location);
-	    else
-	     	needRetry = true;
-	}
+    var restored = false;
 
-	if (!panel.location)
-	    panel.navigate(null);
-
-	if (needRetry)
+    if (!panel.location && panelState && panelState.persistedLocation)
     {
-    	function overrideDefaultWithPersistedLocation()
-    	{
-    		var defaultLocation = panel.getDefaultLocation(panel.context);
-    		if (panelState.persistedLocation)
-    		{
-    			if ( (!panel.location) || (panel.location == defaultLocation))
-    			{
-    				var location = panelState.persistedLocation(panel.context);
-    				if (location)
-    					panel.navigate(location);
-    			}
-    		}
-    		else
-    		{
-    			if (!defaultLocation)  // no persisted and no default locations, erase 
-    			{
-    					panel.navigate();
-    			}
-    		}
+        var location = panelState.persistedLocation(panel.context);
 
-    		if (FBTrace.DBG_INITIALIZE)
-    			FBTrace.dumpProperties("lib.overrideDefaultWithPersistedLocation panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
-    	}
-    	
-    	panel.context.setTimeout(overrideDefaultWithPersistedLocation, overrideDefaultsWithPersistedValuesTimeout);
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.dumpProperties("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
+
+        if (location)
+        {
+            panel.navigate(location);
+            restored = true;
+        }
     }
-	
-	if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restoreObjects panel.location: "+panel.location+" panelState:", panelState);
+
+    if (!panel.location)
+        panel.navigate(null);
+
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.dumpProperties("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
+
+    return restored;
 };
 
 this.restoreSelection = function(panel, panelState)
 {
-	var needRetry = false;
-	
-	if (!panel.selection && panelState && panelState.persistedSelection)
+    var needRetry = false;
+
+    if (!panel.selection && panelState && panelState.persistedSelection)
     {
         var selection = panelState.persistedSelection(panel.context);
         if (selection)
             panel.select(selection);
         else
-        	needRetry = true;
+            needRetry = true;
     }
 
     if (!panel.selection)  // Couldn't restore the selection, so select the default object
         panel.select(null);
-    
+
     if (needRetry)
     {
-    	function overrideDefaultWithPersistedSelection()
-    	{
-    		if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
-    		{
-    			var selection = panelState.persistedSelection(panel.context);
-    			if (selection)
-    				panel.select(selection);
-    		}
-    		
-    		if (FBTrace.DBG_INITIALIZE)
-    			FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
-    	}
-    	
-    	// If we couldn't restore the selection, wait a bit and try again
+        function overrideDefaultWithPersistedSelection()
+        {
+            if (panel.selection == panel.getDefaultSelection(panel.context) && panelState.persistedSelection)
+            {
+                var selection = panelState.persistedSelection(panel.context);
+                if (selection)
+                    panel.select(selection);
+            }
+
+            if (FBTrace.DBG_INITIALIZE)
+                FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+        }
+
+        // If we couldn't restore the selection, wait a bit and try again
         panel.context.setTimeout(overrideDefaultWithPersistedSelection, overrideDefaultsWithPersistedValuesTimeout);
     }
-    
+
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.dumpProperties("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
 };
 
-this.restoreObjects = function(panel, panelState, letMeRetryLater)
+this.restoreObjects = function(panel, panelState)
 {
     this.restoreLocation(panel, panelState);
     this.restoreSelection(panel, panelState);
@@ -3339,23 +3590,37 @@ this.ErrorMessage.prototype =
 this.TextSearch = function(rootNode, rowFinder)
 {
     var doc = rootNode.ownerDocument;
-    var count, searchRange, startPt, endPt;
+    var count, searchRange, startPt;
 
-    this.find = function(text)
+    this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
 
-        var range = this.range = finder.Find(text, searchRange, startPt, endPt);
+        finder.findBackwards = !!reverse;
+        finder.caseSensitive = !!caseSensitive;
+
+        var range = this.range = finder.Find(
+                text, searchRange,
+                startPt || searchRange,
+                searchRange);
         var match = range ?  range.startContainer : null;
         return this.currentNode = (rowFinder && match ? rowFinder(match) : match);
     };
 
-    this.findNext = function(wrapAround, sameNode)
+    this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
     {
+        var curNode = this.currentNode ? this.currentNode : rootNode;
         startPt = doc.createRange();
         try
         {
-            startPt.setStartAfter(this.currentNode ? this.currentNode : rootNode);
+            if (reverse)
+            {
+                startPt.setStartBefore(curNode);
+            }
+            else
+            {
+                startPt.setStartAfter(curNode);
+            }
         }
         catch (e)
         {
@@ -3363,18 +3628,18 @@ this.TextSearch = function(rootNode, rowFinder)
                 FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
             try {
                 FBTrace.sysout("setStart try\n");
-                startPt.setStart(this.currentNode ? this.currentNode : rootNode);
+                startPt.setStart(curNode);
                 FBTrace.sysout("setStart success\n");
             } catch (exc) {
                 return;
             }
         }
 
-        var match = this.find(this.text);
+        var match = this.find(this.text, reverse, caseSensitive);
         if (!match && wrapAround)
         {
             this.reset();
-            return this.find(this.text);
+            return this.find(this.text, reverse, caseSensitive);
         }
 
         return match;
@@ -3387,53 +3652,43 @@ this.TextSearch = function(rootNode, rowFinder)
         searchRange.setStart(rootNode, 0);
         searchRange.setEnd(rootNode, count);
 
-        startPt = doc.createRange();
-        startPt.setStart(rootNode, 0);
-        startPt.setEnd(rootNode, 0);
-
-        endPt = doc.createRange();
-        endPt.setStart(rootNode, count);
-        endPt.setEnd(rootNode, count);
+        startPt = searchRange;
     };
 
     this.reset();
 };
 
 // ************************************************************************************************
+
 this.SourceBoxTextSearch = function(sourceBox)
 {
-    
-    this.find = function(text)
+    this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
-        
-        var regExpOptions = null;
-        if (FBL.reUpperCase.test(text))
-            regExpOptions = "g";
-        else
-            regExpOptions = "gi";  // ignore case unless the user explicitly uses uppercase
-        
-        this.re = new RegExp(text, regExpOptions);
-        return this.findNext(false);
+
+        this.re = new FBL.ReversibleRegExp(text);
+
+        return this.findNext(false, reverse, caseSensitive);
     };
 
-    this.findNext = function(wrapAround)
+    this.findNext = function(wrapAround, reverse, caseSensitive)
     {
+        var lines = sourceBox.lines;
         var match = null;
-        for (var point = this.mark; point < sourceBox.lines.length; point++)
+        for (var iter = new FBL.ReversibleIterator(lines.length, this.mark, reverse); iter.next();)
         {
-            match = this.re.exec(sourceBox.lines[point]);
+            match = this.re.exec(lines[iter.index], false, caseSensitive);
             if (match)
             {
-                this.mark = point;
-                return point;
+                this.mark = iter.index;
+                return iter.index;
             }
         }
 
         if (!match && wrapAround)
         {
             this.reset();
-            return this.findNext(false);
+            return this.findNext(false, reverse, caseSensitive);
         }
 
         return match;
@@ -3441,7 +3696,7 @@ this.SourceBoxTextSearch = function(sourceBox)
 
     this.reset = function()
     {
-        this.mark = 1;
+        delete this.mark;
     };
 
     this.reset();
@@ -3487,7 +3742,15 @@ this.SourceLink.prototype =
     toString: function()
     {
         return this.href;
+    },
+    toJSON: function() // until 3.1...
+    {
+        return "{\"href\":\""+this.href+"\", "+
+            (this.line?("\"line\":"+this.line+","):"")+
+            (this.type?(" \"type\":\""+this.type+"\","):"")+
+                    "}";
     }
+
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3517,14 +3780,14 @@ this.SourceFile.prototype =
             str += (this.outerScript.isValid?this.outerScript.tag:"X") +"| ";
         if (this.innerScripts)
         {
-        	var numberInvalid = 0;
-            for (var i = 0; i < this.innerScripts.length; i++)
+            var numberInvalid = 0;
+            for (var p in this.innerScripts)
             {
-                var script = this.innerScripts[i];
-                if (script.isValid)  
-                	str += script.tag+" ";
+                var script = this.innerScripts[p];
+                if (script.isValid)
+                    str += p+" ";
                 else
-                	numberInvalid++;
+                    numberInvalid++;
             }
         }
         str += ")"+(numberInvalid ? "("+numberInvalid+" invalid)" : "");
@@ -3537,10 +3800,12 @@ this.SourceFile.prototype =
             callback(this.outerScript);
         if (this.innerScripts)
         {
-            for (var i = 0; i < this.innerScripts.length; i++)
+            for (var p in this.innerScripts)
             {
-                var script = this.innerScripts[i];
-                callback(script);
+                var script = this.innerScripts[p];
+                var rc = callback(script);
+                if (rc)
+                    return rc;
             }
         }
     },
@@ -3655,24 +3920,29 @@ this.SourceFile.prototype =
         if (!this.innerScripts)
             return; // eg URLOnly
 
-        if (FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("getScriptsAtLineNumber "+this.innerScripts.length+" innerScripts, offset "+offset+" for sourcefile: "+this.toString()+"\n");
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         var scripts = [];
-        for (var j = 0; j < this.innerScripts.length; j++)
+        for (var p in this.innerScripts)
         {
-            var script = this.innerScripts[j];
+            var script = this.innerScripts[p];
             if (mustBeExecutableLine && !script.isValid) continue;
             this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
         }
         if (this.outerScript && !(mustBeExecutableLine && !this.outerScript.isValid) )
             this.addScriptAtLineNumber(scripts, this.outerScript, targetLineNo, mustBeExecutableLine, offset);
 
-        if (FBTrace.DBG_LINETABLE && scripts.length < 1)
+        if (FBTrace.DBG_LINETABLE)
         {
-            FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
-            return false;
+            if (scripts.length < 1)
+            {
+                FBTrace.sysout("lib.getScriptsAtLineNumber no targetScript at "+lineNo," for sourceFile:"+this.toString());
+                return false;
+            }
+            else
+            {
+                FBTrace.sysout("getScriptsAtLineNumber offset "+offset+" for sourcefile: "+this.toString()+"\n");
+            }
         }
 
         return (scripts.length > 0) ? scripts : false;
@@ -3733,15 +4003,7 @@ this.SourceFile.prototype =
         // XXXjjb Don't use indexOf or similar tests that rely on ===, since we are really working with
         // wrappers around jsdIScript, not script themselves.  I guess.
 
-        if (!this.innerScripts || !this.innerScripts.length)
-        	return false;
-        
-        for (var j = 0; j < this.innerScripts.length; j++)
-        {
-            if (script.tag == this.innerScripts[j].tag)
-                return this.innerScripts[j];
-        }
-        return false;
+       return ( this.innerScripts && this.innerScripts.hasOwnProperty(script.tag) );
     },
 
     // these objects map JSD's values to correct values
@@ -3771,6 +4033,14 @@ this.SourceFile.prototype =
     isEvent: function()
     {
         return (this.compilation_unit_type == "event");
+    },
+
+    loadScriptLines: function(context)  // array of lines
+    {
+        if (this.source)
+            return this.source;
+        else
+            return context.sourceCache.load(this.href);
     }
 }
 
@@ -3839,23 +4109,24 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 
     // Attach the innerScripts for use later
     if (!sourceFile.innerScripts)
-        sourceFile.innerScripts = [];
+        sourceFile.innerScripts = {};
 
+    var total = 0;
     while (innerScripts.hasMoreElements())
     {
-    	var script = innerScripts.getNext();
-    	if (!script)
-    	{
-    	    if (FBTrace.DBG_SOURCEFILES)
-    	        FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext is null! ");
-    	    continue;    	    
+        var script = innerScripts.getNext();
+        if (!script || ( (script instanceof Ci.jsdIScript) && !script.tag) )
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("FBL.addScriptsToSourceFile innerScripts.getNext FAILS "+sourceFile, script);
+            continue;
         }
-    	if (FBTrace.DBG_SOURCEFILES && !script.isValid)
-    		FBTrace.sysout("FBL.addScriptsToSourceFile script "+script.tag+".isValid:"+script.isValid);
-        sourceFile.innerScripts.push(script);
+        sourceFile.innerScripts[script.tag] = script;
+        if (FBTrace.DBG_SOURCEFILES)
+            total++;
     }
     if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
-        FBTrace.sysout("FBL.addScriptsToSourceFile "+sourceFile.innerScripts.length+" scripts, sourcefile="+sourceFile.toString(), sourceFile);
+        FBTrace.sysout("FBL.addScriptsToSourceFile "+ total +" scripts, sourcefile="+sourceFile.toString(), sourceFile);
 }
 
 //------------
@@ -3898,13 +4169,13 @@ this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 {
-    return this.outerScript.baseLineNumber - 1; // baseLineNumber always valid even after jsdIscript isValid false
+    return this.outerScript.baseLineNumber; // baseLineNumber always valid even after jsdIscript isValid false
 }
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
     if (this.href.kind == "source")
-        return FBL.splitURLBase(this.href); 
+        return FBL.splitURLBase(this.href);
 
     if (!this.summary)
     {
@@ -3992,9 +4263,9 @@ this.EventSourceFile.prototype.getObjectDescription = function()
     {
         this.summary = FBL.summarizeSourceLineArray(this.sourceLines, 120);
     }
-    
+
     var containingFileDescription = FBL.splitURLBase(this.containingURL);
-    
+
     return {path: containingFileDescription.path, name: containingFileDescription.name+"/event: "+this.summary };
 }
 
@@ -4063,7 +4334,7 @@ this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
     },
     getSourceLinkForScript: function (script)
     {
-        return SourceLink(FBL.normalizeURL(script.fileName), script.baseLineNumber, "js")
+        return FBL.SourceLink(FBL.normalizeURL(script.fileName), script.baseLineNumber, "js")
     }
 }
 
@@ -4079,11 +4350,10 @@ this.ReusedSourceFile = function(sourceFile, outerScript, innerScriptEnumerator)
 }
 
 //-------
-this.EnumeratedSourceFile = function(context, url) // we don't have the outer script and we delay source load.
+this.EnumeratedSourceFile = function(url) // we don't have the outer script and we delay source load.
 {
-    this.context = context;  // XXXjjb the context of the enumeration, not useful
-    this.href = url;  // may not be outerScript file name, eg this could be an enumerated eval
-    this.innerScripts = [];
+    this.href = new String(url);  // may not be outerScript file name, eg this could be an enumerated eval
+    this.innerScripts = {};
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
@@ -4108,7 +4378,7 @@ this.EnumeratedSourceFile.prototype.getSourceLength = function()
 this.NoScriptSourceFile = function(context, url) // Somehow we got the URL, but not the script
 {
      this.href = url;  // we know this much
-     this.innerScripts = [];
+     this.innerScripts = {};
 }
 
 this.NoScriptSourceFile.prototype = new this.SourceFile("URLOnly");
@@ -4128,14 +4398,39 @@ this.NoScriptSourceFile.prototype.getSourceLength = function()
         this.sourceLength = this.context.sourceCache.load(this.href).length;
     return this.sourceLength;
 }
-//---------
+//---------// javascript in a .xul or .xml file, no outerScript
+this.XULSourceFile = function(url, innerScriptEnumerator)
+{
+    this.href = url;
+    this.pcmap_type = PCMAP_SOURCETEXT;
 
+    FBL.addScriptsToSourceFile(this, null, innerScriptEnumerator);
+}
+
+this.XULSourceFile.prototype = new this.SourceFile("xul");
+
+this.XULSourceFile.prototype.OuterScriptAnalyzer.prototype =
+    this.TopLevelSourceFile.prototype.OuterScriptAnalyzer.prototype;
+
+this.XULSourceFile.prototype.getBaseLineOffset = function()
+{
+    // The outer script is gone, that is what the frame.line is relative to?
+    return 0;  // TODO
+}
+
+this.XULSourceFile.prototype.getSourceLength = function()
+{
+    if (!this.sourceLength)
+        this.sourceLength = this.context.sourceCache.load(this.href).length;
+    return this.sourceLength;
+}
+//---------
 this.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don't have the outer script and we delay source load
 {
     this.context = context;
     this.href = url;  // we know this is not an eval
     this.scriptTagNumber = scriptTagNumber;
-    this.innerScripts = [];
+    this.innerScripts = {};
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
@@ -4173,7 +4468,7 @@ this.getSourceFileByScript = function(context, script)
     if (lucky && lucky.hasScript(script))
         return lucky;
 
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.window.location); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.getName()+": ", context.sourceFileMap); /*@explore*/
 
     for (var url in context.sourceFileMap)
     {
@@ -5983,6 +6278,7 @@ this.cssKeywords =
     [
         "block",
         "inline",
+        "inline-block",
         "list-item",
         "marker",
         "run-in",
@@ -6198,11 +6494,42 @@ const invisibleTags = this.invisibleTags =
 
 this.ERROR = function(exc)
 {
-    if (FBTrace) {                                               
-        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);   
+    if (FBTrace) {
+        if (exc.stack) exc.stack = exc.stack.split('\n');
+        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);
     }
-    else                                                       
+
         ddd("FIREBUG WARNING: " + exc);
+}
+
+// ************************************************************************************************
+// Math Utils
+
+this.formatNumber = function(number)
+{
+    number += "";
+    var x = number.split(".");
+    var x1 = x[0];
+    var x2 = x.length > 1 ? "." + x[1] : "";
+    var rgx = /(\d+)(\d{3})/;
+    while (rgx.test(x1))
+        x1 = x1.replace(rgx, "$1" + "," + "$2");
+    return x1 + x2;
+}
+
+// ************************************************************************************************
+// File Size Utils
+
+this.formatSize = function(bytes)
+{
+    if (bytes == -1 || bytes == undefined)
+        return "?";
+    else if (bytes < 1024)
+        return bytes + " B";
+    else if (bytes < 1024*1024)
+        return Math.ceil(bytes/1024) + " KB";
+    else
+        return (Math.ceil(bytes/(1024*1024))) + " MB";
 }
 
 // ************************************************************************************************
@@ -6221,6 +6548,193 @@ this.formatTime = function(elapsed)
 }
 
 // ************************************************************************************************
+
+this.ReversibleIterator = function(length, start, reverse)
+{
+    this.length = length;
+    this.index = start;
+    this.reversed = !!reverse;
+
+    this.next = function() {
+        if (this.index === undefined || this.index === null) {
+            this.index = this.reversed ? length : -1;
+        }
+        this.index += this.reversed ? -1 : 1;
+
+        return 0 <= this.index && this.index < length;
+    };
+    this.reverse = function() {
+        this.reversed = !this.reversed;
+    };
+};
+
+this.ReversibleRegExp = function(regex, flags)
+{
+    var re = {};
+
+    function expression(text, reverse) {
+        return text + (reverse ? "(?![\\s\\S]*" + text + ")" : "");
+    }
+    function flag(flags, caseSensitive) {
+        return (flags || "") + (caseSensitive ? "" : "i");
+    }
+
+    this.exec = function(text, reverse, caseSensitive, lastMatch)
+    {
+        // Ensure we have a regex
+        var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i");
+        if (!re[key])
+        {
+            re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+        }
+
+        // Modify as needed to all for iterative searches
+        var indexOffset = 0;
+        var searchText = text;
+        if (lastMatch) {
+            if (reverse) {
+                searchText = text.substr(0, lastMatch.index);
+            } else {
+                indexOffset = lastMatch.index+lastMatch[0].length;
+                searchText = text.substr(indexOffset);
+            }
+        }
+
+        var ret = re[key].exec(searchText);
+        if (ret) {
+            ret.input = text;
+            ret.index = ret.index + indexOffset;
+            ret.reverse = reverse;
+            ret.caseSensitive = caseSensitive;
+        }
+        return ret;
+    };
+};
+
+/**
+ * Implements an ordered traveral of the document, including attributes and
+ * iframe contents within the results.
+ *
+ * Note that the order for attributes is not defined. This will follow the
+ * same order as the Element.attributes accessor.
+ */
+this.DOMWalker = function(doc, root)
+{
+    var walker;
+    var currentNode, attrIndex;
+    var pastStart, pastEnd;
+
+    function createWalker(docElement) {
+        var walk = doc.createTreeWalker(docElement, SHOW_ALL, null, true);
+        walker.unshift(walk);
+    }
+    function getLastAncestor() {
+        while (walker[0].lastChild()) {}
+        return walker[0].currentNode;
+    }
+
+    this.previousNode = function() {
+        if (pastStart) {
+            return undefined;
+        }
+
+        if (attrIndex) {
+            attrIndex--;
+        } else {
+            var prevNode;
+            if (currentNode == walker[0].root) {
+                if (walker.length > 1) {
+                    walker.shift();
+                    prevNode = walker[0].currentNode;
+                } else {
+                    prevNode = undefined;
+                }
+            } else {
+                if (!currentNode) {
+                    prevNode = getLastAncestor();
+                } else {
+                    prevNode = walker[0].previousNode();
+                }
+                if (!prevNode) {    // Really shouldn't occur, but to be safe
+                    prevNode = walker[0].root;
+                }
+                while ((prevNode.nodeName || "").toUpperCase() == "IFRAME") {
+                    createWalker(prevNode.contentDocument.documentElement);
+                    prevNode = getLastAncestor();
+                }
+            }
+            currentNode = prevNode;
+            attrIndex = ((prevNode || {}).attributes || []).length;
+        }
+
+        if (!currentNode) {
+            pastStart = true;
+        } else {
+            pastEnd = false;
+        }
+
+        return this.currentNode();
+    };
+    this.nextNode = function() {
+        if (pastEnd) {
+            return undefined;
+        }
+
+        if (!currentNode) {
+            // We are working with a new tree walker
+            currentNode = walker[0].root;
+            attrIndex = 0;
+        } else {
+            // First check attributes
+            var attrs = currentNode.attributes || [];
+            if (attrIndex < attrs.length) {
+                attrIndex++;
+            } else if ((currentNode.nodeName || "").toUpperCase() == "IFRAME") {
+                // Attributes have completed, check for iframe contents
+                createWalker(currentNode.contentDocument.documentElement);
+                currentNode = walker[0].root;
+                attrIndex = 0;
+            } else {
+                // Next node
+                var nextNode = walker[0].nextNode();
+                while (!nextNode && walker.length > 1) {
+                    walker.shift();
+                    nextNode = walker[0].nextNode();
+                }
+                currentNode = nextNode;
+                attrIndex = 0;
+            }
+        }
+
+        if (!currentNode) {
+            pastEnd = true;
+        } else {
+            pastStart = false;
+        }
+
+        return this.currentNode();
+    };
+
+    this.currentNode = function() {
+        if (!attrIndex) {
+            return currentNode;
+        } else {
+            return currentNode.attributes[attrIndex-1];
+        }
+    };
+
+    this.reset = function() {
+        pastStart = false;
+        pastEnd = false;
+        walker = [];
+        currentNode = undefined;
+        attrIndex = 0;
+
+        createWalker(root);
+    };
+
+    this.reset();
+};
 
 }).apply(FBL);
 } catch(e) {																			/*@explore*/

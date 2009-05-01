@@ -17,6 +17,7 @@ var gFindBar;
 
 const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
+const reEndings = /\r\n|\r|\n/;
 
 // The lib.js isn't included in this window so, define the global here. 
 // It'll be initialized from window parameters (see initialize method).
@@ -38,7 +39,7 @@ var TraceConsole =
         // Get pref domain is used for message filtering. Only logs that belong
         // to this pref-domain will be displayed.
         this.prefDomain = args.prefDomain; 
-        window.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
+        document.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
 
         // Initialize root node of the trace-console window.
         var consoleFrame = document.getElementById("consoleFrame");
@@ -47,6 +48,7 @@ var TraceConsole =
 
         // Register listeners and observers
         traceService.addObserver(this, "firebug-trace-on-message", false);
+        prefs.addObserver(this.prefDomain, this, false);
 
         gFindBar = document.getElementById("FindToolbar");
 
@@ -56,12 +58,13 @@ var TraceConsole =
 
         // Make sure the UI is localized.
         this.internationalizeUI();
+        this.updateTimeInfo();
     },
 
     internationalizeUI: function()
     {
         var buttons = ["clearConsole", "findConsole", "separateConsole", 
-            "restartFirefox", "closeFirefox"];
+            "restartFirefox", "closeFirefox", "saveToFile"];
 
         for (var i=0; i<buttons.length; i++)
         {
@@ -71,9 +74,19 @@ var TraceConsole =
         }
     },
 
+    updateTimeInfo: function()
+    {
+        var showTime = Firebug.getPref(this.prefDomain, "trace.showTime");
+        if (showTime)
+            FBL.setClass(this.logs.firstChild, "showTime");
+        else
+            FBL.removeClass(this.logs.firstChild, "showTime");
+    },
+
     shutdown: function()
     {
         traceService.removeObserver(this, "firebug-trace-on-message");
+        prefs.removeObserver(this.prefDomain, this, false);
 
         // Notify listeners
         for (var i=0; i<this.modules.length; ++i)
@@ -111,9 +124,15 @@ var TraceConsole =
                 return;
 
             this.dump(new Firebug.TraceModule.TraceMessage(
-                messageInfo.type, data, messageInfo.obj));
+                messageInfo.type, data, messageInfo.obj, messageInfo.scope,
+                messageInfo.time));
             
             return true;
+        }
+        else if (topic == "nsPref:changed")
+        {
+            if (data == this.prefDomain + ".trace.showTime")
+                this.updateTimeInfo();
         }
     },
 
@@ -148,6 +167,70 @@ var TraceConsole =
 
     onSaveToFile: function()
     {
+        try 
+        {
+            var nsIFilePicker = Ci.nsIFilePicker;
+            var fp = Cc["@mozilla.org/filepicker;1"].getService(nsIFilePicker);
+            fp.init(window, null, nsIFilePicker.modeSave);
+            fp.appendFilters(nsIFilePicker.filterAll | nsIFilePicker.filterText);
+            fp.filterIndex = 1;
+            fp.defaultString = "firebug-tracing-logs.txt";
+
+            var rv = fp.show();
+            if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace)
+            {
+                var foStream = Cc["@mozilla.org/network/file-output-stream;1"]
+                    .createInstance(Ci.nsIFileOutputStream);
+                foStream.init(fp.file, 0x02 | 0x08 | 0x20, 0666, 0); // write, create, truncate
+
+                var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
+                var currLocale = Firebug.getPref("general.useragent", "locale");
+
+                // Store head info.
+                var head = "Firebug: " + Firebug.version + "\n" + 
+                    appInfo.name + ": " + appInfo.version + ", " + 
+                    appInfo.platformVersion + ", " + 
+                    appInfo.appBuildID + ", " + currLocale + "\n" +
+                    "Export Date: " + (new Date()).toGMTString() + 
+                    "\n==========================================\n\n";
+                foStream.write(head, head.length);
+
+                // Iterate over all logs and store it into a file.
+                var tbody = this.logs.firstChild;
+                for (var row = tbody.firstChild; row; row = row.nextSibling)
+                    this.saveMessage(row.repObject, foStream);
+
+                foStream.close();
+            }
+        }
+        catch (err)
+        {
+            alert(err.toString());
+        }
+    },
+
+    saveMessage: function(message, stream) 
+    {
+        var text = message.text;
+        text = text ? text.replace(reEndings, "") : "---";
+        if (message.type)
+            text = "[" + message.type + "] " + text;
+        text = (message.index + 1) + ". " + text + "\n"
+        stream.write(text, text.length);
+        this.saveStackTrace(message, stream);
+    },
+
+    saveStackTrace: function(message, stream) 
+    {
+        var stack = message.stack;
+        for (var i=0; stack && i<stack.length; i++) {
+            var frame = stack[i];
+            var text = "      " + frame.fileName + " (" + frame.lineNumber + ")\n";
+            stream.write(text, text.length);
+        }
+
+        var end = "\n";
+        stream.write(end, end.length);
     },
 
     onRestartFirefox: function()

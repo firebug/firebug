@@ -1,14 +1,12 @@
-
-<!ENTITY  editors.Description       "Ayarli Firebug Editorleri:">
-<!ENTITY  editors.NameColumn        "Editor">
-<!ENTITY  editors.ExecutableColumn  "�alistirilabilir">
-<!ENTITY  editors.ParamsColumn      "Komut parametreleri">
-
-<!ENTITY  add.label               "Ekle">
-<!ENTITY  remove.label            "Kaldir">
-<!ENTITY  change.label            "Degistir">
-<!ENTITY  close.label             "Kapat">
-<!ENTITY  browse.label            "G�zat...">
-<!ENTITY  changeEditor.Name       "Isim:">
-<!ENTITY  changeEditor.Executable "Komut:">
-<!ENTITY  changeEditor.CmdLine    "Parametreler:">
+<!ENTITY editors.Description "Yapılandırılmış Firebug Düzenleyicileri:">
+<!ENTITY editors.NameColumn "Düzenleyici">
+<!ENTITY editors.ExecutableColumn "Uygulama">
+<!ENTITY editors.ParamsColumn "Başlatma parametreleri">
+<!ENTITY add.label "Ekle">
+<!ENTITY remove.label "Kaldır">
+<!ENTITY change.label "Değiştir">
+<!ENTITY close.label "Kapat">
+<!ENTITY browse.label "Gözat...">
+<!ENTITY changeEditor.Name "Ad:">
+<!ENTITY changeEditor.Executable "Uygulama:">
+<!ENTITY changeEditor.CmdLine "Parametreler:">

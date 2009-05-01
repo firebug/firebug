@@ -23,10 +23,10 @@ const reDBG_FBS = /DBG_FBS_(.*)/;
 var EOF = "<br/>";
 
 //************************************************************************************************
-//The controller for the prefDomain Model.
+//  The controller for the prefDomain Model.
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
 //  base for trace viewers like tracePanel and traceConsole
-//  binds  to the branch 'prefDomain' of prefs  
+//  binds  to the branch 'prefDomain' of prefs
 
 Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 {
@@ -50,8 +50,8 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
     // nsIObserver
     this.observe = function(subject, topic, data)
     {
-    if (topic == "nsPref:changed")
-    {
+        if (topic == "nsPref:changed")
+        {
             var m = reDBG.exec(data);
             if (m)
             {
@@ -129,7 +129,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceConsole.setOption: new value "+ this.prefDomain+"."+category+ " = " + newValue, menuitem);
     };
- 
+
     if (onPrefChangeHandler)
         this.prefEventToUserEvent = onPrefChangeHandler;
     else
@@ -145,7 +145,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
         var optionMap = this.traceService.getTracer(prefDomain);
         var items = [];
         for (var p in optionMap)
-        { 
+        {
             var m = p.indexOf("DBG_");
             if (m != 0)
                 continue;
@@ -162,24 +162,25 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 
 Firebug.TraceModule = extend(Firebug.Module,
 {
+    dispatchName: "traceModule",
     initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
     {
         Firebug.Module.initialize.apply(this, arguments);
 
         FBTrace.DBG_OPTIONS = Firebug.getPref(prefDomain, "DBG_OPTIONS");
 
-        if (FBTrace.DBG_OPTIONS)
-            FBTrace.sysout("traceModule.initialize: " + prefDomain);
-
         this.prefDomain = prefDomain;
 
-        // Create menu items for Trace Console 
+        // Create menu items for Trace Console
         // (Open Console and a new option Always Open Console)
         this.initMenu();
 
         // Open console automatically if the pref says so.
         if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
     },
 
     shutdown: function()
@@ -208,7 +209,7 @@ Firebug.TraceModule = extend(Firebug.Module,
     {
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.reattachContext for: " +
-                context ? context.window.location.href : "null context",
+                context ? context.getName() : "null context",
                 [browser, context]);
 
         // Create proper menu items for Firebug Tracing window in the new Firebug window.
@@ -267,7 +268,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         });
 
         // Try to connect an existing trace-console window first.
-        if (this.consoleWindow) {
+        if (this.consoleWindow && this.consoleWindow.TraceConsole) {
             this.consoleWindow.TraceConsole.registerModule(this);
             this.consoleWindow.focus();
             return;
@@ -320,13 +321,13 @@ Firebug.TraceModule = extend(Firebug.Module,
     {
         // xxxHonza: find better solution for checking an ERROR messages
         // (setup some rules).
-        var index = message.text.indexOf("ERROR");
-        if (index != -1)
-            message.type = "DBG_ERROR";
-
-        index = message.text.indexOf("EXCEPTION");
-        if (index != -1)
-            message.type = "DBG_ERROR";
+        var text = message.text;
+        if (text.indexOf("ERROR") != -1 ||
+            text.indexOf("EXCEPTION") != -1 ||
+            text.indexOf("FAILS") != -1)
+        {
+            message.type = "DBG_ERRORS";
+        }
 
         Firebug.TraceModule.MessageTemplate.dump(message, parentNode);
     },
@@ -448,7 +449,7 @@ Firebug.TraceModule.PanelTemplate = domplate({
 });
 
 // ************************************************************************************************
-// Trace message 
+// Trace message
 
 Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 {
@@ -468,6 +469,10 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 DIV({class: "messageNameLabel messageLabel"},
                     "$message|getMessageIndex")
             ),
+            TD({class: "messageTimeCol messageCol"},
+                DIV({class: "messageTimeLabel messageLabel"},
+                    "$message|getMessageTime")
+            ),
             TD({class: "messageCol"},
                 DIV({class: "messageLabel", title: "$message|getMessageTitle"},
                     "$message|getMessageLabel")
@@ -475,8 +480,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         ),
 
     separatorTag:
-        TR({class: "messageRow separatorRow"},
-            TD({class: "messageCol", colspan: "2"},
+        TR({class: "messageRow separatorRow", _repObject: "$message"},
+            TD({class: "messageCol", colspan: "3"},
                 DIV("$message|getMessageIndex")
             )
         ),
@@ -586,6 +591,17 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         return message.index + 1;
     },
 
+    getMessageTime: function(message)
+    {
+        var date = new Date(message.time);
+        var m = date.getMinutes() + "";
+        var s = date.getSeconds() + "";
+        var ms = date.getMilliseconds() + "";
+        return "[" + ((m.length > 1) ? m : "0" + m) + ":" + 
+            ((s.length > 1) ? s : "0" + s) + ":" + 
+            ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
+    },
+
     getMessageLabel: function(message)
     {
         var maxLength = Firebug.getPref(Firebug.TraceModule.prefDomain,
@@ -665,7 +681,6 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     onClickStackFrame: function(event)
     {
         var winType = "FBTraceConsole-SourceView";
-        var url = event.target.innerHTML;
         var lineNumber = event.target.getAttribute("lineNumber");
 
         openDialog("chrome://global/content/viewSource.xul",
@@ -766,7 +781,21 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (items.length > 0)
             items.push("-");
 
+        items.push(this.optionMenu($STR("tracing.Show Time"), "trace.showTime"));
         items.push(this.optionMenu($STR("tracing.Show Scope Variables"), "trace.enableScope"));
+        items.push("-");
+
+        items.push({
+          label: $STR("tracing.cmd.Expand All"),
+          nol10n: true,
+          command: bindFixed(this.onExpandAll, this, message)
+        });
+
+        items.push({
+          label: $STR("tracing.cmd.Collapse All"),
+          nol10n: true,
+          command: bindFixed(this.onCollapseAll, this, message)
+        });
 
         return items;
     },
@@ -810,6 +839,22 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     onCopyException: function(message)
     {
         copyToClipboard(message.getException());
+    },
+
+    onExpandAll: function(message)
+    {
+        var table = getAncestorByClass(message.row, "messageTable");
+        var rows = cloneArray(table.firstChild.childNodes);
+        for (var i=0; i<rows.length; i++)
+            this.expandRow(rows[i]);
+    },
+
+    onCollapseAll: function(message)
+    {
+        var table = getAncestorByClass(message.row, "messageTable");
+        var rows = cloneArray(table.firstChild.childNodes);
+        for (var i=0; i<rows.length; i++)
+            this.collapseRow(rows[i]);
     },
 
     // Clipboard helpers
@@ -892,6 +937,18 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 cancelEvent(event);
             }
         }
+    },
+
+    collapseRow: function(row)
+    {
+        if (hasClass(row, "messageRow", "opened"))
+            this.toggleRow(row);
+    },
+
+    expandRow: function(row)
+    {
+        if (hasClass(row, "messageRow"))
+            this.toggleRow(row, true);
     },
 
     toggleRow: function(row, forceOpen)
@@ -1095,12 +1152,14 @@ var HelperDomplate = (function()
 // ************************************************************************************************
 // Trace Message Object
 
-Firebug.TraceModule.TraceMessage = function(type, text, obj)
+Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
 {
     this.type = type;
     this.text = text;
     this.obj = obj;
     this.stack = [];
+    this.scope = scope;
+    this.time = time;
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
@@ -1116,7 +1175,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
                 }
             }
         }
-        else  
+        else
         {
             // Put info about the script error location into the stack.
             this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
@@ -1161,8 +1220,8 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj)
         }
     }
 
-    if (this.obj instanceof Error || 
-        this.obj instanceof Ci.nsIException || 
+    if (this.obj instanceof Error ||
+        this.obj instanceof Ci.nsIException ||
         this.obj instanceof Ci.nsIScriptError)
     {
         // Put the error message into the title so, it's immediately visible.
@@ -1226,15 +1285,15 @@ Firebug.TraceModule.TraceMessage.prototype =
                 {
                     try
                     {
-                    	var getter = this.obj.__lookupGetter__(p);
-                    	if (getter)
-                    		this.props[p] = "" + getter;
-                    	else
-                    		this.props[p] = "" + this.obj[p];
+                        var getter = this.obj.__lookupGetter__(p);
+                        if (getter)
+                            this.props[p] = "" + getter;
+                        else
+                            this.props[p] = "" + this.obj[p];
                     }
                     catch (e)
                     {
-                        onPanic(e);
+                        onPanic("instanceof Array with length, item "+p, e);
                     }
                 }
             }
@@ -1247,19 +1306,19 @@ Firebug.TraceModule.TraceMessage.prototype =
                         var subProps = this.props[p] = [];
                         var subobj = this.obj.__lookupGetter__(p);
                         if (!subobj)
-                        	subobj = this.obj[p];
+                            subobj = this.obj[p];
                         for (var p1 in subobj)
                         {
-                        	var getter = subobj.lookupGetter__(p1);
-                        	if (getter)
-                        		subProps[p1] = "" + getter;
-                        	else
-                        		subProps[p1] = "" + subobj[p1];
+                            var getter = subobj.lookupGetter__(p1);
+                            if (getter)
+                                subProps[p1] = "" + getter;
+                            else
+                                subProps[p1] = "" + subobj[p1];
                         }
                     }
                     catch (e)
                     {
-                        onPanic(e);
+                        onPanic("instanceof Array, item "+p, e);
                     }
                 }
             }
@@ -1279,7 +1338,7 @@ Firebug.TraceModule.TraceMessage.prototype =
                     var name = prop.name.getWrappedValue();
                     this.props[name] = "" + prop.value.getWrappedValue();
                 } catch (e) {
-                    onPanic(e);
+                    onPanic("instanceof jsdIValue, i="+i, e);
                 }
             }
         }
@@ -1289,12 +1348,14 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         else
         {
-            var propsTotal = 0;
-            for (var p in this.obj)
+            try
             {
-                propsTotal++;
-                try
+                this.props = {};
+                var propsTotal = 0;
+                for (var p in this.obj)
                 {
+                    propsTotal++;
+
                     var pAsString = p + "";
                     var m = this.reXPConnect.exec(pAsString);
                     if (m)
@@ -1308,20 +1369,22 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
 
                     try {
-                    	var getter = this.obj.__lookupGetter__(p);
-                    	if (getter)
-                    		var value = "" + getter;
-                    	else
-                    		var value = "" + this.obj[p];
+                        if (this.obj.__lookupGetter__)
+                            var getter = this.obj.__lookupGetter__(p);
+                        if (getter)
+                            var value = "" + getter;
+                        else
+                            var value = "" + this.obj[p]; // script takes too much time error
                         this.props[p] = value;
                     }
                     catch (err) {
                         this.props[p] = "{Error}";
                     }
                 }
-                catch (err)
-                {
-                }
+            }
+            catch (exc)
+            {
+                window.dump("traceModule getProperties "+exc);
             }
         }
 
@@ -1422,7 +1485,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             }
             catch (err)
             {
-                onPanic(e);
+                onPanic("instanceof Error or nsIExcpetion", e);
             }
         }
 
@@ -1449,7 +1512,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         catch (e)
         {
-            onPanic(e);
+            onPanic("getTypes "+this.types, e);
         }
 
         return this.types;
@@ -1489,7 +1552,7 @@ Firebug.TraceModule.TraceMessage.prototype =
         }
         catch (err)
         {
-            onPanic(err);
+            onPanic("event", err);
         }
 
         return this.eventInfo;
@@ -1502,13 +1565,13 @@ Firebug.TraceModule.TraceMessage.prototype =
 }
 
 var lastPanic = null;
-function onPanic(errorMessage)
+function onPanic(contextMessage, errorMessage)
 {
     var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
     var win = appShellService.hiddenDOMWindow;
-    // XXXjjb I cannot get these tests to work. 
+    // XXXjjb I cannot get these tests to work.
     //if (win.lastPanic && (win.lastPanic == errorMessage))
-        win.dump("Another panic attack "+errorMessage+"\n");
+        win.dump("traceModule: "+contextMessage +" panic attack "+errorMessage+"\n");
     //else
     //alert("Firebug traceModule panics: "+errorMessage);
 
@@ -1536,7 +1599,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     rowTag:
         TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
             _repObject: "$member", level: "$member.level"},
-            TD({class: "memberLabelCell", 
+            TD({class: "memberLabelCell",
                 style: "padding-left: $member.indent\\px; width:1%; white-space: nowrap"},
                 DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
             ),

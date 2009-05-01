@@ -18,76 +18,81 @@ const prefs = PrefService.getService(Ci.nsIPrefBranch2);
 const prefService = PrefService.getService(Ci.nsIPrefService);
 const consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
 
-const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+const appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);
 
 // ************************************************************************************************
 // Service implementation
 
-//var win = appShellService.hiddenDOMWindow;
-const win = false;
+
+var win = false;
 
 function TraceConsoleService()  // singleton
 {
     this.observers = [];
     this.optionMaps = {};
-    
+
     // Listen for preferences changes. Trace Options can be changed at run time.
     prefs.addObserver("extensions", this, false);
-    
+
     this.wrappedJSObject = this; // why not
 }
 
-TraceConsoleService.prototype = 
+TraceConsoleService.prototype =
 {
-	getTracer: function(prefDomain)  
-	{
-		if (!this.optionMaps[prefDomain])
-			this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
-		if (win)
-			win.dump("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
-		return this.optionMaps[prefDomain];
-	},
+    getTracer: function(prefDomain)
+    {
+        if (this.getPref("extensions.firebug-tracing-service.toOSConsole"))
+        {
+             win = appShellService.hiddenDOMWindow;  // also need browser.dom.window.dump.enabled true
+        }
 
-	createManagedOptionMap: function(prefDomain)
-	{
-		var optionMap = new TraceBase(prefDomain); 
-	     
-		var branch = prefService.getBranch ( prefDomain );
-		var arrayDesc = {};
-		var children = branch.getChildList("", arrayDesc);
-		for (var i = 0; i < children.length; i++)
-		{
-			var p = children[i];
-			var m = p.indexOf("DBG_");   
-			if (m != -1)
-			{
-				var optionName = p.substr(1); // drop leading .
-				optionMap[optionName] = this.getPref(prefDomain+p);
-				if (win)
-					win.dump("TraceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
-			}
-		}
-		
-		return optionMap;
-	},
-	
+        if (!this.optionMaps[prefDomain])
+            this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
+        if (win)
+            win.dump("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
+        return this.optionMaps[prefDomain];
+    },
+
+    createManagedOptionMap: function(prefDomain)
+    {
+        var optionMap = new TraceBase(prefDomain);
+
+        var branch = prefService.getBranch ( prefDomain );
+        var arrayDesc = {};
+        var children = branch.getChildList("", arrayDesc);
+        for (var i = 0; i < children.length; i++)
+        {
+            var p = children[i];
+            var m = p.indexOf("DBG_");
+            if (m != -1)
+            {
+                var optionName = p.substr(1); // drop leading .
+                optionMap[optionName] = this.getPref(prefDomain+p);
+                if (win)
+                    win.dump("TraceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
+            }
+        }
+
+        return optionMap;
+    },
+
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
-    	if (data.substr(0,EXTENSIONS.length) == EXTENSIONS)
-    	{
-    		for (var prefDomain in gTraceService.optionMaps)
-    		{
-    			if (data.substr(0, prefDomain.length) == prefDomain)
-    			{
-    				var optionName = data.substr(prefDomain.length+1); // skip dot
-    				if (optionName.substr(0, DBG_.length) == DBG_)
-    					gTraceService.optionMaps[prefDomain][optionName] = this.getPref(data);
-    				if (win)
-    					win.dump("TraceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
-    			}
-    		}
-    	}
+        if (data.substr(0,EXTENSIONS.length) == EXTENSIONS)
+        {
+            for (var prefDomain in gTraceService.optionMaps)
+            {
+                if (data.substr(0, prefDomain.length) == prefDomain)
+                {
+                    var optionName = data.substr(prefDomain.length+1); // skip dot
+                    if (optionName.substr(0, DBG_.length) == DBG_)
+                        gTraceService.optionMaps[prefDomain][optionName] = this.getPref(data);
+                    if (win)
+                        win.dump("TraceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
+                }
+            }
+        }
     },
 
     getPref: function(prefName)
@@ -102,7 +107,7 @@ TraceConsoleService.prototype =
     },
 
     // Prepare trace-object and dispatch to all observers.
-    dispatch: function(messageType, message, obj)
+    dispatch: function(messageType, message, obj, scope)
     {
         // Translate string object.
         if (typeof(obj) == "string") {
@@ -113,11 +118,13 @@ TraceConsoleService.prototype =
 
         // Create wrapper with message type info.
         var messageInfo = {
-            obj: obj, 
-            type: messageType
+            obj: obj,
+            type: messageType,
+            scope: scope,
+            time: (new Date()).getTime()
         };
         if (win)
-			win.dump("TraceConsoleService.dispatch, prefDomain: "+messageType+" message: "+message+"\n");
+            win.dump(messageType+": "+message+"\n");
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
@@ -128,7 +135,10 @@ TraceConsoleService.prototype =
     {
         if (topic != "firebug-trace-on-message")
             throw Cr.NS_ERROR_INVALID_ARG;
-    
+
+        if (this.observers.length == 0) // mark where trace begins.
+            lastResort(this.observers, topic, "addObserver");
+
         this.observers.push(observer);
     },
 
@@ -148,16 +158,16 @@ TraceConsoleService.prototype =
     notifyObservers: function(subject, topic, someData)
     {
         try
-        { 
+        {
             if (this.observers.length > 0)
             {
-                for (var i=0; i<this.observers.length; i++)
-                	this.observers[i].observe(subject, topic, someData);
+                for (var i=0; i < this.observers.length; i++)
+                    this.observers[i].observe(subject, topic, someData);
             }
             else
             {
-            	lastResort(this.observers, subject, someData);
-            }            
+                lastResort(this.observers, subject, someData);
+            }
         }
         catch (err)
         {
@@ -177,23 +187,27 @@ TraceConsoleService.prototype =
         return null;
     },
 
-	/* nsISupports */
-	QueryInterface: function(iid) 
-	{
+    /* nsISupports */
+    QueryInterface: function(iid)
+    {
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService))
- 		    return this;
-		
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+             return this;
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 };
 
 function lastResort(listeners, subject, someData)
 {
-    var hiddenWindow = appShellService.hiddenDOMWindow; 
+    var hiddenWindow = appShellService.hiddenDOMWindow;
     var unwrapped = subject.wrappedJSObject;
-    var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
-    hiddenWindow.dump("FTS"+listeners.length+": "+someData+objPart+"\n");
+    if (unwrapped)
+        var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
+    else
+        var objPart = subject;
+
+    hiddenWindow.dump("FTS"+listeners.length+": "+someData+" "+objPart+"\n");
 }
 // ************************************************************************************************
 // Public TraceService API
@@ -201,7 +215,7 @@ function lastResort(listeners, subject, someData)
 // Prevent tracing from code that performs tracing.
 var noTrace = false;
 
-var TraceAPI = {    
+var TraceAPI = {
     dump: function(messageType, message, obj) {
         if (noTrace)
             return;
@@ -230,19 +244,30 @@ var TraceAPI = {
 
     dumpInterfaces: function(message, eventObj) {
         this.sysout(message, eventObj);
-    }
+    },
+
+    setScope: function(scope)
+    {
+        this.scopeOfFBTrace = scope;
+    },
+
 };
 
 var TraceBase = function(prefDomain) {
-	this.prefDomain = prefDomain;
-	this.sysout = function(message, obj) {
-	    TraceAPI.dump(this.prefDomain, message, obj);
-	}
+    this.prefDomain = prefDomain;
 }
 //Derive all properties from TraceAPI
 for (var p in TraceAPI)
     TraceBase.prototype[p] = TraceAPI[p];
 
+TraceBase.prototype.sysout = function(message, obj) {
+        if (noTrace)
+            return;
+
+        noTrace = true;
+        gTraceService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
+        noTrace = false;
+}
 
 
 
@@ -251,7 +276,7 @@ for (var p in TraceAPI)
 // Service factory
 
 var gTraceService = null;
-var TraceConsoleServiceFactory = 
+var TraceConsoleServiceFactory =
 {
     createInstance: function (outer, iid)
     {
@@ -261,23 +286,23 @@ var TraceConsoleServiceFactory =
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService))
         {
-		    if (!gTraceService)
-    		    gTraceService = new TraceConsoleService();
+            if (!gTraceService)
+                gTraceService = new TraceConsoleService();
             return gTraceService.QueryInterface(iid);
         }
-        
+
         throw Cr.NS_ERROR_NO_INTERFACE;
     },
-    
-	QueryInterface: function(iid) 
-	{
-		if (iid.equals(Ci.nsISupports) ||
-		    iid.equals(Ci.nsISupportsWeakReference) ||
-		    iid.equals(Ci.nsIFactory))
-			return this;
-			
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsISupportsWeakReference) ||
+            iid.equals(Ci.nsIFactory))
+            return this;
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 };
 
 // ************************************************************************************************
@@ -288,7 +313,7 @@ var TraceConsoleServiceModule =
     registerSelf: function (compMgr, fileSpec, location, type)
     {
         compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
-        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME, 
+        compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
             CONTRACT_ID, fileSpec, location, type);
     },
 

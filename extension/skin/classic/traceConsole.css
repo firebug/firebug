@@ -162,6 +162,16 @@
 
 /************************************************************************************************/
 
+.messageTimeLabel {
+    display: none;
+}
+
+.showTime .messageTimeLabel {
+    display: block;
+}
+
+/************************************************************************************************/
+
 .messageInfoCol {
     border-top: 1px solid #EEEEEE;
     background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
@@ -263,7 +273,7 @@
 	color: Red;
 }
 
-.DBG_ERROR {
+.DBG_ERRORS {
 	color: Red;
 }
 
@@ -294,6 +304,8 @@
 }
 
 #saveToFile {
+    list-style-image: url("chrome://browser/skin/Toolbar-small.png");
+    -moz-image-region: rect(0px 96px 16px 80px);
 }
 
 #closeFirefox {

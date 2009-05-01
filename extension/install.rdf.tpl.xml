@@ -12,8 +12,8 @@
     <em:targetApplication>
       <Description>
         <em:id>{ec8030f7-c20a-464f-9b0e-13a3a9e97384}</em:id>
-        <em:minVersion>1.5</em:minVersion>
-        <em:maxVersion>3.2.*</em:maxVersion>
+        <em:minVersion>3.0</em:minVersion>
+        <em:maxVersion>3.5.*</em:maxVersion>
       </Description>
     </em:targetApplication>
 
@@ -32,6 +32,7 @@
     <em:contributor>1.1 and 1.2 enhancements: John J. Barton (IBM Almaden)</em:contributor>
     <em:contributor>Jan Odvarko (All Peers Inc.)</em:contributor>
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
+    <em:contributor>Rob Campbell (Mozilla Corp.)</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
@@ -42,13 +43,15 @@
     <em:translator>peter3 (sv-SE)</em:translator>
     <em:translator>AlleyKat (da-DK)</em:translator>
     <em:translator>lovelywcm (zh-CN)</em:translator>
-    <em:translator>lordfrikk (cs-CZ)</em:translator>
+    <em:translator>Lukáš "lordfrikk" Kucharczyk, mik (cs-CZ)</em:translator>
     <em:translator>Team erweiterungen.de, ReinekeFux, Monoman (de-DE)</em:translator>
     <em:translator>l0stintranslation, gonzalopirobutirro (it-IT)</em:translator>
-    <em:translator>alexxed (ro-RO)</em:translator>      
+    <em:translator>alexxed (ro-RO)</em:translator>
     <em:translator>Nicolas Martin, Franck Marcia (fr-FR)</em:translator>
     <em:translator>gLes (hu-HU)</em:translator>
     <em:translator>Xavi Ivars - Softcatalà (ca)</em:translator>
-      
+    <em:translator>gezmen (tr-TR)</em:translator>
+    <em:translator>eternoendless (es-AR)</em:translator>
+
   </Description>
 </RDF>

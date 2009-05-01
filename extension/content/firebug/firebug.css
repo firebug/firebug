@@ -64,7 +64,6 @@ panelStatus {
 }
 
 /************************************************************************************************/
-
 panelTabMenu {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelTabMenu");
 }
@@ -73,7 +72,11 @@ panelTab > panelTabMenu .menuTarget {
     visibility:collapse;
 }
 
-panelTab[selected="true"] > panelTabMenu .menuTarget {
+panelTab[aria-disabled='true'] {
+    color: graytext;
+}
+
+panelTab[selected="true"] > panelTabMenu .menuTarget, panelTab:focus > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTarget.png) no-repeat center;
     width: 11px;
     height: 10px;
@@ -84,3 +87,55 @@ panelTab[selected="true"] > panelTabMenu .menuTarget {
 panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTargetHover.png) no-repeat center;
 }
+
+/**** focus related ****/
+
+/* Make the following selectors part of the tab order */
+
+/* current tab */
+.useA11y panelTab[selected="true"],
+/* Firebug  Menu */  
+.useA11y #fbFirebugMenu, 
+/* Status bar icon*/
+#fbStatusBar.useA11y {
+    -moz-user-focus: normal;
+}
+
+/* Toolbar buttons in a visible toolbar group (usually hbox) */
+.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton,
+.useA11y .innerToolbar > toolbarbutton{
+   -moz-user-focus: normal;
+}
+
+/* Now override the previous selector and only leave the first button of each group in the tab order*/
+.useA11y .innerToolbar  *:not([collapsed="true"]) toolbarbutton ~ toolbarbutton,
+.useA11y .innerToolbar > toolbarbutton ~ toolbarbutton{
+   -moz-user-focus: ignore;
+}
+
+/* remove toolbar groups from the tab order if they have .noTabStop and are NOT the first visible group in the toolbar */
+.useA11y .innerToolbar *[collapsed="false"] ~ *.noTabStop toolbarbutton,
+/*fbNetButtonsFilter situation, added extra id for specificity*/
+.useA11y #fbToolbox .innerToolbar toolbarbutton ~ *.noTabStop toolbarbutton { 
+    -moz-user-focus: ignore;
+}
+
+/* Buttons in a group with .hasTabOrder (this class is briefly added during right/left arrow key event handlers in a11y.js.*/
+.innerToolbar.hasTabOrder toolbarbutton {
+    -moz-user-focus: normal !important;	
+}
+	
+.useA11y #fbPanelBar1 toolbarbutton:focus,
+#fbStatusBar.useA11y:focus {
+    outline: 2px solid #FF9933;
+}
+
+.useA11y panelTab:focus {
+    background-color: #FF9933;
+}
+
+.useA11y panelTab:focus > label {
+    text-decoration: underline;
+    color: black;
+}
+/**** end focus related ****/

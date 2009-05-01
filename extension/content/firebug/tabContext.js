@@ -28,35 +28,97 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
         this.externalChrome = chrome;
     }
 
+    this.name = normalizeURL(this.getWindowLocation().toString());
+
     this.windows = [];
     this.panelMap = {};
     this.sidePanelNames = {};
     this.sourceFileMap = {};
 
-    // New nsITraceableChannel interface (introduced in FF3.0.4) makes possible 
-    // to re-implement source-cache so, it solves the double-load problem. 
-    // Anyway, keep the previous cache implementation for backward compatibility 
-    // (with Firefox 3.0.3 and lower)    
+    // New nsITraceableChannel interface (introduced in FF3.0.4) makes possible
+    // to re-implement source-cache so, it solves the double-load problem.
+    // Anyway, keep the previous cache implementation for backward compatibility
+    // (with Firefox 3.0.3 and lower)
     if (Components.interfaces.nsITraceableChannel)
-        this.sourceCache = new Firebug.TabCache(win);
+        this.sourceCache = new Firebug.TabCache(this);
     else
-        this.sourceCache = new Firebug.SourceCache(win, this);
+        this.sourceCache = new Firebug.SourceCache(this);
+
+    this.global = win;  // used by chromebug
 };
 
 Firebug.TabContext.prototype =
 {
+    getWindowLocation: function()
+    {
+        try
+        {
+            if (this.window)
+            {
+                if (this.window.closed)
+                    return "about:closed";
+                if ("location" in this.window)
+                {
+                    if ("toString" in this.window.location)
+                        return this.window.location;
+                    else
+                        return "(window.location has no toString)";
+                }
+                else
+                    return "(no window.location)";
+            }
+            else
+                return "(no context.window)";
+        }
+        catch(exc)
+        {
+            //if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
+                FBTrace.sysout("TabContext.getWindowLocation failed window:", this.window);
+            return "(getWindowLocation: "+exc+")";
+        }
+    },
+
+    getTitle: function()
+    {
+        if (this.window && this.window.document)
+            return this.window.document.title;
+        else
+            return "";
+    },
+
+    getName: function()
+    {
+        if (!this.name)
+            this.name = normalizeURL(this.getWindowLocation().toString());
+        return this.name;
+    },
+
+    getGlobalScope: function()
+    {
+        return this.window;
+    },
+
+    addSourceFile: function(sourceFile)
+    {
+        this.sourceFileMap[sourceFile.href] = sourceFile;
+        sourceFile.context = this;
+
+        Firebug.onSourceFileCreated(this, sourceFile);
+    },
+    // ***************************************************************************
     reattach: function(chrome)
     {
-        var oldChrome = this.chrome;
+        var oldChrome = this.chrome;  // ie context.chrome
         this.chrome = chrome;
 
         for (var panelName in this.panelMap)
         {
             var panel = this.panelMap[panelName];
-            panel.detach(oldChrome, chrome);
+            panel.detach(oldChrome, chrome);  // this will cause the ownerDocument for panelNode to change
             panel.invalid = true;
 
-            var panelNode = panel.panelNode;
+            var panelNode = panel.panelNode;  // delete panel content
             if (panelNode && panelNode.parentNode)
                 panelNode.parentNode.removeChild(panelNode);
         }
@@ -100,7 +162,7 @@ Firebug.TabContext.prototype =
             panel.destroy(panelState);
 
             // Remove the panel node from the DOM
-            var panelNode = panel.panelNode;
+            var panelNode = panel.panelNode;  // delete panel content
             if (panelNode && panelNode.parentNode)
                 panelNode.parentNode.removeChild(panelNode);
         }
@@ -192,9 +254,12 @@ Firebug.TabContext.prototype =
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.
     {
-    	this.panelMap[panel.name] = panel;
+        if (panel)
+            this.panelMap[panelName] = panel;
+        else
+            delete this.panelMap[panelName];
     },
-    
+
     invalidatePanels: function()
     {
         if (!this.invalidPanels)
@@ -248,6 +313,8 @@ Firebug.TabContext.prototype =
 
     setTimeout: function()
     {
+        if (setTimeout == this.setTimeout)
+            throw new Error("setTimeout recursion");
         var timeout = setTimeout.apply(top, arguments);
 
         if (!this.timeouts)

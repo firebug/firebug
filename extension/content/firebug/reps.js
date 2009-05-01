@@ -23,7 +23,7 @@ var OBJECTBLOCK = this.OBJECTBLOCK =
 
 var OBJECTLINK = this.OBJECTLINK =
     A({
-        class: "objectLink objectLink-$className",
+        class: "objectLink objectLink-$className a11yFocus",
         _repObject: "$object"
     });
 
@@ -128,7 +128,7 @@ this.Caption = domplate(Firebug.Rep,
 
 this.Warning = domplate(Firebug.Rep,
 {
-    tag: DIV({class: "warning"}, "$object|STR")
+    tag: DIV({class: "warning focusRow", role : 'listitem'}, "$object|STR")
 });
 
 // ************************************************************************************************
@@ -364,20 +364,20 @@ this.Arr = domplate(Firebug.Rep,
 {
     tag:
         OBJECTBOX({_repObject: "$object"},
-            SPAN({class: "arrayLeftBracket"}, "["),
+            SPAN({class: "arrayLeftBracket", role : "presentation"}, "["),
             FOR("item", "$object|arrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
-                SPAN({class: "arrayComma"}, "$item.delim")
+                SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
             ),
-            SPAN({class: "arrayRightBracket"}, "]")
+            SPAN({class: "arrayRightBracket", role : "presentation"}, "]")
         ),
 
     shortTag:
         OBJECTBOX({_repObject: "$object"},
-            SPAN({class: "arrayLeftBracket"}, "["),
+            SPAN({class: "arrayLeftBracket", role : "presentation"}, "["),
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
-                SPAN({class: "arrayComma"}, "$item.delim")
+                SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
             ),
             FOR("prop", "$object|shortPropIterator",
                     " $prop.name=",
@@ -422,7 +422,7 @@ this.Arr = domplate(Firebug.Rep,
     },
 
     shortPropIterator:    this.Obj.propIterator,
-    
+
     getItemIndex: function(child)
     {
         var arrayIndex = 0;
@@ -440,16 +440,7 @@ this.Arr = domplate(Firebug.Rep,
 
     supportsObject: function(object)
     {
-        if (this.isArray(object)) return true;
-
-        // Don't use propertyIsEnumerable("length") as "arguments" array isn't real JS array,
-        // "arguments" have .length but do not respond to object property enumeration.
-        if ("length" in object && typeof(object.length) == "number")
-        {
-            for (name in object)
-                return false;
-            return true;
-        }
+        return this.isArray(object);
     },
 
     // http://code.google.com/p/fbug/issues/detail?id=874
@@ -459,7 +450,7 @@ this.Arr = domplate(Firebug.Rep,
             if (!obj)
                 return false;
             else if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors?
-            	return false;
+                return false;
             else if (isFinite(obj.length) && typeof obj.splice === 'function')
                 return true;
             else if (obj instanceof HTMLCollection)
@@ -510,7 +501,7 @@ this.Property = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-this.NetFile = domplate(Firebug.Rep,
+this.NetFile = domplate(this.Obj,
 {
     supportsObject: function(object)
     {
@@ -984,72 +975,6 @@ this.Event = domplate(Firebug.Rep,
     }
 });
 
-this.EventHandlerInfo = domplate(Firebug.Rep,
-{
-    tag:
-        OBJECTBLOCK(
-                OBJECTBOX( "$object:getElement"),
-                OBJECTLINK({$collapsed: "$object|hideHandler"}, "$object|getHandlerSummary")
-        ),
-
-    hideHandler: function(handler)
-    {
-        //return sourceLink ? sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1 : true;
-        return handler ? false: true;
-    },
-
-    getHandlerSummary: function(handler)
-    {
-        if (!handler)
-            return "";
-        
-        var fncName = cropString(handler.fnAsString, 27);
-        return fncName;
-    },
-    
-    getElement: function(handler)
-    {
-        if (handler)
-            return handler.element;
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    className: "eventHandler",
-
-    supportsObject: function(object)
-    {
-        return object instanceof EventHandlerInfo;
-    },
-
-    getTooltip: function(handler)
-    {
-        return handler.fnAsString;
-    },
-
-    inspectObject: function(handler, context)
-    {
-        var script = findScriptForFunctionInContext(context, handler.fnAsString);
-        
-        if (script)
-            return context.chrome.select(script);
-
-        // Fallback is to just open the view-source window on the file
-        var dataURL = getDataURLForContent(handler.fnAsString, context.window.location.toString());
-        viewSource(dataURL, 1);
-    },
-
-    getContextMenuItems: function(sourceLink, target, context)
-    {
-        return [
-            {label: "CopyLocation", command: bindFixed(this.copyLink, this, sourceLink) },
-            "-",
-            {label: "OpenInTab", command: bindFixed(this.openInTab, this, sourceLink) }
-        ];
-    }
-
-});
-
 // ************************************************************************************************
 
 this.SourceLink = domplate(Firebug.Rep,
@@ -1067,8 +992,17 @@ this.SourceLink = domplate(Firebug.Rep,
         if (!sourceLink)
             return "";
 
-        var fileName = cropString(getFileName(sourceLink.href), 17);
-        fileName = decodeURIComponent(fileName);
+        try
+        {
+            var fileName = getFileName(sourceLink.href);
+            fileName = decodeURIComponent(fileName);
+            fileName = cropString(fileName, 17);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'"+fileName+"\': "+exc, exc);
+        }
         return $STRF("Line", [fileName, sourceLink.line]);
     },
 
@@ -1184,7 +1118,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            A({class: "objectLink", _repObject: "$object"}, "$object|getCallName"),
+            A({class: "objectLink focusRow a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             "(",
             FOR("arg", "$object|argIterator",
                 TAG("$arg.tag", {object: "$arg.value"}),
@@ -1258,7 +1192,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 this.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        FOR("frame", "$object.frames",
+        FOR("frame", "$object.frames focusRow",
             TAG(this.StackFrame.tag, {object: "$frame"})
         ),
 
@@ -1295,6 +1229,8 @@ this.jsdStackFrame = domplate(Firebug.Rep,
         var sourceInfo = FBL.getSourceFileAndLineByScript(context, frame.script, frame);
         if (sourceInfo)
             return $STRF("Line", [sourceInfo.sourceFile.href, sourceInfo.lineNo]);
+        else
+            return $STRF("Line", [frame.script.fileName, frame.line]);
     },
 
     getContextMenuItems: function(frame, target, context)
@@ -1317,13 +1253,13 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 _stackTrace: "$object|getLastErrorStackTrace",
                 onclick: "$onToggleError"},
 
-            DIV({class: "errorTitle"},
+            DIV({class: "errorTitle a11yFocus", role : 'checkbox', 'aria-checked' : 'false'},
                 "$object.message|getMessage"
             ),
             DIV({class: "errorTrace"}),
             DIV({class: "errorSourceBox errorSource-$object|getSourceType"},
-                IMG({class: "errorBreak", src:"blank.gif", title: "Break on this error"}),
-                SPAN({class: "errorSource"}, "$object|getLine")
+                IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':'false', title: "Break on this error"}),
+                A({class: "errorSource a11yFocus"}, "$object|getLine")
             ),
             TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
         ),
@@ -1335,7 +1271,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     hasStackTrace: function(error)
     {
-    	var url = error.href.toString();
+        var url = error.href.toString();
         var fromCommandLine = (url.indexOf("XPCSafeJSObjectWrapper") != -1);
         return !fromCommandLine && error.trace;
     },
@@ -1406,11 +1342,16 @@ this.ErrorMessage = domplate(Firebug.Rep,
         {
             var traceBox = target.childNodes[1];
             toggleClass(target, "opened");
-
+            event.target.setAttribute('aria-checked', hasClass(target, "opened"));
             if (hasClass(target, "opened"))
             {
                 if (target.stackTrace)
-                    FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                    var node = FirebugReps.StackTrace.tag.append({object: target.stackTrace}, traceBox);
+                if (Firebug.A11yModel.enabled)
+                {
+                    var panel = Firebug.getElementPanel(event.target);
+                    dispatch([Firebug.A11yModel], "onLogRowContentCreated", [panel , traceBox]);
+                }
             }
             else
                 clearNode(traceBox);
@@ -1549,11 +1490,53 @@ this.SourceText = domplate(Firebug.Rep,
     }
 });
 
+//************************************************************************************************
+this.nsIDOMHistory = domplate(Firebug.Rep,
+{
+    tag:OBJECTBOX({onclick: "$showHistory"},
+            OBJECTLINK("$object|summarizeHistory")
+        ),
+
+    className: "nsIDOMHistory",
+
+    summarizeHistory: function(history)
+    {
+        try
+        {
+            var items = history.length;
+            return items + " history entries";
+        }
+        catch(exc)
+        {
+            return "object does not support history (nsIDOMHistory)";
+        }
+    },
+
+    showHistory: function(history)
+    {
+        try
+        {
+            var items = history.length;  // if this throws, then unsupported
+            FirebugChrome.select(history);  // XXXjjb context.chrome??
+        }
+        catch (exc)
+        {
+        }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "nsIDOMHistory",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof Ci.nsIDOMHistory);
+    }
+});
+
 // ************************************************************************************************
 this.ApplicationCache = domplate(Firebug.Rep,
 {
-
-
     tag:OBJECTBOX({onclick: "$showApplicationCache"},
             OBJECTLINK("$object|summarizeCache")
         ),
@@ -1587,14 +1570,36 @@ this.ApplicationCache = domplate(Firebug.Rep,
 
 });
 
+this.Storage = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX({onclick: "$show"}, OBJECTLINK("$object|summarize")),
+
+    summarize: function(storage)
+    {
+        return storage.length +" items in Storage";
+    },
+    show: function(storage)
+    {
+        openNewTab("http://dev.w3.org/html5/webstorage/#storage-0");
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    className: "Storage",
+
+    supportsObject: function(object, type)
+    {
+        return (object instanceof Storage);
+    }
+
+});
 
 // ************************************************************************************************
 Firebug.registerRep(
+    this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,
     this.Null,
     this.Number,
     this.String,
-    this.Func,
     this.Window,
     this.ApplicationCache, // must come before Arr (array) else exceptions.
     this.ErrorMessage,
@@ -1603,7 +1608,6 @@ Firebug.registerRep(
     this.Document,
     this.StyleSheet,
     this.Event,
-    this.EventHandlerInfo,
     this.SourceLink,
     this.SourceFile,
     this.StackTrace,
@@ -1616,7 +1620,7 @@ Firebug.registerRep(
     this.Arr
 );
 
-Firebug.setDefaultRep(this.Obj);
+Firebug.setDefaultReps(this.Func, this.Obj);
 
 }});
 

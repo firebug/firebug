@@ -18,36 +18,32 @@
 </binding>
 
 <binding id="panelBar">
+
+    <!-- The XUL structure for the panel bar is specified in the XUL source
+         inside each "panelBar" element.  This allows us to have panel bars
+         with substantially different layous, including the ability to embed
+         one panel bar within another - albeit at some cost in maintainability.
+    -->
     <content>
-        <xul:hbox anonid="tabBox" class="panelTabBox" collapsed="true">
-            <children includes="panelTab"/>
-            <xul:spacer flex="1"/>
-            <children/>
-            <xul:toolbarbutton type="menu" class="toolbar-text-menubutton panelOptionsButton" label="&firebug.Options;" anonid="panelOptions">
-                <xul:menupopup anonid="optionsPopup"/>
-            </xul:toolbarbutton>
-        </xul:hbox>
-        <xul:deck anonid="deck" flex="1">
-            <xul:browser anonid="browser"
-                     xbl:inherits="tooltip=paneltooltip,contextmenu=panelcontextmenu"
-                     disablehistory="true"
-                     src="chrome://firebug/content/panel.html"/>
-        </xul:deck>
+        <children/>
     </content>
 
     <implementation>
         <constructor><![CDATA[
-            this.tabBox = document.getAnonymousElementByAttribute(this, "anonid", "tabBox");
-            this.optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "optionsPopup");
-            this.deck = document.getAnonymousElementByAttribute(this, "anonid", "deck");
-            this.browser = document.getAnonymousElementByAttribute(this, "anonid", "browser");
+            this.tabBox = this.getChildElement("tabBox");
+            this.deck = this.getChildElement("deck");
+            this.browser = this.getChildElement("browser");
+            this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
-
+            
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
-            try {
-                FirebugChrome.panelBarReady(this);
+            try
+            {
+                if(FirebugChrome.panelBarReady(this))
+                {
+                }
             }
             catch (e)
             {
@@ -55,6 +51,17 @@
                 dump("window.top "+window.top.location+" window.opener: "+window.opener+"\n");
             }
         ]]></constructor>
+
+        <method name="getChildElement">
+            <parameter name="id"/>
+            <body><![CDATA[
+                // Construct a unique ID from the panel bar ID and the child element ID,
+                // for example: "panelBar1-panelTabs".  This allows us to define children
+                // in the XUL source, which in turn allows us to have panel bars with
+                // substantially different layouts.
+                return document.getElementById(this.id + "-" + id);
+            ]]></body>
+        </method>
 
         <method name="createTab">
             <parameter name="panelType"/>
@@ -73,7 +80,7 @@
             <parameter name="panelType"/>
             <body><![CDATA[
             var tab = this.createTab(panelType);
-            this.appendChild(tab);
+            this.panelTabs.appendChild(tab);
             ]]></body>
         </method>
 
@@ -84,14 +91,14 @@
 
                 // Replace tabs at the same position if type has changed
                 var i = 0;
-                var tab = this.firstChild;
+                var tab = this.panelTabs.firstChild;
                 for (; i < panelTypes.length && tab; tab = tab.nextSibling)
                 {
                     var panelType = panelTypes[i++];
                     if (tab.panelType.prototype.name != panelType.prototype.name)
                     {
                         var newTab = this.createTab(panelType);
-                        this.replaceChild(newTab, tab);
+                        this.panelTabs.replaceChild(newTab, tab);
                         tab = newTab;
                     }
                     else
@@ -102,7 +109,7 @@
                 while (tab)
                 {
                     var nextTab = tab.nextSibling;
-                    this.removeChild(tab);
+                    this.panelTabs.removeChild(tab);
                     tab = nextTab;
                 }
 
@@ -111,7 +118,7 @@
                 {
                     var panelType = panelTypes[i];
                     var newTab = this.createTab(panelType);
-                    this.appendChild(newTab);
+                    this.panelTabs.appendChild(newTab);
                 }
             ]]></body>
         </method>
@@ -146,7 +153,9 @@
                     this.tabBox.removeAttribute("collapsed");
 
                 if (this.selectedTab)
+                {
                     this.selectedTab.removeAttribute("selected");
+                }
 
                 this.hideSelectedPanel();
 
@@ -154,7 +163,12 @@
                 this.selectedPanel = panel;
 
                 if (tab)
+                {
                     tab.setAttribute("selected", "true");
+                    if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused &&!forceUpdate)
+                        tab.focus();
+                    
+                }
 
                 if (panel)
                 {
@@ -212,10 +226,6 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
-
-                    var menu = panel.getOptionsMenuItems(FirebugContext);
-                    var panelOptions = document.getAnonymousElementByAttribute(this, "anonid", "panelOptions");
-                    panelOptions.disabled = (!menu || !menu.length);
                 }
             ]]></body>
         </method>
@@ -242,30 +252,8 @@
     </implementation>
 
     <handlers>
-        <handler event="popupshowing"><![CDATA[
-            if (!this.selectedPanel || (event.target != this))
-                return;
-
-            var menu = this.selectedPanel.getOptionsMenuItems(FirebugContext);
-
-            if (this.selectedTab.getAttribute("disabled") == "true")
-            {
-                for (var i = 0; i < menu.length; i++)
-                    menu[i].disabled = true;
-            }
-
-            if (menu)
-            {
-                for (var i = 0; i < menu.length; ++i)
-                    FBL.createMenuItem(this.optionsPopup, menu[i]);
-            }
-        ]]></handler>
-
-        <handler event="popuphidden"><![CDATA[
-            FBL.eraseNode(this.optionsPopup);
-        ]]></handler>
-
         <handler event="mousedown" button="0"><![CDATA[
+            event.stopPropagation();
             var tab = event.target;
             for (; tab && !tab.panelType; tab = tab.parentNode);
 
@@ -290,16 +278,20 @@
         <xul:image class="panelTab-right"/>
     </content>
     <implementation>
-        <method name="initTabMenu">
+        <constructor>
+        <![CDATA[
+            this.setAttribute('role', 'tab');
+            this.setAttribute('aria-haspopup', 'true');
+            this.tabMenu = document.createElement("panelTabMenu");
+            this.appendChild(this.tabMenu);
+            return this.tabMenu;
+        ]]>
+        </constructor>
+        <method name="setModule">
             <parameter name="module"/>
             <body><![CDATA[
-            if (!this.tabMenu)
-            {
-                this.tabMenu = document.createElement("panelTabMenu");
-                this.tabMenu.module = module;
-                return this.appendChild(this.tabMenu);
-            }
-            return this.tabMenu;
+            // Make sure the property exists.
+            this.tabMenu.module = module ? module : null;
             ]]></body>
         </method>
     </implementation>
@@ -307,40 +299,49 @@
 
 <binding id="panelTabMenu" display="xul:button" extends="chrome://global/content/bindings/toolbarbutton.xml#toolbarbutton">
     <content>
-        <xul:menupopup anonid="popup"
-                       oncommand="return this.parentNode.onCommand(event)">
-            <xul:menuitem type="radio" value="enable"/>
-            <xul:menuitem type="radio" value="disable"/>
-            <xul:menuitem type="radio" value="enable-site"/>
-            <xul:menuitem type="radio" value="disable-site"/>
-            <xul:menuseparator />
-            <xul:menuitem label="&firebug.Permissions;"
-                          oncommand="this.parentNode.parentNode.openPermissions(event)"/>
-        </xul:menupopup>
+        <xul:menupopup anonid="popup" />
         <xul:image anonid="menuTarget" class="menuTarget"/>
     </content>
     <implementation>
         <constructor>
         <![CDATA[
-           this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
-           this.popup.tooltip
+            this.setAttribute('role', 'menu');
+            this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
         ]]>
         </constructor>
         <field name="value"/>
         <field name="module"/>
-        <method name="onCommand">
-            <parameter name="event"/>
+        <property name="selectedPanel">
+            <getter><![CDATA[
+                var parentNode = this.parentNode;
+                while (parentNode)
+                {
+                    if (parentNode.hasOwnProperty("selectedPanel"))
+                        return parentNode.selectedPanel;
+                    parentNode = parentNode.parentNode;
+                }
+                return null;
+            ]]></getter>
+        </property>
+        <method name="onEnable">
             <body><![CDATA[
-                var menu = event.target;
-                this.module.setHostPermission(FirebugContext, menu.value);
-                if (menu.value.indexOf("disable") == 0)
-                    Firebug.ModuleManagerPage.refresh();
+            if (this.module)
+                this.module.setDefaultState(true);
             ]]></body>
         </method>
-        <method name="openPermissions">
-            <parameter name="event"/>
+        <method name="onDisable">
             <body><![CDATA[
-                this.module.openPermissions(event, FirebugContext);
+            if (this.module)
+                this.module.setDefaultState(false);
+            ]]></body>
+        </method>
+        <method name="optionMenu">
+            <parameter name="label"/>
+            <parameter name="checked"/>
+            <parameter name="command"/>
+            <body><![CDATA[
+            return {label: label, type: "radio", checked: checked,
+                command: FBL.bindFixed(command, this)};
             ]]></body>
         </method>
     </implementation>
@@ -349,23 +350,40 @@
             this.popup.showPopup(this, -1, -1, "popup", "bottomleft", "topleft");
         ]]></handler>
         <handler event="popupshowing"><![CDATA[
-            // XXXjjb getElementsByTagName("xul:menuitem"); fails 2.0.0.16
-            var items = this.popup.getElementsByTagNameNS("http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul","menuitem");
-            var location = FirebugChrome.getBrowserURI(FirebugContext);
-            var value = this.module.getHostPermission(FirebugContext);
+            if (!this.selectedPanel)
+                return false;
 
-            for (var i=0; i<items.length; i++)
+            var items = [];
+
+            // Create menu items for activation. The module is set only for activable modules.
+            if (this.module)
             {
-                var option = items[i].value;
-                if (!option)
-                    continue;
-
-                if (option == value)
-                    items[i].setAttribute("checked", "true");
-
-                items[i].label = this.module.getMenuLabel(option, location);
+                var enabled = this.module.isAlwaysEnabled();
+                items.push(this.optionMenu("panel.Enabled", enabled, this.onEnable));
+                items.push(this.optionMenu("panel.Disabled", !enabled, this.onDisable));
             }
+
+            // Get panel's option items.
+            var panelItems = this.selectedPanel.getOptionsMenuItems(FirebugContext);
+
+            // If the module is disabled, gray out all the options.
+            if (!enabled && this.module)
+            {
+                for (var i = 0; i < panelItems.length; i++)
+                    panelItems[i].disabled = true;
+            }
+
+            if (panelItems.length > 0)
+                items.push("-");
+
+            var menu = FBL.extendArray(items, panelItems);
+            for (var i = 0; i < menu.length; ++i)
+                FBL.createMenuItem(this.popup, menu[i]);
+
             return true;
+        ]]></handler>
+        <handler event="popuphidden"><![CDATA[
+            FBL.eraseNode(this.popup);
         ]]></handler>
     </handlers>
 </binding>
@@ -380,15 +398,20 @@
             <body><![CDATA[
                 if (this.firstChild)
                 {
+                    var box = document.createElement("hbox");  // extra box needed to fix alignment issue in Vista theme
+                    box.setAttribute('role', 'separator');
+                    box.setAttribute('align', 'center');
                     var sep = document.createElement("label");
                     sep.setAttribute("class", "panelStatusSeparator");
                     sep.setAttribute("value", separator);
-                    this.appendChild(sep);
+                    sep.setAttribute('role', 'presentation');
+                    box.appendChild(sep);
+                    this.appendChild(box);
                 }
 
-                var item = document.createElement("label");
+                var item = document.createElement("toolbarbutton");
                 item.setAttribute("class", "panelStatusLabel");
-                item.setAttribute("value", label);
+                item.setAttribute("label", label);
                 item.repObject = object;
                 item.rep = rep;
                 this.appendChild(item);
@@ -442,7 +465,7 @@
     </implementation>
 
     <handlers>
-        <handler event="mousedown" button="0"><![CDATA[
+        <handler event="command" ><![CDATA[
             var object = Firebug.getRepObject(event.target);
             if (object)
             {
@@ -473,12 +496,18 @@
     </handlers>
 </binding>
 
-<binding id="panelFileList" display="xul:menu">
+<binding id="panelFileList" >
+
     <content popup="_child">
+        <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
+            <xul:menupopup anonid="popup" position="after_start"/>
+        </xul:toolbarbutton>
+    <!--
         <xul:label class="toolbarbutton-text"
              xbl:inherits="value=label,tooltip=labeltooltip,contextmenu=labelcontextmenu"/>
         <xul:image class="toolbarbutton-menu-dropmarker"/>
         <xul:menupopup anonid="popup" position="after_start"/>
+    -->
     </content>
 
     <resources>
@@ -493,23 +522,32 @@
 
         <property name="location">
             <getter><![CDATA[
+                if (FBTrace.DBG_LOCATIONS)
+                    FBTrace.sysout("location getter label:"+this.getAttribute('label')+" location: "+this.getAttribute('location'));
                 return this.getAttribute("location");
             ]]></getter>
 
             <setter><![CDATA[
                 var locator = this.getLocator();
-                
+
                 var fileName = null;
                 if (!locator)
+                {
                     fileName = "no locator!";
+                }
                 else if (val)
-                    fileName = locator.getObjectDescription(val).name;
+                {
+                    var description = locator.getObjectDescription(val);
+                    fileName = (description.label?description.label:description.name);
+                }
                 else
                     fileName = "(none)";
-                    
+
                 this.repObject = val;
                 this.setAttribute("label", FBL.cropString(fileName, 80));
                 this.setAttribute("location", val);
+                if (FBTrace.DBG_LOCATIONS)
+                    FBTrace.sysout("location setter label:"+this.getAttribute('label')+" fileName: "+fileName+ " val: "+val);
             ]]></setter>
         </property>
 
@@ -523,11 +561,14 @@
                     else
                     {
                         var whichBinding = this.getAttribute("id");
-                        var msg = "panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
+                        var msg = "ERROR: panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
                         FBTrace.sysout(msg);
                         return null;
                     }
                 }
+                // The locator needs
+                //     getObjectDescription(object): return {path, name}
+                //     getLocationList(), a list of objects that can be fed into getObjectDescription
                 return this.locator(this);
             ]]></body>
         </method>
@@ -644,19 +685,27 @@
             var groupNames = [];
             var groups = {};
 
+            var currentDescription = null;
+            if (this.repObject)
+                currentDescription = locator.getObjectDescription(this.repObject);
+
             for (var i = 0; i < objects.length; ++i)
             {
                 var object = objects[i];
-                var splitName = locator.getObjectDescription(object);
+                var description = locator.getObjectDescription(object);
+                if (!description)
+                    FBTrace.sysout("binding.xml popupshowing Fails" , object);
+                var entry = {object: object, fileName: description.name};
 
-                var entry = {object: object, fileName: splitName.name};
+                if (currentDescription && currentDescription.name == description.name && currentDescription.path == description.path)
+                    entry.selected = true;
 
-                if (groups.hasOwnProperty(splitName.path))
-                    groups[splitName.path].push(entry);
+                if (groups.hasOwnProperty(description.path))
+                    groups[description.path].push(entry);
                 else
                 {
-                    groups[splitName.path] = [entry];
-                    groupNames.push(splitName.path);
+                    groups[description.path] = [entry];
+                    groupNames.push(description.path);
                 }
             }
 
@@ -674,7 +723,8 @@
                 for (var j = 0; j < urls.length; ++j)
                 {
                     var menuInfo = {label: urls[j].fileName, nol10n: true};
-                    if (urls[j].object == locator.location)
+
+                    if (urls[j].selected)
                     {
                         menuInfo.type = "checkbox";
                         menuInfo.checked = true;
@@ -768,6 +818,10 @@
         ]]></handler>
 
         <handler event="keypress" keycode="VK_TAB"><![CDATA[
+            if (this.value == "")
+            {
+                return;
+            }
             Firebug.CommandLine.complete(FirebugContext, FBL.isShift(event));
             event.preventDefault();
         ]]></handler>

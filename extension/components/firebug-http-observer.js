@@ -35,14 +35,14 @@ function HttpRequestObserver()
     this.observers = [];
 }
 
-HttpRequestObserver.prototype = 
+HttpRequestObserver.prototype =
 {
     initialize: function()
     {
         observerService.addObserver(this, "quit-application", false);
         observerService.addObserver(this, "http-on-modify-request", false);
         observerService.addObserver(this, "http-on-examine-response", false);
-        observerService.addObserver(this, "http-on-cached-response", false);
+        observerService.addObserver(this, "http-on-examine-cached-response", false);
 
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.initialize OK");
@@ -71,16 +71,18 @@ HttpRequestObserver.prototype =
             return;
         }
 
-        try 
+        try
         {
-            if (FBTrace.DBG_HTTPOBSERVER) 
-                FBTrace.sysout("httpObserver.observe " + topic + ", " + 
-                    ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+            if (FBTrace.DBG_HTTPOBSERVER)
+            {
+                FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) +
+                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+            }
 
             // Notify all registered observers.
-            if (topic == "http-on-modify-request" || 
+            if (topic == "http-on-modify-request" ||
                 topic == "http-on-examine-response" ||
-                topic == "http-on-cached-response") 
+                topic == "http-on-examine-cached-response")
             {
                 this.notifyObservers(subject, topic, data);
             }
@@ -125,17 +127,17 @@ HttpRequestObserver.prototype =
         return null;
     },
 
-	/* nsISupports */
-	QueryInterface: function(iid) 
-	{
-        if (iid.equals(Ci.nsISupports) || 
+    /* nsISupports */
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService) ||
-			iid.equals(Ci.nsIObserver)) {
- 		    return this;
- 		}
-		
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+            iid.equals(Ci.nsIObserver)) {
+            return this;
+        }
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 }
 
 function safeGetName(request)
@@ -154,7 +156,7 @@ function safeGetName(request)
 // Service factory
 
 var gHttpObserverSingleton = null;
-var HttpRequestObserverFactory = 
+var HttpRequestObserverFactory =
 {
     createInstance: function (outer, iid)
     {
@@ -163,25 +165,25 @@ var HttpRequestObserverFactory =
 
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIObserverService) ||
-			iid.equals(Ci.nsIObserver))
-		{
+            iid.equals(Ci.nsIObserver))
+        {
             if (!gHttpObserverSingleton)
                 gHttpObserverSingleton = new HttpRequestObserver();
             return gHttpObserverSingleton.QueryInterface(iid);
         }
-        
+
         throw Cr.NS_ERROR_NO_INTERFACE;
     },
-    
-	QueryInterface: function(iid) 
-	{
-		if (iid.equals(Ci.nsISupports) ||
-		    iid.equals(Ci.nsISupportsWeakReference) ||
-		    iid.equals(Ci.nsIFactory))
-			return this;
-			
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsISupportsWeakReference) ||
+            iid.equals(Ci.nsIFactory))
+            return this;
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 };
 
 // ************************************************************************************************
@@ -195,7 +197,7 @@ var HttpRequestObserverModule =
         compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
             CONTRACT_ID, fileSpec, location, type);
 
-        categoryManager.addCategoryEntry("app-startup", CLASS_NAME, 
+        categoryManager.addCategoryEntry("app-startup", CLASS_NAME,
             "service," + CONTRACT_ID, true, true);
     },
 

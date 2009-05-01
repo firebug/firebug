@@ -81,3 +81,7 @@
     width: 50%;
 }
 
+.useA11y .focusRow:focus, .useA11y .warning:focus {
+    outline: 2px solid #FF9933;
+    background-color: #FFFFAD;
+}

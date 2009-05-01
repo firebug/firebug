@@ -65,14 +65,18 @@
 }
 
 #fbToolbar {
-    padding-left: 4px;    
+    padding-left: 4px;
     background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
     border-bottom: none;
 }
 
+.innerToolbar {
+    margin-right: 5px;   /* add some space between last button and first tab */
+}
+
 #fbSearchBox {
     -moz-appearance: none;
-    margin: 0 6px 1px 6px;
+    margin: 4px 6px 1px 6px;
     border: none !important;
     padding: 2px 8px 4px 20px;
     background: url(chrome://firebug/skin/mac/searchBox.png) no-repeat;
@@ -97,6 +101,18 @@
 
 .toolbarbutton-iconic > .toolbarbutton-text {
     display: none;
+}
+
+#fbMinimizeButton {
+    list-style-image: url(chrome://firebug/skin/mac/min.png) !important;
+}
+
+#fbMinimizeButton:hover {
+    list-style-image: url(chrome://firebug/skin/mac/minHover.png) !important;
+}
+
+#fbMinimizeButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/mac/minActive.png) !important;
 }
 
 #fbCloseButton {
@@ -156,20 +172,19 @@
     overflow: hidden;
 }
 
+.panelTabs {
+    -moz-box-align: end;
+}
+
 panelTab {
-    margin: 0 1px 0 3px;
+    margin: 2px 1px 0 3px;
     font-size: 11px;
     font-weight: bold;
     color: #565656;
 }
 panelTab:hover,
 panelTab[selected="true"] {
-    margin-bottom: 1px;
-}
-
-panelTab:hover > .panelTab-text,
-panelTab[selected="true"] > .panelTab-text {
-    padding-bottom: 3px;
+    margin-bottom: 0px;
 }
 
 .panelTab-left {
@@ -186,35 +201,35 @@ panelTab[selected="true"] > .panelTab-text {
 }
 
 panelTab:hover > .panelTab-left {
-    background: url(chrome://firebug/skin/mac/tabLeftHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabLeftHover.png) no-repeat top;
 }
 
 panelTab:hover > .panelTab-text {
-    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > panelTabMenu {
-    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > .panelTab-right {
-    background: url(chrome://firebug/skin/mac/tabRightHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabRightHover.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-left {
-    background: url(chrome://firebug/skin/mac/tabLeft.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabLeft.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-text {
-    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > panelTabMenu {
-    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/mac/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > .panelTab-right {
-    background: url(chrome://firebug/skin/mac/tabRight.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/mac/tabRight.png) no-repeat top;
 }
 
 /************************************************************************************************/
@@ -254,7 +269,7 @@ panelTab[selected="true"] > .panelTab-right {
 
 .toolbar-text-button,
 .toolbar-text-menubutton {
-    -moz-appearance: none;    
+    -moz-appearance: none;
     margin: 0 1px;
     padding: 1px 0px 1px 7px;
     min-width: 0;
@@ -319,7 +334,7 @@ panelTab[selected="true"] > .panelTab-right {
 
 .toolbar-text-button .toolbarbutton-text,
 .toolbar-text-menubutton .toolbarbutton-text {
-  font-size: 100% !important; 
+  font-size: 100% !important;
   margin: 0px !important;
 }
 

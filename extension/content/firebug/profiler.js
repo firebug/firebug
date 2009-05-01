@@ -9,24 +9,25 @@ var toggleProfiling = $("fbToggleProfiling");
 
 Firebug.Profiler = extend(Firebug.Module,
 {
+    dispatchName: "profiler",
     showContext: function(browser, context)
     {
         this.setEnabled(context);
     },
 
-    onPanelActivate: function(context, init, panelName)
+    onPanelEnable: function(context, panelName)
     {
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Profiler.onPanelActivate panelName: "+panelName+"\n");
+            FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
 
         if (panelName == "net" || panelName == "script")
             this.setEnabled(context);
     },
 
-    onPanelDeactivate: function(context, init, panelName)
+    onPanelDisable: function(context, panelName)
     {
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("Profiler.onPanelDeactivate panelName: "+panelName+"\n");
+            FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
 
        if (panelName == "net" || panelName == "script")
             this.setEnabled(context);
@@ -35,8 +36,8 @@ Firebug.Profiler = extend(Firebug.Module,
     setEnabled: function(context)
     {
         // The profiler is available only if the debugger (script panel) and console are enabled.
-        var debuggerEnabled = Firebug.Debugger.isEnabled(context);
-        var consoleEnabled = Firebug.Console.isEnabled(context);
+        var debuggerEnabled = Firebug.Debugger.isAlwaysEnabled();
+        var consoleEnabled = Firebug.Console.isAlwaysEnabled();
         toggleProfiling.disabled = !debuggerEnabled || !consoleEnabled;
 
         // Update button's tooltip.
@@ -183,47 +184,47 @@ Firebug.Profiler.ProfileTable = domplate(
         TABLE({class: "profileTable", cellspacing: 0, cellpadding: 0, width: "100%"},
             TBODY({class: "profileTbody"},
                 TR({class: "headerRow", onclick: "$onClick"},
-                    TD({class: "headerCell alphaValue"},
+                    TH({class: "headerCell alphaValue"},
                         DIV({class: "headerCellBox"},
                             $STR("Function")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("CallsHeaderTooltip")},
                             $STR("Calls")
                         )
                     ),
-                    TD({class: "headerCell headerSorted"},
+                    TH({class: "headerCell headerSorted"},
                         DIV({class: "headerCellBox", title: $STR("PercentTooltip")},
                             $STR("Percent")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("OwnTimeHeaderTooltip")},
                             $STR("OwnTime")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("TimeHeaderTooltip")},
                             $STR("Time")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("AvgHeaderTooltip")},
                             $STR("Avg")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("MinHeaderTooltip")},
                             $STR("Min")
                         )
                     ),
-                    TD({class: "headerCell"},
+                    TH({class: "headerCell"},
                         DIV({class: "headerCellBox", title: $STR("MaxHeaderTooltip")},
                             $STR("Max")
                         )
                     ),
-                    TD({class: "headerCell alphaValue"},
+                    TH({class: "headerCell alphaValue"},
                         DIV({class: "headerCellBox"},
                             $STR("File")
                         )

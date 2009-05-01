@@ -2,90 +2,88 @@
 
 //
 FBL.ns(function() { with (FBL) {
+
 // ************************************************************************************************
 // Constants
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const versionChecker = CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
-const appInfo = CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
 
-top.Firebug.Console.injector = {
-
-        isAttached: function(win)   
+top.Firebug.Console.injector =
+{
+    isAttached: function(win)
+    {
+        if (win.wrappedJSObject)
         {
-			if (win.wrappedJSObject)
-			{
-				if (FBTrace.DBG_CONSOLE)
-					FBTrace.sysout("Console.isAttached to win.wrappedJSObject "+win.wrappedJSObject.location+" fnc:"+win.wrappedJSObject._getFirebugConsoleElement);
-				return (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
-			}
-			else
-			{
-				if (FBTrace.DBG_CONSOLE)
-					FBTrace.sysout("Console.isAttached to win "+win.location+" fnc:"+win._getFirebugConsoleElement);
-				return (win._getFirebugConsoleElement ? true : false);
-			}
-        },
-        
-        attachIfNeeded: function(context, win)
-        {
-            if (this.isAttached(win))
-                return true;
-            
-            this.attachConsoleInjector(context, win);
-            this.addConsoleListener(context, win);
-        
-            return this.isAttached(win);
-        },
-        
-        attachConsoleInjector: function(context, win)
-        {
-            var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
-           
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
+                FBTrace.sysout("Console.isAttached? to win.wrappedJSObject "+win.wrappedJSObject.location+" fnc:"+win.wrappedJSObject._getFirebugConsoleElement);
+            return (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
+        }
+        else
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Console.isAttached? to win "+win.location+" fnc:"+win._getFirebugConsoleElement);
+            return (win._getFirebugConsoleElement ? true : false);
+        }
+    },
 
-            Firebug.CommandLine.evaluateInSandbox(consoleInjection, context, null, win);
+    attachIfNeeded: function(context, win)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.attachIfNeeded has win "+(win? ((win.wrappedJSObject?"YES":"NO")+" wrappedJSObject"):"null") );
+
+        if (this.isAttached(win))
+            return true;
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.attachIfNeeded found isAttached false ");
+
+        this.attachConsoleInjector(context, win);
+        this.addConsoleListener(context, win);
+
+        var attached =  this.isAttached(win);
+        if (attached)
+            dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
+
+        return attached;
+    },
+
+    attachConsoleInjector: function(context, win)
+    {
+        var consoleInjection = this.getConsoleInjectionScript();  // Do it all here.
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluating in "+win.location, consoleInjection);
+
+        Firebug.CommandLine.evaluateInWebPage(consoleInjection, context, win);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
+    },
+
+    getConsoleInjectionScript: function() {
+        if (!this.consoleInjectionScript)
+        {
+            var script = "";
+            script += "window.__defineGetter__('console', function() {\n";
+            script += " return (window._firebug ? window._firebug : window.loadFirebugConsole()); })\n\n";
+
+            script += "window.loadFirebugConsole = function() {\n";
+            script += "window._firebug =  new _FirebugConsole();";
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("attachConsoleInjector evaluation completed for "+win.location);
-        },
+                script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
 
-        getConsoleInjectionScript: function() {
-            if (!this.consoleInjectionScript)
-            {
-                var ff3 = versionChecker.compare(appInfo.version, "3.0*") >= 0;
+            script += " return window._firebug };\n";
 
-                // There is a "console" getter defined for FF3.
-                var script = "";
-                if (ff3)
-                {
-                    script += "window.__defineGetter__('console', function() {\n";
-                    script += " return window.loadFirebugConsole(); })\n\n";
-                }
+            var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
+            script += theFirebugConsoleScript;
 
-                script += "window.loadFirebugConsole = function() {\n";
-                script += "window._firebug =  new _FirebugConsole();";
-                // If not ff3 initialize "console" property.
-                if (!ff3)
-                    script += " window.console = window._firebug;\n";
 
-                if (FBTrace.DBG_CONSOLE)
-                	script += " window.dump('loadFirebugConsole '+window.location+'\\n');\n";
-                
-                script += " return window._firebug };\n";
-                
-                var theFirebugConsoleScript = getResource("chrome://firebug/content/consoleInjected.js");
-                script += theFirebugConsoleScript;
-                
-                if (!ff3)
-                    script += " window.loadFirebugConsole();\n";
-                
-                this.consoleInjectionScript = script;
-            }
-            return this.consoleInjectionScript;
-        },
+            this.consoleInjectionScript = script;
+        }
+        return this.consoleInjectionScript;
+    },
 
     forceConsoleCompilationInPage: function(context, win)
     {
@@ -95,16 +93,16 @@ top.Firebug.Console.injector = {
                 FBTrace.dumpStack("no win in forceConsoleCompilationInPage!");                 /*@explore*/
             return;
         }
-        
+
         var consoleForcer = "window.loadFirebugConsole();";
-        
+
         if (context.stopped)
             Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
         else
-            Firebug.CommandLine.evaluateInSandbox(consoleForcer, context, null, win);
-        
-        if (FBTrace.DBG_CONSOLE)    
-        	FBTrace.sysout("forceConsoleCompilationInPage "+win.location, consoleForcer);
+            Firebug.CommandLine.evaluateInWebPage(consoleForcer, context, win);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("forceConsoleCompilationInPage "+win.location, consoleForcer);
     },
 
     evaluateConsoleScript: function(context)
@@ -116,28 +114,28 @@ top.Firebug.Console.injector = {
     addConsoleListener: function(context, win)
     {
         if (!context.activeConsoleHandlers)  // then we have not been this way before
-            context.activeConsoleHandlers = [];  
+            context.activeConsoleHandlers = [];
         else
         {   // we've been this way before...
             for (var i=0; i<context.activeConsoleHandlers.length; i++)
             {
                 if (context.activeConsoleHandlers[i].window == win)
                 {
-                	context.activeConsoleHandlers[i].detach();
+                    context.activeConsoleHandlers[i].detach();
                     if (FBTrace.DBG_CONSOLE)
                         FBTrace.sysout("consoleInjector addConsoleListener removed handler("+context.activeConsoleHandlers[i].handler_name+") from _firebugConsole in : "+win.location+"\n");
                     context.activeConsoleHandlers.splice(i,1);
                 }
-            }   
+            }
         }
-        
+
         // We need the element to attach our event listener.
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
         element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
-        
+
         var handler = new FirebugConsoleHandler(context, win);
         handler.attachTo(element);
-        
+
         context.activeConsoleHandlers.push(handler);
 
         if (FBTrace.DBG_CONSOLE)
@@ -149,21 +147,21 @@ top.Firebug.Console.injector = {
 var total_handlers = 0;
 function FirebugConsoleHandler(context, win)
 {
-	this.window = win;
-	
-	this.attachTo = function(element)
-	{
-		this.element = element;
+    this.window = win;
+
+    this.attachTo = function(element)
+    {
+        this.element = element;
         // When raised on our injected element, callback to Firebug and append to console
-		this.boundHandler = bind(this.handleEvent, this);
+        this.boundHandler = bind(this.handleEvent, this);
         this.element.addEventListener('firebugAppendConsole', this.boundHandler, true); // capturing
-	};
-	
-	this.detach = function()
-	{
-		this.element.removeEventListener('firebugAppendConsole', this.boundHandler, true);
-	};
-	
+    };
+
+    this.detach = function()
+    {
+        this.element.removeEventListener('firebugAppendConsole', this.boundHandler, true);
+    };
+
     this.handler_name = ++total_handlers;
     this.handleEvent = function(event)
     {
@@ -320,7 +318,7 @@ function FirebugConsoleHandler(context, win)
             this.timeCounters = {};
 
         var key = "KEY"+name.toString();
-        
+
         if (!reset && this.timeCounters[key])
             return;
 
@@ -335,7 +333,7 @@ function FirebugConsoleHandler(context, win)
             return;
 
         var key = "KEY"+name.toString();
-        
+
         var timeCounter = this.timeCounters[key];
         if (timeCounter)
         {
@@ -352,27 +350,15 @@ function FirebugConsoleHandler(context, win)
     // These functions are over-ridden by commandLine
     this.evaluated = function(result, context)
     {
-    	if (FBTrace.DBG_CONSOLE)
-    		FBTrace.sysout("consoleInjector.FirebugConsoleHandler evalutated default called", result);
-    	
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector.FirebugConsoleHandler evalutated default called", result);
+
         Firebug.Console.log(result, context);
     };
     this.evaluateError = function(result, context)
     {
         Firebug.Console.log(result, context, "errorMessage");
     };
-
-/*
-    this.addTab = function(url, title, parentPanel)
-    {
-        context.chrome.addTab(context, url, title, parentPanel);
-    };
-
-    this.removeTab = function(url)
-    {
-        context.chrome.removeTab(context, url);
-    };
-*/
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -413,14 +399,14 @@ function FirebugConsoleHandler(context, win)
         // Starting with our stack, walk back to the user-level code
         var frame = Components.stack;
         var userURL = win.location.href.toString();
-        
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getComponentsStackDump initial stack for userURL "+userURL, frame);
 
         // Drop frames until we get into user code.
         while (frame && FBL.isSystemURL(frame.filename) )
             frame = frame.caller;
- 
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
 
@@ -441,7 +427,11 @@ function FirebugConsoleHandler(context, win)
         {
             var bottom = frames.length - 1;
             for (var i = 0; i < frames.length; i++)
+            {
                 if (frames[bottom - i].href.indexOf("chrome:") == 0) break;
+                var fn = frames[bottom - i].fn + "";
+                if (fn && (fn.indexOf("_firebugEvalEvent") != -1) ) break;
+            }
 
             trace.frames = trace.frames.slice(bottom - i + 1);
             return trace;

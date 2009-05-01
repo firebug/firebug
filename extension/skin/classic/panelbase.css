@@ -273,7 +273,7 @@ h1.groupHeader {
 
 /************************************************************************************************/
 
-.moduleManagerBox {
+.disabledPanelBox {
     width: 100%;
     position: relative;
     padding: 10px 10px 0px 90px;
@@ -282,72 +282,49 @@ h1.groupHeader {
     font: message-box;
 }
 
-.moduleManagerLink:hover {
+.disabledPanelLink:hover {
     text-decoration: underline;
     cursor: pointer;
 }
 
-.moduleManagerDescription {
+.disabledPanelDescription {
     margin: 8px 0;
     font-size: 13px;
     width: 75%;
 }
 
-.moduleManagerRow {
-    margin: 5px 0;
-    font-size: 13px;
+.disabledPanelDescription.applyDesc{
+    font-size: 11px;
+    color: gray;
 }
 
-.moduleManagerRow td {
-    vertical-align:middle;
+.disabledPanelApplyButton .host {
+    color: blue;
 }
 
-.moduleManagerBox table {
-    border: solid 1px Gray;
+.disabledPanelDescription img {
+    margin-top: 5px; 
+    margin-left: 0; 
+    margin-bottom: 5px; 
+    vertical-align: middle;
 }
 
-.moduleManagerRow span {
-    margin: 1em;
+.useA11y .textEditorInner:focus {
+    outline: 2px solid #FF9933;
 }
 
-.moduleManagerRow button {
-    margin-left: 4em;
-    margin-right: 1em;
+.useA11y .a11yFocusNoTab:focus {
+    outline: 2px solid #FF9933;
+    background-color: #FFFFAD;
 }
+
+.offScreen {
+    position: absolute;
+    left: -10000px;
+    top: -100000px;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    }
 
 /************************************************************************************************/
-
-.activableModuleTable {
-    border: 0 !important;
-    font-size: 13px;
-    border-top: 1px solid threedlightshadow !important;    
-    margin:8px;
-}
-
-.activableModuleCell {
-    padding: 0 20px 0 0;
-    border-bottom: 1px solid threedlightshadow !important;    
-}
-
-.activableModuleRow:hover {
-    background-color: #EFEFEF;
-}
-
-.panelDisabled {
-    color:gray !important;
-}
-    
-.activableModuleState {
-    padding: 0 5px 0 20px;
-}
-
-.activableModuleName {
-    padding-right:20px;    
-    font-weight:bold;
-}
-
-.activableModuleName:hover {
-    text-decoration:underline;
-    color:Blue;
-    cursor: pointer;
-}

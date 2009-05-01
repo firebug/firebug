@@ -6,10 +6,6 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 const Cc = Components.classes;
-const Ci = Components.interfaces;
-const nsIDOMNodeFilter = Ci.nsIDOMNodeFilter;
-
-const SHOW_ALL = nsIDOMNodeFilter.SHOW_ALL;
 
 const MODIFICATION = MutationEvent.MODIFICATION;
 const ADDITION = MutationEvent.ADDITION;
@@ -22,6 +18,22 @@ var AttrTag =
     );
 
 // ************************************************************************************************
+
+Firebug.HTMLModule = extend(Firebug.Module,
+{
+    deleteNode: function(node, context)
+    {
+        dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
+        node.parentNode.removeChild(node);
+        dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
+    },
+    deleteAttribute: function(node, attr, context)
+    {
+        dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
+        node.removeAttribute(attr);
+        dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
+    }
+});
 
 Firebug.HTMLPanel = function() {};
 
@@ -74,7 +86,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         else if (dir == "down")
             this.selectNext();
         else if (dir == "left")
-            this.ioBox.contractObject(this.selection);
+        {
+            var box = this.ioBox.createObjectBox(this.selection);
+            if (!hasClass(box, "open"))
+                this.select(this.ioBox.getParentObjectBox(box).repObject);
+            else
+                this.ioBox.contractObject(this.selection);
+        }
         else if (dir == "right")
             this.ioBox.expandObject(this.selection);
     },
@@ -109,9 +127,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     deleteAttribute: function(elt, attrName)
     {
-        elt.removeAttribute(attrName);
-
-        //this.markChange();
+        Firebug.HTMLModule.deleteAttribute(elt, attrName, this.context);
     },
 
     editNode: function(node)
@@ -134,9 +150,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     deleteNode: function(node)
     {
-        node.parentNode.removeChild(node);
-
-        //this.markChange();
+        Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -158,7 +172,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         else
         {
             var text = getSourceText(node);
-            lines = text.split(/\r\n|\r|\n/);
+            lines = splitLines(text);
         }
 
         var sourceElt = new SourceText(lines, node);
@@ -620,6 +634,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         this.panelNode.addEventListener("click", this.onClick, false);
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
+        dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
     },
 
     destroyNode: function()
@@ -633,6 +648,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.ioBox.destroy();
             delete this.ioBox;
         }
+        dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
     },
 
     show: function(state)
@@ -797,9 +813,16 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             }
         }
         else if (Firebug.Inspector.inspecting)
+        {
             this.ioBox.highlight(object);
+        }
         else
+        {
             this.ioBox.select(object, true, false, this.noScrollIntoView);
+            this.inspectorHistory.unshift(object);
+            if (this.inspectorHistory.length > 5)
+                this.inspectorHistory.pop();
+        }
     },
 
     stopInspecting: function(object, cancelled)
@@ -809,7 +832,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             // Manage history of selection for later access in the command line.
             this.inspectorHistory.unshift(object);
             if (this.inspectorHistory.length > 5)
-                this.inspectorHistory.pop();            
+                this.inspectorHistory.pop();
 
             if (FBTrace.DBG_HTML)
                 FBTrace.dumpProperties("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
@@ -821,7 +844,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.ioBox.select(object, true);
     },
 
-    search: function(text)
+    search: function(text, reverse)
     {
         var search;
         if (text == this.searchText && this.lastSearch)
@@ -832,11 +855,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             search = this.lastSearch = new NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
-        var loopAround = search.find();
+        var loopAround = search.find(reverse, Firebug.searchCaseSensitive);
         if (loopAround)
         {
             this.resetSearch();
-            this.search(text);
+            this.search(text, reverse);
         }
 
         return !search.noMatch;
@@ -970,7 +993,16 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
             return this.textEditor;
         }
-    }
+    },
+
+    getInspectorVars: function()
+    {
+        var vars = {};
+        for (var i=0; i<2; i++)
+            vars["$"+i] = this.inspectorHistory[i];
+
+        return vars;
+    },
 });
 
 // ************************************************************************************************
@@ -978,21 +1010,21 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox open $object|getHidden repIgnore", _repObject: "$object"},
+        DIV({class: "nodeBox open $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
             DIV({class: "nodeLabel"},
-                SPAN({class: "nodeLabelBox repTarget repTarget"},
+                SPAN({class: "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({class: "nodeBracket"}, "&gt;")
                 )
             ),
-            DIV({class: "nodeChildBox"},
+            DIV({class: "nodeChildBox", role :"group"},
                 FOR("child", "$object|childIterator",
                     TAG("$child|getNodeTag", {object: "$child"})
                 )
             ),
-            DIV({class: "nodeCloseLabel"},
+            DIV({class: "nodeCloseLabel", role:"presentation"},
                 "&lt;/",
                 SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
                 "&gt;"
@@ -1048,18 +1080,18 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object"},
+        DIV({class: "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
             DIV({class: "nodeLabel"},
-                IMG({class: "twisty"}),
-                SPAN({class: "nodeLabelBox repTarget"},
+                IMG({class: "twisty", role: "presentation"}),
+                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({class: "nodeBracket editable insertBefore"}, "&gt;")
                 )
             ),
-            DIV({class: "nodeChildBox"}),
-            DIV({class: "nodeCloseLabel"},
+            DIV({class: "nodeChildBox", role :"group"}),
+            DIV({class: "nodeCloseLabel", role : "presentation"},
                 SPAN({class: "nodeCloseLabelBox repTarget"},
                     "&lt;/",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
@@ -1072,9 +1104,9 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object"},
+        DIV({class: "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
             DIV({class: "nodeLabel"},
-                SPAN({class: "nodeLabelBox repTarget"},
+                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -1091,9 +1123,9 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object"},
+        DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
             DIV({class: "nodeLabel"},
-                SPAN({class: "nodeLabelBox repTarget"},
+                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
@@ -1255,8 +1287,6 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
     hide: function()
     {
         var chrome = this.panel.context.chrome;
-        if (!chrome)
-            chrome = FirebugChrome;
 
         var command = chrome.$("cmd_toggleHTMLEditing");
         command.setAttribute("checked", false);
@@ -1479,29 +1509,34 @@ function getTextElementTextBox(nodeBox)
     return getChildByClass(nodeLabelBox, "nodeText");
 }
 
+function findElementNameBox(objectNodeBox)
+{
+    return objectNodeBox.getElementsByClassName("nodeTag")[0];
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function NodeSearch(text, doc, panelNode, ioBox)
 {
-    var walker;
-    var re = new RegExp(text, "i");
+    var walker = new DOMWalker(doc, doc.documentElement);
+    var re = new ReversibleRegExp(text, "m");
     var matchCount = 0;
 
-    this.find = function()
+    this.find = function(reverse, caseSensitive)
     {
-        var match = this.findNextMatch();
+        var match = this.findNextMatch(reverse, caseSensitive);
         if (match)
         {
             this.lastMatch = match;
             ++matchCount;
 
-            var node = match[0];
-            var nodeBox = this.openToNode(node, match[2]);
+            var node = match.node;
+            var nodeBox = this.openToNode(node, match.isValue);
 
             setTimeout(bindFixed(function()
             {
-                this.selectNodeText(nodeBox, node, text, match[4]);
+                var reMatch = match.match;
+                this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
             }, this));
         }
         else if (matchCount)
@@ -1516,111 +1551,102 @@ function NodeSearch(text, doc, panelNode, ioBox)
         delete this.lastRange;
     };
 
-    this.findNextMatch = function()
+    this.findNextMatch = function(reverse, caseSensitive)
     {
-        var firstTime = !walker;
-        if (!walker)
-            walker = doc.createTreeWalker(doc.documentElement, SHOW_ALL, null, true);
 
-        var innerMatch = this.findNextInnerMatch();
+        var innerMatch = this.findNextInnerMatch(reverse, caseSensitive);
         if (innerMatch)
             return innerMatch;
         else
             this.reset();
 
-        var node = firstTime ? walker.root : walker.nextNode();
-        for (; node; node = walker.nextNode())
+        function walkNode() { return reverse ? walker.previousNode() : walker.nextNode(); }
+
+        var node;
+        while (node = walkNode())
         {
-            if (node.nodeType == 3)
+            if (node.nodeType == Node.TEXT_NODE)
             {
                 if (isSourceElement(node.parentNode))
                     continue;
-
-                var m = re.exec(node.nodeValue);
-                if (m)
-                    return [node, -1, false, m, m.index];
             }
-            else if (node.nodeType == 1)
-            {
-                var m = re.exec(node.nodeName);
-                if (m)
-                    return [node, -1, false, m, m.index];
 
-                var attrMatch = this.findNextAttribute(node, -1);
-                if (attrMatch)
-                    return attrMatch;
-            }
+            var m = this.checkNode(node, reverse, caseSensitive);
+            if (m)
+                return m;
         }
     };
 
-    this.findNextAttribute = function(node, index, startWithValue)
-    {
-        var attrs = node.attributes;
-        if (startWithValue)
-        {
-            var attr = attrs[index];
-            m = re.exec(attr.nodeValue);
-            if (m)
-                return [attr, index, true, m, m.index];
-        }
-
-        for (var i = index+1; i < attrs.length; ++i)
-        {
-            var attr = attrs[i];
-
-            m = re.exec(attr.nodeName);
-            if (m)
-                return [attr, i, false, m, m.index];
-
-            m = re.exec(attr.nodeValue);
-            if (m)
-                return [attr, i, true, m, m.index];
-        }
-    };
-
-    this.findNextInnerMatch = function()
+    this.findNextInnerMatch = function(reverse, caseSensitive)
     {
         if (this.lastRange)
         {
-            var lastMatchNode = this.lastMatch[0];
-
-            var lastReMatch = this.lastMatch[3];
-            var subText = lastReMatch.input.substr(lastReMatch.index+text.length);
-            var m = re.exec(subText);
+            var lastMatchNode = this.lastMatch.node;
+            var lastReMatch = this.lastMatch.match;
+            var m = re.exec(lastReMatch.input, reverse, lastReMatch.caseSensitive, lastReMatch);
             if (m)
             {
-                var startIndex = this.lastMatch[4]+text.length+m.index;
-                var nodeText = this.lastRange.startContainer.nodeValue;
-                if (startIndex+text.length < nodeText.length)
-                    return [lastMatchNode, this.lastMatch[1], this.lastMatch[2], m, startIndex];
+                return {
+                    node: lastMatchNode,
+                    isValue: this.lastMatch.isValue,
+                    match: m
+                };
             }
-            else if (lastMatchNode.nodeType == 1)
-                return this.findNextAttribute(lastMatchNode, -1);
-            else if (lastMatchNode.nodeType == 2)
-                return this.findNextAttribute(lastMatchNode.ownerElement, this.lastMatch[1],
-                     !this.lastMatch[2]);
+
+            // May need to check the pair for attributes
+            if (lastMatchNode.nodeType == Node.ATTRIBUTE_NODE
+                    && this.lastMatch.isValue == reverse)
+            {
+                return this.checkNode(lastMatchNode, reverse, caseSensitive, 1);
+            }
+        }
+    };
+
+    this.checkNode = function(node, reverse, caseSensitive, firstStep)
+    {
+        var checkOrder;
+        if (node.nodeType != Node.TEXT_NODE)
+        {
+            var nameCheck = { name: "nodeName", isValue: false, caseSensitive: false };
+            var valueCheck = { name: "nodeValue", isValue: true, caseSensitive: caseSensitive };
+            checkOrder = reverse ? [ valueCheck, nameCheck ] : [ nameCheck, valueCheck ];
+        }
+        else
+        {
+            checkOrder = [{name: "nodeValue", isValue: false, caseSensitive: caseSensitive }];
+        }
+
+        for (var i = firstStep || 0; i < checkOrder.length; i++) {
+            var m = re.exec(node[checkOrder[i].name], reverse, checkOrder[i].caseSensitive);
+            if (m)
+                return {
+                    node: node,
+                    isValue: checkOrder[i].isValue,
+                    match: m
+                };
         }
     };
 
     this.openToNode = function(node, isValue)
     {
-        if (node.nodeType == 1)
+        if (node.nodeType == Node.ELEMENT_NODE)
         {
-            return ioBox.openToObject(node);
+            var nodeBox = ioBox.openToObject(node);
+            return findElementNameBox(nodeBox);
         }
-        else if (node.nodeType == 2)
+        else if (node.nodeType == Node.ATTRIBUTE_NODE)
         {
-            var nodeBox = this.openToNode(node.ownerElement);
+            var nodeBox = ioBox.openToObject(node.ownerElement);
             if (nodeBox)
             {
                 var attrNodeBox = findNodeAttrBox(nodeBox, node.nodeName);
                 if (isValue)
                     return getChildByClass(attrNodeBox, "nodeValue");
                 else
-                    return attrNodeBox;
+                    return getChildByClass(attrNodeBox, "nodeName");
             }
         }
-        else if (node.nodeType == 3)
+        else if (node.nodeType == Node.TEXT_NODE)
         {
             var nodeBox = ioBox.openToObject(node);
             if (nodeBox)
@@ -1635,7 +1661,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
         }
     };
 
-    this.selectNodeText = function(nodeBox, node, text, index)
+    this.selectNodeText = function(nodeBox, node, text, index, reverse, caseSensitive)
     {
         var row, range;
 
@@ -1656,7 +1682,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
             // Search for the first instance of the string inside the node
             function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
             var search = new TextSearch(nodeBox, findRow);
-            row = this.lastRow = search.find(text);
+            row = this.lastRow = search.find(text, reverse, caseSensitive);
             range = this.lastRange = search.range;
             this.lastNodeBox = nodeBox;
         }

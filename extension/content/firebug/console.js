@@ -9,7 +9,7 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(nsIPrefBranch2);
 
 // ************************************************************************************************
- 
+
 var maxQueueRequests = 500;
 
 // ************************************************************************************************
@@ -46,7 +46,6 @@ Firebug.ConsoleBase =
             if (panel)
             {
                 var row = panel.append(appender, objects, className, rep, sourceLink, noRow);
-
                 var container = panel.panelNode;
                 var template = Firebug.NetMonitor.NetLimit;
 
@@ -56,7 +55,7 @@ Firebug.ConsoleBase =
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
                 }
-
+                dispatch([Firebug.A11yModel], "onLogRowCreated", [panel , row]);
                 return row;
             }
         }
@@ -82,7 +81,7 @@ Firebug.ConsoleBase =
             context = FirebugContext;
 
         if (context)
-        	Firebug.Errors.clear(context);
+            Firebug.Errors.clear(context);
 
         var panel = this.getPanel(context, true);
         if (panel)
@@ -101,6 +100,7 @@ var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
 Firebug.Console = extend(ActivableConsole,
 {
+    dispatchName: "console",
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
@@ -116,15 +116,15 @@ Firebug.Console = extend(ActivableConsole,
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element");
             var elementForcer = "var r=null; try { r = window._getFirebugConsoleElement();}catch(exc){r=exc;} r;";  // we could just add the elements here
-            
+
             if (context.stopped)
                 Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
             else
-                var r = Firebug.CommandLine.evaluateInSandbox(elementForcer, context, null, win);
-            
+                var r = Firebug.CommandLine.evaluateInWebPage(elementForcer, context, win);
+
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element result ", r);
-            
+
             var element = win.document.getElementById("_firebugConsole");
             if (!element) // elementForce fails
             {
@@ -132,35 +132,36 @@ Firebug.Console = extend(ActivableConsole,
                 Firebug.Console.logFormatted(["Firebug cannot find _firebugConsole element", r, win], context, "error", true);
             }
         }
-        
+
         return element;
     },
-    
-    isReadyElsePreparing: function(context, win) 
+
+    isReadyElsePreparing: function(context, win)
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.isReadyElsePreparing "+(win?win.location:context.window.location), (win?win:context.window));
-        
+            FBTrace.sysout("console.isReadyElsePreparing, win is "+(win?"an argument: ":"null, context.window: ")+(win?win.location:context.window.location), (win?win:context.window));
+
         if (win)
             return this.injector.attachIfNeeded(context, win);
         else
         {
-        	var attached = true;
+            var attached = true;
             for (var i = 0; i < context.windows.length; i++)
                 attached = attached && this.injector.attachIfNeeded(context, context.windows[i]);
             // already in the list above attached = attached && this.injector.attachIfNeeded(context, context.window);
             if (context.windows.indexOf(context.window) == -1)
-            	FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
+                FBTrace.sysout("isReadyElsePreparing ***************** context.window not in context.windows");
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("console.isReadyElsePreparing attached to "+context.windows.length+" and returns "+attached);
             return attached;
         }
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
     initialize: function()
     {
         this.panelName = "console";
-        this.description = $STR("console.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
@@ -189,24 +190,7 @@ Firebug.Console = extend(ActivableConsole,
         var container = panel.panelNode;
         container.insertBefore(nodes[0], container.firstChild);
     },
-/*
-    watchWindow: function(context, win)
-    {
-        if (this.isEnabled(context))
-        {
-            this.injector.attachConsoleInjector(context, win);
-            this.injector.addConsoleListener(context, win); 
-        }
 
-        if (FBTrace.DBG_CONSOLE)                                                                                        
-        {                                                                                                              
-            if (win.wrappedJSObject._firebug)                                                                                           
-                FBTrace.sysout("firebug.watchWindow created win._firebug for "+win.location+"\n");          
-            else                                                                                                       
-                FBTrace.sysout("firebug.watchWindow did NOT create win._firebug for "+win.location+"\n");  
-        }                                                                                                               
-    },
-*/
     showContext: function(browser, context)
     {
         if (browser)
@@ -217,59 +201,70 @@ Firebug.Console = extend(ActivableConsole,
 
     // -----------------------------------------------------------------------------------------------------
 
-    onFirstPanelActivate: function(context, init)
+    onPanelEnable: function(context, panelName)
     {
-        Firebug.Errors.startObserving();
-    },
-
-    onPanelActivate: function(context, init, panelName)
-    {
-        if (panelName != this.panelName)  // no cross panel work needed
+        if (panelName != this.panelName)  // we don't care about other panels
             return;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onPanelActivate**************> activeContexts: "+this.activeContexts.length+"\n");
+            FBTrace.sysout("console.onPanelEnable**************");
 
-        if (!init)
-            context.window.location.reload();
+        $('fbStatusIcon').setAttribute("console", "on");
+        Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
+
+        // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
+        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
+        {
+            setTimeout(function()
+            {
+                Firebug.Console.log("'Show XMLHttpRequests' option (Console panel) is disabled " +
+                    "in Firefox 3.1 and higher till bug #483672 is fixed."); 
+            });
+        }
     },
 
-    onLastPanelDeactivate: function(context, destroy)
+    onPanelDisable: function(context, panelName)
     {
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onLastPanelDeactivate**************> activeContexts: "+this.activeContexts.length+"\n");
-        // last one out, turn off error observer
-        Firebug.Errors.stopObserving();
+        if (panelName != this.panelName)  // we don't care about other panels
+            return;
+
+        Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
+        $('fbStatusIcon').removeAttribute("console");
     },
 
     onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
-        Firebug.Errors.stopObserving();  // safe for multiple calls
+        Firebug.Errors.stopObserving();
+        $('fbStatusIcon').removeAttribute("console");
     },
 
     onResumeFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
-        if (this.isEnabled(context))
-            Firebug.Errors.startObserving(); // safe for multiple calls
+        if (Firebug.Console.isAlwaysEnabled())
+        {
+            Firebug.Errors.startObserving();
+            $('fbStatusIcon').setAttribute("console", "on");
+        }
     },
+
     // ----------------------------------------------------------------------------------------------------
     // Firebug.Debugger listener
-    
+
     onMonitorScript: function(context, frame)
     {
-    	Firebug.Console.log(frame, context);
+        Firebug.Console.log(frame, context);
     },
 
     onFunctionCall: function(context, frame, depth, calling)
     {
-    	if (calling) 
-    		Firebug.Console.openGroup([frame, "depth:"+depth], context);
-    	else
-    		Firebug.Console.closeGroup(context);
+        if (calling)
+            Firebug.Console.openGroup([frame, "depth:"+depth], context);
+        else
+            Firebug.Console.closeGroup(context);
     },
 
     // ----------------------------------------------------------------------------------------------------
@@ -280,7 +275,7 @@ Firebug.Console = extend(ActivableConsole,
 
         if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
 
-        if (this.isEnabled(context))
+        // if (this.isEnabled(context)) XXXjjb I don't think we should test this every time
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     }
 });
@@ -300,7 +295,7 @@ Firebug.ConsoleListener =
 
 Firebug.ConsolePanel = function () {} // XXjjb attach Firebug so this panel can be extended.
 
-Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
+Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 {
     wasScrolledToBottom: true,
     messageCount: 0,
@@ -421,15 +416,17 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
         setClass(row, "opened");
 
         var innerRow = this.createRow("logRow");
+        setClass(innerRow, "logGroupLabel");
         if (rep)
             rep.tag.replace({"objects": objects}, innerRow);
         else
             this.appendFormatted(objects, innerRow, rep);
         row.appendChild(innerRow);
-
+        innerRow.setAttribute('aria-expanded', 'true');
+        dispatch([Firebug.A11yModel], 'onLogRowCreated', [this, innerRow]);
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);
-
+        groupBody.setAttribute('role', 'group');
         this.groups.push(groupBody);
 
         innerRow.addEventListener("mousedown", function(event)
@@ -438,9 +435,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
             {
                 var groupRow = event.currentTarget.parentNode;
                 if (hasClass(groupRow, "opened"))
+                {
                     removeClass(groupRow, "opened");
+                    event.target.setAttribute('aria-expanded', 'false');
+                }
                 else
+                {
                     setClass(groupRow, "opened");
+                    event.target.setAttribute('aria-expanded', 'true');
+                }
             }
         }, false);
     },
@@ -460,51 +463,74 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
 
     initialize: function()
     {
-        Firebug.Panel.initialize.apply(this, arguments);
+        Firebug.ActivablePanel.initialize.apply(this, arguments);
 
         // Initialize log limit and listen for changes.
         this.updateMaxLimit();
         prefs.addObserver(Firebug.prefDomain, this, false);
     },
+    
+    initializeNode : function()
+    {
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
+    },
+    
+    destroyNode : function()
+    {
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
+    },
 
-    shutdown: function() {
+    shutdown: function()
+    {
         prefs.removeObserver(Firebug.prefDomain, this, false);
     },
 
     show: function(state)
     {
-        // The "enable/disable" button is always visible.
-        this.showToolbarButtons("fbConsoleButtons", true); // TODO, only enable/disable menu here
-                                                   /*@explore*/
-        // The default page with description and enable button is
-        // visible only if debugger is disabled.
-        var enabled = Firebug.Console.isEnabled(this.context);
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel show enabled:"+ enabled+"\n");
+        var enabled = Firebug.Console.isAlwaysEnabled();
         if (enabled)
         {
-            Firebug.ModuleManagerPage.hide(this);
-
-            FirebugContext.chrome.$("fbCommandBox").collapsed = false;
-            if (Firebug.largeCommandLine)
-                Firebug.CommandLine.setMultiLine(true);
-
-            if (this.wasScrolledToBottom)
-                scrollToBottom(this.panelNode);
+             Firebug.Console.disabledPanelPage.hide(this);
+             this.showCommandLine(true);
+             this.showToolbarButtons("fbConsoleButtons", true);
         }
         else
         {
-            Firebug.CommandLine.setMultiLine(false);
-            FirebugContext.chrome.$("fbCommandBox").collapsed = true;
-
-            Firebug.ModuleManagerPage.show(this, Firebug.Console);
+            this.hide();
+            Firebug.Console.disabledPanelPage.show(this);
         }
+    },
+
+    enablePanel: function(module)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.ConsolePanel.enablePanel; " + this.context.getName());
+
+        Firebug.ActivablePanel.enablePanel.apply(this, arguments);
+
+        this.showCommandLine(true);
+
+        if (this.wasScrolledToBottom)
+            scrollToBottom(this.panelNode);
+    },
+
+    disablePanel: function(module)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.ConsolePanel.disablePanel; " + this.context.getName());
+
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+
+        this.showCommandLine(false);
     },
 
     hide: function()
     {
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("Console.panel hide\n");                                               /*@explore*/
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("Console.panel hide\n");
 
         this.showToolbarButtons("fbConsoleButtons", false);
+        this.showCommandLine(false);
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
     },
 
@@ -515,7 +541,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
             optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
             optionMenu("ShowCSSErrors", "showCSSErrors"),
             optionMenu("ShowXMLErrors", "showXMLErrors"),
-            optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
+            this.xhrSpyOptionMenu(),
             optionMenu("ShowChromeErrors", "showChromeErrors"),
             optionMenu("ShowChromeMessages", "showChromeMessages"),
             optionMenu("ShowExternalErrors", "showExternalErrors"),
@@ -526,10 +552,26 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
         ];
     },
 
+    xhrSpyOptionMenu: function()
+    {
+        var option = optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests");
+
+        // XHR Spy is disabled in in Firefox > 3.1 till #483672 is fixed.
+        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
+        {
+            option.disabled = true;
+            option.checked = false;
+            option.tooltiptext = "This option is disabled in Firefox 3.1 and higher till " + 
+                "bug #483672 is fixed.";
+        }
+
+        return option;
+    },
+
     getShowStackTraceMenuItem: function()
     {
         var menuItem = serviceOptionMenu("ShowStackTrace", "showStackTrace");
-        if (FirebugContext && !Firebug.Debugger.isEnabled(FirebugContext))
+        if (FirebugContext && !Firebug.Debugger.isAlwaysEnabled())
             menuItem.disabled = true;
         return menuItem;
     },
@@ -649,7 +691,27 @@ Firebug.ConsolePanel.prototype = extend(Firebug.AblePanel,
     {
         var value = Firebug.getPref(Firebug.prefDomain, "console.logLimit");
         maxQueueRequests =  value ? value : maxQueueRequests;
-    }
+    },
+
+    showCommandLine: function(shouldShow)
+    {
+        if (shouldShow)
+        {
+            this.context.chrome.$("fbCommandBox").collapsed = false;
+            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, this.context.chrome);
+        }
+        else
+        {
+            if (this.context.chrome)
+            {
+                // Make sure that entire content of the Console panel is hidden when
+                // the panel is disabled.
+                Firebug.CommandLine.setMultiLine(false, this.context.chrome);
+                this.context.chrome.$("fbCommandBox").collapsed = true;
+            }
+            // else the context is not setup, ok we aren't showing it.
+        }
+    },
 });
 
 // ************************************************************************************************

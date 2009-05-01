@@ -25,6 +25,7 @@ var popupHighlighter = null;
 
 Firebug.Inspector = extend(Firebug.Module,
 {
+    dispatchName: "inspector",
     inspecting: false,
 
     highlightObject: function(element, context, highlightType, boxFrame)
@@ -96,7 +97,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.previousObject = htmlPanel.selection;
 
         if (context.detached)
-            FirebugChrome.focus();
+            context.chrome.focus();
         else
             Firebug.showBar(true);
 
@@ -223,8 +224,6 @@ Firebug.Inspector = extend(Firebug.Module,
             return;
 
         var chrome = context.chrome;
-        if (!chrome)
-            chrome = FirebugChrome;
 
         this.keyListeners =
         [
@@ -249,8 +248,6 @@ Firebug.Inspector = extend(Firebug.Module,
             return;
 
         var chrome = context.chrome;
-        if (!chrome)
-            chrome = FirebugChrome;
 
         if (this.keyListeners)  // XXXjjb for some reason this is null some times.
         {

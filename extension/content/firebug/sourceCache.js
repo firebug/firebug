@@ -26,24 +26,23 @@ const NS_BINDING_ABORTED = 0x804b0002;
 
 // ************************************************************************************************
 
-Firebug.SourceCache = function(window, context)
+Firebug.SourceCache = function(context)
 {
-    this.window = window;
     this.context = context;
     this.cache = {};
 };
 
-Firebug.SourceCache.prototype =
+Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 {
-	isCached: function(url)
-	{
-		return this.cache.hasOwnProperty(url);
-	},
-	
+    isCached: function(url)
+    {
+        return this.cache.hasOwnProperty(url);
+    },
+
     loadText: function(url, method, file)
     {
         var lines = this.load(url, method, file);
-        return lines ? lines.join("\n") : null;
+        return lines ? lines.join("") : null;
     },
 
     load: function(url, method, file)
@@ -56,7 +55,7 @@ Firebug.SourceCache.prototype =
         {
             var src = d.encodedContent;
             var data = decodeURIComponent(src);
-            var lines = data.split(/\r\n|\r|\n/);
+            var lines = splitLines(data)
             this.cache[url] = lines;
 
             return lines;
@@ -66,7 +65,7 @@ Firebug.SourceCache.prototype =
         if (j)
         {
             var src = url.substring(FBL.reJavascript.lastIndex);
-            var lines = src.split(/\r\n|\r|\n/);
+            var lines = splitLines(src);
             this.cache[url] = lines;
 
             return lines;
@@ -76,23 +75,23 @@ Firebug.SourceCache.prototype =
         if (c)
         {
             if (Firebug.filterSystemURLs)
-                return;  // ignore chrome
+                return ["Filtered chrome url "+url];  // ignore chrome
 
-            var chromeURI = ioService.newURI(url, null, null);
+            var chromeURI = makeURI(url);
             var localURI = chromeReg.convertChromeURL(chromeURI);
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
             return this.loadFromLocal(localURI.spec);
-        } 
-         
+        }
+
         c = FBL.reFile.test(url);
         if (c)
         {
-        	return this.loadFromLocal(url);
+            return this.loadFromLocal(url);
         }
 
-        // Unfortunately, the URL isn't available so, let's try to use FF cache. 
-        // Notice that additional network request to the server can be made in 
+        // Unfortunately, the URL isn't available so, let's try to use FF cache.
+        // Notice that additional network request to the server can be made in
         // this method (double-load).
         return this.loadFromCache(url, method, file);
     },
@@ -103,17 +102,17 @@ Firebug.SourceCache.prototype =
         var src = getResource(url);
         if (src)
         {
-        	var lines = src.split(/\r\n|\r|\n/);
+            var lines = splitLines(src);
             this.cache[url] = lines;
 
             return lines;
-        }  
+        }
     },
-    
+
     loadFromCache: function(url, method, file)
     {
-    	if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.loadFromCache url:"+url);                                             /*@explore*/
-        
+        if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.loadFromCache url:"+url);                                             /*@explore*/
+
         var doc = this.context.window.document;
         if (doc)
             var charset = doc.characterSet;
@@ -198,7 +197,7 @@ Firebug.SourceCache.prototype =
         try
         {
             var data = readFromStream(stream, charset);
-            var lines = data.split(/\r\n|\r|\n/);
+            var lines = splitLines(data);
             this.cache[url] = lines;
             return lines;
         }
@@ -217,16 +216,33 @@ Firebug.SourceCache.prototype =
     store: function(url, text)
     {
         if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
-            FBTrace.sysout("sourceCache for window="+this.window.location.href+" store url="+url+"\n");        /*@explore*/
-        var lines = splitLines(text);
+            FBTrace.sysout("sourceCache for "+this.context.getName()+" store url="+url+"\n");        /*@explore*/
+        var lines = this.splitLines(text);
         return this.storeSplitLines(url, lines);
     },
-    
-    storeSplitLines: function(url, lines)  
+
+    splitLines: function(text)
     {
-    	if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("sourceCache for window="+this.window.location.href+" store url="+url+"\n");
-    	return this.cache[url] = lines;
+        const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
+        var lines;
+        if (text.match)
+        {
+            lines = text.match(reSplitLines2);
+        }
+        else
+        {
+            var str = text+"";
+            lines = str.match(reSplitLines2);
+        }
+        lines.pop();
+        return lines;
+    },
+
+    storeSplitLines: function(url, lines)
+    {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("sourceCache for window="+this.context.getName()+" store url="+url+"\n");
+        return this.cache[url] = lines;
     },
 
     invalidate: function(url)
@@ -239,15 +255,15 @@ Firebug.SourceCache.prototype =
         var lines = this.load(url);
         if (lines)
         {
-        	if (lineNo <= lines.length)
-        		return lines[lineNo-1];
-        	else
-        		return (lines.length == 1) ? lines[0] : "("+lineNo+" out of range "+lines.length+")";
+            if (lineNo <= lines.length)
+                return lines[lineNo-1];
+            else
+                return (lines.length == 1) ? lines[0] : "("+lineNo+" out of range "+lines.length+")";
         }
         else
-        	return "(no source for "+url+")";
+            return "(no source for "+url+")";
     }
-};
+});
 
 // xxxHonza getPostText and readPostTextFromRequest are copied from
 // net.js. These functions should be removed when this cache is

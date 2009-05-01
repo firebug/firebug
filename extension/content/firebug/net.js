@@ -18,7 +18,6 @@ const nsICacheService = Ci.nsICacheService;
 const nsICache = Ci.nsICache;
 const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
 const nsISupports = Ci.nsISupports;
-const nsIIOService = Ci.nsIIOService;
 const imgIRequest = Ci.imgIRequest;
 const nsIUploadChannel = Ci.nsIUploadChannel;
 const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
@@ -149,6 +148,7 @@ var panelBar1 = $("fbPanelBar1");
 
 Firebug.NetMonitor = extend(Firebug.ActivableModule,
 {
+    dispatchName: "netMonitor",
     clear: function(context)
     {
         // The user pressed a Clear button so, remove content of the panel...
@@ -197,27 +197,22 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // Synchronize UI buttons with the current filter.
         this.syncFilterButtons(FirebugChrome);
 
-        // Register HTTP observer for all net-request monitoring and time measuring.
-        // This is done as soon as the FB UI is loaded.
-        HttpObserver.registerObserver();
-
         prefs.addObserver(Firebug.prefDomain, NetLimit, false);
     },
 
     initialize: function()
     {
         this.panelName = panelName;
-        this.description = $STR("net.modulemanager.description");
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
+
+        Firebug.TraceModule.addListener(this.TraceListener);
     },
 
     shutdown: function()
     {
-        // Unregister HTTP observer. This is done when the FB UI is closed.
-        HttpObserver.unregisterObserver();
-
         prefs.removeObserver(Firebug.prefDomain, this, false);
+        Firebug.TraceModule.removeListener(this.TraceListener);
     },
 
     initContext: function(context, persistedState)
@@ -225,32 +220,35 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.initContext for: " + context.window.location.href, context);
+            FBTrace.sysout("net.initContext for: " + context.getName(), context);
 
-        var window = context.window;
+        if (context.window && 'addEventListener' in context.window)
+        {
+            var window = context.window;
 
-        // Register "load" listener in order to track window load time.
-        var onWindowLoadHandler = function() {
-            if (context.netProgress)
-                context.netProgress.post(windowLoad, [window, now()]);
-            window.removeEventListener("load", onWindowLoadHandler, true);
+            // Register "load" listener in order to track window load time.
+            var onWindowLoadHandler = function() {
+                if (context.netProgress)
+                    context.netProgress.post(windowLoad, [window, now()]);
+                window.removeEventListener("load", onWindowLoadHandler, true);
+            }
+            window.addEventListener("load", onWindowLoadHandler, true);
+
+            // Register "DOMContentLoaded" listener to track timing.
+            var onContentLoadHandler = function() {
+                if (context.netProgress)
+                    context.netProgress.post(contentLoad, [window, now()]);
+                window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
+            }
+
+            window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
         }
-        window.addEventListener("load", onWindowLoadHandler, true);
-
-        // Register "DOMContentLoaded" listener to track timing.
-        var onContentLoadHandler = function() {
-            if (context.netProgress)
-                context.netProgress.post(contentLoad, [window, now()]);
-            window.removeEventListener("DOMContentLoaded", onContentLoadHandler, true);
-        }
-        window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
     },
 
     reattachContext: function(browser, context)
     {
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
-        var chrome = context ? context.chrome : FirebugChrome;
-        this.syncFilterButtons(chrome);
+        this.syncFilterButtons(context.chrome);
     },
 
     destroyContext: function(context)
@@ -275,81 +273,54 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
     },
 
-    onPanelActivate: function(context, init, activatedPanelName)
+    onPanelEnable: function(context, activatedPanelName)
     {
         if (activatedPanelName != panelName)
             return;
 
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onPanelEnable; " + context.getName());
+
         monitorContext(context);
-
-        if (context.netProgress)
-        {
-            var panel = context.getPanel(panelName);
-            context.netProgress.activate(panel);
-        }
-
-        $('fbStatusIcon').setAttribute("net", "on");
-
-        if (!init)
-            context.window.location.reload();
     },
 
-    onPanelDeactivate: function(context, destroy, deactivatedPanelName)
+    onPanelDisable: function(context, deactivatedPanelName)
     {
         if (deactivatedPanelName != panelName)
             return;
 
-        if (context.netProgress)
-            context.netProgress.activate(null);
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onPanelDisable; " + context.getName());
 
         unmonitorContext(context);
     },
 
-    onLastPanelDeactivate: function(context, destroy)
+    onResumeFirebug: function(context)
     {
-        $('fbStatusIcon').removeAttribute("net");
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onResumeFirebug; " + context.getName());
+
+        // Resume only if enabled.
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            monitorContext(context);
     },
 
     onSuspendFirebug: function(context)
     {
-        HttpObserver.unregisterObserver();  // safe for multiple calls
-        try
-        {
-            if (context.browser.removeProgressListener)  // XXXjjb often false?
-                context.browser.removeProgressListener(context.netProgress, NOTIFY_ALL);
-        }
-        catch (e)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.onSuspendFirebug could not removeProgressListener: ", e);
-        }
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onSuspendFirebug; " + context.getName());
 
-        $('fbStatusIcon').removeAttribute("net");
+        // Suspend only if enabled.
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            unmonitorContext(context);
     },
-
-    onResumeFirebug: function(context)
-    {
-        HttpObserver.registerObserver();  // safe for multiple calls
-        try 
-        {
-        	context.browser.addProgressListener(context.netProgress, NOTIFY_ALL);
-        }
-        catch(e)
-        {
-        	if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.onResumeFirebug could not addProgressListener: ", e);
-        }
-
-        if (Firebug.NetMonitor.isEnabled(this.context))
-            $('fbStatusIcon').setAttribute("net", "on");
-    }
 });
 
 // ************************************************************************************************
 
 function NetPanel() {}
 
-NetPanel.prototype = domplate(Firebug.AblePanel,
+NetPanel.prototype = domplate(Firebug.ActivablePanel,
 {
     tableTag:
         TABLE({class: "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
@@ -417,6 +388,13 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     netInfoTag:
         TR({class: "netInfoRow"},
             TD({class: "netInfoCol", colspan: 5})
+        ),
+
+    activationTag:
+        TR({class: "netRow netActivationRow"},
+            TD({class: "netCol netActivationLabel", colspan: 5},
+                $STR("net.ActivationMessage")
+            )
         ),
 
     summaryTag:
@@ -548,14 +526,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
     formatSize: function(bytes)
     {
-        if (bytes == -1 || bytes == undefined)
-            return "?";
-        else if (bytes < 1024)
-            return bytes + " B";
-        else if (bytes < 1024*1024)
-            return Math.ceil(bytes/1024) + " KB";
-        else
-            return (Math.ceil(bytes/(1024*1024))) + " MB";
+        return formatSize(bytes);
     },
 
     formatTime: function(elapsed)
@@ -672,12 +643,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 return;
         }
 
-        // The response text can be empty so, test against undefined.
-        var text = (file.responseText != undefined)
-            ? file.responseText
-            : this.context.sourceCache.loadText(file.href, file.method, file);
-
-        copyToClipboard(text);
+        // Copy response to the clipboard
+        copyToClipboard(getResponseText(file, this.context));
 
         // Try to update file.cacheEntry flag.
         getCacheEntry(file, this.context.netProgress);
@@ -698,6 +665,24 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         gBrowser.selectedTab = gBrowser.addTab(file.href, null, null, postData);
     },
 
+    openResponseInTab: function(file)
+    {
+        try {
+            var response = getResponseText(file, this.context);
+            var inputStream = getInputStreamFromString(response);
+            var stream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+            stream.setInputStream(inputStream);
+            var encodedResponse = btoa(stream.readBytes(stream.available()));
+            var dataURI = "data:" + file.request.contentType + ";base64," + encodedResponse;
+            gBrowser.selectedTab = gBrowser.addTab(dataURI);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.openResponseInTab EXCEPTION", err);
+        }
+    },
+
     stopLoading: function(file)
     {
         const NS_BINDING_ABORTED = 0x804b0002;
@@ -716,21 +701,62 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     {
         this.queue = [];
 
-        Firebug.Panel.initialize.apply(this, arguments);
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.NetPanel.initialize; " + context.getName());
+
+        // we listen for showUI/hideUI for panel activation
+        Firebug.registerUIListener(this);
+
+        Firebug.ActivablePanel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
-        Firebug.Panel.destroy.apply(this, arguments);
+        Firebug.ActivablePanel.destroy.apply(this, arguments);
+
+        Firebug.unregisterUIListener(this);
+    },
+
+    disablePanel: function(module)
+    {
+        Firebug.ActivablePanel.disablePanel.apply(this, arguments);
+        this.table = null;
+    },
+
+    // UI Listener
+    showUI: function(browser, context)
+    {
+        if (Firebug.NetMonitor.isAlwaysEnabled())  // XXXjjb Honza I wonder if this should be done here or only in onPanelEnable and onResume?
+            monitorContext(context);
+    },
+
+    hideUI: function(browser, context)
+    {
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            unmonitorContext(context);
     },
 
     show: function(state)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.netPanel.show; " + this.context.getName(), state);
+
         this.showToolbarButtons("fbNetButtons", true);
 
-        var shouldShow = this.shouldShow();
-        this.showToolbarButtons("fbNetButtonsFilter", shouldShow);
-        if (!shouldShow)
+        var enabled = Firebug.NetMonitor.isAlwaysEnabled();
+        this.showToolbarButtons("fbNetButtonsFilter", enabled);
+
+        if (enabled)
+        {
+            Firebug.NetMonitor.disabledPanelPage.hide(this);
+        }
+        else
+        {
+            Firebug.NetMonitor.disabledPanelPage.show(this);
+            this.table = null;
+        }
+
+        if (!enabled)
             return;
 
         if (!this.filterCategory)
@@ -743,19 +769,14 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             scrollToBottom(this.panelNode);
     },
 
-    shouldShow: function()
-    {
-        if (Firebug.NetMonitor.isEnabled(this.context))
-            return true;
-
-        Firebug.ModuleManagerPage.show(this, Firebug.NetMonitor);
-
-        return false;
-    },
-
     hide: function()
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
+
         this.showToolbarButtons("fbNetButtons", false);
+        this.showToolbarButtons("fbNetButtonsFilter", false);
+
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
@@ -773,6 +794,33 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 var context = TabWatcher.contexts[i];
                 Firebug.NetMonitor.onToggleFilter(context, value);
             }
+        }
+    },
+
+    supportsObject: function(object)
+    {
+        return (object instanceof NetFileLink ? 2 : 0);
+    },
+
+    updateSelection: function(object)
+    {
+        var netProgress = this.context.netProgress;
+        var file = netProgress.getRequestFile(object.request);
+        if (!file)
+        {
+            for (var i=0; i<netProgress.requests.length; i++) {
+                if (safeGetName(netProgress.requests[i]) == object.href) {
+                   file = netProgress.files[i];
+                   break;
+                }
+            }
+        }
+
+        if (file)
+        {
+            scrollIntoCenterView(file.row);
+            if (!hasClass(file.row, "opened"))
+                this.toggleHeadersRow(file.row);
         }
     },
 
@@ -822,6 +870,13 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             {label: "OpenInTab", command: bindFixed(this.openRequestInTab, this, file) }
         );
 
+        if (textFileCategories.hasOwnProperty(file.category))
+        {
+            items.push(
+                {label: "Open Response In New Tab", command: bindFixed(this.openResponseInTab, this, file) }
+            );
+        }
+
         if (!file.loaded)
         {
             items.push(
@@ -832,7 +887,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
         if (object)
         {
-            var subItems = FirebugChrome.getInspectMenuItems(object);
+            var subItems = FirebugChrome.getInspectMenuItems(object); // XXXjjb context.chrome?
             if (subItems.length)
             {
                 items.push("-");
@@ -848,7 +903,25 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var row = getAncestorByClass(target, "netRow");
         if (row)
         {
-            if (getAncestorByClass(target, "netTimeCol"))
+            if (getAncestorByClass(target, "netTotalSizeCol"))
+            {
+                var infoTipURL = "netTotalSize";
+                if (infoTipURL == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = infoTipURL;
+                return this.populateTotalSizeInfoTip(infoTip, row);
+            }
+            else if (getAncestorByClass(target, "netSizeCol"))
+            {
+                var infoTipURL = row.repObject.href + "-netsize";
+                if (infoTipURL == this.infoTipURL)
+                    return true;
+
+                this.infoTipURL = infoTipURL;
+                return this.populateSizeInfoTip(infoTip, row.repObject);
+            }
+            else if (getAncestorByClass(target, "netTimeCol"))
             {
                 var infoTipURL = row.repObject.href + "-nettime";
                 if (infoTipURL == this.infoTipURL)
@@ -875,7 +948,21 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         return true;
     },
 
-    search: function(text)
+    populateSizeInfoTip: function(infoTip, file)
+    {
+        Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
+        return true;
+    },
+
+    populateTotalSizeInfoTip: function(infoTip, row)
+    {
+        var totalSizeLabel = getElementByClass(row, "netTotalSizeLabel");
+        var file = {size: totalSizeLabel.getAttribute("totalSize")};
+        Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
+        return true;
+    },
+
+    search: function(text, reverse)
     {
         if (!text)
         {
@@ -885,12 +972,13 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
 
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
-            row = this.currentSearch.findNext(true);
+        {
+            row = this.currentSearch.findNext(true, false, reverse, Firebug.searchCaseSensitive);
+        }
         else
         {
-            function findRow(node) { return getAncestorByClass(node, "netRow"); }
-            this.currentSearch = new TextSearch(this.panelNode, findRow);
-            row = this.currentSearch.find(text);
+            this.currentSearch = new NetPanelSearch(this);
+            row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
         }
 
         if (row)
@@ -904,6 +992,15 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         }
         else
             return false;
+    },
+
+    getSearchOptionsMenuItems: function()
+    {
+        return [
+            //optionMenu("search.net.Headers", "netSearchHeaders"),
+            //optionMenu("search.net.Parameters", "netSearchParameters"),
+            optionMenu("search.net.Response Bodies", "netSearchResponseBody")
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -944,9 +1041,20 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     layout: function()
     {
         if (!this.queue.length || !this.context.netProgress ||
-            !Firebug.NetMonitor.isEnabled(this.context))
+            !Firebug.NetMonitor.isAlwaysEnabled())
             return;
 
+        this.initLayout();
+
+        var rightNow = now();
+        this.updateRowData(rightNow);
+        this.updateLogLimit(maxQueueRequests);
+        this.updateTimeline(rightNow);
+        this.updateSummaries(rightNow);
+    },
+
+    initLayout: function()
+    {
         if (!this.table)
         {
             var limitInfo = {
@@ -954,17 +1062,10 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".net.logLimit"])
             };
 
-            this.table = this.tableTag.replace({}, this.panelNode, this);
+            this.table = this.tableTag.append({}, this.panelNode, this);
             this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
             this.summaryRow =  this.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
         }
-
-        var rightNow = now();
-
-        this.updateRowData(rightNow);
-        this.updateLogLimit(maxQueueRequests);
-        this.updateTimeline(rightNow);
-        this.updateSummaries(rightNow);
     },
 
     updateRowData: function(rightNow)
@@ -1036,8 +1137,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             {
                 // Force update category.
                 file.category = null;
-                removeClass(row, "category-undefined");
-                setClass(row, "category-"+getFileCategory(file));
+                for (var category in fileCategories)
+                    removeClass(row, "category-" + category);
+                setClass(row, "category-" + getFileCategory(file));
             }
 
             if (file.responseHeaders)
@@ -1105,7 +1207,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             var timeBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
-            resolvingBar.style.left = connectingBar.style.left = waitingBar.style.left = 
+            resolvingBar.style.left = connectingBar.style.left = waitingBar.style.left =
                 respondedBar.style.left = timeBar.style.left = this.barOffset + "%";
 
             // Sets width of all bars (using style). The width is computed according to measured timing.
@@ -1127,10 +1229,10 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
                 this.windowLoadBarOffset = null;
             }
 
-            /*FBTrace.sysout("net.updateTimeline resolving: " + 
-                resolvingBar.style.left + " : "+  resolvingBar.style.width + ", connecting: " + 
-                connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " + 
-                waitingBar.style.left + " : " + waitingBar.style.width + ", time: " + 
+            /*FBTrace.sysout("net.updateTimeline resolving: " +
+                resolvingBar.style.left + " : "+  resolvingBar.style.width + ", connecting: " +
+                connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " +
+                waitingBar.style.left + " : " + waitingBar.style.width + ", time: " +
                 timeBar.style.left + " : " + timeBar.style.width + ", DOMContentLoaded: " +
                 contentLoadBar.style.left + ", load: " +
                 windowLoadBar.style.left, file);*/
@@ -1171,6 +1273,7 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             : $STRF("RequestCount", [fileCount]);
 
         var sizeLabel = row.childNodes[3].firstChild;
+        sizeLabel.setAttribute("totalSize", totalSize);
         sizeLabel.firstChild.nodeValue = this.formatSize(totalSize);
 
         var cacheSizeLabel = row.lastChild.firstChild.firstChild;
@@ -1191,8 +1294,8 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
             this.phaseStartTime = phase.startTime;
             this.phaseEndTime = phase.endTime ? phase.endTime : rightNow;
 
-            // End of the first phase has to respect even the window "onload" event time, which 
-            // can occur after the last received file. This sets the extent of the timeline so, 
+            // End of the first phase has to respect even the window "onload" event time, which
+            // can occur after the last received file. This sets the extent of the timeline so,
             // the windowLoadBar is visible.
             if (phase.windowLoadTime && this.phaseEndTime < phase.windowLoadTime)
                 this.phaseEndTime = phase.windowLoadTime;
@@ -1203,15 +1306,15 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         var elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
         this.barWidth = Math.floor((elapsed/this.phaseElapsed) * 100);
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
-        this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100); 
-        this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100); 
-        this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100); 
-        this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100); 
-        
+        this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100);
+
         // Total request time doesn't include the time spent in queue.
         this.elapsed = elapsed - (file.waitingForTime - file.connectingTime);
 
-        // Compute also offset for the contentLoadBar and windowLoadBar, which are 
+        // Compute also offset for the contentLoadBar and windowLoadBar, which are
         // displayed for the first phase.
         if (phase.contentLoadTime)
             this.contentLoadBarOffset = Math.floor(((phase.contentLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
@@ -1225,6 +1328,9 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
     updateLogLimit: function(limit)
     {
         var netProgress = this.context.netProgress;
+
+        if (!netProgress)  // XXXjjb Honza, please check, I guess we are getting here with the context not setup
+            return;
 
         // Must be positive number;
         limit = Math.max(0, limit) + netProgress.pending.length;
@@ -1304,14 +1410,51 @@ NetPanel.prototype = domplate(Firebug.AblePanel,
         }
 
         return true;
-    }
+    },
+
+    insertActivationMessage: function()
+    {
+        if (!Firebug.NetMonitor.isAlwaysEnabled())
+            return;
+
+        // Make sure the basic structure of the table panel is there.
+        this.initLayout();
+
+        // Get the last request row before summary row.
+        var tbody = this.table.firstChild;
+        var lastRow = tbody.lastChild.previousSibling;
+
+        // Insert an activation message (if the last row isn't the message already);
+        if (hasClass(lastRow, "netActivationRow"))
+            return;
+
+        var message = this.activationTag.insertRows({}, lastRow)[0];
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.insertActivationMessage; ", message);
+    },
+
+    iterateEntries: function(fn)
+    {
+        var rows = getElementsByClass(this.table, "netRow");
+        for (var i=0; i<rows.length; i++)
+        {
+            var row = rows[i];
+            if (hasClass(row, "collapsed"))
+                continue;
+
+            var file = Firebug.getRepObject(row);
+            if (file)
+                fn(file);
+        }
+    },
 });
 
 // ************************************************************************************************
 
 Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 {
-    tag: 
+    tag:
         TABLE({class: "timeInfoTip"},
             TBODY(
                 TR(
@@ -1330,7 +1473,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                     TD({class: "netRespondedBar timeInfoTipBar"}),
                     TD("$file|getResponseTime : " + $STR("requestinfo.Waiting For Response"))
                 ),
-                TR({$loaded: "$file.loaded", 
+                TR({$loaded: "$file.loaded",
                     $fromCache: "$file.fromCache"},
                     TD({class: "netTimeBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
@@ -1391,6 +1534,20 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
         var time = file.phase.contentLoadTime - file.startTime;
         return (time > 0 ? "+" : "") + formatTime(time);
+    },
+});
+
+// ************************************************************************************************
+
+Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
+{
+    tag:
+        DIV({class: "sizeInfoTip"}, "$file|getSize"),
+
+    getSize: function(file)
+    {
+        return $STRF("net.file.SizeInfotip", [formatSize(file.size),
+            (file.size < 0) ? "?" : formatNumber(file.size)]);
     },
 });
 
@@ -1550,14 +1707,7 @@ function NetProgress(context)
         requestQueue = [];
     };
 
-    // tabCache listener. This must be property of the object itself (not of the prototype).
-    // So the FBL.dispatch method can find it (using hasOwnProperty).
-    this.onStoreResponse = function(win, request, lines)
-    {
-        var file = this.getRequestFile(request, null, true);
-        if (file)
-            file.responseText = lines ? lines.join("\n") : null;
-    };
+    this.cacheListener = new NetCacheListener(this);
 
     this.clear();
 }
@@ -1588,9 +1738,13 @@ NetProgress.prototype =
             file.respondedTime = time;
             file.isXHR = xhr;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
+            file.method = request.requestMethod;
+            file.urlParams = parseURLParams(file.href);
 
             this.awaitFile(request, file);
             this.extendPhase(file);
+
+            dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
 
             return file;
         }
@@ -1603,6 +1757,8 @@ NetProgress.prototype =
 
     respondedFile: function respondedFile(request, time, info)
     {
+        dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [context, request]);
+
         var file = this.getRequestFile(request);
         if (file)
         {
@@ -1629,12 +1785,11 @@ NetProgress.prototype =
             if (file.fromCache)
                 getCacheEntry(file, this);
 
-            dispatch(Firebug.NetMonitor.fbListeners, "onLoad", [this.context, file]);
-
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.respondedFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
 
+            dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
             return file;
         }
     },
@@ -1644,7 +1799,7 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (!file.receivingStarted) 
+            if (!file.receivingStarted)
             {
                 file.waitingForTime = time;
                 file.receivingStarted = true;
@@ -1710,7 +1865,7 @@ NetProgress.prototype =
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.stopFile +" + (now() - file.startTime) + " " + 
+                FBTrace.sysout("net.stopFile +" + (now() - file.startTime) + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
             file.endTime = time;
@@ -1768,7 +1923,7 @@ NetProgress.prototype =
     windowLoad: function windowLoad(window, time)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " + 
+            FBTrace.sysout("net.windowLoad +? " + getPrintableTime() + ", " +
                 window.location.href, this.phases);
 
         if (!this.phases.length)
@@ -1786,7 +1941,7 @@ NetProgress.prototype =
     contentLoad: function contentLoad(window, time)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.contentLoad +? " + getPrintableTime() + ", " + 
+            FBTrace.sysout("net.contentLoad +? " + getPrintableTime() + ", " +
                 window.location.href);
 
         if (!this.phases.length)
@@ -1832,7 +1987,6 @@ NetProgress.prototype =
             file.request = request;
             this.requests.push(request);
             this.files.push(file);
-
             return file;
         }
 
@@ -1918,7 +2072,7 @@ NetProgress.prototype =
     endLoad: function(file)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.endLoad +" + (now() - file.startTime) + " " + 
+            FBTrace.sysout("net.endLoad +" + (now() - file.startTime) + " " +
                 getPrintableTime() + ", " + file.request.URI.path, file);
 
         // Set file as loaded.
@@ -1958,7 +2112,6 @@ NetProgress.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsISupports
 
     QueryInterface: function(iid)
     {
@@ -1977,12 +2130,12 @@ NetProgress.prototype =
 
     onStateChange: function(progress, request, flag, status)
     {
-        // For image files we can't get the nsIHttpChannel (the request object is imgIRequest 
+        // For image files we can't get the nsIHttpChannel (the request object is imgIRequest
         // in such a case). So, this method is not much useful.
         var file = this.getRequestFile(request, null, true);
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " + 
-                getPrintableTime() + ", " + getStateDescription(flag) + ", " + 
+            FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " +
+                getPrintableTime() + ", " + getStateDescription(flag) + ", " +
                 safeGetName(request), file);
     },
 
@@ -1992,22 +2145,22 @@ NetProgress.prototype =
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onProgressChange +" + (now() - file.startTime) + " " + 
-                    getPrintableTime() + ", " + "progress: " + current + 
+                FBTrace.sysout("net.onProgressChange +" + (now() - file.startTime) + " " +
+                    getPrintableTime() + ", " + "progress: " + current +
                     ", expectedSize: " + max + ", " + request.URI.path, file);
 
             this.post(progressFile, [request, current, max, now()]);
         }
     },
 
-    onStatusChange: function(progress, request, status, message) 
+    onStatusChange: function(progress, request, status, message)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.onStatusChange +" + (now() - file.startTime) + " " + 
-                    getPrintableTime() + ", " + getStatusDescription(status) + 
+                FBTrace.sysout("net.onStatusChange +" + (now() - file.startTime) + " " +
+                    getPrintableTime() + ", " + getStatusDescription(status) +
                     ", " + message + ", " + request.URI.path, file);
 
             if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO || status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
@@ -2018,7 +2171,6 @@ NetProgress.prototype =
                 this.post(receivingFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
                 this.post(resolvingFile, [request, now()]);
-            
         }
     },
 
@@ -2040,6 +2192,38 @@ var cacheEntryReady = NetProgress.prototype.cacheEntryReady;
 var removeFile = NetProgress.prototype.removeFile;
 var windowLoad = NetProgress.prototype.windowLoad;
 var contentLoad = NetProgress.prototype.contentLoad;
+
+// ************************************************************************************************
+
+/**
+ * TabCache listner implementation. Net panel uses this listner to remember all
+ * responses stored into the cache. There can be more requests to the same URL that
+ * returns different responses. The Net panels must remember all of them (tab cache
+ * remembers only the last one)
+ */
+function NetCacheListener(netProgress)
+{
+    this.netProgress = netProgress;
+}
+
+NetCacheListener.prototype =
+{
+    onStartRequest: function(context, request)
+    {
+        // Keep in mind tha the file object (representing the request) doesn't have to be
+        // created at this moment (top document request).
+    },
+
+    onStopRequest: function(context, request, responseText)
+    {
+        // Remember the response for this request.
+        var file = this.netProgress.getRequestFile(request, null, true);
+        if (file)
+            file.responseText = responseText;
+
+        dispatch(Firebug.NetMonitor.fbListeners, "onResponseBody", [context, file]);
+    }
+}
 
 // ************************************************************************************************
 
@@ -2083,6 +2267,11 @@ NetFile.prototype =
     endTime: null,
     waitingForTime: null,
     connectingTime: null,
+
+    getFileLink: function()
+    {
+        return new FBL.NetFileLink(this.href, this.request);
+    }
 };
 
 Firebug.NetFile = NetFile;
@@ -2165,57 +2354,119 @@ NetPhase.prototype =
 };
 
 // ************************************************************************************************
+
+/*
+ * Use this object to automatically select Net panel and inspect a network request.
+ * context.chrome.select(new FBL.NetFileLink(url [, request]));
+ */
+FBL.NetFileLink = function(href, request)
+{
+    this.href = href;
+    this.request = request;
+}
+
+FBL.NetFileLink.prototype =
+{
+    toString: function()
+    {
+        return this.href;
+    }
+};
+
+// ************************************************************************************************
 // Local Helpers
 
 function monitorContext(context)
 {
-    if (!context.netProgress)
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.monitorContext; (" + context.netProgress + ") " + context.getName());
+
+    if (context.netProgress)
+        return;
+
+    var networkContext = null;
+
+    // Use an existing context associated with the browser tab if any
+    // or create a pure new network context.
+    var tabId = Firebug.getTabIdForWindow(context.window);
+    networkContext = contexts[tabId];
+    if (networkContext)
     {
-        var networkContext = null;
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.monitorContext; Use temporary context.");
 
-        // Use an existing context associated with the browser tab if any
-        // or create a pure new network context.
-        var tabId = Firebug.getTabIdForWindow(context.window);
-        networkContext = contexts[tabId];
-        if (networkContext) {
-          networkContext.context = context;
-          delete contexts[tabId];
-        }
-        else {
-          networkContext = new NetProgress(context);
-        }
-
-        var listener = context.netProgress = networkContext;
-
-        if ("addListener" in context.sourceCache)
-            context.sourceCache.addListener(networkContext);
-
-        // This listener is used to observe downlaod progress.
-        context.browser.addProgressListener(listener, NOTIFY_ALL);
+        networkContext.context = context;
+        delete contexts[tabId];
     }
+    else
+    {
+        networkContext = new NetProgress(context);
+    }
+
+    var listener = context.netProgress = networkContext;
+
+    // Register for HTTP events.
+    HttpObserver.registerObserver();
+
+    // Add cache listener so, net panel has alwas fresh responses.
+    context.sourceCache.addListener(networkContext.cacheListener);
+
+    // This listener is used to observe downlaod progress.
+    context.browser.addProgressListener(listener, NOTIFY_ALL);
+
+    // Activate net panel sub-context.
+    var panel = context.getPanel(panelName);
+    context.netProgress.activate(panel);
+
+    // Display info message
+    panel.insertActivationMessage();
+
+    // Update status bar icon.
+    $('fbStatusIcon').setAttribute("net", "on");
 }
 
 function unmonitorContext(context)
 {
-    var netProgress = context.netProgress;
-    if (netProgress)
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.unmonitorContext; (" + context.netProgress + ") " + context.getName());
+
+    var netProgress = context ? context.netProgress : null;
+    if (!netProgress)
+        return;
+
+    // Remove all files waiting for cache response.
+    if (netProgress.pendingInterval)
     {
-        if (netProgress.pendingInterval)
-        {
-            context.clearInterval(netProgress.pendingInterval);
-            delete netProgress.pendingInterval;
+        context.clearInterval(netProgress.pendingInterval);
+        delete netProgress.pendingInterval;
 
-            netProgress.pending.splice(0, netProgress.pending.length);
-        }
-
-        if (context.sourceCache.removeListener)
-            context.sourceCache.removeListener(netProgress);
-
-        if (context.browser.docShell)
-            context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
-
-        delete context.netProgress;
+        netProgress.pending.splice(0, netProgress.pending.length);
     }
+
+    // Since the print into the UI is done by timeout asynchronously,
+    // make sure there are no requests left.
+    var panel = context.getPanel(panelName, true);
+    if (panel)
+        panel.updateLayout();
+
+    // Remove cache listener
+    context.sourceCache.removeListener(netProgress.cacheListener);
+
+    // Remove progress listener.
+    if (context.browser.docShell)
+        context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
+
+    // Unregister HTTP events.
+    HttpObserver.unregisterObserver();
+
+    // Deactivate net sub-context.
+    context.netProgress.activate(null);
+
+    // Update status bar icon.
+    $('fbStatusIcon').removeAttribute("net");
+
+    // And finaly destroy the net panel sub context.
+    delete context.netProgress;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2356,8 +2607,10 @@ function getHttpHeaders(request, file)
     try
     {
         var http = QI(request, nsIHttpChannel);
-        file.method = http.requestMethod;
         file.status = request.responseStatus;
+
+        // xxxHonza: is there any problem to do this in requestedFile method?
+        file.method = http.requestMethod;
         file.urlParams = parseURLParams(file.href);
         file.mimeType = getMimeType(request.contentType, request.name);
 
@@ -2424,6 +2677,10 @@ function getFileCategory(file)
         if (ext)
             file.mimeType = mimeExtensionMap[ext.toLowerCase()];
     }
+
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.getFileCategory " + mimeCategoryMap[file.mimeType] +
+            ", mimeType: " + file.mimeType + " for: " + file.href, file);
 
     return (file.category = mimeCategoryMap[file.mimeType]);
 }
@@ -2559,7 +2816,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         FOR("param", "$headers",
             TR(
                 TD({class: "netInfoParamName"}, "$param.name"),
-                TD({class: "netInfoParamValue"}, 
+                TD({class: "netInfoParamValue"},
                     PRE("$param|getParamValue")
                 )
             )
@@ -2611,8 +2868,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     getParamValue: function(param)
     {
         // This value is inserted into PRE element and so, make sure the HTML isn't escaped (1210).
-        // This is why the second parameter is true. 
-        // The PRE element preserves whitespaces so they are displayed the same, as they come from 
+        // This is why the second parameter is true.
+        // The PRE element preserves whitespaces so they are displayed the same, as they come from
         // the server (1194).
         return wrapText(param.value, true);
     },
@@ -2790,9 +3047,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             netInfoBox.htmlPresented = true;
 
-            var text = (file.responseText != undefined) ? file.responseText
-                : context.sourceCache.loadText(file.href, file.method, file);
-
+            var text = getResponseText(file, context);
             var iframe = getElementByClass(netInfoBox, "netInfoHtmlPreview");
             iframe.contentWindow.document.body.innerHTML = text;
         }
@@ -2804,11 +3059,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     setResponseText: function(file, netInfoBox, responseTextBox, context)
     {
-        // The response text can be empty so, test against undefined.
-        var text = (file.responseText != undefined)
-            ? file.responseText
-            : context.sourceCache.loadText(file.href, file.method, file);
-
+        // Get response text.
+        var text = getResponseText(file, context);
         if (text)
             insertWrappedText(text, responseTextBox);
         else
@@ -2892,6 +3144,13 @@ function getPostText(file, context)
     return file.postText;
 }
 
+function getResponseText(file, context)
+{
+    // The response can be also empty string so, check agains "undefined".
+    return (typeof(file.responseText) != "undefined")? file.responseText :
+        context.sourceCache.loadText(file.href, file.method, file);
+}
+
 function isURLEncodedFile(file, text)
 {
     if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)
@@ -2943,14 +3202,14 @@ var HttpObserver =
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
-        try 
+        try
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
 
             var win = getWindowForRequest(subject);
             var context = TabWatcher.getContextByWindow(win);
-            if (!Firebug.NetMonitor.isEnabled(context))
+            if (!context)
                 return;
 
             // Some requests are not associted with any page (e.g. favicon).
@@ -2991,7 +3250,7 @@ var HttpObserver =
         if (!networkContext)
             networkContext = context ? context.netProgress : null;
 
-        if (networkContext) 
+        if (networkContext)
         {
             var xhr = isXHR(request);
             networkContext.post(requestedFile, [request, now(), win, xhr]);
@@ -3019,20 +3278,20 @@ var HttpObserver =
             networkContext.post(respondedFile, [request, now(), info]);
     },
 
-	/* nsISupports */
-	QueryInterface: function(iid) 
-	{
-        if (iid.equals(Ci.nsISupports) || 
-			iid.equals(Ci.nsIObserver)) {
- 		    return this;
- 		}
-		
-		throw Cr.NS_ERROR_NO_INTERFACE;
-	}
+    /* nsISupports */
+    QueryInterface: function(iid)
+    {
+        if (iid.equals(Ci.nsISupports) ||
+            iid.equals(Ci.nsIObserver)) {
+             return this;
+         }
+
+        throw Cr.NS_ERROR_NO_INTERFACE;
+    }
 }
 
 // ************************************************************************************************
-// Helper for tracing 
+// Helper for tracing
 
 function getPrintableTime()
 {
@@ -3042,13 +3301,163 @@ function getPrintableTime()
 
 // ************************************************************************************************
 
+Firebug.NetMonitor.TraceListener =
+{
+    // Called when console window is loaded.
+    onLoadConsole: function(win, rootNode)
+    {
+    },
+
+    // Called when a new message is logged in to the trace-console window.
+    onDump: function(message)
+    {
+        var index = message.text.indexOf("net.");
+        if (index == 0)
+        {
+            message.text = message.text.substr("net.".length);
+            message.text = trimLeft(message.text);
+            message.type = "DBG_NET";
+        }
+    }
+};
+
+// ************************************************************************************************
+
+var NetPanelSearch = function(panel, rowFinder)
+{
+    var panelNode = panel.panelNode;
+    var doc = panelNode.ownerDocument;
+    var searchRange, startPt;
+
+    // Common search object methods.
+    this.find = function(text, reverse, caseSensitive)
+    {
+        this.text = text;
+
+        finder.findBackwards = !!reverse;
+        finder.caseSensitive = !!caseSensitive;
+
+        this.currentRow = this.getFirstRow();
+        this.resetRange();
+
+        return this.findNext(false, false, reverse, caseSensitive);
+    };
+
+    this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
+    {
+        while (this.currentRow)
+        {
+            var match = this.findNextInRange(reverse, caseSensitive);
+            if (match)
+                return match;
+
+            if (this.shouldSearchResponses())
+                this.findNextInResponse(reverse, caseSensitive);
+
+            this.currentRow = this.getNextRow(wrapAround, reverse);
+
+            if (this.currentRow)
+                this.resetRange();
+        }
+    };
+
+    // Internal search helpers.
+    this.findNextInRange = function(reverse, caseSensitive)
+    {
+        if (this.range)
+        {
+            startPt = doc.createRange();
+            if (reverse)
+                startPt.setStartBefore(this.currentNode);
+            else
+                startPt.setStart(this.currentNode, this.range.endOffset);
+
+            this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+            if (this.range)
+            {
+                this.currentNode = this.range ? this.range.startContainer : null;
+                return this.currentNode ? this.currentNode.parentNode : null;
+            }
+        }
+
+        if (this.currentNode)
+        {
+            startPt = doc.createRange();
+            if (reverse)
+                startPt.setStartBefore(this.currentNode);
+            else
+                startPt.setStartAfter(this.currentNode);
+        }
+
+        this.range = finder.Find(this.text, searchRange, startPt, searchRange);
+        this.currentNode = this.range ? this.range.startContainer : null;
+        return this.currentNode ? this.currentNode.parentNode : null;
+    },
+
+    this.findNextInResponse = function(reverse, caseSensitive)
+    {
+        var file = Firebug.getRepObject(this.currentRow);
+        if (!file)
+            return;
+
+        var scanRE = new RegExp(this.text, Firebug.searchCaseSensitive ? "g" : "gi");
+        if (scanRE.test(file.responseText))
+        {
+            if (!hasClass(this.currentRow, "opened"))
+                panel.toggleHeadersRow(this.currentRow);
+
+            var netInfoRow = this.currentRow.nextSibling;
+            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+            Firebug.NetMonitor.NetInfoBody.selectTabByName(netInfoBox, "Response");
+
+            // Before the search is started, the new content must be properly
+            // layouted within the page. The layout is executed by reading
+            // the following property.
+            // xxxHonza: This workaround can be removed as soon as #488427 is fixed.
+            doc.body.offsetWidth;
+        }
+    },
+
+    // Helpers
+    this.resetRange = function()
+    {
+        searchRange = doc.createRange();
+        searchRange.setStart(this.currentRow, 0);
+        searchRange.setEnd(this.currentRow, this.currentRow.childNodes.length);
+
+        startPt = searchRange;
+    }
+
+    this.getFirstRow = function()
+    {
+        var table = getElementByClass(panelNode, "netTable");
+        return table.firstChild.firstChild;
+    }
+
+    this.getNextRow = function(wrapAround, reverse)
+    {
+        // xxxHonza: reverse searching missing.
+        for (var sib = this.currentRow.nextSibling; sib; sib = sib.nextSibling)
+        {
+            if (this.shouldSearchResponses())
+                return sib;
+            else if (hasClass(sib, "netRow"))
+                return sib;
+        }
+
+        return wrapAround ? this.getFirstRow() : null;;
+    }
+
+    this.shouldSearchResponses = function()
+    {
+        return Firebug["netSearchResponseBody"];
+    }
+};
+
+// ************************************************************************************************
+
 Firebug.registerActivableModule(Firebug.NetMonitor);
 Firebug.registerPanel(NetPanel);
 
 // ************************************************************************************************
-
 }});
-
-
-
-

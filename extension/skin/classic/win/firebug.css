@@ -3,10 +3,27 @@
 // ***********************************************************************************************/
 
 #fbFirebugMenu {
-    margin: 0 4px 0 0;
-    padding: 0 0 0 4px;
-    list-style-image: url(chrome://firebug/skin/firebug.png);
+    margin-bottom: 1px;
     opacity: 0.8;
+}
+
+#fbInspectButton {
+    margin-bottom: 1px;
+    padding: 0px;
+    opacity: 0.8;
+
+    /* The default styling does not always keep button size contant or image
+       position constant, e.g. when [checked="true"].  These numbers were
+       chosen to keep them constant against the default winstripe styling. */
+    padding-top: 4px;
+    padding-bottom: 2px;
+    -moz-padding-start: 4px;
+    -moz-padding-end: 2px;
+}
+
+#fbInspectButton image {
+    margin-right: 3px;
+    margin-bottom: 1px;
 }
 
 #fbFirebugMenu:hover,
@@ -30,7 +47,7 @@
 
 .toolbar-text-button > .toolbarbutton-icon,
 .toolbar-text-menubutton > .toolbarbutton-icon {
-    display: none;
+    /*display: none;*/
 }
 
 .toolbar-text-menubutton:hover:active,
@@ -58,6 +75,23 @@
 #fbDebuggerButtons {
     margin-top: 1px;
 }
+
+#fbSearchButtons {
+    margin-bottom: 2px;
+}
+
+#fbMinimizeButton {
+    list-style-image: url(chrome://firebug/skin/win/min.png);
+}
+
+#fbMinimizeButton:hover {
+    list-style-image: url(chrome://firebug/skin/win/minHover.png);
+}
+
+#fbMinimizeButton:hover:active {
+    list-style-image: url(chrome://firebug/skin/win/minActive.png);
+}
+
 
 #fbCloseButton {
     margin: 0 4px 0 0;
@@ -165,14 +199,18 @@
 /************************************************************************************************/
 
 .panelTabBox {
-    background: url(chrome://firebug/skin/win/tabBg.png) repeat-x top;
+    background: url(chrome://firebug/skin/win/tabBg.png) repeat-x bottom;
     border-bottom: 1px solid threedshadow;
     padding: 0 4px;
     overflow: hidden;
 }
 
+.panelTabs {
+    -moz-box-align: end;
+}
+
 panelTab {
-    margin: 0 0 1px 0;
+    margin: 1px 0 0 0;
     border: none;
     font-weight: bold;
     color: #565656;
@@ -201,35 +239,35 @@ panelTab[selected="true"] {
 }
 
 panelTab:hover > .panelTab-left {
-    background: url(chrome://firebug/skin/win/tabLeftHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabLeftHover.png) no-repeat top;
 }
 
 panelTab:hover > .panelTab-text {
-    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > panelTabMenu {
-    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMidHover.png) repeat-x top;
 }
 
 panelTab:hover > .panelTab-right {
-    background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabRightHover.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-left {
-    background: url(chrome://firebug/skin/win/tabLeft.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabLeft.png) no-repeat top;
 }
 
 panelTab[selected="true"] > .panelTab-text {
-    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > panelTabMenu {
-    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x bottom;
+    background: url(chrome://firebug/skin/win/tabMid.png) repeat-x top;
 }
 
 panelTab[selected="true"] > .panelTab-right {
-    background: url(chrome://firebug/skin/win/tabRight.png) no-repeat bottom;
+    background: url(chrome://firebug/skin/win/tabRight.png) no-repeat top;
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -243,7 +281,7 @@ panelTab[selected="true"] > .panelTab-right {
 .panelOptionsButton:hover:active,
 .panelOptionsButton[open="true"] {
     margin: 2px;
-    padding: 0 6px; 
+    padding: 0 6px;
 }
 
 .panelOptionsButton:hover {

@@ -1,0 +1,36 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://global/skin/global.css"?>
+<?xml-stylesheet href="chrome://firebug/skin/customizeShortcuts.css ?>
+
+<!DOCTYPE window [
+<!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
+%firebugDTD;
+]>
+
+<dialog xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
+        class="windowDialog"
+        id="firebug-customize-keyboard"
+        width="400" height="500"
+        buttons="accept,cancel"
+        onload="init( );"
+        ondialogaccept="return saveChanges();"
+        ondialogcancel="return true;"       
+        persist="screenX screenY"
+        >
+    <script type="application/x-javascript" src="chrome://firebug/content/customizeShortcuts.js" />
+    <stringbundleset>
+        <stringbundle id="platformKeys" src="chrome://global-platform/locale/platformKeys.properties"/>
+        <stringbundle id="localeKeys" src="chrome://global/locale/keys.properties"/>
+        <stringbundle id="fbStrings" src="chrome://firebug/locale/firebug.properties"/>
+    </stringbundleset>
+    <grid flex="1" id="shortcutGrid" style="background-color: white; overflow: auto;">
+		  <columns>
+		    <column id="labelColumn"/>
+		    <column flex="1"/>
+		    <column/>
+		  </columns>
+		  <rows id="shortcutGridRows">
+		  </rows>
+    </grid>
+</dialog>

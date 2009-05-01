@@ -17,6 +17,29 @@
     background-color: #FFFFFF;
 }
 
+.useA11y .logRow:focus {    
+    border-bottom: 1px solid #000000 !important;
+    outline: none !important;
+    background-color: #FFFFAD !important;
+}
+
+.useA11y .logRow:focus a.objectLink-sourceLink {
+    background-color: #FFFFAD;
+}
+
+.useA11y .a11yFocus:focus, .useA11y .objectBox:focus {
+    outline: 2px solid #FF9933;
+    background-color: #FFFFAD;
+}
+
+.useA11y .objectBox-null:focus, .useA11y .objectBox-undefined:focus{
+    background-color: #888888 !important;
+}
+
+.useA11y .logGroup.opened > .logRow {
+    border-bottom: 1px solid #ffffff;
+}
+
 .logGroup {
     background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
     padding: 0;

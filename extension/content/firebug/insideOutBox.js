@@ -115,7 +115,7 @@ InsideOutBox.prototype =
         if (!isSelected)
         {
             removeClass(this.selectedObjectBox, "selected");
-
+            dispatch([Firebug.A11yModel], 'onObjectBoxUnselected', [this.selectedObjectBox]);
             this.selectedObjectBox = objectBox;
 
             if (objectBox)
@@ -127,6 +127,7 @@ InsideOutBox.prototype =
                     this.toggleObjectBox(objectBox, true);
             }
         }
+        dispatch([Firebug.A11yModel], 'onObjectBoxSelected', [objectBox]);
     },
 
     openObjectBox: function(objectBox)
@@ -136,7 +137,10 @@ InsideOutBox.prototype =
             // Set all of the node's ancestors to be permanently open
             var parentBox = this.getParentObjectBox(objectBox);
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
+            {
                 setClass(parentBox, "open");
+                parentBox.firstChild.setAttribute('aria-expanded', 'true')
+            }
         }
     },
 
@@ -151,18 +155,20 @@ InsideOutBox.prototype =
             var firstChild = this.view.getChildObject(objectBox.repObject, 0);
             this.populateChildBox(firstChild, nodeChildBox);
         }
-
+        objectBox.firstChild.setAttribute('aria-expanded', 'true');
         setClass(objectBox, "open");
     },
 
     contractObjectBox: function(objectBox)
     {
         removeClass(objectBox, "open");
+        objectBox.firstChild.setAttribute('aria-expanded', 'false');
     },
 
     toggleObjectBox: function(objectBox, forceOpen)
     {
         var isOpen = hasClass(objectBox, "open");
+        objectBox.firstChild.setAttribute('aria-expanded', isOpen);
         if (!forceOpen && isOpen)
             this.contractObjectBox(objectBox);
 

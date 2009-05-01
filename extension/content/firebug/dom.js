@@ -37,12 +37,14 @@ const ignoreVars =
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const RowTag =
-    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
+    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren", role : 'presentation',
         level: "$member.level"},
-        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px"},
-            DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
+        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px", role : 'presentation'},
+            DIV({class: "memberLabel $member.type\\Label"},
+                SPAN({}, "$member.name")
+            )
         ),
-        TD({class: "memberValueCell"},
+        TD({class: "memberValueCell", role : 'presentation'},
             TAG("$member.tag", {object: "$member.value"})
         )
     );
@@ -50,14 +52,14 @@ const RowTag =
 const WatchRowTag =
     TR({class: "watchNewRow", level: 0},
         TD({class: "watchEditCell", colspan: 2},
-            DIV({class: "watchEditBox"},
+            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0', 'aria-label' : $STRF('press enter to add new watch expression')},
                     $STR("NewWatch")
             )
         )
     );
 
 const SizerRow =
-    TR(
+    TR({role : 'presentation'},
         TD({width: "30%"}),
         TD({width: "70%"})
     );
@@ -65,8 +67,8 @@ const SizerRow =
 const DirTablePlate = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
-            TBODY(
+        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"tree"},
+            TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator", RowTag)
             )
@@ -74,8 +76,8 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     watchTag:
         TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
-               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick"},
-            TBODY(
+               _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree'},
+            TBODY({role : 'presentation'},
                 SizerRow,
                 WatchRowTag
             )
@@ -83,8 +85,8 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tableTag:
         TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
-            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick"},
-            TBODY(
+            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree'},
+            TBODY({role : 'presentation'},
                 SizerRow
             )
         ),
@@ -116,7 +118,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
             {
-                FirebugChrome.select(object, "script");
+                this.context.chrome.select(object, "script");
                 cancelEvent(event);
             }
             else if (event.detail == 2 && !object)
@@ -199,13 +201,19 @@ const DirTablePlate = domplate(Firebug.Rep,
             var lastRow = row;
 
             var delay = 0;
+            var setSize = members.length;
+            var rowCount = 1;
             while (members.length)
             {
                 setTimeout(function(slice, isLast)
                 {
                     if (lastRow.parentNode)
-                        lastRow = rowTag.insertRows({members: slice}, lastRow)[1];
-
+                    {
+                        var result = rowTag.insertRows({members: slice}, lastRow);
+                        lastRow = result[1];
+                        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                        rowCount += insertSliceSize;
+                    }
                     if (isLast)
                         delete row.insertTimeout;
                 }, delay, members.splice(0, insertSliceSize), !members.length);
@@ -236,12 +244,13 @@ const ToolboxPlate = domplate(
 
 Firebug.DOMBasePanel = function() {}
 
-Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
+Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 {
     tag: DirTablePlate.tableTag,
 
     rebuild: function(update, scrollTop)
     {
+        dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
         var members = getMembers(this.selection);
         expandMembers(members, this.toggles, 0, 0);
 
@@ -275,9 +284,12 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
         var rowTag = DirTablePlate.rowTag;
 
         // Insert the first slice immediately
+        var setSize = members.length;
         var slice = members.splice(0, insertSliceSize);
-        rowTag.insertRows({members: slice}, tbody.lastChild);
-
+        var result = rowTag.insertRows({members: slice}, tbody.lastChild);
+        var rowCount = 1;
+        var panel = this;
+        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
         var timeouts = [];
 
         var delay = 0;
@@ -285,7 +297,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
         {
             timeouts.push(this.context.setTimeout(function(slice)
             {
-                rowTag.insertRows({members: slice}, tbody.lastChild);
+                result = rowTag.insertRows({members: slice}, tbody.lastChild);
+                rowCount += insertSliceSize;
+                dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [panel, result, rowCount, setSize]);
 
                 if ((panelNode.scrollHeight+panelNode.offsetHeight) >= priorScrollTop)
                     panelNode.scrollTop = priorScrollTop;
@@ -314,7 +328,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
                 panelNode.scrollTop = scrollTop == undefined ? 0 : scrollTop;
             }, delay));
         }
-
         this.timeouts = [];
     },
 
@@ -374,8 +387,17 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
     {
         if (hasClass(row, "watchNewRow"))
         {
-            if (Firebug.Console.isEnabled(this.context) && Firebug.CommandLine.isReadyElsePreparing(this.context))
+            if (this.context.stopped)
                 Firebug.Editor.startEditing(row, "");
+            else if (Firebug.Console.isAlwaysEnabled())
+            {
+                if (Firebug.CommandLine.isReadyElsePreparing(this.context))
+                    Firebug.Editor.startEditing(row, "");
+                else
+                    row.innerHTML = $STR("command line blocked?");
+            }
+            else
+                row.innerHTML = $STR("Console must be enabled");
         }
         else if (hasClass(row, "watchRow"))
             Firebug.Editor.startEditing(row, getRowName(row));
@@ -444,7 +466,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
         if (object && !(object instanceof jsdIStackFrame))
         {
              // unwrappedJSObject.property = unwrappedJSObject
-             Firebug.CommandLine.evaluate(value, this.context, object, this.context.window,
+             Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
                  function success(result, context)
                  {
                      object[name] = result;
@@ -664,7 +686,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
                 {
                     var name = newPath[i];
                     var object = value;
-                    value = value[name];
+                    try
+                    {
+                        value = value[name];
+                    }
+                    catch(exc)
+                    {
+                        if (FBTrace.DBG_ERRORS)
+                                FBTrace.sysout("dom.updateSelection FAILS at path_i="+i+" for name:"+name+"\n");
+                        return;
+                    }
 
                     ++this.pathIndex;
                     this.objectPath.push(new Property(object, name));
@@ -676,7 +707,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
             {
                 this.toggles = {};
 
-                var win = this.context.window;
+                var win = this.context.getGlobalScope();
                 if (object == win)
                 {
                     this.pathIndex = 0;
@@ -722,7 +753,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.AblePanel,
 
     getDefaultSelection: function()
     {
-        return this.context.window;
+        return this.context.getGlobalScope();
     },
 
     updateOption: function(name, value)
@@ -869,14 +900,16 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     initializeNode: function(oldPanelNode)
     {
         this.panelNode.addEventListener("click", this.onClick, false);
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
     },
 
     destroyNode: function()
     {
         this.panelNode.removeEventListener("click", this.onClick, false);
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
     },
 
-    search: function(text, visit)
+    search: function(text, reverse)
     {
         if (!text)
         {
@@ -885,48 +918,29 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             return false;
         }
 
-        if (visit && this.currentSearch && this.currentSearch.currentNode)
+        var row;
+        if (this.currentSearch && text == this.currentSearch.text)
+            row = this.currentSearch.findNext(true, undefined, reverse, Firebug.searchCaseSensitive);
+        else
         {
-            Firebug.Search.clear(this.context);
-            this.selectRow(this.currentSearch.currentNode);
-            delete this.currentSearch;
+            function findRow(node) { return getAncestorByClass(node, "memberRow"); }
+            this.currentSearch = new TextSearch(this.panelNode, findRow);
+            row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
+        }
+
+        if (row)
+        {
+            var sel = this.document.defaultView.getSelection();
+            sel.removeAllRanges();
+            sel.addRange(this.currentSearch.range);
+
+            scrollIntoCenterView(row, this.panelNode);
+
+            this.highlightRow(row);
             return true;
         }
         else
-        {
-            var row;
-            if (this.currentSearch && text == this.currentSearch.text)
-                row = this.currentSearch.findNext(true);
-            else
-            {
-                function findRow(node) { return getAncestorByClass(node, "memberRow"); }
-                this.currentSearch = new TextSearch(this.panelNode, findRow);
-                row = this.currentSearch.find(text);
-            }
-
-            if (row)
-            {
-                if (visit)
-                {
-                    Firebug.Search.clear(this.context);
-                    this.selectRow(row);
-                    delete this.currentSearch;
-                }
-                else
-                {
-                    var sel = this.document.defaultView.getSelection();
-                    sel.removeAllRanges();
-                    sel.addRange(this.currentSearch.range);
-
-                    scrollIntoCenterView(row, this.panelNode);
-
-                    this.highlightRow(row);
-                }
-                return true;
-            }
-            else
-                return false;
-        }
+            return false;
     }
 });
 
@@ -942,6 +956,16 @@ DOMSidePanel.prototype = extend(Firebug.DOMBasePanel.prototype,
     name: "domSide",
     parentPanel: "html",
     order: 3,
+
+    initializeNode: function(oldPanelNode)
+    {
+        dispatch([Firebug.A11yModel], 'onInitializeNode', [this, 'console']);
+    },
+
+    destroyNode: function()
+    {
+        dispatch([Firebug.A11yModel], 'onDestroyNode', [this, 'console']);
+    },
 });
 
 // ************************************************************************************************
@@ -1102,6 +1126,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.addEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.addEventListener("mouseout", this.onMouseOut, false);
+        dispatch([Firebug.A11yModel], "onInitializeNode", [this, 'console']);
     },
 
     destroyNode: function()
@@ -1109,15 +1134,18 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         this.panelNode.removeEventListener("mousedown", this.onMouseDown, false);
         this.panelNode.removeEventListener("mouseover", this.onMouseOver, false);
         this.panelNode.removeEventListener("mouseout", this.onMouseOut, false);
+        dispatch([Firebug.A11yModel], "onDestroyNode", [this, 'console']);
     },
 
     refresh: function()
     {
         this.rebuild(true);
+
     },
 
     updateSelection: function(object)
     {
+        dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
         var frame = this.context.currentFrame;
 
         var newFrame = frame && frame.isValid && frame.script != this.lastScript;
@@ -1136,7 +1164,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             {
                 var expr = this.watches[i];
                 var value = null;
-                Firebug.CommandLine.evaluate(expr, this.context, null, this.context.window,
+                Firebug.CommandLine.evaluate(expr, this.context, null, this.context.getGlobalScope(),
                     function success(result, context)
                     {
                         value = result;
@@ -1212,7 +1240,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         return ret;
     },
-    
+
 });
 
 // ************************************************************************************************
@@ -1233,7 +1261,7 @@ function DOMEditor(doc)
 
 DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-    tag: INPUT({class: "fixedWidthEditor", type: "text",
+    tag: INPUT({class: "fixedWidthEditor a11yFocusNoTab", type: "text", title:$STR("NewWatch"),
                 oninput: "$onInput", onkeypress: "$onKeyPress"}),
 
     endEditing: function(target, value, cancel)
@@ -1245,6 +1273,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
 
         var row = getAncestorByClass(target, "memberRow");
+        dispatch([Firebug.A11yModel], 'onWatchEndEditing', [this.panel]);
         if (!row)
             this.panel.addWatch(value);
         else if (hasClass(row, "watchRow"))
@@ -1282,9 +1311,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
             var val;
             try
             {
-            	val = insecureObject.__lookupGetter__(name);
-            	if (!val)
-            		val = insecureObject[name];  // getter is safe
+                val = insecureObject[name];  // getter is safe
             }
             catch (exc)
             {
@@ -1309,12 +1336,13 @@ function getMembers(object, level)  // we expect object to be user-level object 
             }
             else
             {
+                var getterFunction = insecureObject.__lookupGetter__(name);
                 if (name in domMembers)
-                    addMember("dom", domProps, name, val, level, domMembers[name]);
+                    addMember("dom", domProps, (getterFunction?"get "+name:name), val, level, domMembers[name]);
                 else if (name in domConstantMap)
-                    addMember("dom", domConstants, name, val, level);
+                    addMember("dom", domConstants, (getterFunction?"get "+name:name), val, level);
                 else
-                    addMember("user", userProps, name, val, level);
+                    addMember("user", userProps, (getterFunction?"get "+name:name), val, level);
             }
         }
     }
@@ -1512,4 +1540,4 @@ Firebug.registerPanel(WatchPanel);
 // ************************************************************************************************
 
 }});
- 
+

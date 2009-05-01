@@ -25,11 +25,11 @@
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
-  <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
   <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
   <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
   
   <script type="application/x-javascript" src="chrome://firebug/content/traceConsole.js"/>
+  <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
       
   <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
   
@@ -67,10 +67,10 @@
         label="tracing.cmd.Bookmark" class="toolbar-image-button"
         tooltiptext="tracing.cmd.tip.Bookmark" 
         command="cmd_separateConsole"/>
-      <!--<toolbarbutton id="saveToFile"
-        label="Save to File" class="toolbar-image-button"
-        tooltiptext="Save to File Ctrl+S" 
-        command="cmd_saveToFile"/> -->
+      <toolbarbutton id="saveToFile"
+        label="tracing.cmd.Save" class="toolbar-image-button"
+        tooltiptext="tracing.cmd.tip.Save" 
+        command="cmd_saveToFile"/>
       <toolbarseparator flex="1"/>
       <toolbarbutton id="restartFirefox"
         label="tracing.cmd.Restart" class="toolbar-image-button"

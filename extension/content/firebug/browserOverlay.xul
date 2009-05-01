@@ -38,6 +38,7 @@
     <script type="application/x-javascript" src="chrome://firebug/content/html.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/css.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/layout.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/debuggerHalter.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/debugger.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/dom.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/net.js"/>
@@ -46,6 +47,8 @@
     <script type="application/x-javascript" src="chrome://firebug/content/spy.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/consoleInjector.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/jsonViewer.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/shortcuts.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/a11y.js"/>
 
     <script type="application/x-javascript" src="chrome://firebug/content/traceModule.js"/> <!-- /*@explore*/ -->
 
@@ -53,8 +56,16 @@
 
     <commandset id="mainCommandSet">
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
-        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar()"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar(FirebugContext)"/>
+        <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar(FirebugContext)"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
+        <command id="cmd_allOn" oncommand="Firebug.toggleAll('on')"/>
+        <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
+        <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
+        <command id="cmd_enableA11y" oncommand="Firebug.A11yModel.toggle(this.getAttribute('checked') == 'true'); " />
+        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions();" />
     </commandset>
 
     <keyset id="mainKeyset">
@@ -64,26 +75,11 @@
                 command="cmd_detachFirebug"/>
     </keyset>
 
-    <script type="application/x-javascript">
-        function OpenEditorShowHide(event) {
-            var item = document.getElementById("menu_firebugOpenEithEditor");
-            var popupNode = document.popupNode;
-            item.hidden = (popupNode instanceof HTMLInputElement
-                                || popupNode instanceof HTMLIFrameElement
-                                || popupNode instanceof HTMLTextAreaElement
-                || Firebug.registeredEditors.length == 0);
-        }
-        function addOpenEditorSHowHide(event) {
-            window.removeEventListener("load", addOpenEditorSHowHide, false);
-            var contextMenu = document.getElementById("contentAreaContextMenu");
-            if (contextMenu)
-                contextMenu.addEventListener("popupshowing", OpenEditorShowHide, false);
-        };
-        window.addEventListener("load", addOpenEditorSHowHide, false);
-    </script>
+    <script type="application/x-javascript" src="chrome://firebug/content/editorToContextMenu.js"/>
 
     <popup id="contentAreaContextMenu">
-        <menu label="&firebug.OpenWith;" id="menu_firebugOpenEithEditor" insertbefore="context-viewsource">
+        <!-- TODO Firebug.Editors. -->
+        <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor" insertbefore="context-viewsource">
             <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                 <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
             </menupopup>
@@ -104,9 +100,9 @@
               label="&firebug.Firebug;" insertbefore="javascriptConsole">
             <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
                 <menuitem id="menu_toggleFirebug" type="checkbox"
-                    label="&firebug.ShowFirebug;" command="cmd_toggleFirebug"/>
+                    label="&firebug.ShowFirebug;" command="cmd_toggleFirebug" key="key_toggleFirebug" />
                 <menuitem id="menu_detachFirebug"
-                    label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
+                    label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox" key="key_detachFirebug"/>
                 <menuseparator/>
 
                 <menu label="&firebug.OpenWith;">
@@ -128,6 +124,11 @@
                         command="cmd_focusCommandLine" key="key_focusCommandLine"/>
                 <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"
                         command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>
+                <menuseparator/>
+                <menuitem id="menu_enableA11y" label="Firebug.menu.Enable Accessibility Enhancements"
+                        command="cmd_enableA11y" type="checkbox" autocheck="false" />
+                <menuitem id="menu_customizeShortcuts" label="Firebug.menu.Customize shortcuts"
+                        command="cmd_customizeFBKeys" key="key_customizeFBKeys" />
             </menupopup>
         </menu>
     </menupopup>
@@ -135,7 +136,8 @@
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="inspector-button" label="&firebug.Inspect;"
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       observes="cmd_toggleInspecting" tooltiptext="&firebug.InspectElement;"/>
+                       observes="cmd_
+specting" tooltiptext="&firebug.InspectElement;"/>
         <toolbarbutton id="firebug-button" label="&firebug.Firebug;"
                       class="toolbarbutton-1 chromeclass-toolbar-additional"
                       observes="cmd_toggleDetachFirebug" tooltiptext="&firebug.DetachFirebug;"/>
@@ -146,86 +148,30 @@
     <vbox id="appcontent">
         <splitter id="fbContentSplitter" collapsed="true"/>
         <vbox id="fbContentBox" collapsed="true" persist="height">
-            <toolbox id="fbToolbox">
-                <toolbar id="fbToolbar">
-                    <toolbarbutton id="fbFirebugMenu" type="menu">
-                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup">
-
-                            <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
-                                <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                                        <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
-                                </menupopup>
-                            </menu>
-
-                            <menuseparator/>
-
-                            <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
-                                <menupopup>
-                                    <menuitem label="&firebug.IncreaseTextSize;"
-                                              oncommand="Firebug.increaseTextSize(1)"/>
-                                    <menuitem label="&firebug.DecreaseTextSize;"
-                                              oncommand="Firebug.increaseTextSize(-1)"/>
-                                    <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
-                                </menupopup>
-                            </menu>
-
-                            <menu label="&firebug.Options;" id="FirebugMenu_Options">
-                                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
-                                    <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
-                                               oncommand="FirebugChrome.onToggleOption(this)"
-                                               option="openInWindow"/>
-
-                                    <menuitem type="checkbox" label="&firebug.ShowTooltips;"
-                                               oncommand="FirebugChrome.onToggleOption(this)"
-                                               option="showInfoTips"/>
-
-                                    <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
-                                              oncommand="FirebugChrome.onToggleOption(this)"
-                                              option="shadeBoxModel"/>
-                                </menupopup>
-                            </menu>
-                            <menuseparator id="FirebugBetweenOptionsAndSites"/>
-
-                            <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
-                            <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
-                            <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
-                            <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
-                            <menuseparator/>
-                            <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
-                            <menuseparator/>
-                            <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
-                        </menupopup>
-                    </toolbarbutton>
-
-                    <toolbarbutton id="fbDetachButton" class="toolbarbutton-iconic"
-                                   tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>
-
-                    <toolbarbutton id="fbCloseButton" class="toolbarbutton-iconic"
-                                   tooltiptext="&firebug.CloseFirebug;" command="cmd_toggleFirebug"/>
-                </toolbar>
-            </toolbox>
-
-            <hbox id="fbPanelBox" flex="1"/>
-            <hbox id="fbCommandBox"/>
         </vbox>
     </vbox>
 
     <!-- Extend Firefox status bar -->
 
     <statusbar id="status-bar">
-        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu"
+        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button" aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
                         onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon" tooltiptext="Firebug"/>
-            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);"/>
+            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);" role="button" />
         </statusbarpanel>
 
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
             <menuitem id="menu_detachFirebug"
                 label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" type="checkbox"/>
             <menuseparator/>
-            <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole"/>
+            <menuitem id="menu_clearConsole" label="firebug.menu.Clear Console" command="cmd_clearConsole"/>
+            <menuitem id="menu_resetAllOptions" label="firebug.menu.Reset All Firebug Options" command="cmd_resetAllOptions"/>
             <menuseparator/>
-            <menuitem id="menu_toggleSuspendFirebug" label="Suspend Firebug" command="cmd_toggleSuspendFirebug"/>
+            <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
+            <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>
+            <menuseparator/>
+            <menuitem id="menu_AllOff" type="checkbox" label="Off for all web pages" command="cmd_allOff"/>
+            <menuitem id="menu_AllOn" type="checkbox" label="On for all web pages" command="cmd_allOn"/>
         </menupopup>
     </statusbar>
 

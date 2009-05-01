@@ -23,8 +23,8 @@ locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
 locale  firebug sv-SE       locale/sv-SE/
 locale  firebug ro-RO       locale/ro-RO/
+locale  firebug es-AR       locale/es-AR/
 
 
 overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
 overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
-overlay chrome://browser/content/preferences/permissions.xul    chrome://firebug/content/permissionsOverlay.xul

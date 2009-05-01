@@ -31,6 +31,9 @@ var ignoreNextInput = false;
 
 Firebug.Editor = extend(Firebug.Module,
 {
+    supportsStopEvent: true,
+    
+    dispatchName: "editor",
     tabCharacter: "    ",
 
     startEditing: function(target, value, editor)
@@ -43,6 +46,9 @@ Firebug.Editor = extend(Firebug.Module,
         var panel = Firebug.getElementPanel(target);
         if (!panel.editable)
             return;
+
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("editor.startEditing " + value, target);
 
         defaultValue = target.getAttribute("defaultValue");
         if (value == undefined)
@@ -86,6 +92,9 @@ Firebug.Editor = extend(Firebug.Module,
         if (!currentTarget)
             return;
 
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("editor.stopEditing " + cancel);
+
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;
 
@@ -106,6 +115,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             if (cancel)
             {
+                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, this, currentTarget]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -129,6 +139,8 @@ Firebug.Editor = extend(Firebug.Module,
 
         currentEditor.hide();
         currentPanel.editing = false;
+
+        dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
 
         currentTarget = null;
         currentGroup = null;
@@ -189,7 +201,7 @@ Firebug.Editor = extend(Firebug.Module,
         currentEditor.saveEdit(currentTarget, value, previousValue);
         dispatch(this.fbListeners, "onSaveEdit", [currentPanel, currentEditor, currentTarget, value, previousValue]);
     },
-    
+
     setEditTarget: function(element)
     {
         if (!element)
@@ -393,7 +405,7 @@ Firebug.Editor = extend(Firebug.Module,
 // ************************************************************************************************
 // BaseEditor
 
-Firebug.BaseEditor = extend(Firebug.MeasureBox, 
+Firebug.BaseEditor = extend(Firebug.MeasureBox,
 {
     getValue: function()
     {
@@ -420,7 +432,7 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     beginEditing: function(target, value)
     {
     },
-    
+
     // Editor Module listeners will get "onSaveEdit" just after this call
     saveEdit: function(target, value, previousValue)
     {
@@ -456,14 +468,19 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             DIV({class: "textEditorInner1"},
                 DIV({class: "textEditorInner2"},
                     INPUT({class: "textEditorInner", type: "text",
-                        oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"})
+                        oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
+                    )
                 )
             ),
             DIV({class: "textEditorBottom1"},
                 DIV({class: "textEditorBottom2"})
             )
         ),
-
+     
+    inputTag :   
+        INPUT({class: "textEditorInner", type: "text",
+            oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
+        ),
     expanderTag: IMG({class: "inlineExpander", src: "blank.gif"}),
 
     enterOnBlur: true,
@@ -513,6 +530,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 
     show: function(target, panel, value, targetSize)
     {
+        dispatch([Firebug.A11yModel], "onInlineEditorShow", [panel, this]);
         this.target = target;
         this.panel = panel;
 
@@ -991,11 +1009,11 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
             else
             {
                 expr = "";
-                var candidates = [];
+                candidates = [];
                 for (var i = 0; i < values.length; ++i)
                 {
-                	if (values[i].substr)
-                		candidates.push(values[i]);
+                    if (values[i].substr)
+                        candidates.push(values[i]);
                 }
                 lastIndex = -1;
             }

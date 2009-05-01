@@ -13,6 +13,7 @@ const infoTipWindowPadding = 25;
 
 Firebug.InfoTip = extend(Firebug.Module,
 {
+    dispatchName: "infoTip",
     tags: domplate(
     {
         infoTipTag: DIV({class: "infoTip"}),

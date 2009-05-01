@@ -11,6 +11,7 @@ const searchDelay = 150;
 
 Firebug.Search = extend(Firebug.Module,
 {
+    dispatchName: "search",
     search: function(text, context)
     {
         var searchBox = context.chrome.$("fbSearchBox");
@@ -65,7 +66,7 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.select();
     },
 
-    update: function(context, immediate)
+    update: function(context, immediate, reverse)
     {
         var panel = context.chrome.getSelectedPanel();
         if (!panel.searchable)
@@ -87,9 +88,20 @@ Firebug.Search = extend(Firebug.Module,
 
         if (immediate)
         {
-            var found = panel.search(value);
+            var found = panel.search(value, reverse);
             if (!found && value)
                 beep();
+
+            if (value)
+            {
+                // Hides all nodes that didn't pass the filter
+                setClass(panelNode, "searching");
+            }
+            else
+            {
+                // Makes all nodes visible again
+                removeClass(panelNode, "searching");
+            }
 
             panel.searchText = value;
         }
@@ -98,6 +110,12 @@ Firebug.Search = extend(Firebug.Module,
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
+                Firebug.Search.showOptions(context);
+
+                var found = panel.search(value, reverse);
+                if (!found && value)
+                    Firebug.Search.onNotFound(value);
+
                 if (value)
                 {
                     // Hides all nodes that didn't pass the filter
@@ -109,39 +127,59 @@ Firebug.Search = extend(Firebug.Module,
                     removeClass(panelNode, "searching");
                 }
 
-                var found = panel.search(value);
-                if (!found && value)
-                    beep();
-
                 panel.searchText = value;
             }, searchDelay);
         }
     },
 
+    onNotFound: function()
+    {
+        beep();
+    },
+
+    showOptions: function(context)
+    {
+        var panel = context.chrome.getSelectedPanel();
+        if (!panel.searchable)
+            return;
+
+        var searchBox = context.chrome.$("fbSearchBox");
+
+        // Get search options popup menu.
+        var optionsPopup = context.chrome.$("fbSearchOptionsPopup");
+        if (optionsPopup.state == "closed")
+        {
+            eraseNode(optionsPopup);
+
+            // The list of options is provided by the current panel.
+            var menuItems = panel.getSearchOptionsMenuItems();
+            if (menuItems)
+            {
+                for (var i=0; i<menuItems.length; i++)
+                    FBL.createMenuItem(optionsPopup, menuItems[i]);
+            }
+
+            optionsPopup.openPopup(searchBox, "before_start", 0, -5, false, false);
+        }
+
+        // Update search caseSensitive option according to the current capitalization.
+        var searchString = searchBox.value;
+        Firebug.searchCaseSensitive = (searchString != searchString.toLowerCase());
+    },
+
+    hideOptions: function()
+    {
+        var searchOptions = this.context.chrome.$("fbSearchOptionsPopup");
+        if (searchOptions)
+            searchOptions.hidePopup();
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
-    enable: function()
-    {
-        var searchBox = FirebugChrome.$("fbSearchBox");
-        searchBox.value = "";
-        searchBox.disabled = false;
-    },
 
-    disable: function()
-    {
-        var searchBox = FirebugChrome.$("fbSearchBox");
-        searchBox.value = "";
-        searchBox.disabled = true;
-    },
 
-    showPanel: function(browser, panel)
-    {
-        var chrome = browser.chrome;
-        var searchBox = chrome.$("fbSearchBox");
-        searchBox.value = panel && panel.searchText ? panel.searchText : "";
-        searchBox.disabled = !panel || !panel.searchable;
-    }
+
 });
 
 // ************************************************************************************************
