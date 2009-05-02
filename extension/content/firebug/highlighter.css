@@ -4,6 +4,9 @@
     z-index: 2147483647;
     position: absolute;
     background-color: #3875d7;
+    margin: 0px;
+    padding: 0px;
+    outline: 0px;
 }
 
 .firebugLayoutBoxParent {
@@ -12,10 +15,19 @@
     background-color: transparent;
     border-right: 1px dashed #BBBBBB;
     border-bottom: 1px dashed #BBBBBB;
+    margin: 0px;
+    padding: 0px;
+    outline: 0px;
+}
+
+.firebugRuler {
+    position: absolute;
+    margin: 0px;
+    padding: 0px;
+    outline: 0px;
 }
 
 .firebugRulerH {
-    position: absolute;
     top: -15px;
     left: 0;
     width: 100%;
@@ -27,7 +39,6 @@
 }
 
 .firebugRulerV {
-    position: absolute;
     top: 0;
     left: -15px;
     width: 14px;
@@ -47,6 +58,11 @@
 }
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
+.firebugLayoutBox {
+    margin: 0px;
+    padding: 0px;
+    outline: 0px;
+}
 
 .firebugLayoutBoxOffset {
     z-index: 2147483647;
@@ -82,6 +98,9 @@
     z-index: 2147483647;
     background-color: #000000;
     opacity: 0.4;
+    margin: 0px;
+    padding: 0px;
+    outline: 0px;
 }
 
 .firebugLayoutLineLeft,

@@ -445,19 +445,37 @@ FrameHighlighter.prototype =
     {
         if (element instanceof XULElement)
             return;
-        var offset = getViewOffset(element, true);
-        var x = offset.x, y = offset.y;
-        var w = element.offsetWidth, h = element.offsetHeight;
+
+        var m,
+            var win = element.ownerDocument.defaultView;
+            bodyStyle = win.getComputedStyle(element.ownerDocument.body,""),
+            rect = getPosXY(element),
+            x = rect.x,
+            y = rect.y,
+            w = element.offsetWidth,
+            h = element.offsetHeight;
+
         if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
+               
+        if(bodyStyle.getPropertyValue("position") == "absolute")
+        {
+            m=bodyStyle.getPropertyValue('margin-left').match(/([\d\.]+)(.*)/);
+            x-=m[1];
+             
+            m=bodyStyle.getPropertyValue("margin-top").match(/([\d\.]+)(.*)/);
+            y-=m[1];
 
+            FBTrace.sysout("bodyStyle:",bodyStyle);
+        }
+                
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
         if (FBTrace.DBG_INSPECT && wacked)
             FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for ", element.tagName);
         if (wacked)
             return;
 
-        var nodes = this.getNodes(context, element);
+        var nodes = this.getNodes(context);
 
         move(nodes.top, x, y-edgeSize);
         resize(nodes.top, w, edgeSize);
@@ -470,8 +488,10 @@ FrameHighlighter.prototype =
 
         move(nodes.left, x-edgeSize, y-edgeSize);
         resize(nodes.left, edgeSize, h+edgeSize*2);
-        if (FBTrace.DBG_INSPECT)																			/*@explore*/
-            FBTrace.sysout("FrameHighlighter ", element.tagName);											/*@explore*/
+        if (FBTrace.DBG_INSPECT) {																			/*@explore*/
+            FBTrace.sysout("FrameHighlighter ", element.tagName);				/*@explore*/
+            FBTrace.sysout("FrameHighlighter node", nodes);            /*@explore*/
+        }
         var body = getNonFrameBody(element);
         if (!body)
             return this.unhighlight(context);
@@ -573,9 +593,14 @@ BoxModelHighlighter.prototype =
 {
     highlight: function(context, element, boxFrame)
     {
-        var nodes = this.getNodes(context);
-        var highlightFrame = boxFrame ? nodes[boxFrame] : null;
-
+        var m,
+            var win = element.ownerDocument.defaultView;
+            bodyStyle = win.getComputedStyle(element.ownerDocument.body,""),
+            bodyMarginLeft = 0,
+            bodyMarginTop = 0,
+            nodes = this.getNodes(context),
+            highlightFrame = boxFrame ? nodes[boxFrame] : null;
+            
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
 
@@ -598,7 +623,7 @@ BoxModelHighlighter.prototype =
             return;
 
         var parentStyle = win.getComputedStyle(offsetParent, "");
-        var parentOffset = getViewOffset(offsetParent, true);
+        var parentOffset = getPosXY(offsetParent);
         var parentX = parentOffset.x + parseInt(parentStyle.borderLeftWidth);
         var parentY = parentOffset.y + parseInt(parentStyle.borderTopWidth);
         var parentW = offsetParent.offsetWidth-1;
@@ -607,7 +632,7 @@ BoxModelHighlighter.prototype =
         var style = win.getComputedStyle(element, "");
         var styles = readBoxStyles(style);
 
-        var offset = getViewOffset(element, true);
+        var offset = getPosXY(element);
         var x = offset.x - Math.abs(styles.marginLeft);
         var y = offset.y - Math.abs(styles.marginTop);
         var w = element.offsetWidth - (styles.paddingLeft + styles.paddingRight
@@ -615,7 +640,18 @@ BoxModelHighlighter.prototype =
         var h = element.offsetHeight - (styles.paddingTop + styles.paddingBottom
                 + styles.borderTop + styles.borderBottom);
 
-        move(nodes.offset, x, y);
+        if(bodyStyle.getPropertyValue("position") == "absolute")
+        {
+            m=bodyStyle.getPropertyValue("margin-left").match(/([\d\.]+)(.*)/);
+            bodyMarginLeft=parseInt(m[1],10);
+            m=bodyStyle.getPropertyValue("margin-top").match(/([\d\.]+)(.*)/);
+            bodyMarginTop=parseInt(m[1],10);
+
+            FBTrace.sysout("bodyStyle:",bodyStyle);
+        }
+        
+        // Overlay highlighting
+        move(nodes.offset, x-bodyMarginLeft, y-bodyMarginTop);
         pad(nodes.margin, styles.marginTop, styles.marginRight, styles.marginBottom,
                 styles.marginLeft);
         pad(nodes.border, styles.borderTop, styles.borderRight, styles.borderBottom,
@@ -627,7 +663,8 @@ BoxModelHighlighter.prototype =
         var showLines = Firebug.showRulers && boxFrame;
         if (showLines)
         {
-            move(nodes.parent, parentX, parentY);
+            // Dotted line
+            move(nodes.parent, parentX-bodyMarginLeft, parentY-bodyMarginTop);
             resize(nodes.parent, parentW, parentH);
 
             if (parentX < 14)
@@ -641,7 +678,7 @@ BoxModelHighlighter.prototype =
                 removeClass(nodes.parent, "overflowRulerY");
 
             var left = x;
-            var top = y;
+            var top = y-bodyMarginTop;
             var width = w-1;
             var height = h-1;
 
