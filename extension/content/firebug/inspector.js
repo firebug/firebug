@@ -447,7 +447,7 @@ FrameHighlighter.prototype =
             return;
 
         var m,
-            var win = element.ownerDocument.defaultView;
+            win = element.ownerDocument.defaultView,
             bodyStyle = win.getComputedStyle(element.ownerDocument.body,""),
             rect = getPosXY(element),
             x = rect.x,
@@ -594,7 +594,7 @@ BoxModelHighlighter.prototype =
     highlight: function(context, element, boxFrame)
     {
         var m,
-            var win = element.ownerDocument.defaultView;
+            win = element.ownerDocument.defaultView,
             bodyStyle = win.getComputedStyle(element.ownerDocument.body,""),
             bodyMarginLeft = 0,
             bodyMarginTop = 0,
