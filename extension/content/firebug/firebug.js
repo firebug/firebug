@@ -1042,7 +1042,7 @@ top.Firebug =
         if (!context)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
+                FBTrace.sysout("Firebug minimizeBar, no context in "+window.location);
             return null;
         }
 
@@ -1141,9 +1141,14 @@ top.Firebug =
     {
         if (!context)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
-            return null;
+            var browser = FirebugChrome.getCurrentBrowser();
+            var created = TabWatcher.watchBrowser(browser);  // create a context for this page
+            if (!created)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
+                return null;
+            }
         }
 
         var browser = context.browser;
@@ -1701,67 +1706,58 @@ top.Firebug =
 
     destroyContext: function(context, persistedState, browser)
     {
-        if (context)
+        if (!context)  // then we are called just to clean up
         {
-            dispatch(modules, "destroyContext", [context, persistedState]);
+            if(browser && browser.detached)
+                this.killWindow(browser, browser.chrome);
+            return;
+        }
 
-            if (FirebugContext == context)
-                FirebugContext = null;
+        dispatch(modules, "destroyContext", [context, persistedState]);
 
-            var browser = context.browser;
-            // Persist remnants of the context for restoration if the user reloads
-            browser.panelName = context.panelName;
-            browser.sidePanelNames = context.sidePanelNames;
+        if (FirebugContext == context)
+            FirebugContext = null;
 
-            if (browser.detached)
+        var browser = context.browser;
+        // Persist remnants of the context for restoration if the user reloads
+        browser.panelName = context.panelName;
+        browser.sidePanelNames = context.sidePanelNames;
+
+        if (browser.detached)
+        {
+            clearContextTimeout = setTimeout(function delayClearContext()
             {
-                clearContextTimeout = setTimeout(function delayClearContext()
+                if (context == FirebugContext)
                 {
-                    if (context == FirebugContext)
-                    {
-                        browser.isSystemPage = true;  // XXXjjb I don't believe this is ever tested.
-                        Firebug.showContext(browser, null);
-                    }
-                }, 100);
-            }
-
-            if (context.externalChrome)
-            {
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("Firebug.destroyContext context.externalChrome: "+context.externalChrome+" browser.firebugReload: "+browser.firebugReload);
-                if (browser.firebugReload)
-                    delete browser.firebugReload; // and don't killWindow
-                else
-                {
-                    this.killWindow(browser, context.externalChrome);
-                    delete context.detached; // a destroyed context cannot be detached
+                    browser.isSystemPage = true;  // XXXjjb I don't believe this is ever tested.
+                    Firebug.showContext(browser, null);
                 }
-            }
+            }, 100);
+        }
+
+        if (context.externalChrome)
+        {
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("Firebug.destroyContext context.externalChrome: "+context.externalChrome+" browser.firebugReload: "+browser.firebugReload);
+            if (browser.firebugReload)
+                delete browser.firebugReload; // and don't killWindow
             else
             {
-                if (browser.firebugReload)
-                    delete browser.firebugReload;
-                else
-                    delete browser.showFirebug; // ok we are done debugging
+                this.killWindow(browser, context.externalChrome);
+                delete context.detached; // a destroyed context cannot be detached
             }
-            this.updateActiveContexts(context); // a destroyed page is not activeContext
         }
         else
         {
-            if(browser)
-            {
-                if (browser.detached)
-                    this.killWindow(browser, browser.chrome);
-                else if (context.minimized)
-                    Firebug.cleanUpMinimization(context);
-            }
-            else
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Firebug.destroyContext, browser is null");
-            }
-        }
+            if (context.minimized)
+                Firebug.cleanUpMinimization(context);
 
+            if (browser.firebugReload)
+                delete browser.firebugReload;
+            else
+                delete browser.showFirebug; // ok we are done debugging
+        }
+        this.updateActiveContexts(context); // a destroyed page is not activeContext
     },
 
     onSourceFileCreated: function(context, sourceFile)
