@@ -229,11 +229,12 @@ top.Firebug =
             FBTrace.dumpProperties("Firebug.internationalizeUI");
 
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
-                        "menu_enablePanels", "menu_disablePanels",
+            "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y", "fbContinueButton"];
+            "menu_enableA11y", "fbContinueButton", "fbBreakOnNextButton",
+            "fbMinimizeButton"];
 
-        var tooltipTextElements = ['fbContinueButton']
+        var tooltipTextElements = ["fbContinueButton", "fbBreakOnNextButton", "fbMinimizeButton"];
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);

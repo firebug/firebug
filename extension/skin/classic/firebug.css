@@ -137,6 +137,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 #fbContinueButton,
+#fbBreakOnNextButton,
 #fbStepOverButton,
 #fbStepIntoButton,
 #fbStepOutButton {
@@ -155,29 +156,36 @@ fbContinueButton has three states:
    off -> true:  resume w/context.stopped
    off -> false: not allowed
 */
-#fbContinueButton[breakable="off"] {
+#fbContinueButton[breakable="off"],
+#fbBreakOnNextButton[breakable="off"] {
     list-style-image: url(chrome://firebug/skin/continue.png);
 }
 /*
-#fbContinueButton:hover:active {
+#fbContinueButton:hover:active,
+#fbBreakOnNextButton:hover:active {
     list-style-image: url(chrome://firebug/skin/continueActive.png);
 }
 
-#fbContinueButton[disabled="true"] {   no longer used
+#fbContinueButton[disabled="true"],
+#fbBreakOnNextButton[disabled="true"] {   no longer used
     list-style-image: url(chrome://firebug/skin/continueDisabled.png) !important;
 }
  */
 
-#fbContinueButton[breakable="true"] {
+#fbContinueButton[breakable="true"],
+#fbBreakOnNextButton[breakable="true"] {
     list-style-image: url(chrome://firebug/skin/breakNext.png);
 }
-#fbContinueButton:hover:active[breakable="true"] {
+#fbContinueButton:hover:active[breakable="true"],
+#fbBreakOnNextButton:hover:active[breakable="true"] {
    list-style-image: url(chrome://firebug/skin/breakNextActive.png)
 }
-#fbContinueButton:hover:active[breakable="false"] {
+#fbContinueButton:hover:active[breakable="false"],
+#fbBreakOnNextButton:hover:active[breakable="false"] {
    list-style-image: url(chrome://firebug/skin/breakNextActive.png)
 }
-#fbContinueButton[breakable="false"] {
+#fbContinueButton[breakable="false"],
+#fbBreakOnNextButton[breakable="false"] {
    list-style-image: url(chrome://firebug/skin/breakNextArmed.gif)
 }
 

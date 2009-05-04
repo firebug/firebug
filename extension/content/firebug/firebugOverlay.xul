@@ -160,8 +160,8 @@
                             <image src="chrome://firebug/skin/flashlight.png"/>
                         </toolbarbutton>
 
-                        <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                   tooltiptext="BreakOnNext" class="toolbar-image-button" />
+                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_resumeExecution"
+                                   tooltiptext="script.Break On Next" class="toolbar-image-button" />
 
                     </hbox>
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
