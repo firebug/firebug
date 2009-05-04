@@ -161,6 +161,38 @@ const styleGroups =
 };
 
 Firebug.CSSModule = extend(Firebug.Module, {
+    freeEdit: function(styleSheet, value) {
+        if (!styleSheet.editStyleSheet)
+        {
+            var ownerNode = getStyleSheetOwnerNode(styleSheet);
+            styleSheet.disabled = true;
+            
+            var url = CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
+            url.spec = styleSheet.href;
+            
+            var editStyleSheet = ownerNode.ownerDocument.createElementNS(
+                "http://www.w3.org/1999/xhtml",
+                "style");
+            editStyleSheet.firebugIgnore = true;
+            editStyleSheet.setAttribute("type", "text/css");
+            editStyleSheet.setAttributeNS(
+                "http://www.w3.org/XML/1998/namespace",
+                "base",
+                url.directory);
+            
+            // Insert the edited stylesheet directly after the old one to ensure the styles
+            // cascade properly.
+            ownerNode.parentNode.insertBefore(editStyleSheet, ownerNode.nextSibling);
+            
+            styleSheet.editStyleSheet = editStyleSheet;
+        }
+      
+        styleSheet.editStyleSheet.innerHTML = value;
+        if (FBTrace.DBG_CSS)  /*@explore*/
+            FBTrace.sysout("css.saveEdit styleSheet.href:"+styleSheet.href+" got innerHTML:"+value+"\n"); /*@explore*/
+        
+        dispatch(this.fbListener, "onCSSFreeEdit", [styleSheet, value]);
+    },
     insertRule: function(styleSheet, cssText, ruleIndex) {
         if (FBTrace.DBG_CSS) FBTrace.sysout("Insert: " + ruleIndex + " " + cssText);  /*@explore*/
         var insertIndex = styleSheet.insertRule(cssText, ruleIndex);
@@ -1514,33 +1546,7 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
 
     saveEdit: function(target, value, previousValue)
     {
-        var ownerNode = getStyleSheetOwnerNode(this.styleSheet);
-
-        if (!this.styleSheet.editStyleSheet)
-        {
-            this.styleSheet.disabled = true;
-
-            var url = CCSV("@mozilla.org/network/standard-url;1", Components.interfaces.nsIURL);
-            url.spec = this.styleSheet.href;
-
-            var editStyleSheet = this.editStyleSheet;
-            editStyleSheet = ownerNode.ownerDocument.createElementNS("http://www.w3.org/1999/xhtml",
-                "style");
-            editStyleSheet.firebugIgnore = true;
-            editStyleSheet.setAttribute("type", "text/css");
-            editStyleSheet.setAttributeNS("http://www.w3.org/XML/1998/namespace", "base",
-                url.directory);
-
-            // Insert the edited stylesheet directly after the old one to ensure the styles
-        // cascade properly.
-        ownerNode.parentNode.insertBefore(editStyleSheet, ownerNode.nextSibling);
-
-            this.styleSheet.editStyleSheet = editStyleSheet;
-        }
-
-        this.styleSheet.editStyleSheet.innerHTML = value;
-        if (FBTrace.DBG_CSS)  /*@explore*/
-            FBTrace.sysout("css.saveEdit styleSheet.href:"+this.styleSheet.href+" got innerHTML:"+value+"\n"); /*@explore*/
+        Firebug.CSSModule.freeEdit(this.styleSheet, value);
     },
 
     endEditing: function()
