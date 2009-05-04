@@ -918,30 +918,47 @@ var Renderer =
         return [firstRow, lastRow];
     },
 
-    insertAfter: function(args, before, self)
+    insertBefore: function(args, before, self)
+    {
+        return this.insertNode(
+                args, before.ownerDocument,
+                function(frag) {
+                    before.parentNode.insertBefore(frag, before);
+                },
+                self);
+    },
+
+    insertAfter: function(args, after, self)
+    {
+        return this.insertNode(
+                args, after.ownerDocument,
+                function(frag) {
+                    after.parentNode.insertBefore(frag, after.nextSibling);
+                },
+                self);
+    },
+
+    insertNode: function(args, doc, inserter, self)
     {
         this.tag.compile();
 
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
+        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate.insertNode html: "+html+"\n");  /*@explore*/
 
-        var doc = before.ownerDocument;
         var range = doc.createRange();
         range.selectNode(doc.body);
         var frag = range.createContextualFragment(html);
 
         var root = frag.firstChild;
-        if (before.nextSibling)
-            before.parentNode.insertBefore(frag, before.nextSibling);
-        else
-            before.parentNode.appendChild(frag);
+        root = inserter(frag) || root;
 
         var domArgs = [root, this.tag.context, 0];
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
 
-        this.tag.renderDOM.apply(self ? self : (this.tag.subject ? this.tag.subject : null),
-            domArgs);
+        if (FBTrace.DBG_DOM) FBTrace.dumpProperties("domplate.insertNode domArgs:", domArgs);  /*@explore*/
+        this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
         return root;
     },

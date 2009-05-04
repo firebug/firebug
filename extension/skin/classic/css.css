@@ -4,14 +4,22 @@
     overflow-x: hidden;
 }
 
+.cssSheet > .insertBefore {
+    height: 1.5em;
+}
+
 .cssRule {
     position: relative;
-    margin: 3px 0 4px 0;
-    padding: 3px 0 4px 6px;
+    margin: 0;
+    padding: 1em 0 0 6px;
     font-family: Monaco, monospace;
     color: #000000;
 }
 
+.cssRule:first-child {
+    padding-top: 6px;
+ }
+ 
 .cssHead {
     padding-right: 150px;
 }

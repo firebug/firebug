@@ -35,10 +35,10 @@ var CSSImportRuleTag =
     );
 
 var CSSStyleRuleTag =
-    DIV({class: "cssRule insertInto", _repObject: "$rule.rule.style",
+    DIV({class: "cssRule insertInto editGroup", _repObject: "$rule.rule.style",
             "ruleId": "$rule.id", role : 'presentation'},
         DIV({class: "cssHead focusRow", role : 'listitem'},
-            SPAN({class: "cssSelector"}, "$rule.selector"), " {"
+            SPAN({class: "cssSelector editable"}, "$rule.selector"), " {"
         ),
         DIV({role : 'group'},
             DIV({class : "cssPropertyListBox", role : 'listbox'},
@@ -161,6 +161,20 @@ const styleGroups =
 };
 
 Firebug.CSSModule = extend(Firebug.Module, {
+    insertRule: function(styleSheet, cssText, ruleIndex) {
+        if (FBTrace.DBG_CSS) FBTrace.sysout("Insert: " + ruleIndex + " " + cssText);  /*@explore*/
+        var insertIndex = styleSheet.insertRule(cssText, ruleIndex);
+        
+        dispatch(this.fbListeners, "onCSSInsertRule", [styleSheet, cssText, ruleIndex]);
+        
+        return insertIndex;
+    },
+    deleteRule: function(styleSheet, ruleIndex) {
+        if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);  /*@explore*/
+        styleSheet.deleteRule(ruleIndex);
+        
+        dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
+    },
     setProperty: function(style, propName, propValue, propPriority) {
         var prevValue = style.getPropertyValue(propName);
         var prevPriority = style.getPropertyPriority(propName);
@@ -195,10 +209,13 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 {
     template: domplate(
     {
-        tag:
-            FOR("rule", "$rules",
-                CSSRuleTag
-            )
+        tag: 
+            DIV({class: "cssSheet insertInto"},
+                FOR("rule", "$rules",
+                    CSSRuleTag
+                ),
+                DIV({class: "cssSheet editable insertBefore"}, "")
+                )
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -405,13 +422,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         else
         {
             var rule = {rule: this.selection, inherited: false, selector: "element.style", props: []};
-            var styleRuleBox = this.template.ruleTag.replace({rule: rule}, this.document);
-
-            if (rulesBox.firstChild)
-                rulesBox.insertBefore(styleRuleBox, rulesBox.firstChild);
-            else
-                rulesBox.appendChild(styleRuleBox);
-
+            var styleRuleBox = this.template.ruleTag.insertBefore({rule: rule}, rulesBox.firstChild);
             Firebug.Editor.insertRowForObject(styleRuleBox);
         }
     },
@@ -419,6 +430,20 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     insertPropertyRow: function(row)
     {
         Firebug.Editor.insertRowForObject(row);
+    },
+
+    insertRule: function(row)
+    {
+        var location = getAncestorByClass(row, "cssRule");
+        if (!location)
+        {
+            location = getChildByClass(this.panelNode, "cssSheet");
+            Firebug.Editor.insertRowForObject(location);
+        }
+        else
+        {
+            Firebug.Editor.insertRow(location, "before");
+        }
     },
 
     editPropertyRow: function(row)
@@ -697,6 +722,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     command: bindFixed(this.editElementStyle, this) }
             );
         }
+        else
+        {
+            items.push(
+                    "-",
+                    {label: "NewRule",
+                        command: bindFixed(this.insertRule, this, target) }
+                );
+        }
 
         if (getAncestorByClass(target, "cssRule"))
         {
@@ -791,10 +824,22 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getEditor: function(target, value)
     {
-        if (!this.editor)
-            this.editor = new CSSEditor(this.document);
-
-        return this.editor;
+        if (target == this.panelNode
+            || hasClass(target, "cssSelector") || hasClass(target, "cssRule")
+            || hasClass(target, "cssSheet"))
+        {
+            if (!this.ruleEditor)
+                this.ruleEditor = new CSSRuleEditor(this.document);
+    
+            return this.ruleEditor;
+        }
+        else
+        {
+            if (!this.editor)
+                this.editor = new CSSEditor(this.document);
+    
+            return this.editor;
+        }
     },
 
     getDefaultLocation: function()
@@ -1217,9 +1262,11 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var emptyProp = {name: "", value: ""};
-        var sibling = insertWhere == "before" ? target.previousSibling : target;
 
-        return CSSPropTag.insertAfter({prop: emptyProp}, sibling);
+        if (insertWhere == "before")
+            return CSSPropTag.insertBefore({prop: emptyProp}, target);
+        else
+            return CSSPropTag.insertAfter({prop: emptyProp}, target);
     },
 
     saveEdit: function(target, value, previousValue)
@@ -1301,6 +1348,111 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var propName = getChildByClass(row, "cssPropName").textContent;
             return getCSSKeywordsByProperty(propName);
         }
+    }
+});
+
+//************************************************************************************************
+//CSSRuleEditor
+
+function CSSRuleEditor(doc)
+{
+    this.initializeInline(doc);
+    this.completeAsYouType = false;
+}
+CSSRuleEditor.uniquifier = 0;
+CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+{
+    insertNewRow: function(target, insertWhere)
+    {
+         var emptyRule = {
+                 selector: "",
+                 id: "",
+                 props: [],
+                 rule: {}
+         };
+
+         if (insertWhere == "before")
+             return CSSStyleRuleTag.insertBefore({rule: emptyRule}, target);
+         else
+             return CSSStyleRuleTag.insertAfter({rule: emptyRule}, target);
+    },
+
+    saveEdit: function(target, value, previousValue)
+    {
+        if (FBTrace.DBG_CSS)    FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);  /*@explore*/
+        target.innerHTML = escapeHTML(value);
+        
+        if (value === previousValue)     return;
+
+        var row = getAncestorByClass(target, "cssRule");
+        var styleSheet = this.panel.location;
+        styleSheet = styleSheet.editStyleSheet ? styleSheet.editStyleSheet.sheet : styleSheet;
+        
+        var cssRules = styleSheet.cssRules;
+        var style = Firebug.getRepObject(target), oldStyle = style;
+        var ruleIndex = cssRules.length;
+        if (style || Firebug.getRepObject(row.nextSibling))
+        {
+            var parent = (style || Firebug.getRepObject(row.nextSibling)).parentRule;
+            for (ruleIndex=0; ruleIndex<cssRules.length && parent!=cssRules[ruleIndex]; ruleIndex++) {}
+        }
+
+        // Firefox does not follow the spec for the update selector text case.
+        // When attempting to update the value, firefox will silently fail.
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=37468 for the quite
+        // old discussion of this bug.
+        // As a result we need to recreate the style every time the selector
+        // changes.
+        if (value)
+        {
+            var cssText = [ value, "{", ];
+            var props = row.getElementsByClassName("cssProp");
+            for (var i = 0; i < props.length; i++) {
+                var propEl = props[i];
+                if (!hasClass(propEl, "disabledStyle")) {
+                    cssText.push(getChildByClass(propEl, "cssPropName").textContent);
+                    cssText.push(":");
+                    cssText.push(getChildByClass(propEl, "cssPropValue").textContent);
+                    cssText.push(";");
+                }
+            }
+            cssText.push("}");
+            cssText = cssText.join("");
+            
+            try
+            {
+                var insertLoc = Firebug.CSSModule.insertRule(styleSheet, cssText, ruleIndex);
+                style = cssRules[insertLoc].style;
+                ruleIndex++;
+            }
+            catch (err)
+            {
+                if (FBTrace.DBG_CSS) FBTrace.sysout("CSS Insert Error: ", err);  /*@explore*/
+                target.innerHTML = escapeHTML(previousValue);
+                return;
+            }
+        } else {
+            style = undefined;
+        }
+
+        // Delete in all cases except for new add
+        if (oldStyle)
+        {
+            Firebug.CSSModule.deleteRule(styleSheet, ruleIndex);
+        }
+
+        // Update the rep object
+        row.repObject = style;
+        if (!oldStyle)
+        {
+            // Who knows what the domutils will return for rule line
+            // for a recently created rule. To be safe we just generate
+            // a unique value as this is only used as an internal key.
+            var ruleId = "new/"+value+"/"+(++CSSRuleEditor.uniquifier);
+            row.setAttribute("ruleId", ruleId);
+        }
+
+        this.panel.markChange(this.panel.name == "stylesheet");
     }
 });
 

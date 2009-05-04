@@ -211,7 +211,7 @@ Firebug.Editor = extend(Firebug.Module,
         else if (hasClass(element, "insertAfter"))
             this.insertRow(element, "after");
         else
-            this.startEditing(element, undefined, currentEditor);
+            this.startEditing(element);
     },
 
     tabNextEditor: function()
@@ -252,14 +252,9 @@ Firebug.Editor = extend(Firebug.Module,
 
     insertRow: function(relative, insertWhere)
     {
+        var group =
+            relative || getAncestorByClass(currentTarget, "editGroup") || currentTarget;
         var value = this.stopEditing();
-
-        if (!relative)
-            relative = currentTarget;
-
-        var group = getAncestorByClass(relative, "editGroup");
-        if (!group)
-            group = relative;
 
         currentPanel = Firebug.getElementPanel(group);
 
@@ -1062,20 +1057,30 @@ function getDefaultEditor(panel)
     return defaultEditor;
 }
 
+/**
+ * An outsider is the first element matching the stepper element that
+ * is not an child of group. Elements tagged with insertBefore or insertAfter
+ * classes are also excluded from these results unless they are the sibling
+ * of group, relative to group's parent editGroup. This allows for the proper insertion
+ * rows when groups are nested.
+ */
 function getOutsider(element, group, stepper)
 {
-    var next = stepper(element);
-    if (isAncestor(next, group))
+    var parentGroup = getAncestorByClass(group.parentNode, "editGroup");
+    var next;
+    do
     {
-        do
-        {
-            next = stepper(next);
-        }
-        while (isAncestor(next, group) || hasClass(next, "insertBefore")
-            || hasClass(next, "insertAfter"));
+        next = stepper(next || element);
     }
+    while (isAncestor(next, group) || isGroupInsert(next, parentGroup));
 
     return next;
+}
+
+function isGroupInsert(next, group)
+{
+    return (!group || isAncestor(next, group))
+        && (hasClass(next, "insertBefore") || hasClass(next, "insertAfter"));
 }
 
 function getNextOutsider(element, group)
