@@ -1,5 +1,13 @@
 /* See license.txt for terms of usage */
 
+#firebugBody {
+    position: absolute;
+    top:0;
+    left:0;
+    margin:0px;
+    padding:0px;
+}
+
 .firebugHighlight {
     z-index: 2147483647;
     position: absolute;

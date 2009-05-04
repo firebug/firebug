@@ -446,29 +446,15 @@ FrameHighlighter.prototype =
         if (element instanceof XULElement)
             return;
 
-        var m,
-            win = element.ownerDocument.defaultView,
-            bodyStyle = win.getComputedStyle(element.ownerDocument.body,""),
-            rect = getPosXY(element),
+        var rect = getPosXY(element),
             x = rect.x,
             y = rect.y,
             w = element.offsetWidth,
             h = element.offsetHeight;
 
         if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
-               
-        if(bodyStyle.getPropertyValue("position") == "absolute")
-        {
-            m=bodyStyle.getPropertyValue('margin-left').match(/([\d\.]+)(.*)/);
-            x-=m[1];
-             
-            m=bodyStyle.getPropertyValue("margin-top").match(/([\d\.]+)(.*)/);
-            y-=m[1];
+            FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
 
-            FBTrace.sysout("bodyStyle:",bodyStyle);
-        }
-                
         var wacked = isNaN(x) || isNaN(y) || isNaN(w) || isNaN(h);
         if (FBTrace.DBG_INSPECT && wacked)
             FBTrace.sysout("FrameHighlighter.highlight has bad boxObject for ", element.tagName);
@@ -488,18 +474,19 @@ FrameHighlighter.prototype =
 
         move(nodes.left, x-edgeSize, y-edgeSize);
         resize(nodes.left, edgeSize, h+edgeSize*2);
-        if (FBTrace.DBG_INSPECT) {																			/*@explore*/
-            FBTrace.sysout("FrameHighlighter ", element.tagName);				/*@explore*/
+        if (FBTrace.DBG_INSPECT) {                                     /*@explore*/
+            FBTrace.sysout("FrameHighlighter ", element.tagName);       /*@explore*/
             FBTrace.sysout("FrameHighlighter node", nodes);            /*@explore*/
         }
-        var body = getNonFrameBody(element);
+        var body = getHighlighterBody(element);
+
         if (!body)
             return this.unhighlight(context);
 
         var needsAppend = !nodes.top.parentNode || nodes.top.ownerDocument != body.ownerDocument;
         if (needsAppend)
         {
-            if (FBTrace.DBG_INSPECT)																		/*@explore*/
+            if (FBTrace.DBG_INSPECT)                                    /*@explore*/
                 FBTrace.sysout("FrameHighlighter needsAppend", nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI); /*@explore*/
             attachStyles(context, body);
             for (var edge in nodes)
@@ -593,11 +580,7 @@ BoxModelHighlighter.prototype =
 {
     highlight: function(context, element, boxFrame)
     {
-        var m,
-            win = element.ownerDocument.defaultView,
-            bodyStyle = win.getComputedStyle(element.ownerDocument.body,""),
-            bodyMarginLeft = 0,
-            bodyMarginTop = 0,
+        var win = element.ownerDocument.defaultView,
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
             
@@ -640,18 +623,8 @@ BoxModelHighlighter.prototype =
         var h = element.offsetHeight - (styles.paddingTop + styles.paddingBottom
                 + styles.borderTop + styles.borderBottom);
 
-        if(bodyStyle.getPropertyValue("position") == "absolute")
-        {
-            m=bodyStyle.getPropertyValue("margin-left").match(/([\d\.]+)(.*)/);
-            bodyMarginLeft=parseInt(m[1],10);
-            m=bodyStyle.getPropertyValue("margin-top").match(/([\d\.]+)(.*)/);
-            bodyMarginTop=parseInt(m[1],10);
-
-            FBTrace.sysout("bodyStyle:",bodyStyle);
-        }
-        
         // Overlay highlighting
-        move(nodes.offset, x-bodyMarginLeft, y-bodyMarginTop);
+        move(nodes.offset, x, y);
         pad(nodes.margin, styles.marginTop, styles.marginRight, styles.marginBottom,
                 styles.marginLeft);
         pad(nodes.border, styles.borderTop, styles.borderRight, styles.borderBottom,
@@ -664,7 +637,7 @@ BoxModelHighlighter.prototype =
         if (showLines)
         {
             // Dotted line
-            move(nodes.parent, parentX-bodyMarginLeft, parentY-bodyMarginTop);
+            move(nodes.parent, parentX, parentY);
             resize(nodes.parent, parentW, parentH);
 
             if (parentX < 14)
@@ -678,7 +651,7 @@ BoxModelHighlighter.prototype =
                 removeClass(nodes.parent, "overflowRulerY");
 
             var left = x;
-            var top = y-bodyMarginTop;
+            var top = y;
             var width = w-1;
             var height = h-1;
 
@@ -721,7 +694,7 @@ BoxModelHighlighter.prototype =
             move(nodes.lines.left, left, 0)
         }
 
-        var body = getNonFrameBody(element);
+        var body = getHighlighterBody(element);
         if (!body)
             return this.unhighlight(context);
 
@@ -836,6 +809,33 @@ function getNonFrameBody(elt)
 {
     var body = getBody(elt.ownerDocument);
     return body.localName.toUpperCase() == "FRAMESET" ? null : body;
+}
+
+function getHighlighterBody(elt)
+{
+    var body = elt.ownerDocument.getElementById("firebugBody"),
+        doc = elt.ownerDocument;
+    
+    if(!body)
+    {
+        body = doc.createElement('body');
+        body.id='firebugBody';
+        body.firebugIgnore = true;
+        doc.documentElement.appendChild(body);
+    }
+    
+    if (body)
+    {
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.sysout("getHighlighterBody", body);
+
+        return body;
+    }
+
+    if (FBTrace.DBG_INSPECT)
+        FBTrace.sysout("getHighlighterBody", doc.firstChild);
+
+    return doc.firstChild;  // For non-HTML docs
 }
 
 function attachStyles(context, body)
