@@ -157,9 +157,9 @@ Firebug.Search = extend(Firebug.Module,
             {
                 for (var i=0; i<menuItems.length; i++)
                     FBL.createMenuItem(optionsPopup, menuItems[i]);
-            }
 
-            optionsPopup.openPopup(searchBox, "before_start", 0, -5, false, false);
+                optionsPopup.openPopup(searchBox, "before_start", 0, -5, false, false);
+            }
         }
 
         // Update search caseSensitive option according to the current capitalization.
