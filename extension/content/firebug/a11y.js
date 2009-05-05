@@ -346,7 +346,7 @@ FBL.ns( function()
 
             getPanelTabStop : function(panel)
             {
-                if (panel.context)
+                if (panel.context && panel.context.a11yPanels)
                     return panel.context.a11yPanels[panel.name].tabStop;
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("a11y.getPanelTabStop null panel.context");
@@ -1273,7 +1273,7 @@ FBL.ns( function()
 
                         if (event.ctrlKey)
                         {
-                            box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)   
+                            box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)
                             return;
                         }
                         var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
@@ -1286,7 +1286,7 @@ FBL.ns( function()
                         break;
                     case 33://pgup
                     case 34://pgdn
-                        box.scrollTop = keyCode == 33? (box.scrollTop - (box.lineHeight * box.viewableLines)) : 
+                        box.scrollTop = keyCode == 33? (box.scrollTop - (box.lineHeight * box.viewableLines)) :
                                 (box.scrollTop + (box.lineHeight * box.viewableLines))
                         cancelEvent(event);
                         break;
@@ -1295,7 +1295,7 @@ FBL.ns( function()
                         if (event.ctrlKey)
                         {
                             box.scrollTop = keyCode == 36? 0 : (box.scrollHeight - box.clientHeight);
-                            cancelEvent(event);    
+                            cancelEvent(event);
                         }
                         if (keyCode == 36)
                         {
@@ -1347,12 +1347,12 @@ FBL.ns( function()
             {
                 var panelA11y = panel.context.a11yPanels[panel.name];
                 var node = box.getLineNode(line);
-                
+
                 if (!offset)
                 {
                     if (panelA11y.caretOffset)
                         offset = panelA11y.caretOffset;
-                    else 
+                    else
                         offset = 0;
                 }
                 var startNode = getElementByClass(node, 'sourceRowText')
