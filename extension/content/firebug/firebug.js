@@ -26,6 +26,7 @@ const prefService = PrefService.getService(nsIPrefService);
 const observerService = CCSV("@mozilla.org/observer-service;1", "nsIObserverService");
 const categoryManager = CCSV("@mozilla.org/categorymanager;1", "nsICategoryManager");
 const stringBundleService = CCSV("@mozilla.org/intl/stringbundle;1", "nsIStringBundleService");
+const promptService = CCSV("@mozilla.org/embedcomp/prompt-service;1", "nsIPromptService");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 // There is one Firebug object per browser.xul
@@ -1277,8 +1278,12 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     resetAllOptions: function()  // to default state
     {
+        if (!promptService.confirm(null, $STR("Firebug"), $STR("confirmation.Reset_All_Firebug_Options")))
+            return;
+
         var preferences = prefs.getChildList("extensions.firebug", {});
         for (var i = 0; i < preferences.length; i++)
         {
@@ -1298,6 +1303,7 @@ top.Firebug =
 
         Firebug.Debugger.clearAllBreakpoints(); // no context clears in all contexts
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Panels
 
