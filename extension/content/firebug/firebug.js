@@ -1279,10 +1279,13 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    resetAllOptions: function()  // to default state
+    resetAllOptions: function(confirm)  // to default state
     {
-        if (!promptService.confirm(null, $STR("Firebug"), $STR("confirmation.Reset_All_Firebug_Options")))
-            return;
+        if (confirm)
+        {
+            if (!promptService.confirm(null, $STR("Firebug"), $STR("confirmation.Reset_All_Firebug_Options")))
+                return;
+        }
 
         var preferences = prefs.getChildList("extensions.firebug", {});
         for (var i = 0; i < preferences.length; i++)

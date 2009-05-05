@@ -65,7 +65,7 @@
         <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
         <command id="cmd_enableA11y" oncommand="Firebug.A11yModel.toggle(this.getAttribute('checked') == 'true'); " />
-        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions();" />
+        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);" />
     </commandset>
 
     <keyset id="mainKeyset">
