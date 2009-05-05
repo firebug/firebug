@@ -75,6 +75,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 716: Add "Inspect element" context menu element in Fx3 for button and select elements
     * Issue 834: Not displayed POST variables in NET tab
     * Issue 895: Firebug toolbar button should behave the same way as clicking on status bar icon.
+    * Issue 902: Allow adding new CSS rule
     * Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
     * Issue 1113: Unresponsive when using large Data URI image replacement, contribution by  2005jimmont
     * Issue 1122: can't copy or open image background from css viewer
@@ -135,8 +136,11 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1663: CSS Property Name Editor Does not always work (contribution by kpdecker)
     * Issue 1679: Break On Next Statement ("pause" button): poor selection style (partial)
     * Issue 1680: Firebug suspends on page reload.
+    * Issue 1688: Collection of issues relating to element Inspector
     * Issue 1691: CSS style editor autocomplete problems
     * Issue 1694 in fbug: Net Panel Cutsomization: file.responseText doesn't include original line breaks
     * Issue 1695: Clicking on sessionStorage (empty array) in DOM panel causes error
     * Issue 1700: 'Inspect in DOM panel' for variables during script suspension broken
     * Issue 1701: Stack panel not updated immediately during script suspension
+    * Issue 1712: Firebug 1.4's channel listener changes observable behaviour
+    * Issue 1715: Always Open in New Window prevents
