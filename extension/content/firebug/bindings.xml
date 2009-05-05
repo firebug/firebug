@@ -788,7 +788,12 @@
             if (event.keyCode == 13)
             {
                 if (FBL.isControl(event))
-                    Firebug.Search.enter(FirebugContext);
+                {
+                    if (!event.ctrlKey)
+                        Firebug.Search.enter(FirebugContext);
+                    else
+                        FBL.dispatch([Firebug.A11yModel], 'moveToSearchMatch', [FirebugContext]);
+                }
                 else
                     Firebug.Search.update(FirebugContext, true);
             }

@@ -136,10 +136,13 @@ InsideOutBox.prototype =
         {
             // Set all of the node's ancestors to be permanently open
             var parentBox = this.getParentObjectBox(objectBox);
+            var labelBox;
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
             {
                 setClass(parentBox, "open");
-                parentBox.firstChild.setAttribute('aria-expanded', 'true')
+                labelBox = getChildByClass(parentBox.firstChild, 'nodeLabelBox');
+                if (labelBox)
+                    labelBox.setAttribute('aria-expanded', 'true')
             }
         }
     },
@@ -155,20 +158,26 @@ InsideOutBox.prototype =
             var firstChild = this.view.getChildObject(objectBox.repObject, 0);
             this.populateChildBox(firstChild, nodeChildBox);
         }
-        objectBox.firstChild.setAttribute('aria-expanded', 'true');
+        var labelBox = getChildByClass(objectBox.firstChild, 'nodeLabelBox');
+        if (labelBox)
+            labelBox.setAttribute('aria-expanded', 'true');
         setClass(objectBox, "open");
     },
 
     contractObjectBox: function(objectBox)
     {
         removeClass(objectBox, "open");
-        objectBox.firstChild.setAttribute('aria-expanded', 'false');
+        var labelBox = getChildByClass(objectBox.firstChild, 'nodeLabelBox');
+        if (labelBox)
+            labelBox.setAttribute('aria-expanded', 'false');
     },
 
     toggleObjectBox: function(objectBox, forceOpen)
     {
         var isOpen = hasClass(objectBox, "open");
-        objectBox.firstChild.setAttribute('aria-expanded', isOpen);
+        var labelBox = getChildByClass(objectBox.firstChild, 'nodeLabelBox');
+        if (labelBox)
+            labelBox.setAttribute('aria-expanded', isOpen);
         if (!forceOpen && isOpen)
             this.contractObjectBox(objectBox);
 

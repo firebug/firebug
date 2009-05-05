@@ -160,6 +160,7 @@ FBL.ns( function()
                         panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
                         panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
                         panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
+                        this.addLiveElem(panel);
                         break;
                     case 'css':
                         panelA11y.manageFocus = true;
@@ -180,14 +181,7 @@ FBL.ns( function()
                     case 'script':
                         panel.panelNode.addEventListener('contextmenu', this.onScriptContextMenu, true);
                         panel.panelNode.addEventListener('keypress', this.onScriptKeyPress, true);
-                        panelA11y.liveElem = panel.document.createElement('div');
-                        panelA11y.alertElem = panel.document.createElement('div');
-                        //panelA11y.alertElem.setAttribute('role', 'alert');
-                        panelA11y.liveElem.setAttribute('aria-live', 'polite');
-                        panelA11y.liveElem.className = "offScreen";
-                        panelA11y.alertElem.className = "offScreen";
-                        panel.panelNode.appendChild(panelA11y.alertElem);
-                        panel.panelNode.appendChild(panelA11y.liveElem);
+                        this.addLiveElem(panel);
                         break;
                 }
             },
@@ -235,6 +229,44 @@ FBL.ns( function()
                 panel.context.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
                 var panelBrowser = panel.context.chrome.getPanelBrowser(panel);
                 panelBrowser.setAttribute('showcaret', (panel.name == "script"));
+            },
+            
+            addLiveElem : function(panel, role, politeness)
+            {   
+                if (!panel || !panel.context.a11yPanels)
+                    return;
+                var panelA11y = panel.context.a11yPanels[panel.name];
+                if (!panelA11y)
+                    return;
+                var attrName = attrValue = "";
+                if (role)
+                {
+                    attrName = 'role';
+                    attrValue = role;
+                }
+                else 
+                {
+                    attrName = "aria-live";
+                    attrValue = politeness ? politeness : 'polite'; 
+                }
+                var elem = panel.document.createElement('div');
+                elem.setAttribute(attrName, attrValue);
+                elem.className = "offScreen";
+                panel.panelNode.appendChild(elem);
+                panelA11y[role ? role + "Elem" : "liveElem"] = elem;
+                return elem;
+            },
+            
+            updateLiveElem: function(panel, msg, useAlert)
+            {
+                if (!panel || !panel.context.a11yPanels)
+                    return;
+                var elem = panel.context.a11yPanels[panel.name].liveElem;
+                if (!elem)
+                    elem = this.addLiveElem(panel);
+                elem.textContent = msg;
+                if (useAlert)
+                    elem.setAttribute('role', 'alert');
             },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -446,7 +478,7 @@ FBL.ns( function()
                 Array.forEach(focusObjects, function(e,i,a){
                     this.makeFocusable(e);
                     var prepend = "";
-                    var append = this.getObjectType(e);
+                    var append = " (" + this.getObjectType(e) + ") ";
                     if (hasClass(e, 'errorTitle'))
                         prepend += $STR('expand error') + ': ';
                     e.setAttribute('aria-label', prepend + e.textContent + append);
@@ -771,7 +803,65 @@ FBL.ns( function()
                     this.makeUnfocusable(label, true);
                 }
             },
-
+            
+            onHTMLSearchMatchFound: function(panel, match)
+            {
+                if (!this.enabled || !panel.context.a11yPanels[panel.name])
+                    return; 
+                var node = match.node;
+                var elem;
+                var matchFeedback = $STRF("match found for", [match.match[0]]) + " "; 
+                if (node.nodeType == 1)//element
+                {
+                    elem = node;   
+                    matchFeedback += $STRF("in element", [elem.nodeName]);
+                }
+                else if (node.nodeType == 2)//attribute 
+                {
+                    elem = node.ownerElement;
+                    matchFeedback += $STRF("in attribute", [node.nodeName, node.nodeValue, elem.nodeName]);
+                }
+                else if (node.nodeType == 3) // text
+                {
+                    elem = node.parentNode;
+                    matchFeedback += $STRF("in text content", [match.match.input, elem.nodeName]);
+                }
+                matchFeedback += " " + $STRF("at path", [getElementTreeXPath(elem)]);
+                this.updateLiveElem(panel, matchFeedback, true); //should not use alert
+            },
+            
+            onHTMLSearchNoMatchFound: function(panel, text)
+            {
+                this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
+            },
+            
+            moveToSearchMatch: function(context)
+            {
+               
+                if (!this.enabled || !context)
+                    return;
+                var panel = context.chrome.getSelectedPanel();
+                if (!panel || !panel.searchable || !context.a11yPanels[panel.name])
+                    return;
+                
+                switch(panel.name)
+                {
+                    case 'html':
+                        
+                        var match = panel.lastSearch.lastMatch;
+                        if (!match)
+                            return;
+                        
+                        var nodeBox = panel.lastSearch.openToNode(match.node, match.isValue);
+                        if (!nodeBox) 
+                            return;
+                        
+                        nodeBox = getAncestorByClass(nodeBox, 'nodeBox');
+                        panel.select(nodeBox.repObject);
+                        break;
+                }                
+            },
+            
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // CSS Panel
 
@@ -1204,7 +1294,7 @@ FBL.ns( function()
                     case 'html':
                         var box = getAncestorByClass(target, 'nodeBox')
                         if (box)
-                            panel.ioBox.selectObjectBox(box);
+                            panel.select(box.repObject);
                         break;
                     case 'watches':
                         var node = getElementByClass(target, 'watchEditBox');
@@ -1228,8 +1318,7 @@ FBL.ns( function()
                 var fileName =  frame.script.fileName.split("/");
                 fileName = fileName.pop();
                 var alertString = $STRF("scriptSuspendedOnLineInFile",[frame.line, frame.functionName, fileName]);
-                panelA11y.alertElem.setAttribute('role', 'alert')
-                panelA11y.alertElem.textContent = alertString;
+                this.updateLiveElem(context.getPanel('script'), alertString, true);
                 this.onShowSourceLink(context.getPanel('script'), frame.line);
             },
 
@@ -1327,8 +1416,7 @@ FBL.ns( function()
                         if (sourceText)
                             liveString += ": " + sourceText.textContent;
 
-                        panelA11y.liveElem.textContent = liveString;
-                        panelA11y.liveElem.setAttribute('role', 'alert')
+                        this.updateLiveElem(panel, liveString, true); //should not use alert
                         break
                 }
             },
@@ -1428,6 +1516,15 @@ FBL.ns( function()
                     cancelEvent(event);
                 }
             },
+            
+            onWatchPanelRefreshed : function(panel)
+            {   
+                if (!this.enabled || !panel || !panel.context.a11yPanels[panel.name])
+                    return;
+                var watchEditTrigger = getElementByClass(panel.panelNode, 'watchEditCell');
+                if (watchEditTrigger)
+                    this.makeFocusable(watchEditTrigger, true);
+            },
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // Breakpoints Panel
@@ -1477,7 +1574,7 @@ FBL.ns( function()
 
             onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
             {
-                if (!this.enabled)
+                if (!this.enabled || !panel || !panel.context.a11yPanels[panel.name])
                     return;
                 var startRow = borderRows[0];
                 var endRow = borderRows[1];
@@ -1498,6 +1595,8 @@ FBL.ns( function()
 
             modifyMemberRow : function(panel, row, makeTab, posInSet, setSize, reFocusId)
             {
+                if (!panel || !row)
+                    return;    
                 var labelCell = row.cells[0];
                 var valueCell = row.cells[1];
                 if (!valueCell)

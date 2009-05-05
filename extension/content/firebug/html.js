@@ -1537,12 +1537,16 @@ function NodeSearch(text, doc, panelNode, ioBox)
             {
                 var reMatch = match.match;
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
+                dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
             }, this));
         }
         else if (matchCount)
             return true;
         else
+        {
             this.noMatch = true;
+            dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound', [panelNode.ownerPanel, text]);
+        }
     };
 
     this.reset = function()
