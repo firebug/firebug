@@ -1,7 +1,7 @@
 /* See license.txt for terms of usage */
 
 #firebugBody {
-    position: absolute;
+    position: fixed;
     top:0;
     left:0;
     margin:0px;
