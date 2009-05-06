@@ -3280,7 +3280,8 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 
     show: function(panel)
     {
-        if (!panel.disabledBox)
+        // Always render the page so, the previous content is properly replaced.
+        //if (!panel.disabledBox)
             this.render(panel);
 
         panel.disabledBox.setAttribute("collapsed", false);
