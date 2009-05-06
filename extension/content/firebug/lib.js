@@ -6478,9 +6478,13 @@ this.formatTime = function(elapsed)
     else if (elapsed < 1000)
         return elapsed + "ms";
     else if (elapsed < 60000)
-        return (Math.ceil(elapsed/10) / 100) + "s";
+        return (Math.round(elapsed/10) / 100) + "s";
     else
-        return (Math.ceil((elapsed/60000)*100)/100) + "m";
+    {
+        var min = Math.floor(elapsed/60000);
+        var sec = (elapsed % 60000);
+        return min + "m " + (Math.round((elapsed/1000)%60)) + "s";
+    }
 }
 
 // ************************************************************************************************
