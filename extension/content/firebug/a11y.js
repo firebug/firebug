@@ -1574,7 +1574,8 @@ FBL.ns( function()
 
             onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
             {
-                if (!this.enabled || !panel || !panel.context.a11yPanels[panel.name])
+             
+                if (!this.enabled)
                     return;
                 var startRow = borderRows[0];
                 var endRow = borderRows[1];

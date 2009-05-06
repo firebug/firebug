@@ -1011,7 +1011,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox open $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 SPAN({class: "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
@@ -1081,7 +1081,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 IMG({class: "twisty", role: "presentation"}),
                 SPAN({class: "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
@@ -1105,7 +1105,7 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
@@ -1124,7 +1124,7 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
