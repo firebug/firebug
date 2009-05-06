@@ -103,7 +103,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     focusWatch: function(context)
     {
-        if (context.detached)
+        if (Firebug.isDetached())
             context.chrome.focus();
         else
             Firebug.toggleBar(true);
@@ -583,7 +583,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 return;
             }
 
-            if (context != FirebugContext || context.detached)
+            if (context != FirebugContext || Firebug.isDetached())
             {
                 Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
             }
@@ -591,20 +591,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.syncCommands(context);
             this.syncListeners(context);
 
-            // XXXjjb the updateViewOnShowHook is for some problem Max Stepanov had, need to check with him
-            // and find a better solution
-            //const updateViewOnShowHook = function()
-            //{
-                context.chrome.select(context.currentFrame, "script", null, true);
-                context.chrome.focus();
-            //}
-            //if ( !context.hideDebuggerUI || Firebug.isContextActive(context))
-            //     updateViewOnShowHook();
-            //else {
-            //     context.chrome.updateViewOnShowHook = updateViewOnShowHook;
-            //     if (FBTrace.DBG_PANELS) FBTrace.sysout("startDebugging: set updateViewOnShowHook \n");                          /*@explore*/
-            //}
-
+            context.chrome.select(context.currentFrame, "script", null, true);
+            context.chrome.focus();
         }
         catch(exc)
         {

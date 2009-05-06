@@ -327,7 +327,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     focus: function(context)
     {
-        if (context.detached)
+        if (Firebug.isDetached())
             context.chrome.focus();
         else
             Firebug.toggleBar(true);

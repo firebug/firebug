@@ -102,6 +102,11 @@ const servicePrefNames = [
 
 const scriptBlockSize = 20;
 
+const PLACEMENT_NONE = 0;
+const PLACEMENT_INBROWSER = 1;
+const PLACEMENT_DETACHED = 2;
+const PLACEMENT_MINIMIZED = 3;
+
 // ************************************************************************************************
 // Globals
 
@@ -331,7 +336,7 @@ top.Firebug =
     {
         if (this.getSuspended())         // then we should not be visible,
         {
-            if (FirebugContext.detached)
+            if (Firebug.isDetached())
             {
                 if (FBTrace.DBG_INITIALIZE)
                     FBTrace.sysout("firebug.toggleSuspend detached\n");
@@ -361,7 +366,7 @@ top.Firebug =
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
     {
         this.setSuspended("suspending");
-        Firebug.eachActiveContext(
+        TabWatcher.iterateContexts(
             function suspendContext(context)
             {
                 dispatch(activableModules, 'onSuspendFirebug', [context]);
@@ -379,7 +384,7 @@ top.Firebug =
     resumeFirebug: function()  // dispatch onResumeFirebug to all modules
     {
         this.setSuspended("resuming");
-        Firebug.eachActiveContext(
+        TabWatcher.iterateContexts(
                 function resumeContext(context)
                 {
                     dispatch(activableModules, 'onResumeFirebug', [context]);
@@ -421,28 +426,14 @@ top.Firebug =
             tooltip += "\n" + Firebug.getSuspended();
         else
         {
-            var total = {detached: 0, minimized: 0, active: 0};
-            this.eachActiveContext(function countContexts(context)
-            {
-                if (context.detached)
-                    total.detached++;
-                else if (context.minimized)
-                    total.minimized++;
-                total.active++;
-            });
-
-            if (total.detached > 0)
-                tooltip += "\n"+total.detached+" "+$STR("Detached");
-            if (total.minimized > 0)
-                tooltip += "\n"+total.minimized+" "+$STR("Minimized");
-            if (total.active == 1)
-                tooltip += "\n"+total.active+" "+$STR("Total Firebug");
-            if (total.active > 1)
-                tooltip += "\n"+total.active+" "+$STR("Total Firebugs");
+            var total = TabWatcher.contexts.length;
+            tooltip += "\n"+total+" "+ ((total == 1)?$STR("Firebug"):$STR("Firebugs"));
         }
 
         if (Firebug.URLSelector.allPagesActivation)
             tooltip += "\n"+Firebug.URLSelector.allPagesActivation+" for all pages";
+
+        tooltip += "\n" + $STR(Firebug.getPlacement());
 
         $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
     },
@@ -450,10 +441,10 @@ top.Firebug =
     getURLsForAllActiveContexts: function()
     {
         var contextURLSet = [];  // create a list of all unique activeContexts
-        this.eachActiveContext( function createActiveContextList(context)
+        TabWatcher.iterateContexts( function createActiveContextList(context)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("active context "+context.getName()+" browser: "+getFirebuginess(context.browser));
+                FBTrace.sysout("context "+context.getName());
 
             try
             {
@@ -494,7 +485,6 @@ top.Firebug =
     {
         deadWindows.push({browser: browser, chrome: chrome});
         deadWindowTimeout = setTimeout(function() { Firebug.closeDeadWindows(); }, 3000);
-        delete browser.detached;
     },
 
     rescueWindow: function(browser)
@@ -504,8 +494,6 @@ top.Firebug =
             if (deadWindows[i].browser == browser)
             {
                 deadWindows.splice(i, 1);
-                delete browser.showDetached; // we are detached and we rescued the window.
-                browser.detached = true;
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("rescued "+browser.currentURI.spec);
                 break;
@@ -931,13 +919,11 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
 
-    showBar: function(show)
+    showBar: function(show)  // minimized <-> inBrowser
     {
         var browser = FirebugChrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
-
-        browser.showFirebug = show;
 
         var shouldShow = show && !browser.detached;
         contentBox.setAttribute("collapsed", !shouldShow);
@@ -974,169 +960,103 @@ top.Firebug =
     closeFirebug: function()
     {
         var browser = FirebugChrome.getCurrentBrowser();
-        browser.chrome.hidePanel();
-        TabWatcher.unwatchBrowser(browser);
 
-        this.showBar(false);
+        if (Firebug.isDetached())
+        {
+            browser.chrome.close();  // should call unwatchBrowser
+            detachCommand.setAttribute("checked", false);
+        }
+        else if (Firebug.isInBrowser())
+        {
+            TabWatcher.unwatchBrowser(browser);
+            browser.chrome.hidePanel();
+            this.showBar(false);
+        }
+        // else minimized nothing to do
     },
 
-    toggleBar: function(forceOpen, panelName)
+    toggleBar: function(forceOpen, panelName) // the status bar icon click action
     {
-        if (Firebug.openInWindow)
-            return this.toggleDetachBar(true);
-
-        var toggleOff = (forceOpen == undefined) ? !contentBox.collapsed : !forceOpen;
-        if (toggleOff == contentBox.collapsed)
-            return;
-
         var browser = FirebugChrome.getCurrentBrowser();
 
         if (panelName)
             browser.chrome.selectPanel(panelName);
 
-        if (browser.detached)
-            browser.chrome.focus();
-        else
+        if (browser.showFirebug)  // then we are debugging the selected tab
         {
-            if (toggleOff)
-            {
-                var context = TabWatcher.getContextByWindow(browser.contentWindow);
-                if (context)
-                    Firebug.minimizeBar(context);
-                else
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("Firebug.toggleBar toggleOff but no context ");
-                }
-            }
+            if (Firebug.isDetached()) // if we are out of the browser, just focus on the external window
+                browser.chrome.focus();
+            else if (Firebug.isMinimized()) // toggle minimize
+                Firebug.unMinimize();
             else
-            {
-                browser.showFirebug = true;  // user said show
-
-                var context = TabWatcher.getContextByWindow(browser.contentWindow);
-                if (!context) // then a page without a context
-                {
-                    var created = TabWatcher.watchBrowser(browser);  // create a context for this page
-                    if (!created)
-                    {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.sysout("Rejected page should explain to user!");
-                        return false;
-                    }
-                    else
-                        return;  // context creation will trigger showBar
-                }
-                else
-                {
-                    browser.chrome.setFirebugContext(context);
-                    Firebug.updateActiveContexts(context); // now the top tab is active
-                    if (context.minimized)
-                        context.minimized.unminimizer();
-                    else
-                        this.showBar(true);
-                }
-            }
+                Firebug.minimizeBar();
         }
-    },
-
-    minimizeBar: function(context)  // just pull down the UI, but don't deactivate the context
-    {
-        if (!context)
+        else // then user commands debugging the selected tab
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug minimizeBar, no context in "+window.location);
-            return null;
-        }
+            {
+                var context = TabWatcher.getContextByWindow(browser.contentWindow);
+                if (context) // ASSERT: we should not have showFirebug false on a page with a context
+                    FBTrace.sysout("Firebug.toggleBar: a browser without showFirebug has a context! "+context.getName());
+            }
 
-        var browser = context.browser;
+            browser.showFirebug = true;  // mark browser debugged
+
+            if (Firebug.isClosed())
+                Firebug.setPlacement("inBrowser");
+
+            var created = TabWatcher.watchBrowser(browser);  // create a context for this page
+            if (!created)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("Rejected page should explain to user!");
+                return false;
+            }
+        }
+        return true;
+     },
+
+    minimizeBar: function()  // just pull down the UI, but don't deactivate the context
+    {
+        var browser = FirebugChrome.getCurrentBrowser();
 
         if (!browser.chrome)
             return null;
 
-        if (browser.detached)  // TODO disable minimize on externalMode
+        if (Firebug.isDetached())  // TODO disable minimize on externalMode
         {
+            // TODO reattach
             browser.chrome.focus();
         }
-        else
+        else // inBrowser -> minimized
         {
+            Firebug.setPlacement("minimized");
             this.showBar(false);
-            Firebug.showMinimized(context);
+            Firebug.resetTooltip();
         }
     },
 
-    showMinimized: function(context) // put a item in the status bar context menu
+    unMinimize: function()
     {
-        var tab = gBrowser.selectedTab;
-        var url = context.getName();
-
-        function unminimize()
-        {
-            var tab = Firebug.getTabForWindow(context.window);
-            if (tab)
-            {
-                Firebug.tabBrowser.selectedTab = tab;
-                Firebug.showBar(true);
-            }
-            else
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("showMinimizedMenu unminimize, not tab for context "+context.getName());
-            }
-
-            Firebug.cleanUpMinimization(context);
-        }
-
-        if (!Firebug.statusBarContextMenuMinimizedSeparator)
-        {
-            Firebug.statusBarContextMenuMinimizedSeparator = createMenuItem(statusBarContextMenu, '-');
-            createMenuItem(statusBarContextMenu, {label: $STR("Minimized:")});
-        }
-
-        var minimized =
-        {
-            type:"checkbox",
-            nol10n: true,    // URL is what the user sees anyway
-            label: cropString(decodeURI(url), 50),
-            command: unminimize
-        };
-        context.minimized = FBL.createMenuItem(statusBarContextMenu, minimized);
-        context.minimized.unminimizer = unminimize;
+        Firebug.setPlacement("inBrowser");
+        Firebug.showBar(true);
         Firebug.resetTooltip();
     },
 
-    cleanUpMinimization: function(context)
-    {
-        statusBarContextMenu.removeChild(context.minimized);
-        delete context.minimized;
-
-        var allMinimized = getElementsByAttribute(statusBarContextMenu, name, "minimized");
-        if (!allMinimized || allMinimized.length < 1)
-        {
-            // maybe we should put this in static and not show it
-            var wordMinimized = Firebug.statusBarContextMenuMinimizedSeparator.nextSibling;
-            statusBarContextMenu.removeChild(Firebug.statusBarContextMenuMinimizedSeparator);
-            statusBarContextMenu.removeChild(wordMinimized);
-            delete Firebug.statusBarContextMenuMinimizedSeparator;
-        }
-        Firebug.resetTooltip();
-    },
-
-    toggleDetachBar: function(forceOpen)
+    toggleDetachBar: function(forceOpen)  // detached -> closed; inBrowser -> detached TODO reattach
     {
         var browser = FirebugChrome.getCurrentBrowser();
-        if (!forceOpen && browser.detached)
-        {
-            TabWatcher.unwatchBrowser(browser);
-            browser.chrome.close();
-            detachCommand.setAttribute("checked", false);
-        }
+        if (!forceOpen && Firebug.isDetached())  // detached -> closed
+            this.closeFirebug();
         else
             this.detachBar(FirebugContext);
     },
 
     onDetachedWindowClose: function(browser)
     {
+        Firebug.setPlacement("none");
         TabWatcher.unwatchBrowser(browser);
+        Firebug.resetTooltip();
     },
 
     detachBar: function(context)
@@ -1151,22 +1071,25 @@ top.Firebug =
                     FBTrace.sysout("Firebug.detachBar, no context in "+window.location);
                 return null;
             }
+            context = TabWatcher.getContextByWindow(browser.contentWindow);
         }
 
         var browser = context.browser;
 
         if (!browser.chrome)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.detachBar no browser.chrome for context "+context.getName());
             return null;
+        }
 
-        if (browser.detached)  // can be set true attachBrowser
+        if (Firebug.isDetached())  // can be set true attachBrowser
         {
             browser.chrome.focus();
         }
         else
         {
-            context.detached = true;
-
-            Firebug.updateActiveContexts(context); // now the top tab is active because the Firebug is detached
+            Firebug.setPlacement("detached");
 
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+context.getName() );
@@ -1178,8 +1101,6 @@ top.Firebug =
                 context: context
             };
             var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
-
-            context.detached = win;
 
             detachCommand.setAttribute("checked", true);
             FirebugChrome.clearPanels();
@@ -1200,8 +1121,6 @@ top.Firebug =
     {
         if (event.button != 0)
             return;
-        else if (context && context.minimized)
-            context.minimized.unminimizer();
         else if (isControl(event))
             this.toggleDetachBar(true);
         else if (context && context.errorCount)
@@ -1258,7 +1177,7 @@ top.Firebug =
     {
         Firebug.URLSelector.allPagesActivation = "off";  // In future we don't create contexts,
 
-        Firebug.eachActiveContext(function turnOff(context)  // we close the current contexts,
+        TabWatcher.iterateContexts(function turnOff(context)  // we close the current contexts,
         {
             if (!context.browser)
                 FBTrace.sysout("context with no browser??!! "+context.getName());
@@ -1565,6 +1484,47 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Placement
+
+    isClosed: function()
+    {
+        return Firebug.placement == PLACEMENT_NONE;
+    },
+
+    isDetached: function()
+    {
+        return Firebug.placement == PLACEMENT_DETACHED;
+    },
+
+    isMinimized: function()
+    {
+        return Firebug.placement == PLACEMENT_MINIMIZED;
+    },
+
+    isInBrowser: function()
+    {
+        return Firebug.placement == PLACEMENT_INBROWSER;
+    },
+
+    placements: ["none", "inBrowser", "detached", "minimized"],
+
+    placement: 3, // default is inBrowser
+
+    setPlacement: function(toPlacement)
+    {
+        for (Firebug.placement = 0; Firebug.placement < Firebug.placements.length; Firebug.placement++)
+        {
+            if (toPlacement == Firebug.placements[Firebug.placement])
+                return Firebug.placement;
+        }
+        throw new Error("Firebug.setPlacement cannot match "+toPlacement+" as a placement");
+    },
+
+    getPlacement: function()
+    {
+        return Firebug.placements[Firebug.placement];
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
 
     initContext: function(context, persistedState)  // called after a context is created.
@@ -1585,66 +1545,27 @@ top.Firebug =
 
         if (deadWindowTimeout)
             this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
-
-        if (context.browser.showDetached)
-        {
-            delete context.browser.showDetached;
-            Firebug.detachBar(context);
-        }
-    },
-
-    eachActiveContext: function(fnOfContext)
-    {
-        for (var i = 0; i < activeContexts.length; i++)
-            fnOfContext(activeContexts[i]);
-    },
-
-    isContextActive: function(context)
-    {
-        if (!context || !context.window || context.window.closed)
-            return false;
-
-        // A context is active if it is minimized or visible, either because its in a Firebug window or its the selected tab.
-
-        return (context.minimized || context.detached || (context.browser.showFirebug && (context.browser == Firebug.tabBrowser.selectedBrowser) ) );
     },
 
     updateActiveContexts: function(context) // this should be the only method to call suspend and resume.
     {
-        var isActiveContext = this.isContextActive(context);
-        var indexOfActiveContext = activeContexts.indexOf(context);
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("updateActiveContexts isActiveContext: "+isActiveContext+" index:"+indexOfActiveContext+" "+context.getName()+" browser:"+getFirebuginess(context.browser));
-        if (indexOfActiveContext == -1) // then this context was not marked active
+        if (context)  // either a new context or revisiting an old one
         {
-            if (isActiveContext) // but now it is.
+            if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
             {
-                if (!context.window)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("updateActiveContext gets context with no window!");
-                    return;
-                }
+                this.hadFirstContext = true;
+                Firebug.ModuleManager.obeyPrefs();
+            }
+            if (Firebug.getSuspended())
+                Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
+        }
+        else // this browser has no context
+        {
+            Firebug.suspend();
+            if (TabWatcher.contexts.length < 1)  // TODO shutdown ?
+                Firebug.setPlacement("none");
+        }
 
-                activeContexts.push(context);
-                if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
-                {
-                    this.hadFirstContext = true;
-                    Firebug.ModuleManager.obeyPrefs();
-                }
-                if (Firebug.getSuspended())
-                    Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
-            }
-        }
-        else // then this context was marked active
-        {
-            if (!isActiveContext)  // but now it is not
-            {
-                if (activeContexts.length == 1) // then we are about to have none
-                    Firebug.suspend();
-                activeContexts.splice(indexOfActiveContext, 1);
-            }
-        }
         Firebug.resetTooltip();
     },
 
@@ -1656,32 +1577,31 @@ top.Firebug =
             clearContextTimeout = 0;
         }
 
-        if (context)  // then we are debugging this context
-        {
-            this.updateActiveContexts(context);
+        this.updateActiveContexts(context);
+        if (context)
             context.browser.chrome.setFirebugContext(context); // the context becomes the default for its view
 
-            if (Firebug.isContextActive(context)) // then we need to show the ui
-                dispatch(modules, "showContext", [browser, context]);
-        }
-        else  // then we are not debugging on this browser, may need to suspend
+        dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
+
+        if (Firebug.isMinimized())
         {
-            this.eachActiveContext(function checkContext(context)
-            {
-                Firebug.updateActiveContexts(context);
-            });
-        }
-
-        if (context && context.minimized)
             this.showBar(false);  // don't show, we are minimized
-        else
-            this.syncBar();  // either showUI based on context or hideUI without context,
-
-        if (context && context.detached)
+        }
+        else if (Firebug.isDetached())
         {
             context.chrome.focus();
             context.chrome.syncPanel();
         }
+        else
+        {
+            this.syncBar();  // either showUI based on context or hideUI without context,
+        }
+
+    },
+
+    unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
+    {
+        Firebug.updateActiveContexts(null);
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
@@ -1718,7 +1638,7 @@ top.Firebug =
     {
         if (!context)  // then we are called just to clean up
         {
-            if(browser && browser.detached)
+            if(browser && Firebug.isDetached())
                 this.killWindow(browser, browser.chrome);
             return;
         }
@@ -1733,7 +1653,7 @@ top.Firebug =
         browser.panelName = context.panelName;
         browser.sidePanelNames = context.sidePanelNames;
 
-        if (browser.detached)
+        if (Firebug.isDetached())
         {
             clearContextTimeout = setTimeout(function delayClearContext()
             {
@@ -1752,22 +1672,16 @@ top.Firebug =
             if (browser.firebugReload)
                 delete browser.firebugReload; // and don't killWindow
             else
-            {
                 this.killWindow(browser, context.externalChrome);
-                delete context.detached; // a destroyed context cannot be detached
-            }
         }
         else
         {
-            if (context.minimized)
-                Firebug.cleanUpMinimization(context);
-
             if (browser.firebugReload)
                 delete browser.firebugReload;
             else
                 delete browser.showFirebug; // ok we are done debugging
         }
-        this.updateActiveContexts(context); // a destroyed page is not activeContext
+        // next the context is deleted and removed from the TabWatcher, we clean up in unWatchBrowser
     },
 
     onSourceFileCreated: function(context, sourceFile)
@@ -3366,7 +3280,7 @@ Firebug.ModuleManager =
 
     changeActivation: function(module)
     {
-        Firebug.eachActiveContext(
+        TabWatcher.iterateContexts(
             function changeActivation(context)
             {
                 try
@@ -3475,22 +3389,12 @@ Firebug.URLSelector =
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
 
-        delete browser.showDetached;
         delete browser.showFirebug;
 
-        if (annotation.indexOf("detached") > 0)  // then the previous use was detached.
-        {
-            if (!browser.detached) // then it is not now detached
-                browser.showDetached = true; // mark to detach
-            if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("shouldCreateContext set showDetached ");
-        }
-        else if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0)) // then the user closed Firebug on this page last time
-        {
+        if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0)) // then the user closed Firebug on this page last time
             return false; // annotated as 'closed', don't create
-        }
         else
-            browser.showFirebug = true;  // mark to stay in browser
+            browser.showFirebug = true;  // mark to debug this page
 
         return true;    // annotated, createContext
     },
@@ -3503,8 +3407,6 @@ Firebug.URLSelector =
     watchBrowser: function(browser)  // Firebug is opened in browser
     {
         var annotation = "firebugged.showFirebug";
-        if (browser.detached)
-            annotation = "firebugged.detached";
 
         // mark this URI as firebugged
         var uri = makeURI(normalizeURL(browser.currentURI.spec));
@@ -3514,7 +3416,7 @@ Firebug.URLSelector =
         {
             if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
                 FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-            FBTrace.sysout("Firebug.URLSelector.watchBrowser tagged "+uri.spec+" with: "+annotation+" while browser has "+getFirebuginess(browser));
+            FBTrace.sysout("Firebug.URLSelector.watchBrowser tagged "+uri.spec+" with: "+annotation);
         }
     },
 
@@ -3544,17 +3446,5 @@ Firebug.URLSelector =
 }
 
 // ************************************************************************************************
-function getFirebuginess(browser)
-{
-    if (!browser)
-        return "null";
-
-    if (browser.showFirebug)
-        return "showFirebug";
-    else if (browser.detached)
-        return "detached";
-    else
-        return "noFirebug";
-}
 
 }});

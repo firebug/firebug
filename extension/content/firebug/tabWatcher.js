@@ -552,7 +552,7 @@ var TabProgressListener = extend(BaseProgressListener,
             var srcWindow = getWindowForRequest(request);
             if (srcWindow)
                 var browser = TabWatcher.getBrowserByWindow(srcWindow);
-            var requestFromFirebuggedWindow = browser && (browser.showFirebug || browser.detached);
+            var requestFromFirebuggedWindow = browser && browser.showFirebug;
 
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> TabProgressListener.onLocationChange "+progress.DOMWindow.location+" to: "

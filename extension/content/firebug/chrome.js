@@ -191,10 +191,7 @@ top.FirebugChrome =
 
         window.removeEventListener("blur", onBlur, true);
         if (externalMode)
-        {
-            this.detachBrowser(externalBrowser, FirebugContext);
             Firebug.onDetachedWindowClose(externalBrowser);
-        }
         else
             Firebug.shutdown();
     },
@@ -248,15 +245,7 @@ top.FirebugChrome =
 
     detachBrowser: function(browser, context)
     {
-        if (context)
-        {
-            delete context.externalChrome;
-            delete context.detached;
-        }
-
         browser.chrome = browser.originalChrome;
-        delete browser.showFirebug;
-        delete browser.detached;
         delete browser.originalChrome;
 
         if (browser && browser.chrome)

@@ -91,14 +91,14 @@ Firebug.Inspector = extend(Firebug.Module,
         this.previousPanelName = context.panelName;
         this.previousSidePanelName = context.sidePanelName;
         this.previouslyCollapsed = $("fbContentBox").collapsed;
-        this.previouslyFocused = context.detached && context.chrome.isFocused();
+        this.previouslyFocused = Firebug.isDetached() && context.chrome.isFocused();
 
         var htmlPanel = context.chrome.selectPanel("html");
         this.previousObject = htmlPanel.selection;
 
-        if (context.detached)
+        if (Firebug.isDetached())
             context.chrome.focus();
-        else
+        else if (Firebug.isMinimized())
             Firebug.showBar(true);
 
         htmlPanel.panelNode.focus();
@@ -583,7 +583,7 @@ BoxModelHighlighter.prototype =
         var win = element.ownerDocument.defaultView,
             nodes = this.getNodes(context),
             highlightFrame = boxFrame ? nodes[boxFrame] : null;
-            
+
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
 
@@ -815,7 +815,7 @@ function getHighlighterBody(elt)
 {
     var body = elt.ownerDocument.getElementById("firebugBody"),
         doc = elt.ownerDocument;
-    
+
     if(!body)
     {
         body = doc.createElement('body');
@@ -823,7 +823,7 @@ function getHighlighterBody(elt)
         body.firebugIgnore = true;
         doc.documentElement.appendChild(body);
     }
-    
+
     if (body)
     {
         if (FBTrace.DBG_INSPECT)
