@@ -1434,7 +1434,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             FBTrace.sysout("net.insertActivationMessage; ", message);
     },
 
-    iterateEntries: function(fn)
+    enumerateRequests: function(fn)
     {
         var rows = getElementsByClass(this.table, "netRow");
         for (var i=0; i<rows.length; i++)
@@ -2210,7 +2210,7 @@ NetCacheListener.prototype =
 {
     onStartRequest: function(context, request)
     {
-        // Keep in mind tha the file object (representing the request) doesn't have to be
+        // Keep in mind that the file object (representing the request) doesn't have to be
         // created at this moment (top document request).
     },
 
