@@ -195,7 +195,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             executionContext.scriptsEnabled = false;
 
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+                FBTrace.sysout("debugger.stop try to disable scripts executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
             // Unfortunately, due to quirks in Firefox's networking system, we must
             // be sure to load and cache all scripts NOW before we enter the nested
             // event loop, or run the risk that some of them won't load while
@@ -230,7 +230,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 executionContext.scriptsEnabled = true;
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.stop "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+                    FBTrace.sysout("debugger.stop  try to enable scripts executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
             }
             else
             {
