@@ -230,9 +230,9 @@ FBL.ns( function()
                 var panelBrowser = panel.context.chrome.getPanelBrowser(panel);
                 panelBrowser.setAttribute('showcaret', (panel.name == "script"));
             },
-            
+
             addLiveElem : function(panel, role, politeness)
-            {   
+            {
                 if (!panel || !panel.context.a11yPanels)
                     return;
                 var panelA11y = panel.context.a11yPanels[panel.name];
@@ -244,10 +244,10 @@ FBL.ns( function()
                     attrName = 'role';
                     attrValue = role;
                 }
-                else 
+                else
                 {
                     attrName = "aria-live";
-                    attrValue = politeness ? politeness : 'polite'; 
+                    attrValue = politeness ? politeness : 'polite';
                 }
                 var elem = panel.document.createElement('div');
                 elem.setAttribute(attrName, attrValue);
@@ -256,7 +256,7 @@ FBL.ns( function()
                 panelA11y[role ? role + "Elem" : "liveElem"] = elem;
                 return elem;
             },
-            
+
             updateLiveElem: function(panel, msg, useAlert)
             {
                 if (!panel || !panel.context.a11yPanels)
@@ -414,6 +414,9 @@ FBL.ns( function()
                 var tabStop = this.getPanelTabStop(panel)
                 if (tabStop)
                     this.makeFocusable(tabStop, false);
+
+                if (!panel.context.a11yPanels)  // XXXjjb I get null here
+                    return;
 
                 panel.context.a11yPanels[panel.name].tabStop = elem;
                 if (elem)
@@ -803,20 +806,20 @@ FBL.ns( function()
                     this.makeUnfocusable(label, true);
                 }
             },
-            
+
             onHTMLSearchMatchFound: function(panel, match)
             {
                 if (!this.enabled || !panel.context.a11yPanels[panel.name])
-                    return; 
+                    return;
                 var node = match.node;
                 var elem;
-                var matchFeedback = $STRF("match found for", [match.match[0]]) + " "; 
+                var matchFeedback = $STRF("match found for", [match.match[0]]) + " ";
                 if (node.nodeType == 1)//element
                 {
-                    elem = node;   
+                    elem = node;
                     matchFeedback += $STRF("in element", [elem.nodeName]);
                 }
-                else if (node.nodeType == 2)//attribute 
+                else if (node.nodeType == 2)//attribute
                 {
                     elem = node.ownerElement;
                     matchFeedback += $STRF("in attribute", [node.nodeName, node.nodeValue, elem.nodeName]);
@@ -829,39 +832,39 @@ FBL.ns( function()
                 matchFeedback += " " + $STRF("at path", [getElementTreeXPath(elem)]);
                 this.updateLiveElem(panel, matchFeedback, true); //should not use alert
             },
-            
+
             onHTMLSearchNoMatchFound: function(panel, text)
             {
                 this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
             },
-            
+
             moveToSearchMatch: function(context)
             {
-               
+
                 if (!this.enabled || !context)
                     return;
                 var panel = context.chrome.getSelectedPanel();
                 if (!panel || !panel.searchable || !context.a11yPanels[panel.name])
                     return;
-                
+
                 switch(panel.name)
                 {
                     case 'html':
-                        
+
                         var match = panel.lastSearch.lastMatch;
                         if (!match)
                             return;
-                        
+
                         var nodeBox = panel.lastSearch.openToNode(match.node, match.isValue);
-                        if (!nodeBox) 
+                        if (!nodeBox)
                             return;
-                        
+
                         nodeBox = getAncestorByClass(nodeBox, 'nodeBox');
                         panel.select(nodeBox.repObject);
                         break;
-                }                
+                }
             },
-            
+
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
             // CSS Panel
 
@@ -1516,9 +1519,9 @@ FBL.ns( function()
                     cancelEvent(event);
                 }
             },
-            
+
             onWatchPanelRefreshed : function(panel)
-            {   
+            {
                 if (!this.enabled || !panel || !panel.context.a11yPanels[panel.name])
                     return;
                 var watchEditTrigger = getElementByClass(panel.panelNode, 'watchEditCell');
@@ -1574,7 +1577,7 @@ FBL.ns( function()
 
             onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
             {
-             
+
                 if (!this.enabled)
                     return;
                 var startRow = borderRows[0];
@@ -1597,7 +1600,7 @@ FBL.ns( function()
             modifyMemberRow : function(panel, row, makeTab, posInSet, setSize, reFocusId)
             {
                 if (!panel || !row)
-                    return;    
+                    return;
                 var labelCell = row.cells[0];
                 var valueCell = row.cells[1];
                 if (!valueCell)
