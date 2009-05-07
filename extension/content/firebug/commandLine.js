@@ -78,8 +78,18 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (!attached)
             {
                 if (FBTrace.DBG_ERRORS)
+                {
                     FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
-                Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                    Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                }
+                
+                Firebug.CommandLine.injector.attachCommandLine(context, win);
+            }
+            
+            attached = element.getAttribute("firebugCommandLineAttached");
+            if (attached&&FBTrace.DBG_ERRORS)
+            {
+                FBTrace.sysout("Successfully attached command line");
             }
         }
         else

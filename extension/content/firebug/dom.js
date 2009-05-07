@@ -458,6 +458,12 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     setPropertyValue: function(row, value)  // value must be string
     {
+        if(FBTrace.DBG_DOM)
+        {
+          FBTrace.sysout("row: "+row); /*@explore*/
+          FBTrace.sysout("value: "+value); /*@explore*/
+        }
+
         var name = getRowName(row);
         if (name == "this")
             return;
@@ -1336,13 +1342,14 @@ function getMembers(object, level)  // we expect object to be user-level object 
             }
             else
             {
-                var getterFunction = insecureObject.__lookupGetter__(name);
+                var setterFunction = insecureObject.__lookupSetter__(name);
+                               
                 if (name in domMembers)
-                    addMember("dom", domProps, (getterFunction?"get "+name:name), val, level, domMembers[name]);
+                    addMember("dom", domProps, (!setterFunction?"get "+name:name), val, level, domMembers[name]);
                 else if (name in domConstantMap)
-                    addMember("dom", domConstants, (getterFunction?"get "+name:name), val, level);
+                    addMember("dom", domConstants, (!setterFunction?"get "+name:name), val, level);
                 else
-                    addMember("user", userProps, (getterFunction?"get "+name:name), val, level);
+                    addMember("user", userProps, (!setterFunction?"get "+name:name), val, level);
             }
         }
     }
