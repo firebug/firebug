@@ -1131,7 +1131,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     getElementRules: function(element, rules, usedProps, inheritMode)
     {
-        var inspectedRules;
+        var inspectedRules, displayedRules = {};
         try
         {
             inspectedRules = domUtils ? domUtils.getCSSStyleRules(element) : null;
@@ -1154,14 +1154,22 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 if (inheritMode && !props.length)
                     continue;
 
-                this.markOverridenProps(props, usedProps, inheritMode);
-
                 var line = domUtils.getRuleLine(rule);
                 var ruleId = rule.selectorText+"/"+line;
                 var sourceLink = new SourceLink(href, line, "css", rule);
-                rules.splice(0, 0, {rule: rule, id: ruleId,
-                        selector: rule.selectorText, sourceLink: sourceLink,
-                        props: props, inherited: inheritMode});
+                
+                // Rules may be duplicated if the same style sheet is included
+                // multiple times within the page. Filter out any rules we have
+                // seen for this href.
+                var qualifiedRuleId = href+"%|%"+ruleId;
+                if (!displayedRules[qualifiedRuleId]) {
+                  this.markOverridenProps(props, usedProps, inheritMode);
+                  
+                  rules.splice(0, 0, {rule: rule, id: ruleId,
+                          selector: rule.selectorText, sourceLink: sourceLink,
+                          props: props, inherited: inheritMode});
+                  displayedRules[qualifiedRuleId] = true;
+                }
             }
         }
 
