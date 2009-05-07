@@ -21,12 +21,6 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.persistedState = persistedState;
 
     this.chrome = chrome;
-    this.originalChrome = FirebugChrome;
-    if (chrome != FirebugChrome)
-    {
-        this.detached = true;
-        this.externalChrome = chrome;
-    }
 
     this.name = normalizeURL(this.getWindowLocation().toString());
 

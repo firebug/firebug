@@ -151,6 +151,8 @@ top.Firebug =
     stringCropLength: 80,
 
     tabBrowser: tabBrowser,
+    originalChrome: FirebugChrome,
+    chrome: FirebugChrome,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Initialization
@@ -683,15 +685,8 @@ top.Firebug =
 
         FirebugChrome.updateOption(name, value);
 
-        if (TabWatcher.contexts)
-        {
-            for (var i = 0; i < TabWatcher.contexts.length; ++i)
-            {
-                var context = TabWatcher.contexts[i];
-                if (context.externalChrome)
-                    context.chrome.updateOption(name, value);
-            }
-        }
+        if (Firebug.extenalChrome)
+            Firebug.extenalChrome.updateOption(name, value);
 
         if (name.substr(0, 15) == "externalEditors")
         {
@@ -1055,11 +1050,25 @@ top.Firebug =
             this.detachBar(FirebugContext);
     },
 
-    onDetachedWindowClose: function(browser)
+    closeDetachedWindow: function(browser)
     {
         Firebug.setPlacement("none");
         TabWatcher.unwatchBrowser(browser);
         Firebug.resetTooltip();
+    },
+
+    setChrome: function(newChrome)
+    {
+        Firebug.chrome = newChrome;
+
+        // reattach all contexts to the new chrome
+        // This is a hack to allow context.chrome to work for now.
+        TabWatcher.iterateContexts(function reattach(context)
+        {
+            context.reattach(newChrome);
+            Firebug.reattachContext(context.browser, context);
+        });
+
     },
 
     detachBar: function(context)
@@ -1668,14 +1677,14 @@ top.Firebug =
             }, 100);
         }
 
-        if (context.externalChrome)
+        if (Firebug.extenalChrome)
         {
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("Firebug.destroyContext context.externalChrome: "+context.externalChrome+" browser.firebugReload: "+browser.firebugReload);
+                FBTrace.sysout("Firebug.destroyContext Firebug.extenalChrome: "+Firebug.extenalChrome+" browser.firebugReload: "+browser.firebugReload);
             if (browser.firebugReload)
                 delete browser.firebugReload; // and don't killWindow
             else
-                this.killWindow(browser, context.externalChrome);
+                this.killWindow(browser, Firebug.extenalChrome);
         }
         else
         {

@@ -36,7 +36,7 @@ var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, 
 
 var waitingPanelBarCount = 2;
 
-var externalMode = (window.location == "chrome://firebug/content/firebug.xul");
+var inDetachedScope = (window.location == "chrome://firebug/content/firebug.xul");
 var externalBrowser = null;
 
 var disabledHead = null;
@@ -159,7 +159,7 @@ top.FirebugChrome =
 
             this.updatePanelBar1(Firebug.panelTypes);
 
-            if (externalMode)
+            if (inDetachedScope)
                 this.attachBrowser(externalBrowser, FirebugContext);
             else
                 Firebug.initializeUI(detachArgs);
@@ -190,8 +190,8 @@ top.FirebugChrome =
         locationList.removeEventListener("selectObject", onSelectLocation, false);
 
         window.removeEventListener("blur", onBlur, true);
-        if (externalMode)
-            Firebug.onDetachedWindowClose(externalBrowser);
+        if (inDetachedScope)
+            this.detachBrowser(externalBrowser);
         else
             Firebug.shutdown();
     },
@@ -209,47 +209,32 @@ top.FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and externalMode == true
+    attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and inDetachedScope == true
     {
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("chrome.attachBrowser with externalMode="+externalMode+" context="+context
+            FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope+" context="+context
                                +" context==FirebugContext: "+(context==FirebugContext)+" in window: "+window.location);
 
-        if (externalMode)
+        if (inDetachedScope)  // then we are initializing in external window
         {
-            browser.detached = true;
-            browser.originalChrome = browser.chrome;
+            Firebug.setChrome(this); // 1.4
+
+            browser.originalChrome = browser.chrome; // 1.3
             browser.chrome = this;
+
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("attachBrowser externalMode and browser.detached, browser.chrome.window: "+browser.chrome.window.location);
+                FBTrace.sysout("attachBrowser inDetachedScope and browser.detached, browser.chrome.window: "+browser.chrome.window.location);
         }
 
-        if (context)
-        {
-            if (externalMode)
-                context.externalChrome = this;
-
-            context.reattach(this);
-        }
-
-        if (context == FirebugContext)
-        {
-            Firebug.reattachContext(browser, context); // called when the external window is closed also
-
-            this.syncPanel();
-
-            if (!externalMode)
-                Firebug.syncBar(true);
-        }
     },
 
-    detachBrowser: function(browser, context)
+    detachBrowser: function(browser)
     {
-        browser.chrome = browser.originalChrome;
-        delete browser.originalChrome;
+        Firebug.setChrome(Firebug.originalChrome);
+        Firebug.closeDetachedWindow(browser);
 
-        if (browser && browser.chrome)
-            browser.chrome.attachBrowser(browser, context);
+        browser.chrome = browser.originalChrome;  // 1.3
+        delete browser.originalChrome;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -721,8 +706,8 @@ top.FirebugChrome =
                 elt.setAttribute(name, value);
         }
 
-        if (externalMode && FirebugContext && FirebugContext.originalChrome)
-            FirebugContext.originalChrome.setGlobalAttribute(id, name, value);
+        if (Firebug.externalChrome)
+            Firebug.externalChrome.setGlobalAttribute(id, name, value);
     },
 
 
