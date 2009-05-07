@@ -965,10 +965,13 @@ top.Firebug =
         {
             browser.chrome.close();  // should call unwatchBrowser
             detachCommand.setAttribute("checked", false);
+            return
         }
-        else if (Firebug.isInBrowser())
+
+        TabWatcher.unwatchBrowser(browser);
+
+        if (Firebug.isInBrowser())
         {
-            TabWatcher.unwatchBrowser(browser);
             browser.chrome.hidePanel();
             this.showBar(false);
         }
@@ -3426,7 +3429,7 @@ Firebug.URLSelector =
         this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
 
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec+" while browser has "+getFirebuginess(browser));
+            FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec);
     },
 
     clearAll: function()
