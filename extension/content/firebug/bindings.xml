@@ -35,7 +35,7 @@
             this.browser = this.getChildElement("browser");
             this.panelTabs = this.getChildElement("panelTabs");
             this.tabMap = {};
-            
+
             // We initialize Firebug from here instead of from the onload event because
             // we need to make sure it is initialized before the browser starts loading
             // the home page
@@ -167,7 +167,7 @@
                     tab.setAttribute("selected", "true");
                     if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused &&!forceUpdate)
                         tab.focus();
-                    
+
                 }
 
                 if (panel)
@@ -498,7 +498,7 @@
 
 <binding id="panelFileList" >
 
-    <content popup="_child">
+    <content>
         <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
             <xul:menupopup anonid="popup" position="after_start"/>
         </xul:toolbarbutton>
