@@ -1616,7 +1616,10 @@ top.Firebug =
                 Firebug.chrome.syncPanel();
             }
             else
+            {
                 contentBox.setAttribute("collapsed", true);
+                Firebug.chrome.window.document.title = $("Firebug - inactive for selected Firefox tab");
+            }
         }
         else
         {

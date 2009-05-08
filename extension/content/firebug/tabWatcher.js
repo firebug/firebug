@@ -242,7 +242,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     createContext: function(win)
     {
-        var browser = this.getBrowserByWindow(win);  // sets browser.chrome to FirebugChrome
+        var browser = this.getBrowserByWindow(win);  // sets browser.chrome to Firebug.chrome
 
         // If the page is reloaded, store the persisted state from the previous
         // page on the new context
@@ -393,7 +393,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         }
 
         if (!browser.chrome)
-            registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
+            registerFrameListener(browser);  // sets browser.chrome to Firebug.chrome
 
         var detached = browser.detached; // XXXjjb I guess we need different functions for detached?
         var shouldDispatch = true;
@@ -524,7 +524,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             if (browser.contentWindow == win)
             {
                 if (!browser.chrome)
-                    registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
+                    registerFrameListener(browser);  // sets browser.chrome to Firebug.chrome
 
                 return browser;
             }
@@ -623,7 +623,7 @@ function registerFrameListener(browser)
     if (browser.chrome)
         return;
 
-    browser.chrome = FirebugChrome;
+    browser.chrome = Firebug.chrome;
     browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
 
     if (FBTrace.DBG_WINDOWS)

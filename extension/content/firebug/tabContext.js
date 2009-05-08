@@ -20,7 +20,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.browser = browser;
     this.persistedState = persistedState;
 
-    this.chrome = chrome;
+    this.chrome = chrome;  // 1.3
 
     this.name = normalizeURL(this.getWindowLocation().toString());
 
