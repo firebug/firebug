@@ -946,7 +946,11 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
     populateTimeInfoTip: function(infoTip, file)
     {
-        Firebug.NetMonitor.TimeInfoTip.tag.replace({file: file}, infoTip);
+        var infoTip = Firebug.NetMonitor.TimeInfoTip.tag.replace({file: file}, infoTip);
+        if (!file.phase.contentLoadTime)
+            infoTip.firstChild.removeChild(getElementByClass(infoTip, "netContentLoadRow"));
+        if (!file.phase.windowLoadTime)
+            infoTip.firstChild.removeChild(getElementByClass(infoTip, "netWindowLoadRow"));
         return true;
     },
 
@@ -1480,13 +1484,13 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                     TD({class: "netTimeBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
                 ),
-                TR(
+                TR({class: "netContentLoadRow"},
                     TD({align: "center"},
                         DIV({class: "netContentLoadBar timeInfoTipBar"})
                     ),
                     TD("$file|getContentLoadTime : " + $STR("requestinfo.DOMContentLoaded"))
                 ),
-                TR(
+                TR({class: "netWindowLoadRow"},
                     TD({align: "center"},
                         DIV({class: "netWindowLoadBar timeInfoTipBar"})
                     ),
