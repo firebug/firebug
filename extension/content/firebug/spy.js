@@ -139,7 +139,7 @@ Firebug.Spy = extend(Firebug.Module,
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
-        this.detachObserver(context, false);
+        this.detachObserver(context, null);
         delete context.spies;
     },
 
@@ -623,6 +623,8 @@ function updateHttpSpyInfo(spy)
 
     if (!spy.responseHeaders && spy.loaded)
         spy.responseHeaders = getResponseHeaders(spy);
+
+    spy.isXHR = true;
 
     var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
     if (!netInfoBox)
