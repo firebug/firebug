@@ -6,7 +6,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Not Panel Specific ==
     * Curtis Bartley's Tabs-on-top UI reordering
-    * Improved and simplified "natural" Activation UI, minimize to context menu, all on/off
+    * Improved and simplified "natural" Activation UI, minimize to context menu, all on/off, Firebug stays put.
     * Firebug remembers which pages you had opened Firebug on.
     * Supports Firefox 3.5
     * auto-suspend
@@ -133,6 +133,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1649: disabling script panel doesn't disable script view in 1.4
     * Issue 1650: 1.4a18 not picking up other JS files
     * Issue 1651: 1.4a18 panel not updating when changing tabs in firefox
+    * Issue 1655: CSS view is not correct
     * Issue 1663: CSS Property Name Editor Does not always work (contribution by kpdecker)
     * Issue 1679: Break On Next Statement ("pause" button): poor selection style (partial)
     * Issue 1680: Firebug suspends on page reload.
@@ -145,3 +146,4 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1712: Firebug 1.4's channel listener changes observable behaviour
     * Issue 1715: Always Open in New Window prevents
     * Issue 1727: Inspector offset when the screen is scrolled
+    * Issue 1738: All properties getters and not editable in DOM panels
