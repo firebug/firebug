@@ -146,4 +146,10 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1712: Firebug 1.4's channel listener changes observable behaviour
     * Issue 1715: Always Open in New Window prevents
     * Issue 1727: Inspector offset when the screen is scrolled
+    * Issue 1733: Custom Net Panel: file.isXHR is not set in console log
     * Issue 1738: All properties getters and not editable in DOM panels
+    * Issue 1741: CSS Sheets listed multiple times in DOM included multiple times in CSS panel
+    * Issue 1747:  Script Option Grayed-Out when Enabled by Console enable
+    * Issue 1750: "Inspect Element" causes firebug to hide
+    * Issue 1753: command line for open in new window does not immediately respond to Small <-> Large button
+    * Issue 1756: Firebug status bar error counter doesn't update on tab closure.
