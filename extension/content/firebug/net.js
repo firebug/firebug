@@ -243,6 +243,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
             window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
         }
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            monitorContext(context);
     },
 
     reattachContext: function(browser, context)
@@ -254,6 +256,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     destroyContext: function(context)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
+
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            unmonitorContext(context);
     },
 
     showContext: function(browser, context)
