@@ -169,7 +169,7 @@ Firebug.Search = extend(Firebug.Module,
 
     hideOptions: function()
     {
-        var searchOptions = this.context.chrome.$("fbSearchOptionsPopup");
+        var searchOptions = Firebug.chrome.$("fbSearchOptionsPopup");
         if (searchOptions)
             searchOptions.hidePopup();
     },

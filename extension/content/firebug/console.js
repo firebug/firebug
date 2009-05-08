@@ -218,7 +218,7 @@ Firebug.Console = extend(ActivableConsole,
             setTimeout(function()
             {
                 Firebug.Console.log("'Show XMLHttpRequests' option (Console panel) is disabled " +
-                    "in Firefox 3.1 and higher till bug #483672 is fixed."); 
+                    "in Firefox 3.1 and higher till bug #483672 is fixed.");
             });
         }
     },
@@ -469,12 +469,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         this.updateMaxLimit();
         prefs.addObserver(Firebug.prefDomain, this, false);
     },
-    
+
     initializeNode : function()
     {
         dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
     },
-    
+
     destroyNode : function()
     {
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
@@ -561,7 +561,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         {
             option.disabled = true;
             option.checked = false;
-            option.tooltiptext = "This option is disabled in Firefox 3.1 and higher till " + 
+            option.tooltiptext = "This option is disabled in Firefox 3.1 and higher till " +
                 "bug #483672 is fixed.";
         }
 
@@ -697,19 +697,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (shouldShow)
         {
-            this.context.chrome.$("fbCommandBox").collapsed = false;
-            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, this.context.chrome);
+            Firebug.chrome.$("fbCommandBox").collapsed = false;
+            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
         }
         else
         {
-            if (this.context.chrome)
-            {
-                // Make sure that entire content of the Console panel is hidden when
-                // the panel is disabled.
-                Firebug.CommandLine.setMultiLine(false, this.context.chrome);
-                this.context.chrome.$("fbCommandBox").collapsed = true;
-            }
-            // else the context is not setup, ok we aren't showing it.
+            // Make sure that entire content of the Console panel is hidden when
+            // the panel is disabled.
+            Firebug.CommandLine.setMultiLine(false, Firebug.chrome);
+            Firebug.chrome.$("fbCommandBox").collapsed = true;
         }
     },
 });

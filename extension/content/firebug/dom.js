@@ -118,7 +118,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
             {
-                this.context.chrome.select(object, "script");
+                Firebug.chrome.select(object, "script");
                 cancelEvent(event);
             }
             else if (event.detail == 2 && !object)
@@ -868,7 +868,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         // Make sure we get a fresh status path for the object, since otherwise
         // it might find the object in the existing path and not refresh it
-        this.context.chrome.clearStatusPath();
+        Firebug.chrome.clearStatusPath();
 
         this.select(target.repObject, true);
     },
@@ -1343,7 +1343,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
             else
             {
                 var setterFunction = insecureObject.__lookupSetter__(name);
-                               
+
                 if (name in domMembers)
                     addMember("dom", domProps, (!setterFunction?"get "+name:name), val, level, domMembers[name]);
                 else if (name in domConstantMap)

@@ -914,7 +914,7 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
 
-    showBar: function(show)  // minimized <-> inBrowser
+    showBar: function(show)  // minimized <-> inBrowser  This code only works in browser.xul
     {
         var browser = FirebugChrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS)
@@ -1067,6 +1067,11 @@ top.Firebug =
         TabWatcher.iterateContexts(function reattach(context)
         {
             context.reattach(newChrome);
+            if (context.browser.chrome != newChrome)
+            {
+                context.browser.originalChrome = context.browser.chrome;
+                context.browser.chrome = newChrome;
+            }
             Firebug.reattachContext(context.browser, context);
         });
 
@@ -1558,6 +1563,8 @@ top.Firebug =
         this.updateActiveContexts(context); // a newly created context is active
 
         context.browser.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
+        Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
+
 
         if (deadWindowTimeout)
             this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
@@ -1601,8 +1608,15 @@ top.Firebug =
         }
         else if (Firebug.isDetached())
         {
-            context.chrome.focus();
-            context.chrome.syncPanel();
+            var contentBox = Firebug.chrome.$('fbContentBox');
+            if (context)
+            {
+                contentBox.setAttribute("collapsed", false);
+                Firebug.chrome.focus();
+                Firebug.chrome.syncPanel();
+            }
+            else
+                contentBox.setAttribute("collapsed", true);
         }
         else
         {
@@ -1998,7 +2012,7 @@ Firebug.Panel =
 
                 return;
             }
-            var buttons = this.context.chrome.$(buttonsId);
+            var buttons = Firebug.chrome.$(buttonsId);
             if (buttons)
                 collapse(buttons, show ? "false" : "true");
             else
@@ -2052,8 +2066,8 @@ Firebug.Panel =
             this.updateLocation(object);
 
             // XXXjoe This is kind of cheating, but, feh.
-            this.context.chrome.onPanelNavigate(object, this);
-            if (uiListeners.length > 0) dispatch(uiListeners, "onPanelNavigate", [object, this]);  // TODO: make this.context.chrome a uiListener
+            Firebug.chrome.onPanelNavigate(object, this);
+            if (uiListeners.length > 0) dispatch(uiListeners, "onPanelNavigate", [object, this]);  // TODO: make Firebug.chrome a uiListener
         }
     },
 
@@ -2119,9 +2133,9 @@ Firebug.Panel =
             this.updateSelection(object);
 
             // XXXjoe This is kind of cheating, but, feh.
-            this.context.chrome.onPanelSelect(object, this);
+            Firebug.chrome.onPanelSelect(object, this);
             if (uiListeners.length > 0)
-                dispatch(uiListeners, "onPanelSelect", [object, this]);  // TODO: make this.context.chrome a uiListener
+                dispatch(uiListeners, "onPanelSelect", [object, this]);  // TODO: make Firebug.chrome a uiListener
         }
     },
 
@@ -2298,7 +2312,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
     getTab: function()
     {
-        var chrome = this.context.chrome;
+        var chrome = Firebug.chrome;
 
         var tab = chrome.$("fbPanelBar2").getTab(this.name);
         if (!tab)
@@ -2359,7 +2373,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     initializeNode: function(panelNode)
     {
-        this.resizeEventTarget = this.context.chrome.$('fbContentBox');
+        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResize, true);
     },
 
@@ -2368,7 +2382,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var oldEventTarget = this.resizeEventTarget;
         oldEventTarget.removeEventListener("resize", this.onResize, true);
         Firebug.Panel.reattach.apply(this, arguments);
-        this.resizeEventTarget = this.context.chrome.$('fbContentBox');
+        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResize, true);
     },
 

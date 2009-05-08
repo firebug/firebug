@@ -790,7 +790,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
     {
         if (name == "netFilterCategory")
         {
-            Firebug.NetMonitor.syncFilterButtons(this.context.chrome);
+            Firebug.NetMonitor.syncFilterButtons(Firebug.chrome);
             for (var i = 0; i < TabWatcher.contexts.length; ++i)
             {
                 var context = TabWatcher.contexts[i];

@@ -10,7 +10,7 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
 {
     createBrowser: function()
     {
-        var doc = this.context.chrome.window.document;
+        var doc = Firebug.chrome.window.document;
         this.browser = doc.createElement("browser");
         this.browser.addEventListener("DOMContentLoaded", this.browserReady, false);
         if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("plugin.createBrowser DOMContentLoaded addEventListener\n");        /*@explore*/

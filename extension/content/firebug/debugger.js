@@ -2095,7 +2095,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
                 tag.replace({object: result}, infoTip);
 
-                this.context.chrome.contextMenuObject = result;  // for context menu select()
+                Firebug.chrome.contextMenuObject = result;  // for context menu select()
 
                 self.infoTipExpr = expr;
             },
