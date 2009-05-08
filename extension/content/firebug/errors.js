@@ -344,6 +344,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (this.contextCache[url] == context)
                 delete this.contextCache[url];
         }
+        this.showCount(0);
     },
 });
 
