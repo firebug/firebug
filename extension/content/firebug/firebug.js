@@ -987,7 +987,7 @@ top.Firebug =
                 browser.chrome.focus();
             else if (Firebug.isMinimized()) // toggle minimize
                 Firebug.unMinimize();
-            else
+            else if (!forceOpen)
                 Firebug.minimizeBar();
         }
         else // then user commands debugging the selected tab
