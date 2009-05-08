@@ -963,14 +963,15 @@ top.Firebug =
             return
         }
 
-        TabWatcher.unwatchBrowser(browser);
-
         if (Firebug.isInBrowser())
         {
             browser.chrome.hidePanel();
             this.showBar(false);
         }
         // else minimized nothing to do
+
+        TabWatcher.unwatchBrowser(browser);
+        Firebug.resetTooltip();
     },
 
     toggleBar: function(forceOpen, panelName) // the status bar icon click action
@@ -1524,6 +1525,9 @@ top.Firebug =
 
     setPlacement: function(toPlacement)
     {
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement);
+
         for (Firebug.placement = 0; Firebug.placement < Firebug.placements.length; Firebug.placement++)
         {
             if (toPlacement == Firebug.placements[Firebug.placement])
@@ -1572,11 +1576,7 @@ top.Firebug =
                 Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
         }
         else // this browser has no context
-        {
             Firebug.suspend();
-            if (TabWatcher.contexts.length < 1)  // TODO shutdown ?
-                Firebug.setPlacement("none");
-        }
 
         Firebug.resetTooltip();
     },
@@ -1614,6 +1614,8 @@ top.Firebug =
     unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
     {
         Firebug.updateActiveContexts(null);
+        if (TabWatcher.contexts.length < 1)  // TODO shutdown ?
+            Firebug.setPlacement("none");
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
