@@ -2097,6 +2097,7 @@ this.getSourceFileByHref = function(url, context)
 this.getAllStyleSheets = function(context)
 {
     var styleSheets = [];
+    var recordedSheets = {};
 
     function addSheet(sheet)
     {
@@ -2105,13 +2106,18 @@ this.getAllStyleSheets = function(context)
         if (FBL.isSystemURL(sheetLocation) && Firebug.filterSystemURLs)
             return;
 
-        styleSheets.push(sheet);
-
-        for (var i = 0; i < sheet.cssRules.length; ++i)
+        if (!sheet.href || !recordedSheets[sheet.href])
         {
-            var rule = sheet.cssRules[i];
-            if (rule instanceof CSSImportRule)
-                addSheet(rule.styleSheet);
+            styleSheets.push(sheet);
+    
+            for (var i = 0; i < sheet.cssRules.length; ++i)
+            {
+                var rule = sheet.cssRules[i];
+                if (rule instanceof CSSImportRule)
+                    addSheet(rule.styleSheet);
+            }
+            
+            recordedSheets[sheet.href] = true;
         }
     }
 
