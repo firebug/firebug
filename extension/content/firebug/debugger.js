@@ -2897,7 +2897,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     refresh: function()
     {
-        if (!Firebug.Debugger.isAlwaysEnabled(context))
+        if (!Firebug.Debugger.isAlwaysEnabled(this.context))
             updateScriptFiles(this.context);
 
         var extracted = this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
