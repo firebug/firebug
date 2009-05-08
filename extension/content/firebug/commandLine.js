@@ -82,10 +82,10 @@ Firebug.CommandLine = extend(Firebug.Module,
                     FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
                     Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
                 }
-                
+
                 Firebug.CommandLine.injector.attachCommandLine(context, win);
             }
-            
+
             attached = element.getAttribute("firebugCommandLineAttached");
             if (attached&&FBTrace.DBG_ERRORS)
             {
@@ -471,7 +471,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             autoCompleteEval, false, true);
 
         if (Firebug.largeCommandLine)
-            this.setMultiLine(true, FirebugChrome);
+            this.setMultiLine(true, Firebug.chrome);
     },
 
     initializeUI: function()
@@ -527,7 +527,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     updateOption: function(name, value)
     {
         if (name == "largeCommandLine")
-            this.setMultiLine(value, FirebugChrome);
+            this.setMultiLine(value, Firebug.chrome);
     },
 
     // called by users of command line, currently:
@@ -617,7 +617,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (panelName != 'console')
             return;
 
-        this.setMultiLine(Firebug.largeCommandLine, context.chrome);
+        this.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
     },
 
     onPanelDisable: function(context, panelName)
