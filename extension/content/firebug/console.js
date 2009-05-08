@@ -210,7 +210,7 @@ Firebug.Console = extend(ActivableConsole,
             FBTrace.sysout("console.onPanelEnable**************");
 
         $('fbStatusIcon').setAttribute("console", "on");
-        Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
+        Firebug.Debugger.addDependentModule(context, this); // we inject the console during JS compiles so we need jsd
 
         // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
         if (versionChecker.compare(appInfo.version, "3.1") >= 0)

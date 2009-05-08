@@ -1734,15 +1734,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.clearAllBreakpoints(context);
     },
 
-    onDependentModuleChange: function(dependnentAddedOrRemoved)
+    onDependentModuleChange: function(context, dependentAddedOrRemoved)
     {
         if (this.dependents.length > 0) // then we have dependents now
         {
             if (!this.isAlwaysEnabled()) // then we need to enable
             {
-                var prefDomain = this.getPrefDomain();
-                Firebug.setPref(prefDomain, "enableSites", true);
-                Firebug.Console.log("enabling javascript debugger to support "+dependnentAddedOrRemoved.dispatchName);
+                this.setDefaultState(true);
+                Firebug.Console.log("enabling javascript debugger to support "+dependentAddedOrRemoved.dispatchName);
             }
         }
     },

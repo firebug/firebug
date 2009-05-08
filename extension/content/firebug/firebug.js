@@ -3019,7 +3019,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
             FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
                 " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
 
-        var panel = context.getPanel(this.panelName, true);
+        var panel = context.getPanel(this.panelName, false);
         if (panel)
             panel.enablePanel(this);
 
@@ -3055,19 +3055,19 @@ Firebug.ActivableModule = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Cross module dependencies.
 
-    addDependentModule: function(dependent)
+    addDependentModule: function(context, dependent)
     {
         this.dependents.push(dependent);
-        this.onDependentModuleChange(dependent);  // not dispatched.
+        this.onDependentModuleChange(context, dependent);  // not dispatched.
     },
 
-    removeDependentModule: function(dependent)
+    removeDependentModule: function(context, dependent)
     {
         remove(this.dependents, dependent);
-        this.onDependentModuleChange(dependent);  // not dispatched
+        this.onDependentModuleChange(context, dependent);  // not dispatched
     },
 
-    onDependentModuleChange: function(dependent)
+    onDependentModuleChange: function(context, dependent)
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("onDependentModuleChange no-op for "+dependent.dispatchName);
@@ -3178,11 +3178,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var panelBar = chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(this.panelName);
         if (tab)
-            tab.setModule(this);
-
-        // Update tab label.
-        if (context && tab)
         {
+            tab.setModule(this);
             var enabled = this.isAlwaysEnabled();
             tab.setAttribute('aria-disabled', enabled ? "false" : "true");
         }
