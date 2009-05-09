@@ -3383,9 +3383,9 @@ this.getSourceLineRange = function(sourceBox, min, max)
         var line =  sourceBox.getLineAsHTML(i-1);
 
         html.push(
-            '<div class="sourceRow"><a class="sourceLine">',
+            '<div class="sourceRow" role="presentation"><a class="sourceLine">',
             lineNo,
-            '</a><span class="sourceRowText">',
+            '</a><span class="sourceRowText" role="presentation">',
             line,
             '</span></div>'
         );
