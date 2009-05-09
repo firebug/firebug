@@ -77,19 +77,19 @@ Firebug.CommandLine = extend(Firebug.Module,
             var attached = element.getAttribute("firebugCommandLineAttached");
             if (!attached)
             {
+                Firebug.CommandLine.injector.attachCommandLine(context, win);
+                attached = element.getAttribute("firebugCommandLineAttached");
                 if (FBTrace.DBG_ERRORS)
                 {
-                    FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
-                    Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                    if (attached)
+                        FBTrace.sysout("Successfully attached command line");
+                    else
+                    {
+                        FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
+                        Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                        return;
+                    }
                 }
-
-                Firebug.CommandLine.injector.attachCommandLine(context, win);
-            }
-
-            attached = element.getAttribute("firebugCommandLineAttached");
-            if (attached&&FBTrace.DBG_ERRORS)
-            {
-                FBTrace.sysout("Successfully attached command line");
             }
         }
         else
@@ -296,9 +296,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             if (typeof(result) != "undefined")
             {
-                context.chrome.contextMenuObject = result;
+                Firebug.chrome.contextMenuObject = result;
 
-                var popup = context.chrome.$("fbContextMenu");
+                var popup = Firebug.chrome.$("fbContextMenu");
                 popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
             }
         });
@@ -317,7 +317,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.evaluate(expr, context, null, null, function(result, context)
         {
             if (typeof(result) != undefined)
-                context.chrome.select(result);
+                Firebug.chrome.select(result);
         });
     },
 
@@ -338,11 +338,11 @@ Firebug.CommandLine = extend(Firebug.Module,
     focus: function(context)
     {
         if (Firebug.isDetached())
-            context.chrome.focus();
+            Firebug.chrome.focus();
         else
             Firebug.toggleBar(true);
 
-        context.chrome.selectPanel("console");
+        Firebug.chrome.selectPanel("console");
 
         var commandLine = getCommandLine(context);
         setTimeout(function() { commandLine.select(); });
@@ -486,19 +486,16 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     attachListeners: function()
     {
-        $("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
-        $("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
 
     showContext: function(browser, context)
     {
-        if (context)  // null for eg about:crashes
-        {
-            var command = context.chrome.$("cmd_focusCommandLine");
-            command.setAttribute("disabled", !context);
-        }
+        Firebug.chrome.$("cmd_focusCommandLine");
+        command.setAttribute("disabled", !context);
     },
 
     showPanel: function(browser, panel)
@@ -625,9 +622,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (panelName != 'console')  // we don't care about other panels
             return;
 
-        context.chrome.$("fbCommandBox").collapsed = true;
-        context.chrome.$("fbPanelSplitter").collapsed = true;
-        context.chrome.$("fbSidePanelDeck").collapsed = true;
+        Firebug.chrome.$("fbCommandBox").collapsed = true;
+        Firebug.chrome.$("fbPanelSplitter").collapsed = true;
+        Firebug.chrome.$("fbSidePanelDeck").collapsed = true;
     },
 
     // *********************************************************************************************
@@ -786,8 +783,8 @@ function injectScript(script, win)
 function getCommandLine(context)
 {
     return Firebug.largeCommandLine
-        ? context.chrome.$("fbLargeCommandLine")
-        : context.chrome.$("fbCommandLine");
+        ? Firebug.chrome.$("fbLargeCommandLine")
+        : Firebug.chrome.$("fbCommandLine");
 }
 
 const reIndent = /^(\s+)/;
@@ -877,7 +874,7 @@ function FirebugCommandLineAPI(context, baseWindow)
 
     this.inspect = function(obj, panelName)
     {
-        context.chrome.select(obj, panelName);
+        Firebug.chrome.select(obj, panelName);
     };
 
     this.keys = function(o)
