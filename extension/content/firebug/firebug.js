@@ -984,7 +984,7 @@ top.Firebug =
         if (browser.showFirebug)  // then we are debugging the selected tab
         {
             if (Firebug.isDetached()) // if we are out of the browser, just focus on the external window
-                browser.chrome.focus();
+                Firebug.chrome.focus();
             else if (Firebug.isMinimized()) // toggle minimize
                 Firebug.unMinimize();
             else if (!forceOpen)
@@ -1003,6 +1003,11 @@ top.Firebug =
 
             if (Firebug.isClosed())
                 Firebug.setPlacement("inBrowser");
+            else if (Firebug.isMinimized())
+                Firebug.unMinimize();
+            else if (Firebug.isDetatched())
+                Firebug.chrome.focus();
+            // else we are already inBrowser and create will show.
 
             var created = TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
@@ -1054,6 +1059,7 @@ top.Firebug =
     closeDetachedWindow: function(browser)
     {
         Firebug.setPlacement("none");
+        Firebug.showBar(false);
         TabWatcher.unwatchBrowser(browser);
         Firebug.resetTooltip();
     },
@@ -2972,14 +2978,13 @@ Firebug.ActivableModule = extend(Firebug.Module,
     initialize: function()
     {
         this.dependents = [];
+        this.disabledPanelPage = new Firebug.DisabledPanelPage(this);
 
         Firebug.Module.initialize.apply(this, arguments);
     },
 
     initializeUI: function(detachArgs)
     {
-        this.disabledPanelPage = new Firebug.DisabledPanelPage(this);
-
         Firebug.registerUIListener(this);  // we listen for showUI/hideUI for panel activation
 
         this.updateTab(null);

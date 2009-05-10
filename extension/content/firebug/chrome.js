@@ -1146,7 +1146,7 @@ function browser2Loaded()
     browser2Loaded.complete = true;
 
     if (browser1Loaded.complete && browser2Loaded.complete)
-        FirebugChrome.initializeUI();
+        Firebug.chrome.initializeUI();
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("browse2Loaded complete\n");
 }
