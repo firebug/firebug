@@ -1342,14 +1342,19 @@ function getMembers(object, level)  // we expect object to be user-level object 
             }
             else
             {
-                var setterFunction = insecureObject.__lookupSetter__(name);
+                var getterFunction = insecureObject.__lookupGetter__(name),
+                    setterFunction = insecureObject.__lookupSetter__(name),
+                    prefix = "";
+                    
+                if(getterFunction && !setterFunction)
+                    prefix = "get ";
 
                 if (name in domMembers)
-                    addMember("dom", domProps, (!setterFunction?"get "+name:name), val, level, domMembers[name]);
+                    addMember("dom", domProps, (prefix+name), val, level, domMembers[name]);
                 else if (name in domConstantMap)
-                    addMember("dom", domConstants, (!setterFunction?"get "+name:name), val, level);
+                    addMember("dom", domConstants, (prefix+name), val, level);
                 else
-                    addMember("user", userProps, (!setterFunction?"get "+name:name), val, level);
+                    addMember("user", userProps, (prefix+name), val, level);
             }
         }
     }
