@@ -313,7 +313,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     highlightRule: function(rule)
     {
-        var ruleElement = Firebug.getElementByRepObject(this.panelNode, rule.style);
+        var ruleElement = Firebug.getElementByRepObject(this.panelNode.firstChild, rule.style);
         if (ruleElement)
         {
             scrollIntoCenterView(ruleElement, this.panelNode);
@@ -657,6 +657,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             return 1;
         else if (object instanceof CSSStyleRule)
             return 2;
+        else if (object instanceof CSSStyleDeclaration)
+            return 2;
         else if (object instanceof SourceLink && object.type == "css" && reCSS.test(object.href))
             return 2;
         else
@@ -684,6 +686,10 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     updateSelection: function(object)
     {
         this.selection = null;
+
+        if (object instanceof CSSStyleDeclaration) {
+            object = object.parentRule;
+        }
 
         if (object instanceof CSSStyleRule)
         {
