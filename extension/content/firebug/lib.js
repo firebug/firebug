@@ -1091,16 +1091,33 @@ this.getClientOffset = function(elt)
     return coords;
 };
 
-this.getPosXY = function(elt)
+this.getRectTRBLWH = function(elt)
 {
-    var coords = {x: 0, y: 0},
-        rect;
+    var rect,
+        coords =
+        {
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0,
+            "width": 0,
+            "height": 0
+        };
 
     if (elt)
-      {
-      rect=elt.getBoundingClientRect();
-      coords = {x: rect.left, y: rect.top};
-      }
+    {
+        rect = elt.getBoundingClientRect();
+
+        coords =
+        {
+            "top": rect.top,
+            "right": rect.right,
+            "bottom": rect.bottom,
+            "left": rect.left,
+            "width": rect.right-rect.left,
+            "height": rect.bottom-rect.top
+        };
+    }
 
     return coords;
 };

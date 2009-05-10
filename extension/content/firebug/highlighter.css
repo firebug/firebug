@@ -8,6 +8,17 @@
     padding:0;
 }
 
+.firebugCanvas {
+    position:absolute;
+    top: 0;
+    left: 0;
+    display:none;
+    border: 0 none;
+    margin: 0;
+    padding: 0;
+    outline: 0;
+}
+
 .firebugHighlight {
     z-index: 2147483647;
     position: absolute;
