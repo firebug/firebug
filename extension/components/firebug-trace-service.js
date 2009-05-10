@@ -41,7 +41,7 @@ TraceConsoleService.prototype =
 {
     getTracer: function(prefDomain)
     {
-        if (this.getPref("extensions.firebug-tracing-service.toOSConsole"))
+        if (this.getPref("extensions.firebug-tracing-service.DBG_toOSConsole"))
         {
              win = appShellService.hiddenDOMWindow;  // also need browser.dom.window.dump.enabled true
         }
