@@ -113,7 +113,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session
         {
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("-> tabWatcher.watchTopWindow context exists "+context.getName());
             if (!this.shouldShowContext(context))
             {
@@ -129,7 +129,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             var url = (uri instanceof nsIURI) ? uri.spec : uri;
             if (!this.shouldCreateContext(tabBrowser.selectedBrowser, url, userCommands))
             {
-                if (FBTrace.DBG_WINDOWS)
+                if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("-> tabWatcher will not create context ");
                 this.watchContext(win, null);
                 return false;  // we did not create a context
@@ -226,14 +226,14 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if ( dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]) )
             return true;
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
 
         // Do not Create if any Listener says true to shouldNotCreateContext
         if ( dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]) )
             return false;
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldNotCreateContext no opinion for: "+ url);
 
         // create if user said so and no one else has an opinion.
@@ -256,7 +256,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         context.uid = FBL.getUniqueId();
 
-        if (FBTrace.DBG_WINDOWS) {
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
                 ", "+context.getName()+" browser "+browser.currentURI.spec+" browser.chrome.window: "+browser.chrome.window.location);
         }
@@ -554,7 +554,7 @@ var TabProgressListener = extend(BaseProgressListener,
                 var browser = TabWatcher.getBrowserByWindow(srcWindow);
             var requestFromFirebuggedWindow = browser && browser.showFirebug;
 
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("-> TabProgressListener.onLocationChange "+progress.DOMWindow.location+" to: "
                                           +(uri?uri.spec:"null location")+(requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
 
@@ -670,7 +670,7 @@ var HttpObserver = extend(Object,
         // request (win == win.parent) or embedded iframe request.
         if (request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI)
         {
-            if (FBTrace.DBG_WINDOWS && win == win.parent)
+            if ( (FBTrace.DBG_ACTIVATION || FBTrace.DBG_WINDOWS) && win == win.parent)
             {
                 FBTrace.sysout("-> tabWatcher HttpObserver *** START *** " +
                     "document request for: " + request.URI.spec + " window for request is "+win.location+"\n");

@@ -323,7 +323,7 @@ top.Firebug =
     setSuspended: function(value)
     {
         var suspendMarker = $("fbStatusIcon");
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.setSuspended to "+value+"\n");
 
         if (value)
@@ -340,7 +340,7 @@ top.Firebug =
         {
             if (Firebug.isDetached())
             {
-                if (FBTrace.DBG_INITIALIZE)
+                if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("firebug.toggleSuspend detached\n");
                 FirebugContext.chrome.focus();
                 this.resume();
@@ -474,7 +474,7 @@ top.Firebug =
             }
         });
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("active contexts urls "+contextURLSet.length);
 
         return contextURLSet;
@@ -917,7 +917,7 @@ top.Firebug =
     showBar: function(show)  // minimized <-> inBrowser  This code only works in browser.xul
     {
         var browser = FirebugChrome.getCurrentBrowser();
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
 
         var shouldShow = show && !browser.detached;
@@ -1536,7 +1536,7 @@ top.Firebug =
 
     setPlacement: function(toPlacement)
     {
-        if (FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement);
 
         for (Firebug.placement = 0; Firebug.placement < Firebug.placements.length; Firebug.placement++)
@@ -3083,14 +3083,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     showUI: function(browser, context)  // Firebug is opened, in browser or detached
     {
-        if (FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.showUI; " + this.panelName + ", " +
                 (context ? context.getName() : "No Context"));
     },
 
     hideUI: function(browser, context)  // Firebug closes, either in browser or detached.
     {
-        if (FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.hideUI; " + this.panelName + ", " +
                 (context ? context.getName() : "No Context"));
     },
@@ -3368,7 +3368,7 @@ Firebug.URLSelector =
         {
             var uri = makeURI(normalizeURL(url));
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
 
             if (hasAnnotation)
@@ -3400,7 +3400,7 @@ Firebug.URLSelector =
                     }
                     else
                     {
-                        if (FBTrace.DBG_WINDOWS)
+                        if (FBTrace.DBG_ACTIVATION)
                             FBTrace.sysout("shouldCreateContext FirebugLink does not match "+uri.spec, browser.FirebugLink);
                     }
                 }
@@ -3419,7 +3419,7 @@ Firebug.URLSelector =
     {
         var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
 
         delete browser.showFirebug;
@@ -3445,7 +3445,7 @@ Firebug.URLSelector =
         var uri = makeURI(normalizeURL(browser.currentURI.spec));
         this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
         {
             if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
                 FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
@@ -3458,7 +3458,7 @@ Firebug.URLSelector =
         var uri  = makeURI(normalizeURL(browser.currentURI.spec));
         this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec);
     },
 
@@ -3471,7 +3471,7 @@ Firebug.URLSelector =
         {
             var uri = uris[i];
             this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("Firebug.URLSelector.clearAll untagged "+uri.spec);
         }
     },
