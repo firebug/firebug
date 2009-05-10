@@ -494,7 +494,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     showContext: function(browser, context)
     {
-        Firebug.chrome.$("cmd_focusCommandLine");
+        var command = Firebug.chrome.$("cmd_focusCommandLine");
         command.setAttribute("disabled", !context);
     },
 
