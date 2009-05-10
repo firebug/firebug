@@ -448,13 +448,16 @@ function pad(element, t, r, b, l)
 
 function getImageMapHighlighter(context)
 {
+    if(!context)
+        return;
+
     var doc = context.window.document,
         canvas, ctx, 
         image,
         init = function()
         {
             var doc = context.window.document,
-                body = getHighlighterBody(context);
+                body = getFirebugBody(context);
 
             if(!canvas)
             {
@@ -463,7 +466,7 @@ function getImageMapHighlighter(context)
             canvas.id = "firebugCanvas";
             canvas.className = "firebugCanvas";
             canvas.addEventListener("mousemove", function(event){context.imageMapHighlighter.mouseMoved(event)}, true);
-            canvas.addEventListener("mouseout", function(){context.imageMapHighlighter.show(false);}, true);
+            canvas.addEventListener("mouseout", function(){getImageMapHighlighter(context).destroy();}, true);
             context.window.addEventListener("scroll", function(){context.imageMapHighlighter.show(false);}, true);
             
             body.appendChild(canvas);
@@ -514,8 +517,10 @@ function getImageMapHighlighter(context)
 
                 if (eltArea)
                 {
-                    this.getImage('#firebug');
-                    
+                    this.getImage("#"+eltArea.parentNode.name);
+
+                    init();
+
                     if(image)
                     {
                         rect = getRectTRBLWH(image);
@@ -525,7 +530,7 @@ function getImageMapHighlighter(context)
                         rect = getRectTRBLWH(eltArea);
                         image = eltArea;
                     }
-
+                  
                     canvas.style.top = (rect.top+doc.body.scrollTop)+'px';
                     canvas.style.left = (rect.left+doc.body.scrollLeft)+'px';
                     canvas.width = rect.width;
@@ -549,7 +554,7 @@ function getImageMapHighlighter(context)
                     }
                     else if (eltArea.shape.toLowerCase() == 'circle')
                     {
-                        ctx.arc(v[0], v[1], v[2] - (ctx.lineWidth / 2), 0, Math.PI / 180 * 360, false);
+                        ctx.arc(parseInt(v[0],10) + ctx.lineWidth / 2, parseInt(v[1],10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
                     }
                     else
                     {
@@ -576,12 +581,16 @@ function getImageMapHighlighter(context)
                 {
                     this.show(false);
                 }
+            },
+            "destroy": function()
+            {
+                removeFirebugBody(context);
+                canvas = null;
+                ctx = null;
             }
         }
     }
     
-    init();
-
     return context.imageMapHighlighter;
 }
 
@@ -632,7 +641,7 @@ FrameHighlighter.prototype =
                 FBTrace.sysout("FrameHighlighter ", element.tagName);       /*@explore*/
                 FBTrace.sysout("FrameHighlighter node", nodes);            /*@explore*/
             }
-            var body = getHighlighterBody(context);
+            var body = getFirebugBody(context);
 
             if (!body)
                 return this.unhighlight(context);
@@ -856,7 +865,7 @@ BoxModelHighlighter.prototype =
                 move(nodes.lines.left, left, 0)
             }
 
-            var body = getHighlighterBody(context);
+            var body = getFirebugBody(context);
             if (!body)
                 return this.unhighlight(context);
 
@@ -890,6 +899,7 @@ BoxModelHighlighter.prototype =
         else
         {
             this.unhighlight(context);
+
             getImageMapHighlighter(context).highlight(element);
         }
     },
@@ -912,7 +922,8 @@ BoxModelHighlighter.prototype =
             }
         }
         
-        getImageMapHighlighter(context).show(false);
+        // Destroy imagemap canvas AND FirebugBody
+        getImageMapHighlighter(context).destroy();
     },
 
     getNodes: function(context)
@@ -982,11 +993,10 @@ function getNonFrameBody(elt)
     return body.localName.toUpperCase() == "FRAMESET" ? null : body;
 }
 
-function getHighlighterBody(context)
+function getFirebugBody(context)
 {
     var doc = context.window.document,
         body = doc.getElementById("firebugBody");
-        
 
     if(!body)
     {
@@ -999,15 +1009,23 @@ function getHighlighterBody(context)
     if (body)
     {
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("getHighlighterBody", body);
+            FBTrace.sysout("getFirebugBody", body);
 
         return body;
     }
 
     if (FBTrace.DBG_INSPECT)
-        FBTrace.sysout("getHighlighterBody", doc.firstChild);
+        FBTrace.sysout("getFirebugBody", doc.firstChild);
 
     return doc.firstChild;  // For non-HTML docs
+}
+
+function removeFirebugBody(context)
+{
+    var firebugBody = context.window.document.getElementById("firebugBody");
+
+    if(firebugBody)
+        firebugBody.parentNode.removeChild(firebugBody);
 }
 
 function attachStyles(context, body)
