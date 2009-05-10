@@ -365,11 +365,11 @@ Firebug.Inspector = extend(Firebug.Module,
         if (this.inspecting)
             this.stopInspecting(true);
 
-        if (browser)
+        /*if (browser)
         {
             var disabled = !context || !context.loaded;
             browser.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
-        }
+        }*/
     },
 
     showPanel: function(browser, panel)
@@ -377,13 +377,13 @@ Firebug.Inspector = extend(Firebug.Module,
         var chrome = browser.chrome;
         var disabled = !panel || !panel.context.loaded;
         chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
-        chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
+        //chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
     },
 
     loadedContext: function(context)
     {
         context.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
-        context.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", "false");
+        //context.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", "false");
     },
 
     updateOption: function(name, value)
