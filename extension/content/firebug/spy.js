@@ -329,6 +329,7 @@ top.XMLHttpRequestSpy = function(request, xhrRequest, context)
     this.xhrRequest = xhrRequest;
     this.context = context;
     this.responseText = null;
+    this.isXHR = true;
 };
 
 top.XMLHttpRequestSpy.prototype =
@@ -623,8 +624,6 @@ function updateHttpSpyInfo(spy)
 
     if (!spy.responseHeaders && spy.loaded)
         spy.responseHeaders = getResponseHeaders(spy);
-
-    spy.isXHR = true;
 
     var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
     if (!netInfoBox)
