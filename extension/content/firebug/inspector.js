@@ -452,8 +452,7 @@ function getImageMapHighlighter(context)
         return;
 
     var doc = context.window.document,
-        canvas, ctx, 
-        image,
+        canvas, ctx,
         init = function()
         {
             var doc = context.window.document,
@@ -465,6 +464,8 @@ function getImageMapHighlighter(context)
             canvas.firebugIgnore = true;
             canvas.id = "firebugCanvas";
             canvas.className = "firebugCanvas";
+            canvas.width = context.window.innerWidth;
+            canvas.height = context.window.innerHeight;
             canvas.addEventListener("mousemove", function(event){context.imageMapHighlighter.mouseMoved(event)}, true);
             canvas.addEventListener("mouseout", function(){getImageMapHighlighter(context).destroy();}, true);
             context.window.addEventListener("scroll", function(){context.imageMapHighlighter.show(false);}, true);
@@ -476,15 +477,16 @@ function getImageMapHighlighter(context)
     if (!context.imageMapHighlighter)
     {            
         context.imageMapHighlighter = 
-        {
+        {   
             "show": function(state)
             {
                 canvas.style.display=state?'block':'none';
             },
-			"getImage": function(mapName)
+			"getImages": function(mapName, multi)
 			{
                 var i,
                     elts = [],
+                    images = [],
                     elts2 = doc.getElementsByTagName("img"),
                     elts3 = doc.getElementsByTagName("input");
                
@@ -502,40 +504,30 @@ function getImageMapHighlighter(context)
                         {
                             rect=elts[i].getBoundingClientRect();
 
-                            if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
+                            if(multi)
                             {
-                                image=elts[i];
+                                images.push(elts[i]);
+                            }
+                            else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
+                            {
+                                images[0]=elts[i];
                                 break;
                             }
                         }
                     }
                 }
+                return images;
 			},
-            "highlight": function(eltArea)
+            "highlight": function(eltArea, multi)
             {
-                var i, v, rect;
+                var i, j, v, images, rect, clearForFirst;
 
                 if (eltArea)
                 {
-                    this.getImage("#"+eltArea.parentNode.name);
+                    images = this.getImages("#"+eltArea.parentNode.name, multi);
 
                     init();
 
-                    if(image)
-                    {
-                        rect = getRectTRBLWH(image);
-                    }
-                    else
-                    {
-                        rect = getRectTRBLWH(eltArea);
-                        image = eltArea;
-                    }
-                  
-                    canvas.style.top = (rect.top+doc.body.scrollTop)+'px';
-                    canvas.style.left = (rect.left+doc.body.scrollLeft)+'px';
-                    canvas.width = rect.width;
-                    canvas.height = rect.height;
-                    
                     v = eltArea.coords.split(",");
                     
                     if(!ctx)
@@ -545,29 +537,40 @@ function getImageMapHighlighter(context)
                     ctx.strokeStyle = "rgb(29, 55, 95)";
                     ctx.lineWidth = 2;
                     
-                    ctx.beginPath();
-                    ctx.clearRect(0,0,canvas.width,canvas.height);
+                    if(images.length===0)
+                        images[0] = eltArea;
                     
-                    if (eltArea.shape.toLowerCase() == 'rect')
+                    for(var j=0;j<images.length;j++)
                     {
-                        ctx.rect(v[0], v[1], v[2]-v[0], v[3]-v[1]);
-                    }
-                    else if (eltArea.shape.toLowerCase() == 'circle')
-                    {
-                        ctx.arc(parseInt(v[0],10) + ctx.lineWidth / 2, parseInt(v[1],10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
-                    }
-                    else
-                    {
-                        ctx.moveTo(v[0], v[1]);
-                        for(i=2;i<v.length;i+=2)
+                        rect = getRectTRBLWH(images[j]);
+                        
+                        ctx.beginPath();
+
+                        if(!multi || (multi && j===0))
+                            ctx.clearRect(0,0,canvas.width,canvas.height);
+                        
+                        if (eltArea.shape.toLowerCase() === 'rect')
                         {
-                            ctx.lineTo(v[i], v[i+1]);
+                            ctx.rect(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10), v[2]-v[0], v[3]-v[1]);
                         }
+                        else if (eltArea.shape.toLowerCase() === 'circle')
+                        {
+                            ctx.arc(rect.left+parseInt(v[0],10) + ctx.lineWidth / 2, rect.top+parseInt(v[1],10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
+                        }
+                        else
+                        {
+                            ctx.moveTo(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10));
+                            for(i=2;i<v.length;i+=2)
+                            {
+                                ctx.lineTo(rect.left+parseInt(v[i],10), rect.top+parseInt(v[i+1],10));
+                            }
+                        }
+
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.closePath();
                     }
 
-                    ctx.fill();
-                    ctx.stroke();
-                      
                     this.show(true);
                 }
             },
@@ -669,7 +672,9 @@ FrameHighlighter.prototype =
         else
         {
             this.unhighlight(context);
-            getImageMapHighlighter(context).highlight(element);
+
+            var ihl = getImageMapHighlighter(context);
+            ihl.highlight(element, false);
         }
     },
 
@@ -900,7 +905,8 @@ BoxModelHighlighter.prototype =
         {
             this.unhighlight(context);
 
-            getImageMapHighlighter(context).highlight(element);
+            var ihl = getImageMapHighlighter(context);
+            ihl.highlight(element, true);
         }
     },
 
