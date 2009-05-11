@@ -1183,8 +1183,10 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
             this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber, funcName:""});
         }
     }
-    else if (this.obj && this.obj.stack)
+    else if (this.obj && this.obj.stack && (this.obj instanceof Error))
     {
+        // If the passed object is an error with stack trace attached, use it.
+        // This stack trace points directly to the place where the error occurred.
         var stack = this.obj.stack.split("\n");
         for (var i=0; i<stack.length; i++)
         {
