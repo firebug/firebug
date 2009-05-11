@@ -1005,7 +1005,7 @@ top.Firebug =
                 Firebug.setPlacement("inBrowser");
             else if (Firebug.isMinimized())
                 Firebug.unMinimize();
-            else if (Firebug.isDetatched())
+            else if (Firebug.isDetached())
                 Firebug.chrome.focus();
             // else we are already inBrowser and create will show.
 
