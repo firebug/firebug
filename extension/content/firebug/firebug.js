@@ -1048,11 +1048,15 @@ top.Firebug =
             this.detachBar(FirebugContext);
     },
 
-    closeDetachedWindow: function(browser, userCommands)
+    closeDetachedWindow: function(userCommands)
     {
         Firebug.setPlacement("none");
         Firebug.showBar(false);
-        TabWatcher.unwatchBrowser(browser, userCommands);
+
+        if (FirebugContext)
+            TabWatcher.unwatchBrowser(FirebugContext.browser, userCommands);
+        // else the user closed Firebug external window while not looking at a debugged web page.
+
         Firebug.resetTooltip();
     },
 
@@ -1073,6 +1077,11 @@ top.Firebug =
             Firebug.reattachContext(context.browser, context);
         });
 
+        if (FirebugContext)
+        {
+            var browser = FirebugChrome.getCurrentBrowser();
+            Firebug.showContext(browser, FirebugContext);
+        }
     },
 
     detachBar: function(context)
@@ -1616,7 +1625,7 @@ top.Firebug =
             else
             {
                 contentBox.setAttribute("collapsed", true);
-                Firebug.chrome.window.document.title = $("Firebug - inactive for selected Firefox tab");
+                Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
             }
         }
         else
