@@ -276,7 +276,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         // in fbs we stopStepping() so allow breakOnNext again
         context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnNext"));
+        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
 
         delete context.stopped;
         delete context.debugFrame;
@@ -301,7 +301,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.suspend(context);  // arm breakOnNext
         else {
             context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
-            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("BreakOnNext"));
+            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
         }
         this.syncCommands(context);
         return;
@@ -2479,7 +2479,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         this.showSourceFile(updatedSourceFile);
-        dispatch([Firebug.A11yModel], "onUpdateScriptLocation", [this]);
+        dispatch([Firebug.A11yModel], "onUpdateScriptLocation", [this, updatedSourceFile]);
     },
 
     updateSelection: function(object)

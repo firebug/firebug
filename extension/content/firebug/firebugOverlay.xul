@@ -273,7 +273,7 @@
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                                    tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
+                                                    tooltiptext="script.Break On Next" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
                                                     tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"
