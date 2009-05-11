@@ -211,7 +211,7 @@ top.FirebugChrome =
 
     attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and inDetachedScope == true
     {
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope+" context="+context
                                +" context==FirebugContext: "+(context==FirebugContext)+" in window: "+window.location);
 
@@ -231,7 +231,7 @@ top.FirebugChrome =
     detachBrowser: function(browser)
     {
         Firebug.setChrome(Firebug.originalChrome);
-        Firebug.closeDetachedWindow(browser, true);
+        Firebug.closeDetachedWindow(true);
 
         browser.chrome = browser.originalChrome;  // 1.3
         delete browser.originalChrome;
@@ -1146,7 +1146,8 @@ function browser2Loaded()
     browser2Loaded.complete = true;
 
     if (browser1Loaded.complete && browser2Loaded.complete)
-        Firebug.chrome.initializeUI();
+        FirebugChrome.initializeUI();  // the chrome bound into this scope
+
     if (FBTrace.DBG_INITIALIZE)
         FBTrace.sysout("browse2Loaded complete\n");
 }
