@@ -1466,9 +1466,9 @@ this.SourceText = domplate(Firebug.Rep,
     tag:
         DIV(
             FOR("line", "$object|lineIterator",
-                DIV({class: "sourceRow"},
+                DIV({class: "sourceRow", role : "presentation"},
                     SPAN({class: "sourceLine"}, "$line.lineNo"),
-                    SPAN({class: "sourceRowText"}, "$line.text")
+                    SPAN({class: "sourceRowText", role : "presentation"}, "$line.text")
                 )
             )
         ),
