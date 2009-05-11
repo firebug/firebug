@@ -557,6 +557,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                                     SPAN("&nbsp;"),
                                     SPAN("(", "$stack.lineNumber", ")"),
                                     SPAN("&nbsp;"),
+                                    SPAN({class: "stackFuncName"},
+                                        "$stack.funcName"),
                                     A({class: "openDebugger", onclick: "$onOpenDebugger",
                                         lineNumber: "$stack.lineNumber",
                                         fileName: "$stack.fileName"},
@@ -1171,14 +1173,31 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
                 for (var i=0; i<trace.frames.length; i++) {
                     var frame = trace.frames[i];
                     if (frame.href && frame.lineNo)
-                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo});
+                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo, funcName:""});
                 }
             }
         }
         else
         {
             // Put info about the script error location into the stack.
-            this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
+            this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber, funcName:""});
+        }
+    }
+    else if (this.obj && this.obj.stack)
+    {
+        var stack = this.obj.stack.split("\n");
+        for (var i=0; i<stack.length; i++)
+        {
+            var frame = stack[i].split("@");
+            if (frame.length != 2)
+                continue;
+
+            var index = frame[1].lastIndexOf(":");
+            this.stack.push({
+                fileName: frame[1].substr(0, index),
+                lineNumber: frame[1].substr(index+1),
+                funcName: frame[0]
+            });
         }
     }
     else
@@ -1195,7 +1214,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
 
             var sourceLine = frame.sourceLine ? frame.sourceLine : "";
             var lineNumber = frame.lineNumber ? frame.lineNumber : "";
-            this.stack.push({fileName:fileName, lineNumber:lineNumber});
+            this.stack.push({fileName:fileName, lineNumber:lineNumber, funcName:""});
         }
     }
 
