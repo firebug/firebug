@@ -931,7 +931,7 @@ top.Firebug =
 
         // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
-        if (show)
+        if (show && browser.chrome)
             browser.chrome.syncPanel();
     },
 
