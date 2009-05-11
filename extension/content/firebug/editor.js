@@ -115,7 +115,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             if (cancel)
             {
-                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, this, currentTarget]);
+                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -205,7 +205,10 @@ Firebug.Editor = extend(Firebug.Module,
     setEditTarget: function(element)
     {
         if (!element)
+        {
+            dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
+        } 
         else if (hasClass(element, "insertBefore"))
             this.insertRow(element, "before");
         else if (hasClass(element, "insertAfter"))

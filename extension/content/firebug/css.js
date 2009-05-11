@@ -504,7 +504,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
             }
         }
-
+        if (this.name == "stylesheet")
+            dispatch([Firebug.A11yModel], 'onInlineEditorClose', [this, row.firstChild, true]);
         row.parentNode.removeChild(row);
 
         this.markChange(this.name == "stylesheet");
@@ -1081,6 +1082,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateCascadeView: function(element)
     {
+        dispatch([Firebug.A11yModel], 'onBeforeCSSRulesAdded', [this]);
         var rules = [], sections = [], usedProps = {};
         this.getInheritedRules(element, sections, usedProps);
         this.getElementRules(element, rules, usedProps);

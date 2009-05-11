@@ -165,7 +165,7 @@
                 if (tab)
                 {
                     tab.setAttribute("selected", "true");
-                    if (Firebug.A11yModel.enabled && Firebug.A11yModel.tabFocused &&!forceUpdate)
+                    if (Firebug.A11yModel && Firebug.A11yModel.isEnabled() && Firebug.A11yModel.tabFocused &&!forceUpdate)
                         tab.focus();
                     
                 }
