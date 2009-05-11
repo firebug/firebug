@@ -381,9 +381,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (FirebugContext && FirebugContext.panelName != "console")
             return;
 
-        chrome.$("fbCommandBox").collapsed = multiLine;
-        chrome.$("fbPanelSplitter").collapsed = !multiLine;
-        chrome.$("fbSidePanelDeck").collapsed = !multiLine;
+        collapse(chrome.$("fbCommandBox"), multiLine);
+        collapse(chrome.$("fbPanelSplitter"), !multiLine);
+        collapse(chrome.$("fbSidePanelDeck"), !multiLine);
+
         if (multiLine)
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
 
@@ -507,8 +508,8 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             if (isConsole)
             {
-                chrome.$("fbPanelSplitter").collapsed = false;
-                chrome.$("fbSidePanelDeck").collapsed = false;
+                collapse(chrome.$("fbPanelSplitter"), false);
+                collapse(chrome.$("fbSidePanelDeck"), false);
                 chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
                 collapse(chrome.$("fbCommandBox"), true);
             }
@@ -611,8 +612,9 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     onPanelEnable: function(context, panelName)
     {
-        if (panelName != 'console')
-            return;
+        collapse(Firebug.chrome.$("fbCommandBox"), true);
+        collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
 
         this.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
     },
@@ -622,9 +624,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (panelName != 'console')  // we don't care about other panels
             return;
 
-        Firebug.chrome.$("fbCommandBox").collapsed = true;
-        Firebug.chrome.$("fbPanelSplitter").collapsed = true;
-        Firebug.chrome.$("fbSidePanelDeck").collapsed = true;
+        collapse(Firebug.chrome.$("fbCommandBox"), true);
+        collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
     },
 
     // *********************************************************************************************

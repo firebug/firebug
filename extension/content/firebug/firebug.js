@@ -2018,12 +2018,14 @@ Firebug.Panel =
             {
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser in window "+window.location+" this.context", this.context);
-
                 return;
             }
+
             var buttons = Firebug.chrome.$(buttonsId);
             if (buttons)
-                collapse(buttons, show ? "false" : "true");
+            {
+                collapse(buttons, !show);
+            }
             else
             {
                 if (FBTrace.DBG_ERRORS)

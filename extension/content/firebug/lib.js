@@ -427,7 +427,7 @@ this.isVisible = function(elt)
 
 this.collapse = function(elt, collapsed)
 {
-    elt.setAttribute("collapsed", collapsed);
+    elt.setAttribute("collapsed", collapsed ? "true" : "false");
 };
 
 this.obscure = function(elt, obscured)
