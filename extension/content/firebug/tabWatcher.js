@@ -256,6 +256,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         context.uid = FBL.getUniqueId();
 
+        browser.showFirebug = true; // this is the only place we should set showFirebug.
+
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
                 ", "+context.getName()+" browser "+browser.currentURI.spec+" browser.chrome.window: "+browser.chrome.window.location);
@@ -412,22 +414,22 @@ top.TabWatcher = extend(new Firebug.Listener(),
      * User closes Firebug
      */
 
-    unwatchBrowser: function(browser)
+    unwatchBrowser: function(browser, userCommands)
     {
         if (FBTrace.DBG_WINDOWS)
         {
             var uri = safeGetURI(browser);
-            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");
+            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + " user commands: "+userCommands+"\n");
         }
 
-        var detached = browser.detached;
+        var detached = Firebug.isDetached();
         var shouldDispatch = true;
         if (!detached)
             var shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
 
         if (shouldDispatch)
         {
-            dispatch(this.fbListeners, "unwatchBrowser", [browser, detached]);
+            dispatch(this.fbListeners, "unwatchBrowser", [browser, userCommands]);
             return true;
         }
         return false;

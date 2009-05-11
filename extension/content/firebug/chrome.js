@@ -231,7 +231,7 @@ top.FirebugChrome =
     detachBrowser: function(browser)
     {
         Firebug.setChrome(Firebug.originalChrome);
-        Firebug.closeDetachedWindow(browser);
+        Firebug.closeDetachedWindow(browser, true);
 
         browser.chrome = browser.originalChrome;  // 1.3
         delete browser.originalChrome;

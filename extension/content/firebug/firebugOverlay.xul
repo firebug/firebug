@@ -23,7 +23,7 @@
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
-        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug()"/>
+        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
         <command id="cmd_disablePanels" oncommand="Firebug.disablePanels(FirebugContext)"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"

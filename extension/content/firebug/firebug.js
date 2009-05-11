@@ -952,7 +952,7 @@ top.Firebug =
         window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "", "chrome,centerscreen,dialog,modal,resizable=yes");
     },
 
-    closeFirebug: function()
+    closeFirebug: function(userCommand)
     {
         var browser = FirebugChrome.getCurrentBrowser();
 
@@ -970,7 +970,7 @@ top.Firebug =
         }
         // else minimized nothing to do
 
-        TabWatcher.unwatchBrowser(browser);
+        TabWatcher.unwatchBrowser(browser, userCommand);
         Firebug.resetTooltip();
     },
 
@@ -999,8 +999,6 @@ top.Firebug =
                     FBTrace.sysout("Firebug.toggleBar: a browser without showFirebug has a context! "+context.getName());
             }
 
-            browser.showFirebug = true;  // mark browser debugged
-
             if (Firebug.isClosed())
                 Firebug.setPlacement("inBrowser");
             else if (Firebug.isMinimized())
@@ -1022,15 +1020,10 @@ top.Firebug =
 
     minimizeBar: function()  // just pull down the UI, but don't deactivate the context
     {
-        var browser = FirebugChrome.getCurrentBrowser();
-
-        if (!browser.chrome)
-            return null;
-
         if (Firebug.isDetached())  // TODO disable minimize on externalMode
         {
             // TODO reattach
-            browser.chrome.focus();
+            Firebug.chrome.focus();
         }
         else // inBrowser -> minimized
         {
@@ -1049,18 +1042,17 @@ top.Firebug =
 
     toggleDetachBar: function(forceOpen)  // detached -> closed; inBrowser -> detached TODO reattach
     {
-        var browser = FirebugChrome.getCurrentBrowser();
         if (!forceOpen && Firebug.isDetached())  // detached -> closed
             this.closeFirebug();
         else
             this.detachBar(FirebugContext);
     },
 
-    closeDetachedWindow: function(browser)
+    closeDetachedWindow: function(browser, userCommands)
     {
         Firebug.setPlacement("none");
         Firebug.showBar(false);
-        TabWatcher.unwatchBrowser(browser);
+        TabWatcher.unwatchBrowser(browser, userCommands);
         Firebug.resetTooltip();
     },
 
@@ -3366,6 +3358,9 @@ Firebug.URLSelector =
         if (this.allPagesActivation == "off")
             return false;
 
+        if (userCommands)
+            return true;
+
         try
         {
             var uri = makeURI(normalizeURL(url));
@@ -3381,13 +3376,10 @@ Firebug.URLSelector =
             {
                 if (this.allPagesActivation == "on")
                 {
-                    browser.showFirebug = true;
                     if (FBTrace.DBG_WINDOWS)
                         FBTrace.sysout("shouldCreateContext allPagesActivation "+this.allPagesActivation);
                     return true;
                 }
-
-                delete browser.showDetached;
 
                 if (browser.FirebugLink) // then TabWatcher found a connection
                 {
@@ -3396,9 +3388,12 @@ Firebug.URLSelector =
                     if (dstURI.equals(uri)) // and it matches us now
                     {
                         var srcURI = makeURI(normalizeURL(browser.FirebugLink.src.spec));
-                        hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
-                        if (hasAnnotation)
-                            return this.checkAnnotation(browser, srcURI);
+                        if (dstURI.host == srcURI.host) // and it's on the same domain
+                        {
+                            hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
+                            if (hasAnnotation) // and the source page was annotated.
+                                return this.checkAnnotation(browser, srcURI);
+                        }
                     }
                     else
                     {
@@ -3424,14 +3419,10 @@ Firebug.URLSelector =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
 
-        delete browser.showFirebug;
-
         if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0)) // then the user closed Firebug on this page last time
             return false; // annotated as 'closed', don't create
         else
-            browser.showFirebug = true;  // mark to debug this page
-
-        return true;    // annotated, createContext
+            return true;    // annotated, createContext
     },
 
     shouldShowContext: function(context)
@@ -3455,13 +3446,22 @@ Firebug.URLSelector =
         }
     },
 
-    unwatchBrowser: function(browser)  // Firebug closes in browser
+    unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
     {
         var uri  = makeURI(normalizeURL(browser.currentURI.spec));
-        this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
 
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec);
+        if (userCommands)  // then mark to not open virally.
+        {
+            var annotation = "firebugged.closed";
+            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+        }
+        else
+        {
+            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("Firebug.URLSelector.unwatchBrowser untagged "+uri.spec);
+        }
     },
 
     clearAll: function()
