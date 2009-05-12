@@ -207,12 +207,17 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
         Firebug.TraceModule.addListener(this.TraceListener);
+
+        // HTTP observer must be registered now (and not in monitorContext, since if a 
+        // page is opened in a new tab the top document request would be missed otherwise.
+        HttpObserver.registerObserver();
     },
 
     shutdown: function()
     {
         prefs.removeObserver(Firebug.prefDomain, this, false);
         Firebug.TraceModule.removeListener(this.TraceListener);
+        HttpObserver.unregisterObserver();
     },
 
     initContext: function(context, persistedState)
@@ -220,7 +225,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.initContext for: " + context.getName(), context);
+            FBTrace.sysout("net.initContext for: " + context.getName());
 
         if (context.window && 'addEventListener' in context.window)
         {
@@ -264,18 +269,19 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     showContext: function(browser, context)
     {
         Firebug.ActivableModule.showContext.apply(this, arguments);
-
-        if (!context)
-        {
-            var tabId = Firebug.getTabIdForWindow(browser.contentWindow);
-            delete contexts[tabId];
-        }
     },
 
     loadedContext: function(context)
     {
         if (context.netProgress)
             context.netProgress.loaded = true;
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId, 
+                contexts[tabId]);
+
+        var tabId = Firebug.getTabIdForWindow(context.browser.contentWindow);
+        delete contexts[tabId];
     },
 
     onPanelEnable: function(context, activatedPanelName)
@@ -1652,6 +1658,9 @@ var NetLimit = Firebug.NetMonitor.NetLimit;
 
 function NetProgress(context)
 {
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.NetProgress.constructor; " + (context ? context.getName() : "NULL Context"));
+
     this.context = context;
 
     var panel = null;
@@ -2384,9 +2393,6 @@ FBL.NetFileLink.prototype =
 
 function monitorContext(context)
 {
-    if (FBTrace.DBG_NET)
-        FBTrace.sysout("net.monitorContext; (" + context.netProgress + ") " + context.getName());
-
     if (context.netProgress)
         return;
 
@@ -2396,10 +2402,15 @@ function monitorContext(context)
     // or create a pure new network context.
     var tabId = Firebug.getTabIdForWindow(context.window);
     networkContext = contexts[tabId];
+
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.monitorContext; (" + networkContext + ") " +
+            tabId + ", " + context.getName());
+
     if (networkContext)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.monitorContext; Use temporary context.");
+            FBTrace.sysout("net.monitorContext; Use temporary context." + tabId);
 
         networkContext.context = context;
         delete contexts[tabId];
@@ -2410,9 +2421,6 @@ function monitorContext(context)
     }
 
     var listener = context.netProgress = networkContext;
-
-    // Register for HTTP events.
-    HttpObserver.registerObserver();
 
     // Add cache listener so, net panel has alwas fresh responses.
     context.sourceCache.addListener(networkContext.cacheListener);
@@ -2461,9 +2469,6 @@ function unmonitorContext(context)
     // Remove progress listener.
     if (context.browser.docShell)
         context.browser.removeProgressListener(netProgress, NOTIFY_ALL);
-
-    // Unregister HTTP events.
-    HttpObserver.unregisterObserver();
 
     // Deactivate net sub-context.
     context.netProgress.activate(null);
@@ -3210,13 +3215,20 @@ var HttpObserver =
     {
         try
         {
+            if (FBTrace.DBG_NET)
+            {
+                FBTrace.sysout("net.observe " + (topic ? topic.toUpperCase() : topic) +
+                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+            }
+
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
 
             var win = getWindowForRequest(subject);
             var context = TabWatcher.getContextByWindow(win);
-            if (!context)
-                return;
+
+            // The context doesn't have to exist yet. In such cases a temp Net context is
+            // created within onModifyRequest.
 
             // Some requests are not associted with any page (e.g. favicon).
             // These are ignored as Net panel shows only page requests.
@@ -3249,7 +3261,11 @@ var HttpObserver =
         {
             // Create a new network context prematurely.
             if (!contexts[tabId])
-            contexts[tabId] = new NetProgress(null);
+            {
+                contexts[tabId] = new NetProgress(null);
+                if (FBTrace.DBG_NET)
+                    FBTrace.sysout("net.onModifyRequest; Create Temp Context " + tabId, contexts);
+            }
         }
 
         var networkContext = contexts[tabId];
@@ -3274,7 +3290,7 @@ var HttpObserver =
         info.responseStatusText = request.responseStatusText;
         info.postText = readPostTextFromRequest(request, context);
 
-        if (!info.postText)
+        if (!info.postText && context)
             info.postText = readPostTextFromPage(request.name, context);
 
         if (FBTrace.DBG_NET && info.postText)
