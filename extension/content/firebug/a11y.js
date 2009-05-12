@@ -31,6 +31,9 @@ FBL.ns( function()
                 this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
                 this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
                 Firebug.Debugger.addListener(this);
+                
+                //this.enabled and this.isEnabled() are not set yet when console and script panels load the first time. Set it manually until they are
+                this.enabled = Firebug.getPref("extensions.firebug.a11y", "enableSites");  
             },
 
             onPanelEnable : function(context, panelName)
@@ -109,21 +112,15 @@ FBL.ns( function()
 
             onInitializeNode : function(panel, actAsPanel)
             {
-                if (!this.isEnabled())
+                var panelA11y = this.getPanelA11y(panel, true);
+                if (!panelA11y)
                     return;
-                this.makeFocusable(panel.panelNode, false);
-                if (!panel.context.a11yPanels)
-                    panel.context.a11yPanels = {};
-                panel.context.a11yPanels[panel.name] =
-                {
-                    tabStop     : null,
-                    manageFocus : false,
-                    lastIsDefault: false
-                };
-                var panelA11y = panel.context.a11yPanels[panel.name];
-
+                panelA11y.tabStop = null;
+                panelA11y.manageFocus = false;
+                panelA11y.lastIsDefault = false;
                 actAsPanel = actAsPanel ? actAsPanel : panel.name;
                 //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
+                this.makeFocusable(panel.panelNode, false);
                 switch (actAsPanel)
                 {
                     case 'console':
@@ -217,9 +214,7 @@ FBL.ns( function()
 
             addLiveElem : function(panel, role, politeness)
             {
-                if (!panel || !panel.context.a11yPanels)
-                    return;
-                var panelA11y = panel.context.a11yPanels[panel.name];
+                var panelA11y = this.getPanelA11y(panel);
                 if (!panelA11y)
                     return;
                 var attrName = attrValue = "";
@@ -243,9 +238,10 @@ FBL.ns( function()
 
             updateLiveElem: function(panel, msg, useAlert)
             {
-                if (!panel || !panel.context.a11yPanels)
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
-                var elem = panel.context.a11yPanels[panel.name].liveElem;
+                var elem = panelA11y.liveElem;
                 if (!elem)
                     elem = this.addLiveElem(panel);
                 elem.textContent = msg;
@@ -362,12 +358,12 @@ FBL.ns( function()
 
             getPanelTabStop : function(panel)
             {
-                if (panel.context && panel.context.a11yPanels)
-                    return panel.context.a11yPanels[panel.name].tabStop;
+                var panelA11y = this.getPanelA11y(panel);
+                if (panelA11y)                    
+                    return panelA11y.tabStop;
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("a11y.getPanelTabStop null panel.context");
                 return null;
-
             },
 
             ensurePanelTabStops: function()
@@ -381,10 +377,10 @@ FBL.ns( function()
 
             ensurePanelTabStop: function(panel)
             {
-                if (!panel)
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
-                var panelA11y = panel.context.a11yPanels[panel.name];
-                if ( panelA11y && panelA11y.manageFocus)
+                if (panelA11y.manageFocus)
                 {
                     var tabStop = this.getPanelTabStop(panel);
                     if (!tabStop || !this.isVisbleByStyle(tabStop) || !isVisible(tabStop))
@@ -399,17 +395,16 @@ FBL.ns( function()
 
             setPanelTabStop : function (panel, elem)
             {
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
+                    return;
                 var tabStop = this.getPanelTabStop(panel)
                 if (tabStop)
                     this.makeFocusable(tabStop, false);
-
-                if (!panel.context.a11yPanels)  // XXXjjb I get null here
-                    return;
-
-                panel.context.a11yPanels[panel.name].tabStop = elem;
+                panelA11y.tabStop = elem;
                 if (elem)
                 {
-                    panel.context.a11yPanels[panel.name].reFocusId = null;
+                    panelA11y.reFocusId = null;
                     this.makeFocusable(elem, true);
                 }
             },
@@ -436,7 +431,8 @@ FBL.ns( function()
 
             onLogRowCreated : function(panel, row)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 if (hasClass(row, 'logRow-dir'))
                 {
@@ -463,7 +459,8 @@ FBL.ns( function()
 
             onLogRowContentCreated : function(panel, node)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 var focusObjects = this.getFocusObjects(node);
                 Array.forEach(focusObjects, function(e,i,a){
@@ -797,7 +794,8 @@ FBL.ns( function()
 
             onHTMLSearchMatchFound: function(panel, match)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 var node = match.node;
                 var elem;
@@ -828,11 +826,11 @@ FBL.ns( function()
 
             moveToSearchMatch: function(context)
             {
-
-                if (!this.isEnabled() || !context)
+                if (!this.isEnabled() || !context || !context.chrome)
                     return;
                 var panel = context.chrome.getSelectedPanel();
-                if (!panel || !panel.searchable || !context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y || !panel.searchable )
                     return;
 
                 switch(panel.name)
@@ -860,7 +858,6 @@ FBL.ns( function()
             {
                 var target = event.target;
                 var keyCode = event.keyCode || event.charCode;
-
                 if (!this.isFocusRow(target))
                     return;
                 else if (event.altKey)
@@ -868,7 +865,9 @@ FBL.ns( function()
                 else if ([13, 32, 33, 34, 35, 36, 38,  40].indexOf(keyCode) == -1)
                     return;//not interested in any other keys, than arrows, pg, home/end, space & enter
                 var panel = Firebug.getElementPanel(target)
-
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
+                    return;
                 switch (keyCode)
                 {
                     case 38://up
@@ -933,7 +932,7 @@ FBL.ns( function()
                         if (hasClass(target, 'cssProp'))
                         {
                             //our focus is about to be wiped out, we'll try to get it back after
-                            panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(target);
+                            panelA11y.reFocusId = getElementXPath(target);
                             panel.disablePropertyRow(target);
                             if (panel.name == "stylesheet")
                                 target.setAttribute('aria-checked', !hasClass(target, 'disabledStyle'));
@@ -1016,10 +1015,8 @@ FBL.ns( function()
             },
 
             onBeforeCSSRulesAdded : function(panel)
-            {
-                if (!this.isEnabled() || !panel)
-                    return;
-                var panelA11y = panel.context.a11yPanels[panel.name];
+            {               
+                var panelA11y = this.getPanelA11y(panel);
                 if (!panelA11y || !this.panelHasFocus(panel))
                     return;
                 if (panelA11y.tabStop && hasClass(panelA11y.tabStop, 'focusRow'))
@@ -1028,9 +1025,7 @@ FBL.ns( function()
             
             onCSSRulesAdded : function(panel, rootNode)
             {
-                if (!this.isEnabled() || !panel)
-                    return;
-                var panelA11y = panel.context.a11yPanels[panel.name];
+                var panelA11y = this.getPanelA11y(panel);
                 if (!panelA11y)
                     return;
                 var row;
@@ -1087,6 +1082,9 @@ FBL.ns( function()
 
             onCSSPanelContextMenu : function(event)
             {
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
+                    return;
                 if (event.button == 0) //the event was created by keyboard, not right mouse click
                 {
                     var panel = Firebug.getElementPanel(event.target);
@@ -1103,7 +1101,7 @@ FBL.ns( function()
                                 node = event.target;
                         }    
                         //these context menu options are likely to destroy current focus
-                        panel.context.a11yPanels[panel.name].reFocusId = getElementXPath(event.target);
+                        panelA11y.reFocusId = getElementXPath(event.target);
                         document.popupNode = node;
                         panel.context.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
                         cancelEvent(event); //no need for default handlers anymore
@@ -1239,7 +1237,8 @@ FBL.ns( function()
 
             onInlineEditorShow : function(panel, editor)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 //recreate the input element rather than reusing the old one, otherwise AT won't pick it up
                 editor.input.onkeypress = editor.input.oninput = editor.input.onoverflow = null;
@@ -1312,7 +1311,8 @@ FBL.ns( function()
 
             onInlineEditorClose  : function(panel, target, removeGroup)
             {
-                if (!this.isEnabled() || !panel || !panel.context.a11yPanels || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 switch (panel.name)
                 {
@@ -1353,9 +1353,10 @@ FBL.ns( function()
 
             onStop : function(context, frame, type,rv)
             {
-                if (!this.isEnabled())
+                var panel = context.getPanel('script');
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
-                var panelA11y = context.a11yPanels['script'];
                 var fileName =  frame.script.fileName.split("/");
                 fileName = fileName.pop();
                 var alertString = $STRF("scriptSuspendedOnLineInFile",[frame.line, frame.functionName, fileName]);
@@ -1385,8 +1386,10 @@ FBL.ns( function()
               if ([13, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
                  return;
                 var panel = Firebug.getElementPanel(target);
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
+                    return;
                 var box = panel.selectedSourceBox
-                var panelA11y = panel.context.a11yPanels[panel.name];
                 var lastLineNo = box.lastViewableLine;
                 var firstLineNo = box.firstViewableLine;
                 var caretDetails = this.getNodeAndOffsetFromCaret(event.target.ownerDocument);
@@ -1464,17 +1467,20 @@ FBL.ns( function()
 
             onBeforeViewportChange : function(panel, link, scrollUp)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 var box = panel.selectedSourceBox;
                 var scrolltoLine = scrollUp ? box.firstViewableLine + 1 : box.lastViewableLine - 1;
                 var node = box.getLineNode(scrolltoLine);
-                this.insertCaretIntoLine(panel, box,  scrolltoLine)
+                this.insertCaretIntoLine(panel, box,  scrolltoLine);
             },
 
             insertCaretIntoLine : function(panel, box, line, offset)
             {
-                var panelA11y = panel.context.a11yPanels[panel.name];
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
+                    return;
                 var node = box.getLineNode(line);
 
                 if (!offset)
@@ -1507,8 +1513,8 @@ FBL.ns( function()
 
             onUpdateScriptLocation : function(panel, file)
             {
-                //It seems initializeNode for script is called when A11yModel is not ready yet, so no panelA11y to check for here.
-                if (!this.isEnabled())  
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 var box = panel.selectedSourceBox
                 var viewport = getElementByClass(panel.selectedSourceBox, 'sourceViewport');
@@ -1562,7 +1568,8 @@ FBL.ns( function()
 
             onWatchPanelRefreshed : function(panel)
             {
-                if (!this.isEnabled() || !panel || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 var watchEditTrigger = getElementByClass(panel.panelNode, 'watchEditCell');
                 if (watchEditTrigger)
@@ -1597,12 +1604,10 @@ FBL.ns( function()
 
             onMemberRowsAdded: function(panel, rows)
             {
-                if (!this.isEnabled() || !rows)
-                    return;
                 if (!panel)
                     panel = Firebug.getElementPanel(rows[0]);
-                var panelA11y = panel.context.a11yPanels[panel.name];
-                if (!panel || !panelA11y)
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y || !rows)
                     return;
                 var setSize
                 var posInset;
@@ -1617,16 +1622,16 @@ FBL.ns( function()
 
             onMemberRowSliceAdded : function(panel, borderRows, posInSet, setSize)
             {
-
-                if (!this.isEnabled())
+                if (!borderRows)
                     return;
                 var startRow = borderRows[0];
                 var endRow = borderRows[1];
                 if (!panel)
                     panel = Firebug.getElementPanel(startRow);
-                if (!panel || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
-                var reFocusId = panel.context.a11yPanels[panel.name].reFocusId;
+                var reFocusId = panelA11y.reFocusId;
                 var row = startRow;
                 do
                 {
@@ -1639,7 +1644,8 @@ FBL.ns( function()
 
             modifyMemberRow : function(panel, row, makeTab, posInSet, setSize, reFocusId)
             {
-                if (!panel || !row)
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y|| !row)
                     return;
                 var labelCell = row.cells[0];
                 var valueCell = row.cells[1];
@@ -1671,26 +1677,28 @@ FBL.ns( function()
                         this.setPanelTabStop(panel, cellChild)
 
                         this.focus(cellChild, true, true);
-                        panel.context.a11yPanels[panel.name].reFocusId = null;
+                        panelA11y.reFocusId = null;
                     }
                 }
             },
 
             onBeforeDomUpdateSelection : function (panel)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
                 var focusNode = panel.document.activeElement;
 
                 if (this.isDirCell(focusNode))
-                    panel.context.a11yPanels[panel.name].reFocusId = focusNode.parentNode.parentNode.rowIndex;
+                    panelA11y.reFocusId = focusNode.parentNode.parentNode.rowIndex;
             },
 
             onWatchEndEditing : function(panel, row)
             {
-                if (!this.isEnabled() || !panel.context.a11yPanels[panel.name])
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
-                panel.context.a11yPanels[panel.name].reFocusId = 2;
+                panelA11y.reFocusId = 2;
 
             },
 
@@ -1835,6 +1843,25 @@ FBL.ns( function()
             {
                 function iter(node) { return node.nodeType == 1 && hasClass(node, className); }
                 return  FBL.findNext(elem, iter, false, rootNode);   
+            },
+            
+            getPanelA11y : function(panel, create)
+            {
+                var a11yPanels, panelA11y;
+                if (!this.enabled || !panel || !panel.name || !panel.context)
+                    return false;
+                a11yPanels = panel.context.a11yPanels;
+                if (!a11yPanels)
+                    a11yPanels = panel.context.a11yPanels = {};
+                panelA11y = a11yPanels[panel.name];
+                if (!panelA11y)
+                {
+                    if (create)
+                        panelA11y = a11yPanels[panel.name] = {};
+                    else
+                        return false;
+                }                 
+                return panelA11y
             }
         });
         Firebug.registerActivableModule(Firebug.A11yModel);
