@@ -1804,7 +1804,7 @@ FirebugService.prototype =
     reFindDebugger: function(frame, debuggr)
     {
         var frameWin = getFrameScopeWindowAncestor(frame);
-        if (frameWin && debuggr.supportsGlobal(frameWin)) return debuggr;
+        if (frameWin && debuggr.supportsGlobal(frameWin, frame)) return debuggr;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameWin ", frameWin);
@@ -2591,6 +2591,7 @@ function countFrames(frame)
 
 function testBreakpoint(frame, bp)
 {
+    if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.testBreakpoint "+bp.condition, bp);
     if ( bp.condition && bp.condition != "" )
     {
         var result = {};
