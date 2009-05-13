@@ -931,8 +931,8 @@ top.Firebug =
 
         // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
-        if (show && browser.chrome)
-            browser.chrome.syncPanel();
+        if (show)
+            Firebug.chrome.syncPanel();
     },
 
     showKeys: function(shouldShow)
@@ -981,13 +981,13 @@ top.Firebug =
         if (panelName)
             browser.chrome.selectPanel(panelName);
 
-        if (browser.showFirebug)  // then we are debugging the selected tab
+        if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are debugging the selected tab
         {
             if (Firebug.isDetached()) // if we are out of the browser, just focus on the external window
                 Firebug.chrome.focus();
             else if (Firebug.isMinimized()) // toggle minimize
                 Firebug.unMinimize();
-            else if (!forceOpen)
+            else if (!forceOpen)  // else isInBrowser
                 Firebug.minimizeBar();
         }
         else // then user commands debugging the selected tab
@@ -1640,6 +1640,8 @@ top.Firebug =
         Firebug.updateActiveContexts(null);
         if (TabWatcher.contexts.length < 1)  // TODO shutdown ?
             Firebug.setPlacement("none");
+
+        delete browser.showFirebug; // ok we are done debugging
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
@@ -1684,41 +1686,13 @@ top.Firebug =
         dispatch(modules, "destroyContext", [context, persistedState]);
 
         if (FirebugContext == context)
-            FirebugContext = null;
+            Firebug.chrome.setFirebugContext(null);  // FirebugContext is about to be destroyed
 
         var browser = context.browser;
         // Persist remnants of the context for restoration if the user reloads
         browser.panelName = context.panelName;
         browser.sidePanelNames = context.sidePanelNames;
 
-        if (Firebug.isDetached())
-        {
-            clearContextTimeout = setTimeout(function delayClearContext()
-            {
-                if (context == FirebugContext)
-                {
-                    browser.isSystemPage = true;  // XXXjjb I don't believe this is ever tested.
-                    Firebug.showContext(browser, null);
-                }
-            }, 100);
-        }
-
-        if (Firebug.extenalChrome)
-        {
-            if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("Firebug.destroyContext Firebug.extenalChrome: "+Firebug.extenalChrome+" browser.firebugReload: "+browser.firebugReload);
-            if (browser.firebugReload)
-                delete browser.firebugReload; // and don't killWindow
-            else
-                this.killWindow(browser, Firebug.extenalChrome);
-        }
-        else
-        {
-            if (browser.firebugReload)
-                delete browser.firebugReload;
-            else
-                delete browser.showFirebug; // ok we are done debugging
-        }
         // next the context is deleted and removed from the TabWatcher, we clean up in unWatchBrowser
     },
 
