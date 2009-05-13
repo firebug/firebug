@@ -3230,6 +3230,23 @@ this.getRequestWebProgress = function(request)
     return null;
 };
 
+/**
+ * Returns <browser> element for specified content window.
+ * @param {Object} win - Content window
+ */
+this.getBrowserForWindow = function(win)
+{
+    var tabBrowser = document.getElementById("content");
+    for (var i=0; i<tabBrowser.browsers.length; ++i)
+    {
+        var browser = tabBrowser.browsers[i];
+        if (browser.contentWindow == win)
+            return browser;
+    }
+
+    return null;
+};
+
 // ************************************************************************************************
 
 this.BaseProgressListener =
@@ -3378,7 +3395,7 @@ this.makeURI = function(urlString)
         //var explain = {message: "Firebug.lib.makeURI FAILS", url: urlString, exception: exc};
         // todo convert explain to json and then to data url
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("makeURI FAILS for "+urlString+" "+exc);
+            FBTrace.sysout("makeURI FAILS for "+urlString+" ", exc);
         return false;
     }
 }
