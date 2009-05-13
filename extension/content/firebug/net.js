@@ -269,6 +269,9 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     showContext: function(browser, context)
     {
         Firebug.ActivableModule.showContext.apply(this, arguments);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.showContext; ");
     },
 
     loadedContext: function(context)
@@ -277,7 +280,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId, 
+            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId,
                 contexts[tabId]);
 
         var tabId = Firebug.getTabIdForWindow(context.browser.contentWindow);
@@ -3259,6 +3262,14 @@ var HttpObserver =
             request.loadGroup && request.loadGroup.groupObserver &&
             win == win.parent && !isRedirect)
         {
+            var browser = getBrowserForWindow(win);
+            if (!Firebug.URLSelector.shouldCreateContext(browser, name, null))
+            {
+                if (FBTrace.DBG_NET)
+                    FBTrace.sysout("net.onModifyRequest; annotated as 'closed', don't create temp context.")
+                return;
+            }
+
             // Create a new network context prematurely.
             if (!contexts[tabId])
             {
