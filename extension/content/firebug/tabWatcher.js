@@ -397,10 +397,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!browser.chrome)
             registerFrameListener(browser);  // sets browser.chrome to Firebug.chrome
 
-        var detached = browser.detached; // XXXjjb I guess we need different functions for detached?
-        var shouldDispatch = true;
-        if (!detached)
-            var shouldDispatch = this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
+        var shouldDispatch = this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
 
         if (shouldDispatch)
         {
