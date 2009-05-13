@@ -1589,7 +1589,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 var lastPanic = null;
 function onPanic(contextMessage, errorMessage)
 {
-    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);
     var win = appShellService.hiddenDOMWindow;
     // XXXjjb I cannot get these tests to work.
     //if (win.lastPanic && (win.lastPanic == errorMessage))

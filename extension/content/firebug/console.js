@@ -273,7 +273,7 @@ Firebug.Console = extend(ActivableConsole,
         if (!context)
             context = FirebugContext;
 
-        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
+        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");
 
         // if (this.isEnabled(context)) XXXjjb I don't think we should test this every time
             return Firebug.ConsoleBase.logRow.apply(this, arguments);

@@ -659,7 +659,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         if (FBTrace.DBG_CONSOLE)
         {
             var uid = element.getAttribute('uid');  // set if // DBG removed from Injected
-            FBTrace.sysout("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
+            FBTrace.sysout("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);
             FBTrace.sysout("Firebug.CommandLine.CommandHandler: "+(win.wrappedJSObject?"win.wrappedJSObject._firebug":"win._firebug"), (win.wrappedJSObject?win.wrappedJSObject._firebug:win._firebug));
             if (!userObjects)
                 debugger;
@@ -769,8 +769,8 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS) /*@explore*/
-            FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc); /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc);
         return [];
     }
 }

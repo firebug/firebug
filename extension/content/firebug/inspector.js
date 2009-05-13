@@ -640,9 +640,10 @@ FrameHighlighter.prototype =
 
             move(nodes.left, x-edgeSize, y-edgeSize);
             resize(nodes.left, edgeSize, h+edgeSize*2);
-            if (FBTrace.DBG_INSPECT) {                                     /*@explore*/
-                FBTrace.sysout("FrameHighlighter ", element.tagName);       /*@explore*/
-                FBTrace.sysout("FrameHighlighter node", nodes);            /*@explore*/
+            if (FBTrace.DBG_INSPECT)
+            {
+                FBTrace.sysout("FrameHighlighter ", element.tagName);
+                FBTrace.sysout("FrameHighlighter node", nodes);
             }
             var body = getFirebugBody(context);
 
@@ -652,8 +653,8 @@ FrameHighlighter.prototype =
             var needsAppend = !nodes.top.parentNode || nodes.top.ownerDocument != body.ownerDocument;
             if (needsAppend)
             {
-                if (FBTrace.DBG_INSPECT)                                    /*@explore*/
-                    FBTrace.sysout("FrameHighlighter needsAppend", nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI); /*@explore*/
+                if (FBTrace.DBG_INSPECT)
+                    FBTrace.sysout("FrameHighlighter needsAppend", nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI);
                 attachStyles(context, body);
                 for (var edge in nodes)
                 {
@@ -663,8 +664,8 @@ FrameHighlighter.prototype =
                     }
                     catch(exc)
                     {
-                        if (FBTrace.DBG_INSPECT)                                                                              /*@explore*/
-                            FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);                     /*@explore*/
+                        if (FBTrace.DBG_INSPECT)
+                            FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);
                     }
                 }
             }

@@ -199,8 +199,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // is only bad for performance
         if (attrName == "curpos")
             return;
-        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
-            FBTrace.sysout("\nhtml.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+"\n");   /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("\nhtml.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+"\n");
 
         this.markChange();
 
@@ -297,18 +297,18 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     mutateNode: function(target, parent, nextSibling, removal)
     {
-        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
-            FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");           /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");
+
         this.markChange();  // This invalidates the panels for every mutate
 
         var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
             ? this.ioBox.createObjectBox(parent)
             : this.ioBox.findObjectBox(parent);
 
-        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
-            FBTrace.sysout("html.mutateNode parent:"+parent+" parentNodeBox:"+parentNodeBox+"\n");                     /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.mutateNode parent:"+parent+" parentNodeBox:"+parentNodeBox+"\n");
+
         if (!parentNodeBox)
             return;
 
@@ -401,7 +401,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     createObjectBox: function(object, isRoot)
     {
-        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+(object.tagName?object.tagName:object)+", isRoot:"+(isRoot?"true":"false")+")\n");                         /*@explore*/
+        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+(object.tagName?object.tagName:object)+", isRoot:"+(isRoot?"true":"false")+")\n");
         var tag = getNodeTag(object);
         if (tag)
             return tag.replace({object: object}, this.document);
@@ -419,7 +419,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (parentNode)
             if (parentNode.nodeType == 9)
             {
-                if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");                  /*@explore*/
+                if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");
                 if (parentNode.defaultView)
                     return parentNode.defaultView.frameElement;
                 else
@@ -696,8 +696,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             {
                 if (win == subwin)
                 {
-                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
-                        FBTrace.sysout("html.watchWindow found subwin.location.href="+win.location.href+"\n");         /*@explore*/
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("html.watchWindow found subwin.location.href="+win.location.href+"\n");
                     htmlPanel.mutateDocumentEmbedded(win, false);
                 }
             });
@@ -722,8 +722,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             {
                 if (win == subwin)
                 {
-                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
-                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+win.location.href+"\n");       /*@explore*/
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+win.location.href+"\n");
                     htmlPanel.mutateDocumentEmbedded(win, true);
                 }
             });
@@ -772,8 +772,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_HTML)                                           /*@explore*/
-            FBTrace.sysout("html.updateSelection "+object);             /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.updateSelection "+object);
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exeLine");
 
@@ -784,9 +784,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
              if (stylesheet)
              {
                 var ownerNode = stylesheet.ownerNode;
-                if (FBTrace.DBG_CSS)                                                                                   /*@explore*/
-                        FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+stylesheet.ownerNode         /*@explore*/
-                                          +" href:"+sourceLink.href+"\n");                                             /*@explore*/
+                if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+stylesheet.ownerNode
+                                          +" href:"+sourceLink.href+"\n");
                 if (ownerNode)
                 {
                     var objectbox = this.ioBox.select(ownerNode, true, true, this.noScrollIntoView);
@@ -799,9 +799,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                         if (!sourceRow) break;
                         sourceRow = FBL.getNextByClass(sourceRow,  "sourceRow");
                     }
-                    if (FBTrace.DBG_CSS)                                                                               /*@explore*/
-                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line                   /*@explore*/
-                                          +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined")+"\n");            /*@explore*/
+                    if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line
+                                          +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined")+"\n");
                     if (sourceRow)
                     {
                         this.ioBox.sourceRow = sourceRow;

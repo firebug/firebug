@@ -190,10 +190,10 @@ top.Firebug =
         for (var i = basePrefNames; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
 
-        if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
-        {                                                                                                              /*@explore*/
-             for (var i = 0; i < prefNames.length; ++i)                                                                /*@explore*/
-                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");                 /*@explore*/
+        if (FBTrace.DBG_OPTIONS)
+        {
+             for (var i = 0; i < prefNames.length; ++i)
+                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");
         }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize prefDomain "+this.prefDomain);
@@ -263,10 +263,10 @@ top.Firebug =
      */
     initializeUI: function(detachArgs)
     {
-        if (FBTrace.DBG_INITIALIZE)                                                                                    /*@explore*/
-            FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+					   /*@explore*/
-                    " detachArgs:", detachArgs);                      												   /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+
+                    " detachArgs:", detachArgs);
+
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
 
@@ -306,8 +306,8 @@ top.Firebug =
 
         this.closeDeadWindows();
         this.deleteTemporaryFiles();
-                                                                                                                       /*@explore*/
-        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("firebug.shutdown exited\n");                                       /*@explore*/
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("firebug.shutdown exited\n");
     },
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -577,10 +577,10 @@ top.Firebug =
 
         for (var i = 0; i < arguments.length; ++i)
             panelTypeMap[arguments[i].prototype.name] = arguments[i];
-                                                                                                                       /*@explore*/
-        if (FBTrace.DBG_INITIALIZE)                                                                                    /*@explore*/
-            for (var i = 0; i < arguments.length; ++i)                                                                 /*@explore*/
-                FBTrace.sysout("registerPanel "+arguments[i].prototype.name+"\n");                                     /*@explore*/
+
+        if (FBTrace.DBG_INITIALIZE)
+            for (var i = 0; i < arguments.length; ++i)
+                FBTrace.sysout("registerPanel "+arguments[i].prototype.name+"\n");
     },
 
     registerRep: function()
@@ -658,8 +658,8 @@ top.Firebug =
             FBTrace.sysout("firebug.setPref FAILS: Invalid preference "+prefName+" check that it is listed in defaults/prefs.js");
         }
 
-        if (FBTrace.DBG_OPTIONS)                                                                                       /*@explore*/
-            FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");                       /*@explore*/
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
     },
 
     increaseTextSize: function(amt)
@@ -694,9 +694,9 @@ top.Firebug =
         }
 
         delete optionUpdateMap[name];
-                                                                                                                       /*@explore*/
-        if (FBTrace.DBG_OPTIONS)  /*@explore*/
-            FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");                      /*@explore*/
+
+        if (FBTrace.DBG_OPTIONS)
+            FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
     },
     // *******************************************************************************
     // External editors
@@ -1480,7 +1480,7 @@ top.Firebug =
         {
             var name = data.substr(domain.length+1);
             var value = this.getPref(domain, name);
-            if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");                /*@explore*/
+            if (FBTrace.DBG_OPTIONS) FBTrace.sysout("firebug.observe name = value: "+name+"= "+value+"\n");
             this.updatePref(name, value);
         }
 
@@ -2110,7 +2110,7 @@ Firebug.Panel =
         if (!object)
             object = this.getDefaultSelection(this.context);
 
-        if(FBTrace.DBG_PANELS)    /*@explore*/
+        if(FBTrace.DBG_PANELS)
             FBTrace.sysout("firebug.select "+this.name+" forceUpdate: "+forceUpdate+" "+object+((object==this.selection)?"==":"!=")+this.selection);
 
         if (forceUpdate || object != this.selection)
@@ -2475,8 +2475,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         else
             this.anonSourceBoxes.push(sourceBox);
 
-        if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
-            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.lines.length+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox); /*@explore*/
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.lines.length+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
 
         return sourceBox;
     },
@@ -2577,7 +2577,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     showSourceFile: function(sourceFile)
     {
         var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
-        if (FBTrace.DBG_SOURCEFILES)                                                                                                /*@explore*/
+        if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
         if (!sourceBox)
         {

@@ -944,7 +944,8 @@ var Renderer =
 
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
-        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate.insertNode html: "+html+"\n");  /*@explore*/
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("domplate.insertNode html: "+html+"\n");
 
         var range = doc.createRange();
         range.selectNode(doc.body);
@@ -957,7 +958,8 @@ var Renderer =
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
 
-        if (FBTrace.DBG_DOM) FBTrace.dumpProperties("domplate.insertNode domArgs:", domArgs);  /*@explore*/
+        if (FBTrace.DBG_DOM)
+            FBTrace.dumpProperties("domplate.insertNode domArgs:", domArgs);
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
         return root;

@@ -312,7 +312,7 @@ FirebugService.prototype =
             if (debuggers.length == 1)
                 this.enableDebugger();
             if (FBTrace.DBG_FBS_FINDDEBUGGER)  // 1.3.1 report after enableDebugger op
-                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd")); /*@explore*/
+                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";

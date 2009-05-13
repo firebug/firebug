@@ -460,8 +460,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if(FBTrace.DBG_DOM)
         {
-          FBTrace.sysout("row: "+row); /*@explore*/
-          FBTrace.sysout("value: "+value); /*@explore*/
+            FBTrace.sysout("row: "+row);
+            FBTrace.sysout("value: "+value);
         }
 
         var name = getRowName(row);
@@ -1322,8 +1322,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
             catch (exc)
             {
                 // Sometimes we get exceptions trying to access certain members
-                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM) /*@explore*/
-                    FBTrace.sysout("dom.getMembers cannot access "+name, exc); /*@explore*/
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.getMembers cannot access "+name, exc);
             }
 
             var ordinal = parseInt(name);
@@ -1363,8 +1363,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
         // Sometimes we get exceptions just from trying to iterate the members
         // of certain objects, like StorageList, but don't let that gum up the works
         //throw exc;
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM) /*@explore*/
-            FBTrace.dumpProperties("dom.getMembers FAILS: ", exc); /*@explore*/
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+            FBTrace.dumpProperties("dom.getMembers FAILS: ", exc);
     }
 
     function sortName(a, b) { return a.name > b.name ? 1 : -1; }
@@ -1425,14 +1425,13 @@ function expandMembers(members, toggles, offset, level)  // recursion starts wit
             var args = [i+1, 0];
             args.push.apply(args, newMembers);
             members.splice.apply(members, args);
-            if (FBTrace.DBG_DOM)  																		/*@explore*/
-            { 																							/*@explore*/
-                FBTrace.dumpProperties("expandMembers member.name", member.name); 						/*@explore*/
-                FBTrace.dumpProperties("expandMembers toggles", toggles); 								/*@explore*/
-                                                                                                        /*@explore*/
-                FBTrace.dumpProperties("expandMembers toggles[member.name]", toggles[member.name]); 	/*@explore*/
-                FBTrace.dumpProperties("dom.expandedMembers level: "+level+" member", member); 			/*@explore*/
-            } 																							/*@explore*/
+            if (FBTrace.DBG_DOM)
+            {
+                FBTrace.dumpProperties("expandMembers member.name", member.name);
+                FBTrace.dumpProperties("expandMembers toggles", toggles);
+                FBTrace.dumpProperties("expandMembers toggles[member.name]", toggles[member.name]);
+                FBTrace.dumpProperties("dom.expandedMembers level: "+level+" member", member);
+            }
 
             expanded += newMembers.length;
             i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1);

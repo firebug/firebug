@@ -188,13 +188,13 @@ Firebug.CSSModule = extend(Firebug.Module, {
         }
 
         styleSheet.editStyleSheet.innerHTML = value;
-        if (FBTrace.DBG_CSS)  /*@explore*/
-            FBTrace.sysout("css.saveEdit styleSheet.href:"+styleSheet.href+" got innerHTML:"+value+"\n"); /*@explore*/
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("css.saveEdit styleSheet.href:"+styleSheet.href+" got innerHTML:"+value+"\n");
 
         dispatch(this.fbListener, "onCSSFreeEdit", [styleSheet, value]);
     },
     insertRule: function(styleSheet, cssText, ruleIndex) {
-        if (FBTrace.DBG_CSS) FBTrace.sysout("Insert: " + ruleIndex + " " + cssText);  /*@explore*/
+        if (FBTrace.DBG_CSS) FBTrace.sysout("Insert: " + ruleIndex + " " + cssText);
         var insertIndex = styleSheet.insertRule(cssText, ruleIndex);
 
         dispatch(this.fbListeners, "onCSSInsertRule", [styleSheet, cssText, ruleIndex]);
@@ -202,7 +202,7 @@ Firebug.CSSModule = extend(Firebug.Module, {
         return insertIndex;
     },
     deleteRule: function(styleSheet, ruleIndex) {
-        if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);  /*@explore*/
+        if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);
         styleSheet.deleteRule(ruleIndex);
 
         dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
@@ -1367,9 +1367,9 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var propName = getChildByClass(row, "cssPropName").textContent;
             var propValue = getChildByClass(row, "cssPropValue").textContent;
 
-            if (FBTrace.DBG_CSS) /*@explore*/
+            if (FBTrace.DBG_CSS)
             {
-                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +" = "+propValue+"\n"); /*@explore*/
+                FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +" = "+propValue+"\n");
                // FBTrace.dumpProperties("CSSEditor.saveEdit BEFORE style:",style);
             }
 
@@ -1444,7 +1444,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     saveEdit: function(target, value, previousValue)
     {
-        if (FBTrace.DBG_CSS)    FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);  /*@explore*/
+        if (FBTrace.DBG_CSS)    FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
         target.innerHTML = escapeHTML(value);
 
         if (value === previousValue)     return;
@@ -1492,7 +1492,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             catch (err)
             {
-                if (FBTrace.DBG_CSS) FBTrace.sysout("CSS Insert Error: ", err);  /*@explore*/
+                if (FBTrace.DBG_CSS) FBTrace.sysout("CSS Insert Error: ", err);
                 target.innerHTML = escapeHTML(previousValue);
                 return;
             }

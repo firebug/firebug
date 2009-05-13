@@ -1766,11 +1766,11 @@ NetProgress.prototype =
 
             return file;
         }
-        else                                                                                          /*@explore*/
-        {                                                                                             /*@explore*/
-            if (FBTrace.DBG_NET)                                                                      /*@explore*/
-                FBTrace.dumpProperties("net.requestedFile no file for request=", request);            /*@explore*/
-        }                                                                                             /*@explore*/
+        else
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.dumpProperties("net.requestedFile no file for request=", request);
+        }
     },
 
     respondedFile: function respondedFile(request, time, info)
@@ -2071,8 +2071,8 @@ NetProgress.prototype =
 
     arriveFile: function(file, request)
     {
-        //if (FBTrace.DBG_NET)                                                                                           /*@explore*/
-        //    FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");  /*@explore*/
+        //if (FBTrace.DBG_NET)
+        //    FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");
 
         var index = this.pending.indexOf(file);
         if (index != -1)
@@ -2931,8 +2931,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     updateInfo: function(netInfoBox, file, context)
     {
-        if (FBTrace.DBG_NET)                                     /*@explore*/
-            FBTrace.dumpProperties("updateInfo file", file);     /*@explore*/
+        if (FBTrace.DBG_NET)
+            FBTrace.dumpProperties("updateInfo file", file);
 
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
