@@ -136,8 +136,7 @@
     <toolbarpalette id="BrowserToolbarPalette">
         <toolbarbutton id="inspector-button" label="&firebug.Inspect;"
                        class="toolbarbutton-1 chromeclass-toolbar-additional"
-                       observes="cmd_
-specting" tooltiptext="&firebug.InspectElement;"/>
+                       observes="cmd_toggleInspecting" tooltiptext="&firebug.InspectElement;"/>
         <toolbarbutton id="firebug-button" label="&firebug.Firebug;"
                       class="toolbarbutton-1 chromeclass-toolbar-additional"
                       observes="cmd_toggleDetachFirebug" tooltiptext="&firebug.DetachFirebug;"/>
