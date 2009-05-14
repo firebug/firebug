@@ -1985,7 +1985,7 @@ Firebug.Panel =
         try
         {
             // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
-            // xxxHonza: this should be fixed, the problem was that selectedPanel was
+            // xxxHonza: this should be fixed (R2188), the problem was that selectedPanel was
             // removed from panelBar (binding) after the context was destroyed.
             // So, the panel.hide() method used invalid context object.
             // The selected panel is now removed with in Firebug.destroyContext();
