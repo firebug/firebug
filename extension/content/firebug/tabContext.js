@@ -109,8 +109,8 @@ Firebug.TabContext.prototype =
         for (var panelName in this.panelMap)
         {
             var panel = this.panelMap[panelName];
-            panel.detach(oldChrome, chrome);  // this will cause the ownerDocument for panelNode to change
-            panel.invalid = true;
+            panel.detach(oldChrome, chrome);
+            panel.invalid = true;// this will cause reattach on next use
 
             var panelNode = panel.panelNode;  // delete panel content
             if (panelNode && panelNode.parentNode)

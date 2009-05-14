@@ -260,7 +260,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
-                ", "+context.getName()+" browser "+browser.currentURI.spec+" browser.chrome.window: "+browser.chrome.window.location);
+                ", "+context.getName()+" browser "+browser.currentURI.spec+" Firebug.chrome.window: "+Firebug.chrome.window.location);
         }
 
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -451,7 +451,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
         {
             var browser = this.getBrowserByWindow(win);
             if (browser)
+            {
                 browser.persistedState = {};
+                delete browser.showFirebug;
+            }
             dispatch(this.fbListeners, "destroyContext", [null, browser?browser.persistedState:null, browser]);
             return;
         }
@@ -464,6 +467,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             dispatch(TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
 
+        delete context.browser.showFirebug;
         dispatch(this.fbListeners, "destroyContext", [context, persistedState, context.browser]);
 
         if (FBTrace.DBG_WINDOWS)
@@ -633,6 +637,20 @@ function registerFrameListener(browser)
     }
 }
 
+function getRefererHeader(request)
+{
+    var http = QI(request, Ci.nsIHttpChannel);
+    var referer = null;
+    http.visitRequestHeaders({
+        visitHeader: function(name, value)
+        {
+            if (name == 'referer')
+                referer = value;
+        }
+    });
+    return referer;
+}
+
 var HttpObserver = extend(Object,
 {
     // nsIObserver
@@ -680,8 +698,33 @@ var HttpObserver = extend(Object,
                 // Make sure the frame listener is registered for top level window so,
                 // we can get all onStateChange events and init context for all opened tabs.
                 var browser = TabWatcher.getBrowserByWindow(win);
-                // Here we know the source of the request is 'win'. For viral activation and web app tracking
-                browser.FirebugLink = {src: browser.currentURI, dst: request.URI};
+
+                delete browser.FirebugLink;
+
+                if (win.location.toString() == "about:blank") // then this page is opened in new tab or window
+                {
+                    var referer = getRefererHeader(request);
+                    if (referer)
+                    {
+                        try
+                        {
+                            var srcURI = makeURI(referer);
+                            browser.FirebugLink = {src: srcURI, dst: request.URI};
+                        }
+                        catch(e)
+                        {
+                            if (FBTrace.DBG_ERRORS)
+                                FBTrace.sysout("tabWatcher.onModifyRequest failed to make URI from "+referer+" because "+exc, exc);
+                        }
+                    }
+                }
+                else
+                {
+                    // Here we know the source of the request is 'win'. For viral activation and web app tracking
+                    browser.FirebugLink = {src: browser.currentURI, dst: request.URI};
+                }
+                if (FBTrace.DBG_ACTIVATION && browser.FirebugLink)
+                    FBTrace.sysout("tabWatcher.onModifyRequest created FirebugLink from "+browser.FirebugLink.src.spec + " to "+browser.FirebugLink.dst.spec);
             }
         }
     },

@@ -217,23 +217,29 @@ top.FirebugChrome =
 
         if (inDetachedScope)  // then we are initializing in external window
         {
-            Firebug.setChrome(this); // 1.4
+            Firebug.setChrome(this, "detached"); // 1.4
 
             browser.originalChrome = browser.chrome; // 1.3
             browser.chrome = this;
 
+            Firebug.showContext(browser, context);
+
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("attachBrowser inDetachedScope and browser.detached, browser.chrome.window: "+browser.chrome.window.location);
+                FBTrace.sysout("attachBrowser inDetachedScope in browser.chrome.window: "+browser.chrome.window.location);
         }
 
     },
 
     detachBrowser: function(browser)
     {
-        Firebug.setChrome(Firebug.originalChrome);
+        var detachedChrome = Firebug.chrome;
+        Firebug.setChrome(Firebug.originalChrome, "none");
         Firebug.closeDetachedWindow(true);
 
-        browser.chrome = browser.originalChrome;  // 1.3
+        // when we are done here the window.closed will be true so we don't want to hang on to the ref.
+        detachedChrome.window = "This is detached chrome!";
+
+        browser.chrome = Firebug.originalChrome;  // 1.3
         delete browser.originalChrome;
     },
 

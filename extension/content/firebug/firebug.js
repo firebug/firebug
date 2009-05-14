@@ -920,11 +920,11 @@ top.Firebug =
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
 
-        var shouldShow = show && !browser.detached;
+        var shouldShow = show && !Firebug.isDetached();
         contentBox.setAttribute("collapsed", !shouldShow);
         contentSplitter.setAttribute("collapsed", !shouldShow);
         toggleCommand.setAttribute("checked", !!shouldShow);
-        detachCommand.setAttribute("checked", !!browser.detached);
+        detachCommand.setAttribute("checked", Firebug.isDetached());
         this.showKeys(shouldShow);
 
         dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
@@ -1050,7 +1050,6 @@ top.Firebug =
 
     closeDetachedWindow: function(userCommands)
     {
-        Firebug.setPlacement("none");
         Firebug.showBar(false);
 
         if (FirebugContext)
@@ -1060,9 +1059,10 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
-    setChrome: function(newChrome)
+    setChrome: function(newChrome, newPlacement)
     {
         Firebug.chrome = newChrome;
+        Firebug.setPlacement(newPlacement);  // This should be the only setPlacement call with "detached"
 
         // reattach all contexts to the new chrome
         // This is a hack to allow context.chrome to work for now.
@@ -1076,19 +1076,13 @@ top.Firebug =
             }
             Firebug.reattachContext(context.browser, context);
         });
-
-        if (FirebugContext)
-        {
-            var browser = FirebugChrome.getCurrentBrowser();
-            Firebug.showContext(browser, FirebugContext);
-        }
     },
 
     detachBar: function(context)
     {
         if (!context)
         {
-            var browser = FirebugChrome.getCurrentBrowser();
+            var browser = Firebug.chrome.getCurrentBrowser();
             var created = TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
             {
@@ -1099,41 +1093,26 @@ top.Firebug =
             context = TabWatcher.getContextByWindow(browser.contentWindow);
         }
 
-        var browser = context.browser;
-
-        if (!browser.chrome)
+        if (Firebug.isDetached())  // can be set true attachBrowser
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.detachBar no browser.chrome for context "+context.getName());
+            Firebug.chrome.focus();
             return null;
         }
 
-        if (Firebug.isDetached())  // can be set true attachBrowser
-        {
-            browser.chrome.focus();
-        }
-        else
-        {
-            Firebug.setPlacement("detached");
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+context.getName() );
 
-            if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+context.getName() );
+        this.showBar(false);  // don't show in browser.xul now
 
-            var args = {
-                FBL: FBL,
-                Firebug: this,
-                browser: browser,
-                context: context
-            };
-            var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
+        var args = {
+            FBL: FBL,
+            Firebug: this,
+            browser: context.browser,
+            context: context
+        };
+        var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
-            detachCommand.setAttribute("checked", true);
-            FirebugChrome.clearPanels();
-            this.showBar(false);  // don't show in browser now
-            return win;
-        }
-
-        return null;
+        return win;
     },
 
     syncBar: function()  // show firebug if we should
@@ -1346,8 +1325,6 @@ top.Firebug =
 
     reattachContext: function(browser, context)
     {
-        TabWatcher.watchBrowser(browser);  // re-watch browser not that we are detached or reattached
-
         dispatch(modules, "reattachContext", [browser, context]);
     },
 
@@ -1538,7 +1515,7 @@ top.Firebug =
     setPlacement: function(toPlacement)
     {
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement);
+            FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement+" with chrome "+Firebug.chrome.window.location);
 
         for (Firebug.placement = 0; Firebug.placement < Firebug.placements.length; Firebug.placement++)
         {
@@ -1569,9 +1546,7 @@ top.Firebug =
 
         this.updateActiveContexts(context); // a newly created context is active
 
-        context.browser.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
         Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
-
 
         if (deadWindowTimeout)
             this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
@@ -1604,8 +1579,8 @@ top.Firebug =
         }
 
         this.updateActiveContexts(context);
-        if (context)
-            context.browser.chrome.setFirebugContext(context); // the context becomes the default for its view
+
+        Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
@@ -1640,8 +1615,6 @@ top.Firebug =
         Firebug.updateActiveContexts(null);
         if (TabWatcher.contexts.length < 1)  // TODO shutdown ?
             Firebug.setPlacement("none");
-
-        delete browser.showFirebug; // ok we are done debugging
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
