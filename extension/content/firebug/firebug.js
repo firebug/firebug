@@ -1966,36 +1966,13 @@ Firebug.Panel =
     {
         try
         {
-            // XXXjjb this is bug. Somehow the panel context is not FirebugContext.
-            // xxxHonza: this should be fixed (R2188), the problem was that selectedPanel was
-            // removed from panelBar (binding) after the context was destroyed.
-            // So, the panel.hide() method used invalid context object.
-            // The selected panel is now removed with in Firebug.destroyContext();
-            if (!this.context.browser)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("firebug.Panel showToolbarButtons this.context ("+this.context.getName()+") has no browser in window "+window.location+" this.context", this.context);
-                return;
-            }
-
             var buttons = Firebug.chrome.$(buttonsId);
-            if (buttons)
-            {
-                collapse(buttons, !show);
-            }
-            else
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("showToolBarButtons failed to find buttons for "+buttonsId, this.context.browser.chrome);
-            }
+            buttons.collapse(buttons, !show);
         }
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-            {
-                FBTrace.dumpProperties("firebug.Panel showToolbarButtons FAILS", exc);
-                if (!this.context.browser)FBTrace.dumpStack("firebug.Panel showToolbarButtons no browser");
-            }
+                FBTrace.sysout("firebug.Panel showToolbarButtons FAILS", exc);
         }
     },
 
@@ -3357,7 +3334,12 @@ Firebug.URLSelector =
                         {
                             hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
                             if (hasAnnotation) // and the source page was annotated.
-                                return this.checkAnnotation(browser, srcURI);
+                            {
+                                var srcShow = this.checkAnnotation(browser, srcURI);
+                                if (srcShow)  // and the source annotation said show it
+                                    this.watchBrowser(browser);  // so we show dst as well.
+                                return srcShow;
+                            }
                         }
                     }
                     else
