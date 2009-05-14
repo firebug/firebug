@@ -413,7 +413,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             fbs.enumerateBreakpoints(null, {call: function(url, lineNo) // null means all urls
             {
+                if (Firebug.filterSystemURLs) // then there are not system urls, clear all
                     fbs.clearBreakpoint(url, lineNo);
+                else
+                {
+                    if (!isSystemURL(url))  // if there are system urls, leave them
+                        fbs.clearBreakpoint(url, lineNo);
+                }
             }});
         }
     },
