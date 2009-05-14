@@ -11,7 +11,7 @@ FBL.ns( function()
 
             dispatchName: "a11y",
             panelName: "a11y", // We don't have a panel, but we ActivableModule expects one
-            
+
             initialize : function()
             {
                 this.handleTabBarFocus = bind(this.handleTabBarFocus, this);
@@ -31,9 +31,9 @@ FBL.ns( function()
                 this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
                 this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
                 Firebug.Debugger.addListener(this);
-                
+
                 //this.enabled and this.isEnabled() are not set yet when console and script panels load the first time. Set it manually until they are
-                this.enabled = Firebug.getPref("extensions.firebug.a11y", "enableSites");  
+                this.enabled = Firebug.getPref("extensions.firebug.a11y", "enableSites");
             },
 
             onPanelEnable : function(context, panelName)
@@ -359,7 +359,7 @@ FBL.ns( function()
             getPanelTabStop : function(panel)
             {
                 var panelA11y = this.getPanelA11y(panel);
-                if (panelA11y)                    
+                if (panelA11y)
                     return panelA11y.tabStop;
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("a11y.getPanelTabStop null panel.context");
@@ -882,7 +882,7 @@ FBL.ns( function()
                                 {
                                     this.modifyCssRow(panel, node);
                                     this.focus(node);
-                                }  
+                                }
                                 else if (goUp)
                                    this.focusEdgeCSSRow(panel, target, true);
                             }
@@ -943,23 +943,23 @@ FBL.ns( function()
                 if (!event.shiftKey)
                     event.preventDefault();
             },
-            
+
             onCSSMouseDown : function(event)
             {
                 var row = getAncestorByClass(event.target, 'focusRow');
                 if (row)
                     this.modifyCssRow(Firebug.getElementPanel(row), row, false);
             },
-            
+
             focusSiblingCSSRow : function(panel, target, goUp)
             {
-                var newRow = this[goUp ? 'getPreviousByClass' : 'getNextByClass'](target, 'focusRow', panel.panelNode)                
+                var newRow = this[goUp ? 'getPreviousByClass' : 'getNextByClass'](target, 'focusRow', panel.panelNode)
                 if (!newRow)
                     return;
                 this.modifyCssRow(panel, newRow, false);
                 this.focus(newRow)
             },
-            
+
             focusPageSiblingCSSRow : function(panel, target, goUp)
             {
                 var rows = this.getFocusRows(panel);
@@ -1015,14 +1015,14 @@ FBL.ns( function()
             },
 
             onBeforeCSSRulesAdded : function(panel)
-            {               
+            {
                 var panelA11y = this.getPanelA11y(panel);
                 if (!panelA11y || !this.panelHasFocus(panel))
                     return;
                 if (panelA11y.tabStop && hasClass(panelA11y.tabStop, 'focusRow'))
                     panelA11y.reFocusId = getElementXPath(panelA11y.tabStop);
             },
-            
+
             onCSSRulesAdded : function(panel, rootNode)
             {
                 var panelA11y = this.getPanelA11y(panel);
@@ -1035,18 +1035,18 @@ FBL.ns( function()
                     panelA11y.reFocusId = null;
                     if (reFocusRows.length > 0)
                     {
-                        
+
                         row = reFocusRows[0];
                         this.modifyCssRow(panel, row, true);
                         this.focus(row, true);
                         this.setPanelTabStop(panel, row);
                         return;
                     }
-                    
+
                 }
                 row = getElementByClass(rootNode, 'focusRow');
                 this.modifyCssRow(panel, row, true);
-                return;    
+                return;
             },
 
             modifyCssRow : function(panel, row, inTabOrder)
@@ -1077,7 +1077,7 @@ FBL.ns( function()
                         row.setAttribute('aria-label', $STR('overridden') + " " + row.textContent);
                 }
                 setClass(rule, 'a11yModified');
-                return;    
+                return;
             },
 
             onCSSPanelContextMenu : function(event)
@@ -1099,7 +1099,7 @@ FBL.ns( function()
                                 node = getElementByClass(event.target, 'objectLink');
                             if (!node || hasClass(node, 'collapsed'))
                                 node = event.target;
-                        }    
+                        }
                         //these context menu options are likely to destroy current focus
                         panelA11y.reFocusId = getElementXPath(event.target);
                         document.popupNode = node;
@@ -1471,6 +1471,8 @@ FBL.ns( function()
                 if (!panelA11y)
                     return;
                 var box = panel.selectedSourceBox;
+                if (!box)
+                    return;
                 var scrolltoLine = scrollUp ? box.firstViewableLine + 1 : box.lastViewableLine - 1;
                 var node = box.getLineNode(scrolltoLine);
                 this.insertCaretIntoLine(panel, box,  scrolltoLine);
@@ -1822,29 +1824,29 @@ FBL.ns( function()
             isDirCell : function(elem) {
                 return hasClass(elem.parentNode, 'memberValueCell');
             },
-            
+
             panelHasFocus : function(panel)
             {
                 if (!panel || !panel.context)
                     return false;
                 var focusedElement = panel.context.chrome.window.document.commandDispatcher.focusedElement;
                 var focusedPanel = Firebug.getElementPanel(focusedElement)
-                return focusedPanel && (focusedPanel.name == panel.name); 
-                
+                return focusedPanel && (focusedPanel.name == panel.name);
+
             },
-            
+
             getPreviousByClass: function(elem, className, rootNode)
             {
                 function iter(node) { return node.nodeType == 1 && hasClass(node, className); }
-                return  FBL.findPrevious(elem, iter, false, rootNode);   
+                return  FBL.findPrevious(elem, iter, false, rootNode);
             },
-            
+
             getNextByClass: function(elem, className, rootNode)
             {
                 function iter(node) { return node.nodeType == 1 && hasClass(node, className); }
-                return  FBL.findNext(elem, iter, false, rootNode);   
+                return  FBL.findNext(elem, iter, false, rootNode);
             },
-            
+
             getPanelA11y : function(panel, create)
             {
                 var a11yPanels, panelA11y;
@@ -1860,7 +1862,7 @@ FBL.ns( function()
                         panelA11y = a11yPanels[panel.name] = {};
                     else
                         return false;
-                }                 
+                }
                 return panelA11y
             }
         });
