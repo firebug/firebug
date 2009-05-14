@@ -1603,9 +1603,18 @@ top.Firebug =
                 Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
             }
         }
-        else
+        if (Firebug.isClosed())
         {
-            this.syncBar();  // either showUI based on context or hideUI without context,
+            if (context)
+            {
+                Firebug.setPlacement("inBrowser");
+                this.showBar(true);
+            }
+            // else should not happen
+        }
+        else  // inBrowser
+        {
+            this.showBar(context?true:false);
         }
 
     },
