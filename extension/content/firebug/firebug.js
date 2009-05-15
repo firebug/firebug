@@ -1967,7 +1967,7 @@ Firebug.Panel =
         try
         {
             var buttons = Firebug.chrome.$(buttonsId);
-            buttons.collapse(buttons, !show);
+            collapse(buttons, !show);
         }
         catch (exc)
         {
