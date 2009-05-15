@@ -208,7 +208,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         Firebug.TraceModule.addListener(this.TraceListener);
 
-        // HTTP observer must be registered now (and not in monitorContext, since if a 
+        // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
         HttpObserver.registerObserver();
     },
@@ -3266,7 +3266,7 @@ var HttpObserver =
             if (!Firebug.URLSelector.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; annotated as 'closed', don't create temp context.")
+                    FBTrace.sysout("net.onModifyRequest; URLSelector says don't create temp context.")
                 return;
             }
 
