@@ -53,7 +53,7 @@ function init()
     shortcutNames.sort();
     shortcutNames.forEach(addShortcutRow);
     setHandlers();
-    document.title = FBL.$STR('customizeShortcuts')
+    document.title = FBL.$STR('customizeShortcuts');
 
     if (FBTrace.DBG_SHORTCUTS)
         FBTrace.sysout("shortcuts.init; Customize Shortcuts dialog initialized.");
@@ -99,7 +99,7 @@ function setHandlers()
     {
         shortcutSinks[i].addEventListener('keydown', recognizeShortcut, false);
     }
-    var resetBtns = document.getElementsByClassName('shortcutResetBtn');    
+    var resetBtns = document.getElementsByClassName('shortcutResetBtn');
     for (i = 0; i < resetBtns.length; i++)
     {
         resetBtns[i].addEventListener('command', handleResetBtn, false);
@@ -136,7 +136,7 @@ function handleResetBtn(event)
         modified = true;
     }
 
-    var textbox = document.getElementById(element + '_shortcut')
+    var textbox = document.getElementById(element + '_shortcut');
     if (textbox)
         textbox.value = getHumanShortcut(element);
 }
@@ -228,7 +228,7 @@ function recognizeShortcut(event)
 
     //check if the keycode is actually a printable character
 
-    //1. convert some of the punctuation keyConstants (e.g. VK_COMMA) back to actual characters 
+    //1. convert some of the punctuation keyConstants (e.g. VK_COMMA) back to actual characters
     if (mustBeKeyChars[keyConstant])
     {
         key = mustBeKeyChars[keyConstant];
