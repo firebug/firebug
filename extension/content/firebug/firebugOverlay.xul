@@ -65,7 +65,7 @@
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
         <command id="cmd_allOn" oncommand="Firebug.toggleAll('on')"/>
         <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
-        <command id="cmd_customizeFBKeys" oncommand="Firebug.customizeShortcuts()"/>
+        <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_enableA11y" oncommand="Firebug.A11yModel.toggle(this.getAttribute('checked') == 'true'); " />
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
     </commandset>

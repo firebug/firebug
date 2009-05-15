@@ -947,11 +947,6 @@ top.Firebug =
             keys[i].setAttribute("disabled", !!shouldShow);
     },
 
-    customizeShortcuts: function()  // XXXjjb a better place would be Firebug.shortcutsModel
-    {
-        window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "", "chrome,centerscreen,dialog,modal,resizable=yes");
-    },
-
     closeFirebug: function(userCommand)
     {
         var browser = FirebugChrome.getCurrentBrowser();

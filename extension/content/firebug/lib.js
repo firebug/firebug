@@ -329,12 +329,15 @@ this.addScript = function(doc, id, src)
  *   are inserted at specified places (%S) in the same order as they are passed. If the
  *   key doesn't exist the method returns "Request Time".
  */
-function $STR(name, bundleId)
+function $STR(name, bundle)
 {
     try
     {
-        if (bundleId)
-            return document.getElementById(bundleId).getString(name.replace(' ', '_', "g"));
+        if (typeof bundle == "string")
+            bundle = document.getElementById(bundle);
+
+        if (bundle)
+            return bundle.getString(name.replace(' ', '_', "g"));
         else
             return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
     }
@@ -355,15 +358,19 @@ function $STR(name, bundleId)
     return name;
 }
 
-function $STRF(name, args, bundleId)
+function $STRF(name, args, bundle)
 {
     try
     {
         // xxxHonza: Workaround for #485511
-        bundleId = "strings_firebug";
+        if (!bundle)
+            bundle = "strings_firebug";
 
-        if (bundleId)
-            return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
+        if (typeof bundle == "string")
+            bundle = document.getElementById(bundle);
+
+        if (bundle)
+            return bundle.getFormattedString(name.replace(' ', '_', "g"), args);
         else
             return Firebug.getStringBundle().formatStringFromName(name.replace(' ', '_', "g"), args, args.length);
     }

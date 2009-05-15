@@ -13,24 +13,25 @@
         id="firebug-customize-keyboard"
         width="400" height="500"
         buttons="accept,cancel"
-        onload="init( );"
+        onload="init();"
         ondialogaccept="return saveChanges();"
-        ondialogcancel="return true;"       
-        persist="screenX screenY"
-        >
+        ondialogcancel="return true;"
+        persist="screenX screenY width height">
+
     <script type="application/x-javascript" src="chrome://firebug/content/customizeShortcuts.js" />
+
     <stringbundleset>
         <stringbundle id="platformKeys" src="chrome://global-platform/locale/platformKeys.properties"/>
         <stringbundle id="localeKeys" src="chrome://global/locale/keys.properties"/>
-        <stringbundle id="fbStrings" src="chrome://firebug/locale/firebug.properties"/>
     </stringbundleset>
+
+    <!-- Dialog UI structure (list of registered shortcuts) -->
     <grid flex="1" id="shortcutGrid" style="background-color: white; overflow: auto;">
-		  <columns>
-		    <column id="labelColumn"/>
-		    <column flex="1"/>
-		    <column/>
-		  </columns>
-		  <rows id="shortcutGridRows">
-		  </rows>
+        <columns>
+           <column id="labelColumn"/>
+            <column flex="1"/>
+            <column/>
+        </columns>
+        <rows id="shortcutGridRows"></rows>
     </grid>
 </dialog>
