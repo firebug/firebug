@@ -116,6 +116,14 @@ top.FirebugChrome =
         browser2.addEventListener("load", browser2Loaded, true);
 
         window.addEventListener("blur", onBlur, true);
+
+        // Initialize Firebug Tools & Firebug Icon menus.
+        var firebugMenuPopup = $("fbFirebugMenuPopup");
+        var toolsMenu = $("menu_firebug");
+        var iconMenu = $("fbFirebugMenu");
+
+        toolsMenu.appendChild(firebugMenuPopup.cloneNode(true));
+        iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
     },
 
     /**
@@ -822,6 +830,7 @@ top.FirebugChrome =
     hideUI: function(browser, context)  // called when the Firebug UI comes down; context may be null
     {
     },
+
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onOptionsShowing: function(popup)
