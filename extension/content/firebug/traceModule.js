@@ -171,10 +171,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         this.prefDomain = prefDomain;
 
-        // Create menu items for Trace Console
-        // (Open Console and a new option Always Open Console)
-        this.initMenu();
-
         // Open console automatically if the pref says so.
         if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
@@ -189,69 +185,12 @@ Firebug.TraceModule = extend(Firebug.Module,
             this.consoleWindow.TraceConsole.unregisterModule(this);
     },
 
-    initMenu: function()
-    {
-        // Create menu item "Open Firebug Tracing" within Firebug menu (the bug-menu on FB bar).
-        var popupMenu = $("fbFirebugMenuPopup");
-        this.createOpenTracingMenu(popupMenu);
-
-        // Create menu item "Open Firebug Tracing" within Firefox Tools menu.
-        var toolsMenu = $("menu_firebug");
-        if (toolsMenu)  // then we are in Firefox not eg Chromebug
-            this.createOpenTracingMenu(toolsMenu.menupopup);
-
-        // Create new option "Always Open Firebug Tracing" item within Firebug options menu.
-        var optionsMenu = $("FirebugMenu_OptionsPopup");
-        this.createAlwaysOpenTracingMenu(optionsMenu);
-    },
-
     reattachContext: function(browser, context)
     {
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.reattachContext for: " +
                 context ? context.getName() : "null context",
                 [browser, context]);
-
-        // Create proper menu items for Firebug Tracing window in the new Firebug window.
-        var viewMenu = browser.chrome.$("view-menu");
-        this.createOpenTracingMenu(viewMenu.menupopup);
-
-        var optionsMenu = browser.chrome.$("FirebugMenu_OptionsPopup");
-        this.createAlwaysOpenTracingMenu(optionsMenu);
-    },
-
-    createOpenTracingMenu: function(parentMenu)
-    {
-        if (!parentMenu)
-            return;
-
-        var doc = parentMenu.ownerDocument;
-        var menuItem = doc.createElement("menuitem");
-        menuItem.setAttribute("label", $STR("Open Firebug Tracing"));
-        menuItem.setAttribute("oncommand", "Firebug.TraceModule.openConsole()");
-        var firstItem = parentMenu.firstChild;
-        parentMenu.insertBefore(menuItem, firstItem);
-        parentMenu.insertBefore(document.createElement("menuseparator"), firstItem);
-    },
-
-    createAlwaysOpenTracingMenu: function(parentMenu)
-    {
-        if (!parentMenu)
-            return;
-
-        var menuItemId = "FirebugMenu_Options_alwaysOpenTraceConsole";
-        var doc = parentMenu.ownerDocument;
-        if ($(menuItemId, doc))
-            return;
-
-        var menuItem = doc.createElement("menuitem");
-        menuItem.setAttribute("id", menuItemId);
-        menuItem.setAttribute("label", $STR("Always Open Firebug Tracing"));
-        menuItem.setAttribute("type", "checkbox");
-        menuItem.setAttribute("oncommand", "FirebugChrome.onToggleOption(this)");
-        menuItem.setAttribute("option", "alwaysOpenTraceConsole");
-        parentMenu.appendChild(document.createElement("menuseparator"));
-        parentMenu.appendChild(menuItem);
     },
 
     openConsole: function(prefDomain, windowURL)

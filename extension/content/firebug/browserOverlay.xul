@@ -2,6 +2,9 @@
 
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
 
+<!-- Support for tracing. Only available in X version -->
+<?xul-overlay href="chrome://firebug/content/traceOverlay.xul"?> <!-- /*@explore*/ -->
+
 <!DOCTYPE window [
 <!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
 %firebugDTD;
