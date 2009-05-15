@@ -118,7 +118,7 @@
         <!-- Context menu -->
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
             <menuitem id="menu_detachFirebug" label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" 
-                      type="checkbox"/>
+                      type="checkbox" key="key_detachFirebug"/>
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole" key="key_clearConsole"/>
             <menuseparator/>
