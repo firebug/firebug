@@ -18,6 +18,9 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
 
     initializeUI: function()
     {
+        if (FBTrace.DBG_SHORTCUTS)
+            FBTrace.sysout("shortcuts.initializeUI; Shortcuts module initialization.");
+
         this.initShortcuts();
     },
 
@@ -66,7 +69,8 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
     customizeShortcuts: function()
     {
         var args = {
-            FBL: FBL
+            FBL: FBL,
+            FBTrace: FBTrace
         };
 
         // Open customize shortcuts dialog. Pass FBL into the XUL window so,

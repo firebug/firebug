@@ -132,6 +132,7 @@ pref("extensions.firebug.DBG_HTTPOBSERVER", false); // Centralized HTTP Observer
 pref("extensions.firebug.DBG_SPY", false);          // spy.js
 pref("extensions.firebug.DBG_JSONVIEWER", false);   // json explorer
 pref("extensions.firebug.DBG_EDITOR", false);       // Inline editors
+pref("extensions.firebug.DBG_SHORTCUTS", false);    // Keyboard shortcuts. /*@explore*/
 
 //Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "accel shift e");

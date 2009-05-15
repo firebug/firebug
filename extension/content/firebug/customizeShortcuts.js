@@ -12,6 +12,7 @@ var branch = prefs.getBranch("extensions.firebug.key.shortcut.");
 
 // Initialized from window parameters.
 var FBL; 
+var FBTrace;
 
 // Global variables used by this dialog.
 var shortcutNames = null;
@@ -45,6 +46,7 @@ function init()
 {
     var args = window.arguments[0];
     FBL = args.FBL;
+    FBTrace = args.FBTrace;
 
     setKeyInfo();
     shortcutNames = branch.getChildList("", {});
@@ -52,6 +54,9 @@ function init()
     shortcutNames.forEach(addShortcutRow);
     setHandlers();
     document.title = FBL.$STR('customizeShortcuts')
+
+    if (FBTrace.DBG_SHORTCUTS)
+        FBTrace.sysout("shortcuts.init; Customize Shortcuts dialog initialized.");
 }
 
 function setKeyInfo()
