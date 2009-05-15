@@ -2477,7 +2477,20 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var newTopLine = Math.round(sourceBox.scrollTop/scrollStep);
         var newBottomLine = Math.round((sourceBox.scrollTop + panelHeight)/scrollStep);
 
-        sourceBox.viewableLines = newBottomLine - newTopLine;  // eg 17
+        var viewableLines = newBottomLine - newTopLine;  // eg 17
+
+        if (viewableLines == sourceBox.viewableLines)  // then the size has not changed
+        {
+            if (newTopLine == sourceBox.firstViewableLine)  // then the top is also the same
+            {
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("reView scrollTop: "+scrollTop+" no change to viewableLines "+viewableLines, sourceBox);
+
+                return null;
+            }
+        }
+
+        sourceBox.viewableLines = viewableLines;
 
         var halfViewableLines = Math.round(sourceBox.viewableLines/2.0);  //eg 8
         sourceBox.halfViewableLines = halfViewableLines;
@@ -2592,7 +2605,9 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
             if (!skipScrolling)
             {
-                var halfViewableLines = this.selectedSourceBox.halfViewableLines ? this.selectedSourceBox.halfViewableLines : 10;
+                var halfViewableLines = 10;
+                if (this.selectedSourceBox.halfViewableLines > 0)
+                    halfViewableLines = this.selectedSourceBox.halfViewableLines;
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight);
                 var newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+newScrollTop);
@@ -2761,8 +2776,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         {
             if (FBTrace.DBG_SOURCEFILES)
                 FBTrace.sysout("resizer will clear viewable lines, event:", event);
-            delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
-            delete this.selectedSourceBox.halfViewableLines;
+            //delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
+            //delete this.selectedSourceBox.halfViewableLines;
             delete this.lastScrollTop;
             this.reView(this.selectedSourceBox);
         }
