@@ -120,10 +120,12 @@ top.FirebugChrome =
         // Initialize Firebug Tools & Firebug Icon menus.
         var firebugMenuPopup = $("fbFirebugMenuPopup");
         var toolsMenu = $("menu_firebug");
-        var iconMenu = $("fbFirebugMenu");
+        if (toolsMenu)
+            toolsMenu.appendChild(firebugMenuPopup.cloneNode(true));
 
-        toolsMenu.appendChild(firebugMenuPopup.cloneNode(true));
-        iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
+        var iconMenu = $("fbFirebugMenu");
+        if (iconMenu)
+            iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
     },
 
     /**
