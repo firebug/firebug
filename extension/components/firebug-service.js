@@ -181,7 +181,7 @@ function FirebugService()
     this.profiling = false;
 
     prefs = PrefService.getService(nsIPrefBranch2);
-    fbs.prefDomain = "extensions.firebug-service."
+    fbs.prefDomain = "extensions.firebug.service."
     prefs.addObserver(fbs.prefDomain, fbs, false);
 
     var observerService = Cc["@mozilla.org/observer-service;1"]
@@ -908,11 +908,11 @@ FirebugService.prototype =
 
     obeyPrefs: function()
     {
-        this.showStackTrace = prefs.getBoolPref("extensions.firebug-service.showStackTrace");
-        this.breakOnErrors = prefs.getBoolPref("extensions.firebug-service.breakOnErrors");
-        this.trackThrowCatch = prefs.getBoolPref("extensions.firebug-service.trackThrowCatch");
-        this.scriptsFilter = prefs.getCharPref("extensions.firebug-service.scriptsFilter");
-        this.filterSystemURLs = prefs.getBoolPref("extensions.firebug-service.filterSystemURLs");  // may not be exposed to users
+        this.showStackTrace = prefs.getBoolPref("extensions.firebug.service.showStackTrace");
+        this.breakOnErrors = prefs.getBoolPref("extensions.firebug.service.breakOnErrors");
+        this.trackThrowCatch = prefs.getBoolPref("extensions.firebug.service.trackThrowCatch");
+        this.scriptsFilter = prefs.getCharPref("extensions.firebug.service.scriptsFilter");
+        this.filterSystemURLs = prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");  // may not be exposed to users
 
         FirebugPrefsObserver.syncFilter();
 
@@ -2377,7 +2377,7 @@ var FirebugFactory =
         if (!prefs)
            prefs = PrefService.getService(nsIPrefBranch2);
 
-        var filterSystemURLs =  prefs.getBoolPref("extensions.firebug-service.filterSystemURLs");
+        var filterSystemURLs =  prefs.getBoolPref("extensions.firebug.service.filterSystemURLs");
         if (filterSystemURLs)  // do not turn jsd on unless we want to see chrome
             return;
 

@@ -146,7 +146,7 @@ top.Firebug =
     panelTypes: panelTypes,
     reps: reps,
     prefDomain: "extensions.firebug",
-    servicePrefDomain: "extensions.firebug-service",
+    servicePrefDomain: "extensions.firebug.service",
 
     stringCropLength: 80,
 

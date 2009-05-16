@@ -33,7 +33,7 @@ pref("extensions.firebug.showChromeErrors", false);
 pref("extensions.firebug.showChromeMessages", false);
 pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
-pref("extensions.firebug-service.showStackTrace", true);
+pref("extensions.firebug.service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
 
@@ -51,13 +51,13 @@ pref("extensions.firebug.showComputedStyle", false);
 pref("extensions.firebug.showUserAgentCSS", false);
 
 // Script
-pref("extensions.firebug-service.breakOnErrors", false);
-pref("extensions.firebug-service.filterSystemURLs", true);
-pref("extensions.firebug-service.showAllSourceFiles", false);
-pref("extensions.firebug-service.trackThrowCatch", false);
+pref("extensions.firebug.service.breakOnErrors", false);
+pref("extensions.firebug.service.filterSystemURLs", true);
+pref("extensions.firebug.service.showAllSourceFiles", false);
+pref("extensions.firebug.service.trackThrowCatch", false);
 pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug.decompileEvals", false);
-pref("extensions.firebug-service.scriptsFilter", "all");
+pref("extensions.firebug.service.scriptsFilter", "all");
 
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
