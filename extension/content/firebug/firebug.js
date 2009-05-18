@@ -1554,7 +1554,7 @@ top.Firebug =
             if(!this.hadFirstContext)  // then we need to enable the panels iff the prefs say so
             {
                 this.hadFirstContext = true;
-                Firebug.ModuleManager.obeyPrefs();
+                Firebug.ModuleManager.obeyPrefs(context);
             }
             if (Firebug.getSuspended())
                 Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
@@ -3278,7 +3278,7 @@ Firebug.ModuleManager =
         );
     },
 
-    obeyPrefs: function()
+    obeyPrefs: function(context)
     {
         for (var i=0; i<activableModules.length; i++)
         {
@@ -3288,8 +3288,7 @@ Firebug.ModuleManager =
             else
                 this.disableModule(module);
 
-            // XXXjjb, xxxHonza: where the context comes from?
-            //module.updateTab(context);
+            module.updateTab(context);
         }
     },
 }
