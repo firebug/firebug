@@ -10,7 +10,6 @@ const Ci = Components.interfaces;
 
 const nsIPrefBranch = Ci.nsIPrefBranch;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
-const nsIFireBugClient = Ci.nsIFireBugClient;
 const nsISupports = Ci.nsISupports;
 const nsIFile = Ci.nsIFile;
 const nsILocalFile = Ci.nsILocalFile;
@@ -1427,7 +1426,7 @@ top.Firebug =
 
     QueryInterface : function(iid)
     {
-        if (iid.equals(nsIFireBugClient) || iid.equals(nsISupports))
+        if (iid.equals(nsISupports))
         {
             return this;
         }
