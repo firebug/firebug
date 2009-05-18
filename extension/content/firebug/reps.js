@@ -1533,8 +1533,6 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    className: "nsIDOMHistory",
-
     supportsObject: function(object, type)
     {
         return (object instanceof Ci.nsIDOMHistory);
