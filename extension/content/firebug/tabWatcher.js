@@ -251,7 +251,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!persistedState || persistedState.location != win.location.href)
             persistedState = null;
 
-        context = new Firebug.TabContext(win, browser, browser.chrome, persistedState);
+        var context = new Firebug.TabContext(win, browser, browser.chrome, persistedState);
         contexts.push(context);
 
         context.uid = FBL.getUniqueId();

@@ -1774,7 +1774,7 @@ NetProgress.prototype =
 
     respondedFile: function respondedFile(request, time, info)
     {
-        dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [context, request]);
+        dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [this.context, request]);
 
         var file = this.getRequestFile(request);
         if (file)

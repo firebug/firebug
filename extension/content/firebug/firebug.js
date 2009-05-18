@@ -2229,7 +2229,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         // xxxHonza: now I think this is the correct place to call Panel.show
         // If the enabled panel is currently visible, show the content.
         // It's necessary to update the toolbar.
-        if (context.panelName == this.name)
+        if (this.context.panelName == this.name)
         {
             var state = Firebug.getPanelState(this);
             this.show(state);
@@ -3287,7 +3287,9 @@ Firebug.ModuleManager =
                 this.enableModule(module);
             else
                 this.disableModule(module);
-            module.updateTab(context);
+
+            // XXXjjb, xxxHonza: where the context comes from?
+            //module.updateTab(context);
         }
     },
 }
