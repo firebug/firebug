@@ -3265,7 +3265,7 @@ var HttpObserver =
             if (!Firebug.URLSelector.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; URLSelector says don't create temp context.")
+                    FBTrace.sysout("net.onModifyRequest; URLSelector says don't create temp context.");
                 return;
             }
 
