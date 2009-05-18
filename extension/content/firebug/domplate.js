@@ -1011,7 +1011,7 @@ var Renderer =
             womb = parent.ownerDocument.createElement("div");
         womb.innerHTML = html;
 
-        root = womb.firstChild;
+        var root = womb.firstChild;
         while (womb.firstChild)
             parent.appendChild(womb.firstChild);
 
