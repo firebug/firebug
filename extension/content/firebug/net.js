@@ -206,7 +206,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
 
-        Firebug.TraceModule.addListener(this.TraceListener);
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.addListener(this.TraceListener);
 
         // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
@@ -216,7 +217,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     shutdown: function()
     {
         prefs.removeObserver(Firebug.prefDomain, this, false);
-        Firebug.TraceModule.removeListener(this.TraceListener);
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.removeListener(this.TraceListener);
         HttpObserver.unregisterObserver();
     },
 
