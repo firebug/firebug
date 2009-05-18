@@ -2456,7 +2456,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    setViewableLines: function(sourceBox)  // called only by buildViewAround
+    getViewableLines: function(sourceBox)
     {
         var scrollStep = sourceBox.lineHeight;
         if (!scrollStep || scrollStep < 1)
@@ -2472,9 +2472,17 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             }
         }
 
+        var scrollTop = sourceBox.scrollTop;
+        if (sourceBox.newScrollTop)
+        {
+            // XXXjjb for some reason sourceBox.scrollTop is being cleared, so we have to use our own value
+            scrollTop = sourceBox.newScrollTop;
+            delete sourceBox.newScrollTop;
+        }
+
         var panelHeight = this.panelNode.clientHeight;
-        var newTopLine = Math.round(sourceBox.scrollTop/scrollStep);
-        var newBottomLine = Math.round((sourceBox.scrollTop + panelHeight)/scrollStep);
+        var newTopLine = Math.round(scrollTop/scrollStep);
+        var newBottomLine = Math.round((scrollTop + panelHeight)/scrollStep);
 
         var viewableLines = newBottomLine - newTopLine;  // eg 17
 
@@ -2488,8 +2496,17 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                 return null;
             }
         }
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("getViewableLines clientHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+viewableLines+"\n");
 
-        sourceBox.viewableLines = viewableLines;
+        return {top: newTopLine, bottom: newBottomLine};
+    },
+
+    setViewableLines: function(sourceBox, lines)  // called only by buildViewAround
+    {
+        var newTopLine = lines.top;
+        var newBottomLine = lines.bottom;
+        sourceBox.viewableLines = newBottomLine - newTopLine;
 
         var halfViewableLines = Math.round(sourceBox.viewableLines/2.0);  //eg 8
         sourceBox.halfViewableLines = halfViewableLines;
@@ -2497,10 +2514,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var newCenterLine = newTopLine + halfViewableLines;
 
         if (FBTrace.DBG_SOURCEFILES)
-        {
-            FBTrace.sysout("setViewableLines scrollTop: "+sourceBox.scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+"\n");
-            FBTrace.sysout("setViewableLines clientHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+ sourceBox.viewableLines+"\n");
-        }
+            FBTrace.sysout("setViewableLines scrollTop: "+sourceBox.scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+" for "+sourceBox.repObject.href+"\n");
 
         return newCenterLine;
     },
@@ -2607,10 +2621,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                 var halfViewableLines = 10;
                 if (this.selectedSourceBox.halfViewableLines > 0)
                     halfViewableLines = this.selectedSourceBox.halfViewableLines;
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight);
-                var newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+newScrollTop);
-                this.selectedSourceBox.scrollTop = newScrollTop; // *may* cause scrolling
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight+" for "+this.selectedSourceBox.repObject.href);
+                this.selectedSourceBox.newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight
+                delete this.lastScrollTop;
+                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" for "+this.selectedSourceBox.repObject.href);
+                this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
             }
 
@@ -2653,9 +2668,12 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             return;
         }
 
-         var lineNo = this.setViewableLines(sourceBox);
-         if (!lineNo)
-             return;
+        var lines = this.getViewableLines(sourceBox);
+
+        if (!lines)
+            return;
+
+        var lineNo = this.setViewableLines(sourceBox, lines);
 
         var topLine = 1; // will be view.firstChild
         if (lineNo)
@@ -2774,10 +2792,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         if (this.selectedSourceBox)
         {
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("resizer will clear viewable lines, event:", event);
-            //delete this.selectedSourceBox.viewableLines;  // force recompute of viewport capacity
-            //delete this.selectedSourceBox.halfViewableLines;
-            delete this.lastScrollTop;
+                FBTrace.sysout("resizer event:", event);
+
             this.reView(this.selectedSourceBox);
         }
     },
