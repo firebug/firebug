@@ -1722,7 +1722,6 @@ function NetProgress(context)
         this.windows = [];
 
         queue = [];
-        requestQueue = [];
     };
 
     this.cacheListener = new NetCacheListener(this);
