@@ -589,6 +589,13 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     attachConsoleOnFocus: function()
     {
+        if (!FirebugContext)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLine.attachConsoleOnFocus no FirebugContext");
+            return;
+        }
+
         // User has decided to use the command line, but the web page may not have the console if the page has no javascript
         if (Firebug.Console.isReadyElsePreparing(FirebugContext))
         {

@@ -199,6 +199,11 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.Console.injector.detachConsole(context, context.window);  // TODO iterate windows?
+    },
+
     // -----------------------------------------------------------------------------------------------------
 
     onPanelEnable: function(context, panelName)

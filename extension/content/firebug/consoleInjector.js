@@ -11,13 +11,16 @@ const Ci = Components.interfaces;
 
 top.Firebug.Console.injector =
 {
-    isAttached: function(win)
+    isAttached: function(context, win)
     {
         if (win.wrappedJSObject)
         {
+            var attached = (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("Console.isAttached? to win.wrappedJSObject "+win.wrappedJSObject.location+" fnc:"+win.wrappedJSObject._getFirebugConsoleElement);
-            return (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
+            {
+                FBTrace.sysout("Console.isAttached:"+attached+" to win.wrappedJSObject "+win.wrappedJSObject.location+" context.activeConsoleHandlers:"+context.activeConsoleHandlers);
+            }
+            return attached;
         }
         else
         {
@@ -32,7 +35,7 @@ top.Firebug.Console.injector =
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("Console.attachIfNeeded has win "+(win? ((win.wrappedJSObject?"YES":"NO")+" wrappedJSObject"):"null") );
 
-        if (this.isAttached(win))
+        if (this.isAttached(context, win))
             return true;
 
         if (FBTrace.DBG_CONSOLE)
@@ -41,7 +44,7 @@ top.Firebug.Console.injector =
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);
 
-        var attached =  this.isAttached(win);
+        var attached =  this.isAttached(context, win);
         if (attached)
             dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
 
@@ -141,7 +144,14 @@ top.Firebug.Console.injector =
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener attached handler("+handler.handler_name+") to _firebugConsole in : "+win.location+"\n");
         return true;
-    }
+    },
+
+    detachConsole: function(context, win)
+    {
+        var element = win.document.getElementById("_firebugConsole");
+        if (element)
+            element.parentNode.removeChild(element);
+    },
 }
 
 var total_handlers = 0;
