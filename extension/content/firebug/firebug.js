@@ -2219,7 +2219,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         var tab = this.getTab();
         if (tab)
-            tab.setAttribute('aria-disabled', 'false');
+            tab.setAttribute('aria-label', tab.textContent);
 
         // The panel was just enabled so, hide the disable message. Notice that
         // displaying this page replaces content of the panel.
@@ -2242,7 +2242,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         var tab = this.getTab();
         if (tab)
-            tab.setAttribute('aria-disabled', 'true');
+            tab.setAttribute('aria-label', tab.getAttribute('label') + " (inactive panel)");
 
         // The panel was disabled so, show the disabled page. This page also replaces the
         // old content so, the panel is fresh empty after it's enabled again.
@@ -3147,7 +3147,6 @@ Firebug.ActivableModule = extend(Firebug.Module,
         {
             tab.setModule(this);
             var enabled = this.isAlwaysEnabled();
-            tab.setAttribute('aria-disabled', enabled ? "false" : "true");
         }
     }
 });
