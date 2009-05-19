@@ -342,10 +342,17 @@ Firebug.CommandLine = extend(Firebug.Module,
         else
             Firebug.toggleBar(true);
 
-        Firebug.chrome.selectPanel("console");
+        if (context.panelName != "console")
+        {
+            Firebug.chrome.switchToPanel(context, "console");
 
-        var commandLine = getCommandLine(context);
-        setTimeout(function() { commandLine.select(); });
+            var commandLine = getCommandLine(context);
+            setTimeout(function() { commandLine.select(); });
+        }
+        else // then we are already on the console, toggle back
+        {
+            Firebug.chrome.unswitchToPanel(context, "console", true);
+        }
     },
 
     clear: function(context)

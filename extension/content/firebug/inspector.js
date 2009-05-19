@@ -28,7 +28,7 @@ Firebug.Inspector = extend(Firebug.Module,
 {
     dispatchName: "inspector",
     inspecting: false,
-    
+
     highlightObject: function(element, context, highlightType, boxFrame)
     {
         if(context)
@@ -39,7 +39,7 @@ Firebug.Inspector = extend(Firebug.Module,
                 my = event.clientY;
                 }, true);
         }
-        
+
         if (!element || !isElement(element) || !isVisible(element))
             element = null;
 
@@ -97,17 +97,10 @@ Firebug.Inspector = extend(Firebug.Module,
         context.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
 
-        // Remember the previous panel and bar state so we can revert if the user cancels
-        this.previousPanelName = context.panelName;
-        this.previousSidePanelName = context.sidePanelName;
-        this.previouslyCollapsed = $("fbContentBox").collapsed;
-        this.previouslyFocused = Firebug.isDetached() && context.chrome.isFocused();
-
-        var htmlPanel = context.chrome.selectPanel("html");
-        this.previousObject = htmlPanel.selection;
+        var htmlPanel = Firebug.chrome.switchToPanel(context, "html");
 
         if (Firebug.isDetached())
-            context.chrome.focus();
+            Firebug.chrome.focus();
         else if (Firebug.isMinimized())
             Firebug.showBar(true);
 
@@ -169,35 +162,11 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspecting = false;
 
-        var htmlPanel = context.getPanel("html");
-
-        if (this.previouslyFocused)
-            context.chrome.focus();
-
-        if (cancelled)
-        {
-            if (this.previouslyCollapsed)
-                Firebug.showBar(false);
-
-            if (this.previousPanelName == "html")
-                context.chrome.select(this.previousObject);
-            else
-                context.chrome.selectPanel(this.previousPanelName, this.previousSidePanelName);
-        }
-        else
-        {
-            context.chrome.select(htmlPanel.selection);
-            context.chrome.getSelectedPanel().panelNode.focus();
-        }
+        var htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", cancelled);
 
         htmlPanel.stopInspecting(htmlPanel.selection, cancelled);
 
         this.inspectNode(null);
-
-        delete this.previousObject;
-        delete this.previousPanelName;
-        delete this.previousSidePanelName;
-        delete this.inspectingContext;
     },
 
     inspectNodeBy: function(dir)
@@ -469,33 +438,33 @@ function getImageMapHighlighter(context)
             canvas.addEventListener("mousemove", function(event){context.imageMapHighlighter.mouseMoved(event)}, true);
             canvas.addEventListener("mouseout", function(){getImageMapHighlighter(context).destroy();}, true);
             context.window.addEventListener("scroll", function(){context.imageMapHighlighter.show(false);}, true);
-            
+
             body.appendChild(canvas);
             }
         };
 
     if (!context.imageMapHighlighter)
-    {            
-        context.imageMapHighlighter = 
-        {   
+    {
+        context.imageMapHighlighter =
+        {
             "show": function(state)
             {
                 canvas.style.display=state?'block':'none';
             },
-			"getImages": function(mapName, multi)
-			{
+            "getImages": function(mapName, multi)
+            {
                 var i,
                     elts = [],
                     images = [],
                     elts2 = doc.getElementsByTagName("img"),
                     elts3 = doc.getElementsByTagName("input");
-               
+
                 for(i=0;i<elts2.length;i++)
                     elts.push(elts2[i]);
-                    
+
                 for(i=0;i<elts3.length;i++)
                     elts.push(elts3[i]);
-               
+
                 if(elts)
                 {
                     for(i=0;i<elts.length;i++)
@@ -517,7 +486,7 @@ function getImageMapHighlighter(context)
                     }
                 }
                 return images;
-			},
+            },
             "highlight": function(eltArea, multi)
             {
                 var i, j, v, images, rect, clearForFirst;
@@ -529,26 +498,26 @@ function getImageMapHighlighter(context)
                     init();
 
                     v = eltArea.coords.split(",");
-                    
+
                     if(!ctx)
                         ctx = canvas.getContext("2d");
-                        
+
                     ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
                     ctx.strokeStyle = "rgb(29, 55, 95)";
                     ctx.lineWidth = 2;
-                    
+
                     if(images.length===0)
                         images[0] = eltArea;
-                    
+
                     for(var j=0;j<images.length;j++)
                     {
                         rect = getRectTRBLWH(images[j]);
-                        
+
                         ctx.beginPath();
 
                         if(!multi || (multi && j===0))
                             ctx.clearRect(0,0,canvas.width,canvas.height);
-                        
+
                         if (eltArea.shape.toLowerCase() === 'rect')
                         {
                             ctx.rect(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10), v[2]-v[0], v[3]-v[1]);
@@ -593,7 +562,7 @@ function getImageMapHighlighter(context)
             }
         }
     }
-    
+
     return context.imageMapHighlighter;
 }
 
@@ -787,7 +756,7 @@ BoxModelHighlighter.prototype =
             var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
             var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
             var parentW = offsetParent.offsetWidth-1;
-    	    var parentH = offsetParent.offsetHeight-1;
+            var parentH = offsetParent.offsetHeight-1;
 
             var style = win.getComputedStyle(element, "");
             var styles = readBoxStyles(style);
@@ -928,7 +897,7 @@ BoxModelHighlighter.prototype =
                     body.removeChild(nodes.lines[line]);
             }
         }
-        
+
         // Destroy imagemap canvas AND FirebugBody
         getImageMapHighlighter(context).destroy();
     },

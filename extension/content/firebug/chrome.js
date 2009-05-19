@@ -494,6 +494,49 @@ top.FirebugChrome =
         return panelBar2.selectedPanel;
     },
 
+    switchToPanel: function(context, switchToPanelName)
+    {
+        // Remember the previous panel and bar state so we can revert if the user cancels
+        this.previousPanelName = context.panelName;
+        this.previousSidePanelName = context.sidePanelName;
+        this.previouslyCollapsed = $("fbContentBox").collapsed;
+        this.previouslyFocused = Firebug.isDetached() && this.isFocused();  // TODO previouslyMinimized
+
+        var switchPanel = this.selectPanel(switchToPanelName);
+        this.previousObject = switchPanel.selection;
+        return switchPanel;
+    },
+
+    unswitchToPanel: function(context, switchToPanelName, cancelled)
+    {
+        var switchToPanel = context.getPanel(switchToPanelName);
+
+        if (this.previouslyFocused)
+            this.focus();
+
+        if (cancelled)  // revert
+        {
+            if (this.previouslyCollapsed)
+                Firebug.showBar(false);
+
+            if (this.previousPanelName == switchToPanelName)
+                this.select(this.previousObject);
+            else
+                this.selectPanel(this.previousPanelName, this.previousSidePanelName);
+        }
+        else // else stay on the switchToPanel
+        {
+            this.select(switchToPanel.selection);
+            this.getSelectedPanel().panelNode.focus();
+        }
+
+        delete this.previousObject;
+        delete this.previousPanelName;
+        delete this.previousSidePanelName;
+        delete this.inspectingContext;
+
+        return switchToPanel;
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Location interface provider for binding.xml panelFileList
 
