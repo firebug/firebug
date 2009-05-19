@@ -1474,7 +1474,6 @@ FBL.ns( function()
                 if (!box)
                     return;
                 var scrolltoLine = scrollUp ? box.firstViewableLine + 1 : box.lastViewableLine - 1;
-                var node = box.getLineNode(scrolltoLine);
                 this.insertCaretIntoLine(panel, box,  scrolltoLine);
             },
 
@@ -1484,7 +1483,8 @@ FBL.ns( function()
                 if (!panelA11y)
                     return;
                 var node = box.getLineNode(line);
-
+                if (!node)
+                    return;
                 if (!offset)
                 {
                     if (panelA11y.caretOffset)
