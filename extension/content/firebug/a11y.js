@@ -1267,7 +1267,6 @@ FBL.ns( function()
                             setSize = (setElems.length * 2);
                             posInSet = ((Array.indexOf(setElems, target) + 1) * 2) - (isName ? 1 : 0);
                             editor.input.setAttribute('role', 'listitem');
-                            editor.input.setAttribute('aria-editable', 'true');
                             editor.input.setAttribute('aria-setsize', setSize);
                             editor.input.setAttribute('aria-posinset', posInSet);
                             nodeTag = getPreviousByClass(target, 'nodeTag');
@@ -1303,6 +1302,7 @@ FBL.ns( function()
                         else if (hasClass(target, 'cssSelector'))
                             label += $STR('cssSelector');
                         editor.input.setAttribute('aria-label', label);
+                        editor.setAttribute('aria-autocomplete', 'inline');
                         break;
                     case 'layout':
                         editor.input.setAttribute('aria-label', target.getAttribute('aria-label'));

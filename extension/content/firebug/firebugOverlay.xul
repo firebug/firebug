@@ -300,7 +300,7 @@
 
         <hbox id="fbCommandBox">
             <label id="fbCommandArow" value=">>>"/>
-            <textbox id="fbCommandLine" flex="1" label="console command line"/>
+            <textbox id="fbCommandLine" flex="1" label="console command line" aria-autocomplete="inline" />
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                            oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
         </hbox>
