@@ -78,6 +78,7 @@ pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
+pref("extensions.firebug.net.displayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.
