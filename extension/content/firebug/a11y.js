@@ -168,9 +168,10 @@ FBL.ns( function()
 
             onDestroyNode : function(panel, actAsPanel)
             {
-                if (!this.isEnabled())
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
                     return;
-                panel.context.a11yPanels = null;
+                panelA11y = null;
                 actAsPanel = actAsPanel ? actAsPanel : panel.name;
                 //remove all event handlers we added in onInitializeNode
                 switch (actAsPanel)
@@ -205,7 +206,8 @@ FBL.ns( function()
 
             showPanel : function(browser, panel)
             {
-                if (!this.isEnabled())
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y || !panel.context.chrome)
                     return;
                 panel.context.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
                 var panelBrowser = panel.context.chrome.getPanelBrowser(panel);
@@ -368,8 +370,10 @@ FBL.ns( function()
 
             ensurePanelTabStops: function()
             {
-                var panel = context.chrome.getSelectedPanel();
-                var sidePanel = context.chrome.getSelectedSidePanel();
+                if (!FirebugContext || !FirebugContext.chrome)
+                    return;
+                var panel = FirebugContext.chrome.getSelectedPanel();
+                var sidePanel = FirebugContext.chrome.getSelectedSidePanel();
                 this.ensurePanelTabStop(panel);
                 if (sidePanel)
                     this.ensurePanelTabStop(sidePanel);
@@ -485,7 +489,9 @@ FBL.ns( function()
                 else if ([13, 32, 33, 34, 35, 36, 37, 38, 39, 40, 46].indexOf(keyCode) == -1)
                     return;//not interested in any other keys, than arrows, pg, home/end, del space & enter
                 var panel = Firebug.getElementPanel(target)
-
+                var panelA11y = this.getPanelA11y(panel);
+                if (!panelA11y)
+                    return;
                 var newTarget = target
                 if (!this.isLogRow(target))
                 {
@@ -1353,6 +1359,8 @@ FBL.ns( function()
 
             onStop : function(context, frame, type,rv)
             {
+                if (!context)
+                    return;
                 var panel = context.getPanel('script');
                 var panelA11y = this.getPanelA11y(panel);
                 if (!panelA11y)
@@ -1360,8 +1368,8 @@ FBL.ns( function()
                 var fileName =  frame.script.fileName.split("/");
                 fileName = fileName.pop();
                 var alertString = $STRF("scriptSuspendedOnLineInFile",[frame.line, frame.functionName, fileName]);
-                this.updateLiveElem(context.getPanel('script'), alertString, true);
-                this.onShowSourceLink(context.getPanel('script'), frame.line);
+                this.updateLiveElem(panel, alertString, true);
+                this.onShowSourceLink(panel, frame.line);
             },
 
             onShowSourceLink : function (panel, line)
@@ -1560,6 +1568,9 @@ FBL.ns( function()
                 {
                     //Try to find the line node based on the caret and manually trigger the context menu
                     var panel = Firebug.getElementPanel(event.target);
+                    var panelA11y = this.getPanelA11y(panel);
+                    if (!panelA11y)
+                        return;
                     var sel = event.target.ownerDocument.defaultView.getSelection();
                     var node = sel.focusNode.parentNode;
                     panel.context.chrome.window.document.popupNode = node;
@@ -1755,7 +1766,7 @@ FBL.ns( function()
             focus : function(elem, noVisiCheck, needsMoreTime)
             {
                 if (isElement(elem) && (noVisiCheck || this.isVisbleByStyle(elem)))
-                    context.setTimeout(function(){
+                    FirebugContext.setTimeout(function(){
                         elem.focus()
                         }, needsMoreTime ? 500 :10);
             },
