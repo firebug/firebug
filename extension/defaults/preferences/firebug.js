@@ -148,7 +148,7 @@ pref("extensions.firebug.key.shortcut.toggleFirebug", "VK_F12");
 pref("extensions.firebug.key.shortcut.detachFirebug", "accel VK_F12");
 pref("extensions.firebug.key.shortcut.leftFirebugTab", "accel shift VK_PAGE_UP");
 pref("extensions.firebug.key.shortcut.rightFirebugTab", "accel shift VK_PAGE_DOWN");
-pref("extensions.firebug.key.shortcut.previousFirebugTab", "accel `");
+pref("extensions.firebug.key.shortcut.previousFirebugTab", "control `");
 pref("extensions.firebug.key.shortcut.customizeFBKeys", "alt accel shift k");
 pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
