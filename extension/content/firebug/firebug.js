@@ -1902,11 +1902,6 @@ Firebug.Panel =
         this.destroyNode();
     },
 
-    detach: function(oldChrome, newChrome)
-    {
-        this.lastScrollTop = this.panelNode.scrollTop;
-    },
-
     reattach: function(doc)  // this is how a panel in one window reappears in another window; lazy called
     {
         this.document = doc;
@@ -1916,8 +1911,6 @@ Firebug.Panel =
             this.panelNode = doc.adoptNode(this.panelNode, true);
             this.panelNode.ownerPanel = this;
             doc.body.appendChild(this.panelNode);
-            this.panelNode.scrollTop = this.lastScrollTop;
-            delete this.lastScrollTop;
         }
     },
 
@@ -2421,8 +2414,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         sourceBox.viewport = getChildByClass(sourceBox, 'sourceViewport');
 
-        delete this.lastScrollTop;
-
         if (sourceFile.href)
             this.sourceBoxes[sourceFile.href] = sourceBox;
         else
@@ -2467,7 +2458,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             if (!scrollStep || scrollStep < 1)
             {
                 if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("reView scrollTop: "+scrollTop+" no scrollStep and could not set it", sourceBox);
+                    FBTrace.sysout("getViewableLines scrollTop: "+scrollTop+" no scrollStep and could not set it", sourceBox);
                 return null;
             }
         }
@@ -2491,7 +2482,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             if (newTopLine == sourceBox.firstViewableLine)  // then the top is also the same
             {
                 if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("reView scrollTop: "+scrollTop+" no change to viewableLines "+viewableLines, sourceBox);
+                    FBTrace.sysout("getViewableLines scrollTop: "+scrollTop+" no change to viewableLines "+viewableLines, sourceBox);
 
                 return null;
             }
@@ -2564,7 +2555,13 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
             this.panelNode.appendChild(sourceBox);
             this.setSourceBoxLineSizes(sourceBox);
-            this.buildViewAround(sourceBox);
+
+            var viewableLines = this.getViewableLines(sourceBox);
+
+            if (!viewableLines)
+                return;
+
+            this.buildViewAround(sourceBox, viewableLines);
         }
 
         this.showSourceBox(sourceBox);
@@ -2623,7 +2620,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                     halfViewableLines = this.selectedSourceBox.halfViewableLines;
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight+" for "+this.selectedSourceBox.repObject.href);
                 this.selectedSourceBox.newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight
-                delete this.lastScrollTop;
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" for "+this.selectedSourceBox.repObject.href);
                 this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
@@ -2658,21 +2654,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     },
 
     // should only be called onScroll
-    buildViewAround: function(sourceBox)  // defaults to first viewable lines
+    buildViewAround: function(sourceBox, lines)  // defaults to first viewable lines
     {
-        var view = sourceBox.viewport;
-        if (!view)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
-            return;
-        }
-
-        var lines = this.getViewableLines(sourceBox);
-
-        if (!lines)
-            return;
-
         var lineNo = this.setViewableLines(sourceBox, lines);
 
         var topLine = 1; // will be view.firstChild
@@ -2693,6 +2676,14 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         // Zero-based childNode index in view for lineNo. 2544 - (2544 - 8) = 8 or 4 - 1 = 3
         var centralLineNumber = lineNo ? (lineNo - topLine) : -1;
+
+        var view = sourceBox.viewport;
+        if (!view)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+            return;
+        }
 
         clearNode(view);
 
@@ -2716,8 +2707,9 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         sourceBox.lastViewableLine = bottomLine;
 
         appendScriptLines(sourceBox, topLine, bottomLine, view);
-        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this, link, this.lastScrollTop > sourceBox.scrollTop]);
-        this.lastScrollTop = sourceBox.scrollTop;  // prevent reView before sourceBoxDecoratorTimeout reset scrollTop
+
+        // XXXjjb TODO
+        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this, link, /* this.lastScrollTop > sourceBox.scrollTop*/true]);
 
         this.applyDecorator(sourceBox);
 
@@ -2768,21 +2760,12 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        var scrollTop = sourceBox.scrollTop;
+        var viewableLines = this.getViewableLines(sourceBox);
 
-        if (scrollTop == this.lastScrollTop)
-        {
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("reView no change to scrollTop ", sourceBox);
+        if (!viewableLines)
             return;
-        }
 
-        if (!this.lastScrollTop)
-            this.lastScrollTop = 0;
-
-        this.buildViewAround(sourceBox);
-
-        this.lastScrollTop = scrollTop;
+        this.buildViewAround(sourceBox, viewableLines);
     },
 
     resizer: function(event)

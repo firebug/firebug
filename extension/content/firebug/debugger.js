@@ -1710,10 +1710,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.registerDebugger();
 
-        // redraw the viewport
-        delete this.lastScrollTop;
-
-
         if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
     },
 
@@ -2212,11 +2208,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         state.location = this.location;
 
         var sourceBox = this.selectedSourceBox;
-        state.lastScrollTop = sourceBox  && sourceBox.scrollTop
-            ? sourceBox.scrollTop
-            : this.lastScrollTop;
+        if (sourceBox)
+        {
+            var lines = this.getViewableLines(sourceBox);
+            state.lastLine = lines ? lines.bottom - lines.top : 0;
 
-        delete this.selectedSourceBox;
+            delete this.selectedSourceBox;
+        }
 
         Firebug.SourceBoxPanel.destroy.apply(this, arguments);
     },
@@ -2315,7 +2313,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 restoreLocation(this, state);
 
                 if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                    this.scrollInfo = { location: this.location, lastScrollTop: state.lastScrollTop};
+                    this.scrollInfo = { location: this.location, lastLine: state.lastLine};
             }
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
@@ -2359,10 +2357,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         FBL.hide(panelStatus, false);
 
         delete this.infoTipExpr;
-
-        var sourceBox = this.selectedSourceBox;
-        if (sourceBox && state)
-            state.lastScrollTop = sourceBox.scrollTop;
     },
 
     search: function(text, reverse)
