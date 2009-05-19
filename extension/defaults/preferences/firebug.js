@@ -135,15 +135,15 @@ pref("extensions.firebug.DBG_EDITOR", false);       // Inline editors           
 pref("extensions.firebug.DBG_SHORTCUTS", false);    // Keyboard shortcuts.                       /*@explore*/
 
 //Keyboard
-pref("extensions.firebug.key.shortcut.reenterCommand", "accel shift e");
+pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");
 pref("extensions.firebug.key.shortcut.toggleInspecting", "accel shift c");
 pref("extensions.firebug.key.shortcut.toggleProfiling", "accel shift p");
 pref("extensions.firebug.key.shortcut.focusCommandLine", "accel shift l");
 pref("extensions.firebug.key.shortcut.focusFirebugSearch", "accel shift k");
 pref("extensions.firebug.key.shortcut.focusWatchEditor", "accel shift n");
-pref("extensions.firebug.key.shortcut.focusLocation", "accel shift VK_SPACE");
-pref("extensions.firebug.key.shortcut.nextObject", "accel .");
-pref("extensions.firebug.key.shortcut.previousObject", "accel ,");
+pref("extensions.firebug.key.shortcut.focusLocation", "control shift VK_SPACE");
+pref("extensions.firebug.key.shortcut.nextObject", "control .");
+pref("extensions.firebug.key.shortcut.previousObject", "control ,");
 pref("extensions.firebug.key.shortcut.toggleFirebug", "VK_F12");
 pref("extensions.firebug.key.shortcut.detachFirebug", "accel VK_F12");
 pref("extensions.firebug.key.shortcut.leftFirebugTab", "accel shift VK_PAGE_UP");
