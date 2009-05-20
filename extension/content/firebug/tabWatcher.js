@@ -135,7 +135,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 return false;  // we did not create a context
             }
 
-            context = this.createContext(win);
+            var browser = this.getBrowserByWindow(win);  // sets browser.chrome to Firebug.chrome
+
+            context = this.createContext(win, browser, Firebug.TabContext);
        }
 
         if (win instanceof Ci.nsIDOMWindow && win.parent == win)
@@ -240,10 +242,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         return userCommands;
     },
 
-    createContext: function(win)
+    createContext: function(win, browser, contextType)
     {
-        var browser = this.getBrowserByWindow(win);  // sets browser.chrome to Firebug.chrome
-
         // If the page is reloaded, store the persisted state from the previous
         // page on the new context
         var persistedState = browser.persistedState;
@@ -251,7 +251,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!persistedState || persistedState.location != win.location.href)
             persistedState = null;
 
-        var context = new Firebug.TabContext(win, browser, browser.chrome, persistedState);
+        var context = new contextType(win, browser, browser.chrome, persistedState);
         contexts.push(context);
 
         context.uid = FBL.getUniqueId();
