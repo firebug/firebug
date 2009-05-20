@@ -1877,6 +1877,6 @@ FBL.ns( function()
                 return panelA11y
             }
         });
-        Firebug.registerActivableModule(Firebug.A11yModel);
+        Firebug.registerModule(Firebug.A11yModel);
     }
 });
