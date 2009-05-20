@@ -1588,7 +1588,6 @@ top.Firebug =
             if (context)
             {
                 contentBox.setAttribute("collapsed", false);
-                Firebug.chrome.focus();
                 Firebug.chrome.syncPanel();
             }
             else
