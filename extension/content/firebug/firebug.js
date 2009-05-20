@@ -1902,6 +1902,11 @@ Firebug.Panel =
         this.destroyNode();
     },
 
+    // called when a panel in one XUL window is about to appear in another one.
+    detach: function(oldChrome, newChrome)
+    {
+    },
+
     reattach: function(doc)  // this is how a panel in one window reappears in another window; lazy called
     {
         this.document = doc;
