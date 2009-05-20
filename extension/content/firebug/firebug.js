@@ -341,8 +341,14 @@ top.Firebug =
             {
                 if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("firebug.toggleSuspend detached\n");
-                FirebugContext.chrome.focus();
-                this.resume();
+                //FirebugContext.chrome.focus();
+                //this.resume();
+                
+                // xxxHonza: Firebug is detached, but the user wants to resume it
+                // for the selected tab. The most suitable method seems to be 
+                // toggleBar, which creates a context. Note that Firebug.showBar 
+                // is called as part of this process.
+                this.toggleBar(true);
             }
             else
                 this.toggleBar(true);   // become visible and call resume()
@@ -913,17 +919,29 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
 
+    // xxxHonza: this method is also useful when resuming detached Firebug for selected page.
+    // let's try to fix it (use proper DOM elements) and allow also execution from detached window.
     showBar: function(show)  // minimized <-> inBrowser  This code only works in browser.xul
     {
-        var browser = FirebugChrome.getCurrentBrowser();
+        var browser = Firebug.chrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("showBar("+show+") for browser "+browser.currentURI.spec+" FirebugContext "+FirebugContext);
 
-        var shouldShow = show && !Firebug.isDetached();
+        var contentBox = Firebug.chrome.$("fbContentBox");
+        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
+
+        var shouldShow = show/* && !Firebug.isDetached()*/;
         contentBox.setAttribute("collapsed", !shouldShow);
-        contentSplitter.setAttribute("collapsed", !shouldShow);
-        toggleCommand.setAttribute("checked", !!shouldShow);
-        detachCommand.setAttribute("checked", Firebug.isDetached());
+
+        if (contentSplitter)
+            contentSplitter.setAttribute("collapsed", !shouldShow);
+
+        if (toggleCommand)
+            toggleCommand.setAttribute("checked", !!shouldShow);
+
+        if (detachCommand)
+            detachCommand.setAttribute("checked", Firebug.isDetached());
+
         this.showKeys(shouldShow);
 
         dispatch(uiListeners, show ? "showUI" : "hideUI", [browser, FirebugContext]);
@@ -931,7 +949,7 @@ top.Firebug =
         // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
         if (show)
-            Firebug.chrome.syncPanel();
+            Firebug.originalChrome.syncPanel();
     },
 
     showKeys: function(shouldShow)
@@ -1585,14 +1603,19 @@ top.Firebug =
         else if (Firebug.isDetached())
         {
             var contentBox = Firebug.chrome.$('fbContentBox');
+            var resumeBox = Firebug.chrome.$('fbResumeBox');
             if (context)
             {
                 contentBox.setAttribute("collapsed", false);
                 Firebug.chrome.syncPanel();
+                resumeBox.setAttribute("collapsed", "true");
             }
             else
             {
                 contentBox.setAttribute("collapsed", true);
+                resumeBox.removeAttribute("collapsed");
+
+                // xxxHonza: localization
                 Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
             }
         }
