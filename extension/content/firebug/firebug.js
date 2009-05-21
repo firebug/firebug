@@ -354,8 +354,12 @@ top.Firebug =
             // the activation button).
             this.suspend();
 
-            // Show/Hide Firebug UI according to the browser.showFirebug flag.
-            this.syncBar();
+            // Close detached Firebug or
+            // show/hide Firebug UI according to the browser.showFirebug flag.
+            if (Firebug.isDetached())
+                this.toggleDetachBar(false);
+            else
+                this.syncBar();
         }
     },
 
@@ -973,7 +977,7 @@ top.Firebug =
             // The current detached chrome object is Firebug.chrome.
             Firebug.chrome.close();  // should call unwatchBrowser
             detachCommand.setAttribute("checked", false);
-            return
+            return;
         }
 
         if (Firebug.isInBrowser())
@@ -999,7 +1003,11 @@ top.Firebug =
         if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are debugging the selected tab
         {
             if (Firebug.isDetached()) // if we are out of the browser, just focus on the external window
-                Firebug.chrome.focus();
+            {
+                //Firebug.chrome.focus();
+                this.toggleSuspend();
+                TabWatcher.unwatchBrowser(browser, userCommand);
+            }
             else if (Firebug.isMinimized()) // toggle minimize
                 Firebug.unMinimize();
             else if (!forceOpen)  // else isInBrowser
