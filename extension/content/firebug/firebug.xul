@@ -90,6 +90,7 @@
 
     <popupset id="mainPopupSet"/>
 
+    <!-- A menu used within this external Firebug window. -->
     <toolbox id="fbToolbox">
         <menubar>
             <menu id="file-menu" label="&fileMenu.label;"
@@ -161,6 +162,7 @@
 
     </toolbox>
 
+    <!-- Entire Firebug UI -->
     <vbox id="fbContentBox" flex="1">
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1">
@@ -180,11 +182,15 @@
         <hbox id="fbCommandBox"/>
     </vbox>
 
+    <!-- If Firebug is displayed in this external window, but not active for currently selected
+         Firefox tab, the following button allows to resume it.
+         xxxHonza: localization -->
     <vbox id="fbResumeBox" flex="1" collapsed="true">
         <spacer flex="1"/>
         <hbox>
             <spacer flex="1"/>
-            <button id="fbResumeBoxButton" label="Activate Firebug for the selected Firefox tab" command="cmd_toggleFirebug" />
+            <button id="fbResumeBoxButton" label="Activate Firebug for the selected Firefox tab"
+                command="cmd_toggleSuspendFirebug" />
             <spacer flex="1"/>
         </hbox>
         <spacer flex="1"/>

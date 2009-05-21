@@ -251,7 +251,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!persistedState || persistedState.location != win.location.href)
             persistedState = null;
 
-        var context = new contextType(win, browser, browser.chrome, persistedState);
+        // The proper instance of FirebugChrome object (different for detached Firebug and
+        // accessible as Firebug.chrome property) must be used for the context object.
+        // (the global context object FirebugContext is also different for detached firebug).
+        var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
         context.uid = FBL.getUniqueId();

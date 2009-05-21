@@ -335,28 +335,27 @@ top.Firebug =
 
     toggleSuspend: function()
     {
-        if (this.getSuspended())         // then we should not be visible,
+        // getSuspended returns non-null value if Firebug is suspended.
+        if (this.getSuspended())
         {
-            if (Firebug.isDetached())
-            {
-                if (FBTrace.DBG_ACTIVATION)
-                    FBTrace.sysout("firebug.toggleSuspend detached\n");
-                //FirebugContext.chrome.focus();
-                //this.resume();
-                
-                // xxxHonza: Firebug is detached, but the user wants to resume it
-                // for the selected tab. The most suitable method seems to be 
-                // toggleBar, which creates a context. Note that Firebug.showBar 
-                // is called as part of this process.
-                this.toggleBar(true);
-            }
-            else
-                this.toggleBar(true);   // become visible and call resume()
+            // Firebug is suspended now. Two possible actions have been executed:
+            // 1) Firebug UI is closed and the user clicked on the status bar icon in order to
+            //    show the UI and resume Firebug.
+            // 2) Firebug is detached, but suspended for the current page. The user clicked
+            //    either on the status bar icon or on an activation button that is displayed 
+            //    within detached Firebug window.
+            this.toggleBar(true);
         }
         else
         {
+            // The users wants to suspend Firebug, let's do it and pull down the visible UI.
+            // xxxHonza: the Firebug isn't suspended if detached and the user clicks on the
+            // status bar icon (the detached window should becoma blank displaying only
+            // the activation button).
             this.suspend();
-            this.syncBar();  // pull down the visible UI
+
+            // Show/Hide Firebug UI according to the browser.showFirebug flag.
+            this.syncBar();
         }
     },
 
@@ -919,9 +918,10 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
 
-    // xxxHonza: this method is also useful when resuming detached Firebug for selected page.
-    // let's try to fix it (use proper DOM elements) and allow also execution from detached window.
-    showBar: function(show)  // minimized <-> inBrowser  This code only works in browser.xul
+    // minimized <-> inBrowser  This code only works in browser.xul
+    // xxxHonza: this method is also used when resuming detached Firebug for selected page.
+    // It should now work even called from Firebug.xul
+    showBar: function(show)  
     {
         var browser = Firebug.chrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
@@ -949,7 +949,7 @@ top.Firebug =
         // Sync panel state after the showUI event is dispatched. syncPanel method calls
         // Panel.show method, which expects the active context to be already registered.
         if (show)
-            Firebug.originalChrome.syncPanel();
+            Firebug.chrome.syncPanel();
     },
 
     showKeys: function(shouldShow)
@@ -986,7 +986,9 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
-    toggleBar: function(forceOpen, panelName) // the status bar icon click action
+    // 1) the status bar icon click action
+    // 2) the activation button (within Firebug.xul) click action
+    toggleBar: function(forceOpen, panelName)
     {
         var browser = FirebugChrome.getCurrentBrowser();
 
