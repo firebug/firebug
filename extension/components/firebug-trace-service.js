@@ -229,15 +229,6 @@ var TraceAPI = {
         this.dump(null, message, obj);
     },
 
-    // OBSOLETE
-    dumpStack: function(message) {
-        this.sysout(message);
-    },
-
-    dumpInterfaces: function(message, eventObj) {
-        this.sysout(message, eventObj);
-    },
-
     setScope: function(scope)
     {
         this.scopeOfFBTrace = scope;

@@ -66,7 +66,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
         if (!win)
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluateByEventPassing: no targetWindow!\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
             return;
         }
 

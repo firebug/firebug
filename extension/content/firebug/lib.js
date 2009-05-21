@@ -2023,7 +2023,7 @@ this.getFunctionName = function(script, context, frame)
 {
     if (!script)
     {
-        if (FBTrace.DBG_STACK) FBTrace.dumpStack("lib.getFunctionName FAILS typeof(script)="+typeof(script)+"\n");
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getFunctionName FAILS typeof(script)="+typeof(script)+"\n");
         return "(no script)";
     }
     var name = script.functionName;

@@ -93,7 +93,7 @@ top.Firebug.Console.injector =
         if (!win)
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.dumpStack("no win in forceConsoleCompilationInPage!");
+                FBTrace.sysout("no win in forceConsoleCompilationInPage!");
             return;
         }
 

@@ -189,7 +189,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                 var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";
                 FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n");
                 FBTrace.sysout("sourceCache.load fails channel.open for url="+url+ " cause:", exc);
-                FBTrace.dumpStack("sourceCache.load fails channel=", channel);
+                FBTrace.sysout("sourceCache.load fails channel=", channel);
             }
             return ["sourceCache.load FAILS for url="+url, exc.toString()];
         }

@@ -907,7 +907,7 @@ BoxModelHighlighter.prototype =
         if (!context.boxModelHighlighter)
         {
             var doc = context.window.document;
-            if (FBTrace.DBG_ERRORS && !doc) FBTrace.dumpStack("inspector getNodes no document for window:"+window.location);
+            if (FBTrace.DBG_ERRORS && !doc) FBTrace.sysout("inspector getNodes no document for window:"+window.location);
 
             function createRuler(name)
             {

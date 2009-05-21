@@ -656,7 +656,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!chrome)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpStack("debugger.syncCommand, context with no chrome: "+context.getGlobalScope());
+                FBTrace.sysout("debugger.syncCommand, context with no chrome: "+context.getGlobalScope());
             return;
         }
 
@@ -1503,7 +1503,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var url  = sourceFile.href;
 
             if (FBTrace.DBG_EVAL && !context.sourceCache)
-                FBTrace.dumpStack("debugger.getEvalExpressionFromEval context.sourceCache null??\n");
+                FBTrace.sysout("debugger.getEvalExpressionFromEval context.sourceCache null??\n");
 
             // Walk backwards from the first line in the function until we find the line which
             // matches the pattern above, which is the eval call
@@ -1784,7 +1784,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onScriptFilterMenuTooltipShowing: function(tooltip, context)
     {
         if (FBTrace.DBG_OPTIONS)
-            FBTrace.dumpStack("onScriptFilterMenuTooltipShowing not implemented");
+            FBTrace.sysout("onScriptFilterMenuTooltipShowing not implemented");
     },
 
     onScriptFilterMenuCommand: function(event, context)
@@ -1898,7 +1898,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("no sourcelink for function"); // want to avoid the debugger panel if possible
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("no sourcelink for function"); // want to avoid the debugger panel if possible
         }
     },
 
