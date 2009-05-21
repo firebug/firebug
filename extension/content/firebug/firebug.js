@@ -970,7 +970,8 @@ top.Firebug =
 
         if (Firebug.isDetached())
         {
-            browser.chrome.close();  // should call unwatchBrowser
+            // The current detached chrome object is Firebug.chrome.
+            Firebug.chrome.close();  // should call unwatchBrowser
             detachCommand.setAttribute("checked", false);
             return
         }
