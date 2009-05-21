@@ -234,10 +234,6 @@ var TraceAPI = {
         this.sysout(message);
     },
 
-    dumpEvent: function(message, eventObj) {
-        this.sysout(message, eventObj);
-    },
-
     dumpInterfaces: function(message, eventObj) {
         this.sysout(message, eventObj);
     },

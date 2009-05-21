@@ -257,7 +257,7 @@ Firebug.Inspector = extend(Firebug.Module,
     onInspectingMouseOver: function(event)
     {
         if (FBTrace.DBG_INSPECT)
-           FBTrace.dumpEvent("onInspecting event", event);
+           FBTrace.sysout("onInspecting event", event);
         this.inspectNode(event.target);
         cancelEvent(event);
     },
@@ -265,7 +265,7 @@ Firebug.Inspector = extend(Firebug.Module,
     onInspectingMouseDown: function(event)
     {
         if (FBTrace.DBG_INSPECT)
-           FBTrace.dumpEvent("onInspecting event", event);
+           FBTrace.sysout("onInspecting event", event);
         this.stopInspecting(false, true);
         cancelEvent(event);
     },
@@ -273,7 +273,7 @@ Firebug.Inspector = extend(Firebug.Module,
     onInspectingClick: function(event)
     {
         if (FBTrace.DBG_INSPECT)
-            FBTrace.dumpEvent("onInspecting event", event);
+            FBTrace.sysout("onInspecting event", event);
         var win = event.currentTarget.defaultView;
         if (win)
         {
