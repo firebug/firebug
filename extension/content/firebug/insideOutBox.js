@@ -58,7 +58,7 @@ InsideOutBox.prototype =
     select: function(object, makeBoxVisible, forceOpen, noScrollIntoView)
     {
         if (FBTrace.DBG_HTML)
-            FBTrace.dumpProperties("insideOutBox.select object:", object);
+            FBTrace.sysout("insideOutBox.select object:", object);
         var objectBox = this.createObjectBox(object);
         this.selectObjectBox(objectBox, forceOpen);
         if (makeBoxVisible)

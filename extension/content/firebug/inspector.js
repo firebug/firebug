@@ -634,7 +634,7 @@ FrameHighlighter.prototype =
                     catch(exc)
                     {
                         if (FBTrace.DBG_INSPECT)
-                            FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);
+                            FBTrace.sysout("inspector.FrameHighlighter.highlight FAILS", exc);
                     }
                 }
             }
@@ -706,7 +706,7 @@ PopupHighlighter.prototype =
         if (FBTrace.DBG_INSPECT)
         {
             FBTrace.sysout("PopupHighlighter for "+element.tagName, " at ("+element.boxObject.screenX+","+element.boxObject.screenY+")");
-            FBTrace.dumpProperties("PopupHighlighter popup=", popup);
+            FBTrace.sysout("PopupHighlighter popup=", popup);
         }
     },
 

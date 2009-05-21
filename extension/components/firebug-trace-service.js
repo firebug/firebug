@@ -230,10 +230,6 @@ var TraceAPI = {
     },
 
     // OBSOLETE
-    dumpProperties: function(message, obj) {
-        this.sysout(message, obj);
-    },
-
     dumpStack: function(message) {
         this.sysout(message);
     },
@@ -250,7 +246,6 @@ var TraceAPI = {
     {
         this.scopeOfFBTrace = scope;
     },
-
 };
 
 var TraceBase = function(prefDomain) {

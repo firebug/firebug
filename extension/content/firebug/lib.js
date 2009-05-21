@@ -291,7 +291,7 @@ this.addScript = function(doc, id, src)
     {
         // See issue 1079, the svg test case gives this error
         if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpProperties("lib.addScript doc has no documentElement:", doc);
+            FBTrace.sysout("lib.addScript doc has no documentElement:", doc);
     }
     return element;
 }
@@ -346,7 +346,7 @@ function $STR(name, bundle)
         if (FBTrace.DBG_ERRORS)
         {
             FBTrace.sysout("lib.getString: " + name + "\n");
-            FBTrace.dumpProperties("lib.getString FAILS ", err);
+            FBTrace.sysout("lib.getString FAILS ", err);
         }
     }
 
@@ -379,7 +379,7 @@ function $STRF(name, args, bundle)
         if (FBTrace.DBG_ERRORS)
         {
             FBTrace.sysout("lib.getString: " + name + "\n");
-            FBTrace.dumpProperties("lib.getString FAILS ", err);
+            FBTrace.sysout("lib.getString FAILS ", err);
         }
     }
 
@@ -1692,9 +1692,9 @@ this.getCurrentStackTrace = function(context)
 
     Firebug.Debugger.halt(function(frame)
     {
-        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace frame:", frame);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
         trace = FBL.getStackTrace(frame, context);
-        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace trace:", trace);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace);
     });
 
     return trace;
@@ -1766,7 +1766,7 @@ this.getStackFrame = function(frame, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("getStackTrace fails:", exc);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("getStackTrace fails:", exc);
         return null;
     }
 };
@@ -1915,7 +1915,7 @@ this.findScriptForFunctionInContext = function(context, fn)
         try {
             var tfs = aFunction.toString();
         } catch (etfs) {
-            FBTrace.dumpProperties("unwrapped.toString fails for unwrapped: "+etfs, aFunction);
+            FBTrace.sysout("unwrapped.toString fails for unwrapped: "+etfs, aFunction);
         }
 
         if (tfs == fns)
@@ -1957,7 +1957,7 @@ this.forEachFunction = function(context, cb)
                     if (exc.name == "NS_ERROR_NOT_AVAILABLE")
                         FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
                     else
-                       FBTrace.dumpProperties("lib.forEachFunction FAILS ",exc);
+                       FBTrace.sysout("lib.forEachFunction FAILS ",exc);
                 }
             }
         });
@@ -1994,12 +1994,12 @@ this.findScriptForFunction = function(fn)
                 if (exc.name == "NS_ERROR_NOT_AVAILABLE")
                     FBTrace.sysout("lib.findScriptForFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
                 else
-                    FBTrace.dumpProperties("lib.findScriptForFunction FAILS ",exc);
+                    FBTrace.sysout("lib.findScriptForFunction FAILS ",exc);
             }
         }
     }});
 
-    FBTrace.dumpProperties("findScriptForFunction found ", found.tag);
+    FBTrace.sysout("findScriptForFunction found ", found.tag);
     return found;
 };
 
@@ -2285,7 +2285,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 
     if (FBTrace.DBG_SOURCEFILES)
     {
-        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
+        FBTrace.sysout("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
     }
 };
 
@@ -2499,7 +2499,7 @@ this.dispatch = function(listeners, name, args)
                             exc.stack = stack.split('\n');
                         }
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
                     }
                 }
             }
@@ -2525,7 +2525,7 @@ this.dispatch = function(listeners, name, args)
                 exc.stack = stack.split('\n');
             }
             var culprit = listeners[i] ? listeners[i].dispatchName : null;
-            FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+            FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
             window.dump(FBL.getStackDump());
         }
     }
@@ -2565,7 +2565,7 @@ this.dispatch2 = function(listeners, name, args)
         if (FBTrace.DBG_ERRORS)
         {
             if (exc.stack) exc.stack = exc.stack.split('/n');
-            FBTrace.dumpProperties(" Exception in lib.dispatch2 "+ name, exc);
+            FBTrace.sysout(" Exception in lib.dispatch2 "+ name, exc);
         }
     }
 };
@@ -3156,7 +3156,7 @@ this.readPostTextFromPage = function(url, context)
          catch (exc)
          {
              if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("lib.readPostText FAILS, url:"+url, exc);
+                FBTrace.sysout("lib.readPostText FAILS, url:"+url, exc);
          }
      }
 };
@@ -3191,7 +3191,7 @@ this.readPostTextFromRequest = function(request, context)
     catch(exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpProperties("lib.readPostTextFromRequest FAILS ", exc);
+            FBTrace.sysout("lib.readPostTextFromRequest FAILS ", exc);
     }
 
     return null;
@@ -3467,7 +3467,7 @@ this.restoreLocation =  function(panel, panelState)
         var location = panelState.persistedLocation(panel.context);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.dumpProperties("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
+            FBTrace.sysout("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
 
         if (location)
         {
@@ -3480,7 +3480,7 @@ this.restoreLocation =  function(panel, panelState)
         panel.navigate(null);
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
+        FBTrace.sysout("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
 
     return restored;
 };
@@ -3513,7 +3513,7 @@ this.restoreSelection = function(panel, panelState)
             }
 
             if (FBTrace.DBG_INITIALIZE)
-                FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
         }
 
         // If we couldn't restore the selection, wait a bit and try again
@@ -3521,7 +3521,7 @@ this.restoreSelection = function(panel, panelState)
     }
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
+        FBTrace.sysout("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
 };
 
 this.restoreObjects = function(panel, panelState)
@@ -3610,7 +3610,7 @@ this.TextSearch = function(rootNode, rowFinder)
         catch (e)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
+                FBTrace.sysout("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
             try {
                 FBTrace.sysout("setStart try\n");
                 startPt.setStart(curNode);
@@ -3973,7 +3973,7 @@ this.SourceFile.prototype =
     scriptsIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
     {
         var scripts = this.getScriptsAtLineNumber(lineNo, true);
-        if (FBTrace.DBG_LINETABLE && !scripts) FBTrace.dumpProperties("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
+        if (FBTrace.DBG_LINETABLE && !scripts) FBTrace.sysout("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
         if (!scripts && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
             return [this.outerScript];
         return scripts;
@@ -4085,7 +4085,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
         {
             // XXXjjb I think this is happening when we go out of the script range in isLineExecutable.
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("addScriptsToSourceFile addLineTable FAILS", exc);
+                FBTrace.sysout("addScriptsToSourceFile addLineTable FAILS", exc);
         }
     }
 */
@@ -6481,7 +6481,7 @@ this.ERROR = function(exc)
 {
     if (FBTrace) {
         if (exc.stack) exc.stack = exc.stack.split('\n');
-        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);
+        FBTrace.sysout("lib.ERROR: "+exc, exc);
     }
 
         ddd("FIREBUG WARNING: " + exc);

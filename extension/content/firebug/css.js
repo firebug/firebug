@@ -731,7 +731,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             }
             catch(exc) {
                 if (FBTrace.DBG_CSS)
-                    FBTrace.dumpProperties("css.upDateSelection FAILS "+exc, exc);
+                    FBTrace.sysout("css.upDateSelection FAILS "+exc, exc);
             }
         }
     },
@@ -1370,7 +1370,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             if (FBTrace.DBG_CSS)
             {
                 FBTrace.sysout("CSSEditor.saveEdit propName=propValue: "+propName +" = "+propValue+"\n");
-               // FBTrace.dumpProperties("CSSEditor.saveEdit BEFORE style:",style);
+               // FBTrace.sysout("CSSEditor.saveEdit BEFORE style:",style);
             }
 
             if (value && value != "null")

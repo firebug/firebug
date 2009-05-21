@@ -1364,7 +1364,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
         // of certain objects, like StorageList, but don't let that gum up the works
         //throw exc;
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
-            FBTrace.dumpProperties("dom.getMembers FAILS: ", exc);
+            FBTrace.sysout("dom.getMembers FAILS: ", exc);
     }
 
     function sortName(a, b) { return a.name > b.name ? 1 : -1; }
@@ -1427,10 +1427,10 @@ function expandMembers(members, toggles, offset, level)  // recursion starts wit
             members.splice.apply(members, args);
             if (FBTrace.DBG_DOM)
             {
-                FBTrace.dumpProperties("expandMembers member.name", member.name);
-                FBTrace.dumpProperties("expandMembers toggles", toggles);
-                FBTrace.dumpProperties("expandMembers toggles[member.name]", toggles[member.name]);
-                FBTrace.dumpProperties("dom.expandedMembers level: "+level+" member", member);
+                FBTrace.sysout("expandMembers member.name", member.name);
+                FBTrace.sysout("expandMembers toggles", toggles);
+                FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
+                FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
             }
 
             expanded += newMembers.length;

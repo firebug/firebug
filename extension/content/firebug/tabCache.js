@@ -102,7 +102,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     initContext: function(context)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.dumpProperties("tabCache.initContext for: " + context.getName());
+            FBTrace.sysout("tabCache.initContext for: " + context.getName());
     },
 
     /* nsIObserver */
@@ -182,7 +182,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         catch (err)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("tabCache: Register Traceable Listener EXCEPTION", err);
+                FBTrace.sysout("tabCache: Register Traceable Listener EXCEPTION", err);
         }
     },
 
@@ -226,7 +226,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 Firebug.TabCache = function(context)
 {
     if (FBTrace.DBG_CACHE)
-        FBTrace.dumpProperties("tabCache.TabCache Created for: " + context.getName());
+        FBTrace.sysout("tabCache.TabCache Created for: " + context.getName());
 
     Firebug.SourceCache.call(this, context);
 };

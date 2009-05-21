@@ -69,7 +69,7 @@ const httpObserver =
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("spy.httpObserver FAILS", exc);
+                FBTrace.sysout("spy.httpObserver FAILS", exc);
         }
     }
 };
@@ -484,7 +484,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         catch (exc)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.dumpProperties("spy.requestStopped " + spy.href +
+                FBTrace.sysout("spy.requestStopped " + spy.href +
                     ", status access FAILED", exc);
         }
     }

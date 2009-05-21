@@ -640,7 +640,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
         // Open Chromebug window.
         var cbWindow = ChromeBugOpener.openNow();
-        FBTrace.dumpProperties("Chromebug window has been opened", cbWindow);
+        FBTrace.sysout("Chromebug window has been opened", cbWindow);
 
         // xxxHonza: Open Chromebug with the source code file, scrolled automatically
         // to the specified line number. Currently chrome bug doesn't return the window

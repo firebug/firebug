@@ -383,7 +383,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("profiler.getTooltip FAILS ", exc);
+                FBTrace.sysout("profiler.getTooltip FAILS ", exc);
         }
     },
 

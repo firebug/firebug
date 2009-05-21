@@ -134,7 +134,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         catch (exc)
         {
             if (FBTrace.DBG_CACHE)
-                FBTrace.dumpProperties("sourceCache for url:"+url+" window="+this.context.window.location.href+" FAILS:", exc);
+                FBTrace.sysout("sourceCache for url:"+url+" window="+this.context.window.location.href+" FAILS:", exc);
             return;
         }
 
@@ -188,7 +188,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                 var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";
                 var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";
                 FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n");
-                FBTrace.dumpProperties("sourceCache.load fails channel.open for url="+url+ " cause:", exc);
+                FBTrace.sysout("sourceCache.load fails channel.open for url="+url+ " cause:", exc);
                 FBTrace.dumpStack("sourceCache.load fails channel=", channel);
             }
             return ["sourceCache.load FAILS for url="+url, exc.toString()];
@@ -204,7 +204,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("sourceCache.load FAILS, url="+url, exc);
+                FBTrace.sysout("sourceCache.load FAILS, url="+url, exc);
             return ["sourceCache.load FAILS for url="+url, exc.toString()];
         }
         finally

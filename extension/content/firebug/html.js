@@ -425,7 +425,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 else
                 {
                     if (FBTrace.DBG_HTML || FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
+                        FBTrace.sysout("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
                 }
             }
             else
@@ -552,7 +552,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
-                    FBTrace.dumpProperties("html.onMutateNode FAILS:", exc);
+                    FBTrace.sysout("html.onMutateNode FAILS:", exc);
             }
         }, this);
     },
@@ -835,7 +835,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 this.inspectorHistory.pop();
 
             if (FBTrace.DBG_HTML)
-                FBTrace.dumpProperties("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
+                FBTrace.sysout("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
         }
 
         this.ioBox.highlight(null);

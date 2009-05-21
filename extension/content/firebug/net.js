@@ -1793,7 +1793,7 @@ NetProgress.prototype =
         else
         {
             if (FBTrace.DBG_NET)
-                FBTrace.dumpProperties("net.requestedFile no file for request=", request);
+                FBTrace.sysout("net.requestedFile no file for request=", request);
         }
     },
 
@@ -2617,7 +2617,7 @@ function getCacheEntry(file, netProgress)
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("net.delayGetCacheEntry FAILS", exc);
+                FBTrace.sysout("net.delayGetCacheEntry FAILS", exc);
         }
     });
 }
@@ -2956,7 +2956,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     updateInfo: function(netInfoBox, file, context)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.dumpProperties("updateInfo file", file);
+            FBTrace.sysout("updateInfo file", file);
 
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
@@ -3348,7 +3348,7 @@ var HttpObserver =
             info.postText = readPostTextFromPage(request.name, context);
 
         if (FBTrace.DBG_NET && info.postText)
-            FBTrace.dumpProperties("net.onExamineResponse, POST data: " + info.postText, info);
+            FBTrace.sysout("net.onExamineResponse, POST data: " + info.postText, info);
 
         if (networkContext)
             networkContext.post(respondedFile, [request, now(), info]);

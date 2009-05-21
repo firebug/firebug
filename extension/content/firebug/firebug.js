@@ -233,7 +233,7 @@ top.Firebug =
             return;
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.dumpProperties("Firebug.internationalizeUI");
+            FBTrace.sysout("Firebug.internationalizeUI");
 
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
@@ -263,7 +263,7 @@ top.Firebug =
     initializeUI: function(detachArgs)
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.dumpProperties("firebug.initializeUI this.disabledAlways="+this.disabledAlways+
+            FBTrace.sysout("firebug.initializeUI this.disabledAlways="+this.disabledAlways+
                     " detachArgs:", detachArgs);
 
         TabWatcher.initialize(this);
@@ -475,7 +475,7 @@ top.Firebug =
             catch(e)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.dumpProperties("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
+                    FBTrace.sysout("firebug.getURLsForAllActiveContexts could not get window.location for a context", e);
             }
         });
 
@@ -527,7 +527,7 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
         {
             for (var i = 0; i < arguments.length; ++i)
-                FBTrace.dumpProperties("registerModule "+arguments[i].dispatchName);
+                FBTrace.sysout("registerModule "+arguments[i].dispatchName);
         }
     },
 
@@ -1552,7 +1552,7 @@ top.Firebug =
 
 
         if (FBTrace.DBG_ERRORS && !context.sidePanelNames)
-            FBTrace.dumpProperties("firebug.initContext sidePanelNames:",context.sidePanelNames);
+            FBTrace.sysout("firebug.initContext sidePanelNames:",context.sidePanelNames);
 
         dispatch(modules, "initContext", [context, persistedState]);
 
@@ -2708,7 +2708,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         if (!view)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("buildViewAround got no viewport form sourceBox", sourceBox);
+                FBTrace.sysout("buildViewAround got no viewport form sourceBox", sourceBox);
             return;
         }
 
@@ -2780,7 +2780,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.dumpProperties("sourcebox applyDecorator FAILS", exc);
+                    FBTrace.sysout("sourcebox applyDecorator FAILS", exc);
             }
         }, this));
     },
@@ -3296,7 +3296,7 @@ Firebug.ModuleManager =
                 catch (exc)
                 {
                     if (FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("ModuleManager.changeActivation FAILS for "+context.getName(), exc);
+                        FBTrace.sysout("ModuleManager.changeActivation FAILS for "+context.getName(), exc);
                 }
             }
         );

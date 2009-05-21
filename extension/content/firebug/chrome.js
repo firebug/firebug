@@ -65,8 +65,8 @@ top.FirebugChrome =
         }
         catch (exc)
         {
-            if (FBTrace.dumpProperties)
-                FBTrace.dumpProperties("chrome.panelBarReady FAILS", exc);
+            if (FBTrace.sysout)
+                FBTrace.sysout("chrome.panelBarReady FAILS", exc);
             return false;
         }
         return true; // the panel bar is ready
@@ -80,14 +80,14 @@ top.FirebugChrome =
         if (!detachArgs)
             detachArgs = {};
 
-        if (FBTrace.DBG_INITIALIZE) FBTrace.dumpProperties("chrome.initialize w/detachArgs=", detachArgs);
+        if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("chrome.initialize w/detachArgs=", detachArgs);
 
         if (detachArgs.FBL)
             top.FBL = detachArgs.FBL;
         else
         {
-            if (FBTrace.dumpProperties && (!FBL || !FBL.initialize) )
-                FBTrace.dumpProperties("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
+            if (FBTrace.sysout && (!FBL || !FBL.initialize) )
+                FBTrace.sysout("Firebug is broken, FBL incomplete, if the last function is QI, check lib.js:", FBL);
 
             FBL.initialize();
         }
@@ -175,7 +175,7 @@ top.FirebugChrome =
                 Firebug.initializeUI(detachArgs);
 
         } catch (exc) {
-            FBTrace.dumpProperties("chrome.initializeUI fails "+exc, exc);
+            FBTrace.sysout("chrome.initializeUI fails "+exc, exc);
         }
         var toolbar = $('fbToolbar');
     },
@@ -1265,7 +1265,7 @@ function onSelectedSidePanel(event)
         else
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
+                FBTrace.sysout("onSelectedSidePanel FirebugContext has no panelName: ",FirebugContext);
         }
     }
     if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.onSelectedSidePanel name="+(sidePanel?sidePanel.name:"undefined")+"\n");

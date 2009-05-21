@@ -177,7 +177,7 @@ this.Func = domplate(Firebug.Rep,
         if (sourceLink)
             context.chrome.select(sourceLink);
         if (FBTrace.DBG_FUNCTION_NAME)
-            FBTrace.dumpProperties("reps.function.inspectObject selected sourceLink is ", sourceLink);
+            FBTrace.sysout("reps.function.inspectObject selected sourceLink is ", sourceLink);
     },
 
     getTooltip: function(fn, context)
@@ -464,8 +464,8 @@ this.Arr = domplate(Firebug.Rep,
         {
             if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.dumpProperties("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
-                FBTrace.dumpProperties("isArray Fails on obj", obj);
+                FBTrace.sysout("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
+                FBTrace.sysout("isArray Fails on obj", obj);
             }
         }
 

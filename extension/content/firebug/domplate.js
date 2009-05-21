@@ -959,7 +959,7 @@ var Renderer =
         domArgs.push.apply(domArgs, outputs);
 
         if (FBTrace.DBG_DOM)
-            FBTrace.dumpProperties("domplate.insertNode domArgs:", domArgs);
+            FBTrace.sysout("domplate.insertNode domArgs:", domArgs);
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
         return root;
@@ -1019,7 +1019,7 @@ var Renderer =
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
         
-        if (FBTrace.DBG_DOM) FBTrace.dumpProperties("domplate append domArgs:", domArgs);
+        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate append domArgs:", domArgs);
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
         return root;
