@@ -743,14 +743,10 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
     // UI Listener
     showUI: function(browser, context)
     {
-        if (Firebug.NetMonitor.isAlwaysEnabled())  // XXXjjb Honza I wonder if this should be done here or only in onPanelEnable and onResume?
-            monitorContext(context);
     },
 
     hideUI: function(browser, context)
     {
-        if (Firebug.NetMonitor.isAlwaysEnabled())
-            unmonitorContext(context);
     },
 
     show: function(state)
