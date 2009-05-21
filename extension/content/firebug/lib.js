@@ -6511,10 +6511,10 @@ this.formatSize = function(bytes)
         return "?";
     else if (bytes < 1024)
         return bytes + " B";
-    else if (bytes < 1024*1024)
-        return Math.ceil(bytes/1024) + " KB";
+    else if (bytes < (1024*1024))
+        return Math.floor(bytes/1024) + " KB";
     else
-        return (Math.ceil(bytes/(1024*1024))) + " MB";
+        return Math.floor((bytes/(1024*1024))*100)/100 + " MB";
 }
 
 // ************************************************************************************************
