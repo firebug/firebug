@@ -214,10 +214,10 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
     showPanel : function(browser, panel)
     {
         var panelA11y = this.getPanelA11y(panel);
-        if (!panelA11y || !panel.Firebug.chrome)
+        if (!panelA11y)
             return;
-        panel.Firebug.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
-        var panelBrowser = panel.Firebug.chrome.getPanelBrowser(panel);
+        Firebug.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
+        var panelBrowser = Firebug.chrome.getPanelBrowser(panel);
         panelBrowser.setAttribute('showcaret', (panel.name == "script"));
     },
 
@@ -797,7 +797,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
 
     onObjectBoxUnselected: function(objectBox)
     {
-        if (!this.isEnabled())
+        if (!this.isEnabled() ||  !objectBox)
             return;
         var label = getElementByClass(objectBox.firstChild, 'nodeLabelBox');
         if (label) {
@@ -1116,7 +1116,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
                 //these context menu options are likely to destroy current focus
                 panelA11y.reFocusId = getElementXPath(event.target);
                 document.popupNode = node;
-                panel.Firebug.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
+                Firebug.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
                 cancelEvent(event); //no need for default handlers anymore
             }
         }
