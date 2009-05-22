@@ -691,22 +691,25 @@ top.Firebug =
 
         dispatch(modules, "updateOption", [name, value]);
 
-        FirebugChrome.updateOption(name, value);
+        // Update the current chrome...
+        Firebug.chrome.updateOption(name, value);
 
-        if (Firebug.extenalChrome)
-            Firebug.extenalChrome.updateOption(name, value);
+        // ... as well as the original in-browser chrome (if Firebug is currently detached).
+        // xxxHonza, xxxJJB: John, the Firebug.externalChrome is not longer set, is it correct?
+        // it's still used in FirebugChrome.setGlobalAttribute.
+        if (Firebug.chrome != Firebug.originalChrome)
+            Firebug.originalChrome.updateOption(name, value);
 
         if (name.substr(0, 15) == "externalEditors")
-        {
             this.loadExternalEditors();
-        }
 
         delete optionUpdateMap[name];
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("firebug.updatePref EXIT: "+name+"="+value+"\n");
     },
-    // *******************************************************************************
+
+    // ********************************************************************************************
     // External editors
     // TODO move to editors.js as Firebug.Editors module
 
