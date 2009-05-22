@@ -134,6 +134,7 @@ pref("extensions.firebug.DBG_SPY", false);          // spy.js                   
 pref("extensions.firebug.DBG_JSONVIEWER", false);   // json explorer                             /*@explore*/
 pref("extensions.firebug.DBG_EDITOR", false);       // Inline editors                            /*@explore*/
 pref("extensions.firebug.DBG_SHORTCUTS", false);    // Keyboard shortcuts.                       /*@explore*/
+pref("extensions.firebug.DBG_A11Y", false);         // a11y                                      /*@explore*/
 
 //Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");
