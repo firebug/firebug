@@ -67,6 +67,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 == Bug Fixes ==
     * Issue 176: net flash tab not recognising flv files
     * Issue 241: Does not reload javascript content when dynamically removed and added from page.
+    * Issue 260: Firebug disables Mac Standard Cmd-Tilde switching
     * Issue 369: Inspect JSON data in HTTP responses (contribution by Ashish Datta)
     * Issue 199: CSS priority with '!important'
     * Issue 699: Inspector - Highlight Image Map Areas
@@ -139,10 +140,12 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1680: Firebug suspends on page reload.
     * Issue 1688: Collection of issues relating to element Inspector
     * Issue 1691: CSS style editor autocomplete problems
+    * Issue 1693: Viewing requests with large message bodies in Console tab temporarily freezes browser
     * Issue 1694 in fbug: Net Panel Cutsomization: file.responseText doesn't include original line breaks
     * Issue 1695: Clicking on sessionStorage (empty array) in DOM panel causes error
     * Issue 1700: 'Inspect in DOM panel' for variables during script suspension broken
     * Issue 1701: Stack panel not updated immediately during script suspension
+    * Issue 1709: OS X - Pressing Cmd+, fails to open preferences window
     * Issue 1712: Firebug 1.4's channel listener changes observable behaviour
     * Issue 1715: Always Open in New Window prevents
     * Issue 1727: Inspector offset when the screen is scrolled
@@ -160,3 +163,4 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1762: Firebug body is replacing document.body
     * Issue 1764: Net panel misses page load.
     * Issue 1771: Firebug.resetAllOptions: Should this clear debug/developer options?
+    * Issue 1775:       Command Line command could toggle like inspect does
