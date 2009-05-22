@@ -175,7 +175,7 @@ this.Func = domplate(Firebug.Rep,
     {
         var sourceLink = findSourceForFunction(fn, context);
         if (sourceLink)
-            context.chrome.select(sourceLink);
+            Firebug.chrome.select(sourceLink);
         if (FBTrace.DBG_FUNCTION_NAME)
             FBTrace.sysout("reps.function.inspectObject selected sourceLink is ", sourceLink);
     },
@@ -247,7 +247,7 @@ this.jsdScript = domplate(Firebug.Rep,
     {
         var sourceLink = getSourceLinkForScript(script, context);
         if (sourceLink)
-            context.chrome.select(sourceLink);
+            Firebug.chrome.select(sourceLink);
     },
 
     getRealObject: function(script, context)
@@ -1036,14 +1036,14 @@ this.SourceLink = domplate(Firebug.Rep,
         {
             var scriptFile = getSourceFileByHref(sourceLink.href, context);
             if (scriptFile)
-                return context.chrome.select(sourceLink);
+                return Firebug.chrome.select(sourceLink);
         }
         else if (sourceLink.type == "css")
         {
             // If an object is defined, treat it as the highest priority for
             // inspect actions
             if (sourceLink.object) {
-                context.chrome.select(sourceLink.object);
+                Firebug.chrome.select(sourceLink.object);
                 return;
             }
 
@@ -1053,13 +1053,13 @@ this.SourceLink = domplate(Firebug.Rep,
                 var ownerNode = stylesheet.ownerNode;
                 if (ownerNode)
                 {
-                    context.chrome.select(sourceLink, "html");
+                    Firebug.chrome.select(sourceLink, "html");
                     return;
                 }
 
                 var panel = context.getPanel("stylesheet");
                 if (panel && panel.getRuleByLine(stylesheet, sourceLink.line))
-                    return context.chrome.select(sourceLink);
+                    return Firebug.chrome.select(sourceLink);
             }
         }
 
@@ -1183,7 +1183,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
     inspectObject: function(stackFrame, context)
     {
         var sourceLink = new SourceLink(stackFrame.href, stackFrame.lineNo, "js");
-        context.chrome.select(sourceLink);
+        Firebug.chrome.select(sourceLink);
     },
 
     getTooltip: function(stackFrame, context)
@@ -1441,7 +1441,7 @@ this.Assert = domplate(Firebug.Rep,
     inspectObject: function(error, context)
     {
         var sourceLink = this.getSourceLink(error);
-        context.chrome.select(sourceLink);
+        Firebug.chrome.select(sourceLink);
     },
 
     getContextMenuItems: function(error, target, context)
@@ -1524,7 +1524,7 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
         try
         {
             var items = history.length;  // if this throws, then unsupported
-            FirebugChrome.select(history);  // XXXjjb context.chrome??
+            Firebug.chrome.select(history);
         }
         catch (exc)
         {

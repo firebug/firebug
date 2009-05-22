@@ -778,7 +778,7 @@ top.Firebug =
         var location;
         if (context)
         {
-            var panel = context.chrome.getSelectedPanel();
+            var panel = Firebug.chrome.getSelectedPanel();
             if (panel)
             {
                 location = panel.location;
@@ -2882,7 +2882,7 @@ Firebug.Rep = domplate(
 
     inspectObject: function(object, context)
     {
-        context.chrome.select(object);
+        Firebug.chrome.select(object);
     },
 
     browseObject: function(object, context)
@@ -3148,15 +3148,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     updateTab: function(context)
     {
-        var chrome = context ? context.chrome : null;
-        if (!chrome)
-            return;
-
         if (!this.panelName && (FBTrace.DBG_PANELS || FBTrace.DBG_ERRORS))
             FBTrace.sysout("firebug.ActivableModule.updateTab; Missing panelName in activable module", this);
 
         // Set activable module to mini tab menu so, the menu can get the actual state.
-        var panelBar = chrome.$("fbPanelBar1");
+        var panelBar = Firebug.chrome.$("fbPanelBar1");
         var tab = panelBar.getTab(this.panelName);
         if (tab)
         {

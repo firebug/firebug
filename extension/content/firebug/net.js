@@ -257,7 +257,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     reattachContext: function(browser, context)
     {
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
-        this.syncFilterButtons(context.chrome);
+        this.syncFilterButtons(Firebug.chrome);
     },
 
     destroyContext: function(context)
@@ -897,7 +897,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         if (object)
         {
-            var subItems = FirebugChrome.getInspectMenuItems(object); // XXXjjb context.chrome?
+            var subItems = Firebug.chrome.getInspectMenuItems(object);
             if (subItems.length)
             {
                 items.push("-");
@@ -2399,7 +2399,7 @@ NetPhase.prototype =
 
 /*
  * Use this object to automatically select Net panel and inspect a network request.
- * context.chrome.select(new FBL.NetFileLink(url [, request]));
+ * Firebug.chrome.select(new FBL.NetFileLink(url [, request]));
  */
 FBL.NetFileLink = function(href, request)
 {

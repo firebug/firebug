@@ -58,7 +58,7 @@ Firebug.Profiler = extend(Firebug.Module,
     {
         fbs.startProfiling();
 
-        context.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
 
         var isCustomMessage = !!title;
         if (!isCustomMessage)
@@ -74,7 +74,7 @@ Firebug.Profiler = extend(Firebug.Module,
         if (totalTime == -1)
             return;
 
-        context.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "false");
 
         if (cancelReport)
             delete context.profileRow;
@@ -370,7 +370,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     inspectObject: function(call, context)
     {
         var sourceLink = this.getSourceLink(call);
-        context.chrome.select(sourceLink);
+        Firebug.chrome.select(sourceLink);
     },
 
     getTooltip: function(call)

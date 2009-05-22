@@ -94,7 +94,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.inspecting = true;
         this.inspectingContext = context;
 
-        context.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "true");
         this.attachInspectListeners(context);
 
         var htmlPanel = Firebug.chrome.switchToPanel(context, "html");
@@ -135,8 +135,7 @@ Firebug.Inspector = extend(Firebug.Module,
         {
             this.inspectTimeout = context.setTimeout(function()
             {
-                if (context.chrome)
-                    context.chrome.select(node);
+                Firebug.chrome.select(node);
             }, inspectDelay);
         }
     },
@@ -158,7 +157,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!waitForClick)
             this.detachClickInspectListeners(context.window);
 
-        context.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "checked", "false");
 
         this.inspecting = false;
 
@@ -175,10 +174,10 @@ Firebug.Inspector = extend(Firebug.Module,
         var node = this.inspectingNode;
 
         if (dir == "up")
-            target = this.inspectingContext.chrome.getNextObject();
+            target = Firebug.chrome.getNextObject();
         else if (dir == "down")
         {
-            target = this.inspectingContext.chrome.getNextObject(true);
+            target = Firebug.chrome.getNextObject(true);
             if (node && !target)
             {
                 if (node.contentDocument)
@@ -202,7 +201,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!win || !win.document)
             return;
 
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
 
         this.keyListeners =
         [
@@ -226,7 +225,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!win || !win.document)
             return;
 
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
 
         if (this.keyListeners)  // XXXjjb for some reason this is null some times.
         {
@@ -346,8 +345,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
     loadedContext: function(context)
     {
-        context.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
-        //context.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", "false");
+        //Firebug.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", "false");
     },
 
     updateOption: function(name, value)

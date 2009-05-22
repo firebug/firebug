@@ -1070,7 +1070,7 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
             if (child.repObject)
             {
                 var panel = Firebug.getElementPanel(child);
-                panel.context.chrome.select(child.repObject);
+                Firebug.chrome.select(child.repObject);
                 break;
             }
         }
@@ -1280,15 +1280,13 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.value = value;
         this.input.focus();
 
-        var command = this.panel.context.chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var chrome = this.panel.context.chrome;
-
-        var command = chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
         command.setAttribute("checked", false);
 
         this.panel.panelNode.removeChild(this.box);

@@ -103,7 +103,7 @@ Firebug.TabContext.prototype =
     // ***************************************************************************
     reattach: function(chrome)
     {
-        var oldChrome = this.chrome;  // ie context.chrome
+        var oldChrome = this.chrome;  // ie Firebug.chrome
         this.chrome = chrome;
 
         for (var panelName in this.panelMap)

@@ -529,7 +529,7 @@ top.FirebugChrome =
         delete this.previousObject;
         delete this.previousPanelName;
         delete this.previousSidePanelName;
-        delete this.inspectingContext;
+        delete this.inspectingChrome;
 
         return switchToPanel;
     },

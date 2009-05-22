@@ -32,7 +32,7 @@ var ignoreNextInput = false;
 Firebug.Editor = extend(Firebug.Module,
 {
     supportsStopEvent: true,
-    
+
     dispatchName: "editor",
     tabCharacter: "    ",
 
@@ -208,7 +208,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
-        } 
+        }
         else if (hasClass(element, "insertBefore"))
             this.insertRow(element, "before");
         else if (hasClass(element, "insertAfter"))
@@ -296,7 +296,7 @@ Firebug.Editor = extend(Firebug.Module,
         win.addEventListener("resize", this.onResize, true);
         win.addEventListener("blur", this.onBlur, true);
 
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
 
         this.listeners = [
             chrome.keyCodeListen("ESCAPE", null, bind(this.cancelEditing, this)),
@@ -352,7 +352,7 @@ Firebug.Editor = extend(Firebug.Module,
         win.removeEventListener("resize", this.onResize, true);
         win.removeEventListener("blur", this.onBlur, true);
 
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
         if (chrome)
         {
             for (var i = 0; i < this.listeners.length; ++i)
@@ -474,8 +474,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 DIV({class: "textEditorBottom2"})
             )
         ),
-     
-    inputTag :   
+
+    inputTag :
         INPUT({class: "textEditorInner", type: "text",
             oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
         ),

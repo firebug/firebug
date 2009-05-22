@@ -40,7 +40,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
             FBTrace.sysout("a11y.onPanelEnable; " + panelName + ", " + context.getName());
 
         if (panelName == "a11y")
-            this.set(true, context.chrome);
+            this.set(true, Firebug.chrome);
     },
 
     onPanelDisable : function(context, panelName)
@@ -48,14 +48,14 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_A11Y)
             FBTrace.sysout("a11y.onPanelDisable; " + panelName + ", " + context.getName());
 
-        if (panelName == "a11y" && context.chrome.window.a11yEnabled)
-            this.set(false, context.chrome);
+        if (panelName == "a11y" && Firebug.chrome.window.a11yEnabled)
+            this.set(false, Firebug.chrome);
     },
 
     reattachContext : function(browser, context)
     {
         if (this.isEnabled())
-            this.set(true, context.chrome);
+            this.set(true, Firebug.chrome);
     },
 
     toggle : function(currentlyChecked)
@@ -214,10 +214,10 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
     showPanel : function(browser, panel)
     {
         var panelA11y = this.getPanelA11y(panel);
-        if (!panelA11y || !panel.context.chrome)
+        if (!panelA11y || !panel.Firebug.chrome)
             return;
-        panel.context.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
-        var panelBrowser = panel.context.chrome.getPanelBrowser(panel);
+        panel.Firebug.chrome.$('fbToolbar').setAttribute('aria-label', panel.name + " " + $STR("panel tools"))
+        var panelBrowser = panel.Firebug.chrome.getPanelBrowser(panel);
         panelBrowser.setAttribute('showcaret', (panel.name == "script"));
     },
 
@@ -379,8 +379,8 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
     {
         if (!FirebugContext || !FirebugContext.chrome)
             return;
-        var panel = FirebugContext.chrome.getSelectedPanel();
-        var sidePanel = FirebugContext.chrome.getSelectedSidePanel();
+        var panel = Firebug.chrome.getSelectedPanel();
+        var sidePanel = Firebug.chrome.getSelectedSidePanel();
         this.ensurePanelTabStop(panel);
         if (sidePanel)
             this.ensurePanelTabStop(sidePanel);
@@ -639,7 +639,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
                         var prevBreakpoint = getPreviousByClass(target, 'breakpointRow');
                         if (prevBreakpoint)
                             this.makeFocusable(prevBreakpoint, true);
-                        panel.context.chrome.window.document.commandDispatcher.rewindFocus();
+                        Firebug.chrome.window.document.commandDispatcher.rewindFocus();
                         this.dispatchMouseEvent(closeBtn, 'click');
                     }
                 }
@@ -837,11 +837,11 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
         this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
     },
 
-    moveToSearchMatch: function(context)
+    moveToSearchMatch: function(context)  // TODO context not needed
     {
-        if (!this.isEnabled() || !context || !context.chrome)
+        if (!this.isEnabled())
             return;
-        var panel = context.chrome.getSelectedPanel();
+        var panel = Firebug.chrome.getSelectedPanel();
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !panel.searchable )
             return;
@@ -1116,7 +1116,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
                 //these context menu options are likely to destroy current focus
                 panelA11y.reFocusId = getElementXPath(event.target);
                 document.popupNode = node;
-                panel.context.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
+                panel.Firebug.chrome.$('fbContextMenu').openPopup(node, 'overlap', 0,0,true);
                 cancelEvent(event); //no need for default handlers anymore
             }
         }
@@ -1547,7 +1547,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
             fileName = tokens[tokens.length - 1];
         viewport.setAttribute('aria-label', $STRF('source code for file', [fileName]));
         //bit ugly, but not sure how else I can get the caret into the sourcebox without a mouse
-        var focusElem = panel.context.chrome.window.document.commandDispatcher.focusedElement;
+        var focusElem = Firebug.chrome.window.document.commandDispatcher.focusedElement;
         var line = box.getLineNode(box.firstViewableLine);
         if (!line)
             return;
@@ -1580,8 +1580,8 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
                 return;
             var sel = event.target.ownerDocument.defaultView.getSelection();
             var node = sel.focusNode.parentNode;
-            panel.context.chrome.window.document.popupNode = node;
-            panel.context.chrome.$('fbContextMenu').openPopup(node, "overlap", 0, 0, true);
+            Firebug.chrome.window.document.popupNode = node;
+            Firebug.chrome.$('fbContextMenu').openPopup(node, "overlap", 0, 0, true);
             cancelEvent(event);
         }
     },
@@ -1847,7 +1847,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
     {
         if (!panel || !panel.context)
             return false;
-        var focusedElement = panel.context.chrome.window.document.commandDispatcher.focusedElement;
+        var focusedElement = Firebug.chrome.window.document.commandDispatcher.focusedElement;
         var focusedPanel = Firebug.getElementPanel(focusedElement)
         return focusedPanel && (focusedPanel.name == panel.name);
 

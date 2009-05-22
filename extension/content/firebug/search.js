@@ -14,18 +14,18 @@ Firebug.Search = extend(Firebug.Module,
     dispatchName: "search",
     search: function(text, context)
     {
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = text;
         this.update(context);
     },
 
     enter: function(context)
     {
-        var panel = context.chrome.getSelectedPanel();
+        var panel = Firebug.chrome.getSelectedPanel();
         if (!panel.searchable)
             return;
 
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
         var value = searchBox.value;
 
         panel.search(value, true);
@@ -38,13 +38,13 @@ Firebug.Search = extend(Firebug.Module,
 
     clear: function(context)
     {
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = "";
     },
 
     displayOnly: function(text, context)
     {
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
 
         if (text && text.length > 0)
             setClass(searchBox, "fbSearchBox-attention");
@@ -57,22 +57,22 @@ Firebug.Search = extend(Firebug.Module,
     focus: function(context)
     {
         if (Firebug.isDetached())
-            context.chrome.focus();
+            Firebug.chrome.focus();
         else
             Firebug.toggleBar(true);
 
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.focus();
         searchBox.select();
     },
 
     update: function(context, immediate, reverse)
     {
-        var panel = context.chrome.getSelectedPanel();
+        var panel = Firebug.chrome.getSelectedPanel();
         if (!panel.searchable)
             return;
 
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
         var panelNode = panel.panelNode;
 
         var value = searchBox.value;
@@ -139,14 +139,14 @@ Firebug.Search = extend(Firebug.Module,
 
     showOptions: function(context)
     {
-        var panel = context.chrome.getSelectedPanel();
+        var panel = Firebug.chrome.getSelectedPanel();
         if (!panel.searchable)
             return;
 
-        var searchBox = context.chrome.$("fbSearchBox");
+        var searchBox = Firebug.chrome.$("fbSearchBox");
 
         // Get search options popup menu.
-        var optionsPopup = context.chrome.$("fbSearchOptionsPopup");
+        var optionsPopup = Firebug.chrome.$("fbSearchOptionsPopup");
         if (optionsPopup.state == "closed")
         {
             eraseNode(optionsPopup);

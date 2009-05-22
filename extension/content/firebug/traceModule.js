@@ -538,8 +538,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var m = date.getMinutes() + "";
         var s = date.getSeconds() + "";
         var ms = date.getMilliseconds() + "";
-        return "[" + ((m.length > 1) ? m : "0" + m) + ":" + 
-            ((s.length > 1) ? s : "0" + s) + ":" + 
+        return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
+            ((s.length > 1) ? s : "0" + s) + ":" +
             ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
     },
 
@@ -652,7 +652,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             cbWindow.addEventListener("load", function() {
                 var context = cbWindow.FirebugContext;
                 var link = new cbWindow.FBL.SourceLink(fileName, lineNumber, "js");
-                context.chrome.select(link, "script");
+                Firebug.chrome.select(link, "script");
             }, true);
         }
     },

@@ -104,11 +104,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     focusWatch: function(context)
     {
         if (Firebug.isDetached())
-            context.chrome.focus();
+            Firebug.chrome.focus();
         else
             Firebug.toggleBar(true);
 
-        context.chrome.selectPanel("script");
+        Firebug.chrome.selectPanel("script");
 
         var watchPanel = context.getPanel("watches", true);
         if (watchPanel)
@@ -275,8 +275,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         // in fbs we stopStepping() so allow breakOnNext again
-        context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
 
         delete context.stopped;
         delete context.debugFrame;
@@ -289,10 +289,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     breakOnNext: function(context)
     {
-        if (!context || !context.chrome)
+        if (!context || !Firebug.chrome)
             return;
 
-        var breakable = context.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
 
         if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
             FBTrace.sysout("debugger.breakOnNext "+context.getName()+ " breakable: "+breakable, breakable);
@@ -300,8 +300,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (breakable == "true")
             this.suspend(context);  // arm breakOnNext
         else {
-            context.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
-            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
         }
         this.syncCommands(context);
         return;
@@ -309,9 +309,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onBreakingNext: function(debuggr, context)
     {
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
         chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");  // mark armed
-        context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnNext"));
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnNext"));
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.onBreakingNext "+context.getName()+ " breakable: "+chrome.getGlobalAttribute("cmd_resumeExecution", "breakable"));
     },
@@ -597,8 +597,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.syncCommands(context);
             this.syncListeners(context);
 
-            context.chrome.select(context.currentFrame, "script", null, true);
-            context.chrome.focus();
+            Firebug.chrome.select(context.currentFrame, "script", null, true);
+            Firebug.chrome.focus();
         }
         catch(exc)
         {
@@ -624,7 +624,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // the current context will be destroyed just before
             if (context && context.window && !context.aborted)
             {
-                var chrome = context.chrome;
+                var chrome = Firebug.chrome;
 
                 //if ( chrome.updateViewOnShowHook )
                 //    delete chrome.updateViewOnShowHook;
@@ -652,7 +652,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     syncCommands: function(context)
     {
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
         if (!chrome)
         {
             if (FBTrace.DBG_ERRORS)
@@ -664,7 +664,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
             chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "off");
-            context.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("Continue"));
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("Continue"));
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
@@ -676,7 +676,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
 
-            var panel = context.chrome.getSelectedPanel();
+            var panel = Firebug.chrome.getSelectedPanel();
             if (panel && panel.name != "script") // take down the disabled buttons altogether
                 panel.showToolbarButtons("fbDebuggerButtons", false);
         }
@@ -684,7 +684,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     syncListeners: function(context)
     {
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
 
         if (context.stopped)
             this.attachListeners(context, chrome);
@@ -1595,7 +1595,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     reattachContext: function(browser, context)
     {
-        this.filterButton = context.chrome.$("fbScriptFilterMenu");  // connect to the button in the new window, not 'window'
+        this.filterButton = Firebug.chrome.$("fbScriptFilterMenu");  // connect to the button in the new window, not 'window'
         this.filterMenuUpdate();
         Firebug.ActivableModule.reattachContext.apply(this, arguments);
     },

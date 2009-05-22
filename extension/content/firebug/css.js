@@ -1558,15 +1558,13 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.value = value;
         this.input.focus();
 
-        var command = this.panel.context.chrome.$("cmd_toggleCSSEditing");
+        var command = Firebug.chrome.$("cmd_toggleCSSEditing");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var chrome = this.panel.context.chrome;
-
-        var command = chrome.$("cmd_toggleCSSEditing");
+        var command = Firebug.chrome.$("cmd_toggleCSSEditing");
         command.setAttribute("checked", false);
 
         if (this.box.parentNode == this.panel.panelNode)
@@ -1733,7 +1731,7 @@ function scrollSelectionIntoView(panel)
 
 function getSelectionController(panel)
 {
-    var browser = panel.context.chrome.getPanelBrowser(panel);
+    var browser = Firebug.chrome.getPanelBrowser(panel);
     return browser.docShell.QueryInterface(nsIInterfaceRequestor)
         .getInterface(nsISelectionDisplay)
         .QueryInterface(nsISelectionController);
