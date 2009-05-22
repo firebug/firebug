@@ -719,15 +719,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     showPanel: function(browser, panel)
     {
-        var chrome =  browser.chrome;
-        if (chrome.updateViewOnShowHook)
-        {
-            if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.showPanel: call updateViewOnShowHook \n");
-            var updateViewOnShowHook = chrome.updateViewOnShowHook;
-            delete chrome.updateViewOnShowHook;
-            updateViewOnShowHook();
-        }
-
         if (panel && panel.name == "script")
         {
             this.syncCommands(panel.context);

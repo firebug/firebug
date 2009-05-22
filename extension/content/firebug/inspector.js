@@ -334,16 +334,11 @@ Firebug.Inspector = extend(Firebug.Module,
         if (this.inspecting)
             this.stopInspecting(true);
 
-        /*if (browser)
-        {
-            var disabled = !context || !context.loaded;
-            browser.chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
-        }*/
     },
 
     showPanel: function(browser, panel)
     {
-        var chrome = browser.chrome;
+        var chrome = Firebug.chrome;
         var disabled = !panel || !panel.context.loaded;
         chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
         //chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);

@@ -342,7 +342,7 @@ top.Firebug =
             // 1) Firebug UI is closed and the user clicked on the status bar icon in order to
             //    show the UI and resume Firebug.
             // 2) Firebug is detached, but suspended for the current page. The user clicked
-            //    either on the status bar icon or on an activation button that is displayed 
+            //    either on the status bar icon or on an activation button that is displayed
             //    within detached Firebug window.
             this.toggleBar(true);
         }
@@ -928,7 +928,7 @@ top.Firebug =
     // minimized <-> inBrowser  This code only works in browser.xul
     // xxxHonza: this method is also used when resuming detached Firebug for selected page.
     // It should now work even called from Firebug.xul
-    showBar: function(show)  
+    showBar: function(show)
     {
         var browser = Firebug.chrome.getCurrentBrowser();
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
@@ -985,7 +985,7 @@ top.Firebug =
 
         if (Firebug.isInBrowser())
         {
-            browser.chrome.hidePanel();
+            Firebug.chrome.hidePanel();
             this.showBar(false);
         }
         // else minimized nothing to do
@@ -1001,7 +1001,7 @@ top.Firebug =
         var browser = FirebugChrome.getCurrentBrowser();
 
         if (panelName)
-            browser.chrome.selectPanel(panelName);
+            Firebug.chrome.selectPanel(panelName);
 
         if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are debugging the selected tab
         {
@@ -1091,15 +1091,10 @@ top.Firebug =
         Firebug.setPlacement(newPlacement);  // This should be the only setPlacement call with "detached"
 
         // reattach all contexts to the new chrome
-        // This is a hack to allow context.chrome to work for now.
         TabWatcher.iterateContexts(function reattach(context)
         {
             context.reattach(newChrome);
-            if (context.browser.chrome != newChrome)
-            {
-                context.browser.originalChrome = context.browser.chrome;
-                context.browser.chrome = newChrome;
-            }
+
             Firebug.reattachContext(context.browser, context);
         });
     },
@@ -1167,14 +1162,10 @@ top.Firebug =
         if (!context || !context.errorCount)
             return;
 
-        var browser = FirebugChrome.getCurrentBrowser();
-        if (!browser.chrome)
-            return;
-
-        var panel = browser.chrome.getSelectedPanel();
+        var panel = Firebug.chrome.getSelectedPanel();
         if (panel && panel.name != "console")
         {
-            browser.chrome.selectPanel("console");
+            Firebug.chrome.selectPanel("console");
             cancelEvent(event);
         }
     },
@@ -1691,7 +1682,7 @@ top.Firebug =
         if (!context)  // then we are called just to clean up
         {
             if(browser && Firebug.isDetached())
-                this.killWindow(browser, browser.chrome);
+                this.killWindow(browser, Firebug.chrome);
             return;
         }
 

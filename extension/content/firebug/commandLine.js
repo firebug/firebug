@@ -508,7 +508,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        var chrome = browser.chrome;
+        var chrome = Firebug.chrome;
 
         var isConsole = panel && panel.name == "console";
         if (Firebug.largeCommandLine)

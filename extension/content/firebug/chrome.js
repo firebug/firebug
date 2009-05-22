@@ -229,13 +229,12 @@ top.FirebugChrome =
         {
             Firebug.setChrome(this, "detached"); // 1.4
 
-            browser.originalChrome = browser.chrome; // 1.3
-            browser.chrome = this;
+            browser.chrome = null;  // TODO delete this line
 
             Firebug.showContext(browser, context);
 
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("attachBrowser inDetachedScope in browser.chrome.window: "+browser.chrome.window.location);
+                FBTrace.sysout("attachBrowser inDetachedScope in Firebug.chrome.window: "+Firebug.chrome.window.location);
         }
 
     },
@@ -248,9 +247,6 @@ top.FirebugChrome =
 
         // when we are done here the window.closed will be true so we don't want to hang on to the ref.
         detachedChrome.window = "This is detached chrome!";
-
-        browser.chrome = Firebug.originalChrome;  // 1.3
-        delete browser.originalChrome;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -772,7 +768,7 @@ top.FirebugChrome =
 
     setChromeDocumentAttribute: function(id, name, value)
     {
-        // Call as context.browser.chrome.setChromeDocumentAttribute() to set attributes in another window.
+        // Call as  Firebug.chrome.setChromeDocumentAttribute() to set attributes in another window.
         var elt = $(id);
         if (elt)
             elt.setAttribute(name, value);

@@ -193,8 +193,7 @@ Firebug.Console = extend(ActivableConsole,
 
     showContext: function(browser, context)
     {
-        if (browser)
-            browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
+        Firebug.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
