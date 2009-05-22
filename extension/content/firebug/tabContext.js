@@ -20,7 +20,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.browser = browser;
     this.persistedState = persistedState;
 
-    this.chrome = chrome;  // 1.3
+    browser.__defineGetter__("chrome", function() { return Firebug.chrome; }); // backward compat
 
     this.name = normalizeURL(this.getWindowLocation().toString());
 
@@ -101,6 +101,11 @@ Firebug.TabContext.prototype =
         Firebug.onSourceFileCreated(this, sourceFile);
     },
     // ***************************************************************************
+    get chrome()  // backward compat
+    {
+        return Firebug.chrome;
+    },
+
     reattach: function(chrome)
     {
         var oldChrome = this.chrome;  // ie Firebug.chrome
