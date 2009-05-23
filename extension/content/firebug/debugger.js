@@ -2299,12 +2299,22 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (enabled)
         {
             Firebug.Debugger.disabledPanelPage.hide(this);
-            if (this.context.loaded && !this.location)
+            if (this.context.loaded)
             {
-                restoreLocation(this, state);
+                if(!this.location)
+                {
+                    restoreLocation(this, state);
 
-                if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                    this.scrollInfo = { location: this.location, lastLine: state.lastLine};
+                    if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+                        this.scrollInfo = { location: this.location, lastLine: state.lastLine};
+                }
+                else  // we have a location from before
+                {
+                    if (this.selectedSourceBox)  // so we need only refresh the view
+                        this.reView(this.selectedSourceBox);
+                    else                         // somehow we did not make a sourcebox?
+                        this.navigate(this.location);
+                }
             }
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
