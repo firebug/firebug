@@ -106,15 +106,12 @@ Firebug.TabContext.prototype =
         return Firebug.chrome;
     },
 
-    reattach: function(chrome)
+    reattach: function(oldChrome, newChrome)
     {
-        var oldChrome = this.chrome;  // ie Firebug.chrome
-        this.chrome = chrome;
-
         for (var panelName in this.panelMap)
         {
             var panel = this.panelMap[panelName];
-            panel.detach(oldChrome, chrome);
+            panel.detach(oldChrome, newChrome);
             panel.invalid = true;// this will cause reattach on next use
 
             var panelNode = panel.panelNode;  // delete panel content

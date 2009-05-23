@@ -1087,13 +1087,14 @@ top.Firebug =
 
     setChrome: function(newChrome, newPlacement)
     {
+        var oldChrome = Firebug.chrome;
         Firebug.chrome = newChrome;
         Firebug.setPlacement(newPlacement);  // This should be the only setPlacement call with "detached"
 
         // reattach all contexts to the new chrome
         TabWatcher.iterateContexts(function reattach(context)
         {
-            context.reattach(newChrome);
+            context.reattach(oldChrome, newChrome);
 
             Firebug.reattachContext(context.browser, context);
         });
