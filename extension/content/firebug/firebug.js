@@ -1624,7 +1624,7 @@ top.Firebug =
                 Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
             }
         }
-        if (Firebug.isClosed())
+        else if (Firebug.isClosed())
         {
             if (context)
             {
