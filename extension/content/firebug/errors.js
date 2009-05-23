@@ -204,6 +204,9 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     logScriptError: function(context, object, isWarning)
     {
+        if (!context)
+            return;
+
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);
 
