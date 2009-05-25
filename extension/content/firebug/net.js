@@ -2176,11 +2176,11 @@ NetProgress.prototype =
     {
         // For image files we can't get the nsIHttpChannel (the request object is imgIRequest
         // in such a case). So, this method is not much useful.
-        /*var file = this.getRequestFile(request, null, true);
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " +
-                getPrintableTime() + ", " + getStateDescription(flag) + ", " +
-                safeGetName(request), file);*/
+        //var file = this.getRequestFile(request, null, true);
+        //if (FBTrace.DBG_NET)
+        //    FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " +
+        //        getPrintableTime() + ", " + getStateDescription(flag) + ", " +
+        //        safeGetName(request), file);
     },
 
     onProgressChange : function(progress, request, current, max, total, maxTotal)
