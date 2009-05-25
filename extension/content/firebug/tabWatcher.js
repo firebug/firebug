@@ -780,7 +780,7 @@ function onUnloadTopWindow(event)
     var win = event.currentTarget;
     win.removeEventListener("unload", onUnloadTopWindow, true);
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+win.location+"\n");
+        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+win.location+" typeof :"+typeof(win)+"\n");
     TabWatcher.unwatchTopWindow(win);
 }
 

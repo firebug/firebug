@@ -1574,6 +1574,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.onFunctionCall = bind(this.onFunctionCall, this);
         fbs.registerClient(this);   // allow callbacks for jsd
         Firebug.ActivableModule.initialize.apply(this, arguments);
+
+        if (this.isAlwaysEnabled())
+            this.registerDebugger();
     },
 
     initializeUI: function()
@@ -1671,6 +1674,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return;
         var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
         this.registered = true;
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.registerDebugger "+check+" debuggers");
     },
 
     unregisterDebugger: function() // 1.3.1 safe for multiple calls
@@ -1683,8 +1688,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var check = fbs.unregisterDebugger(this);
 
-
         this.registered = false;
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.unregisterDebugger: "+check+" debuggers");
     },
 
     onSourceFileCreated: function(context, sourceFile)
@@ -1694,17 +1701,17 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
         if (panelName != this.panelName)
             return;
 
         this.registerDebugger();
 
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION) FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
     },
 
-    onPanelDisable: function(context, panelName)
+    onPanelDisable: function(panelName)
     {
         if (panelName != this.panelName)
             return;
@@ -1717,7 +1724,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 {
                     var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
                     Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
-                    if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable rejected: "+ name+" dependent, with panelName: "+panelName+" for "+context.getName()+"\n");
+                    if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable rejected: "+ name+" dependent, with panelName: "+panelName);
                     return;
                 }
             }
@@ -1725,8 +1732,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // else no dependents enabled:
         this.unregisterDebugger();
 
-        if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName+" for "+context.getName()+"\n");
-        this.clearAllBreakpoints(context);
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION) FBTrace.sysout("debugger.onPanelDisable with panelName: "+panelName);
+        this.clearAllBreakpoints();
     },
 
     onDependentModuleChange: function(context, dependentAddedOrRemoved)
@@ -1755,6 +1762,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
+        if (FBTrace.DBG_ERRORS && !this.registered)
+            FBTrace.sysout("debugger.onResumeFirebug but debugger not registered! *** ");
     },
 
     ableWatchSidePanel: function(context)
@@ -2400,6 +2409,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         function scanDoc(sourceFile) {
             var lines = sourceFile.loadScriptLines(self.context);
+            if (!lines)
+                return;
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
             for (var i = 0; i < lines.length; i++) {

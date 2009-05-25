@@ -1061,6 +1061,7 @@ top.Firebug =
 
     unMinimize: function()
     {
+        this.updateActiveContexts(FirebugContext);
         Firebug.setPlacement("inBrowser");
         Firebug.showBar(true);
         Firebug.resetTooltip();
@@ -1992,7 +1993,7 @@ Firebug.Panel =
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("firebug.Panel showToolbarButtons FAILS", exc);
+                FBTrace.sysout("firebug.Panel showToolbarButtons FAILS "+exc, exc);
         }
     },
 
@@ -2786,7 +2787,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("sourcebox applyDecorator FAILS", exc);
+                    FBTrace.sysout("sourcebox applyDecorator FAILS "+exc, exc);
             }
         }, this));
     },
@@ -2992,64 +2993,47 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     isEnabled: function()
     {
-        return this.enabled;
+        return this.isAlwaysEnabled();
     },
 
     panelEnable: function(context) // panel Disabled -> Enabled
     {
-        if (FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_PANELS  || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
                 " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
 
         var panel = context.getPanel(this.panelName, false);
         if (panel)
             panel.enablePanel(this);
-
-        this.enabled = true;
-
-        dispatch(modules, "onPanelEnable", [context, this.panelName]);
-        Firebug.resetTooltip();
     },
 
     panelDisable: function(context)  // panel Enabled -> Disabled
     {
-        if (FBTrace.DBG_PANELS)
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("firebug.ActivableModulepanelDisable "+this.getPrefDomain()+
                 " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
 
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.disablePanel(this);
-
-        this.enabled = false;
-
-        dispatch(modules, "onPanelDisable", [context, this.panelName]);
-
-        if (panel)
-        {
-            var state = Firebug.getPanelState(panel);
-            panel.show(state);
-        }
-
-        Firebug.resetTooltip();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Cross module dependencies.
 
-    addDependentModule: function(context, dependent)
+    addDependentModule: function(dependent)
     {
         this.dependents.push(dependent);
-        this.onDependentModuleChange(context, dependent);  // not dispatched.
+        this.onDependentModuleChange(dependent);  // not dispatched.
     },
 
-    removeDependentModule: function(context, dependent)
+    removeDependentModule: function(dependent)
     {
         remove(this.dependents, dependent);
-        this.onDependentModuleChange(context, dependent);  // not dispatched
+        this.onDependentModuleChange(dependent);  // not dispatched
     },
 
-    onDependentModuleChange: function(context, dependent)
+    onDependentModuleChange: function(dependent)
     {
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("onDependentModuleChange no-op for "+dependent.dispatchName);
@@ -3074,14 +3058,14 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
-        // Module activation code. Just added to activeContexts (init == true) OR just enabled
+        // Module activation code.
     },
 
-    onPanelDisable: function(context,  panelName)
+    onPanelDisable: function(panelName)
     {
-        // Module deactivation code. Just removed from activeContexts (destroy==true) OR just disabled
+        // Module deactivation code.
     },
 
     onSuspendFirebug: function(context)
@@ -3132,6 +3116,10 @@ Firebug.ActivableModule = extend(Firebug.Module,
         return Firebug.getPref(prefDomain, "enableSites");
     },
 
+    get enabled() // backward compat
+    {
+        return this.isAlwaysEnabled();
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onEnablePrefChange: function(pref)
@@ -3285,6 +3273,12 @@ Firebug.ModuleManager =
 
     changeActivation: function(module)
     {
+        if (module.isAlwaysEnabled())
+            dispatch(modules, "onPanelEnable", [module.panelName]);
+        else
+            dispatch(modules, "onPanelDisable", [module.panelName]);
+        Firebug.resetTooltip();
+
         TabWatcher.iterateContexts(
             function changeActivation(context)
             {
@@ -3302,6 +3296,16 @@ Firebug.ModuleManager =
                 }
             }
         );
+
+        if (FirebugContext)  // then update the view
+        {
+            var panel = FirebugContext.getPanel(module.panelName, false);
+            if (panel)
+            {
+                var state = Firebug.getPanelState(panel);
+                panel.show(state);
+            }
+        }
     },
 
     obeyPrefs: function(context)
@@ -3345,7 +3349,7 @@ Firebug.URLSelector =
             var uri = makeURI(normalizeURL(url));
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec);
+                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec+" in "+browser.contentWindow.location);
 
             if (hasAnnotation)
             {
@@ -3364,10 +3368,12 @@ Firebug.URLSelector =
                 {
                     var dst = browser.FirebugLink.dst;
                     var dstURI = makeURI(normalizeURL(dst.spec));
+                    if (FBTrace.DBG_ACTIVATION)
+                        FBTrace.sysout("shouldCreateContext found FirebugLink pointing to does not match "+dstURI.spec, browser.FirebugLink);
                     if (dstURI.equals(uri)) // and it matches us now
                     {
                         var srcURI = makeURI(normalizeURL(browser.FirebugLink.src.spec));
-                        if (dstURI.host == srcURI.host) // and it's on the same domain
+                        if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
                         {
                             hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
                             if (hasAnnotation) // and the source page was annotated.
@@ -3384,6 +3390,16 @@ Firebug.URLSelector =
                         if (FBTrace.DBG_ACTIVATION)
                             FBTrace.sysout("shouldCreateContext FirebugLink does not match "+uri.spec, browser.FirebugLink);
                     }
+                }
+                else if (browser.contentWindow.opener)
+                {
+                    var openerContext = TabWatcher.getContextByWindow(browser.contentWindow.opener);
+
+                    if (FBTrace.DBG_ACTIVATION)
+                        FBTrace.sysout("shouldCreateContext opener found, has "+(openerContext?"a ":"no ")+" context: "+browser.contentWindow.opener.location);
+
+                    if (openerContext)
+                        return true;  // popup windows of Firebugged windows are Firebugged
                 }
 
                 return false;   // don't createContext

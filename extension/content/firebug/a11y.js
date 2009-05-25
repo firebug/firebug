@@ -31,22 +31,28 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
         Firebug.Debugger.addListener(this);
 
         //this.enabled and this.isEnabled() are not set yet when console and script panels load the first time. Set it manually until they are
-        this.enabled = Firebug.getPref("extensions.firebug.a11y", "enableSites");
+      // XXXjjb
+      //  this.enabled = Firebug.getPref("extensions.firebug.a11y", "enableSites");
     },
 
-    onPanelEnable : function(context, panelName)
+    isEnabled : function()
+    {
+        return Firebug.chrome.window.a11yEnabled;
+    },
+
+    onPanelEnable : function(panelName)
     {
         if (FBTrace.DBG_A11Y)
-            FBTrace.sysout("a11y.onPanelEnable; " + panelName + ", " + context.getName());
+            FBTrace.sysout("a11y.onPanelEnable; " + panelName);
 
         if (panelName == "a11y")
             this.set(true, Firebug.chrome);
     },
 
-    onPanelDisable : function(context, panelName)
+    onPanelDisable : function(panelName)
     {
         if (FBTrace.DBG_A11Y)
-            FBTrace.sysout("a11y.onPanelDisable; " + panelName + ", " + context.getName());
+            FBTrace.sysout("a11y.onPanelDisable; " + panelName);
 
         if (panelName == "a11y" && Firebug.chrome.window.a11yEnabled)
             this.set(false, Firebug.chrome);
@@ -1868,7 +1874,7 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
     getPanelA11y : function(panel, create)
     {
         var a11yPanels, panelA11y;
-        if (!this.enabled || !panel || !panel.name || !panel.context)
+        if (!this.isEnabled() || !panel || !panel.name || !panel.context)
             return false;
         a11yPanels = panel.context.a11yPanels;
         if (!a11yPanels)

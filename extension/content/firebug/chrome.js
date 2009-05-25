@@ -66,7 +66,7 @@ top.FirebugChrome =
         catch (exc)
         {
             if (FBTrace.sysout)
-                FBTrace.sysout("chrome.panelBarReady FAILS", exc);
+                FBTrace.sysout("chrome.panelBarReady FAILS: "+exc, exc);
             return false;
         }
         return true; // the panel bar is ready

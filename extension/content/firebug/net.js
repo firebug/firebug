@@ -289,26 +289,28 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         delete contexts[tabId];
     },
 
-    onPanelEnable: function(context, activatedPanelName)
+    onPanelEnable: function(activatedPanelName)
     {
         if (activatedPanelName != panelName)
             return;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelEnable; " + context.getName());
+            FBTrace.sysout("net.onPanelEnable; ");
 
-        monitorContext(context);
+        if (FirebugContext)
+            monitorContext(FirebugContext);
     },
 
-    onPanelDisable: function(context, deactivatedPanelName)
+    onPanelDisable: function(deactivatedPanelName)
     {
         if (deactivatedPanelName != panelName)
             return;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelDisable; " + context.getName());
+            FBTrace.sysout("net.onPanelDisable; ");
 
-        unmonitorContext(context);
+        if (FirebugContext)
+            unmonitorContext(FirebugContext);
     },
 
     onResumeFirebug: function(context)

@@ -624,7 +624,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
     },
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
         collapse(Firebug.chrome.$("fbCommandBox"), true);
         collapse(Firebug.chrome.$("fbPanelSplitter"), true);
@@ -633,7 +633,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
     },
 
-    onPanelDisable: function(context, panelName)
+    onPanelDisable: function(panelName)
     {
         if (panelName != 'console')  // we don't care about other panels
             return;

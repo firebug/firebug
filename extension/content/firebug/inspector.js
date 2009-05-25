@@ -31,13 +31,13 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
-        if(context)
+        if(context && context.window.document)
         {
             context.window.document.addEventListener("mousemove", function(event)
-                {
+            {
                 mx = event.clientX;
                 my = event.clientY;
-                }, true);
+            }, true);
         }
 
         if (!element || !isElement(element) || !isVisible(element))

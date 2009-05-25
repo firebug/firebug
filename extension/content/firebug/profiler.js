@@ -24,16 +24,16 @@ Firebug.Profiler = extend(Firebug.Module,
             this.setEnabled(context);
     },
 
-    onPanelDisable: function(context, panelName)
+    onPanelDisable: function(panelName)
     {
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
 
        if (panelName == "net" || panelName == "script")
-            this.setEnabled(context);
+            this.setEnabled();
     },
 
-    setEnabled: function(context)
+    setEnabled: function()
     {
         // The profiler is available only if the debugger (script panel) and console are enabled.
         var debuggerEnabled = Firebug.Debugger.isAlwaysEnabled();
