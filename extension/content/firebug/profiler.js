@@ -15,13 +15,13 @@ Firebug.Profiler = extend(Firebug.Module,
         this.setEnabled(context);
     },
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
 
         if (panelName == "net" || panelName == "script")
-            this.setEnabled(context);
+            this.setEnabled();
     },
 
     onPanelDisable: function(panelName)
