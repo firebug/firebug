@@ -138,7 +138,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.haltCallback = fn; // called in this.onHalt as fn(frame);
         fbs.halt(this);
 
-        debuggerHalter(); // a function with a URL that passes jdsIFilter
+        debuggerHalter(); // a function with a URL that passes jsdIFilter
 
         if (this.haltCallback) // so we have a second try
         {
@@ -730,19 +730,23 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // These are XUL window level call backs and should be moved into Firebug where is says nsIFirebugClient
 
-    onJSDActivate: function(jsd)  // just before hooks are set
+    onJSDActivate: function(jsd, why)  // just before hooks are set
     {
         var active = this.setIsJSDActive();
 
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("debugger.onJSDActivate "+active+"\n");
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
 
         dispatch2(this.fbListeners,"onJSDActivate",[fbs]);
     },
 
-    onJSDDeactivate: function(jsd)
+    onJSDDeactivate: function(jsd, why)
     {
-        this.setIsJSDActive();
+        var active = this.setIsJSDActive();
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
+
         dispatch2(this.fbListeners,"onJSDDeactivate",[fbs]);
     },
 
@@ -754,7 +758,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
             $('fbStatusIcon').setAttribute("script", "off");
 
-        if (FBTrace.DBG_INITIALIZE)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
 
         return active;
@@ -1708,6 +1712,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.registerDebugger();
 
+        if (FirebugContext && !fbs.isJSDActive())
+            fbs.unPause();
+
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION) FBTrace.sysout("debugger.onPanelEnable with panelName: "+panelName);
     },
 
@@ -1736,7 +1743,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.clearAllBreakpoints();
     },
 
-    onDependentModuleChange: function(context, dependentAddedOrRemoved)
+    onDependentModuleChange: function(dependentAddedOrRemoved)
     {
         if (this.dependents.length > 0) // then we have dependents now
         {
@@ -1750,18 +1757,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onSuspendFirebug: function(context)
     {
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            return;
+
         var paused = fbs.pause();  // can be called multiple times.
 
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+(context?context.getName():"no context")+"\n");
     },
 
     onResumeFirebug: function(context)
     {
+        if (!Firebug.Debugger.isAlwaysEnabled())
+            return;
+
         var unpaused = fbs.unPause();
 
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+context.getName()+"\n");
+        if (FBTrace.DBG_DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+(context?context.getName():"no context")+"\n");
         if (FBTrace.DBG_ERRORS && !this.registered)
             FBTrace.sysout("debugger.onResumeFirebug but debugger not registered! *** ");
     },

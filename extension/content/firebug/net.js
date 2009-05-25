@@ -319,17 +319,17 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             FBTrace.sysout("net.onResumeFirebug; " + context.getName());
 
         // Resume only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled())
+        if (Firebug.NetMonitor.isAlwaysEnabled() && context)
             monitorContext(context);
     },
 
     onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onSuspendFirebug; " + context.getName());
+            FBTrace.sysout("net.onSuspendFirebug; " + (context?context.getName():"no context"));
 
         // Suspend only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled())
+        if (Firebug.NetMonitor.isAlwaysEnabled() && context)
             unmonitorContext(context);
     },
 });

@@ -376,13 +376,7 @@ top.Firebug =
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
     {
         this.setSuspended("suspending");
-        TabWatcher.iterateContexts(
-            function suspendContext(context)
-            {
-                dispatch(activableModules, 'onSuspendFirebug', [context]);
-            }
-        );
-
+        dispatch(activableModules, 'onSuspendFirebug', [FirebugContext]);
         this.setSuspended("suspended");
     },
 
@@ -394,13 +388,7 @@ top.Firebug =
     resumeFirebug: function()  // dispatch onResumeFirebug to all modules
     {
         this.setSuspended("resuming");
-        TabWatcher.iterateContexts(
-                function resumeContext(context)
-                {
-                    dispatch(activableModules, 'onResumeFirebug', [context]);
-                }
-            );
-
+        dispatch(activableModules, 'onResumeFirebug', [FirebugContext]);
         this.setSuspended(null);
     },
 
@@ -2977,12 +2965,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
 
     reattachContext: function(browser, context)
     {
-        this.updateTab(context);
+        this.updateTab();
     },
 
     showContext: function(browser, context)
     {
-        this.updateTab(context);
+        this.updateTab();
     },
 
     destroyContext: function(context)
@@ -3010,7 +2998,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     panelDisable: function(context)  // panel Enabled -> Disabled
     {
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("firebug.ActivableModulepanelDisable "+this.getPrefDomain()+
+            FBTrace.sysout("firebug.ActivableModule.panelDisable "+this.getPrefDomain()+
                 " isEnabled:"+this.isAlwaysEnabled()+", "+context.getName()+"\n");
 
         var panel = context.getPanel(this.panelName, true);
@@ -3126,8 +3114,8 @@ Firebug.ActivableModule = extend(Firebug.Module,
     {
         var panelPref = this.getPrefDomain()+".enableSites";
 
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("firebug.onEnablePrefChange for:"+panelPref +" pref:"+ pref+"\n");
+        if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("firebug.onEnablePrefChange for:"+panelPref +" pref:"+ pref+" in module.panelName:"+this.panelName+"\n");
 
         if (pref == panelPref)
         {
@@ -3135,7 +3123,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         }
     },
 
-    updateTab: function(context)
+    updateTab: function()
     {
         if (!this.panelName && (FBTrace.DBG_PANELS || FBTrace.DBG_ERRORS))
             FBTrace.sysout("firebug.ActivableModule.updateTab; Missing panelName in activable module", this);
@@ -3147,7 +3135,19 @@ Firebug.ActivableModule = extend(Firebug.Module,
         {
             tab.setModule(this);
             var enabled = this.isAlwaysEnabled();
+            if (enabled)
+                tab.setAttribute("aria-disabled", "false");
+            else
+                tab.setAttribute("aria-disabled", "true");
+            if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("firebug.updateTab for "+this.panelName+" set aria-disabled with enabled:"+enabled);
         }
+        else
+        {
+            if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("firebug.updateTab for "+this.panelName+" ** no tab **");
+        }
+
     }
 });
 
@@ -3238,7 +3238,6 @@ Firebug.ModuleManager =
         {
             var module = activableModules[i];
             this.disableModule(module);
-            module.updateTab(context);
         }
     },
 
@@ -3251,7 +3250,6 @@ Firebug.ModuleManager =
         {
             var module = activableModules[i];
             this.enableModule(module);
-            module.updateTab(context);
         }
     },
 
@@ -3277,6 +3275,8 @@ Firebug.ModuleManager =
             dispatch(modules, "onPanelEnable", [module.panelName]);
         else
             dispatch(modules, "onPanelDisable", [module.panelName]);
+
+        module.updateTab();
         Firebug.resetTooltip();
 
         TabWatcher.iterateContexts(
@@ -3318,7 +3318,7 @@ Firebug.ModuleManager =
             else
                 this.disableModule(module);
 
-            module.updateTab(context);
+            module.updateTab();
         }
     },
 }
