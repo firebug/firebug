@@ -883,7 +883,7 @@ FirebugService.prototype =
             while(jsd.pauseDepth)  // 1.3.1 unwind completely before dispatch (port to 1.4)
                 jsd.unPause();
 
-            dispatch(clients, "onJSDActivate", [jsd]);
+            dispatch(clients, "onJSDActivate", [jsd, "fbs enableDebugger"]);
             this.hookScripts();
         }
         else
@@ -894,7 +894,7 @@ FirebugService.prototype =
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
 
-            dispatch(clients, "onJSDActivate", [jsd]);
+            dispatch(clients, "onJSDActivate", [jsd, "fbs enableDebugger create"]);
 
             this.hookScripts();
 
@@ -949,20 +949,15 @@ FirebugService.prototype =
         if (!timer)  // then we probably shutdown
             return;
 
- // 1.3.1 timer is confusing and seems unnecessary here Port 1.4
-//        timer.init({observe: function()
-//        {
-            enabledDebugger = false;
+        enabledDebugger = false;
 
-            jsd.pause();
-            fbs.unhookScripts();
-            jsd.off();
-            dispatch(clients, "onJSDDeactivate", [jsd]);
- //       }}, 500, TYPE_ONE_SHOT);
+        jsd.pause();
+        fbs.unhookScripts();
+        jsd.off();
+        dispatch(clients, "onJSDDeactivate", [jsd, "fbs disableDebugger"]);
 
-        //waitingForTimer = true;
-        if (FBTrace.DBG_FBS_FINDDEBUGGER) // 1.3.1 report after the work
-            FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger+" waitingForTimer:"+waitingForTimer);
+        if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger);
     },
 
     pause: function()  // must support multiple calls
@@ -971,7 +966,7 @@ FirebugService.prototype =
             return "not enabled";
         if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
             jsd.pause();
-        dispatch(clients, "onJSDDeactivate", [jsd]);
+        dispatch(clients, "onJSDDeactivate", [jsd, "pause depth "+jsd.pauseDepth]);
         if (!jsd)
             FBTrace.sysout("*********************** deactivate JSD NULL ");
         return jsd.pauseDepth;
@@ -984,7 +979,7 @@ FirebugService.prototype =
             var depth = jsd.unPause();
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause depth "+depth);
-            dispatch(clients, "onJSDActivate", [jsd]);
+            dispatch(clients, "onJSDActivate", [jsd, "unpause depth"+jsd.pauseDepth]);
             if (!jsd)
                 FBTrace.sysout("*********************** activate JSD NULL ");
         }
