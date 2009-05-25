@@ -311,7 +311,7 @@ FirebugService.prototype =
             debuggers.push(debuggr);
             if (debuggers.length == 1)
                 this.enableDebugger();
-            if (FBTrace.DBG_FBS_FINDDEBUGGER)  // 1.3.1 report after enableDebugger op
+            if (FBTrace.DBG_FBS_FINDDEBUGGER  || FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
         }
         else
@@ -363,7 +363,7 @@ FirebugService.prototype =
         if (debuggers.length == 0)
             this.disableDebugger();
 
-        if (FBTrace.DBG_FBS_FINDDEBUGGER)  // 1.3.1 move below disableDebugger
+        if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("fbs.unregisterDebugger have "+debuggers.length+" after unreg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
 
         return debuggers.length;
@@ -969,28 +969,26 @@ FirebugService.prototype =
     {
         if (!enabledDebugger)
             return "not enabled";
-        if (!this.suspended)  // marker only UI in debugger.js
-            this.suspended = jsd.pause();
+        if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
+            jsd.pause();
         dispatch(clients, "onJSDDeactivate", [jsd]);
         if (!jsd)
             FBTrace.sysout("*********************** deactivate JSD NULL ");
-        return this.suspended;
+        return jsd.pauseDepth;
     },
 
     unPause: function()
     {
-        if (this.suspended)
+        if (jsd.pauseDepth)
         {
             var depth = jsd.unPause();
-            if ( (this.suspended !=  1 || depth != 0) && FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.resume unpause mismatch this.suspended "+this.suspended+" unpause depth "+depth);
-            delete this.suspended;
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("fbs.unPause depth "+depth);
             dispatch(clients, "onJSDActivate", [jsd]);
             if (!jsd)
                 FBTrace.sysout("*********************** activate JSD NULL ");
-            return depth;
         }
-        return null;
+        return jsd.pauseDepth;
     },
 
     isJSDActive: function()
@@ -1035,7 +1033,7 @@ FirebugService.prototype =
             {
                 var debuggr = this.reFindDebugger(frame, stepStayOnDebuggr);
                 if (FBTrace.DBG_FBS_STEP && (stepMode != STEP_SUSPEND) )
-                    FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
+                    FBTrace.sysout("fbs.onBreak type="+getExecutionStopNameFromType(type)+" hookFrameCount:"+hookFrameCount+" stepStayOnDebuggr "+stepStayOnDebuggr+" debuggr:"+(debuggr?debuggr:"null")+" last_debuggr="+(fbs.last_debuggr?fbs.last_debuggr.debuggerName:"null"));
 
                 if (!debuggr)
                 {
@@ -1773,7 +1771,7 @@ FirebugService.prototype =
                     if (!debuggr.breakContext)
                         FBTrace.sysout("Debugger with no breakContext:",debuggr.supportsGlobal);
                     if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                        FBTrace.sysout(" findDebugger found debuggr at "+i+" for global "+global+" while processing "+frame.script.fileName);
+                        FBTrace.sysout(" findDebugger found debuggr ("+debuggr.debuggerName+") at "+i+" for global "+global+" while processing "+frame.script.fileName);
                     return debuggr;
                 }
             }
@@ -1807,7 +1805,7 @@ FirebugService.prototype =
         if (frameWin && debuggr.supportsGlobal(frameWin, frame)) return debuggr;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameWin ", frameWin);
+            FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameWin "+frameWin, frameWin);
         return null;
     },
 
@@ -2251,8 +2249,12 @@ FirebugService.prototype =
     {
         function interruptHook(frame, type, rv)
         {
-            if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing
+            if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing TODO try again
+            {
+                if (FBTrace.DBG_FBS_STEP)
+                    FBTrace.sysout("fbs.hookInterrupts filtered "+frame.script.fileName);
                 return RETURN_CONTINUE;
+            }
 
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
