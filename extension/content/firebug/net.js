@@ -289,28 +289,20 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         delete contexts[tabId];
     },
 
-    onPanelEnable: function(activatedPanelName)
+    onEnabled: function(context)
     {
-        if (activatedPanelName != panelName)
-            return;
-
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelEnable; ");
+            FBTrace.sysout("net.onEnabled; "+context.getName());
 
-        if (FirebugContext)
-            monitorContext(FirebugContext);
+        monitorContext(context);
     },
 
-    onPanelDisable: function(deactivatedPanelName)
+    onDisabled: function(context)
     {
-        if (deactivatedPanelName != panelName)
-            return;
-
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onPanelDisable; ");
+            FBTrace.sysout("net.onDisabled; "+context.getName());
 
-        if (FirebugContext)
-            unmonitorContext(FirebugContext);
+        unmonitorContext(context);
     },
 
     onResumeFirebug: function(context)
@@ -2446,6 +2438,9 @@ function monitorContext(context)
     }
     else
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.monitorContext; create new NetProgress(context). " + tabId);
+
         networkContext = new NetProgress(context);
     }
 

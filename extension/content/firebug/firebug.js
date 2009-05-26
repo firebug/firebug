@@ -2984,7 +2984,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
         return this.isAlwaysEnabled();
     },
 
-    panelEnable: function(context) // panel Disabled -> Enabled
+    panelEnable: function(context) // panel Disabled -> Enabled for every context with a panel
     {
         if (FBTrace.DBG_PANELS  || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("firebug.ActivableModule.panelEnable "+this.getPrefDomain()+
@@ -2993,9 +2993,11 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var panel = context.getPanel(this.panelName, false);
         if (panel)
             panel.enablePanel(this);
+
+        this.onEnabled(context);
     },
 
-    panelDisable: function(context)  // panel Enabled -> Disabled
+    panelDisable: function(context)  // panel Enabled -> Disabled for every context with a panel
     {
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("firebug.ActivableModule.panelDisable "+this.getPrefDomain()+
@@ -3004,6 +3006,18 @@ Firebug.ActivableModule = extend(Firebug.Module,
         var panel = context.getPanel(this.panelName, true);
         if (panel)
             panel.disablePanel(this);
+
+        this.onDisabled(context);
+    },
+
+    onEnabled: function(context)
+    {
+        // called for each context at the end of enable
+    },
+
+    onDisabled: function(context)
+    {
+        // called for each context at the end of disable
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
