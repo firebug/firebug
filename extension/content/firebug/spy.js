@@ -85,10 +85,6 @@ Firebug.Spy = extend(Firebug.Module,
         var uri = win.location.href; // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
             return true;
-
-        // Don't attach spy in Firefox > 3.1 till #483672 is fixed.
-        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
-            return true;
     },
 
     attachObserver: function(context, win)

@@ -215,16 +215,6 @@ Firebug.Console = extend(ActivableConsole,
 
         $('fbStatusIcon').setAttribute("console", "on");
         Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
-
-        // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
-        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
-        {
-            setTimeout(function()
-            {
-                Firebug.Console.log("'Show XMLHttpRequests' option (Console panel) is disabled " +
-                    "in Firefox 3.1 and higher till bug #483672 is fixed.");
-            });
-        }
     },
 
     onPanelDisable: function(panelName)
@@ -545,7 +535,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
             optionMenu("ShowCSSErrors", "showCSSErrors"),
             optionMenu("ShowXMLErrors", "showXMLErrors"),
-            this.xhrSpyOptionMenu(),
+            optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
             optionMenu("ShowChromeErrors", "showChromeErrors"),
             optionMenu("ShowChromeMessages", "showChromeMessages"),
             optionMenu("ShowExternalErrors", "showExternalErrors"),
@@ -554,22 +544,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             "-",
             optionMenu("LargeCommandLine", "largeCommandLine")
         ];
-    },
-
-    xhrSpyOptionMenu: function()
-    {
-        var option = optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests");
-
-        // XHR Spy is disabled in in Firefox > 3.1 till #483672 is fixed.
-        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
-        {
-            option.disabled = true;
-            option.checked = false;
-            option.tooltiptext = "This option is disabled in Firefox 3.1 and higher till " +
-                "bug #483672 is fixed.";
-        }
-
-        return option;
     },
 
     getShowStackTraceMenuItem: function()
