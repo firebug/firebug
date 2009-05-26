@@ -165,6 +165,9 @@ Firebug.Console = extend(ActivableConsole,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
+
+        if (Firebug.Console.isAlwaysEnabled())
+            this.watchForErrors();
     },
 
     initContext: function(context, persistedState)
@@ -213,7 +216,7 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onPanelEnable**************");
 
-        $('fbStatusIcon').setAttribute("console", "on");
+        this.watchForErrors();
         Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
     },
 
@@ -223,15 +226,15 @@ Firebug.Console = extend(ActivableConsole,
             return;
 
         Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
-        $('fbStatusIcon').removeAttribute("console");
+        this.unwatchForErrors();
     },
 
     onSuspendFirebug: function(context)
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
-        Firebug.Errors.stopObserving();
-        $('fbStatusIcon').removeAttribute("console");
+        if (Firebug.Console.isAlwaysEnabled())
+            this.unwatchForErrors();
     },
 
     onResumeFirebug: function(context)
@@ -239,10 +242,19 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
         if (Firebug.Console.isAlwaysEnabled())
-        {
-            Firebug.Errors.startObserving();
-            $('fbStatusIcon').setAttribute("console", "on");
-        }
+            this.watchForErrors();
+    },
+
+    watchForErrors: function()
+    {
+        Firebug.Errors.startObserving();
+        $('fbStatusIcon').setAttribute("console", "on");
+    },
+
+    unwatchForErrors: function()
+    {
+        Firebug.Errors.stopObserving();
+        $('fbStatusIcon').removeAttribute("console");
     },
 
     // ----------------------------------------------------------------------------------------------------
