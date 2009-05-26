@@ -128,6 +128,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * issue 1508: Problems with some downloads.
     * Issue 1547: &editors.Description;
     * Issue 1575: New watch expression can't be created when breakpoint is active
+    * Issue 1586: XHR complete fails to trigger onComplete callback (workaround removed)
     * Issue 1592: Added display: autocompletions to CSS editor
     * Issue 1591: Firebug cannot find _firebugConsole element
     * Issue 1640: Fixed install.rdf typo
@@ -163,4 +164,6 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1762: Firebug body is replacing document.body
     * Issue 1764: Net panel misses page load.
     * Issue 1771: Firebug.resetAllOptions: Should this clear debug/developer options?
-    * Issue 1775:       Command Line command could toggle like inspect does
+    * Issue 1775: Command Line command could toggle like inspect does
+    * Issue 1789: Firebug console opens on some sites after console.log called (1.4.0a28)
+    * Issue 1793: Frames (still) cause problems -- detailed example
