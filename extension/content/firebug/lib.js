@@ -431,7 +431,8 @@ this.isVisible = function(elt)
         return (!elt.hidden && !elt.collapsed);
     }
     return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags
-        || elt.namespaceURI == "http://www.w3.org/2000/svg";
+        || elt.namespaceURI == "http://www.w3.org/2000/svg"
+        || elt.namespaceURI == "http://www.w3.org/1998/Math/MathML";
 };
 
 this.collapse = function(elt, collapsed)
@@ -1100,9 +1101,9 @@ this.getClientOffset = function(elt)
     return coords;
 };
 
-this.getRectTRBLWH = function(elt)
+this.getRectTRBLWH = function(elt, context)
 {
-    var rect,
+    var i, rect, frameRect, win,
         coords =
         {
             "top": 0,
@@ -1113,16 +1114,37 @@ this.getRectTRBLWH = function(elt)
             "height": 0
         };
 
+    frameRect = coords;
+        
     if (elt)
     {
+        win = context.window;
+
+        if(win && win.frames.length > 0)
+        {
+            for(i=0; i < win.frames.length; i++)
+            {
+                try
+                {
+                    if(win.frames[i].document == elt.ownerDocument)
+                    {
+                        frameRect = win.frames[i].frameElement.getBoundingClientRect();
+                        break;
+                    }
+                }
+                catch(e)
+                {}
+            }
+        }
+
         rect = elt.getBoundingClientRect();
 
         coords =
         {
-            "top": rect.top,
-            "right": rect.right,
-            "bottom": rect.bottom,
-            "left": rect.left,
+            "top": rect.top + frameRect.top,
+            "right": rect.right + frameRect.right,
+            "bottom": rect.bottom + frameRect.bottom,
+            "left": rect.left + frameRect.left,
             "width": rect.right-rect.left,
             "height": rect.bottom-rect.top
         };

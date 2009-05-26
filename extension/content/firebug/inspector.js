@@ -465,7 +465,7 @@ function getImageMapHighlighter(context)
                     {
                         if(elts[i].getAttribute('usemap') == mapName)
                         {
-                            rect=elts[i].getBoundingClientRect();
+                            rect = getRectTRBLWH(elts[i], context);
 
                             if(multi)
                             {
@@ -505,7 +505,7 @@ function getImageMapHighlighter(context)
 
                     for(var j=0;j<images.length;j++)
                     {
-                        rect = getRectTRBLWH(images[j]);
+                        rect = getRectTRBLWH(images[j], context);
 
                         ctx.beginPath();
 
@@ -573,7 +573,7 @@ FrameHighlighter.prototype =
         if (element instanceof XULElement)
             return;
 
-        var rect = getRectTRBLWH(element),
+        var rect = getRectTRBLWH(element, context),
             x = rect.left,
             y = rect.top,
             w = rect.width,
@@ -746,7 +746,7 @@ BoxModelHighlighter.prototype =
                 return;
 
             var parentStyle = win.getComputedStyle(offsetParent, "");
-            var parentOffset = getRectTRBLWH(offsetParent);
+            var parentOffset = getRectTRBLWH(offsetParent, context);
             var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
             var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
             var parentW = offsetParent.offsetWidth-1;
@@ -755,7 +755,7 @@ BoxModelHighlighter.prototype =
             var style = win.getComputedStyle(element, "");
             var styles = readBoxStyles(style);
 
-            var offset = getRectTRBLWH(element);
+            var offset = getRectTRBLWH(element, context);
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);
             var w = element.offsetWidth - (styles.paddingLeft + styles.paddingRight
