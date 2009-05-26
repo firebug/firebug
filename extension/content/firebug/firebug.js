@@ -365,7 +365,7 @@ top.Firebug =
 
     disablePanels: function(context)
     {
-        Firebug.ModuleManager.disableModules(context);
+        Firebug.ModuleManager.disableModules();
     },
 
     suspend: function()  // dispatch suspendFirebug to all windows
