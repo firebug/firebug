@@ -3311,15 +3311,6 @@ Firebug.ModuleManager =
             }
         );
 
-        if (FirebugContext)  // then update the view
-        {
-            var panel = FirebugContext.getPanel(module.panelName, false);
-            if (panel)
-            {
-                var state = Firebug.getPanelState(panel);
-                panel.show(state);
-            }
-        }
     },
 
     obeyPrefs: function(context)
