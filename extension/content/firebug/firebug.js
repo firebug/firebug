@@ -376,7 +376,7 @@ top.Firebug =
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
     {
         this.setSuspended("suspending");
-        dispatch(activableModules, 'onSuspendFirebug', [FirebugContext]);
+        dispatch(activableModules, 'onSuspendFirebug', [FirebugContext]);  // TODO no context arg
         this.setSuspended("suspended");
     },
 
@@ -388,7 +388,7 @@ top.Firebug =
     resumeFirebug: function()  // dispatch onResumeFirebug to all modules
     {
         this.setSuspended("resuming");
-        dispatch(activableModules, 'onResumeFirebug', [FirebugContext]);
+        dispatch(activableModules, 'onResumeFirebug', [FirebugContext]);// TODO no context arg
         this.setSuspended(null);
     },
 
@@ -1585,9 +1585,17 @@ top.Firebug =
             clearContextTimeout = 0;
         }
 
-        this.updateActiveContexts(context);
+        if (context)
+        {
+            Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
+            this.updateActiveContexts(context);  // resume, after setting FirebugContext
+        }
+        else
+        {
+            this.updateActiveContexts(context);  // suspend, before setting FirebugContext
+            Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
+        }
 
-        Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
@@ -3070,12 +3078,12 @@ Firebug.ActivableModule = extend(Firebug.Module,
         // Module deactivation code.
     },
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function( )
     {
         // When the number of activeContexts decreases to zero. Modules should remove listeners, disable function that takes resources
     },
 
-    onResumeFirebug: function(context)
+    onResumeFirebug: function( )
     {
         // When the number of activeContexts increases from zero. Modules should undo the work done in onSuspendFirebug
     },

@@ -1755,7 +1755,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function()
     {
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
@@ -1763,10 +1763,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var paused = fbs.pause();  // can be called multiple times.
 
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+(context?context.getName():"no context")+"\n");
+            FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+"\n");
     },
 
-    onResumeFirebug: function(context)
+    onResumeFirebug: function()
     {
         if (!Firebug.Debugger.isAlwaysEnabled())
             return;
@@ -1774,7 +1774,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var unpaused = fbs.unPause();
 
         if (FBTrace.DBG_DBG_ACTIVATION)
-            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+ " for "+(context?context.getName():"no context")+"\n");
+            FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled());
         if (FBTrace.DBG_ERRORS && !this.registered)
             FBTrace.sysout("debugger.onResumeFirebug but debugger not registered! *** ");
     },

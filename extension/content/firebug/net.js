@@ -305,24 +305,24 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         unmonitorContext(context);
     },
 
-    onResumeFirebug: function(context)
+    onResumeFirebug: function()
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onResumeFirebug; " + context.getName());
+            FBTrace.sysout("net.onResumeFirebug; ");
 
         // Resume only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled() && context)
-            monitorContext(context);
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            TabWatcher.iterateContexts(monitorContext);
     },
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function()
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.onSuspendFirebug; " + (context?context.getName():"no context"));
+            FBTrace.sysout("net.onSuspendFirebug; ");
 
         // Suspend only if enabled.
-        if (Firebug.NetMonitor.isAlwaysEnabled() && context)
-            unmonitorContext(context);
+        if (Firebug.NetMonitor.isAlwaysEnabled())
+            TabWatcher.iterateContexts(unmonitorContext);
     },
 });
 

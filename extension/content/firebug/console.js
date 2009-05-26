@@ -229,7 +229,7 @@ Firebug.Console = extend(ActivableConsole,
         this.unwatchForErrors();
     },
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
@@ -237,7 +237,7 @@ Firebug.Console = extend(ActivableConsole,
             this.unwatchForErrors();
     },
 
-    onResumeFirebug: function(context)
+    onResumeFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
