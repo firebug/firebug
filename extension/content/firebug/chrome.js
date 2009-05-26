@@ -229,8 +229,6 @@ top.FirebugChrome =
         {
             Firebug.setChrome(this, "detached"); // 1.4
 
-            browser.chrome = null;  // TODO delete this line
-
             Firebug.showContext(browser, context);
 
             if (FBTrace.DBG_WINDOWS)
