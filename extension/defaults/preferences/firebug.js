@@ -157,5 +157,5 @@ pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
 
 //Accessibility
-pref("extensions.firebug.a11y.enableSites", false);
+pref("extensions.firebug.a11y.enable", false);
 

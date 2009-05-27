@@ -112,7 +112,7 @@
                             <menuitem type="checkbox" id="menu_enableA11y"
                                       label="Firebug.menu.Enable Accessibility Enhancements"
                                       oncommand="FirebugChrome.onToggleOption(this)"
-                                      option="a11y.enableSites"/>
+                                      option="a11y.enable"/>
                         </menupopup>
                     </menu>
 

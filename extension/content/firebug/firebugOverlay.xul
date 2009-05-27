@@ -352,7 +352,7 @@
                     <menuitem type="checkbox" id="menu_enableA11y"
                               label="Firebug.menu.Enable Accessibility Enhancements"
                               oncommand="FirebugChrome.onToggleOption(this)"
-                              option="a11y.enableSites"/>
+                              option="a11y.enable"/>
                     <menuseparator id="menu_optionsSeparator"/>
                     <menuitem id="menu_resetAllOptions"
                               label="firebug.menu.Reset All Firebug Options"

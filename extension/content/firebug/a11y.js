@@ -30,12 +30,12 @@ Firebug.A11yModel = extend(Firebug.Module,
         Firebug.Debugger.addListener(this);
 
         // Initialize according to the current pref value.
-        this.updateOption("a11y.enableSites", this.isEnabled());
+        this.updateOption("a11y.enable", this.isEnabled());
     },
 
     isEnabled : function()
     {
-        return Firebug.getPref("extensions.firebug", "a11y.enableSites");
+        return Firebug.getPref("extensions.firebug", "a11y.enable");
     },
 
     updateOption: function(name, value)
@@ -45,7 +45,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 ", Current chrome: " + Firebug.chrome.getName() +
                 ", Original chrome: " + Firebug.originalChrome.getName());
 
-        if (name == "a11y.enableSites")
+        if (name == "a11y.enable")
         {
             // Update for current chrome
             this.set(value, Firebug.chrome);
