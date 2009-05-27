@@ -349,13 +349,13 @@
                     <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="shadeBoxModel"/>
-                    <menuitem type="checkbox" id="menu_enableA11y" 
+                    <menuitem type="checkbox" id="menu_enableA11y"
                               label="Firebug.menu.Enable Accessibility Enhancements"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="a11y.enableSites"/>
                     <menuseparator id="menu_optionsSeparator"/>
-                    <menuitem id="menu_resetAllOptions" 
-                              label="firebug.menu.Reset All Firebug Options" 
+                    <menuitem id="menu_resetAllOptions"
+                              label="firebug.menu.Reset All Firebug Options"
                               command="cmd_resetAllOptions"/>
                 </menupopup>
             </menu>
@@ -386,7 +386,7 @@
 
             <menuseparator id="menu_toolsSeparator"/>
 
-            <menuitem id="menu_customizeShortcuts" 
+            <menuitem id="menu_customizeShortcuts"
                       label="Firebug.menu.Customize shortcuts"
                       command="cmd_customizeFBKeys" key="key_customizeFBKeys" />
 
