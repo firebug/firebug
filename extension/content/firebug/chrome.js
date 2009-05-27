@@ -337,8 +337,12 @@ top.FirebugChrome =
         panelBar1.updatePanels(mainPanelTypes);
     },
 
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    getName: function()
+    {
+        return window ? window.location.href : null;
+    },
 
     close: function()
     {
@@ -531,6 +535,7 @@ top.FirebugChrome =
 
         return switchToPanel;
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Location interface provider for binding.xml panelFileList
 
@@ -541,7 +546,7 @@ top.FirebugChrome =
         {
             return FirebugContext.chrome.getSelectedPanel();  // panels provide location, use the selected panel
         }
-     },
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Synchronization
@@ -568,7 +573,7 @@ top.FirebugChrome =
     syncPanel: function()  // we've decided to have Firebug open
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+
-                (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");
+            (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");
 
         panelStatus.clear();
 

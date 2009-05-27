@@ -42,8 +42,8 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         if (FBTrace.DBG_A11Y)
             FBTrace.sysout("a11y.updateOption; " + name + ": " + value +
-                ", Current chrome: " + Firebug.chrome.window.location.href +
-                ", Original chrome: " + Firebug.originalChrome.window.location.href);
+                ", Current chrome: " + Firebug.chrome.getName() +
+                ", Original chrome: " + Firebug.originalChrome.getName());
 
         if (name == "a11y.enableSites")
         {
@@ -55,8 +55,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 this.set(value, Firebug.originalChrome);
                 if (FBTrace.DBG_A11Y)
-                    FBTrace.sysout("a11y.updateOption; (original chrome) " +
-                        Firebug.chrome.window.location.href);
+                    FBTrace.sysout("a11y.updateOption; (original chrome)");
             }
         }
     },
@@ -65,7 +64,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         if (FBTrace.DBG_A11Y)
             FBTrace.sysout("a11y.reattachContext; " + this.isEnabled() + ", " +
-                Firebug.chrome.window.location.href);
+                Firebug.chrome.getName());
 
         if (this.isEnabled())
             this.set(true, Firebug.chrome);
