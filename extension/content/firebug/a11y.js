@@ -5,10 +5,9 @@ FBL.ns(function() { with (FBL) {
 // ************************************************************************************************
 // Module Management
 
-Firebug.A11yModel = extend(Firebug.ActivableModule,
+Firebug.A11yModel = extend(Firebug.Module,
 {
     dispatchName: "a11y",
-    panelName: "a11y", // We don't have a panel, but we ActivableModule expects one
 
     initialize : function()
     {
@@ -30,59 +29,59 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
         this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
         Firebug.Debugger.addListener(this);
 
-        //this.enabled and this.isEnabled() are not set yet when console and script panels load the first time. Set it manually until they are
-      // XXXjjb
-      //  this.enabled = Firebug.getPref("extensions.firebug.a11y", "enableSites");
+        // Initialize according to the current pref value.
+        this.updateOption("a11y.enableSites", this.isEnabled());
     },
 
     isEnabled : function()
     {
-        return Firebug.chrome.window.a11yEnabled;
+        return Firebug.getPref("extensions.firebug", "a11y.enableSites");
     },
 
-    onPanelEnable : function(panelName)
+    updateOption: function(name, value)
     {
         if (FBTrace.DBG_A11Y)
-            FBTrace.sysout("a11y.onPanelEnable; " + panelName);
+            FBTrace.sysout("a11y.updateOption; " + name + ": " + value +
+                ", Current chrome: " + Firebug.chrome.window.location.href +
+                ", Original chrome: " + Firebug.originalChrome.window.location.href);
 
-        if (panelName == "a11y")
-            this.set(true, Firebug.chrome);
-    },
+        if (name == "a11y.enableSites")
+        {
+            // Update for current chrome
+            this.set(value, Firebug.chrome);
 
-    onPanelDisable : function(panelName)
-    {
-        if (FBTrace.DBG_A11Y)
-            FBTrace.sysout("a11y.onPanelDisable; " + panelName);
-
-        if (panelName == "a11y" && Firebug.chrome.window.a11yEnabled)
-            this.set(false, Firebug.chrome);
+            // If the current chrome is external window, update also original chrome.
+            if (Firebug.chrome != Firebug.originalChrome)
+            {
+                this.set(value, Firebug.originalChrome);
+                if (FBTrace.DBG_A11Y)
+                    FBTrace.sysout("a11y.updateOption; (original chrome) " +
+                        Firebug.chrome.window.location.href);
+            }
+        }
     },
 
     reattachContext : function(browser, context)
     {
+        if (FBTrace.DBG_A11Y)
+            FBTrace.sysout("a11y.reattachContext; " + this.isEnabled() + ", " +
+                Firebug.chrome.window.location.href);
+
         if (this.isEnabled())
             this.set(true, Firebug.chrome);
     },
 
-    toggle : function(currentlyChecked)
-    {
-        if (FBTrace.DBG_A11Y)
-            FBTrace.sysout("a11y.toggle; " + currentlyChecked);
-
-        if (currentlyChecked)
-            Firebug.ModuleManager.disableModule(this);
-        else
-            Firebug.ModuleManager.enableModule(this);
-    },
-
     set : function(enable, chrome)
     {
+        if (chrome.window.a11yEnabled == enable)
+            return;
+
         if (enable)
             this.performEnable(chrome);
         else
             this.performDisable(chrome);
+
         chrome.window.a11yEnabled = enable;
-        $('cmd_enableA11y').setAttribute('checked', enable);
     },
 
     performEnable : function(chrome)
@@ -105,7 +104,8 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
     },
 
     performDisable : function(chrome)
-    {   //undo everything we did in performEnable
+    {
+        //undo everything we did in performEnable
         removeClass(chrome.$('fbContentBox'), 'useA11y');
         removeClass(chrome.$('fbStatusBar'), 'useA11y');
         chrome.$("fbPanelBar1").removeEventListener("keypress", this.handlePanelBarKeyPress , true);
@@ -1894,6 +1894,6 @@ Firebug.A11yModel = extend(Firebug.ActivableModule,
 // ************************************************************************************************
 // Registration
 
-Firebug.registerActivableModule(Firebug.A11yModel);
+Firebug.registerModule(Firebug.A11yModel);
 
 }});
