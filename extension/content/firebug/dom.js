@@ -52,7 +52,8 @@ const RowTag =
 const WatchRowTag =
     TR({class: "watchNewRow", level: 0},
         TD({class: "watchEditCell", colspan: 2},
-            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0', 'aria-label' : $STRF('press enter to add new watch expression')},
+            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
+                'aria-label' : $STR('press enter to add new watch expression')},
                     $STR("NewWatch")
             )
         )
