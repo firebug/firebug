@@ -753,7 +753,12 @@ this.Element = domplate(Firebug.Rep,
 this.TextNode = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTLINK("&quot;$object.nodeValue|cropString&quot;"),
+        OBJECTLINK(
+            "&lt;",
+            SPAN({class: "nodeTag"}, "TextNode"),
+            "&nbsp;textContent=&quot;", SPAN({class: "nodeValue"}, "$object.textContent|cropString"), "&quot;",
+            "&gt;"
+            ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
