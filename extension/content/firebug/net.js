@@ -1830,6 +1830,29 @@ NetProgress.prototype =
         }
     },
 
+    respondedCacheFile: function respondedCacheFile(request, time)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.respondedCacheFile; REMOVE FROM PENDINGS " +
+                    safeGetName(request));
+
+            // Remove reqeust/file from the pending array (this array represents the
+            // big hack / related to the fact that the http-on-examine-cached-response
+            // wasn't send till Fx 3.5)
+            // xxxHonza: the entire hack can be removed in FB 1.5 (as soon as only Fx 3.5
+            // is supported).
+            this.arriveFile(file, request);
+        }
+        else
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.respondedCacheFile; NO FILE FOR " + safeGetName(request));
+        }
+    },
+
     waitingForFile: function waitingForFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
@@ -2218,6 +2241,7 @@ NetProgress.prototype =
 
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
+var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
 var connectingFile = NetProgress.prototype.connectingFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
 var receivingFile = NetProgress.prototype.receivingFile;
@@ -2527,8 +2551,8 @@ function waitForCacheCompletion(request, file, netProgress)
         if (descriptor)
             netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
 
-        //if (FBTrace.DBG_NET)
-        //    FBTrace.sysout("waitForCacheCompletion "+(descriptor?"posted ":"no cache entry ")+file.href+"\n");
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("waitForCacheCompletion "+(descriptor?"posted ":"no cache entry ")+file.href+"\n");
     }
     catch (exc)
     {
@@ -3283,6 +3307,8 @@ var HttpObserver =
                 this.onModifyRequest(subject, win, tabId, context);
             else if (topic == "http-on-examine-response")
                 this.onExamineResponse(subject, win, tabId, context);
+            else if (topic == "http-on-examine-cached-response")
+                this.onExamineCachedResponse(subject, win, tabId, context);
         }
         catch (err)
         {
@@ -3349,6 +3375,16 @@ var HttpObserver =
 
         if (networkContext)
             networkContext.post(respondedFile, [request, now(), info]);
+    },
+
+    onExamineCachedResponse: function(request, win, tabId, context)
+    {
+        var networkContext = contexts[tabId];
+        if (!networkContext)
+            networkContext = context ? context.netProgress : null;
+
+        if (networkContext)
+            networkContext.post(respondedCacheFile, [request, now()]);
     },
 
     /* nsISupports */
