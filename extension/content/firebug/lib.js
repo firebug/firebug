@@ -343,7 +343,7 @@ function $STR(name, bundle)
     }
     catch (err)
     {
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_LOCALE)
         {
             FBTrace.sysout("lib.getString: " + name + "\n");
             FBTrace.sysout("lib.getString FAILS ", err);
@@ -376,7 +376,7 @@ function $STRF(name, args, bundle)
     }
     catch (err)
     {
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_LOCALE)
         {
             FBTrace.sysout("lib.getString: " + name + "\n");
             FBTrace.sysout("lib.getString FAILS ", err);
