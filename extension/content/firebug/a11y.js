@@ -30,8 +30,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         Firebug.Debugger.addListener(this);
 
         // Initialize according to the current pref value.
-        chrome.window.a11yEnabled = this.isEnabled();
-        this.updateOption("a11y.enable", chrome.window.a11yEnabled);
+        Firebug.chrome.window.a11yEnabled = this.isEnabled();
+        this.updateOption("a11y.enable", Firebug.chrome.window.a11yEnabled);
     },
 
     isEnabled : function()
