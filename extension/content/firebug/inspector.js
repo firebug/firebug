@@ -201,6 +201,9 @@ Firebug.Inspector = extend(Firebug.Module,
         if (!win || !win.document)
             return;
 
+        if (FBTrace.DBG_INSPECT)
+            FBTrace.sysout("inspector.attacheInspectListeners to alls subWindows of "+win.location);
+
         var chrome = Firebug.chrome;
 
         this.keyListeners =
@@ -213,6 +216,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
         iterateWindows(win, bind(function(subWin)
         {
+            if (FBTrace.DBG_INSPECT)
+                FBTrace.sysout("inspector.attacheInspectListeners to "+subWin.location+" subWindow of "+win.location);
             subWin.document.addEventListener("mouseover", this.onInspectingMouseOver, true);
             subWin.document.addEventListener("mousedown", this.onInspectingMouseDown, true);
             subWin.document.addEventListener("click", this.onInspectingClick, true);
@@ -570,9 +575,6 @@ FrameHighlighter.prototype =
 {
     highlight: function(context, element)
     {
-        if (element instanceof XULElement)
-            return;
-
         var rect = getRectTRBLWH(element, context),
             x = rect.left,
             y = rect.top,
@@ -902,6 +904,8 @@ BoxModelHighlighter.prototype =
         {
             var doc = context.window.document;
             if (FBTrace.DBG_ERRORS && !doc) FBTrace.sysout("inspector getNodes no document for window:"+window.location);
+            if (FBTrace.DBG_INSPECT && doc)
+                FBTrace.sysout("inspect.getNodes doc: "+doc.location);
 
             function createRuler(name)
             {
@@ -979,7 +983,7 @@ function getFirebugBody(context)
     if (body)
     {
         if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("getFirebugBody", body);
+            FBTrace.sysout("getFirebugBody for doc "+doc.location, body);
 
         return body;
     }
