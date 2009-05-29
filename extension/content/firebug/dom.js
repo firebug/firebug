@@ -249,6 +249,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 {
     tag: DirTablePlate.tableTag,
 
+    getRealObject: function(object)
+    {
+        // TODO: Move this to some global location
+        // TODO: Unwrapping should be centralized rather than sprinkling it around ad hoc.
+        // TODO: We might be able to make this check more authoritative with QueryInterface.
+        if (!object) return object;
+        if (object.wrappedJSObject) return object.wrappedJSObject;
+        return object;
+    },
+
     rebuild: function(update, scrollTop)
     {
         dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
@@ -367,6 +377,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     getRowPropertyValue: function(row)
     {
         var object = this.getRowObject(row);
+        object = this.getRealObject(object);
         if (object)
         {
             var propName = getRowName(row);
@@ -438,6 +449,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             var object = getRowOwnerObject(row);
             if (!object)
                 object = this.selection;
+            object = this.getRealObject(object);
 
             if (object)
             {
@@ -470,6 +482,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             return;
 
         var object = this.getRowObject(row);
+        object = this.getRealObject(object);
         if (object && !(object instanceof jsdIStackFrame))
         {
              // unwrappedJSObject.property = unwrappedJSObject
