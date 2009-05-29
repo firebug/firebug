@@ -1552,14 +1552,19 @@ this.isWhitespace = function(text)
 
 this.splitLines = function(text)
 {
-    if (text.split)
-        return text.split(reSplitLines);
+    const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
+    var lines;
+    if (text.match)
+    {
+        lines = text.match(reSplitLines2);
+    }
     else
     {
         var str = text+"";
-        var theSplit = str.split(reSplitLines);
-        return theSplit;
+        lines = str.match(reSplitLines2);
     }
+    lines.pop();
+    return lines;
 };
 
 this.trimLeft = function(text)
@@ -1598,7 +1603,7 @@ this.wrapText = function(text, noEscapeHTML)
         if (!noEscapeHTML) html.push("</pre>");
     }
 
-    return html.join(noEscapeHTML ? "\n" : "");
+    return html.join("");
 }
 
 this.insertWrappedText = function(text, textBox, noEscapeHTML)

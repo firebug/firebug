@@ -217,25 +217,8 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
     {
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("sourceCache for "+this.context.getName()+" store url="+url+"\n");
-        var lines = this.splitLines(text);
+        var lines = splitLines(text);
         return this.storeSplitLines(url, lines);
-    },
-
-    splitLines: function(text)
-    {
-        const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
-        var lines;
-        if (text.match)
-        {
-            lines = text.match(reSplitLines2);
-        }
-        else
-        {
-            var str = text+"";
-            lines = str.match(reSplitLines2);
-        }
-        lines.pop();
-        return lines;
     },
 
     storeSplitLines: function(url, lines)
