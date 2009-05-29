@@ -122,15 +122,15 @@
 }
 
 #fbCommandToggleSmall {
-    list-style-image: url(chrome://firebug/skin/win/detach.png);
+    list-style-image: url(chrome://firebug/skin/win/up.png);
 }
 
 #fbCommandToggleSmall:hover {
-    list-style-image: url(chrome://firebug/skin/win/detachHover.png);
+    list-style-image: url(chrome://firebug/skin/win/upHover.png);
 }
 
 #fbCommandToggleSmall:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/detachActive.png);
+    list-style-image: url(chrome://firebug/skin/win/upActive.png);
 }
 
 #fbCommandToggleLarge {
