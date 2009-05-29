@@ -568,7 +568,6 @@ FirebugService.prototype =
             if (!urlBreakpoints)
                 continue;
 
-            urlBreakpoints = urlBreakpoints.slice();
             for (var j = 0; j < urlBreakpoints.length; ++j)
             {
                 var bp = urlBreakpoints[j];
