@@ -153,8 +153,8 @@ Firebug.InfoTip = extend(Firebug.Module,
 
             if (y+infoTip.offsetHeight+infoTipMargin > panelHeight)
             {
-                infoTip.style.top = "auto";
-                infoTip.style.bottom = ((panelHeight-y)+infoTipMargin) + "px";
+                infoTip.style.top = Math.max(0, panelHeight-(infoTip.offsetHeight+infoTipMargin)) + "px";
+                infoTip.style.bottom = "auto";
             }
             else
             {
@@ -166,7 +166,7 @@ Firebug.InfoTip = extend(Firebug.Module,
                 FBTrace.sysout("infotip.showInfoTip; top: " + infoTip.style.top +
                     ", left: " + infoTip.style.left + ", bottom: " + infoTip.style.bottom +
                     ", right:" + infoTip.style.right + ", offsetHeight: " + infoTip.offsetHeight +
-                    ", y: " + y + ", " + panelHeight);
+                    ", y: " + y + ", panelHeight: " + panelHeight);
 
             infoTip.setAttribute("active", "true");
         }
