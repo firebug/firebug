@@ -162,6 +162,12 @@ Firebug.InfoTip = extend(Firebug.Module,
                 infoTip.style.bottom = "auto";
             }
 
+            if (FBTrace.DBG_INFOTIP)
+                FBTrace.sysout("infotip.showInfoTip; top: " + infoTip.style.top +
+                    ", left: " + infoTip.style.left + ", bottom: " + infoTip.style.bottom +
+                    ", right:" + infoTip.style.right + ", offsetHeight: " + infoTip.offsetHeight +
+                    ", y: " + y + ", " + panelHeight);
+
             infoTip.setAttribute("active", "true");
         }
         else
