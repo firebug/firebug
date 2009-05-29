@@ -1735,7 +1735,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (this.dependents[i].isAlwaysEnabled())
                 {
                     var name = this.dependents[0].dispatchName; // TODO getName() for modules required.
-                    Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it");
+                    if (FirebugContext)
+                        Firebug.Console.log("Cannot disable the script panel, "+name+" panel requires it", FirebugContext);
                     if (FBTrace.DBG_PANELS) FBTrace.sysout("debugger.onPanelDisable rejected: "+ name+" dependent, with panelName: "+panelName);
                     return;
                 }
