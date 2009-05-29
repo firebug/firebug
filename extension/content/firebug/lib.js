@@ -1115,7 +1115,7 @@ this.getRectTRBLWH = function(elt, context)
         };
 
     frameRect = coords;
-        
+
     if (elt)
     {
         win = context.window;
@@ -1178,7 +1178,7 @@ this.isScrolledToBottom = function(element)
 this.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight - element.offsetHeight;
-    
+
     if (FBTrace.DBG_CONSOLE)
         element.wasScrolledToBottom = true;
 };
@@ -2157,14 +2157,14 @@ this.getAllStyleSheets = function(context)
         if (!sheet.href || !recordedSheets[sheet.href])
         {
             styleSheets.push(sheet);
-    
+
             for (var i = 0; i < sheet.cssRules.length; ++i)
             {
                 var rule = sheet.cssRules[i];
                 if (rule instanceof CSSImportRule)
                     addSheet(rule.styleSheet);
             }
-            
+
             recordedSheets[sheet.href] = true;
         }
     }
@@ -4179,7 +4179,7 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
-    if (this.href.kind == "source")
+    if (this.href.kind == "source" || this.href.kind == "data")
         return FBL.splitURLBase(this.href);
 
     if (!this.summary)
