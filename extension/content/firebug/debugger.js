@@ -1001,10 +1001,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var sourceFile = this.getEvalLevelSourceFile(frame, context, innerScripts);
 
             if (FBTrace.DBG_EVAL)
-            {
-                FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href+"\n");
-                FBTrace.sysout( traceToString(FBL.getStackTrace(frame, context))+"\n" );
-            }
+                FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href, FBL.getStackTrace(frame, context));
 
             dispatch(this.fbListeners,"onEvalScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
@@ -1299,7 +1296,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var mapType = PCMAP_PRETTYPRINT;
         }
         if (FBTrace.DBG_EVAL)
-            FBTrace.sysout("getEvalLevelSourceFile mapType:"+(mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY"+" source:"+source+"\n");
+            FBTrace.sysout("getEvalLevelSourceFile mapType:"+((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source+"\n");
 
         var lines = splitLines(source);
 
@@ -1325,7 +1322,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 return url;
         }
 
-        var url = this.getURLFromLastLine(lines);
+        var url = this.getURLFromLastLine(context, lines);
         if (url)
             return url;
 
@@ -1363,7 +1360,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return url;
     },
 
-    getURLFromLastLine: function(lines)
+    getURLFromLastLine: function(context, lines)
     {
         var url = null;
         // Ignores any trailing whitespace in |source|
@@ -1371,7 +1368,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var m = reURIinComment.exec(lines[lines.length - 1]);
         if (m)
         {
+            // add context info to the sourceURL so eval'd sources are grouped correctly in the source file list
+            if (m[1] && m[1].indexOf('://') == -1) {
+                var loc = context.window.location;
+                if (m[1].charAt(0) != '/') m[1] = '/'+m[1]; // prepend leading slash if necessary
+                m[1] = loc.protocol + '//' + loc.host + m[1]; // prepend protocol and host
+            }
+
             url = new String(m[1]);
+
             url.kind = "source";
             if (FBTrace.DBG_SOURCEFILES)
                 FBTrace.sysout("debugger.getURLFromLastLine "+url, url);
@@ -1390,11 +1395,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context.dynamicURLhasBP)
         {
             // If no breakpoints live in dynamic code then we don't need to compare
-            // the previous and reloaded source. In that case let's us a cheap URL.
+            // the previous and reloaded source. In that case let's use a cheap URL.
             url = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++));
             url.kind = "seq";
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("debugger.getSequentialURL "+url, url);
+                FBTrace.sysout("debugger.getSequentialURL context:"+context.getName()+" url:"+url, url);
         }
         return url;
     },
