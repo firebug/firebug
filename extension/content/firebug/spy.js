@@ -215,7 +215,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getFullUri: function(spy)
     {
-        return spy.getURL();
+        return spy.method.toUpperCase() + " " + spy.getURL();
     },
 
     getStatus: function(spy)
