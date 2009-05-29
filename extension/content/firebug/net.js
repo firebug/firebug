@@ -3301,7 +3301,12 @@ var HttpObserver =
             // These are ignored as Net panel shows only page requests.
             var tabId = Firebug.getTabIdForWindow(win);
             if (!(tabId && win))
+            {
+                if (FBTrace.DBG_NET)
+                    FBTrace.sysout("net.observe NO TAB " + safeGetName(subject) +
+                        ", " + tabId + ", " + win);
                 return;
+            }
 
             if (topic == "http-on-modify-request")
                 this.onModifyRequest(subject, win, tabId, context);
