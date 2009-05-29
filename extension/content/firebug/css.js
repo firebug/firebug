@@ -203,9 +203,9 @@ Firebug.CSSModule = extend(Firebug.Module, {
     },
     deleteRule: function(styleSheet, ruleIndex) {
         if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);
-        styleSheet.deleteRule(ruleIndex);
-
         dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
+
+        styleSheet.deleteRule(ruleIndex);
     },
     setProperty: function(style, propName, propValue, propPriority) {
         var prevValue = style.getPropertyValue(propName);
