@@ -1,4 +1,4 @@
-8/29/2007/* See license.txt for terms of usage */
+/* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
 
