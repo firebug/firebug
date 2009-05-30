@@ -4179,7 +4179,7 @@ this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 {
-    return this.outerScript.baseLineNumber; // baseLineNumber always valid even after jsdIscript isValid false
+    return this.outerScript.baseLineNumber - 1; // baseLineNumber always valid even after jsdIscript isValid false
 }
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
