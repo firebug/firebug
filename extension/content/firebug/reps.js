@@ -453,6 +453,8 @@ this.Arr = domplate(Firebug.Rep,
                 return false;
             else if (isFinite(obj.length) && typeof obj.splice === 'function')
                 return true;
+            else if (isFinite(obj.length) && typeof obj.callee === 'function') // arguments
+                return true;
             else if (obj instanceof HTMLCollection)
                 return true;
             else if (obj instanceof NodeList)
