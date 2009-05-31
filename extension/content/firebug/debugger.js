@@ -1295,13 +1295,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var source = frame.script.functionSource; // XXXms - possible crash on OSX FF2
             var mapType = PCMAP_PRETTYPRINT;
         }
-        if (FBTrace.DBG_EVAL)
-            FBTrace.sysout("getEvalLevelSourceFile mapType:"+((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source+"\n");
 
         var lines = splitLines(source);
 
+        if (FBTrace.DBG_EVAL)
+            FBTrace.sysout("getEvalLevelSourceFile "+lines.length+ "lines, mapType:"+((mapType==PCMAP_SOURCETEXT)?"SOURCE":"PRETTY")+" source:"+source+"\n");
+
         var url = this.getDynamicURL(context, normalizeURL(frame.script.fileName), lines, "eval");
 
+        context.sourceCache.invalidate(url);
         context.sourceCache.storeSplitLines(url, lines);
 
         var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
