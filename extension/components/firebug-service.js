@@ -2435,6 +2435,8 @@ function isFilteredURL(rawJSD_script_filename)
 {
     if (!rawJSD_script_filename)
         return true;
+    if (fbs.filterConsoleInjections)
+        return true;
     if (rawJSD_script_filename[0] == 'h')
         return false;
     if (rawJSD_script_filename == "XPCSafeJSObjectWrapper.cpp")

@@ -798,7 +798,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 if (Firebug.Console.isAlwaysEnabled())
                 {
+                    // This is how the console is injected ahead of JS running on the page
+                    fbs.filterConsoleInjections = true;
                     var consoleReady = Firebug.Console.isReadyElsePreparing(context, frameWin);
+                    fbs.filterConsoleInjections = false;
                     if (FBTrace.DBG_CONSOLE)
                         FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady:"+consoleReady, frameWin);
                 }
