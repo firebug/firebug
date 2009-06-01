@@ -1462,6 +1462,13 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             for (ruleIndex=0; ruleIndex<cssRules.length && parent!=cssRules[ruleIndex]; ruleIndex++) {}
         }
 
+        // Delete in all cases except for new add
+        // We want to do this before the insert to ease change tracking
+        if (oldStyle)
+        {
+            Firebug.CSSModule.deleteRule(styleSheet, ruleIndex);
+        }
+
         // Firefox does not follow the spec for the update selector text case.
         // When attempting to update the value, firefox will silently fail.
         // See https://bugzilla.mozilla.org/show_bug.cgi?id=37468 for the quite
@@ -1498,12 +1505,6 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
         } else {
             style = undefined;
-        }
-
-        // Delete in all cases except for new add
-        if (oldStyle)
-        {
-            Firebug.CSSModule.deleteRule(styleSheet, ruleIndex);
         }
 
         // Update the rep object
