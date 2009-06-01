@@ -1501,6 +1501,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             {
                 if (FBTrace.DBG_CSS) FBTrace.sysout("CSS Insert Error: ", err);
                 target.innerHTML = escapeHTML(previousValue);
+                row.repObject = undefined;
                 return;
             }
         } else {
