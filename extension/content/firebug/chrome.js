@@ -367,9 +367,12 @@ top.FirebugChrome =
             ? LOAD_FLAGS_BYPASS_PROXY | LOAD_FLAGS_BYPASS_CACHE
             : LOAD_FLAGS_NONE;
 
-        var browser = this.getCurrentBrowser();
+        var browser = Firebug.tabBrowser.selectedBrowser
         browser.firebugReload = true;
         browser.webNavigation.reload(reloadFlags);
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("chrome.reload; " + skipCache + ", " + browser.currentURI.spec);
     },
 
     gotoPreviousTab: function()
