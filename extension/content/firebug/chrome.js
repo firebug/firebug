@@ -367,7 +367,8 @@ top.FirebugChrome =
             ? LOAD_FLAGS_BYPASS_PROXY | LOAD_FLAGS_BYPASS_CACHE
             : LOAD_FLAGS_NONE;
 
-        var browser = Firebug.tabBrowser.selectedBrowser
+        // Make sure the selected tab in the attached browser window is refreshed.
+        var browser = Firebug.tabBrowser.selectedBrowser;
         browser.firebugReload = true;
         browser.webNavigation.reload(reloadFlags);
 
