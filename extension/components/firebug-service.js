@@ -200,7 +200,7 @@ function FirebugService()
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
     this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
                         .createInstance(Components.interfaces.nsIMutableArray);  // scripts contained in leveledScript that have not been drained
-    this.ff3p1 = versionChecker.compare(appInfo.version, "3.1*") >= 0;
+    this.FF3p5 = versionChecker.compare(appInfo.version, "3.5*") >= 0;
 }
 
 FirebugService.prototype =
@@ -312,7 +312,7 @@ FirebugService.prototype =
             if (debuggers.length == 1)
                 this.enableDebugger();
             if (FBTrace.DBG_FBS_FINDDEBUGGER  || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd"));
+                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd")+" pauseDepth:"+(jsd?jsd.pauseDepth:"off"));
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";
@@ -963,11 +963,22 @@ FirebugService.prototype =
     {
         if (!enabledDebugger)
             return "not enabled";
-        if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
-            jsd.pause();
-        dispatch(clients, "onJSDDeactivate", [jsd, "pause depth "+jsd.pauseDepth]);
-        if (!jsd)
-            FBTrace.sysout("*********************** deactivate JSD NULL ");
+        var rejection = [];
+        dispatch(clients, "onPauseJSDRequested", [rejection]);
+
+        if (rejection.length == 0)
+        {
+            if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
+                jsd.pause();
+            dispatch(clients, "onJSDDeactivate", [jsd, "pause depth "+jsd.pauseDepth]);
+        }
+        else
+        {
+            while (jsd.pauseDepth > 0)
+                jsd.unPause();
+        }
+        if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("fbs.pause depth "+jsd.pauseDepth+" rejection "+rejection.length+" from clients "+clients, rejection);
         return jsd.pauseDepth;
     },
 
@@ -979,8 +990,8 @@ FirebugService.prototype =
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause depth "+depth);
             dispatch(clients, "onJSDActivate", [jsd, "unpause depth"+jsd.pauseDepth]);
-            if (!jsd)
-                FBTrace.sysout("*********************** activate JSD NULL ");
+            if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("fbs.unpause depth "+jsd.pauseDepth);
         }
         return jsd.pauseDepth;
     },
@@ -1276,7 +1287,7 @@ FirebugService.prototype =
             reportNextError = true;
             if (FBTrace.DBG_FBS_ERRORS)
             {
-                FBTrace.sysout("fbs.onError showStackTrace, we will try to drop into onDebug\n");
+                FBTrace.sysout("fbs.onError debugs missed:("+fbs.onDebugRequests+") showStackTrace, we will try to drop into onDebug\n");
                 fbs.onDebugRequests++;
             }
             return false; // Drop into onDebug, sometimes only
@@ -1504,7 +1515,9 @@ FirebugService.prototype =
 
                 script.setBreakpoint(0);
                 if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_BP)
-                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName);
+                {
+                    FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+" jsd depth:"+(jsd.isOn?jsd.pauseDepth+"":"OFF"));
+                }
             }
             else if (script.baseLineNumber == 1)
             {
@@ -1565,7 +1578,7 @@ FirebugService.prototype =
             var msg = [];
             for (var frame = Components.stack; frame; frame = frame.caller)
                 msg.push( frame.filename + "@" + frame.lineNumber +": "+frame.sourceLine  );
-            FBTrace.sysout("createdScriptHasCaller "+msg.length+" FF3.1:"+this.ff3p1, msg);
+            FBTrace.sysout("createdScriptHasCaller "+msg.length+" FF3.1:"+this.FF3p5, msg);
         }
 
         var frame = Components.stack; // createdScriptHasCaller
@@ -1573,7 +1586,7 @@ FirebugService.prototype =
         frame = frame.caller;         // onScriptCreated
         if (!frame) return frame;
 
-        if (!this.ff3p1)
+        if (!this.FF3p5)
         {
             frame = frame.caller;         // native jsd?
             if (!frame) return frame;
@@ -1841,7 +1854,7 @@ FirebugService.prototype =
             bp = this.recordBreakpoint(type, url, lineNo, debuggr, props);
             fbs.setJSDBreakpoint(sourceFile, bp);
         }
-        if (FBTrace.DBG_FBS_BP) FBTrace.sysout("addBreakpoint", bp);
+        if (FBTrace.DBG_FBS_BP) FBTrace.sysout("addBreakpoint for "+url, [bp, sourceFile]);
         return bp;
     },
 
@@ -2019,6 +2032,22 @@ FirebugService.prototype =
                 }
             }
         }
+        else
+        {
+        	if (FBTrace.DBG_FBS_BP)
+        	{
+            	var tp = 0;
+            	for (var p in breakpoints)
+            	{
+                	if (breakpoints.hasOwnProperty(p))
+                	{
+                    	FBTrace.sysout(url+" =("+(p==url)+")="+p);
+                    	tp++;
+                	}
+            	}
+            	FBTrace.sysout("resetBreakpoints total bp="+tp, breakpoints);
+            }
+        }
     },
 
     setJSDBreakpoint: function(sourceFile, bp)
@@ -2043,7 +2072,11 @@ FirebugService.prototype =
         {
             var script = scripts[i];
             if (!script.isValid)
+            {
+                if (FBTrace.DBG_FBS_BP)
+                    FBTrace.sysout("setJSDBreakpoint:  tag "+script.tag+", "+i+"/"+scripts.length+" is invalid\n");
                 continue;
+            }
 
             var pcmap = sourceFile.pcmap_type;
             if (!pcmap)
