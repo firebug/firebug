@@ -832,7 +832,7 @@ function cleanIndentation(text)
         if (indent >= minIndent)
             lines[i] = line.substr(minIndent);
     }
-    return lines.join("\n");
+    return lines.join("");
 }
 
 // ************************************************************************************************
