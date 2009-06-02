@@ -2536,9 +2536,7 @@ function initCacheSession()
     {
         var cacheService = CacheService.getService(nsICacheService);
         cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
-
-        // xxxHonza setting this to false makes problems with the cache. See Issue 1029.
-        //cacheSession.doomEntriesIfExpired = false;
+        cacheSession.doomEntriesIfExpired = false;
     }
 }
 
@@ -2549,7 +2547,10 @@ function waitForCacheCompletion(request, file, netProgress)
         initCacheSession();
         var descriptor = cacheSession.openCacheEntry(file.href, ACCESS_READ, false);
         if (descriptor)
+        {
             netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
+            descriptor.close();
+        }
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("waitForCacheCompletion "+(descriptor?"posted ":"no cache entry ")+file.href+"\n");
@@ -2630,6 +2631,7 @@ function getCacheEntry(file, netProgress)
                             }
                         });
 
+                        descriptor.close();
                         netProgress.update(file);
                     }
                 }
