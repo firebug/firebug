@@ -733,7 +733,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onPauseJSDRequested: function(rejection)
     {
         dispatch2(this.fbListeners, "onPauseJSDRequested", [rejection]);
-        FBTrace.sysout("debugger.onPauseJSDRequested "+rejection.length);
     },
 
     onJSDActivate: function(jsd, why)  // just before hooks are set
