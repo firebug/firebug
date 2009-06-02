@@ -978,7 +978,11 @@ FirebugService.prototype =
                 jsd.unPause();
         }
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("fbs.pause depth "+jsd.pauseDepth+" rejection "+rejection.length+" from clients "+clients, rejection);
+        {
+            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from "+clients.length+" clients ");
+            // The next line gives NS_ERROR_NOT_AVAILABLE
+            // FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from clients "+clients, rejection);
+        }
         return jsd.pauseDepth;
     },
 
@@ -1074,6 +1078,8 @@ FirebugService.prototype =
         }
         catch(exc)
         {
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("onBreak failed: "+exc,exc);
             ERROR("onBreak failed: "+exc);
         }
         return RETURN_CONTINUE;
@@ -1096,7 +1102,7 @@ FirebugService.prototype =
          catch(exc)
          {
             if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("onDebugger failed: ",exc);
+                FBTrace.sysout("onDebugger failed: "+exc,exc);
 
             ERROR("onDebugger failed: "+exc);
             return RETURN_CONTINUE;
@@ -2034,18 +2040,18 @@ FirebugService.prototype =
         }
         else
         {
-        	if (FBTrace.DBG_FBS_BP)
-        	{
-            	var tp = 0;
-            	for (var p in breakpoints)
-            	{
-                	if (breakpoints.hasOwnProperty(p))
-                	{
-                    	FBTrace.sysout(url+" =("+(p==url)+")="+p);
-                    	tp++;
-                	}
-            	}
-            	FBTrace.sysout("resetBreakpoints total bp="+tp, breakpoints);
+            if (FBTrace.DBG_FBS_BP)
+            {
+                var tp = 0;
+                for (var p in breakpoints)
+                {
+                    if (breakpoints.hasOwnProperty(p))
+                    {
+                        FBTrace.sysout(url+" =("+(p==url)+")="+p);
+                        tp++;
+                    }
+                }
+                FBTrace.sysout("resetBreakpoints total bp="+tp, breakpoints);
             }
         }
     },
