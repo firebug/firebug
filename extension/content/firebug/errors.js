@@ -228,7 +228,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             return null;
 
         Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
-        context.thrownStackTrace = null;
 
         if (!isWarning)
             this.increaseCount(context);
@@ -240,14 +239,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         if (context)
         {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.getName()+"\n");
              // then report later to avoid loading sourceS
             context.throttle(Firebug.Console.log, Firebug.Console, [error, context,  className, false, true], true);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.window.location+"\n");
         }
         else
         {
-            Firebug.Console.log(error, context,  className);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe direct log to "+context+"\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe direct log to FirebugContext"+FirebugContext+"\n");
+            Firebug.Console.log(error, FirebugContext,  className);
         }
         return context;
     },
@@ -510,6 +509,7 @@ function checkForUncaughtException(context, object)
             {
                 Firebug.errorStackTrace = context.thrownStackTrace;
                 if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe trace.frames", context.thrownStackTrace.frames);
+                delete context.thrownStackTrace;
             }
             else
             {
@@ -522,6 +522,7 @@ function checkForUncaughtException(context, object)
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
         }
     }
+    delete context.thrownStackTrace;
     return false;
 }
 
@@ -532,8 +533,9 @@ function getExceptionContext(context)
     {
         var errorContext = TabWatcher.getContextByWindow(errorWin);
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe exception context:"+errorContext+" errorWin: "+errorWin+"\n");
-        return errorContext;
+            FBTrace.sysout("errors.observe exception context:"+(errorContext?errorContext.getName():"none")+" errorWin: "+errorWin+"\n");
+        if (errorContext)
+            return errorContext;
     }
     return context;
 }
