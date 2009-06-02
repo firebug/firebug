@@ -29,6 +29,7 @@ const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
 const reNotWhitespace = /[^\s]/;
 const reSplitFile = /:\/{1,3}(.*?)\/([^\/]*?)\/?($|\?.*)/;
 const reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;  // This RE and the previous one should changed to be consistent
+const reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
 // Globals
 this.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 this.reJavascript = /\s*javascript:\s*(.*)/;
@@ -2814,7 +2815,7 @@ this.isSystemURL = function(url)
     if (url[0] == 'h') return false;
     if (url.substr(0, 9) == "resource:")
         return true;
-    else if (url.substr(0, 17) == "chrome://firebug/")
+    else if (url.substr(0, 16) == "chrome://firebug")
         return true;
     else if (url  == "XPCSafeJSObjectWrapper.cpp")
         return true;
@@ -2976,6 +2977,14 @@ this.normalizeURL = function(url)  // this gets called a lot, any performance im
         // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
         // don't match up with the URLs we get back from the DOM
         url = url.replace(/file:\/([^/])/g, "file:///$1");
+        if (url.indexOf('chrome:')==0)
+        {
+            var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
+            if (m)
+            {
+                url = "chrome://"+m[1].toLowerCase()+"/"+m[2];
+            }
+        }
     }
     return url;
 };
@@ -4479,7 +4488,7 @@ this.getSourceFileByScript = function(context, script)
         return lucky;
 
     if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.getName()+": ", context.sourceFileMap);
+        FBTrace.sysout("getSourceFileByScript looking for "+script.tag+" in "+context.getName()+": ", context.sourceFileMap);
 
     for (var url in context.sourceFileMap)
     {
