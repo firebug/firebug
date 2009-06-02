@@ -27,6 +27,21 @@ Firebug.CommandLine = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // targetWindow was needed by evaluateInSandbox, let's leave it for a while in case we rethink this yet again
+    
+    initializeCommandLineIfNeeded: function (context, win)
+    {
+      if (context == null) return;
+      if (win == null) return;
+
+      // The command-line requires that the console has been initialized first,
+      // so make sure that's so.  This call should have no effect if the console
+      // is already initialized.
+      Firebug.Console.isReadyElsePreparing(context, win);
+      
+      // Make sure the command-line is initialized.  This call should have no
+      // effect if the command-line is already initialized.
+      Firebug.CommandLine.isReadyElsePreparing(context, win); 
+    },
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
     {
@@ -60,7 +75,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         return result;
     },
 
-
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
@@ -69,6 +83,9 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
             return;
         }
+        
+        // We're going to use some command-line facilities, but it may not have initialized yet.
+        this.initializeCommandLineIfNeeded(context, win);
 
         // Make sure the command line script is attached.
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
@@ -77,19 +94,9 @@ Firebug.CommandLine = extend(Firebug.Module,
             var attached = element.getAttribute("firebugCommandLineAttached");
             if (!attached)
             {
-                Firebug.CommandLine.injector.attachCommandLine(context, win);
-                attached = element.getAttribute("firebugCommandLineAttached");
-                if (FBTrace.DBG_ERRORS)
-                {
-                    if (attached)
-                        FBTrace.sysout("Successfully attached command line");
-                    else
-                    {
-                        FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
-                        Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
-                        return;
-                    }
-                }
+                FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
+                Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                return;
             }
         }
         else
@@ -825,7 +832,7 @@ function cleanIndentation(text)
         if (indent >= minIndent)
             lines[i] = line.substr(minIndent);
     }
-    return lines.join("");
+    return lines.join("\n");
 }
 
 // ************************************************************************************************
