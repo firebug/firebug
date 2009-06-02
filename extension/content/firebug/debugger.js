@@ -635,7 +635,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 chrome.syncSidePanels();
 
                 var panel = context.getPanel("script", true);
-                if (panel)
+                if (panel && panel == Firebug.chrome.getSelectedPanel())
                     panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
 
                 context.executingSourceFile = null;
