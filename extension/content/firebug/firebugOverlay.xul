@@ -32,10 +32,10 @@
         <command id="cmd_toggleHTMLEditing" oncommand="FirebugContext.getPanel('html').toggleEditing()"/>
         <command id="cmd_toggleCSSEditing" oncommand="FirebugContext.getPanel('stylesheet').toggleEditing()"/>
 
-        <command id="cmd_focusCommandLine" oncommand="Firebug.CommandLine.focus(FirebugContext)"/>
-        <command id="cmd_focusFirebugSearch" oncommand="Firebug.Search.focus(FirebugContext)"/>
-        <command id="cmd_focusWatchEditor" oncommand="Firebug.Debugger.focusWatch(FirebugContext)"/>
-        <command id="cmd_focusLocation" oncommand="FirebugChrome.focusLocationList(FirebugContext)"/>
+        <command id="cmd_focusCommandLine" oncommand="if (FirebugContext) Firebug.CommandLine.focus(FirebugContext)"/>
+        <command id="cmd_focusFirebugSearch" oncommand="if (FirebugContext) Firebug.Search.focus(FirebugContext);"/>
+        <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
+        <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
 
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" breakable="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
@@ -101,18 +101,18 @@
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
-                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar" 
+                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar"
                           aria-label="Firebug Tools">
 
                         <!-- Firebug Icon Menu -->
-                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" 
+                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options"
                                 role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
                             <image src="chrome://firebug/skin/firebug.png"/>
                             <!-- Content comes from fbFirebugMenuPopup -->
                         </toolbarbutton>
 
                         <!-- HTML Inspector -->
-                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;" 
+                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
                                 command="cmd_toggleInspecting" collapsed="false">
                             <image src="chrome://firebug/skin/flashlight.png"/>
                         </toolbarbutton>
@@ -122,7 +122,7 @@
                                 tooltiptext="script.Break On Next" class="toolbar-image-button" />
                     </hbox>
 
-                    <!-- Tab Bar --> 
+                    <!-- Tab Bar -->
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
                     <spacer flex="1"/>
 
@@ -227,7 +227,7 @@
 
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
                                     <hbox id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                                          collapsed="true" labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu" 
+                                          collapsed="true" labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"
                                           class="noTabStop"></hbox>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
@@ -261,7 +261,7 @@
                     <deck id="fbSidePanelDeck" persist="width,height">
                         <panelBar id="fbPanelBar2" class="panelBar">
                             <hbox id="fbPanelBar2-tabBox" class="panelTabBox" collapsed="true">
-                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist" 
+                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist"
                                       aria-label="firebug side panels" />
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">
@@ -273,7 +273,7 @@
                         </panelBar>
 
                         <vbox id="fbLargeCommandBox">
-                            <textbox id="fbLargeCommandLine" multiline="true" flex="1" 
+                            <textbox id="fbLargeCommandLine" multiline="true" flex="1"
                                      label="LargeCommandLine" />
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton label="&firebug.Run;" class="toolbar-text-button"
@@ -310,10 +310,10 @@
 
             <!-- Open -->
             <menuitem id="menu_toggleFirebug" type="checkbox"
-                      label="&firebug.ShowFirebug;" command="cmd_toggleFirebug" 
+                      label="&firebug.ShowFirebug;" command="cmd_toggleFirebug"
                       key="key_toggleFirebug" />
             <menuitem id="menu_detachFirebug" label="&firebug.DetachFirebug;"
-                      command="cmd_toggleDetachFirebug" type="checkbox" 
+                      command="cmd_toggleDetachFirebug" type="checkbox"
                       key="key_detachFirebug"/>
 
             <!-- Editors -->
@@ -338,7 +338,7 @@
 
             <!-- Options -->
             <menu label="&firebug.Options;" id="FirebugMenu_Options">
-                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" 
+                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);"
                            id="FirebugMenu_OptionsPopup">
                     <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
                               oncommand="FirebugChrome.onToggleOption(this)"
