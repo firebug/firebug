@@ -45,6 +45,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * function() objects default rep is next to last so function types can be trapped by supportsObject()
     * DBG_ACTIVATION to focus tracing on activation issues
     * DBG_SHORTCUTS to focus tracing on key binding issues
+    * DBG_LOCALE tracing for missing localization
 
 == Locales ==
     * No more entites, all properties
@@ -65,6 +66,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Update cs-CZ locale (contribution by lordfrikk and mik)
 
 == Bug Fixes ==
+    * Issue 64:  Displaying TextNodes with their content directly causes debugging headache; contribution by Hernan Colmeiro
     * Issue 176: net flash tab not recognising flv files
     * Issue 241: Does not reload javascript content when dynamically removed and added from page.
     * Issue 260: Firebug disables Mac Standard Cmd-Tilde switching
@@ -77,6 +79,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 834: Not displayed POST variables in NET tab
     * Issue 895: Firebug toolbar button should behave the same way as clicking on status bar icon.
     * Issue 902: Allow adding new CSS rule
+    * Issue 1021: Editing of DOM properties fail
     * Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
     * Issue 1113: Unresponsive when using large Data URI image replacement, contribution by  2005jimmont
     * Issue 1122: can't copy or open image background from css viewer
@@ -93,6 +96,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
     * Issue 1258: Enhancement patch: filefield is editable in add external editor dialog
     * Issue 1267: console.time('toString') returns `NaN`;
+    * Issue 1274: Firebug affects 304 responses, causing a new full request on reload
     * Issue 1276: Break on error without message in status bar
     * Issue 1278: console create unclickable, 4px-high log entries
     * Issue 1281: Watch tab: New Watch expression fails if Firebug is not stopped on a breakpoint
@@ -146,6 +150,8 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1695: Clicking on sessionStorage (empty array) in DOM panel causes error
     * Issue 1700: 'Inspect in DOM panel' for variables during script suspension broken
     * Issue 1701: Stack panel not updated immediately during script suspension
+    * Issue 1706: "POST" disappears
+    * Issue 1707: I can't edit DOM values using Firebug
     * Issue 1709: OS X - Pressing Cmd+, fails to open preferences window
     * Issue 1712: Firebug 1.4's channel listener changes observable behaviour
     * Issue 1715: Always Open in New Window prevents
@@ -161,9 +167,16 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1753: command line for open in new window does not immediately respond to Small <-> Large button
     * Issue 1755: Script tab does not keep line highlighted after clicking on console trace
     * Issue 1756: Firebug status bar error counter doesn't update on tab closure.
+    * Issue 1760: Popup window obscured in Net tab
     * Issue 1762: Firebug body is replacing document.body
     * Issue 1764: Net panel misses page load.
+    * Issue 1766: html, body { width: 100%, height: 100% } -> Inspect-Tool does not work properly
     * Issue 1771: Firebug.resetAllOptions: Should this clear debug/developer options?
     * Issue 1775: Command Line command could toggle like inspect does
     * Issue 1789: Firebug console opens on some sites after console.log called (1.4.0a28)
     * Issue 1793: Frames (still) cause problems -- detailed example
+    * Issue 1795: Fails to format string in locale bundle: en-US
+    * Issue 1800: Inspect shows no highlight borders when HTML and BODY are set to overflow:hidden
+    * Issue 1801: refreshing in detached window refreshes wrong tab
+    * Issue 1812: console.log(arguments)
+    * Issue 1814: Frames still cause problems in a30, though fewer. (ref Issue 1793)
