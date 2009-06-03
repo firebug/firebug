@@ -1219,7 +1219,7 @@ top.Firebug =
             if (preferences[i].indexOf("DBG_") == -1 && preferences[i].indexOf("filterSystemURLs") == -1)
             {
                 if (FBTrace.DBG_OPTIONS)
-                    FBTrace.sysout("Clearin option: "+i+") "+preferences[i]);
+                    FBTrace.sysout("Clearing option: "+i+") "+preferences[i]);
                 if (prefs.prefHasUserValue(preferences[i]))  // avoid exception
                     prefs.clearUserPref(preferences[i]);
             }
@@ -2815,6 +2815,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         var anchorSourceRow = getAncestorByClass(selection.anchorNode, "sourceRow");
         var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
+        if (anchorSourceRow == focusSourceRow)
+        {
+            var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset, selection.focusOffset);
+            return buf;
+        }
         var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
 
         var currentSourceRow = anchorSourceRow.nextSibling;
