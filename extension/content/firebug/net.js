@@ -2704,12 +2704,15 @@ function getHttpHeaders(request, file)
 
 function isXHR(request)
 {
-    try {
+    try
+    {
         if (request.notificationCallbacks)
             return (request.notificationCallbacks instanceof XMLHttpRequest);
     }
-    catch (exc) {
+    catch (exc)
+    {
     }
+
     return false;
 }
 
@@ -2719,7 +2722,9 @@ function safeGetName(request)
     {
         return request.name;
     }
-    catch (exc) { }
+    catch (exc)
+    {
+    }
 
     return null;
 }
@@ -2727,10 +2732,18 @@ function safeGetName(request)
 function getFileCategory(file)
 {
     if (file.category)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.getFileCategory; current: " + file.category + " for: " + file.href, file);
         return file.category;
+    }
 
     if (file.isXHR)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.getFileCategory; XHR for: " + file.href, file);
         return "xhr";
+    }
 
     if (!file.mimeType)
     {
@@ -2740,7 +2753,7 @@ function getFileCategory(file)
     }
 
     if (FBTrace.DBG_NET)
-        FBTrace.sysout("net.getFileCategory " + mimeCategoryMap[file.mimeType] +
+        FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
             ", mimeType: " + file.mimeType + " for: " + file.href, file);
 
     return (file.category = mimeCategoryMap[file.mimeType]);
