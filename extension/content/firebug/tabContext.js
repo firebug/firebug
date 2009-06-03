@@ -20,13 +20,7 @@ Firebug.TabContext = function(win, browser, chrome, persistedState)
     this.browser = browser;
     this.persistedState = persistedState;
 
-    this.chrome = chrome;
-    this.originalChrome = FirebugChrome;
-    if (chrome != FirebugChrome)
-    {
-        this.detached = true;
-        this.externalChrome = chrome;
-    }
+    browser.__defineGetter__("chrome", function() { return Firebug.chrome; }); // backward compat
 
     this.name = normalizeURL(this.getWindowLocation().toString());
 
@@ -107,16 +101,18 @@ Firebug.TabContext.prototype =
         Firebug.onSourceFileCreated(this, sourceFile);
     },
     // ***************************************************************************
-    reattach: function(chrome)
+    get chrome()  // backward compat
     {
-        var oldChrome = this.chrome;  // ie context.chrome
-        this.chrome = chrome;
+        return Firebug.chrome;
+    },
 
+    reattach: function(oldChrome, newChrome)
+    {
         for (var panelName in this.panelMap)
         {
             var panel = this.panelMap[panelName];
-            panel.detach(oldChrome, chrome);  // this will cause the ownerDocument for panelNode to change
-            panel.invalid = true;
+            panel.detach(oldChrome, newChrome);
+            panel.invalid = true;// this will cause reattach on next use
 
             var panelNode = panel.panelNode;  // delete panel content
             if (panelNode && panelNode.parentNode)
@@ -230,8 +226,8 @@ Firebug.TabContext.prototype =
         if ( this.panelMap.hasOwnProperty(panelName) )
         {
             var panel = this.panelMap[panelName];
-            //if (FBTrace.DBG_PANELS)                                                                                   /*@explore*/
-            //    FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");           /*@explore*/
+            //if (FBTrace.DBG_PANELS)
+            //    FBTrace.sysout("tabContext.getPanelByType panel in panelMap, .invalid="+panel.invalid+"\n");
             if (panel.invalid)
             {
                 var doc = this.chrome.getPanelDocument(panelType);
@@ -243,7 +239,7 @@ Firebug.TabContext.prototype =
         }
         else if (!noCreate)
         {
-            //if (FBTrace.DBG_PANELS) FBTrace.sysout("tabContext.getPanelByType panel NOT in panelMap\n");              /*@explore*/
+            //if (FBTrace.DBG_PANELS) FBTrace.sysout("tabContext.getPanelByType panel NOT in panelMap\n");
             var panel = new panelType();  // This is why panels are defined by prototype inheritance
             var doc = this.chrome.getPanelDocument(panelType);
             panel.initialize(this, doc);

@@ -26,39 +26,25 @@
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript">
         // To avoid error messages when Firebug extensions are loaded into this window.
-        // All necessary JS objects are already created in the browser window space and 
-        // shared here (see FirebugChrome.initialize). It's not desirable to create 
+        // All necessary JS objects are already created in the browser window space and
+        // shared here (see FirebugChrome.initialize). It's not desirable to create
         // these objects again.
         top.FBL = { ns: function(fn) {} }
     </script>
-    
+
     <stringbundleset id="stringbundleset"/>
     <commandset id="baseMenuCommandSet"/>
     <keyset id="baseMenuKeyset"/>
 
     <commandset id="mainCommandSet">
-        <command id="cmd_undo"
-                 oncommand="goDoCommand('cmd_undo')"
+        <command id="cmd_undo" oncommand="goDoCommand('cmd_undo')" disabled="true"/>
+        <command id="cmd_redo" oncommand="goDoCommand('cmd_redo')" disabled="true"/>
+        <command id="cmd_cut" oncommand="goDoCommand('cmd_cut')" disabled="true"/>
+        <command id="cmd_copy" oncommand="goDoCommand('cmd_copy')" disabled="true"/>
+        <command id="cmd_paste" oncommand="goDoCommand('cmd_paste')" disabled="true"/>
+        <command id="cmd_delete" oncommand="goDoCommand('cmd_delete')" valueDefault="&deleteCmd.label;"
                  disabled="true"/>
-        <command id="cmd_redo"
-                 oncommand="goDoCommand('cmd_redo')"
-                 disabled="true"/>
-        <command id="cmd_cut"
-                 oncommand="goDoCommand('cmd_cut')"
-                 disabled="true"/>
-        <command id="cmd_copy"
-                 oncommand="goDoCommand('cmd_copy')"
-                 disabled="true"/>
-        <command id="cmd_paste"
-                 oncommand="goDoCommand('cmd_paste')"
-                 disabled="true"/>
-        <command id="cmd_delete"
-                 oncommand="goDoCommand('cmd_delete')"
-                 valueDefault="&deleteCmd.label;"
-                 disabled="true"/>
-        <command id="cmd_selectAll"
-                 oncommand="goDoCommand('cmd_selectAll')"
-                 disabled="true"/>
+        <command id="cmd_selectAll" oncommand="goDoCommand('cmd_selectAll')" disabled="true"/>
         <command id="cmd_closeWindow" oncommand="window.close()"/>
         <command id="cmd_reload" oncommand="FirebugChrome.reload()"/>
         <command id="cmd_reloadSkipCache" oncommand="FirebugChrome.reload(true)"/>
@@ -66,19 +52,11 @@
     </commandset>
 
     <keyset id="mainKeyset">
-        <key id="key_undo"
-             key="&undoCmd.key;"
-             modifiers="accel"/>
+        <key id="key_undo" key="&undoCmd.key;" modifiers="accel"/>
         <key id="key_redo" key="&undoCmd.key;" modifiers="accel,shift"/>
-        <key id="key_cut"
-             key="&cutCmd.key;"
-             modifiers="accel"/>
-        <key id="key_copy"
-             key="&copyCmd.key;"
-             modifiers="accel"/>
-        <key id="key_paste"
-             key="&pasteCmd.key;"
-             modifiers="accel"/>
+        <key id="key_cut" key="&cutCmd.key;" modifiers="accel"/>
+        <key id="key_copy" key="&copyCmd.key;" modifiers="accel"/>
+        <key id="key_paste" key="&pasteCmd.key;" modifiers="accel"/>
         <key id="key_delete" keycode="VK_DELETE" command="cmd_delete"/>
         <key id="key_selectAll" key="&selectAllCmd.key;" modifiers="accel"/>
         <key key="&reloadCmd.commandkey;" command="cmd_reload" modifiers="accel" id="key_reload"/>
@@ -90,6 +68,7 @@
 
     <popupset id="mainPopupSet"/>
 
+    <!-- A menu used within this external Firebug window. -->
     <toolbox id="fbToolbox">
         <menubar>
             <menu id="file-menu" label="&fileMenu.label;"
@@ -118,19 +97,22 @@
                         </menupopup>
                     </menu>
 
+                    <!-- Options -->
                     <menu label="&firebug.Options;" id="FirebugMenu_Options">
                         <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
                             <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
                                        oncommand="FirebugChrome.onToggleOption(this)"
                                        option="openInWindow"/>
-
                             <menuitem type="checkbox" label="&firebug.ShowTooltips;"
                                        oncommand="FirebugChrome.onToggleOption(this)"
                                        option="showInfoTips"/>
-
                             <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
                                       oncommand="FirebugChrome.onToggleOption(this)"
                                       option="shadeBoxModel"/>
+                            <menuitem type="checkbox" id="menu_enableA11y"
+                                      label="Firebug.menu.Enable Accessibility Enhancements"
+                                      oncommand="FirebugChrome.onToggleOption(this)"
+                                      option="a11y.enable"/>
                         </menupopup>
                     </menu>
 
@@ -161,6 +143,7 @@
 
     </toolbox>
 
+    <!-- Entire Firebug UI -->
     <vbox id="fbContentBox" flex="1">
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1">
@@ -180,11 +163,15 @@
         <hbox id="fbCommandBox"/>
     </vbox>
 
+    <!-- If Firebug is displayed in this external window, but not active for currently selected
+         Firefox tab, the following button allows to resume it.
+         xxxHonza: localization -->
     <vbox id="fbResumeBox" flex="1" collapsed="true">
         <spacer flex="1"/>
         <hbox>
             <spacer flex="1"/>
-            <button id="fbResumeBoxButton" label="Resume Firebug" command="cmd_toggleSuspendFirebug" />
+            <button id="fbResumeBoxButton" label="Activate Firebug for the selected Firefox tab"
+                command="cmd_toggleSuspendFirebug" />
             <spacer flex="1"/>
         </hbox>
         <spacer flex="1"/>

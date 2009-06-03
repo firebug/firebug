@@ -6,7 +6,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 
 == Not Panel Specific ==
     * Curtis Bartley's Tabs-on-top UI reordering
-    * Improved and simplified "natural" Activation UI, minimize to context menu, all on/off
+    * Improved and simplified "natural" Activation UI, minimize to context menu, all on/off, Firebug stays put.
     * Firebug remembers which pages you had opened Firebug on.
     * Supports Firefox 3.5
     * auto-suspend
@@ -43,9 +43,9 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * TabWatch dispatch separate from modules dispatch
     * acceptContext/declineContext replaced by shouldCreateContext/shouldNotCreateContext
     * function() objects default rep is next to last so function types can be trapped by supportsObject()
-
-
-
+    * DBG_ACTIVATION to focus tracing on activation issues
+    * DBG_SHORTCUTS to focus tracing on key binding issues
+    * DBG_LOCALE tracing for missing localization
 
 == Locales ==
     * No more entites, all properties
@@ -66,15 +66,20 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Update cs-CZ locale (contribution by lordfrikk and mik)
 
 == Bug Fixes ==
+    * Issue 64:  Displaying TextNodes with their content directly causes debugging headache; contribution by Hernan Colmeiro
     * Issue 176: net flash tab not recognising flv files
     * Issue 241: Does not reload javascript content when dynamically removed and added from page.
+    * Issue 260: Firebug disables Mac Standard Cmd-Tilde switching
     * Issue 369: Inspect JSON data in HTTP responses (contribution by Ashish Datta)
     * Issue 199: CSS priority with '!important'
+    * Issue 699: Inspector - Highlight Image Map Areas
     * Issue 700: HTML preview for net responses
     * Issue 749: Hungarian Locale
     * Issue 716: Add "Inspect element" context menu element in Fx3 for button and select elements
     * Issue 834: Not displayed POST variables in NET tab
     * Issue 895: Firebug toolbar button should behave the same way as clicking on status bar icon.
+    * Issue 902: Allow adding new CSS rule
+    * Issue 1021: Editing of DOM properties fail
     * Issue 1044: In a page with a HTML doc in an iframe, the CSS of the pagein the iframe cannot be displayed
     * Issue 1113: Unresponsive when using large Data URI image replacement, contribution by  2005jimmont
     * Issue 1122: can't copy or open image background from css viewer
@@ -91,6 +96,7 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * Issue 1255: Reloading page resets current Javascript file to default HTML file in Firebug's "Script" tab
     * Issue 1258: Enhancement patch: filefield is editable in add external editor dialog
     * Issue 1267: console.time('toString') returns `NaN`;
+    * Issue 1274: Firebug affects 304 responses, causing a new full request on reload
     * Issue 1276: Break on error without message in status bar
     * Issue 1278: console create unclickable, 4px-high log entries
     * Issue 1281: Watch tab: New Watch expression fails if Firebug is not stopped on a breakpoint
@@ -126,17 +132,51 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
     * issue 1508: Problems with some downloads.
     * Issue 1547: &editors.Description;
     * Issue 1575: New watch expression can't be created when breakpoint is active
+    * Issue 1586: XHR complete fails to trigger onComplete callback (workaround removed)
     * Issue 1592: Added display: autocompletions to CSS editor
     * Issue 1591: Firebug cannot find _firebugConsole element
     * Issue 1640: Fixed install.rdf typo
     * Issue 1649: disabling script panel doesn't disable script view in 1.4
     * Issue 1650: 1.4a18 not picking up other JS files
     * Issue 1651: 1.4a18 panel not updating when changing tabs in firefox
+    * Issue 1655: CSS view is not correct
     * Issue 1663: CSS Property Name Editor Does not always work (contribution by kpdecker)
     * Issue 1679: Break On Next Statement ("pause" button): poor selection style (partial)
     * Issue 1680: Firebug suspends on page reload.
+    * Issue 1688: Collection of issues relating to element Inspector
     * Issue 1691: CSS style editor autocomplete problems
+    * Issue 1693: Viewing requests with large message bodies in Console tab temporarily freezes browser
     * Issue 1694 in fbug: Net Panel Cutsomization: file.responseText doesn't include original line breaks
     * Issue 1695: Clicking on sessionStorage (empty array) in DOM panel causes error
     * Issue 1700: 'Inspect in DOM panel' for variables during script suspension broken
     * Issue 1701: Stack panel not updated immediately during script suspension
+    * Issue 1706: "POST" disappears
+    * Issue 1707: I can't edit DOM values using Firebug
+    * Issue 1709: OS X - Pressing Cmd+, fails to open preferences window
+    * Issue 1712: Firebug 1.4's channel listener changes observable behaviour
+    * Issue 1715: Always Open in New Window prevents
+    * Issue 1727: Inspector offset when the screen is scrolled
+    * Issue 1733: Custom Net Panel: file.isXHR is not set in console log
+    * Issue 1738: All properties getters and not editable in DOM panels
+    * Issue 1740: Inspect context menu item should not be disabled
+    * Issue 1741: CSS Sheets listed multiple times in DOM included multiple times in CSS panel
+    * Issue 1742: CSS Source Links do not work
+    * Issue 1744: Defect commandLine openInNewWindow
+    * Issue 1747: Script Option Grayed-Out when Enabled by Console enable
+    * Issue 1750: "Inspect Element" causes firebug to hide
+    * Issue 1753: command line for open in new window does not immediately respond to Small <-> Large button
+    * Issue 1755: Script tab does not keep line highlighted after clicking on console trace
+    * Issue 1756: Firebug status bar error counter doesn't update on tab closure.
+    * Issue 1760: Popup window obscured in Net tab
+    * Issue 1762: Firebug body is replacing document.body
+    * Issue 1764: Net panel misses page load.
+    * Issue 1766: html, body { width: 100%, height: 100% } -> Inspect-Tool does not work properly
+    * Issue 1771: Firebug.resetAllOptions: Should this clear debug/developer options?
+    * Issue 1775: Command Line command could toggle like inspect does
+    * Issue 1789: Firebug console opens on some sites after console.log called (1.4.0a28)
+    * Issue 1793: Frames (still) cause problems -- detailed example
+    * Issue 1795: Fails to format string in locale bundle: en-US
+    * Issue 1800: Inspect shows no highlight borders when HTML and BODY are set to overflow:hidden
+    * Issue 1801: refreshing in detached window refreshes wrong tab
+    * Issue 1812: console.log(arguments)
+    * Issue 1814: Frames still cause problems in a30, though fewer. (ref Issue 1793)

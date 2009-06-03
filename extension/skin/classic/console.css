@@ -17,7 +17,7 @@
     background-color: #FFFFFF;
 }
 
-.useA11y .logRow:focus {    
+.useA11y .logRow:focus {
     border-bottom: 1px solid #000000 !important;
     outline: none !important;
     background-color: #FFFFAD !important;
@@ -155,12 +155,12 @@
 
 .objectBox-number,
 .objectLink-styleRule,
-.objectLink-element {
+.objectLink-element,
+.objectLink-textNode {
     color: #000088;
 }
 
-.objectBox-string,
-.objectLink-textNode {
+.objectBox-string {
     color: #FF0000;
 }
 

@@ -69,7 +69,7 @@ const httpObserver =
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("spy.httpObserver FAILS", exc);
+                FBTrace.sysout("spy.httpObserver FAILS", exc);
         }
     }
 };
@@ -84,10 +84,6 @@ Firebug.Spy = extend(Firebug.Module,
     {
         var uri = win.location.href; // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
-            return true;
-
-        // Don't attach spy in Firefox > 3.1 till #483672 is fixed.
-        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
             return true;
     },
 
@@ -139,7 +135,7 @@ Firebug.Spy = extend(Firebug.Module,
     destroyContext: function(context)
     {
         // For any spies that are in progress, remove our listeners so that they don't leak
-        this.detachObserver(context, false);
+        this.detachObserver(context, null);
         delete context.spies;
     },
 
@@ -219,7 +215,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getFullUri: function(spy)
     {
-        return spy.getURL();
+        return spy.method.toUpperCase() + " " + spy.getURL();
     },
 
     getStatus: function(spy)
@@ -329,6 +325,7 @@ top.XMLHttpRequestSpy = function(request, xhrRequest, context)
     this.xhrRequest = xhrRequest;
     this.context = context;
     this.responseText = null;
+    this.isXHR = true;
 };
 
 top.XMLHttpRequestSpy.prototype =
@@ -483,7 +480,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         catch (exc)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.dumpProperties("spy.requestStopped " + spy.href +
+                FBTrace.sysout("spy.requestStopped " + spy.href +
                     ", status access FAILED", exc);
         }
     }

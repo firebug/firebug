@@ -27,6 +27,21 @@ Firebug.CommandLine = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // targetWindow was needed by evaluateInSandbox, let's leave it for a while in case we rethink this yet again
+    
+    initializeCommandLineIfNeeded: function (context, win)
+    {
+      if (context == null) return;
+      if (win == null) return;
+
+      // The command-line requires that the console has been initialized first,
+      // so make sure that's so.  This call should have no effect if the console
+      // is already initialized.
+      Firebug.Console.isReadyElsePreparing(context, win);
+      
+      // Make sure the command-line is initialized.  This call should have no
+      // effect if the command-line is already initialized.
+      Firebug.CommandLine.isReadyElsePreparing(context, win); 
+    },
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
     {
@@ -60,15 +75,17 @@ Firebug.CommandLine = extend(Firebug.Module,
         return result;
     },
 
-
     evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
         if (!win)
         {
-            if (FBTrace.DBG_ERRORS) FBTrace.dumpStack("commandLine.evaluateByEventPassing: no targetWindow!\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
             return;
         }
+        
+        // We're going to use some command-line facilities, but it may not have initialized yet.
+        this.initializeCommandLineIfNeeded(context, win);
 
         // Make sure the command line script is attached.
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
@@ -77,9 +94,9 @@ Firebug.CommandLine = extend(Firebug.Module,
             var attached = element.getAttribute("firebugCommandLineAttached");
             if (!attached)
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
+                FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
                 Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                return;
             }
         }
         else
@@ -286,9 +303,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             if (typeof(result) != "undefined")
             {
-                context.chrome.contextMenuObject = result;
+                Firebug.chrome.contextMenuObject = result;
 
-                var popup = context.chrome.$("fbContextMenu");
+                var popup = Firebug.chrome.$("fbContextMenu");
                 popup.showPopup(commandLine, -1, -1, "popup", "bottomleft", "topleft");
             }
         });
@@ -307,7 +324,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         this.evaluate(expr, context, null, null, function(result, context)
         {
             if (typeof(result) != undefined)
-                context.chrome.select(result);
+                Firebug.chrome.select(result);
         });
     },
 
@@ -327,15 +344,22 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     focus: function(context)
     {
-        if (context.detached)
-            context.chrome.focus();
+        if (Firebug.isDetached())
+            Firebug.chrome.focus();
         else
             Firebug.toggleBar(true);
 
-        context.chrome.selectPanel("console");
+        if (context.panelName != "console")
+        {
+            Firebug.chrome.switchToPanel(context, "console");
 
-        var commandLine = getCommandLine(context);
-        setTimeout(function() { commandLine.select(); });
+            var commandLine = getCommandLine(context);
+            setTimeout(function() { commandLine.select(); });
+        }
+        else // then we are already on the console, toggle back
+        {
+            Firebug.chrome.unswitchToPanel(context, "console", true);
+        }
     },
 
     clear: function(context)
@@ -371,9 +395,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (FirebugContext && FirebugContext.panelName != "console")
             return;
 
-        chrome.$("fbCommandBox").collapsed = multiLine;
-        chrome.$("fbPanelSplitter").collapsed = !multiLine;
-        chrome.$("fbSidePanelDeck").collapsed = !multiLine;
+        collapse(chrome.$("fbCommandBox"), multiLine);
+        collapse(chrome.$("fbPanelSplitter"), !multiLine);
+        collapse(chrome.$("fbSidePanelDeck"), !multiLine);
+
         if (multiLine)
             chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
 
@@ -461,7 +486,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             autoCompleteEval, false, true);
 
         if (Firebug.largeCommandLine)
-            this.setMultiLine(true, FirebugChrome);
+            this.setMultiLine(true, Firebug.chrome);
     },
 
     initializeUI: function()
@@ -476,32 +501,29 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     attachListeners: function()
     {
-        $("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
-        $("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbLargeCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
+        Firebug.chrome.$("fbCommandLine").addEventListener('focus', this.onCommandLineFocus, true);
 
         Firebug.Console.addListener(this);  // to get onConsoleInjection
     },
 
     showContext: function(browser, context)
     {
-        if (context)  // null for eg about:crashes
-        {
-            var command = context.chrome.$("cmd_focusCommandLine");
-            command.setAttribute("disabled", !context);
-        }
+        var command = Firebug.chrome.$("cmd_focusCommandLine");
+        command.setAttribute("disabled", !context);
     },
 
     showPanel: function(browser, panel)
     {
-        var chrome = browser.chrome;
+        var chrome = Firebug.chrome;
 
         var isConsole = panel && panel.name == "console";
         if (Firebug.largeCommandLine)
         {
             if (isConsole)
             {
-                chrome.$("fbPanelSplitter").collapsed = false;
-                chrome.$("fbSidePanelDeck").collapsed = false;
+                collapse(chrome.$("fbPanelSplitter"), false);
+                collapse(chrome.$("fbSidePanelDeck"), false);
                 chrome.$("fbSidePanelDeck").selectedPanel = chrome.$("fbLargeCommandBox");
                 collapse(chrome.$("fbCommandBox"), true);
             }
@@ -517,7 +539,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     updateOption: function(name, value)
     {
         if (name == "largeCommandLine")
-            this.setMultiLine(value, FirebugChrome);
+            this.setMultiLine(value, Firebug.chrome);
     },
 
     // called by users of command line, currently:
@@ -581,6 +603,13 @@ Firebug.CommandLine = extend(Firebug.Module,
 
     attachConsoleOnFocus: function()
     {
+        if (!FirebugContext)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLine.attachConsoleOnFocus no FirebugContext");
+            return;
+        }
+
         // User has decided to use the command line, but the web page may not have the console if the page has no javascript
         if (Firebug.Console.isReadyElsePreparing(FirebugContext))
         {
@@ -602,22 +631,23 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
     },
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
-        if (panelName != 'console')
-            return;
+        collapse(Firebug.chrome.$("fbCommandBox"), true);
+        collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
 
-        this.setMultiLine(Firebug.largeCommandLine, context.chrome);
+        this.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
     },
 
-    onPanelDisable: function(context, panelName)
+    onPanelDisable: function(panelName)
     {
         if (panelName != 'console')  // we don't care about other panels
             return;
 
-        context.chrome.$("fbCommandBox").collapsed = true;
-        context.chrome.$("fbPanelSplitter").collapsed = true;
-        context.chrome.$("fbSidePanelDeck").collapsed = true;
+        collapse(Firebug.chrome.$("fbCommandBox"), true);
+        collapse(Firebug.chrome.$("fbPanelSplitter"), true);
+        collapse(Firebug.chrome.$("fbSidePanelDeck"), true);
     },
 
     // *********************************************************************************************
@@ -650,7 +680,7 @@ Firebug.CommandLine.CommandHandler = extend(Object,
         if (FBTrace.DBG_CONSOLE)
         {
             var uid = element.getAttribute('uid');  // set if // DBG removed from Injected
-            FBTrace.sysout("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);                                             /*@explore*/
+            FBTrace.sysout("Firebug.CommandLine.CommandHandler: ("+uid+") "+methodName+" userObjects:",  userObjects);
             FBTrace.sysout("Firebug.CommandLine.CommandHandler: "+(win.wrappedJSObject?"win.wrappedJSObject._firebug":"win._firebug"), (win.wrappedJSObject?win.wrappedJSObject._firebug:win._firebug));
             if (!userObjects)
                 debugger;
@@ -760,8 +790,8 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_ERRORS) /*@explore*/
-            FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc); /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("commandLine.autoCompleteEval FAILED", exc);
         return [];
     }
 }
@@ -776,8 +806,8 @@ function injectScript(script, win)
 function getCommandLine(context)
 {
     return Firebug.largeCommandLine
-        ? context.chrome.$("fbLargeCommandLine")
-        : context.chrome.$("fbCommandLine");
+        ? Firebug.chrome.$("fbLargeCommandLine")
+        : Firebug.chrome.$("fbCommandLine");
 }
 
 const reIndent = /^(\s+)/;
@@ -802,7 +832,7 @@ function cleanIndentation(text)
         if (indent >= minIndent)
             lines[i] = line.substr(minIndent);
     }
-    return lines.join("\n");
+    return lines.join("");
 }
 
 // ************************************************************************************************
@@ -867,7 +897,7 @@ function FirebugCommandLineAPI(context, baseWindow)
 
     this.inspect = function(obj, panelName)
     {
-        context.chrome.select(obj, panelName);
+        Firebug.chrome.select(obj, panelName);
     };
 
     this.keys = function(o)

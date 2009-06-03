@@ -82,17 +82,20 @@ var _FirebugCommandLine =
     },
 };
 
-try 
+(function()
 {
-	// DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
-	_FirebugCommandLine.init();
-}
-catch(exc)
-{
-	var wrappedException = {
-		cause: exc, 
-		message: "_FirebugCommandLine init failed in "+window.location+" because "+exc, 
-		toString: function() { return this.message; }
-	};
-	throw wrappedException;
-}
+    try 
+    {
+    	// DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
+    	_FirebugCommandLine.init();
+    }
+    catch(exc)
+    {
+    	var wrappedException = {
+    		cause: exc, 
+    		message: "_FirebugCommandLine init failed in "+window.location+" because "+exc, 
+    		toString: function() { return this.message; }
+    	};
+    	throw wrappedException;
+    }
+})();

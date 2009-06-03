@@ -171,10 +171,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         this.prefDomain = prefDomain;
 
-        // Create menu items for Trace Console
-        // (Open Console and a new option Always Open Console)
-        this.initMenu();
-
         // Open console automatically if the pref says so.
         if (Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"))
             this.openConsole();
@@ -189,69 +185,12 @@ Firebug.TraceModule = extend(Firebug.Module,
             this.consoleWindow.TraceConsole.unregisterModule(this);
     },
 
-    initMenu: function()
-    {
-        // Create menu item "Open Firebug Tracing" within Firebug menu (the bug-menu on FB bar).
-        var popupMenu = $("fbFirebugMenuPopup");
-        this.createOpenTracingMenu(popupMenu);
-
-        // Create menu item "Open Firebug Tracing" within Firefox Tools menu.
-        var toolsMenu = $("menu_firebug");
-        if (toolsMenu)  // then we are in Firefox not eg Chromebug
-            this.createOpenTracingMenu(toolsMenu.menupopup);
-
-        // Create new option "Always Open Firebug Tracing" item within Firebug options menu.
-        var optionsMenu = $("FirebugMenu_OptionsPopup");
-        this.createAlwaysOpenTracingMenu(optionsMenu);
-    },
-
     reattachContext: function(browser, context)
     {
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.reattachContext for: " +
                 context ? context.getName() : "null context",
                 [browser, context]);
-
-        // Create proper menu items for Firebug Tracing window in the new Firebug window.
-        var viewMenu = browser.chrome.$("view-menu");
-        this.createOpenTracingMenu(viewMenu.menupopup);
-
-        var optionsMenu = browser.chrome.$("FirebugMenu_OptionsPopup");
-        this.createAlwaysOpenTracingMenu(optionsMenu);
-    },
-
-    createOpenTracingMenu: function(parentMenu)
-    {
-        if (!parentMenu)
-            return;
-
-        var doc = parentMenu.ownerDocument;
-        var menuItem = doc.createElement("menuitem");
-        menuItem.setAttribute("label", $STR("Open Firebug Tracing"));
-        menuItem.setAttribute("oncommand", "Firebug.TraceModule.openConsole()");
-        var firstItem = parentMenu.firstChild;
-        parentMenu.insertBefore(menuItem, firstItem);
-        parentMenu.insertBefore(document.createElement("menuseparator"), firstItem);
-    },
-
-    createAlwaysOpenTracingMenu: function(parentMenu)
-    {
-        if (!parentMenu)
-            return;
-
-        var menuItemId = "FirebugMenu_Options_alwaysOpenTraceConsole";
-        var doc = parentMenu.ownerDocument;
-        if ($(menuItemId, doc))
-            return;
-
-        var menuItem = doc.createElement("menuitem");
-        menuItem.setAttribute("id", menuItemId);
-        menuItem.setAttribute("label", $STR("Always Open Firebug Tracing"));
-        menuItem.setAttribute("type", "checkbox");
-        menuItem.setAttribute("oncommand", "FirebugChrome.onToggleOption(this)");
-        menuItem.setAttribute("option", "alwaysOpenTraceConsole");
-        parentMenu.appendChild(document.createElement("menuseparator"));
-        parentMenu.appendChild(menuItem);
     },
 
     openConsole: function(prefDomain, windowURL)
@@ -557,6 +496,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                                     SPAN("&nbsp;"),
                                     SPAN("(", "$stack.lineNumber", ")"),
                                     SPAN("&nbsp;"),
+                                    SPAN({class: "stackFuncName"},
+                                        "$stack.funcName"),
                                     A({class: "openDebugger", onclick: "$onOpenDebugger",
                                         lineNumber: "$stack.lineNumber",
                                         fileName: "$stack.fileName"},
@@ -597,8 +538,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var m = date.getMinutes() + "";
         var s = date.getSeconds() + "";
         var ms = date.getMilliseconds() + "";
-        return "[" + ((m.length > 1) ? m : "0" + m) + ":" + 
-            ((s.length > 1) ? s : "0" + s) + ":" + 
+        return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
+            ((s.length > 1) ? s : "0" + s) + ":" +
             ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
     },
 
@@ -699,7 +640,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
         // Open Chromebug window.
         var cbWindow = ChromeBugOpener.openNow();
-        FBTrace.dumpProperties("Chromebug window has been opened", cbWindow);
+        FBTrace.sysout("Chromebug window has been opened", cbWindow);
 
         // xxxHonza: Open Chromebug with the source code file, scrolled automatically
         // to the specified line number. Currently chrome bug doesn't return the window
@@ -711,7 +652,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             cbWindow.addEventListener("load", function() {
                 var context = cbWindow.FirebugContext;
                 var link = new cbWindow.FBL.SourceLink(fileName, lineNumber, "js");
-                context.chrome.select(link, "script");
+                Firebug.chrome.select(link, "script");
             }, true);
         }
     },
@@ -1171,14 +1112,34 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
                 for (var i=0; i<trace.frames.length; i++) {
                     var frame = trace.frames[i];
                     if (frame.href && frame.lineNo)
-                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo});
+                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo, funcName:""});
                 }
             }
         }
         else
         {
             // Put info about the script error location into the stack.
-            this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber});
+            this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber, funcName:""});
+        }
+    }
+    else if (this.obj && this.obj.stack && (this.obj instanceof Error) &&
+        (typeof this.obj.stack.split == "function"))
+    {
+        // If the passed object is an error with stack trace attached, use it.
+        // This stack trace points directly to the place where the error occurred.
+        var stack = this.obj.stack.split("\n");
+        for (var i=0; i<stack.length; i++)
+        {
+            var frame = stack[i].split("@");
+            if (frame.length != 2)
+                continue;
+
+            var index = frame[1].lastIndexOf(":");
+            this.stack.push({
+                fileName: frame[1].substr(0, index),
+                lineNumber: frame[1].substr(index+1),
+                funcName: frame[0]
+            });
         }
     }
     else
@@ -1195,7 +1156,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
 
             var sourceLine = frame.sourceLine ? frame.sourceLine : "";
             var lineNumber = frame.lineNumber ? frame.lineNumber : "";
-            this.stack.push({fileName:fileName, lineNumber:lineNumber});
+            this.stack.push({fileName:fileName, lineNumber:lineNumber, funcName:""});
         }
     }
 
@@ -1567,7 +1528,7 @@ Firebug.TraceModule.TraceMessage.prototype =
 var lastPanic = null;
 function onPanic(contextMessage, errorMessage)
 {
-    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);                       /*@explore*/
+    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].getService(Components.interfaces.nsIAppShellService);
     var win = appShellService.hiddenDOMWindow;
     // XXXjjb I cannot get these tests to work.
     //if (win.lastPanic && (win.lastPanic == errorMessage))

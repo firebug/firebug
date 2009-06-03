@@ -113,15 +113,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session
         {
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("-> tabWatcher.watchTopWindow context exists "+context.getName());
             if (!this.shouldShowContext(context))
             {
                 this.watchContext(win, null);
+
+                // There shouldn't be context for this widnow so, remove it from the 
+                // global array.
+                remove(contexts, context);
+
                 return;  // did not create a context
             }
             // else we should show
-
         }
         else // then we've not looked this window in this session
         {
@@ -129,13 +133,15 @@ top.TabWatcher = extend(new Firebug.Listener(),
             var url = (uri instanceof nsIURI) ? uri.spec : uri;
             if (!this.shouldCreateContext(tabBrowser.selectedBrowser, url, userCommands))
             {
-                if (FBTrace.DBG_WINDOWS)
+                if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("-> tabWatcher will not create context ");
                 this.watchContext(win, null);
                 return false;  // we did not create a context
             }
 
-            context = this.createContext(win);
+            var browser = this.getBrowserByWindow(win);
+
+            context = this.createContext(win, browser, Firebug.TabContext);
        }
 
         if (win instanceof Ci.nsIDOMWindow && win.parent == win)
@@ -226,24 +232,22 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if ( dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]) )
             return true;
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
 
         // Do not Create if any Listener says true to shouldNotCreateContext
         if ( dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]) )
             return false;
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldNotCreateContext no opinion for: "+ url);
 
         // create if user said so and no one else has an opinion.
         return userCommands;
     },
 
-    createContext: function(win)
+    createContext: function(win, browser, contextType)
     {
-        var browser = this.getBrowserByWindow(win);  // sets browser.chrome to FirebugChrome
-
         // If the page is reloaded, store the persisted state from the previous
         // page on the new context
         var persistedState = browser.persistedState;
@@ -251,14 +255,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!persistedState || persistedState.location != win.location.href)
             persistedState = null;
 
-        context = new Firebug.TabContext(win, browser, browser.chrome, persistedState);
+        // The proper instance of FirebugChrome object (different for detached Firebug and
+        // accessible as Firebug.chrome property) must be used for the context object.
+        // (the global context object FirebugContext is also different for detached firebug).
+        var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
         context.uid = FBL.getUniqueId();
 
-        if (FBTrace.DBG_WINDOWS) {
+        browser.showFirebug = true; // this is the only place we should set showFirebug.
+
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
-                ", "+context.getName()+" browser "+browser.currentURI.spec+" browser.chrome.window: "+browser.chrome.window.location);
+                ", "+context.getName()+" browser "+browser.currentURI.spec+" Firebug.chrome.window: "+Firebug.chrome.window.location);
         }
 
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -392,13 +401,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> tabWatcher.watchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");
         }
 
-        if (!browser.chrome)
-            registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
+        registerFrameListener(browser);
 
-        var detached = browser.detached; // XXXjjb I guess we need different functions for detached?
-        var shouldDispatch = true;
-        if (!detached)
-            var shouldDispatch = this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
+        var shouldDispatch = this.watchTopWindow(browser.contentWindow, safeGetURI(browser), true);
 
         if (shouldDispatch)
         {
@@ -412,22 +417,22 @@ top.TabWatcher = extend(new Firebug.Listener(),
      * User closes Firebug
      */
 
-    unwatchBrowser: function(browser)
+    unwatchBrowser: function(browser, userCommands)
     {
         if (FBTrace.DBG_WINDOWS)
         {
             var uri = safeGetURI(browser);
-            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + "\n");
+            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + " user commands: "+userCommands+"\n");
         }
 
-        var detached = browser.detached;
+        var detached = Firebug.isDetached();
         var shouldDispatch = true;
         if (!detached)
             var shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
 
         if (shouldDispatch)
         {
-            dispatch(this.fbListeners, "unwatchBrowser", [browser, detached]);
+            dispatch(this.fbListeners, "unwatchBrowser", [browser, userCommands]);
             return true;
         }
         return false;
@@ -452,7 +457,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
         {
             var browser = this.getBrowserByWindow(win);
             if (browser)
+            {
                 browser.persistedState = {};
+                delete browser.showFirebug;
+            }
             dispatch(this.fbListeners, "destroyContext", [null, browser?browser.persistedState:null, browser]);
             return;
         }
@@ -465,6 +473,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             dispatch(TabWatcher.fbListeners, "unwatchWindow", [context, win]);
         });
 
+        delete context.browser.showFirebug;
         dispatch(this.fbListeners, "destroyContext", [context, persistedState, context.browser]);
 
         if (FBTrace.DBG_WINDOWS)
@@ -523,9 +532,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             var browser = tabBrowser.browsers[i];
             if (browser.contentWindow == win)
             {
-                if (!browser.chrome)
-                    registerFrameListener(browser);  // sets browser.chrome to FirebugChrome
-
+                registerFrameListener(browser);
                 return browser;
             }
         }
@@ -552,9 +559,9 @@ var TabProgressListener = extend(BaseProgressListener,
             var srcWindow = getWindowForRequest(request);
             if (srcWindow)
                 var browser = TabWatcher.getBrowserByWindow(srcWindow);
-            var requestFromFirebuggedWindow = browser && (browser.showFirebug || browser.detached);
+            var requestFromFirebuggedWindow = browser && browser.showFirebug;
 
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("-> TabProgressListener.onLocationChange "+progress.DOMWindow.location+" to: "
                                           +(uri?uri.spec:"null location")+(requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
 
@@ -620,10 +627,10 @@ var FrameProgressListener = extend(BaseProgressListener,
 // Registers frame listener for specified tab browser.
 function registerFrameListener(browser)
 {
-    if (browser.chrome)
+    if (browser.frameListener)
         return;
 
-    browser.chrome = FirebugChrome;
+    browser.frameListener = FrameProgressListener;  // just a mark saying we've registered. TODO remove!
     browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
 
     if (FBTrace.DBG_WINDOWS)
@@ -632,6 +639,20 @@ function registerFrameListener(browser)
         FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+
             (win.location.href)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
     }
+}
+
+function getRefererHeader(request)
+{
+    var http = QI(request, Ci.nsIHttpChannel);
+    var referer = null;
+    http.visitRequestHeaders({
+        visitHeader: function(name, value)
+        {
+            if (name == 'referer')
+                referer = value;
+        }
+    });
+    return referer;
 }
 
 var HttpObserver = extend(Object,
@@ -670,7 +691,7 @@ var HttpObserver = extend(Object,
         // request (win == win.parent) or embedded iframe request.
         if (request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI)
         {
-            if (FBTrace.DBG_WINDOWS && win == win.parent)
+            if ( (FBTrace.DBG_ACTIVATION || FBTrace.DBG_WINDOWS) && win == win.parent)
             {
                 FBTrace.sysout("-> tabWatcher HttpObserver *** START *** " +
                     "document request for: " + request.URI.spec + " window for request is "+win.location+"\n");
@@ -681,8 +702,33 @@ var HttpObserver = extend(Object,
                 // Make sure the frame listener is registered for top level window so,
                 // we can get all onStateChange events and init context for all opened tabs.
                 var browser = TabWatcher.getBrowserByWindow(win);
-                // Here we know the source of the request is 'win'. For viral activation and web app tracking
-                browser.FirebugLink = {src: browser.currentURI, dst: request.URI};
+
+                delete browser.FirebugLink;
+
+                if (win.location.toString() == "about:blank") // then this page is opened in new tab or window
+                {
+                    var referer = getRefererHeader(request);
+                    if (referer)
+                    {
+                        try
+                        {
+                            var srcURI = makeURI(referer);
+                            browser.FirebugLink = {src: srcURI, dst: request.URI};
+                        }
+                        catch(e)
+                        {
+                            if (FBTrace.DBG_ERRORS)
+                                FBTrace.sysout("tabWatcher.onModifyRequest failed to make URI from "+referer+" because "+exc, exc);
+                        }
+                    }
+                }
+                else
+                {
+                    // Here we know the source of the request is 'win'. For viral activation and web app tracking
+                    browser.FirebugLink = {src: browser.currentURI, dst: request.URI};
+                }
+                if (FBTrace.DBG_ACTIVATION && browser.FirebugLink)
+                    FBTrace.sysout("tabWatcher.onModifyRequest created FirebugLink from "+browser.FirebugLink.src.spec + " to "+browser.FirebugLink.dst.spec);
             }
         }
     },
@@ -738,7 +784,7 @@ function onUnloadTopWindow(event)
     var win = event.currentTarget;
     win.removeEventListener("unload", onUnloadTopWindow, true);
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+win.location+"\n");
+        FBTrace.sysout("-> tabWatcher onUnloadTopWindow for: "+win.location+" typeof :"+typeof(win)+"\n");
     TabWatcher.unwatchTopWindow(win);
 }
 

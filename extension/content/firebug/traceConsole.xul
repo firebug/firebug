@@ -27,12 +27,12 @@
 
   <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
   <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
-  
+
   <script type="application/x-javascript" src="chrome://firebug/content/traceConsole.js"/>
   <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
-      
+
   <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
-  
+
   <commandset id="mainCommandSet">
     <command id="cmd_clearConsole" oncommand="TraceConsole.onClearConsole()"/>
     <command id="cmd_find" oncommand="gFindBar.onFindCommand();"/>
@@ -52,8 +52,8 @@
     <key id="key_clearConsole" key="l" command="cmd_clearConsole" modifiers="accel"/>
   </keyset>
 
+  <!-- Trace Console Toolbar -->
   <toolbox id="consoleToolbox">
-    <!-- Toolbar -->
     <toolbar id="consoleToolbar" align="center">
       <toolbarbutton id="clearConsole"
         label="tracing.cmd.Clear" class="toolbar-image-button"
@@ -87,7 +87,7 @@
     <popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);" />
     <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
   </popupset>
-    
+
   <vbox flex="1">
     <browser id="consoleFrame" type="content-primary"
              src="chrome://firebug/content/traceConsole.html" flex="1"

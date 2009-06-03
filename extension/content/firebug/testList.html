@@ -24,6 +24,8 @@ var baseURI = "chrome://firebugTests/content/";
  * @param: {String} category    Test category, this can be set to:
  *                              "passes": (default) - a test must pass, otherwise it's a blocking bug.
  *                              "fails": - it's not blocking bug if the test fails.
+ * @param: {String} testPage    Relative location of the test page [optional]. This is useful for manual
+ *                              opening of the test page from FBTest console (context menu "Open Test Page").
  */
 var testList = [
     {group: "firebug", uri: "firebug/allOpenAllClose.js",              desc: "First test: all open and all close"},
@@ -48,7 +50,8 @@ var testList = [
     {group: "console", uri: "console/onreadystatechange.js",           desc: "Log an onreadystatechange function." },
     {group: "console", uri: "console/issue1591.js",                    desc: "Issue 1591: Firebug cannot find _firebugConsole element." },
     {group: "console", uri: "console/reps/console_array.js",           desc: "Rendering of Array and Array-like objects." },
-    {group: "net",     uri: "net/1256/issue1256.js",                   desc: "Issue1256: Firebug displays spaces as plus signs in POST fields" },
+    {group: "console", uri: "console/1693/Issue1693.js",               desc: "Viewing requests with large message bodies in Console tab temporarily freezes browser", testPage: "console/1693/Issue1693.html" },
+    {group: "net",     uri: "net/1256/issue1256.js",                   desc: "Issue1256: Firebug displays spaces as plus signs in POST fields", testPage: "net/1256/issue1256.html" },
     {group: "net",     uri: "net/1275/issue1275.js",                   desc: "Issue1275: firebug does not show JSON answers from server" },
     {group: "net",     uri: "net/1461/issue1461.js",                   desc: "Issue1461: Failed to load source for sourceFile (FF 3.0.6 FireBug 1.3.2)" },
     {group: "net",     uri: "net/1456/issue1456.js",                   desc: "Issue1456: XMLHttpRequest / Response totally wrong" },
@@ -59,14 +62,15 @@ var testList = [
     {group: "net",     uri: "net/372/issue372.js",                     desc: "Issue 372: Outgoing XML isn't displayed in 'post'-tab" },
     {group: "net",     uri: "net/1468/issue1468.js",                   desc: "Issue 1468: File Locking on File upload when firebug is installed" },
     {group: "net",     uri: "net/1308/issue1308.js",                   desc: "Issue 1308: Missing URL-Encoding of reserved characters when using 'Copy Location with Parameters' from Net Panel" },
-    {group: "net",     uri: "net/601/issue601.js",                     desc: "Issue 601: XHR in console shows stale/cached output" },
+    {group: "net",     uri: "net/601/issue601.js",                     desc: "Issue 601: XHR in console shows stale/cached output", testPage: "net/601/issue601.html"},
     {group: "net",     uri: "net/700/issue700.js",                     desc: "Issue 700: HTML preview for net responses" },
     {group: "net",     uri: "net/176/issue176.js",                     desc: "Issue 176: net flash tab not recognising flv files" },
     {group: "net",     uri: "net/listeners/netInfoBodyListener.js",    desc: "netInfoBody listener test" },
+    {group: "net",     uri: "net/1764/issue1764.js",                   desc: "Net panel misses page load.", testPage: "net/1764/issue1764-1.html" },
     {group: "search",  uri: "search/scriptPanelSearch.js",             desc: "Search within the Script panel" },
-    {group: "search",  uri: "search/netPanelSearch.js",                desc: "Search within the Net panel" },
-    {group: "examples", uri: "examples/exampleTest.html",               desc: "Simple test example." },
-    {group: "examples", uri: "examples/exampleNetTest.js",              desc: "Example of a Net panel test." },
+    {group: "search",  uri: "search/netPanelSearch.js",                desc: "Search within the Net panel", testPage: "search/netVictim.htm" },
+    {group: "examples", uri: "examples/exampleTest.html",              desc: "Simple test example." },
+    {group: "examples", uri: "examples/exampleNetTest.js",             desc: "Example of a Net panel test." },
 ];
 </script>
 </body>

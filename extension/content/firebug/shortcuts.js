@@ -10,8 +10,7 @@ const Ci = Components.interfaces;
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 
 /**
- * ShortcutsModel implementation
- * description TODO
+ * ShortcutsModel object implements keyboard shortcuts logic.
  */
 Firebug.ShortcutsModel = extend(Firebug.Module,
 {
@@ -19,6 +18,9 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
 
     initializeUI: function()
     {
+        if (FBTrace.DBG_SHORTCUTS)
+            FBTrace.sysout("shortcuts.initializeUI; Shortcuts module initialization.");
+
         this.initShortcuts();
     },
 
@@ -36,6 +38,7 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
         var tokens = shortcut.split(' ');
         var key = tokens.pop();
         var modifiers = tokens.join(',')
+
         var keyElem = document.getElementById("key_" + element);
         if (!keyElem)
         {
@@ -60,6 +63,20 @@ Firebug.ShortcutsModel = extend(Firebug.Module,
             keyElem.setAttribute('keycode', key);
             keyElem.removeAttribute('key'); //in case default shortcut uses key rather than keycode
         }
+    },
+
+    // UI Commands
+    customizeShortcuts: function()
+    {
+        var args = {
+            FBL: FBL,
+            FBTrace: FBTrace
+        };
+
+        // Open customize shortcuts dialog. Pass FBL into the XUL window so,
+        // common APIs can be used (e.g. localization).
+        window.openDialog("chrome://firebug/content/customizeShortcuts.xul", "", 
+            "chrome,centerscreen,dialog,modal,resizable=yes", args);
     }
 });
 

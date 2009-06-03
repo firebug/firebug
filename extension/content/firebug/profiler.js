@@ -15,25 +15,25 @@ Firebug.Profiler = extend(Firebug.Module,
         this.setEnabled(context);
     },
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelEnable panelName: "+panelName+"\n");
 
         if (panelName == "net" || panelName == "script")
-            this.setEnabled(context);
+            this.setEnabled();
     },
 
-    onPanelDisable: function(context, panelName)
+    onPanelDisable: function(panelName)
     {
         if (FBTrace.DBG_DISPATCH)
             FBTrace.sysout("Profiler.onPanelDisable panelName: "+panelName+"\n");
 
        if (panelName == "net" || panelName == "script")
-            this.setEnabled(context);
+            this.setEnabled();
     },
 
-    setEnabled: function(context)
+    setEnabled: function()
     {
         // The profiler is available only if the debugger (script panel) and console are enabled.
         var debuggerEnabled = Firebug.Debugger.isAlwaysEnabled();
@@ -58,7 +58,7 @@ Firebug.Profiler = extend(Firebug.Module,
     {
         fbs.startProfiling();
 
-        context.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "true");
 
         var isCustomMessage = !!title;
         if (!isCustomMessage)
@@ -74,7 +74,7 @@ Firebug.Profiler = extend(Firebug.Module,
         if (totalTime == -1)
             return;
 
-        context.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "false");
+        Firebug.chrome.setGlobalAttribute("cmd_toggleProfiling", "checked", "false");
 
         if (cancelReport)
             delete context.profileRow;
@@ -370,7 +370,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     inspectObject: function(call, context)
     {
         var sourceLink = this.getSourceLink(call);
-        context.chrome.select(sourceLink);
+        Firebug.chrome.select(sourceLink);
     },
 
     getTooltip: function(call)
@@ -383,7 +383,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("profiler.getTooltip FAILS ", exc);
+                FBTrace.sysout("profiler.getTooltip FAILS ", exc);
         }
     },
 

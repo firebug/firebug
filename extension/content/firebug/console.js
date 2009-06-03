@@ -165,6 +165,9 @@ Firebug.Console = extend(ActivableConsole,
 
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
+
+        if (Firebug.Console.isAlwaysEnabled())
+            this.watchForErrors();
     },
 
     initContext: function(context, persistedState)
@@ -193,15 +196,19 @@ Firebug.Console = extend(ActivableConsole,
 
     showContext: function(browser, context)
     {
-        if (browser)
-            browser.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
+        Firebug.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
     },
 
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.Console.injector.detachConsole(context, context.window);  // TODO iterate windows?
+    },
+
     // -----------------------------------------------------------------------------------------------------
 
-    onPanelEnable: function(context, panelName)
+    onPanelEnable: function(panelName)
     {
         if (panelName != this.panelName)  // we don't care about other panels
             return;
@@ -209,46 +216,45 @@ Firebug.Console = extend(ActivableConsole,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onPanelEnable**************");
 
-        $('fbStatusIcon').setAttribute("console", "on");
+        this.watchForErrors();
         Firebug.Debugger.addDependentModule(this); // we inject the console during JS compiles so we need jsd
-
-        // Log a message about disabled Spy in Firefox > 3.1 till #483672 is fixed.
-        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
-        {
-            setTimeout(function()
-            {
-                Firebug.Console.log("'Show XMLHttpRequests' option (Console panel) is disabled " +
-                    "in Firefox 3.1 and higher till bug #483672 is fixed."); 
-            });
-        }
     },
 
-    onPanelDisable: function(context, panelName)
+    onPanelDisable: function(panelName)
     {
         if (panelName != this.panelName)  // we don't care about other panels
             return;
 
         Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
-        $('fbStatusIcon').removeAttribute("console");
+        this.unwatchForErrors();
     },
 
-    onSuspendFirebug: function(context)
+    onSuspendFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onSuspendFirebug\n");
-        Firebug.Errors.stopObserving();
-        $('fbStatusIcon').removeAttribute("console");
+        if (Firebug.Console.isAlwaysEnabled())
+            this.unwatchForErrors();
     },
 
-    onResumeFirebug: function(context)
+    onResumeFirebug: function()
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onResumeFirebug\n");
         if (Firebug.Console.isAlwaysEnabled())
-        {
-            Firebug.Errors.startObserving();
-            $('fbStatusIcon').setAttribute("console", "on");
-        }
+            this.watchForErrors();
+    },
+
+    watchForErrors: function()
+    {
+        Firebug.Errors.startObserving();
+        $('fbStatusIcon').setAttribute("console", "on");
+    },
+
+    unwatchForErrors: function()
+    {
+        Firebug.Errors.stopObserving();
+        $('fbStatusIcon').removeAttribute("console");
     },
 
     // ----------------------------------------------------------------------------------------------------
@@ -273,9 +279,9 @@ Firebug.Console = extend(ActivableConsole,
         if (!context)
             context = FirebugContext;
 
-        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");                          /*@explore*/
+        if (FBTrace.DBG_WINDOWS && !context) FBTrace.sysout("Console.logRow: no context \n");
 
-        // if (this.isEnabled(context)) XXXjjb I don't think we should test this every time
+        if (this.isAlwaysEnabled())
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     }
 });
@@ -469,12 +475,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         this.updateMaxLimit();
         prefs.addObserver(Firebug.prefDomain, this, false);
     },
-    
+
     initializeNode : function()
     {
         dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
     },
-    
+
     destroyNode : function()
     {
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
@@ -541,7 +547,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             optionMenu("ShowJavaScriptWarnings", "showJSWarnings"),
             optionMenu("ShowCSSErrors", "showCSSErrors"),
             optionMenu("ShowXMLErrors", "showXMLErrors"),
-            this.xhrSpyOptionMenu(),
+            optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests"),
             optionMenu("ShowChromeErrors", "showChromeErrors"),
             optionMenu("ShowChromeMessages", "showChromeMessages"),
             optionMenu("ShowExternalErrors", "showExternalErrors"),
@@ -550,22 +556,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             "-",
             optionMenu("LargeCommandLine", "largeCommandLine")
         ];
-    },
-
-    xhrSpyOptionMenu: function()
-    {
-        var option = optionMenu("ShowXMLHttpRequests", "showXMLHttpRequests");
-
-        // XHR Spy is disabled in in Firefox > 3.1 till #483672 is fixed.
-        if (versionChecker.compare(appInfo.version, "3.1") >= 0)
-        {
-            option.disabled = true;
-            option.checked = false;
-            option.tooltiptext = "This option is disabled in Firefox 3.1 and higher till " + 
-                "bug #483672 is fixed.";
-        }
-
-        return option;
     },
 
     getShowStackTraceMenuItem: function()
@@ -697,19 +687,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (shouldShow)
         {
-            this.context.chrome.$("fbCommandBox").collapsed = false;
-            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, this.context.chrome);
+            collapse(Firebug.chrome.$("fbCommandBox"), false);
+            Firebug.CommandLine.setMultiLine(Firebug.largeCommandLine, Firebug.chrome);
         }
         else
         {
-            if (this.context.chrome)
-            {
-                // Make sure that entire content of the Console panel is hidden when
-                // the panel is disabled.
-                Firebug.CommandLine.setMultiLine(false, this.context.chrome);
-                this.context.chrome.$("fbCommandBox").collapsed = true;
-            }
-            // else the context is not setup, ok we aren't showing it.
+            // Make sure that entire content of the Console panel is hidden when
+            // the panel is disabled.
+            Firebug.CommandLine.setMultiLine(false, Firebug.chrome);
+            collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
     },
 });

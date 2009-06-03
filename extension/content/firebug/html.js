@@ -199,8 +199,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // is only bad for performance
         if (attrName == "curpos")
             return;
-        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
-            FBTrace.sysout("\nhtml.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+"\n");   /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("\nhtml.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+"\n");
 
         this.markChange();
 
@@ -297,18 +297,18 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     mutateNode: function(target, parent, nextSibling, removal)
     {
-        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
-            FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");           /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");
+
         this.markChange();  // This invalidates the panels for every mutate
 
         var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
             ? this.ioBox.createObjectBox(parent)
             : this.ioBox.findObjectBox(parent);
 
-        if (FBTrace.DBG_HTML)                                                                                          /*@explore*/
-            FBTrace.sysout("html.mutateNode parent:"+parent+" parentNodeBox:"+parentNodeBox+"\n");                     /*@explore*/
-                                                                                                                       /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.mutateNode parent:"+parent+" parentNodeBox:"+parentNodeBox+"\n");
+
         if (!parentNodeBox)
             return;
 
@@ -401,7 +401,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     createObjectBox: function(object, isRoot)
     {
-        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+(object.tagName?object.tagName:object)+", isRoot:"+(isRoot?"true":"false")+")\n");                         /*@explore*/
+        if (FBTrace.DBG_HTML) FBTrace.sysout("html.createObjectBox("+(object.tagName?object.tagName:object)+", isRoot:"+(isRoot?"true":"false")+")\n");
         var tag = getNodeTag(object);
         if (tag)
             return tag.replace({object: object}, this.document);
@@ -419,13 +419,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (parentNode)
             if (parentNode.nodeType == 9)
             {
-                if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");                  /*@explore*/
+                if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");
                 if (parentNode.defaultView)
                     return parentNode.defaultView.frameElement;
                 else
                 {
                     if (FBTrace.DBG_HTML || FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
+                        FBTrace.sysout("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
                 }
             }
             else
@@ -552,7 +552,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             catch (exc)
             {
                 if (FBTrace.DBG_ERRORS || FBTrace.DBG_HTML)
-                    FBTrace.dumpProperties("html.onMutateNode FAILS:", exc);
+                    FBTrace.sysout("html.onMutateNode FAILS:", exc);
             }
         }, this);
     },
@@ -696,8 +696,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             {
                 if (win == subwin)
                 {
-                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
-                        FBTrace.sysout("html.watchWindow found subwin.location.href="+win.location.href+"\n");         /*@explore*/
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("html.watchWindow found subwin.location.href="+win.location.href+"\n");
                     htmlPanel.mutateDocumentEmbedded(win, false);
                 }
             });
@@ -722,8 +722,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             {
                 if (win == subwin)
                 {
-                    if (FBTrace.DBG_HTML)                                                                              /*@explore*/
-                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+win.location.href+"\n");       /*@explore*/
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("html.unwatchWindow found subwin.location.href="+win.location.href+"\n");
                     htmlPanel.mutateDocumentEmbedded(win, true);
                 }
             });
@@ -772,8 +772,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     updateSelection: function(object)
     {
-        if (FBTrace.DBG_HTML)                                           /*@explore*/
-            FBTrace.sysout("html.updateSelection "+object);             /*@explore*/
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.updateSelection "+object);
         if (this.ioBox.sourceRow)
             this.ioBox.sourceRow.removeAttribute("exeLine");
 
@@ -784,9 +784,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
              if (stylesheet)
              {
                 var ownerNode = stylesheet.ownerNode;
-                if (FBTrace.DBG_CSS)                                                                                   /*@explore*/
-                        FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+stylesheet.ownerNode         /*@explore*/
-                                          +" href:"+sourceLink.href+"\n");                                             /*@explore*/
+                if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+stylesheet.ownerNode
+                                          +" href:"+sourceLink.href+"\n");
                 if (ownerNode)
                 {
                     var objectbox = this.ioBox.select(ownerNode, true, true, this.noScrollIntoView);
@@ -799,9 +799,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                         if (!sourceRow) break;
                         sourceRow = FBL.getNextByClass(sourceRow,  "sourceRow");
                     }
-                    if (FBTrace.DBG_CSS)                                                                               /*@explore*/
-                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line                   /*@explore*/
-                                          +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined")+"\n");            /*@explore*/
+                    if (FBTrace.DBG_CSS)
+                        FBTrace.sysout("html panel updateSelection sourceLink.line="+sourceLink.line
+                                          +" sourceRow="+(sourceRow?sourceRow.innerHTML:"undefined")+"\n");
                     if (sourceRow)
                     {
                         this.ioBox.sourceRow = sourceRow;
@@ -835,7 +835,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 this.inspectorHistory.pop();
 
             if (FBTrace.DBG_HTML)
-                FBTrace.dumpProperties("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
+                FBTrace.sysout("html.stopInspecting: inspectoryHistory updated", this.inspectorHistory);
         }
 
         this.ioBox.highlight(null);
@@ -1011,7 +1011,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox open $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 SPAN({class: "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
@@ -1070,7 +1070,7 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
             if (child.repObject)
             {
                 var panel = Firebug.getElementPanel(child);
-                panel.context.chrome.select(child.repObject);
+                Firebug.chrome.select(child.repObject);
                 break;
             }
         }
@@ -1081,7 +1081,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 IMG({class: "twisty", role: "presentation"}),
                 SPAN({class: "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
@@ -1105,7 +1105,7 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
@@ -1124,7 +1124,7 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel"},
+            DIV({class: "nodeLabel", role: "presentation"},
                 SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
@@ -1280,15 +1280,13 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
         this.input.value = value;
         this.input.focus();
 
-        var command = this.panel.context.chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
         command.setAttribute("checked", true);
     },
 
     hide: function()
     {
-        var chrome = this.panel.context.chrome;
-
-        var command = chrome.$("cmd_toggleHTMLEditing");
+        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
         command.setAttribute("checked", false);
 
         this.panel.panelNode.removeChild(this.box);
@@ -1537,12 +1535,16 @@ function NodeSearch(text, doc, panelNode, ioBox)
             {
                 var reMatch = match.match;
                 this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
+                dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
             }, this));
         }
         else if (matchCount)
             return true;
         else
+        {
             this.noMatch = true;
+            dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound', [panelNode.ownerPanel, text]);
+        }
     };
 
     this.reset = function()

@@ -111,7 +111,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 
     loadFromCache: function(url, method, file)
     {
-        if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.loadFromCache url:"+url);                                             /*@explore*/
+        if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.loadFromCache url:"+url);
 
         var doc = this.context.window.document;
         if (doc)
@@ -133,14 +133,14 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         }
         catch (exc)
         {
-            if (FBTrace.DBG_CACHE)                                                                                     /*@explore*/
-                FBTrace.dumpProperties("sourceCache for url:"+url+" window="+this.context.window.location.href+" FAILS:", exc); /*@explore*/
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("sourceCache for url:"+url+" window="+this.context.window.location.href+" FAILS:", exc);
             return;
         }
 
         if (url == this.context.browser.contentWindow.location.href)
         {
-            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load content window href\n");                                             /*@explore*/
+            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load content window href\n");
             if (channel instanceof nsIUploadChannel)
             {
                 var postData = getPostStream(this.context);
@@ -148,7 +148,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                 {
                     var uploadChannel = QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postData, "", -1);
-                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");                                             /*@explore*/
+                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
             }
 
@@ -156,7 +156,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
             {
                 var cacheChannel = QI(channel, nsICachingChannel);
                 cacheChannel.cacheKey = getCacheKey(this.context);
-                if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");                                             /*@explore*/
+                if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load cacheChannel key"+cacheChannel.cacheKey+"\n");
             }
         }
         else if ((method == "PUT" || method == "POST") && file)
@@ -170,7 +170,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                     var postDataStream = getInputStreamFromString(postData);
                     var uploadChannel = QI(channel, nsIUploadChannel);
                     uploadChannel.setUploadStream(postDataStream, "application/x-www-form-urlencoded", -1);
-                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");                                             /*@explore*/
+                    if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load uploadChannel set\n");
                 }
             }
         }
@@ -178,18 +178,18 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         var stream;
         try
         {
-            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load url:"+url+" with charset"+charset+"\n");                                             /*@explore*/
+            if (FBTrace.DBG_CACHE) FBTrace.sysout("sourceCache.load url:"+url+" with charset"+charset+"\n");
             stream = channel.open();
         }
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
             {
-                var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";            /*@explore*/
-                var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";                /*@explore*/
-                FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n"); /*@explore*/
-                FBTrace.dumpProperties("sourceCache.load fails channel.open for url="+url+ " cause:", exc);                /*@explore*/
-                FBTrace.dumpStack("sourceCache.load fails channel=", channel);
+                var isCache = (channel instanceof nsICachingChannel)?"nsICachingChannel":"NOT caching channel";
+                var isUp = (channel instanceof nsIUploadChannel)?"nsIUploadChannel":"NOT nsIUploadChannel";
+                FBTrace.sysout(url+" vs "+this.context.browser.contentWindow.location.href+" and "+isCache+" "+isUp+"\n");
+                FBTrace.sysout("sourceCache.load fails channel.open for url="+url+ " cause:", exc);
+                FBTrace.sysout("sourceCache.load fails channel=", channel);
             }
             return ["sourceCache.load FAILS for url="+url, exc.toString()];
         }
@@ -203,8 +203,8 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-                FBTrace.dumpProperties("sourceCache.load FAILS, url="+url, exc);                    /*@explore*/
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("sourceCache.load FAILS, url="+url, exc);
             return ["sourceCache.load FAILS for url="+url, exc.toString()];
         }
         finally
@@ -215,27 +215,10 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 
     store: function(url, text)
     {
-        if (FBTrace.DBG_CACHE)                                                                                         /*@explore*/
-            FBTrace.sysout("sourceCache for "+this.context.getName()+" store url="+url+"\n");        /*@explore*/
-        var lines = this.splitLines(text);
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("sourceCache for "+this.context.getName()+" store url="+url+"\n");
+        var lines = splitLines(text);
         return this.storeSplitLines(url, lines);
-    },
-
-    splitLines: function(text)
-    {
-        const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
-        var lines;
-        if (text.match)
-        {
-            lines = text.match(reSplitLines2);
-        }
-        else
-        {
-            var str = text+"";
-            lines = str.match(reSplitLines2);
-        }
-        lines.pop();
-        return lines;
     },
 
     storeSplitLines: function(url, lines)

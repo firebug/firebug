@@ -109,18 +109,8 @@ ChannelListener.prototype =
                     safeGetName(request), err);
         }
 
-        try
-        {
-            if (this.listener)
-                this.listener.onDataAvailable(request, requestContext, inputStream, offset, count);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener; originalListener.onDataAvailable " +
-                    "(" + offset + ", " + count + ") EXCEPTION: " +
-                    safeGetName(request), err);
-        }
+        if (this.listener)
+            this.listener.onDataAvailable(request, requestContext, inputStream, offset, count);
     },
 
     onStartRequest: function(request, requestContext)
@@ -138,16 +128,10 @@ ChannelListener.prototype =
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest EXCEPTION\n", err);
         }
 
-        try
-        {
-            if (this.listener)
-                this.listener.onStartRequest(request, requestContext);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener; originalListener.onStartRequest EXCEPTION\n", err);
-        }
+        // Possible exception from the following onStartRequest call is used by Firefox to 
+        // cancel the request so, don't eat it (#1712).
+        if (this.listener)
+            this.listener.onStartRequest(request, requestContext);
     },
 
     onStopRequest: function(request, requestContext, statusCode)
@@ -164,16 +148,8 @@ ChannelListener.prototype =
                 FBTrace.sysout("tabCache.ChannelListener.onStopRequest EXCEPTION\n", err);
         }
 
-        try
-        {
-            if (this.listener)
-                this.listener.onStopRequest(request, requestContext, statusCode);
-        }
-        catch (err)
-        {
-            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener; originalListener.onStopRequest EXCEPTION\n", err);
-        }
+        if (this.listener)
+            this.listener.onStopRequest(request, requestContext, statusCode);
     },
 
     /* nsITraceableChannel */

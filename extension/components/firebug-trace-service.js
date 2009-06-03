@@ -41,7 +41,7 @@ TraceConsoleService.prototype =
 {
     getTracer: function(prefDomain)
     {
-        if (this.getPref("extensions.firebug-tracing-service.toOSConsole"))
+        if (this.getPref("extensions.firebug-tracing-service.DBG_toOSConsole"))
         {
              win = appShellService.hiddenDOMWindow;  // also need browser.dom.window.dump.enabled true
         }
@@ -229,28 +229,10 @@ var TraceAPI = {
         this.dump(null, message, obj);
     },
 
-    // OBSOLETE
-    dumpProperties: function(message, obj) {
-        this.sysout(message, obj);
-    },
-
-    dumpStack: function(message) {
-        this.sysout(message);
-    },
-
-    dumpEvent: function(message, eventObj) {
-        this.sysout(message, eventObj);
-    },
-
-    dumpInterfaces: function(message, eventObj) {
-        this.sysout(message, eventObj);
-    },
-
     setScope: function(scope)
     {
         this.scopeOfFBTrace = scope;
     },
-
 };
 
 var TraceBase = function(prefDomain) {

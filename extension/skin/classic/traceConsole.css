@@ -250,6 +250,10 @@
 	text-decoration:underline;
 }
 
+.stackFuncName {
+    color: gray;
+}
+
 .messageInfoExcText > .ExceptionMessage {
 	font-weight:bold;
 	color: Red;

@@ -32,7 +32,7 @@ var ignoreNextInput = false;
 Firebug.Editor = extend(Firebug.Module,
 {
     supportsStopEvent: true,
-    
+
     dispatchName: "editor",
     tabCharacter: "    ",
 
@@ -115,7 +115,7 @@ Firebug.Editor = extend(Firebug.Module,
         {
             if (cancel)
             {
-                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, this, currentTarget]);
+                dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, removeGroup && !originalValue]);
                 if (value != originalValue)
                     this.saveEditAndNotifyListeners(currentTarget, originalValue, previousValue);
 
@@ -205,13 +205,16 @@ Firebug.Editor = extend(Firebug.Module,
     setEditTarget: function(element)
     {
         if (!element)
+        {
+            dispatch([Firebug.A11yModel], 'onInlineEditorClose', [currentPanel, currentTarget, true]);
             this.stopEditing();
+        }
         else if (hasClass(element, "insertBefore"))
             this.insertRow(element, "before");
         else if (hasClass(element, "insertAfter"))
             this.insertRow(element, "after");
         else
-            this.startEditing(element, undefined, currentEditor);
+            this.startEditing(element);
     },
 
     tabNextEditor: function()
@@ -252,14 +255,9 @@ Firebug.Editor = extend(Firebug.Module,
 
     insertRow: function(relative, insertWhere)
     {
+        var group =
+            relative || getAncestorByClass(currentTarget, "editGroup") || currentTarget;
         var value = this.stopEditing();
-
-        if (!relative)
-            relative = currentTarget;
-
-        var group = getAncestorByClass(relative, "editGroup");
-        if (!group)
-            group = relative;
 
         currentPanel = Firebug.getElementPanel(group);
 
@@ -298,7 +296,7 @@ Firebug.Editor = extend(Firebug.Module,
         win.addEventListener("resize", this.onResize, true);
         win.addEventListener("blur", this.onBlur, true);
 
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
 
         this.listeners = [
             chrome.keyCodeListen("ESCAPE", null, bind(this.cancelEditing, this)),
@@ -354,7 +352,7 @@ Firebug.Editor = extend(Firebug.Module,
         win.removeEventListener("resize", this.onResize, true);
         win.removeEventListener("blur", this.onBlur, true);
 
-        var chrome = context.chrome;
+        var chrome = Firebug.chrome;
         if (chrome)
         {
             for (var i = 0; i < this.listeners.length; ++i)
@@ -476,8 +474,8 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
                 DIV({class: "textEditorBottom2"})
             )
         ),
-     
-    inputTag :   
+
+    inputTag :
         INPUT({class: "textEditorInner", type: "text",
             oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
         ),
@@ -1062,20 +1060,30 @@ function getDefaultEditor(panel)
     return defaultEditor;
 }
 
+/**
+ * An outsider is the first element matching the stepper element that
+ * is not an child of group. Elements tagged with insertBefore or insertAfter
+ * classes are also excluded from these results unless they are the sibling
+ * of group, relative to group's parent editGroup. This allows for the proper insertion
+ * rows when groups are nested.
+ */
 function getOutsider(element, group, stepper)
 {
-    var next = stepper(element);
-    if (isAncestor(next, group))
+    var parentGroup = getAncestorByClass(group.parentNode, "editGroup");
+    var next;
+    do
     {
-        do
-        {
-            next = stepper(next);
-        }
-        while (isAncestor(next, group) || hasClass(next, "insertBefore")
-            || hasClass(next, "insertAfter"));
+        next = stepper(next || element);
     }
+    while (isAncestor(next, group) || isGroupInsert(next, parentGroup));
 
     return next;
+}
+
+function isGroupInsert(next, group)
+{
+    return (!group || isAncestor(next, group))
+        && (hasClass(next, "insertBefore") || hasClass(next, "insertAfter"));
 }
 
 function getNextOutsider(element, group)

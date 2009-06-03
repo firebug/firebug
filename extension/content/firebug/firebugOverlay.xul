@@ -23,7 +23,7 @@
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
-        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(FirebugContext)"/>
+        <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
         <command id="cmd_disablePanels" oncommand="Firebug.disablePanels(FirebugContext)"/>
 
         <command id="cmd_toggleInspecting" oncommand="Firebug.Inspector.toggleInspecting(FirebugContext)"
@@ -32,10 +32,10 @@
         <command id="cmd_toggleHTMLEditing" oncommand="FirebugContext.getPanel('html').toggleEditing()"/>
         <command id="cmd_toggleCSSEditing" oncommand="FirebugContext.getPanel('stylesheet').toggleEditing()"/>
 
-        <command id="cmd_focusCommandLine" oncommand="Firebug.CommandLine.focus(FirebugContext)"/>
-        <command id="cmd_focusFirebugSearch" oncommand="Firebug.Search.focus(FirebugContext)"/>
-        <command id="cmd_focusWatchEditor" oncommand="Firebug.Debugger.focusWatch(FirebugContext)"/>
-        <command id="cmd_focusLocation" oncommand="FirebugChrome.focusLocationList(FirebugContext)"/>
+        <command id="cmd_focusCommandLine" oncommand="if (FirebugContext) Firebug.CommandLine.focus(FirebugContext)"/>
+        <command id="cmd_focusFirebugSearch" oncommand="if (FirebugContext) Firebug.Search.focus(FirebugContext);"/>
+        <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
+        <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
 
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" breakable="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
@@ -56,39 +56,37 @@
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
         <command id="cmd_searchNext" oncommand="Firebug.Search.update(FirebugContext, true, false)"/>
         <command id="cmd_searchPrev" oncommand="Firebug.Search.update(FirebugContext, true, true)"/>
+
+        <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar(FirebugContext)"/>
+        <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
+        <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
+        <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
+        <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
+        <command id="cmd_allOn" oncommand="Firebug.toggleAll('on')"/>
+        <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
+        <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
+        <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
     </commandset>
 
     <keyset id="mainKeyset">
-        <key id="key_reenterCommand" key="e" modifiers="control,shift" class="fbOnlyKey"
-                command="cmd_reenterCommand"/>
-        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" class="fbOnlyKey"
-                command="cmd_toggleInspecting"/>
-        <key id="key_toggleProfiling" key="p" modifiers="accel,shift" class="fbOnlyKey"
-                command="cmd_toggleProfiling"/>
-
-        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" class="fbOnlyKey"
-                command="cmd_focusCommandLine"/>
-        <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" class="fbOnlyKey"
-                command="cmd_focusFirebugSearch"/>
-        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" class="fbOnlyKey"
-                command="cmd_focusWatchEditor"/>
-        <key id="key_focusLocation" key=" " modifiers="accel,shift" class="fbOnlyKey"
-                command="cmd_focusLocation"/>
-        <key id="key_focusLocation" key=" " modifiers="control" class="fbOnlyKey"
-                command="cmd_focusLocation"/>
-        <key id="key_nextObject" key="." modifiers="control" class="fbOnlyKey"
-                command="cmd_nextObject"/>
-        <key id="key_previousObject" key="," modifiers="control" class="fbOnlyKey"
-                command="cmd_previousObject"/>
-        <key id="key_previousFirebugTab" key="`" modifiers="control" class="fbOnlyKey"
-                command="cmd_previousFirebugTab"/>
-        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift"
-                command="cmd_leftFirebugTab"/>
-        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift"
-                command="cmd_rightFirebugTab"/>
-
-        <key id="key_customizeFBKeys" keycode="VK_B" modifiers="accel shift alt"
-                command="cmd_customizeFBKeys"/>
+        <key id="key_reenterCommand" key="e" modifiers="control,shift" command="cmd_reenterCommand" class="fbOnlyKey"/>
+        <key id="key_toggleInspecting" key="c" modifiers="accel,shift" command="cmd_toggleInspecting" class="fbOnlyKey"/>
+        <key id="key_toggleProfiling" key="p" modifiers="accel,shift" command="cmd_toggleProfiling" class="fbOnlyKey"/>
+        <key id="key_focusCommandLine" key="l" modifiers="accel,shift" command="cmd_focusCommandLine" class="fbOnlyKey"/>
+        <key id="key_focusFirebugSearch" key="k" modifiers="accel,shift" command="cmd_focusFirebugSearch" class="fbOnlyKey"/>
+        <key id="key_focusWatchEditor" key="n" modifiers="accel,shift" command="cmd_focusWatchEditor" class="fbOnlyKey"/>
+        <key id="key_focusLocation" key=" " modifiers="accel,shift" command="cmd_focusLocation" class="fbOnlyKey"/>
+        <key id="key_focusLocation" key=" " modifiers="control" command="cmd_focusLocation" class="fbOnlyKey"/>
+        <key id="key_nextObject" key="." modifiers="control" command="cmd_nextObject" class="fbOnlyKey"/>
+        <key id="key_previousObject" key="," modifiers="control" command="cmd_previousObject" class="fbOnlyKey"/>
+        <key id="key_previousFirebugTab" key="`" modifiers="control" command="cmd_previousFirebugTab" class="fbOnlyKey"/>
+        <key id="key_leftFirebugTab" keycode="VK_PAGE_UP" modifiers="accel shift" command="cmd_leftFirebugTab"/>
+        <key id="key_rightFirebugTab" keycode="VK_PAGE_DOWN" modifiers="accel shift" command="cmd_rightFirebugTab"/>
+        <key id="key_customizeFBKeys" keycode="VK_B" modifiers="accel shift alt" command="cmd_customizeFBKeys"/>
+        <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
+        <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
+        <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
     </keyset>
 
     <popupset id="mainPopupSet">
@@ -99,92 +97,57 @@
     </popupset>
 
     <!-- Main UI -->
-
     <vbox id="fbContentBox">
-
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
-                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar" aria-label="Firebug Tools">
-                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options" role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
+                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar"
+                          aria-label="Firebug Tools">
+
+                        <!-- Firebug Icon Menu -->
+                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options"
+                                role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
                             <image src="chrome://firebug/skin/firebug.png"/>
-                            <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="fbFirebugMenuPopup" role="menu">
-
-                                <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
-                                    <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                                            <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
-                                    </menupopup>
-                                </menu>
-
-                                <menuseparator/>
-
-                                <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
-                                    <menupopup>
-                                        <menuitem label="&firebug.IncreaseTextSize;"
-                                                  oncommand="Firebug.increaseTextSize(1)"/>
-                                        <menuitem label="&firebug.DecreaseTextSize;"
-                                                  oncommand="Firebug.increaseTextSize(-1)"/>
-                                        <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
-                                    </menupopup>
-                                </menu>
-
-                                <menu label="&firebug.Options;" id="FirebugMenu_Options">
-                                    <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
-                                        <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
-                                                    oncommand="FirebugChrome.onToggleOption(this)"
-                                                    option="openInWindow"/>
-
-                                        <menuitem type="checkbox" label="&firebug.ShowTooltips;"
-                                                    oncommand="FirebugChrome.onToggleOption(this)"
-                                                    option="showInfoTips"/>
-
-                                        <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
-                                                  oncommand="FirebugChrome.onToggleOption(this)"
-                                                  option="shadeBoxModel"/>
-                                    </menupopup>
-                                </menu>
-                                <menuseparator id="FirebugBetweenOptionsAndSites"/>
-
-                                <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
-                                <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
-                                <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
-                                <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
-                                <menuseparator/>
-                                <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
-                                <menuseparator/>
-                                <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
-                            </menupopup>
+                            <!-- Content comes from fbFirebugMenuPopup -->
                         </toolbarbutton>
 
-                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;" command="cmd_toggleInspecting" collapsed="false">
+                        <!-- HTML Inspector -->
+                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
+                                command="cmd_toggleInspecting" collapsed="false">
                             <image src="chrome://firebug/skin/flashlight.png"/>
                         </toolbarbutton>
 
-                        <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                   tooltiptext="BreakOnNext" class="toolbar-image-button" />
-
+                        <!-- Break On Next -->
+                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_resumeExecution"
+                                tooltiptext="script.Break On Next" class="toolbar-image-button" />
                     </hbox>
+
+                    <!-- Tab Bar -->
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
                     <spacer flex="1"/>
 
+                    <!-- Search Box -->
                     <vbox>
                         <spacer flex="1"/>
                         <menupopup id="fbSearchOptionsPopup" position="before_start" open="true" ignorekeys="true" />
                         <textbox id="fbSearchBox" autocomplete="true" rows="1" label="firebug search"/>
                         <spacer flex="1"/>
                     </vbox>
+
+                    <!-- Open In New Window & Minimize & Close -->
                     <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="firebug window">
                         <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
-                                    tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
+                            tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
 
                         <toolbarbutton id="fbDetachButton" class="toolbarbutton-iconic"
-                                    tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>
+                            tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>
 
                         <toolbarbutton id="fbCloseButton" class="toolbarbutton-iconic"
-                                    tooltiptext="&firebug.CloseFirebug;" command="cmd_closeFirebug"/>
+                            tooltiptext="&firebug.CloseFirebug;" command="cmd_closeFirebug"/>
                     </hbox>
                 </hbox>
 
+                <!-- Firebug Panels Content -->
                 <box id="fbPanelPane" flex="1" persist="orient">
 
                     <vbox flex="3">
@@ -194,19 +157,19 @@
                                 <hbox id="fbToolbarInner" class="innerToolbar" insertbefore="fbDetachButton" flex="1" align="center">
                                     <hbox id="fbConsoleButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
-                                                        tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
+                                            tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button"
-                                                        type="checkbox" command="cmd_toggleProfiling"/>
+                                            type="checkbox" command="cmd_toggleProfiling"/>
                                     </hbox>
 
                                     <hbox id="fbHTMLButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Edit;" class="toolbar-text-button"
-                                                        tooltiptext="&firebug.EditHTMLTooltip;" command="cmd_toggleHTMLEditing"/>
+                                            tooltiptext="&firebug.EditHTMLTooltip;" command="cmd_toggleHTMLEditing"/>
                                     </hbox>
 
                                     <hbox id="fbCSSButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Edit;" class="toolbar-text-button"
-                                                        tooltiptext="&firebug.EditCSSTooltip;" command="cmd_toggleCSSEditing"/>
+                                            tooltiptext="&firebug.EditCSSTooltip;" command="cmd_toggleCSSEditing"/>
                                     </hbox>
 
                                     <hbox id="fbScriptButtons" collapsed="true">
@@ -228,63 +191,61 @@
                                     <hbox id="fbNetButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                                         tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
-                                        <hbox id="fbNetButtonsFilter" collapsed="true" class="noTabStop">
+                                        <hbox id="fbNetButtonsFilter" class="noTabStop">
                                             <toolbarseparator/>
                                             <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
-                                                        group="firebugNetFilter" checked="true"
-                                                        oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'all')"/>
+                                                group="firebugNetFilter" checked="true"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'all')"/>
                                             <toolbarbutton id="fbNetFilter-html" label="HTML" type="radio" class="toolbar-text-button"
-                                                        group="firebugNetFilter"
-                                                        oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'html')"/>
+                                                group="firebugNetFilter"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'html')"/>
                                             <toolbarbutton id="fbNetFilter-css" label="CSS" type="radio" class="toolbar-text-button"
-                                                        group="firebugNetFilter"
-                                                        oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'css')"/>
+                                                group="firebugNetFilter"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'css')"/>
                                             <toolbarbutton id="fbNetFilter-js" label="JS" type="radio" class="toolbar-text-button"
-                                                        group="firebugNetFilter"
-                                                        oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'js')"/>
+                                                group="firebugNetFilter"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'js')"/>
                                             <toolbarbutton id="fbNetFilter-xhr" label="XHR" type="radio"
-                                                            tooltiptext="XMLHttpRequest"
-                                                            class="toolbar-text-button" group="firebugNetFilter"
-                                                            oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'xhr')"/>
+                                                tooltiptext="XMLHttpRequest"
+                                                class="toolbar-text-button" group="firebugNetFilter"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'xhr')"/>
                                             <toolbarbutton id="fbNetFilter-image" label="&firebug.Images;" type="radio" class="toolbar-text-button"
-                                                        group="firebugNetFilter"
-                                                        oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'image')"/>
+                                                group="firebugNetFilter"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'image')"/>
                                             <toolbarbutton id="fbNetFilter-flash" label="&firebug.Flash;" type="radio"
-                                                            class="toolbar-text-button" group="firebugNetFilter"
-                                                            oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'flash')"/>
+                                                class="toolbar-text-button" group="firebugNetFilter"
+                                                oncommand="Firebug.NetMonitor.onToggleFilter(FirebugContext, 'flash')"/>
                                         </hbox>
                                     </hbox>
 
                                     <hbox id="fbTraceButtons" collapsed="true">
                                         <toolbarseparator/>
                                         <toolbarbutton id="fbTraceOpenConsole" class="toolbar-text-button"
-                                                        label="Open Console" tooltiptext="Open Console Tooltip"
-                                                        command="cmd_toggleTraceConsole"/>
+                                            label="Open Console" tooltiptext="Open Console Tooltip"
+                                            command="cmd_toggleTraceConsole"/>
                                     </hbox>
 
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
                                     <hbox id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                                                    collapsed="true"
-                                                    labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu" class="noTabStop"></hbox>
+                                          collapsed="true" labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"
+                                          class="noTabStop"></hbox>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
                                     <panelStatus id="fbPanelStatus" flex="1"
-                                                  tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
+                                        tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
-                                                    tooltiptext="&firebug.Continue;" class="toolbar-image-button"/>
+                                            tooltiptext="script.Break On Next" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepIntoButton" command="cmd_stepInto"
-                                                    tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
+                                            tooltiptext="&firebug.StepInto;" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepOverButton" command="cmd_stepOver"
-                                                    tooltiptext="&firebug.StepOver;" class="toolbar-image-button"/>
+                                            tooltiptext="&firebug.StepOver;" class="toolbar-image-button"/>
                                         <toolbarbutton id="fbStepOutButton" command="cmd_stepOut"
-                                                    tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
+                                            tooltiptext="&firebug.StepOut;" class="toolbar-image-button"/>
                                     </hbox>
                                 </hbox>
-
                             </toolbar>
-
                         </toolbox>
 
                         <deck anonid="deck" id="fbPanelBar1-deck" flex="1">
@@ -293,14 +254,15 @@
                                      disablehistory="true"
                                      src="chrome://firebug/content/panel.html"/>
                         </deck>
-
                     </vbox>
 
                     <splitter id="fbPanelSplitter"/>
+
                     <deck id="fbSidePanelDeck" persist="width,height">
                         <panelBar id="fbPanelBar2" class="panelBar">
                             <hbox id="fbPanelBar2-tabBox" class="panelTabBox" collapsed="true">
-                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist" aria-label="firebug side panels" />
+                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist"
+                                      aria-label="firebug side panels" />
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">
                                 <browser id="fbPanelBar2-browser"
@@ -311,39 +273,127 @@
                         </panelBar>
 
                         <vbox id="fbLargeCommandBox">
-                            <textbox id="fbLargeCommandLine" multiline="true" flex="1" label="LargeCommandLine" />
+                            <textbox id="fbLargeCommandLine" multiline="true" flex="1"
+                                     label="LargeCommandLine" />
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton label="&firebug.Run;" class="toolbar-text-button"
-                                               oncommand="Firebug.CommandLine.enter(FirebugContext)"/>
+                                    oncommand="Firebug.CommandLine.enter(FirebugContext)"/>
                                 <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
-                                             oncommand="Firebug.CommandLine.clear(FirebugContext)"/>
+                                    oncommand="Firebug.CommandLine.clear(FirebugContext)"/>
                                 <toolbarbutton label="&firebug.Copy;" class="toolbar-text-button"
-                                               tooltiptext="&firebug.CopyBookmarklet;"
-                                               oncommand="Firebug.CommandLine.copyBookmarklet(FirebugContext)"/>
+                                    tooltiptext="&firebug.CopyBookmarklet;"
+                                    oncommand="Firebug.CommandLine.copyBookmarklet(FirebugContext)"/>
                                 <toolbarspacer flex="1"/>
                                 <toolbarbutton id="fbCommandToggleLarge" class="toolbarbutton-iconic"
-                                               oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
+                                    oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', false)"/>
                             </hbox>
                         </vbox>
                     </deck>
-
-
                 </box>
-
             </panelBar>
 
             <popup id="inspectorPopup" style="background: transparent; border: 2px solid red">
-            <label value="inspect"/>
+                <label value="inspect"/>
             </popup>
         </box>
 
         <hbox id="fbCommandBox">
             <label id="fbCommandArow" value=">>>"/>
-            <textbox id="fbCommandLine" flex="1" label="console command line"/>
+            <textbox id="fbCommandLine" flex="1" label="console command line" aria-autocomplete="inline" />
             <toolbarbutton id="fbCommandToggleSmall" class="toolbarbutton-iconic"
                            oncommand="Firebug.setPref(Firebug.prefDomain, 'largeCommandLine', true)"/>
         </hbox>
 
-    </vbox>
+        <!-- Firebug Tools & Icon menu -->
+        <menupopup id="fbFirebugMenuPopup" role="menu"
+                   onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
 
+            <!-- Open -->
+            <menuitem id="menu_toggleFirebug" type="checkbox"
+                      label="&firebug.ShowFirebug;" command="cmd_toggleFirebug"
+                      key="key_toggleFirebug" />
+            <menuitem id="menu_detachFirebug" label="&firebug.DetachFirebug;"
+                      command="cmd_toggleDetachFirebug" type="checkbox"
+                      key="key_detachFirebug"/>
+
+            <!-- Editors -->
+            <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
+                <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                        <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
+                </menupopup>
+            </menu>
+
+            <menuseparator  id="menu_openActionsSeparator"/>
+
+            <!-- Text Size -->
+            <menu label="&firebug.TextSize;" id="FirebugMenu_TextSize">
+                <menupopup>
+                    <menuitem label="&firebug.IncreaseTextSize;"
+                              oncommand="Firebug.increaseTextSize(1)"/>
+                    <menuitem label="&firebug.DecreaseTextSize;"
+                              oncommand="Firebug.increaseTextSize(-1)"/>
+                    <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
+                </menupopup>
+            </menu>
+
+            <!-- Options -->
+            <menu label="&firebug.Options;" id="FirebugMenu_Options">
+                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);"
+                           id="FirebugMenu_OptionsPopup">
+                    <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
+                              oncommand="FirebugChrome.onToggleOption(this)"
+                              option="openInWindow"/>
+                    <menuitem type="checkbox" label="&firebug.ShowTooltips;"
+                              oncommand="FirebugChrome.onToggleOption(this)"
+                              option="showInfoTips"/>
+                    <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
+                              oncommand="FirebugChrome.onToggleOption(this)"
+                              option="shadeBoxModel"/>
+                    <menuitem type="checkbox" id="menu_enableA11y"
+                              label="Firebug.menu.Enable Accessibility Enhancements"
+                              oncommand="FirebugChrome.onToggleOption(this)"
+                              option="a11y.enable"/>
+                    <menuseparator id="menu_optionsSeparator"/>
+                    <menuitem id="menu_resetAllOptions"
+                              label="firebug.menu.Reset All Firebug Options"
+                              command="cmd_resetAllOptions"/>
+                </menupopup>
+            </menu>
+
+            <menuseparator id="FirebugBetweenOptionsAndSites" collapsed="true"/>
+
+            <!-- Sites -->
+            <menu label="firebug.menu.Firebug Online" id="FirebugMenu_Sites">
+                <menupopup id="FirebugMenu_SitesPopup">
+                    <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
+                    <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
+                    <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
+                    <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
+                    <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
+                </menupopup>
+            </menu>
+
+            <menuseparator  id="menu_miscActionsSeparator"/>
+
+            <menuitem id="menu_inspectElement" label="&firebug.InspectElement;"
+                      command="cmd_toggleInspecting" key="key_toggleInspecting"/>
+            <menuitem label="&firebug.ProfileScript;"
+                      command="cmd_toggleProfiling" key="key_toggleProfiling"/>
+            <menuitem id="menu_focusCommandLine" label="&firebug.CommandLine;"
+                      command="cmd_focusCommandLine" key="key_focusCommandLine"/>
+            <menuitem id="menu_focusFirebugSearch" label="&firebug.Search;"
+                      command="cmd_focusFirebugSearch" key="key_focusFirebugSearch"/>
+
+            <menuseparator id="menu_toolsSeparator"/>
+
+            <menuitem id="menu_customizeShortcuts"
+                      label="Firebug.menu.Customize shortcuts"
+                      command="cmd_customizeFBKeys" key="key_customizeFBKeys" />
+
+            <menuseparator id="menu_aboutSeparator"/>
+
+            <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
+        </menupopup>
+
+    </vbox>
 </overlay>

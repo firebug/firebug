@@ -52,7 +52,8 @@ const RowTag =
 const WatchRowTag =
     TR({class: "watchNewRow", level: 0},
         TD({class: "watchEditCell", colspan: 2},
-            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0', 'aria-label' : $STRF('press enter to add new watch expression')},
+            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
+                'aria-label' : $STR('press enter to add new watch expression')},
                     $STR("NewWatch")
             )
         )
@@ -118,7 +119,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
             {
-                this.context.chrome.select(object, "script");
+                Firebug.chrome.select(object, "script");
                 cancelEvent(event);
             }
             else if (event.detail == 2 && !object)
@@ -248,6 +249,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 {
     tag: DirTablePlate.tableTag,
 
+    getRealObject: function(object)
+    {
+        // TODO: Move this to some global location
+        // TODO: Unwrapping should be centralized rather than sprinkling it around ad hoc.
+        // TODO: We might be able to make this check more authoritative with QueryInterface.
+        if (!object) return object;
+        if (object.wrappedJSObject) return object.wrappedJSObject;
+        return object;
+    },
+
     rebuild: function(update, scrollTop)
     {
         dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
@@ -366,6 +377,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     getRowPropertyValue: function(row)
     {
         var object = this.getRowObject(row);
+        object = this.getRealObject(object);
         if (object)
         {
             var propName = getRowName(row);
@@ -437,6 +449,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             var object = getRowOwnerObject(row);
             if (!object)
                 object = this.selection;
+            object = this.getRealObject(object);
 
             if (object)
             {
@@ -458,11 +471,18 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     setPropertyValue: function(row, value)  // value must be string
     {
+        if(FBTrace.DBG_DOM)
+        {
+            FBTrace.sysout("row: "+row);
+            FBTrace.sysout("value: "+value);
+        }
+
         var name = getRowName(row);
         if (name == "this")
             return;
 
         var object = this.getRowObject(row);
+        object = this.getRealObject(object);
         if (object && !(object instanceof jsdIStackFrame))
         {
              // unwrappedJSObject.property = unwrappedJSObject
@@ -862,7 +882,7 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         // Make sure we get a fresh status path for the object, since otherwise
         // it might find the object in the existing path and not refresh it
-        this.context.chrome.clearStatusPath();
+        Firebug.chrome.clearStatusPath();
 
         this.select(target.repObject, true);
     },
@@ -1316,8 +1336,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
             catch (exc)
             {
                 // Sometimes we get exceptions trying to access certain members
-                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM) /*@explore*/
-                    FBTrace.sysout("dom.getMembers cannot access "+name, exc); /*@explore*/
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.getMembers cannot access "+name, exc);
             }
 
             var ordinal = parseInt(name);
@@ -1336,13 +1356,19 @@ function getMembers(object, level)  // we expect object to be user-level object 
             }
             else
             {
-                var getterFunction = insecureObject.__lookupGetter__(name);
+                var getterFunction = insecureObject.__lookupGetter__(name),
+                    setterFunction = insecureObject.__lookupSetter__(name),
+                    prefix = "";
+                    
+                if(getterFunction && !setterFunction)
+                    prefix = "get ";
+
                 if (name in domMembers)
-                    addMember("dom", domProps, (getterFunction?"get "+name:name), val, level, domMembers[name]);
+                    addMember("dom", domProps, (prefix+name), val, level, domMembers[name]);
                 else if (name in domConstantMap)
-                    addMember("dom", domConstants, (getterFunction?"get "+name:name), val, level);
+                    addMember("dom", domConstants, (prefix+name), val, level);
                 else
-                    addMember("user", userProps, (getterFunction?"get "+name:name), val, level);
+                    addMember("user", userProps, (prefix+name), val, level);
             }
         }
     }
@@ -1351,8 +1377,8 @@ function getMembers(object, level)  // we expect object to be user-level object 
         // Sometimes we get exceptions just from trying to iterate the members
         // of certain objects, like StorageList, but don't let that gum up the works
         //throw exc;
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM) /*@explore*/
-            FBTrace.dumpProperties("dom.getMembers FAILS: ", exc); /*@explore*/
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.getMembers FAILS: ", exc);
     }
 
     function sortName(a, b) { return a.name > b.name ? 1 : -1; }
@@ -1413,14 +1439,13 @@ function expandMembers(members, toggles, offset, level)  // recursion starts wit
             var args = [i+1, 0];
             args.push.apply(args, newMembers);
             members.splice.apply(members, args);
-            if (FBTrace.DBG_DOM)  																		/*@explore*/
-            { 																							/*@explore*/
-                FBTrace.dumpProperties("expandMembers member.name", member.name); 						/*@explore*/
-                FBTrace.dumpProperties("expandMembers toggles", toggles); 								/*@explore*/
-                                                                                                        /*@explore*/
-                FBTrace.dumpProperties("expandMembers toggles[member.name]", toggles[member.name]); 	/*@explore*/
-                FBTrace.dumpProperties("dom.expandedMembers level: "+level+" member", member); 			/*@explore*/
-            } 																							/*@explore*/
+            if (FBTrace.DBG_DOM)
+            {
+                FBTrace.sysout("expandMembers member.name", member.name);
+                FBTrace.sysout("expandMembers toggles", toggles);
+                FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
+                FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
+            }
 
             expanded += newMembers.length;
             i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1);

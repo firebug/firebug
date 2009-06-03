@@ -380,6 +380,12 @@
     display: none;
 }
 
+.netInfoResponseSizeLimit {
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    padding-top: 10px;
+    font-size: 11px;
+}
+
 .netInfoText {
     display: none;
     margin: 0;

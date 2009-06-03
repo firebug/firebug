@@ -130,7 +130,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (object instanceof nsIScriptError)  // all branches should trace 'object'
             {
                 if (FBTrace.DBG_ERRORS)
-                    FBTrace.dumpProperties("errors.observe nsIScriptError: "+object.errorMessage, object);
+                    FBTrace.sysout("errors.observe nsIScriptError: "+object.errorMessage, object);
 
                 var context = this.getErrorContext(object);  // after instanceof
                 var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
@@ -146,7 +146,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     if (object instanceof nsIConsoleMessage)
                     {
                         if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("errors.observe nsIConsoleMessage: "+object.message, object);
+                            FBTrace.sysout("errors.observe nsIConsoleMessage: "+object.message, object);
 
                         var context = this.getErrorContext(object);  // after instanceof
                         if (lessTalkMoreAction(context, object, isWarning))
@@ -157,21 +157,21 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     else if (object.message)
                     {
                         if (FBTrace.DBG_ERRORS)
-                            FBTrace.dumpProperties("errors.observe object.message:", object);
+                            FBTrace.sysout("errors.observe object.message:", object);
 
                         var context = this.getErrorContext(object);
                         if (context)  // maybe just FirebugContext
                             Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                         else
-                            FBTrace.dumpProperties("errors.observe, no context for message", object);
+                            FBTrace.sysout("errors.observe, no context for message", object);
                     }
                     else
-                        FBTrace.dumpProperties("errors.observe, no message in object", object);
+                        FBTrace.sysout("errors.observe, no message in object", object);
                 }
                 else
                 {
                     if (FBTrace.DBG_ERRORS)
-                        FBTrace.dumpProperties("errors.observe showChromeMessages off, dropped:", object);
+                        FBTrace.sysout("errors.observe showChromeMessages off, dropped:", object);
                     return;
                 }
             }
@@ -183,8 +183,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         FBTrace.sysout((isWarning?"warning":"error")+" logged to ",  context.window.location+"\n");
                     else
                     {
-                        FBTrace.dumpProperties("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
-                        FBTrace.dumpProperties("errors.observe, context with no window, context:", context);
+                        FBTrace.sysout("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
+                        FBTrace.sysout("errors.observe, context with no window, context:", context);
                     }
                 }
                 else
@@ -196,16 +196,19 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             // Errors prior to console init will come out here, eg error message from Firefox startup jjb.
             if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.dumpProperties("errors.observe FAILS", exc);
-                FBTrace.dumpProperties("errors.observe object", object);
+                FBTrace.sysout("errors.observe FAILS", exc);
+                FBTrace.sysout("errors.observe object", object);
             }
         }
     },
 
     logScriptError: function(context, object, isWarning)
     {
+        if (!context)
+            return;
+
         if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpProperties("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);
+            FBTrace.sysout("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);
 
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
@@ -225,7 +228,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             return null;
 
         Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
-        context.thrownStackTrace = null;
 
         if (!isWarning)
             this.increaseCount(context);
@@ -237,14 +239,14 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         if (context)
         {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.getName()+"\n");
              // then report later to avoid loading sourceS
             context.throttle(Firebug.Console.log, Firebug.Console, [error, context,  className, false, true], true);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.window.location+"\n");
         }
         else
         {
-            Firebug.Console.log(error, context,  className);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe direct log to "+context+"\n");
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe direct log to FirebugContext"+FirebugContext+"\n");
+            Firebug.Console.log(error, FirebugContext,  className);
         }
         return context;
     },
@@ -274,7 +276,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             return true;
         }
         if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpProperties("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);
+            FBTrace.sysout("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);
 
         return false;
     },
@@ -344,6 +346,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (this.contextCache[url] == context)
                 delete this.contextCache[url];
         }
+        this.showCount(0);
     },
 });
 
@@ -505,7 +508,8 @@ function checkForUncaughtException(context, object)
             if (context.thrownStackTrace)
             {
                 Firebug.errorStackTrace = context.thrownStackTrace;
-                if (FBTrace.DBG_ERRORS) FBTrace.dumpProperties("errors.observe trace.frames", context.thrownStackTrace.frames);
+                if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe trace.frames", context.thrownStackTrace.frames);
+                delete context.thrownStackTrace;
             }
             else
             {
@@ -518,6 +522,7 @@ function checkForUncaughtException(context, object)
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe not an uncaught exception\n");
         }
     }
+    delete context.thrownStackTrace;
     return false;
 }
 
@@ -528,8 +533,9 @@ function getExceptionContext(context)
     {
         var errorContext = TabWatcher.getContextByWindow(errorWin);
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe exception context:"+errorContext+" errorWin: "+errorWin+"\n");
-        return errorContext;
+            FBTrace.sysout("errors.observe exception context:"+(errorContext?errorContext.getName():"none")+" errorWin: "+errorWin+"\n");
+        if (errorContext)
+            return errorContext;
     }
     return context;
 }

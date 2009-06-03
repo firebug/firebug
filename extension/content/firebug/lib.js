@@ -29,6 +29,7 @@ const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
 const reNotWhitespace = /[^\s]/;
 const reSplitFile = /:\/{1,3}(.*?)\/([^\/]*?)\/?($|\?.*)/;
 const reURL = /(([^:]+:)\/{1,2}[^\/]*)(.*?)$/;  // This RE and the previous one should changed to be consistent
+const reChromeCase = /chrome:\/\/([^/]*)\/(.*?)$/;
 // Globals
 this.reDataURL = /data:text\/javascript;fileName=([^;]*);baseLineNumber=(\d*?),((?:.*?%0A)|(?:.*))/g;
 this.reJavascript = /\s*javascript:\s*(.*)/;
@@ -64,16 +65,18 @@ this.ns = function(fn)
 
 this.initialize = function()
 {
-    if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("FBL.initialize BEGIN "+namespaces.length+" namespaces\n");             /*@explore*/
-                                                                                                                       /*@explore*/
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("FBL.initialize BEGIN "+namespaces.length+" namespaces\n");
+
     for (var i = 0; i < namespaces.length; i += 2)
     {
         var fn = namespaces[i];
         var ns = namespaces[i+1];
         fn.apply(ns);
     }
-                                                                                                                       /*@explore*/
-    if (FBTrace.DBG_INITIALIZE) FBTrace.sysout("FBL.initialize END "+namespaces.length+" namespaces\n");               /*@explore*/
+
+    if (FBTrace.DBG_INITIALIZE)
+        FBTrace.sysout("FBL.initialize END "+namespaces.length+" namespaces\n");
 };
 
 // ************************************************************************************************
@@ -131,8 +134,8 @@ this.values = function(map)
             catch (exc)
             {
                 // Sometimes we get exceptions trying to access properties
-                if (FBTrace.DBG_ERRORS) /*@explore*/
-                    FBTrace.dumpPropreties("lib.values FAILED ", exc); /*@explore*/
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.dumpPropreties("lib.values FAILED ", exc);
             }
 
         }
@@ -140,8 +143,8 @@ this.values = function(map)
     catch (exc)
     {
         // Sometimes we get exceptions trying to iterate properties
-        if (FBTrace.DBG_ERRORS) /*@explore*/
-            FBTrace.dumpPropreties("lib.values FAILED ", exc); /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.dumpPropreties("lib.values FAILED ", exc);
     }
 
     return values;
@@ -289,7 +292,7 @@ this.addScript = function(doc, id, src)
     {
         // See issue 1079, the svg test case gives this error
         if (FBTrace.DBG_ERRORS)
-            FBTrace.dumpProperties("lib.addScript doc has no documentElement:", doc);
+            FBTrace.sysout("lib.addScript doc has no documentElement:", doc);
     }
     return element;
 }
@@ -327,21 +330,24 @@ this.addScript = function(doc, id, src)
  *   are inserted at specified places (%S) in the same order as they are passed. If the
  *   key doesn't exist the method returns "Request Time".
  */
-function $STR(name, bundleId)
+function $STR(name, bundle)
 {
     try
     {
-        if (bundleId)
-            return document.getElementById(bundleId).getString(name.replace(' ', '_', "g"));
+        if (typeof bundle == "string")
+            bundle = document.getElementById(bundle);
+
+        if (bundle)
+            return bundle.getString(name.replace(' ', '_', "g"));
         else
             return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
     }
     catch (err)
     {
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_LOCALE)
         {
             FBTrace.sysout("lib.getString: " + name + "\n");
-            FBTrace.dumpProperties("lib.getString FAILS ", err);
+            FBTrace.sysout("lib.getString FAILS ", err);
         }
     }
 
@@ -353,24 +359,28 @@ function $STR(name, bundleId)
     return name;
 }
 
-function $STRF(name, args, bundleId)
+function $STRF(name, args, bundle)
 {
     try
     {
         // xxxHonza: Workaround for #485511
-        bundleId = "strings_firebug";
+        if (!bundle)
+            bundle = "strings_firebug";
 
-        if (bundleId)
-            return document.getElementById(bundleId).getFormattedString(name.replace(' ', '_', "g"), args);
+        if (typeof bundle == "string")
+            bundle = document.getElementById(bundle);
+
+        if (bundle)
+            return bundle.getFormattedString(name.replace(' ', '_', "g"), args);
         else
             return Firebug.getStringBundle().formatStringFromName(name.replace(' ', '_', "g"), args, args.length);
     }
     catch (err)
     {
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_LOCALE)
         {
             FBTrace.sysout("lib.getString: " + name + "\n");
-            FBTrace.dumpProperties("lib.getString FAILS ", err);
+            FBTrace.sysout("lib.getString FAILS ", err);
         }
     }
 
@@ -422,12 +432,13 @@ this.isVisible = function(elt)
         return (!elt.hidden && !elt.collapsed);
     }
     return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags
-        || elt.namespaceURI == "http://www.w3.org/2000/svg";
+        || elt.namespaceURI == "http://www.w3.org/2000/svg"
+        || elt.namespaceURI == "http://www.w3.org/1998/Math/MathML";
 };
 
 this.collapse = function(elt, collapsed)
 {
-    elt.setAttribute("collapsed", collapsed);
+    elt.setAttribute("collapsed", collapsed ? "true" : "false");
 };
 
 this.obscure = function(elt, obscured)
@@ -1091,80 +1102,54 @@ this.getClientOffset = function(elt)
     return coords;
 };
 
-this.getViewOffset = function(elt, singleFrame)
+this.getRectTRBLWH = function(elt, context)
 {
-    function addOffset(elt, coords, view)
-    {
-        var p = elt.offsetParent;
-        coords.x += elt.offsetLeft - (p ? p.scrollLeft : 0);
-        coords.y += elt.offsetTop - (p ? p.scrollTop : 0);
-
-        if (p)
+    var i, rect, frameRect, win,
+        coords =
         {
-            if (p.nodeType == 1) // element node
-            {
-                var parentStyle = view.getComputedStyle(p, "");
-                if (parentStyle.position != "static")
-                {
-                    coords.x += parseInt(parentStyle.borderLeftWidth);
-                    coords.y += parseInt(parentStyle.borderTopWidth);
+            "top": 0,
+            "right": 0,
+            "bottom": 0,
+            "left": 0,
+            "width": 0,
+            "height": 0
+        };
 
-                    if (p.localName == "TABLE")
-                    {
-                        coords.x += parseInt(parentStyle.paddingLeft);
-                        coords.y += parseInt(parentStyle.paddingTop);
-                    }
-                    else if (p.localName == "BODY")
-                    {
-                        var style = view.getComputedStyle(elt, "");
-                        coords.x += parseInt(style.marginLeft);
-                        coords.y += parseInt(style.marginTop);
-                    }
-                }
-                else if (p.localName == "BODY")
-                {
-                    coords.x += parseInt(parentStyle.borderLeftWidth);
-                    coords.y += parseInt(parentStyle.borderTopWidth);
-                }
+    frameRect = coords;
 
-                var parent = elt.parentNode;
-                while (p != parent)
-                {
-                    coords.x -= parent.scrollLeft;
-                    coords.y -= parent.scrollTop;
-                    parent = parent.parentNode;
-                }
-                addOffset(p, coords, view);
-            }
-        }
-        else  // no offsetParent
-        {
-            if (elt.localName == "BODY")
-            {
-                var style = view.getComputedStyle(elt, "");
-                coords.x += parseInt(style.borderLeftWidth);
-                coords.y += parseInt(style.borderTopWidth);
-
-                var htmlStyle = view.getComputedStyle(elt.parentNode, "");
-                coords.x -= parseInt(htmlStyle.paddingLeft);
-                coords.y -= parseInt(htmlStyle.paddingTop);
-            }
-
-            if (elt.scrollLeft)
-                coords.x += elt.scrollLeft;
-            if (elt.scrollTop)
-                coords.y += elt.scrollTop;
-
-            var win = elt.ownerDocument.defaultView;
-            if (win && (!singleFrame && win.frameElement))
-                addOffset(win.frameElement, coords, win);
-        }
-
-    }
-
-    var coords = {x: 0, y: 0};
     if (elt)
-        addOffset(elt, coords, elt.ownerDocument.defaultView);
+    {
+        win = context.window;
+
+        if(win && win.frames.length > 0)
+        {
+            for(i=0; i < win.frames.length; i++)
+            {
+                try
+                {
+                    if(win.frames[i].document == elt.ownerDocument)
+                    {
+                        frameRect = win.frames[i].frameElement.getBoundingClientRect();
+                        break;
+                    }
+                }
+                catch(e)
+                {}
+            }
+        }
+
+        rect = elt.getBoundingClientRect();
+
+        coords =
+        {
+            "top": rect.top + frameRect.top,
+            "right": rect.right + frameRect.right,
+            "bottom": rect.bottom + frameRect.bottom,
+            "left": rect.left + frameRect.left,
+            "width": rect.right-rect.left,
+            "height": rect.bottom-rect.top
+        };
+    }
 
     return coords;
 };
@@ -1194,7 +1179,7 @@ this.isScrolledToBottom = function(element)
 this.scrollToBottom = function(element)
 {
     element.scrollTop = element.scrollHeight - element.offsetHeight;
-    
+
     if (FBTrace.DBG_CONSOLE)
         element.wasScrolledToBottom = true;
 };
@@ -1276,8 +1261,8 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
             scrollBox.scrollLeft = centerX;
         }
     }
-    if (FBTrace.DBG_SOURCEFILES) /*@explore*/
-        FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("lib.scrollIntoCenterView ","Element:"+element.innerHTML);
 };
 
 // ************************************************************************************************
@@ -1568,14 +1553,19 @@ this.isWhitespace = function(text)
 
 this.splitLines = function(text)
 {
-    if (text.split)
-        return text.split(reSplitLines);
+    const reSplitLines2 = /.*(:?\r\n|\n|\r)?/mg;
+    var lines;
+    if (text.match)
+    {
+        lines = text.match(reSplitLines2);
+    }
     else
     {
         var str = text+"";
-        var theSplit = str.split(reSplitLines);
-        return theSplit;
+        lines = str.match(reSplitLines2);
     }
+    lines.pop();
+    return lines;
 };
 
 this.trimLeft = function(text)
@@ -1614,7 +1604,7 @@ this.wrapText = function(text, noEscapeHTML)
         if (!noEscapeHTML) html.push("</pre>");
     }
 
-    return html.join(noEscapeHTML ? "\n" : "");
+    return html.join("");
 }
 
 this.insertWrappedText = function(text, textBox, noEscapeHTML)
@@ -1730,9 +1720,9 @@ this.getCurrentStackTrace = function(context)
 
     Firebug.Debugger.halt(function(frame)
     {
-        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace frame:", frame);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
         trace = FBL.getStackTrace(frame, context);
-        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("lib.getCurrentStackTrace trace:", trace);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace);
     });
 
     return trace;
@@ -1751,10 +1741,10 @@ this.getStackTrace = function(frame, context)
                 trace.frames.push(stackFrame);
         }
         else
-        {                                                                                                           /*@explore*/
-            if (FBTrace.DBG_STACK)                                                                                     /*@explore*/
-                FBTrace.sysout("lib.getStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");     /*@explore*/
-        }                                                                                                           /*@explore*/
+        {
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("lib.getStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
+        }
     }
 
     if (trace.frames.length > 100)
@@ -1773,7 +1763,7 @@ this.getStackFrame = function(frame, context)
     if (frame.isNative || frame.isDebugger)
     {
         var excuse = (frame.isNative) ?  "(native)" : "(debugger)";
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+excuse+" frame\n");                                 /*@explore*/
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+excuse+" frame\n");
         return new this.StackFrame(context, excuse, null, excuse, 0, []);
     }
     try
@@ -1804,7 +1794,7 @@ this.getStackFrame = function(frame, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_STACK) FBTrace.dumpProperties("getStackTrace fails:", exc);                                    /*@explore*/
+        if (FBTrace.DBG_STACK) FBTrace.sysout("getStackTrace fails:", exc);
         return null;
     }
 };
@@ -1953,7 +1943,7 @@ this.findScriptForFunctionInContext = function(context, fn)
         try {
             var tfs = aFunction.toString();
         } catch (etfs) {
-            FBTrace.dumpProperties("unwrapped.toString fails for unwrapped: "+etfs, aFunction);
+            FBTrace.sysout("unwrapped.toString fails for unwrapped: "+etfs, aFunction);
         }
 
         if (tfs == fns)
@@ -1995,7 +1985,7 @@ this.forEachFunction = function(context, cb)
                     if (exc.name == "NS_ERROR_NOT_AVAILABLE")
                         FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
                     else
-                       FBTrace.dumpProperties("lib.forEachFunction FAILS ",exc);
+                       FBTrace.sysout("lib.forEachFunction FAILS ",exc);
                 }
             }
         });
@@ -2032,12 +2022,12 @@ this.findScriptForFunction = function(fn)
                 if (exc.name == "NS_ERROR_NOT_AVAILABLE")
                     FBTrace.sysout("lib.findScriptForFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
                 else
-                    FBTrace.dumpProperties("lib.findScriptForFunction FAILS ",exc);
+                    FBTrace.sysout("lib.findScriptForFunction FAILS ",exc);
             }
         }
     }});
 
-    FBTrace.dumpProperties("findScriptForFunction found ", found.tag);
+    FBTrace.sysout("findScriptForFunction found ", found.tag);
     return found;
 };
 
@@ -2061,7 +2051,7 @@ this.getFunctionName = function(script, context, frame)
 {
     if (!script)
     {
-        if (FBTrace.DBG_STACK) FBTrace.dumpStack("lib.getFunctionName FAILS typeof(script)="+typeof(script)+"\n");     /*@explore*/
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getFunctionName FAILS typeof(script)="+typeof(script)+"\n");
         return "(no script)";
     }
     var name = script.functionName;
@@ -2071,17 +2061,17 @@ this.getFunctionName = function(script, context, frame)
         var analyzer = FBL.getScriptAnalyzer(context, script);
         if (analyzer)
         {
-            if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);     /*@explore*/
+            if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
             name = functionSpec.name +"("+functionSpec.args.join(',')+")";
         }
         else
         {
-            if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");     /*@explore*/
+            if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");
             name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
         }
     }
-    if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");     /*@explore*/
+    if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName "+script.tag+" ="+name+"\n");
 
     return name;
 };
@@ -2100,7 +2090,7 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
         // Walk backwards from the first line in the function until we find the line which
         // matches the pattern above, which is the function definition
         var line = "";
-        if (FBTrace.DBG_FUNCTION_NAMES) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");           /*@explore*/
+        if (FBTrace.DBG_FUNCTION_NAMES) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");
         for (var i = 0; i < 4; ++i)
         {
             line = sourceCache.getLine(url, lineNo-i) + line;
@@ -2111,8 +2101,8 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
                     return m[1];
                 else
                 {
-                    if (FBTrace.DBG_FUNCTION_NAMES)                                                                    /*@explore*/
-                        FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");    /*@explore*/
+                    if (FBTrace.DBG_FUNCTION_NAMES)
+                        FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");
                 }
                 m = reFunctionArgNames.exec(line);
                 if (m && m[1])
@@ -2161,6 +2151,7 @@ this.getSourceFileByHref = function(url, context)
 this.getAllStyleSheets = function(context)
 {
     var styleSheets = [];
+    var recordedSheets = {};
 
     function addSheet(sheet)
     {
@@ -2169,13 +2160,18 @@ this.getAllStyleSheets = function(context)
         if (FBL.isSystemURL(sheetLocation) && Firebug.filterSystemURLs)
             return;
 
-        styleSheets.push(sheet);
-
-        for (var i = 0; i < sheet.cssRules.length; ++i)
+        if (!sheet.href || !recordedSheets[sheet.href])
         {
-            var rule = sheet.cssRules[i];
-            if (rule instanceof CSSImportRule)
-                addSheet(rule.styleSheet);
+            styleSheets.push(sheet);
+
+            for (var i = 0; i < sheet.cssRules.length; ++i)
+            {
+                var rule = sheet.cssRules[i];
+                if (rule instanceof CSSImportRule)
+                    addSheet(rule.styleSheet);
+            }
+
+            recordedSheets[sheet.href] = true;
         }
     }
 
@@ -2274,8 +2270,8 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 
     this.iterateWindows(context.window, this.bind(function(win)
     {
-        if (FBTrace.DBG_SOURCEFILES)  																								/*@explore*/
-            FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);  /*@explore*/
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);
         if (!win.document.documentElement)
             return;
 
@@ -2305,8 +2301,8 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
             var url = scriptSrc ? this.absoluteURL(scriptSrc, baseUrl) : win.location.href;
             url = this.normalizeURL(url ? url : win.location.href);
             var added = addFile(url, i, (scriptSrc?win.location.href:null));
-            if (FBTrace.DBG_SOURCEFILES)                                                                           /*@explore*/
-                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");  /*@explore*/
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");
         }
     }, this));
 
@@ -2317,7 +2313,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 
     if (FBTrace.DBG_SOURCEFILES)
     {
-        FBTrace.dumpProperties("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
+        FBTrace.sysout("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
     }
 };
 
@@ -2531,7 +2527,7 @@ this.dispatch = function(listeners, name, args)
                             exc.stack = stack.split('\n');
                         }
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
                     }
                 }
             }
@@ -2545,7 +2541,7 @@ this.dispatch = function(listeners, name, args)
             }
         }
         if (FBTrace.DBG_DISPATCH)
-            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);              /*@explore*/
+            FBTrace.sysout("FBL.dispatch "+name+" to "+listeners.length+" listeners, "+noMethods.length+" had no such method:", noMethods);
     }
     catch (exc)
     {
@@ -2557,7 +2553,7 @@ this.dispatch = function(listeners, name, args)
                 exc.stack = stack.split('\n');
             }
             var culprit = listeners[i] ? listeners[i].dispatchName : null;
-            FBTrace.dumpProperties(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+            FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
             window.dump(FBL.getStackDump());
         }
     }
@@ -2597,7 +2593,7 @@ this.dispatch2 = function(listeners, name, args)
         if (FBTrace.DBG_ERRORS)
         {
             if (exc.stack) exc.stack = exc.stack.split('/n');
-            FBTrace.dumpProperties(" Exception in lib.dispatch2 "+ name, exc);
+            FBTrace.sysout(" Exception in lib.dispatch2 "+ name, exc);
         }
     }
 };
@@ -2819,7 +2815,7 @@ this.isSystemURL = function(url)
     if (url[0] == 'h') return false;
     if (url.substr(0, 9) == "resource:")
         return true;
-    else if (url.substr(0, 17) == "chrome://firebug/")
+    else if (url.substr(0, 16) == "chrome://firebug")
         return true;
     else if (url  == "XPCSafeJSObjectWrapper.cpp")
         return true;
@@ -2981,6 +2977,14 @@ this.normalizeURL = function(url)  // this gets called a lot, any performance im
         // For some reason, JSDS reports file URLs like "file:/" instead of "file:///", so they
         // don't match up with the URLs we get back from the DOM
         url = url.replace(/file:\/([^/])/g, "file:///$1");
+        if (url.indexOf('chrome:')==0)
+        {
+            var m = reChromeCase.exec(url);  // 1 is package name, 2 is path
+            if (m)
+            {
+                url = "chrome://"+m[1].toLowerCase()+"/"+m[2];
+            }
+        }
     }
     return url;
 };
@@ -3187,8 +3191,8 @@ this.readPostTextFromPage = function(url, context)
          }
          catch (exc)
          {
-             if (FBTrace.DBG_ERRORS)                                                         /*@explore*/
-                FBTrace.dumpProperties("lib.readPostText FAILS, url:"+url, exc);                    /*@explore*/
+             if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("lib.readPostText FAILS, url:"+url, exc);
          }
      }
 };
@@ -3222,8 +3226,8 @@ this.readPostTextFromRequest = function(request, context)
     }
     catch(exc)
     {
-        if (FBTrace.DBG_ERRORS)                                                                                        /*@explore*/
-            FBTrace.dumpProperties("lib.readPostTextFromRequest FAILS ", exc);                                             /*@explore*/
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.readPostTextFromRequest FAILS ", exc);
     }
 
     return null;
@@ -3267,6 +3271,23 @@ this.getRequestWebProgress = function(request)
         if (request && request.loadGroup && request.loadGroup.groupObserver)
             return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
     } catch (exc) {}
+
+    return null;
+};
+
+/**
+ * Returns <browser> element for specified content window.
+ * @param {Object} win - Content window
+ */
+this.getBrowserForWindow = function(win)
+{
+    var tabBrowser = document.getElementById("content");
+    for (var i=0; i<tabBrowser.browsers.length; ++i)
+    {
+        var browser = tabBrowser.browsers[i];
+        if (browser.contentWindow == win)
+            return browser;
+    }
 
     return null;
 };
@@ -3419,7 +3440,7 @@ this.makeURI = function(urlString)
         //var explain = {message: "Firebug.lib.makeURI FAILS", url: urlString, exception: exc};
         // todo convert explain to json and then to data url
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("makeURI FAILS for "+urlString+" "+exc);
+            FBTrace.sysout("makeURI FAILS for "+urlString+" ", exc);
         return false;
     }
 }
@@ -3441,9 +3462,9 @@ this.getSourceLineRange = function(sourceBox, min, max)
         var line =  sourceBox.getLineAsHTML(i-1);
 
         html.push(
-            '<div class="sourceRow"><a class="sourceLine">',
+            '<div class="sourceRow" role="presentation"><a class="sourceLine" role="presentation">',
             lineNo,
-            '</a><span class="sourceRowText">',
+            '</a><span class="sourceRowText" role="presentation">',
             line,
             '</span></div>'
         );
@@ -3482,7 +3503,7 @@ this.restoreLocation =  function(panel, panelState)
         var location = panelState.persistedLocation(panel.context);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.dumpProperties("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
+            FBTrace.sysout("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
 
         if (location)
         {
@@ -3495,7 +3516,7 @@ this.restoreLocation =  function(panel, panelState)
         panel.navigate(null);
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
+        FBTrace.sysout("lib.restoreLocation panel.location: "+panel.location+" restored: "+restored+" panelState:", panelState);
 
     return restored;
 };
@@ -3528,7 +3549,7 @@ this.restoreSelection = function(panel, panelState)
             }
 
             if (FBTrace.DBG_INITIALIZE)
-                FBTrace.dumpProperties("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
         }
 
         // If we couldn't restore the selection, wait a bit and try again
@@ -3536,7 +3557,7 @@ this.restoreSelection = function(panel, panelState)
     }
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.dumpProperties("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
+        FBTrace.sysout("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
 };
 
 this.restoreObjects = function(panel, panelState)
@@ -3625,7 +3646,7 @@ this.TextSearch = function(rootNode, rowFinder)
         catch (e)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
+                FBTrace.sysout("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
             try {
                 FBTrace.sysout("setStart try\n");
                 startPt.setStart(curNode);
@@ -3840,8 +3861,8 @@ this.SourceFile.prototype =
         var lineCount = script.lineExtent + 1;
         var offset = this.getBaseLineOffset();
         if (FBTrace.DBG_LINETABLE)
-        {                                                                                     /*@explore*/
-            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineExtent="+lineCount+" baseLineNumber="+script.baseLineNumber+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
+        {
+            FBTrace.sysout("lib.SourceFile.addToLineTable script.tag:"+script.tag+" lineExtent="+lineCount+" baseLineNumber="+script.baseLineNumber+" offset="+offset+" for "+this.compilation_unit_type+"\n");
             var startTime = new Date().getTime();
         }
         if (lineCount > 100)
@@ -3860,24 +3881,23 @@ this.SourceFile.prototype =
             {
                 // I guess not...
             }
-                                                                                                                       /*@explore*/
-            if (FBTrace.DBG_LINETABLE)                                                                                 /*@explore*/
-            {                                                                                                          /*@explore*/
-                var pcFromLine = script.lineToPc(scriptLineNo, this.pcmap_type);                                            /*@explore*/
-                var lineFromPC = script.pcToLine(pcFromLine, this.pcmap_type);                                              /*@explore*/
-                                                                                                                       /*@explore*/
-                if (this.outerScriptLineMap.indexOf(mapLineNo) != -1)                                                                  /*@explore*/
-                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+script.tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n"); /*@explore*/
-                else                                                                                                   /*@explore*/
-                    FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");     /*@explore*/
-            }                                                                                                          /*@explore*/
+
+            if (FBTrace.DBG_LINETABLE)
+            {
+                var pcFromLine = script.lineToPc(scriptLineNo, this.pcmap_type);
+                var lineFromPC = script.pcToLine(pcFromLine, this.pcmap_type);
+                if (this.outerScriptLineMap.indexOf(mapLineNo) != -1)
+                    FBTrace.sysout("lib.SourceFile.addToLineTable ["+mapLineNo+"]="+script.tag+" for scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+" with map="+(this.pcmap_type==PCMAP_PRETTYPRINT?"PP":"SOURCE")+"\n");
+                else
+                    FBTrace.sysout("lib.SourceFile.addToLineTable not executable scriptLineNo="+scriptLineNo+" vs "+lineFromPC+"=lineFromPC; lineToPc="+pcFromLine+"\n");
+            }
         }
         if (FBTrace.DBG_LINETABLE)
         {
             var endTime = new Date().getTime();
             var delta = endTime - startTime ;
             if (delta > 0) FBTrace.sysout("SourceFile.addToLineTable processed "+lineCount+" lines in "+delta+" millisecs "+Math.round(lineCount/delta)+" lines per millisecond\n");
-            FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");                 /*@explore*/
+            FBTrace.sysout("SourceFile.addToLineTable: "+this.toString()+"\n");
         }
     },
 
@@ -3889,28 +3909,27 @@ this.SourceFile.prototype =
 
         var lineCount = script.lineExtent;
         var offset = this.getBaseLineOffset();
-                                                                                           /*@explore*/
         if (FBTrace.DBG_LINETABLE)
-        {/*@explore*/
-            FBTrace.sysout("lib.SourceFile.addToLineTableByPCLoop script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");  /*@explore*/
-            var startTime = new Date().getTime();/*@explore*/
-        }/*@explore*/
+        {
+            FBTrace.sysout("lib.SourceFile.addToLineTableByPCLoop script.tag:"+script.tag+" lineCount="+lineCount+" offset="+offset+" for "+this.compilation_unit_type+"\n");
+            var startTime = new Date().getTime();
+        }
 
         for (var i = 0; i <= 10*lineCount; i++)
         {
             var lineFromPC = script.pcToLine(i, this.pcmap_type);
-            //FBTrace.sysout("lib.SourceFile.addToLineTableByPCLoop pc="+i+" line: "+lineFromPC+"\n");                                                                                         /*@explore*/
+            //FBTrace.sysout("lib.SourceFile.addToLineTableByPCLoop pc="+i+" line: "+lineFromPC+"\n");
             this.outerScriptLineMap[lineFromPC] = script;
             if (lineFromPC >= lineCount) break;
         }
 
-        if (FBTrace.DBG_LINETABLE)/*@explore*/
-        {/*@explore*/
-            FBTrace.sysout("SourceFile.addToLineTableByPCLoop: "+this.toString()+"\n");                 /*@explore*/
-            var endTime = new Date().getTime();/*@explore*/
-            var delta = endTime - startTime ;/*@explore*/
-            if (delta > 0) FBTrace.sysout("SourceFileaddToLineTableByPCLoop processed "+lineCount+" lines in "+delta+" millisecs "+Math.round(lineCount/delta)+" lines per millisecond\n");/*@explore*/
-        }        /*@explore*/
+        if (FBTrace.DBG_LINETABLE)
+        {
+            FBTrace.sysout("SourceFile.addToLineTableByPCLoop: "+this.toString()+"\n");
+            var endTime = new Date().getTime();
+            var delta = endTime - startTime ;
+            if (delta > 0) FBTrace.sysout("SourceFileaddToLineTableByPCLoop processed "+lineCount+" lines in "+delta+" millisecs "+Math.round(lineCount/delta)+" lines per millisecond\n");
+        }
     },
 
     getScriptsAtLineNumber: function(lineNo, mustBeExecutableLine)
@@ -3990,7 +4009,7 @@ this.SourceFile.prototype =
     scriptsIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
     {
         var scripts = this.getScriptsAtLineNumber(lineNo, true);
-        if (FBTrace.DBG_LINETABLE && !scripts) FBTrace.dumpProperties("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
+        if (FBTrace.DBG_LINETABLE && !scripts) FBTrace.sysout("lib.scriptsIfLineCouldBeExecutable this.outerScriptLineMap", this.outerScriptLineMap);
         if (!scripts && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
             return [this.outerScript];
         return scripts;
@@ -4102,7 +4121,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
         {
             // XXXjjb I think this is happening when we go out of the script range in isLineExecutable.
             if (FBTrace.DBG_ERRORS)
-                FBTrace.dumpProperties("addScriptsToSourceFile addLineTable FAILS", exc);
+                FBTrace.sysout("addScriptsToSourceFile addLineTable FAILS", exc);
         }
     }
 */
@@ -4125,7 +4144,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
         if (FBTrace.DBG_SOURCEFILES)
             total++;
     }
-    if (FBTrace.DBG_SOURCEFILES)                                                                                   /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES)
         FBTrace.sysout("FBL.addScriptsToSourceFile "+ total +" scripts, sourcefile="+sourceFile.toString(), sourceFile);
 }
 
@@ -4169,12 +4188,12 @@ this.EvalLevelSourceFile.prototype.OuterScriptAnalyzer.prototype =
 
 this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 {
-    return this.outerScript.baseLineNumber; // baseLineNumber always valid even after jsdIscript isValid false
+    return this.outerScript.baseLineNumber - 1; // baseLineNumber always valid even after jsdIscript isValid false
 }
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
-    if (this.href.kind == "source")
+    if (this.href.kind == "source" || this.href.kind == "data")
         return FBL.splitURLBase(this.href);
 
     if (!this.summary)
@@ -4187,8 +4206,8 @@ this.EvalLevelSourceFile.prototype.getObjectDescription = function()
             this.summary = "eval("+this.summary + "...)=" + FBL.summarizeSourceLineArray(this.source, 120 - this.summary.length);
     }
     var containingFileDescription = FBL.splitURLBase(this.containingURL);
-    if (FBTrace.DBG_SOURCEFILES) /*@explore*/
-        FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+(this.evalExpression?this.evalExpression.substr(0, 240):"null")+" summary", this.summary); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("EvalLevelSourceFile this.evalExpression.substr(0, 240):"+(this.evalExpression?this.evalExpression.substr(0, 240):"null")+" summary", this.summary);
     return {path: containingFileDescription.path, name: containingFileDescription.name+"/eval: "+this.summary };
 }
 //------------
@@ -4468,7 +4487,8 @@ this.getSourceFileByScript = function(context, script)
     if (lucky && lucky.hasScript(script))
         return lucky;
 
-    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("getSourceFileByScript looking for "+script.tag, " in "+context.getName()+": ", context.sourceFileMap); /*@explore*/
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("getSourceFileByScript looking for "+script.tag+" in "+context.getName()+": ", context.sourceFileMap);
 
     for (var url in context.sourceFileMap)
     {
@@ -4481,13 +4501,13 @@ this.getSourceFileByScript = function(context, script)
 this.getScriptAnalyzer = function(context, script)
 {
     var sourceFile = this.getSourceFileByScript(context, script);
-    if (FBTrace.DBG_STACK) /*@explore*/
-        FBTrace.sysout("getScriptAnalyzer finds sourceFile: ", sourceFile); /*@explore*/
+    if (FBTrace.DBG_STACK)
+        FBTrace.sysout("getScriptAnalyzer finds sourceFile: ", sourceFile);
     if (sourceFile)
     {
         var analyzer = sourceFile.getScriptAnalyzer(script);
-        if (FBTrace.DBG_STACK) /*@explore*/
-            FBTrace.sysout("getScriptAnalyzer finds analyzer: ", analyzer);  /*@explore*/
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("getScriptAnalyzer finds analyzer: ", analyzer);
 
         return analyzer;
     }
@@ -4568,18 +4588,18 @@ this.StackTrace.prototype =
         {
             this.frames[i].destroy();
         }
-        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.StackTrace destroy "+this.uid+"\n");                                /*@explore*/
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.StackTrace destroy "+this.uid+"\n");
     }
 };
 
-this.traceToString = function(trace)                                                                                   /*@explore*/
-{                                                                                                                      /*@explore*/
-    var str = "<top>";                                                                                                 /*@explore*/
-    for(var i = 0; i < trace.frames.length; i++)                                                                       /*@explore*/
-        str += "\n" + trace.frames[i];                                                                                 /*@explore*/
-    str += "\n<bottom>";                                                                                               /*@explore*/
-    return str;                                                                                                        /*@explore*/
-}                                                                                                                      /*@explore*/
+this.traceToString = function(trace)                /*@explore*/
+{                                                   /*@explore*/
+    var str = "<top>";                              /*@explore*/
+    for(var i = 0; i < trace.frames.length; i++)    /*@explore*/
+        str += "\n" + trace.frames[i];              /*@explore*/
+    str += "\n<bottom>";                            /*@explore*/
+    return str;                                     /*@explore*/
+}
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 this.StackFrame = function(context, fn, script, href, lineNo, args, pc)
@@ -4607,7 +4627,8 @@ this.StackFrame.prototype =
     },
     destroy: function()
     {
-        if (FBTrace.DBG_STACK) FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");                                  /*@explore*/
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("StackFrame destroyed:"+this.uid+"\n");
         this.script = null;
         this.fn = null;
     },
@@ -6496,7 +6517,7 @@ this.ERROR = function(exc)
 {
     if (FBTrace) {
         if (exc.stack) exc.stack = exc.stack.split('\n');
-        FBTrace.dumpProperties("lib.ERROR: "+exc, exc);
+        FBTrace.sysout("lib.ERROR: "+exc, exc);
     }
 
         ddd("FIREBUG WARNING: " + exc);
@@ -6526,10 +6547,10 @@ this.formatSize = function(bytes)
         return "?";
     else if (bytes < 1024)
         return bytes + " B";
-    else if (bytes < 1024*1024)
-        return Math.ceil(bytes/1024) + " KB";
+    else if (bytes < (1024*1024))
+        return Math.floor(bytes/1024) + " KB";
     else
-        return (Math.ceil(bytes/(1024*1024))) + " MB";
+        return Math.floor((bytes/(1024*1024))*100)/100 + " MB";
 }
 
 // ************************************************************************************************
@@ -6542,9 +6563,13 @@ this.formatTime = function(elapsed)
     else if (elapsed < 1000)
         return elapsed + "ms";
     else if (elapsed < 60000)
-        return (Math.ceil(elapsed/10) / 100) + "s";
+        return (Math.round(elapsed/10) / 100) + "s";
     else
-        return (Math.ceil((elapsed/60000)*100)/100) + "m";
+    {
+        var min = Math.floor(elapsed/60000);
+        var sec = (elapsed % 60000);
+        return min + "m " + (Math.round((elapsed/1000)%60)) + "s";
+    }
 }
 
 // ************************************************************************************************
@@ -6737,8 +6762,9 @@ this.DOMWalker = function(doc, root)
 };
 
 }).apply(FBL);
-} catch(e) {																			/*@explore*/
-    dump("FBL Fails "+e+"\n");																/*@explore*/
-    dump("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n");/*@explore*/
-    dump("Another cause can be mangled install.rdf.\n");/*@explore*/
-}   																		/*@explore*/
+} catch(e) /*@explore*/
+{ /*@explore*/
+    dump("FBL Fails "+e+"\n"); /*@explore*/
+    dump("If the service @joehewitt.com/firebug;1 fails, try deleting compreg.dat, xpti.dat\n"); /*@explore*/
+    dump("Another cause can be mangled install.rdf.\n"); /*@explore*/
+} /*@explore*/
