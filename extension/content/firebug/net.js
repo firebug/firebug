@@ -2640,7 +2640,7 @@ function getCacheEntry(file, netProgress)
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.delayGetCacheEntry FAILS", exc);
+                FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
         }
     });
 }
@@ -2706,11 +2706,17 @@ function isXHR(request)
 {
     try
     {
-        if (request.notificationCallbacks)
-            return (request.notificationCallbacks instanceof XMLHttpRequest);
+        var callbacks = request.notificationCallbacks;
+        var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
+
+        return (xhrRequest != null);
     }
     catch (exc)
     {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.isXHR; EXCEPTION " + safeGetName(request));
     }
 
     return false;
