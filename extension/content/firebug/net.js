@@ -9,53 +9,47 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-const nsIWebProgressListener = Ci.nsIWebProgressListener;
-const nsIWebProgress = Ci.nsIWebProgress;
-const nsIRequest = Ci.nsIRequest;
-const nsIChannel = Ci.nsIChannel;
-const nsIHttpChannel = Ci.nsIHttpChannel;
-const nsICacheService = Ci.nsICacheService;
-const nsICache = Ci.nsICache;
-const nsISupportsWeakReference = Ci.nsISupportsWeakReference;
-const nsISupports = Ci.nsISupports;
-const imgIRequest = Ci.imgIRequest;
-const nsIUploadChannel = Ci.nsIUploadChannel;
-const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
-const nsISeekableStream = Ci.nsISeekableStream;
-const nsIURI = Ci.nsIURI;
-
 const CacheService = Cc["@mozilla.org/network/cache-service;1"];
 const ImgCache = Cc["@mozilla.org/image/cache;1"];
 const IOService = Cc["@mozilla.org/network/io-service;1"];
+const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
 
-const nsIPrefBranch2 = Ci.nsIPrefBranch2;
-const PrefService = Cc["@mozilla.org/preferences-service;1"];
-const prefs = PrefService.getService(nsIPrefBranch2);
+const NOTIFY_ALL = Ci.nsIWebProgress.NOTIFY_ALL;
 
-const NOTIFY_ALL = nsIWebProgress.NOTIFY_ALL;
-
+const nsIWebProgressListener = Ci.nsIWebProgressListener;
 const STATE_IS_WINDOW = nsIWebProgressListener.STATE_IS_WINDOW;
 const STATE_IS_DOCUMENT = nsIWebProgressListener.STATE_IS_DOCUMENT;
 const STATE_IS_NETWORK = nsIWebProgressListener.STATE_IS_NETWORK;
 const STATE_IS_REQUEST = nsIWebProgressListener.STATE_IS_REQUEST;
-
 const STATE_START = nsIWebProgressListener.STATE_START;
 const STATE_STOP = nsIWebProgressListener.STATE_STOP;
 const STATE_TRANSFERRING = nsIWebProgressListener.STATE_TRANSFERRING;
 
-const LOAD_BACKGROUND = nsIRequest.LOAD_BACKGROUND;
-const LOAD_FROM_CACHE = nsIRequest.LOAD_FROM_CACHE;
-const LOAD_DOCUMENT_URI = nsIChannel.LOAD_DOCUMENT_URI;
+const LOAD_BACKGROUND = Ci.nsIRequest.LOAD_BACKGROUND;
+const LOAD_FROM_CACHE = Ci.nsIRequest.LOAD_FROM_CACHE;
+const LOAD_DOCUMENT_URI = Ci.nsIChannel.LOAD_DOCUMENT_URI;
 
-const ACCESS_READ = nsICache.ACCESS_READ;
-const STORE_ANYWHERE = nsICache.STORE_ANYWHERE;
+const ACCESS_READ = Ci.nsICache.ACCESS_READ;
+const STORE_ANYWHERE = Ci.nsICache.STORE_ANYWHERE;
 
 const NS_ERROR_CACHE_KEY_NOT_FOUND = 0x804B003D;
 const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 
-const NS_SEEK_SET = nsISeekableStream.NS_SEEK_SET;
-
 const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
+const layoutInterval = 300;
+const phaseInterval = 1000;
+const indentWidth = 18;
+const maxPendingCheck = 200;
+
+var cacheSession = null;
+var contexts = new Array();
+var panelName = "net";
+var maxQueueRequests = 500;
+var panelBar1 = $("fbPanelBar1");
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -129,20 +123,6 @@ const binaryCategoryMap =
     "image": 1,
     "flash" : 1
 };
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
-const layoutInterval = 300;
-const phaseInterval = 1000;
-const indentWidth = 18;
-const maxPendingCheck = 200;
-
-var cacheSession = null;
-var contexts = new Array();
-var panelName = "net";
-var maxQueueRequests = 500;
-var panelBar1 = $("fbPanelBar1");
 
 // ************************************************************************************************
 
@@ -2174,9 +2154,9 @@ NetProgress.prototype =
 
     QueryInterface: function(iid)
     {
-        if (iid.equals(nsIWebProgressListener)
-            || iid.equals(nsISupportsWeakReference)
-            || iid.equals(nsISupports))
+        if (iid.equals(Ci.nsIWebProgressListener)
+            || iid.equals(Ci.nsISupportsWeakReference)
+            || iid.equals(Ci.nsISupports))
         {
             return this;
         }
@@ -2534,7 +2514,7 @@ function initCacheSession()
 {
     if (!cacheSession)
     {
-        var cacheService = CacheService.getService(nsICacheService);
+        var cacheService = CacheService.getService(Ci.nsICacheService);
         cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
         cacheSession.doomEntriesIfExpired = false;
     }
@@ -2667,7 +2647,7 @@ function getHttpHeaders(request, file)
 {
     try
     {
-        var http = QI(request, nsIHttpChannel);
+        var http = QI(request, Ci.nsIHttpChannel);
         file.status = request.responseStatus;
 
         // xxxHonza: is there any problem to do this in requestedFile method?
@@ -3350,7 +3330,7 @@ var HttpObserver =
         var isRedirect = (name != origName);
 
         // We only need to create a new context if this is a top document uri (not frames).
-        if ((request.loadFlags & nsIChannel.LOAD_DOCUMENT_URI) &&
+        if ((request.loadFlags & LOAD_DOCUMENT_URI) &&
             request.loadGroup && request.loadGroup.groupObserver &&
             win == win.parent && !isRedirect)
         {
