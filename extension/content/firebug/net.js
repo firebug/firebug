@@ -2695,8 +2695,6 @@ function isXHR(request)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.isXHR; EXCEPTION " + safeGetName(request));
     }
 
     return false;
