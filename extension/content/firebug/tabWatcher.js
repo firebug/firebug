@@ -428,7 +428,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var detached = Firebug.isDetached();
         var shouldDispatch = true;
         if (!detached)
-            var shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
+            shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
 
         if (shouldDispatch)
         {
