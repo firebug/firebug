@@ -215,6 +215,8 @@ top.FirebugChrome =
 
         if (name == "textSize")
             this.applyTextSize(value);
+        if (name =="omitObjectPathStack")
+            this.obeyOmitObjectPathStack(value);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -410,6 +412,7 @@ top.FirebugChrome =
 
     openPanelOptionsMenu : function()
     {
+        // XXXjjb what is this?
         FBTrace.sysout('test');
     },
 
@@ -841,6 +844,16 @@ top.FirebugChrome =
 
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
+    },
+
+    obeyOmitObjectPathStack: function(value)
+    {
+        FBL.hide(panelStatus, (value?true:false));
+    },
+
+    getPanelStatusElements: function()
+    {
+        return panelStatus;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

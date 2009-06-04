@@ -39,8 +39,6 @@ const reEval =  /\s*eval\s*\(([^)]*)\)/m;        // eval ( $1 )
 const reHTM = /\.[hH][tT][mM]/;
 const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 
-const panelStatus = $("fbPanelStatus");
-
 // ************************************************************************************************
 
 Firebug.Debugger = extend(Firebug.ActivableModule,
@@ -1994,6 +1992,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (this.selectedSourceBox)
             this.highlightExecutionLine(this.selectedSourceBox);  // clear highlight
 
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
         panelStatus.clear(); // clear stack on status bar
         this.updateInfoTip();
     },
@@ -2327,8 +2326,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbLocationList", enabled);
         this.showToolbarButtons("fbScriptButtons", enabled);
 
-        this.obeyPreferences();
-
         // Additional debugger panels are visible only if debugger
         // is enabled.
         this.panelSplitter.collapsed = !enabled;
@@ -2381,18 +2378,13 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.sidePanelDeck.collapsed = true;
     },
 
-    obeyPreferences: function()
-    {
-        if (Firebug.omitObjectPathStack)  // User does not want the toolbar stack
-            FBL.hide(panelStatus, true);
-    },
-
     hide: function(state)
     {
         if (!this.context.stopped) // leave the buttons so we can see that we are stopped
             this.showToolbarButtons("fbDebuggerButtons", false);
 
         this.showToolbarButtons("fbScriptButtons", false);
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
         FBL.hide(panelStatus, false);
 
         delete this.infoTipExpr;
@@ -3310,7 +3302,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         if (mainPanel.selection instanceof jsdIStackFrame)
             this.showStackFrame(mainPanel.selection);
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.callstackPanel.refresh for mainPanel.selection "+mainPanel.selection );
+            FBTrace.sysout("debugger.callstackPanel.refresh for jsdIStackFrame:"+(mainPanel.selection instanceof jsdIStackFrame)+" mainPanel.selection "+mainPanel.selection );
     },
 
     showStackFrame: function(frame)
@@ -3323,6 +3315,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             FBL.setClass(this.panelNode, "objectBox-stackTrace");
             // The panelStatus has the stack, lets reuse it to give the same UX as that control.
             // TODO use domplate? Use the panel status directly?
+            var panelStatus = Firebug.chrome.getPanelStatusElements();
             var frameButtons = panelStatus.getElementsByTagName("toolbarbutton");
             var doc = this.panelNode.ownerDocument;
             for (var i = 0; i < frameButtons.length; i++)
@@ -3379,7 +3372,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     getOptionsMenuItems: function()
     {
         var items = [
-            optionMenu("OmitObjectPathStack", "omitObjectPathStack"),
+            optionMenu("OmitObjectPathStack", "omitObjectPathStack"),  // an option handled by chrome.js
             ];
         return items;
     }
