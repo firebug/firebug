@@ -1200,8 +1200,6 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
 
 Firebug.TraceModule.TraceMessage.prototype =
 {
-    reXPConnect: /\[xpconnect wrapped ([^\]]*)\]/,
-
     getType: function()
     {
         return this.type;
@@ -1316,18 +1314,6 @@ Firebug.TraceModule.TraceMessage.prototype =
                 for (var p in this.obj)
                 {
                     propsTotal++;
-
-                    var pAsString = p + "";
-                    var m = this.reXPConnect.exec(pAsString);
-                    if (m)
-                    {
-                        var kind = m[1];
-                        if (!this.obj[p] instanceof Ci[kind])
-                        {
-                            var xpobj = "" + this.obj[p].wrappedJSObject;
-                            this.props[p] = xpobj;
-                        }
-                    }
 
                     try {
                         if (this.obj.__lookupGetter__)
@@ -1678,8 +1664,6 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
 
 Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
 {
-    reXPConnect: /\[xpconnect wrapped ([^\]]*)\]/,
-
     getMembers: function(object, level)
     {
         if (!level)
@@ -1692,17 +1676,6 @@ Firebug.TraceModule.PropertyTree = domplate(Firebug.TraceModule.Tree,
             {
                 try
                 {
-                    var pAsString = p + "";
-                    var m = this.reXPConnect.exec(pAsString);
-                    if (m)
-                    {
-                        var kind = m[1];
-                        if (!object[p] instanceof Ci[kind])
-                        {
-                            var xpobj = object[p].wrappedJSObject;
-                            members.push(this.createMember("dom", p, xpobj, level));
-                        }
-                    }
                     members.push(this.createMember("dom", p, object[p], level));
                 }
                 catch (e)
