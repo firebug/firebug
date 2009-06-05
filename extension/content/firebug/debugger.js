@@ -1406,8 +1406,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // the previous and reloaded source. In that case let's use a cheap URL.
             url = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++));
             url.kind = "seq";
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("debugger.getSequentialURL context:"+context.getName()+" url:"+url, url);
+            if (FBTrace.DBG_SOURCEFILES || isNaN(context.dynamicURLIndex) )
+                FBTrace.sysout("debugger.getSequentialURL context:"+context.getName()+" url:"+url+" index: "+context.dynamicURLIndex, url);
         }
         return url;
     },
