@@ -117,6 +117,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     {
         try
         {
+            if (window.closed)
+                this.stopObserving();
             if (!FBTrace)
                 return;
         }
@@ -465,17 +467,19 @@ function lessTalkMoreAction(context, object, isWarning)
     if (!incoming_message)                       // nsIConsoleMessage
         incoming_message = object.message;
 
-
-    for (var msg in pointlessErrors)
+    if (Firebug.suppressPointlessErrors)
     {
-
-        if( msg.charAt(0) == incoming_message.charAt(0) )
+        for (var msg in pointlessErrors)
         {
-            if (incoming_message.indexOf(msg) == 0)
+
+            if( msg.charAt(0) == incoming_message.charAt(0) )
             {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("errors.observe dropping pointlessError: "+msg+"\n");
-                return true;
+                if (incoming_message.indexOf(msg) == 0)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("errors.observe dropping pointlessError: "+msg+"\n");
+                    return true;
+                }
             }
         }
     }
