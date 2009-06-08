@@ -1240,17 +1240,24 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                 scopeVars = scope.getWrappedValue();
             }
 
-            if (!scopeVars.hasOwnProperty("toString")) {
-                (function() {
-                    var className = scope.jsClassName;
-                    scopeVars.toString = function() {
-                        return $STR(className + " Scope");
-                    };
-                })();
+            if (scopeVars && scopeVars.hasOwnProperty)
+            {
+                if (!scopeVars.hasOwnProperty("toString")) {
+                    (function() {
+                        var className = scope.jsClassName;
+                        scopeVars.toString = function() {
+                            return $STR(className + " Scope");
+                        };
+                    })();
+                }
+
+                ret.push(scopeVars);
             }
-
-            ret.push(scopeVars);
-
+            else
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("dom .generateScopeChain: bad scopeVars");
+            }
             scope = scope.jsParent;
         }
 
@@ -1359,7 +1366,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
                 var getterFunction = insecureObject.__lookupGetter__(name),
                     setterFunction = insecureObject.__lookupSetter__(name),
                     prefix = "";
-                    
+
                 if(getterFunction && !setterFunction)
                     prefix = "get ";
 
