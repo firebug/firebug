@@ -417,7 +417,7 @@ this.internationalize = function(element, attr, args)
     }
     else
     {
-        if (FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_LOCALE)
             FBTrace.sysout("Failed to internationalize element with attr "+attr+' args:'+args);
     }
 }
