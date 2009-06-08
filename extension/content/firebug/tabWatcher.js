@@ -119,7 +119,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             {
                 this.watchContext(win, null);
 
-                // There shouldn't be context for this widnow so, remove it from the 
+                // There shouldn't be context for this window so, remove it from the
                 // global array.
                 remove(contexts, context);
 
@@ -422,12 +422,14 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
         {
             var uri = safeGetURI(browser);
-            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + " user commands: "+userCommands+"\n");
+            FBTrace.sysout("-> tabWatcher.unwatchBrowser for: " + (uri instanceof nsIURI?uri.spec:uri) + " user commands: "+userCommands+(browser?"":"NULL BROWSER"));
         }
+        if (!browser)
+            return;
 
         var detached = Firebug.isDetached();
         var shouldDispatch = true;
-        if (!detached)
+        if (!detached)  // if we are detached we don't want to unwatchTopWindow, just go dormant
             shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
 
         if (shouldDispatch)
