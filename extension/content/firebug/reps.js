@@ -936,7 +936,8 @@ this.Window = domplate(Firebug.Rep,
 
     getTooltip: function(win)
     {
-        return win.location.href;
+        if (win && !win.closed)
+            return win.location.href;
     }
 });
 
