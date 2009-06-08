@@ -210,7 +210,8 @@ this.safeToString = function(ob)
 {
     try
     {
-        return ob.toString();
+        if (ob && toString in ob && typeof (ob[toString]) == "function")
+            return ob.toString();
     }
     catch (exc)
     {
