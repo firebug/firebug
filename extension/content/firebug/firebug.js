@@ -245,8 +245,11 @@ top.Firebug =
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);
-            if (!element && FBTrace.DBG_ERRORS)
+            if (!element && FBTrace.DBG_LOCALE )
+            {
                 FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
+                continue;
+            }
             FBL.internationalize(element, tooltipTextElements.indexOf(elements[i]) == -1 ? "label" : "tooltiptext");
         }
     },
@@ -1187,7 +1190,11 @@ top.Firebug =
         TabWatcher.iterateContexts(function turnOff(context)  // we close the current contexts,
         {
             if (!context.browser)
-                FBTrace.sysout("context with no browser??!! "+context.getName());
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("context with no browser??!! "+context.getName());
+                return;
+            }
             if (context != FirebugContext)
                 TabWatcher.unwatchBrowser(context.browser);
         });
@@ -3266,9 +3273,6 @@ Firebug.ModuleManager =
 
     enableModules: function(context)
     {
-        if (!context)
-            context = FirebugContext;
-
         for (var i=0; i<activableModules.length; i++)
         {
             var module = activableModules[i];
