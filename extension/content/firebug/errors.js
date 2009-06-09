@@ -341,6 +341,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         this.showCount(context ? context.errorCount : 0);
     },
 
+    unwatchWindow: function(context, win)  // called for top window and frames.
+    {
+        this.clear(context);  // If we ever get errors by window from Firefox we can cache by window.
+    },
+
     destroyContext: function(context, persistedState)
     {
         for (var url in this.contextCache)
