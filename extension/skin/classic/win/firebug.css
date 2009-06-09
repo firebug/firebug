@@ -213,7 +213,7 @@ panelTab {
     margin: 1px 0 0 0;
     border: none;
     font-weight: bold;
-    font-family: Segoe UI, Arial;
+    font-family: "Segoe UI, Arial";
     color: #565656;
     font-size: 11px;
 }
