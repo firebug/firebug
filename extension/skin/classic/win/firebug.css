@@ -213,6 +213,7 @@ panelTab {
     margin: 1px 0 0 0;
     border: none;
     font-weight: bold;
+    font-family: Segoe UI, Arial;
     color: #565656;
     font-size: 11px;
 }
@@ -223,19 +224,22 @@ panelTab[selected="true"] {
 
 .panelTab-left {
     width: 8px;
+    background: url(chrome://firebug/skin/win/tabLeftUnselected.png) no-repeat top;
 }
 
 .panelTab-text {
     margin: 0;
     padding: 3px 1px 4px 1px;
+    background: url(chrome://firebug/skin/win/tabMidUnselected.png) repeat-x top;
 }
 
 .panelTab-text[disabled="true"] {
-    color:Gray;
+    color: Gray;
 }
 
 .panelTab-right {
     width: 8px;
+    background: url(chrome://firebug/skin/win/tabRightUnselected.png) no-repeat top;
 }
 
 panelTab:hover > .panelTab-left {
