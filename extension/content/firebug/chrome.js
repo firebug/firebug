@@ -410,12 +410,6 @@ top.FirebugChrome =
         }
     },
 
-    openPanelOptionsMenu : function()
-    {
-        // XXXjjb what is this?
-        FBTrace.sysout('test');
-    },
-
     getNextObject: function(reverse)
     {
         var panel = FirebugContext.getPanel(FirebugContext.panelName);
