@@ -298,9 +298,14 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
             currLines = this.cache[url] = [];
 
         // Join the last line with the new first one so, the source code
-        // lines are properly formatted.
+        // lines are properly formatted...
         if (currLines.length)
-            currLines[currLines.length-1] += lines.shift();
+        {
+            // ... but only if the last line isn't already completed.
+            var lastLine = currLines[currLines.length-1];
+            if (lastLine && lastLine.search(/\r|\n/) == -1)
+                currLines[currLines.length-1] += lines.shift();
+        }
 
         // Append new lines (if any) into the array for specified url.
         if (lines.length)
