@@ -150,8 +150,9 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         try
         {
-            if (!this.shouldCacheRequest(request))
-                return;
+            // Due to #489317, the content type must be checked in onStartRequest
+            //if (!this.shouldCacheRequest(request))
+            //    return;
 
             request.QueryInterface(Ci.nsITraceableChannel);
 
@@ -425,6 +426,10 @@ ChannelListenerProxy.prototype =
         var context = this.getContext();
         if (context)
             context.sourceCache.onStartRequest(request, requestContext);
+
+        // Due to #489317 it isn't possible to get the content type before the request
+        // is started.
+        return Firebug.TabCacheModel.shouldCacheRequest(request);
     },
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)

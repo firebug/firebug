@@ -126,7 +126,12 @@ ChannelListener.prototype =
             // Pass to the proxy only if the associated context exists (the window is not unloaded)
             var context = this.getContext(this.window);
             if (context)
-                this.proxyListener.onStartRequest(request, requestContext);
+            {
+                // Due to #489317, the check whether this response should be cached
+                // or not is done in onStartRequets. Let's ignore the response if it
+                // should not be cached.
+                this.ignore = !this.proxyListener.onStartRequest(request, requestContext);
+            }
         }
         catch (err)
         {
