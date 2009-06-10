@@ -496,18 +496,19 @@
     </handlers>
 </binding>
 
-<binding id="panelFileList" >
+<binding id="panelFileList">
 
-    <content>
-        <xul:toolbarbutton  xbl:inherits="label,tooltip=labeltooltip,contextmenu=labelcontextmenu" type="menu" role="button" aria-haspopup="true">
-            <xul:menupopup anonid="popup" position="after_start"/>
-        </xul:toolbarbutton>
-    <!--
-        <xul:label class="toolbarbutton-text"
-             xbl:inherits="value=label,tooltip=labeltooltip,contextmenu=labelcontextmenu"/>
-        <xul:image class="toolbarbutton-menu-dropmarker"/>
+    <content popup="_child">
+        <xul:label class="toolbarbutton-text title" crop="right" flex="1"
+            xbl:inherits="value=title"/>
         <xul:menupopup anonid="popup" position="after_start"/>
-    -->
+        <children includes="observes|template|menupopup|tooltip"/>
+        <xul:image class="toolbarbutton-icon"
+            xbl:inherits="validate,src=image,toolbarmode,buttonstyle"/>
+        <xul:label class="toolbarbutton-text label" crop="right" flex="1"
+             xbl:inherits="value=label,accesskey,crop,toolbarmode,buttonstyle"/>
+        <xul:dropmarker type="menu" class="toolbarbutton-menu-dropmarker"
+            xbl:inherits="disabled,label"/>
     </content>
 
     <resources>

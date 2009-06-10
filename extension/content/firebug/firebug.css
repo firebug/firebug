@@ -64,6 +64,7 @@ panelStatus {
 }
 
 /************************************************************************************************/
+
 panelTabMenu {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelTabMenu");
 }
@@ -139,3 +140,10 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     color: black;
 }
 /**** end focus related ****/
+
+/************************************************************************************************/
+
+/* panelFileList */
+.toolbarbutton-text.title[value] {
+    padding-right: 5px;
+}

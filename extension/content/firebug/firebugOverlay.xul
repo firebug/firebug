@@ -226,9 +226,9 @@
                                     </hbox>
 
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
-                                    <hbox id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
-                                          collapsed="true" labeltooltip="fbTooltip" labelcontextmenu="fbContextMenu"
-                                          class="noTabStop"></hbox>
+                                    <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
+                                          collapsed="true" tooltip="fbTooltip" contextmenu="fbContextMenu"
+                                          class="noTabStop"/>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
                                     <panelStatus id="fbPanelStatus" flex="1"
