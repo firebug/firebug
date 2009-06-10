@@ -28,10 +28,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
         this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
         Firebug.Debugger.addListener(this);
-
-        // Initialize according to the current pref value.
-        Firebug.chrome.window.a11yEnabled = this.isEnabled();
-        this.updateOption("a11y.enable", Firebug.chrome.window.a11yEnabled);
+        // Initialize according to the current pref value.        
+        this.updateOption("a11y.enable", this.isEnabled());
     },
 
     isEnabled : function()
