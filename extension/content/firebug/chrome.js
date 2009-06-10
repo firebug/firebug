@@ -639,7 +639,7 @@ top.FirebugChrome =
 
     focusLocationList: function()
     {
-        locationList.showPopup();
+        locationList.popup.showPopup(locationList, -1, -1, "popup", "bottomleft", "topleft");
     },
 
     syncLocationList: function()

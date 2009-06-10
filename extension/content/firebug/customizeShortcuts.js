@@ -162,16 +162,10 @@ function addShortcutRow(element, index, array)
     var labelText;
 
     var label = document.createElement("label");
-    // Get the label from firebug.properties
-    try
-    {
-        labelText = $FBL.STR('firebug.shortcut.' + element + ".label");
-    }
-    catch (e)
-    {
-        labelText = element;
-    }
-
+    // Get the label from firebug.properties    
+    labelText = FBL.$STR('firebug.shortcut.' + element + ".label");
+    if (labelText == "label") // $STR defaults to property name (label) if it's not defined. We don't want that
+        labelText = element
     label.setAttribute("value", labelText);
     row.appendChild(label);
 
