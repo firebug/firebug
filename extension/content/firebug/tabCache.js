@@ -428,8 +428,13 @@ ChannelListenerProxy.prototype =
             context.sourceCache.onStartRequest(request, requestContext);
 
         // Due to #489317 it isn't possible to get the content type before the request
-        // is started.
-        return Firebug.TabCacheModel.shouldCacheRequest(request);
+        // is started. Since nsIRequestObserver.onStartRequest doesn't return any value 
+        // (defined with void) it uses the same technique as Firefox for canceling requests:
+        // an exception is fired.
+        if (!Firebug.TabCacheModel.shouldCacheRequest(request))
+        {
+            throw new Error("tabCache: response is not cached: " + safeGetName(request));
+        }
     },
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
