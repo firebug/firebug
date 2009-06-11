@@ -128,14 +128,9 @@ ChannelListener.prototype =
             if (context)
             {
                 // Due to #489317, the check whether this response should be cached
-                // or not is done in onStartRequets. Let's ignore the response if it
-                // should not be cached (an exception is fired).
-                try {
-                    this.proxyListener.onStartRequest(request, requestContext);
-                }
-                catch (err) {
-                    this.ignore = true;
-                }
+                // must be done here (the content type is not valid before calling 
+                // onStartRequest). Let's ignore the response if it should not be cached.
+                this.ignore = !this.shouldCacheRequest(request);
             }
         }
         catch (err)

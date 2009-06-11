@@ -166,6 +166,17 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             newListener.QueryInterface(Ci.nsITraceableChannel);
             newListener.setNewListener(new ChannelListenerProxy(win));
 
+            // xxxHonza: this is a workaround for #489317. Just passing
+            // shouldCacheRequest method to the component so, onStartRequest
+            // can decide whether to cache or not.
+            newListener.wrappedJSObject.shouldCacheRequest = function(request)
+            {
+                try {
+                    return Firebug.TabCacheModel.shouldCacheRequest(request)
+                } catch (err) {}
+                return false;
+            }
+
             // xxxHonza: this is a workaround for the tracing-listener to get the
             // right context. Notice that if the window (parent browser) is closed
             // during the response download the TabWatcher (used within this method)
@@ -426,15 +437,6 @@ ChannelListenerProxy.prototype =
         var context = this.getContext();
         if (context)
             context.sourceCache.onStartRequest(request, requestContext);
-
-        // Due to #489317 it isn't possible to get the content type before the request
-        // is started. Since nsIRequestObserver.onStartRequest doesn't return any value 
-        // (defined with void) it uses the same technique as Firefox for canceling requests:
-        // an exception is fired.
-        if (!Firebug.TabCacheModel.shouldCacheRequest(request))
-        {
-            throw new Error("tabCache: response is not cached: " + safeGetName(request));
-        }
     },
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
