@@ -1589,11 +1589,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         this.onFunctionCall = bind(this.onFunctionCall, this);
-        fbs.registerClient(this);   // allow callbacks for jsd
         Firebug.ActivableModule.initialize.apply(this, arguments);
-
-        if (this.isAlwaysEnabled())
-            this.registerDebugger();
     },
 
     initializeUI: function()
@@ -1601,6 +1597,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
+
+        fbs.registerClient(this);   // allow callbacks for jsd
+        if (this.isAlwaysEnabled())
+            this.registerDebugger();
     },
 
     initContext: function(context, persistedState)
