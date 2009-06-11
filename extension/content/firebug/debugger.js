@@ -1043,7 +1043,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var source = creatorURL + "/"+getUniqueId();
         }
 
-        var url = this.getDynamicURL(context, normalizeURL(frame.script.fileName), source, "event");
+        var urlDescribed = this.getDynamicURL(context, normalizeURL(frame.script.fileName), source, "event");
+        var url = urlDescribed.href;
 
         var lines = context.sourceCache.store(url, source);
         var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
@@ -1354,14 +1355,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var url = null;
         if (context.onReadySpy)  // coool we can get the request URL.
         {
-            url = new String(context.onReadySpy.getURL());
-            if (context.sourceFileName && context.sourceFileName[url]) // oops taken
-                url = null;
+            var href = new String(context.onReadySpy.getURL());
+            if (context.sourceFileName && context.sourceFileName[href]) // oops taken
+                return null;
             else
             {
-                url.kind = "data";
+                url = {href: href, kind: "data"};
                 if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("debugger.getURLFromSpy "+url, url);
+                    FBTrace.sysout("debugger.getURLFromSpy "+url.href, url);
             }
         }
 
@@ -1383,11 +1384,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 m[1] = loc.protocol + '//' + loc.host + m[1]; // prepend protocol and host
             }
 
-            url = new String(m[1]);
+            var href = new String(m[1]);
 
-            url.kind = "source";
+            url = {href: href, kind: "source"};
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("debugger.getURLFromLastLine "+url, url);
+                FBTrace.sysout("debugger.getURLFromLastLine "+url.href, url);
         }
         else
         {
@@ -1404,10 +1405,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             // If no breakpoints live in dynamic code then we don't need to compare
             // the previous and reloaded source. In that case let's use a cheap URL.
-            url = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++));
-            url.kind = "seq";
+            var href = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"seq/" +(context.dynamicURLIndex++));
+            url = {href: href, kind: "seq"};
             if (FBTrace.DBG_SOURCEFILES || isNaN(context.dynamicURLIndex) )
-                FBTrace.sysout("debugger.getSequentialURL context:"+context.getName()+" url:"+url+" index: "+context.dynamicURLIndex, url);
+                FBTrace.sysout("debugger.getSequentialURL context:"+context.getName()+" url:"+url.href+" index: "+context.dynamicURLIndex, url);
         }
         return url;
     },
@@ -1425,30 +1426,31 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var hash = this.hash_service.finish(true);
 
         // encoding the hash should be ok, it should be information-preserving? Or at least reversable?
-        var url = new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"MD5/" + encodeURIComponent(hash));
-        url.kind = "MD5";
+        var href= new String(callerURL + (kind ? "/"+kind+"/" : "/nokind/")+"MD5/" + encodeURIComponent(hash));
+        url = {href: href, kind: "MD5"};
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.getURLFromMD5 "+url, url);
+            FBTrace.sysout("debugger.getURLFromMD5 "+url.href, url);
         return url;
     },
 
     getDataURLForScript: function(callerURL, lines)
     {
         var url = null;
+        var href = null;
         if (!source)
-            url = "eval."+script.tag;
+            href = "eval."+script.tag;
         else
         {
             // data:text/javascript;fileName=x%2Cy.js;baseLineNumber=10,<the-url-encoded-data>
-            var url = new String("data:text/javascript;");
-            url += "fileName="+encodeURIComponent(callerURL);
+            href = new String("data:text/javascript;");
+            href += "fileName="+encodeURIComponent(callerURL);
             var source = lines.join('\n');
             //url +=  ";"+ "baseLineNumber="+encodeURIComponent(script.baseLineNumber) +
-            url +="," + encodeURIComponent(source);
+            href +="," + encodeURIComponent(source);
         }
-        url.kind = "data";
+        url = {href:href, kind:"data"};
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("debugger.getDataURLForScript "+url, url);
+            FBTrace.sysout("debugger.getDataURLForScript "+url.href, url);
         return url;
     },
 

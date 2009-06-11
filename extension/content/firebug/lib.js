@@ -4152,7 +4152,8 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 //------------
 this.EvalLevelSourceFile = function(url, script, eval_expr, source, mapType, innerScriptEnumerator) // ctor
 {
-    this.href = url;
+    this.href = url.href;
+    this.hrefKind = url.kind;
     this.outerScript = script;
     this.containingURL = script.fileName;
     this.evalExpression = eval_expr;
@@ -4194,7 +4195,7 @@ this.EvalLevelSourceFile.prototype.getBaseLineOffset = function()
 
 this.EvalLevelSourceFile.prototype.getObjectDescription = function()
 {
-    if (this.href.kind == "source" || this.href.kind == "data")
+    if (this.hrefKind == "source" || this.hrefKind == "data")
         return FBL.splitURLBase(this.href);
 
     if (!this.summary)
