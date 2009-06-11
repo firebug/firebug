@@ -131,6 +131,9 @@ ChannelListener.prototype =
                 // must be done here (the content type is not valid before calling 
                 // onStartRequest). Let's ignore the response if it should not be cached.
                 this.ignore = !this.shouldCacheRequest(request);
+
+                if (!this.ignore)
+                    this.proxyListener.onStartRequest(request, requestContext);
             }
         }
         catch (err)
@@ -150,7 +153,7 @@ ChannelListener.prototype =
         try
         {
             var context = this.getContext(this.window);
-            if (context)
+            if (context && !this.ignore)
                 this.proxyListener.onStopRequest(request, requestContext, statusCode);
         }
         catch (err)
