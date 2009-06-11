@@ -239,7 +239,7 @@ top.Firebug =
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y", "fbContinueButton", "fbBreakOnNextButton",
-            "fbMinimizeButton", "FirebugMenu_Sites"];
+            "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton"];
 
         var tooltipTextElements = ["fbContinueButton", "fbBreakOnNextButton", "fbMinimizeButton"];
         for (var i=0; i<elements.length; i++)
@@ -1621,7 +1621,6 @@ top.Firebug =
                 contentBox.setAttribute("collapsed", true);
                 resumeBox.removeAttribute("collapsed");
 
-                // xxxHonza: localization
                 Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
             }
         }
