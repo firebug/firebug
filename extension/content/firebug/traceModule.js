@@ -412,7 +412,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                 DIV({class: "messageTimeLabel messageLabel"},
                     "$message|getMessageTime")
             ),
-            TD({class: "messageCol"},
+            TD({class: "messageBodyCol messageCol"},
                 DIV({class: "messageLabel", title: "$message|getMessageTitle"},
                     "$message|getMessageLabel")
             )

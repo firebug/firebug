@@ -129,6 +129,9 @@
     white-space: nowrap;
 }
 
+.messageBodyCol {
+    width: 100%;
+}
 .messageLabel {
     padding: 1px 0 2px 10px;
 }
