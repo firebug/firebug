@@ -2383,14 +2383,14 @@ this.safeGetWindowLocation = function(window)
 {
     try
     {
-        if (this.window)
+        if (window)
         {
-            if (this.window.closed)
+            if (window.closed)
                 return "about:closed";
-            if ("location" in this.window)
+            if ("location" in window)
             {
-                if ("toString" in this.window.location)
-                    return this.window.location;
+                if ("toString" in window.location)
+                    return window.location;
                 else
                     return "(window.location has no toString)";
             }
@@ -2404,7 +2404,7 @@ this.safeGetWindowLocation = function(window)
     {
         //if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
             FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
-            FBTrace.sysout("TabContext.getWindowLocation failed window:", this.window);
+            FBTrace.sysout("TabContext.getWindowLocation failed window:", window);
         return "(getWindowLocation: "+exc+")";
     }
 };
