@@ -370,9 +370,25 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
             stream = channel.open();
 
+            // The response doesn't have to be in the browser cache.
+            if (!stream.available())
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
+
+                stream.close();
+                return ["Failed to load source for: " + url]; // xxxHonza: localization?
+            }
+
             // Don't load responses that shouldn't be cached.
             if (!Firebug.TabCacheModel.shouldCacheRequest(channel))
-                return;
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not text: " + url);
+
+                stream.close();
+                return ["The resource from this URL is not text: " + url]; // xxxHonza: localization?
+            }
 
             responseText = readFromStream(stream, charset);
 
@@ -389,7 +405,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         }
         finally
         {
-            if(stream)
+            if (stream)
                 stream.close();
         }
 
