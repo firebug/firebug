@@ -210,13 +210,13 @@ this.safeToString = function(ob)
 {
     try
     {
-        if (ob && toString in ob && typeof (ob[toString]) == "function")
+        if (ob && (typeof (ob['toString']) == "function") )
             return ob.toString();
     }
     catch (exc)
     {
-        return "[an object with no toString() function]";
     }
+    return "[object has no toString() function]";
 };
 
 this.convertToUnicode = function(text, charset)
@@ -3997,7 +3997,7 @@ this.SourceFile.prototype =
 
         return (scripts.length > 0) ? scripts : false;
     },
-
+    // TODO XXXjjb the scripts are probably ordered, at least do a binary search
     addScriptAtLineNumber: function(scripts, script, targetLineNo, mustBeExecutableLine, offset)
     {
         // script.isValid will be true.
