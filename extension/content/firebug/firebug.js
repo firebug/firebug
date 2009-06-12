@@ -2688,6 +2688,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     // should only be called onScroll
     buildViewAround: function(sourceBox, lines)  // defaults to first viewable lines
     {
+        if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
+            return;
         var lineNo = this.setViewableLines(sourceBox, lines);
 
         var topLine = 1; // will be view.firstChild
@@ -2740,8 +2742,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         appendScriptLines(sourceBox, topLine, bottomLine, view);
 
-        // XXXjjb TODO
-        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this, link, /* this.lastScrollTop > sourceBox.scrollTop*/true]);
+        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);
 
         this.applyDecorator(sourceBox);
 
@@ -2753,7 +2754,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var link = new SourceLink(sourceBox.repObject.href, lineNo, this.getSourceType());
             dispatch(uiListeners, "onViewportChange", [link]);
         }
-
+        sourceBox.lastScrollTop = sourceBox.scrollTop;
+        sourceBox.lastClientHeight = sourceBox.clientHeight;
         return;
     },
 
