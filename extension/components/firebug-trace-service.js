@@ -157,28 +157,30 @@ TraceConsoleService.prototype =
 
     notifyObservers: function(subject, topic, someData)
     {
-        try
+        if (this.observers.length > 0)
         {
-            if (this.observers.length > 0)
+            for (var i=0; i < this.observers.length; i++)
             {
-                for (var i=0; i < this.observers.length; i++)
+                try
+                {
                     this.observers[i].observe(subject, topic, someData);
-            }
-            else
-            {
-                lastResort(this.observers, subject, someData);
+                }
+                catch (err)
+                {
+                    // If it's not possible to distribute the log through registered observers,
+                    // use Firefox ErrorConsole. Ultimately the trace-console listens for it
+                    // too and so, will display that.
+                    var scriptError = Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError);
+                    scriptError.init("[JavaScript Error: Failed to notify firebug-trace observers!] " +
+                        err.toString(), err.sourceName,
+                        err.sourceLine, err.lineNumber, err.columnNumber, err.flags, err.category);
+                    consoleService.logMessage(scriptError);
+                }
             }
         }
-        catch (err)
+        else
         {
-            // If it's not possible to distribute the log through registered observers,
-            // use Firefox ErrorConsole. Ulimately the trace-console listens for it
-            // too and so, will display that.
-            var scriptError = Cc["@mozilla.org/scripterror;1"].createInstance(Ci.nsIScriptError);
-            scriptError.init("[JavaScript Error: Failed to notify firebug-trace observers!] " +
-                err.toString(), err.sourceName,
-                err.sourceLine, err.lineNumber, err.columnNumber, err.flags, err.category);
-            consoleService.logMessage(scriptError);
+            lastResort(this.observers, subject, someData);
         }
     },
 
