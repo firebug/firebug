@@ -449,7 +449,9 @@ this.Arr = domplate(Firebug.Rep,
         try {
             if (!obj)
                 return false;
-            else if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors?
+            else if (obj instanceof Ci.nsIDOMHistory) // do this first to avoid security 1000 errors
+                return false;
+            else if (obj instanceof StorageList) // do this first to avoid security 1000 errors
                 return false;
             else if (isFinite(obj.length) && typeof obj.splice === 'function')
                 return true;
@@ -467,7 +469,7 @@ this.Arr = domplate(Firebug.Rep,
             if (FBTrace.DBG_ERRORS)
             {
                 FBTrace.sysout("isArray FAILS:", exc);  /* Something weird: without the try/catch, OOM, with no exception?? */
-                FBTrace.sysout("isArray Fails on obj", obj);
+                FBTrace.sysout("isArray Fails on obj "+obj);
             }
         }
 
