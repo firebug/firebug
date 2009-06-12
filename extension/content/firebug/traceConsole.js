@@ -211,6 +211,9 @@ var TraceConsole =
 
     saveMessage: function(message, stream) 
     {
+        if (!message)
+            return;
+
         var text = message.text;
         text = text ? text.replace(reEndings, "") : "---";
         if (message.type)
