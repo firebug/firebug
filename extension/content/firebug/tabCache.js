@@ -334,10 +334,12 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         // This new implementation (TabCache) uses nsITraceableChannel so, all responses
         // should be already cached.
 
+        // xxxHonza: TODO entire implementation of this method should be removed in Firebug 1.5
+
         var ff307 = (versionChecker.compare(appInfo.version, "3.0.7") == 0);
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.loadFromCache; Current Firefox version " +
-                appInfo.version + ", " + ff307);
+                appInfo.version + ", " + ff307 + ", " + url);
 
         // See issue: 1565 Site loading is slow or broken with Firebug 1.3.3 and Firefox 3.0.7
         // xxxHonza: There is a bug in 3.0.7 that causes deadlock if FF cache is accessed by
@@ -367,6 +369,11 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                 charset = doc.characterSet;
 
             stream = channel.open();
+
+            // Don't load responses that shouldn't be cached.
+            if (!Firebug.TabCacheModel.shouldCacheRequest(channel))
+                return;
+
             responseText = readFromStream(stream, charset);
 
             if (FBTrace.DBG_CACHE)
