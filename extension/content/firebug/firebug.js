@@ -845,17 +845,26 @@ top.Firebug =
     {
         if ( isLocalURL(href) )
             return getLocalPath(href);
+
         var data;
         if (context)
         {
             data = context.sourceCache.loadText(href);
-        } else
-        {
-            var ctx = { browser: tabBrowser.selectedBrowser, window: tabBrowser.selectedBrowser.contentWindow };
-            data = new SourceCache(ctx).loadText(href);
         }
+        else
+        {
+            // xxxHonza: if the fake context is used the source code is always get using
+            // (a) the browser cache or (b) request to the server.
+            var ctx = {
+                browser: tabBrowser.selectedBrowser,
+                window: tabBrowser.selectedBrowser.contentWindow
+            };
+            data = new Firebug.SourceCache(ctx).loadText(href);
+        }
+
         if (!data)
             return;
+
         if (!temporaryDirectory)
         {
             var tmpDir = DirService.getFile(NS_OS_TEMP_DIR, {});
@@ -872,8 +881,10 @@ top.Firebug =
                 lpath += "index";
             lpath += ".html";
         }
+
         if ( getPlatformName() == "WINNT" )
             lpath = lpath.replace(/\//g, "\\");
+
         var file = QI(temporaryDirectory.clone(), nsILocalFile);
         file.appendRelativePath(lpath);
         if (!file.exists())
