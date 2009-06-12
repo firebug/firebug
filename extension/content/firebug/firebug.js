@@ -996,8 +996,8 @@ top.Firebug =
 
         if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are debugging the selected tab
         {
-            if (Firebug.isDetached()) // if we are out of the browser close
-                Firebug.toggleDetachBar(false);
+            if (Firebug.isDetached()) // if we are out of the browser focus the window
+                Firebug.chrome.focus();
             else if (Firebug.isMinimized()) // toggle minimize
                 Firebug.unMinimize();
             else if (!forceOpen)  // else isInBrowser
