@@ -367,7 +367,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
     unwatchTopWindow: function(win)
     {
         var context = this.getContextByWindow(win);
-        if (FBTrace.DBG_WINDOWS) FBTrace.sysout("-> tabWatcher.unwatchTopWindow for: "+win.location.href+", context: "+context+"\n");
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher.unwatchTopWindow for: " +
+                (context ? context.getWindowLocation() : "NULL Context") +
+                ", context: " + context);
+
         this.unwatchContext(win, context);
         return true; // we might later allow extensions to reject unwatch
     },
@@ -467,7 +471,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             return;
         }
 
-        var persistedState = {location: context.window.location.href};
+        var persistedState = {location: context.getWindowLocation()};
         context.browser.persistedState = persistedState;  // store our state on FF browser elt
 
         iterateWindows(context.window, function(win)
@@ -639,7 +643,7 @@ function registerFrameListener(browser)
     {
         var win = browser.contentWindow;
         FBTrace.sysout("-> tabWatcher register FrameProgressListener for: "+
-            (win.location.href)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
+            safeGetWindowLocation(win)+", tab: "+Firebug.getTabIdForWindow(win)+"\n");
     }
 }
 

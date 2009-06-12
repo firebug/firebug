@@ -2379,6 +2379,36 @@ this.iterateBrowserTabs = function(browserWindow, callback)
     return false;
 }
 
+this.safeGetWindowLocation = function(window)
+{
+    try
+    {
+        if (this.window)
+        {
+            if (this.window.closed)
+                return "about:closed";
+            if ("location" in this.window)
+            {
+                if ("toString" in this.window.location)
+                    return this.window.location;
+                else
+                    return "(window.location has no toString)";
+            }
+            else
+                return "(no window.location)";
+        }
+        else
+            return "(no context.window)";
+    }
+    catch(exc)
+    {
+        //if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
+            FBTrace.sysout("TabContext.getWindowLocation failed window:", this.window);
+        return "(getWindowLocation: "+exc+")";
+    }
+};
+
 // ************************************************************************************************
 // JavaScript Parsing
 
