@@ -568,9 +568,10 @@ FirebugService.prototype =
             if (!urlBreakpoints)
                 continue;
 
-            for (var j = 0; j < urlBreakpoints.length; ++j)
+            var removals = urlBreakpoints.length;
+            for (var j = 0; j < removals; ++j)
             {
-                var bp = urlBreakpoints[j];
+                var bp = urlBreakpoints[0];  // this one will be spliced out each time
                 this.clearBreakpoint(url, bp.lineNo);
             }
          }
