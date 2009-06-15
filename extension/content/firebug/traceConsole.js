@@ -59,6 +59,10 @@ var TraceConsole =
         // Make sure the UI is localized.
         this.internationalizeUI();
         this.updateTimeInfo();
+
+        // If the opener is closed the console must be also closed.
+        // (this console uses shared object from the opener (e.g. Firebug)
+        window.opener.addEventListener("close", this.onCloseOpener, true);
     },
 
     internationalizeUI: function()
@@ -91,6 +95,14 @@ var TraceConsole =
         // Notify listeners
         for (var i=0; i<this.modules.length; ++i)
             this.modules[i].onUnloadConsole(window);
+
+        // Unregister from the opener
+        window.opener.removeEventListener("close", this.onCloseOpener, true);
+    },
+
+    onCloseOpener: function()
+    {
+        window.close();
     },
 
     registerModule: function(traceModule)
