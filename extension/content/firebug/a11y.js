@@ -2,8 +2,10 @@
 
 FBL.ns(function() { with (FBL) {
 
-// ************************************************************************************************
-// Module Management
+var singleSpaceTag = DIV({'class' : 'a11y1emSize'}, "x");
+    
+//************************************************************************************************
+//Module Management
 
 Firebug.A11yModel = extend(Firebug.Module,
 {
@@ -27,11 +29,14 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.onScriptContextMenu = bind(this.onScriptContextMenu, this);
         this.onCSSPanelContextMenu = bind(this.onCSSPanelContextMenu, this);
         this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
+        this.onScriptKeyUp = bind(this.onScriptKeyUp, this);
+        this.onScriptMouseUp = bind(this.onScriptMouseUp, this);
         Firebug.Debugger.addListener(this);
-
-        Firebug.chrome.window.a11yEnabled = false; // mark ourselves disabled so we don't performDisable() if we are not enabled.
-
-        // Initialize according to the current pref value.
+    },
+    
+    initializeUI : function()
+    {
+        //Initialize according to the current pref value.        
         this.updateOption("a11y.enable", this.isEnabled());
     },
 
@@ -175,7 +180,10 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 'script':
                 panel.panelNode.addEventListener('contextmenu', this.onScriptContextMenu, true);
                 panel.panelNode.addEventListener('keypress', this.onScriptKeyPress, true);
+                panel.panelNode.addEventListener('keyup', this.onScriptKeyUp, true);
+                panel.panelNode.addEventListener('mouseup', this.onScriptMouseUp, true)
                 this.addLiveElem(panel);
+                panelA11y.oneEmElem = this.addSingleSpaceElem(panel.panelNode);
                 break;
         }
     },
@@ -212,8 +220,10 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panel.panelNode.removeEventListener("blur", this.onLayoutBlur, true);
                 break;
             case 'script':
-                panel.panelNode.removeEventListener('contextmenu', this.onScriptContextMenu, false);
-                panel.panelNode.removeEventListener('keypress', this.onScriptKeyPress, true)
+                panel.panelNode.removeEventListener('contextmenu', this.onScriptContextMenu, true);
+                panel.panelNode.removeEventListener('keypress', this.onScriptKeyPress, true);
+                panel.panelNode.removeEventListener('keyup', this.onScriptKeyUp, true);
+                panel.panelNode.removeEventListener('mouseup', this.onScriptMouseUp, true)
                 break;
         }
     },
@@ -263,6 +273,11 @@ Firebug.A11yModel = extend(Firebug.Module,
         elem.textContent = msg;
         if (useAlert)
             elem.setAttribute('role', 'alert');
+    },
+    
+    addSingleSpaceElem : function(parent)
+    {
+        return singleSpaceTag.append({}, parent, this);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1414,54 +1429,76 @@ Firebug.A11yModel = extend(Firebug.Module,
         var box = panel.selectedSourceBox
         var lastLineNo = box.lastViewableLine;
         var firstLineNo = box.firstViewableLine;
-        var caretDetails = this.getNodeAndOffsetFromCaret(event.target.ownerDocument);
+        var caretDetails = this.getCaretDetails(event.target.ownerDocument);
+        
+        var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+         
+        if (!lineNode )
+            return;        
+        var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
+        box.a11yCaretLine = lineNo;
+        box.a11yCaretOffset = caretDetails[1];
+        var newLineNo = 1;
+        var linesToScroll = 0;
+        var goUp;
         switch(keyCode)
         {
             case 38:
             case 40:
-                var goUp = keyCode == 38
-
-                var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
-
-                if (!lineNode )
-                    return;
-
-                if (event.ctrlKey)
+                goUp = keyCode == 38
+                linesToScroll = goUp ? -1 : 1;
+                if (!event.ctrlKey)
                 {
-                    box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)
-                    return;
+                    if (goUp && (lineNo > (firstLineNo +  1)))
+                        return;
+                    else if (!goUp && (lineNo < (lastLineNo -  1)))
+                        return;
+                    box.a11yCaretLine = goUp ? lineNo - 1 : lineNo +1;
                 }
-                var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
-                if (goUp && (lineNo > (firstLineNo +  1)))
-                    return;
-                else if (!goUp && (lineNo < (lastLineNo -  1)))
-                    return;
-                panelA11y.caretOffset = caretDetails[1];
-                box.scrollTop = goUp ? (box.scrollTop - box.lineHeight) : (box.scrollTop + box.lineHeight)
+                box.scrollTop = box.scrollTop + (linesToScroll * box.lineHeight);
                 break;
             case 33://pgup
             case 34://pgdn
-                box.scrollTop = keyCode == 33? (box.scrollTop - (box.lineHeight * box.viewableLines)) :
-                        (box.scrollTop + (box.lineHeight * box.viewableLines))
+                goUp = keyCode == 33;
+                if ((goUp && box.scrollTop == 0) || (!goUp && box.scrollTop == box.scrollHeight - box.clientHeight))
+                {
+                    box.a11yCaretLine = goUp ? 0 : box.totalMax;
+                    box.a11yCaretOffset = 0;
+                    this.insertCaretIntoLine(panel, box);   
+                    cancelEvent(event);
+                    return
+                }
+                 
+                box.a11yCaretLine = goUp ? lineNo - box.viewableLines : lineNo + box.viewableLines;
+                linesToScroll = goUp ? -box.viewableLines : box.viewableLines;
+                box.scrollTop = box.scrollTop + (linesToScroll * box.lineHeight);
                 cancelEvent(event);
                 break;
             case 36://home
             case 35://end
+                goUp = keyCode == 36;
                 if (event.ctrlKey)
                 {
-                    box.scrollTop = keyCode == 36? 0 : (box.scrollHeight - box.clientHeight);
+                    box.a11yCaretLine = goUp ? 0 : box.totalMax;
+                    box.a11yCaretOffset = 0;
+                    if ((goUp && box.scrollTop == 0) || (!goUp && box.scrollTop == box.scrollHeight - box.clientHeight))
+                        this.insertCaretIntoLine(panel, box);   
+                    else
+                        box.scrollTop = goUp ? 0 : box.scrollHeight - box.clientHeight;;
                     cancelEvent(event);
+                    return;
                 }
-                if (keyCode == 36)
+                if (goUp)
                 {
-                    var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
+                    //move caret to beginning of line. Override default behavior, as that would take the caret into the line number
                     this.insertCaretIntoLine(panel, box, lineNo, 0);
+                    box.scrollLeft = 0; //in case beginning of line is scrolled out of view
                     cancelEvent(event);
                 }
                 break;
             case 13:
                 var liveString = "";
-                var caretDetails = this.getNodeAndOffsetFromCaret(event.target.ownerDocument);
+                var caretDetails = this.getCaretDetails(event.target.ownerDocument);
                 var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
                 var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
                 liveString += "Line " + lineNo;
@@ -1486,8 +1523,51 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break
         }
     },
+    
+    onScriptKeyUp : function(event)
+    {
+        var target = event.target;
+        var keyCode = event.keyCode || event.charCode;
+        if (!hasClass(target, 'sourceViewport'))
+            return;
+        if ([13, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
+            return;
+        var panel = Firebug.getElementPanel(target);
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
+            return;
+        var box = panel.selectedSourceBox
+        var caretDetails = this.getCaretDetails(target.ownerDocument);
+        var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+         
+        if (!lineNode )
+            return;        
+        var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
+        box.a11yCaretLine = lineNo;
+        box.a11yCaretOffset = caretDetails[1];
+    },
+    
+    onScriptMouseUp : function(event)
+    {
+        var target = event.target;        
+        if (event.button !== 0)
+            return;
+        var panel = Firebug.getElementPanel(target);
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
+            return;
+        var box = panel.selectedSourceBox
+        var caretDetails = this.getCaretDetails(target.ownerDocument);
+        var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
+         
+        if (!lineNode )
+            return;        
+        var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
+        box.a11yCaretLine = lineNo;
+        box.a11yCaretOffset = caretDetails[1];        
+    },
 
-    onBeforeViewportChange : function(panel, link, scrollUp)
+    onBeforeViewportChange : function(panel)
     {
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
@@ -1495,41 +1575,52 @@ Firebug.A11yModel = extend(Firebug.Module,
         var box = panel.selectedSourceBox;
         if (!box)
             return;
-        var scrolltoLine = scrollUp ? box.firstViewableLine + 1 : box.lastViewableLine - 1;
-        this.insertCaretIntoLine(panel, box,  scrolltoLine);
+        this.insertCaretIntoLine(panel, box);
     },
 
-    insertCaretIntoLine : function(panel, box, line, offset)
+    insertCaretIntoLine : function(panel, box, lineNo, offset)
     {
         var panelA11y = this.getPanelA11y(panel);
-        if (!panelA11y)
+        if (!panelA11y || !box)
             return;
-        var node = box.getLineNode(line);
+        if (typeof lineNo == "undefined")
+            lineNo = box.a11yCaretLine ?  box.a11yCaretLine : 0;
+        //to prevent the caret from (partially) being placed just out of sight,
+        //adjust the viewable line boundaries by 1 (unless the current line is the first or last line)
+        var lineAdjust = lineNo == 0 || lineNo == box.totalMax ? 0 : 1;
+        var firstLine = box.firstViewableLine + lineAdjust;
+        var lastLine = box.lastViewableLine - lineAdjust;
+        
+        if (lineNo < (firstLine) || lineNo > lastLine)
+            box.a11yCaretLine = lineNo = lineNo < firstLine ? firstLine : lastLine;
+        
+        var node = box.getLineNode(lineNo);
         if (!node)
             return;
-        if (!offset)
+        
+        if (typeof offset =="undefined")
         {
-            if (panelA11y.caretOffset)
-                offset = panelA11y.caretOffset;
+            if (box.a11yCaretOffset)
+                offset = box.a11yCaretOffset;
             else
-                offset = 0;
+                box.a11yCaretOffset = offset = 0;
         }
         var startNode = getElementByClass(node, 'sourceRowText')
         if (startNode && startNode.firstChild && startNode.firstChild.nodeType == 3)
         {
             startNode = startNode.firstChild;
             if (offset >= startNode.length)
-                offset = startNode.length - 1;
+                box.a11yCaretOffset = offset = startNode.length - 1;
         }
         else
         {
-            startNode = node; // offset is now the number of nodes, not characters within a text node
+            startNode = node; //offset is now the number of nodes, not characters within a text node
             offset = 1;
         }
         this.insertCaretToNode(panel, startNode, offset);
     },
 
-    getNodeAndOffsetFromCaret : function(doc)
+    getCaretDetails : function(doc)
     {
         var sel = doc.defaultView.getSelection();
         return [sel.focusNode, sel.focusOffset];
@@ -1587,8 +1678,20 @@ Firebug.A11yModel = extend(Firebug.Module,
                 return;
             var sel = event.target.ownerDocument.defaultView.getSelection();
             var node = sel.focusNode.parentNode;
+            var x = event.pageX
+            if (x == 0)
+            {
+                //TODO: This is ugly and way too inaccurate, how to get xy coordinates from selection object?
+                var charWidth = panelA11y.oneEmElem ? panelA11y.oneEmElem.clientWidth * 0.65: 7.5;
+                x = node.offsetLeft + sel.focusOffset * charWidth;
+            }
+            var y = event.pageY;
+            if (y >= event.target.clientHeight) 
+            {
+               y = node.offsetTop;
+            }
             Firebug.chrome.window.document.popupNode = node;
-            Firebug.chrome.$('fbContextMenu').openPopup(node, "overlap", 0, 0, true);
+            Firebug.chrome.$('fbContextMenu').openPopup(node.ownerDocument.body, "overlap", x, y, true);
             cancelEvent(event);
         }
     },
@@ -1802,18 +1905,20 @@ Firebug.A11yModel = extend(Firebug.Module,
         FBTrace.sysout('focus: ' + event.target.nodeName + "#" + event.target.id + "." + event.target.className, event.target);
     },
 
-    dispatchMouseEvent : function (node, eventType, clientX, clientY)
+    dispatchMouseEvent : function (node, eventType, clientX, clientY, button)
     {
         if (!clientX)
             clientX = 0;
         if (!clientY)
             clientY = 0;
+        if (!button)
+            button = 0;
         if (typeof node == "string")
             node = $(node);
         var doc = node.ownerDocument;
         var event = doc.createEvent('MouseEvents');
         event.initMouseEvent(eventType, true, true, doc.defaultView,
-            0, 0, 0, clientX, clientY, false, false, false, false, 0, null);
+            0, 0, 0, clientX, clientY, false, false, false, false, button, null);
         node.dispatchEvent(event);
     },
 

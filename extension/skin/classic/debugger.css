@@ -52,11 +52,17 @@
 .useA11y .sourceBox .sourceViewport:focus .sourceLine {
     background-color: #FFFFC0;
     color: navy;	
-    border-right: 1px solid #FF9933;
+    border-right: 1px solid black;
 }
 
 .useA11y .sourceBox .sourceViewport:focus {
 	outline: none;
+}
+
+.a11y1emSize {
+    width: 1em;
+    height: 1em;
+    position: absolute;	
 }
 
 .sourceBox > .sourceRow > .sourceLine {
