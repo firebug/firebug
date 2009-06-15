@@ -3244,7 +3244,7 @@ this.readPostTextFromRequest = function(request, context)
             }
 
             // Read data from the stream..
-            var charset = context.window.document.characterSet;
+            var charset = (context && context.window) ? context.window.document.characterSet : null;
             var text = this.readFromStream(is, charset, true);
 
             // Seek locks the file so, seek to the beginning only if necko hasn't read it yet,
