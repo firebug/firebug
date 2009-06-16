@@ -93,7 +93,28 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         // Unfortunately, the URL isn't available so, let's try to use FF cache.
         // Notice that additional network request to the server can be made in
         // this method (double-load).
-        return this.loadFromCache(url, method, file);
+        return this.loadFromCache(this.normalizeURL(url), method, file);
+    },
+
+    store: function(url, text)
+    {
+        var tempURL = this.normalizeURL(url);
+
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("sourceCache for " + this.context.getName() + " store url=" +
+                url + ((tempURL != url) ? " -> " + tempURL : ""));
+
+        var lines = splitLines(text);
+        return this.storeSplitLines(tempURL, lines);
+    },
+
+    normalizeURL: function(url)
+    {
+        var index = url.indexOf("#");
+        if (index < 0)
+            return url;
+
+        return url.substr(0, index);
     },
 
     loadFromLocal: function(url)
@@ -211,14 +232,6 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         {
             stream.close();
         }
-    },
-
-    store: function(url, text)
-    {
-        if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("sourceCache for "+this.context.getName()+" store url="+url+"\n");
-        var lines = splitLines(text);
-        return this.storeSplitLines(url, lines);
     },
 
     storeSplitLines: function(url, lines)
