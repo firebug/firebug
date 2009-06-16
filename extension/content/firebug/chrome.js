@@ -1365,7 +1365,6 @@ function getRealObject(object)
 {
     var rep = Firebug.getRep(object);
     var realObject = rep ? rep.getRealObject(object, FirebugContext) : null;
-    var realRep = realObject ? Firebug.getRep(realObject) : rep;
     return realObject ? realObject : object;
 }
 
