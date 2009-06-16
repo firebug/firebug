@@ -93,22 +93,22 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         // Unfortunately, the URL isn't available so, let's try to use FF cache.
         // Notice that additional network request to the server can be made in
         // this method (double-load).
-        return this.loadFromCache(this.normalizeURL(url), method, file);
+        return this.loadFromCache(this.removeAnchor(url), method, file);
     },
 
     store: function(url, text)
     {
-        var tempURL = this.normalizeURL(url);
+        var tempURL = this.removeAnchor(url);
 
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("sourceCache for " + this.context.getName() + " store url=" +
-                url + ((tempURL != url) ? " -> " + tempURL : ""));
+                url + ((tempURL != url) ? " -> " + tempURL : ""), text);
 
         var lines = splitLines(text);
         return this.storeSplitLines(tempURL, lines);
     },
 
-    normalizeURL: function(url)
+    removeAnchor: function(url)
     {
         var index = url.indexOf("#");
         if (index < 0)
