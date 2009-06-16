@@ -36,7 +36,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 {
     isCached: function(url)
     {
-        return this.cache.hasOwnProperty(url);
+        return (this.cache[url] ? true : false);
     },
 
     loadText: function(url, method, file)
@@ -47,8 +47,18 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 
     load: function(url, method, file)
     {
-        if ( this.cache.hasOwnProperty(url) )
-            return this.cache[url];
+        if (FBTrace.DBG_CACHE)
+        {
+            if (!this.cache.hasOwnProperty(url) && this.cache[url])
+                FBTrace.sysout("sourceCache.load; WARNING - hasOwnProperty returns false, " +
+                    "but the URL is cached: " + url, this.cache[url]);
+        }
+
+        // xxxHonza: sometimes hasOwnProperty return false even if the URL is obviously there.
+        //if (this.cache.hasOwnProperty(url))
+        var response = this.cache[url];
+        if (response)
+            return response;
 
         var d = FBL.splitDataURL(url);  //TODO the RE should not have baseLine
         if (d)
