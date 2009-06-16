@@ -1232,7 +1232,11 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     var prop = listValue.value[i];
                     var name = prop.name.getWrappedValue();
                     if (ignoreVars[name] == 1)
+                    {
+                        if (FBTrace.DBG_DOM)
+                            FBTrace.sysout("dom.generateScopeChain: ignoreVars: " + name);
                         continue;
+                    }
 
                     scopeVars[name] = prop.value.getWrappedValue();
                 }
@@ -1332,8 +1336,14 @@ function getMembers(object, level)  // we expect object to be user-level object 
 
         for (var name in insecureObject)  // enumeration is safe
         {
-            if (ignoreVars[name] == 1)  // javascript.options.strict says ignoreVars is undefined.
+            // Ignore only global variables (properties of the |window| object).
+            // javascript.options.strict says ignoreVars is undefined.
+            if (ignoreVars[name] == 1 && (object instanceof Window))
+            {
+                if (FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
                 continue;
+            }
 
             var val;
             try
