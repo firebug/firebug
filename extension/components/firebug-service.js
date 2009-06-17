@@ -889,8 +889,10 @@ FirebugService.prototype =
         else
         {
             jsd = DebuggerService.getService(jsdIDebuggerService);
+
             if ( FBTrace.DBG_FBS_ERRORS )
-                FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers\n");
+                FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+clients.length+" clients");
+
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
 
@@ -2524,7 +2526,8 @@ function deepSystemURLStem(rawJSD_script_filename)
 
 function dispatch(listeners, name, args)
 {
-    for (var i = 0; i < listeners.length; ++i)
+    var totalListeners = listeners.length;
+    for (var i = 0; i < totalListeners; ++i)
     {
         var listener = listeners[i];
         if ( listener.hasOwnProperty(name) )
