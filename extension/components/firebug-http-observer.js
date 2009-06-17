@@ -111,13 +111,19 @@ HttpRequestObserver.prototype =
         for (var i=0; i<this.observers.length; i++) {
             if (this.observers[i] == observer) {
                 this.observers.splice(i, 1);
-                break;
+                return;
             }
         }
+
+        if (FBTrace.DBG_HTTPOBSERVER)
+            FBTrace.sysout("httpObserver.removeObserver FAILED (no such observer)");
     },
 
     notifyObservers: function(subject, topic, data)
     {
+        if (FBTrace.DBG_HTTPOBSERVER)
+            FBTrace.sysout("httpObserver.notifyObservers (" + this.observers.length + ") " + topic);
+
         for (var i=0; i<this.observers.length; i++)
             this.observers[i].observe(subject, topic, data);
     },

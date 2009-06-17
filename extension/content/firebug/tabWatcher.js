@@ -563,13 +563,16 @@ var TabProgressListener = extend(BaseProgressListener,
         if (progress.DOMWindow.parent == progress.DOMWindow)
         {
             var srcWindow = getWindowForRequest(request);
-            if (srcWindow)
-                var browser = TabWatcher.getBrowserByWindow(srcWindow);
+            var browser = srcWindow ? TabWatcher.getBrowserByWindow(srcWindow) : null;
             var requestFromFirebuggedWindow = browser && browser.showFirebug;
 
             if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("-> TabProgressListener.onLocationChange "+progress.DOMWindow.location+" to: "
-                                          +(uri?uri.spec:"null location")+(requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
+            {
+                FBTrace.sysout("-> TabProgressListener.onLocationChange "+
+                    progress.DOMWindow.location+" to: "+
+                    (uri?uri.spec:"null location")+
+                    (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
+            }
 
             TabWatcher.watchTopWindow(progress.DOMWindow, uri);
         }

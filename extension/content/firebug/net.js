@@ -1447,7 +1447,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         var message = this.activationTag.insertRows({}, lastRow)[0];
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.insertActivationMessage; ", message);
+            FBTrace.sysout("net.insertActivationMessage; " + this.context.getName(), message);
     },
 
     enumerateRequests: function(fn)
