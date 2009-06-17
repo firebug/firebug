@@ -927,9 +927,6 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Browser Bottom Bar
 
-    // minimized <-> inBrowser  This code only works in browser.xul
-    // xxxHonza: this method is also used when resuming detached Firebug for selected page.
-    // It should now work even called from Firebug.xul
     showBar: function(show)
     {
         var browser = Firebug.chrome.getCurrentBrowser();
@@ -1018,18 +1015,12 @@ top.Firebug =
         {
             if (FBTrace.DBG_ERRORS)
             {
+                if (FirebugContext && Firebug.isClosed())
+                    FBTrace.sysout("ASSERT: Firebug.isClosed() and FirebugContext:"+FirebugContext.getName()+getStackDump());
                 var context = TabWatcher.getContextByWindow(browser.contentWindow);
                 if (context) // ASSERT: we should not have showFirebug false on a page with a context
-                    FBTrace.sysout("Firebug.toggleBar: a browser without showFirebug has a context! "+context.getName());
+                    FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" FirebugContext: "+(FirebugContext?FirebugContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
             }
-
-            if (Firebug.isClosed())
-                Firebug.setPlacement("inBrowser");
-            else if (Firebug.isMinimized())
-                Firebug.unMinimize();
-            else if (Firebug.isDetached())
-                Firebug.chrome.focus();
-            // else we are already inBrowser and create will show.
 
             var created = TabWatcher.watchBrowser(browser);  // create a context for this page
             if (!created)
@@ -1120,7 +1111,7 @@ top.Firebug =
             return null;
         }
 
-        if (FBTrace.DBG_WINDOWS)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+context.getName() );
 
         this.showBar(false);  // don't show in browser.xul now
@@ -1550,6 +1541,7 @@ top.Firebug =
     {
         return Firebug.placements[Firebug.placement];
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
 
@@ -1610,7 +1602,6 @@ top.Firebug =
             Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
         }
 
-
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
         if (Firebug.isMinimized())
@@ -1637,10 +1628,15 @@ top.Firebug =
         }
         else if (Firebug.isClosed())
         {
-            if (context)
+            if (context)  // then we are opening a new context
             {
-                Firebug.setPlacement("inBrowser");
-                this.showBar(true);
+                if (Firebug.openInWindow)
+                    this.detachBar(context);  // the placement will be set once the external window opens
+                else
+                {
+                    this.setPlacement("inBrowser");
+                    this.showBar(true);
+                }
             }
             // else should not happen
         }
