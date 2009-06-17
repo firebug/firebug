@@ -3,7 +3,7 @@
 FBL.ns(function() { with (FBL) {
 
 var singleSpaceTag = DIV({'class' : 'a11y1emSize'}, "x");
-    
+
 //************************************************************************************************
 //Module Management
 
@@ -31,12 +31,13 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.onScriptKeyPress = bind(this.onScriptKeyPress, this);
         this.onScriptKeyUp = bind(this.onScriptKeyUp, this);
         this.onScriptMouseUp = bind(this.onScriptMouseUp, this);
+        Firebug.chrome.window.a11yEnabled = false; // mark ourselves disabled so we don't performDisable() if we are not enabled.
         Firebug.Debugger.addListener(this);
     },
-    
+
     initializeUI : function()
     {
-        //Initialize according to the current pref value.        
+        //Initialize according to the current pref value.
         this.updateOption("a11y.enable", this.isEnabled());
     },
 
@@ -274,7 +275,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (useAlert)
             elem.setAttribute('role', 'alert');
     },
-    
+
     addSingleSpaceElem : function(parent)
     {
         return singleSpaceTag.append({}, parent, this);
@@ -1430,11 +1431,11 @@ Firebug.A11yModel = extend(Firebug.Module,
         var lastLineNo = box.lastViewableLine;
         var firstLineNo = box.firstViewableLine;
         var caretDetails = this.getCaretDetails(event.target.ownerDocument);
-        
+
         var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
-         
+
         if (!lineNode )
-            return;        
+            return;
         var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
         box.a11yCaretLine = lineNo;
         box.a11yCaretOffset = caretDetails[1];
@@ -1464,11 +1465,11 @@ Firebug.A11yModel = extend(Firebug.Module,
                 {
                     box.a11yCaretLine = goUp ? 0 : box.totalMax;
                     box.a11yCaretOffset = 0;
-                    this.insertCaretIntoLine(panel, box);   
+                    this.insertCaretIntoLine(panel, box);
                     cancelEvent(event);
                     return
                 }
-                 
+
                 box.a11yCaretLine = goUp ? lineNo - box.viewableLines : lineNo + box.viewableLines;
                 linesToScroll = goUp ? -box.viewableLines : box.viewableLines;
                 box.scrollTop = box.scrollTop + (linesToScroll * box.lineHeight);
@@ -1482,7 +1483,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                     box.a11yCaretLine = goUp ? 0 : box.totalMax;
                     box.a11yCaretOffset = 0;
                     if ((goUp && box.scrollTop == 0) || (!goUp && box.scrollTop == box.scrollHeight - box.clientHeight))
-                        this.insertCaretIntoLine(panel, box);   
+                        this.insertCaretIntoLine(panel, box);
                     else
                         box.scrollTop = goUp ? 0 : box.scrollHeight - box.clientHeight;;
                     cancelEvent(event);
@@ -1523,7 +1524,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break
         }
     },
-    
+
     onScriptKeyUp : function(event)
     {
         var target = event.target;
@@ -1539,17 +1540,17 @@ Firebug.A11yModel = extend(Firebug.Module,
         var box = panel.selectedSourceBox
         var caretDetails = this.getCaretDetails(target.ownerDocument);
         var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
-         
+
         if (!lineNode )
-            return;        
+            return;
         var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
         box.a11yCaretLine = lineNo;
         box.a11yCaretOffset = caretDetails[1];
     },
-    
+
     onScriptMouseUp : function(event)
     {
-        var target = event.target;        
+        var target = event.target;
         if (event.button !== 0)
             return;
         var panel = Firebug.getElementPanel(target);
@@ -1559,12 +1560,12 @@ Firebug.A11yModel = extend(Firebug.Module,
         var box = panel.selectedSourceBox
         var caretDetails = this.getCaretDetails(target.ownerDocument);
         var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
-         
+
         if (!lineNode )
-            return;        
+            return;
         var lineNo = parseInt(getElementByClass(lineNode, 'sourceLine').textContent);
         box.a11yCaretLine = lineNo;
-        box.a11yCaretOffset = caretDetails[1];        
+        box.a11yCaretOffset = caretDetails[1];
     },
 
     onBeforeViewportChange : function(panel)
@@ -1590,14 +1591,14 @@ Firebug.A11yModel = extend(Firebug.Module,
         var lineAdjust = lineNo == 0 || lineNo == box.totalMax ? 0 : 1;
         var firstLine = box.firstViewableLine + lineAdjust;
         var lastLine = box.lastViewableLine - lineAdjust;
-        
+
         if (lineNo < (firstLine) || lineNo > lastLine)
             box.a11yCaretLine = lineNo = lineNo < firstLine ? firstLine : lastLine;
-        
+
         var node = box.getLineNode(lineNo);
         if (!node)
             return;
-        
+
         if (typeof offset =="undefined")
         {
             if (box.a11yCaretOffset)
@@ -1686,7 +1687,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 x = node.offsetLeft + sel.focusOffset * charWidth;
             }
             var y = event.pageY;
-            if (y >= event.target.clientHeight) 
+            if (y >= event.target.clientHeight)
             {
                y = node.offsetTop;
             }
