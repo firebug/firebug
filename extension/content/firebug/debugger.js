@@ -1599,15 +1599,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.initialize.apply(this, arguments);
     },
 
+    enable: function()
+    {
+        fbs.registerClient(this);   // allow callbacks for jsd
+        if (this.isAlwaysEnabled())
+            this.registerDebugger();
+    },
+
     initializeUI: function()
     {
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
         this.filterButton = $("fbScriptFilterMenu");
         this.filterMenuUpdate();
-
-        fbs.registerClient(this);   // allow callbacks for jsd
-        if (this.isAlwaysEnabled())
-            this.registerDebugger();
     },
 
     initContext: function(context, persistedState)
@@ -1696,9 +1699,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (this.registered)
             return;
-        var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
         this.registered = true;
-        if (FBTrace.DBG_ACTIVATION)
+
+        var check = fbs.registerDebugger(this);  //  this will eventually set 'jsd' on the statusIcon
+
+        if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("debugger.registerDebugger "+check+" debuggers");
     },
 
