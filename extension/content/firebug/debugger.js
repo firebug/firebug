@@ -309,7 +309,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         var chrome = Firebug.chrome;
         chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");  // mark armed
-        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnNext"));
+        chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("DisableBreakOnNext"));
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.onBreakingNext "+context.getName()+ " breakable: "+chrome.getGlobalAttribute("cmd_resumeExecution", "breakable"));
     },
@@ -662,7 +662,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
             chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "off");
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("Continue"));
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("Continue"));
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
@@ -674,7 +674,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
 
-            var panel = Firebug.chrome.getSelectedPanel();
+            var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+            if (breakable == "true")
+                chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+                    $STR("script.Break On Next"));
+
+            var panel = chrome.getSelectedPanel();
             if (panel && panel.name != "script") // take down the disabled buttons altogether
                 panel.showToolbarButtons("fbDebuggerButtons", false);
         }

@@ -1115,6 +1115,22 @@ top.FirebugChrome =
         var extensionManager = CCSV("@mozilla.org/extensions/manager;1", "nsIExtensionManager");
         openDialog("chrome://mozapps/content/extensions/about.xul", "",
             "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
+    },
+
+    resume: function(context)
+    {
+        var panel = panelBar1.selectedPanel;
+        if (!panel)
+            return;
+
+        if (!context.stopped && panel.resume)
+        {
+            panel.resume();
+            return;
+        }
+
+        // Use debugger as the default handler.
+        Firebug.Debugger.resume(context); 
     }
 };
 

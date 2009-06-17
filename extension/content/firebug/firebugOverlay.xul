@@ -37,7 +37,7 @@
         <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
         <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
 
-        <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" breakable="true"/>
+        <command id="cmd_resumeExecution" oncommand="FirebugChrome.resume(FirebugContext)" breakable="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
         <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(FirebugContext)" disabled="true"/>
         <command id="cmd_stepOut" oncommand="Firebug.Debugger.stepOut(FirebugContext)" disabled="true"/>

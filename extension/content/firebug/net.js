@@ -744,6 +744,9 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (!enabled)
             return;
 
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+            $STR("net.Break On XHR"));
+
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
@@ -760,6 +763,8 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
         this.showToolbarButtons("fbNetButtons", false);
+
+        Firebug.Debugger.syncCommands(this.context);
 
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
@@ -989,6 +994,29 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             //optionMenu("search.net.Parameters", "netSearchParameters"),
             optionMenu("search.net.Response Bodies", "netSearchResponseBody")
         ];
+    },
+
+    resume: function()
+    {
+        this.context.breakOnXHR = !this.context.breakOnXHR;
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.resume; " + this.context.breakOnXHR + ", " + this.context.getName());
+
+        Firebug.Debugger.syncCommands(this.context);
+
+        var chrome = Firebug.chrome;
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        if (breakable == "true")
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("net.Disable Break On XHR"));
+        }
+        else
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("net.Break On XHR"));
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1762,6 +1790,8 @@ NetProgress.prototype =
 
             dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
 
+            this.breakOnXHR();
+
             return file;
         }
         else
@@ -1769,6 +1799,28 @@ NetProgress.prototype =
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.requestedFile no file for request=", request);
         }
+    },
+
+    breakOnXHR: function()
+    {
+        if (!this.context.breakOnXHR)
+            return;
+
+        this.context.breakOnXHR = false;
+
+        Firebug.Debugger.halt(function(frame)
+        {
+            for (; frame && frame.isValid; frame = frame.callingFrame)
+            {
+                var fileName = frame.script.fileName;
+                if (fileName && fileName.indexOf("chrome://firebug/") != 0 &&
+                    fileName.indexOf("/components/firebug-") == -1)
+                    break;
+            }
+
+            if (frame)
+                Firebug.Debugger.onBreak(frame, 3);
+        });
     },
 
     respondedFile: function respondedFile(request, time, info)
