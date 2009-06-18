@@ -348,6 +348,8 @@ top.FirebugChrome =
 
     close: function()
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.close closing window "+window.location);
         window.close();
     },
 
@@ -1130,7 +1132,7 @@ top.FirebugChrome =
         }
 
         // Use debugger as the default handler.
-        Firebug.Debugger.resume(context); 
+        Firebug.Debugger.resume(context);
     }
 };
 

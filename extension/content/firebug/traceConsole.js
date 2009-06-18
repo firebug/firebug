@@ -19,7 +19,7 @@ const reDBG = /extensions\.([^\.]*)\.(DBG_.*)/;
 const reDBG_FBS = /DBG_FBS_(.*)/;
 const reEndings = /\r\n|\r|\n/;
 
-// The lib.js isn't included in this window so, define the global here. 
+// The lib.js isn't included in this window so, define the global here.
 // It'll be initialized from window parameters (see initialize method).
 var FBL;
 
@@ -30,15 +30,15 @@ var TraceConsole =
 {
     modules: [],
 
-    initialize: function()  
+    initialize: function()
     {
         var args = window.arguments[0];
         FBL = args.FBL;
-        Firebug = args.Firebug; 
+        Firebug = args.Firebug;
 
         // Get pref domain is used for message filtering. Only logs that belong
         // to this pref-domain will be displayed.
-        this.prefDomain = args.prefDomain; 
+        this.prefDomain = args.prefDomain;
         document.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
 
         // Initialize root node of the trace-console window.
@@ -67,7 +67,7 @@ var TraceConsole =
 
     internationalizeUI: function()
     {
-        var buttons = ["clearConsole", "findConsole", "separateConsole", 
+        var buttons = ["clearConsole", "findConsole", "separateConsole",
             "restartFirefox", "closeFirefox", "saveToFile"];
 
         for (var i=0; i<buttons.length; i++)
@@ -102,6 +102,9 @@ var TraceConsole =
 
     onCloseOpener: function()
     {
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("traceConsole.onCloseOpener closing window "+window.location);
+
         window.close();
     },
 
@@ -138,7 +141,7 @@ var TraceConsole =
             this.dump(new Firebug.TraceModule.TraceMessage(
                 messageInfo.type, data, messageInfo.obj, messageInfo.scope,
                 messageInfo.time));
-            
+
             return true;
         }
         else if (topic == "nsPref:changed")
@@ -179,7 +182,7 @@ var TraceConsole =
 
     onSaveToFile: function()
     {
-        try 
+        try
         {
             var nsIFilePicker = Ci.nsIFilePicker;
             var fp = Cc["@mozilla.org/filepicker;1"].getService(nsIFilePicker);
@@ -199,11 +202,11 @@ var TraceConsole =
                 var currLocale = Firebug.getPref("general.useragent", "locale");
 
                 // Store head info.
-                var head = "Firebug: " + Firebug.version + "\n" + 
-                    appInfo.name + ": " + appInfo.version + ", " + 
-                    appInfo.platformVersion + ", " + 
+                var head = "Firebug: " + Firebug.version + "\n" +
+                    appInfo.name + ": " + appInfo.version + ", " +
+                    appInfo.platformVersion + ", " +
                     appInfo.appBuildID + ", " + currLocale + "\n" +
-                    "Export Date: " + (new Date()).toGMTString() + 
+                    "Export Date: " + (new Date()).toGMTString() +
                     "\n==========================================\n\n";
                 foStream.write(head, head.length);
 
@@ -221,7 +224,7 @@ var TraceConsole =
         }
     },
 
-    saveMessage: function(message, stream) 
+    saveMessage: function(message, stream)
     {
         if (!message)
             return;
@@ -235,7 +238,7 @@ var TraceConsole =
         this.saveStackTrace(message, stream);
     },
 
-    saveStackTrace: function(message, stream) 
+    saveStackTrace: function(message, stream)
     {
         var stack = message.stack;
         for (var i=0; stack && i<stack.length; i++) {
