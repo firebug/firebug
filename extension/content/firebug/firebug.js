@@ -481,7 +481,7 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Dead Windows
+    // Dead Windows  XXXjjb this code is not used by 1.4, external placement.
 
     killWindow: function(browser, chrome)
     {
@@ -1688,11 +1688,7 @@ top.Firebug =
     destroyContext: function(context, persistedState, browser)
     {
         if (!context)  // then we are called just to clean up
-        {
-            if(browser && Firebug.isDetached())
-                this.killWindow(browser, Firebug.chrome);
             return;
-        }
 
         dispatch(modules, "destroyContext", [context, persistedState]);
 
