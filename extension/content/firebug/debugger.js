@@ -735,6 +735,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onPauseJSDRequested: function(rejection)
     {
+        if (FirebugContext)  // then we are active in this browser.xul
+            rejection.push(true); // so reject the suspend
+
         dispatch2(this.fbListeners, "onPauseJSDRequested", [rejection]);
     },
 
