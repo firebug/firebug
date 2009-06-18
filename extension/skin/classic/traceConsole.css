@@ -155,8 +155,8 @@
 }
 
 .messageNameCol {
-	width: 30px;
-	min-width: 30px;
+    width: 30px;
+    min-width: 30px;
 }
 
 .messageNameCol > .messageNameLabel {
@@ -236,8 +236,8 @@
 
 .openDebugger {
     color:Fuchsia;
-	text-decoration:none !important;
-	cursor:pointer;
+    text-decoration:none !important;
+    cursor:pointer;
 }
 
 /************************************************************************************************/
@@ -249,8 +249,8 @@
 }
 
 .stackFrameLink:hover {
-	cursor:pointer;
-	text-decoration:underline;
+    cursor:pointer;
+    text-decoration:underline;
 }
 
 .stackFuncName {
@@ -258,41 +258,38 @@
 }
 
 .messageInfoExcText > .ExceptionMessage {
-	font-weight:bold;
-	color: Red;
+    font-weight:bold;
+    color: Red;
 }
 
 /* Exception */
 .messageTable .exception {
-	color: Red;
+    color: Red;
 }
 
 /* Custom messages types */
 .DBG_WINDOWS {
-	color: blue;
+    color: rgb(148, 121, 71);
 }
 
 .DBG_NET {
-	color: maroon;
+    color: maroon;
 }
 
-.DBG_JSERROR {
-	color: Red;
-}
-
+.DBG_JSERROR,
 .DBG_ERRORS {
-	color: Red;
+    color: Red;
 }
 
 /************************************************************************************************/
 
 #consoleToolbar toolbarbutton {
-	margin:1px;
-	-moz-box-orient: vertical;
+    margin:1px;
+    -moz-box-orient: vertical;
 }
 
 #consoleToolbar toolbarbutton .toolbarbutton-icon {
-	padding:5px;
+    padding:5px;
 }
 
 /************************************************************************************************/
@@ -307,7 +304,7 @@
 }
 
 #separateConsole {
-	list-style-image:url("chrome://mozapps/skin/places/tagContainerIcon.png");
+    list-style-image:url("chrome://mozapps/skin/places/tagContainerIcon.png");
 }
 
 #saveToFile {

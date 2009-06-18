@@ -49,6 +49,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     initialize: function()
     {
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.addListener(TraceListener);
+
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher initialize\n");
 
@@ -75,6 +78,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 this.unwatchTopWindow(browser.contentWindow);
             }
         }
+
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.removeListener(TraceListener);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -502,7 +508,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
     getContextByWindow: function(winIn)
     {
         var rootWindow = getRootWindow(winIn);
-
         if (rootWindow)
         {
             for (var i = 0; i < contexts.length; ++i)
@@ -888,6 +893,22 @@ function safeGetURI(browser)
         return null;
     }
 }
+
+// ************************************************************************************************
+
+var TraceListener =
+{
+    onDump: function(message)
+    {
+        var prefix = "->";
+        if (message.text.indexOf(prefix) == 0)
+        {
+            message.text = message.text.substr(prefix.length);
+            message.text = trimLeft(message.text);
+            message.type = "DBG_WINDOWS";
+        }
+    }
+};
 
 // ************************************************************************************************
 
