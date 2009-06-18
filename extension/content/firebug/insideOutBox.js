@@ -3,6 +3,33 @@
 FBL.ns(function() { with (FBL) {
 
 /**
+ * View interface used to populate an InsideOutBox object.
+ * 
+ * All views must implement this interface (directly or via duck typing).
+ */
+top.InsideOutBoxView = {
+    /**
+     * Retrieves the parent object for a given child object.
+     */
+    getParentObject: function(child) {},
+
+    /**
+     * Retrieves a given child node.
+     * 
+     * If both index and previousSibling are pased, the implementation
+     * may assume that previousSibling will be the return for getChildObject
+     * with index-1.
+     */
+    getChildObject: function(parent, index, previousSibling) {},
+
+    /**
+     * Renders the HTML representation of the object. Should return an HTML
+     * object which will be displayed to the user.
+     */
+    createObjectBox: function(object, isRoot) {}
+};
+
+/**
  * Creates a tree based on objects provided by a separate "view" object.
  *
  * Construction uses an "inside-out" algorithm, meaning that the view's job is first
@@ -417,7 +444,11 @@ InsideOutBox.prototype =
         for (var childBox = parentNodeBox.firstChild; childBox; childBox = childBox.nextSibling)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout("insideOutBox.findChildObjectBox "+(childBox.repObject == repObject?"match ":"no match ")+" childBox.repObject: "+(childBox.repObject.localName?childBox.repObject.localName:childBox.repObject) +" repObject: "+(repObject.localName?repObject.localName:repObject)+"\n");
+                FBTrace.sysout(
+                    "insideOutBox.findChildObjectBox "
+                    +(childBox.repObject == repObject?"match ":"no match ")
+                    +" childBox.repObject: " + (childBox.repObject && (childBox.repObject.localName || childBox.repObject))
+                    +" repObject: " +(repObject && (repObject.localName || repObject))+"\n", childBox);
             if (childBox.repObject == repObject)
                 return childBox;
         }
