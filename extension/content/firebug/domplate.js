@@ -567,6 +567,7 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
 {
     merge: function(args, oldTag)
     {
+        this.isLoop = true;
         this.varName = oldTag ? oldTag.varName : args[0];
         this.iter = oldTag ? oldTag.iter : parseValue(args[1]);
         this.vars = [];
@@ -902,8 +903,21 @@ var Renderer =
                 parent.appendChild(lastRow);
         }
 
+        // To save the next poor soul:
+        // In order to properly apply properties and event handlers on elements
+        // constructed by a FOR tag, the tag needs to be able to iterate up and
+        // down the tree, meaning if FOR is the root element as is the case with
+        // many insertRows calls, it will need to iterator over portions of the
+        // new parent.
+        //
+        // To achieve this end, __path__ defines the -1 operator which allows
+        // parent traversal. When combined with the offset that we calculate
+        // below we are able to iterate over the elements.
+        //
+        // This fails when applied to a non-loop element as non-loop elements
+        // Do not generate to proper path to bounce up and down the tree.
         var offset = 0;
-        if (before.localName.toLowerCase() == "tr")
+        if (this.tag.isLoop)
         {
             var node = firstRow.parentNode.firstChild;
             for (; node && node != firstRow; node = node.nextSibling)
