@@ -23,6 +23,9 @@ const reEndings = /\r\n|\r|\n/;
 // It'll be initialized from window parameters (see initialize method).
 var FBL;
 
+// Cache messages that are fired before the content of the window is loaded.
+var queue = [];
+
 // ************************************************************************************************
 // Trace Window Implementation
 
@@ -41,16 +44,22 @@ var TraceConsole =
         this.prefDomain = args.prefDomain;
         document.title = FBL.$STR("title.Tracing") + ": " + this.prefDomain;
 
-        // Initialize root node of the trace-console window.
-        var consoleFrame = document.getElementById("consoleFrame");
-        this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
-        this.logs = Firebug.TraceModule.CommonBaseUI.initializeContent(this.consoleNode, this.prefDomain);
-
         // Register listeners and observers
         traceService.addObserver(this, "firebug-trace-on-message", false);
         prefs.addObserver(this.prefDomain, this, false);
 
+        // Initialize root node of the trace-console window.
+        var consoleFrame = document.getElementById("consoleFrame");
+        this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
+        Firebug.TraceModule.CommonBaseUI.initializeContent(this.consoleNode, this.prefDomain,
+            FBL.bind(this.initializeContent, this));
+
         gFindBar = document.getElementById("FindToolbar");
+    },
+
+    initializeContent: function(logNode)
+    {
+        this.logs = logNode;
 
         // Notify listeners
         Firebug.TraceModule.onLoadConsole(window, this.consoleNode);
@@ -63,6 +72,10 @@ var TraceConsole =
         // If the opener is closed the console must be also closed.
         // (this console uses shared object from the opener (e.g. Firebug)
         window.opener.addEventListener("close", this.onCloseOpener, true);
+
+        // Fetch all cached messages.
+        for (var i=0; i<queue.length; i++)
+            this.dump(queue[i]);
     },
 
     internationalizeUI: function()
@@ -138,9 +151,15 @@ var TraceConsole =
             if (messageInfo.type != this.prefDomain)
                 return;
 
-            this.dump(new Firebug.TraceModule.TraceMessage(
+            var message = new Firebug.TraceModule.TraceMessage(
                 messageInfo.type, data, messageInfo.obj, messageInfo.scope,
-                messageInfo.time));
+                messageInfo.time);
+
+            // If the content isn't loaded yet, remember all messages and insert them later.
+            if (this.logs)
+                this.dump(message);
+            else
+                queue.push(message);
 
             return true;
         }
