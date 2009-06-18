@@ -1121,6 +1121,12 @@ top.FirebugChrome =
 
     resume: function(context)
     {
+        if (!context)
+        {
+            FBTrace.sysout("Firebug chrome: resume with no context??");
+            return;
+        }
+
         var panel = panelBar1.selectedPanel;
         if (!panel)
             return;
