@@ -326,7 +326,8 @@ top.Firebug =
     {
         var suspendMarker = $("fbStatusIcon");
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.setSuspended to "+value+"\n");
+            FBTrace.sysout("Firebug.setSuspended to "+value+". Browser: " +
+                Firebug.chrome.window.document.title);
 
         if (value)
             suspendMarker.setAttribute("suspended", value);
@@ -3422,7 +3423,9 @@ Firebug.URLSelector =
                     var openerContext = TabWatcher.getContextByWindow(browser.contentWindow.opener);
 
                     if (FBTrace.DBG_ACTIVATION)
-                        FBTrace.sysout("shouldCreateContext opener found, has "+(openerContext?"a ":"no ")+" context: "+browser.contentWindow.opener.location);
+                        FBTrace.sysout("shouldCreateContext opener found, has "+
+                            (openerContext?"a ":"no ")+" context: "+
+                            browser.contentWindow.opener.location);
 
                     if (openerContext)
                         return true;  // popup windows of Firebugged windows are Firebugged

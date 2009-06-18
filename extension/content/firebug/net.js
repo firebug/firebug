@@ -3336,7 +3336,9 @@ var HttpObserver =
             if (FBTrace.DBG_NET)
             {
                 FBTrace.sysout("net.observe " + (topic ? topic.toUpperCase() : topic) +
-                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : "") +
+                    ", Browser: " + Firebug.chrome.window.document.title,
+                    subject);
             }
 
             if (!(subject instanceof Ci.nsIHttpChannel))
