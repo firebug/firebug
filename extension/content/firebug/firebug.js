@@ -1045,7 +1045,6 @@ top.Firebug =
         {
             Firebug.setPlacement("minimized");
             this.showBar(false);
-            Firebug.resetTooltip();
         }
     },
 
@@ -1054,7 +1053,6 @@ top.Firebug =
         this.updateActiveContexts(FirebugContext);
         Firebug.setPlacement("inBrowser");
         Firebug.showBar(true);
-        Firebug.resetTooltip();
     },
 
     toggleDetachBar: function(forceOpen)  // detached -> closed; inBrowser -> detached TODO reattach
@@ -1533,7 +1531,10 @@ top.Firebug =
         for (Firebug.placement = 0; Firebug.placement < Firebug.placements.length; Firebug.placement++)
         {
             if (toPlacement == Firebug.placements[Firebug.placement])
+            {
+                Firebug.resetTooltip();
                 return Firebug.placement;
+            }
         }
         throw new Error("Firebug.setPlacement cannot match "+toPlacement+" as a placement");
     },
