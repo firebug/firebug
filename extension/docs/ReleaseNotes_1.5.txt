@@ -1,8 +1,24 @@
 Release Notes for Firebug 1.5
-Firebug 1.5 is Firebug 1.4 with additions by John J. Barton, Jan Odvarko and others.
-Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, and more to come.
+Firebug 1.5 is Firebug 1.4 with additions by John J. Barton, Jan Odvarko Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins.
+Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins, and Templarian
 Firebug 1.3 is Firebug 1.2 with additions by John J. Barton, Jan Odvarko.
 Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
 
 Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
+
+== New Features ==
+
+== Net Panel ==
+  Break on XHR
+
+
+== Bug Fixes ==
+ * Issue 872: JS Errors in IFrame with 1.2.0b3.
+ * Issue 1866: "Remove all breakpoints" only removes every other breakpoint\
+ * Issue 1865: ignoring java reserved keywords even when nested in javascript objects
+ * Issue 1867: File locked after upload: after uploading a file to a website (via a form) the file handle is not closed
+ * Issue 1877: removed unecessary variable init, contribution by lchesn
+ * Issue 1870: firefox 3.6 nightly - net panel problem
+ * Issue 1880: Firebug will not open in new window when using Inspect Element in Context menu; NEED to test before 1.4 release
+ * Issue 1883: domplate insertRows fails with root tags other than FOR
