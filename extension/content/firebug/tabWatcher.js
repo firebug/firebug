@@ -273,7 +273,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
-                ", "+context.getName()+" browser "+browser.currentURI.spec+" Firebug.chrome.window: "+Firebug.chrome.window.location);
+                ", "+context.getName()+" browser "+browser.currentURI.spec+" Firebug.chrome.window: "+Firebug.chrome.window.location+" context.window: "+safeGetWindowLocation(context.window));
         }
 
         dispatch(this.fbListeners, "initContext", [context, persistedState]);
@@ -514,7 +514,14 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     getContextByWindow: function(winIn)
     {
+        if (!winIn)
+            return;
+
         var rootWindow = getRootWindow(winIn);
+        
+        if (FBTrace.DBG_INITIALIZE)
+        	FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+safeGetWindowLocation(rootWindow));
+        
         if (rootWindow)
         {
             for (var i = 0; i < contexts.length; ++i)
