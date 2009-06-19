@@ -389,9 +389,16 @@ top.TabWatcher = extend(new Firebug.Listener(),
     {
         var context = this.getContextByWindow(win);
 
-        var index = context ? context.windows.indexOf(win) : -1;
+        if (!context)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("unwatchWindow: no context for win "+(win && win.location?win.location:"no location"));
+            return;
+        }
+
+        var index = context.windows.indexOf(win);
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.unwatchWindow context: "+context+", index of win: "+index+"\n");
+            FBTrace.sysout("-> tabWatcher.unwatchWindow context: "+context.getName()+" index of win: "+index+"/"+context.windows.length, context.windows);
         if (index != -1)
         {
             context.windows.splice(index, 1);
