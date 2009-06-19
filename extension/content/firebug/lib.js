@@ -2390,7 +2390,7 @@ this.safeGetWindowLocation = function(window)
             if ("location" in window)
             {
                 if ("toString" in window.location)
-                    return window.location;
+                    return window.location.toString();
                 else
                     return "(window.location has no toString)";
             }
