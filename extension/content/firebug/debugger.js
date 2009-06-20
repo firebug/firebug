@@ -981,7 +981,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try
         {
             Firebug.errorStackTrace = getStackTrace(frame, context);
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message ,error);
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.message+" in "+context.getName() ,error);
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace);
 
             if (Firebug.breakOnErrors)
