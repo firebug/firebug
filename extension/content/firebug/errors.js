@@ -579,6 +579,8 @@ function correctLineNumbersOnExceptions(context, object)
 
         return correctedError;
     }
+    else
+        return object;
 }
 
 // ************************************************************************************************
