@@ -93,7 +93,10 @@ top.FirebugChrome =
         }
 
         if (detachArgs.Firebug)
+        {
             Firebug = detachArgs.Firebug;
+            FirebugContext = detachArgs.FirebugContext;
+        }
         else
             Firebug.initialize();
 
@@ -138,10 +141,7 @@ top.FirebugChrome =
                 var detachArgs = window.arguments[0];
 
             if (detachArgs)
-            {
-                FirebugContext = detachArgs.context ? detachArgs.context : FirebugContext;
                 externalBrowser = detachArgs.browser;// else undefined
-            }
 
             this.applyTextSize(Firebug.textSize);
 
@@ -560,8 +560,8 @@ top.FirebugChrome =
          // Note that for firebug.xul, the Firebug object is shared across windows, but not FirebugChrome and FirebugContext
          FirebugContext = context;
 
-         if (FBTrace.DBG_WINDOWS)
-             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location);
+         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
+             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location+" has browser: "+(FirebugContext?FirebugContext.browser:"no"));
     },
 
     hidePanel: function()

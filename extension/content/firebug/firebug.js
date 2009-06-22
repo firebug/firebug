@@ -1110,16 +1110,18 @@ top.Firebug =
             return null;
         }
 
-        if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+context.getName() );
-
         this.showBar(false);  // don't show in browser.xul now
+
+        Firebug.chrome.setFirebugContext(context);  // make sure the FirebugContext agrees with context
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+FirebugContext.getName() );
 
         var args = {
             FBL: FBL,
             Firebug: this,
             browser: context.browser,
-            context: context
+            FirebugContext: window.FirebugContext
         };
         var win = openWindow("Firebug", "chrome://firebug/content/firebug.xul", "", args);
 
@@ -3066,7 +3068,7 @@ Firebug.ActivableModule = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // uiListener
 
-    showUI: function(browser, context)  // Firebug is opened, in browser or detached
+    showUI: function(browser, context)  // Firebug is opened, in browser or ed
     {
         if (FBTrace.DBG_PANELS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.showUI; " + this.panelName + ", " +
