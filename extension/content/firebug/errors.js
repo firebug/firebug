@@ -223,7 +223,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         else if (checkForUncaughtException(context, object))
         {
             context = getExceptionContext(context);
-            correctLineNumbersOnExceptions(context, object);
+            object = correctLineNumbersOnExceptions(context, object);
         }
 
         if (lessTalkMoreAction(context, object, isWarning))
@@ -561,23 +561,23 @@ function correctLineNumbersOnExceptions(context, object)
         if (nsresult)
             errorMessage += " ("+nsresult+")";
         sourceName = m[3];
-        lineNumber = m[4];
+        lineNumber = parseInt(m[4]);
 
         var correctedError =
         {
                 errorMessage: object.errorMessage,
-                dsourceName: sourceName,
+                sourceName: sourceName,
                 sourceLine: object.sourceLine,
                 lineNumber: lineNumber,
                 columnNumber: object.columnNumber,
                 flags: object.flags,
-                categor: object.category
+                category: object.category
         };
-        object = correctedError;
 
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.correctLineNumbersOnExceptions corrected message with sourceName: "+sourceName);
+            FBTrace.sysout("errors.correctLineNumbersOnExceptions corrected message with sourceName: "+sourceName+"@"+lineNumber);
 
+        return correctedError;
     }
 }
 
