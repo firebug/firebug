@@ -474,7 +474,7 @@
                 if (object)
                 {
                     this.selectObject(object);
-                    FirebugContext.chrome.select(object, null, null, true);
+                    Firebug.chrome.select(object, null, null, true);
                 }
             }
         ]]></handler>

@@ -547,7 +547,7 @@ top.FirebugChrome =
         // a function that returns an object with .getObjectDescription() and .getLocationList()
         return function getSelectedPanelFromCurrentContext()
         {
-            return FirebugContext.chrome.getSelectedPanel();  // panels provide location, use the selected panel
+            return Firebug.chrome.getSelectedPanel();  // panels provide location, use the selected panel
         }
     },
 
