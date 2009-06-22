@@ -2558,7 +2558,7 @@ this.dispatch = function(listeners, name, args)
                             exc.stack = stack.split('\n');
                         }
                         var culprit = listeners[i] ? listeners[i].dispatchName : null;
-                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc, exc);
+                        FBTrace.sysout(" Exception in lib.dispatch "+(culprit?culprit+".":"")+ name+": "+exc+(exc.fileName?exc.fileName:"")+(exc.lineNumber?":"+exc.lineNumber:""), exc);
                     }
                 }
             }
