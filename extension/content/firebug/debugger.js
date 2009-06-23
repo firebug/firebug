@@ -1779,7 +1779,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (!this.isAlwaysEnabled()) // then we need to enable
             {
                 this.setDefaultState(true);
-                Firebug.Console.log("enabling javascript debugger to support "+dependentAddedOrRemoved.dispatchName);
+                if (FirebugContext)
+                    Firebug.Console.log("enabling javascript debugger to support "+dependentAddedOrRemoved.dispatchName, FirebugContext);
             }
         }
     },
