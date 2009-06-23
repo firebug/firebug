@@ -22,3 +22,5 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 1870: firefox 3.6 nightly - net panel problem
  * Issue 1880: Firebug will not open in new window when using Inspect Element in Context menu; NEED to test before 1.4 release
  * Issue 1883: domplate insertRows fails with root tags other than FOR
+ * Issue 1890: Large command line broken when Firebug is in a separate window
+ * Issue 1891: Some exceptions aren't caught even with "break on all errors"
