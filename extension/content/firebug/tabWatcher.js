@@ -554,9 +554,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     getBrowserByWindow: function(win)
     {
-        for (var i = 0; i < tabBrowser.browsers.length; ++i)
+        var browsers = Firebug.chrome.getBrowsers();
+        for (var i = 0; i < browsers.length; ++i)
         {
-            var browser = tabBrowser.browsers[i];
+            var browser = browsers[i];
             if (browser.contentWindow == win)
             {
                 registerFrameListener(browser);
