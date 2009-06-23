@@ -561,7 +561,7 @@ top.FirebugChrome =
          FirebugContext = context;
 
          if (FBTrace.DBG_WINDOWS || FBTrace.DBG_DISPATCH)
-             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location+" has browser: "+(FirebugContext?FirebugContext.browser:"no"));
+             FBTrace.sysout("setFirebugContext "+(FirebugContext?FirebugContext.getName():" **> NULL <** ") + " in "+window.location+" has wrapped: "+(FirebugContext?FirebugContext.wrappedJSObject:"no"));
     },
 
     hidePanel: function()

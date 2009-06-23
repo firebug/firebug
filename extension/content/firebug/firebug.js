@@ -1113,6 +1113,7 @@ top.Firebug =
         this.showBar(false);  // don't show in browser.xul now
 
         Firebug.chrome.setFirebugContext(context);  // make sure the FirebugContext agrees with context
+        FirebugContext = context;
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+FirebugContext.getName() );
@@ -1564,6 +1565,7 @@ top.Firebug =
         this.updateActiveContexts(context); // a newly created context is active
 
         Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
+        FirebugContext = context;
 
         if (deadWindowTimeout)
             this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
@@ -1597,13 +1599,15 @@ top.Firebug =
 
         if (context)
         {
+            FirebugContext = context;
             Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
             this.updateActiveContexts(context);  // resume, after setting FirebugContext
         }
         else
         {
-            this.updateActiveContexts(context);  // suspend, before setting FirebugContext
-            Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
+            Firebug.chrome.setFirebugContext(context); // null context
+            FirebugContext = context;
+            this.updateActiveContexts(context);  // suspend, after setting FirebugContext
         }
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
