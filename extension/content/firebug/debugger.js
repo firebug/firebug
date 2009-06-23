@@ -1137,10 +1137,22 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     if (isSet && props)
                     {
                         row.setAttribute("condition", props.condition ? "true" : "false");
+                        if (props.condition)  // issue 1371
+                        {
+                            var watchPanel = this.ableWatchSidePanel(context);
+                            watchPanel.addWatch(props.condition);
+                        }
                         row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
-                    } else
+                    }
+                    else
                     {
                         row.removeAttribute("condition");
+                        if (props.condition)
+                        {
+                            var watchPanel = this.ableWatchSidePanel(context);
+                            watchPanel.removeWatch(props.condition);
+                            watchPanel.rebuild();
+                        }
                         row.removeAttribute("disabledBreakpoint");
                     }
                 }
