@@ -27,7 +27,7 @@ Firebug.CommandLine = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     // targetWindow was needed by evaluateInSandbox, let's leave it for a while in case we rethink this yet again
-    
+
     initializeCommandLineIfNeeded: function (context, win)
     {
       if (context == null) return;
@@ -37,10 +37,10 @@ Firebug.CommandLine = extend(Firebug.Module,
       // so make sure that's so.  This call should have no effect if the console
       // is already initialized.
       Firebug.Console.isReadyElsePreparing(context, win);
-      
+
       // Make sure the command-line is initialized.  This call should have no
       // effect if the command-line is already initialized.
-      Firebug.CommandLine.isReadyElsePreparing(context, win); 
+      Firebug.CommandLine.isReadyElsePreparing(context, win);
     },
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
@@ -83,7 +83,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
             return;
         }
-        
+
         // We're going to use some command-line facilities, but it may not have initialized yet.
         this.initializeCommandLineIfNeeded(context, win);
 
@@ -609,6 +609,10 @@ Firebug.CommandLine = extend(Firebug.Module,
                 FBTrace.sysout("commandLine.attachConsoleOnFocus no FirebugContext");
             return;
         }
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("attachConsoleOnFocus: FirebugContext is "+FirebugContext.getName() +" in window "+window.location);
+
 
         // User has decided to use the command line, but the web page may not have the console if the page has no javascript
         if (Firebug.Console.isReadyElsePreparing(FirebugContext))

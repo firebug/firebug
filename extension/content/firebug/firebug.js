@@ -856,9 +856,10 @@ top.Firebug =
         {
             // xxxHonza: if the fake context is used the source code is always get using
             // (a) the browser cache or (b) request to the server.
+            var selectedBrowser = Firebug.chrome.getCurrentBrowser();
             var ctx = {
-                browser: tabBrowser.selectedBrowser,
-                window: tabBrowser.selectedBrowser.contentWindow
+                browser: selectedBrowser,
+                window: selectedBrowser.contentWindow
             };
             data = new Firebug.SourceCache(ctx).loadText(href);
         }
@@ -1549,6 +1550,11 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
+
+    getContextType: function()
+    {
+        return Firebug.TabContext;
+    },
 
     initContext: function(context, persistedState)  // called after a context is created.
     {

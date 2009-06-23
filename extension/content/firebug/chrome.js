@@ -251,6 +251,11 @@ top.FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    getBrowsers: function()
+    {
+          return Firebug.tabBrowser.browsers;
+    },
+
     getCurrentBrowser: function()
     {
         return externalBrowser ? externalBrowser : Firebug.tabBrowser.selectedBrowser;
@@ -372,7 +377,7 @@ top.FirebugChrome =
             : LOAD_FLAGS_NONE;
 
         // Make sure the selected tab in the attached browser window is refreshed.
-        var browser = Firebug.tabBrowser.selectedBrowser;
+        var browser = Firebug.chrome.getCurrentBrowser();
         browser.firebugReload = true;
         browser.webNavigation.reload(reloadFlags);
 
