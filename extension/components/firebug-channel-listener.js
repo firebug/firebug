@@ -18,7 +18,7 @@ var FBTrace = null;
 
 /**
  * This object implements nsIStreamListener interface and is intended to monitor all network
- * channels (nsIHttpChannel). A new instance of this object is created and registered an HTTP 
+ * channels (nsIHttpChannel). A new instance of this object is created and registered an HTTP
  * channel. See Firebug.TabCacheModel.onExamineResponse method.
  */
 function ChannelListener()
@@ -104,13 +104,27 @@ ChannelListener.prototype =
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onDataAvailable " +
+                FBTrace.sysout("tabCache.ChannelListener.onDataAvailable onCollectData FAILS " +
                     "(" + offset + ", " + count + ") EXCEPTION: " +
                     safeGetName(request), err);
         }
 
         if (this.listener)
-            this.listener.onDataAvailable(request, requestContext, inputStream, offset, count);
+        {
+            try  // https://bugzilla.mozilla.org/show_bug.cgi?id=492534
+            {
+                this.listener.onDataAvailable(request, requestContext, inputStream, offset, count);
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.onDataAvailable cancelling request at " +
+                    "(" + offset + ", " + count + ") EXCEPTION: " +
+                    safeGetName(request), exc);
+
+                request.cancel(exc.result);
+            }
+        }
     },
 
     onStartRequest: function(request, requestContext)
@@ -128,7 +142,7 @@ ChannelListener.prototype =
             if (context)
             {
                 // Due to #489317, the check whether this response should be cached
-                // must be done here (the content type is not valid before calling 
+                // must be done here (the content type is not valid before calling
                 // onStartRequest). Let's ignore the response if it should not be cached.
                 this.ignore = !this.shouldCacheRequest(request);
 
@@ -142,7 +156,7 @@ ChannelListener.prototype =
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest EXCEPTION\n", err);
         }
 
-        // Possible exception from the following onStartRequest call is used by Firefox to 
+        // Possible exception from the following onStartRequest call is used by Firefox to
         // cancel the request so, don't eat it (#1712).
         if (this.listener)
             this.listener.onStartRequest(request, requestContext);
@@ -189,7 +203,7 @@ ChannelListener.prototype =
 
     getContext: function(win)
     {
-        // This must be overridden in tabCache. This scope doesn't have an 
+        // This must be overridden in tabCache. This scope doesn't have an
         // access to TabWatcher and its getContextByWindow method.
         return null;
     }
@@ -215,7 +229,7 @@ function CCIN(cName, ifaceName)
 // ************************************************************************************************
 // Service factory
 
-var ListenerFactory = 
+var ListenerFactory =
 {
     createInstance: function (outer, iid)
     {
@@ -236,7 +250,7 @@ var ListenerFactory =
         throw Cr.NS_ERROR_NO_INTERFACE;
     },
 
-    QueryInterface: function(iid) 
+    QueryInterface: function(iid)
     {
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsISupportsWeakReference) ||
