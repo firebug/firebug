@@ -2164,14 +2164,20 @@ this.getAllStyleSheets = function(context)
         if (!sheet.href || !recordedSheets[sheet.href])
         {
             styleSheets.push(sheet);
-
-            for (var i = 0; i < sheet.cssRules.length; ++i)
+            try
             {
-                var rule = sheet.cssRules[i];
-                if (rule instanceof CSSImportRule)
-                    addSheet(rule.styleSheet);
+                for (var i = 0; i < sheet.cssRules.length; ++i)
+                {
+                    var rule = sheet.cssRules[i];
+                    if (rule instanceof CSSImportRule)
+                        addSheet(rule.styleSheet);
+                }
             }
-
+            catch(e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("getAllStyleSheets sheet.cssRules FAILS for "+(sheet?sheet.href:"null sheet")+e, e);
+            }
             recordedSheets[sheet.href] = true;
         }
     }

@@ -1263,7 +1263,31 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     show: function(state)
     {
-        // Do nothing, and don't call superclass
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
+        // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
+        if (!this.context.forcedUniqueStyleSheets)
+        {
+            if (this.context.loaded)  // keep forcing until we are loaded
+                this.context.forcedUniqueStyleSheets = true;
+
+            var styleSheets = getAllStyleSheets(this.context);
+            for(var i = 0; i < styleSheets.length; i++)
+            {
+                try
+                {
+                    var rules = styleSheets[i].cssRules;
+                    if (rules.length > 0)
+                        var touch = rules[0];
+                    if (FBTrace.DBG_CSS && touch)
+                        FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+(styleSheets[i].href?styleSheets[i].href:this.context.getName()));
+                }
+                catch(e)
+                {
+                    if (FBTrace.DBG_ERRORS)
+                        FBTrace.sysout("css.show: sheet.cssRules FAILS for "+(styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
+                }
+            }
+        }
     },
 
     supportsObject: function(object)
@@ -1499,7 +1523,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             catch (err)
             {
-                if (FBTrace.DBG_CSS) FBTrace.sysout("CSS Insert Error: ", err);
+                if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS) FBTrace.sysout("CSS Insert Error: "+err, err);
                 target.innerHTML = escapeHTML(previousValue);
                 row.repObject = undefined;
                 return;
