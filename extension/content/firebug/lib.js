@@ -1939,7 +1939,7 @@ this.findScriptForFunctionInContext = function(context, fn)
     var fns = fn.toString();
     this.forEachFunction(context, function findMatchingScript(script, aFunction)
     {
-        if (!aFunction.toString || typeof(aFunction.toString) != "function")
+        if (!aFunction['toString'] || typeof(aFunction['toString']) != "function")
             return;
         try {
             var tfs = aFunction.toString();
