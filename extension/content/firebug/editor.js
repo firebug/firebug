@@ -83,7 +83,8 @@ Firebug.Editor = extend(Firebug.Module,
         currentEditor.show(target, currentPanel, value, targetSize);
         dispatch(this.fbListeners, "onBeginEditing", [currentPanel, currentEditor, target, value]);
         currentEditor.beginEditing(target, value);
-
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("Editor start panel "+currentPanel.name);
         this.attachListeners(currentEditor, panel.context);
     },
 
@@ -93,7 +94,7 @@ Firebug.Editor = extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_EDITOR)
-            FBTrace.sysout("editor.stopEditing " + cancel);
+            FBTrace.sysout("editor.stopEditing cancel:" + cancel+" saveTimeout: "+this.saveTimeout);
 
         clearTimeout(this.saveTimeout);
         delete this.saveTimeout;
@@ -141,7 +142,8 @@ Firebug.Editor = extend(Firebug.Module,
         currentPanel.editing = false;
 
         dispatch(this.fbListeners, "onStopEdit", [currentPanel, currentEditor, currentTarget]);
-
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("Editor stop panel "+currentPanel.name);
         currentTarget = null;
         currentGroup = null;
         currentPanel = null;
@@ -172,6 +174,8 @@ Firebug.Editor = extend(Firebug.Module,
         {
             var context = currentPanel.context;
             this.saveTimeout = context.setTimeout(bindFixed(this.save, this), saveTimeout);
+            if (FBTrace.DBG_EDITOR)
+                FBTrace.sysout("editor.update saveTimeout: "+this.saveTimeout);
         }
     },
 
@@ -182,7 +186,8 @@ Firebug.Editor = extend(Firebug.Module,
 
         if (value == undefined)
             value = currentEditor.getValue();
-
+        if (FBTrace.DBG_EDITOR)
+            FBTrace.sysout("editor.save saveTimeout: "+this.saveTimeout+" currentPanel: "+(currentPanel?currentPanel.name:"null"));
         try
         {
             this.saveEditAndNotifyListeners(currentTarget, value, previousValue);
@@ -192,7 +197,8 @@ Firebug.Editor = extend(Firebug.Module,
         }
         catch (exc)
         {
-            ERROR(exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("editor.save FAILS "+exc, exc);
         }
     },
 
