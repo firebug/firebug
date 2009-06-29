@@ -417,6 +417,12 @@ function FirebugConsoleHandler(context, win)
         while (frame && FBL.isSystemURL(frame.filename) )
             frame = frame.caller;
 
+        // Drop two more frames, the injected console function and firebugAppendConsole()
+        if (frame)
+            frame = frame.caller;
+        if (frame)
+            frame = frame.caller;
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector.getComponentsStackDump final stack for userURL "+userURL, frame);
 
