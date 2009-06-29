@@ -3201,6 +3201,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         // the response is displayed automatically the next time the
         // net-entry is expanded again.
         getCacheEntry(file, context.netProgress);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.setResponseText; response text updated");
     },
 
     onLoadResponse: function(event)
