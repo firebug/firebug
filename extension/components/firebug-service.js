@@ -1482,7 +1482,7 @@ FirebugService.prototype =
             {
                 try {
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                        FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'");
+                        FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'"+(fbs.filterConsoleInjections?" console injection":""));
                 } catch (exc) { /*Bug 426692 */ }
                 if (FBTrace.DBG_FBS_TRACKFILES)
                     trackFiles.drop(fileName);
@@ -2596,6 +2596,8 @@ function getFrameWindow(frame)
             return;
     try
     {
+    	if (FBTrace.DBG_FBS_SRCUNITS)
+    		FBTrace.sysout("fbs: resort to getFrameWindow");
         var result = {};
         frame.eval("window", "", 1, result);
         var win = result.value.getWrappedValue();
