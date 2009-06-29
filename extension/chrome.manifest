@@ -1,10 +1,12 @@
 content firebug content/firebug/ contentaccessible=yes
 content firebug content/firebug/
-skin	firebug	classic/1.0	skin/classic/
-skin	firebug-os	classic/1.0	skin/classic/win/
-locale  firebug bg	      	locale/bg/
-locale	firebug	ca-AD		locale/ca-AD/
-locale	firebug	cs-CZ		locale/cs-CZ/
+
+skin    firebug classic/1.0 skin/classic/
+skin    firebug-os  classic/1.0 skin/classic/win/
+
+locale  firebug bg-BG       locale/bg-BG/
+locale  firebug ca-AD       locale/ca-AD/
+locale  firebug cs-CZ       locale/cs-CZ/
 locale  firebug da-DK       locale/da-DK/
 locale  firebug de-DE       locale/de-DE/
 locale  firebug en-US       locale/en-US/
@@ -12,7 +14,7 @@ locale  firebug es-ES       locale/es-ES/
 locale  firebug fr-FR       locale/fr-FR/
 locale  firebug hu-HU       locale/hu-HU/
 locale  firebug it-IT       locale/it-IT/
-locale  firebug ja       	locale/ja/
+locale  firebug ja-JP       locale/ja-JP/
 locale  firebug ko-KR       locale/ko-KR/
 locale  firebug nl-NL       locale/nl-NL/
 locale  firebug pl-PL       locale/pl-PL/
@@ -24,7 +26,6 @@ locale  firebug zh-TW       locale/zh-TW/
 locale  firebug sv-SE       locale/sv-SE/
 locale  firebug ro-RO       locale/ro-RO/
 locale  firebug es-AR       locale/es-AR/
-
 
 overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
 overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
