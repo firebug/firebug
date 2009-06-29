@@ -561,11 +561,25 @@ this.setClassTimed = function(elt, name, context, timeout)
     else
         this.setClass(elt, name);
 
+    if (!this.isVisible(elt))
+    {
+        if (elt.__invisibleAtSetPoint)
+            elt.__invisibleAtSetPoint--;
+        else
+            elt.__invisibleAtSetPoint = 5;
+    }
+
     elt.__setClassTimeout = context.setTimeout(function()
     {
         delete elt.__setClassTimeout;
 
-        FBL.removeClass(elt, name);
+        if (elt.__invisibleAtSetPoint)
+            FBL.setClassTimed(elt, name, context, timeout);
+        else
+        {
+            delete elt.__invisibleAtSetPoint;
+            FBL.removeClass(elt, name);
+        }
     }, timeout);
 };
 
