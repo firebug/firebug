@@ -82,7 +82,7 @@ Firebug.Spy = extend(Firebug.Module,
 
     skipSpy: function(win)
     {
-        var uri = win.location.href; // don't attach spy to chrome
+        var uri = safeGetWindowLocation(win); // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
             return true;
     },
