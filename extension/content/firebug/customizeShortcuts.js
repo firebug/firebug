@@ -162,7 +162,7 @@ function addShortcutRow(element, index, array)
     var labelText;
 
     var label = document.createElement("label");
-    // Get the label from firebug.properties    
+    // Get the label from firebug.properties
     labelText = FBL.$STR('firebug.shortcut.' + element + ".label");
     if (labelText == "label") // $STR defaults to property name (label) if it's not defined. We don't want that
         labelText = element
@@ -177,10 +177,10 @@ function addShortcutRow(element, index, array)
     row.appendChild(textbox);
 
     var resetBtn = document.createElement('button');
-    resetBtn.id = element + "_reset"
-    resetBtn.setAttribute('label', "reset");
-    resetBtn.setAttribute('aria-label', FBL.$STR("reset") + labelText + ' shortcut');
-    resetBtn.className = "shortcutResetBtn"
+    resetBtn.id = element + "_reset";
+    resetBtn.setAttribute('label', FBL.$STR("reset"));
+    resetBtn.setAttribute('aria-label', FBL.$STR("reset") + " " + labelText + ' shortcut');
+    resetBtn.className = "shortcutResetBtn";
     row.appendChild(resetBtn);
     rows.appendChild(row);
 }
