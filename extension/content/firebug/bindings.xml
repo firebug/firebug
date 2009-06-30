@@ -365,6 +365,8 @@
 
             // Get panel's option items.
             var panelItems = this.selectedPanel.getOptionsMenuItems(FirebugContext);
+            if (!panelItems)
+                return false;
 
             // If the module is disabled, gray out all the options.
             if (!enabled && this.module)
