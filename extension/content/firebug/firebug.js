@@ -239,7 +239,8 @@ top.Firebug =
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y", "fbContinueButton", "fbBreakOnNextButton",
-            "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton"];
+            "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
+            "menu_AllOff", "menu_AllOn"];
 
         var tooltipTextElements = ["fbContinueButton", "fbBreakOnNextButton", "fbMinimizeButton"];
         for (var i=0; i<elements.length; i++)
