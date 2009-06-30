@@ -472,7 +472,7 @@ DomplateTag.prototype =
 
     generateNodePath: function(path, blocks)
     {
-        blocks.push("node = __path__(root, o");
+        blocks.push("var node = __path__(root, o");
         for (var i = 0; i < path.length; ++i)
             blocks.push(",", path[i]);
         blocks.push(");");
