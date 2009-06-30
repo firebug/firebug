@@ -1667,6 +1667,23 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger("+this.debuggerName+").loadedContext enabled on load: "+context.onLoadWindowContent+" context.sourceFileMap", context.sourceFileMap);
     },
 
+    unwatchWindow: function(context, win)  // clean up the source file map in case the frame is being reloaded.
+    {
+        var scriptTags = win.document.getElementsByTagName("script");
+        for (var i = 0; i < scriptTags.length; i++)
+        {
+            var src = scriptTags[i].getAttribute("src");
+            if (src)
+                delete context.sourceFileMap[src];
+            else
+                delete context.sourceFileMap[safeGetWindowLocation(win)];
+            if (FBTrace.DBG_SOURCEFILES)    
+            	FBTrace.sysout("debugger.unWatchWindow delete sourceFileMap entry for "+(src?src:safeGetWindowLocation(win)) );
+        }
+        if (scriptTags.length > 0)
+            context.invalidatePanels('script');
+    },
+
     destroyContext: function(context, persistedState)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
@@ -1740,7 +1757,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     onSourceFileCreated: function(context, sourceFile)
     {
-
+        // This event can come at any time, eg by frame reloads or ajax, so we need to update the display.
+        context.invalidatePanels("script", "breakpoints");
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
@@ -2528,6 +2546,30 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             return (normalizeURL(object.script.fileName) in this.context.sourceFileMap);
         else if (object instanceof "function")
             return false; //TODO
+    },
+
+    refresh: function()  // delete any sourceBox-es that are not in sync with sourceFiles
+    {
+        for(var url in this.sourceBoxes)
+        {
+            if (this.sourceBoxes.hasOwnProperty(url))
+            {
+                var sourceBox = this.sourceBoxes[url];
+                var sourceFile = this.context.sourceFileMap[url];
+                if (sourceFile != sourceBox.repObject)
+                {
+                    var victim = this.sourceBoxes[url];
+                    delete this.sourceBoxes[url];
+                    if (this.selectedSourceBox == victim)
+                        this.showSourceFile(sourceFile);
+                    if (FBTrace.DBG_SOURCEFILES)
+                        FBTrace.sysout("debugger.refresh deleted sourceBox for "+url);
+                }
+            }
+        }
+
+        if (!this.selectedSourceBox)  // then show() has not run, but we have to refresh, so do the default.
+            this.navigate();
     },
 
     updateLocation: function(sourceFile)
