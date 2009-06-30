@@ -21,7 +21,7 @@
 
 .sourceBox {
     overflow: scroll; /* see issue 1479 */
-     position: absolute;
+    position: absolute;
     left: 0;
     top: 0;
     width: 100%;
