@@ -258,8 +258,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         var stack_frame = trace.frames[0];
         if (stack_frame)
         {
-            sourceName = stack_frame.href;
-            lineNumber = stack_frame.lineNo;
+            var sourceName = stack_frame.href;
+            var lineNumber = stack_frame.lineNo;
 
             var correctedError =
             {
@@ -560,8 +560,8 @@ function correctLineNumbersOnExceptions(context, object)
         var nsresult = m[2];
         if (nsresult)
             errorMessage += " ("+nsresult+")";
-        sourceName = m[3];
-        lineNumber = parseInt(m[4]);
+        var sourceName = m[3];
+        var lineNumber = parseInt(m[4]);
 
         var correctedError =
         {
