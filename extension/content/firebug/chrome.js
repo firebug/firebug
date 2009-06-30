@@ -129,6 +129,9 @@ top.FirebugChrome =
         var iconMenu = $("fbFirebugMenu");
         if (iconMenu)
             iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
+
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("chrome.initialized ", window);
     },
 
     /**
