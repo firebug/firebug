@@ -8,19 +8,27 @@ Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and M
 Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
 
 == New Features ==
+ * Implement ActivateSameDomain option, default true, to cause an activate foo.bar.com to activate *.foo.com.
 
 == Net Panel ==
   Break on XHR
 
 
 == Bug Fixes ==
+ * Issue 520: Firebug doesn't reload modified iFrame scripts until parent frame is reloaded;
  * Issue 872: JS Errors in IFrame with 1.2.0b3.
+ * Issue 882: console.log() reports wrong source file and line number
+ * Issue 1371: conditional breakpoint undefined?
+ * Issue 1864:  Allow scripts to log exceptions as if uncaught
  * Issue 1866: "Remove all breakpoints" only removes every other breakpoint\
  * Issue 1865: ignoring java reserved keywords even when nested in javascript objects
  * Issue 1867: File locked after upload: after uploading a file to a website (via a form) the file handle is not closed
  * Issue 1877: removed unecessary variable init, contribution by lchesn
  * Issue 1870: firefox 3.6 nightly - net panel problem
+ * Issue 1879: nsIStreamListener.onDataAvailable throws exception
  * Issue 1880: Firebug will not open in new window when using Inspect Element in Context menu; NEED to test before 1.4 release
  * Issue 1883: domplate insertRows fails with root tags other than FOR
  * Issue 1890: Large command line broken when Firebug is in a separate window
  * Issue 1891: Some exceptions aren't caught even with "break on all errors"
+ * Issue 1894: CSS-edit removes declaration if page with specific javascript
+ * Issue 1928: Update Firebug Windows Script panel icons
