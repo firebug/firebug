@@ -218,7 +218,7 @@ function FirebugConsoleHandler(context, win)
     this.error = function()
     {
         Firebug.Errors.increaseCount(context);
-        logFormatted(arguments, "error", true);
+        logAssert("error", arguments);
     };
 
     this.assert = function(x)
@@ -228,7 +228,7 @@ function FirebugConsoleHandler(context, win)
             var rest = [];
             for (var i = 1; i < arguments.length; i++)
                 rest.push(arguments[i]);
-            logAssert(rest);
+            logAssert("assert", rest);
         }
     };
 
@@ -378,7 +378,7 @@ function FirebugConsoleHandler(context, win)
         return Firebug.Console.logFormatted(args, context, className, noThrottle, sourceLink);
     }
 
-    function logAssert(args)
+    function logAssert(category, args)
     {
         Firebug.Errors.increaseCount(context);
 
@@ -389,16 +389,27 @@ function FirebugConsoleHandler(context, win)
 
         var sourceName = win.location;
         var lineNumber = 0;
-        var trace = getJSDUserStack();
-        if (trace && trace.frames && trace.frames[0])
+        if (msg.stack)
+            var trace = parseToStackTrace(msg.stack);
+        else
         {
-            var frame = trace.frames[0];
-            sourceName = normalizeURL(frame.script.fileName);
-            lineNumber = frame.line;
+            var trace = getJSDUserStack();
+            if (trace && trace.frames && trace.frames[0])
+            {
+                var frame = trace.frames[0];
+                sourceName = normalizeURL(frame.script.fileName);
+                lineNumber = frame.line;
+                if (lineNumber && sourceName)
+                    var sourceLine = context.sourceCache.getLine(sourceName, lineNumber);
+            }
         }
+        if (msg.fileName)
+            sourceName = msg.fileName;
+        if (msg.lineNumber)
+            lineNumber = msg.lineNumber;
 
         var errorObject = new FBL.ErrorMessage(msg, sourceName,
-                        lineNumber, "", "assert", context, trace);
+                        lineNumber, (sourceLine?sourceLine:""), category, context, trace);
 
         var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
@@ -441,15 +452,16 @@ function FirebugConsoleHandler(context, win)
         var frames = trace ? trace.frames : null;
         if (frames && (frames.length > 0) )
         {
-            var bottom = frames.length - 1;
+            var oldest = frames.length - 1;  // 6 - 1 = 5
             for (var i = 0; i < frames.length; i++)
             {
-                if (frames[bottom - i].href.indexOf("chrome:") == 0) break;
-                var fn = frames[bottom - i].fn + "";
-                if (fn && (fn.indexOf("_firebugEvalEvent") != -1) ) break;
+                if (frames[oldest - i].href.indexOf("chrome:") == 0) break;
+                var fn = frames[oldest - i].fn + "";
+                if (fn && (fn.indexOf("_firebugEvalEvent") != -1) ) break;  // command line
             }
+            FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace);
+            trace.frames = trace.frames.slice(2 - i);  // take the oldest frames, leave 2 behind they are injection code
 
-            trace.frames = trace.frames.slice(bottom - i + 1);
             return trace;
         }
         else

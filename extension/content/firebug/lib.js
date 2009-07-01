@@ -866,6 +866,28 @@ this.isNode = function(o)
     }
 };
 
+this.XW_instanceof = function(obj, type) // Cross Window instanceof; type is local to this window
+{
+    if (obj instanceof type)
+        return true;  // within-window test
+
+    if (!type)
+        return false;
+    if (!obj)
+        return (type == "undefined");
+
+    // compare strings: obj constructor.name to type.name.
+    // This is not perfect, we should compare type.prototype to object.__proto__, but mostly code does not change the constructor object.
+    do
+    {
+        if (obj.constructor && obj.constructor.name == type.name)  // then the function that constructed us is the argument
+            return true;
+    }
+    while(obj = obj.__proto__);  // walk the prototype chain.
+    return false;
+    // https://developer.mozilla.org/en/Core_JavaScript_1.5_Guide/Property_Inheritance_Revisited/Determining_Instance_Relationships
+}
+
 // ************************************************************************************************
 // DOM Modification
 
@@ -4689,6 +4711,27 @@ this.StackFrame.prototype =
         return this.script.tag +"." + this.pc;
     }
 };
+//-----------------------111111----222222-----33---444  1 All 'Not a (' followed by (; 2 All 'Not a )' followed by a ); 3 text between @ and : digits
+var reErrorStackLine = /([^\(]*)\(([^\)]*)\)@(.*):(\d*)/;
+this.parseToStackFrame = function(line) // function name (arg, arg, arg)@fileName:lineNo
+{
+    var m = reErrorStackLine.exec(line);
+    if (m)
+        return new this.StackFrame(null, m[1], null, m[3], m[4], m[2].split(','), 0);
+}
+this.parseToStackTrace = function(stack)
+{
+    var lines = stack.split('\n');
+    var trace = new this.StackTrace();
+    for (var i = 0; i < lines.length; i++)
+    {
+        var frame = this.parseToStackFrame(lines[i]);
+        FBTrace.sysout("parseToStackTrace i "+i+" line:"+lines[i]+ "->frame: "+frame, frame);
+        if (frame)
+            trace.frames.push(frame);
+    }
+    return trace;
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

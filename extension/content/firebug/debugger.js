@@ -1677,8 +1677,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 delete context.sourceFileMap[src];
             else
                 delete context.sourceFileMap[safeGetWindowLocation(win)];
-            if (FBTrace.DBG_SOURCEFILES)    
-            	FBTrace.sysout("debugger.unWatchWindow delete sourceFileMap entry for "+(src?src:safeGetWindowLocation(win)) );
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("debugger.unWatchWindow delete sourceFileMap entry for "+(src?src:safeGetWindowLocation(win)) );
         }
         if (scriptTags.length > 0)
             context.invalidatePanels('script');
@@ -1986,6 +1986,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 this.scrollToLine(sourceLink.href, sourceLink.line, this.jumpHighlightFactory(sourceLink.line, this.context));
                 dispatch([Firebug.A11yModel], "onShowSourceLink", [this, sourceLink.line]);
             }
+            if (sourceLink == this.selection)  // then clear it so the next link will scroll and highlight.
+                delete this.selection;
         }
     },
 

@@ -1147,6 +1147,8 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     getCallName: function(frame)
     {
+        if (frame.fn)
+            return frame.fn;
         return getFunctionName(frame.script, frame.context);
     },
 
@@ -1170,12 +1172,23 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
             if (!arg)
                 break;
 
-            var rep = Firebug.getRep(arg.value);
-            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+            if (arg.value) // then we got these from jsd
+            {
+                var rep = Firebug.getRep(arg.value);
+                var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
-            var delim = (i == frame.args.length-1 ? "" : ", ");
+                var delim = (i == frame.args.length-1 ? "" : ", ");
 
-            items.push({name: arg.name, value: arg.value, tag: tag, delim: delim});
+                items.push({name: arg.name, value: arg.value, tag: tag, delim: delim});
+            }
+            else  // eg from Error object
+            {
+                var delim = (i == frame.args.length-1 ? "" : ", ");
+                var rep = Firebug.getRep(arg);
+                var tag = rep.shortTag ? rep.shortTag : rep.tag;
+
+                items.push({value: arg, tag: tag, delim: delim});
+            }
         }
 
         return items;
@@ -1312,13 +1325,11 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     getLine: function(error)
     {
-        if (error.category == "js")
-        {
-            if (error.source)
-                return cropString(error.source, 80);
-            else if (error.href && error.href.indexOf("XPCSafeJSObjectWrapper") == -1)
-                return cropString(error.getSourceLine(), 80);
-        }
+        if (error.source)
+            return cropString(error.source, 80);
+        if (error.category == "js" && error.href && error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
+            return "";
+        return cropString(error.getSourceLine(), 80);
     },
 
     getSourceLink: function(error)
