@@ -60,6 +60,7 @@ const prefNames =
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
+    "activateSameOrigin",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "netSearchHeaders", "netSearchParameters",
@@ -238,7 +239,7 @@ top.Firebug =
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y", "fbContinueButton", "fbBreakOnNextButton",
+            "menu_enableA11y", "menu_activateSameOrigin", "fbContinueButton", "fbBreakOnNextButton",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOff", "menu_AllOn"];
 
@@ -3381,6 +3382,21 @@ Firebug.URLSelector =
             .getService(Components.interfaces.nsIAnnotationService);
     },
 
+    convertToURIKey: function(url)  // process the URL to canonicalize it. Need not be reversible.
+    {
+
+        var uri = makeURI(normalizeURL(url));
+        if (Firebug.activateSameOrigin)
+        {
+            var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
+            uri = makeURI(prePath);
+            var host = uri.host;
+            var crossDomain = host.split('.').slice(-2)
+            uri.host = crossDomain.join('.');
+        }
+        return uri;
+    },
+
     shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
     {
         if (this.allPagesActivation == "off")
@@ -3391,10 +3407,10 @@ Firebug.URLSelector =
 
         try
         {
-            var uri = makeURI(normalizeURL(url));
+            var uri = this.convertToURIKey(url);
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec+" in "+browser.contentWindow.location);
+                FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec+" in "+browser.contentWindow.location+ " using activateSameOrigin: "+Firebug.activateSameOrigin);
 
             if (hasAnnotation)
             {
@@ -3412,12 +3428,12 @@ Firebug.URLSelector =
                 if (browser.FirebugLink) // then TabWatcher found a connection
                 {
                     var dst = browser.FirebugLink.dst;
-                    var dstURI = makeURI(normalizeURL(dst.spec));
+                    var dstURI = this.convertToURIKey(dst.spec);
                     if (FBTrace.DBG_ACTIVATION)
                         FBTrace.sysout("shouldCreateContext found FirebugLink pointing to does not match "+dstURI.spec, browser.FirebugLink);
                     if (dstURI.equals(uri)) // and it matches us now
                     {
-                        var srcURI = makeURI(normalizeURL(browser.FirebugLink.src.spec));
+                        var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec);
                         if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
                         {
                             hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
@@ -3482,7 +3498,7 @@ Firebug.URLSelector =
         var annotation = "firebugged.showFirebug";
 
         // mark this URI as firebugged
-        var uri = makeURI(normalizeURL(browser.currentURI.spec));
+        var uri = this.convertToURIKey(browser.currentURI.spec);
         this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
 
         if (FBTrace.DBG_ACTIVATION)
@@ -3495,7 +3511,7 @@ Firebug.URLSelector =
 
     unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
     {
-        var uri  = makeURI(normalizeURL(browser.currentURI.spec));
+        var uri  = this.convertToURIKey(browser.currentURI.spec);
 
         if (userCommands)  // then mark to not open virally.
         {

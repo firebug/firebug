@@ -113,7 +113,11 @@
                                       label="Firebug.menu.Enable Accessibility Enhancements"
                                       oncommand="FirebugChrome.onToggleOption(this)"
                                       option="a11y.enable"/>
-                        </menupopup>
+                            <menuitem type="checkbox" id="menu_activateSameOrigin"
+                                      label="Firebug.menu.Activate Same Origin URLs"
+                                      oncommand="FirebugChrome.onToggleOption(this)"
+                                      option="activateSameOrigin"/>
+                         </menupopup>
                     </menu>
 
                     <menuseparator/>

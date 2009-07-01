@@ -15,6 +15,7 @@ pref("extensions.firebug.preferEnabled.Script", false);
 pref("extensions.firebug.preferEnabled.Net", false);
 
 pref("extensions.firebug.allowDoublePost", false);
+pref("extensions.firebug.activateSameOrigin", true);
 
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);
