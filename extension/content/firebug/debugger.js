@@ -59,10 +59,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var result = {};
         var scriptToEval = js;
-        if (scope && scope.thisValue) {
-            // XXX need to stick scope.thisValue somewhere... frame.scope.globalObject?
-            scriptToEval = " (function() { return " + js + " }).apply(__thisValue__);";
-        }
 
         // This seem to be safe; eval'ing a getter property in content that tries to
         // be evil and get Components.classes results in a permission denied error.

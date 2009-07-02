@@ -474,7 +474,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         if(FBTrace.DBG_DOM)
         {
             FBTrace.sysout("row: "+row);
-            FBTrace.sysout("value: "+value);
+            FBTrace.sysout("value: "+value+" type "+typeof(value), value);
         }
 
         var name = getRowName(row);
@@ -489,12 +489,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
              Firebug.CommandLine.evaluate(value, this.context, object, this.context.getGlobalScope(),
                  function success(result, context)
                  {
+                     if (FBTrace.DBG_DOM)
+                         FBTrace.sysout("setPropertyValue evaluate success object["+name+"]="+result+" type "+typeof(result), result);
                      object[name] = result;
                  },
-                 function failed(result, context)
+                 function failed(exc, context)
                  {
                      try
                      {
+                         if (FBTrace.DBG_DOM)
+                              FBTrace.sysout("setPropertyValue evaluate failed with exc:"+exc+" object["+name+"]="+value+" type "+typeof(value), exc);
                          // If the value doesn't parse, then just store it as a string.  Some users will
                          // not realize they're supposed to enter a JavaScript expression and just type
                          // literal text
