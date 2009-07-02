@@ -156,10 +156,22 @@ ChannelListener.prototype =
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest EXCEPTION\n", err);
         }
 
-        // Possible exception from the following onStartRequest call is used by Firefox to
-        // cancel the request so, don't eat it (#1712).
         if (this.listener)
-            this.listener.onStartRequest(request, requestContext);
+        {
+            try  // https://bugzilla.mozilla.org/show_bug.cgi?id=492534
+            {
+                this.listener.onStartRequest(request, requestContext);
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest cancelling request at " +
+                    "(" + offset + ", " + count + ") EXCEPTION: " +
+                    safeGetName(request), exc);
+
+                request.cancel(exc.result);
+            }
+        }
     },
 
     onStopRequest: function(request, requestContext, statusCode)
