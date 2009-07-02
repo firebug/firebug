@@ -182,10 +182,12 @@ this.Func = domplate(Firebug.Rep,
 
     getTooltip: function(fn, context)
     {
+        /*  XXjjb I think this is very expensive...
         var script = findScriptForFunctionInContext(context, fn);
         if (script)
             return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
         else
+         */
             if (fn.toString)
                 return fn.toString();
     },
