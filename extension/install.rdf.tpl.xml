@@ -29,10 +29,18 @@
     <em:name>Firebug</em:name>
     <em:description>Web Development Evolved.</em:description>
     <em:creator>Joe Hewitt</em:creator>
-    <em:contributor>1.1 and 1.2 enhancements: John J. Barton (IBM Almaden)</em:contributor>
+    <em:contributor>John J. Barton (IBM Almaden)</em:contributor>
     <em:contributor>Jan Odvarko (All Peers Inc.)</em:contributor>
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:contributor>Rob Campbell (Mozilla Corp.)</em:contributor>
+    <em:contributor>Hans Hillen, (Paciello Group, Mozilla)</em:contributor>
+    <em:contributor>Curtis Bartley, (Mozilla Corp.)</em:contributor>
+    <em:contributor>Mike Collins, (IBM Almaden)</em:contributor>
+    <em:contributor>Kevin Decker</em:contributor>
+    <em:contributor>Mike Ratcliffe, (Comartis AG)</em:contributor>
+    <em:contributor>Hernan Rodríguez Colmeiro</em:contributor>
+    <em:contributor>Austin Andrews</em:contributor>
+    <em:contributor>Christoph Dorn</em:contributor>
     <em:iconURL>chrome://firebug/content/firebug.png</em:iconURL>
     <em:homepageURL>http://www.getfirebug.com/</em:homepageURL>
     <em:updateURL>http://getfirebug.com/releases/firebug/@VERSION@/update.rdf</em:updateURL>
