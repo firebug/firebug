@@ -18,6 +18,7 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 520: Firebug doesn't reload modified iFrame scripts until parent frame is reloaded;
  * Issue 872: JS Errors in IFrame with 1.2.0b3.
  * Issue 882: console.log() reports wrong source file and line number
+ * Issue 1282:  Editing boolean var in watch panel changes it to a string
  * Issue 1371: conditional breakpoint undefined?
  * Issue 1864:  Allow scripts to log exceptions as if uncaught
  * Issue 1866: "Remove all breakpoints" only removes every other breakpoint\
@@ -32,3 +33,4 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 1891: Some exceptions aren't caught even with "break on all errors"
  * Issue 1894: CSS-edit removes declaration if page with specific javascript
  * Issue 1928: Update Firebug Windows Script panel icons
+ * Issue 1947, update install.rdf(.tpl)+ with current contributors)
