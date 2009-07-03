@@ -3384,15 +3384,18 @@ Firebug.URLSelector =
 
     convertToURIKey: function(url)  // process the URL to canonicalize it. Need not be reversible.
     {
-
         var uri = makeURI(normalizeURL(url));
-        if (Firebug.activateSameOrigin)
+        if (uri && Firebug.activateSameOrigin)
         {
             var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
-            uri = makeURI(prePath);
-            var host = uri.host;
-            var crossDomain = host.split('.').slice(-2)
-            uri.host = crossDomain.join('.');
+            var shortURI = makeURI(prePath);
+            var host = shortURI.host;
+            if (host)
+            {
+                var crossDomain = host.split('.').slice(-2)
+                shortURI.host = crossDomain.join('.');
+                return shortURI
+            }
         }
         return uri;
     },
@@ -3408,6 +3411,9 @@ Firebug.URLSelector =
         try
         {
             var uri = this.convertToURIKey(url);
+            if (!uri)
+                return false;
+
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec+" in "+browser.contentWindow.location+ " using activateSameOrigin: "+Firebug.activateSameOrigin);
@@ -3431,7 +3437,7 @@ Firebug.URLSelector =
                     var dstURI = this.convertToURIKey(dst.spec);
                     if (FBTrace.DBG_ACTIVATION)
                         FBTrace.sysout("shouldCreateContext found FirebugLink pointing to does not match "+dstURI.spec, browser.FirebugLink);
-                    if (dstURI.equals(uri)) // and it matches us now
+                    if (dstURI && dstURI.equals(uri)) // and it matches us now
                     {
                         var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec);
                         if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
@@ -3499,7 +3505,8 @@ Firebug.URLSelector =
 
         // mark this URI as firebugged
         var uri = this.convertToURIKey(browser.currentURI.spec);
-        this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+        if (uri)
+            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
 
         if (FBTrace.DBG_ACTIVATION)
         {
@@ -3512,6 +3519,9 @@ Firebug.URLSelector =
     unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
     {
         var uri  = this.convertToURIKey(browser.currentURI.spec);
+
+        if (!uri)
+            return;
 
         if (userCommands)  // then mark to not open virally.
         {
