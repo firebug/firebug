@@ -261,9 +261,9 @@ Firebug.TraceModule = extend(Firebug.Module,
         // xxxHonza: find better solution for checking an ERROR messages
         // (setup some rules).
         var text = message.text;
-        if (text.indexOf("ERROR") != -1 ||
+        if (text && (text.indexOf("ERROR") != -1 ||
             text.indexOf("EXCEPTION") != -1 ||
-            text.indexOf("FAILS") != -1)
+            text.indexOf("FAILS") != -1))
         {
             message.type = "DBG_ERRORS";
         }
@@ -1230,6 +1230,9 @@ Firebug.TraceModule.TraceMessage.prototype =
 
     getLabel: function(maxLength)
     {
+        if (!this.text)
+            return "";
+
         if (maxLength <= 10 || this.text.length <= maxLength)
             return this.text.replace(/[\n]/g,"");
 
