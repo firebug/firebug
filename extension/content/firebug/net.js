@@ -847,7 +847,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
                 command: bindFixed(this.copyHeaders, this, file.responseHeaders) }
         );
 
-        if ( textFileCategories.hasOwnProperty(file.category) )
+        if (textFileCategories.hasOwnProperty(file.category))
         {
             items.push(
                 {label: "CopyResponse", command: bindFixed(this.copyResponse, this, file) }
@@ -2778,7 +2778,7 @@ function getFileCategory(file)
     {
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.getFileCategory; XHR for: " + file.href, file);
-        return "xhr";
+        return file.category = "xhr";
     }
 
     if (!file.mimeType)
