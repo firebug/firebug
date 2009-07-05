@@ -36,11 +36,14 @@ Firebug.CommandLine = extend(Firebug.Module,
       // The command-line requires that the console has been initialized first,
       // so make sure that's so.  This call should have no effect if the console
       // is already initialized.
-      Firebug.Console.isReadyElsePreparing(context, win);
+      var consoleIsReady = Firebug.Console.isReadyElsePreparing(context, win);
 
       // Make sure the command-line is initialized.  This call should have no
       // effect if the command-line is already initialized.
-      Firebug.CommandLine.isReadyElsePreparing(context, win);
+      var commandLineIsReady = Firebug.CommandLine.isReadyElsePreparing(context, win);
+
+      if (FBTrace.DBG_CONSOLE)
+          FBTrace.sysout("initializeCommandLineIfNeeded console ready: "+consoleIsReady +" commandLine ready: "+commandLineIsReady);
     },
 
     evaluate: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction) // returns user-level wrapped object I guess.
@@ -65,7 +68,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         catch (exc)  // XXX jjb, I don't expect this to be taken, the try here is for the finally
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("CommandLine.evaluate with context.stopped:"+context.stopped+" FAILS:", exc);
+                FBTrace.sysout("CommandLine.evaluate with context.stopped:"+context.stopped+" FAILS:"+exc, exc);
         }
         finally
         {
@@ -577,7 +580,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (!Firebug.CommandLine.isAttached(FirebugContext))
         {
-            Firebug.CommandLine.isReadyElsePreparing(FirebugContext);
+            return Firebug.CommandLine.isReadyElsePreparing(FirebugContext);
         }
         else
         {
@@ -593,6 +596,7 @@ Firebug.CommandLine = extend(Firebug.Module,
                     FBTrace.sysout("onCommandLineFocus, did NOT attachCommandLine ", e);
                 }
             }
+            return true; // is attached.
         }
     },
 

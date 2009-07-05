@@ -401,9 +401,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         {
             if (this.context.stopped)
                 Firebug.Editor.startEditing(row, "");
-            else if (Firebug.Console.isAlwaysEnabled())
+            else if (Firebug.Console.isAlwaysEnabled())  // not stopped in debugger, need command line
             {
-                if (Firebug.CommandLine.isReadyElsePreparing(this.context))
+                if (Firebug.CommandLine.onCommandLineFocus())
                     Firebug.Editor.startEditing(row, "");
                 else
                     row.innerHTML = $STR("command line blocked?");
@@ -1181,8 +1181,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         var members = [];
 
-        var showWatches = this.context.onLoadWindowContent || this.context.stopped;
-        if (this.watches && showWatches)
+        if (this.watches)
         {
             for (var i = 0; i < this.watches.length; ++i)
             {

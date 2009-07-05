@@ -17,9 +17,8 @@ top.Firebug.Console.injector =
         {
             var attached = (win.wrappedJSObject._getFirebugConsoleElement ? true : false);
             if (FBTrace.DBG_CONSOLE)
-            {
-                FBTrace.sysout("Console.isAttached:"+attached+" to win.wrappedJSObject "+win.wrappedJSObject.location+" context.activeConsoleHandlers:"+context.activeConsoleHandlers);
-            }
+                FBTrace.sysout("Console.isAttached:"+attached+" to win.wrappedJSObject "+safeGetWindowLocation(win.wrappedJSObject));
+
             return attached;
         }
         else
