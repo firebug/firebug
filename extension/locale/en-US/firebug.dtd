@@ -24,7 +24,7 @@
 <!ENTITY firebug.ShowFirebug "Open Firebug">
 <!ENTITY firebug.DetachFirebug "Open Firebug in New Window">
 <!ENTITY firebug.OpenWith "Open With Editor">
-<!ENTITY firebug.CloseFirebug "Close Firebug">
+<!ENTITY firebug.CloseFirebug "Deactivate Firebug For this web site">
 <!ENTITY firebug.Permissions "Sites...">
 <!ENTITY firebug.ConfigureEditors "Configure Editors">
 <!ENTITY firebug.CommandLine "Command Line">

@@ -204,7 +204,7 @@ top.FirebugChrome =
 
         window.removeEventListener("blur", onBlur, true);
         if (inDetachedScope)
-            this.detachBrowser(externalBrowser);
+            this.undetach();
         else
             Firebug.shutdown();
     },
@@ -234,6 +234,9 @@ top.FirebugChrome =
         {
             Firebug.setChrome(this, "detached"); // 1.4
 
+            FBL.collapse($("fbMinimizeButton"), true);  // Closing the external window will minimize
+            FBL.collapse($("fbDetachButton"), true);    // we are already detached.
+
             Firebug.showContext(browser, context);
 
             if (FBTrace.DBG_WINDOWS)
@@ -242,11 +245,13 @@ top.FirebugChrome =
 
     },
 
-    detachBrowser: function(browser)
+    undetach: function()
     {
         var detachedChrome = Firebug.chrome;
-        Firebug.setChrome(Firebug.originalChrome, "none");
-        Firebug.closeDetachedWindow(true);
+        Firebug.setChrome(Firebug.originalChrome, "minimized");
+
+        Firebug.showBar(false);
+        Firebug.resetTooltip();
 
         // when we are done here the window.closed will be true so we don't want to hang on to the ref.
         detachedChrome.window = "This is detached chrome!";

@@ -1068,8 +1068,11 @@ top.Firebug =
 
     toggleDetachBar: function(forceOpen)  // detached -> closed; inBrowser -> detached TODO reattach
     {
-        if (!forceOpen && Firebug.isDetached())  // detached -> closed
-            this.closeFirebug();
+        if (!forceOpen && Firebug.isDetached())  // detached -> minimized
+        {
+            Firebug.chrome.close();
+            detachCommand.setAttribute("checked", false);
+        }
         else
             this.detachBar(FirebugContext);
     },
