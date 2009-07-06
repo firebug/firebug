@@ -1542,11 +1542,17 @@ top.Firebug =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement+" with chrome "+Firebug.chrome.window.location);
 
-        for (Firebug.placement = 0; Firebug.placement < Firebug.placements.length; Firebug.placement++)
+        for (var i = 0; i < Firebug.placements.length; i++)
         {
-            if (toPlacement == Firebug.placements[Firebug.placement])
+            if (toPlacement == Firebug.placements[i])
             {
                 Firebug.resetTooltip();
+                if (Firebug.placement != i) // then we are changing the value
+                {
+                    Firebug.placement = i;
+                    delete Firebug.previousPlacement;
+                    Firebug.setPref(Firebug.prefDomain, "previousPlacement", Firebug.placement);
+                }
                 return Firebug.placement;
             }
         }
@@ -1558,6 +1564,13 @@ top.Firebug =
         return Firebug.placements[Firebug.placement];
     },
 
+    openMinimized: function()
+    {
+        if (!Firebug.previousPlacement)
+            Firebug.previousPlacement = Firebug.getPref(Firebug.prefDomain, "previousPlacement");
+
+        return (Firebug.previousPlacement && (Firebug.previousPlacement == PLACEMENT_MINIMIZED) )
+    },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // TabWatcher Listener
 
@@ -1654,8 +1667,12 @@ top.Firebug =
         {
             if (context)  // then we are opening a new context
             {
-                if (Firebug.openInWindow)
-                    this.detachBar(context);  // the placement will be set once the external window opens
+                if (Firebug.openInWindow)     // user wants detached
+                    this.detachBar(context);  //   the placement will be set once the external window opens
+                else if (Firebug.openMinimized())  // previous browser.xul had placement minimized
+                {
+                    this.minimizeBar();
+                }
                 else
                 {
                     this.setPlacement("inBrowser");
