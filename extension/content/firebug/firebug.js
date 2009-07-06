@@ -1184,10 +1184,12 @@ top.Firebug =
 
         if (offOrOn == "on" || offOrOn == "off")
         {
-            if (Firebug.URLSelector.allPagesActivation == offOrOn)
+            if (Firebug.URLSelector.allPagesActivation == offOrOn) // then we were armed
                 delete Firebug.URLSelector.allPagesActivation;
             else
                 (offOrOn == "off") ? Firebug.allOff() : Firebug.allOn();
+
+            Firebug.chrome.disableOff(Firebug.URLSelector.allPagesActivation == "on");  // don't show Off if we are always on
         }
         else
             delete Firebug.URLSelector.allPagesActivation;

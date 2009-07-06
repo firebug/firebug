@@ -257,6 +257,11 @@ top.FirebugChrome =
         detachedChrome.window = "This is detached chrome!";
     },
 
+    disableOff: function(collapse)
+    {
+        FBL.collapse($("fbCloseButton"), collapse);  // disable/enable this button in the Firebug.chrome window.
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getBrowsers: function()
