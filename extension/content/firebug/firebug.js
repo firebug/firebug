@@ -3407,10 +3407,17 @@ Firebug.URLSelector =
     convertToURIKey: function(url)  // process the URL to canonicalize it. Need not be reversible.
     {
         var uri = makeURI(normalizeURL(url));
+
+        if (url == "about:blank")  // avoid exceptions.
+            return uri;
+
         if (uri && Firebug.activateSameOrigin)
         {
             var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
             var shortURI = makeURI(prePath);
+            if (!shortURI)
+                return uri;
+
             var host = shortURI.host;
             if (host)
             {
