@@ -33,4 +33,6 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 1891: Some exceptions aren't caught even with "break on all errors"
  * Issue 1894: CSS-edit removes declaration if page with specific javascript
  * Issue 1928: Update Firebug Windows Script panel icons
- * Issue 1947, update install.rdf(.tpl)+ with current contributors)
+ * Issue 1947: update install.rdf(.tpl)+ with current contributors)
+ * Issue 1968: "On for all pages", but minimized - Firebug doen't stay minimized
+ * Issue 1970: Errors inside an XmlHttpRequest.onReadyStateChange fail silently
