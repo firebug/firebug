@@ -355,6 +355,36 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         }
         this.showCount(0);
     },
+    // ******************************************************************************
+
+    reparseXPC: function(errorMessage, context)
+    {
+        var reXPCError = /JavaScript Error:\s*\"([^\"]*)\"/;
+        var reFile = /file:\s*\"([^\"]*)\"/;
+        var reLine = /line:\s*(\d*)/;
+        var m = reXPCError.exec(errorMessage);
+        if (!m)
+            return null;
+        var msg = m[1];
+
+        var sourceFile = null;
+        m = reFile.exec(errorMessage);
+        if (m)
+            sourceFile = m[1];
+
+        var sourceLineNo = 0;
+        m = reLine.exec(errorMessage);
+        if (m)
+            sourceLineNo = m[1];
+
+        var sourceLine = null;
+        if (sourceFile && sourceLineNo && sourceLineNo != 0)
+            sourceLine = context.sourceCache.getLine(sourceFile, sourceLineNo);
+
+        var error = new ErrorMessage(msg, sourceFile,
+                sourceLineNo, sourceLine, "error", context, null);
+        return error;
+    }
 });
 
 // ************************************************************************************************
