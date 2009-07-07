@@ -1223,8 +1223,21 @@ top.Firebug =
                 TabWatcher.unwatchBrowser(context.browser);
         });
 
-        Firebug.closeFirebug();
+        if (Firebug.isDetached())
+        {
+            // The current detached chrome object is Firebug.chrome.
+            Firebug.chrome.close();  // should call unwatchBrowser
+            detachCommand.setAttribute("checked", false);
+            return;
+        }
 
+        if (Firebug.isInBrowser())
+        {
+            Firebug.chrome.hidePanel();
+            this.showBar(false);
+        }
+
+        Firebug.closeFirebug();
         Firebug.URLSelector.clearAll();  // and the past pages with contexts are forgotten.
     },
 
