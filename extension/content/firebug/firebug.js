@@ -1015,7 +1015,7 @@ top.Firebug =
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are debugging the selected tab
+        if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are already debugging the selected tab
         {
             if (Firebug.isDetached()) // if we are out of the browser focus the window
                 Firebug.chrome.focus();
@@ -1024,7 +1024,7 @@ top.Firebug =
             else if (!forceOpen)  // else isInBrowser
                 Firebug.minimizeBar();
         }
-        else // then user commands debugging the selected tab
+        else  // closed or no context or no showFirebug
         {
             if (FBTrace.DBG_ERRORS)
             {
@@ -1042,6 +1042,9 @@ top.Firebug =
                     FBTrace.sysout("Rejected page should explain to user!");
                 return false;
             }
+
+            if (Firebug.isMinimized()) // then toggle minimize
+                Firebug.unMinimize();
         }
         return true;
      },
