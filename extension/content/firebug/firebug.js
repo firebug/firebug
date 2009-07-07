@@ -982,11 +982,11 @@ top.Firebug =
             keys[i].setAttribute("disabled", !!shouldShow);
     },
 
-    closeFirebug: function(userCommand)
+    closeFirebug: function(userCommand)  // this is really deactivate
     {
         var browser = FirebugChrome.getCurrentBrowser();
 
-        if (Firebug.isDetached())
+        /*if (Firebug.isDetached())
         {
             // The current detached chrome object is Firebug.chrome.
             Firebug.chrome.close();  // should call unwatchBrowser
@@ -1000,6 +1000,7 @@ top.Firebug =
             this.showBar(false);
         }
         // else minimized nothing to do
+        */
 
         TabWatcher.unwatchBrowser(browser, userCommand);
         Firebug.resetTooltip();
@@ -1656,15 +1657,14 @@ top.Firebug =
             var resumeBox = Firebug.chrome.$('fbResumeBox');
             if (context)
             {
-                contentBox.setAttribute("collapsed", false);
+                collapse(contentBox, false);
                 Firebug.chrome.syncPanel();
-                resumeBox.setAttribute("collapsed", "true");
+                collapse(resumeBox, true);
             }
             else
             {
-                contentBox.setAttribute("collapsed", true);
-                resumeBox.removeAttribute("collapsed");
-
+                collapse(contentBox, true);
+                collapse(resumeBox, false);
                 Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
             }
         }

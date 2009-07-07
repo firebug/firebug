@@ -381,6 +381,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 ", context: " + context);
 
         this.unwatchContext(win, context);
+
         return true; // we might later allow extensions to reject unwatch
     },
 
@@ -446,10 +447,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!browser)
             return;
 
-        var detached = Firebug.isDetached();
-        var shouldDispatch = true;
-        if (!detached)  // if we are detached we don't want to unwatchTopWindow, just go dormant
-            shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
+        var shouldDispatch = this.unwatchTopWindow(browser.contentWindow);
 
         if (shouldDispatch)
         {
@@ -510,6 +508,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         context.destroy(persistedState);
         remove(contexts, context);
+
+        dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
