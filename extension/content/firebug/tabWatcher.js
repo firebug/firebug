@@ -480,7 +480,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 browser.persistedState = {};
                 delete browser.showFirebug;
             }
-            dispatch(this.fbListeners, "destroyContext", [null, browser?browser.persistedState:null, browser]);
+            dispatch(this.fbListeners, "destroyContext", [null, (browser?browser.persistedState:null), browser]);
             return;
         }
 
@@ -509,7 +509,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         context.destroy(persistedState);
         remove(contexts, context);
 
-        dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
+        if (Firebug.tabBrowser.selectedBrowser == context.browser)  // unwatchContext can be called on an unload event after another tab is selected
+            dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
