@@ -1696,8 +1696,6 @@ top.Firebug =
     unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
     {
         Firebug.updateActiveContexts(null);
-        if (TabWatcher.contexts.length < 1)  // TODO shutdown ?
-            Firebug.setPlacement("none");
     },
 
     // Either a top level or a frame, (interior window) for an exist context is seen by the tabWatcher.
