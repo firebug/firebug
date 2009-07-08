@@ -2194,7 +2194,7 @@ this.getAllStyleSheets = function(context)
     {
         var sheetLocation =  FBL.getURLForStyleSheet(sheet);
 
-        if (FBL.isSystemURL(sheetLocation) && Firebug.filterSystemURLs)
+        if (!Firebug.showUserAgentCSS && FBL.isSystemURL(sheetLocation))
             return;
 
         if (!sheet.href || !recordedSheets[sheet.href])
