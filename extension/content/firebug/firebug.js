@@ -1198,6 +1198,7 @@ top.Firebug =
         else
             delete Firebug.URLSelector.allPagesActivation;
 
+        Firebug.setPref(Firebug.prefDomain, "allPagesActivation",  Firebug.URLSelector.allPagesActivation);
         Firebug.updateAllPagesActivation();
     },
 
@@ -3416,6 +3417,8 @@ Firebug.URLSelector =
     {
         this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
             .getService(Components.interfaces.nsIAnnotationService);
+        this.allPagesActivation = Firebug.getPref(Firebug.prefDomain, "allPagesActivation");
+        Firebug.updateAllPagesActivation();
     },
 
     convertToURIKey: function(url)  // process the URL to canonicalize it. Need not be reversible.
