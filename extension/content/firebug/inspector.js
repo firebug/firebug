@@ -41,7 +41,12 @@ Firebug.Inspector = extend(Firebug.Module,
         }
 
         if (!element || !isElement(element) || !isVisible(element))
-            element = null;
+        {
+            if(element && element.nodeType == 3)
+                element = element.parentNode;
+            else
+                element = null;
+        }
 
         if (element && context && context.highlightTimeout)
         {

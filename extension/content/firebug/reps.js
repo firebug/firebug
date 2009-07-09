@@ -770,9 +770,19 @@ this.TextNode = domplate(Firebug.Rep,
 
     className: "textNode",
 
+    inspectObject: function(node, context)
+    {
+        Firebug.chrome.select(node, "html", "domSide");
+    },
+
     supportsObject: function(object)
     {
         return object instanceof Text;
+    },
+
+    getTitle: function(win, context)
+    {
+        return "textNode";
     }
 });
 
