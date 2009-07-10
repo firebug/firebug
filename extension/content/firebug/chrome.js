@@ -37,7 +37,6 @@ var panelBox, panelSplitter, sidePanelDeck, panelBar1, panelBar2, locationList, 
 var waitingPanelBarCount = 2;
 
 var inDetachedScope = (window.location == "chrome://firebug/content/firebug.xul");
-var externalBrowser = null;
 
 var disabledHead = null;
 var disabledCaption = null;
@@ -143,9 +142,6 @@ top.FirebugChrome =
             if (window.arguments)
                 var detachArgs = window.arguments[0];
 
-            if (detachArgs)
-                externalBrowser = detachArgs.browser;// else undefined
-
             this.applyTextSize(Firebug.textSize);
 
             var doc1 = panelBar1.browser.contentDocument;
@@ -173,7 +169,7 @@ top.FirebugChrome =
             this.updatePanelBar1(Firebug.panelTypes);
 
             if (inDetachedScope)
-                this.attachBrowser(externalBrowser, FirebugContext);
+                this.attachBrowser(FirebugContext);
             else
                 Firebug.initializeUI(detachArgs);
 
@@ -224,7 +220,7 @@ top.FirebugChrome =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    attachBrowser: function(browser, context)  // XXXjjb context == (FirebugContext || null)  and inDetachedScope == true
+    attachBrowser: function(context)  // XXXjjb context == (FirebugContext || null)  and inDetachedScope == true
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("chrome.attachBrowser with inDetachedScope="+inDetachedScope+" context="+context
@@ -237,6 +233,7 @@ top.FirebugChrome =
             FBL.collapse($("fbMinimizeButton"), true);  // Closing the external window will minimize
             FBL.collapse($("fbDetachButton"), true);    // we are already detached.
 
+            var browser = context ? context.browser : this.getCurrentBrowser();
             Firebug.showContext(browser, context);
 
             if (FBTrace.DBG_WINDOWS)
@@ -271,32 +268,14 @@ top.FirebugChrome =
 
     getCurrentBrowser: function()
     {
-        return externalBrowser ? externalBrowser : Firebug.tabBrowser.selectedBrowser;
+        return Firebug.tabBrowser.selectedBrowser;
     },
 
     getCurrentURI: function()
     {
         try
         {
-            if (externalBrowser)
-                return externalBrowser.currentURI;
-            else
-                return Firebug.tabBrowser.currentURI;
-        }
-        catch (exc)
-        {
-            return null;
-        }
-    },
-
-    getBrowserURI: function(context)
-    {
-        try
-        {
-            if (externalBrowser)
-                return externalBrowser.currentURI;
-            if (context && context.browser)
-                return context.browser.currentURI;
+            return Firebug.tabBrowser.currentURI;
         }
         catch (exc)
         {
@@ -622,7 +601,7 @@ top.FirebugChrome =
             panelBar1.selectPanel(null, true);
         }
 
-        if (externalBrowser)
+        if (Firebug.isDetached())
             this.syncTitle();
     },
 
