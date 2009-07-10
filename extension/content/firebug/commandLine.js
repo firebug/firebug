@@ -1010,6 +1010,8 @@ Firebug.CommandLine.injector = {
     {
         var scriptSource = getResource("chrome://firebug/content/commandLineInjected.js");
         Firebug.Debugger.evaluate(scriptSource, context);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("evalCommandLineScript ", scriptSource);
     },
 
     injectCommandLineScript: function(doc)
