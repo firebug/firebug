@@ -509,7 +509,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         context.destroy(persistedState);
         remove(contexts, context);
 
-        if (!Firebug.tabBrowser.selectedBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected
+        var currentBrowser = Firebug.chrome.getCurrentBrowser();
+        if (!currentBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected
             dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
     },
 
