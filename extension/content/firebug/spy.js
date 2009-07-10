@@ -511,10 +511,10 @@ function onHTTPSpyReadyStateChange(spy, event)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION", exc);
+            FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION "+exc, [exc, event]);
 
         if (exc.name != "NS_ERROR_XPC_JAVASCRIPT_ERROR_WITH_DETAILS")
-            Firebug.Console.logFormatted(["onreadystatechange FAILS "+exc, exc, spy.onreadystatechange], spy.context, "error", true);
+            Firebug.Console.logFormatted(["onreadystatechange FAILS "+exc, exc, event], spy.context, "error", true);
         else
         {
             var error = Firebug.Errors.reparseXPC(exc, spy.context);
