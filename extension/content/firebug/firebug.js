@@ -1551,7 +1551,7 @@ top.Firebug =
 
     placements: ["none", "inBrowser", "detached", "minimized"],
 
-    placement: 0,
+    placement: 1,
 
     setPlacement: function(toPlacement)
     {
