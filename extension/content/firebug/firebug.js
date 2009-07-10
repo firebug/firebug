@@ -1015,7 +1015,7 @@ top.Firebug =
         if (panelName)
             Firebug.chrome.selectPanel(panelName);
 
-        if (!Firebug.isClosed() && FirebugContext && browser.showFirebug)  // then we are already debugging the selected tab
+        if (FirebugContext && browser.showFirebug)  // then we are already debugging the selected tab
         {
             if (Firebug.isDetached()) // if we are out of the browser focus the window
                 Firebug.chrome.focus();
@@ -1028,8 +1028,6 @@ top.Firebug =
         {
             if (FBTrace.DBG_ERRORS)
             {
-                if (FirebugContext && Firebug.isClosed())
-                    FBTrace.sysout("ASSERT: Firebug.isClosed() and FirebugContext:"+FirebugContext.getName()+getStackDump());
                 var context = TabWatcher.getContextByWindow(browser.contentWindow);
                 if (context) // ASSERT: we should not have showFirebug false on a page with a context
                     FBTrace.sysout("Firebug.toggleBar: placement "+this.getPlacement()+ " context: "+context.getName()+" FirebugContext: "+(FirebugContext?FirebugContext.getName():"null")+" browser.showFirebug:"+browser.showFirebug);
@@ -1536,11 +1534,6 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Placement
 
-    isClosed: function()
-    {
-        return Firebug.placement == PLACEMENT_NONE;
-    },
-
     isDetached: function()
     {
         return Firebug.placement == PLACEMENT_DETACHED;
@@ -1664,50 +1657,47 @@ top.Firebug =
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
-        if (Firebug.isMinimized())
+        if (Firebug.openInWindow && !Firebug.isDetached())  // user wants detached but we are not yet
         {
-            this.showBar(false);  // don't show, we are minimized
-        }
-        else if (Firebug.isDetached())
-        {
-            var contentBox = Firebug.chrome.$('fbContentBox');
-            var resumeBox = Firebug.chrome.$('fbResumeBox');
             if (context)
-            {
-                collapse(contentBox, false);
-                Firebug.chrome.syncPanel();
-                collapse(resumeBox, true);
-            }
-            else
-            {
-                collapse(contentBox, true);
-                collapse(resumeBox, false);
-                Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
-            }
-        }
-        else if (Firebug.isClosed())
-        {
-            if (context)  // then we are opening a new context
-            {
-                if (Firebug.openInWindow)     // user wants detached
-                    this.detachBar(context);  //   the placement will be set once the external window opens
-                else if (Firebug.openMinimized())  // previous browser.xul had placement minimized
-                {
-                    this.minimizeBar();
-                }
-                else
-                {
-                    this.setPlacement("inBrowser");
-                    this.showBar(true);
-                }
-            }
-            // else should not happen
-        }
-        else  // inBrowser
-        {
-            this.showBar(context?true:false);
+                this.detachBar(context);  //   the placement will be set once the external window opens
+            else  // just make sure we are not showing
+                this.showBar(false);
+
+            return;
         }
 
+        if (Firebug.openMinimized() && !Firebug.isMinimized())  // previous browser.xul had placement minimized
+        {
+            this.minimizeBar();
+            return;
+        }
+
+        if (Firebug.isMinimized())
+            this.showBar(false);  // don't show, we are minimized
+        else if (Firebug.isDetached())
+            this.syncResumeBox(context);
+        else  // inBrowser
+            this.showBar(context?true:false);
+
+    },
+
+    syncResumeBox: function(context)
+    {
+        var contentBox = Firebug.chrome.$('fbContentBox');
+        var resumeBox = Firebug.chrome.$('fbResumeBox');
+        if (context)
+        {
+            collapse(contentBox, false);
+            Firebug.chrome.syncPanel();
+            collapse(resumeBox, true);
+        }
+        else
+        {
+            collapse(contentBox, true);
+            collapse(resumeBox, false);
+            Firebug.chrome.window.document.title = $STR("Firebug - inactive for selected Firefox tab");
+        }
     },
 
     unwatchBrowser: function(browser)  // the context for this browser has been destroyed and removed
