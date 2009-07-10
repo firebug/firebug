@@ -438,12 +438,17 @@ top.Firebug =
                 $STR("Total_Firebug"):$STR("Total_Firebugs"));
         }
 
-        if (Firebug.URLSelector.allPagesActivation)
+        if (Firebug.URLSelector.allPagesActivation == "on")
         {
-            var label = Firebug.URLSelector.allPagesActivation == "on" ?
-                $STR("enablement.on") : $STR("enablement.off");
+            var label = $STR("enablement.on");
             tooltip += "\n"+label+" "+$STR("enablement.for all pages");
         }
+        if (Firebug.URLSelector.allPagesActivation == "off")
+        {
+            var label = $STR("enablement.off");
+            tooltip += "\n"+label+" "+$STR("enablement.for all pages");
+        }
+        // else allPagesActivation == "none" we don't show it.
 
         tooltip += "\n" + $STR(Firebug.getPlacement());
 
