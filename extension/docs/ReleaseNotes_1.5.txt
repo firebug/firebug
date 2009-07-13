@@ -15,11 +15,13 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
 
 
 == Bug Fixes ==
+ * issue 64: Displaying TextNodes with their content directly causes debugging headache
  * Issue 520: Firebug doesn't reload modified iFrame scripts until parent frame is reloaded;
  * Issue 872: JS Errors in IFrame with 1.2.0b3.
  * Issue 882: console.log() reports wrong source file and line number
  * Issue 1282:  Editing boolean var in watch panel changes it to a string
  * Issue 1371: conditional breakpoint undefined?
+ * Issue 1697: Console stops auto-scrolling
  * Issue 1864:  Allow scripts to log exceptions as if uncaught
  * Issue 1866: "Remove all breakpoints" only removes every other breakpoint\
  * Issue 1865: ignoring java reserved keywords even when nested in javascript objects
@@ -36,3 +38,5 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 1947: update install.rdf(.tpl)+ with current contributors)
  * Issue 1968: "On for all pages", but minimized - Firebug doen't stay minimized
  * Issue 1970: Errors inside an XmlHttpRequest.onReadyStateChange fail silently
+ * Issue 2010: Tracing Console -> Rightclick on message -> Remove ~ fails to remove details of open messages
+ * Issue 2022: new off icon
