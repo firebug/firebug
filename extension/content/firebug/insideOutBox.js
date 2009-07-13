@@ -230,7 +230,10 @@ InsideOutBox.prototype =
         if (!object)
             return null;
 
-            this.rootObject = this.getRootNode(object);
+        if(object.nodeType == 3)
+            object = object.parentNode;
+
+        this.rootObject = this.getRootNode(object);
 
         // Get or create all of the boxes for the target and its ancestors
         var objectBox = this.createObjectBoxes(object, this.rootObject);
