@@ -1207,9 +1207,9 @@ this.getOverflowParent = function(element)
 
 this.isScrolledToBottom = function(element)
 {
-    var onBottom = element.scrollTop + element.offsetHeight == element.scrollHeight;
+    var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
     if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("isScrolledToBottom "+onBottom+" wasScrolledToBottom: "+element.wasScrolledToBottom);
+        FBTrace.sysout("isScrolledToBottom "+onBottom+" wasScrolledToBottom: "+this.wasScrolledToBottom);
     return onBottom;
 };
 
@@ -1218,7 +1218,9 @@ this.scrollToBottom = function(element)
     element.scrollTop = element.scrollHeight - element.offsetHeight;
 
     if (FBTrace.DBG_CONSOLE)
-        element.wasScrolledToBottom = true;
+        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" wasScrolledToBottom: "+this.wasScrolledToBottom);
+
+    this.wasScrolledToBottom = true;
 };
 
 this.move = function(element, x, y)

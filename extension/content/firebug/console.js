@@ -312,7 +312,7 @@ Firebug.ConsolePanel = function () {} // XXjjb attach Firebug so this panel can 
 
 Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 {
-    wasScrolledToBottom: true,
+    wasScrolledToBottom: false,
     messageCount: 0,
     lastLogTime: 0,
     groups: null,
@@ -508,6 +508,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              Firebug.Console.disabledPanelPage.hide(this);
              this.showCommandLine(true);
              this.showToolbarButtons("fbConsoleButtons", true);
+             if (this.wasScrolledToBottom)
+                 scrollToBottom(this.panelNode);
         }
         else
         {
