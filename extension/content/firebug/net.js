@@ -734,6 +734,8 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (enabled)
         {
             Firebug.NetMonitor.disabledPanelPage.hide(this);
+            if (!this.context.stopped)
+                Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
         }
         else
         {
@@ -763,6 +765,9 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             FBTrace.sysout("net.netPanel.hide; " + this.context.getName());
 
         this.showToolbarButtons("fbNetButtons", false);
+
+        if (!this.context.stopped)
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
 
         Firebug.Debugger.syncCommands(this.context);
 
