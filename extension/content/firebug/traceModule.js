@@ -791,8 +791,10 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     onRemoveMessage: function(message)
     {
-        var parentNode = message.row.parentNode;
-        parentNode.removeChild(message.row);
+        var row = message.row;
+        var parentNode = row.parentNode;
+        this.toggleRow(row, false);
+        parentNode.removeChild(row);
     },
 
     onCopyStack: function(message)
@@ -915,11 +917,11 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             this.toggleRow(row, true);
     },
 
-    toggleRow: function(row, forceOpen)
+    toggleRow: function(row, state)
     {
         var opened = hasClass(row, "opened");
-        if (opened && forceOpen)
-            return;
+        if ((state != null) && (opened == state))
+             return;
 
         toggleClass(row, "opened");
 
@@ -933,7 +935,6 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             var messageInfo = HelperDomplate.replace(this.bodyTag,
                 {message: message}, bodyRow.firstChild);
             message.bodyRow = bodyRow;
-
 
             this.selectTabByName(messageInfo, "Stack");
         }
