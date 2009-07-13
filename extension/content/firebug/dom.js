@@ -406,10 +406,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 if (Firebug.CommandLine.onCommandLineFocus())
                     Firebug.Editor.startEditing(row, "");
                 else
-                    row.innerHTML = $STR("command line blocked?");
+                    row.innerHTML = $STR("warning.Command line blocked?");
             }
             else
-                row.innerHTML = $STR("Console must be enabled");
+                row.innerHTML = $STR("warning.Console must be enabled");
         }
         else if (hasClass(row, "watchRow"))
             Firebug.Editor.startEditing(row, getRowName(row));
