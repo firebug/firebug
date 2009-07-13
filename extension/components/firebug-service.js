@@ -390,6 +390,11 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    forceGarbageCollection: function()
+    {
+        jsd.GC(); // Force the engine to perform garbage collection.
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     enterNestedEventLoop: function(callback)
     {
@@ -2596,8 +2601,8 @@ function getFrameWindow(frame)
             return;
     try
     {
-    	if (FBTrace.DBG_FBS_SRCUNITS)
-    		FBTrace.sysout("fbs: resort to getFrameWindow");
+        if (FBTrace.DBG_FBS_SRCUNITS)
+            FBTrace.sysout("fbs: resort to getFrameWindow");
         var result = {};
         frame.eval("window", "", 1, result);
         var win = result.value.getWrappedValue();
