@@ -13,19 +13,19 @@
 <!ENTITY firebug.NormalTextSize "Normale tekstgrootte">
 <!ENTITY firebug.ShowTooltips "Voorbeeldweergavetooltips weergeven">
 <!ENTITY firebug.ShadeBoxModel "Schaduwboxmodel">
-<!ENTITY firebug.Website "Firebug website...">
-<!ENTITY firebug.Documentation "Documentatie...">
-<!ENTITY firebug.KeyShortcuts "Sneltoetsen...">
-<!ENTITY firebug.Forums "Discussiegroep...">
-<!ENTITY firebug.Issues "Probleem volgen...">
-<!ENTITY firebug.Donate "Doneren...">
-<!ENTITY firebug.About "Over...">
+<!ENTITY firebug.Website "Firebug website…">
+<!ENTITY firebug.Documentation "Documentatie…">
+<!ENTITY firebug.KeyShortcuts "Sneltoetsen…">
+<!ENTITY firebug.Forums "Discussiegroep…">
+<!ENTITY firebug.Issues "Probleem volgen…">
+<!ENTITY firebug.Donate "Doneren…">
+<!ENTITY firebug.About "Over…">
 <!ENTITY firebug.AlwaysOpenInWindow "Altijd in nieuw venster openen">
 <!ENTITY firebug.ShowFirebug "Firebug openen">
 <!ENTITY firebug.DetachFirebug "Firebug in nieuw venster openen">
 <!ENTITY firebug.OpenWith "Met tekstbewerker openen">
 <!ENTITY firebug.CloseFirebug "Firebug sluiten">
-<!ENTITY firebug.Permissions "Sites...">
+<!ENTITY firebug.Permissions "Sites…">
 <!ENTITY firebug.ConfigureEditors "Tekstbewerkers instellen">
 <!ENTITY firebug.CommandLine "Opdrachtregel">
 <!ENTITY firebug.Search "Zoeken">

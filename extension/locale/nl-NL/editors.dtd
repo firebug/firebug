@@ -6,7 +6,7 @@
 <!ENTITY remove.label "Verwijderen">
 <!ENTITY change.label "Wijzigen">
 <!ENTITY close.label "Sluiten">
-<!ENTITY browse.label "Bladeren...">
+<!ENTITY browse.label "Bladeren…">
 <!ENTITY changeEditor.Name "Naam:">
 <!ENTITY changeEditor.Executable "Uitvoerbaar bestand:">
 <!ENTITY changeEditor.CmdLine "Argumenten:">
