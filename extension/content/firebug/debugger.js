@@ -291,7 +291,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
             FBTrace.sysout("debugger.breakOnNext "+context.getName()+ " breakable: "+breakable, breakable);
 
-        if (breakable == "true")
+        if (breakable == "disabled")
+            return;
+        else if (breakable == "true")
             this.suspend(context);  // arm breakOnNext
         else {
             Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
@@ -2378,6 +2380,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (enabled)
         {
             Firebug.Debugger.disabledPanelPage.hide(this);
+
+            if (!this.context.stopped)
+                Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true"); // allow break on next
+
             if (this.context.loaded)
             {
                 if(!this.location)
@@ -2424,8 +2430,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hide: function(state)
     {
-        if (!this.context.stopped) // leave the buttons so we can see that we are stopped
+        if (!this.context.stopped)
+        {
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
             this.showToolbarButtons("fbDebuggerButtons", false);
+        } // else leave the buttons so we can see that we are stopped
 
         this.showToolbarButtons("fbScriptButtons", false);
         var panelStatus = Firebug.chrome.getPanelStatusElements();

@@ -165,12 +165,13 @@ fbContinueButton has three states:
 #fbBreakOnNextButton:hover:active {
     list-style-image: url(chrome://firebug/skin/continueActive.png);
 }
+*/
 
-#fbContinueButton[disabled="true"],
-#fbBreakOnNextButton[disabled="true"] {   no longer used
-    list-style-image: url(chrome://firebug/skin/continueDisabled.png) !important;
+#fbContinueButton[breakable="disabled"],
+#fbBreakOnNextButton[breakable="disabled"] {
+    list-style-image: url(chrome://firebug/skin/breakNextDisabled.png) !important;
 }
- */
+
 
 #fbContinueButton[breakable="true"],
 #fbBreakOnNextButton[breakable="true"] {
