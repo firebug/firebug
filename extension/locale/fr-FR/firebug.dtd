@@ -48,5 +48,3 @@
 <!ENTITY firebug.All "Tous">
 <!ENTITY firebug.Images "Images">
 <!ENTITY firebug.Flash "Flash">
-<!ENTITY firebug.Trace.ToggleConsole "Ouvrir la console">
-<!ENTITY firebug.Trace.ToggleConsoleTooltip "Ouvrir la console de traces de Firebug.">
