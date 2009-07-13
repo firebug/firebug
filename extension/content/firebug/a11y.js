@@ -296,7 +296,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var isButton = target.nodeName.search(/(xul:)?toolbarbutton/) != -1;
         var isDropDownMenu = isButton && target.getAttribute('type') == "menu";
         var siblingTab, forward, toolbar, buttons;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
 
         if (keyCode == KeyEvent.DOM_VK_TAB)
             this.ensurePanelTabStops(); //TODO: need a better solution to prevent loss of panel tabstop
@@ -510,7 +510,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     onConsoleKeyPress : function(event)
     {
         var target = event.target;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
 
         if (!this.isTabWorthy(target) && !this.isFocusNoTabObject(target))
             return;
@@ -746,7 +746,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     onHTMLKeyPress: function(event)
     {
         var target = event.target;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if ([13, 32, KeyEvent.DOM_VK_F2].indexOf(keyCode) == -1)
             return;
         if (!hasClass(target, "nodeLabelBox"))
@@ -893,7 +893,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     onCSSKeyPress : function(event)
     {
         var target = event.target;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if (!this.isFocusRow(target))
             return;
         else if (event.altKey)
@@ -1227,7 +1227,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     onLayoutKeyPress : function(event)
     {
         var target = event.target;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if ([13, 37, 38, 39, 40].indexOf(keyCode) == -1)
             return;
         if (!hasClass(target, 'focusGroup'))
@@ -1418,7 +1418,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     onScriptKeyPress : function(event)
     {
         var target = event.target;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if (!hasClass(target, 'sourceViewport'))
             return;
       if ([13, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
@@ -1528,7 +1528,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     onScriptKeyUp : function(event)
     {
         var target = event.target;
-        var keyCode = event.keyCode || event.charCode;
+        var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
         if (!hasClass(target, 'sourceViewport'))
             return;
         if ([13, 33, 34, 35, 36, 37, 38, 39, 40].indexOf(keyCode) == -1)
