@@ -5,14 +5,14 @@
 <!ENTITY firebug.Vertical "Függőleges panelek">
 <!ENTITY firebug.Run "Futtatás">
 <!ENTITY firebug.Copy "Másolás">
-<!ENTITY firebug.CopyBookmarklet "Szkript másolása mint bookmarklet-ként.">
+<!ENTITY firebug.CopyBookmarklet "Szkript másolása bookmarkletként">
 <!ENTITY firebug.Options "Beállítások">
 <!ENTITY firebug.TextSize "Szöveg nagyítása">
 <!ENTITY firebug.IncreaseTextSize "Nagyítás">
 <!ENTITY firebug.DecreaseTextSize "Kicsinyítés">
 <!ENTITY firebug.NormalTextSize "Visszaállítás">
 <!ENTITY firebug.ShowTooltips "Tippek megjelenítése">
-<!ENTITY firebug.ShadeBoxModel "Doboz modell árnyalása">
+<!ENTITY firebug.ShadeBoxModel "Doboz modell kiemelése">
 <!ENTITY firebug.Website "Firebug honlap...">
 <!ENTITY firebug.Documentation "Dokumentáció...">
 <!ENTITY firebug.KeyShortcuts "Gyorsbillentyűk...">
@@ -40,9 +40,9 @@
 <!ENTITY firebug.Edit "Szerkesztés">
 <!ENTITY firebug.EditHTMLTooltip "HTML szerkesztése">
 <!ENTITY firebug.EditCSSTooltip "Stíluslap szerkesztése">
-<!ENTITY firebug.Profile "Elemzés">
-<!ENTITY firebug.ProfileScript "JavaScript elemzés">
-<!ENTITY firebug.Clear "Törlés">
+<!ENTITY firebug.Profile "Futásidő elemzés">
+<!ENTITY firebug.ProfileScript "JavaScript futásidő elemzés">
+<!ENTITY firebug.Clear "Ürítés">
 <!ENTITY firebug.ClearConsole "Konzol ürítése">
 <!ENTITY firebug.ClearTooltip "Konzol ürítése">
 <!ENTITY firebug.All "Mind">
