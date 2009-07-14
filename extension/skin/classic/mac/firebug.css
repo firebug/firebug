@@ -391,3 +391,10 @@ panelTab[selected="true"] > .panelTab-right {
 .toolbar-label {
     color: #565656;
 }
+
+/* ensure the inner toolbar background looks the same as the other toolbars */
+#fbToolbarInner.innerToolbar {
+    background: #F6F6F6 url(chrome://firebug/skin/mac/toolbar.gif) repeat-x;
+    margin-left: -5px;
+    margin-right: 0px;
+}
