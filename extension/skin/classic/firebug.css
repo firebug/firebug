@@ -8,6 +8,39 @@
   list-style-image: url(chrome://firebug/skin/inspectDisabled.png);
 }
 
+#fbInspectButton {
+    margin-bottom: 1px;
+    padding: 0px;
+    opacity: 0.8;
+
+    /* The default styling does not always keep button size contant or image
+       position constant, e.g. when [checked="true"].  These numbers were
+       chosen to keep them constant against the default winstripe styling. */
+    padding-top: 4px;
+    padding-bottom: 2px;
+    -moz-padding-start: 4px;
+    -moz-padding-end: 2px;
+}
+
+#fbInspectButton image {
+    margin-right: 3px;
+    margin-bottom: 1px;
+}
+
+#fbBreakOnNextButton {
+    margin-bottom: 1px;
+    opacity: 0.8;
+    padding-right: 2px;
+    padding-left: 2px;
+        /* The default styling does not always keep button size contant or image
+       position constant, e.g. when [checked="true"].  These numbers were
+       chosen to keep them constant against the default winstripe styling. */
+    padding-top: 4px;
+    padding-bottom: 2px;
+    -moz-padding-start: 4px;
+    -moz-padding-end: 2px;
+}
+
 toolbar[iconsize="small"] #inspector-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/inspectSmall.png);
     width: 16px;
@@ -145,20 +178,25 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 /*
-fbContinueButton has three states:
+fbBreakOnNextButton has four states:
+   disabled true: program control, no UI
    breakable true: default.
    breakable false: breakOnNext is armed.
    breakable off: we are stopped in debugger. always goes to true
-   true -> false: onBreakingNext
+
+   disabled true -> false: program control. if (stopped) breakable off, else breakable true
+   breakable true -> false: onBreakingNext
    true -> off: syncCommands with context.stopped true
    false -> true: resume w/!context.stopped and !breakable
    false -> off: syncCommands with context.stopped true
    off -> true:  resume w/context.stopped
    off -> false: not allowed
+fbBreakOnNextButton
 */
 #fbContinueButton[breakable="off"],
 #fbBreakOnNextButton[breakable="off"] {
     list-style-image: url(chrome://firebug/skin/continue.png);
+    padding-right: 2px;
 }
 /*
 #fbContinueButton:hover:active,
@@ -166,7 +204,6 @@ fbContinueButton has three states:
     list-style-image: url(chrome://firebug/skin/continueActive.png);
 }
 */
-
 #fbContinueButton[breakable="disabled"],
 #fbBreakOnNextButton[breakable="disabled"] {
     list-style-image: url(chrome://firebug/skin/breakNextDisabled.png) !important;
@@ -176,50 +213,62 @@ fbContinueButton has three states:
 #fbContinueButton[breakable="true"],
 #fbBreakOnNextButton[breakable="true"] {
     list-style-image: url(chrome://firebug/skin/breakNext.png);
+    padding-right: 2px;
 }
 #fbContinueButton:hover:active[breakable="true"],
 #fbBreakOnNextButton:hover:active[breakable="true"] {
-   list-style-image: url(chrome://firebug/skin/breakNextActive.png)
+    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
+    padding-right: 2px;
 }
 #fbContinueButton:hover:active[breakable="false"],
 #fbBreakOnNextButton:hover:active[breakable="false"] {
-   list-style-image: url(chrome://firebug/skin/breakNextActive.png)
+    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
+    padding-right: 2px;
 }
 #fbContinueButton[breakable="false"],
 #fbBreakOnNextButton[breakable="false"] {
-   list-style-image: url(chrome://firebug/skin/breakNextArmed.png)
+    list-style-image: url(chrome://firebug/skin/breakNextArmed.png);
+    padding-right: 2px;
 }
 
 #fbStepOverButton {
     list-style-image: url(chrome://firebug/skin/stepOver.png);
+    padding-right: 2px;
 }
 
 #fbStepOverButton:hover:active {
     list-style-image: url(chrome://firebug/skin/stepOverActive.png);
+    padding-right: 2px;
 }
 
 #fbStepOverButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/stepOverDisabled.png) !important;
+    padding-right: 2px;
 }
 
 #fbStepIntoButton {
     list-style-image: url(chrome://firebug/skin/stepInto.png);
+    padding-right: 2px;
 }
 
 #fbStepIntoButton:hover:active {
     list-style-image: url(chrome://firebug/skin/stepIntoActive.png);
+    padding-right: 2px;
 }
 
 #fbStepIntoButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/stepIntoDisabled.png) !important;
+    padding-right: 2px;
 }
 
 #fbStepOutButton {
     list-style-image: url(chrome://firebug/skin/stepOut.png);
+    padding-right: 2px;
 }
 
 #fbStepOutButton:hover:active {
     list-style-image: url(chrome://firebug/skin/stepOutActive.png);
+    padding-right: 2px;
 }
 
 #fbStepOutButton[disabled="true"] {
