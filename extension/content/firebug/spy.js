@@ -102,6 +102,9 @@ Firebug.Spy = extend(Firebug.Module,
             if ( contexts.length == 0 )
                 observerService.addObserver(httpObserver, "firebug-http-event", false);
             contexts.push({ context: context, win: win });
+
+            if (FBTrace.DBG_SPY)
+                FBTrace.sysout("spy.attachObserver " + contexts.length + " ", context.getName());
         }
     },
 
@@ -116,6 +119,9 @@ Firebug.Spy = extend(Firebug.Module,
                 contexts.splice(i, 1);
                 if ( contexts.length == 0 )
                     observerService.removeObserver(httpObserver, "firebug-http-event");
+
+                if (FBTrace.DBG_SPY)
+                    FBTrace.sysout("spy.detachObserver " + contexts.length + " ", context.getName());
                 return;
             }
         }
@@ -130,6 +136,9 @@ Firebug.Spy = extend(Firebug.Module,
 
         if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
             this.attachObserver(context, context.window);
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.initContext " + contexts.length + " ", context.getName());
     },
 
     destroyContext: function(context)
@@ -137,6 +146,9 @@ Firebug.Spy = extend(Firebug.Module,
         // For any spies that are in progress, remove our listeners so that they don't leak
         this.detachObserver(context, null);
         delete context.spies;
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.destroyContext " + contexts.length + " ", context.getName());
     },
 
     watchWindow: function(context, win)

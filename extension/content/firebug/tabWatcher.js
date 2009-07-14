@@ -618,8 +618,9 @@ var FrameProgressListener = extend(BaseProgressListener,
     {
         if (FBTrace.DBG_WINDOWS)
         {
-            FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+
-                ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
+            // xxxHonza: there is too much of these messages so, disable it for now.
+            //FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+
+            //    ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
         }
 
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
