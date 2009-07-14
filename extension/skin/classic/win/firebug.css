@@ -403,46 +403,46 @@ fbBreakOnNextButton
 }
 
 #fbStepOverButton {
-    list-style-image: url(chrome://firebug/skin/win/stepOver.png);
+    list-style-image: url(chrome://firebug/skin/stepOver.png);
     padding-right: 2px;
 }
 
 #fbStepOverButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/stepOverActive.png);
+    list-style-image: url(chrome://firebug/skin/stepOverActive.png);
     padding-right: 2px;
 }
 
 #fbStepOverButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/win/stepOverDisabled.png) !important;
+    list-style-image: url(chrome://firebug/skin/stepOverDisabled.png) !important;
     padding-right: 2px;
 }
 
 #fbStepIntoButton {
-    list-style-image: url(chrome://firebug/skin/win/stepInto.png);
+    list-style-image: url(chrome://firebug/skin/stepInto.png);
     padding-right: 2px;
 }
 
 #fbStepIntoButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/stepIntoActive.png);
+    list-style-image: url(chrome://firebug/skin/stepIntoActive.png);
     padding-right: 2px;
 }
 
 #fbStepIntoButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/win/stepIntoDisabled.png) !important;
+    list-style-image: url(chrome://firebug/skin/stepIntoDisabled.png) !important;
     padding-right: 2px;
 }
 
 #fbStepOutButton {
-    list-style-image: url(chrome://firebug/skin/win/stepOut.png);
+    list-style-image: url(chrome://firebug/skin/stepOut.png);
     padding-right: 2px;
 }
 
 #fbStepOutButton:hover:active {
-    list-style-image: url(chrome://firebug/skin/win/stepOutActive.png);
+    list-style-image: url(chrome://firebug/skin/stepOutActive.png);
     padding-right: 2px;
 }
 
 #fbStepOutButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/win/stepOutDisabled.png) !important;
+    list-style-image: url(chrome://firebug/skin/stepOutDisabled.png) !important;
     padding-right: 2px;
 }
