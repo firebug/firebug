@@ -1,12 +1,12 @@
-<!ENTITY editors.Description "Skonfigurowane edytory Firebuga:">
+<!ENTITY editors.Description "Edytory Firebuga:">
 <!ENTITY editors.NameColumn "Edytor">
-<!ENTITY editors.ExecutableColumn "Wykonywalne">
-<!ENTITY editors.ParamsColumn "Uruchom argumenty">
+<!ENTITY editors.ExecutableColumn "Plik wykonywalny">
+<!ENTITY editors.ParamsColumn "Argumenty">
 <!ENTITY add.label "Dodaj">
 <!ENTITY remove.label "Usuń">
 <!ENTITY change.label "Zmień">
 <!ENTITY close.label "Zamknij">
-<!ENTITY browse.label "Przeglądaj">
+<!ENTITY browse.label "Przeglądaj…">
 <!ENTITY changeEditor.Name "Nazwa:">
-<!ENTITY changeEditor.Executable "Wykonywalne:">
+<!ENTITY changeEditor.Executable "Plik wykonywalny:">
 <!ENTITY changeEditor.CmdLine "Argumenty:">
