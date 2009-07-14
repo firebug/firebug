@@ -297,8 +297,12 @@ top.Firebug =
     shutdown: function()  // never called in externalMode
     {
         TabWatcher.removeListener(Firebug.URLSelector);
-        TabWatcher.removeListener(this);
         TabWatcher.destroy();
+
+        // Remove the listener after the TabWatcher.destroy() method is called so,
+        // destroyContext event is properly dispatched to the Firebug object and 
+        // consequently to all registered modules.
+        TabWatcher.removeListener(this);
 
         dispatch(modules, "disable", [FirebugChrome]);
 
