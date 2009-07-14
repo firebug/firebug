@@ -374,12 +374,12 @@ fbBreakOnNextButton
 #fbBreakOnNextButton:hover:active {
     list-style-image: url(chrome://firebug/skin/continueActive.png);
 }
-*/
+
 
 #fbBreakOnNextButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/breakNextDisabled.png) !important;
 }
-
+*/
 
 #fbContinueButton[breakable="true"],
 #fbBreakOnNextButton[breakable="true"] {
