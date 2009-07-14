@@ -187,7 +187,7 @@ fbContinueButton has three states:
 }
 #fbContinueButton[breakable="false"],
 #fbBreakOnNextButton[breakable="false"] {
-   list-style-image: url(chrome://firebug/skin/breakNextArmed.gif)
+   list-style-image: url(chrome://firebug/skin/breakNextArmed.png)
 }
 
 #fbStepOverButton {
