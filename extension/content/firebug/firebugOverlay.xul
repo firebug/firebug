@@ -114,7 +114,7 @@
                         <!-- HTML Inspector -->
                         <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
                                 command="cmd_toggleInspecting" collapsed="false">
-                            <image src="chrome://firebug/skin/flashlight.png"/>
+                            <image src="chrome://firebug/skin/Templarian_inspector.png"/>
                         </toolbarbutton>
 
                         <!-- Break On Next -->
