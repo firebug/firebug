@@ -39,6 +39,10 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 1968: "On for all pages", but minimized - Firebug doen't stay minimized
  * Issue 1970: Errors inside an XmlHttpRequest.onReadyStateChange fail silently
  * Issue 1993: FBTrace is not defined in chrome://firebug/content/spy.js, line 71
+ * Issue 1988: Newlines dissappear after moving away from console
+ * Issue 1998: Console logging doesn't work
  * Issue 2026: debugger icons look funky on Mac OS / Inner toolbar is the wrong color
+ * Issue 2008: "Command Line" command hides everything if you start in Console
  * Issue 2010: Tracing Console -> Rightclick on message -> Remove ~ fails to remove details of open messages
+ * Issue 2014: List of scripts missing from script panel;
  * Issue 2022: new off icon
