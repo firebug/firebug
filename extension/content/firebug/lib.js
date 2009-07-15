@@ -2846,7 +2846,7 @@ this.splitDataURL = function(url)
         {
             props['path'] = caller_split.path;
             props['line'] = props['baseLineNumber'];
-            var hint = decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+            var hint = decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
             props['name'] =  'eval->'+hint;
         }
         else
@@ -2860,7 +2860,7 @@ this.splitDataURL = function(url)
         if (!props.hasOwnProperty('path'))
             props['path'] = "data:";
         if (!props.hasOwnProperty('name'))
-            props['name'] =  decodeURIComponent(props['encodedContent'].substr(0,200)).replace(/\s*$/, "");
+            props['name'] =  decodeURIComponent(props['encodedContent']).substr(0,200).replace(/\s*$/, "");
     }
 
     return props;
