@@ -273,7 +273,7 @@
                         </panelBar>
 
                         <vbox id="fbLargeCommandBox">
-                            <textbox id="fbLargeCommandLine" multiline="true" flex="1"
+                            <textbox id="fbLargeCommandLine" multiline="true" flex="1" newlines="pasteintact"
                                      label="LargeCommandLine" />
                             <hbox id="fbCommandToolbar">
                                 <toolbarbutton label="&firebug.Run;" class="toolbar-text-button"

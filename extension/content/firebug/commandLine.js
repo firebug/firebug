@@ -395,7 +395,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         context.commandLineText = commandLine.value;
     },
 
-    setMultiLine: function(multiLine, chrome)
+    setMultiLine: function(multiLine, chrome, saveMultiLine)
     {
         if (FirebugContext && FirebugContext.panelName != "console")
             return;
@@ -409,6 +409,12 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         var commandLineSmall = chrome.$("fbCommandLine");
         var commandLineLarge = chrome.$("fbLargeCommandLine");
+
+        if (saveMultiLine)  // we are just closing the view
+        {
+            commandLineSmall.value = commandLineLarge.value;
+            return;
+        }
 
         if (multiLine)
             commandLineLarge.value = cleanIndentation(commandLineSmall.value);
