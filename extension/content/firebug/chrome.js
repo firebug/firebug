@@ -517,7 +517,7 @@ top.FirebugChrome =
         if (this.previouslyFocused)
             this.focus();
 
-        if (cancelled)  // revert
+        if (cancelled && this.previousPanelName)  // revert
         {
             if (this.previouslyCollapsed)
                 Firebug.showBar(false);
@@ -529,7 +529,9 @@ top.FirebugChrome =
         }
         else // else stay on the switchToPanel
         {
-            this.select(switchToPanel.selection);
+            this.selectPanel(switchToPanelName);
+            if (switchToPanel.selection)
+                this.select(switchToPanel.selection);
             this.getSelectedPanel().panelNode.focus();
         }
 

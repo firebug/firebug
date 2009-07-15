@@ -352,7 +352,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         else
             Firebug.toggleBar(true);
 
-        if (context.panelName != "console")
+        if (!context.panelName)
+            Firebug.chrome.selectPanel("console");
+        else if (context.panelName != "console")
         {
             Firebug.chrome.switchToPanel(context, "console");
 
