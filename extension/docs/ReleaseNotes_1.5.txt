@@ -46,3 +46,5 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 2010: Tracing Console -> Rightclick on message -> Remove ~ fails to remove details of open messages
  * Issue 2014: List of scripts missing from script panel;
  * Issue 2022: new off icon
+ * Issue 2038: strange behavior with Always Open In New Window
+ * Issue 2039: Removing a condition removes the breakpoint; contribution by http://code.google.com/u/@VBlTRV1WARJNXAd%2F/
