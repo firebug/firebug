@@ -3540,10 +3540,7 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var sourceFile = this.panel.location;
             var lineNo = parseInt(this.target.textContent);
 
-            if (value)
-                fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
-            else
-                fbs.clearBreakpoint(sourceFile.href, lineNo);
+            fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
     }
 });
