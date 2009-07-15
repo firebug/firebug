@@ -300,7 +300,7 @@ top.Firebug =
         TabWatcher.destroy();
 
         // Remove the listener after the TabWatcher.destroy() method is called so,
-        // destroyContext event is properly dispatched to the Firebug object and 
+        // destroyContext event is properly dispatched to the Firebug object and
         // consequently to all registered modules.
         TabWatcher.removeListener(this);
 
@@ -1028,6 +1028,8 @@ top.Firebug =
         {
             if (Firebug.isDetached()) // if we are out of the browser focus the window
                 Firebug.chrome.focus();
+            else if (Firebug.openInWindow)
+                this.detachBar(context);
             else if (Firebug.isMinimized()) // toggle minimize
                 Firebug.unMinimize();
             else if (!forceOpen)  // else isInBrowser
@@ -1103,7 +1105,7 @@ top.Firebug =
     {
         var oldChrome = Firebug.chrome;
         Firebug.chrome = newChrome;
-        Firebug.setPlacement(newPlacement);  // This should be the only setPlacement call with "detached"
+        Firebug.setPlacement(newPlacement);
 
         // reattach all contexts to the new chrome
         TabWatcher.iterateContexts(function reattach(context)
@@ -1139,6 +1141,8 @@ top.Firebug =
 
         Firebug.chrome.setFirebugContext(context);  // make sure the FirebugContext agrees with context
         FirebugContext = context;
+
+        this.setPlacement("detached");  // we'll reset it in the new window, but we seem to race with code in this window.
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.detachBar opening firebug.xul for context "+FirebugContext.getName() );
@@ -1695,6 +1699,10 @@ top.Firebug =
     {
         var contentBox = Firebug.chrome.$('fbContentBox');
         var resumeBox = Firebug.chrome.$('fbResumeBox');
+
+        if (!resumeBox) // the showContext is being called before the reattachContext, we'll get a second showContext
+            return;
+
         if (context)
         {
             collapse(contentBox, false);
