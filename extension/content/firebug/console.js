@@ -212,7 +212,7 @@ Firebug.Console = extend(ActivableConsole,
         if (context && !context.onLoadWindowContent) // then context was not active during load
         {
             if (Firebug.Console.isAlwaysEnabled())
-                Firebug.Console.log("Reload to activate window console", context, "info");  // XXXjjb Honza NLS
+                Firebug.Console.log($STR("message.Reload to activate window console"), context, "info");
         }
     },
 
