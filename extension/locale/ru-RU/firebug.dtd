@@ -1,0 +1,50 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Закрыть">
+<!ENTITY firebug.View "Просмотреть">
+<!ENTITY firebug.Help "Помощь">
+<!ENTITY firebug.Vertical "Вертикальные панели">
+<!ENTITY firebug.Run "Выполнить">
+<!ENTITY firebug.Copy "Скопировать">
+<!ENTITY firebug.CopyBookmarklet "Скопировать скрипт как bookmarklet.">
+<!ENTITY firebug.Options "Опции">
+<!ENTITY firebug.TextSize "Размер текста">
+<!ENTITY firebug.IncreaseTextSize "Увеличить размер текста">
+<!ENTITY firebug.DecreaseTextSize "Уменьшить размер текста">
+<!ENTITY firebug.NormalTextSize "Сбросить размер текста">
+<!ENTITY firebug.ShowTooltips "Показывать подсказки">
+<!ENTITY firebug.ShadeBoxModel "Модель Shade Box">
+<!ENTITY firebug.Website "Сайт Firebug...">
+<!ENTITY firebug.Documentation "Документация...">
+<!ENTITY firebug.KeyShortcuts "Горячие клавиши...">
+<!ENTITY firebug.Forums "Обсудить на форуме...">
+<!ENTITY firebug.Issues "Трэкер задач/ошибок...">
+<!ENTITY firebug.Donate "Спонсировать...">
+<!ENTITY firebug.About "О расширении...">
+<!ENTITY firebug.AlwaysOpenInWindow "Всегда открывать в новом окне">
+<!ENTITY firebug.ShowFirebug "Открыть Firebug">
+<!ENTITY firebug.DetachFirebug "Открыть Firebug в новом окне">
+<!ENTITY firebug.OpenWith "Открыть в редакторе">
+<!ENTITY firebug.CloseFirebug "Закрыть Firebug">
+<!ENTITY firebug.Permissions "Сайты...">
+<!ENTITY firebug.ConfigureEditors "Конфигурация внешних редакторов">
+<!ENTITY firebug.CommandLine "Командная строка">
+<!ENTITY firebug.Search "Искать">
+<!ENTITY firebug.Continue "Продолжить (F8)">
+<!ENTITY firebug.StepOver "Шаг с обходом (F10)">
+<!ENTITY firebug.StepInto "Шаг с заходом (F11)">
+<!ENTITY firebug.StepOut "Шаг с выходом">
+<!ENTITY firebug.BreakOnErrors "Прерывать на ошибках">
+<!ENTITY firebug.Inspect "Анализировать">
+<!ENTITY firebug.InspectElement "Анализировать элемент">
+<!ENTITY firebug.InspectTooltip "Щелкните на элементе страницы для анализа">
+<!ENTITY firebug.Edit "Редактировать">
+<!ENTITY firebug.EditHTMLTooltip "Редактировать HTML-код элемента">
+<!ENTITY firebug.EditCSSTooltip "Редактировать таблицу стилей">
+<!ENTITY firebug.Profile "Профилировать">
+<!ENTITY firebug.ProfileScript "Профилировать JavaScript">
+<!ENTITY firebug.Clear "Очистить">
+<!ENTITY firebug.ClearConsole "Очистить консоль">
+<!ENTITY firebug.ClearTooltip "Очистить консоль">
+<!ENTITY firebug.All "Все">
+<!ENTITY firebug.Images "Картинки">
+<!ENTITY firebug.Flash "Flash">
