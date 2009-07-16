@@ -10,6 +10,7 @@ locale  firebug cs-CZ       locale/cs-CZ/
 locale  firebug da-DK       locale/da-DK/
 locale  firebug de-DE       locale/de-DE/
 locale  firebug en-US       locale/en-US/
+locale  firebug es-AR       locale/es-AR/
 locale  firebug es-ES       locale/es-ES/
 locale  firebug fr-FR       locale/fr-FR/
 locale  firebug hu-HU       locale/hu-HU/
@@ -19,14 +20,13 @@ locale  firebug ko-KR       locale/ko-KR/
 locale  firebug nl-NL       locale/nl-NL/
 locale  firebug pl-PL       locale/pl-PL/
 locale  firebug pt-BR       locale/pt-BR/
+locale  firebug ro-RO       locale/ro-RO/
+locale  firebug es-AR       locale/ru-RU/
 locale  firebug sk-SK       locale/sk-SK/
+locale  firebug sv-SE       locale/sv-SE/
 locale  firebug tr-TR       locale/tr-TR/
 locale  firebug zh-CN       locale/zh-CN/
 locale  firebug zh-TW       locale/zh-TW/
-locale  firebug sv-SE       locale/sv-SE/
-locale  firebug ro-RO       locale/ro-RO/
-locale  firebug es-AR       locale/ru-RU/
-locale  firebug es-AR       locale/es-AR/
 
 overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
 overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
