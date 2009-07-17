@@ -400,7 +400,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     ensurePanelTabStops: function()
     {
-        if (!FirebugContext)
+        if (!FirebugContext || !FirebugContext.chrome)
             return;
         var panel = Firebug.chrome.getSelectedPanel();
         var sidePanel = Firebug.chrome.getSelectedSidePanel();
