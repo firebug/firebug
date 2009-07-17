@@ -111,7 +111,7 @@
                         aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
                         onmouseup="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon" tooltiptext="Firebug"/>
-            <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);"
+            <label id="fbStatusText" onmouseup="Firebug.onClickStatusText(FirebugContext, event);"
                    role="button" />
         </statusbarpanel>
 
