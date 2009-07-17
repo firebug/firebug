@@ -109,7 +109,7 @@
     <statusbar id="status-bar">
         <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button" 
                         aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
-                        onmousedown="Firebug.onClickStatusIcon(FirebugContext, event);">
+                        onmouseup="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon" tooltiptext="Firebug"/>
             <label id="fbStatusText" onmousedown="Firebug.onClickStatusText(FirebugContext, event);"
                    role="button" />
