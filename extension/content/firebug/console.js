@@ -145,7 +145,7 @@ Firebug.Console = extend(ActivableConsole,
         return element;
     },
 
-    isReadyElsePreparing: function(context, win)
+    isReadyElsePreparing: function(context, win) // this is the only code that should call injector.attachIfNeeded
     {
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.isReadyElsePreparing, win is "+(win?"an argument: ":"null, context.window: ")+(win?win.location:context.window.location), (win?win:context.window));
@@ -183,24 +183,10 @@ Firebug.Console = extend(ActivableConsole,
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
 
-        // Create limit row. This row is the first in the list of entries
-        // and initially hidden. It's displayed as soon as the number of
-        // entries reache the limit.
-        var panel = context.getPanel(this.panelName);
-        var row = panel.createRow("limitRow");
+        this.insertLogLimit(context);
 
-        var limitInfo = {
-            totalCount: 0,
-            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".console.logLimit"])
-        };
-
-        var netLimitRep = Firebug.NetMonitor.NetLimit;
-        var nodes = netLimitRep.createTable(row, limitInfo);
-
-        panel.limit = nodes[1];
-
-        var container = panel.panelNode;
-        container.insertBefore(nodes[0], container.firstChild);
+        if (Firebug.Console.isAlwaysEnabled())  // put the message in, we will clear if the window console is injected.
+            Firebug.Console.log($STR("message.Reload to activate window console"), context, "info");
     },
 
     showContext: function(browser, context)
@@ -208,12 +194,6 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.chrome.setGlobalAttribute("cmd_clearConsole", "disabled", !context);
 
         Firebug.ActivableModule.showContext.apply(this, arguments);
-
-        if (context && !context.onLoadWindowContent) // then context was not active during load
-        {
-            if (Firebug.Console.isAlwaysEnabled())
-                Firebug.Console.log($STR("message.Reload to activate window console"), context, "info");
-        }
     },
 
     destroyContext: function(context, persistedState)
@@ -298,6 +278,28 @@ Firebug.Console = extend(ActivableConsole,
 
         if (this.isAlwaysEnabled())
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
+    },
+
+    insertLogLimit: function(context)
+    {
+        // Create limit row. This row is the first in the list of entries
+        // and initially hidden. It's displayed as soon as the number of
+        // entries reaches the limit.
+        var panel = context.getPanel(this.panelName);
+        var row = panel.createRow("limitRow");
+
+        var limitInfo = {
+            totalCount: 0,
+            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".console.logLimit"])
+        };
+
+        var netLimitRep = Firebug.NetMonitor.NetLimit;
+        var nodes = netLimitRep.createTable(row, limitInfo);
+
+        panel.limit = nodes[1];
+
+        var container = panel.panelNode;
+        container.insertBefore(nodes[0], container.firstChild);
     }
 });
 
@@ -356,7 +358,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     clear: function()
     {
         if (this.panelNode)
+        {
             clearNode(this.panelNode);
+            Firebug.Console.insertLogLimit(this.context);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

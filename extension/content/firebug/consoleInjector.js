@@ -43,6 +43,8 @@ top.Firebug.Console.injector =
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);
 
+        Firebug.Console.clear(context); // remove the warning about reloading.
+
         var attached =  this.isAttached(context, win);
         if (attached)
             dispatch(Firebug.Console.fbListeners, "onConsoleInjected", [context, win]);
