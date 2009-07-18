@@ -132,7 +132,7 @@ Firebug.Console = extend(ActivableConsole,
                 var r = Firebug.CommandLine.evaluateInWebPage(elementForcer, context, win);
 
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("getFirebugConsoleElement forcing element result ", r);
+                FBTrace.sysout("getFirebugConsoleElement forcing element result "+r, r);
 
             var element = win.document.getElementById("_firebugConsole");
             if (!element) // elementForce fails
