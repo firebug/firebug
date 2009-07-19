@@ -189,9 +189,7 @@ var TraceConsole =
     // Trace console toolbar commands
     onClearConsole: function()
     {
-        var tbody = this.logs.firstChild;
-        while (tbody.firstChild)
-            tbody.removeChild(tbody.lastChild);
+        FBL.clearNode(this.logs.firstChild);
     },
 
     onSeparateConsole: function()
