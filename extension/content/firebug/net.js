@@ -356,11 +356,12 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
                         "&nbsp;",
                         DIV({class: "netResolvingBar", style: "left: $file.offset"}),
                         DIV({class: "netConnectingBar", style: "left: $file.offset"}),
+                        DIV({class: "netSendingBar", style: "left: $file.offset"}),
                         DIV({class: "netWaitingBar", style: "left: $file.offset"}),
                         DIV({class: "netRespondedBar", style: "left: $file.offset"}),
                         DIV({class: "netContentLoadBar", style: "left: $file.offset"}),
                         DIV({class: "netWindowLoadBar", style: "left: $file.offset"}),
-                        DIV({class: "netTimeBar", style: "left: $file.offset; width: $file.width"},
+                        DIV({class: "netReceivingBar", style: "left: $file.offset; width: $file.width"},
                             SPAN({class: "netTimeLabel"}, "$file.elapsed|formatTime")
                         )
                     )
@@ -405,7 +406,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
                         SPAN(" " + $STR("FromCache")),
                         ")"
                     ),
-                    DIV({class: "netTimeBar", style: "width: 100%"},
+                    DIV({class: "netReceivingBar", style: "width: 100%"},
                         SPAN({class: "netTotalTimeLabel netSummaryLabel"}, "0ms")
                     )
                 )
@@ -1139,7 +1140,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             newFileData.push({
                 file: file,
                 offset: this.barOffset + "%",
-                width: this.barWidth + "%",
+                width: this.barReceivingWidth + "%",
                 elapsed: file.loaded ? this.elapsed : -1
             });
         }
@@ -1221,22 +1222,25 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             // Get bar nodes
             var resolvingBar = row.childNodes[4].firstChild.childNodes[1];
             var connectingBar = resolvingBar.nextSibling;
-            var waitingBar = connectingBar.nextSibling;
+            var sendingBar = connectingBar.nextSibling;
+            var waitingBar = sendingBar.nextSibling;
             var respondedBar = waitingBar.nextSibling;
             var contentLoadBar = respondedBar.nextSibling;
             var windowLoadBar = contentLoadBar.nextSibling;
-            var timeBar = windowLoadBar.nextSibling;
+            var receivingBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
-            resolvingBar.style.left = connectingBar.style.left = waitingBar.style.left =
-                respondedBar.style.left = timeBar.style.left = this.barOffset + "%";
+            resolvingBar.style.left = connectingBar.style.left = sendingBar.style.left = 
+                waitingBar.style.left =
+                respondedBar.style.left = receivingBar.style.left = this.barOffset + "%";
 
             // Sets width of all bars (using style). The width is computed according to measured timing.
-            resolvingBar.style.width = this.barResolvingWidth ? this.barResolvingWidth + "%" : "1px";
-            connectingBar.style.width = this.barConnectingWidth ? this.barConnectingWidth + "%" : "1px";
+            resolvingBar.style.width = this.barResolvingWidth ? this.barResolvingWidth + "%" : "0px";
+            connectingBar.style.width = this.barConnectingWidth ? this.barConnectingWidth + "%" : "0px";
+            sendingBar.style.width = this.barSendingWidth + "%";
             waitingBar.style.width = this.barWaitingWidth + "%";
             respondedBar.style.width = this.barRespondedWidth + "%";
-            timeBar.style.width = this.barWidth + "%";
+            receivingBar.style.width = this.barReceivingWidth + "%";
 
             if (this.contentLoadBarOffset) {
                 contentLoadBar.style.left = this.contentLoadBarOffset + "%";
@@ -1249,14 +1253,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
                 windowLoadBar.style.display = "block";
                 this.windowLoadBarOffset = null;
             }
-
-            /*FBTrace.sysout("net.updateTimeline resolving: " +
-                resolvingBar.style.left + " : "+  resolvingBar.style.width + ", connecting: " +
-                connectingBar.style.left + " : "+  connectingBar.style.width + ", waiting: " +
-                waitingBar.style.left + " : " + waitingBar.style.width + ", time: " +
-                timeBar.style.left + " : " + timeBar.style.width + ", DOMContentLoaded: " +
-                contentLoadBar.style.left + ", load: " +
-                windowLoadBar.style.left, file);*/
         }
     },
 
@@ -1325,12 +1321,14 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         }
 
         var elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
-        this.barWidth = Math.floor((elapsed/this.phaseElapsed) * 100);
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
+
         this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100);
         this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barSendingWidth = Math.floor(((file.sendingTime - file.startTime)/this.phaseElapsed) * 100);
         this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100);
         this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100);
+        this.barReceivingWidth = Math.floor((elapsed/this.phaseElapsed) * 100);
 
         // Total request time doesn't include the time spent in queue.
         this.elapsed = elapsed - (file.waitingForTime - file.connectingTime);
@@ -1342,6 +1340,14 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
 
         if (phase.windowLoadTime)
             this.windowLoadBarOffset = Math.floor(((phase.windowLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
+
+        /*FBTrace.sysout("net.calculateFileTimes" + 
+            " dns: " + formatTime(file.resolvingTime - file.startTime) +
+            ", conn: " + formatTime(file.connectingTime - file.startTime) +
+            ", send: " + formatTime(file.sendingTime - file.startTime) +
+            ", wait: " + formatTime(file.waitingForTime - file.startTime) +
+            ", response: " + formatTime(file.respondedTime - file.startTime) +
+            ", rec: " + formatTime(elapsed));*/
 
         return phase;
     },
@@ -1490,6 +1496,10 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                     TD("$file|getConnectintTime : " + $STR("requestinfo.Connecting"))
                 ),
                 TR(
+                    TD({class: "netSendingBar timeInfoTipBar"}),
+                    TD("$file|getSendingTime : " + $STR("requestinfo.Sending"))
+                ),
+                TR(
                     TD({class: "netWaitingBar timeInfoTipBar"}),
                     TD("$file|getWaitingTime : " + $STR("requestinfo.Queuing"))
                 ),
@@ -1499,7 +1509,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                 ),
                 TR({$loaded: "$file.loaded",
                     $fromCache: "$file.fromCache"},
-                    TD({class: "netTimeBar timeInfoTipBar"}),
+                    TD({class: "netReceivingBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
                 ),
                 TR({class: "netContentLoadRow"},
@@ -1527,9 +1537,19 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         return formatTime(file.connectingTime - file.startTime);
     },
 
+    getSendingTime: function(file)
+    {
+        // The sending event doesn't have to come.
+        if (file.sendingTime > file.connectingTime)
+            return formatTime(file.sendingTime - file.connectingTime);
+        else
+            return formatTime(0);
+    },
+
     getWaitingTime: function(file)
     {
-        return formatTime(file.waitingForTime - file.connectingTime);
+        var sendingElapsed = file.sendingTime - file.connectingTime;
+        return formatTime(file.waitingForTime - file.connectingTime - sendingElapsed);
     },
 
     getResponseTime: function(file)
@@ -1784,9 +1804,10 @@ NetProgress.prototype =
             // after this point, so we have to assume that the file is cached and loaded
             // until we get a respondedFile call later
             file.startTime = file.endTime = time;
-            file.waitingForTime = time;
             file.resolvingTime = time;
             file.connectingTime = time;
+            file.sendingTime = time;
+            file.waitingForTime = time;
             file.respondedTime = time;
             file.isXHR = xhr;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
@@ -1903,6 +1924,22 @@ NetProgress.prototype =
                 file.waitingForTime = time;
                 file.receivingStarted = true;
             }
+        }
+
+        // Don't update the UI now (optimalization).
+        return null;
+    },
+
+    sendingFile: function waitingForFile(request, time)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            file.sendingTime = time;
+
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.sendingFile +" + (now() - file.startTime) + " " +
+                     getPrintableTime() + ", " + request.URI.path, file);
         }
 
         // Don't update the UI now (optimalization).
@@ -2262,14 +2299,16 @@ NetProgress.prototype =
                     getPrintableTime() + ", " + getStatusDescription(status) +
                     ", " + message + ", " + request.URI.path, file);
 
-            if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO || status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
+            if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
+                this.post(resolvingFile, [request, now()]);
+            else if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO || status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
                 this.post(connectingFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_WAITING_FOR)
                 this.post(waitingForFile, [request, now()]);
+            else if (status == Ci.nsISocketTransport.STATUS_SENDING_TO)
+                this.post(sendingFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
                 this.post(receivingFile, [request, now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
-                this.post(resolvingFile, [request, now()]);
         }
     },
 
@@ -2284,6 +2323,7 @@ var respondedFile = NetProgress.prototype.respondedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
 var connectingFile = NetProgress.prototype.connectingFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
+var sendingFile = NetProgress.prototype.sendingFile;
 var receivingFile = NetProgress.prototype.receivingFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;

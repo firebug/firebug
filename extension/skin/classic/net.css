@@ -152,8 +152,8 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarResolving.gif) repeat-x;
-    min-width: 1px;
-    z-index:30;
+    min-width: 0px;
+    z-index:60;
 }
 
 .netConnectingBar {
@@ -162,9 +162,20 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarConnecting.gif) repeat-x;
-    min-width: 1px;
+    min-width: 0px;
+    z-index:50;
+}
+
+.netSendingBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: #FFFFFF url(chrome://firebug/skin/netBarSending.gif) repeat-x;
+    min-width: 0px;
     z-index:40;
 }
+
 
 .netWaitingBar {
     position: absolute;
@@ -172,7 +183,7 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarWaiting.gif) repeat-x;
-    min-width: 2px;
+    min-width: 0px;
     z-index:30;
 }
 
@@ -182,18 +193,17 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarResponded.gif) repeat-x;
-    min-width: 3px;
+    min-width: 0px;
     z-index:20;
 }
 
-.netTimeBar {    
+.netReceivingBar {
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
-    min-width: 3px;
+    min-width: 0px;
     background: #38D63B url(chrome://firebug/skin/netBarLoading.gif) repeat-x;
-    border-right: 1px solid #38D63B;
     z-index:10;
 }
 
@@ -223,7 +233,6 @@
     padding-left: 6px;
     color: #444444;
     min-width: 16px;
-    background: url(chrome://firebug/skin/loading_16.gif) no-repeat 4px -1px;
 }
 
 .timeInfoTip {
@@ -244,17 +253,17 @@
     background: transparent;
 }
 
-.loaded .netTimeBar {
+.loaded .netReceivingBar {
     background: #B6B6B6 url(chrome://firebug/skin/netBarLoaded.gif) repeat-x;
     border-color: #B6B6B6;
 }
 
-.fromCache .netTimeBar {
+.fromCache .netReceivingBar {
     background: #D6D6D6 url(chrome://firebug/skin/netBarCached.gif) repeat-x;
     border-color: #D6D6D6;
 }
 
-.netSummaryRow .netTimeBar {
+.netSummaryRow .netReceivingBar {
     background: #BBBBBB;
     border: none;
 }
