@@ -1235,8 +1235,8 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
                 respondedBar.style.left = receivingBar.style.left = this.barOffset + "%";
 
             // Sets width of all bars (using style). The width is computed according to measured timing.
-            resolvingBar.style.width = this.barResolvingWidth ? this.barResolvingWidth + "%" : "0px";
-            connectingBar.style.width = this.barConnectingWidth ? this.barConnectingWidth + "%" : "0px";
+            resolvingBar.style.width = this.barResolvingWidth ? this.barResolvingWidth + "%" : "1px";
+            connectingBar.style.width = this.barConnectingWidth ? this.barConnectingWidth + "%" : "1px";
             sendingBar.style.width = this.barSendingWidth + "%";
             waitingBar.style.width = this.barWaitingWidth + "%";
             respondedBar.style.width = this.barRespondedWidth + "%";
