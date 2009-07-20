@@ -1,8 +1,32 @@
-content firebug jar:chrome/firebug.jar!/content/firebug/
-skin	firebug	classic/1.0	jar:chrome/firebug.jar!/skin/classic/
-skin	firebug-os	classic/1.0	jar:chrome/firebug.jar!/skin/classic/win/
-locale	firebug	en-US		jar:chrome/firebug.jar!/locale/en-US/
+content firebug content/firebug/ contentaccessible=yes
+content firebug content/firebug/
+
+skin    firebug classic/1.0 skin/classic/
+skin    firebug-os  classic/1.0 skin/classic/win/
+
+locale  firebug bg-BG       locale/bg-BG/
+locale  firebug ca-AD       locale/ca-AD/
+locale  firebug cs-CZ       locale/cs-CZ/
+locale  firebug da-DK       locale/da-DK/
+locale  firebug de-DE       locale/de-DE/
+locale  firebug en-US       locale/en-US/
+locale  firebug es-AR       locale/es-AR/
+locale  firebug es-ES       locale/es-ES/
+locale  firebug fr-FR       locale/fr-FR/
 locale  firebug hu-HU       locale/hu-HU/
+locale  firebug it-IT       locale/it-IT/
+locale  firebug ja-JP       locale/ja-JP/
+locale  firebug ko-KR       locale/ko-KR/
+locale  firebug nl-NL       locale/nl-NL/
+locale  firebug pl-PL       locale/pl-PL/
+locale  firebug pt-BR       locale/pt-BR/
+locale  firebug ro-RO       locale/ro-RO/
+locale  firebug es-AR       locale/ru-RU/
+locale  firebug sk-SK       locale/sk-SK/
+locale  firebug sv-SE       locale/sv-SE/
+locale  firebug tr-TR       locale/tr-TR/
+locale  firebug zh-CN       locale/zh-CN/
+locale  firebug zh-TW       locale/zh-TW/
 
 overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
 overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
