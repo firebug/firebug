@@ -129,8 +129,18 @@ Firebug.TabContext.prototype =
             var panelState = panelName in state.panelState ? state.panelState[panelName] : {};
             state.panelState[panelName] = panelState;
 
-            // Destroy the panel and allow it to persist extra info to the state object
-            panel.destroy(panelState);
+            try
+            {
+                // Destroy the panel and allow it to persist extra info to the state object
+                panel.destroy(panelState);
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("tabContext.destroy FAILS "+exc, exc);
+                // the destroy failed, don't keep the bad state
+                delete state.panelState[panelName];
+            }
 
             // Remove the panel node from the DOM
             var panelNode = panel.panelNode;  // delete panel content
