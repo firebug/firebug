@@ -3434,6 +3434,9 @@ Firebug.URLSelector =
     {
         var uri = makeURI(normalizeURL(url));
 
+        if (Firebug.filterSystemURLs && isSystemURL(location)))  // about: URIs can chrome uris just use them
+            return uri;
+
         if (url == "about:blank")  // avoid exceptions.
             return uri;
 
