@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.5X.0a16</em:version>
+    <em:version>1.5X.0a17</em:version>
     <em:type>2</em:type>
 
     <!-- Firefox -->
@@ -60,6 +60,8 @@
     <em:translator>Xavi Ivars - Softcatalà (ca)</em:translator>
     <em:translator>gezmen (tr-TR)</em:translator>
     <em:translator>eternoendless (es-AR)</em:translator>
+    <em:translator>Dark Preacher (ru-RU)</em:translator>
+    <em:translator>Tiago Oliveira, Diego de Carvalho Zimmermann, Alexandre Rapaki (pt-BR)</em:translator>
 
   </Description>
 </RDF>
