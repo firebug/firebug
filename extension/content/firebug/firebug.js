@@ -3464,6 +3464,9 @@ Firebug.URLSelector =
         if (this.allPagesActivation == "off")
             return false;
 
+        if (Firebug.filterSystemURLs && isSystemURL(url)) // if about:blank gets thru, 1483 fails
+            return false;
+
         if (userCommands)
             return true;
 
