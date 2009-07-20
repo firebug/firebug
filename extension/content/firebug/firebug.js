@@ -1370,7 +1370,8 @@ top.Firebug =
      */
     getPanelState: function(panel)
     {
-        return getPersistedState(panel.context, panel.name);
+        var persistedState = panel.context.persistedState;
+        return persistedState ? persistedState.panelState[panel.name] : null;
     },
 
     showPanel: function(browser, panel)
@@ -2327,8 +2328,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         // It's necessary to update the toolbar.
         if (this.context.panelName == this.name)
         {
-            var state = Firebug.getPanelState(this);
-            this.show(state);
+            FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
+            this.show(persistedPanelState);
         }
     },
 
