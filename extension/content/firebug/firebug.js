@@ -60,7 +60,7 @@ const prefNames =
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
-    "activateSameOrigin",
+    "activateSameOrigin", "onByDefault",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "netSearchHeaders", "netSearchParameters",
@@ -239,7 +239,8 @@ top.Firebug =
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y", "menu_activateSameOrigin", "fbContinueButton", "fbBreakOnNextButton",
+            "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
+            "fbBreakOnNextButton",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOff", "menu_AllOn"];
 
@@ -3435,7 +3436,7 @@ Firebug.URLSelector =
     {
         var uri = makeURI(normalizeURL(url));
 
-        if (Firebug.filterSystemURLs && isSystemURL(url))  // about: URIs can chrome uris just use them
+        if (Firebug.filterSystemURLs && isSystemURL(url))
             return uri;
 
         if (url == "about:blank")  // avoid exceptions.
@@ -3461,8 +3462,13 @@ Firebug.URLSelector =
 
     shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
     {
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("shouldCreateContext allPagesActivation "+this.allPagesActivation+" onByDefault: "+Firebug.onByDefault);
+
         if (this.allPagesActivation == "off")
             return false;
+        if (this.allPagesActivation == "on")
+            return true;
 
         if (Firebug.filterSystemURLs && isSystemURL(url)) // if about:blank gets thru, 1483 fails
             return false;
@@ -3477,6 +3483,7 @@ Firebug.URLSelector =
                 return false;
 
             var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation+" for "+uri.spec+" in "+browser.contentWindow.location+ " using activateSameOrigin: "+Firebug.activateSameOrigin);
 
@@ -3486,12 +3493,8 @@ Firebug.URLSelector =
             }
             else  // not annotated
             {
-                if (this.allPagesActivation == "on")
-                {
-                    if (FBTrace.DBG_WINDOWS)
-                        FBTrace.sysout("shouldCreateContext allPagesActivation "+this.allPagesActivation);
+                if (Firebug.onByDefault)
                     return true;
-                }
 
                 if (browser.FirebugLink) // then TabWatcher found a connection
                 {

@@ -61,7 +61,7 @@
     <popup id="contentAreaContextMenu">
 
         <!-- TODO Firebug.Editors. -->
-        <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor" 
+        <menu label="&firebug.OpenWith;" id="menu_firebugOpenWithEditor"
               insertbefore="context-viewsource">
             <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                 <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
@@ -107,7 +107,7 @@
 
     <!-- Extend Firefox status bar -->
     <statusbar id="status-bar">
-        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button" 
+        <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button"
                         aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
                         onmouseup="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon" tooltiptext="Firebug"/>
@@ -117,7 +117,7 @@
 
         <!-- Context menu -->
         <menupopup id="fbStatusContextMenu" onpopupshowing="FirebugChrome.onOptionsShowing(this)">
-            <menuitem id="menu_detachFirebug" label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug" 
+            <menuitem id="menu_detachFirebug" label="&firebug.DetachFirebug;" command="cmd_toggleDetachFirebug"
                       type="checkbox" key="key_detachFirebug"/>
             <menuseparator/>
             <menuitem label="&firebug.ClearConsole;" command="cmd_clearConsole" key="key_clearConsole"/>
