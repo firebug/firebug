@@ -599,8 +599,8 @@ var TabProgressListener = extend(BaseProgressListener,
                     (uri?uri.spec:"null location")+
                     (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
             }
-
-            TabWatcher.watchTopWindow(progress.DOMWindow, uri);
+            if (uri)
+                TabWatcher.watchTopWindow(progress.DOMWindow, uri);
         }
     },
 
