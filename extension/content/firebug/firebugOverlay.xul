@@ -350,11 +350,11 @@
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="shadeBoxModel"/>
                     <menuitem type="checkbox" id="menu_enableA11y"
-                              label="Firebug.menu.Enable Accessibility Enhancements"
+                              label="firebug.menu.Enable Accessibility Enhancements"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="a11y.enable"/>
                     <menuitem type="checkbox" id="menu_activateSameOrigin"
-                              label="Firebug.menu.Activate Same Origin URLs"
+                              label="firebug.menu.Activate Same Origin URLs"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="activateSameOrigin"/>
                     <menuseparator id="menu_optionsSeparator"/>
@@ -391,7 +391,7 @@
             <menuseparator id="menu_toolsSeparator"/>
 
             <menuitem id="menu_customizeShortcuts"
-                      label="Firebug.menu.Customize shortcuts"
+                      label="firebug.menu.Customize shortcuts"
                       command="cmd_customizeFBKeys" key="key_customizeFBKeys" />
 
             <menuseparator id="menu_aboutSeparator"/>
