@@ -1368,6 +1368,8 @@ top.Firebug =
     /**
      * Gets an object containing the state of the panel from the last time
      * it was displayed before one or more page reloads.
+     * The 'null' return here is a too-subtle signal to the panel code in bindings.xml.
+     * Note that panel.context may not have a persistedState, but in addition the persisted state for panel.name may be null.
      */
     getPanelState: function(panel)
     {
@@ -3501,19 +3503,25 @@ Firebug.URLSelector =
                     var dst = browser.FirebugLink.dst;
                     var dstURI = this.convertToURIKey(dst.spec);
                     if (FBTrace.DBG_ACTIVATION)
-                        FBTrace.sysout("shouldCreateContext found FirebugLink pointing to does not match "+dstURI.spec, browser.FirebugLink);
+                        FBTrace.sysout("shouldCreateContext found FirebugLink pointing to "+dstURI.spec, browser.FirebugLink);
                     if (dstURI && dstURI.equals(uri)) // and it matches us now
                     {
                         var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec);
-                        if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
+                        if (srcURI)
                         {
-                            hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
-                            if (hasAnnotation) // and the source page was annotated.
+                            if (FBTrace.DBG_ACTIVATION)
+                                FBTrace.sysout("shouldCreateContext found FirebugLink pointing from "+srcURI.spec, browser.FirebugLink);
+
+                            if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
                             {
-                                var srcShow = this.checkAnnotation(browser, srcURI);
-                                if (srcShow)  // and the source annotation said show it
-                                    this.watchBrowser(browser);  // so we show dst as well.
-                                return srcShow;
+                                hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
+                                if (hasAnnotation) // and the source page was annotated.
+                                {
+                                    var srcShow = this.checkAnnotation(browser, srcURI);
+                                    if (srcShow)  // and the source annotation said show it
+                                        this.watchBrowser(browser);  // so we show dst as well.
+                                    return srcShow;
+                                }
                             }
                         }
                     }
