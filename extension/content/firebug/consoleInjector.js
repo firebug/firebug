@@ -135,7 +135,10 @@ top.Firebug.Console.injector =
 
         // We need the element to attach our event listener.
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
-        element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
+        if (element)
+            element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
+        else 
+            return false;
 
         var handler = new FirebugConsoleHandler(context, win);
         handler.attachTo(element);
