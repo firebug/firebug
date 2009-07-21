@@ -805,6 +805,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
             if (!frameWin._getFirebugConsoleElement)
             {
+                if (context.notificationSourceFile)
+                {
+                    delete context.sourceFileMap[notificationSourceFile.href];
+                    delete context.notificationSourceFile;
+                }
                 if (Firebug.Console.isAlwaysEnabled())
                 {
                     // This is how the console is injected ahead of JS running on the page
@@ -1831,7 +1836,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var unpaused = fbs.unPause();
 
-        if (FBTrace.DBG_DBG_ACTIVATION)
+        if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onResumeFirebug unpaused: "+unpaused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled());
         if (FBTrace.DBG_ERRORS && !this.registered)
             FBTrace.sysout("debugger.onResumeFirebug but debugger not registered! *** ");
@@ -2002,7 +2007,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceFile = FBL.getSourceFileByScript(this.context, this.context.currentFrame.script);
         if (!sourceFile)
         {
-            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile for currentFrame.script: "+frame.script.fileName);
+            if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile in context "+context.getName()+"for currentFrame.script: "+frame.script.fileName);
             this.showNoStackFrame()
             return;
         }

@@ -2355,6 +2355,7 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
     var dummySourceFile = new this.NoScriptSourceFile(context, notificationURL);
     context.sourceCache.store(notificationURL, 'reload to see all source files');
     context.addSourceFile(dummySourceFile);
+    context.notificationSourceFile = dummySourceFile;
 
     if (FBTrace.DBG_SOURCEFILES)
     {
@@ -4564,7 +4565,7 @@ this.getSourceFileByScript = function(context, script)
         return lucky;
 
     if (FBTrace.DBG_SOURCEFILES)
-        FBTrace.sysout("getSourceFileByScript looking for "+script.tag+" in "+context.getName()+": ", context.sourceFileMap);
+        FBTrace.sysout("getSourceFileByScript looking for "+script.tag+"@"+script.fileName+" in "+context.getName()+": ", context.sourceFileMap);
 
     for (var url in context.sourceFileMap)
     {
@@ -4578,7 +4579,7 @@ this.getScriptAnalyzer = function(context, script)
 {
     var sourceFile = this.getSourceFileByScript(context, script);
     if (FBTrace.DBG_STACK)
-        FBTrace.sysout("getScriptAnalyzer finds sourceFile: ", sourceFile);
+        FBTrace.sysout("getScriptAnalyzer "+ (sourceFile?"finds sourceFile: ":"FAILS to find sourceFile"), sourceFile);
     if (sourceFile)
     {
         var analyzer = sourceFile.getScriptAnalyzer(script);
