@@ -111,9 +111,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
             // is unloaded
             delete selectedBrowser.cancelNextLoad;
             selectedBrowser.webNavigation.stop(STOP_ALL);
-            delayBrowserLoad(selectedBrowser, safeGetWindowLocation(win).href);
+            var url = (uri instanceof nsIURI?uri.spec:uri);
+            delayBrowserLoad(selectedBrowser, url);
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> tabWatcher.watchTopWindow **CANCEL&RETRY** for: "+safeGetWindowLocation(win).href+
+                FBTrace.sysout("-> tabWatcher.watchTopWindow **CANCEL&RETRY** for: "+url+
                     ", tab: "+Firebug.getTabIdForWindow(win)+"\n");
             return;
         }
