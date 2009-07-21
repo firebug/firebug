@@ -26,7 +26,7 @@
 <!ENTITY firebug.OpenWith "Otwórz za pomocą edytora">
 <!ENTITY firebug.CloseFirebug "Zamknij">
 <!ENTITY firebug.Permissions "Uprawnione witryny…">
-<!ENTITY firebug.ConfigureEditors "Konfiguracja edytorów">
+<!ENTITY firebug.ConfigureEditors "Konfigurowanie edytorów">
 <!ENTITY firebug.CommandLine "Wiersz poleceń">
 <!ENTITY firebug.Search "Szukaj">
 <!ENTITY firebug.Continue "Kontynuuj (F8)">
@@ -44,7 +44,7 @@
 <!ENTITY firebug.ProfileScript "Sprawdź czas wykonania JS">
 <!ENTITY firebug.Clear "Wyczyść">
 <!ENTITY firebug.ClearConsole "Wyczyść konsolę">
-<!ENTITY firebug.ClearTooltip "Wyczyści konsolę błędów">
+<!ENTITY firebug.ClearTooltip "Czyści konsolę błędów">
 <!ENTITY firebug.All "Wszystko">
 <!ENTITY firebug.Images "Obrazki">
 <!ENTITY firebug.Flash "Flash">
