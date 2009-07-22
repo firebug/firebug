@@ -223,8 +223,17 @@ var TraceAPI = {
             return;
 
         noTrace = true;
-        gTraceService.dispatch(messageType, message, obj);
-        noTrace = false;
+        try
+        {
+            gTraceService.dispatch(messageType, message, obj);
+        }
+        catch(exc)
+        {
+        }
+        finally
+        {
+            noTrace = false;
+        }
     },
 
     sysout: function(message, obj) {
@@ -249,8 +258,20 @@ TraceBase.prototype.sysout = function(message, obj) {
             return;
 
         noTrace = true;
-        gTraceService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
-        noTrace = false;
+
+        try
+        {
+            gTraceService.dispatch(this.prefDomain, message, obj, this.scopeOfFBTrace);
+        }
+        catch(exc)
+        {
+            if (win)
+                win.dump("gTraceService.dispatch FAILS "+exc);
+        }
+        finally
+        {
+            noTrace = false;
+        }
 }
 
 
