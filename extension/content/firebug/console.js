@@ -416,7 +416,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             if (part && typeof(part) == "object")
             {
                 var object = objects[++objIndex];
-                this.appendObject(object, row, part.rep);
+                if (object)
+                    this.appendObject(object, row, part.rep);
+                else
+                    this.appendObject(part.type, row, FirebugReps.Text);
             }
             else
                 FirebugReps.Text.tag.append({object: part}, row);
@@ -760,14 +763,13 @@ function parseFormat(format)
             }
 
             parts.push(format.substr(0, m[0][0] == "%" ? m.index : m.index+1));
-            parts.push({rep: rep, precision: precision});
+            parts.push({rep: rep, precision: precision, type: ("%" + type)});
         }
 
         format = format.substr(m.index+m[0].length);
     }
 
     parts.push(format);
-
     return parts;
 }
 
