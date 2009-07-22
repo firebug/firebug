@@ -26,6 +26,8 @@
         <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
         <command id="cmd_disablePanels" oncommand="Firebug.disablePanels(FirebugContext)"/>
 
+        <command id="cmd_logActivationURIs" oncommand="Firebug.URLSelector.logBlackWhiteList()"/>
+
         <command id="cmd_toggleInspecting" oncommand="if (!FirebugContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
         <command id="cmd_toggleProfiling" oncommand="Firebug.Profiler.toggleProfiling(FirebugContext)"/>

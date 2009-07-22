@@ -237,7 +237,7 @@ top.Firebug =
             FBTrace.sysout("Firebug.internationalizeUI");
 
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
-            "menu_enablePanels", "menu_disablePanels",
+            "menu_enablePanels", "menu_disablePanels", "menu_logActivationURIs",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
             "fbBreakOnNextButton",
@@ -3612,18 +3612,49 @@ Firebug.URLSelector =
 
     clearAll: function()
     {
+        var self =this;
+        this.eachURI(function remove(uri)
+        {
+            self.annotationSvc.removePageAnnotation(uri, self.annotationName); // unmark this URI
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("Firebug.URLSelector.clearAll untagged "+uri.spec);
+        });
+    },
+
+    eachURI: function(fn)  // stops at the first fn(uri) that returns a true value
+    {
         var resultCount = {};
         var results = [];
         var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName, resultCount, results);
         for (var i = 0; i < uris.length; i++)
         {
             var uri = uris[i];
-            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Firebug.URLSelector.clearAll untagged "+uri.spec);
+            var rc = fn(uri);
+            if (rc)
+                return rc;
         }
     },
 
+    getURLsAsBlackWhiteLists: function()
+    {
+        var blacklist = [];
+        var whitelist = [];
+        var self = this;
+        this.eachURI(function buildLists(uri)
+        {
+            var annotation = self.annotationSvc.getPageAnnotation(uri, self.annotationName);
+            if (annotation.indexOf("closed") > 0)
+                blacklist.push(uri.spec);
+            else
+                whitelist.push(uri.spec);
+        });
+        return {blacklist: blacklist, whitelist: whitelist};
+    },
+
+    logBlackWhiteList: function()
+    {
+        Firebug.Console.logFormatted([this.getURLsAsBlackWhiteLists()]);
+    }
 }
 
 // ************************************************************************************************
