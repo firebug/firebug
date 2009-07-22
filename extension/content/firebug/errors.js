@@ -287,7 +287,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     {
         var url = object.sourceName;
         if(!url)
-            return null;  // eg some XPCOM messages
+            return FirebugContext;  // eg some XPCOM messages
 
         var errorContext = this.contextCache[url];
 
