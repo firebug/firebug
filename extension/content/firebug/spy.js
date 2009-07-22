@@ -1,4 +1,3 @@
-/* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
 
@@ -351,7 +350,11 @@ top.XMLHttpRequestSpy.prototype =
 
         this.onreadystatechange = this.xhrRequest.onreadystatechange;
 
-        this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+        // xxxHonza: Workaround for FB issue 1948 and FF bug #502959
+        // Don't replace the original onreadystatechange callback since there is an 
+        // exception when the callback is executed (see onHTTPSpyReadyStateChange)
+        // Only the "load" and "error" event handlers are used to monitor the XHR. 
+        //this.xhrRequest.onreadystatechange = this.onReadyStateChange;
         this.xhrRequest.addEventListener("load", this.onLoad, true);
         this.xhrRequest.addEventListener("error", this.onError, true);
 
@@ -518,7 +521,7 @@ function onHTTPSpyReadyStateChange(spy, event)
     {
         spy.context.onReadySpy = spy; // maybe the handler will eval(), we want the URL.
         if (spy.onreadystatechange)
-            spy.onreadystatechange.handleEvent(event);
+            spy.onreadystatechange.handleEvent(event);  // This throws an exception see #502959
     }
     catch (exc)
     {
