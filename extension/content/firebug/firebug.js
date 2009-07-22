@@ -3431,6 +3431,7 @@ Firebug.URLSelector =
         this.annotationSvc = Components.classes["@mozilla.org/browser/annotation-service;1"]
             .getService(Components.interfaces.nsIAnnotationService);
         this.allPagesActivation = Firebug.getPref(Firebug.prefDomain, "allPagesActivation");
+        this.expires = this.annotationSvc.EXPIRE_NEVER;
         Firebug.updateAllPagesActivation();
     },
 
@@ -3579,7 +3580,7 @@ Firebug.URLSelector =
         // mark this URI as firebugged
         var uri = this.convertToURIKey(browser.currentURI.spec);
         if (uri)
-            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.expires);
 
         if (FBTrace.DBG_ACTIVATION)
         {
@@ -3599,7 +3600,7 @@ Firebug.URLSelector =
         if (userCommands)  // then mark to not open virally.
         {
             var annotation = "firebugged.closed";
-            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.annotationSvc.EXPIRE_WITH_HISTORY);
+            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.expires);
         }
         else
         {
