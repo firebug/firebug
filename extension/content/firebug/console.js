@@ -186,7 +186,10 @@ Firebug.Console = extend(ActivableConsole,
         this.insertLogLimit(context);
 
         if (Firebug.Console.isAlwaysEnabled())  // put the message in, we will clear if the window console is injected.
+        {
             Firebug.Console.log($STR("message.Reload to activate window console"), context, "info");
+            context.consoleWarning = true;
+        }
     },
 
     showContext: function(browser, context)
@@ -359,6 +362,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (this.panelNode)
         {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("ConsolePanel.clear");
             clearNode(this.panelNode);
             Firebug.Console.insertLogLimit(this.context);
         }

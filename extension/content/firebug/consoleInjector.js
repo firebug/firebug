@@ -43,7 +43,11 @@ top.Firebug.Console.injector =
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);
 
-        Firebug.Console.clear(context); // remove the warning about reloading.
+        if (context.consoleWarning)
+        {
+            Firebug.Console.clear(context); // remove the warning about reloading.
+            delete context.consoleWarning;
+        }
 
         var attached =  this.isAttached(context, win);
         if (attached)
@@ -137,7 +141,7 @@ top.Firebug.Console.injector =
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
         if (element)
             element.setAttribute("FirebugVersion", Firebug.version); // Initialize Firebug version.
-        else 
+        else
             return false;
 
         var handler = new FirebugConsoleHandler(context, win);
