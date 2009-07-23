@@ -255,6 +255,10 @@ top.Firebug =
             }
             FBL.internationalize(element, tooltipTextElements.indexOf(elements[i]) == -1 ? "label" : "tooltiptext");
         }
+
+        // Allow other modules to internationalize UI labels (whis is called also for
+        // detached Firebug window).
+        dispatch(modules, "internationalizeUI", [doc]);
     },
 
     broadcast: function(message, args)
