@@ -1275,7 +1275,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_EVAL) FBTrace.sysout("createSourceFileForFunctionConstructor source:"+source+"\n");
         var url = this.getDynamicURL(context, normalizeURL(caller_frame.script.fileName), source, "Function");
 
-        var lines = context.sourceCache.store(url, source);
+        var lines = context.sourceCache.store(url.href, source);
         var sourceFile = new FBL.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
         context.addSourceFile(sourceFile);
 
@@ -1344,8 +1344,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var url = this.getDynamicURL(context, normalizeURL(frame.script.fileName), lines, "eval");
 
-        context.sourceCache.invalidate(url);
-        context.sourceCache.storeSplitLines(url, lines);
+        context.sourceCache.invalidate(url.href);
+        context.sourceCache.storeSplitLines(url.href, lines);
 
         var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
         context.addSourceFile(sourceFile);
@@ -3258,7 +3258,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         var kind = segs.splice(segs.length - 3, 3)[0];
         var callerURL = segs.join('/');
         var newURL = Firebug.Debugger.getURLFromMD5(callerURL, sourceFile.source, kind);
-        sourceFile.href = newURL;
+        sourceFile.href = newURL.href;
 
         fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
         delete context.sourceFileMap[oldURL];  // SourceFile delete
@@ -3270,12 +3270,12 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         if (panel)
         {
             panel.context.invalidatePanels("breakpoints");
-            panel.renameSourceBox(oldURL, newURL);
+            panel.renameSourceBox(oldURL, newURL.href);
         }
         if (context.sourceCache.isCached(oldURL))
         {
             var lines = context.sourceCache.load(oldURL);
-            context.sourceCache.storeSplitLines(newURL, lines);
+            context.sourceCache.storeSplitLines(newURL.href, lines);
             context.sourceCache.invalidate(oldURL);
         }
 
