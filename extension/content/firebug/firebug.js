@@ -1374,7 +1374,10 @@ top.Firebug =
     getPanelState: function(panel)
     {
         var persistedState = panel.context.persistedState;
-        return persistedState ? persistedState.panelState[panel.name] : null;
+        if (!persistedState || !persistedState.panelState)
+            return null;
+
+        return persistedState.panelState[panel.name];
     },
 
     showPanel: function(browser, panel)
