@@ -807,7 +807,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 if (context.notificationSourceFile)
                 {
-                    delete context.sourceFileMap[notificationSourceFile.href];
+                    delete context.sourceFileMap[context.notificationSourceFile.href];
                     delete context.notificationSourceFile;
                 }
                 if (Firebug.Console.isAlwaysEnabled())
