@@ -11,7 +11,7 @@
 <!ENTITY firebug.IncreaseTextSize "Schrift vergrößern">
 <!ENTITY firebug.DecreaseTextSize "Schrift verkleinern">
 <!ENTITY firebug.NormalTextSize "Normale Schriftgröße">
-<!ENTITY firebug.ShowTooltips "Vorschau-Tooltips anzeigen">
+<!ENTITY firebug.ShowTooltips "Vorschau-Kurzinfos anzeigen">
 <!ENTITY firebug.ShadeBoxModel "Box-Modell schattieren">
 <!ENTITY firebug.Website "Firebug-Webseite...">
 <!ENTITY firebug.Documentation "Dokumentation...">
