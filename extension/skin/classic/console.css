@@ -350,7 +350,7 @@
     background: #F8F8F8;
 }
 
-.logRow-stackTrace > .objectBox-stackFrame {
+.objectBox-stackFrame, .errorSourceBox {
     position: relative;
     padding-top: 2px;
 }

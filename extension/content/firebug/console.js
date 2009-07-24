@@ -456,7 +456,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         else
             this.appendFormatted(objects, innerRow, rep);
         row.appendChild(innerRow);
-        innerRow.setAttribute('aria-expanded', 'true');
         dispatch([Firebug.A11yModel], 'onLogRowCreated', [this, innerRow]);
         var groupBody = this.createRow("logGroupBody");
         row.appendChild(groupBody);

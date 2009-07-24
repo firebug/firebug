@@ -68,7 +68,7 @@ const SizerRow =
 const DirTablePlate = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"tree"},
+        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"tree", 'aria-label' : 'DOM properties'},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator", RowTag)
@@ -86,7 +86,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tableTag:
         TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
-            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree'},
+            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree', 'aria-label' : 'DOM properties'},
             TBODY({role : 'presentation'},
                 SizerRow
             )

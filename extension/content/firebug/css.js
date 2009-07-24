@@ -1015,13 +1015,13 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     template: domplate(
     {
         cascadedTag:
-            DIV({},
-                DIV({role : 'list'},
+            DIV({role : 'presentation'},
+                DIV({role : 'list', 'aria-label' : 'style rules' },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role : "list"},
+                DIV({role : "list", 'aria-label' :'inherited style rules'},
                     FOR("section", "$inherited",
 
                         H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
@@ -1061,16 +1061,18 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             ),
 
         computedTag:
-            DIV({},
+            DIV({role : "list", "aria-label" : "computed styles"},
                 FOR("group", "$groups",
-                    H1({class: "cssInheritHeader groupHeader focusRow"},
+                    H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
                         SPAN({class: "cssInheritLabel"}, "$group.title")
                     ),
-                    TABLE({width: "100%", role : 'list'},
-                        FOR("prop", "$group.props",
-                            TR({class : 'focusRow', role : 'listitem'},
-                                TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
-                                TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
+                    TABLE({width: "100%", role : 'group'},
+                        TBODY({role : 'presentation'},
+                            FOR("prop", "$group.props",
+                                TR({class : 'focusRow', role : 'listitem'},
+                                    TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
+                                    TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
+                                )
                             )
                         )
                     )

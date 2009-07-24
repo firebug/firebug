@@ -276,7 +276,7 @@ function FirebugConsoleHandler(context, win)
     {
         var sourceLink = getStackLink();
         // noThrottle true is probably ok, openGroups will likely be short strings.
-        var row = Firebug.Console.openGroup(arguments, null, "group", null, true, sourceLink);
+        var row = Firebug.Console.openGroup(arguments, null, "group a11yCollapsed", null, true, sourceLink);
         removeClass(row, "opened");
     };
 

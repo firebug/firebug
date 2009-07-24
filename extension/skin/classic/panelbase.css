@@ -321,7 +321,6 @@ h1.groupHeader {
 .offScreen {
     position: absolute;
     left: -10000px;
-    top: -100000px;
     width: 1px;
     height: 1px;
     overflow: hidden;

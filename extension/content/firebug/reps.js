@@ -16,10 +16,10 @@ const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 // Common Tags
 
 var OBJECTBOX = this.OBJECTBOX =
-    SPAN({class: "objectBox objectBox-$className"});
+    SPAN({class: "objectBox objectBox-$className", role : "presentation"});
 
 var OBJECTBLOCK = this.OBJECTBLOCK =
-    DIV({class: "objectBox objectBox-$className"});
+    DIV({class: "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
 
 var OBJECTLINK = this.OBJECTLINK =
     A({
@@ -1147,14 +1147,14 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            A({class: "objectLink focusRow a11yFocus", _repObject: "$object"}, "$object|getCallName"),
+            A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             "(",
             FOR("arg", "$object|argIterator",
                 TAG("$arg.tag", {object: "$arg.value"}),
                 SPAN({class: "arrayComma"}, "$arg.delim")
             ),
             ")",
-            SPAN({class: "objectLink-sourceLink objectLink"}, "$object|getSourceLinkTitle")
+            SPAN({class: "objectLink-sourceLink objectLink a11yFocus", role : "link"}, "$object|getSourceLinkTitle")
         ),
 
     getCallName: function(frame)
@@ -1234,8 +1234,10 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 this.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        FOR("frame", "$object.frames focusRow",
-            TAG(this.StackFrame.tag, {object: "$frame"})
+        DIV({role : "group", 'aria-label' : 'stack trace'},
+            FOR("frame", "$object.frames",
+                TAG(this.StackFrame.tag, {object: "$frame"})
+            )
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1295,15 +1297,15 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 _stackTrace: "$object|getLastErrorStackTrace",
                 onclick: "$onToggleError"},
 
-            DIV({class: "errorTitle a11yFocus", role : 'checkbox', 'aria-checked' : 'false'},
+            DIV({class: "errorTitle focusRow subLogRow", role : 'listitem'},
                 "$object.message|getMessage"
             ),
-            DIV({class: "errorTrace"}),
-            DIV({class: "errorSourceBox errorSource-$object|getSourceType"},
-                IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':'false', title: "Break on this error"}),
-                A({class: "errorSource a11yFocus"}, "$object|getLine")
-            ),
-            TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
+            DIV({class: "errorTrace", role : 'presentation'}),
+            DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
+                IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: "Break on this error"}),
+                A({class: "errorSource a11yFocus"}, "$object|getLine"),
+                TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
+            )
         ),
 
     getLastErrorStackTrace: function(error)
@@ -1368,10 +1370,12 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     onToggleError: function(event)
     {
+        
         var target = event.currentTarget;
         if (hasClass(event.target, "errorBreak"))
         {
             this.breakOnThisError(target.repObject);
+            
         }
         else if (hasClass(event.target, "errorSource"))
         {
@@ -1382,7 +1386,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
         {
             var traceBox = target.childNodes[1];
             toggleClass(target, "opened");
-            event.target.setAttribute('aria-checked', hasClass(target, "opened"));
+            event.target.setAttribute('aria-expanded', hasClass(target, "opened"));
             if (hasClass(target, "opened"))
             {
                 if (target.stackTrace)
@@ -1390,7 +1394,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 if (Firebug.A11yModel.enabled)
                 {
                     var panel = Firebug.getElementPanel(event.target);
-                    dispatch([Firebug.A11yModel], "onLogRowContentCreated", [panel , traceBox]);
+                    dispatch([Firebug.A11yModel], "modifyLogRow", [panel , traceBox]);
                 }
             }
             else
