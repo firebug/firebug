@@ -1540,6 +1540,11 @@ top.Firebug =
         return Firebug.TabContext;
     },
 
+    shouldShowContext: function(context)
+    {
+        return dispatch2(modules, "shouldShowContext", [context]);
+    },
+    
     shouldCreateContext: function(browser, url, userCommands)
     {
         return dispatch2(modules, "shouldCreateContext", [browser, url, userCommands]);
