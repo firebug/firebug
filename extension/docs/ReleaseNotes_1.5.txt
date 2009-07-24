@@ -67,3 +67,19 @@ In addition there are previews of two features that will ultimately be moved int
 
     * Implement onByDefault option (Firebug > Firebug Icon Menu > Options > On By Default). Firebug will be active on every page, unless you hit “Off”. Once you hit Off on a page, Firebug won’t open for that page until you explicitly turn it on.
     * Implement log activation URIs. (Firebug Status bar icon > Right click > Log Activation URIs). Prints into the Console panel of the seletected web page in the tab browser.
+
+---------------
+getfirebug.com has Firebug 1.5a19 with the following fixes:
+
+    * Issue 2110: Firebug 1.4 disables JavaScript on yahoo.com (also for 1.4.1)
+    * Issue 2007: console.error only accepts 1 argument (part for 1.4.1)
+    * Issue 1187: Persistent Panels for Firebug (1.5 only)
+    * Issue 1723: Firebug hides when 'Tools:Clear Private Data' (clearing cache) is chosen (also for 1.4.1)
+    * Issue 2093: Copy in net pane adds extra new-lines
+    * Issue 2096: dynamic iframes refresh the console
+
+Note that this version previews persistent Console, an often-requested feature. When the Persist button is pressed, ConsolePersist, the the console will copy info from old to new Console when you reload a page.
+
+Two small activation related features are removed, On By Default and Log Activation URLs. These will reappear in Honza's FireStarter extension.
+
+
