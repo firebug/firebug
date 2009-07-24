@@ -340,6 +340,9 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         var responseText;
         try
         {
+            if (!url)
+                return responseText;
+
             var channel = ioService.newChannel(url, null, null);
 
             // These flag combination doesn't repost the request.
@@ -385,7 +388,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         catch (err)
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE)
-                FBTrace.sysout("tabCache.loadFromCache EXCEPTION " + url, err);
+                FBTrace.sysout("tabCache.loadFromCache EXCEPTION on url \'" + url +"\'", err);
         }
         finally
         {
