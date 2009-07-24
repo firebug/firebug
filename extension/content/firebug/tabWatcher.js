@@ -238,14 +238,14 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // called when win has no context, answers the question: create one, true or false?
 
         // Create if any listener says true to showCreateContext
-        if ( dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]) )
+        if (dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
             return true;
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> shouldCreateContext with user: "+userCommands+ " no opinion for: "+ url);
 
         // Do not Create if any Listener says true to shouldNotCreateContext
-        if ( dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]) )
+        if (dispatch2(this.fbListeners, "shouldNotCreateContext", [browser, url, userCommands]))
             return false;
 
         if (FBTrace.DBG_ACTIVATION)

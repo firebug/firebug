@@ -26,7 +26,7 @@
         <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
         <command id="cmd_disablePanels" oncommand="Firebug.disablePanels(FirebugContext)"/>
 
-        <command id="cmd_logActivationURIs" oncommand="Firebug.URLSelector.logBlackWhiteList()"/>
+        <command id="cmd_logActivationURIs" oncommand="Firebug.Activation.logBlackWhiteList()"/>
 
         <command id="cmd_toggleInspecting" oncommand="if (!FirebugContext) Firebug.toggleBar(true); Firebug.Inspector.toggleInspecting(FirebugContext)"
                  checked="false"/>
@@ -65,8 +65,8 @@
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
-        <command id="cmd_allOn" oncommand="Firebug.toggleAll('on')"/>
-        <command id="cmd_allOff" oncommand="Firebug.toggleAll('off')"/>
+        <command id="cmd_allOn" oncommand="Firebug.Activation.toggleAll('on')"/>
+        <command id="cmd_allOff" oncommand="Firebug.Activation.toggleAll('off')"/>
         <command id="cmd_OnByDefault" oncommand="Firebug.toggleOnByDefault()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
