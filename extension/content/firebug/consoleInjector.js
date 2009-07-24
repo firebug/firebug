@@ -222,6 +222,15 @@ function FirebugConsoleHandler(context, win)
     this.error = function()
     {
         Firebug.Errors.increaseCount(context);
+        if (arguments.length == 1)
+            logAssert("error", arguments);  // add more info based on stack trace
+        else
+            logFormatted(arguments, "error", true);  // user already added info
+    };
+
+    this.exception = function()
+    {
+        Firebug.Errors.increaseCount(context);
         logAssert("error", arguments);
     };
 
@@ -415,7 +424,15 @@ function FirebugConsoleHandler(context, win)
         var errorObject = new FBL.ErrorMessage(msg, sourceName,
                         lineNumber, (sourceLine?sourceLine:""), category, context, trace);
 
-        var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
+        var objects = errorObject;
+        if (args.length > 1)
+        {
+            objects = [errorObject];
+            for (var i = 1; i < args.length; i++)
+                objects.push(args[i]);
+        }
+
+        var row = Firebug.Console.log(objects, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
     }
 

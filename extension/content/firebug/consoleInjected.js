@@ -6,6 +6,7 @@ function _FirebugConsole()
     this.info = function() { window._firebug.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
     this.warn = function() { window._firebug.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
     this.error = function() { window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
+    this.exception = function() { window._firebug.notifyFirebug(arguments, 'exception', 'firebugAppendConsole'); }
     this.assert = function() { window._firebug.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
     this.dir = function() { window._firebug.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
     this.dirxml = function() { window._firebug.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
@@ -21,7 +22,7 @@ function _FirebugConsole()
     this.clear = function() { window._firebug.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
 
     // DBG this.uid = Math.random();
-    
+
     this.notifyFirebug = function(objs, methodName, eventID)
     {
         var element = this.getFirebugElement();
@@ -31,25 +32,25 @@ function _FirebugConsole()
 
         window._firebug.userObjects = [];
         for (var i=0; i<objs.length; i++)
-        	window._firebug.userObjects.push(objs[i]);
+            window._firebug.userObjects.push(objs[i]);
 
         var length = window._firebug.userObjects.length;
         element.setAttribute("methodName", methodName);
-        
-        // DBG element.setAttribute("uid", this.uid); 
-        
+
+        // DBG element.setAttribute("uid", this.uid);
+
         // DBG if (length > 0)
         // DBG 	element.setAttribute("checkUserObjects", this.userObjects[0].toString());
-        // DBG else 
+        // DBG else
         // DBG 	element.setAttribute("checkUserObjects", "no userObjects");
-        
+
         // DBG dump("FirebugConsole("+this.uid+") dispatching event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
         //debugger;
-        
+
         element.dispatchEvent(event);
 
         // DBG dump("FirebugConsole dispatched event "+methodName+" via "+eventID+" with "+length+ " user objects, [0]:"+this.userObjects[0]+"\n");
-         
+
         var result;
         if (element.getAttribute("retValueType") == "array")
             result = [];
@@ -69,7 +70,7 @@ function _FirebugConsole()
             this.element = window._getFirebugConsoleElement();
         return this.element;
     },
-    
+
     // ***********************************************************************
     // Console API
 
@@ -86,11 +87,10 @@ window._getFirebugConsoleElement = function()  // could this be done in extensio
         element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
         element.setAttribute("id", "_firebugConsole");
         element.firebugIgnore = true;
-         
+
         element.setAttribute("style", "display:none");
 
         document.documentElement.appendChild(element);
     }
     return element;
 };
- 
