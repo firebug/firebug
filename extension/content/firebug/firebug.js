@@ -237,7 +237,7 @@ top.Firebug =
             FBTrace.sysout("Firebug.internationalizeUI");
 
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
-            "menu_enablePanels", "menu_disablePanels", "menu_logActivationURIs",
+            "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y", "menu_activateSameOrigin", "fbContinueButton", "fbBreakOnNextButton",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",

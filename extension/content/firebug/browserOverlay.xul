@@ -126,8 +126,6 @@
             <menuitem id="menu_enablePanels" label="firebug.menu.Enable All Panels" command="cmd_enablePanels"/>
             <menuitem id="menu_disablePanels" label="firebug.menu.Disable All Panels" command="cmd_disablePanels"/>
             <menuseparator/>
-            <menuitem id="menu_logActivationURIs" label="firebug.menu.Log Activation URIs" command="cmd_logActivationURIs"/>
-            <menuseparator/>
             <menuitem id="menu_AllOff" type="checkbox" label="Off for all web pages" command="cmd_allOff"/>
             <menuitem id="menu_AllOn" type="checkbox" label="On for all web pages" command="cmd_allOn"/>
         </menupopup>

@@ -247,7 +247,9 @@ Firebug.Activation = extend(Firebug.Module,
     {
         var resultCount = {};
         var results = [];
-        var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName, resultCount, results);
+        var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName,
+            resultCount, results);
+
         for (var i = 0; i < uris.length; i++)
         {
             var uri = uris[i];
@@ -255,27 +257,6 @@ Firebug.Activation = extend(Firebug.Module,
             if (rc)
                 return rc;
         }
-    },
-
-    getURLsAsBlackWhiteLists: function()
-    {
-        var blacklist = [];
-        var whitelist = [];
-        var self = this;
-        this.iterateAnnotations(function buildLists(uri)
-        {
-            var annotation = self.annotationSvc.getPageAnnotation(uri, self.annotationName);
-            if (annotation.indexOf("closed") > 0)
-                blacklist.push(uri.spec);
-            else
-                whitelist.push(uri.spec);
-        });
-        return {blacklist: blacklist, whitelist: whitelist};
-    },
-
-    logBlackWhiteList: function()
-    {
-        Firebug.Console.logFormatted([this.getURLsAsBlackWhiteLists()]);
     },
 
     toggleAll: function(offOrOn)
