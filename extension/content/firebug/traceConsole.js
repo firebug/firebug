@@ -62,7 +62,7 @@ var TraceConsole =
         this.logs = logNode;
 
         // Notify listeners
-        Firebug.TraceModule.onLoadConsole(window, this.consoleNode);
+        Firebug.TraceModule.onLoadConsole(window, logNode);
         this.registerModule(Firebug.TraceModule);
 
         // Make sure the UI is localized.
