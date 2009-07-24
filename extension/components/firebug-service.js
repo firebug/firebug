@@ -978,8 +978,8 @@ FirebugService.prototype =
             if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
             {
                 jsd.pause();
-                /* fbs.unhookScripts();
-                jsd.off();
+                 fbs.unhookScripts();
+                 /* jsd.off();
                 if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("fbs.pause turned jsd OFF,  depth "+jsd.pauseDepth);
                     */
@@ -1007,10 +1007,10 @@ FirebugService.prototype =
             if (!jsd.isOn)
             {
                 jsd.on();
-                fbs.hookScripts();
                 if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("fbs.unpause turned on jsd and hooked scripts pauseDepth:"+jsd.pauseDepth);
             }
+            fbs.hookScripts();
             var depth = jsd.unPause();
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause depth "+depth+" jsd.isOn: "+jsd.isOn);
