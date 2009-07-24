@@ -85,8 +85,7 @@ Firebug.Activation = extend(Firebug.Module,
     shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
     {
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("shouldCreateContext allPagesActivation "+this.allPagesActivation +
-                " onByDefault: "+Firebug.onByDefault);
+            FBTrace.sysout("shouldCreateContext allPagesActivation " + this.allPagesActivation);
 
         if (this.allPagesActivation == "off")
             return false;
@@ -116,9 +115,6 @@ Firebug.Activation = extend(Firebug.Module,
             // Annotated so, return the value.
             if (hasAnnotation)
                 return this.checkAnnotation(browser, uri);
-
-            if (Firebug.onByDefault)
-                return true;
 
             if (browser.FirebugLink) // then TabWatcher found a connection
             {

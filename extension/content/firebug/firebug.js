@@ -60,7 +60,7 @@ const prefNames =
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
-    "activateSameOrigin", "onByDefault",
+    "activateSameOrigin",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "netSearchHeaders", "netSearchParameters",
@@ -239,8 +239,7 @@ top.Firebug =
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels", "menu_logActivationURIs",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
-            "fbBreakOnNextButton",
+            "menu_enableA11y", "menu_activateSameOrigin", "fbContinueButton", "fbBreakOnNextButton",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOff", "menu_AllOn"];
 

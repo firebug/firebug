@@ -67,7 +67,6 @@
         <command id="cmd_disablePanels" oncommand="Firebug.ModuleManager.disableModules()"/>
         <command id="cmd_allOn" oncommand="Firebug.Activation.toggleAll('on')"/>
         <command id="cmd_allOff" oncommand="Firebug.Activation.toggleAll('off')"/>
-        <command id="cmd_OnByDefault" oncommand="Firebug.toggleOnByDefault()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
     </commandset>
@@ -360,10 +359,6 @@
                               label="firebug.menu.Activate Same Origin URLs"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="activateSameOrigin"/>
-                    <menuitem type="checkbox" id="menu_onByDefault"
-                              label="firebug.menu.On By Default"
-                              oncommand="FirebugChrome.onToggleOption(this)"
-                              option="onByDefault"/>
                     <menuseparator id="menu_optionsSeparator"/>
                     <menuitem id="menu_resetAllOptions"
                               label="firebug.menu.Reset All Firebug Options"
