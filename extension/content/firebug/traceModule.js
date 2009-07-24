@@ -181,7 +181,7 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     shutdown: function()
     {
-        if (this.consoleWindow)
+        if (this.consoleWindow && this.consoleWindow.TraceConsole)
             this.consoleWindow.TraceConsole.unregisterModule(this);
     },
 
