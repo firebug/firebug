@@ -904,7 +904,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.onThrow, no context, try to get from frame\n");
             context = getFrameContext(frame);
         }
-        if (FBTrace.DBG_THROW) FBTrace.sysout("debugger.onThrow context:"+(context?context.getName():"undefined")+"\n");
+        if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onThrow context:"+(context?context.getName():"undefined")+"\n");
         if (!context)
             return RETURN_CONTINUE_THROW;
 
@@ -917,11 +917,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (!isCatch)
             {
                 context.thrownStackTrace = getStackTrace(frame, context);
-                if (FBTrace.DBG_THROW) FBTrace.sysout("debugger.onThrow reset context.thrownStackTrace", context.thrownStackTrace.frames);
+                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onThrow reset context.thrownStackTrace", context.thrownStackTrace.frames);
             }
             else
             {
-                if (FBTrace.DBG_THROW) FBTrace.sysout("debugger.onThrow isCatch\n");
+                if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onThrow isCatch\n");
             }
         }
         catch  (exc)
