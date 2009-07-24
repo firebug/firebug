@@ -1619,9 +1619,11 @@ this.wrapText = function(text, noEscapeHTML)
     var html = [];
     var wrapWidth = Firebug.textWrapWidth;
 
-    // Split long text into lines and put every line into an <pre> element (only in case
+    // Split long text into lines and put every line into an <code> element (only in case
     // if noEscapeHTML is false). This is useful for automatic scrolling when searching
     // within response body (in order to scroll we need an element).
+    // Don't use <pre> elements since these adds addiontanl new line ending when copying
+    // selected source code using Firefox->Edit->Copy (Ctrl+C) (issue 2093).
     var lines = this.splitLines(text);
     for (var i = 0; i < lines.length; ++i)
     {
@@ -1633,14 +1635,14 @@ this.wrapText = function(text, noEscapeHTML)
             var subLine = line.substr(0, wrapIndex);
             line = line.substr(wrapIndex);
 
-            if (!noEscapeHTML) html.push("<pre>");
+            if (!noEscapeHTML) html.push("<code>");
             html.push(noEscapeHTML ? subLine : escapeHTML(subLine));
-            if (!noEscapeHTML) html.push("</pre>");
+            if (!noEscapeHTML) html.push("</code>");
         }
 
-        if (!noEscapeHTML) html.push("<pre>");
+        if (!noEscapeHTML) html.push("<code>");
         html.push(noEscapeHTML ? line : escapeHTML(line));
-        if (!noEscapeHTML) html.push("</pre>");
+        if (!noEscapeHTML) html.push("</code>");
     }
 
     return html.join("");
