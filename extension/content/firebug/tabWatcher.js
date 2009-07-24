@@ -261,7 +261,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // page on the new context
         var persistedState = browser.persistedState;
         delete browser.persistedState;
-        if (!persistedState || persistedState.location != safeGetWindowLocation(win).href)
+        var location = safeGetWindowLocation(win).toString();
+        if (!persistedState || persistedState.location != location)
             persistedState = null;
 
         // The proper instance of FirebugChrome object (different for detached Firebug and

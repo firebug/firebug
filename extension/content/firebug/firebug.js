@@ -239,7 +239,8 @@ top.Firebug =
         var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
-            "menu_enableA11y", "menu_activateSameOrigin", "fbContinueButton", "fbBreakOnNextButton",
+            "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
+            "fbBreakOnNextButton", "fbConsolePersist",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOff", "menu_AllOn"];
 
@@ -1544,7 +1545,7 @@ top.Firebug =
     {
         return dispatch2(modules, "shouldShowContext", [context]);
     },
-    
+
     shouldCreateContext: function(browser, url, userCommands)
     {
         return dispatch2(modules, "shouldCreateContext", [browser, url, userCommands]);
@@ -1929,6 +1930,9 @@ Firebug.Panel =
         this.panelNode.ownerPanel = this;
 
         setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
+
+        this.loadPersistedContent();
+
         doc.body.appendChild(this.panelNode);
 
         if (FBTrace.DBG_INITIALIZE)
@@ -1943,9 +1947,34 @@ Firebug.Panel =
             FBTrace.sysout("firebug.destroy panelNode for "+this.name+"\n");
 
         if (this.panelNode)
+        {
+            if (this.persistContent)
+                this.savePersistedContent(state);
             delete this.panelNode.ownerPanel;
+        }
 
         this.destroyNode();
+    },
+
+    savePersistedContent: function(state)
+    {
+        state.panelNode = this.panelNode;
+        state.persistContent = this.persistContent;
+    },
+
+    loadPersistedContent: function()
+    {
+        var persistedState = Firebug.getPanelState(this);
+        if (persistedState)
+        {
+            this.persistContent = persistedState.persistContent;
+            if (this.persistContent && persistedState.panelNode)
+            {
+                // move the nodes from the persistedState to the panel
+                while(persistedState.panelNode.firstChild)
+                    this.panelNode.appendChild(persistedState.panelNode.firstChild);
+            }
+        }
     },
 
     // called when a panel in one XUL window is about to appear in another one.
@@ -3340,7 +3369,7 @@ Firebug.ModuleManager =
                 catch (exc)
                 {
                     if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("ModuleManager.changeActivation FAILS for "+context.getName(), exc);
+                        FBTrace.sysout("ModuleManager.changeActivation FAILS for "+context.getName()+" because: "+ exc, exc);
                 }
             }
         );

@@ -182,14 +182,24 @@ Firebug.Console = extend(ActivableConsole,
     initContext: function(context, persistedState)
     {
         Firebug.ActivableModule.initContext.apply(this, arguments);
+        context.consoleReloadWarning = true;  // mark as need to warn.
+    },
 
-        this.insertLogLimit(context);
+    clearReloadWarning: function(context) // remove the warning about reloading.
+    {
+         if (context.consoleReloadWarning)
+         {
+                var panel = context.getPanel(this.panelName);
+             panel.clearReloadWarning();
+             delete context.consoleReloadWarning;
+         }
+    },
 
-        if (Firebug.Console.isAlwaysEnabled())  // put the message in, we will clear if the window console is injected.
-        {
-            Firebug.Console.log($STR("message.Reload to activate window console"), context, "info");
-            context.consoleWarning = true;
-        }
+    togglePersist: function(context)
+    {
+        var panel = context.getPanel(this.panelName);
+        panel.persistContent = panel.persistContent? false : true;
+        Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", panel.persistContent);
     },
 
     showContext: function(browser, context)
@@ -283,27 +293,6 @@ Firebug.Console = extend(ActivableConsole,
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     },
 
-    insertLogLimit: function(context)
-    {
-        // Create limit row. This row is the first in the list of entries
-        // and initially hidden. It's displayed as soon as the number of
-        // entries reaches the limit.
-        var panel = context.getPanel(this.panelName);
-        var row = panel.createRow("limitRow");
-
-        var limitInfo = {
-            totalCount: 0,
-            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".console.logLimit"])
-        };
-
-        var netLimitRep = Firebug.NetMonitor.NetLimit;
-        var nodes = netLimitRep.createTable(row, limitInfo);
-
-        panel.limit = nodes[1];
-
-        var container = panel.panelNode;
-        container.insertBefore(nodes[0], container.firstChild);
-    }
 });
 
 Firebug.ConsoleListener =
@@ -365,7 +354,43 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("ConsolePanel.clear");
             clearNode(this.panelNode);
-            Firebug.Console.insertLogLimit(this.context);
+            this.insertLogLimit(this.context);
+        }
+    },
+
+    insertLogLimit: function()
+    {
+        // Create limit row. This row is the first in the list of entries
+        // and initially hidden. It's displayed as soon as the number of
+        // entries reaches the limit.
+        var row = this.createRow("limitRow");
+
+        var limitInfo = {
+            totalCount: 0,
+            limitPrefsTitle: $STRF("LimitPrefsTitle", [Firebug.prefDomain+".console.logLimit"])
+        };
+
+        var netLimitRep = Firebug.NetMonitor.NetLimit;
+        var nodes = netLimitRep.createTable(row, limitInfo);
+
+        this.limit = nodes[1];
+
+        var container = this.panelNode;
+        container.insertBefore(nodes[0], container.firstChild);
+    },
+
+    insertReloadWarning: function()
+    {
+        // put the message in, we will clear if the window console is injected.
+        this.warningRow = this.append(appendObject, $STR("message.Reload to activate window console"), "info");
+    },
+
+    clearReloadWarning: function()
+    {
+        if (this.warningRow)
+        {
+            this.warningRow.parentNode.removeChild(this.warningRow);
+            delete this.warningRow;
         }
     },
 
@@ -496,10 +521,19 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     initialize: function()
     {
-        Firebug.ActivablePanel.initialize.apply(this, arguments);
+        Firebug.ActivablePanel.initialize.apply(this, arguments);  // loads persisted content
 
-        // Initialize log limit and listen for changes.
-        this.updateMaxLimit();
+        if (!this.persistedContent && Firebug.Console.isAlwaysEnabled())
+        {
+            this.insertLogLimit(this.context);
+
+            // Initialize log limit and listen for changes.
+            this.updateMaxLimit();
+
+            if (this.context.consoleReloadWarning)  // we have not yet injected the console
+                this.insertReloadWarning();
+        }
+
         prefs.addObserver(Firebug.prefDomain, this, false);
     },
 
@@ -526,6 +560,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              Firebug.Console.disabledPanelPage.hide(this);
              this.showCommandLine(true);
              this.showToolbarButtons("fbConsoleButtons", true);
+             Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", this.persistContent);
              if (this.wasScrolledToBottom)
                  scrollToBottom(this.panelNode);
         }

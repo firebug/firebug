@@ -21,6 +21,7 @@
         <command id="cmd_openInEditor" oncommand="Firebug.openInEditor(FirebugContext, event.sourceEvent.target.value)"/>
         <!-- end TODO Firebug.Editors. -->
         <command id="cmd_clearConsole" oncommand="Firebug.Console.clear(FirebugContext)"/>
+        <command id="cmd_togglePersistConsole" oncommand="Firebug.Console.togglePersist(FirebugContext)"/>
         <command id="cmd_clearNet" oncommand="Firebug.NetMonitor.clear(FirebugContext)"/>
         <command id="cmd_toggleSuspendFirebug" oncommand="Firebug.toggleSuspend()"/>
         <command id="cmd_closeFirebug" oncommand="Firebug.closeFirebug(true)"/>
@@ -158,6 +159,8 @@
                                     <hbox id="fbConsoleButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                             tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
+                                        <toolbarbutton label="firebug.console.Persist" class="toolbar-text-button" id="fbConsolePersist"
+                                            type="checkbox" tooltiptext="firebug.conosole.Do Not Clear On Reload" command="cmd_togglePersistConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button"
                                             type="checkbox" command="cmd_toggleProfiling"/>
                                     </hbox>
