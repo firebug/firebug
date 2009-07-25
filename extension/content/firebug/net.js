@@ -2840,6 +2840,11 @@ function getFileCategory(file)
         FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
             ", mimeType: " + file.mimeType + " for: " + file.href, file);
 
+    // Solve cases when charset is also specified, eg "text/html; charset=UTF-8".
+    var mimeType = file.mimeType;
+    if (mimeType)
+        mimeType = mimeType.split(";")[0];
+
     return (file.category = mimeCategoryMap[file.mimeType]);
 }
 
