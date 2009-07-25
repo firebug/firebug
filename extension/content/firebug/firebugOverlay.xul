@@ -231,7 +231,7 @@
                                     <toolbarseparator id="fbLocationSeparator" collapsed="true"/>
                                     <toolbarbutton id="fbLocationList" locationProvider="FirebugChrome.getLocationProvider();"
                                           collapsed="true" tooltip="fbTooltip" contextmenu="fbContextMenu"
-                                          class="noTabStop"/>
+                                          class="noTabStop" role="button" aria-haspopup="true" aria-label="file selector"/>
 
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
                                     <panelStatus id="fbPanelStatus" flex="1"

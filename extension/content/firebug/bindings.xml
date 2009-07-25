@@ -795,7 +795,7 @@
                     if (!event.ctrlKey)
                         Firebug.Search.enter(FirebugContext);
                     else
-                        FBL.dispatch([Firebug.A11yModel], 'moveToSearchMatch', [FirebugContext]);
+                        FBL.dispatch([Firebug.A11yModel], 'moveToSearchMatch');
                 }
                 else
                     Firebug.Search.update(FirebugContext, true);

@@ -658,14 +658,16 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         var logRow = search.find(text);
         if (!logRow)
+        {
+            dispatch([Firebug.A11yModel], 'onConsoleSearchMatchFound', [this, text, []]);
             return false;
-
+        }
         for (; logRow; logRow = search.findNext())
         {
             setClass(logRow, "matched");
             this.matchSet.push(logRow);
         }
-
+        dispatch([Firebug.A11yModel], 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
         return true;
     },
 

@@ -98,7 +98,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         setClass(chrome.$('fbStatusBar'), 'useA11y');
 
         //manage all key events in toolbox (including tablists)
-        chrome.$("fbPanelBar1").addEventListener("keypress", this.handlePanelBarKeyPress , true);
+        chrome.$("fbContentBox").addEventListener("keypress", this.handlePanelBarKeyPress , true);
         //make focus stick to inspect button when clicked
         chrome.$("fbInspectButton").addEventListener("mousedown", this.focusTarget, true);
         chrome.$('fbPanelBar1-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
@@ -173,7 +173,6 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
                 panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
-                this.addLiveElem(panel);
                 break;
             case 'css':
                 panelA11y.manageFocus = true;
@@ -195,8 +194,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panel.panelNode.addEventListener('contextmenu', this.onScriptContextMenu, true);
                 panel.panelNode.addEventListener('keypress', this.onScriptKeyPress, true);
                 panel.panelNode.addEventListener('keyup', this.onScriptKeyUp, true);
-                panel.panelNode.addEventListener('mouseup', this.onScriptMouseUp, true)
-                this.addLiveElem(panel);
+                panel.panelNode.addEventListener('mouseup', this.onScriptMouseUp, true);
                 panelA11y.oneEmElem = this.addSingleSpaceElem(panel.panelNode);
                 break;
         }
@@ -276,6 +274,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
+        if (panelA11y.liveElem && isElement(panelA11y.liveElem))
+            return;
         var attrName = attrValue = "";
         if (role)
         {
@@ -290,8 +290,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var elem = panel.document.createElement('div');
         elem.setAttribute(attrName, attrValue);
         elem.className = "offScreen";
-        panel.panelNode.appendChild(elem);
-        panelA11y[role ? role + "Elem" : "liveElem"] = elem;
+        panel.document.body.appendChild(elem);
+        panelA11y.liveElem = elem;
         return elem;
     },
 
@@ -326,7 +326,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var target = event.originalTarget;
         var isTab = target.nodeName.toLowerCase() == "paneltab";
         var isButton = target.nodeName.search(/(xul:)?toolbarbutton/) != -1;
-        var isDropDownMenu = isButton && target.getAttribute('type') == "menu";
+        var isDropDownMenu = isButton && (target.getAttribute('type') == "menu" || target.id == "fbLocationList") ;
         var siblingTab, forward, toolbar, buttons;
         var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
 
@@ -394,7 +394,12 @@ Firebug.A11yModel = extend(Firebug.Module,
                     else if (isButton)
                     {
                         if (isDropDownMenu)
-                            target.open = true;
+                        {
+                            if (target.id == "fbLocationList")
+                                target.showPopup();
+                            else
+                                target.open = true;
+                        }
                         cancelEvent(event);
                         return false;
                     }
@@ -456,6 +461,23 @@ Firebug.A11yModel = extend(Firebug.Module,
             }
             else if (tabStop.getAttribute('tabindex') !== "0")
                 tabStop.setAttribute('tabindex', "0");
+        if (tabStop)
+            this.checkModifiedState(panel, tabStop, true);
+        }
+    },
+    
+    checkModifiedState : function(panel, elem, makeTab)
+    {
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y || !elem)
+            return;
+        
+        switch (panel.name)
+        {
+            case  'console' :
+                if (hasClass(elem, 'focusRow'))
+                    this.modifyConsoleRow(panel, elem, makeTab);
+                break;
         }
     },
 
@@ -478,6 +500,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     findPanelTabStop : function(panel, className, last)
     {
         var candidates = panel.panelNode.getElementsByClassName(className);
+        candidates= Array.filter(candidates, function(e,i,a){return this.isVisibleByStyle(e) && isVisible(e);}, this);
         if (candidates.length > 0)
             this.setPanelTabStop(panel, candidates[last ? candidates.length -1 : 0]);
         else
@@ -507,6 +530,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 this.setPanelTabStop(panel, focusRow);
                 focusRow.setAttribute('aria-expanded', !hasClass(row, 'a11yCollapsed') + "");
+                this.insertHiddenText(panel, focusRow, 'group label: ');
             }
         }
         else if (hasClass(row, 'logRow-errorMessage'))
@@ -611,16 +635,46 @@ Firebug.A11yModel = extend(Firebug.Module,
 
             var goLeft = keyCode == 37;
             if (this.isLogRow(target, true))
-            { 
+            {
                 if (target.hasAttribute('aria-expanded') && target.getAttribute('aria-expanded') == (goLeft ? "true" : "false"))
-                    this.dispatchMouseEvent(target, hasClass(target, 'logGroupLabel') ? 'mousedown' : 'click'); //should both be click
+                    this.dispatchMouseEvent(target, hasClass(target, 'logGroupLabel') ? 'mousedown' : 'click');
+                else if (goLeft)
+                {
+                    //check if we're in an expanded section
+                    var inExpanded = false, groupClass, groupLabelClass, group, groupLabel;
+                    if (hasClass(target, 'objectBox-stackFrame'))
+                    {
+                        inExpanded = true;
+                        groupClass = "errorTrace";
+                        groupLabelClass = "errorTitle";
+                    }
+                    else if (getAncestorByClass(target, 'logGroupBody'))
+                    {
+                        inExpanded = true; 
+                        groupClass = "logGroupBody";
+                        groupLabelClass = "logGroupLabel";
+                    }
+                    
+                    if (inExpanded)
+                    { 
+                        group = getAncestorByClass(target, groupClass);
+                        if (group)
+                        {
+                            groupLabel = this.getPreviousByClass(target, groupLabelClass, false, panel.panelNode);
+                            if (groupLabel)
+                            {
+                                this.modifyConsoleRow(panel, groupLabel);
+                                this.focus(groupLabel);
+                            }
+                        }
+                    }
+                }
                 else if (!goLeft)
                 {
                     var focusItems = this.getFocusObjects(target);
                     if (focusItems.length > 0)
                         this.focus(event.ctrlKey ? focusItems[focusItems.length -1] : focusItems[0]);
                 }
-                cancelEvent(event);
             }
             else if (this.isDirCell(target))
             {
@@ -847,6 +901,20 @@ Firebug.A11yModel = extend(Firebug.Module,
         else return;
         setClass(row, 'a11yModified');
     },
+    
+    onConsoleSearchMatchFound : function(panel, text, matches)
+    {   
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
+            return;
+        var matchFeedback = "";
+        //TODO: localize these for 1.5
+        if (!matches || matches.length == 0) 
+            matchFeedback = "No matching log rows for \"" + text + "\"";
+        else
+            matchFeedback = "\"" + text + "\" matched in " + matches.length + " log rows";
+        this.updateLiveElem(panel, matchFeedback, true); //should not use alert
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // HTML Panel
@@ -968,7 +1036,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
     },
 
-    moveToSearchMatch: function(context)  // TODO context not needed
+    moveToSearchMatch: function()
     {
         if (!this.isEnabled())
             return;
@@ -1929,7 +1997,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             if (hasClass(row, 'hasChildren'))
                 cellChild.setAttribute('aria-expanded', hasClass(row, 'opened'));
             if (makeTab)
-                this.modifyMemberRow(panel, cellChild, true);            
+                this.modifyConsoleRow(panel, cellChild, true);            
             cellChild.setAttribute('role', 'treeitem');
             cellChild.setAttribute('aria-level', parseInt(row.getAttribute('level')) + 1);
             if (posInSet && setSize)
@@ -2033,12 +2101,19 @@ Firebug.A11yModel = extend(Firebug.Module,
             type = "boolean";
         else if ((type == "" || type == "object") && elem.repObject)
         {
-            var obj = elem.repObject;
-            type = typeof obj;
-            if (obj instanceof Array)
-                type = "array";
-            if (typeof obj.lineNo != "undefined")
-                type = "function call";
+            try
+            {
+                var obj = elem.repObject;
+                if (!obj)
+                    return type;
+                type = typeof obj;
+                if (obj instanceof Array)
+                    type = "array";
+                if (typeof obj.lineNo != "undefined")
+                    type = "function call";
+            }
+            catch(e)
+            {}
         }
         return type;
     },
