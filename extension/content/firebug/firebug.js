@@ -1950,6 +1950,9 @@ Firebug.Panel =
         {
             if (this.persistContent)
                 this.savePersistedContent(state);
+            else
+                delete state.persistContent;
+
             delete this.panelNode.ownerPanel;
         }
 
