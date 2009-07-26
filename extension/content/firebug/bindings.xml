@@ -144,7 +144,7 @@
 
                 var panel = FirebugContext ? FirebugContext.getPanel(panelName) : null;
 
-                if (panel && panel == this.selectedPanel && !forceUpdate)
+                if (panel && (panel == this.selectedPanel) && !forceUpdate)
                     return panel;
 
                 if (!panel)
@@ -167,7 +167,6 @@
                     tab.setAttribute("selected", "true");
                     if (Firebug.A11yModel && Firebug.A11yModel.isEnabled() && Firebug.A11yModel.tabFocused &&!forceUpdate)
                         tab.focus();
-
                 }
 
                 if (panel)
@@ -235,9 +234,10 @@
                 var oldPanel = this.selectedPanel;
                 if (oldPanel)
                 {
-                    oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
                     var state = Firebug.getPanelState(oldPanel);
                     oldPanel.hide(state);
+
+                    oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?
                     oldPanel.panelNode.removeAttribute("active");
                 }
             ]]></body>
