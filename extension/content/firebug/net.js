@@ -1050,11 +1050,12 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (!this.queue.length)
             return;
 
-        var scrolledToBottom = isScrolledToBottom(this.panelNode);
+        if (this.panelNode.offsetHeight)
+            this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
         this.layout();
 
-        if (scrolledToBottom)
+        if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
     },
 
@@ -1230,7 +1231,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
             var receivingBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
-            resolvingBar.style.left = connectingBar.style.left = sendingBar.style.left = 
+            resolvingBar.style.left = connectingBar.style.left = sendingBar.style.left =
                 waitingBar.style.left =
                 respondedBar.style.left = receivingBar.style.left = this.barOffset + "%";
 
@@ -1341,7 +1342,7 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         if (phase.windowLoadTime)
             this.windowLoadBarOffset = Math.floor(((phase.windowLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
 
-        /*FBTrace.sysout("net.calculateFileTimes" + 
+        /*FBTrace.sysout("net.calculateFileTimes" +
             " dns: " + formatTime(file.resolvingTime - file.startTime) +
             ", conn: " + formatTime(file.connectingTime - file.startTime) +
             ", send: " + formatTime(file.sendingTime - file.startTime) +

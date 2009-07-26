@@ -1209,18 +1209,22 @@ this.isScrolledToBottom = function(element)
 {
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
     if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("isScrolledToBottom "+onBottom+" wasScrolledToBottom: "+this.wasScrolledToBottom);
+        FBTrace.sysout("isScrolledToBottom offsetHeight: "+element.offsetHeight +" onBottom:"+onBottom);
     return onBottom;
 };
 
 this.scrollToBottom = function(element)
 {
-    element.scrollTop = element.scrollHeight - element.offsetHeight;
+    if (element.offsetHeight)
+    {
+        element.scrollTop = element.scrollHeight - element.offsetHeight;
 
-    if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" wasScrolledToBottom: "+this.wasScrolledToBottom);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop);
 
-    this.wasScrolledToBottom = true;
+        return true;
+    }
+    return false;
 };
 
 this.move = function(element, x, y)

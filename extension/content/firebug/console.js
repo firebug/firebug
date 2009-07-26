@@ -189,7 +189,7 @@ Firebug.Console = extend(ActivableConsole,
     {
          if (context.consoleReloadWarning)
          {
-                var panel = context.getPanel(this.panelName);
+             var panel = context.getPanel(this.panelName);
              panel.clearReloadWarning();
              delete context.consoleReloadWarning;
          }
@@ -328,7 +328,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            var scrolledToBottom = isScrolledToBottom(this.panelNode);
+            if (this.panelNode.offsetHeight)
+                this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
             var row = this.createRow("logRow", className);
             appender.apply(this, [objects, row, rep]);
@@ -338,9 +339,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
             container.appendChild(row);
 
-            this.filterLogRow(row, scrolledToBottom);
+            this.filterLogRow(row, this.wasScrolledToBottom);
 
-            if (scrolledToBottom)
+            if (this.wasScrolledToBottom)
                 scrollToBottom(this.panelNode);
 
             return row;
@@ -540,11 +541,18 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     initializeNode : function()
     {
         dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
+        if (FBTrace.DBG_CONSOLE)
+        {
+            this.onScroller = bind(this.onScroll, this);
+            this.panelNode.addEventListener("scroll", this.onScroller, true);
+        }
     },
 
     destroyNode : function()
     {
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
+        if (this.onScroller)
+            this.panelNode.removeEventListener("scroll", this.onScroller, true);
     },
 
     shutdown: function()
@@ -561,6 +569,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              this.showCommandLine(true);
              this.showToolbarButtons("fbConsoleButtons", true);
              Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", this.persistContent);
+             if (state.wasScrolledToBottom)
+             {
+                 this.wasScrolledToBottom = state.wasScrolledToBottom;
+                 delete state.wasScrolledToBottom;
+             }
              if (this.wasScrolledToBottom)
                  scrollToBottom(this.panelNode);
         }
@@ -594,14 +607,18 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         this.showCommandLine(false);
     },
 
-    hide: function()
+    hide: function(state)
     {
         if (FBTrace.DBG_PANELS)
             FBTrace.sysout("Console.panel hide\n");
 
         this.showToolbarButtons("fbConsoleButtons", false);
         this.showCommandLine(false);
-        this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+
+        if (this.panelNode.offsetHeight)
+            this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+
+        state.wasScrolledToBottom = this.wasScrolledToBottom;
     },
 
     getOptionsMenuItems: function()
@@ -763,6 +780,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             Firebug.CommandLine.setMultiLine(false, Firebug.chrome, Firebug.largeCommandLine);
             collapse(Firebug.chrome.$("fbCommandBox"), true);
         }
+    },
+
+    onScroll: function(event)
+    {
+        var isScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
+        if(FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onScroll /\/\/\/\/\/\/\/\/\//\/\/\/\/\/ scrolledToBottom: "+isScrolledToBottom, event);
     },
 });
 

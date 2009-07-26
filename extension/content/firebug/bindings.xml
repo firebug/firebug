@@ -147,6 +147,8 @@
                 if (panel && (panel == this.selectedPanel) && !forceUpdate)
                     return panel;
 
+                this.hideSelectedPanel();
+
                 if (!panel)
                     this.tabBox.setAttribute("collapsed", "true");
                 else
@@ -156,8 +158,6 @@
                 {
                     this.selectedTab.removeAttribute("selected");
                 }
-
-                this.hideSelectedPanel();
 
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
@@ -234,7 +234,7 @@
                 var oldPanel = this.selectedPanel;
                 if (oldPanel)
                 {
-                    var state = Firebug.getPanelState(oldPanel);
+                    var state = FBL.getPersistedState(FirebugContext, oldPanel.name);
                     oldPanel.hide(state);
 
                     oldPanel.visible = false;  // xxxjjb Why three ways to un-show the panel?

@@ -1973,6 +1973,8 @@ Firebug.Panel =
                 // move the nodes from the persistedState to the panel
                 while(persistedState.panelNode.firstChild)
                     this.panelNode.appendChild(persistedState.panelNode.firstChild);
+
+                scrollToBottom(this.panelNode);
             }
         }
     },
