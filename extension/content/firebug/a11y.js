@@ -410,6 +410,17 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
             }
         }
+        else if ((keyCode == KeyEvent.DOM_VK_UP || keyCode == KeyEvent.DOM_VK_DOWN) && event.target.id == "fbSearchBox") 
+        {
+            var popup = Firebug.chrome.$('fbSearchOptionsPopup');
+            if (popup)
+            {
+                popup.hidePopup();
+                popup.setAttribute('ignorekeys', 'false');
+                popup.openPopup(event.target, "before_start", 0, -5, false, false);
+                popup.setAttribute('onpopuphidden', "this.setAttribute('ignorekeys', 'true');");
+            }
+        }
     },
 
     handleTabBarFocus: function(event)
