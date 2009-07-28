@@ -82,4 +82,21 @@ Note that this version previews persistent Console, an often-requested feature. 
 
 Two small activation related features are removed, On By Default and Log Activation URLs. These will reappear in Honza's FireStarter extension.
 
+------------
+getfirebug.com has released Firebug 1.5X.0a20.
+
+This release contains the following fixes that will also be in 1.4.1.
+
+    * Issue 2092: Copy does not appear on context menu in Net pane
+    * Update locale sv-SE
+    * Issue 2127: wrong delete icon for watch panel entries
+    * Issue 2124: Search options popup not keyboard accessible
+    * Issue 2070: Stack trace in 1.4 not resolving function names
+    * Issue 2086: Source links incorrectly positioned in error stack trace
+
+Some fixes are 1.5 only:
+
+    * Issue 2118: Persist and scroll to bottom
+    * Issue 2117: "Persist" setting persists...
+
 
