@@ -447,7 +447,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             if (part && typeof(part) == "object")
             {
                 var object = objects[++objIndex];
-                if (object)
+                if (typeof(object) != "undefined")
                     this.appendObject(object, row, part.rep);
                 else
                     this.appendObject(part.type, row, FirebugReps.Text);
