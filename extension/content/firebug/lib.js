@@ -1711,6 +1711,9 @@ this.setItemIntoElement = function(element, item)
     if (item.command)
         element.addEventListener("command", item.command, false);
 
+    if (item.commandID)
+        element.setAttribute("command", item.commandID);
+
     if (item.option)
         element.setAttribute("option", item.option);
 
