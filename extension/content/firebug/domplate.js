@@ -1032,7 +1032,7 @@ var Renderer =
         var domArgs = [root, this.tag.context, 0];
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
-        
+
         if (FBTrace.DBG_DOM) FBTrace.sysout("domplate append domArgs:", domArgs);
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
@@ -1057,7 +1057,8 @@ function defineTags()
 defineTags(
     "a", "button", "br", "canvas", "col", "colgroup", "div", "fieldset", "form", "h1", "h2", "h3", "hr",
      "img", "input", "label", "legend", "li", "ol", "optgroup", "option", "p", "pre", "select", "b",
-    "span", "strong", "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "tr", "tt", "ul", "iframe"
+    "span", "strong", "table", "tbody", "td", "textarea", "tfoot", "th", "thead", "tr", "tt", "ul",
+    "iframe", "code"
 );
 
 })();

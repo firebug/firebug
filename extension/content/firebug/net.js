@@ -2993,7 +2993,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             TR(
                 TD({class: "netInfoParamName"}, "$param.name"),
                 TD({class: "netInfoParamValue"},
-                    PRE("$param|getParamValue")
+                    FOR("line", "$param|getParamValueIterator",
+                        CODE("$line")
+                    )
                 )
             )
         ),
@@ -3041,12 +3043,13 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         this.selectTab(event.currentTarget);
     },
 
-    getParamValue: function(param)
+    getParamValueIterator: function(param)
     {
-        // This value is inserted into PRE element and so, make sure the HTML isn't escaped (1210).
+        // This value is inserted into CODE element and so, make sure the HTML isn't escaped (1210).
         // This is why the second parameter is true.
-        // The PRE element preserves whitespaces so they are displayed the same, as they come from
-        // the server (1194).
+        // The CODE (with style white-space:pre) element preserves whitespaces so they are
+        // displayed the same, as they come from the server (1194).
+        // In case of a long header values of post parameters the value must be wrapped (2105).
         return wrapText(param.value, true);
     },
 
