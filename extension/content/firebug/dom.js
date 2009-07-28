@@ -961,10 +961,14 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             scrollIntoCenterView(row, this.panelNode);
 
             this.highlightRow(row);
+            dispatch([Firebug.A11yModel], 'onDomSearchMatchFound', [this, text, row]);
             return true;
         }
         else
+        {
+        	dispatch([Firebug.A11yModel], 'onDomSearchMatchFound', [this, text, null]);
             return false;
+		}
     }
 });
 

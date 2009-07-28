@@ -991,10 +991,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             this.document.defaultView.getSelection().selectAllChildren(row);
             scrollIntoCenterView(row, this.panelNode);
+            dispatch([Firebug.A11yModel], 'onCSSSearchMatchFound', [this, text, row]);
             return true;
         }
         else
+        {
+            dispatch([Firebug.A11yModel], 'onCSSSearchMatchFound', [this, text, null]);
             return false;
+        }
     },
 
     getSearchOptionsMenuItems: function()

@@ -2534,11 +2534,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             // this lineNo is an zero-based index into sourceBox.lines. Add one for user line numbers
             this.scrollToLine(sourceBox.repObject.href, lineNo, this.jumpHighlightFactory(lineNo+1, this.context));
+            dispatch([Firebug.A11yModel], 'onScriptSearchMatchFound', [this, text, sourceBox.repObject, lineNo]);
 
             return true;
         }
         else
+        {
+            dispatch([Firebug.A11yModel], 'onScriptSearchMatchFound', [this, text, null, null]);
             return false;
+        }
     },
 
     getSearchOptionsMenuItems: function()

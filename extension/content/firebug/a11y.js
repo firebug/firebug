@@ -923,7 +923,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (!matches || matches.length == 0) 
             matchFeedback = "No matching log rows for \"" + text + "\"";
         else
-            matchFeedback = "\"" + text + "\" matched in " + matches.length + " log rows";
+            matchFeedback = $STRF('match found for', [text]) + " in " + matches.length + " log rows";
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },
 
@@ -1055,7 +1055,9 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !panel.searchable )
             return;
-
+        var popup = Firebug.chrome.$('fbSearchOptionsPopup');
+        if (popup)
+            popup.hidePopup();
         switch(panel.name)
         {
             case 'html':
@@ -1070,6 +1072,44 @@ Firebug.A11yModel = extend(Firebug.Module,
 
                 nodeBox = getAncestorByClass(nodeBox, 'nodeBox');
                 panel.select(nodeBox.repObject, true);
+                break;
+            case 'stylesheet':
+                if (panel.currentSearch && panel.currentSearch.currentNode)
+                {
+                    var focusRow = getAncestorByClass(panel.currentSearch.currentNode, 'focusRow');
+                    if (focusRow)
+                    {
+                        this.modifyCssRow(panel, focusRow);
+                        this.focus(focusRow);    
+                    }
+                }
+                break
+            case 'script' : 
+                if (panel.currentSearch && panel.selectedSourceBox)
+                {
+                    var box = panel.selectedSourceBox;
+                    var lineNo = panel.currentSearch.mark;
+                    box.a11yCaretLine = lineNo + 1;
+                    box.a11yCaretOffset = 0;
+                    panel.scrollToLine(box.repObject.href, lineNo, panel.jumpHighlightFactory(lineNo+1, panel.context));
+                    var viewport = getElementByClass(box, 'sourceViewport');
+                    if(viewport)
+                    {
+                        this.focus(viewport);
+                        this.insertCaretIntoLine(panel, box);     
+                    }
+                }
+                break;
+            case 'dom':
+                if (panel.currentSearch && panel.currentSearch.currentNode)
+                {
+                    var focusRow = getElementByClass(panel.currentSearch.currentNode, 'focusRow');
+                    if (focusRow)
+                    {
+                        this.modifyConsoleRow(panel, focusRow);
+                        this.focus(focusRow);    
+                    }
+                }
                 break;
         }
     },
@@ -1344,13 +1384,44 @@ Firebug.A11yModel = extend(Firebug.Module,
             }
         }
     },
+    
+    onCSSSearchMatchFound : function(panel, text, matchRow)
+    {
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y || !text)    
+            return;
+        if (!matchRow)
+        {
+            this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
+            return;
+        }
+        var matchFeedback = $STRF('match_found_for', [text]);
+        var matchType = '';
+        var selector;
+        
+        if (hasClass(matchRow, 'cssSelector'))
+            matchFeedback += " " + $STRF('in_selector', [matchRow.textContent]);
+        else 
+        {
+            selector = getPreviousByClass(matchRow, 'cssSelector');
+            selector = selector ? selector.textContent : "";
+            if (hasClass(matchRow, 'cssPropName') || hasClass(matchRow, 'cssPropValue'))
+            {
+                var propRow = getAncestorByClass(matchRow, 'cssProp');
+                if (propRow)
+                    matchFeedback += " " + $STRF('in_style_property', [propRow.textContent]) + " " + $STRF('in_selector', [selector]);  
+            }   
+        }
+        this.updateLiveElem(panel, matchFeedback, true); // should not use alert
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Layout Panel
 
     onLayoutBoxCreated : function(panel, node, detailsObj)
     {
-        if (!this.isEnabled())
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
             return;
         var focusGroups = node.getElementsByClassName('focusGroup');
         Array.forEach(focusGroups, function(e,i,a){
@@ -1635,7 +1706,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var lastLineNo = box.lastViewableLine;
         var firstLineNo = box.firstViewableLine;
         var caretDetails = this.getCaretDetails(event.target.ownerDocument);
-
+        if (!caretDetails || caretDetails.length != 2)
+            return;
         var lineNode = getAncestorByClass(caretDetails[0].parentNode, 'sourceRow');
 
         if (!lineNode )
@@ -1845,10 +1917,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         viewport.setAttribute('role', 'textbox');
         viewport.setAttribute('aria-multiline', 'true');
         viewport.setAttribute('aria-readonly', 'true');
-        var fileName = file.href;
-        var tokens = fileName.split("/");
-        if (tokens.length > 1)
-            fileName = tokens[tokens.length - 1];
+        fileName = getFileName(file.href);
         viewport.setAttribute('aria-label', $STRF('source code for file', [fileName]));
         //bit ugly, but not sure how else I can get the caret into the sourcebox without a mouse
         var focusElem = Firebug.chrome.window.document.commandDispatcher.focusedElement;
@@ -1950,6 +2019,23 @@ Firebug.A11yModel = extend(Firebug.Module,
             if (listBox)
                 listBox.setAttribute('aria-label', groupHeaders[i].textContent);
         }
+    },
+    
+    onScriptSearchMatchFound : function(panel, text, sourceBox, lineNo)
+    {
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y || !text)
+            return;
+        var matchFeedback = "";
+        if (!sourceBox || lineNo === null)
+            matchFeedback = $STRF('no matches found', [text]);
+        else
+        {
+            var line = sourceBox.getLine(panel.context, lineNo + 1);
+            if (!line) line = "";
+            matchFeedback = $STRF("match found for", [text]) + " " + $STRF("on line", [lineNo + 1]) + ": " + line + " in " + getFileName(sourceBox.href);
+        } 
+        this.updateLiveElem(panel, matchFeedback, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2057,6 +2143,28 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         panelA11y.reFocusId = 2;
 
+    },
+    
+    onDomSearchMatchFound : function (panel, text, matchRow)
+    {
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y || !text)
+            return;
+        var matchFeedback = "";
+        
+        if (matchRow && matchRow.cells)
+        {
+            var dirCell = getElementByClass(matchRow, 'focusRow');
+            if (dirCell)
+            {
+                this.modifyConsoleRow(panel, dirCell);
+                var rowLabel = dirCell.getAttribute('aria-label');
+                matchFeedback += $STRF('match found for', [text]) + " " + $STRF('in dom property', [rowLabel]);
+            }
+        }
+        else
+            matchFeedback = $STRF('no matches found', [text]);
+        this.updateLiveElem(panel, matchFeedback, true);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
