@@ -212,6 +212,9 @@ this.safeToString = function(ob)
     {
         if (ob && (typeof (ob['toString']) == "function") )
             return ob.toString();
+        var str = ob + "";
+        if (str.length > 0)
+            return str;
     }
     catch (exc)
     {
