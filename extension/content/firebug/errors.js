@@ -526,9 +526,13 @@ function lessTalkMoreAction(context, object, isWarning)
     if (context.errorMap && msgId in context.errorMap)
     {
         context.errorMap[msgId] += 1;
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");
-        return true;
+        if (context.errorMap[msgId] < 9)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");
+            return true;
+        }
+        // else put out another 1, something bad is happening....
     }
 
     if (!context.errorMap)
