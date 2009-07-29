@@ -2964,12 +2964,12 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             ),
             DIV({class: "netInfoPostText netInfoText"},
                 TABLE({class: "netInfoPostTable", cellpadding: 0, cellspacing: 0},
-                    TBODY()
+                    TAG("$postDataBodyTag")
                 )
             ),
             DIV({class: "netInfoPutText netInfoText"},
                 TABLE({class: "netInfoPutTable", cellpadding: 0, cellspacing: 0},
-                    TBODY()
+                    TAG("$postDataBodyTag")
                 )
             ),
             DIV({class: "netInfoResponseText netInfoText"},
@@ -2985,6 +2985,34 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             ),
             DIV({class: "netInfoHtmlText netInfoText"},
                 IFRAME({class: "netInfoHtmlPreview"})
+            )
+        ),
+
+    postDataBodyTag:
+        TBODY(
+            TR({class: "netInfoPostParamsTitle"},
+                TD({colspan: 2},
+                    DIV({class: "netInfoPostParams"},
+                        $STR("net.label.Parsed Parameters"),
+                        SPAN({class: "netInfoPostContentType"},
+                            "application/x-www-form-urlencoded"
+                        )
+                    )
+                )
+            ),
+            TR({class: "netInfoPostSourceTitle"},
+                TD({colspan: 2},
+                    DIV({class: "netInfoPostSource"}, $STR("net.label.Source Text"))
+                )
+            )
+        ),
+
+    postSourceTag:
+        TR(
+            TD({colspan: 2},
+                FOR("line", "$param|getParamValueIterator",
+                    CODE("$line")
+                )
             )
         ),
 
@@ -3126,7 +3154,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
         if (hasClass(tab, "netInfoPostTab"))
         {
-            var postTextBox = getElementByClass(netInfoBox, "netInfoPostText");
             if (!netInfoBox.postPresented)
             {
                 netInfoBox.postPresented  = true;
@@ -3134,25 +3161,23 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 var text = getPostText(file, context);
                 if (text != undefined)
                 {
+                    var params; 
                     if (isURLEncodedFile(file, text))
                     {
                         var lines = text.split("\n");
-                        var params = parseURLEncodedText(lines[lines.length-1]);
-                        this.insertHeaderRows(netInfoBox, params, "Post");
+                        params = parseURLEncodedText(lines[lines.length-1]);
                     }
-                    else
-                    {
-                        var postText = formatPostText(text);
-                        if (postText)
-                            insertWrappedText(postText, postTextBox);
-                    }
+                    this.insertHeaderRows(netInfoBox, params, "Post", "PostParams");
+
+                    var postText = formatPostText(text);
+                    if (postText)
+                        this.insertPostSource(netInfoBox, postText, "Post", "PostSource");
                 }
             }
         }
 
         if (hasClass(tab, "netInfoPutTab"))
         {
-            var putTextBox = getElementByClass(netInfoBox, "netInfoPutText");
             if (!netInfoBox.putPresented)
             {
                 netInfoBox.putPresented  = true;
@@ -3160,18 +3185,17 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 var text = getPostText(file, context);
                 if (text != undefined)
                 {
+                    var params;
                     if (isURLEncodedFile(file, text))
                     {
                         var lines = text.split("\n");
-                        var params = parseURLEncodedText(lines[lines.length-1]);
-                        this.insertHeaderRows(netInfoBox, params, "Put");
+                        params = parseURLEncodedText(lines[lines.length-1]);
                     }
-                    else
-                    {
-                        var putText = formatPostText(text);
-                        if (putText)
-                            insertWrappedText(putText, putTextBox);
-                    }
+                    this.insertHeaderRows(netInfoBox, params, "Put", "PostParams");
+
+                    var postText = formatPostText(text);
+                    if (postText)
+                        this.insertPostSource(netInfoBox, postText, "Put", "PostSource");
                 }
             }
         }
@@ -3290,14 +3314,30 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         var tbody = headersTable.firstChild;
         var titleRow = getChildByClass(tbody, "netInfo" + rowName + "Title");
 
-        if (headers.length)
+        if (headers && headers.length)
         {
             this.headerDataTag.insertRows({headers: headers}, titleRow ? titleRow : tbody);
             removeClass(titleRow, "collapsed");
         }
         else
             setClass(titleRow, "collapsed");
-    }
+    },
+
+    insertPostSource: function(netInfoBox, text, tableName, rowName)
+    {
+        var headersTable = getElementByClass(netInfoBox, "netInfo"+tableName+"Table");
+        var tbody = headersTable.firstChild;
+        var titleRow = getChildByClass(tbody, "netInfo" + rowName + "Title");
+
+        if (text.length)
+        {
+            var param = {value: text};
+            this.postSourceTag.insertRows({param: param}, titleRow);
+            removeClass(titleRow, "collapsed");
+        }
+        else
+            setClass(titleRow, "collapsed");
+    },
 });
 
 function doublePostForbiddenMessage(url)

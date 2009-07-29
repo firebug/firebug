@@ -416,13 +416,22 @@
     font-weight: bold;
     vertical-align: top;
     text-align: right;
+    white-space: nowrap;
 }
 
-.netInfoHeadersText {
+.netInfoParamValue {
+    width: 100%;
+}
+
+.netInfoHeadersText,
+.netInfoPostText,
+.netInfoPutText {
     padding-top: 0;
 }
 
-.netInfoHeadersGroup {
+.netInfoHeadersGroup,
+.netInfoPostParams,
+.netInfoPostSource {
     margin-bottom: 4px;
     border-bottom: 1px solid #D7D7D7;
     padding-top: 8px;
@@ -430,6 +439,11 @@
     font-family: Lucida Grande, Tahoma, sans-serif;
     font-weight: bold;
     color: #565656;
+}
+
+.netInfoPostContentType {
+    color: #bdbdbd;
+    padding-left: 50px;
 }
 
 .netInfoHtmlPreview {
