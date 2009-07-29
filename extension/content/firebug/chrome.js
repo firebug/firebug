@@ -1088,9 +1088,19 @@ top.FirebugChrome =
         var panel = target ? Firebug.getElementPanel(target) : null;
 
         var object;
+        /* XXXjjb This causes the Script panel to show the function body over and over. We need to clear it at least,
+         * but really we need to understand why the tooltip should show the context menu object at all.
+         * One thing the contextMenuObject supports is peeking at function bodies when stopped a breakpoint.
+         * That case could be supported with clearing the contextMenuObject, but we don't know if that breaks
+         * something else. So maybe a popupMenuObject should be set on the context if that is what we want to support
+         * The other complication is that there seems to be another tooltip.
         if (this.contextMenuObject)
+        {
             object = this.contextMenuObject;
-        else if (target && target.ownerDocument == document)
+            FBTrace.sysout("tooltip by contextMenuObject");
+        }
+        else*/
+        if (target && target.ownerDocument == document)
             object = Firebug.getRepObject(target);
         else if (panel)
             object = panel.getTooltipObject(target);
