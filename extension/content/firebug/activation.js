@@ -12,7 +12,7 @@ const Ci = Components.interfaces;
 
 /**
  * This module implements Firebug activation logic.
- * 
+ *
  * 1) Part of the logic is based on URL annotations ("firebug/history") that are used
  *    to remember whether Firebug was active the last time. If yes, open it for the URL
  *    automatically again.
@@ -30,7 +30,6 @@ Firebug.Activation = extend(Firebug.Module,
 {
     dispatchName: "activation",
     annotationName: "firebug/history",
-    allPagesActivation: "none",
 
     initializeUI: function()  // called once
     {
@@ -41,7 +40,6 @@ Firebug.Activation = extend(Firebug.Module,
         this.annotationSvc = Cc["@mozilla.org/browser/annotation-service;1"]
             .getService(Ci.nsIAnnotationService);
 
-        this.allPagesActivation = Firebug.getPref(Firebug.prefDomain, "allPagesActivation");
         this.expires = this.annotationSvc.EXPIRE_NEVER;
 
         this.updateAllPagesActivation();
@@ -85,12 +83,12 @@ Firebug.Activation = extend(Firebug.Module,
     shouldCreateContext: function(browser, url, userCommands)  // true if the Places annotation the URI "firebugged"
     {
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("shouldCreateContext allPagesActivation " + this.allPagesActivation);
+            FBTrace.sysout("shouldCreateContext allPagesActivation " + Firebug.allPagesActivation);
 
-        if (this.allPagesActivation == "off")
+        if (Firebug.allPagesActivation == "off")
             return false;
 
-        if (this.allPagesActivation == "on")
+        if (Firebug.allPagesActivation == "on")
             return true;
 
         if (Firebug.filterSystemURLs && isSystemURL(url)) // if about:blank gets thru, 1483 fails
@@ -182,7 +180,7 @@ Firebug.Activation = extend(Firebug.Module,
             FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
 
         // then the user closed Firebug on this page last time
-        if ((this.allPagesActivation != "on") && (annotation.indexOf("closed") > 0))
+        if ((Firebug.allPagesActivation != "on") && (annotation.indexOf("closed") > 0))
             return false; // annotated as 'closed', don't create
         else
             return true;    // annotated, createContext
@@ -263,42 +261,48 @@ Firebug.Activation = extend(Firebug.Module,
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.toggleAll("+offOrOn+") with allPagesActivation: " +
-                this.allPagesActivation);
+                Firebug.allPagesActivation);
 
         if (offOrOn == "on" || offOrOn == "off")
         {
-            if (this.allPagesActivation == offOrOn) // then we were armed
-                this.allPagesActivation = "none";
+            if (Firebug.allPagesActivation == offOrOn) // then we were armed
+                Firebug.allPagesActivation = "none";
             else
                 (offOrOn == "off") ? this.allOff() : this.allOn();
 
             // don't show Off if we are always on
-            Firebug.chrome.disableOff(this.allPagesActivation == "on");
+            Firebug.chrome.disableOff(Firebug.allPagesActivation == "on");
         }
         else
         {
-            this.allPagesActivation = "none";
+            Firebug.allPagesActivation = "none";
         }
 
-        Firebug.setPref(Firebug.prefDomain, "allPagesActivation", this.allPagesActivation);
+        Firebug.setPref(Firebug.prefDomain, "allPagesActivation", Firebug.allPagesActivation);
         this.updateAllPagesActivation();
+    },
+
+    updateOption: function(name, value)
+    {
+        if (name = "allPagesActivation")
+            this.updateAllPagesActivation();
     },
 
     updateAllPagesActivation: function()
     {
-        $('menu_AllOff').setAttribute("checked", (this.allPagesActivation=="off"));
-        $('menu_AllOn').setAttribute("checked", (this.allPagesActivation=="on"));
+        $('menu_AllOff').setAttribute("checked", (Firebug.allPagesActivation=="off"));
+        $('menu_AllOn').setAttribute("checked", (Firebug.allPagesActivation=="on"));
     },
 
     allOn: function()
     {
-        this.allPagesActivation = "on";  // In future we always create contexts,
+        Firebug.allPagesActivation = "on";  // In future we always create contexts,
         Firebug.toggleBar(true);  // and we turn on for the current page
     },
 
     allOff: function()
     {
-        this.allPagesActivation = "off";  // In future we don't create contexts,
+        Firebug.allPagesActivation = "off";  // In future we don't create contexts,
 
         TabWatcher.iterateContexts(function turnOff(context)  // we close the current contexts,
         {

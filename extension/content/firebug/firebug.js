@@ -60,7 +60,7 @@ const prefNames =
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
     "largeCommandLine", "textWrapWidth", "openInWindow", "showErrorCount",
-    "activateSameOrigin",
+    "activateSameOrigin", "allPagesActivation",
 
     // Search
     "searchCaseSensitive", "searchGlobal", "netSearchHeaders", "netSearchParameters",
