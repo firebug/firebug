@@ -566,9 +566,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         if (view && this.panelNode.scrollTop)
             view.scrollTop = this.panelNode.scrollTop;
 
-        state.pathIndex = this.pathIndex;
-        state.viewPath = this.viewPath;
-        state.propertyPath = this.propertyPath;
+        if (this.pathIndex)
+            state.pathIndex = this.pathIndex;
+        if (this.viewPath)
+            state.viewPath = this.viewPath;
+        if (this.propertyPath)
+            state.propertyPath = this.propertyPath;
+
         if (this.propertyPath.length > 0 && !this.propertyPath[1])
             state.firstSelection = persistObject(this.getPathObject(1), this.context);
 
@@ -584,9 +588,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 this.select(null);
                 return;
             }
-
-            this.viewPath = state.viewPath;
-            this.propertyPath = state.propertyPath;
+            if (state.viewPath)
+                this.viewPath = state.viewPath;
+            if (state.propertyPath)
+                this.propertyPath = state.propertyPath;
 
             var selectObject = defaultObject = this.getDefaultSelection(this.context);
 
@@ -966,9 +971,9 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
         }
         else
         {
-        	dispatch([Firebug.A11yModel], 'onDomSearchMatchFound', [this, text, null]);
+            dispatch([Firebug.A11yModel], 'onDomSearchMatchFound', [this, text, null]);
             return false;
-		}
+        }
     }
 });
 
