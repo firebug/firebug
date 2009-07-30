@@ -2886,10 +2886,10 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var currentSourceRow = anchorSourceRow.nextSibling;
         while(currentSourceRow && (currentSourceRow != focusSourceRow) && hasClass(currentSourceRow, "sourceRow"))
         {
-            buf += "\n" + this.getSourceLine(currentSourceRow);
+            buf += this.getSourceLine(currentSourceRow);
             currentSourceRow = currentSourceRow.nextSibling;
         }
-        buf += "\n" + this.getSourceLine(focusSourceRow, 0, selection.focusOffset);
+        buf += this.getSourceLine(focusSourceRow, 0, selection.focusOffset);
         return buf;
     },
 
@@ -2897,13 +2897,14 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     {
         var source = getChildByClass(sourceRow, "sourceRowText").innerHTML;
         if (endOffset)
-            return source.substring(beginOffset, endOffset);
+            source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
-            return source.substring(beginOffset);
+            source = source.substring(beginOffset);
         else
-            return source;
-    },
+            source = source;
 
+        return unEscapeHTML(source);
+    },
 });
 
 function appendScriptLines(sourceBox, min, max, panelNode)

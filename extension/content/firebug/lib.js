@@ -1552,7 +1552,6 @@ function escapeHTMLAttribute(value)
     return around + (String(value).replace(/[&'"]/g, replaceChars)) + around;
 }
 
-
 function escapeHTML(value)
 {
     function replaceChars(ch)
@@ -1576,6 +1575,15 @@ function escapeHTML(value)
 }
 
 this.escapeHTML = escapeHTML;
+
+this.unEscapeHTML = function(str)
+{
+    return str.replace(/&amp;/g, "&")
+        .replace(/&lt;/g, "<")
+        .replace(/&gt;/g, ">")
+        .replace(/&quot;/g, ">")
+        .replace(/&#39;/g, ">");
+};
 
 this.cropString = function(text, limit)
 {
