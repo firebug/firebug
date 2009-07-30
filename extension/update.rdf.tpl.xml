@@ -14,6 +14,8 @@
               <minVersion>1.5</minVersion>
               <maxVersion>3.9</maxVersion>
               <updateLink>http://getfirebug.com/releases/firebug/@VERSION@/@LEAF@</updateLink>
+              <!-- A page describing what is new in this updated version -->
+                <updateInfoURL>http://getfirebug.com/updateInfo/firebug1.5.xml</updateInfoURL>
             </r:Description>
           </targetApplication>
         </r:Description>
