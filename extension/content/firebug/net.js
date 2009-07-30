@@ -835,15 +835,6 @@ NetPanel.prototype = domplate(Firebug.ActivablePanel,
         var object = Firebug.getObjectByURL(this.context, file.href);
         var isPost = isURLEncodedFile(file, getPostText(file, this.context));
 
-        var selection = this.document.defaultView.getSelection();
-        if (selection)
-        {
-            items.push(
-                {label: "Copy", commandID: "cmd_copy" }
-            );
-            items.push("-");
-        }
-
         items.push(
             {label: "CopyLocation", command: bindFixed(copyToClipboard, FBL, file.href) }
         );
