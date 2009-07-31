@@ -579,7 +579,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            this.hide();
+            this.hide(state);
             Firebug.Console.disabledPanelPage.show(this);
         }
     },
@@ -617,8 +617,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         if (this.panelNode.offsetHeight)
             this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
-
-        state.wasScrolledToBottom = this.wasScrolledToBottom;
+        if (state)
+            state.wasScrolledToBottom = this.wasScrolledToBottom;
     },
 
     getOptionsMenuItems: function()
