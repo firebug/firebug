@@ -64,17 +64,26 @@ Firebug.Activation = extend(Firebug.Module,
 
         if (uri && Firebug.activateSameOrigin)
         {
-            var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
-            var shortURI = makeURI(prePath);
-            if (!shortURI)
-                return uri;
-
-            var host = shortURI.host;
-            if (host)
+            try
             {
-                var crossDomain = host.split('.').slice(-2)
-                shortURI.host = crossDomain.join('.');
-                return shortURI
+                var prePath = uri.prePath; // returns the string before the path (such as "scheme://user:password@host:port").
+                var shortURI = makeURI(prePath);
+                if (!shortURI)
+                    return uri;
+
+                var host = shortURI.host;
+                if (host)
+                {
+                    var crossDomain = host.split('.').slice(-2)
+                    shortURI.host = crossDomain.join('.');
+                    return shortURI
+                }
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("activation.convertToURIKey returning full URI, activateSameOrigin FAILS for shortURI "+shortURI+" because: "+exc, exc);
+                return uri;
             }
         }
         return uri;
