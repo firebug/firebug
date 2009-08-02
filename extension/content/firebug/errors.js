@@ -100,14 +100,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     startObserving: function()
     {
-        this.contextCache = [];
         consoleService.registerListener(this);
     },
 
     stopObserving: function()
     {
         consoleService.unregisterListener(this);
-        delete this.contextCache;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -289,11 +287,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if(!url)
             return FirebugContext;  // eg some XPCOM messages
 
-        var errorContext = this.contextCache[url];
-
-        if (errorContext)
-            return errorContext;
-
         TabWatcher.iterateContexts(
             function findContextByURL(context)
             {
@@ -315,9 +308,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     return errorContext = context;
             }
         );
-
-        if (errorContext)
-            this.contextCache[url] = errorContext;
 
         if (FBTrace.DBG_ERRORS && !errorContext)
             FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
@@ -351,11 +341,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     destroyContext: function(context, persistedState)
     {
-        for (var url in this.contextCache)
-        {
-            if (this.contextCache[url] == context)
-                delete this.contextCache[url];
-        }
         this.showCount(0);
     },
     // ******************************************************************************
