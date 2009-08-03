@@ -3480,10 +3480,9 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 
 function ConditionEditor(doc)
 {
-    this.box = this.tag.replace({}, doc, this);
-    this.input = this.box.childNodes[1].firstChild.firstChild.lastChild;  // XXXjjb we need childNode[1] always
-    this.initialize();
+    this.initialize(doc);
 }
+
 
 ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
@@ -3504,6 +3503,13 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 DIV({class: "conditionEditorBottom2"})
             )
         ),
+
+    initialize: function(doc)
+    {
+        this.box = this.tag.replace({}, doc, this);
+        this.input = this.box.childNodes[1].firstChild.firstChild.lastChild;  // XXXjjb we need childNode[1] always
+        Firebug.InlineEditor.prototype.initialize.apply(this, arguments);
+    },
 
     show: function(sourceLine, panel, value)
     {
@@ -3565,7 +3571,9 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     }
 });
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function setLineBreakpoints(sourceFile, sourceBox)
 {
