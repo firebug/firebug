@@ -287,6 +287,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if(!url)
             return FirebugContext;  // eg some XPCOM messages
 
+        var errorContext = null;
         TabWatcher.iterateContexts(
             function findContextByURL(context)
             {
