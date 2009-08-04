@@ -51,18 +51,18 @@
 
 .useA11y .sourceBox .sourceViewport:focus .sourceLine {
     background-color: #FFFFC0;
-    color: navy;	
+    color: navy;
     border-right: 1px solid black;
 }
 
 .useA11y .sourceBox .sourceViewport:focus {
-	outline: none;
+    outline: none;
 }
 
 .a11y1emSize {
     width: 1em;
     height: 1em;
-    position: absolute;	
+    position: absolute;
 }
 
 .sourceBox > .sourceRow > .sourceLine {
@@ -119,17 +119,17 @@
 }
 
 .breakingError {
-	text-align: right;
-	float:right;
-	color: red;
-	margin-right: 1ex;
-	cursor: pointer;
+    text-align: right;
+    float:right;
+    color: red;
+    margin-right: 1ex;
+    cursor: pointer;
 }
 
 .breakingError:hover {
     display: none;
-    cursor: pointer;	
-	}
+    cursor: pointer;
+    }
 
 /************************************************************************************************/
 
@@ -330,4 +330,8 @@
 
 .objectLink-stackFrame[selected="true"] {
     font-weight: bold;
+}
+
+.errorNotificationButton {
+    float: right;
 }

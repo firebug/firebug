@@ -2097,10 +2097,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var error = this.context.breakingError;
                 if (error.message)
                 {
-                    sourceBox.breakingError = this.document.createElement("span");
-                    sourceBox.breakingError.setAttribute("class", "breakingError");
-                    sourceBox.breakingError.innerHTML = cropString(error.message, 40);
-                    lineNode.insertBefore(sourceBox.breakingError, lineNode.firstChild);
+                    var sourceLine = getChildByClass(lineNode, "sourceLine");
+                    sourceBox.breakingError = new ErrorNotification(this.document, error);
+                    sourceBox.breakingError.show(sourceLine, this, "not an editor, yet?");
                 }
             }
         }
@@ -2108,7 +2107,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             if (sourceBox.breakingError)
             {
-                sourceBox.breakingError.parentNode.removeChild(sourceBox.breakingError);
+                sourceBox.breakingError.hide();
                 delete sourceBox.breakingError;
             }
         }
@@ -3516,12 +3515,14 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         this.target = sourceLine;
         this.panel = panel;
 
-        this.getAutoCompleter().reset();
+        if (this.getAutoCompleter)
+            this.getAutoCompleter().reset();
 
         hide(this.box, true);
         panel.selectedSourceBox.appendChild(this.box);
 
-        this.input.value = value;
+        if (this.input)
+            this.input.value = value;
 
         setTimeout(bindFixed(function()
         {
@@ -3540,8 +3541,11 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             this.box.style.top = y + "px";
             hide(this.box, false);
 
-            this.input.focus();
-            this.input.select();
+            if (this.input)
+            {
+                this.input.focus();
+                this.input.select();
+            }
         }, this));
     },
 
@@ -3572,6 +3576,59 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 });
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+function ErrorNotification(doc, errorObject)
+{
+    this.initialize(doc, errorObject);
+}
+
+ErrorNotification.prototype = domplate(Firebug.MeasureBox,
+{
+    tag:
+        DIV({class: "conditionEditor"},
+            DIV({class: "conditionEditorTop1"},
+                DIV({class: "conditionEditorTop2"})
+            ),
+            DIV({class: "conditionEditorInner1"},
+                DIV({class: "conditionEditorInner2"},
+                    DIV({class: "conditionEditorInner"},
+                        DIV({class: "conditionCaption"},
+                                SPAN("$object|getCategory"),
+                                BUTTON({class: "errorNotificationButton", onclick: "$hide"}, $STR("ok"))
+                           ),
+                        DIV({class: "conditionCaption"}, "$object|getCause")
+                    )
+                )
+            ),
+            DIV({class: "conditionEditorBottom1"},
+                DIV({class: "conditionEditorBottom2"})
+            )
+        ),
+
+    initialize: function(doc, errorObject)
+    {
+        this.box = this.tag.replace({object: errorObject}, doc, this);
+    },
+
+    getCause: function(errorObject)
+    {
+        return errorObject.message;
+    },
+
+    getCategory: function(errorObject)
+    {
+        return $STR("Break on Error");
+    },
+
+    show: ConditionEditor.prototype.show,
+
+    hide: function()
+    {
+        if (this.panel)
+            ConditionEditor.prototype.hide.apply(this);
+        // else we already called hide
+    }
+});
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
