@@ -315,6 +315,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (!Firebug.showWhitespaceNodes && this.isWhitespaceText(target))
             return;
 
+        // target is only whitespace
+
         var newParentTag = getNodeTag(parent);
         var oldParentTag = getNodeBoxTag(parentNodeBox);
 
@@ -1148,6 +1150,35 @@ Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
         )
 }),
 
+Firebug.HTMLPanel.WhitespaceNode = domplate(FirebugReps.Element,
+{
+    tag:
+        DIV({class: "nodeBox", _repObject: "$object"},
+            FOR("char", "$object|charIterator",
+                    SPAN({class: "nodeText nodeWhiteSpace editable"}, "$char")
+                    )
+        ),
+    charIterator: function(node)
+    {
+        var str = node.nodeValue;
+        var arr = [];
+        for(var i = 0; i < str.length; i++)
+        {
+            // http://www.w3.org/TR/html401/struct/text.html
+            var char = str[i];
+            switch(char)
+            {
+            case ' ': arr[i] = ' ';break;
+            case '\t': arr[i] = '\\t';break;
+            case '\n': arr[i] = '\\n';break;
+            case '\u200B': arr[i] = '\\u200B';break;  // Zero width space http://www.fileformat.info/info/unicode/char/200b/index.htm
+            default: arr[i] = '?'; break;
+            }
+        }
+        return arr;
+    },
+}),
+
 Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 {
     tag:
@@ -1360,7 +1391,7 @@ function getNodeTag(node, expandAll)
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
     }
     else if (node instanceof Text)
-        return Firebug.HTMLPanel.TextNode.tag;
+        return isWhitespaceText(node) ? Firebug.HTMLPanel.WhitespaceNode.tag : Firebug.HTMLPanel.TextNode.tag;
     else if (node instanceof CDATASection)
         return Firebug.HTMLPanel.CDATANode.tag;
     else if (node instanceof Comment && (Firebug.showCommentNodes || expandAll))

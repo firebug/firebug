@@ -57,6 +57,11 @@
     color: #333333;
 }
 
+.nodeWhiteSpace {
+    border: 1px solid gray;
+    white-space: pre; /* otherwise the border will be collapsed around zero pixels */
+}
+
 .nodeComment {
     color: DarkGreen;
 }
