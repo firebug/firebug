@@ -87,21 +87,48 @@ this.Number = domplate(Firebug.Rep,
 });
 
 // ************************************************************************************************
-
 this.String = domplate(Firebug.Rep,
-{
-    tag: OBJECTBOX("&quot;$object&quot;"),
+        {
+            tag: OBJECTBOX("&quot;$object&quot;"),
 
-    shortTag: OBJECTBOX("&quot;$object|cropString&quot;"),
+            shortTag: OBJECTBOX("&quot;$object|cropString&quot;"),
+
+            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+            className: "string",
+
+            supportsObject: function(object, type)
+            {
+                return type == "string";
+            }
+        });
+
+// ************************************************************************************************
+
+this.XML = domplate(Firebug.Rep,
+{
+    tag: OBJECTBOX("$object|asString"),
+
+    shortTag: OBJECTBOX("$object|asShortString"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    className: "string",
+    className: "xml",
 
     supportsObject: function(object, type)
     {
-        return type == "string";
-    }
+        return type == "xml";
+    },
+
+    asString: function(object)
+    {
+        return object.toXMLString();
+    },
+
+    asShortString: function(object)
+    {
+        return cropString(this.asString(object));
+    },
 });
 
 // ************************************************************************************************
@@ -1370,12 +1397,12 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     onToggleError: function(event)
     {
-        
+
         var target = event.currentTarget;
         if (hasClass(event.target, "errorBreak"))
         {
             this.breakOnThisError(target.repObject);
-            
+
         }
         else if (hasClass(event.target, "errorSource"))
         {
@@ -1659,6 +1686,7 @@ Firebug.registerRep(
     this.NetFile,
     this.Property,
     this.Except,
+    this.XML,
     this.Arr
 );
 
