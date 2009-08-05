@@ -185,6 +185,15 @@ Firebug.Console = extend(ActivableConsole,
         context.consoleReloadWarning = true;  // mark as need to warn.
     },
 
+    loadedContext: function(context)
+    {
+        for (var url in context.sourceFileMap)
+            return;  // if there are any sourceFiles, then do nothing
+
+        // else we saw no JS, so the reload warning it not needed.
+        this.clearReloadWarning(context);
+    },
+
     clearReloadWarning: function(context) // remove the warning about reloading.
     {
          if (context.consoleReloadWarning)
@@ -569,7 +578,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              this.showCommandLine(true);
              this.showToolbarButtons("fbConsoleButtons", true);
              Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", this.persistContent);
-             if (state.wasScrolledToBottom)
+             if (state && state.wasScrolledToBottom)
              {
                  this.wasScrolledToBottom = state.wasScrolledToBottom;
                  delete state.wasScrolledToBottom;
