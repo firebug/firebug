@@ -1222,7 +1222,7 @@ this.scrollToBottom = function(element)
         element.scrollTop = element.scrollHeight - element.offsetHeight;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop);
+            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight +" - "+ element.offsetHeight);
 
         return true;
     }
