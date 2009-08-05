@@ -1062,25 +1062,6 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 ),
                 DIV({class: "editable insertBefore", role:'presentation'}, "}"),
                 TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
-            ),
-
-        computedTag:
-            DIV({role : "list", "aria-label" : "computed styles"},
-                FOR("group", "$groups",
-                    H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
-                        SPAN({class: "cssInheritLabel"}, "$group.title")
-                    ),
-                    TABLE({width: "100%", role : 'group'},
-                        TBODY({role : 'presentation'},
-                            FOR("prop", "$group.props",
-                                TR({class : 'focusRow', role : 'listitem'},
-                                    TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
-                                    TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
-                                )
-                            )
-                        )
-                    )
-                )
             )
     }),
 
@@ -1323,52 +1304,6 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
 {
     template: domplate(
     {
-        cascadedTag:
-            DIV({role : 'presentation'},
-                DIV({role : 'list', 'aria-label' : 'style rules' },
-                    FOR("rule", "$rules",
-                        TAG("$ruleTag", {rule: "$rule"})
-                    )
-                ),
-                DIV({role : "list", 'aria-label' :'inherited style rules'},
-                    FOR("section", "$inherited",
-
-                        H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
-                            SPAN({class: "cssInheritLabel"}, "$inheritLabel"),
-                            TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
-                        ),
-                        DIV({role : 'group'},
-                            FOR("rule", "$section.rules",
-                                TAG("$ruleTag", {rule: "$rule"})
-                            )
-                        )
-                    )
-                 )
-            ),
-
-        ruleTag:
-            DIV({class: "cssRule insertInto", $cssInheritedRule: "$rule.inherited",
-                 _repObject: "$rule.rule.style", "ruleId": "$rule.id",  role : 'presentation'},
-                DIV({class: "cssHead focusRow",  role : 'listitem'},
-                    SPAN({class: "cssSelector"}, "$rule.selector"), " {"
-                ),
-                DIV({role : 'group'},
-                    DIV({class : "cssPropertyListBox", role : 'listbox'},
-                        FOR("prop", "$rule.props",
-                            DIV({class: "cssProp editGroup focusRow", $disabledStyle: "$prop.disabled",
-                                    $cssOverridden: "$prop.overridden", role : "option"},
-                                SPAN({class: "cssPropName editable"}, "$prop.name"),
-                                SPAN({class: "cssColon"}, ":"),
-                                SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
-                                SPAN({class: "cssSemi"}, ";")
-                            )
-                        )
-                    )
-                ),
-                DIV({class: "editable insertBefore", role:'presentation'}, "}"),
-                TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
-            ),
-
         computedTag:
             DIV({role : "list", "aria-label" : "computed styles"},
                 FOR("group", "$groups",
