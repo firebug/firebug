@@ -1107,33 +1107,6 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
     },
 
-    updateComputedView: function(element)
-    {
-        var win = element.ownerDocument.defaultView;
-        var style = win.getComputedStyle(element, "");
-
-        var groups = [];
-
-        for (var groupName in styleGroups)
-        {
-            var title = $STR("StyleGroup-" + groupName);
-            var group = {title: title, props: []};
-            groups.push(group);
-
-            var props = styleGroups[groupName];
-            for (var i = 0; i < props.length; ++i)
-            {
-                var propName = props[i];
-                var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
-                if (propValue)
-                    group.props.push({name: propName, value: propValue});
-            }
-        }
-
-        var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
-        dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
-    },
-
     getStylesheetURL: function(style)
     {
         // if the parentStyleSheet.href is null, CSS std says its inline style
@@ -1301,6 +1274,11 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         return object instanceof Element ? 1 : 0;
     },
 
+    updateView: function(element)
+    {
+        this.updateCascadeView(element);
+    },
+
     updateSelection: function(element)
     {
         if ( !(element instanceof Element) ) // html supports SourceLink
@@ -1321,25 +1299,141 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         if (!element)
             return;
 
-        if (Firebug.showComputedStyle)
-            this.updateComputedView(element);
-        else
-            this.updateCascadeView(element);
+        this.updateView(element);
     },
 
     updateOption: function(name, value)
     {
-        if (name == "showComputedStyle" || name == "showUserAgentCSS")
+        if (name == "showUserAgentCSS")
             this.refresh();
     },
 
     getOptionsMenuItems: function()
     {
         return [
-            {label: "ShowComputedStyle", type: "checkbox", checked: Firebug.showComputedStyle,
-                command: bindFixed(Firebug.togglePref, Firebug, "showComputedStyle") },
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
                     command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }
+        ];
+    }
+});
+
+function CSSComputedElementPanel() {}
+
+CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
+{
+    template: domplate(
+    {
+        cascadedTag:
+            DIV({role : 'presentation'},
+                DIV({role : 'list', 'aria-label' : 'style rules' },
+                    FOR("rule", "$rules",
+                        TAG("$ruleTag", {rule: "$rule"})
+                    )
+                ),
+                DIV({role : "list", 'aria-label' :'inherited style rules'},
+                    FOR("section", "$inherited",
+
+                        H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
+                            SPAN({class: "cssInheritLabel"}, "$inheritLabel"),
+                            TAG(FirebugReps.Element.shortTag, {object: "$section.element"})
+                        ),
+                        DIV({role : 'group'},
+                            FOR("rule", "$section.rules",
+                                TAG("$ruleTag", {rule: "$rule"})
+                            )
+                        )
+                    )
+                 )
+            ),
+
+        ruleTag:
+            DIV({class: "cssRule insertInto", $cssInheritedRule: "$rule.inherited",
+                 _repObject: "$rule.rule.style", "ruleId": "$rule.id",  role : 'presentation'},
+                DIV({class: "cssHead focusRow",  role : 'listitem'},
+                    SPAN({class: "cssSelector"}, "$rule.selector"), " {"
+                ),
+                DIV({role : 'group'},
+                    DIV({class : "cssPropertyListBox", role : 'listbox'},
+                        FOR("prop", "$rule.props",
+                            DIV({class: "cssProp editGroup focusRow", $disabledStyle: "$prop.disabled",
+                                    $cssOverridden: "$prop.overridden", role : "option"},
+                                SPAN({class: "cssPropName editable"}, "$prop.name"),
+                                SPAN({class: "cssColon"}, ":"),
+                                SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
+                                SPAN({class: "cssSemi"}, ";")
+                            )
+                        )
+                    )
+                ),
+                DIV({class: "editable insertBefore", role:'presentation'}, "}"),
+                TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+            ),
+
+        computedTag:
+            DIV({role : "list", "aria-label" : "computed styles"},
+                FOR("group", "$groups",
+                    H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
+                        SPAN({class: "cssInheritLabel"}, "$group.title")
+                    ),
+                    TABLE({width: "100%", role : 'group'},
+                        TBODY({role : 'presentation'},
+                            FOR("prop", "$group.props",
+                                TR({class : 'focusRow', role : 'listitem'},
+                                    TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
+                                    TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
+                                )
+                            )
+                        )
+                    )
+                )
+            )
+    }),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    updateComputedView: function(element)
+    {
+        var win = element.ownerDocument.defaultView;
+        var style = win.getComputedStyle(element, "");
+
+        var groups = [];
+
+        for (var groupName in styleGroups)
+        {
+            var title = $STR("StyleGroup-" + groupName);
+            var group = {title: title, props: []};
+            groups.push(group);
+
+            var props = styleGroups[groupName];
+            for (var i = 0; i < props.length; ++i)
+            {
+                var propName = props[i];
+                var propValue = stripUnits(rgbToHex(style.getPropertyValue(propName)));
+                if (propValue)
+                    group.props.push({name: propName, value: propValue});
+            }
+        }
+
+        var result = this.template.computedTag.replace({groups: groups}, this.panelNode);
+        dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, result]);
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // extends Panel
+
+    name: "computed",
+    parentPanel: "html",
+    order: 1,
+
+    updateView: function(element)
+    {
+        this.updateComputedView(element);
+    },
+
+    getOptionsMenuItems: function()
+    {
+        return [
+            {label: "Refresh", command: bind(this.refresh, this) }
         ];
     }
 });
@@ -1774,6 +1868,7 @@ function getSelectionController(panel)
 Firebug.registerModule(Firebug.CSSModule);
 Firebug.registerPanel(Firebug.CSSStyleSheetPanel);
 Firebug.registerPanel(CSSElementPanel);
+Firebug.registerPanel(CSSComputedElementPanel);
 
 // ************************************************************************************************
 

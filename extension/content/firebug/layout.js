@@ -134,7 +134,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
     name: "layout",
     parentPanel: "html",
-    order: 1,
+    order: 2,
 
     initialize: function()
     {

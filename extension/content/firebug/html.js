@@ -614,7 +614,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     name: "html",
     searchable: true,
-    dependents: ["css", "layout", "dom", "domSide", "watch"],
+    dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
 
     initialize: function()
