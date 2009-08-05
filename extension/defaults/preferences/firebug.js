@@ -50,7 +50,6 @@ pref("extensions.firebug.scrollToMutations", false);
 pref("extensions.firebug.shadeBoxModel", true);
 
 // CSS
-pref("extensions.firebug.showComputedStyle", false);
 pref("extensions.firebug.showUserAgentCSS", false);
 
 // Script
