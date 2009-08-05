@@ -43,11 +43,8 @@ Firebug.ConsoleBase =
         if (!context)
             context = FirebugContext;
 
-        if (!context)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Console.logRow has no context, skipping objects", objects);
-        }
+        if (FBTrace.DBG_ERRORS && !context)
+            FBTrace.sysout("Console.logRow has no context, skipping objects", objects);
 
         if (noThrottle || !context)
         {
