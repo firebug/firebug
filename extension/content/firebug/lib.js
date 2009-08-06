@@ -1141,53 +1141,75 @@ this.getClientOffset = function(elt)
     return coords;
 };
 
-this.getRectTRBLWH = function(elt, context)
+this.getViewOffset = function(elt, singleFrame)
 {
-    var i, rect, frameRect, win,
-        coords =
-        {
-            "top": 0,
-            "right": 0,
-            "bottom": 0,
-            "left": 0,
-            "width": 0,
-            "height": 0
-        };
-
-    frameRect = coords;
-
-    if (elt)
+    function addOffset(elt, coords, view)
     {
-        win = context.window;
+        var p = elt.offsetParent;
+        coords.x += elt.offsetLeft - (p ? p.scrollLeft : 0);
+        coords.y += elt.offsetTop - (p ? p.scrollTop : 0);
 
-        if(win && win.frames.length > 0)
+        if (p)
         {
-            for(i=0; i < win.frames.length; i++)
+            if (p.nodeType == 1)
             {
-                try
+                var parentStyle = view.getComputedStyle(p, "");
+                if (parentStyle.position != "static")
                 {
-                    if(win.frames[i].document == elt.ownerDocument)
+                    coords.x += parseInt(parentStyle.borderLeftWidth);
+                    coords.y += parseInt(parentStyle.borderTopWidth);
+
+                    if (p.localName == "TABLE")
                     {
-                        frameRect = win.frames[i].frameElement.getBoundingClientRect();
-                        break;
+                        coords.x += parseInt(parentStyle.paddingLeft);
+                        coords.y += parseInt(parentStyle.paddingTop);
+                    }
+                    else if (p.localName == "BODY")
+                    {
+                        var style = view.getComputedStyle(elt, "");
+                        coords.x += parseInt(style.marginLeft);
+                        coords.y += parseInt(style.marginTop);
                     }
                 }
-                catch(e)
-                {}
+                else if (p.localName == "BODY")
+                {
+                    coords.x += parseInt(parentStyle.borderLeftWidth);
+                    coords.y += parseInt(parentStyle.borderTopWidth);
+                }
+
+                var parent = elt.parentNode;
+                while (p != parent)
+                {
+                    coords.x -= parent.scrollLeft;
+                    coords.y -= parent.scrollTop;
+                    parent = parent.parentNode;
+                }
+                addOffset(p, coords, view);
             }
         }
-
-        rect = elt.getBoundingClientRect();
-
-        coords =
+        else
         {
-            "top": rect.top + frameRect.top,
-            "right": rect.right + frameRect.right,
-            "bottom": rect.bottom + frameRect.bottom,
-            "left": rect.left + frameRect.left,
-            "width": rect.right-rect.left,
-            "height": rect.bottom-rect.top
-        };
+            if (elt.localName == "BODY")
+            {
+                var style = view.getComputedStyle(elt, "");
+                coords.x += parseInt(style.borderLeftWidth);
+                coords.y += parseInt(style.borderTopWidth);
+
+                var htmlStyle = view.getComputedStyle(elt.parentNode, "");
+                coords.x -= parseInt(htmlStyle.paddingLeft);
+                coords.y -= parseInt(htmlStyle.paddingTop);
+            }
+
+            if (elt.scrollLeft)
+                coords.x += elt.scrollLeft;
+            if (elt.scrollTop)
+                coords.y += elt.scrollTop;
+
+            var win = elt.ownerDocument.defaultView;
+            if (win && (!singleFrame && win.frameElement))
+                addOffset(win.frameElement, coords, win);
+        }
+
     }
 
     return coords;
