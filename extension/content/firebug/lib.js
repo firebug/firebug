@@ -1151,7 +1151,7 @@ this.getViewOffset = function(elt, singleFrame)
 
         if (p)
         {
-            if (p.nodeType == 1)
+            if (p.nodeType == 1) // element node
             {
                 var parentStyle = view.getComputedStyle(p, "");
                 if (parentStyle.position != "static")
@@ -1187,7 +1187,7 @@ this.getViewOffset = function(elt, singleFrame)
                 addOffset(p, coords, view);
             }
         }
-        else
+        else  // no offsetParent
         {
             if (elt.localName == "BODY")
             {
@@ -1211,6 +1211,10 @@ this.getViewOffset = function(elt, singleFrame)
         }
 
     }
+
+    var coords = {x: 0, y: 0};
+    if (elt)
+        addOffset(elt, coords, elt.ownerDocument.defaultView);
 
     return coords;
 };
