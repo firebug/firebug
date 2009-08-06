@@ -313,7 +313,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> watchLoadedTopWindow context: "+
                 (context?(context.uid+", loaded="+context.loaded):'undefined')+
-                ", "+safeGetWindowLocation(win).href+"\n");
+                ", "+safeGetWindowLocation(win)+"\n");
 
         if (context && !context.loaded)
         {
@@ -321,7 +321,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> Context *** LOADED *** in watchLoadedTopWindow, id: "+context.uid+
-                    ", uri: "+safeGetWindowLocation(win).href+"\n");
+                    ", uri: "+safeGetWindowLocation(win)+"\n");
 
             dispatch(this.fbListeners, "loadedContext", [context]);
 
@@ -340,17 +340,15 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         var location = safeGetWindowLocation(win);
 
-        var href = location.href;
-
         // Unfortunately, dummy requests that trigger the call to watchWindow
         // are called several times, so we have to avoid dispatching watchWindow
         // more than once
-        if (context && context.windows.indexOf(win) == -1 && href != aboutBlank)
+        if (context && context.windows.indexOf(win) == -1 && location != aboutBlank)
         {
             context.windows.push(win);
 
             if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> watchWindow register *** FRAME *** to context for win.location: "+href+"\n");
+                FBTrace.sysout("-> watchWindow register *** FRAME *** to context for win.location: "+location+"\n");
 
             // For every window we watch, prepare for unwatch.
             if (win.parent == win)
@@ -370,7 +368,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             if (FBTrace.DBG_WINDOWS)
             {
-                FBTrace.sysout("-> watchWindow for: "+href+", context: "+context.uid+"\n");
+                FBTrace.sysout("-> watchWindow for: "+location+", context: "+context.uid+"\n");
                 if (context)
                     for (var i = 0; i < context.windows.length; i++)
                         FBTrace.sysout("   context: "+context.uid+", window in context: "+context.windows[i].location.href+"\n");
@@ -633,8 +631,8 @@ var FrameProgressListener = extend(BaseProgressListener,
         if (FBTrace.DBG_WINDOWS)
         {
             // xxxHonza: there is too much of these messages so, disable it for now.
-            //FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+
-            //    ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
+            FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+
+                ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
         }
 
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
@@ -890,7 +888,7 @@ function onUnloadWindow(event)
     var eventType = "unload";
     win.removeEventListener(eventType, onUnloadWindow, false);
     if (FBTrace.DBG_WINDOWS)
-        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+safeGetWindowLocation(win).href +" removeEventListener: "+ eventType+"\n");
+        FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+safeGetWindowLocation(win) +" removeEventListener: "+ eventType+"\n");
     TabWatcher.unwatchWindow(win);
 }
 
