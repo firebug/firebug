@@ -121,7 +121,7 @@ Firebug.Console = extend(ActivableConsole,
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element");
-            var elementForcer = "var _firebugForcer=null; try { _firebugForcer = window._getFirebugConsoleElement();}catch(exc){_firebugForcer=exc;} _firebugForcer;";  // we could just add the elements here
+            var elementForcer = "(function(){var r=null; try { r = window._getFirebugConsoleElement();}catch(exc){r=exc;} return r;})();";  // we could just add the elements here
 
             if (context.stopped)
                 Firebug.Console.injector.evaluateConsoleScript(context);  // todo evaluate consoleForcer on stack
