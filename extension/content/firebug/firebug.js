@@ -906,6 +906,10 @@ top.Firebug =
             file.create(nsIFile.NORMAL_FILE_TYPE, 0664);
         temporaryFiles.push(file.path);
 
+        var converter = CCIN("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        converter.charset = 'UTF-8'; // TODO detect charset from current tab
+        data = converter.ConvertFromUnicode(data);
+
         var stream = CCIN("@mozilla.org/network/safe-file-output-stream;1", "nsIFileOutputStream");
         stream.init(file, 0x04 | 0x08 | 0x20, 0664, 0); // write, create, truncate
         stream.write(data, data.length);
