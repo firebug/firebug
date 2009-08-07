@@ -418,9 +418,9 @@ FrameHighlighter.prototype =
     {
         if (element instanceof XULElement)
             return;
-        var offset = getViewOffset(element, true);
-        var x = offset.x, y = offset.y;
-        var w = element.offsetWidth, h = element.offsetHeight;
+        var offset = getLTRBWH(element);
+        var x = offset.left, y = offset.top;
+        var w = offset.width, h = offset.height;
         if (FBTrace.DBG_INSPECT)
                 FBTrace.sysout("FrameHighlighter HTML tag:"+element.tagName,"x:"+x+" y:"+y+" w:"+w+" h:"+h);
 
@@ -571,18 +571,18 @@ BoxModelHighlighter.prototype =
             return;
 
         var parentStyle = win.getComputedStyle(offsetParent, "");
-        var parentOffset = getViewOffset(offsetParent, true);
-        var parentX = parentOffset.x + parseInt(parentStyle.borderLeftWidth);
-        var parentY = parentOffset.y + parseInt(parentStyle.borderTopWidth);
+        var parentOffset = getLTRBWH(offsetParent);
+        var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
+        var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
         var parentW = offsetParent.offsetWidth-1;
         var parentH = offsetParent.offsetHeight-1;
 
         var style = win.getComputedStyle(element, "");
         var styles = readBoxStyles(style);
 
-        var offset = getViewOffset(element, true);
-        var x = offset.x - Math.abs(styles.marginLeft);
-        var y = offset.y - Math.abs(styles.marginTop);
+        var offset = getLTRBWH(element);
+        var x = offset.left - Math.abs(styles.marginLeft);
+        var y = offset.top - Math.abs(styles.marginTop);
         var w = element.offsetWidth - (styles.paddingLeft + styles.paddingRight
                 + styles.borderLeft + styles.borderRight);
         var h = element.offsetHeight - (styles.paddingTop + styles.paddingBottom

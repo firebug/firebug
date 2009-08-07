@@ -1141,82 +1141,45 @@ this.getClientOffset = function(elt)
     return coords;
 };
 
-this.getViewOffset = function(elt, singleFrame)
+this.getLTRBWH = function(elt)
 {
-    function addOffset(elt, coords, view)
-    {
-        var p = elt.offsetParent;
-        coords.x += elt.offsetLeft - (p ? p.scrollLeft : 0);
-        coords.y += elt.offsetTop - (p ? p.scrollTop : 0);
+    var bcrect, od, odb, odde,
+        dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
 
-        if (p)
-        {
-            if (p.nodeType == 1) // element node
-            {
-                var parentStyle = view.getComputedStyle(p, "");
-                if (parentStyle.position != "static")
-                {
-                    coords.x += parseInt(parentStyle.borderLeftWidth);
-                    coords.y += parseInt(parentStyle.borderTopWidth);
-
-                    if (p.localName == "TABLE")
-                    {
-                        coords.x += parseInt(parentStyle.paddingLeft);
-                        coords.y += parseInt(parentStyle.paddingTop);
-                    }
-                    else if (p.localName == "BODY")
-                    {
-                        var style = view.getComputedStyle(elt, "");
-                        coords.x += parseInt(style.marginLeft);
-                        coords.y += parseInt(style.marginTop);
-                    }
-                }
-                else if (p.localName == "BODY")
-                {
-                    coords.x += parseInt(parentStyle.borderLeftWidth);
-                    coords.y += parseInt(parentStyle.borderTopWidth);
-                }
-
-                var parent = elt.parentNode;
-                while (p != parent)
-                {
-                    coords.x -= parent.scrollLeft;
-                    coords.y -= parent.scrollTop;
-                    parent = parent.parentNode;
-                }
-                addOffset(p, coords, view);
-            }
-        }
-        else  // no offsetParent
-        {
-            if (elt.localName == "BODY")
-            {
-                var style = view.getComputedStyle(elt, "");
-                coords.x += parseInt(style.borderLeftWidth);
-                coords.y += parseInt(style.borderTopWidth);
-
-                var htmlStyle = view.getComputedStyle(elt.parentNode, "");
-                coords.x -= parseInt(htmlStyle.paddingLeft);
-                coords.y -= parseInt(htmlStyle.paddingTop);
-            }
-
-            if (elt.scrollLeft)
-                coords.x += elt.scrollLeft;
-            if (elt.scrollTop)
-                coords.y += elt.scrollTop;
-
-            var win = elt.ownerDocument.defaultView;
-            if (win && (!singleFrame && win.frameElement))
-                addOffset(win.frameElement, coords, win);
-        }
-
-    }
-
-    var coords = {x: 0, y: 0};
     if (elt)
-        addOffset(elt, coords, elt.ownerDocument.defaultView);
-
-    return coords;
+    {
+        od = elt.ownerDocument;
+        odb = od.body;
+        odde = od.documentElement;
+        bcrect = elt.getBoundingClientRect();
+        dims.left = bcrect.left;
+        dims.top = bcrect.top;
+        dims.right = bcrect.right;
+        dims.bottom = bcrect.bottom;
+        
+        if(bcrect.width)
+        {
+            dims.width = bcrect.width;
+            dims.height = bcrect.height;
+        }
+        else
+        {
+            dims.width = dims.right - dims.left;
+            dims.height = dims.bottom - dims.top;
+        }
+        
+        if(odb.scrollTop)
+        {
+            dims.top += odb.scrollTop;
+            dims.left += odb.scrollLeft;
+        }
+        else if(odde && odde.scrollTop)
+        {
+            dims.top += odde.scrollTop;
+            dims.left += odde.scrollLeft;
+        }
+    }
+    return dims;
 };
 
 this.getOffsetSize = function(elt)
