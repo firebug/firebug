@@ -40,6 +40,7 @@ Firebug.Activation = extend(Firebug.Module,
         this.annotationSvc = Cc["@mozilla.org/browser/annotation-service;1"]
             .getService(Ci.nsIAnnotationService);
 
+        this.privateBrowsingsSvc = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService);
         this.expires = this.annotationSvc.EXPIRE_NEVER;
 
         this.updateAllPagesActivation();
@@ -207,8 +208,18 @@ Firebug.Activation = extend(Firebug.Module,
         // mark this URI as firebugged
         var uri = this.convertToURIKey(browser.currentURI.spec);
         if (uri)
-            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation,
-                null, this.expires);
+        {
+            if (this.isPrivateBrowsing())
+            {
+                this.warnPrivateBrowsing();
+                return;
+            }
+            else
+            {
+                this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation,
+                        null, this.expires);
+            }
+        }
 
         if (FBTrace.DBG_ACTIVATION)
         {
@@ -224,6 +235,12 @@ Firebug.Activation = extend(Firebug.Module,
 
         if (!uri)
             return;
+
+        if (this.isPrivateBrowsing())
+        {
+            this.warnPrivateBrowsing();
+            return;
+        }
 
         if (userCommands)  // then mark to not open virally.
         {
@@ -341,6 +358,16 @@ Firebug.Activation = extend(Firebug.Module,
 
         Firebug.closeFirebug();
         this.clearAnnotations();  // and the past pages with contexts are forgotten.
+    },
+
+    isPrivateBrowsing: function()
+    {
+        return this.privateBrowsingsSvc.privateBrowsingEnabled;
+    },
+
+    warnPrivateBrowsing: function()
+    {
+        Firebug.Console.logFormatted(["Firebug cannot save activation state in Firefox Private Browsing mode"], FirebugContext, "error", true);
     },
 });
 
