@@ -163,6 +163,7 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 Firebug.TraceModule = extend(Firebug.Module,
 {
     dispatchName: "traceModule",
+
     initialize: function(prefDomain, prefNames)  // prefDomain is the calling app, firebug or chromebug
     {
         Firebug.Module.initialize.apply(this, arguments);
@@ -177,6 +178,17 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.initialize: " + prefDomain+" alwayOpen:"+Firebug.getPref(this.prefDomain, "alwaysOpenTraceConsole"));
+    },
+
+    internationalizeUI: function(doc)
+    {
+        var elements = ["FirebugMenu_Options_alwaysOpenTraceConsole", "menu_openTraceConsole"];
+        for (var i=0; i<elements.length; i++)
+        {
+            var element = doc.getElementById(elements[i]);
+            if (element)
+                FBL.internationalize(element, "label");
+        }
     },
 
     shutdown: function()

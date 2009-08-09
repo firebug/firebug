@@ -244,19 +244,23 @@ top.Firebug =
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
             "menu_AllOff", "menu_AllOn"];
 
-        var tooltipTextElements = ["fbContinueButton", "fbBreakOnNextButton", "fbMinimizeButton"];
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);
-            if (!element && FBTrace.DBG_LOCALE )
+            if (!element && FBTrace.DBG_LOCALE)
             {
                 FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
                 continue;
             }
-            FBL.internationalize(element, tooltipTextElements.indexOf(elements[i]) == -1 ? "label" : "tooltiptext");
+
+            if (element.hasAttribute("label"))
+                FBL.internationalize(element, "label");
+
+            if (element.hasAttribute("tooltiptext"))
+                FBL.internationalize(element, "tooltiptext");
         }
 
-        // Allow other modules to internationalize UI labels (whis is called also for
+        // Allow other modules to internationalize UI labels (called also for
         // detached Firebug window).
         dispatch(modules, "internationalizeUI", [doc]);
     },
