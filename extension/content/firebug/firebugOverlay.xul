@@ -160,7 +160,7 @@
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                             tooltiptext="&firebug.ClearTooltip;" command="cmd_clearConsole"/>
                                         <toolbarbutton label="firebug.console.Persist" class="toolbar-text-button" id="fbConsolePersist"
-                                            type="checkbox" tooltiptext="firebug.conosole.Do Not Clear On Reload" command="cmd_togglePersistConsole"/>
+                                            type="checkbox" tooltiptext="firebug.console.Do Not Clear On Reload" command="cmd_togglePersistConsole"/>
                                         <toolbarbutton id="fbToggleProfiling" label="&firebug.Profile;" class="toolbar-text-button"
                                             type="checkbox" command="cmd_toggleProfiling"/>
                                     </hbox>
