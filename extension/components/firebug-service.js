@@ -2572,7 +2572,7 @@ function hook(fn, rv)
         }
     }
 }
-
+var lastWindowScope = null;
 function getFrameScopeWindowAncestor(frame)  // walk script scope chain to bottom, null unless a Window
 {
     var scope = frame.scope;
@@ -2582,8 +2582,21 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             scope = scope.jsParent;
 
         if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
+        {
+            lastWindowScope = scope.getWrappedValue();
             return  scope.getWrappedValue();
+        }
 
+        if (scope.jsClassName == "DedicatedWorkerGlobalScope")
+        {
+            var workerScope = scope.getWrappedValue();
+
+            if (FBTrace.DBG_FBS_FINDDEBUGGER)
+                    FBTrace.sysout("fbs.getFrameScopeWindowAncestor found WorkerGlobalScope: "+scope.jsClassName, workerScope);
+            // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
+            //        FBTrace.sysout("fbs.getFrameScopeWindowAncestor found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
+            return lastWindowScope;
+        }
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("fbs.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
     }
