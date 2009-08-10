@@ -301,15 +301,15 @@ Firebug.TraceModule.CommonBaseUI = {
 
         // This IFRAME is the container for all logs.
         var logTabIframe = FBL.getElementByClass(parentNode, "traceInfoLogsFrame");
-        this.rootNode = frameDoc.getElementById("traceLogContent");
+        var frameDoc = logTabIframe.contentWindow.document;
+        var rootNode = frameDoc.getElementById("traceLogContent");
+        this.rootNode = rootNode;
         logTabIframe.addEventListener("load", function(event)
         {
-            var frameDoc = logTabIframe.contentWindow.document;
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/panelbase.css"));
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceconsole.css"));
 
-
-            var logNode = Firebug.TraceModule.MessageTemplate.createTable(this.rootNode);
+            var logNode = Firebug.TraceModule.MessageTemplate.createTable(rootNode);
 
             function recalcLayout() {
                logTabIframe.style.height = (doc.defaultView.innerHeight - 25) + "px";
