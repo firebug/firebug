@@ -1,0 +1,50 @@
+<!ENTITY firebug.Firebug "آتش افروز">
+<!ENTITY firebug.Close "بستن">
+<!ENTITY firebug.View "نما">
+<!ENTITY firebug.Help "راهنما">
+<!ENTITY firebug.Vertical "نمایش عمودی پنجره ها">
+<!ENTITY firebug.Run "اجرا">
+<!ENTITY firebug.Copy "رونوشت">
+<!ENTITY firebug.CopyBookmarklet "کپی کردن اسکریپت به عنوان یک Bookmarklet">
+<!ENTITY firebug.Options "گزینه ها">
+<!ENTITY firebug.TextSize "سایز قلم">
+<!ENTITY firebug.IncreaseTextSize "افزایش سایز قلم">
+<!ENTITY firebug.DecreaseTextSize "کاهش سایز قلم">
+<!ENTITY firebug.NormalTextSize "سایز قلم استاندارد">
+<!ENTITY firebug.ShowTooltips "نمایش Tooltip ها در صفحه">
+<!ENTITY firebug.ShadeBoxModel "پررنگ کردن عنصر انتخابی">
+<!ENTITY firebug.Website "وب سایت آتش افروز...">
+<!ENTITY firebug.Documentation "مستندات...">
+<!ENTITY firebug.KeyShortcuts "کلیدهای میانبر...">
+<!ENTITY firebug.Forums "تالار گفتگو...">
+<!ENTITY firebug.Issues "دنبال کننده موضوع...">
+<!ENTITY firebug.Donate "همکاری کردن...">
+<!ENTITY firebug.About "درباره...">
+<!ENTITY firebug.AlwaysOpenInWindow "همیشه در یک پنجره جدید باز شو">
+<!ENTITY firebug.ShowFirebug "بازکردن آتش افروز">
+<!ENTITY firebug.DetachFirebug "بازکردن آتش افروز در یک پنجره جدید">
+<!ENTITY firebug.OpenWith "بازکردن با ویرایشگر">
+<!ENTITY firebug.CloseFirebug "غیرفعال کردن آتش افروز برای این وب سایت">
+<!ENTITY firebug.Permissions "سایت ها...">
+<!ENTITY firebug.ConfigureEditors "پیکره بندی ویرایشگرها">
+<!ENTITY firebug.CommandLine "خط فرمان">
+<!ENTITY firebug.Search "جستجو">
+<!ENTITY firebug.Continue "ادامه دادن (F8)">
+<!ENTITY firebug.StepOver "برگشت به گام قبلی (F10)">
+<!ENTITY firebug.StepInto "رفتن به گام بعدی   (F11)">
+<!ENTITY firebug.StepOut "خارج شدن">
+<!ENTITY firebug.BreakOnErrors "قطع کردن در هنگام خطا">
+<!ENTITY firebug.Inspect "بررسی کردن">
+<!ENTITY firebug.InspectElement "بررسی کردن عنصر">
+<!ENTITY firebug.InspectTooltip "برای بررسی کردن یک عنصر بر روی آن در صفحه کلیک کنید">
+<!ENTITY firebug.Edit "ویرایش">
+<!ENTITY firebug.EditHTMLTooltip "ویرایش این HTML">
+<!ENTITY firebug.EditCSSTooltip "ویرایش این style sheet">
+<!ENTITY firebug.Profile "پروفایل">
+<!ENTITY firebug.ProfileScript "پروفایل جاوا اسکریپت">
+<!ENTITY firebug.Clear "پاک کردن">
+<!ENTITY firebug.ClearConsole "پاک کردن کنسول">
+<!ENTITY firebug.ClearTooltip "پاک کردن کنسول">
+<!ENTITY firebug.All "All">
+<!ENTITY firebug.Images "Images">
+<!ENTITY firebug.Flash "Flash">
