@@ -247,9 +247,10 @@ top.Firebug =
         for (var i=0; i<elements.length; i++)
         {
             var element = doc.getElementById(elements[i]);
-            if (!element && FBTrace.DBG_LOCALE)
+            if (!element)
             {
-                FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
+                if (FBTrace.DBG_LOCALE)
+                    FBTrace.sysout("firebug.internationalizeUI; Element Not Found: " + elements[i]);
                 continue;
             }
 
