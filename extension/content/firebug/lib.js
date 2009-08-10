@@ -1198,9 +1198,6 @@ this.applyBodyOffsets = function(elt, clientRect)
         marginLeft = parseInt(style.getPropertyValue('margin-left').replace('px', ''),10) || 0;
         marginTop = parseInt(style.getPropertyValue('margin-top').replace('px', ''),10) || 0;
 
-        offsetX = 0;
-        offsetY = 0;
-
         offsetX = borderLeft + paddingLeft + marginLeft;
         offsetY = borderTop + paddingTop + marginTop;
 
