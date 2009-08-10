@@ -1156,7 +1156,7 @@ this.getLTRBWH = function(elt)
         dims.top = bcrect.top;
         dims.right = bcrect.right;
         dims.bottom = bcrect.bottom;
-        
+
         if(bcrect.width)
         {
             dims.width = bcrect.width;
@@ -1167,7 +1167,7 @@ this.getLTRBWH = function(elt)
             dims.width = dims.right - dims.left;
             dims.height = dims.bottom - dims.top;
         }
-        
+
         if(odb.scrollTop)
         {
             dims.top += odb.scrollTop;
@@ -1234,16 +1234,16 @@ this.isScrolledToBottom = function(element)
 
 this.scrollToBottom = function(element)
 {
-    if (element.offsetHeight)
-    {
-        element.scrollTop = element.scrollHeight - element.offsetHeight;
+        element.scrollTop = element.scrollHeight;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight +" - "+ element.offsetHeight);
+        {
+            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
+            if (element.scrollHeight == element.offsetHeight)
+                FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
+        }
 
-        return true;
-    }
-    return false;
+        return (element.scrollTop == element.scrollHeight);
 };
 
 this.move = function(element, x, y)

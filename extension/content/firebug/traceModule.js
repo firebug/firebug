@@ -301,14 +301,15 @@ Firebug.TraceModule.CommonBaseUI = {
 
         // This IFRAME is the container for all logs.
         var logTabIframe = FBL.getElementByClass(parentNode, "traceInfoLogsFrame");
+        this.rootNode = frameDoc.getElementById("traceLogContent");
         logTabIframe.addEventListener("load", function(event)
         {
             var frameDoc = logTabIframe.contentWindow.document;
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/panelbase.css"));
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceconsole.css"));
 
-            var rootNode = frameDoc.getElementById("traceLogContent");
-            var logNode = Firebug.TraceModule.MessageTemplate.createTable(rootNode);
+
+            var logNode = Firebug.TraceModule.MessageTemplate.createTable(this.rootNode);
 
             function recalcLayout() {
                logTabIframe.style.height = (doc.defaultView.innerHeight - 25) + "px";
@@ -352,7 +353,13 @@ Firebug.TraceModule.CommonBaseUI = {
         rep.selectTabByName(parentNode, "Logs");
 
         this.optionsController.addObserver();
-    }
+    },
+
+    getScrollingNode: function()
+    {
+        return this.rootNode;
+    },
+
 };
 
 
@@ -860,8 +867,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     dump: function(message, parentNode, index)
     {
-        var panelNode = parentNode.parentNode.parentNode;
-        var scrolledToBottom = isScrolledToBottom(panelNode);
+        var scrollingNode = this.getScrollingNode();
+        var scrolledToBottom = isScrolledToBottom(scrollingNode);
 
         // Set message index
         if (index)
@@ -883,12 +890,12 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             row.wrappedJSObject.repObject = message;
 
         if (scrolledToBottom)
-            scrollToBottom(panelNode);
+            scrollToBottom(scrollingNode);
     },
 
     dumpSeparator: function(parentNode)
     {
-        var panelNode = parentNode.parentNode.parentNode;
+        var panelNode = this.getScrollingNode();
         var scrolledToBottom = isScrolledToBottom(panelNode);
 
         var fakeMessage = {};
