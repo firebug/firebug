@@ -20,6 +20,7 @@ const highlightCSS = "chrome://firebug/content/highlighter.css";
 var boxModelHighlighter = null;
 var frameHighlighter = null;
 var popupHighlighter = null;
+var mx, my;
 
 // ************************************************************************************************
 
@@ -30,6 +31,15 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
+        if(context && context.window.document)
+        {
+            context.window.document.addEventListener("mousemove", function(event)
+            {
+                mx = event.clientX;
+                my = event.clientY;
+            }, true);
+        }
+
         if (!element || !isElement(element) || !isVisible(element))
         {
             if(element && element.nodeType == 3)
@@ -406,6 +416,160 @@ function pad(element, t, r, b, l)
         + Math.abs(b) + "px " + Math.abs(l) + "px";
 }
 
+// ************************************************************************************************
+// Imagemap Inspector
+
+function getImageMapHighlighter(context)
+{
+    if(!context)
+        return;
+
+    var canvas, ctx,
+        doc = context.window.document,
+        init = function(elt)
+        {
+            if(elt)
+                doc = elt.ownerDocument;
+            canvas = doc.getElementById('firebugCanvas');
+            
+            if(!canvas)
+            {
+                canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
+                canvas.firebugIgnore = true;
+                canvas.id = "firebugCanvas";
+                canvas.className = "firebugCanvas";
+                canvas.width = context.window.innerWidth;
+                canvas.height = context.window.innerHeight;
+                canvas.addEventListener("mousemove", function(event){context.imageMapHighlighter.mouseMoved(event)}, true);
+                canvas.addEventListener("mouseout", function(){getImageMapHighlighter(context).destroy();}, true);
+                context.window.addEventListener("scroll", function(){context.imageMapHighlighter.show(false);}, true);
+
+                doc.body.appendChild(canvas);
+            }
+        };
+
+    if (!context.imageMapHighlighter)
+    {
+        context.imageMapHighlighter =
+        {
+            "show": function(state)
+            {
+                if(!canvas)
+                    init();
+                canvas.style.display = state?'block':'none';
+            },
+            "getImages": function(mapName, multi)
+            {
+                var i,
+                    elts = [],
+                    images = [],
+                    elts2 = doc.getElementsByTagName("img"),
+                    elts3 = doc.getElementsByTagName("input");
+
+                for(i=0;i<elts2.length;i++)
+                    elts.push(elts2[i]);
+
+                for(i=0;i<elts3.length;i++)
+                    elts.push(elts3[i]);
+
+                if(elts)
+                {
+                    for(i=0;i<elts.length;i++)
+                    {
+                        if(elts[i].getAttribute('usemap') == mapName)
+                        {
+                            rect = getLTRBWH(elts[i]);
+
+                            if(multi)
+                                images.push(elts[i]);
+                            else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
+                            {
+                                images[0]=elts[i];
+                                break;
+                            }
+                        }
+                    }
+                }
+                return images;
+            },
+            "highlight": function(eltArea, multi)
+            {
+//debugger;
+                var i, j, v, images, rect, clearForFirst;
+
+                if (eltArea && eltArea.coords)
+                {
+                    images = this.getImages("#"+eltArea.parentNode.name, multi);
+
+                    init(eltArea);
+
+                    v = eltArea.coords.split(",");
+
+                    if(!ctx)
+                        ctx = canvas.getContext("2d");
+
+                    ctx.fillStyle = "rgba(135, 206, 235, 0.7)";
+                    ctx.strokeStyle = "rgb(29, 55, 95)";
+                    ctx.lineWidth = 2;
+
+                    if(images.length===0)
+                        images[0] = eltArea;
+
+                    for(var j=0;j<images.length;j++)
+                    {
+                        rect = getLTRBWH(images[j], context);
+
+                        ctx.beginPath();
+
+                        if(!multi || (multi && j===0))
+                            ctx.clearRect(0,0,canvas.width,canvas.height);
+
+                        if (eltArea.shape.toLowerCase() === 'rect')
+                            ctx.rect(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10), v[2]-v[0], v[3]-v[1]);
+                        else if (eltArea.shape.toLowerCase() === 'circle')
+                            ctx.arc(rect.left+parseInt(v[0],10) + ctx.lineWidth / 2, rect.top+parseInt(v[1],10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
+                        else
+                        {
+                            ctx.moveTo(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10));
+                            for(i=2;i<v.length;i+=2)
+                                ctx.lineTo(rect.left+parseInt(v[i],10), rect.top+parseInt(v[i+1],10));
+                        }
+
+                        ctx.fill();
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+
+                    this.show(true);
+                }
+                else
+                {
+                    return;
+                }
+            },
+            "mouseMoved": function(event)
+            {
+                var idata = ctx.getImageData(event.layerX, event.layerY, 1, 1);
+
+                mx = event.clientX;
+                my = event.clientY;
+                
+                if(!idata)
+                    this.show(false);
+                else if(idata.data[0]===0 && idata.data[1]===0 && idata.data[2]===0 && idata.data[3]===0)
+                    this.show(false);
+            },
+            "destroy": function()
+            {
+                canvas = null;
+                ctx = null;
+            }
+        }
+    }
+
+    return context.imageMapHighlighter;
+}
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function FrameHighlighter()
@@ -431,43 +595,51 @@ FrameHighlighter.prototype =
         if (wacked)
             return;
 
-        var nodes = this.getNodes(context, element);
-
-        move(nodes.top, x, y-edgeSize);
-        resize(nodes.top, w, edgeSize);
-
-        move(nodes.right, x+w, y-edgeSize);
-        resize(nodes.right, edgeSize, h+edgeSize*2);
-
-        move(nodes.bottom, x, y+h);
-        resize(nodes.bottom, w, edgeSize);
-
-        move(nodes.left, x-edgeSize, y-edgeSize);
-        resize(nodes.left, edgeSize, h+edgeSize*2);
-        if (FBTrace.DBG_INSPECT)
-            FBTrace.sysout("FrameHighlighter ", element.tagName);
-        var body = getNonFrameBody(element);
-        if (!body)
-            return this.unhighlight(context);
-
-        var needsAppend = !nodes.top.parentNode || nodes.top.ownerDocument != body.ownerDocument;
-        if (needsAppend)
+        if(element.tagName !== "AREA")
         {
+            var nodes = this.getNodes(context, element);
+
+            move(nodes.top, x, y-edgeSize);
+            resize(nodes.top, w, edgeSize);
+
+            move(nodes.right, x+w, y-edgeSize);
+            resize(nodes.right, edgeSize, h+edgeSize*2);
+
+            move(nodes.bottom, x, y+h);
+            resize(nodes.bottom, w, edgeSize);
+
+            move(nodes.left, x-edgeSize, y-edgeSize);
+            resize(nodes.left, edgeSize, h+edgeSize*2);
             if (FBTrace.DBG_INSPECT)
-                FBTrace.sysout("FrameHighlighter needsAppend", nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI);
-            attachStyles(context, body);
-            for (var edge in nodes)
+                FBTrace.sysout("FrameHighlighter ", element.tagName);
+            var body = getNonFrameBody(element);
+            if (!body)
+                return this.unhighlight(context);
+
+            var needsAppend = !nodes.top.parentNode || nodes.top.ownerDocument != body.ownerDocument;
+            if (needsAppend)
             {
-                try
+                if (FBTrace.DBG_INSPECT)
+                    FBTrace.sysout("FrameHighlighter needsAppend", nodes.top.ownerDocument.documentURI+" !?= "+body.ownerDocument.documentURI);
+                attachStyles(context, body);
+                for (var edge in nodes)
                 {
-                    body.appendChild(nodes[edge]);
-                }
-                catch(exc)
-                {
-                    if (FBTrace.DBG_INSPECT)
-                        FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);
+                    try
+                    {
+                        body.appendChild(nodes[edge]);
+                    }
+                    catch(exc)
+                    {
+                        if (FBTrace.DBG_INSPECT)
+                            FBTrace.dumpProperties("inspector.FrameHighlighter.highlight FAILS", exc);
+                    }
                 }
             }
+        }
+        else
+        {
+            var ihl = getImageMapHighlighter(context);
+            ihl.highlight(element, false);
         }
     },
 
@@ -553,142 +725,150 @@ BoxModelHighlighter.prototype =
         if (context.highlightFrame)
             removeClass(context.highlightFrame, "firebugHighlightBox");
 
-        context.highlightFrame = highlightFrame;
-
-        if (highlightFrame)
+        if(element.tagName !== "AREA")
         {
-            setClass(nodes.offset, "firebugHighlightGroup");
-            setClass(highlightFrame, "firebugHighlightBox");
-        }
-        else
-            removeClass(nodes.offset, "firebugHighlightGroup");
+            context.highlightFrame = highlightFrame;
 
-        var win = element.ownerDocument.defaultView;
-        if (!win)
-            return;
-
-        var offsetParent = element.offsetParent;
-        if (!offsetParent)
-            return;
-
-        var parentStyle = win.getComputedStyle(offsetParent, "");
-        var parentOffset = getLTRBWH(offsetParent);
-        parentOffset = applyBodyOffsets(offsetParent, parentOffset);
-        var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
-        var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
-        var parentW = offsetParent.offsetWidth-1;
-        var parentH = offsetParent.offsetHeight-1;
-
-        var style = win.getComputedStyle(element, "");
-        var styles = readBoxStyles(style);
-
-        var offset = getLTRBWH(element);
-        offset = applyBodyOffsets(element, offset);
-        var x = offset.left - Math.abs(styles.marginLeft);
-        var y = offset.top - Math.abs(styles.marginTop);
-        var w = element.offsetWidth - (styles.paddingLeft + styles.paddingRight
-                + styles.borderLeft + styles.borderRight);
-        var h = element.offsetHeight - (styles.paddingTop + styles.paddingBottom
-                + styles.borderTop + styles.borderBottom);
-
-        move(nodes.offset, x, y);
-        pad(nodes.margin, styles.marginTop, styles.marginRight, styles.marginBottom,
-                styles.marginLeft);
-        pad(nodes.border, styles.borderTop, styles.borderRight, styles.borderBottom,
-                styles.borderLeft);
-        pad(nodes.padding, styles.paddingTop, styles.paddingRight, styles.paddingBottom,
-                styles.paddingLeft);
-        resize(nodes.content, w, h);
-
-        var showLines = Firebug.showRulers && boxFrame;
-        if (showLines)
-        {
-            move(nodes.parent, parentX, parentY);
-            resize(nodes.parent, parentW, parentH);
-
-            if (parentX < 14)
-                setClass(nodes.parent, "overflowRulerX");
+            if (highlightFrame)
+            {
+                setClass(nodes.offset, "firebugHighlightGroup");
+                setClass(highlightFrame, "firebugHighlightBox");
+            }
             else
-                removeClass(nodes.parent, "overflowRulerX");
+                removeClass(nodes.offset, "firebugHighlightGroup");
 
-            if (parentY < 14)
-                setClass(nodes.parent, "overflowRulerY");
-            else
-                removeClass(nodes.parent, "overflowRulerY");
+            var win = element.ownerDocument.defaultView;
+            if (!win)
+                return;
 
-            var left = x;
-            var top = y;
-            var width = w-1;
-            var height = h-1;
+            var offsetParent = element.offsetParent;
+            if (!offsetParent)
+                return;
 
-            if (boxFrame == "content")
+            var parentStyle = win.getComputedStyle(offsetParent, "");
+            var parentOffset = getLTRBWH(offsetParent);
+            parentOffset = applyBodyOffsets(offsetParent, parentOffset);
+            var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
+            var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
+            var parentW = offsetParent.offsetWidth-1;
+            var parentH = offsetParent.offsetHeight-1;
+
+            var style = win.getComputedStyle(element, "");
+            var styles = readBoxStyles(style);
+
+            var offset = getLTRBWH(element);
+            offset = applyBodyOffsets(element, offset);
+            var x = offset.left - Math.abs(styles.marginLeft);
+            var y = offset.top - Math.abs(styles.marginTop);
+            var w = element.offsetWidth - (styles.paddingLeft + styles.paddingRight
+                    + styles.borderLeft + styles.borderRight);
+            var h = element.offsetHeight - (styles.paddingTop + styles.paddingBottom
+                    + styles.borderTop + styles.borderBottom);
+
+            move(nodes.offset, x, y);
+            pad(nodes.margin, styles.marginTop, styles.marginRight, styles.marginBottom,
+                    styles.marginLeft);
+            pad(nodes.border, styles.borderTop, styles.borderRight, styles.borderBottom,
+                    styles.borderLeft);
+            pad(nodes.padding, styles.paddingTop, styles.paddingRight, styles.paddingBottom,
+                    styles.paddingLeft);
+            resize(nodes.content, w, h);
+
+            var showLines = Firebug.showRulers && boxFrame;
+            if (showLines)
             {
-                left += Math.abs(styles.marginLeft) + Math.abs(styles.borderLeft)
-                    + Math.abs(styles.paddingLeft);
-                top += Math.abs(styles.marginTop) + Math.abs(styles.borderTop)
-                    + Math.abs(styles.paddingTop);
+                move(nodes.parent, parentX, parentY);
+                resize(nodes.parent, parentW, parentH);
+
+                if (parentX < 14)
+                    setClass(nodes.parent, "overflowRulerX");
+                else
+                    removeClass(nodes.parent, "overflowRulerX");
+
+                if (parentY < 14)
+                    setClass(nodes.parent, "overflowRulerY");
+                else
+                    removeClass(nodes.parent, "overflowRulerY");
+
+                var left = x;
+                var top = y;
+                var width = w-1;
+                var height = h-1;
+
+                if (boxFrame == "content")
+                {
+                    left += Math.abs(styles.marginLeft) + Math.abs(styles.borderLeft)
+                        + Math.abs(styles.paddingLeft);
+                    top += Math.abs(styles.marginTop) + Math.abs(styles.borderTop)
+                        + Math.abs(styles.paddingTop);
+                }
+                else if (boxFrame == "padding")
+                {
+                    left += Math.abs(styles.marginLeft) + Math.abs(styles.borderLeft);
+                    top += Math.abs(styles.marginTop) + Math.abs(styles.borderTop);
+                    width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight);
+                    height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom);
+                }
+                else if (boxFrame == "border")
+                {
+                    left += Math.abs(styles.marginLeft);
+                    top += Math.abs(styles.marginTop);
+                    width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight)
+                         + Math.abs(styles.borderLeft) + Math.abs(styles.borderRight);
+                    height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom)
+                        + Math.abs(styles.borderTop) + Math.abs(styles.borderBottom);
+                }
+                else if (boxFrame == "margin")
+                {
+                    width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight)
+                         + Math.abs(styles.borderLeft) + Math.abs(styles.borderRight)
+                         + Math.abs(styles.marginLeft) + Math.abs(styles.marginRight);
+                    height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom)
+                        + Math.abs(styles.borderTop) + Math.abs(styles.borderBottom)
+                        + Math.abs(styles.marginTop) + Math.abs(styles.marginBottom);
+                }
+
+                move(nodes.lines.top, 0, top);
+                move(nodes.lines.right, left+width, 0);
+                move(nodes.lines.bottom, 0, top+height);
+                move(nodes.lines.left, left, 0)
             }
-            else if (boxFrame == "padding")
+
+            var body = getNonFrameBody(element);
+            if (!body)
+                return this.unhighlight(context);
+
+            var needsAppend = !nodes.offset.parentNode
+                || nodes.offset.parentNode.ownerDocument != body.ownerDocument;
+
+            if (needsAppend)
             {
-                left += Math.abs(styles.marginLeft) + Math.abs(styles.borderLeft);
-                top += Math.abs(styles.marginTop) + Math.abs(styles.borderTop);
-                width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight);
-                height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom);
-            }
-            else if (boxFrame == "border")
-            {
-                left += Math.abs(styles.marginLeft);
-                top += Math.abs(styles.marginTop);
-                width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight)
-                     + Math.abs(styles.borderLeft) + Math.abs(styles.borderRight);
-                height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom)
-                    + Math.abs(styles.borderTop) + Math.abs(styles.borderBottom);
-            }
-            else if (boxFrame == "margin")
-            {
-                width += Math.abs(styles.paddingLeft) + Math.abs(styles.paddingRight)
-                     + Math.abs(styles.borderLeft) + Math.abs(styles.borderRight)
-                     + Math.abs(styles.marginLeft) + Math.abs(styles.marginRight);
-                height += Math.abs(styles.paddingTop) + Math.abs(styles.paddingBottom)
-                    + Math.abs(styles.borderTop) + Math.abs(styles.borderBottom)
-                    + Math.abs(styles.marginTop) + Math.abs(styles.marginBottom);
+                attachStyles(context, body);
+                body.appendChild(nodes.offset);
             }
 
-            move(nodes.lines.top, 0, top);
-            move(nodes.lines.right, left+width, 0);
-            move(nodes.lines.bottom, 0, top+height);
-            move(nodes.lines.left, left, 0)
-        }
-
-        var body = getNonFrameBody(element);
-        if (!body)
-            return this.unhighlight(context);
-
-        var needsAppend = !nodes.offset.parentNode
-            || nodes.offset.parentNode.ownerDocument != body.ownerDocument;
-
-        if (needsAppend)
-        {
-            attachStyles(context, body);
-            body.appendChild(nodes.offset);
-        }
-
-        if (showLines)
-        {
-            if (!nodes.lines.top.parentNode)
+            if (showLines)
             {
-                body.appendChild(nodes.parent);
+                if (!nodes.lines.top.parentNode)
+                {
+                    body.appendChild(nodes.parent);
+
+                    for (var line in nodes.lines)
+                        body.appendChild(nodes.lines[line]);
+                }
+            }
+            else if (nodes.lines.top.parentNode)
+            {
+                body.removeChild(nodes.parent);
 
                 for (var line in nodes.lines)
-                    body.appendChild(nodes.lines[line]);
+                    body.removeChild(nodes.lines[line]);
             }
         }
-        else if (nodes.lines.top.parentNode)
+        else
         {
-            body.removeChild(nodes.parent);
-
-            for (var line in nodes.lines)
-                body.removeChild(nodes.lines[line]);
+            var ihl = getImageMapHighlighter(context);
+            ihl.highlight(element, true);
         }
     },
 
