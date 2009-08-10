@@ -860,8 +860,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     dump: function(message, parentNode, index)
     {
-        //var panelNode = parentNode.parentNode.parentNode;
-        //var scrolledToBottom = isScrolledToBottom(panelNode);
+        var panelNode = parentNode.parentNode.parentNode;
+        var scrolledToBottom = isScrolledToBottom(panelNode);
 
         // Set message index
         if (index)
@@ -882,8 +882,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         if (row.wrappedJSObject)
             row.wrappedJSObject.repObject = message;
 
-        //if (scrolledToBottom)
-        //    scrollToBottom(panelNode);
+        if (scrolledToBottom)
+            scrollToBottom(panelNode);
     },
 
     dumpSeparator: function(parentNode)
