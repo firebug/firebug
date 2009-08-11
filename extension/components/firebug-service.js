@@ -730,6 +730,9 @@ FirebugService.prototype =
     {
         jsd.functionHook = null; // undo hookCalls()
 
+        if (!debuggr.jsdFilters)
+           return;
+
         for (var i = 0; i < debuggr.jsdFilters.length; i++)
         {
             jsd.removeFilter(debuggr.jsdFilters[i]);
