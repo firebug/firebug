@@ -174,8 +174,8 @@ var TraceConsole =
     // Interface to the output nodes, going by the name outputNodes
     getScrollingNode: function()
     {
-        window.dump(FBL.getStackDump());
-        window.dump("traceConsole getScrollingNode this.scrollingNode "+this.scrollingNode+"\n");
+        //window.dump(FBL.getStackDump());
+        //window.dump("traceConsole getScrollingNode this.scrollingNode "+this.scrollingNode+"\n");
 
         return this.scrollingNode;
     },
@@ -185,8 +185,8 @@ var TraceConsole =
     },
     getTargetNode: function()
     {
-        window.dump(FBL.getStackDump());
-        window.dump("traceConsole getTargetgNode this.scrollingNode "+this.logs.firstChild+"\n");
+        //window.dump(FBL.getStackDump());
+        //window.dump("traceConsole getTargetgNode this.scrollingNode "+this.logs.firstChild+"\n");
 
         return this.logs.firstChild;
     },
