@@ -51,7 +51,7 @@ var TraceConsole =
         // Initialize root node of the trace-console window.
         var consoleFrame = document.getElementById("consoleFrame");
         this.consoleNode = consoleFrame.contentDocument.getElementById("panelNode-traceConsole");
-        Firebug.TraceModule.CommonBaseUI.initializeContent(this.consoleNode, this.prefDomain,
+        Firebug.TraceModule.CommonBaseUI.initializeContent(this.consoleNode, this, this.prefDomain,
             FBL.bind(this.initializeContent, this));
 
         gFindBar = document.getElementById("FindToolbar");
@@ -170,6 +170,27 @@ var TraceConsole =
         }
     },
 
+    // ********************************************************************************************
+    // Interface to the output nodes, going by the name outputNodes
+    getScrollingNode: function()
+    {
+        window.dump(FBL.getStackDump());
+        window.dump("traceConsole getScrollingNode this.scrollingNode "+this.scrollingNode+"\n");
+
+        return this.scrollingNode;
+    },
+    setScrollingNode: function(node)
+    {
+        this.scrollingNode = node;
+    },
+    getTargetNode: function()
+    {
+        window.dump(FBL.getStackDump());
+        window.dump("traceConsole getTargetgNode this.scrollingNode "+this.logs.firstChild+"\n");
+
+        return this.logs.firstChild;
+    },
+    // ********************************************************************************************
     // Message dump
     dump: function(message)
     {
@@ -177,13 +198,12 @@ var TraceConsole =
         for (var i=0; i<this.modules.length; ++i)
             this.modules[i].onDump(message);
 
-        Firebug.TraceModule.dump(message, this.logs.firstChild);
+        Firebug.TraceModule.dump(message, this);
     },
 
     dumpSeparator: function()
     {
-        Firebug.TraceModule.MessageTemplate.dumpSeparator(
-            this.logs.firstChild);
+        Firebug.TraceModule.MessageTemplate.dumpSeparator(this);
     },
 
     // Trace console toolbar commands
@@ -194,7 +214,7 @@ var TraceConsole =
 
     onSeparateConsole: function()
     {
-        Firebug.TraceModule.MessageTemplate.dumpSeparator(this.logs.firstChild);
+        Firebug.TraceModule.MessageTemplate.dumpSeparator(this);
     },
 
     onSaveToFile: function()

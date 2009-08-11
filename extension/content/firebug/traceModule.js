@@ -268,7 +268,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         dispatch(this.fbListeners, "onDump", [message]);
     },
 
-    dump: function(message, parentNode)
+    dump: function(message, outputNodes)
     {
         // xxxHonza: find better solution for checking an ERROR messages
         // (setup some rules).
@@ -280,7 +280,7 @@ Firebug.TraceModule = extend(Firebug.Module,
             message.type = "DBG_ERRORS";
         }
 
-        Firebug.TraceModule.MessageTemplate.dump(message, parentNode);
+        Firebug.TraceModule.MessageTemplate.dump(message, outputNodes);
     },
 });
 
@@ -291,7 +291,7 @@ Firebug.TraceModule.CommonBaseUI = {
         this.optionsController.removeObserver();
     },
 
-    initializeContent: function(parentNode, prefDomain, callback)
+    initializeContent: function(parentNode, outputNodes, prefDomain, callback)
     {
         var doc = parentNode.ownerDocument;
 
@@ -301,13 +301,16 @@ Firebug.TraceModule.CommonBaseUI = {
 
         // This IFRAME is the container for all logs.
         var logTabIframe = FBL.getElementByClass(parentNode, "traceInfoLogsFrame");
-        var frameDoc = logTabIframe.contentWindow.document;
-        var rootNode = frameDoc.getElementById("traceLogContent");
-        this.rootNode = rootNode;
+        var self = this;
         logTabIframe.addEventListener("load", function(event)
         {
+            var frameDoc = logTabIframe.contentWindow.document;
+
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/panelbase.css"));
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceconsole.css"));
+
+            var rootNode = frameDoc.getElementById("traceLogContent");
+            outputNodes.setScrollingNode(rootNode);
 
             var logNode = Firebug.TraceModule.MessageTemplate.createTable(rootNode);
 
@@ -353,11 +356,6 @@ Firebug.TraceModule.CommonBaseUI = {
         rep.selectTabByName(parentNode, "Logs");
 
         this.optionsController.addObserver();
-    },
-
-    getScrollingNode: function()
-    {
-        return this.rootNode;
     },
 
 };
@@ -865,20 +863,21 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         return HelperDomplate.replace(this.tableTag, {}, parentNode, this);
     },
 
-    dump: function(message, parentNode, index)
+    dump: function(message, outputNodes, index)
     {
-        var scrollingNode = this.getScrollingNode();
+        var scrollingNode = outputNodes.getScrollingNode();
         var scrolledToBottom = isScrolledToBottom(scrollingNode);
 
+        var targetNode = outputNodes.getTargetNode();
         // Set message index
         if (index)
             message.index = index;
         else
-            message.index = parentNode.childNodes.length;
+            message.index = targetNode.childNodes.length;
 
         // Insert log into the console.
         var row = HelperDomplate.insertRows(this.rowTag, {message: message},
-            parentNode, this)[0];
+            targetNode, this)[0];
 
         message.row = row;
 
@@ -893,16 +892,17 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             scrollToBottom(scrollingNode);
     },
 
-    dumpSeparator: function(parentNode)
+    dumpSeparator: function(outputNodes)
     {
-        var panelNode = this.getScrollingNode();
+        var panelNode = outputNodes.getScrollingNode();
         var scrolledToBottom = isScrolledToBottom(panelNode);
 
+        var targetNode = outputNodes.getTargetNode();
         var fakeMessage = {};
-        fakeMessage.index = parentNode.childNodes.length;
+        fakeMessage.index = targetNode.childNodes.length;
 
         var row = HelperDomplate.insertRows(this.separatorTag, {message: fakeMessage},
-            parentNode, this)[0];
+            targetNode, this)[0];
 
         if (scrolledToBottom)
             scrollToBottom(panelNode);
