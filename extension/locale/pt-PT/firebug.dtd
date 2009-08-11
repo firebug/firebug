@@ -1,0 +1,50 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Fechar">
+<!ENTITY firebug.View "Ver">
+<!ENTITY firebug.Help "Ajuda">
+<!ENTITY firebug.Vertical "Molduras na Vertical">
+<!ENTITY firebug.Run "Executar">
+<!ENTITY firebug.Copy "Copiar">
+<!ENTITY firebug.CopyBookmarklet "Copiar o script como um bookmarklet.">
+<!ENTITY firebug.Options "Opções">
+<!ENTITY firebug.TextSize "Tamanho do Texto">
+<!ENTITY firebug.IncreaseTextSize "Aumentar Tamanho do Texto">
+<!ENTITY firebug.DecreaseTextSize "Reduzir Tamanho do Texto">
+<!ENTITY firebug.NormalTextSize "Tamanho do Texto Normal">
+<!ENTITY firebug.ShowTooltips "Mostrar Dicas de Antevisão">
+<!ENTITY firebug.ShadeBoxModel "Sombrear o Modelo de Caixas">
+<!ENTITY firebug.Website "Sítio do Firebug...">
+<!ENTITY firebug.Documentation "Documentação...">
+<!ENTITY firebug.KeyShortcuts "Atalhos de Teclado...">
+<!ENTITY firebug.Forums "Grupo de Discussão...">
+<!ENTITY firebug.Issues "Reportar Erros...">
+<!ENTITY firebug.Donate "Contribuir...">
+<!ENTITY firebug.About "Sobre...">
+<!ENTITY firebug.AlwaysOpenInWindow "Abrir Sempre numa Nova Janela">
+<!ENTITY firebug.ShowFirebug "Abrir o Firebug">
+<!ENTITY firebug.DetachFirebug "Abrir o Firebug numa Nova Janela">
+<!ENTITY firebug.OpenWith "Abrir no Editor">
+<!ENTITY firebug.CloseFirebug "Fechar o Firebug">
+<!ENTITY firebug.Permissions "Sítios...">
+<!ENTITY firebug.ConfigureEditors "Configurar Editores">
+<!ENTITY firebug.CommandLine "Linha de Comandos">
+<!ENTITY firebug.Search "Procurar">
+<!ENTITY firebug.Continue "Continuar (F8)">
+<!ENTITY firebug.StepOver "Passo por Cima (F10)">
+<!ENTITY firebug.StepInto "Passo para Dentro (F11)">
+<!ENTITY firebug.StepOut "Passo para Fora">
+<!ENTITY firebug.BreakOnErrors "Parar em Erros">
+<!ENTITY firebug.Inspect "Inspeccionar">
+<!ENTITY firebug.InspectElement "Inspeccionar Elemento">
+<!ENTITY firebug.InspectTooltip "Clique num elemento da página para inspeccionar">
+<!ENTITY firebug.Edit "Editar">
+<!ENTITY firebug.EditHTMLTooltip "Editar este HTML">
+<!ENTITY firebug.EditCSSTooltip "Editar esta folha de estilos">
+<!ENTITY firebug.Profile "Perfil">
+<!ENTITY firebug.ProfileScript "Analisar perfil do JavaScript">
+<!ENTITY firebug.Clear "Limpar">
+<!ENTITY firebug.ClearConsole "Limpar Consola">
+<!ENTITY firebug.ClearTooltip "Limpar a consola">
+<!ENTITY firebug.All "Tudo">
+<!ENTITY firebug.Images "Imagens">
+<!ENTITY firebug.Flash "Flash">
