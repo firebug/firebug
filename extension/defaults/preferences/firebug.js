@@ -1,5 +1,6 @@
 
 // Global
+pref("javascript.options.strict.debug", false);
 pref("extensions.firebug.defaultPanelName", "html");
 pref("extensions.firebug.throttleMessages", true);
 pref("extensions.firebug.textSize", 0);
