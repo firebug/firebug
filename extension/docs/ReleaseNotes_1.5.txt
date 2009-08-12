@@ -1,6 +1,6 @@
 Release Notes for Firebug 1.5
-Firebug 1.5 is Firebug 1.4 with additions by John J. Barton, Jan Odvarko Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins.
-Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins, and Templarian
+Firebug 1.5 is Firebug 1.4 with additions by John J. Barton, Jan Odvarko Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins, Rob Campbell.
+Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins, Rob Campbell and Templarian
 Firebug 1.3 is Firebug 1.2 with additions by John J. Barton, Jan Odvarko.
 Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
@@ -17,6 +17,7 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
 == Bug Fixes ==
  * issue 64: Displaying TextNodes with their content directly causes debugging headache
  * Issue 520: Firebug doesn't reload modified iFrame scripts until parent frame is reloaded;
+ * Issue 568: Computed style and CSS rules should be separate tabs instead of an option
  * Issue 872: JS Errors in IFrame with 1.2.0b3.
  * Issue 882: console.log() reports wrong source file and line number
  * Issue 1282:  Editing boolean var in watch panel changes it to a string
@@ -51,7 +52,9 @@ Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
  * Issue 2039: Removing a condition removes the breakpoint; contribution by http://code.google.com/u/@VBlTRV1WARJNXAd%2F/
  * Issue 2042: "Reload to activate window console" doesn't go away
  * Issue 2049: Firebug opens on mouse down (it does not wait for mouse up)
- * Issue 2054:       update close icons
+ * Issue 2054: update close icons
+ * Issue 2140: Add newly supported CSS features to CSS panes auto-completion
+ * Issue 2218: cleanup strict javascript warnings in Firebug code
 
  -------------
  Firebug 1.5a18
