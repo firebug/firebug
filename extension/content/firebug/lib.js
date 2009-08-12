@@ -3137,17 +3137,24 @@ this.parseURLEncodedText = function(text)
     var args = text.split("&");
     for (var i = 0; i < args.length; ++i)
     {
-        try {
-            var parts = args[i].split("=");
-            if (parts.length == 2)
+        try
+        {
+            var index = args[i].indexOf("=");
+            if (index != -1)
             {
-                if (parts[1].length > maxValueLength)
-                    parts[1] = this.$STR("LargeData");
+                var paramName = args[i].substring(0, index);
+                var paramValue = args[i].substring(index + 1);
 
-                params.push({name: decodeURIComponent(parts[0]), value: decodeURIComponent(parts[1])});
+                if (paramValue > maxValueLength)
+                    paramValue = this.$STR("LargeData");
+
+                params.push({name: decodeURIComponent(paramName),
+                    value: decodeURIComponent(paramValue)});
             }
             else
-                params.push({name: decodeURIComponent(parts[0]), value: ""});
+            {
+                params.push({name: decodeURIComponent(paramName), value: ""});
+            }
         }
         catch (e)
         {
