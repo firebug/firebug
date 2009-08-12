@@ -1443,7 +1443,7 @@ function bindFixed()
 // behave erratically when typing, and the only solution I've found is to delay
 // the initialization of HTML Validator by overriding this function with a timeout.
 // XXXrobc Do we still need this? Does this extension even exist anymore?
-if (top.TidyBrowser)
+if (top.hasOwnProperty('TidyBrowser'))
 {
     var prev = TidyBrowser.prototype.updateStatusBar;
     TidyBrowser.prototype.updateStatusBar = function()
