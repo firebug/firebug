@@ -441,12 +441,12 @@ top.Firebug =
                 $STR("Total_Firebug"):$STR("Total_Firebugs"));
         }
 
-        if (Firebug.Activation.allPagesActivation == "on")
+        if (Firebug.allPagesActivation == "on")
         {
             var label = $STR("enablement.on");
             tooltip += "\n"+label+" "+$STR("enablement.for all pages");
         }
-        if (Firebug.Activation.allPagesActivation == "off")
+        if (Firebug.allPagesActivation == "off")
         {
             var label = $STR("enablement.off");
             tooltip += "\n"+label+" "+$STR("enablement.for all pages");
