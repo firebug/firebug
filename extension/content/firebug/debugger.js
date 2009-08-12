@@ -2186,6 +2186,27 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 var rep = Firebug.getRep(result);
                 var tag = rep.shortTag ? rep.shortTag : rep.tag;
 
+                if (FBTrace.DBG_STACK)
+                    FBTrace.sysout("populateInfoTip result is "+result, result);
+                try
+                {
+                    var propertyBinding = findObjectInScopeChain(context.currentFrame.scope, result);
+                    if (propertyBinding)
+                    {
+                        var scopeVars = propertyBinding.scope.getWrappedValue();
+                        if (!scopeVars.hasOwnProperty("toString"))
+                            propertyBinding.scopeName = scope.jsClassName;
+                        else
+                            propertyBinding.scopeName = scopeVars.toString();
+
+                        FBTrace.sysout("found object in scope chain "+propertyBinding.scopeName+"["+propertyBinding.prop+"]", propertyBinding);
+                    }
+                }
+                catch(exc)
+                {
+                    FBTrace.sysout("generateScope FAILS "+exc, exc);
+                }
+
                 tag.replace({object: result}, infoTip);
 
                 Firebug.chrome.contextMenuObject = result;  // for context menu select()
@@ -3703,6 +3724,85 @@ function getFrameContext(frame)
 {
     var win = getFrameScopeWindowAncestor(frame);
     return win ? TabWatcher.getContextByWindow(win) : null;
+}
+
+function eachScope(scope, processScopeFalseToAbort) {
+    var ret = [];
+    while (scope) {
+        var rc = processScopeFalseToAbort(scope);
+        if (rc)
+            ret.push(rc);
+        else
+            return false;
+        scope = scope.jsParent;
+    }
+    return ret;
+}
+
+function findObjectInScopeChain(newestScope, obj)
+{
+    var scopeInfo = {};
+    eachScope(newestScope, function findObjectInScopeThenAbort(scope)
+    {
+        var info;
+        // getWrappedValue will not contain any variables for closure
+        // scopes, so we want to special case this to get all variables
+        // in all cases.
+        if (scope.jsClassName == "Call")
+            info = findObjectInCallScope(scope, obj);
+        else
+            info = findObjectInNonCallScope(scope, obj);
+
+        if (info)
+        {
+            scopeInfo = info;
+            return false; // done, no more scopes.
+        }
+        return true;
+    });
+
+    if (scopeInfo.hasOwnProperty('scope'))
+        return scopeInfo;
+}
+
+function findObjectInCallScope(scope, obj)
+{
+    var listValue = {value: null}, lengthValue = {value: 0};
+    scope.getProperties(listValue, lengthValue);
+
+    for (var i = 0; i < lengthValue.value; ++i)
+    {
+        var prop = listValue.value[i];
+        var name = prop.name.getWrappedValue();
+        if (ignoreVars[name] == 1)
+        {
+            if (FBTrace.DBG_DOM)
+                FBTrace.sysout("dom.generateScopeChain: ignoreVars: " + name);
+            continue;
+        }
+        var candidate = prop.value.getWrappedValue();
+        if (candidate == obj)
+            return {prop: name, scope: scope, object: obj};
+    }
+}
+
+function findObjectInNonCallScope(scope, obj)
+{
+    var scopeVars = scope.getWrappedValue();
+    if (scopeVars && scopeVars.hasOwnProperty)
+    {
+        for (var p in scopeVars)
+        {
+            if (scopeVars[p] == obj)
+                return {prop: p, scope: scope, object: obj};
+        }
+    }
+    else
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("dom .generateScopeChain: bad scopeVars");
+    }
+    return false;
 }
 
 function cacheAllScripts(context)
