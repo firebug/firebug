@@ -5834,7 +5834,7 @@ this.cssInfo =
     "clear": ["clear", "none"],
     "clip": ["auto"],
     "color": ["color", "systemColor"],
-    "content": ["content"],
+    "content": ["content", "none"],
     "counter-increment": ["none"],
     "counter-reset": ["none"],
     "cursor": ["cursor", "none"],
@@ -5853,6 +5853,7 @@ this.cssInfo =
     "font-weight": ["fontWeight"],
 
     "height": ["auto"],
+    "ime-mode": ["imeMode", "auto"],
     "left": ["auto"],
     "letter-spacing": [],
     "line-height": [],
@@ -5871,8 +5872,10 @@ this.cssInfo =
     "marker-offset": ["auto"],
     "min-height": ["none"],
     "max-height": ["none"],
-    "min-width": ["none"],
-    "max-width": ["none"],
+    "min-width": ["width", "none"],
+    "max-width": ["width", "none"],
+
+    "opacity": [],
 
     "outline": ["borderStyle", "color", "systemColor", "none"],
     "outline-color": ["color", "systemColor"],
@@ -5896,17 +5899,20 @@ this.cssInfo =
     "text-align": ["textAlign"],
     "text-decoration": ["textDecoration", "none"],
     "text-indent": [],
+    "text-rendering": ["textRendering", "auto"],
     "text-shadow": [],
     "text-transform": ["textTransform", "none"],
     "top": ["auto"],
     "unicode-bidi": [],
     "vertical-align": ["verticalAlign"],
     "white-space": ["whiteSpace"],
-    "width": ["auto"],
+    "width": ["width", "auto"],
     "word-spacing": [],
+    "word-wrap": ["wordWrap"],
     "z-index": [],
 
     "-moz-appearance": ["mozAppearance"],
+    "-moz-border-image": ["mozBorderImage", "thickness", "none"],
     "-moz-border-radius": [],
     "-moz-border-radius-bottomleft": [],
     "-moz-border-radius-bottomright": [],
@@ -5916,14 +5922,22 @@ this.cssInfo =
     "-moz-border-right-colors": ["color", "systemColor"],
     "-moz-border-bottom-colors": ["color", "systemColor"],
     "-moz-border-left-colors": ["color", "systemColor"],
+    "-moz-border-start": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
+    "-moz-border-end": ["borderStyle", "borderCollapse", "color", "systemColor", "none"],
+    "-moz-border-start-color": ["color", "systemColor"],
+    "-moz-border-end-color": ["color", "systemColor"],
+    "-moz-border-start-style": ["borderStyle"],
+    "-moz-border-end-style": ["borderStyle"],
+    "-moz-border-start-width": ["thickness"],
+    "-moz-border-end-width": ["thickness"],
     "-moz-box-align": ["mozBoxAlign"],
     "-moz-box-direction": ["mozBoxDirection"],
     "-moz-box-flex": [],
     "-moz-box-ordinal-group": [],
     "-moz-box-orient": ["mozBoxOrient"],
     "-moz-box-pack": ["mozBoxPack"],
+    "-moz-box-shadow": ["mozBoxShadow", "none"],
     "-moz-box-sizing": ["mozBoxSizing"],
-    "-moz-opacity": [],
     "-moz-user-focus": ["userFocus", "none"],
     "-moz-user-input": ["userInput"],
     "-moz-user-modify": [],
@@ -5934,8 +5948,14 @@ this.cssInfo =
     "-moz-binding": [],
     "-moz-column-count": [],
     "-moz-column-gap": [],
+    "-moz-column-rule": ["thickness", "borderStyle", "color", "systemColor"],
+    "-moz-column-rule-width": ["thickness"],
+    "-moz-column-rule-style": ["borderStyle"],
+    "-moz-column-rule-color": ["color",  "systemColor"],
     "-moz-column-width": [],
-    "-moz-image-region": []
+    "-moz-image-region": [],
+    "-moz-transform": ["mozTransformFunction", "none"],
+    "-moz-transform-origin": ["bgPosition"]
 };
 
 this.inheritedStyleNames =
@@ -5961,6 +5981,7 @@ this.inheritedStyleNames =
     "list-style-image": 1,
     "list-style-position": 1,
     "list-style-type": 1,
+    "opacity": 1,
     "quotes": 1,
     "text-align": 1,
     "text-decoration": 1,
@@ -5968,7 +5989,8 @@ this.inheritedStyleNames =
     "text-shadow": 1,
     "text-transform": 1,
     "white-space": 1,
-    "word-spacing": 1
+    "word-spacing": 1,
+    "word-wrap": 1
 };
 
 this.cssKeywords =
@@ -6052,6 +6074,7 @@ this.cssKeywords =
         "-moz-fieldtext",
         "-moz-workspace",
         "-moz-visitedhyperlinktext",
+        "-moz-nativehyperlinktext",
         "-moz-use-text-color"
     ],
 
@@ -6529,7 +6552,10 @@ this.cssKeywords =
     [
         "normal",
         "pre",
-        "nowrap"
+        "nowrap",
+        "pre-wrap",
+        "pre-line",
+        "inherit"
     ],
 
     "verticalAlign":
@@ -6602,6 +6628,63 @@ this.cssKeywords =
         "start",
         "center",
         "end"
+    ],
+
+    "mozBoxShadow":
+    [
+        "inset"
+    ],
+
+    "mozBorderImage":
+    [
+        "stretch",
+        "round",
+        "repeat"
+    ],
+
+    "mozTransformFunction":
+    [
+        "matrix",
+        "rotate",
+        "scale",
+        "scaleX",
+        "scaleY",
+        "skew",
+        "skewX",
+        "skewY",
+        "translate",
+        "translateX",
+        "translateY"
+    ],
+
+    "width":
+    [
+        "-moz-max-content",
+        "-moz-min-content",
+        "-moz-fit-content",
+        "-moz-available"
+    ],
+
+    "imeMode":
+    [
+        "normal",
+        "active",
+        "inactive",
+        "disabled"
+    ],
+
+    "textRendering":
+    [
+        "optimizeSpeed",
+        "optimizeLegibility",
+        "geometricPrecision"
+    ],
+
+    "wordWrap":
+    [
+        "normal",
+        "break-word",
+        "inherit"
     ]
 };
 
