@@ -139,8 +139,10 @@ categoryManager.addCategoryEntry("strings_firebug",
 
 top.Firebug =
 {
-    version: "1.4",
+    version: "1.5",
 
+    // Adding to remove strict warning, see chrome.js line 1445
+    TidyBrowser: false,
     dispatchName: "Firebug",
     module: modules,
     panelTypes: panelTypes,

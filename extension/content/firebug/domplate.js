@@ -490,6 +490,11 @@ DomplateTag.prototype =
                 path[path.length-1] += '+1';
         }
         path.pop();
+    },
+    
+    getContext: function()
+    {
+        return this.context;
     }
 };
 
@@ -872,7 +877,7 @@ var Renderer =
     renderHTML: function(args, outputs, self)
     {
         var code = [];
-        var markupArgs = [code, this.tag.context, args, outputs];
+        var markupArgs = [code, this.tag.getContext(), args, outputs];
         markupArgs.push.apply(markupArgs, this.tag.markupArgs);
         this.tag.renderMarkup.apply(self ? self : this.tag.subject, markupArgs);
         return code.join("");
@@ -924,7 +929,8 @@ var Renderer =
                 ++offset;
         }
 
-        var domArgs = [firstRow, this.tag.context, offset];
+        // strict warning: this.tag.context undefined
+        var domArgs = [firstRow, this.tag.getContext(), offset];
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
 

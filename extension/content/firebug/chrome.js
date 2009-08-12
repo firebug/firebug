@@ -1442,6 +1442,7 @@ function bindFixed()
 // the HTML Validator extension and Firebug are installed.  It causes the keyboard to
 // behave erratically when typing, and the only solution I've found is to delay
 // the initialization of HTML Validator by overriding this function with a timeout.
+// XXXrobc Do we still need this? Does this extension even exist anymore?
 if (top.TidyBrowser)
 {
     var prev = TidyBrowser.prototype.updateStatusBar;
