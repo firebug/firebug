@@ -1,0 +1,12 @@
+<!ENTITY editors.Description "Nastavljeni Firebug urejevalniki:">
+<!ENTITY editors.NameColumn "Urejevalniki">
+<!ENTITY editors.ExecutableColumn "Izvršilne datoteke">
+<!ENTITY editors.ParamsColumn "Ukazi ob zagonu">
+<!ENTITY add.label "dodaj">
+<!ENTITY remove.label "Odstrani">
+<!ENTITY change.label "Spremeni">
+<!ENTITY close.label "Zapri">
+<!ENTITY browse.label "Prebrskaj...">
+<!ENTITY changeEditor.Name "Ime:">
+<!ENTITY changeEditor.Executable "Izvršilna datoteka:">
+<!ENTITY changeEditor.CmdLine "Argumenti:">
