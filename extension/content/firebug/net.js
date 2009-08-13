@@ -831,6 +831,11 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 var file = newFileData[i].file;
                 row.repObject = file;
                 file.row = row;
+
+                // Allow customization of request entries in the list. A row is represented
+                // by <TR> HTML element.
+                dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
+
                 row = row.nextSibling;
             }
         }
