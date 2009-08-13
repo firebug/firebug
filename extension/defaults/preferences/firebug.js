@@ -141,6 +141,7 @@ pref("extensions.firebug.DBG_SHORTCUTS", false);    // Keyboard shortcuts.      
 pref("extensions.firebug.DBG_A11Y", false);         // a11y                                      /*@explore*/
 pref("extensions.firebug.DBG_LOCALE", false);       // localization, missing strings             /*@explore*/
 pref("extensions.firebug.DBG_INFOTIP", false);      // popup info tip in panels                  /*@explore*/
+pref("extensions.firebug.DBG_ANNOTATIONS", false);  // Page annotations service                  /*@explore*/
 
 //Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");

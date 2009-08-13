@@ -29,7 +29,6 @@ const Ci = Components.interfaces;
 Firebug.Activation = extend(Firebug.Module,
 {
     dispatchName: "activation",
-    annotationName: "firebug/history",
 
     initializeUI: function()  // called once
     {
@@ -37,12 +36,11 @@ Firebug.Activation = extend(Firebug.Module,
 
         TabWatcher.addListener(this.TabWatcherListener);
 
-        this.annotationSvc = Cc["@mozilla.org/browser/annotation-service;1"]
-            .getService(Ci.nsIAnnotationService);
+        // Create annotation service.
+        this.annotationSvc = Cc["@joehewitt.com/firebug-annotation-service;1"]
+            .getService(Ci.nsISupports).wrappedJSObject;
 
-        this.privateBrowsingsSvc = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService);
-        this.expires = this.annotationSvc.EXPIRE_NEVER;
-
+        // Update option menu item.
         this.updateAllPagesActivation();
     },
 
@@ -51,6 +49,8 @@ Firebug.Activation = extend(Firebug.Module,
         Firebug.Module.shutdown.apply(this, arguments);
 
         TabWatcher.removeListener(this.TabWatcherListener);
+
+        this.annotationSvc.flush();
     },
 
     convertToURIKey: function(url)  // process the URL to canonicalize it. Need not be reversible.
@@ -113,7 +113,7 @@ Firebug.Activation = extend(Firebug.Module,
             if (!uri)
                 return false;
 
-            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri, this.annotationName);
+            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri);
 
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation +
@@ -143,7 +143,7 @@ Firebug.Activation = extend(Firebug.Module,
 
                         if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
                         {
-                            hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI, this.annotationName);
+                            hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI);
                             if (hasAnnotation) // and the source page was annotated.
                             {
                                 var srcShow = this.checkAnnotation(browser, srcURI);
@@ -184,7 +184,7 @@ Firebug.Activation = extend(Firebug.Module,
 
     checkAnnotation: function(browser, uri)
     {
-        var annotation = this.annotationSvc.getPageAnnotation(uri, this.annotationName);
+        var annotation = this.annotationSvc.getPageAnnotation(uri);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
@@ -208,22 +208,11 @@ Firebug.Activation = extend(Firebug.Module,
         // mark this URI as firebugged
         var uri = this.convertToURIKey(browser.currentURI.spec);
         if (uri)
-        {
-            if (this.isPrivateBrowsing())
-            {
-                this.warnPrivateBrowsing();
-                return;
-            }
-            else
-            {
-                this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation,
-                        null, this.expires);
-            }
-        }
+            this.annotationSvc.setPageAnnotation(uri, annotation);
 
         if (FBTrace.DBG_ACTIVATION)
         {
-            if (!this.annotationSvc.pageHasAnnotation(uri, this.annotationName))
+            if (!this.annotationSvc.pageHasAnnotation(uri))
                 FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
             FBTrace.sysout("Firebug.Activation.watchBrowser tagged "+uri.spec+" with: "+annotation);
         }
@@ -236,20 +225,14 @@ Firebug.Activation = extend(Firebug.Module,
         if (!uri)
             return;
 
-        if (this.isPrivateBrowsing())
-        {
-            this.warnPrivateBrowsing();
-            return;
-        }
-
         if (userCommands)  // then mark to not open virally.
         {
             var annotation = "firebugged.closed";
-            this.annotationSvc.setPageAnnotation(uri, this.annotationName, annotation, null, this.expires);
+            this.annotationSvc.setPageAnnotation(uri, annotation);
         }
         else
         {
-            this.annotationSvc.removePageAnnotation(uri, this.annotationName); // unmark this URI
+            this.annotationSvc.removePageAnnotation(uri); // unmark this URI
 
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("Firebug.Activation.unwatchBrowser untagged "+uri.spec);
@@ -258,26 +241,15 @@ Firebug.Activation = extend(Firebug.Module,
 
     clearAnnotations: function()
     {
-        var self =this;
-        this.iterateAnnotations(function remove(uri)
-        {
-            self.annotationSvc.removePageAnnotation(uri, self.annotationName); // unmark this URI
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Firebug.Activation.clearAnnotations untagged "+uri.spec);
-        });
+        this.annotationSvc.clear();
     },
 
     iterateAnnotations: function(fn)  // stops at the first fn(uri) that returns a true value
     {
-        var resultCount = {};
-        var results = [];
-        var uris = this.annotationSvc.getPagesWithAnnotation(this.annotationName,
-            resultCount, results);
-
-        for (var i = 0; i < uris.length; i++)
+        var annotations = this.annotationSvc.getAnnotations(this.annotationName);
+        for (var uri in annotations)
         {
-            var uri = uris[i];
-            var rc = fn(uri);
+            var rc = fn(uri, annotations[uri]);
             if (rc)
                 return rc;
         }
@@ -359,16 +331,6 @@ Firebug.Activation = extend(Firebug.Module,
         Firebug.closeFirebug();
         this.clearAnnotations();  // and the past pages with contexts are forgotten.
     },
-
-    isPrivateBrowsing: function()
-    {
-        return this.privateBrowsingsSvc.privateBrowsingEnabled;
-    },
-
-    warnPrivateBrowsing: function()
-    {
-        Firebug.Console.logFormatted(["Firebug cannot save activation state in Firefox Private Browsing mode"], FirebugContext, "error", true);
-    },
 });
 
 // ************************************************************************************************
@@ -384,7 +346,7 @@ Firebug.Activation.TabWatcherListener =
     {
         Firebug.Activation.unwatchBrowser(browser, userCommands);
     }
-}
+};
 
 // ************************************************************************************************
 
