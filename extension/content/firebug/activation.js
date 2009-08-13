@@ -37,12 +37,19 @@ Firebug.Activation = extend(Firebug.Module,
 
         TabWatcher.addListener(this.TabWatcherListener);
 
-        // Create annotation service.
-        this.annotationSvc = Cc["@joehewitt.com/firebug-annotation-service;1"]
-            .getService(Ci.nsISupports).wrappedJSObject;
-
         // Update option menu item.
         this.updateAllPagesActivation();
+    },
+
+    getAnnotationService: function()
+    {
+        if(!this.annotationSvc)
+        {
+            // Create annotation service.
+            this.annotationSvc = Cc["@joehewitt.com/firebug-annotation-service;1"]
+                                    .getService(Ci.nsISupports).wrappedJSObject;
+        }
+        return this.annotationSvc;
     },
 
     shutdown: function()
@@ -51,7 +58,7 @@ Firebug.Activation = extend(Firebug.Module,
 
         TabWatcher.removeListener(this.TabWatcherListener);
 
-        this.annotationSvc.flush();
+        this.getAnnotationService().flush();
     },
 
     convertToURIKey: function(url, sameOrigin)  // process the URL to canonicalize it. Need not be reversible.
@@ -114,7 +121,7 @@ Firebug.Activation = extend(Firebug.Module,
             if (!uri)
                 return false;
 
-            var hasAnnotation = this.annotationSvc.pageHasAnnotation(uri);
+            var hasAnnotation = this.getAnnotationService().pageHasAnnotation(uri);
 
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("shouldCreateContext hasAnnotation "+hasAnnotation +
@@ -144,7 +151,7 @@ Firebug.Activation = extend(Firebug.Module,
 
                         if (srcURI.schemeIs("file") || (dstURI.host == srcURI.host) ) // and it's on the same domain
                         {
-                            hasAnnotation = this.annotationSvc.pageHasAnnotation(srcURI);
+                            hasAnnotation = this.getAnnotationService().pageHasAnnotation(srcURI);
                             if (hasAnnotation) // and the source page was annotated.
                             {
                                 var srcShow = this.checkAnnotation(browser, srcURI);
@@ -185,7 +192,7 @@ Firebug.Activation = extend(Firebug.Module,
 
     checkAnnotation: function(browser, uri)
     {
-        var annotation = this.annotationSvc.getPageAnnotation(uri);
+        var annotation = this.getAnnotationService().getPageAnnotation(uri);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("shouldCreateContext read back annotation "+annotation+" for uri "+uri.spec);
@@ -210,6 +217,7 @@ Firebug.Activation = extend(Firebug.Module,
 
     unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
     {
+    	var uri = browser.currentURI.spec;
         if (userCommands)  // then mark to not open virally.
             this.setPageAnnotation(uri, "firebugged.closed");
         else
@@ -218,20 +226,20 @@ Firebug.Activation = extend(Firebug.Module,
 
     clearAnnotations: function()
     {
-        this.annotationSvc.clear();
+        this.getAnnotationService().clear();
     },
 
     setPageAnnotation: function(currentURI, annotation)
     {
         var uri = this.convertToURIKey(currentURI, Firebug.activateSameOrigin);
         if (uri)
-            this.annotationSvc.setPageAnnotation(uri, annotation);
+            this.getAnnotationService().setPageAnnotation(uri, annotation);
 
         if (Firebug.activateSameOrigin)
         {
             uri = this.convertToURIKey(currentURI, false);
             if (uri)
-                this.annotationSvc.setPageAnnotation(uri, annotation);
+                this.getAnnotationService().setPageAnnotation(uri, annotation);
         }
     },
 
@@ -239,13 +247,13 @@ Firebug.Activation = extend(Firebug.Module,
     {
         var uri = this.convertToURIKey(currentURI, Firebug.activateSameOrigin);
         if (uri)
-            this.annotationSvc.removePageAnnotation(uri);
+            this.getAnnotationService().removePageAnnotation(uri);
 
         if (Firebug.activateSameOrigin)
         {
             uri = this.convertToURIKey(currentURI, false);
             if (uri)
-                this.annotationSvc.removePageAnnotation(uri);
+                this.getAnnotationService().removePageAnnotation(uri);
         }
 
         if (FBTrace.DBG_ACTIVATION)
@@ -254,7 +262,7 @@ Firebug.Activation = extend(Firebug.Module,
 
     iterateAnnotations: function(fn)  // stops at the first fn(uri) that returns a true value
     {
-        var annotations = this.annotationSvc.getAnnotations(this.annotationName);
+        var annotations = this.getAnnotationService().getAnnotations(this.annotationName);
         for (var uri in annotations)
         {
             var rc = fn(uri, annotations[uri]);
