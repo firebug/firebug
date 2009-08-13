@@ -852,13 +852,19 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     search: function(text, reverse)
     {
+        if (!text)
+            return;
+
         var search;
         if (text == this.searchText && this.lastSearch)
             search = this.lastSearch;
         else
         {
             var doc = this.context.window.document;
-            search = this.lastSearch = new NodeSearch(text, doc, this.panelNode, this.ioBox);
+            if (Firebug.searchSelector)
+                search = this.lastSearch = new SelectorSearch(text, doc, this.panelNode, this.ioBox);
+            else
+                search = this.lastSearch = new NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
         var loopAround = search.find(reverse, Firebug.searchCaseSensitive);
@@ -869,6 +875,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
 
         return !search.noMatch;
+    },
+
+    getSearchOptionsMenuItems: function()
+    {
+        return [
+            optionMenu("search.html.CSS_Selector", "searchSelector")
+        ];
     },
 
     getDefaultSelection: function()
@@ -1566,12 +1579,7 @@ function NodeSearch(text, doc, panelNode, ioBox)
             var node = match.node;
             var nodeBox = this.openToNode(node, match.isValue);
 
-            setTimeout(bindFixed(function()
-            {
-                var reMatch = match.match;
-                this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
-                dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
-            }, this));
+            this.selectMatched(nodeBox, node, match, reverse);
         }
         else if (matchCount)
             return true;
@@ -1698,6 +1706,16 @@ function NodeSearch(text, doc, panelNode, ioBox)
         }
     };
 
+    this.selectMatched = function(nodeBox, node, match, reverse)
+    {
+        setTimeout(bindFixed(function()
+        {
+            var reMatch = match.match;
+            this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
+            dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+        }, this));
+    };
+
     this.selectNodeText = function(nodeBox, node, text, index, reverse, caseSensitive)
     {
         var row, range;
@@ -1734,8 +1752,60 @@ function NodeSearch(text, doc, panelNode, ioBox)
             return true;
         }
     };
+
 }
 
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+function SelectorSearch(text, doc, panelNode, ioBox)
+{
+    this.parent = new NodeSearch(text, doc, panelNode, ioBox);
+
+    this.find = this.parent.find;
+    this.reset = this.parent.reset;
+    this.openToNode = this.parent.openToNode;
+
+    try
+    {
+        // http://dev.w3.org/2006/webapi/selectors-api/
+        this.matchingNodes = doc.querySelectorAll(text);
+        this.matchIndex = 0;
+    }
+    catch(exc)
+    {
+        FBTrace.sysout("SelectorSearch FAILS "+exc, exc);
+    }
+
+    this.findNextMatch = function(reverse, caseSensitive)
+    {
+        if (!this.matchingNodes || !this.matchingNodes.length)
+            return undefined;
+
+        if (reverse)
+        {
+            if (this.matchIndex > 0)
+                return { node: this.matchingNodes[this.matchIndex--], isValue: false, match: "?XX?"};
+            else
+                return undefined;
+        }
+        else
+        {
+            if (this.matchIndex < this.matchingNodes.length)
+                return { node: this.matchingNodes[this.matchIndex++], isValue: false, match: "?XX?"};
+            else
+                return undefined;
+        }
+    };
+
+    this.selectMatched = function(nodeBox, node, match, reverse)
+    {
+        setTimeout(bindFixed(function()
+        {
+            ioBox.select(node, true, true);
+            dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
+        }, this));
+    };
+}
 // ************************************************************************************************
 
 Firebug.registerPanel(Firebug.HTMLPanel);

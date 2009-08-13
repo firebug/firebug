@@ -49,6 +49,7 @@ pref("extensions.firebug.highlightMutations", true);
 pref("extensions.firebug.expandMutations", false);
 pref("extensions.firebug.scrollToMutations", false);
 pref("extensions.firebug.shadeBoxModel", true);
+pref("extensions.firebug.searchSelector", false);
 
 // CSS
 pref("extensions.firebug.showUserAgentCSS", false);

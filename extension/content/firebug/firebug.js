@@ -55,7 +55,7 @@ const firebugURLs =
     donate: "http://www.getfirebug.com/contribute.html?product"
 };
 
-const prefNames =
+const prefNames =  // XXXjjb TODO distribute to modules
 [
     // Global
     "defaultPanelName", "throttleMessages", "textSize", "showInfoTips",
@@ -74,6 +74,7 @@ const prefNames =
     // HTML
     "showFullTextNodes", "showCommentNodes", "showWhitespaceNodes",
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
+    "searchSelector",
 
     // CSS
     "showUserAgentCSS",
@@ -450,6 +451,11 @@ top.Firebug =
         {
             var label = $STR("enablement.off");
             tooltip += "\n"+label+" "+$STR("enablement.for all pages");
+        }
+        else if (Firebug.allPagesActivation != "none")
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("Firebug.allPagesActivation has an unexpected value: "+Firebug.allPagesActivation);
         }
         // else allPagesActivation == "none" we don't show it.
 
