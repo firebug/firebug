@@ -3755,6 +3755,27 @@ function findObjectInScopeChain(newestScope, obj)
         return scopeInfo;
 }
 
+// HACK: this is a copy of the ignoreVars from dom.js FIXME
+const ignoreVars =
+{
+    "__firebug__": 1,
+    "eval": 1,
+
+    // We are forced to ignore Java-related variables, because
+    // trying to access them causes browser freeze
+    "java": 1,
+    "sun": 1,
+    "Packages": 1,
+    "JavaArray": 1,
+    "JavaMember": 1,
+    "JavaObject": 1,
+    "JavaClass": 1,
+    "JavaPackage": 1,
+    "_firebug": 1,
+    "_FirebugConsole": 1,
+    "_FirebugCommandLine": 1,
+};
+
 function findObjectInCallScope(scope, obj)
 {
     var listValue = {value: null}, lengthValue = {value: 0};
