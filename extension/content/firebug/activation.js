@@ -11,11 +11,12 @@ const Ci = Components.interfaces;
 // ************************************************************************************************
 
 /**
- * This module implements Firebug activation logic.
+ * @class Implements Firebug activation logic.
  *
- * 1) Part of the logic is based on URL annotations ("firebug/history") that are used
- *    to remember whether Firebug was active the last time. If yes, open it for the URL
- *    automatically again.
+ * 1) Part of the logic is based on annotation service (see components/firebug-annotations.js)
+ *    in order to remember whether Firebug is activated for given site or not.
+ *    If there is "firebugged.showFirebug" annotation for a given site Firbug is activated.
+ *    If there is "firebugged.closed" annotation for a given site Firbug is not activated.
  *
  * 2) Othe part is based on extensions.firebug.allPagesActivation option. This option
  *    can be set to the following values:
@@ -53,7 +54,7 @@ Firebug.Activation = extend(Firebug.Module,
         this.annotationSvc.flush();
     },
 
-    convertToURIKey: function(url)  // process the URL to canonicalize it. Need not be reversible.
+    convertToURIKey: function(url, sameOrigin)  // process the URL to canonicalize it. Need not be reversible.
     {
         var uri = makeURI(normalizeURL(url));
 
@@ -63,7 +64,7 @@ Firebug.Activation = extend(Firebug.Module,
         if (url == "about:blank")  // avoid exceptions.
             return uri;
 
-        if (uri && Firebug.activateSameOrigin)
+        if (uri && sameOrigin)
         {
             try
             {
@@ -109,7 +110,7 @@ Firebug.Activation = extend(Firebug.Module,
 
         try
         {
-            var uri = this.convertToURIKey(url);
+            var uri = this.convertToURIKey(url, Firebug.activateSameOrigin);
             if (!uri)
                 return false;
 
@@ -127,14 +128,14 @@ Firebug.Activation = extend(Firebug.Module,
             if (browser.FirebugLink) // then TabWatcher found a connection
             {
                 var dst = browser.FirebugLink.dst;
-                var dstURI = this.convertToURIKey(dst.spec);
+                var dstURI = this.convertToURIKey(dst.spec, Firebug.activateSameOrigin);
                 if (FBTrace.DBG_ACTIVATION)
                     FBTrace.sysout("shouldCreateContext found FirebugLink pointing to " +
                         dstURI.spec, browser.FirebugLink);
 
                 if (dstURI && dstURI.equals(uri)) // and it matches us now
                 {
-                    var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec);
+                    var srcURI = this.convertToURIKey(browser.FirebugLink.src.spec, Firebug.activateSameOrigin);
                     if (srcURI)
                     {
                         if (FBTrace.DBG_ACTIVATION)
@@ -204,44 +205,51 @@ Firebug.Activation = extend(Firebug.Module,
     watchBrowser: function(browser)  // Firebug is opened in browser
     {
         var annotation = "firebugged.showFirebug";
-
-        // mark this URI as firebugged
-        var uri = this.convertToURIKey(browser.currentURI.spec);
-        if (uri)
-            this.annotationSvc.setPageAnnotation(uri, annotation);
-
-        if (FBTrace.DBG_ACTIVATION)
-        {
-            if (!this.annotationSvc.pageHasAnnotation(uri))
-                FBTrace.sysout("nsIAnnotationService FAILS for "+uri.spec);
-            FBTrace.sysout("Firebug.Activation.watchBrowser tagged "+uri.spec+" with: "+annotation);
-        }
+        this.setPageAnnotation(browser.currentURI.spec, annotation);
     },
 
     unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
     {
-        var uri  = this.convertToURIKey(browser.currentURI.spec);
-
-        if (!uri)
-            return;
-
         if (userCommands)  // then mark to not open virally.
-        {
-            var annotation = "firebugged.closed";
-            this.annotationSvc.setPageAnnotation(uri, annotation);
-        }
+            this.setPageAnnotation(uri, "firebugged.closed");
         else
-        {
-            this.annotationSvc.removePageAnnotation(uri); // unmark this URI
-
-            if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("Firebug.Activation.unwatchBrowser untagged "+uri.spec);
-        }
+            this.removePageAnnotation(uri); // unmark this URI
     },
 
     clearAnnotations: function()
     {
         this.annotationSvc.clear();
+    },
+
+    setPageAnnotation: function(currentURI, annotation)
+    {
+        var uri = this.convertToURIKey(currentURI, Firebug.activateSameOrigin);
+        if (uri)
+            this.annotationSvc.setPageAnnotation(uri, annotation);
+
+        if (Firebug.activateSameOrigin)
+        {
+            uri = this.convertToURIKey(currentURI, false);
+            if (uri)
+                this.annotationSvc.setPageAnnotation(uri, annotation);
+        }
+    },
+
+    removePageAnnotation: function(currentURI)
+    {
+        var uri = this.convertToURIKey(currentURI, Firebug.activateSameOrigin);
+        if (uri)
+            this.annotationSvc.removePageAnnotation(uri);
+
+        if (Firebug.activateSameOrigin)
+        {
+            uri = this.convertToURIKey(currentURI, false);
+            if (uri)
+                this.annotationSvc.removePageAnnotation(uri);
+        }
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("Firebug.Activation.unwatchBrowser untagged "+uri.spec);
     },
 
     iterateAnnotations: function(fn)  // stops at the first fn(uri) that returns a true value
