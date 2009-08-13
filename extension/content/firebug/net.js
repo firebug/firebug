@@ -1277,7 +1277,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(),
 {
     tableTag:
-        TABLE({class: "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
+        TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
                 TR(
                     TD({width: "18%"}),
@@ -1291,42 +1291,42 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
     fileTag:
         FOR("file", "$files",
-            TR({class: "netRow $file.file|getCategory",
+            TR({"class": "netRow $file.file|getCategory",
                 $collapsed: "$file.file|hideRow",
                 $hasHeaders: "$file.file|hasResponseHeaders",
                 $loaded: "$file.file.loaded", $responseError: "$file.file|isError",
                 $fromCache: "$file.file.fromCache", $inFrame: "$file.file|getInFrame"},
-                TD({class: "netHrefCol netCol"},
-                    DIV({class: "netHrefLabel netLabel",
+                TD({"class": "netHrefCol netCol"},
+                    DIV({"class": "netHrefLabel netLabel",
                          style: "margin-left: $file.file|getIndent\\px"},
                         "$file.file|getHref"
                     ),
-                    DIV({class: "netFullHrefLabel netHrefLabel netLabel",
+                    DIV({"class": "netFullHrefLabel netHrefLabel netLabel",
                          style: "margin-left: $file.file|getIndent\\px"},
                         "$file.file.href"
                     )
                 ),
-                TD({class: "netStatusCol netCol"},
-                    DIV({class: "netStatusLabel netLabel"}, "$file.file|getStatus")
+                TD({"class": "netStatusCol netCol"},
+                    DIV({"class": "netStatusLabel netLabel"}, "$file.file|getStatus")
                 ),
-                TD({class: "netDomainCol netCol"},
-                    DIV({class: "netDomainLabel netLabel"}, "$file.file|getDomain")
+                TD({"class": "netDomainCol netCol"},
+                    DIV({"class": "netDomainLabel netLabel"}, "$file.file|getDomain")
                 ),
-                TD({class: "netSizeCol netCol"},
-                    DIV({class: "netSizeLabel netLabel"}, "$file.file|getSize")
+                TD({"class": "netSizeCol netCol"},
+                    DIV({"class": "netSizeLabel netLabel"}, "$file.file|getSize")
                 ),
-                TD({class: "netTimeCol netCol"},
-                    DIV({class: "netBar"},
+                TD({"class": "netTimeCol netCol"},
+                    DIV({"class": "netBar"},
                         "&nbsp;",
-                        DIV({class: "netResolvingBar", style: "left: $file.offset"}),
-                        DIV({class: "netConnectingBar", style: "left: $file.offset"}),
-                        DIV({class: "netSendingBar", style: "left: $file.offset"}),
-                        DIV({class: "netWaitingBar", style: "left: $file.offset"}),
-                        DIV({class: "netRespondedBar", style: "left: $file.offset"}),
-                        DIV({class: "netContentLoadBar", style: "left: $file.offset"}),
-                        DIV({class: "netWindowLoadBar", style: "left: $file.offset"}),
-                        DIV({class: "netReceivingBar", style: "left: $file.offset; width: $file.width"},
-                            SPAN({class: "netTimeLabel"}, "$file.elapsed|formatTime")
+                        DIV({"class": "netResolvingBar", style: "left: $file.offset"}),
+                        DIV({"class": "netConnectingBar", style: "left: $file.offset"}),
+                        DIV({"class": "netSendingBar", style: "left: $file.offset"}),
+                        DIV({"class": "netWaitingBar", style: "left: $file.offset"}),
+                        DIV({"class": "netRespondedBar", style: "left: $file.offset"}),
+                        DIV({"class": "netContentLoadBar", style: "left: $file.offset"}),
+                        DIV({"class": "netWindowLoadBar", style: "left: $file.offset"}),
+                        DIV({"class": "netReceivingBar", style: "left: $file.offset; width: $file.width"},
+                            SPAN({"class": "netTimeLabel"}, "$file.elapsed|formatTime")
                         )
                     )
                 )
@@ -1334,44 +1334,44 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         ),
 
     headTag:
-        TR({class: "netHeadRow"},
-            TD({class: "netHeadCol", colspan: 5},
-                DIV({class: "netHeadLabel"}, "$doc.rootFile.href")
+        TR({"class": "netHeadRow"},
+            TD({"class": "netHeadCol", colspan: 5},
+                DIV({"class": "netHeadLabel"}, "$doc.rootFile.href")
             )
         ),
 
     netInfoTag:
-        TR({class: "netInfoRow"},
-            TD({class: "netInfoCol", colspan: 5})
+        TR({"class": "netInfoRow"},
+            TD({"class": "netInfoCol", colspan: 5})
         ),
 
     activationTag:
-        TR({class: "netRow netActivationRow"},
-            TD({class: "netCol netActivationLabel", colspan: 5},
+        TR({"class": "netRow netActivationRow"},
+            TD({"class": "netCol netActivationLabel", colspan: 5},
                 $STR("net.ActivationMessage")
             )
         ),
 
     summaryTag:
-        TR({class: "netRow netSummaryRow"},
-            TD({class: "netCol"},
-                DIV({class: "netCountLabel netSummaryLabel"}, "-")
+        TR({"class": "netRow netSummaryRow"},
+            TD({"class": "netCol"},
+                DIV({"class": "netCountLabel netSummaryLabel"}, "-")
             ),
-            TD({class: "netCol"}),
-            TD({class: "netCol"}),
-            TD({class: "netTotalSizeCol netCol"},
-                DIV({class: "netTotalSizeLabel netSummaryLabel"}, "0KB")
+            TD({"class": "netCol"}),
+            TD({"class": "netCol"}),
+            TD({"class": "netTotalSizeCol netCol"},
+                DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
-            TD({class: "netTotalTimeCol netCol", colspan: 2},
-                DIV({class: "netBar"},
-                    DIV({class: "netCacheSizeLabel netSummaryLabel"},
+            TD({"class": "netTotalTimeCol netCol", colspan: 2},
+                DIV({"class": "netBar"},
+                    DIV({"class": "netCacheSizeLabel netSummaryLabel"},
                         "(",
                         SPAN("0KB"),
                         SPAN(" " + $STR("FromCache")),
                         ")"
                     ),
-                    DIV({class: "netReceivingBar", style: "width: 100%"},
-                        SPAN({class: "netTotalTimeLabel netSummaryLabel"}, "0ms")
+                    DIV({"class": "netReceivingBar", style: "width: 100%"},
+                        SPAN({"class": "netTotalTimeLabel netSummaryLabel"}, "0ms")
                     )
                 )
             )
@@ -1503,43 +1503,43 @@ var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
 Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 {
     tag:
-        DIV({class: "netInfoBody", _repObject: "$file"},
+        DIV({"class": "netInfoBody", _repObject: "$file"},
             TAG("$infoTabs", {file: "$file"}),
             TAG("$infoBodies", {file: "$file"})
         ),
 
     infoTabs:
-        DIV({class: "netInfoTabs"},
-            A({class: "netInfoParamsTab netInfoTab", onclick: "$onClickTab",
+        DIV({"class": "netInfoTabs"},
+            A({"class": "netInfoParamsTab netInfoTab", onclick: "$onClickTab",
                 view: "Params",
                 $collapsed: "$file|hideParams"},
                 $STR("URLParameters")
             ),
-            A({class: "netInfoHeadersTab netInfoTab", onclick: "$onClickTab",
+            A({"class": "netInfoHeadersTab netInfoTab", onclick: "$onClickTab",
                 view: "Headers"},
                 $STR("Headers")
             ),
-            A({class: "netInfoPostTab netInfoTab", onclick: "$onClickTab",
+            A({"class": "netInfoPostTab netInfoTab", onclick: "$onClickTab",
                 view: "Post",
                 $collapsed: "$file|hidePost"},
                 $STR("Post")
             ),
-            A({class: "netInfoPutTab netInfoTab", onclick: "$onClickTab",
+            A({"class": "netInfoPutTab netInfoTab", onclick: "$onClickTab",
                 view: "Put",
                 $collapsed: "$file|hidePut"},
                 $STR("Put")
             ),
-            A({class: "netInfoResponseTab netInfoTab", onclick: "$onClickTab",
+            A({"class": "netInfoResponseTab netInfoTab", onclick: "$onClickTab",
                 view: "Response",
                 $collapsed: "$file|hideResponse"},
                 $STR("Response")
             ),
-            A({class: "netInfoCacheTab netInfoTab", onclick: "$onClickTab",
+            A({"class": "netInfoCacheTab netInfoTab", onclick: "$onClickTab",
                view: "Cache",
                $collapsed: "$file|hideCache"},
                $STR("Cache")
             ),
-            A({class: "netInfoHtmlTab netInfoTab", onclick: "$onClickTab",
+            A({"class": "netInfoHtmlTab netInfoTab", onclick: "$onClickTab",
                view: "Html",
                $collapsed: "$file|hideHtml"},
                $STR("HTML")
@@ -1547,65 +1547,65 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         ),
 
     infoBodies:
-        DIV({class: "netInfoBodies"},
-            TABLE({class: "netInfoParamsText netInfoText netInfoParamsTable",
+        DIV({"class": "netInfoBodies"},
+            TABLE({"class": "netInfoParamsText netInfoText netInfoParamsTable",
                     cellpadding: 0, cellspacing: 0}, TBODY()),
-            TABLE({class: "netInfoHeadersText netInfoText netInfoHeadersTable",
+            TABLE({"class": "netInfoHeadersText netInfoText netInfoHeadersTable",
                     cellpadding: 0, cellspacing: 0},
                 TBODY(
-                    TR({class: "netInfoResponseHeadersTitle"},
+                    TR({"class": "netInfoResponseHeadersTitle"},
                         TD({colspan: 2},
-                            DIV({class: "netInfoHeadersGroup"}, $STR("ResponseHeaders"))
+                            DIV({"class": "netInfoHeadersGroup"}, $STR("ResponseHeaders"))
                         )
                     ),
-                    TR({class: "netInfoRequestHeadersTitle"},
+                    TR({"class": "netInfoRequestHeadersTitle"},
                         TD({colspan: 2},
-                            DIV({class: "netInfoHeadersGroup"}, $STR("RequestHeaders"))
+                            DIV({"class": "netInfoHeadersGroup"}, $STR("RequestHeaders"))
                         )
                     )
                 )
             ),
-            DIV({class: "netInfoPostText netInfoText"},
-                TABLE({class: "netInfoPostTable", cellpadding: 0, cellspacing: 0},
+            DIV({"class": "netInfoPostText netInfoText"},
+                TABLE({"class": "netInfoPostTable", cellpadding: 0, cellspacing: 0},
                     TAG("$postDataBodyTag")
                 )
             ),
-            DIV({class: "netInfoPutText netInfoText"},
-                TABLE({class: "netInfoPutTable", cellpadding: 0, cellspacing: 0},
+            DIV({"class": "netInfoPutText netInfoText"},
+                TABLE({"class": "netInfoPutTable", cellpadding: 0, cellspacing: 0},
                     TAG("$postDataBodyTag")
                 )
             ),
-            DIV({class: "netInfoResponseText netInfoText"},
-                DIV({class: "loadResponseMessage"}),
+            DIV({"class": "netInfoResponseText netInfoText"},
+                DIV({"class": "loadResponseMessage"}),
                 BUTTON({onclick: "$onLoadResponse"},
                     SPAN("Load Response")
                 )
             ),
-            DIV({class: "netInfoCacheText netInfoText"},
-                TABLE({class: "netInfoCacheTable", cellpadding: 0, cellspacing: 0},
+            DIV({"class": "netInfoCacheText netInfoText"},
+                TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0},
                     TBODY()
                 )
             ),
-            DIV({class: "netInfoHtmlText netInfoText"},
-                IFRAME({class: "netInfoHtmlPreview"})
+            DIV({"class": "netInfoHtmlText netInfoText"},
+                IFRAME({"class": "netInfoHtmlPreview"})
             )
         ),
 
     postDataBodyTag:
         TBODY(
-            TR({class: "netInfoPostParamsTitle"},
+            TR({"class": "netInfoPostParamsTitle"},
                 TD({colspan: 2},
-                    DIV({class: "netInfoPostParams"},
+                    DIV({"class": "netInfoPostParams"},
                         $STR("net.label.Parsed Parameters"),
-                        SPAN({class: "netInfoPostContentType"},
+                        SPAN({"class": "netInfoPostContentType"},
                             "application/x-www-form-urlencoded"
                         )
                     )
                 )
             ),
-            TR({class: "netInfoPostSourceTitle"},
+            TR({"class": "netInfoPostSourceTitle"},
                 TD({colspan: 2},
-                    DIV({class: "netInfoPostSource"}, $STR("net.label.Source Text"))
+                    DIV({"class": "netInfoPostSource"}, $STR("net.label.Source Text"))
                 )
             )
         ),
@@ -1622,8 +1622,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     headerDataTag:
         FOR("param", "$headers",
             TR(
-                TD({class: "netInfoParamName"}, "$param.name"),
-                TD({class: "netInfoParamValue"},
+                TD({"class": "netInfoParamName"}, "$param.name"),
+                TD({"class": "netInfoParamValue"},
                     FOR("line", "$param|getParamValueIterator",
                         CODE("$line")
                     )
@@ -1632,12 +1632,12 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         ),
 
     customTab:
-        A({class: "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab", view: "$tabId"},
+        A({"class": "netInfo$tabId\\Tab netInfoTab", onclick: "$onClickTab", view: "$tabId"},
             "$tabTitle"
         ),
 
     customBody:
-        DIV({class: "netInfo$tabId\\Text netInfoText"}),
+        DIV({"class": "netInfo$tabId\\Text netInfoText"}),
 
     hideParams: function(file)
     {
@@ -1948,42 +1948,42 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "timeInfoTip"},
+        TABLE({"class": "timeInfoTip"},
             TBODY(
                 TR(
-                    TD({class: "netResolvingBar timeInfoTipBar"}),
+                    TD({"class": "netResolvingBar timeInfoTipBar"}),
                     TD("$file|getResolvingTime : " + $STR("requestinfo.DNS Lookup"))
                 ),
                 TR(
-                    TD({class: "netConnectingBar timeInfoTipBar"}),
+                    TD({"class": "netConnectingBar timeInfoTipBar"}),
                     TD("$file|getConnectintTime : " + $STR("requestinfo.Connecting"))
                 ),
                 TR(
-                    TD({class: "netSendingBar timeInfoTipBar"}),
+                    TD({"class": "netSendingBar timeInfoTipBar"}),
                     TD("$file|getSendingTime : " + $STR("requestinfo.Sending"))
                 ),
                 TR(
-                    TD({class: "netWaitingBar timeInfoTipBar"}),
+                    TD({"class": "netWaitingBar timeInfoTipBar"}),
                     TD("$file|getWaitingTime : " + $STR("requestinfo.Queuing"))
                 ),
                 TR(
-                    TD({class: "netRespondedBar timeInfoTipBar"}),
+                    TD({"class": "netRespondedBar timeInfoTipBar"}),
                     TD("$file|getResponseTime : " + $STR("requestinfo.Waiting For Response"))
                 ),
                 TR({$loaded: "$file.loaded",
                     $fromCache: "$file.fromCache"},
-                    TD({class: "netReceivingBar timeInfoTipBar"}),
+                    TD({"class": "netReceivingBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
                 ),
-                TR({class: "netContentLoadRow"},
+                TR({"class": "netContentLoadRow"},
                     TD({align: "center"},
-                        DIV({class: "netContentLoadBar timeInfoTipBar"})
+                        DIV({"class": "netContentLoadBar timeInfoTipBar"})
                     ),
                     TD("$file|getContentLoadTime : " + $STR("requestinfo.DOMContentLoaded"))
                 ),
-                TR({class: "netWindowLoadRow"},
+                TR({"class": "netWindowLoadRow"},
                     TD({align: "center"},
-                        DIV({class: "netWindowLoadBar timeInfoTipBar"})
+                        DIV({"class": "netWindowLoadBar timeInfoTipBar"})
                     ),
                     TD("$file|getWindowLoadTime : " + $STR("requestinfo.Load"))
                 )
@@ -2049,7 +2049,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 {
     tag:
-        DIV({class: "sizeInfoTip"}, "$file|getSize"),
+        DIV({"class": "sizeInfoTip"}, "$file|getSize"),
 
     getSize: function(file)
     {
@@ -2072,19 +2072,19 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         ),
 
     limitTag:
-        TR({class: "netRow netLimitRow", $collapsed: "$isCollapsed"},
-            TD({class: "netCol netLimitCol", colspan: 5},
+        TR({"class": "netRow netLimitRow", $collapsed: "$isCollapsed"},
+            TD({"class": "netCol netLimitCol", colspan: 5},
                 TABLE({cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR(
                             TD(
-                                SPAN({class: "netLimitLabel"},
+                                SPAN({"class": "netLimitLabel"},
                                     $STR("LimitExceeded")
                                 )
                             ),
                             TD({style: "width:100%"}),
                             TD(
-                                BUTTON({class: "netLimitButton", title: "$limitPrefsTitle",
+                                BUTTON({"class": "netLimitButton", title: "$limitPrefsTitle",
                                     onclick: "$onPreferences"},
                                   $STR("LimitPrefs")
                                 )
