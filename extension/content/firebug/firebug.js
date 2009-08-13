@@ -1228,7 +1228,10 @@ top.Firebug =
             }
         }
 
-        Firebug.Debugger.clearAllBreakpoints(); // no context clears in all contexts
+        TabWatcher.iterateContexts( function clearBPs(context)
+        {
+            Firebug.Debugger.clearAllBreakpoints(context);
+        });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
