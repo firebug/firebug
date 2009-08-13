@@ -620,23 +620,27 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // error breakpoints are a way of selectively breaking on errors.  see needToBreakForError
+    // error breakpoints are a way of selecting breakpoint from the Console
     //
-    setErrorBreakpoint: function(url, lineNo, debuggr)
+    setErrorBreakpoint: function(sourceFile, lineNo, debuggr)
     {
+        var url = sourceFile.href;
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index == -1)
         {
-             errorBreakpoints.push({href: url, lineNo: lineNo, type: BP_ERROR });
-             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true, debuggr]);
+            this.setBreakpoint(sourceFile, lineNo, null, debuggr);
+            errorBreakpoints.push({href: url, lineNo: lineNo, type: BP_ERROR });
+            dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, true, debuggr]);
         }
     },
 
-    clearErrorBreakpoint: function(url, lineNo, debuggr)
+    clearErrorBreakpoint: function(sourceFile, lineNo, debuggr)
     {
+        var url = sourceFile.href;
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
+            clearBreakpoint(url, lineNo);
             errorBreakpoints.splice(index, 1);
 
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);

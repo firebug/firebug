@@ -1401,8 +1401,8 @@ this.ErrorMessage = domplate(Firebug.Rep,
         var target = event.currentTarget;
         if (hasClass(event.target, "errorBreak"))
         {
-            this.breakOnThisError(target.repObject);
-
+            var panel = Firebug.getElementPanel(event.target);
+            this.breakOnThisError(target.repObject, panel.context);
         }
         else if (hasClass(event.target, "errorSource"))
         {
@@ -1441,12 +1441,19 @@ this.ErrorMessage = domplate(Firebug.Rep,
         copyToClipboard(message.join("\n"));
     },
 
-    breakOnThisError: function(error)
+    breakOnThisError: function(error, context)
     {
+        var sourceFile = context.sourceFileMap[error.href];
+        if (!sourceFile)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.breakOnThisError has not source file for error.href: "+error.href, error);
+        }
+
         if (this.hasErrorBreak(error))
-            Firebug.Debugger.clearErrorBreakpoint(error.href, error.lineNo);
+            Firebug.Debugger.clearErrorBreakpoint(sourceFile, error.lineNo);
         else
-            Firebug.Debugger.setErrorBreakpoint(error.href, error.lineNo);
+            Firebug.Debugger.setErrorBreakpoint(sourceFile, error.lineNo);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

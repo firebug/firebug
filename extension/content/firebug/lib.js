@@ -4649,9 +4649,9 @@ this.getSourceFileAndLineByScript= function(context, script, frame)
     }
 };
 
-this.guessEnclosingFunctionName = function(url, line)
+this.guessEnclosingFunctionName = function(url, line, context)
 {
-    var sourceFile = this.context.sourceFileMap[url];
+    var sourceFile = context.sourceFileMap[url];
     if (sourceFile)
     {
         var scripts = sourceFile.getScriptsAtLineNumber(line);
@@ -4662,7 +4662,7 @@ this.guessEnclosingFunctionName = function(url, line)
             line = analyzer.getBaseLineNumberByScript(script);
         }
     }
-     return guessFunctionName(url, line-1, context);
+     return this.guessFunctionName(url, line-1, context);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

@@ -385,17 +385,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     clearErrorBreakpoint: function(sourceFile, line)
     {
-        fbs.clearErrorBreakpoint(sourceFile.href, line, Firebug.Debugger);
-    },
-
-    enableErrorBreakpoint: function(sourceFile, line)
-    {
-        fbs.enableErrorBreakpoint(sourceFile, line, Firebug.Debugger);
-    },
-
-    disableErrorBreakpoint: function(sourceFile, line)
-    {
-        fbs.disableErrorBreakpoint(sourceFile, line, Firebug.Debugger);
+        fbs.clearErrorBreakpoint(sourceFile, line, Firebug.Debugger);
     },
 
     clearAllBreakpoints: function(context)
@@ -3142,7 +3132,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
 
-                var name = self.guessEnclosingFunctionName(url, line);
+                var name = FBL.guessEnclosingFunctionName(url, line, context);
                 var source = context.sourceCache.getLine(url, line);
                 errorBreakpoints.push({name: name, href: url, lineNumber: line, checked: true,
                     sourceLine: source});
@@ -3153,7 +3143,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
 
-                var name = self.guessEnclosingFunctionName(url, line);
+                var name = FBL.guessEnclosingFunctionName(url, line, context);
                 monitors.push({name: name, href: url, lineNumber: line, checked: true,
                         sourceLine: ""});
             }});
