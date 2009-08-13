@@ -64,7 +64,7 @@ AnnotationService.prototype =
 
     getAnnotations: function()
     {
-        return this.annotations[uri.spec];
+        return this.annotations;
     },
 
     clear: function()
