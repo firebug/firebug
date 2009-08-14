@@ -1477,6 +1477,43 @@ this.getURLForStyleSheet= function(styleSheet)
     return (styleSheet.href ? styleSheet.href : styleSheet.ownerNode.ownerDocument.URL);
 };
 
+this.getDocumentForStyleSheet = function(styleSheet)
+{
+    while (styleSheet.parentStyleSheet && !styleSheet.ownerNode)
+    {
+        styleSheet = styleSheet.parentStyleSheet;
+    }
+    if (styleSheet.ownerNode)
+      return styleSheet.ownerNode.ownerDocument;
+};
+
+/**
+ * Retrieves the instance number for a given style sheet. The instance number
+ * is sheet's index within the set of all other sheets whose URL is the same.
+ */
+this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
+{
+    // System URLs are always unique (or at least we are making this assumption)
+    if (styleSheet.href && FBL.isSystemURL(styleSheet.href))
+        return 0;
+    
+    // ownerDocument is an optional hint for performance
+    ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
+    
+    var ret = 0,
+        styleSheets = ownerDocument.styleSheets,
+        href = styleSheet.href;
+    for (var i = 0; i < styleSheets.length; i++)
+    {
+        var curSheet = styleSheets[i];
+        if (curSheet == styleSheet)
+            break;
+        if (curSheet.href == href)
+            ret++;
+    }
+    return ret;
+};
+
 // ************************************************************************************************
 // XML Serialization
 
@@ -2227,7 +2264,6 @@ this.getSourceFileByHref = function(url, context)
 this.getAllStyleSheets = function(context)
 {
     var styleSheets = [];
-    var recordedSheets = {};
 
     function addSheet(sheet)
     {
@@ -2236,24 +2272,20 @@ this.getAllStyleSheets = function(context)
         if (!Firebug.showUserAgentCSS && FBL.isSystemURL(sheetLocation))
             return;
 
-        if (!sheet.href || !recordedSheets[sheet.href])
+        styleSheets.push(sheet);
+        try
         {
-            styleSheets.push(sheet);
-            try
+            for (var i = 0; i < sheet.cssRules.length; ++i)
             {
-                for (var i = 0; i < sheet.cssRules.length; ++i)
-                {
-                    var rule = sheet.cssRules[i];
-                    if (rule instanceof CSSImportRule)
-                        addSheet(rule.styleSheet);
-                }
+                var rule = sheet.cssRules[i];
+                if (rule instanceof CSSImportRule)
+                    addSheet(rule.styleSheet);
             }
-            catch(e)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("getAllStyleSheets sheet.cssRules FAILS for "+(sheet?sheet.href:"null sheet")+e, e);
-            }
-            recordedSheets[sheet.href] = true;
+        }
+        catch(e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("getAllStyleSheets sheet.cssRules FAILS for "+(sheet?sheet.href:"null sheet")+e, e);
         }
     }
 
@@ -3870,9 +3902,10 @@ this.Continued.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.SourceLink = function(url, line, type, object)
+this.SourceLink = function(url, line, type, object, instance)
 {
     this.href = url;
+    this.instance = instance;
     this.line = line;
     this.type = type;
     this.object = object;

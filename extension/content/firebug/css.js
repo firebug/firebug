@@ -911,9 +911,16 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
-    getObjectLocation: function(styleSheet)
+    getObjectDescription: function(styleSheet)
     {
-        return getURLForStyleSheet(styleSheet);
+        var url = getURLForStyleSheet(styleSheet);
+        var instance = getInstanceForStyleSheet(styleSheet);
+        
+        var baseDescription = splitURLBase(url);
+        if (instance) {
+          baseDescription.name = baseDescription.name + " #" + (instance + 1);
+        }
+        return baseDescription;
     },
 
     search: function(text, reverse)
@@ -1129,6 +1136,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var href = rule.parentStyleSheet.href;  // Null means inline
+                
+                var instance = getInstanceForStyleSheet(rule.parentStyleSheet, element.ownerDocument);
 
                 if (href && !Firebug.showUserAgentCSS && isSystemURL(href)) // This removes user agent rules
                     continue;
@@ -1141,20 +1150,13 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
                 var line = domUtils.getRuleLine(rule);
                 var ruleId = rule.selectorText+"/"+line;
-                var sourceLink = new SourceLink(href, line, "css", rule);
+                var sourceLink = new SourceLink(href, line, "css", rule, instance);
 
-                // Rules may be duplicated if the same style sheet is included
-                // multiple times within the page. Filter out any rules we have
-                // seen for this href.
-                var qualifiedRuleId = href+"%|%"+ruleId;
-                if (!displayedRules[qualifiedRuleId]) {
-                  this.markOverridenProps(props, usedProps, inheritMode);
+                this.markOverridenProps(props, usedProps, inheritMode);
 
-                  rules.splice(0, 0, {rule: rule, id: ruleId,
-                          selector: rule.selectorText, sourceLink: sourceLink,
-                          props: props, inherited: inheritMode});
-                  displayedRules[qualifiedRuleId] = true;
-                }
+                rules.splice(0, 0, {rule: rule, id: ruleId,
+                        selector: rule.selectorText, sourceLink: sourceLink,
+                        props: props, inherited: inheritMode});
             }
         }
 
