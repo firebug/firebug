@@ -686,6 +686,12 @@ top.Firebug =
             FBTrace.sysout("firebug.setPref type="+type+" name="+prefName+" value="+value+"\n");
     },
 
+    clearPref: function(prefDomain, name)
+    {
+        var prefName = prefDomain + "." + name;
+        prefs.clearUserPref(prefName);
+    },
+
     increaseTextSize: function(amt)
     {
         this.setTextSize(this.textSize+amt);
