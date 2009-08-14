@@ -158,6 +158,9 @@ top.FirebugChrome =
             doc2.addEventListener("mousedown", onPanelMouseDown, false);
             panelBar2.addEventListener("selectPanel", onSelectedSidePanel, false);
 
+            var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
+            mainTabBox.addEventListener("mousedown", onMainTabBoxMouseDown, false);
+
             // The side panel bar doesn't care about this event.  It must, however,
             // prevent it from bubbling now that we allow the side panel bar to be
             // *inside* the main panel bar.
@@ -195,6 +198,9 @@ top.FirebugChrome =
         doc2.removeEventListener("mouseout", onPanelMouseOut, false);
         doc2.removeEventListener("mousedown", onPanelMouseDown, false);
         doc2.removeEventListener("click", onPanelClick, false);
+
+        var mainTabBox = panelBar1.ownerDocument.getElementById("fbPanelBar1-tabBox");
+        mainTabBox.removeEventListener("mousedown", onMainTabBoxMouseDown, false);
 
         locationList.removeEventListener("selectObject", onSelectLocation, false);
 
@@ -1396,6 +1402,17 @@ function onPanelMouseDown(event)
     {
         // Prevent auto-scroll when middle-clicking a rep object
         FBL.cancelEvent(event);
+    }
+}
+
+function onMainTabBoxMouseDown(event)
+{
+    if (Firebug.isInBrowser())
+    {
+        var contentSplitter = Firebug.chrome.$("fbContentSplitter");
+        if (FBTrace.DBG_ERRORS)
+	        FBTrace.sysout("onMainTabBoxMouseDown ", event);
+	    // TODO: grab the splitter here.
     }
 }
 
