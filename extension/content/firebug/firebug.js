@@ -2121,7 +2121,6 @@ Firebug.Panel =
         // sorting within the UI.
         var self = this;
         function compare(a, b) {
-          // TODO : Update this to sort on object description not location
             var locA = self.getObjectDescription(a);
             var locB = self.getObjectDescription(b);
             if(locA.path > locB.path)
