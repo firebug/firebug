@@ -8,6 +8,8 @@ FBL.ns(function() { with (FBL) {
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 
+const detachCommand = $("cmd_toggleDetachFirebug");
+
 // ************************************************************************************************
 
 /**
