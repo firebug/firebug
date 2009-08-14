@@ -3691,7 +3691,7 @@ var NetPanelSearch = function(panel, rowFinder)
         if (scanRE.test(file.responseText))
         {
             if (!hasClass(this.currentRow, "opened"))
-                panel.toggleHeadersRow(this.currentRow);
+                NetRequestTable.toggleHeadersRow(this.currentRow);
 
             var netInfoRow = this.currentRow.nextSibling;
             var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
