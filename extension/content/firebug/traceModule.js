@@ -1203,11 +1203,6 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
         }
     }
 
-    if (this.obj instanceof Ci.nsIHttpChannel)
-    {
-        //firebug.netModule.getHttpHeaders(this.obj, this);
-    }
-
     if (this.obj instanceof Ci.nsICachingChannel)
     {
         try
