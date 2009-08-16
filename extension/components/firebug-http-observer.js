@@ -76,7 +76,7 @@ HttpRequestObserver.prototype =
             if (FBTrace.DBG_HTTPOBSERVER)
             {
                 FBTrace.sysout("httpObserver.observe " + (topic ? topic.toUpperCase() : topic) +
-                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""), subject);
+                    ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : ""));
             }
 
             // Notify all registered observers.

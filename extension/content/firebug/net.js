@@ -2289,7 +2289,7 @@ NetProgress.prototype =
         else
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.requestedFile no file for request=", request);
+                FBTrace.sysout("net.requestedFile no file for request=");
         }
     },
 
@@ -3457,8 +3457,7 @@ var HttpObserver =
             {
                 FBTrace.sysout("net.observe " + (topic ? topic.toUpperCase() : topic) +
                     ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : "") +
-                    ", Browser: " + Firebug.chrome.window.document.title,
-                    subject);
+                    ", Browser: " + Firebug.chrome.window.document.title);
             }
 
             if (!(subject instanceof Ci.nsIHttpChannel))
