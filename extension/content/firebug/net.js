@@ -262,8 +262,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             context.netProgress.loaded = true;
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId,
-                contexts[tabId]);
+            FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
 
         var tabId = Firebug.getTabIdForWindow(context.browser.contentWindow);
         delete contexts[tabId];
@@ -3518,7 +3517,7 @@ var HttpObserver =
             {
                 contexts[tabId] = new NetProgress(null);
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; Create Temp Context " + tabId, contexts);
+                    FBTrace.sysout("net.onModifyRequest; Create Temp Context " + tabId);
             }
         }
 
