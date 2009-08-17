@@ -560,17 +560,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     openRequestInTab: function(file)
     {
-        var postData = null;
-        if (file.postText)
-        {
-            var stringStream = getInputStreamFromString(file.postText);
-            postData = CCIN("@mozilla.org/network/mime-input-stream;1", "nsIMIMEInputStream");
-            postData.addHeader("Content-Type", "application/x-www-form-urlencoded");
-            postData.addContentLength = true;
-            postData.setData(stringStream);
-        }
-
-        gBrowser.selectedTab = gBrowser.addTab(file.href, null, null, postData);
+        openNewTab(file.href, file.postText);
     },
 
     openResponseInTab: function(file)

@@ -2435,10 +2435,22 @@ this.updateScriptFiles = function(context, eraseSourceFileMap)  // scan windows 
 // ************************************************************************************************
 // Firefox browsing
 
-this.openNewTab = function(url)
+this.openNewTab = function(url, postText)
 {
-    if (url)
-        gBrowser.selectedTab = gBrowser.addTab(url);
+    if (!url)
+        return;
+
+    var postData = null;
+    if (postText)
+    {
+        var stringStream = this.getInputStreamFromString(postText);
+        postData = this.CCIN("@mozilla.org/network/mime-input-stream;1", "nsIMIMEInputStream");
+        postData.addHeader("Content-Type", "application/x-www-form-urlencoded");
+        postData.addContentLength = true;
+        postData.setData(stringStream);
+    }
+
+    gBrowser.selectedTab = gBrowser.addTab(url, null, null, postData);
 };
 
 this.openWindow = function(windowType, url, features, params)

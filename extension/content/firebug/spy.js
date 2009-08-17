@@ -284,7 +284,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     openInTab: function(spy)
     {
-        openNewTab(spy.getURL());
+        openNewTab(spy.getURL(), spy.postText);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
