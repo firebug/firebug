@@ -138,11 +138,11 @@
                     <!-- Open In New Window & Minimize & Close -->
                     <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="firebug window">
 
-                        <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
+                        <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-text-button"
                             tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
-                        <toolbarbutton id="fbDetachButton" class="toolbarbutton-iconic"
+                        <toolbarbutton id="fbDetachButton" class="toolbarbutton-text-button"
                             tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>
-                        <toolbarbutton id="fbCloseButton" label="Off" class="toolbar-text-button"
+                        <toolbarbutton id="fbCloseButton" class="toolbar-text-button"
                             tooltiptext="&firebug.CloseFirebug;" command="cmd_closeFirebug"/>
 
                     </hbox>
