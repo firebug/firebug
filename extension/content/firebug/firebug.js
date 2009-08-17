@@ -243,7 +243,7 @@ top.Firebug =
             "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
             "fbBreakOnNextButton", "fbConsolePersist",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
-            "menu_AllOff", "menu_AllOn"];
+            "menu_AllOn", "menu_clearActivationList"];
 
         for (var i=0; i<elements.length; i++)
         {
@@ -445,11 +445,6 @@ top.Firebug =
         if (Firebug.allPagesActivation == "on")
         {
             var label = $STR("enablement.on");
-            tooltip += "\n"+label+" "+$STR("enablement.for all pages");
-        }
-        if (Firebug.allPagesActivation == "off")
-        {
-            var label = $STR("enablement.off");
             tooltip += "\n"+label+" "+$STR("enablement.for all pages");
         }
         else if (Firebug.allPagesActivation != "none")

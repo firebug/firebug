@@ -20,7 +20,7 @@ const detachCommand = $("cmd_toggleDetachFirebug");
  *    If there is "firebugged.showFirebug" annotation for a given site Firbug is activated.
  *    If there is "firebugged.closed" annotation for a given site Firbug is not activated.
  *
- * 2) Othe part is based on extensions.firebug.allPagesActivation option. This option
+ * 2) Other part is based on extensions.firebug.allPagesActivation option. This option
  *    can be set to the following values:
  *    none: The option isn't used (default value)
  *    on:   Firebug is activated for all URLs.
@@ -39,6 +39,11 @@ Firebug.Activation = extend(Firebug.Module,
 
         TabWatcher.addListener(this.TabWatcherListener);
 
+        // The "off" option is removed so make sure to convert previsous prev value
+        // into "none" if necessary.
+        if (Firebug.allPagesActivation == "off")
+            Firebug.allPagesActivation = "none";
+
         // Update option menu item.
         this.updateAllPagesActivation();
     },
@@ -49,7 +54,7 @@ Firebug.Activation = extend(Firebug.Module,
         {
             // Create annotation service.
             this.annotationSvc = Cc["@joehewitt.com/firebug-annotation-service;1"]
-                                    .getService(Ci.nsISupports).wrappedJSObject;
+                .getService(Ci.nsISupports).wrappedJSObject;
         }
         return this.annotationSvc;
     },
@@ -104,9 +109,6 @@ Firebug.Activation = extend(Firebug.Module,
     {
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("shouldCreateContext allPagesActivation " + Firebug.allPagesActivation);
-
-        if (Firebug.allPagesActivation == "off")
-            return false;
 
         if (Firebug.allPagesActivation == "on")
             return true;
@@ -273,20 +275,20 @@ Firebug.Activation = extend(Firebug.Module,
         }
     },
 
-    toggleAll: function(offOrOn)
+    toggleAll: function(state)
     {
         if (FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("Firebug.toggleAll("+offOrOn+") with allPagesActivation: " +
+            FBTrace.sysout("Firebug.toggleAll("+state+") with allPagesActivation: " +
                 Firebug.allPagesActivation);
 
-        if (offOrOn == "on" || offOrOn == "off")
+        if (state == "on")
         {
-            if (Firebug.allPagesActivation == offOrOn) // then we were armed
+            if (Firebug.allPagesActivation == state) // then we were armed
                 Firebug.allPagesActivation = "none";
             else
-                (offOrOn == "off") ? this.allOff() : this.allOn();
+                this.allOn();
 
-            // don't show Off if we are always on
+            // don't show Off button if we are always on
             Firebug.chrome.disableOff(Firebug.allPagesActivation == "on");
         }
         else
@@ -306,49 +308,16 @@ Firebug.Activation = extend(Firebug.Module,
 
     updateAllPagesActivation: function()
     {
-        $('menu_AllOff').setAttribute("checked", (Firebug.allPagesActivation=="off"));
-        $('menu_AllOn').setAttribute("checked", (Firebug.allPagesActivation=="on"));
+        var menu = $('menu_AllOn');
+        if (menu)
+            menu.setAttribute("checked", (Firebug.allPagesActivation=="on"));
     },
 
     allOn: function()
     {
         Firebug.allPagesActivation = "on";  // In future we always create contexts,
         Firebug.toggleBar(true);  // and we turn on for the current page
-    },
-
-    allOff: function()
-    {
-        Firebug.allPagesActivation = "off";  // In future we don't create contexts,
-
-        TabWatcher.iterateContexts(function turnOff(context)  // we close the current contexts,
-        {
-            if (!context.browser)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("context with no browser??!! "+context.getName());
-                return;
-            }
-            if (context != FirebugContext)
-                TabWatcher.unwatchBrowser(context.browser);
-        });
-
-        if (Firebug.isDetached())
-        {
-            // The current detached chrome object is Firebug.chrome.
-            Firebug.chrome.close();  // should call unwatchBrowser
-            detachCommand.setAttribute("checked", false);
-            return;
-        }
-
-        if (Firebug.isInBrowser())
-        {
-            Firebug.chrome.hidePanel();
-            Firebug.showBar(false);
-        }
-
-        Firebug.closeFirebug();
-        this.clearAnnotations();  // and the past pages with contexts are forgotten.
-    },
+    }
 });
 
 // ************************************************************************************************
