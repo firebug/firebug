@@ -1020,9 +1020,14 @@ FirebugService.prototype =
             fbs.hookScripts();
             var depth = jsd.unPause();
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause depth "+depth+" jsd.isOn: "+jsd.isOn);
+                FBTrace.sysout("fbs.unPause hooked scripts and unPaused depth "+depth+" jsd.isOn: "+jsd.isOn);
             dispatch(clients, "onJSDActivate", [jsd, "unpause depth"+jsd.pauseDepth]);
 
+        }
+        else
+        {
+            if (FBTrace.DBG_ACTIVATION)
+                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+ jsd.pauseDepth+" || "+ !jsd.isOn+")");
         }
         return jsd.pauseDepth;
     },
