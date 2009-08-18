@@ -16,39 +16,58 @@ const nsISelectionController = Ci.nsISelectionController;
 
 var domUtils = null;
 
-var CSSPropTag =
-    DIV({class: "cssProp editGroup focusRow", $disabledStyle: "$prop.disabled", role : 'option'},
-        SPAN({class: "cssPropName editable"}, "$prop.name"),
+var CSSDomplateBase = {
+    isEditable: function(rule)
+    {
+        return !rule.isSystemSheet;
+    },
+    isSelectorEditable: function(rule)
+    {
+        return rule.isSelectorEditable && this.isEditable(rule);
+    }
+};
+
+var CSSPropTag = domplate(CSSDomplateBase, {
+    tag: DIV({class: "cssProp focusRow", $disabledStyle: "$prop.disabled",
+          $editGroup: "$rule|isEditable",
+          $cssOverridden: "$prop.overridden", role : "option"},
+        SPAN({class: "cssPropName", $editable: "$rule|isEditable"}, "$prop.name"),
         SPAN({class: "cssColon"}, ":"),
-        SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
+        SPAN({class: "cssPropValue", $editable: "$rule|isEditable"}, "$prop.value$prop.important"),
         SPAN({class: "cssSemi"}, ";")
-    );
+    )
+});
 
 var CSSRuleTag =
     TAG("$rule.tag", {rule: "$rule"});
 
-var CSSImportRuleTag =
-    DIV({class: "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
+var CSSImportRuleTag = domplate({
+    tag: DIV({class: "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
         "@import &quot;",
         A({class: "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
         "&quot;;"
-    );
+    )
+});
 
-var CSSStyleRuleTag =
-    DIV({class: "cssRule insertInto editGroup", _repObject: "$rule.rule.style",
+var CSSStyleRuleTag = domplate(CSSDomplateBase, {
+    tag: DIV({class: "cssRule insertInto",
+            $cssEditableRule: "$rule|isEditable",
+            $editGroup: "$rule|isSelectorEditable",
+            _repObject: "$rule.rule.style",
             "ruleId": "$rule.id", role : 'presentation'},
         DIV({class: "cssHead focusRow", role : 'listitem'},
-            SPAN({class: "cssSelector editable"}, "$rule.selector"), " {"
+            SPAN({class: "cssSelector", $editable: "$rule|isSelectorEditable"}, "$rule.selector"), " {"
         ),
         DIV({role : 'group'},
             DIV({class : "cssPropertyListBox", role : 'listbox'},
                 FOR("prop", "$rule.props",
-                    CSSPropTag
+                    TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
                 )
             )
         ),
         DIV({class: "editable insertBefore", role:"presentation"}, "}")
-    );
+    )
+});
 
 const reSplitCSS =  /(url\("?[^"\)]+?"?\))|(rgb\(.*?\))|(#[\dA-Fa-f]+)|(-?\d+(\.\d+)?(%|[a-z]{1,2})?)|([^,\s]+)|"(.*?)"/;
 
@@ -323,6 +342,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getStyleSheetRules: function(context, styleSheet)
     {
+        var isSystemSheet = isSystemStyleSheet(styleSheet);
+
         function appendRules(cssRules)
         {
             for (var i = 0; i < cssRules.length; ++i)
@@ -333,11 +354,13 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     var props = this.getRuleProperties(context, rule);
                     var line = domUtils.getRuleLine(rule);
                     var ruleId = rule.selectorText+"/"+line;
-                    rules.push({tag: CSSStyleRuleTag, rule: rule, id: ruleId,
-                                selector: rule.selectorText, props: props});
+                    rules.push({tag: CSSStyleRuleTag.tag, rule: rule, id: ruleId,
+                                selector: rule.selectorText, props: props,
+                                isSystemSheet: isSystemSheet,
+                                isSelectorEditable: true});
                 }
                 else if (rule instanceof CSSImportRule)
-                    rules.push({tag: CSSImportRuleTag, rule: rule});
+                    rules.push({tag: CSSImportRuleTag.tag, rule: rule});
                 else if (rule instanceof CSSMediaRule)
                     appendRules.apply(this, [rule.cssRules]);
             }
@@ -559,7 +582,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             return;
 
         var row = getAncestorByClass(event.target, "cssProp");
-        if (row)
+        if (row && hasClass(row, "editGroup"))
         {
             this.disablePropertyRow(row);
             cancelEvent(event);
@@ -681,6 +704,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
             else
             result = FirebugReps.Warning.tag.replace({object: "EmptyStyleSheet"}, this.panelNode);
+
+        this.showToolbarButtons("fbCSSButtons", !isSystemStyleSheet(this.location));
+
         dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, this.panelNode]);
     },
 
@@ -778,7 +804,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     command: bindFixed(this.editElementStyle, this) }
             );
         }
-        else
+        else if (!isSystemStyleSheet(this.selection))
         {
             items.push(
                     "-",
@@ -787,7 +813,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 );
         }
 
-        if (getAncestorByClass(target, "cssRule"))
+        var cssRule = getAncestorByClass(target, "cssRule")
+        if (cssRule && hasClass(cssRule, "cssEditableRule"))
         {
             items.push(
                 "-",
@@ -1049,27 +1076,10 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             ),
 
         ruleTag:
-            DIV({class: "cssRule insertInto", $cssInheritedRule: "$rule.inherited",
-                 _repObject: "$rule.rule.style", "ruleId": "$rule.id",  role : 'presentation'},
-                DIV({class: "cssHead focusRow",  role : 'listitem'},
-                    SPAN({class: "cssSelector"}, "$rule.selector"), " {"
-                ),
-                DIV({role : 'group'},
-                    DIV({class : "cssPropertyListBox", role : 'listbox'},
-                        FOR("prop", "$rule.props",
-                            DIV({class: "cssProp editGroup focusRow", $disabledStyle: "$prop.disabled",
-                                    $cssOverridden: "$prop.overridden", role : "option"},
-                                SPAN({class: "cssPropName editable"}, "$prop.name"),
-                                SPAN({class: "cssColon"}, ":"),
-                                SPAN({class: "cssPropValue editable"}, "$prop.value$prop.important"),
-                                SPAN({class: "cssSemi"}, ";")
-                            )
-                        )
-                    )
-                ),
-                DIV({class: "editable insertBefore", role:'presentation'}, "}"),
-                TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
-            )
+          DIV({class: "cssElementRuleContainer"},
+              TAG(CSSStyleRuleTag.tag, {rule: "$rule"}),
+              TAG(FirebugReps.SourceLink.tag, {object: "$rule.sourceLink"})
+          )
     }),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1139,7 +1149,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 
                 var instance = getInstanceForStyleSheet(rule.parentStyleSheet, element.ownerDocument);
 
-                if (href && !Firebug.showUserAgentCSS && isSystemURL(href)) // This removes user agent rules
+                var isSystemSheet = isSystemStyleSheet(rule.parentStyleSheet);
+                if (!Firebug.showUserAgentCSS && isSystemSheet) // This removes user agent rules
                     continue;
                 if (!href)
                     href = element.ownerDocument.location.href; // http://code.google.com/p/fbug/issues/detail?id=452
@@ -1156,7 +1167,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
                 rules.splice(0, 0, {rule: rule, id: ruleId,
                         selector: rule.selectorText, sourceLink: sourceLink,
-                        props: props, inherited: inheritMode});
+                        props: props, inherited: inheritMode,
+                        isSystemSheet: isSystemSheet});
             }
         }
 
@@ -1387,12 +1399,13 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     insertNewRow: function(target, insertWhere)
     {
+        var rule = Firebug.getRepObject(target);
         var emptyProp = {name: "", value: ""};
 
         if (insertWhere == "before")
-            return CSSPropTag.insertBefore({prop: emptyProp}, target);
+            return CSSPropTag.tag.insertBefore({prop: emptyProp, rule: rule}, target);
         else
-            return CSSPropTag.insertAfter({prop: emptyProp}, target);
+            return CSSPropTag.tag.insertAfter({prop: emptyProp, rule: rule}, target);
     },
 
     saveEdit: function(target, value, previousValue)
@@ -1494,13 +1507,14 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                  selector: "",
                  id: "",
                  props: [],
-                 rule: {}
+                 rule: {},
+                 isSelectorEditable: true
          };
 
          if (insertWhere == "before")
-             return CSSStyleRuleTag.insertBefore({rule: emptyRule}, target);
+             return CSSStyleRuleTag.tag.insertBefore({rule: emptyRule}, target);
          else
-             return CSSStyleRuleTag.insertAfter({rule: emptyRule}, target);
+             return CSSStyleRuleTag.tag.insertAfter({rule: emptyRule}, target);
     },
 
     saveEdit: function(target, value, previousValue)

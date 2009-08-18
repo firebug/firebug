@@ -1494,7 +1494,7 @@ this.getDocumentForStyleSheet = function(styleSheet)
 this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 {
     // System URLs are always unique (or at least we are making this assumption)
-    if (styleSheet.href && FBL.isSystemURL(styleSheet.href))
+    if (FBL.isSystemStyleSheet(styleSheet))
         return 0;
     
     // ownerDocument is an optional hint for performance
@@ -3009,6 +3009,12 @@ this.isSystemPage = function(win)
         return false;
     }
 }
+
+this.isSystemStyleSheet = function(sheet)
+{
+    var href = sheet && sheet.href;
+    return href && FBL.isSystemURL(href);
+};
 
 this.getURIHost = function(uri)
 {

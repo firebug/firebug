@@ -18,8 +18,12 @@
 
 .cssRule:first-child {
     padding-top: 6px;
- }
- 
+}
+
+.cssElementRuleContainer {
+    position: relative;
+}
+
 .cssHead {
     padding-right: 150px;
 }
@@ -53,7 +57,7 @@
     top: 0;
 }
 
-.cssProp:hover {
+.cssProp.editGroup:hover {
     background: url(chrome://firebug/skin/disable.png) no-repeat 2px 1px;
 }
 
