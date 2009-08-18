@@ -684,7 +684,8 @@ top.Firebug =
     clearPref: function(prefDomain, name)
     {
         var prefName = prefDomain + "." + name;
-        prefs.clearUserPref(prefName);
+        if (prefs.prefHasUserValue(prefName))
+            prefs.clearUserPref(prefName);
     },
 
     increaseTextSize: function(amt)
