@@ -24,30 +24,39 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
     initTabBody: function(infoBox, file)
     {
         if (FBTrace.DBG_JSONVIEWER)
-            FBTrace.sysout("jsonviewer.JSONViewerModel.initTabBody", infoBox);
+            FBTrace.sysout("jsonviewer.initTabBody", infoBox);
 
-        const maybeHarmful = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
-        const jsonStrings = /"(\\.|[^"\\\n\r])*"/g;
+        // Let listeners to parse the JSON.
+        dispatch(this.fbListeners, "onParseJSON", [file]);
 
-        // xxxadatta02: not every JSON response is going to have this header...
-        // need some way to override this
-        var contentType = safeGetContentType(file);
-        if (!contentType)
-            return;
+        // The JSON is still no there, try to parse most common cases.
+        if (!file.jsonObject)
+        {
+            const maybeHarmful = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
+            const jsonStrings = /"(\\.|[^"\\\n\r])*"/g;
 
-        if ((contentType.indexOf("application/json") != 0) &&
-            (contentType.indexOf("text/plain") != 0) &&
-            (contentType.indexOf("text/x-json") != 0) &&
-            (contentType.indexOf("text/javascript") != 0))
-            return;
+            var contentType = safeGetContentType(file);
+            if (!contentType)
+                return;
 
-        file.jsonObject = this.parseJSON(file);
+            if ((contentType.indexOf("application/json") != 0) &&
+                (contentType.indexOf("text/plain") != 0) &&
+                (contentType.indexOf("text/x-json") != 0) &&
+                (contentType.indexOf("text/javascript") != 0))
+                return;
 
-        // Check the file.request content-type and display
-        // the tab only when appropriate.
+            file.jsonObject = this.parseJSON(file);
+        }
+
+        // The jsonObject is created so, the JSON tab can be displayed.
         if (file.jsonObject)
+        {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
                 $STR("jsonviewer.tab.JSON"));
+
+            if (FBTrace.DBG_JSONVIEWER)
+                FBTrace.sysout("jsonviewer.initTabBody; JSON object available", file.jsonObject);
+        }
     },
 
     // Update listener for TabView
