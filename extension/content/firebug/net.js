@@ -2068,7 +2068,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
                         TR(
                             TD(
                                 SPAN({"class": "netLimitLabel"},
-                                    $STR("LimitExceeded")
+                                    $STRF("LimitExceeded", [0])
                                 )
                             ),
                             TD({style: "width:100%"}),
