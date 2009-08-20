@@ -2658,6 +2658,16 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             //        FBTrace.sysout("fbs.getFrameScopeWindowAncestor found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
             return lastWindowScope;
         }
+
+        if (scope.jsClassName == "Sandbox")
+        {
+            var proto = scope.jsPrototype;
+            if (proto.jsClassName == "XPCNativeWrapper")
+                proto = proto.jsParent;
+            if (proto.jsClassName == "Window")
+                return proto.getWrappedValue();
+        }
+
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("fbs.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
     }

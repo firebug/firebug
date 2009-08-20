@@ -3704,6 +3704,15 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
         if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
             return  scope.getWrappedValue();
 
+        if (scope.jsClassName == "Sandbox")
+        {
+            var proto = scope.jsPrototype;
+            if (proto.jsClassName == "XPCNativeWrapper")
+                proto = proto.jsParent;
+            if (proto.jsClassName == "Window")
+                return proto.getWrappedValue();
+        }
+
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("debugger.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
     }
