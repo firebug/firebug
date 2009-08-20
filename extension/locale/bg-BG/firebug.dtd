@@ -1,63 +1,50 @@
-
-<!ENTITY  firebug.Permissions           "Sites...">
-
-<!ENTITY  firebug.Firebug               "Firebug">
-<!ENTITY  firebug.Close                 "Затваряне">
-<!ENTITY  firebug.View                  "Изглед">
-<!ENTITY  firebug.Help                  "Помощ">
-<!ENTITY  firebug.Vertical              "Вертикални панели">
-<!ENTITY  firebug.Run                   "Изпълнение">
-<!ENTITY  firebug.Copy                  "Копиране">
-<!ENTITY  firebug.CopyBookmarklet       "Копиране на скрипта като отметчица.">
-
-<!ENTITY  firebug.Options               "Настройки">
-<!ENTITY  firebug.TextSize              "Размер на шрифта">
-<!ENTITY  firebug.IncreaseTextSize      "Увеличаване на размера на шрифта">
-<!ENTITY  firebug.DecreaseTextSize      "Намаляване на размера на шрифта">
-<!ENTITY  firebug.NormalTextSize        "Стандартен размер на шрифта">
-<!ENTITY  firebug.ShowTooltips          "Показване на подсказки">
-<!ENTITY  firebug.ShadeBoxModel         "Оцветяване на модела на разполагането">
-<!ENTITY  firebug.Website               "Сайт на Firebug…">
-<!ENTITY  firebug.Documentation         "Документация…">
-<!ENTITY  firebug.KeyShortcuts          "Клавишни комбинации…">
-<!ENTITY  firebug.Forums                "Група за дискусии…">
-<!ENTITY  firebug.Issues                "Система за проследяване на грешки…">
-<!ENTITY  firebug.Donate                "Допринасяне…">
-<!ENTITY  firebug.About                 "Относно…">
-<!ENTITY  firebug.AlwaysOpenInWindow    "Винаги да се отваря в нов прозорец">
-
-<!ENTITY  firebug.ShowFirebug           "Отваряне на Firebug">
-<!ENTITY  firebug.DetachFirebug         "Отваряне на Firebug в нов прозорец">
-<!ENTITY  firebug.OpenWith              "Отваряне с редактор">
-<!ENTITY  firebug.CloseFirebug          "Затваряне на Firebug">
-<!ENTITY  firebug.DisableFirebug        "Изключване на Firebug">
-<!ENTITY  firebug.AllowedSites          "Сайтове, за които е включен…">
-<!ENTITY  firebug.ConfigureEditors      "Настройване на редакторите…">
-<!ENTITY  firebug.CommandLine           "Команден ред">
-<!ENTITY  firebug.Search                "Търсене">
-
-<!ENTITY  firebug.Continue              "Продължаване (F8)">
-<!ENTITY  firebug.StepOver              "Стъпка през функция (F10)">
-<!ENTITY  firebug.StepInto              "Стъпка във функция (F11)">
-<!ENTITY  firebug.StepOut               "Стъпка извън функция">
-<!ENTITY  firebug.BreakOnErrors         "Прекъсване при грешки">
-
-<!ENTITY  firebug.Inspect               "Изследване">
-<!ENTITY  firebug.InspectElement        "Изследване на елемент">
-<!ENTITY  firebug.InspectTooltip        "Натиснете върху елемента в страницата, който ще изследвате">
-
-<!ENTITY  firebug.Edit                  "Редактиране">
-<!ENTITY  firebug.EditHTMLTooltip       "Редактиране на този HTML">
-<!ENTITY  firebug.EditCSSTooltip        "Редактиране на този CSS">
-
-<!ENTITY  firebug.Profile               "Отчет">
-<!ENTITY  firebug.ProfileScript         "Отчитане на JavaScript">
-<!ENTITY  firebug.ProfileTooltip        "Отчитане на времето за изпълнение на JavaScript">
-
-<!ENTITY  firebug.Clear                 "Изчистване">
-<!ENTITY  firebug.ClearConsole          "Изчистване на конзолата">
-<!ENTITY  firebug.ClearTooltip          "Изчистване на конзолата">
-
-<!ENTITY  firebug.All                   "Всички">
-<!ENTITY  firebug.Images                "Изображенията">
-<!ENTITY  firebug.Flash                 "Flash">
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Затваряне">
+<!ENTITY firebug.View "Изглед">
+<!ENTITY firebug.Help "Помощ">
+<!ENTITY firebug.Vertical "Вертикални панели">
+<!ENTITY firebug.Run "Изпълнение">
+<!ENTITY firebug.Copy "Копиране">
+<!ENTITY firebug.CopyBookmarklet "Копиране на скрипта като отметчица.">
+<!ENTITY firebug.Options "Настройки">
+<!ENTITY firebug.TextSize "Размер на шрифта">
+<!ENTITY firebug.IncreaseTextSize "Увеличаване на размера на шрифта">
+<!ENTITY firebug.DecreaseTextSize "Намаляване на размера на шрифта">
+<!ENTITY firebug.NormalTextSize "Стандартен размер на шрифта">
+<!ENTITY firebug.ShowTooltips "Показване на подсказки">
+<!ENTITY firebug.ShadeBoxModel "Оцветяване на модела на разполагането">
+<!ENTITY firebug.Website "Сайт на Firebug…">
+<!ENTITY firebug.Documentation "Документация…">
+<!ENTITY firebug.KeyShortcuts "Клавишни комбинации…">
+<!ENTITY firebug.Forums "Група за дискусии…">
+<!ENTITY firebug.Issues "Система за проследяване на грешки…">
+<!ENTITY firebug.Donate "Допринасяне…">
+<!ENTITY firebug.About "Относно…">
+<!ENTITY firebug.AlwaysOpenInWindow "Винаги да се отваря в нов прозорец">
+<!ENTITY firebug.ShowFirebug "Отваряне на Firebug">
+<!ENTITY firebug.DetachFirebug "Отваряне на Firebug в нов прозорец">
+<!ENTITY firebug.OpenWith "Отваряне с редактор">
+<!ENTITY firebug.CloseFirebug "Затваряне на Firebug">
+<!ENTITY firebug.Permissions "Сайтове...">
+<!ENTITY firebug.ConfigureEditors "Настройване на редакторите">
+<!ENTITY firebug.CommandLine "Команден ред">
+<!ENTITY firebug.Search "Търсене">
+<!ENTITY firebug.Continue "Продължаване (F8)">
+<!ENTITY firebug.StepOver "Стъпка през функция (F10)">
+<!ENTITY firebug.StepInto "Стъпка във функция (F11)">
+<!ENTITY firebug.StepOut "Стъпка извън функция">
+<!ENTITY firebug.BreakOnErrors "Прекъсване при грешки">
+<!ENTITY firebug.Inspect "Изследване">
+<!ENTITY firebug.InspectElement "Изследване на елемент">
+<!ENTITY firebug.InspectTooltip "Натиснете върху елемента в страницата, който ще изследвате">
+<!ENTITY firebug.Edit "Редактиране">
+<!ENTITY firebug.EditHTMLTooltip "Редактиране на този HTML">
+<!ENTITY firebug.EditCSSTooltip "Редактиране на този CSS">
+<!ENTITY firebug.Profile "Отчет">
+<!ENTITY firebug.ProfileScript "Отчитане на JavaScript">
+<!ENTITY firebug.Clear "Изчистване">
+<!ENTITY firebug.ClearConsole "Изчистване на конзолата">
+<!ENTITY firebug.ClearTooltip "Изчистване на конзолата">
+<!ENTITY firebug.All "Всички">
+<!ENTITY firebug.Images "Изображенията">
+<!ENTITY firebug.Flash "Flash">
