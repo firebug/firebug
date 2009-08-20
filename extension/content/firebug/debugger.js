@@ -1060,7 +1060,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var lines = context.sourceCache.store(url, source);
         var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
-        context.addSourceFile(sourceFile);
+        this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_EVENTS)
             FBTrace.sysout("debugger.onEventScriptCreated url="+sourceFile.href+"\n");
@@ -1098,7 +1098,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         else
         {
             sourceFile = new FBL.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
-            context.addSourceFile(sourceFile);
+            this.watchSourceFile(context, sourceFile);
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
         }
 
@@ -1107,7 +1107,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    watchSourceFile: function(context, sourceFile)
+    {
+        context.addSourceFile(sourceFile);  // store in the context and notify listeners
+        //fbs.watchSourceFile(sourceFile);    // tell the service to watch this file
+    },
+    unwatchSourceFile: function(context, sourceFile)
+    {
+        //fbs.unwatchSourceFile(sourceFile);
+        context.removeSourceFile(sourceFile);
+    },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
         if (props.debugger != this) // then not for us
@@ -1267,7 +1278,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var lines = context.sourceCache.store(url.href, source);
         var sourceFile = new FBL.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
-        context.addSourceFile(sourceFile);
+        this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onNewFunction sourcefile="+sourceFile.toString()+" -> "+context.getName()+"\n");
 
@@ -1338,7 +1349,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.sourceCache.storeSplitLines(url.href, lines);
 
         var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
-        context.addSourceFile(sourceFile);
+        this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_SOURCEFILES)
             FBTrace.sysout("debugger.getEvalLevelSourceFile sourcefile="+sourceFile.toString()+" -> "+context.getName()+"\n");
@@ -3277,7 +3288,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
         delete context.sourceFileMap[oldURL];  // SourceFile delete
 
-        context.addSourceFile(sourceFile);
+        this.watchSourceFile(context, sourceFile);
         var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);
 
         var panel = context.getPanel("script", true);

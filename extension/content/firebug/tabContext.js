@@ -75,6 +75,14 @@ Firebug.TabContext.prototype =
 
         Firebug.onSourceFileCreated(this, sourceFile);
     },
+
+    removeSourceFile: function(sourceFile)
+    {
+        delete this.sourceFileMap[sourceFile.href];
+        delete sourceFile.context;
+
+        // ?? Firebug.onSourceFileDestroyed(this, sourceFile);
+    },
     // ***************************************************************************
     get chrome()  // backward compat
     {

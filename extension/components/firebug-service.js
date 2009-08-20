@@ -97,8 +97,6 @@ const COMPONENTS_FILTERS = [
     new RegExp("^(file:/.*/modules/).*\\.jsm$"),
     ];
 
-const COMPONENTS_RE =  new RegExp("/components/[^/]*\\.js$");
-
 const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
 
@@ -311,7 +309,8 @@ FirebugService.prototype =
             if (debuggers.length == 1)
                 this.enableDebugger();
             if (FBTrace.DBG_FBS_FINDDEBUGGER  || FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" jsd.isOn:"+(jsd?jsd.isOn:"no jsd")+" pauseDepth:"+(jsd?jsd.pauseDepth:"off"));
+                FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" " +
+                        "On:"+(jsd?jsd.isOn:"no jsd")+" pauseDepth:"+(jsd?jsd.pauseDepth:"off"));
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";
@@ -689,68 +688,12 @@ FirebugService.prototype =
 
     traceAll: function(urls, debuggr)
     {
-        if (urls.length < 1)
-            return;
-
-        if (debuggr.jsdFilters) // one at a time please
-            return;
-
-        debuggr.jsdFilters = [];  // save for untraceAll
-
-        for (var i = 0; i < urls.length; i++)
-        {
-            var urlFilter = {
-                    globalObject: null,
-                    flags: jsdIFilter.FLAG_ENABLED | jsdIFilter.FLAG_PASS,
-                    urlPattern: urls[i],
-                    startLine: 0,
-                    endLine: 0
-                };
-            debuggr.jsdFilters.push(urlFilter);
-            jsd.appendFilter(urlFilter);  // pass all of our urls
-        }
-        var blockAll = {
-                globalObject: null,
-                flags: jsdIFilter.FLAG_ENABLED ,
-                urlPattern: "*",
-                startLine: 0,
-                endLine: 0
-            };
-        debuggr.jsdFilters.push(blockAll);
-        jsd.appendFilter(blockAll);  // block everyone else
-
-        if (FBTrace.DBG_BP)
-        {
-            jsd.enumerateFilters({ enumerateFilter: function(filter)
-                {
-                    FBTrace.sysout("traceAll filter "+filter.urlPattern, filter);
-                }});
-        }
-
         this.hookCalls(debuggr.onFunctionCall, false);  // call on all passed urls
     },
 
     untraceAll: function(debuggr)
     {
         jsd.functionHook = null; // undo hookCalls()
-
-        if (!debuggr.jsdFilters)
-           return;
-
-        for (var i = 0; i < debuggr.jsdFilters.length; i++)
-        {
-            jsd.removeFilter(debuggr.jsdFilters[i]);
-        }
-
-        if (FBTrace.DBG_BP)
-        {
-            jsd.enumerateFilters({ enumerateFilter: function(filter)
-                {
-                    FBTrace.sysout("traceAll filter "+filter.urlPattern, filter);
-                }});
-        }
-
-        delete debuggr.jsdFilters;
     },
 
     traceCalls: function(sourceFile, lineNo, debuggr)
@@ -886,37 +829,28 @@ FirebugService.prototype =
 
         this.obeyPrefs();
 
-        if (jsd)
-        {
-            if (!jsd.isOn)
-                jsd.on();
-
-            while(jsd.pauseDepth)  // 1.3.1 unwind completely before dispatch (port to 1.4)
-                jsd.unPause();
-
-            dispatch(clients, "onJSDActivate", [jsd, "fbs enableDebugger"]);
-            this.hookScripts();
-        }
-        else
+        if (!jsd)
         {
             jsd = DebuggerService.getService(jsdIDebuggerService);
 
             if ( FBTrace.DBG_FBS_ERRORS )
                 FBTrace.sysout("enableDebugger gets jsd service, isOn:"+jsd.isOn+" initAtStartup:"+jsd.initAtStartup+" now have "+debuggers.length+" debuggers"+" in "+clients.length+" clients");
+        }
 
+        if (!jsd.isOn)
+        {
             jsd.on();
             jsd.flags |= DISABLE_OBJECT_TRACE;
-
-            dispatch(clients, "onJSDActivate", [jsd, "fbs enableDebugger create"]);
-
-            this.hookScripts();
-
-            jsd.debuggerHook = { onExecute: hook(this.onDebugger, RETURN_CONTINUE) };
-            jsd.debugHook = { onExecute: hook(this.onDebug, RETURN_CONTINUE) };
-            jsd.breakpointHook = { onExecute: hook(this.onBreakpoint, RETURN_CONTINUE) };
-            jsd.throwHook = { onExecute: hook(this.onThrow, RETURN_CONTINUE_THROW) };
-            jsd.errorHook = { onError: hook(this.onError, true) };
         }
+
+        while(jsd.pauseDepth)  // unwind completely
+            jsd.unPause();
+
+        if (!this.filterChrome)
+            this.createChromeBlockingFilters();
+
+        dispatch(clients, "onJSDActivate", [jsd, "fbs enableDebugger"]);
+        this.hookScripts();
     },
 
     obeyPrefs: function()
@@ -1336,6 +1270,8 @@ FirebugService.prototype =
         }
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     onEventScriptCreated: function(frame, type, val, noNestTest)
     {
         if (fbs.showEvents)
@@ -1476,6 +1412,8 @@ FirebugService.prototype =
 
         return sourceFile;
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     clearNestedScripts: function()
     {
@@ -1660,6 +1598,107 @@ FirebugService.prototype =
             FBTrace.sysout("onScriptDestroyed failed: ", exc);
         }
     },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    createFilter: function(pattern, pass)
+    {
+        var filter = {
+                globalObject: null,
+                flags: pass ? (jsdIFilter.FLAG_ENABLED | jsdIFilter.FLAG_PASS) : jsdIFilter.FLAG_ENABLED,
+                urlPattern: pattern,
+                startLine: 0,
+                endLine: 0
+            };
+        return filter;
+    },
+
+    setChromeBlockingFilters: function()
+    {
+        jsd.appendFilter(this.filterChrome);
+        jsd.appendFilter(this.filterPrettyPrint);
+        jsd.appendFilter(this.filterWrapper);
+        for (var i = 0; i < this.componentFilters.length; i++)
+            jsd.appendFilter(this.componentFilters[i]);
+
+        fbs.isChromeBlocked = true;
+
+        //if (FBTrace.DBG_FBS_BP)
+            this.traceFilters("setChromeBlockingFilters with "+this.componentFilters.length+" component filters");
+    },
+
+    removeChromeBlockingFilters: function()
+    {
+        if (fbs.isChromeBlocked)
+        {
+            jsd.removeFilter(this.filterChrome);
+            jsd.removeFilter(this.filterPrettyPrint);
+            jsd.removeFilter(this.filterWrapper);
+            for (var i = 0; i < this.componentFilters.length; i++)
+                jsd.removeFilter(this.componentFilters[i]);
+
+            fbs.isChromeBlocked = false;
+        }
+       // if (FBTrace.DBG_FBS_BP)
+            this.traceFilters("removeChromeBlockingFilters");
+    },
+
+    createChromeBlockingFilters: function() // call after components are loaded.
+    {
+        try
+        {
+        this.filterChrome = this.createFilter("chrome://*");
+        this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");
+        this.filterWrapper = this.createFilter("XPCSafeJSObjectWrapper.cpp");
+
+        // jsdIFilter does not allow full regexp matching.
+        // So to filter components, we filter their directory names, which we obtain by looking for
+        // scripts that match regexps
+
+        var componentsUnfound = [];
+        for( var i = 0; i < COMPONENTS_FILTERS.length; ++i )
+        {
+            componentsUnfound.push(COMPONENTS_FILTERS[i]);
+        }
+
+        this.componentFilters = [];
+
+        jsd.enumerateScripts( {
+            enumerateScript: function(script) {
+                var fileName = script.fileName;
+                for( var i = 0; i < componentsUnfound.length; ++i )
+                {
+                    if ( componentsUnfound[i].test(fileName) )
+                    {
+                        var match = componentsUnfound[i].exec(fileName);
+                        fbs.componentFilters.push(fbs.createFilter(match[1]));
+                        componentsUnfound.splice(i, 1);
+                        return;
+                    }
+                }
+            }
+        });
+        } catch (exc) {
+            FBTrace.sysout("createChromeblockingFilters fails >>>>>>>>>>>>>>>>> "+exc, exc);
+        }
+
+        if (FBTrace.DBG_FBS_BP)
+        {
+            FBTrace.sysout("createChromeBlockingFilters considered "+COMPONENTS_FILTERS.length+
+                    " regexps and created "+this.componentFilters.length+
+                    " filters with unfound: "+componentsUnfound.length, componentsUnfound);
+        }
+    },
+
+    traceFilters: function(from)
+    {
+        FBTrace.sysout("fbs.traceFilters from "+from);
+        jsd.enumerateFilters({ enumerateFilter: function(filter)
+            {
+                FBTrace.sysout("jsdIFilter "+filter.urlPattern, filter);
+            }});
+    },
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getJSContexts: function()
     {
@@ -2314,13 +2353,13 @@ FirebugService.prototype =
     {
         function interruptHook(frame, type, rv)
         {
-            if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing TODO try again
+            /*if ( isFilteredURL(frame.script.fileName) )  // it does not seem feasible to use jsdIFilter-ing TODO try again
             {
                 if (FBTrace.DBG_FBS_STEP)
                     FBTrace.sysout("fbs.hookInterrupts filtered "+frame.script.fileName);
                 return RETURN_CONTINUE;
             }
-
+             */
             // Sometimes the same line will have multiple interrupts, so check
             // a unique id for the line and don't break until it changes
             var frameLineId = hookFrameCount + frame.script.fileName + frame.line;
@@ -2343,12 +2382,21 @@ FirebugService.prototype =
             onScriptCreated: hook(this.onScriptCreated),
             onScriptDestroyed: hook(this.onScriptDestroyed)
         };
+        if (fbs.filterSystemURLs)
+            fbs.setChromeBlockingFilters();
 
+        jsd.debuggerHook = { onExecute: hook(this.onDebugger, RETURN_CONTINUE) };
+        jsd.debugHook = { onExecute: hook(this.onDebug, RETURN_CONTINUE) };
+        jsd.breakpointHook = { onExecute: hook(this.onBreakpoint, RETURN_CONTINUE) };
+        jsd.throwHook = { onExecute: hook(this.onThrow, RETURN_CONTINUE_THROW) };
+        jsd.errorHook = { onError: hook(this.onError, true) };
     },
 
     unhookScripts: function()
     {
         jsd.scriptHook = null;
+        fbs.removeChromeBlockingFilters();
+
         if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("unset scriptHook\n");
     },
 
@@ -2502,6 +2550,7 @@ function NSGetModule(compMgr, fileSpec)
 // ************************************************************************************************
 // Local Helpers
 
+// called by enumerateScripts, onThrow, onDebug, onScriptCreated/Destroyed.
 function isFilteredURL(rawJSD_script_filename)
 {
     if (!rawJSD_script_filename)
@@ -2544,7 +2593,7 @@ function deepSystemURLStem(rawJSD_script_filename)
         if ( COMPONENTS_FILTERS[i].test(rawJSD_script_filename) )
         {
             var match = COMPONENTS_FILTERS[i].exec(rawJSD_script_filename);
-            urlFilters.push(match[1]);
+            urlFilters.push(match[1]);  // cache this for future calls
             return match[1];
         }
     }
