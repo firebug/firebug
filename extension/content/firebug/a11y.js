@@ -1781,12 +1781,12 @@ Firebug.A11yModel = extend(Firebug.Module,
                 liveString += "Line " + lineNo;
                 if (lineNode.getAttribute('breakpoint') == 'true')
                 {
-                    var breakpointStr = ""
+                    var breakpointStr;
                     if (lineNode.getAttribute('disabledbreakpoint') == 'true')
-                        breakpointStr += " disabled ";
+                        breakpointStr = "a11y.has_disabled_break_point";
                     if (lineNode.getAttribute('condition') == 'true')
-                        breakpointStr += " conditional ";
-                    liveString += ", " + $STRF('hasBreakpoint', [breakpointStr]);
+                        breakpointStr = "a11y.has_conditional_break_point";
+                    liveString += ", " + $STRF(breakpointStr);
                 }
                 if (lineNode.getAttribute('executable') == 'true')
                     liveString += ", executable";
