@@ -230,7 +230,6 @@ this.convertToUnicode = function(text, charset)
     {
         var conv = this.CCSV("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
         conv.charset = charset ? charset : "UTF-8";
-        var selectedCharset = conv.charset;
         return conv.ConvertToUnicode(text);
     }
     catch (exc)
@@ -239,6 +238,24 @@ this.convertToUnicode = function(text, charset)
             FBTrace.sysout("lib.convertToUnicode: fails: for charset "+charset+" conv.charset:"+conv.charset+" exc: "+exc, exc);
         // the exception is worthless, make up a new one
         throw new Error("Firebug failed to convert to unicode using charset: "+conv.charset+" in @mozilla.org/intl/scriptableunicodeconverter");
+    }
+};
+
+this.convertFromUnicode = function(text, charset)
+{
+    if (!text)
+        return "";
+
+    try
+    {
+        var conv = this.CCSV("@mozilla.org/intl/scriptableunicodeconverter", "nsIScriptableUnicodeConverter");
+        conv.charset = charset ? charset : "UTF-8";
+        return conv.ConvertFromUnicode(text);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("lib.convertFromUnicode: fails: for charset "+charset+" conv.charset:"+conv.charset+" exc: "+exc, exc);
     }
 };
 
