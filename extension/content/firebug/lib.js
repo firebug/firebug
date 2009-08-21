@@ -373,7 +373,7 @@ function $STR(name, bundle)
 
     // Use only the label after last dot.
     var index = name.lastIndexOf(".");
-    if (index > 0)
+    if (index > 0 && name.charAt(index-1) != "\\")
         name = name.substr(index + 1);
 
     return name;
@@ -1513,10 +1513,10 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     // System URLs are always unique (or at least we are making this assumption)
     if (FBL.isSystemStyleSheet(styleSheet))
         return 0;
-    
+
     // ownerDocument is an optional hint for performance
     ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
-    
+
     var ret = 0,
         styleSheets = ownerDocument.styleSheets,
         href = styleSheet.href;
