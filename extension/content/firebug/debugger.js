@@ -3380,11 +3380,19 @@ CallstackPanel.prototype = extend(Firebug.Panel,
             this.uid = FBL.getUniqueId();
             FBTrace.sysout("CallstackPanel.initialize:"+this.uid+"\n");
         }
+
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
+        this.onPanelStatusSelectItem = bind(this.onSelectItem, this);
+        panelStatus.addEventListener('selectItem', this.onPanelStatusSelectItem, false);
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
     destroy: function(state)
     {
+        var panelStatus = Firebug.chrome.getPanelStatusElements();
+        panelStatus.removeEventListener('selectItem', this.onPanelStatusSelectItem, false);
+
         Firebug.Panel.destroy.apply(this, arguments);
     },
 
@@ -3452,6 +3460,9 @@ CallstackPanel.prototype = extend(Firebug.Panel,
                     FBL.setClass(div, "focusRow");
                     div.setAttribute('role', "listitem");
 
+                    if (frameButton.getAttribute("selected") == "true")
+                        this.selectItem(div);
+
                     this.panelNode.appendChild(div);
                 }
             }
@@ -3459,21 +3470,22 @@ CallstackPanel.prototype = extend(Firebug.Panel,
         }
     },
 
-    highlightFrame: function(frame)
+    onSelectItem: function(event)
     {
         if (FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.callstackPanel.highlightFrame", frame);
+            FBTrace.sysout("CallStack onSelectItem event.target "+event.target, event);
 
-        var frameViews = this.panelNode.childNodes
         for (var child = this.panelNode.firstChild; child; child = child.nextSibling)
         {
-            if (child.label && child.label.repObject && child.label.repObject == frame)
+            if (child.frameButton.getAttribute("selected") == "true")
             {
                 this.selectItem(child);
-                return true;
+                return;
             }
         }
-        return false;
+
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("CallStack onSelectItem NO HIT in panelNode ", this.panelNode);
     },
 
     selectItem: function(item)

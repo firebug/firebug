@@ -461,7 +461,13 @@
                 this.selectedItem = item;
 
                 if (item)
+                {
                     item.setAttribute("selected", "true");
+
+                    var ev = document.createEvent("Events");
+                    ev.initEvent("selectItem", true, false);
+                    this.dispatchEvent(ev);
+                }
             ]]></body>
         </method>
     </implementation>
