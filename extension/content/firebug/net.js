@@ -135,10 +135,6 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         var panel = context.getPanel(panelName, true);
         if (panel)
             panel.clear();
-
-        // ... and clear the network context.
-        if (context.netProgress)
-            context.netProgress.clear();
     },
 
     onToggleFilter: function(context, filterCategory)
@@ -1255,6 +1251,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         this.queue = [];
         this.invalidPhases = false;
+
+        if (this.context.netProgress)
+            this.context.netProgress.clear();
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.panel.clear; " + this.context.getName());
     },
 });
 
