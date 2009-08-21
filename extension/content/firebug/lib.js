@@ -3209,8 +3209,8 @@ this.parseURLEncodedText = function(text)
             var index = args[i].indexOf("=");
             if (index != -1)
             {
-                var paramName = args[i].substring(0, index);
-                var paramValue = args[i].substring(index + 1);
+                var paramName = unescape(args[i].substring(0, index));
+                var paramValue = unescape(args[i].substring(index + 1));
 
                 if (paramValue > maxValueLength)
                     paramValue = this.$STR("LargeData");
@@ -3220,6 +3220,7 @@ this.parseURLEncodedText = function(text)
             }
             else
             {
+                var paramName = unescape(args[i]);
                 params.push({name: decodeURIComponent(paramName), value: ""});
             }
         }
