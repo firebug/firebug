@@ -143,7 +143,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
             this.htmlEditor.innerEditMode = node.localName in innerEditableTags;
 
-            var html = this.htmlEditor.innerEditMode ? node.innerHTML : getElementXML(node);
+            var html = this.htmlEditor.innerEditMode ? node.innerHTML : getElementHTML(node);
             Firebug.Editor.startEditing(objectNodeBox, html, this.htmlEditor);
         }
     },
@@ -1148,6 +1148,21 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
                     "&lt;",
                     SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
+                    SPAN({class: "nodeBracket editable insertBefore"}, "&gt;")
+                )
+            )
+        )
+});
+
+Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
+{
+    tag:
+        DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+            DIV({class: "nodeLabel", role: "presentation"},
+                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
+                    "&lt;",
+                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({class: "nodeBracket editable insertBefore"}, "/&gt;")
                 )
             )
@@ -1390,18 +1405,26 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 // ************************************************************************************************
 // Local Helpers
 
+function getEmptyElementTag(node)
+{
+    if (node.ownerDocument.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml")
+        return Firebug.HTMLPanel.XEmptyElement.tag;
+    else
+        return Firebug.HTMLPanel.EmptyElement.tag;
+}
+
 function getNodeTag(node, expandAll)
 {
     if (node instanceof Element)
     {
         if (node instanceof HTMLAppletElement)
-            return Firebug.HTMLPanel.EmptyElement.tag;
+            return getEmptyElementTag(node);
         else if (node.firebugIgnore)
             return null;
         else if (isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
         else if (isEmptyElement(node))
-            return Firebug.HTMLPanel.EmptyElement.tag;
+            return getEmptyElementTag(node);
         else if (isPureText(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
@@ -1479,7 +1502,7 @@ function isPureText(element)
 {
     for (var child = element.firstChild; child; child = child.nextSibling)
     {
-        if (child.nodeType == 1)
+        if (child.nodeType != 3)
             return false;
     }
     return true;
@@ -1507,19 +1530,21 @@ function isEmptyElement(element)
     // XXXjjb the commented code causes issues 48, 240, and 244. I think the lines should be deleted.
     // If the DOM has whitespace children, then the element is not empty even if
     // we decide not to show the whitespace in the UI.
-//    if (Firebug.showWhitespaceNodes)
-//    {
-        return !element.firstChild;
-//    }
-//    else
-//    {
-//        for (var child = element.firstChild; child; child = child.nextSibling)
-//        {
-//            if (!isWhitespaceText(child))
-//                return false;
-//        }
-//    }
-//    return true;
+
+    // XXXsroussey reverted above but added a check for self closing tags
+    if (Firebug.showWhitespaceNodes)
+    {
+        return !element.firstChild && isSelfClosing(element);
+    }
+    else
+    {
+        for (var child = element.firstChild; child; child = child.nextSibling)
+        {
+            if (!isWhitespaceText(child))
+                return false;
+        }
+    }
+    return isSelfClosing(element);
 }
 
 function findNextSibling(node)

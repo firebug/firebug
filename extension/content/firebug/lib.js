@@ -1532,7 +1532,67 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 };
 
 // ************************************************************************************************
-// XML Serialization
+// HTML and XML Serialization
+
+
+this.isSelfClosing = function (element)
+{
+    var tag = element.localName.toLowerCase();
+    return (this.selfClosingTags.hasOwnProperty(tag));
+};
+
+this.getElementHTML = function(element)
+{
+    var isXhtml= element.ownerDocument.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml";
+
+    var self=this;
+    function toHTML(elt)
+    {
+        if (elt.nodeType == 1)
+        {
+            xml.push('<', elt.localName.toLowerCase());
+
+            for (var i = 0; i < elt.attributes.length; ++i)
+            {
+                var attr = elt.attributes[i];
+
+                // Hide attributes set by Firebug
+                if (attr.localName.indexOf("firebug-") == 0)
+                    continue;
+
+                xml.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
+            }
+
+            if (elt.firstChild)
+            {
+                xml.push('>');
+
+                for (var child = elt.firstChild; child; child = child.nextSibling)
+                    toHTML(child);
+
+                xml.push('</', elt.localName.toLowerCase(), '>');
+            }
+            else if (self.isSelfClosing(elt))
+            {
+                xml.push(isXhtml?'/>':'>');
+            }
+            else
+            {
+                xml.push('></', elt.localName.toLowerCase(), '>');
+            }
+        }
+        else if (elt.nodeType == 3)
+            xml.push(escapeHTMLnoQuote(elt.nodeValue));
+        else if (elt.nodeType == 4)
+            xml.push('<![CDATA[', elt.nodeValue, ']]>');
+        else if (elt.nodeType == 8)
+            xml.push('<!--', elt.nodeValue, '-->');
+    }
+
+    var xml = [];
+    toHTML(element);
+    return xml.join("");
+};
 
 this.getElementXML = function(element)
 {
@@ -1645,6 +1705,28 @@ function escapeHTML(value)
 }
 
 this.escapeHTML = escapeHTML;
+
+function escapeHTMLnoQuote(value)
+{
+    function replaceChars(ch)
+    {
+        switch (ch)
+        {
+            case "<":
+                return "&lt;";
+            case ">":
+                return "&gt;";
+            case "&":
+                return "&amp;";
+            case "\xa0":
+                return "&nbsp;";
+        }
+        return "?";
+    };
+    return String(value).replace(/[<>&\xa0]/g, replaceChars);
+};
+
+this.escapeHTMLnoQuote = escapeHTMLnoQuote;
 
 this.unEscapeHTML = function(str)
 {
@@ -2918,7 +3000,7 @@ this.splitDataURL = function(url)
 {
     var mark = url.indexOf(':', 3);
     if (mark != 4)
-        return false;	//  the first 5 chars must be 'data:'
+        return false; //  the first 5 chars must be 'data:'
 
     var point = url.indexOf(',', mark+1);
     if (point < mark)
@@ -6769,6 +6851,19 @@ this.innerEditableTags =
 {
     "BODY": 1,
     "body": 1
+};
+
+this.selfClosingTags =
+{
+    "meta": 1,
+    "link": 1,
+    "area": 1,
+    "base": 1,
+    "basefont": 1,
+    "input": 1,
+    "img": 1,
+    "br": 1,
+    "hr": 1
 };
 
 const invisibleTags = this.invisibleTags =

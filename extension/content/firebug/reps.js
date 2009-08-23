@@ -699,7 +699,7 @@ this.Element = domplate(Firebug.Rep,
 
     copyHTML: function(elt)
     {
-        var html = getElementXML(elt);
+        var html = getElementHTML(elt);
         copyToClipboard(html);
     },
 
