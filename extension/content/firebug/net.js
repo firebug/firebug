@@ -126,6 +126,12 @@ const binaryCategoryMap =
 
 // ************************************************************************************************
 
+/**
+ * @module Represents a module object for the Net panel. This object is derived
+ * from <code>Firebug.ActivableModule</code> in order to support activation (enable/disable).
+ * This allows to avoid (performance) expensive features if the functionality is not necessary
+ * for the user.
+ */
 Firebug.NetMonitor = extend(Firebug.ActivableModule,
 {
     dispatchName: "netMonitor",
@@ -304,7 +310,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 // ************************************************************************************************
 
 /**
- * @class Represents a Firebug <i>panel</i> that displayes info about HTTP activity associated with
+ * @panel Represents a Firebug panel that displayes info about HTTP activity associated with
  * the current page. This class is derived from <code>Firebug.ActivablePanel</code> in order
  * to support activation (enable/disable). This allows to avoid (performance) expensive
  * features if the functionality is not necessary for the user.
@@ -1263,7 +1269,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 // ************************************************************************************************
 
 /**
- * @class Represents a domplate template that is used to render basic content of the net panel.
+ * @domplate Represents a template that is used to render basic content of the net panel.
  */
 Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(),
 {
@@ -1491,6 +1497,10 @@ var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
 
 // ************************************************************************************************
 
+/**
+ * @domplate Represents a template that is used to reneder detailed info about a request.
+ * This template is rendered when a request is expanded.
+ */
 Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 {
     tag:
@@ -1936,6 +1946,10 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
 // ************************************************************************************************
 
+/**
+ * @domplate Represents a template for popup tip that displays detailed timing info about
+ * a network request.
+ */
 Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 {
     tag:
@@ -2037,6 +2051,9 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
+/**
+ * @domplate Represents a template for a pupup tip with detailed size info.
+ */
 Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 {
     tag:

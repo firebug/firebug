@@ -1805,6 +1805,11 @@ Firebug.Listener.prototype =
 
 // ************************************************************************************************
 
+/**
+ * @module Base class for all modules. Every derived module object must be registered using
+ * <code>Firebug.registerModule</code> method. There is always one instance of a module object
+ * per browser window.
+ */
 Firebug.Module = extend(new Firebug.Listener(),
 {
     /**
@@ -1927,6 +1932,11 @@ Firebug.Extension =
 
 // ************************************************************************************************
 
+/**
+ * @panel Base class for all panels. Every derived panel must define a constructor and
+ * register with <code>Firebug.registerPanel</code> method. An instance of the panel
+ * object is created by the framework for each browser tab where Firebug is activated.
+ */
 Firebug.Panel =
 {
     searchable: false,
