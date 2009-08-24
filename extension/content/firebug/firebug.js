@@ -1938,6 +1938,7 @@ Firebug.Extension =
  * object is created by the framework for each browser tab where Firebug is activated.
  */
 Firebug.Panel =
+/** @lends Firebug.Panel */
 {
     searchable: false,
     editable: true,
