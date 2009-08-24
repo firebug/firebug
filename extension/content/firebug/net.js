@@ -437,7 +437,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             scrollIntoCenterView(file.row);
             if (!hasClass(file.row, "opened"))
-                this.toggleHeadersRow(file.row);
+                NetRequestTable.toggleHeadersRow(file.row);
         }
     },
 
