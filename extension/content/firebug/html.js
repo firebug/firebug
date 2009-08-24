@@ -1431,7 +1431,7 @@ function getNodeTag(node, expandAll)
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
     }
     else if (node instanceof Text)
-        return isWhitespaceText(node) ? Firebug.HTMLPanel.WhitespaceNode.tag : Firebug.HTMLPanel.TextNode.tag;
+        return Firebug.showWhitespaceNodes ? Firebug.HTMLPanel.WhitespaceNode.tag : Firebug.HTMLPanel.TextNode.tag;
     else if (node instanceof CDATASection)
         return Firebug.HTMLPanel.CDATANode.tag;
     else if (node instanceof Comment && (Firebug.showCommentNodes || expandAll))
@@ -1553,6 +1553,7 @@ function findNextSibling(node)
         return node.nextSibling;
     else
     {
+        // only return a non-whitespace node
         for (var child = node.nextSibling; child; child = child.nextSibling)
         {
             if (!isWhitespaceText(child))

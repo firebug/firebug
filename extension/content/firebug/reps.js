@@ -688,18 +688,29 @@ this.Element = domplate(Firebug.Rep,
 
      getNodeText: function(element)
      {
-         var text = element.textContent;
-         if (Firebug.showFullTextNodes)
-            return text;
-        else
-            return cropString(text, 50);
+         if (Firebug.showWhitespaceNodes)
+         {
+            var text = element.innerHTML;
+            if (Firebug.showFullTextNodes)
+                return escapeHTML(text);
+            else
+                return cropString(escapeHTML(text), 50);
+         }
+         else
+         {
+             var text = element.textContent;
+             if (Firebug.showFullTextNodes)
+                 return text;
+             else
+                 return cropString(text, 50);
+         }
      },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     copyHTML: function(elt)
     {
-        var html = getElementHTML(elt);
+        var html = getElementXML(elt);
         copyToClipboard(html);
     },
 
