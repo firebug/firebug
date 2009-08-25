@@ -146,7 +146,6 @@ Firebug.XMLViewerModel.ParseError = domplate(Firebug.Rep,
 // ************************************************************************************************
 // Registration
 
-Firebug.registerRep(Firebug.XMLViewerModel.XMLElement);
 Firebug.registerModule(Firebug.XMLViewerModel);
 
 }});
