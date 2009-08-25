@@ -716,7 +716,8 @@ top.FirebugChrome =
 
                         var rep = Firebug.getRep(object);
                         var objectTitle = rep.getTitle(object, FirebugContext);
-                        var title = FBL.cropString(objectTitle, statusCropSize);
+
+                        var title = FBL.cropMultiplLines(objectTitle, statusCropSize);
                         panelStatus.addItem(title, object, rep, panel.statusSeparator);
                     }
 
@@ -1411,8 +1412,8 @@ function onMainTabBoxMouseDown(event)
     {
         var contentSplitter = Firebug.chrome.$("fbContentSplitter");
         if (FBTrace.DBG_ERRORS)
-	        FBTrace.sysout("onMainTabBoxMouseDown ", event);
-	    // TODO: grab the splitter here.
+            FBTrace.sysout("onMainTabBoxMouseDown ", event);
+        // TODO: grab the splitter here.
     }
 }
 

@@ -91,7 +91,7 @@ this.String = domplate(Firebug.Rep,
         {
             tag: OBJECTBOX("&quot;$object&quot;"),
 
-            shortTag: OBJECTBOX("&quot;$object|cropString&quot;"),
+            shortTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
 
             // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -127,7 +127,7 @@ this.XML = domplate(Firebug.Rep,
 
     asShortString: function(object)
     {
-        return cropString(this.asString(object));
+        return cropMultipleLines(this.asString(object));
     },
 });
 
@@ -137,7 +137,7 @@ this.Text = domplate(Firebug.Rep,
 {
     tag: OBJECTBOX("$object"),
 
-    shortTag: OBJECTBOX("$object|cropString"),
+    shortTag: OBJECTBOX("$object|cropMultipleLines"),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -323,7 +323,7 @@ this.Obj = domplate(Firebug.Rep,
             SPAN({class: "objectTitle"}, "$object|getTitle"),
             FOR("prop", "$object|propIterator",
                 " $prop.name=",
-                SPAN({class: "objectPropValue"}, "$prop.value|cropString")
+                SPAN({class: "objectPropValue"}, "$prop.value|cropMultipleLines")
             )
         ),
 
@@ -631,7 +631,7 @@ this.Element = domplate(Firebug.Rep,
         else if (elt instanceof HTMLScriptElement)
             value = getFileName(elt.src);
 
-        return value ? " " + cropString(value, 20) : "";
+        return value ? " " + cropMultipleLines(value, 20) : "";
      },
 
      attrIterator: function(elt)
@@ -692,9 +692,9 @@ this.Element = domplate(Firebug.Rep,
          {
             var text = element.innerHTML;
             if (Firebug.showFullTextNodes)
-                return escapeHTML(text);
+                return escapeNewLines(text);
             else
-                return cropString(escapeHTML(text), 50);
+                return cropMultipleLines(text, 50);
          }
          else
          {
@@ -710,7 +710,7 @@ this.Element = domplate(Firebug.Rep,
 
     copyHTML: function(elt)
     {
-        var html = getElementXML(elt);
+        var html = getElementHTML(elt);
         copyToClipboard(html);
     },
 
@@ -800,7 +800,7 @@ this.TextNode = domplate(Firebug.Rep,
         OBJECTLINK(
             "&lt;",
             SPAN({class: "nodeTag"}, "TextNode"),
-            "&nbsp;textContent=&quot;", SPAN({class: "nodeValue"}, "$object.textContent|cropString"), "&quot;",
+            "&nbsp;textContent=&quot;", SPAN({class: "nodeValue"}, "$object.textContent|cropMultipleLines"), "&quot;",
             "&gt;"
             ),
 
@@ -1381,7 +1381,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
     getLine: function(error)
     {
         if (error.source)
-            return cropString(error.source, 80);
+            return cropMultipleLines(error.source, 80);
         if (error.category == "js" && error.href && error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
             return "";
         return cropString(error.getSourceLine(), 80);

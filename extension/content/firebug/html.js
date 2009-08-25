@@ -266,7 +266,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             return;
 
         if (!Firebug.showFullTextNodes)
-            textValue = cropString(textValue, 50);
+            textValue = cropMultipleLines(textValue, 50);
 
         var parentTag = getNodeBoxTag(parentNodeBox);
         if (parentTag == Firebug.HTMLPanel.TextElement.tag)

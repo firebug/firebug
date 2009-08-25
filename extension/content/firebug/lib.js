@@ -1550,7 +1550,7 @@ this.getElementHTML = function(element)
     {
         if (elt.nodeType == 1)
         {
-            xml.push('<', elt.localName.toLowerCase());
+            html.push('<', elt.localName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -1560,38 +1560,46 @@ this.getElementHTML = function(element)
                 if (attr.localName.indexOf("firebug-") == 0)
                     continue;
 
-                xml.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
+                html.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
             }
 
             if (elt.firstChild)
             {
-                xml.push('>');
+                html.push('>');
 
-                for (var child = elt.firstChild; child; child = child.nextSibling)
-                    toHTML(child);
+                var pureText=true;
+                for (var child = element.firstChild; child; child = child.nextSibling)
+                    pureText=pureText && (child.nodeType == 3);
 
-                xml.push('</', elt.localName.toLowerCase(), '>');
+                if (pureText)
+                    html.push(elt.innerHTML)
+                else {
+                    for (var child = elt.firstChild; child; child = child.nextSibling)
+                        toHTML(child);
+                }
+
+                html.push('</', elt.localName.toLowerCase(), '>');
             }
             else if (self.isSelfClosing(elt))
             {
-                xml.push(isXhtml?'/>':'>');
+                html.push(isXhtml?'/>':'>');
             }
             else
             {
-                xml.push('></', elt.localName.toLowerCase(), '>');
+                html.push('></', elt.localName.toLowerCase(), '>');
             }
         }
         else if (elt.nodeType == 3)
-            xml.push(escapeHTMLnoQuote(elt.nodeValue));
+            html.push(escapeHTMLnoQuote(elt.nodeValue));
         else if (elt.nodeType == 4)
-            xml.push('<![CDATA[', elt.nodeValue, ']]>');
+            html.push('<![CDATA[', elt.nodeValue, ']]>');
         else if (elt.nodeType == 8)
-            xml.push('<!--', elt.nodeValue, '-->');
+            html.push('<!--', elt.nodeValue, '-->');
     }
 
-    var xml = [];
+    var html = [];
     toHTML(element);
-    return xml.join("");
+    return html.join("");
 };
 
 this.getElementXML = function(element)
@@ -1733,8 +1741,8 @@ this.unEscapeHTML = function(str)
     return str.replace(/&amp;/g, "&")
         .replace(/&lt;/g, "<")
         .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, ">")
-        .replace(/&#39;/g, ">");
+        .replace(/&quot;/g, '"')
+        .replace(/&#39;/g, "'");
 };
 
 this.cropString = function(text, limit)
@@ -1747,9 +1755,14 @@ this.cropString = function(text, limit)
         var halfLimit = limit / 2;
 
     if (text.length > limit)
-        return this.escapeNewLines(text.substr(0, halfLimit) + "..." + text.substr(text.length-halfLimit));
+        return text.substr(0, halfLimit) + "..." + text.substr(text.length-halfLimit);
     else
-        return this.escapeNewLines(text);
+        return text;
+};
+
+this.cropMultipleLines = function(text, limit)
+{
+    return this.escapeNewLines(this.cropString(text, limit));
 };
 
 this.isWhitespace = function(text)
