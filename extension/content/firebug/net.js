@@ -456,7 +456,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var items = [];
 
         var file = Firebug.getRepObject(target);
-        if (!file)
+        if (!file || !(file instanceof NetFile))
             return items;
 
         var object = Firebug.getObjectByURL(this.context, file.href);

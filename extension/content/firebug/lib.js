@@ -2647,6 +2647,19 @@ this.safeGetWindowLocation = function(window)
     }
 };
 
+this.safeGetContentType = function(request)
+{
+    try
+    {
+        return new String(request.contentType).toLowerCase();
+    }
+    catch (err)
+    {
+    }
+
+    return null;
+}
+
 // ************************************************************************************************
 // JavaScript Parsing
 
