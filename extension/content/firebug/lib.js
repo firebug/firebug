@@ -2157,7 +2157,7 @@ this.findScriptForFunctionInContext = function(context, fn)
 {
     var found = null;
 
-    if (!fn.toString)
+    if (!fn || !fn.toString)
         return found;
 
     var fns = fn.toString();
