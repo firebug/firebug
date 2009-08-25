@@ -785,7 +785,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
             this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
-            this.summaryRow =  NetRequestTable.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
+            this.summaryRow =  NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
         }
     },
 
@@ -815,7 +815,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             var tbody = this.table.firstChild;
             var lastRow = tbody.lastChild.previousSibling;
-            var row = NetRequestTable.fileTag.insertRows({files: newFileData}, lastRow)[0];
+            var row = NetRequestEntry.fileTag.insertRows({files: newFileData}, lastRow)[0];
 
             for (var i = 0; i < newFileData.length; ++i)
             {
@@ -860,13 +860,13 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         else
         {
             var sizeLabel = row.childNodes[3].firstChild;
-            sizeLabel.firstChild.nodeValue = NetRequestTable.getSize(file);
+            sizeLabel.firstChild.nodeValue = NetRequestEntry.getSize(file);
 
             var methodLabel = row.childNodes[1].firstChild;
-            methodLabel.firstChild.nodeValue = NetRequestTable.getStatus(file);
+            methodLabel.firstChild.nodeValue = NetRequestEntry.getStatus(file);
 
             var hrefLabel = row.childNodes[0].firstChild;
-            hrefLabel.firstChild.nodeValue = NetRequestTable.getHref(file);
+            hrefLabel.firstChild.nodeValue = NetRequestEntry.getHref(file);
 
             if (file.mimeType)
             {
@@ -885,12 +885,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             else
                 removeClass(row, "fromCache");
 
-            if (NetRequestTable.isError(file))
+            if (NetRequestEntry.isError(file))
             {
                 setClass(row, "responseError");
 
                 var hrefLabel = row.firstChild.firstChild.firstChild;
-                hrefLabel.nodeValue = NetRequestTable.getHref(file);
+                hrefLabel.nodeValue = NetRequestEntry.getHref(file);
             }
 
             var timeLabel = row.childNodes[4].firstChild.lastChild.firstChild;
@@ -899,7 +899,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             {
                 removeClass(row, "collapsed");
                 setClass(row, "loaded");
-                timeLabel.innerHTML = NetRequestTable.formatTime(this.elapsed);
+                timeLabel.innerHTML = NetRequestEntry.formatTime(this.elapsed);
             }
             else
             {
@@ -1055,14 +1055,14 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         var sizeLabel = row.childNodes[3].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
-        sizeLabel.firstChild.nodeValue = NetRequestTable.formatSize(totalSize);
+        sizeLabel.firstChild.nodeValue = NetRequestEntry.formatSize(totalSize);
 
         var cacheSizeLabel = row.lastChild.firstChild.firstChild;
         cacheSizeLabel.setAttribute("collapsed", cachedSize == 0);
-        cacheSizeLabel.childNodes[1].firstChild.nodeValue = NetRequestTable.formatSize(cachedSize);
+        cacheSizeLabel.childNodes[1].firstChild.nodeValue = NetRequestEntry.formatSize(cachedSize);
 
         var timeLabel = row.lastChild.firstChild.lastChild.firstChild;
-        timeLabel.innerHTML = NetRequestTable.formatTime(totalTime);
+        timeLabel.innerHTML = NetRequestEntry.formatTime(totalTime);
     },
 
     summarizePhase: function(phase, rightNow)
@@ -1209,7 +1209,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (hasClass(lastRow, "netActivationRow"))
             return;
 
-        var message = NetRequestTable.activationTag.insertRows({}, lastRow)[0];
+        var message = NetRequestEntry.activationTag.insertRows({}, lastRow)[0];
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.insertActivationMessage; " + this.context.getName(), message);
@@ -1277,15 +1277,91 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
                 TR(
-                    TD({width: "18%"}),
-                    TD({width: "12%"}),
-                    TD({width: "12%"}),
-                    TD({width: "4%"}),
-                    TD({width: "54%"})
+                    TD({id: "netHeaderHrefCell", width: "18%", "class": "netHeaderCell alphaValue"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: $STR("net.header.URL Tooltip")}, 
+                        $STR("net.header.URL"))
+                    ),
+                    TD({id: "netHeaderStatusCell", width: "12%", "class": "netHeaderCell alphaValue"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: $STR("net.header.Status Tooltip")}, 
+                        $STR("net.header.Status"))
+                    ),
+                    TD({id: "netHeaderDomainCell", width: "12%", "class": "netHeaderCell alphaValue"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: $STR("net.header.Domain Tooltip")}, 
+                        $STR("net.header.Domain"))
+                    ),
+                    TD({id: "netHeaderSizeCell", width: "4%", "class": "netHeaderCell alphaValue"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: $STR("net.header.Size Tooltip")}, 
+                        $STR("net.header.Size"))
+                    ),
+                    TD({id: "netHeaderTimeCell", width: "54%", "class": "netHeaderCell alphaValue"},
+                        DIV({"class": "netHeaderCellBox",
+                        title: $STR("net.header.Timeline Tooltip")}, 
+                        $STR("net.header.Timeline"))
+                    )
                 )
             )
         ),
 
+    onClick: function(event)
+    {
+        if (isLeftClick(event))
+        {
+            var row = getAncestorByClass(event.target, "netRow");
+            if (row)
+            {
+                this.toggleHeadersRow(row);
+                cancelEvent(event);
+            }
+        }
+    },
+
+    toggleHeadersRow: function(row)
+    {
+        if (!hasClass(row, "hasHeaders"))
+            return;
+
+        var file = row.repObject;
+        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
+
+        toggleClass(row, "opened");
+        if (hasClass(row, "opened"))
+        {
+            var netInfoRow = NetRequestEntry.netInfoTag.insertRows({}, row)[0];
+            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
+
+            // Notify listeners so additional tabs can be created.
+            dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
+
+            NetInfoBody.selectTabByName(netInfoBox, "Headers");
+            var category = getFileCategory(row.repObject);
+            if (category)
+                setClass(netInfoBox, "category-" + category);
+        }
+        else
+        {
+            var netInfoRow = row.nextSibling;
+            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+
+            dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
+
+            row.parentNode.removeChild(netInfoRow);
+        }
+    },
+});
+
+var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
+
+// ************************************************************************************************
+
+/**
+ * @domplate Represents a template that is used to render net panel entries.
+ */
+Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(),
+{
     fileTag:
         FOR("file", "$files",
             TR({"class": "netRow $file.file|getCategory",
@@ -1445,55 +1521,9 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         // Use formatTime util from the lib.
         return formatTime(elapsed);
     },
-
-    onClick: function(event)
-    {
-        if (isLeftClick(event))
-        {
-            var row = getAncestorByClass(event.target, "netRow");
-            if (row)
-            {
-                this.toggleHeadersRow(row);
-                cancelEvent(event);
-            }
-        }
-    },
-
-    toggleHeadersRow: function(row)
-    {
-        if (!hasClass(row, "hasHeaders"))
-            return;
-
-        var file = row.repObject;
-        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
-
-        toggleClass(row, "opened");
-        if (hasClass(row, "opened"))
-        {
-            var netInfoRow = this.netInfoTag.insertRows({}, row)[0];
-            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
-
-            // Notify listeners so additional tabs can be created.
-            dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
-
-            NetInfoBody.selectTabByName(netInfoBox, "Headers");
-            var category = getFileCategory(row.repObject);
-            if (category)
-                setClass(netInfoBox, "category-" + category);
-        }
-        else
-        {
-            var netInfoRow = row.nextSibling;
-            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
-
-            dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
-
-            row.parentNode.removeChild(netInfoRow);
-        }
-    },
 });
 
-var NetRequestTable = Firebug.NetMonitor.NetRequestTable;
+var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
 
 // ************************************************************************************************
 

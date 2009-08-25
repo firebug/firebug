@@ -40,6 +40,54 @@
 }
 
 /************************************************************************************************/
+/* Header for Net panel table */
+
+.netHeaderRow {
+    height: 16px;
+}
+
+.netHeaderCell {
+    cursor: pointer;
+    -moz-user-select: none;
+    border-bottom: 1px solid #9C9C9C;
+    padding: 0 !important;
+    font-weight: bold;
+    background: #BBBBBB url(chrome://firebug/skin/tableHeader.gif) repeat-x;
+    white-space: nowrap;
+}
+
+.netHeaderRow > .netHeaderCell:first-child > .netHeaderCellBox {
+    padding: 2px 14px 2px 18px;
+}
+
+.netHeaderCellBox {
+    padding: 2px 14px 2px 10px;
+    border-left: 1px solid #D9D9D9;
+    border-right: 1px solid #9C9C9C;
+}
+
+.netHeaderCell:hover:active {
+    background: #959595 url(chrome://firebug/skin/tableHeaderActive.gif) repeat-x;
+}
+
+.netHeaderSorted {
+    background: #7D93B2 url(chrome://firebug/skin/tableHeaderSorted.gif) repeat-x;
+}
+
+.netHeaderSorted > .netHeaderCellBox {
+    border-right-color: #6B7C93;
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
+}
+
+.netHeaderSorted.sortedAscending > .netHeaderCellBox {
+    background-image: url(chrome://firebug/skin/arrowUp.png);
+}
+
+.netHeaderSorted:hover:active {
+    background: #536B90 url(chrome://firebug/skin/tableHeaderSortedActive.gif) repeat-x;
+}
+
+/************************************************************************************************/
 
 .netRow {
     background: LightYellow;
