@@ -35,7 +35,7 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
             const maybeHarmful = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
             const jsonStrings = /"(\\.|[^"\\\n\r])*"/g;
 
-            var contentType = safeGetContentType(file);
+            var contentType = safeGetContentType(file.request);
             if (!contentType)
                 return;
 

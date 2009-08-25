@@ -101,7 +101,7 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
         }
 
         if (FBTrace.DBG_XMLVIEWER)
-            FBTrace.sysout("xmlviewer.initTabBody; XML response parsed", doc);
+            FBTrace.sysout("xmlviewer.updateTabBody; XML response parsed", doc);
 
         // Generate XML preview.
         Firebug.HTMLPanel.CompleteElement.tag.replace({object: doc.documentElement}, tabBody);
