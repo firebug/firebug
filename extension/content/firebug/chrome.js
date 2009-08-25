@@ -717,7 +717,7 @@ top.FirebugChrome =
                         var rep = Firebug.getRep(object);
                         var objectTitle = rep.getTitle(object, FirebugContext);
 
-                        var title = FBL.cropMultiplLines(objectTitle, statusCropSize);
+                        var title = FBL.cropMultipleLines(objectTitle, statusCropSize);
                         panelStatus.addItem(title, object, rep, panel.statusSeparator);
                     }
 
