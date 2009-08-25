@@ -32,8 +32,8 @@ Firebug.TraceOptionsController = function(prefDomain, onPrefChangeHandler)
 {
     this.prefDomain = prefDomain;
 
-    this.traceService =  Cc["@joehewitt.com/firebug-trace-service;1"]
-                                         .getService(Ci.nsISupports).wrappedJSObject;
+    this.traceService = Cc["@joehewitt.com/firebug-trace-service;1"]
+        .getService(Ci.nsISupports).wrappedJSObject;
 
     this.addObserver = function()
     {
@@ -1165,7 +1165,8 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
             this.stack.push({fileName:this.obj.sourceName, lineNumber:this.obj.lineNumber, funcName:""});
         }
     }
-    else if (this.obj && this.obj.stack && (this.obj instanceof Error) &&
+    //xxxHonza: the object doesn't have to always be an instance of Error.
+    else if (this.obj && this.obj.stack && /*(this.obj instanceof Error) &&*/
         (typeof this.obj.stack.split == "function"))
     {
         // If the passed object is an error with stack trace attached, use it.
