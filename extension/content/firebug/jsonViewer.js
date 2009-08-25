@@ -83,19 +83,6 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
 
 });
 
-function safeGetContentType(file)
-{
-    try
-    {
-        return new String(file.request.contentType).toLowerCase();
-    }
-    catch (err)
-    {
-    }
-
-    return null;
-}
-
 // ************************************************************************************************
 // Registration
 
