@@ -87,21 +87,22 @@ this.Number = domplate(Firebug.Rep,
 });
 
 // ************************************************************************************************
+
 this.String = domplate(Firebug.Rep,
-        {
-            tag: OBJECTBOX("&quot;$object&quot;"),
+{
+    tag: OBJECTBOX("&quot;$object&quot;"),
 
-            shortTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
+    shortTag: OBJECTBOX("&quot;$object|cropMultipleLines&quot;"),
 
-            // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-            className: "string",
+    className: "string",
 
-            supportsObject: function(object, type)
-            {
-                return type == "string";
-            }
-        });
+    supportsObject: function(object, type)
+    {
+        return type == "string";
+    }
+});
 
 // ************************************************************************************************
 

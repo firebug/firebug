@@ -1811,9 +1811,10 @@ Firebug.Listener.prototype =
  * per browser window.
  */
 Firebug.Module = extend(new Firebug.Listener(),
+/** @lends Firebug.Module */
 {
     /**
-     * Called when the window is opened.
+     * Called by Firebug when Firefox window is opened.
      */
     initialize: function()
     {
@@ -1830,7 +1831,7 @@ Firebug.Module = extend(new Firebug.Listener(),
     },
 
     /**
-     * Called when the window is closed.
+     * Called by Firebug when Firefox window is closed.
      */
     shutdown: function()
     {
@@ -3024,6 +3025,11 @@ Firebug.Rep = domplate(
     cropString: function(text)
     {
         return cropString(text);
+    },
+
+    cropMultipleLines: function(text, limit)
+    {
+        return cropMultipleLines(text, limit);
     },
 
     toLowerCase: function(text)
