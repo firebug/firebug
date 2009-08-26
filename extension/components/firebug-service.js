@@ -1623,7 +1623,7 @@ FirebugService.prototype =
 
         fbs.isChromeBlocked = true;
 
-        //if (FBTrace.DBG_FBS_BP)
+        if (FBTrace.DBG_FBS_BP)
             this.traceFilters("setChromeBlockingFilters with "+this.componentFilters.length+" component filters");
     },
 
@@ -1639,7 +1639,7 @@ FirebugService.prototype =
 
             fbs.isChromeBlocked = false;
         }
-       // if (FBTrace.DBG_FBS_BP)
+        if (FBTrace.DBG_FBS_BP)
             this.traceFilters("removeChromeBlockingFilters");
     },
 
