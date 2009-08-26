@@ -380,8 +380,11 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
-        this.layout();
-        this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
+        if (!this.layoutInterval)
+        {
+            this.updateLayout();
+            this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
+        }
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
@@ -750,6 +753,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.queue.length)
             return;
 
+        var rightNow = now();
+        var length = this.queue.length;
+
         if (this.panelNode.offsetHeight)
             this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
@@ -757,6 +763,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (this.wasScrolledToBottom)
             scrollToBottom(this.panelNode);
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.updateLayout; Layout done, time elapsed: " +
+                formatTime(now() - rightNow) + " (" + length + ")");
     },
 
     layout: function()
@@ -2569,8 +2579,10 @@ NetProgress.prototype =
         // Update all requests that belong to the first phase.
         var firstPhase = this.phases[0];
         firstPhase.windowLoadTime = time;
-        for (var i=0; i<firstPhase.files.length; i++)
-            this.panel.updateFile(firstPhase.files[i]);
+
+        // xxxHonza: this should not be necessary.
+        //for (var i=0; i<firstPhase.files.length; i++)
+        //    this.panel.updateFile(firstPhase.files[i]);
 
         return null;
     },
@@ -2587,8 +2599,9 @@ NetProgress.prototype =
         // Update all requests that belong to the first phase.
         var firstPhase = this.phases[0];
         firstPhase.contentLoadTime = time;
-        for (var i=0; i<firstPhase.files.length; i++)
-            this.panel.updateFile(firstPhase.files[i]);
+        // xxxHonza: this should not be necessary.
+        //for (var i=0; i<firstPhase.files.length; i++)
+        //    this.panel.updateFile(firstPhase.files[i]);
 
         return null;
     },
