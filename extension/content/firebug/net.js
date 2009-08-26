@@ -43,7 +43,6 @@ const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
 const layoutInterval = 300;
 const phaseInterval = 1000;
 const indentWidth = 18;
-const maxPendingCheck = 200;
 
 var cacheSession = null;
 var contexts = new Array();
@@ -382,12 +381,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (!this.layoutInterval)
         {
-            this.updateLayout();
+            //this.layout();
             this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
         }
 
-        if (this.wasScrolledToBottom)
-            scrollToBottom(this.panelNode);
+        //if (this.wasScrolledToBottom)
+        //    scrollToBottom(this.panelNode);
     },
 
     hide: function()
@@ -854,11 +853,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     updateFileRow: function(file, newFileData)
     {
         var row = file.row;
-        if (file.toRemove)
-        {
-            this.removeLogEntry(file, true);
-        }
-        else if (!row)
+        if (!row)
         {
             newFileData.push({
                 file: file,
@@ -1121,13 +1116,16 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var netProgress = this.context.netProgress;
 
         if (!netProgress)  // XXXjjb Honza, please check, I guess we are getting here with the context not setup
+        {
+            //if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.updateLogLimit; NO NET CONTEXT for: " + this.context.getName());
             return;
+        }
 
         // Must be positive number;
-        limit = Math.max(0, limit) + netProgress.pending.length;
+        limit = Math.max(0, limit);
 
-        var files = netProgress.files;
-        var filesLength = files.length;
+        var filesLength = netProgress.files.length;
         if (!filesLength || filesLength <= limit)
             return;
 
@@ -1135,7 +1133,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var removeCount = Math.max(0, filesLength - limit);
         for (var i=0; i<removeCount; i++)
         {
-            var file = files[0];
+            var file = netProgress.files[0];
             this.removeLogEntry(file);
 
             // Remove the file occurrence from the queue.
@@ -1178,26 +1176,22 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     removeFile: function(file)
     {
         var netProgress = this.context.netProgress;
-        var files = netProgress.files;
-        var index = files.indexOf(file);
+        var index = netProgress.files.indexOf(file);
         if (index == -1)
             return false;
 
-        var requests = netProgress.requests;
-        var phases = netProgress.phases;
-
-        files.splice(index, 1);
-        requests.splice(index, 1);
+        netProgress.files.splice(index, 1);
+        netProgress.requests.splice(index, 1);
 
         // Don't forget to remove the phase whose last file has been removed.
         var phase = file.phase;
         phase.removeFile(file);
         if (!phase.files.length)
         {
-          remove(phases, phase);
+            remove(netProgress.phases, phase);
 
-          if (netProgress.currentPhase == phase)
-            netProgress.currentPhase = null;
+            if (netProgress.currentPhase == phase)
+                netProgress.currentPhase = null;
         }
 
         return true;
@@ -2298,7 +2292,6 @@ function NetProgress(context)
 NetProgress.prototype =
 {
     panel: null,
-    pending: [],
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -2325,7 +2318,6 @@ NetProgress.prototype =
             file.method = request.requestMethod;
             file.urlParams = parseURLParams(file.href);
 
-            this.awaitFile(request, file);
             this.extendPhase(file);
 
             dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
@@ -2388,7 +2380,6 @@ NetProgress.prototype =
             file.postText = info.postText;
 
             this.endLoad(file);
-            this.arriveFile(file, request);
 
             if (file.fromCache)
                 getCacheEntry(file, this);
@@ -2408,15 +2399,9 @@ NetProgress.prototype =
         if (file)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.respondedCacheFile; REMOVE FROM PENDINGS " +
-                    safeGetName(request));
+                FBTrace.sysout("net.respondedCacheFile; " + safeGetName(request));
 
-            // Remove reqeust/file from the pending array (this array represents the
-            // big hack / related to the fact that the http-on-examine-cached-response
-            // wasn't send till Fx 3.5)
-            // xxxHonza: the entire hack can be removed in FB 1.5 (as soon as only Fx 3.5
-            // is supported).
-            this.arriveFile(file, request);
+            this.panel.removeLogEntry(file, true);
         }
         else
         {
@@ -2521,8 +2506,6 @@ NetProgress.prototype =
 
             getHttpHeaders(request, file);
 
-            this.arriveFile(file, request);
-
             // Don't mark this file as "loaded". Only request for which the http-on-examine-response
             // event is received is displayed within the list. This method is used by spy.
             //this.endLoad(file);
@@ -2530,40 +2513,6 @@ NetProgress.prototype =
             getCacheEntry(file, this);
         }
 
-        return file;
-    },
-
-    cacheEntryReady: function cacheEntryReady(request, file, size)
-    {
-        //if (FBTrace.DBG_NET)
-        //    FBTrace.sysout("net.cacheEntryReady for file.href: " + file.href + "\n");
-
-        if (size != -1)
-            file.size = size;
-
-        if (file.loaded)
-        {
-            getHttpHeaders(request, file);
-            this.arriveFile(file, request);
-            return file;
-        }
-
-        // Don't update the UI.
-        return null;
-    },
-
-    removeFile: function removeFile(request, file, size)
-    {
-        if (file.loaded)
-            return;
-
-        if (!this.pending.length)
-        {
-            this.context.clearInterval(this.pendingInterval);
-            delete this.pendingInterval;
-        }
-
-        file.toRemove = true;
         return file;
     },
 
@@ -2667,54 +2616,6 @@ NetProgress.prototype =
         }
         else
             return this.documents[0];
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-    awaitFile: function(request, file)
-    {
-        //if (FBTrace.DBG_NET)
-        //    FBTrace.sysout("net.awaitFile for file.href: " + file.href + "\n");
-
-        this.pending.push(file);
-
-        // XXXjoe Remove files after they have been checked N times
-        if (!this.pendingInterval)
-        {
-            this.pendingInterval = this.context.setInterval(bindFixed(function()
-            {
-                for (var i = 0; i < this.pending.length; ++i)
-                {
-                    var file = this.pending[i];
-                    if (file.pendingCount++ > maxPendingCheck)
-                    {
-                        this.pending.splice(i, 1);
-                        --i;
-
-                        this.post(cacheEntryReady, [request, file, 0]);
-                        this.post(removeFile, [request, file, 0]);
-                    }
-                    else
-                        waitForCacheCompletion(request, file, this);
-                }
-            }, this), 300);
-        }
-    },
-
-    arriveFile: function(file, request)
-    {
-        //if (FBTrace.DBG_NET)
-        //    FBTrace.sysout("net.arriveFile for file.href="+file.href+" and request.name="+safeGetName(request)+"\n");
-
-        var index = this.pending.indexOf(file);
-        if (index != -1)
-            this.pending.splice(index, 1);
-
-        if (!this.pending.length)
-        {
-            this.context.clearInterval(this.pendingInterval);
-            delete this.pendingInterval;
-        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2842,8 +2743,6 @@ var receivingFile = NetProgress.prototype.receivingFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
 var stopFile = NetProgress.prototype.stopFile;
-var cacheEntryReady = NetProgress.prototype.cacheEntryReady;
-var removeFile = NetProgress.prototype.removeFile;
 var windowLoad = NetProgress.prototype.windowLoad;
 var contentLoad = NetProgress.prototype.contentLoad;
 
@@ -2907,7 +2806,6 @@ function NetFile(href, document)
 {
     this.href = href;
     this.document = document
-    this.pendingCount = 0;
 }
 
 NetFile.prototype =
@@ -3090,15 +2988,6 @@ function unmonitorContext(context)
     if (!netProgress)
         return;
 
-    // Remove all files waiting for cache response.
-    if (netProgress.pendingInterval)
-    {
-        context.clearInterval(netProgress.pendingInterval);
-        delete netProgress.pendingInterval;
-
-        netProgress.pending.splice(0, netProgress.pending.length);
-    }
-
     // Since the print into the UI is done by timeout asynchronously,
     // make sure there are no requests left.
     var panel = context.getPanel(panelName, true);
@@ -3131,32 +3020,6 @@ function initCacheSession()
         var cacheService = CacheService.getService(Ci.nsICacheService);
         cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
         cacheSession.doomEntriesIfExpired = false;
-    }
-}
-
-function waitForCacheCompletion(request, file, netProgress)
-{
-    try
-    {
-        initCacheSession();
-        var descriptor = cacheSession.openCacheEntry(file.href, ACCESS_READ, false);
-        if (descriptor)
-        {
-            netProgress.post(cacheEntryReady, [request, file, descriptor.dataSize]);
-            descriptor.close();
-        }
-
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("waitForCacheCompletion "+(descriptor?"posted ":"no cache entry ")+file.href+"\n");
-    }
-    catch (exc)
-    {
-        if (exc.result != NS_ERROR_CACHE_WAIT_FOR_VALIDATION
-            && exc.result != NS_ERROR_CACHE_KEY_NOT_FOUND)
-        {
-            ERROR(exc);
-            netProgress.post(cacheEntryReady, [request, file, -1]);
-        }
     }
 }
 
