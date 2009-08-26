@@ -1279,27 +1279,27 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                 TR(
                     TD({id: "netHeaderHrefCell", width: "18%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
-                        title: $STR("net.header.URL Tooltip")}, 
+                        title: $STR("net.header.URL Tooltip")},
                         $STR("net.header.URL"))
                     ),
                     TD({id: "netHeaderStatusCell", width: "12%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
-                        title: $STR("net.header.Status Tooltip")}, 
+                        title: $STR("net.header.Status Tooltip")},
                         $STR("net.header.Status"))
                     ),
                     TD({id: "netHeaderDomainCell", width: "12%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
-                        title: $STR("net.header.Domain Tooltip")}, 
+                        title: $STR("net.header.Domain Tooltip")},
                         $STR("net.header.Domain"))
                     ),
                     TD({id: "netHeaderSizeCell", width: "4%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
-                        title: $STR("net.header.Size Tooltip")}, 
+                        title: $STR("net.header.Size Tooltip")},
                         $STR("net.header.Size"))
                     ),
                     TD({id: "netHeaderTimeCell", width: "54%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
-                        title: $STR("net.header.Timeline Tooltip")}, 
+                        title: $STR("net.header.Timeline Tooltip")},
                         $STR("net.header.Timeline"))
                     )
                 )
@@ -1795,7 +1795,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 var text = getPostText(file, context);
                 if (text != undefined)
                 {
-                    var params; 
+                    var params;
                     if (isURLEncodedFile(file, text))
                     {
                         var lines = text.split("\n");
@@ -2155,7 +2155,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     createTable: function(parent, limitInfo)
     {
-        var table = NetRequestTable.tableTag.replace({}, parent);
+        var table = this.tableTag.replace({}, parent);
         var row = this.createRow(table.firstChild.firstChild, limitInfo);
         return [table, row];
     },
