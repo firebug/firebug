@@ -856,8 +856,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (!context)
             {
                 context = getFrameContext(frame);
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.onBreak no breakContext, trying getFrameContext ", context);
+                if (FBTrace.DBG_BP)
+                    FBTrace.sysout("debugger.onBreak no breakContext, trying getFrameContext " + (context ? context.getName() : " none!") );
             }
             if (!context)
                 return RETURN_CONTINUE;

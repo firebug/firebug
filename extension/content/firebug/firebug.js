@@ -2344,7 +2344,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         // It's necessary to update the toolbar.
         if (this.context.panelName == this.name)
         {
-            FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
+            if(FBTrace.DBG_PANELS)
+                FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
             this.show(persistedPanelState);
         }
     },
