@@ -2363,7 +2363,7 @@ NetProgress.prototype =
             file.respondedTime = time;
             file.endTime = time;
 
-            if (request.contentLength > 0)
+            if (request.contentLength != undefined)
                 file.size = request.contentLength;
 
             if (info.responseStatus == 304)
