@@ -379,14 +379,13 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
 
-        if (!this.layoutInterval)
-        {
-            //this.layout();
-            this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
-        }
+        this.layout();
 
-        //if (this.wasScrolledToBottom)
-        //    scrollToBottom(this.panelNode);
+        if (!this.layoutInterval)
+            this.layoutInterval = setInterval(bindFixed(this.updateLayout, this), layoutInterval);
+
+        if (this.wasScrolledToBottom)
+            scrollToBottom(this.panelNode);
     },
 
     hide: function()
@@ -2185,7 +2184,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
     updateMaxLimit: function()
     {
         var value = Firebug.getPref(Firebug.prefDomain, "net.logLimit");
-        maxQueueRequests =  value ? value : maxQueueRequests;
+        maxQueueRequests = value ? value : maxQueueRequests;
     }
 });
 
