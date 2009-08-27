@@ -6,6 +6,7 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 const MODIFICATION = MutationEvent.MODIFICATION;
 const ADDITION = MutationEvent.ADDITION;
@@ -200,13 +201,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (attrName == "curpos")
             return;
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("\nhtml.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+"\n");
+            FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName, target);
 
         this.markChange();
 
         var objectNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
             ? this.ioBox.createObjectBox(target)
             : this.ioBox.findObjectBox(target);
+
         if (!objectNodeBox)
             return;
 
@@ -218,6 +220,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
             var nodeAttr = findNodeAttrBox(objectNodeBox, attrName);
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
             if (nodeAttr && nodeAttr.childNodes.length > 3)
             {
                 var attrValueBox = nodeAttr.childNodes[3];
@@ -230,6 +234,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             else
             {
                 var attr = target.getAttributeNode(attrName);
+                if (FBTrace.DBG_HTML)
+                    FBTrace.sysout("mutateAttr getAttributeNode "+attrChange+" "+attrName+"="+attrValue+" node: "+attr, attr);
                 if (attr)
                 {
                     var nodeAttr = Firebug.HTMLPanel.AttrNode.tag.replace({attr: attr},
@@ -262,6 +268,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
             ? this.ioBox.createObjectBox(parent)
             : this.ioBox.findObjectBox(parent);
+
         if (!parentNodeBox)
             return;
 
@@ -421,7 +428,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (parentNode)
             if (parentNode.nodeType == 9)
             {
-                if (FBTrace.DBG_HTML) FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");
+                if (FBTrace.DBG_HTML)
+                    FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");
                 if (parentNode.defaultView)
                     return parentNode.defaultView.frameElement;
                 else
@@ -1109,7 +1117,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
                     SPAN({class: "nodeBracket editable insertBefore"}, "&gt;")
                 )
             ),
-            DIV({class: "nodeChildBox", role :"group"}),
+            DIV({class: "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
             DIV({class: "nodeCloseLabel", role : "presentation"},
                 SPAN({class: "nodeCloseLabelBox repTarget"},
                     "&lt;/",
@@ -1425,7 +1433,7 @@ function getNodeTag(node, expandAll)
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
         else if (isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (isPureText(node))
+        else if (hasNoElementChildren(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -1498,13 +1506,26 @@ function isContainerElement(element)
     return false;
 }
 
-function isPureText(element)
+function hasNoElementChildren(element)
 {
-    for (var child = element.firstChild; child; child = child.nextSibling)
+    if (element.childElementCount != 0)  // FF 3.5+
+        return false;
+
+    // https://developer.mozilla.org/en/XBL/XBL_1.0_Reference/DOM_Interfaces
+    if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
     {
-        if (child.nodeType != 3)
-            return false;
+        var anonChildren = element.ownerDocument.getAnonymousNodes(element);
+        if (anonChildren)
+        {
+            for (var i = 0; i < anonChildren.length; i++)
+            {
+                if (anonChildren[i].nodeType == 1)
+                    return false;
+            }
+        }
     }
+    if (FBTrace.DBG_HTML)
+        FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName, element);
     return true;
 }
 
