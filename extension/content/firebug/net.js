@@ -1356,19 +1356,33 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         var table = context.getPanel(panelName, true).table;
         var hiddenCols = table.getAttribute("hiddenCols");
 
+        var lastVisibleIndex;
+        var visibleColCount = 0;
+
         var header = getAncestorByClass(target, "netHeaderRow");
         for (var i=0; i<header.childNodes.length; i++)
         {
             var column = header.childNodes[i];
-            var label = column.textContent;
+            var visible = (hiddenCols.indexOf(column.id) == -1);
+
             items.push({
-                label: label,
+                label: column.textContent,
                 type: "checkbox",
-                checked: (hiddenCols.indexOf(column.id) == -1),
+                checked: visible,
                 nol10n: true,
                 command: bindFixed(this.onShowColumn, this, context, column.id)
             });
+
+            if (visible)
+            {
+                lastVisibleIndex = i;
+                visibleColCount++;
+            }
         }
+
+        // If the last column is visible, disable its menu item.
+        if (visibleColCount == 1)
+            items[lastVisibleIndex].disabled = true;
 
         items.push("-");
         items.push({
