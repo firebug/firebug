@@ -2413,36 +2413,51 @@ this.getAllStyleSheets = function(context)
 
 this.getStyleSheetByHref = function(url, context)
 {
+    if (!context.styleSheetMap)
+        FBL.createStyleSheetMap(context);  // fill cache
+
+    return context.styleSheetMap[url];
+};
+
+this.createStyleSheetMap = function(context)
+{
+    context.styleSheetMap = {};
+
     function addSheet(sheet)
     {
-        if (FBL.getURLForStyleSheet(sheet) == url)
-            return sheet;
+        var sheetURL = FBL.getURLForStyleSheet(sheet);
+        context.styleSheetMap[sheetURL] = sheet;
+
+        // recurse for imported sheets
 
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
             var rule = sheet.cssRules[i];
-            if (rule instanceof CSSImportRule)
+            if (rule instanceof CSSStyleRule)
             {
-                var found = addSheet(rule.styleSheet);
-                if (found)
-                    return found;
+                if (rule.type == CSSStyleRule.STYLE_RULE)  // once we get here no more imports
+                    break;
+            }
+            else if (rule instanceof CSSImportRule)
+            {
+                addSheet(rule.styleSheet);
             }
         }
     }
 
-    var sheetIfFound = null;
     this.iterateWindows(context.window, function(subwin)
     {
         var rootSheets = context.window.document.styleSheets;
         for (var i = 0; i < rootSheets.length; ++i)
         {
-            sheetIfFound = addSheet(rootSheets[i]);
-            if (sheetIfFound)
-                return sheetIfFound;
+            addSheet(rootSheets[i]);
         }
     });
 
-    return sheetIfFound;
+    if (FBTrace.DBG_CSS)
+        FBTrace.sysout("createStyleSheetMap for "+context.getName(), context.styleSheetMap);
+
+    return context.styleSheetMap;
 };
 
 this.sourceURLsAsArray = function(context)

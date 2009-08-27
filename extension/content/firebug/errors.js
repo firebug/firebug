@@ -307,8 +307,19 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         return errorContext = context;
                 }
 
-                if (FBL.getStyleSheetByHref(url, context))
-                    return errorContext = context;
+                if (context.loaded)
+                {
+                    if (FBL.getStyleSheetByHref(url, context))
+                        return errorContext = context;
+                    else
+                        return;
+                }
+                else  // then new stylesheets are still coming in.
+                {
+                    if (FBL.getStyleSheetByHref(url, context))
+                        errorContext = context;  // but we already have this one.
+                    delete context.styleSheetMap; // clear the cache for next time.
+                }
             }
         );
 
