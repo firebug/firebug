@@ -126,6 +126,7 @@
     vertical-align: top;
     border-bottom: 1px solid #EFEFEF;  
     white-space: nowrap;
+    height: 17px;
 }
 
 .netLabel {
@@ -357,6 +358,10 @@
     -moz-border-bottom-colors: #EFEFEF #999999;
     padding-top: 1px;
     padding-bottom: 2px;
+}
+
+.netSummaryRow > .netHrefCol:hover {
+    background: transparent !important;
 }
 
 .netCountLabel {

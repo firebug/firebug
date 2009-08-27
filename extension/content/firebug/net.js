@@ -635,7 +635,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     showInfoTip: function(infoTip, target, x, y)
     {
         var row = getAncestorByClass(target, "netRow");
-        if (row)
+        if (row && row.repObject)
         {
             if (getAncestorByClass(target, "netTotalSizeCol"))
             {
@@ -1325,7 +1325,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
-    onClickHeader: function()
+    onClickHeader: function(event)
     {
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onClickHeader\n");
