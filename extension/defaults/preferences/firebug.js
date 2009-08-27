@@ -83,6 +83,7 @@ pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
 pref("extensions.firebug.net.displayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].
+pref("extensions.firebug.net.hiddenColumns", "");   // List of hidden columns for the Net panel (space separated)
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.

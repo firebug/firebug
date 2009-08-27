@@ -88,6 +88,22 @@
 }
 
 /************************************************************************************************/
+/* Column visibility */
+
+.netTable[hiddenCols~=netHrefCol] TD[id="netHrefCol"],
+.netTable[hiddenCols~=netHrefCol] TD.netHrefCol,
+.netTable[hiddenCols~=netStatusCol] TD[id="netStatusCol"],
+.netTable[hiddenCols~=netStatusCol] TD.netStatusCol,
+.netTable[hiddenCols~=netDomainCol] TD[id="netDomainCol"],
+.netTable[hiddenCols~=netDomainCol] TD.netDomainCol,
+.netTable[hiddenCols~=netSizeCol] TD[id="netSizeCol"],
+.netTable[hiddenCols~=netSizeCol] TD.netSizeCol,
+.netTable[hiddenCols~=netTimeCol] TD[id="netTimeCol"],
+.netTable[hiddenCols~=netTimeCol] TD.netTimeCol {
+    display: none;
+}
+
+/************************************************************************************************/
 
 .netRow {
     background: LightYellow;
@@ -110,6 +126,10 @@
     vertical-align: top;
     border-bottom: 1px solid #EFEFEF;  
     white-space: nowrap;
+}
+
+.netLabel {
+    width: 100%;
 }
 
 .netStatusCol {

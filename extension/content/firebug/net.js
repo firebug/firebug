@@ -442,6 +442,15 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         }
     },
 
+    getPopupObject: function(target)
+    {
+        var header = getAncestorByClass(target, "netHeaderRow");
+        if (header)
+            return NetRequestTable;
+
+        return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
+    },
+
     supportsObject: function(object)
     {
         return (object instanceof NetFileLink ? 2 : 0);
@@ -794,6 +803,11 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
             this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
             this.summaryRow =  NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
+
+            // Update visibility of columns according to the preferences
+            var hiddenCols = Firebug.getPref(Firebug.prefDomain, "net.hiddenColumns");
+            if (hiddenCols)
+                this.table.setAttribute("hiddenCols", hiddenCols);
         }
     },
 
@@ -1276,31 +1290,33 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
  */
 Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(),
 {
+    inspectable: false,
+
     tableTag:
-        TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
+        TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: ""},
             TBODY(
-                TR(
-                    TD({id: "netHeaderHrefCell", width: "18%", "class": "netHeaderCell alphaValue"},
+                TR({"class": "netHeaderRow", onclick: "$onClickHeader"},
+                    TD({id: "netHrefCol", width: "18%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.URL Tooltip")},
                         $STR("net.header.URL"))
                     ),
-                    TD({id: "netHeaderStatusCell", width: "12%", "class": "netHeaderCell alphaValue"},
+                    TD({id: "netStatusCol", width: "12%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Status Tooltip")},
                         $STR("net.header.Status"))
                     ),
-                    TD({id: "netHeaderDomainCell", width: "12%", "class": "netHeaderCell alphaValue"},
+                    TD({id: "netDomainCol", width: "12%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Domain Tooltip")},
                         $STR("net.header.Domain"))
                     ),
-                    TD({id: "netHeaderSizeCell", width: "4%", "class": "netHeaderCell alphaValue"},
+                    TD({id: "netSizeCol", width: "4%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Size Tooltip")},
                         $STR("net.header.Size"))
                     ),
-                    TD({id: "netHeaderTimeCell", width: "54%", "class": "netHeaderCell alphaValue"},
+                    TD({id: "netTimeCol", width: "54%", "class": "netHeaderCell alphaValue"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Timeline Tooltip")},
                         $STR("net.header.Timeline"))
@@ -1309,50 +1325,100 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
-    onClick: function(event)
+    onClickHeader: function()
     {
-        if (isLeftClick(event))
-        {
-            var row = getAncestorByClass(event.target, "netRow");
-            if (row)
-            {
-                this.toggleHeadersRow(row);
-                cancelEvent(event);
-            }
-        }
-    },
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.onClickHeader\n");
 
-    toggleHeadersRow: function(row)
-    {
-        if (!hasClass(row, "hasHeaders"))
+        if (!isLeftClick(event))
             return;
 
-        var file = row.repObject;
-        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
+        // TODO: sorting
+    },
 
-        toggleClass(row, "opened");
-        if (hasClass(row, "opened"))
+    supportsObject: function(object)
+    {
+        return (object == this);
+    },
+
+    /**
+     * Provides menu items for header context menu.
+     */
+    getContextMenuItems: function(object, target, context)
+    {
+        var popup = $("fbContextMenu");
+        if (popup.firstChild.getAttribute("command") == "cmd_copy")
+            popup.removeChild(popup.firstChild);
+
+        var items = [];
+
+        // Iterate over all columns and create a menu item for each.
+        var table = context.getPanel(panelName, true).table;
+        var hiddenCols = table.getAttribute("hiddenCols");
+
+        var header = getAncestorByClass(target, "netHeaderRow");
+        for (var i=0; i<header.childNodes.length; i++)
         {
-            var netInfoRow = NetRequestEntry.netInfoTag.insertRows({}, row)[0];
-            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
+            var column = header.childNodes[i];
+            var label = column.textContent;
+            items.push({
+                label: label,
+                type: "checkbox",
+                checked: (hiddenCols.indexOf(column.id) == -1),
+                nol10n: true,
+                command: bindFixed(this.onShowColumn, this, context, column.id)
+            });
+        }
 
-            // Notify listeners so additional tabs can be created.
-            dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
+        items.push("-");
+        items.push({
+            label: $STR("net.header.Reset_Header"),
+            nol10n: true, 
+            command: bindFixed(this.onResetColumns, this, context)
+        });
 
-            NetInfoBody.selectTabByName(netInfoBox, "Headers");
-            var category = getFileCategory(row.repObject);
-            if (category)
-                setClass(netInfoBox, "category-" + category);
+        return items;
+    },
+
+    onShowColumn: function(context, colId)
+    {
+        var table = context.getPanel(panelName, true).table;
+        var hiddenCols = table.getAttribute("hiddenCols");
+
+        // If the column is already presented in the list of hidden columns,
+        // remove it, otherwise append.
+        var index = hiddenCols.indexOf(colId);
+        if (index >= 0)
+        {
+            table.setAttribute("hiddenCols", hiddenCols.substr(0,index-1) +
+                hiddenCols.substr(index+colId.length));
         }
         else
         {
-            var netInfoRow = row.nextSibling;
-            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
-
-            dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
-
-            row.parentNode.removeChild(netInfoRow);
+            table.setAttribute("hiddenCols", hiddenCols + " " + colId);
         }
+
+        // Store current state into the preferences.
+        Firebug.setPref(Firebug.prefDomain, "net.hiddenColumns", table.getAttribute("hiddenCols"));
+    },
+
+    onResetColumns: function(context)
+    {
+        var panel = context.getPanel(panelName, true);
+        var header = getElementByClass(panel.panelNode, "netHeaderRow");
+
+        // Reset widths
+        var columns = header.childNodes;
+        for (var i=0; i<columns.length; i++)
+        {
+            var col = columns[i];
+            if (col.style)
+                col.style.width = "";
+        }
+
+        // Reset visibility. Only the Status column is hidden by default.
+        panel.table.setAttribute("hiddenCols", "colStatus");
+        Firebug.setPref(Firebug.prefDomain, "net.hiddenColumns", "colStatus");
     },
 });
 
@@ -1367,11 +1433,13 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 {
     fileTag:
         FOR("file", "$files",
-            TR({"class": "netRow $file.file|getCategory",
+            TR({"class": "netRow $file.file|getCategory", onclick: "$onClick",
                 $collapsed: "$file.file|hideRow",
                 $hasHeaders: "$file.file|hasResponseHeaders",
-                $loaded: "$file.file.loaded", $responseError: "$file.file|isError",
-                $fromCache: "$file.file.fromCache", $inFrame: "$file.file|getInFrame"},
+                $loaded: "$file.file.loaded",
+                $responseError: "$file.file|isError",
+                $fromCache: "$file.file.fromCache",
+                $inFrame: "$file.file|getInFrame"},
                 TD({"class": "netHrefCol netCol"},
                     DIV({"class": "netHrefLabel netLabel",
                          style: "margin-left: $file.file|getIndent\\px"},
@@ -1430,15 +1498,15 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     summaryTag:
         TR({"class": "netRow netSummaryRow"},
-            TD({"class": "netCol"},
+            TD({"class": "netCol netHrefCol"},
                 DIV({"class": "netCountLabel netSummaryLabel"}, "-")
             ),
-            TD({"class": "netCol"}),
-            TD({"class": "netCol"}),
-            TD({"class": "netTotalSizeCol netCol"},
+            TD({"class": "netCol netStatusCol"}),
+            TD({"class": "netCol netDomainCol"}),
+            TD({"class": "netTotalSizeCol netCol netSizeCol"},
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
-            TD({"class": "netTotalTimeCol netCol", colspan: 2},
+            TD({"class": "netTotalTimeCol netCol netTimeCol"},
                 DIV({"class": "netBar"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel"},
                         "(",
@@ -1452,6 +1520,52 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 )
             )
         ),
+
+    onClick: function(event)
+    {
+        if (isLeftClick(event))
+        {
+            var row = getAncestorByClass(event.target, "netRow");
+            if (row)
+            {
+                this.toggleHeadersRow(row);
+                cancelEvent(event);
+            }
+        }
+    },
+
+    toggleHeadersRow: function(row)
+    {
+        if (!hasClass(row, "hasHeaders"))
+            return;
+
+        var file = row.repObject;
+        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
+
+        toggleClass(row, "opened");
+        if (hasClass(row, "opened"))
+        {
+            var netInfoRow = this.netInfoTag.insertRows({}, row)[0];
+            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
+
+            // Notify listeners so additional tabs can be created.
+            dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
+
+            NetInfoBody.selectTabByName(netInfoBox, "Headers");
+            var category = getFileCategory(row.repObject);
+            if (category)
+                setClass(netInfoBox, "category-" + category);
+        }
+        else
+        {
+            var netInfoRow = row.nextSibling;
+            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+
+            dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
+
+            row.parentNode.removeChild(netInfoRow);
+        }
+    },
 
     getCategory: function(file)
     {
@@ -3655,6 +3769,7 @@ var NetPanelSearch = function(panel, rowFinder)
 
 // ************************************************************************************************
 
+Firebug.registerRep(Firebug.NetMonitor.NetRequestTable);
 Firebug.registerActivableModule(Firebug.NetMonitor);
 Firebug.registerPanel(NetPanel);
 
