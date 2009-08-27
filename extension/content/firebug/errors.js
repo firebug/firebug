@@ -101,11 +101,13 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     startObserving: function()
     {
         consoleService.registerListener(this);
+        this.isObserving = true;
     },
 
     stopObserving: function()
     {
         consoleService.unregisterListener(this);
+        this.isObserving = false;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -343,6 +345,43 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     destroyContext: function(context, persistedState)
     {
         this.showCount(0);
+    },
+
+    updateOption: function(name, value)
+    {
+        this.checkEnabled();
+    },
+
+    checkEnabled: function()
+    {
+        if (this.mustBeEnabled())
+        {
+            if(!this.isObserving)
+                this.startObserving();
+            // else we must be and we are observing
+        }
+        else
+        {
+            if (this.isObserving)
+                this.stopObserving();
+            // else we must not be and we are not
+        }
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("errors.checkEnabled mustBeEnabled: "+this.mustBeEnabled()+" isObserving:"+this.isObserving);
+    },
+
+    mustBeEnabled: function()
+    {
+        const optionMap = {showJSErrors:1, showJSWarnings:1, showCSSErrors:1, showXMLErrors: 1,
+                showChromeErrors: 1, showChromeMessages: 1, showExternalErrors: 1, showXMLHttpRequests: 1,
+                showStackTrace: 1};
+
+        for (var p in optionMap)
+        {
+            if (Firebug[p])
+                return true;
+        }
+        return false;
     },
     // ******************************************************************************
 
