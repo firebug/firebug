@@ -275,7 +275,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         delete context.stopped;
         delete context.debugFrame;
         delete context.currentFrame;
-        delete context;
 
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
@@ -2191,16 +2190,19 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     FBTrace.sysout("populateInfoTip result is "+result, result);
                 try
                 {
-                    var propertyBinding = findObjectInScopeChain(context.currentFrame.scope, result);
-                    if (propertyBinding)
+                    if (context.currentFrame)
                     {
-                        var scopeVars = propertyBinding.scope.getWrappedValue();
-                        if (!scopeVars.hasOwnProperty("toString"))
-                            propertyBinding.scopeName = scope.jsClassName;
-                        else
-                            propertyBinding.scopeName = scopeVars.toString();
+                        var propertyBinding = findObjectInScopeChain(context.currentFrame.scope, result);
+                        if (propertyBinding)
+                        {
+                            var scopeVars = propertyBinding.scope.getWrappedValue();
+                            if (scopeVars && ('hasOwnProperty' in scopVars) && !scopeVars.hasOwnProperty("toString"))
+                                propertyBinding.scopeName = scope.jsClassName;
+                            else
+                                propertyBinding.scopeName = scopeVars.toString();
 
-                        FBTrace.sysout("found object in scope chain "+propertyBinding.scopeName+"["+propertyBinding.prop+"]", propertyBinding);
+                            FBTrace.sysout("found object in scope chain "+propertyBinding.scopeName+"["+propertyBinding.prop+"]", propertyBinding);
+                        }
                     }
                 }
                 catch(exc)
