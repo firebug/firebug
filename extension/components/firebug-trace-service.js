@@ -244,6 +244,12 @@ var TraceAPI = {
     {
         this.scopeOfFBTrace = scope;
     },
+
+    matchesNode: function(node)
+    {
+        return (node.getAttribute('anonid')=="title-box");
+    },
+
 };
 
 var TraceBase = function(prefDomain) {
