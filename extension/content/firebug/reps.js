@@ -1403,11 +1403,11 @@ this.ErrorMessage = domplate(Firebug.Rep,
         else if (error.lineNo == 1 && getFileExtension(error.href) != "js")
             return "none";
         else if (error.category == "css")
-            return "none";
+            return "show";
         else if (!error.href || !error.lineNo)
             return "none";
         else
-            return "exec";
+            return "show";
     },
 
     onToggleError: function(event)
