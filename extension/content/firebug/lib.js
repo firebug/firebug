@@ -2413,8 +2413,18 @@ this.getAllStyleSheets = function(context)
 
 this.getStyleSheetByHref = function(url, context)
 {
+    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+    {
+        var r = FBL.totalRules;
+        var s = FBL.totalSheets;
+        var t = new Date();
+    }
+
     if (!context.styleSheetMap)
         FBL.createStyleSheetMap(context);  // fill cache
+
+    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        FBTrace.sysout((FBL.totalRules-r)+" rules in "+ (FBL.totalSheets-s)+" sheets required "+(new Date().getTime() - t.getTime())+" ms");
 
     return context.styleSheetMap[url];
 };
@@ -2428,15 +2438,21 @@ this.createStyleSheetMap = function(context)
         var sheetURL = FBL.getURLForStyleSheet(sheet);
         context.styleSheetMap[sheetURL] = sheet;
 
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+            FBL.totalSheets++;
+
         // recurse for imported sheets
 
         for (var i = 0; i < sheet.cssRules.length; ++i)
         {
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+                FBL.totalRules++;
+
             var rule = sheet.cssRules[i];
             if (rule instanceof CSSStyleRule)
             {
-                if (rule.type == CSSStyleRule.STYLE_RULE)  // once we get here no more imports
-                    break;
+                if (rule.type == CSSRule.STYLE_RULE)  // once we get here no more imports
+                    return;
             }
             else if (rule instanceof CSSImportRule)
             {
@@ -2454,7 +2470,7 @@ this.createStyleSheetMap = function(context)
         }
     });
 
-    if (FBTrace.DBG_CSS)
+    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         FBTrace.sysout("createStyleSheetMap for "+context.getName(), context.styleSheetMap);
 
     return context.styleSheetMap;

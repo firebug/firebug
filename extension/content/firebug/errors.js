@@ -289,35 +289,57 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if(!url)
             return FirebugContext;  // eg some XPCOM messages
 
+        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+        {
+            var deltaT = new Date().getTime() - this.initTime.getTime();
+            FBTrace.sysout("errors.getErrorContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
+        }
+
         var errorContext = null;
         TabWatcher.iterateContexts(
             function findContextByURL(context)
             {
-                if (errorContext) // is it faster to keep iterating or throw to abort iterator?
-                    return;
+                if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                    FBTrace.sysout("findContextByURL "+context.getName());
 
                 if (!context.window || !context.getWindowLocation())
-                    return;
+                    return false;
 
                 if (context.getWindowLocation().toString() == url)
+                {
+                    if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                        FBTrace.sysout("findContextByURL found match to context window location");
                     return errorContext = context;
+                }
                 else
                 {
                     if (context.sourceFileMap && context.sourceFileMap[url])
+                    {
+                        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                            FBTrace.sysout("findContextByURL found match in sourceFileMap");
                         return errorContext = context;
+                    }
                 }
 
                 if (context.loaded)
                 {
                     if (FBL.getStyleSheetByHref(url, context))
+                    {
+                        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                            FBTrace.sysout("findContextByURL found match to in loaded styleSheetMap");
                         return errorContext = context;
+                    }
                     else
-                        return;
+                        return false;
                 }
                 else  // then new stylesheets are still coming in.
                 {
                     if (FBL.getStyleSheetByHref(url, context))
+                    {
+                        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                            FBTrace.sysout("findContextByURL found match to in non-loaded styleSheetMap");
                         errorContext = context;  // but we already have this one.
+                    }
                     delete context.styleSheetMap; // clear the cache for next time.
                 }
             }
@@ -327,7 +349,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
 
         if (!errorContext)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
             errorContext = FirebugContext;  // this is problem if the user isn't viewing the page with errors
+        }
 
         if (FBTrace.DBG_ERRORS && !FirebugContext)
             FBTrace.sysout("errors.observe, no FirebugContext in "+window.location+"\n");
@@ -341,6 +367,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     initContext: function(context)
     {
         context.errorCount = 0;
+        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+        {
+            FBL.totalSheets = 0;
+            FBL.totalRules = 0;
+            this.initTime = new Date();
+        }
     },
 
     showContext: function(browser, context)
@@ -356,6 +388,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     destroyContext: function(context, persistedState)
     {
         this.showCount(0);
+        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+        {
+            var deltaT = new Date().getTime() - this.initTime.getTime();
+            FBTrace.sysout("errors.destroyContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
+        }
     },
 
     updateOption: function(name, value)
