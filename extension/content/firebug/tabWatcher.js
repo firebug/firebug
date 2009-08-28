@@ -583,7 +583,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
     iterateContexts: function(fn)
     {
         for (var i = 0; i < contexts.length; ++i)
-            fn(contexts[i]);
+        {
+            var rc = fn(contexts[i]);
+            if (rc)
+                return rc;
+        }
     },
 });
 

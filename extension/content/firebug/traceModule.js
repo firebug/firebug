@@ -1438,9 +1438,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             var self = this;
             TabWatcher.iterateContexts(function(context) {
                 var url = self.obj.originalURI.spec;
-                result = context.sourceCache.loadText(url);
-                if (result)
-                    throw "OK"; // Break the cycle if the response is there.
+                return context.sourceCache.loadText(url);
             });
         }
         catch (err)
