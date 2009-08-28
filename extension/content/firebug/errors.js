@@ -560,7 +560,6 @@ function lessTalkMoreAction(context, object, isWarning)
 
     var enabled = Firebug.Console.isAlwaysEnabled();
     if (!enabled) {
-        FBTrace.sysout("errors.observe not enabled for context "+(context.window?context.window.location:"no window")+"\n");
         return true;
     }
 
