@@ -289,17 +289,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if(!url)
             return FirebugContext;  // eg some XPCOM messages
 
-        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
-        {
-            var deltaT = new Date().getTime() - this.initTime.getTime();
-            FBTrace.sysout("errors.getErrorContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
-        }
-
         var errorContext = null;
         TabWatcher.iterateContexts(
             function findContextByURL(context)
             {
-                if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                     FBTrace.sysout("findContextByURL "+context.getName());
 
                 if (!context.window || !context.getWindowLocation())
@@ -307,7 +301,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
                 if (context.getWindowLocation().toString() == url)
                 {
-                    if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                         FBTrace.sysout("findContextByURL found match to context window location");
                     return errorContext = context;
                 }
@@ -315,7 +309,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 {
                     if (context.sourceFileMap && context.sourceFileMap[url])
                     {
-                        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match in sourceFileMap");
                         return errorContext = context;
                     }
@@ -325,7 +319,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 {
                     if (FBL.getStyleSheetByHref(url, context))
                     {
-                        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match to in loaded styleSheetMap");
                         return errorContext = context;
                     }
@@ -336,7 +330,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 {
                     if (FBL.getStyleSheetByHref(url, context))
                     {
-                        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
                             FBTrace.sysout("findContextByURL found match to in non-loaded styleSheetMap");
                         errorContext = context;  // but we already have this one.
                     }
@@ -345,6 +339,11 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
         );
 
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        {
+            var deltaT = new Date().getTime() - this.initTime.getTime();
+            FBTrace.sysout("errors.getErrorContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
+        }
         if (FBTrace.DBG_ERRORS && !errorContext)
             FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
 
@@ -367,7 +366,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     initContext: function(context)
     {
         context.errorCount = 0;
-        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         {
             FBL.totalSheets = 0;
             FBL.totalRules = 0;
@@ -388,7 +387,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     destroyContext: function(context, persistedState)
     {
         this.showCount(0);
-        if (FBTrace.DBG_ERRORS && FBTRACE.DBG_CSS)
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
             FBTrace.sysout("errors.destroyContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);

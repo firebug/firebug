@@ -2424,7 +2424,7 @@ this.getStyleSheetByHref = function(url, context)
         FBL.createStyleSheetMap(context);  // fill cache
 
     if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-        FBTrace.sysout((FBL.totalRules-r)+" rules in "+ (FBL.totalSheets-s)+" sheets required "+(new Date().getTime() - t.getTime())+" ms");
+        FBTrace.sysout((FBL.totalRules-r)+" rules in "+ (FBL.totalSheets-s)+" sheets required "+(new Date().getTime() - t.getTime())+" ms", context.styleSheetMap);
 
     return context.styleSheetMap[url];
 };
@@ -2439,7 +2439,10 @@ this.createStyleSheetMap = function(context)
         context.styleSheetMap[sheetURL] = sheet;
 
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        {
             FBL.totalSheets++;
+            FBTrace.sysout("addSheet "+FBL.totalSheets+" "+sheetURL);
+        }
 
         // recurse for imported sheets
 
@@ -2463,7 +2466,7 @@ this.createStyleSheetMap = function(context)
 
     this.iterateWindows(context.window, function(subwin)
     {
-        var rootSheets = context.window.document.styleSheets;
+        var rootSheets = subwin.document.styleSheets;
         for (var i = 0; i < rootSheets.length; ++i)
         {
             addSheet(rootSheets[i]);
