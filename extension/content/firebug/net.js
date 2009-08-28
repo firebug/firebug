@@ -1347,7 +1347,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     getContextMenuItems: function(object, target, context)
     {
         var popup = $("fbContextMenu");
-        if (popup.firstChild.getAttribute("command") == "cmd_copy")
+        if (popup.firstChild && popup.firstChild.getAttribute("command") == "cmd_copy")
             popup.removeChild(popup.firstChild);
 
         var items = [];
