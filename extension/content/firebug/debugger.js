@@ -2196,7 +2196,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                         if (propertyBinding)
                         {
                             var scopeVars = propertyBinding.scope.getWrappedValue();
-                            if (scopeVars && ('hasOwnProperty' in scopVars) && !scopeVars.hasOwnProperty("toString"))
+                            if (scopeVars && ('hasOwnProperty' in scopeVars) && !scopeVars.hasOwnProperty("toString"))
                                 propertyBinding.scopeName = scope.jsClassName;
                             else
                                 propertyBinding.scopeName = scopeVars.toString();
