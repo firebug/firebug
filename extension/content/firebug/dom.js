@@ -339,7 +339,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 panelNode.scrollTop = scrollTop == undefined ? 0 : scrollTop;
             }, delay));
         }
-        this.timeouts = [];
+        this.timeouts = timeouts;
     },
 
     showEmptyMembers: function()
