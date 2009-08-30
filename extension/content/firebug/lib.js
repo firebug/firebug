@@ -3777,30 +3777,43 @@ this.makeURI = function(urlString)
 
 // ************************************************************************************************
 
-this.getSourceLineRange = function(sourceBox, min, max)
+this.getSourceLineRange = function(sourceBox, min, max)   // min, max are indexes in the viewport
 {
     var html = [];
 
     for (var i = min; i <= max; ++i)
     {
-        // Make sure all line numbers are the same width (with a fixed-width font)
-        var lineNo = i + "";
-        var maxLineNoChars = sourceBox.maxLineNoChars;
-        while (lineNo.length < maxLineNoChars)
-            lineNo = " " + lineNo;
+        var lineData = sourceBox.decorator.getLineData(i, sourceBox);
 
-        var line =  sourceBox.getLineAsHTML(i-1);
+        var lineNo = lineData.userVisibleLineNumber;
+        var lineHTML = lineData.html;
+        var lineId = lineData.id;    // decorator lines may not have ids
+
+        var lineNoText = this.getTextForLineNo(lineNo, sourceBox.maxLineNoChars);
 
         html.push(
-            '<div class="sourceRow" role="presentation"><a class="sourceLine" role="presentation">',
-            lineNo,
+            '<div '
+               + (lineId ? ('id="' + lineId + '"') : "")
+               + ' class="sourceRow" role="presentation"><a class="'
+               +  'sourceLine' + '" role="presentation">',
+            lineNoText,
             '</a><span class="sourceRowText" role="presentation">',
-            line,
+            lineHTML,
             '</span></div>'
         );
     }
 
     return html.join("");
+};
+
+this.getTextForLineNo = function(lineNo, maxLineNoChars)
+{
+    // Make sure all line numbers are the same width (with a fixed-width font)
+    var lineNoText = lineNo + "";
+    while (lineNoText.length < maxLineNoChars)
+        lineNoText = " " + lineNoText;
+
+    return lineNoText;
 };
 
 // ************************************************************************************************

@@ -1966,7 +1966,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getDecorator: function(sourceBox)
     {
         if (!this.decorator)
-            this.decorator = bind(this.decorateJavascript, this, sourceBox);
+        {
+            this.decorator = Firebug.SourceBoxPanel.getDecorator();
+            this.decorator.decorate = bind(this.decorateJavascript, this, sourceBox);
+        }
         return this.decorator;
     },
 

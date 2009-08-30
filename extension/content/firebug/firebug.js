@@ -132,6 +132,8 @@ var clearContextTimeout = 0;
 var temporaryFiles = [];
 var temporaryDirectory = null;
 
+var sourceBoxCounter = 0;
+
 // Register default Firebug string bundle (yet before domplate templates).
 categoryManager.addCategoryEntry("strings_firebug",
     "chrome://firebug/locale/firebug.properties", "", true, true);
@@ -2452,15 +2454,13 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         // called just before box is shown
     },
 
-    getDecorator: function(sourceBox)
+    getDecorator: function()
     {
-        // called at sourceBox creation, return a function to be called on a delay after the view port is updated.
-        return function decorate(sourceBox, sourceFile)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("firebug.getDecorator not overridden\n");
-        };
-    },
+        if (!this.decorator)
+            this.decorator = new Firebug.SourceBoxDecorator();
+
+        return this.decorator;
+     },
 
     getSourceType: function()
     {
@@ -2509,20 +2509,22 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         setClass(sourceBox, "sourceBox");
         collapse(sourceBox, true);
 
-        sourceBox.maxLineNoChars = (lines.length + "").length;
         sourceBox.lines = lines;
-        sourceBox.getLineAsHTML = getSourceBoxLineAsHTML;
-
-        sourceBox.min = 0;
-        if (sourceFile.lineNumberShift)
-            sourceBox.min = sourceBox.min + sourceFile.lineNumberShift;
-
-        sourceBox.totalMax = lines.length;
-        if (sourceFile.lineNumberShift)
-            sourceBox.totalMax = sourceBox.totalMax + sourceFile.lineNumberShift; // eg -1
 
         sourceBox.decorator = sourceBoxDecorator;
-        sourceBox.getLineNode = getLineNodeIfViewable;
+
+        sourceBoxDecorator.onSourceBoxCreation(sourceBox);
+
+        sourceBox.totalMax = sourceBoxDecorator.getTotalLines(sourceBox);
+        sourceBox.maxLineNoChars = (sourceBox.totalMax + "").length;
+
+        sourceBox.min = 0;
+
+        sourceBox.getLineNode =  function(lineNo)
+        {
+            // XXXjjb this method is supposed to return null if the lineNo is not in the viewport
+            return $(this.decorator.getIdForLine(lineNo, this), this.ownerDocument);
+        };
 
         var paddedSource =
             "<div class='topSourcePadding'>" +
@@ -2532,6 +2534,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             "<div class='bottomSourcePadding'>"+
                 "<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
             "<div>";
+
         appendInnerHTML(sourceBox, paddedSource);
 
         sourceBox.viewport = getChildByClass(sourceBox, 'sourceViewport');
@@ -2542,7 +2545,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             this.anonSourceBoxes.push(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.lines.length+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.totalMax+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
 
         return sourceBox;
     },
@@ -2868,7 +2871,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                     if (!sticky)
                         delete sourceBox.highlighter;
                 }
-                sourceBox.decorator(sourceBox, sourceBox.repObject);
+                sourceBox.decorator.decorate(sourceBox, sourceBox.repObject);
 
                 if (uiListeners.length > 0) dispatch(uiListeners, "onApplyDecorator", [sourceBox]);
                 if (FBTrace.DBG_SOURCEFILES)
@@ -2944,27 +2947,54 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     },
 });
 
+Firebug.SourceBoxDecorator = function() {}
+
+Firebug.SourceBoxDecorator.prototype =
+{
+    // called on a delay after the view port is updated.
+    decorate: function(sourceBox, sourceFile)
+    {
+        return;
+    },
+    // called at source box creation, return eg decompiled lines
+    onSourceBoxCreation: function(sourceBox)
+    {
+        // allow panel-document unique ids to be generated for lines.
+        sourceBox.uniqueId = sourceBoxCounter++;
+
+        // you may like to add, eg sourceBox.transformedLines here
+    },
+
+    // called after onSourceBoxCreation, once.
+    getTotalLines: function(sourceBox)
+    {
+        return sourceBox.lines.length;
+    },
+
+    // called as the lines are being rendered.
+    getLineData: function(lineNo, sourceBox)
+    {
+        var lineData =
+        {
+            userVisibleLineNumber: lineNo,
+            html: escapeHTML(sourceBox.lines[lineNo-1]),
+            id: this.getIdForLine(lineNo, sourceBox),
+        };
+        return lineData;
+    },
+
+    // accessor (not a framework call)
+    getIdForLine: function(lineNo, sourceBox)
+    {
+        return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
+    },
+}
+
 function appendScriptLines(sourceBox, min, max, panelNode)
 {
     var html = getSourceLineRange(sourceBox, min, max);
     appendInnerHTML(panelNode, html);
 }
-
-function getLineNodeIfViewable(lineNo)
-{
-    if (lineNo >= this.firstViewableLine && lineNo <= this.lastViewableLine)
-    {
-        var view = getChildByClass(this, 'sourceViewport');
-        return view.childNodes[lineNo - this.firstViewableLine];
-    }
-    return null;
-}
-
-function getSourceBoxLineAsHTML(lineNo)  // XXXjjb TODO make this a prototype
-{
-    return escapeHTML(this.lines[lineNo]);
-};
-
 
 // ************************************************************************************************
 
