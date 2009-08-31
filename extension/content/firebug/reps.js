@@ -1298,9 +1298,11 @@ this.jsdStackFrame = domplate(Firebug.Rep,
 {
     inspectable: false,
 
+    className: "jsdIStactFrame",
+
     supportsObject: function(object)
     {
-        return (object instanceof jsdIStackFrame) && (object.isValid);
+        return (object instanceof jsdIStackFrame);
     },
 
     getTitle: function(frame, context)
@@ -1311,7 +1313,7 @@ this.jsdStackFrame = domplate(Firebug.Rep,
 
     getTooltip: function(frame, context)
     {
-        if (!frame.isValid) return "(invalid frame)";  // XXXjjb avoid frame.script == null
+        if (!frame.isValid) return "(invalid frame; did Firebug suspend?)";  // XXXjjb avoid frame.script == null
         var sourceInfo = FBL.getSourceFileAndLineByScript(context, frame.script, frame);
         if (sourceInfo)
             return $STRF("Line", [sourceInfo.sourceFile.href, sourceInfo.lineNo]);

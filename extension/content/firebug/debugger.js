@@ -2647,15 +2647,15 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             FBTrace.sysout("debugger updateSelection object:"+object+" of type "+typeof(object)+"\n");
             if (object instanceof jsdIStackFrame)
-                FBTrace.sysout("debugger updateSelection this.showStackFrame(object)");
+                FBTrace.sysout("debugger updateSelection this.showStackFrame(object)", object);
             else if (object instanceof SourceFile)
-                FBTrace.sysout("debugger updateSelection this.navigate(object)");
+                FBTrace.sysout("debugger updateSelection this.navigate(object)", object);
             else if (object instanceof SourceLink)
-                FBTrace.sysout("debugger updateSelection this.showSourceLink(object)");
+                FBTrace.sysout("debugger updateSelection this.showSourceLink(object)", object);
             else if (typeof(object) == "function")
-                FBTrace.sysout("debugger updateSelection this.showFunction(object)");
+                FBTrace.sysout("debugger updateSelection this.showFunction(object)", object);
             else
-                FBTrace.sysout("debugger updateSelection this.showStackFrame(null)");
+                FBTrace.sysout("debugger updateSelection this.showStackFrame(null)", object);
         }
 
         if (object instanceof jsdIStackFrame)
@@ -2806,6 +2806,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         frame = this.context.debugFrame;
 
+		if (FBTrace.DBG_STACK)
+			FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?"frame is good":(frame?"frame invalid":"no frame"))+" selection: "+this.selection, this.selection);
+			
         var frames = [];
         for (; frame; frame = getCallingFrame(frame))
             frames.push(frame);
