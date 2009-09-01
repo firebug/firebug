@@ -3439,10 +3439,18 @@ CallstackPanel.prototype = extend(Firebug.Panel,
     refresh: function()
     {
         var mainPanel = this.context.getPanel("script", true);
-        if (mainPanel.selection instanceof jsdIStackFrame)
-            this.showStackFrame(mainPanel.selection);
-        if (FBTrace.DBG_STACK)
-            FBTrace.sysout("debugger.callstackPanel.refresh for jsdIStackFrame:"+(mainPanel.selection instanceof jsdIStackFrame)+" mainPanel.selection "+mainPanel.selection );
+        if (mainPanel)
+        {
+            if (mainPanel.selection instanceof jsdIStackFrame)
+                this.showStackFrame(mainPanel.selection);
+            if (FBTrace.DBG_STACK)
+                FBTrace.sysout("debugger.callstackPanel.refresh for jsdIStackFrame:"+(mainPanel.selection instanceof jsdIStackFrame)+" mainPanel.selection "+mainPanel.selection );
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.refresh: no main panel 'script' in context "+this.context.getName());
+        }
     },
 
     showStackFrame: function(frame)
