@@ -1586,6 +1586,7 @@ this.SourceText = domplate(Firebug.Rep,
 });
 
 //************************************************************************************************
+
 this.nsIDOMHistory = domplate(Firebug.Rep,
 {
     tag:OBJECTBOX({onclick: "$showHistory"},
@@ -1628,6 +1629,7 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
 });
 
 // ************************************************************************************************
+
 this.ApplicationCache = domplate(Firebug.Rep,
 {
     tag:OBJECTBOX({onclick: "$showApplicationCache"},
@@ -1687,6 +1689,7 @@ this.Storage = domplate(Firebug.Rep,
 });
 
 // ************************************************************************************************
+
 Firebug.registerRep(
     this.nsIDOMHistory, // make this early to avoid exceptions
     this.Undefined,
