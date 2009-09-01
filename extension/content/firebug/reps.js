@@ -596,41 +596,42 @@ this.Element = domplate(Firebug.Rep,
             )
          ),
 
-     getVisible: function(elt)
-     {
-         return isVisible(elt) ? "" : "selectorHidden";
-     },
+    getVisible: function(elt)
+    {
+        return isVisible(elt) ? "" : "selectorHidden";
+    },
 
-     getSelectorTag: function(elt)
-     {
-         return elt.localName.toLowerCase();
-     },
+    getSelectorTag: function(elt)
+    {
+        return elt.localName.toLowerCase();
+    },
 
-     getSelectorId: function(elt)
-     {
-         return elt.id ? ("#" + elt.id) : "";
-     },
+    getSelectorId: function(elt)
+    {
+        return elt.id ? ("#" + elt.id) : "";
+    },
 
-     getSelectorClass: function(elt)
-     {
-         return elt.getAttribute("class")
-             ? ("." + elt.getAttribute("class").split(" ")[0])
-             : "";
-     },
+    getSelectorClass: function(elt)
+    {
+        return elt.getAttribute("class")
+            ? ("." + elt.getAttribute("class").split(" ")[0])
+            : "";
+    },
 
-     getValue: function(elt)
-     {
-         var value;
-         if (elt instanceof HTMLImageElement)
-            value = getFileName(elt.src);
+    getValue: function(elt)
+    {
+        var value;
+
+        if (elt instanceof HTMLImageElement)
+            value = getFileName(elt.getAttribute("src"));
         else if (elt instanceof HTMLAnchorElement)
-            value = getFileName(elt.href);
+            value = getFileName(elt.getAttribute("href"));
         else if (elt instanceof HTMLInputElement)
-            value = elt.value;
+            value = elt.getAttribute("value");
         else if (elt instanceof HTMLFormElement)
-            value = getFileName(elt.action);
+            value = getFileName(elt.getAttribute("action"));
         else if (elt instanceof HTMLScriptElement)
-            value = getFileName(elt.src);
+            value = getFileName(elt.getAttribute("src"));
 
         return value ? " " + cropMultipleLines(value, 20) : "";
      },
