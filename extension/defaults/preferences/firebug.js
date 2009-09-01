@@ -63,6 +63,10 @@ pref("extensions.firebug.script.enableSites", false);
 pref("extensions.firebug.decompileEvals", false);
 pref("extensions.firebug.service.scriptsFilter", "all");
 
+// If the value is greather than zero, the Script panel replaces tabs
+// by corresponding number of spaces when displaying JavaScript source.
+pref("extensions.firebug.replaceTabs", 4);
+
 // Stack
 pref("extensions.firebug.omitObjectPathStack", false);
 

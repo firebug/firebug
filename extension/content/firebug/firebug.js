@@ -80,7 +80,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showUserAgentCSS",
 
     // Script
-    "decompileEvals",
+    "decompileEvals", "replaceTabs",
 
     // DOM
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
@@ -626,9 +626,9 @@ top.Firebug =
         editors.push.apply(editors, arguments);
     },
 
-    registerStringBundle: function(bundleUri)
+    registerStringBundle: function(bundleURI)
     {
-        categoryManager.addCategoryEntry("strings_firebug", bundleUri, "", true, true);
+        categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", true, true);
         this.stringBundle = null;
     },
 
@@ -2980,6 +2980,14 @@ Firebug.SourceBoxDecorator.prototype =
             html: escapeHTML(sourceBox.lines[lineNo-1]),
             id: this.getIdForLine(lineNo, sourceBox),
         };
+
+        // If the pref says so, replace tabs by corresponding number of spaces.
+        if (Firebug.replaceTabs > 0)
+        {
+            var space = new Array(Firebug.replaceTabs + 1).join(" ");
+            lineData.html = lineData.html.replace(/\t/g, space);
+        }
+
         return lineData;
     },
 
