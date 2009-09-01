@@ -1154,7 +1154,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         if (props.condition)  // issue 1371
                         {
                             var watchPanel = this.ableWatchSidePanel(context);
-                            watchPanel.addWatch(props.condition);
+
+                            // If the Console panel is disabled the watch is not available (issue 2264).
+                            if (watchPanel)
+                                watchPanel.addWatch(props.condition);
                         }
                         row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
                     }
@@ -1164,8 +1167,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                         if (props.condition)
                         {
                             var watchPanel = this.ableWatchSidePanel(context);
-                            watchPanel.removeWatch(props.condition);
-                            watchPanel.rebuild();
+                            if (wathPanel)
+                            {
+                                watchPanel.removeWatch(props.condition);
+                                watchPanel.rebuild();
+                            }
                         }
                         row.removeAttribute("disabledBreakpoint");
                     }
@@ -1861,8 +1867,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (watchPanel)
                 return watchPanel;
         }
-        else
-            return false;
+
+        return null;
     },
 
     //---------------------------------------------------------------------------------------------
