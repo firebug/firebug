@@ -347,6 +347,7 @@ Firebug.TabContext.prototype =
         this.throttle(message, object, null, true);
     },
 
+    // queue the call |object.message(arg)| or just delay it if forceDelay
     throttle: function(message, object, args, forceDelay)
     {
         if (!this.throttleInit)
@@ -398,6 +399,9 @@ Firebug.TabContext.prototype =
     flushThrottleQueue: function()
     {
         var queue = this.throttleQueue;
+
+        if (!queue[0])
+            FBTrace.sysout("tabContext.flushThrottleQueue no queue[0]", queue);
 
         var max = throttleFlushCount * 3;
         if (max > queue.length)
