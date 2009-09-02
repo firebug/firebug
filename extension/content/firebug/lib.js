@@ -3343,6 +3343,18 @@ this.parseURLEncodedText = function(text)
     // See section 2.2.in RFC 3986: http://www.ietf.org/rfc/rfc3986.txt
     text = text.replace(/\+/g, " ");
 
+    function decodeText(text)
+    {
+        try
+        {
+            return decodeURIComponent(text);
+        }
+        catch (e)
+        {
+            return decodeURIComponent(unescape(text));
+        }
+    }
+
     var args = text.split("&");
     for (var i = 0; i < args.length; ++i)
     {
@@ -3351,19 +3363,18 @@ this.parseURLEncodedText = function(text)
             var index = args[i].indexOf("=");
             if (index != -1)
             {
-                var paramName = unescape(args[i].substring(0, index));
-                var paramValue = unescape(args[i].substring(index + 1));
+                var paramName = args[i].substring(0, index);
+                var paramValue = args[i].substring(index + 1);
 
                 if (paramValue > maxValueLength)
                     paramValue = this.$STR("LargeData");
 
-                params.push({name: decodeURIComponent(paramName),
-                    value: decodeURIComponent(paramValue)});
+                params.push({name: decodeText(paramName), value: decodeText(paramValue)});
             }
             else
             {
-                var paramName = unescape(args[i]);
-                params.push({name: decodeURIComponent(paramName), value: ""});
+                var paramName = args[i];
+                params.push({name: decodeText(paramName), value: ""});
             }
         }
         catch (e)
@@ -3381,7 +3392,7 @@ this.parseURLEncodedText = function(text)
     return params;
 };
 
-this.reEncodeURL= function(file, text)
+this.reEncodeURL = function(file, text)
 {
     var lines = text.split("\n");
     var params = this.parseURLEncodedText(lines[lines.length-1]);
