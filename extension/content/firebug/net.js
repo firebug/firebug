@@ -438,7 +438,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             scrollIntoCenterView(file.row);
             if (!hasClass(file.row, "opened"))
-                NetRequestTable.toggleHeadersRow(file.row);
+                NetRequestEntry.toggleHeadersRow(file.row);
         }
     },
 
@@ -3731,7 +3731,7 @@ var NetPanelSearch = function(panel, rowFinder)
         if (scanRE.test(file.responseText))
         {
             if (!hasClass(this.currentRow, "opened"))
-                NetRequestTable.toggleHeadersRow(this.currentRow);
+                NetRequestEntry.toggleHeadersRow(this.currentRow);
 
             var netInfoRow = this.currentRow.nextSibling;
             var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
