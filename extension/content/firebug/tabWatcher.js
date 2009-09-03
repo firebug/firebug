@@ -29,8 +29,6 @@ const STOP_ALL = nsIWebNavigation.STOP_ALL;
 const dummyURI = "about:layout-dummy-request";
 const aboutBlank = "about:blank";
 
-const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const tabBrowser = $("content");
@@ -58,7 +56,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
 
-        observerService.addObserver(HttpObserver, "firebug-http-event", false);
+        httpObserver.addObserver(TabWatcherHttpObserver, "firebug-http-event", false);
     },
 
     destroy: function()
@@ -66,7 +64,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher destroy\n");
 
-        observerService.removeObserver(HttpObserver, "firebug-http-event");
+        httpObserver.removeObserver(TabWatcherHttpObserver, "firebug-http-event");
 
         if (tabBrowser)
         {
@@ -705,7 +703,7 @@ function getRefererHeader(request)
     return referer;
 }
 
-var HttpObserver = extend(Object,
+var TabWatcherHttpObserver = extend(Object,
 {
     // nsIObserver
     observe: function(aSubject, aTopic, aData)
@@ -743,7 +741,7 @@ var HttpObserver = extend(Object,
         {
             if ( (FBTrace.DBG_ACTIVATION || FBTrace.DBG_WINDOWS) && win == win.parent)
             {
-                FBTrace.sysout("-> tabWatcher HttpObserver *** START *** " +
+                FBTrace.sysout("-> tabWatcher TabWatcherHttpObserver *** START *** " +
                     "document request for: " + request.URI.spec + " window for request is "+safeGetWindowLocation(win)+"\n");
             }
 

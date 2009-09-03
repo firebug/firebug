@@ -20,29 +20,55 @@ var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICate
 var FBTrace = null;
 
 /**
- * This service is intended as the only HTTP observer registered by Firebug.
+ * @service This service is intended as the only HTTP observer registered by Firebug.
  * All FB extensions and Firebug itself should register a listener within this
- * servise in order to listen for http-on-modify-request and http-on-examine-response.
- * See also: http://developer.mozilla.org/en/Setting_HTTP_request_headers
+ * service in order to listen for http-on-modify-request, http-on-examine-response and
+ * http-on-examine-cached-response events.
+ *
+ * See also: <a href="http://developer.mozilla.org/en/Setting_HTTP_request_headers">
+ * Setting_HTTP_request_headers</a>
  */
 function HttpRequestObserver()
 {
+    this.observers = [];
+    this.isObserving = false;
+
     // Get firebug-trace service for logging (the service should be already
     // registered at this moment).
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"]
        .getService(Ci.nsISupports).wrappedJSObject.getTracer("extensions.firebug");
 
-    this.observers = [];
+    // Get firebug-service to listen for suspendFirebug and resumeFirebug events.
+    fbs = Cc["@joehewitt.com/firebug;1"].getService(Ci.nsISupports).wrappedJSObject;
+
+    this.initialize();
+}
+
+/* nsIFireBugClient */
+var FirebugClient =
+{
+    suspendFirebug: function()
+    {
+        if (gHttpObserverSingleton)
+            gHttpObserverSingleton.unregisterObservers();
+    },
+
+    resumeFirebug: function()
+    {
+        if (gHttpObserverSingleton)
+            gHttpObserverSingleton.registerObservers();
+    }
 }
 
 HttpRequestObserver.prototype =
 {
     initialize: function()
     {
+        fbs.registerClient(FirebugClient);
+
         observerService.addObserver(this, "quit-application", false);
-        observerService.addObserver(this, "http-on-modify-request", false);
-        observerService.addObserver(this, "http-on-examine-response", false);
-        observerService.addObserver(this, "http-on-examine-cached-response", false);
+
+        this.registerObservers();
 
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.initialize OK");
@@ -50,23 +76,50 @@ HttpRequestObserver.prototype =
 
     shutdown: function()
     {
+        fbs.unregisterClient(FirebugClient);
+
         observerService.removeObserver(this, "quit-application");
-        observerService.removeObserver(this, "http-on-modify-request");
-        observerService.removeObserver(this, "http-on-examine-response");
-        observerService.removeObserver(this, "http-on-cached-response");
 
         if (FBTrace.DBG_HTTPOBSERVER)
             FBTrace.sysout("httpObserver.shutdown OK");
     },
 
+    registerObservers: function()
+    {
+        if (FBTrace.DBG_HTTPOBSERVER)
+            FBTrace.sysout("httpObserver.registerObservers; wasObserving: " +
+                this.isObserving);
+
+        if (this.isObserving)
+            return;
+
+        observerService.addObserver(this, "http-on-modify-request", false);
+        observerService.addObserver(this, "http-on-examine-response", false);
+        observerService.addObserver(this, "http-on-examine-cached-response", false);
+
+        this.isObserving = true;
+    },
+
+    unregisterObservers: function()
+    {
+        if (FBTrace.DBG_HTTPOBSERVER)
+            FBTrace.sysout("httpObserver.unregisterObservers; wasObserving: " +
+                this.isObserving);
+
+        if (!this.isObserving)
+            return;
+
+        observerService.removeObserver(this, "http-on-modify-request");
+        observerService.removeObserver(this, "http-on-examine-response");
+        observerService.removeObserver(this, "http-on-examine-cached-response");
+
+        this.isObserving = false;
+    },
+
     /* nsIObserve */
     observe: function(subject, topic, data)
     {
-        if (topic == "app-startup") {
-            this.initialize();
-            return;
-        }
-        else if (topic == "quit-application") {
+        if (topic == "quit-application") {
             this.shutdown();
             return;
         }
@@ -202,17 +255,12 @@ var HttpRequestObserverModule =
         compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
         compMgr.registerFactoryLocation(CLASS_ID, CLASS_NAME,
             CONTRACT_ID, fileSpec, location, type);
-
-        categoryManager.addCategoryEntry("app-startup", CLASS_NAME,
-            "service," + CONTRACT_ID, true, true);
     },
 
     unregisterSelf: function(compMgr, fileSpec, location)
     {
         compMgr = compMgr.QueryInterface(Ci.nsIComponentRegistrar);
         compMgr.unregisterFactoryLocation(CLASS_ID, location);
-
-        categoryManager.deleteCategoryEntry("app-startup", CLASS_NAME, true);
     },
 
     getClassObject: function (compMgr, cid, iid)

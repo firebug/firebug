@@ -13,12 +13,10 @@ const nsIRequest = Ci.nsIRequest;
 const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
 const nsIWebProgress = Ci.nsIWebProgress;
 
-const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
-
 // ************************************************************************************************
 
 var contexts = [];
-const httpObserver =
+const SpyHttpObserver =
 {
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIObserver
@@ -69,7 +67,7 @@ const httpObserver =
         catch(exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.httpObserver FAILS", exc);
+                FBTrace.sysout("spy.SpyHttpObserver FAILS", exc);
         }
     }
 };
@@ -100,7 +98,7 @@ Firebug.Spy = extend(Firebug.Module,
                     return;
             }
             if ( contexts.length == 0 )
-                observerService.addObserver(httpObserver, "firebug-http-event", false);
+                httpObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
             contexts.push({ context: context, win: win });
 
             if (FBTrace.DBG_SPY)
@@ -118,7 +116,7 @@ Firebug.Spy = extend(Firebug.Module,
                     continue;
                 contexts.splice(i, 1);
                 if ( contexts.length == 0 )
-                    observerService.removeObserver(httpObserver, "firebug-http-event");
+                    httpObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
 
                 if (FBTrace.DBG_SPY)
                     FBTrace.sysout("spy.detachObserver " + contexts.length + " ", context.getName());

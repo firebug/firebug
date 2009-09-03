@@ -35,8 +35,6 @@ const STORE_ANYWHERE = Ci.nsICache.STORE_ANYWHERE;
 const NS_ERROR_CACHE_KEY_NOT_FOUND = 0x804B003D;
 const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 
-const observerService = CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
-
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
@@ -192,7 +190,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
-        HttpObserver.registerObserver();
+        NetHttpObserver.registerObserver();
     },
 
     shutdown: function()
@@ -200,7 +198,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         prefs.removeObserver(Firebug.prefDomain, this, false);
         if (Firebug.TraceModule)
             Firebug.TraceModule.removeListener(this.TraceListener);
-        HttpObserver.unregisterObserver();
+
+        NetHttpObserver.unregisterObserver();
     },
 
     initContext: function(context, persistedState)
@@ -3467,7 +3466,7 @@ function isURLEncodedFile(file, text)
 // them to appropriate tab - initContext then uses the array in order to access it.
 //-----------------------------------------------------------------------------
 
-var HttpObserver =
+var NetHttpObserver =
 {
     registered: false,
 
@@ -3476,7 +3475,7 @@ var HttpObserver =
         if (this.registered)
             return;
 
-        observerService.addObserver(this, "firebug-http-event", false);
+        httpObserver.addObserver(this, "firebug-http-event", false);
         this.registered = true;
     },
 
@@ -3485,7 +3484,7 @@ var HttpObserver =
         if (!this.registered)
             return;
 
-        observerService.removeObserver(this, "firebug-http-event");
+        httpObserver.removeObserver(this, "firebug-http-event");
         this.registered = false;
     },
 

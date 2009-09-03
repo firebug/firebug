@@ -13,6 +13,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
+this.httpObserver = this.CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
 this.versionChecker = this.CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
 this.appInfo = this.CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
