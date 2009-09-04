@@ -1725,16 +1725,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                     )
                 )
             ),
-            DIV({"class": "netInfoPostText netInfoText"},
-                TABLE({"class": "netInfoPostTable", cellpadding: 0, cellspacing: 0},
-                    TBODY()
-                )
-            ),
-            DIV({"class": "netInfoPutText netInfoText"},
-                TABLE({"class": "netInfoPutTable", cellpadding: 0, cellspacing: 0},
-                    TBODY()
-                )
-            ),
+            DIV({"class": "netInfoPostText netInfoText"}),
+            DIV({"class": "netInfoPutText netInfoText"}),
             DIV({"class": "netInfoResponseText netInfoText"},
                 DIV({"class": "loadResponseMessage"}),
                 BUTTON({onclick: "$onLoadResponse"},
@@ -1892,8 +1884,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (!netInfoBox.postPresented)
             {
                 netInfoBox.postPresented  = true;
-                var postTable = getElementByClass(netInfoBox, "netInfoPostTable");
-                NetInfoPostData.render(context, postTable.firstChild, file);
+                var postText = getElementByClass(netInfoBox, "netInfoPostText");
+                NetInfoPostData.render(context, postText, file);
             }
         }
 
@@ -1902,8 +1894,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (!netInfoBox.putPresented)
             {
                 netInfoBox.putPresented  = true;
-                var putTable = getElementByClass(netInfoBox, "netInfoPutTable");
-                NetInfoPostData.render(context, putTable.firstChild, file);
+                var putText = getElementByClass(netInfoBox, "netInfoPutText");
+                NetInfoPostData.render(context, putText, file);
             }
         }
 
@@ -2035,22 +2027,33 @@ var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
  */
 Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(),
 {
-    paramsTag:
-        TR({"class": "netInfoPostParamsTitle"},
-            TD({colspan: 2},
-                DIV({"class": "netInfoPostParams"},
-                    $STR("net.label.Parameters"),
-                    SPAN({"class": "netInfoPostContentType"},
-                        "application/x-www-form-urlencoded"
+    // application/x-www-form-urlencoded
+    paramsTable:
+        TABLE({"class": "netInfoPostParamsTable", cellpadding: 0, cellspacing: 0},
+            TBODY(
+                TR({"class": "netInfoPostParamsTitle"},
+                    TD({colspan: 2},
+                        DIV({"class": "netInfoPostParams"},
+                            $STR("net.label.Parameters"),
+                            SPAN({"class": "netInfoPostContentType"},
+                                "application/x-www-form-urlencoded"
+                            )
+                        )
                     )
                 )
             )
         ),
 
-    sourceTag:
-        TR({"class": "netInfoPostSourceTitle"},
-            TD({colspan: 2},
-                DIV({"class": "netInfoPostSource"}, $STR("net.label.Source Text"))
+    sourceTable:
+        TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0},
+            TBODY(
+                TR({"class": "netInfoPostSourceTitle"},
+                    TD({colspan: 2},
+                        DIV({"class": "netInfoPostSource"},
+                            $STR("net.label.Source")
+                        )
+                    )
+                )
             )
         ),
 
@@ -2089,14 +2092,16 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     insertParameters: function(parentNode, params)
     {
-        var row = this.paramsTag.insertRows(null, parentNode)[0];
+        var paramTable = this.paramsTable.append(null, parentNode);
+        var row = getElementByClass(paramTable, "netInfoPostParamsTitle");
 
-        NetInfoBody.headerDataTag.insertRows({headers: params}, row ? row : parentNode);
+        NetInfoBody.headerDataTag.insertRows({headers: params}, row);
     },
 
     insertSource: function(parentNode, text)
     {
-        var row = this.sourceTag.insertRows(null, parentNode)[0];
+        var sourceTable = this.sourceTable.append(null, parentNode);
+        var row = getElementByClass(sourceTable, "netInfoPostSourceTitle");
 
         var param = {value: text};
         this.sourceBodyTag.insertRows({param: param}, row);

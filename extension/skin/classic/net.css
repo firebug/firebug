@@ -514,6 +514,10 @@
     color: #565656;
 }
 
+.netInfoPostParamsTable {
+    margin-bottom: 10px;
+}
+
 .netInfoPostContentType {
     color: #bdbdbd;
     padding-left: 50px;
