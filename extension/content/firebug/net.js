@@ -469,7 +469,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return items;
 
         var object = Firebug.getObjectByURL(this.context, file.href);
-        var isPost = isURLEncodedRequest(file);
+        var isPost = isURLEncodedRequest(file, this.context);
 
         items.push(
             {label: "CopyLocation", command: bindFixed(copyToClipboard, FBL, file.href) }
@@ -2044,6 +2044,23 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
+    // multipart/form-data
+    partsTable:
+        TABLE({"class": "netInfoPostPartsTable", cellpadding: 0, cellspacing: 0},
+            TBODY(
+                TR({"class": "netInfoPostPartsTitle"},
+                    TD({colspan: 2},
+                        DIV({"class": "netInfoPostParams"},
+                            $STR("net.label.Parts"),
+                            SPAN({"class": "netInfoPostContentType"},
+                                "multipart/form-data"
+                            )
+                        )
+                    )
+                )
+            )
+        ),
+
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0},
             TBODY(
@@ -2077,12 +2094,19 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         if (text == undefined)
             return;
 
-        if (isURLEncodedRequest(file))
+        if (isURLEncodedRequest(file, context))
         {
             var lines = text.split("\n");
             var params = parseURLEncodedText(lines[lines.length-1]);
             if (params)
                 this.insertParameters(parentNode, params);
+        }
+
+        if (isMultiPartRequest(file, context))
+        {
+            var data = this.parseMultiPartText(file, context);
+            if (data)
+                this.insertParts(parentNode, data);
         }
 
         var postText = formatPostText(text);
@@ -2098,6 +2122,14 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         NetInfoBody.headerDataTag.insertRows({headers: params}, row);
     },
 
+    insertParts: function(parentNode, data)
+    {
+        var partsTable = this.partsTable.append(null, parentNode);
+        var row = getElementByClass(partsTable, "netInfoPostPartsTitle");
+
+        NetInfoBody.headerDataTag.insertRows({headers: data.params}, row);
+    },
+
     insertSource: function(parentNode, text)
     {
         var sourceTable = this.sourceTable.append(null, parentNode);
@@ -2105,6 +2137,41 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
         var param = {value: text};
         this.sourceBodyTag.insertRows({param: param}, row);
+    },
+
+    parseMultiPartText: function(file, context)
+    {
+        var text = getPostText(file, context);
+        if (text == undefined)
+            return null;
+
+        FBTrace.sysout("net.parseMultiPartText; boundary: ", text);
+
+        var boundary = text.match(/\s*boundary=\s*(.*)/)[1];
+
+        var divider = "\r\n\r\n";
+        var bodyStart = text.indexOf(divider);
+        var body = text.substr(bodyStart + divider.length);
+
+        var postData = {};
+        postData.mimeType = "multipart/form-data";
+        postData.params = [];
+
+        var parts = body.split("--" + boundary);
+        for (var i=0; i<parts.length; i++)
+        {
+            var part = parts[i].split(divider);
+            if (part.length != 2)
+                continue;
+
+            var m = part[0].match(/\s*name=\"(.*)\"(;|$)/);
+            postData.params.push({
+                name: (m && m.length > 1) ? m[1] : "",
+                value: trimLeft(part[1])
+            })
+        }
+
+        return postData;
     },
 });
 
@@ -3446,9 +3513,9 @@ function getResponseText(file, context)
         context.sourceCache.loadText(file.href, file.method, file);
 }
 
-function isURLEncodedRequest(file)
+function isURLEncodedRequest(file, context)
 {
-    var text = getPostText(file, this.context);
+    var text = getPostText(file, context);
     if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") == 0)
         return true;
 
@@ -3456,6 +3523,15 @@ function isURLEncodedRequest(file)
     // there can be even charset specified. So, use indexOf rather than just "==".
     var headerValue = findHeader(file.requestHeaders, "Content-Type");
     if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)
+        return true;
+
+    return false;
+}
+
+function isMultiPartRequest(file, context)
+{
+    var text = getPostText(file, context);
+    if (text && text.indexOf("Content-Type: multipart/form-data") == 0) 
         return true;
 
     return false;

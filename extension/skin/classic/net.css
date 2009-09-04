@@ -514,7 +514,8 @@
     color: #565656;
 }
 
-.netInfoPostParamsTable {
+.netInfoPostParamsTable,
+.netInfoPostPartsTable {
     margin-bottom: 10px;
 }
 
