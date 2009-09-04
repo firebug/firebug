@@ -927,7 +927,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             if (hasClass(row, "opened"))
             {
                 var netInfoBox = row.nextSibling.firstChild.firstChild;
-                Firebug.NetMonitor.NetInfoBody.updateInfo(netInfoBox, file, this.context);
+                NetInfoBody.updateInfo(netInfoBox, file, this.context);
             }
         }
     },
@@ -1553,7 +1553,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             return;
 
         var file = row.repObject;
-        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
 
         toggleClass(row, "opened");
         if (hasClass(row, "opened"))
@@ -1964,7 +1963,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         }
 
         // Notify listeners about update so, content of custom tabs can be updated.
-        var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
         dispatch(NetInfoBody.fbListeners, "updateTabBody", [netInfoBox, file, context]);
     },
 
@@ -2027,6 +2025,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     },
 });
 
+var NetInfoBody = Firebug.NetMonitor.NetInfoBody;
+
 // ************************************************************************************************
 
 /**
@@ -2065,7 +2065,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     getParamValueIterator: function(param)
     {
-        return Firebug.NetMonitor.NetInfoBody.getParamValueIterator(param);
+        return NetInfoBody.getParamValueIterator(param);
     },
 
     render: function(context, parentNode, file)
@@ -2091,8 +2091,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     {
         var row = this.paramsTag.insertRows(null, parentNode)[0];
 
-        Firebug.NetMonitor.NetInfoBody.headerDataTag.insertRows(
-            {headers: params}, row ? row : parentNode);
+        NetInfoBody.headerDataTag.insertRows({headers: params}, row ? row : parentNode);
     },
 
     insertSource: function(parentNode, text)
@@ -3737,7 +3736,7 @@ var NetPanelSearch = function(panel, rowFinder)
 
             var netInfoRow = this.currentRow.nextSibling;
             var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
-            Firebug.NetMonitor.NetInfoBody.selectTabByName(netInfoBox, "Response");
+            NetInfoBody.selectTabByName(netInfoBox, "Response");
 
             // Before the search is started, the new content must be properly
             // layouted within the page. The layout is executed by reading
