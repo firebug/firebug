@@ -1,37 +1,36 @@
-content firebug content/firebug/ contentaccessible=yes
-content firebug content/firebug/
+content firebug jar:chrome/firebug.jar!/content/firebug/ contentaccessible=yes
+content firebug jar:chrome/firebug.jar!/content/firebug/
+skin    firebug classic/1.0 jar:chrome/firebug.jar!/skin/classic/
+skin    firebug-os  classic/1.0 jar:chrome/firebug.jar!/skin/classic/win/
 
-skin    firebug classic/1.0 skin/classic/
-skin    firebug-os  classic/1.0 skin/classic/win/
-
-locale  firebug bg-BG       locale/bg-BG/
-locale  firebug ca-AD       locale/ca-AD/
-locale  firebug cs-CZ       locale/cs-CZ/
-locale  firebug da-DK       locale/da-DK/
-locale  firebug de-DE       locale/de-DE/
-locale  firebug en-US       locale/en-US/
-locale  firebug es-AR       locale/es-AR/
-locale  firebug es-ES       locale/es-ES/
-locale  firebug fa-IR       locale/fa-IR/
-locale  firebug fr-FR       locale/fr-FR/
-locale  firebug hu-HU       locale/hu-HU/
-locale  firebug hy-AM       locale/hy-AM/
-locale  firebug it-IT       locale/it-IT/
-locale  firebug ja-JP       locale/ja-JP/
-locale  firebug ko-KR       locale/ko-KR/
-locale  firebug nl-NL       locale/nl-NL/
-locale  firebug pl-PL       locale/pl-PL/
-locale  firebug pt-BR       locale/pt-BR/
-locale  firebug pt-PT       locale/pt-PT/
-locale  firebug ro-RO       locale/ro-RO/
-locale  firebug ru-RU       locale/ru-RU/
-locale  firebug sk-SK       locale/sk-SK/
-locale  firebug sl-SI       locale/sl-SI/
-locale  firebug sv-SE       locale/sv-SE/
-locale  firebug tr-TR       locale/tr-TR/
-locale  firebug uk-UA       locale/uk-UA/
-locale  firebug zh-CN       locale/zh-CN/
-locale  firebug zh-TW       locale/zh-TW/
+locale  firebug bg-BG       jar:chrome/firebug.jar!/locale/bg-BG/
+locale  firebug ca-AD       jar:chrome/firebug.jar!/locale/ca-AD/
+locale  firebug cs-CZ       jar:chrome/firebug.jar!/locale/cs-CZ/
+locale  firebug da-DK       jar:chrome/firebug.jar!/locale/da-DK/
+locale  firebug de-DE       jar:chrome/firebug.jar!/locale/de-DE/
+locale  firebug en-US       jar:chrome/firebug.jar!/locale/en-US/
+locale  firebug es-AR       jar:chrome/firebug.jar!/locale/es-AR/
+locale  firebug es-ES       jar:chrome/firebug.jar!/locale/es-ES/
+locale  firebug fa-IR       jar:chrome/firebug.jar!/locale/fa-IR/
+locale  firebug fr-FR       jar:chrome/firebug.jar!/locale/fr-FR/
+locale  firebug hu-HU       jar:chrome/firebug.jar!/locale/hu-HU/
+locale  firebug hy-AM       jar:chrome/firebug.jar!/locale/hy-AM/
+locale  firebug it-IT       jar:chrome/firebug.jar!/locale/it-IT/
+locale  firebug ja-JP       jar:chrome/firebug.jar!/locale/ja-JP/
+locale  firebug ko-KR       jar:chrome/firebug.jar!/locale/ko-KR/
+locale  firebug nl-NL       jar:chrome/firebug.jar!/locale/nl-NL/
+locale  firebug pl-PL       jar:chrome/firebug.jar!/locale/pl-PL/
+locale  firebug pt-BR       jar:chrome/firebug.jar!/locale/pt-BR/
+locale  firebug pt-PT       jar:chrome/firebug.jar!/locale/pt-PT/
+locale  firebug ro-RO       jar:chrome/firebug.jar!/locale/ro-RO/
+locale  firebug ru-RU       jar:chrome/firebug.jar!/locale/ru-RU/
+locale  firebug sk-SK       jar:chrome/firebug.jar!/locale/sk-SK/
+locale  firebug sl-SI       jar:chrome/firebug.jar!/locale/sl-SI/
+locale  firebug sv-SE       jar:chrome/firebug.jar!/locale/sv-SE/
+locale  firebug tr-TR       jar:chrome/firebug.jar!/locale/tr-TR/
+locale  firebug uk-UA       jar:chrome/firebug.jar!/locale/uk-UA/
+locale  firebug zh-CN       jar:chrome/firebug.jar!/locale/zh-CN/
+locale  firebug zh-TW       jar:chrome/firebug.jar!/locale/zh-TW/
 
 overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
 overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
