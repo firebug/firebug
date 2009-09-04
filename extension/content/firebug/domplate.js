@@ -885,6 +885,9 @@ var Renderer =
 
     insertRows: function(args, before, self)
     {
+        if (!args)
+            args = {};
+
         this.tag.compile();
 
         var outputs = [];
@@ -960,6 +963,9 @@ var Renderer =
 
     insertNode: function(args, doc, inserter, self)
     {
+        if (!args)
+            args = {};
+
         this.tag.compile();
 
         var outputs = [];
@@ -987,6 +993,9 @@ var Renderer =
 
     replace: function(args, parent, self)
     {
+        if (!args)
+            args = {};
+
         this.tag.compile();
 
         var outputs = [];
@@ -1021,6 +1030,9 @@ var Renderer =
 
     append: function(args, parent, self)
     {
+        if (!args)
+            args = {};
+
         this.tag.compile();
 
         var outputs = [];
