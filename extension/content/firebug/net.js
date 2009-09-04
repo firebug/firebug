@@ -469,7 +469,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return items;
 
         var object = Firebug.getObjectByURL(this.context, file.href);
-        var isPost = isURLEncodedFile(file, getPostText(file, this.context));
+        var isPost = isURLEncodedRequest(file);
 
         items.push(
             {label: "CopyLocation", command: bindFixed(copyToClipboard, FBL, file.href) }
@@ -1728,12 +1728,12 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             ),
             DIV({"class": "netInfoPostText netInfoText"},
                 TABLE({"class": "netInfoPostTable", cellpadding: 0, cellspacing: 0},
-                    TAG("$postDataBodyTag")
+                    TBODY()
                 )
             ),
             DIV({"class": "netInfoPutText netInfoText"},
                 TABLE({"class": "netInfoPutTable", cellpadding: 0, cellspacing: 0},
-                    TAG("$postDataBodyTag")
+                    TBODY()
                 )
             ),
             DIV({"class": "netInfoResponseText netInfoText"},
@@ -1749,34 +1749,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             ),
             DIV({"class": "netInfoHtmlText netInfoText"},
                 IFRAME({"class": "netInfoHtmlPreview"})
-            )
-        ),
-
-    postDataBodyTag:
-        TBODY(
-            TR({"class": "netInfoPostParamsTitle"},
-                TD({colspan: 2},
-                    DIV({"class": "netInfoPostParams"},
-                        $STR("net.label.Parsed Parameters"),
-                        SPAN({"class": "netInfoPostContentType"},
-                            "application/x-www-form-urlencoded"
-                        )
-                    )
-                )
-            ),
-            TR({"class": "netInfoPostSourceTitle"},
-                TD({colspan: 2},
-                    DIV({"class": "netInfoPostSource"}, $STR("net.label.Source Text"))
-                )
-            )
-        ),
-
-    postSourceTag:
-        TR(
-            TD({colspan: 2},
-                FOR("line", "$param|getParamValueIterator",
-                    CODE("$line")
-                )
             )
         ),
 
@@ -1921,22 +1893,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (!netInfoBox.postPresented)
             {
                 netInfoBox.postPresented  = true;
-
-                var text = getPostText(file, context);
-                if (text != undefined)
-                {
-                    var params;
-                    if (isURLEncodedFile(file, text))
-                    {
-                        var lines = text.split("\n");
-                        params = parseURLEncodedText(lines[lines.length-1]);
-                    }
-                    this.insertHeaderRows(netInfoBox, params, "Post", "PostParams");
-
-                    var postText = formatPostText(text);
-                    if (postText)
-                        this.insertPostSource(netInfoBox, postText, "Post", "PostSource");
-                }
+                var postTable = getElementByClass(netInfoBox, "netInfoPostTable");
+                NetInfoPostData.render(context, postTable.firstChild, file);
             }
         }
 
@@ -1945,22 +1903,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (!netInfoBox.putPresented)
             {
                 netInfoBox.putPresented  = true;
-
-                var text = getPostText(file, context);
-                if (text != undefined)
-                {
-                    var params;
-                    if (isURLEncodedFile(file, text))
-                    {
-                        var lines = text.split("\n");
-                        params = parseURLEncodedText(lines[lines.length-1]);
-                    }
-                    this.insertHeaderRows(netInfoBox, params, "Put", "PostParams");
-
-                    var postText = formatPostText(text);
-                    if (postText)
-                        this.insertPostSource(netInfoBox, postText, "Put", "PostSource");
-                }
+                var putTable = getElementByClass(netInfoBox, "netInfoPutTable");
+                NetInfoPostData.render(context, putTable.firstChild, file);
             }
         }
 
@@ -2078,31 +2022,89 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         var tbody = headersTable.firstChild;
         var titleRow = getChildByClass(tbody, "netInfo" + rowName + "Title");
 
-        if (headers && headers.length)
-        {
-            this.headerDataTag.insertRows({headers: headers}, titleRow ? titleRow : tbody);
-            removeClass(titleRow, "collapsed");
-        }
-        else
-            setClass(titleRow, "collapsed");
-    },
-
-    insertPostSource: function(netInfoBox, text, tableName, rowName)
-    {
-        var headersTable = getElementByClass(netInfoBox, "netInfo"+tableName+"Table");
-        var tbody = headersTable.firstChild;
-        var titleRow = getChildByClass(tbody, "netInfo" + rowName + "Title");
-
-        if (text.length)
-        {
-            var param = {value: text};
-            this.postSourceTag.insertRows({param: param}, titleRow);
-            removeClass(titleRow, "collapsed");
-        }
-        else
-            setClass(titleRow, "collapsed");
+        this.headerDataTag.insertRows({headers: headers}, titleRow ? titleRow : tbody);
+        removeClass(titleRow, "collapsed");
     },
 });
+
+// ************************************************************************************************
+
+/**
+ * @domplate Represents posted data within request info (the info, which is visible when
+ * a request entry is expanded. This template renders content of the Post tab.
+ */
+Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(),
+{
+    paramsTag:
+        TR({"class": "netInfoPostParamsTitle"},
+            TD({colspan: 2},
+                DIV({"class": "netInfoPostParams"},
+                    $STR("net.label.Parameters"),
+                    SPAN({"class": "netInfoPostContentType"},
+                        "application/x-www-form-urlencoded"
+                    )
+                )
+            )
+        ),
+
+    sourceTag:
+        TR({"class": "netInfoPostSourceTitle"},
+            TD({colspan: 2},
+                DIV({"class": "netInfoPostSource"}, $STR("net.label.Source Text"))
+            )
+        ),
+
+    sourceBodyTag:
+        TR(
+            TD({colspan: 2},
+                FOR("line", "$param|getParamValueIterator",
+                    CODE("$line")
+                )
+            )
+        ),
+
+    getParamValueIterator: function(param)
+    {
+        return Firebug.NetMonitor.NetInfoBody.getParamValueIterator(param);
+    },
+
+    render: function(context, parentNode, file)
+    {
+        var text = getPostText(file, context);
+        if (text == undefined)
+            return;
+
+        if (isURLEncodedRequest(file))
+        {
+            var lines = text.split("\n");
+            var params = parseURLEncodedText(lines[lines.length-1]);
+            if (params)
+                this.insertParameters(parentNode, params);
+        }
+
+        var postText = formatPostText(text);
+        if (postText)
+            this.insertSource(parentNode, postText);
+    },
+
+    insertParameters: function(parentNode, params)
+    {
+        var row = this.paramsTag.insertRows(null, parentNode)[0];
+
+        Firebug.NetMonitor.NetInfoBody.headerDataTag.insertRows(
+            {headers: params}, row ? row : parentNode);
+    },
+
+    insertSource: function(parentNode, text)
+    {
+        var row = this.sourceTag.insertRows(null, parentNode)[0];
+
+        var param = {value: text};
+        this.sourceBodyTag.insertRows({param: param}, row);
+    },
+});
+
+var NetInfoPostData = Firebug.NetMonitor.NetInfoPostData;
 
 // ************************************************************************************************
 
@@ -3440,12 +3442,13 @@ function getResponseText(file, context)
         context.sourceCache.loadText(file.href, file.method, file);
 }
 
-function isURLEncodedFile(file, text)
+function isURLEncodedRequest(file)
 {
-    if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") != -1)
+    var text = getPostText(file, this.context);
+    if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") == 0)
         return true;
 
-    // The header value doesn't have to be alway exactly "application/x-www-form-urlencoded",
+    // The header value doesn't have to be always exactly "application/x-www-form-urlencoded",
     // there can be even charset specified. So, use indexOf rather than just "==".
     var headerValue = findHeader(file.requestHeaders, "Content-Type");
     if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)

@@ -517,6 +517,7 @@
 .netInfoPostContentType {
     color: #bdbdbd;
     padding-left: 50px;
+    font-weight: normal;
 }
 
 .netInfoHtmlPreview {
