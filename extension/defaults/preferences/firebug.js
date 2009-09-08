@@ -148,6 +148,7 @@ pref("extensions.firebug.DBG_LOCALE", false);       // localization, missing str
 pref("extensions.firebug.DBG_INFOTIP", false);      // popup info tip in panels                  /*@explore*/
 pref("extensions.firebug.DBG_ANNOTATIONS", false);  // Page annotations service                  /*@explore*/
 pref("extensions.firebug.DBG_XMLVIEWER", false);    // xml explorer                              /*@explore*/
+pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activity observer      /*@explore*/
 
 //Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");

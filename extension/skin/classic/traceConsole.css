@@ -288,6 +288,10 @@
     color: maroon;
 }
 
+.DBG_ACTIVITYOBSERVER {
+    color: rgb(164, 123, 123);
+}
+
 .DBG_JSERROR,
 .DBG_ERRORS {
     color: Red;
