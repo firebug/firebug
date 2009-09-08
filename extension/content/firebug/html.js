@@ -512,6 +512,54 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Break on Mutate
+
+    resume: function()
+    {
+        this.context.breakOnMutate = !this.context.breakOnMutate
+
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.resume; " + this.context.breakOnMutate + ", " + this.context.getName());
+
+        Firebug.Debugger.syncCommands(this.context);
+
+        var chrome = Firebug.chrome;
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        if (breakable == "true")
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Disable Break On Mutate"));
+        }
+        else
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Break On Mutate"));
+        }
+    },
+
+    breakOnMutate: function(type)
+    {
+        if (!this.context.breakOnMutate)
+            return;
+
+        this.context.breakOnMutate = false;
+
+        Firebug.Debugger.halt(function(frame)
+        {
+            for (; frame && frame.isValid; frame = frame.callingFrame)
+            {
+                var fileName = frame.script.fileName;
+                if (fileName && fileName.indexOf("chrome://firebug/") != 0 &&
+                    fileName.indexOf("/components/firebug-") == -1)
+                    break;
+            }
+
+            if (frame)
+                Firebug.Debugger.onBreak(frame, 3);
+        });
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Events
 
     onMutateAttr: function(event)
@@ -528,6 +576,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         {
             this.mutateAttr(target, attrChange, attrName, newValue);
         }, this);
+
+        this.breakOnMutate(event.type);
     },
 
     onMutateText: function(event)
@@ -541,6 +591,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         {
             this.mutateText(target, parent, newValue);
         }, this);
+
+        this.breakOnMutate(event.type);
     },
 
     onMutateNode: function(event)
@@ -565,6 +617,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     FBTrace.sysout("html.onMutateNode FAILS:", exc);
             }
         }, this);
+
+        this.breakOnMutate(event.type);
     },
 
     onClick: function(event)
@@ -689,6 +743,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     doc.addEventListener("DOMNodeRemoved", this.onMutateNode, false);
                 }, this));
             }
+
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+                $STR("html.Break On Mutate"));
 
             restoreObjects(this, state);
         }
