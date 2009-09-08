@@ -639,7 +639,7 @@ FirebugService.prototype =
         var index = this.findErrorBreakpoint(url, lineNo);
         if (index != -1)
         {
-            clearBreakpoint(url, lineNo);
+            this.clearBreakpoint(url, lineNo);
             errorBreakpoints.splice(index, 1);
 
             dispatch(debuggers, "onToggleErrorBreakpoint", [url, lineNo, false, debuggr]);
