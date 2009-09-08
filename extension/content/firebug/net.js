@@ -394,9 +394,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         this.showToolbarButtons("fbNetButtons", false);
 
-        if (!this.context.stopped)
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
-
         Firebug.Debugger.syncCommands(this.context);
 
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
