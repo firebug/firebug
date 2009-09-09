@@ -47,13 +47,13 @@ function HttpRequestObserver()
 /* nsIFireBugClient */
 var FirebugClient =
 {
-    suspendFirebug: function()
+    disable: function()
     {
         if (gHttpObserverSingleton)
             gHttpObserverSingleton.unregisterObservers();
     },
 
-    resumeFirebug: function()
+    enable: function()
     {
         if (gHttpObserverSingleton)
             gHttpObserverSingleton.registerObservers();
