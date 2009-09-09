@@ -35,6 +35,10 @@ const STORE_ANYWHERE = Ci.nsICache.STORE_ANYWHERE;
 const NS_ERROR_CACHE_KEY_NOT_FOUND = 0x804B003D;
 const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 
+var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
+var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
+var nsISocketTransport = Ci.nsISocketTransport;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
@@ -47,6 +51,7 @@ var contexts = new Array();
 var panelName = "net";
 var maxQueueRequests = 500;
 var panelBar1 = $("fbPanelBar1");
+var activeRequests = [];
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -2551,6 +2556,17 @@ NetProgress.prototype =
         });
     },
 
+    completedFile: function completedFile(request, time)
+    {
+        var file = this.getRequestFile(request);
+        if (file)
+        {
+            file.respondedTime = time;
+            file.endTime = time;
+            return file;
+        }
+    },
+
     respondedFile: function respondedFile(request, time, info)
     {
         dispatch(Firebug.NetMonitor.fbListeners, "onExamineResponse", [this.context, request]);
@@ -2558,8 +2574,11 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
         {
-            file.respondedTime = time;
-            file.endTime = time;
+            if (!Ci.nsIHttpActivityDistributor)
+            {
+                file.respondedTime = time;
+                file.endTime = time;
+            }
 
             if (request.contentLength != undefined)
                 file.size = request.contentLength;
@@ -2622,7 +2641,7 @@ NetProgress.prototype =
         return null;
     },
 
-    sendingFile: function waitingForFile(request, time)
+    sendingFile: function sendingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
@@ -2888,6 +2907,10 @@ NetProgress.prototype =
 
     onProgressChange : function(progress, request, current, max, total, maxTotal)
     {
+        // The timing is measured by activity-distributor observer (if it's available).
+        if (Ci.nsIHttpActivityDistributor)
+            return;
+
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
@@ -2902,6 +2925,10 @@ NetProgress.prototype =
 
     onStatusChange: function(progress, request, status, message)
     {
+        // The timing is measured by activity-distributor observer (if it's available).
+        if (Ci.nsIHttpActivityDistributor)
+            return;
+
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
@@ -2931,6 +2958,7 @@ NetProgress.prototype =
 
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
+var completedFile = NetProgress.prototype.completedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
 var connectingFile = NetProgress.prototype.connectingFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
@@ -3647,6 +3675,9 @@ var NetHttpObserver =
             }
         }
 
+        if (Ci.nsIHttpActivityDistributor)
+            return;
+
         var networkContext = contexts[tabId];
         if (!networkContext)
             networkContext = context ? context.netProgress : null;
@@ -3765,17 +3796,93 @@ var NetHttpActivityObserver =
     observeActivity: function(httpChannel, activityType, activitySubtype, timestamp,
         extraSizeData, extraStringData)
     {
-        if (FBTrace.DBG_ACTIVITYOBSERVER)
+        try
         {
+            if (!(httpChannel instanceof Ci.nsIHttpChannel))
+                return;
+
+            var win = getWindowForRequest(httpChannel);
+            if (!win)
+            {
+                var index = activeRequests.indexOf(httpChannel);
+                if (!(win = activeRequests[index+1]))
+                    return;
+            }
+
+            var context = TabWatcher.getContextByWindow(win);
+            var tabId = Firebug.getTabIdForWindow(win);
+            if (!(tabId && win))
+                return;
+
+            if (FBTrace.DBG_ACTIVITYOBSERVER)
+            {
+                var time = new Date();
+                time.setTime(timestamp/1000);
+                FBTrace.sysout("activityObserver.observeActivity; " +
+                    getTimeLabel(time) + ", " +
+                    safeGetName(httpChannel) + ", " +
+                    getActivityTypeDescription(activityType) + ", " + 
+                    getActivitySubtypeDescription(activitySubtype) + ", " +
+                    extraSizeData,
+                    extraStringData);
+            }
+
+            if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
+            {
+                if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
+                {
+                    activeRequests.push(httpChannel);
+                    activeRequests.push(win);
+
+                    if (FBTrace.DBG_ACTIVITYOBSERVER)
+                        FBTrace.sysout("activityObserver.Request START; " + 
+                            activeRequests.length + ", " + safeGetName(httpChannel));
+                }
+                else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
+                {
+                    var index = activeRequests.indexOf(httpChannel);
+                    activeRequests.splice(index, 2);
+
+                    if (FBTrace.DBG_ACTIVITYOBSERVER)
+                        FBTrace.sysout("activityObserver.Request END; " +
+                            activeRequests.length + ", " + safeGetName(httpChannel));
+                }
+            }
+
+            var networkContext = contexts[tabId];
+            if (!networkContext)
+                networkContext = context ? context.netProgress : null;
+
+            if (!networkContext)
+                return;
+
             var time = new Date();
             time.setTime(timestamp/1000);
-            FBTrace.sysout("activityObserver.observeActivity; " +
-                safeGetName(httpChannel) + ", " +
-                getActivityTypeDescription(activityType) + ", " + 
-                getActivitySubtypeDescription(activitySubtype) + ", " +
-                formatTime(time) + ", " +
-                extraSizeData,
-                extraStringData);
+
+            if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
+            {
+                if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
+                    networkContext.post(requestedFile, [httpChannel, time, win, isXHR(httpChannel)]);
+                else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_COMPLETE)
+                    networkContext.post(completedFile, [httpChannel, time]);
+            }
+            else if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT)
+            {
+                if (activitySubtype == nsISocketTransport.STATUS_RESOLVING)
+                    networkContext.post(resolvingFile, [httpChannel, time]);
+                else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
+                    networkContext.post(connectingFile, [httpChannel, time]);
+                else if (activitySubtype == nsISocketTransport.STATUS_WAITING_FOR)
+                    networkContext.post(waitingForFile, [httpChannel, time]);
+                else if (activitySubtype == nsISocketTransport.STATUS_SENDING_TO)
+                    networkContext.post(sendingFile, [httpChannel, time]);
+                else if (activitySubtype == nsISocketTransport.STATUS_RECEIVING_FROM)
+                    networkContext.post(receivingFile, [httpChannel, time]);
+            }
+        }
+        catch (exc)
+        {
+            FBTrace.sysout("net.observeActivity: EXCEPTION ", exc);
         }
     },
 
@@ -3784,7 +3891,7 @@ var NetHttpActivityObserver =
     {
         if (iid.equals(Ci.nsISupports) ||
             iid.equals(Ci.nsIActivityObserver)) {
-             return this;
+            return this;
          }
 
         throw Cr.NS_ERROR_NO_INTERFACE;
@@ -3794,15 +3901,23 @@ var NetHttpActivityObserver =
 // ************************************************************************************************
 // Activity Observer Tracing Support
 
+function getTimeLabel(date)
+{
+    var m = date.getMinutes() + "";
+    var s = date.getSeconds() + "";
+    var ms = date.getMilliseconds() + "";
+    return "[" + ((m.length > 1) ? m : "0" + m) + ":" +
+        ((s.length > 1) ? s : "0" + s) + "." +
+        ((ms.length > 2) ? ms : ((ms.length > 1) ? "0" + ms : "00" + ms)) + "]";
+}
+
 function getActivityTypeDescription(a)
 {
-    var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
-
     switch (a)
     {
-    case Ci.nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT:
+    case nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT:
         return "ACTIVITY_TYPE_SOCKET_TRANSPORT";
-    case Ci.nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION:
+    case nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION:
         return "ACTIVITY_TYPE_HTTP_TRANSACTION";
     default:
         return a;
@@ -3811,9 +3926,6 @@ function getActivityTypeDescription(a)
 
 function getActivitySubtypeDescription(a)
 {
-    var nsIHttpActivityObserver = Ci.nsIHttpActivityObserver;
-    var nsISocketTransport = Ci.nsISocketTransport;
-
     switch (a)
     {
     case nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER:
