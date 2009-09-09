@@ -516,7 +516,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     resume: function()
     {
-        this.context.breakOnMutate = !this.context.breakOnMutate
+        this.context.breakOnMutate = !this.context.breakOnMutate;
 
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("html.resume; " + this.context.breakOnMutate + ", " + this.context.getName());
