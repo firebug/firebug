@@ -2427,7 +2427,7 @@ this.getStyleSheetByHref = function(url, context)
     if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         FBTrace.sysout((FBL.totalRules-r)+" rules in "+ (FBL.totalSheets-s)+" sheets required "+(new Date().getTime() - t.getTime())+" ms", context.styleSheetMap);
 
-    // The hasOwnProperty check must be done to prevent warnings in strict mode
+    // hasOwnProperty is called to prevent possible conflicts with prototype extensions and strict mode warnings
     return context.styleSheetMap.hasOwnProperty(url) ? context.styleSheetMap[url] : undefined;
 };
 
