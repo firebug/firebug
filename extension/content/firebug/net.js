@@ -2250,7 +2250,6 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         var elapsed = file.loaded ? file.endTime - file.startTime : file.phase.phaseEndTime - file.startTime;
         var blockingEnd = (file.sendingTime > file.startTime) ? file.sendingTime : file.waitingForTime;
 
-        // Insert request timing info.
         var timings = [];
         timings.push({bar: "Resolving",
             elapsed: file.connectingTime - file.startTime,
@@ -2270,17 +2269,23 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         timings.push({bar: "Receiving",
             elapsed: file.endTime - file.respondedTime,
             start: file.respondedTime - file.startTime});
-        this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
 
-        // Insert separator.
-        this.separatorTag.insertRows({}, infoTip.firstChild);
-
-        // Insert events timing info.
         var events = [];
         if (file.phase.contentLoadTime)
             events.push({bar: "ContentLoad", start: file.phase.contentLoadTime- file.startTime});
         if (file.phase.windowLoadTime)
             events.push({bar: "WindowLoad", start: file.phase.windowLoadTime - file.startTime});
+
+        // Insert request timing info.
+        this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
+
+        if (!events.length)
+            return;
+
+        // Insert separator.
+        this.separatorTag.insertRows({}, infoTip.firstChild);
+
+        // Insert events timing info.
         this.eventsTag.insertRows({events: events}, infoTip.firstChild);
 
         return true;
@@ -3870,7 +3875,7 @@ var NetHttpActivityObserver =
             {
                 if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
                     networkContext.post(requestedFile, [httpChannel, time, win, isXHR(httpChannel)]);
-                else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_COMPLETE)
+                else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
                     networkContext.post(completedFile, [httpChannel, time]);
             }
             else if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT)
