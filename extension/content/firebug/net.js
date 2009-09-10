@@ -679,11 +679,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     populateTimeInfoTip: function(infoTip, file)
     {
-        var infoTip = Firebug.NetMonitor.TimeInfoTip.tag.replace({file: file}, infoTip);
-        if (!file.phase.contentLoadTime)
-            infoTip.firstChild.removeChild(getElementByClass(infoTip, "netContentLoadRow"));
-        if (!file.phase.windowLoadTime)
-            infoTip.firstChild.removeChild(getElementByClass(infoTip, "netWindowLoadRow"));
+        Firebug.NetMonitor.TimeInfoTip.render(file, infoTip);
         return true;
     },
 
@@ -1015,7 +1011,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.barResolvingWidth = Math.round(((file.connectingTime - file.startTime) / this.phaseElapsed) * 100);
         this.barConnectingWidth = Math.round(((file.connectedTime - file.startTime) / this.phaseElapsed) * 100);
         this.barBlockingWidth = Math.round(((blockingEnd - file.startTime) / this.phaseElapsed) * 100);
-        this.barSendingWidth = Math.round(((file.sendingTime - file.startTime) / this.phaseElapsed) * 100);
+        this.barSendingWidth = Math.round(((file.waitingForTime - file.startTime) / this.phaseElapsed) * 100);
         this.barWaitingWidth = Math.round(((file.respondedTime - file.startTime) / this.phaseElapsed) * 100);
         this.barReceivingWidth = Math.round((elapsed / this.phaseElapsed) * 100);
 
@@ -2181,104 +2177,114 @@ var NetInfoPostData = Firebug.NetMonitor.NetInfoPostData;
  */
 Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 {
-    tag:
+    tableTag:
         TABLE({"class": "timeInfoTip"},
-            TBODY(
-                TR(
-                    TD({"class": "netBlockingBar timeInfoTipBar"}),
-                    TD("$file|getBlockingTime : " + $STR("requestinfo.Blocking"))
+            TBODY()
+        ),
+
+    timingsTag:
+        FOR("time", "$timings",
+            TR({"class": "timeInfoTipRow", $collapsed: "$time|hideBar"},
+                TD({"class": "$time|getBarClass timeInfoTipBar"}),
+                TD({"class": "timeInfoTipCell startTime"},
+                    "$time.start|formatStartTime"
                 ),
-                TR(
-                    TD({"class": "netResolvingBar timeInfoTipBar"}),
-                    TD("$file|getResolvingTime : " + $STR("requestinfo.DNS Lookup"))
+                TD({"class": "timeInfoTipCell elapsedTime"},
+                    "$time.elapsed|formatTime"
                 ),
-                TR(
-                    TD({"class": "netConnectingBar timeInfoTipBar"}),
-                    TD("$file|getConnectingTime : " + $STR("requestinfo.Connecting"))
+                TD("$time|getLabel")
+            )
+        ),
+
+    separatorTag:
+        TR(
+            TD({"colspan": 4, "height": "10px"})
+        ),
+
+    eventsTag:
+        FOR("event", "$events",
+            TR({"class": "timeInfoTipEventRow"},
+                TD({"class": "timeInfoTipBar", align: "center"},
+                    DIV({"class": "$event|getBarClass timeInfoTipEventBar"})
                 ),
-                TR(
-                    TD({"class": "netSendingBar timeInfoTipBar"}),
-                    TD("$file|getSendingTime : " + $STR("requestinfo.Sending"))
-                ),
-                TR(
-                    TD({"class": "netWaitingBar timeInfoTipBar"}),
-                    TD("$file|getWaitingTime : " + $STR("requestinfo.Waiting For Response"))
-                ),
-                TR({$loaded: "$file.loaded",
-                    $fromCache: "$file.fromCache"},
-                    TD({"class": "netReceivingBar timeInfoTipBar"}),
-                    TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
-                ),
-                TR(
-                    TD({"colspan": 2, "height": "10px"})
-                ),
-                TR({"class": "netContentLoadRow"},
-                    TD({align: "center"},
-                        DIV({"class": "netContentLoadBar timeInfoTipBar"})
-                    ),
-                    TD("$file|getContentLoadTime : " + $STR("requestinfo.DOMContentLoaded"))
-                ),
-                TR({"class": "netWindowLoadRow"},
-                    TD({align: "center"},
-                        DIV({"class": "netWindowLoadBar timeInfoTipBar"})
-                    ),
-                    TD("$file|getWindowLoadTime : " + $STR("requestinfo.Load"))
+                TD("$event.start|formatStartTime"),
+                TD({"colspan": 2},
+                    "$event|getLabel"
                 )
             )
         ),
 
-    getBlockingTime: function(file)
+    hideBar: function(obj)
     {
-        var blockingEnd = (file.sendingTime != file.startTime) ? file.sendingTime : file.waitingForTime;
-        return formatTime(blockingEnd - file.connectedTime);
+        return !obj.elapsed && obj.bar == "Blocking";
     },
 
-    getResolvingTime: function(file)
+    getBarClass: function(obj)
     {
-        return formatTime(file.connectingTime - file.startTime);
+        return "net" + obj.bar + "Bar";
     },
 
-    getConnectingTime: function(file)
+    formatTime: function(time)
     {
-        return formatTime(file.connectedTime - file.connectingTime);
+        return formatTime(time)
     },
 
-    getSendingTime: function(file)
+    formatStartTime: function(time)
     {
-        // The sending event doesn't have to come.
-        if (file.sendingTime > file.connectingTime)
-            return formatTime(file.waitingForTime - file.sendingTime);
-        else
-            return formatTime(0);
+        var label = formatTime(time);
+        if (!time)
+            return label;
+
+        return (time > 0 ? "+" : "") + label;
     },
 
-    getWaitingTime: function(file)
+    getLabel: function(obj)
     {
-        return formatTime(file.respondedTime - file.waitingForTime);
+        return $STR("requestinfo." + obj.bar);
     },
 
-    getLoadingTime: function(file)
+    render: function(file, parentNode)
     {
-        return formatTime(file.endTime - file.respondedTime);
-    },
+        var infoTip = Firebug.NetMonitor.TimeInfoTip.tableTag.replace({}, parentNode);
 
-    getWindowLoadTime: function(file)
-    {
-        if (!file.phase.windowLoadTime)
-            return "";
+        var elapsed = file.loaded ? file.endTime - file.startTime : file.phase.phaseEndTime - file.startTime;
+        var blockingEnd = (file.sendingTime > file.startTime) ? file.sendingTime : file.waitingForTime;
 
-        var time = file.phase.windowLoadTime - file.startTime;
-        return (time > 0 ? "+" : "") + formatTime(time);
-    },
+        // Insert request timing info.
+        var timings = [];
+        timings.push({bar: "Resolving",
+            elapsed: file.connectingTime - file.startTime,
+            start: 0});
+        timings.push({bar: "Connecting",
+            elapsed: file.connectedTime - file.connectingTime,
+            start: file.connectingTime - file.startTime});
+        timings.push({bar: "Blocking",
+            elapsed: blockingEnd - file.connectedTime,
+            start: file.connectedTime - file.startTime});
+        timings.push({bar: "Sending",
+            elapsed: file.waitingForTime - file.sendingTime,
+            start: file.sendingTime - file.startTime});
+        timings.push({bar: "Waiting",
+            elapsed: file.respondedTime - file.waitingForTime,
+            start: file.waitingForTime - file.startTime});
+        timings.push({bar: "Receiving",
+            elapsed: file.endTime - file.respondedTime,
+            start: file.respondedTime - file.startTime});
+        this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
 
-    getContentLoadTime: function(file)
-    {
-        if (!file.phase.contentLoadTime)
-            return "";
+        // Insert separator.
+        this.separatorTag.insertRows({}, infoTip.firstChild);
 
-        var time = file.phase.contentLoadTime - file.startTime;
-        return (time > 0 ? "+" : "") + formatTime(time);
-    },
+        // Insert events timing info.
+        var events = [];
+        if (file.phase.contentLoadTime)
+            events.push({bar: "ContentLoad", start: file.phase.contentLoadTime- file.startTime});
+        if (file.phase.windowLoadTime)
+            events.push({bar: "WindowLoad", start: file.phase.windowLoadTime - file.startTime});
+        this.eventsTag.insertRows({events: events}, infoTip.firstChild);
+
+        return true;
+    }
 });
 
 // ************************************************************************************************

@@ -7030,6 +7030,8 @@ this.formatSize = function(bytes)
 {
     if (bytes == -1 || bytes == undefined)
         return "?";
+    else if (bytes == 0)
+        return "0";
     else if (bytes < 1024)
         return bytes + " B";
     else if (bytes < (1024*1024))
@@ -7045,6 +7047,8 @@ this.formatTime = function(elapsed)
 {
     if (elapsed == -1)
         return "_"; // should be &nbsp; but this will be escaped so we need something that is no whitespace
+    else if (elapsed == 0)
+        return "0";
     else if (elapsed < 1000)
         return elapsed + "ms";
     else if (elapsed < 60000)

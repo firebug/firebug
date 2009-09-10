@@ -297,24 +297,6 @@
     min-width: 16px;
 }
 
-.timeInfoTip {
-    width: 150px; 
-    height: 40px
-}
-
-.timeInfoTipBar {
-    position: relative;
-    display: block;
-    margin: 0;
-    opacity: 1;
-    height: 15px;
-}
-
-.netSummaryRow .netTimeLabel,
-.loaded .netTimeLabel {
-    background: transparent;
-}
-
 .loaded .netReceivingBar {
     background: #B6B6B6 url(chrome://firebug/skin/netBarLoaded.gif) repeat-x;
     border-color: #B6B6B6;
@@ -325,12 +307,49 @@
     border-color: #D6D6D6;
 }
 
+.netSummaryRow .netTimeLabel,
+.loaded .netTimeLabel {
+    background: transparent;
+}
+
+/************************************************************************************************/
+/* Time Info tip */
+
+.timeInfoTip {
+    width: 150px; 
+    height: 40px
+}
+
+.timeInfoTipBar,
+.timeInfoTipEventBar {
+    position: relative;
+    display: block;
+    margin: 0;
+    opacity: 1;
+    height: 15px;
+    width: 4px;
+}
+
+.timeInfoTipEventBar {
+    width: 1px !important;
+}
+
+.timeInfoTipCell.startTime {
+    padding-right: 8px;
+}
+
+.timeInfoTipCell.elapsedTime {
+    text-align: right;
+    padding-right: 8px;
+}
+
+/************************************************************************************************/
+/* Summary */
+
 .netSummaryRow .netReceivingBar {
     background: #BBBBBB;
     border: none;
 }
-
-/************************************************************************************************/
 
 .netSummaryLabel {
     color: #222222;
