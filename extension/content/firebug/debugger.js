@@ -2071,7 +2071,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     markExecutableLines: function(sourceBox)
     {
         var sourceFile = sourceBox.repObject;
-        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString()+"\n");
+        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString(), sourceFile.getLineRanges());
         var lineNo = sourceBox.firstViewableLine;
         while( lineNode = sourceBox.getLineNode(lineNo) )
         {
@@ -2812,9 +2812,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         frame = this.context.debugFrame;
 
-		if (FBTrace.DBG_STACK)
-			FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?"frame is good":(frame?"frame invalid":"no frame"))+" selection: "+this.selection, this.selection);
-			
+        if (FBTrace.DBG_STACK)
+            FBTrace.sysout("debugger.getObjectPath "+((frame && frame.isValid)?"frame is good":(frame?"frame invalid":"no frame"))+" selection: "+this.selection, this.selection);
+
         var frames = [];
         for (; frame; frame = getCallingFrame(frame))
             frames.push(frame);
