@@ -339,7 +339,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             }
         );
 
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS && 'initTime' in this)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
             FBTrace.sysout("errors.getErrorContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
@@ -387,7 +387,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     destroyContext: function(context, persistedState)
     {
         this.showCount(0);
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS && 'initTime' in this)
         {
             var deltaT = new Date().getTime() - this.initTime.getTime();
             FBTrace.sysout("errors.destroyContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
