@@ -4188,6 +4188,16 @@ this.SourceFile.prototype =
         }
     },
 
+    getLineRanges: function()
+    {
+        var str = "";
+        this.forEachScript(function appendARange(script)
+        {
+            str += " "+script.baseLineNumber +"-("+script.tag+")-"+script.baseLineNumber+script.lineExtent;
+        });
+        return str;
+    },
+
     getSourceLength: function()
     {
             return this.sourceLength;
@@ -4302,7 +4312,7 @@ this.SourceFile.prototype =
         if (!this.innerScriptsOrdered)
         {
             if (FBTrace.DBG_LINETABLE)
-            	FBTrace.sysout("getScriptsAtLineNumber no innerScriptsOrdered "+this, this );
+                FBTrace.sysout("getScriptsAtLineNumber no innerScriptsOrdered "+this, this );
             for (var p in this.innerScripts)
             {
                 var script = this.innerScripts[p];
@@ -4396,7 +4406,7 @@ this.SourceFile.prototype =
             var midScript = scriptsOrdered[mid];
             var midBaseLineNumber = midScript.baseLineNumber;
             if (FBTrace.DBG_LINETABLE)
-            	FBTrace.sysout("getBaseLineScript lo-hi:"+lo+"-"+hi+" "+midBaseLineNumber+" ? "+targetLineNo+" ? "+midBaseLineNumber+midScript.lineExtent);
+                FBTrace.sysout("getBaseLineScript lo-mid-hi:"+lo+"-"+mid+"-"+hi+" "+midBaseLineNumber+" ? "+targetLineNo+" ? "+midBaseLineNumber+midScript.lineExtent);
             if (midBaseLineNumber > targetLineNo) // then mid is too high, look below
             {
                 hi = mid - 1;
@@ -4415,8 +4425,10 @@ this.SourceFile.prototype =
         }
         // if the targetLineNo is less than the lowest baseLineNumber, report |lo| (should be zero)
         // if the targetLineNo is greater than the highest baseLineNumber+extent, report |lo| (should be length)
+        if (FBTrace.DBG_LINETABLE && !scriptsOrdered[lo])
+            FBTrace.sysout("getBaseLineScript found index:"+lo+" for "+targetLineNo+" but it is not valid:", scriptsOrdered);
         if (FBTrace.DBG_LINETABLE)
-            	FBTrace.sysout("getBaseLineScript found index:"+lo+" tag "+scriptsOrdered[lo].tag+" = "+scriptsOrdered[lo].baseLineNumber+" lt "+targetLineNo+" lt "+scriptsOrdered[lo].baseLineNumber+scriptsOrdered[lo].lineExtent);
+            FBTrace.sysout("getBaseLineScript found index:"+lo+" tag "+scriptsOrdered[lo].tag+" = "+scriptsOrdered[lo].baseLineNumber+" lt "+targetLineNo+" lt "+scriptsOrdered[lo].baseLineNumber+scriptsOrdered[lo].lineExtent, scriptsOrdered[lo].functionSource);
         return lo;
     },
 
@@ -4562,7 +4574,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 
         if (FBTrace.DBG_LINETABLE && total > 0 && script.baseLineNumber < sourceFile.innerScriptsOrdered[sourcefile.innerScriptsOrdered.length].baseLineNumber)
             FBTrace.sysout(" OUT OF ORDER Script "+sourceFile, sourceFile);
-        
+
         sourceFile.innerScriptsOrdered.push(script);
         if (FBTrace.DBG_SOURCEFILES)
             total++;
