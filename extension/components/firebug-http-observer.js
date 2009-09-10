@@ -18,6 +18,7 @@ var categoryManager = Cc["@mozilla.org/categorymanager;1"].getService(Ci.nsICate
 // HTTP Request Observer implementation
 
 var FBTrace = null;
+var fbs = null;
 
 /**
  * @service This service is intended as the only HTTP observer registered by Firebug.
