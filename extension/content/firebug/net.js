@@ -952,26 +952,26 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
-            var resolvingBar = row.childNodes[4].firstChild.childNodes[1];
+            var blockingBar = row.childNodes[4].firstChild.childNodes[1];
+            var resolvingBar = blockingBar.nextSibling;
             var connectingBar = resolvingBar.nextSibling;
             var sendingBar = connectingBar.nextSibling;
             var waitingBar = sendingBar.nextSibling;
-            var respondedBar = waitingBar.nextSibling;
-            var contentLoadBar = respondedBar.nextSibling;
+            var contentLoadBar = waitingBar.nextSibling;
             var windowLoadBar = contentLoadBar.nextSibling;
             var receivingBar = windowLoadBar.nextSibling;
 
             // All bars starts at the beginning
             resolvingBar.style.left = connectingBar.style.left = sendingBar.style.left =
-                waitingBar.style.left =
-                respondedBar.style.left = receivingBar.style.left = this.barOffset + "%";
+                blockingBar.style.left =
+                waitingBar.style.left = receivingBar.style.left = this.barOffset + "%";
 
             // Sets width of all bars (using style). The width is computed according to measured timing.
-            resolvingBar.style.width = this.barResolvingWidth ? this.barResolvingWidth + "%" : "1px";
-            connectingBar.style.width = this.barConnectingWidth ? this.barConnectingWidth + "%" : "1px";
+            blockingBar.style.width = this.barBlockingWidth + "%";
+            resolvingBar.style.width = this.barResolvingWidth + "%";
+            connectingBar.style.width = this.barConnectingWidth + "%";
             sendingBar.style.width = this.barSendingWidth + "%";
             waitingBar.style.width = this.barWaitingWidth + "%";
-            respondedBar.style.width = this.barRespondedWidth + "%";
             receivingBar.style.width = this.barReceivingWidth + "%";
 
             if (this.contentLoadBarOffset) {
@@ -1010,15 +1010,17 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
 
-        this.barResolvingWidth = Math.floor(((file.resolvingTime - file.startTime)/this.phaseElapsed) * 100);
-        this.barConnectingWidth = Math.floor(((file.connectingTime - file.startTime)/this.phaseElapsed) * 100);
-        this.barSendingWidth = Math.floor(((file.sendingTime - file.startTime)/this.phaseElapsed) * 100);
-        this.barWaitingWidth = Math.floor(((file.waitingForTime - file.startTime)/this.phaseElapsed) * 100);
-        this.barRespondedWidth = Math.floor(((file.respondedTime - file.startTime)/this.phaseElapsed) * 100);
-        this.barReceivingWidth = Math.floor((elapsed/this.phaseElapsed) * 100);
+        var blockingEnd = (file.sendingTime != file.startTime) ? file.sendingTime : file.waitingForTime;
+
+        this.barResolvingWidth = Math.round(((file.connectingTime - file.startTime) / this.phaseElapsed) * 100);
+        this.barConnectingWidth = Math.round(((file.connectedTime - file.startTime) / this.phaseElapsed) * 100);
+        this.barBlockingWidth = Math.round(((blockingEnd - file.startTime) / this.phaseElapsed) * 100);
+        this.barSendingWidth = Math.round(((file.sendingTime - file.startTime) / this.phaseElapsed) * 100);
+        this.barWaitingWidth = Math.round(((file.respondedTime - file.startTime) / this.phaseElapsed) * 100);
+        this.barReceivingWidth = Math.round((elapsed / this.phaseElapsed) * 100);
 
         // Total request time doesn't include the time spent in queue.
-        this.elapsed = elapsed - (file.waitingForTime - file.connectingTime);
+        this.elapsed = elapsed - (file.sendingTime - file.connectedTime);
 
         // Compute also offset for the contentLoadBar and windowLoadBar, which are
         // displayed for the first phase.
@@ -1027,14 +1029,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (phase.windowLoadTime)
             this.windowLoadBarOffset = Math.floor(((phase.windowLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
-
-        /*FBTrace.sysout("net.calculateFileTimes" +
-            " dns: " + formatTime(file.resolvingTime - file.startTime) +
-            ", conn: " + formatTime(file.connectingTime - file.startTime) +
-            ", send: " + formatTime(file.sendingTime - file.startTime) +
-            ", wait: " + formatTime(file.waitingForTime - file.startTime) +
-            ", response: " + formatTime(file.respondedTime - file.startTime) +
-            ", rec: " + formatTime(elapsed));*/
 
         return phase;
     },
@@ -1477,11 +1471,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 TD({"class": "netTimeCol netCol"},
                     DIV({"class": "netBar"},
                         "&nbsp;",
+                        DIV({"class": "netBlockingBar", style: "left: $file.offset"}),
                         DIV({"class": "netResolvingBar", style: "left: $file.offset"}),
                         DIV({"class": "netConnectingBar", style: "left: $file.offset"}),
                         DIV({"class": "netSendingBar", style: "left: $file.offset"}),
                         DIV({"class": "netWaitingBar", style: "left: $file.offset"}),
-                        DIV({"class": "netRespondedBar", style: "left: $file.offset"}),
                         DIV({"class": "netContentLoadBar", style: "left: $file.offset"}),
                         DIV({"class": "netWindowLoadBar", style: "left: $file.offset"}),
                         DIV({"class": "netReceivingBar", style: "left: $file.offset; width: $file.width"},
@@ -2191,12 +2185,16 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         TABLE({"class": "timeInfoTip"},
             TBODY(
                 TR(
+                    TD({"class": "netBlockingBar timeInfoTipBar"}),
+                    TD("$file|getBlockingTime : " + $STR("requestinfo.Blocking"))
+                ),
+                TR(
                     TD({"class": "netResolvingBar timeInfoTipBar"}),
                     TD("$file|getResolvingTime : " + $STR("requestinfo.DNS Lookup"))
                 ),
                 TR(
                     TD({"class": "netConnectingBar timeInfoTipBar"}),
-                    TD("$file|getConnectintTime : " + $STR("requestinfo.Connecting"))
+                    TD("$file|getConnectingTime : " + $STR("requestinfo.Connecting"))
                 ),
                 TR(
                     TD({"class": "netSendingBar timeInfoTipBar"}),
@@ -2204,16 +2202,15 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
                 ),
                 TR(
                     TD({"class": "netWaitingBar timeInfoTipBar"}),
-                    TD("$file|getWaitingTime : " + $STR("requestinfo.Queuing"))
-                ),
-                TR(
-                    TD({"class": "netRespondedBar timeInfoTipBar"}),
-                    TD("$file|getResponseTime : " + $STR("requestinfo.Waiting For Response"))
+                    TD("$file|getWaitingTime : " + $STR("requestinfo.Waiting For Response"))
                 ),
                 TR({$loaded: "$file.loaded",
                     $fromCache: "$file.fromCache"},
                     TD({"class": "netReceivingBar timeInfoTipBar"}),
                     TD("$file|getLoadingTime : " + $STR("requestinfo.Receiving Data"))
+                ),
+                TR(
+                    TD({"colspan": 2, "height": "10px"})
                 ),
                 TR({"class": "netContentLoadRow"},
                     TD({align: "center"},
@@ -2230,32 +2227,32 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             )
         ),
 
-    getResolvingTime: function(file)
+    getBlockingTime: function(file)
     {
-        return formatTime(file.resolvingTime - file.startTime);
+        var blockingEnd = (file.sendingTime != file.startTime) ? file.sendingTime : file.waitingForTime;
+        return formatTime(blockingEnd - file.connectedTime);
     },
 
-    getConnectintTime: function(file)
+    getResolvingTime: function(file)
     {
         return formatTime(file.connectingTime - file.startTime);
+    },
+
+    getConnectingTime: function(file)
+    {
+        return formatTime(file.connectedTime - file.connectingTime);
     },
 
     getSendingTime: function(file)
     {
         // The sending event doesn't have to come.
         if (file.sendingTime > file.connectingTime)
-            return formatTime(file.sendingTime - file.connectingTime);
+            return formatTime(file.waitingForTime - file.sendingTime);
         else
             return formatTime(0);
     },
 
     getWaitingTime: function(file)
-    {
-        var sendingElapsed = file.sendingTime - file.connectingTime;
-        return formatTime(file.waitingForTime - file.connectingTime - sendingElapsed);
-    },
-
-    getResponseTime: function(file)
     {
         return formatTime(file.respondedTime - file.waitingForTime);
     },
@@ -2511,6 +2508,7 @@ NetProgress.prototype =
             file.startTime = file.endTime = time;
             file.resolvingTime = time;
             file.connectingTime = time;
+            file.connectedTime = time;
             file.sendingTime = time;
             file.waitingForTime = time;
             file.respondedTime = time;
@@ -2663,6 +2661,19 @@ NetProgress.prototype =
         if (file)
         {
             file.connectingTime = time;
+            file.connectedTime = time; // just in case connected_to would never came.
+        }
+
+        // Don't update the UI now (optimalization).
+        return null;
+    },
+
+    connectedFile: function connectedFile(request, time)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            file.connectedTime = time;
         }
 
         // Don't update the UI now (optimalization).
@@ -2881,9 +2892,9 @@ NetProgress.prototype =
 
     QueryInterface: function(iid)
     {
-        if (iid.equals(Ci.nsIWebProgressListener)
-            || iid.equals(Ci.nsISupportsWeakReference)
-            || iid.equals(Ci.nsISupports))
+        if (iid.equals(Ci.nsIWebProgressListener) ||
+            iid.equals(Ci.nsISupportsWeakReference) ||
+            iid.equals(Ci.nsISupports))
         {
             return this;
         }
@@ -2896,13 +2907,8 @@ NetProgress.prototype =
 
     onStateChange: function(progress, request, flag, status)
     {
-        // For image files we can't get the nsIHttpChannel (the request object is imgIRequest
-        // in such a case). So, this method is not much useful.
-        //var file = this.getRequestFile(request, null, true);
-        //if (FBTrace.DBG_NET)
-        //    FBTrace.sysout("net.onStateChange +" + (file ? (now() - file.startTime) : "?") + " " +
-        //        getPrintableTime() + ", " + getStateDescription(flag) + ", " +
-        //        safeGetName(request), file);
+        // We can't get the nsIHttpChannel for image requests (images use imgIRequest)
+        // So, this method is not much useful.
     },
 
     onProgressChange : function(progress, request, current, max, total, maxTotal)
@@ -2939,12 +2945,14 @@ NetProgress.prototype =
 
             if (status == Ci.nsISocketTransport.STATUS_RESOLVING)
                 this.post(resolvingFile, [request, now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO || status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
+            else if (status == Ci.nsISocketTransport.STATUS_CONNECTING_TO)
                 this.post(connectingFile, [request, now()]);
-            else if (status == Ci.nsISocketTransport.STATUS_WAITING_FOR)
-                this.post(waitingForFile, [request, now()]);
+            else if (status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
+                this.post(connectedFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_SENDING_TO)
                 this.post(sendingFile, [request, now()]);
+            else if (status == Ci.nsISocketTransport.STATUS_WAITING_FOR)
+                this.post(waitingForFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
                 this.post(receivingFile, [request, now()]);
         }
@@ -2961,6 +2969,7 @@ var respondedFile = NetProgress.prototype.respondedFile;
 var completedFile = NetProgress.prototype.completedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
 var connectingFile = NetProgress.prototype.connectingFile;
+var connectedFile = NetProgress.prototype.connectedFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
 var sendingFile = NetProgress.prototype.sendingFile;
 var receivingFile = NetProgress.prototype.receivingFile;
@@ -3833,19 +3842,11 @@ var NetHttpActivityObserver =
                 {
                     activeRequests.push(httpChannel);
                     activeRequests.push(win);
-
-                    if (FBTrace.DBG_ACTIVITYOBSERVER)
-                        FBTrace.sysout("activityObserver.Request START; " + 
-                            activeRequests.length + ", " + safeGetName(httpChannel));
                 }
                 else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
                 {
                     var index = activeRequests.indexOf(httpChannel);
                     activeRequests.splice(index, 2);
-
-                    if (FBTrace.DBG_ACTIVITYOBSERVER)
-                        FBTrace.sysout("activityObserver.Request END; " +
-                            activeRequests.length + ", " + safeGetName(httpChannel));
                 }
             }
 
@@ -3870,12 +3871,14 @@ var NetHttpActivityObserver =
             {
                 if (activitySubtype == nsISocketTransport.STATUS_RESOLVING)
                     networkContext.post(resolvingFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
+                else if (activitySubtype == nsISocketTransport.STATUS_CONNECTING_TO)
                     networkContext.post(connectingFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_WAITING_FOR)
-                    networkContext.post(waitingForFile, [httpChannel, time]);
+                else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
+                    networkContext.post(connectedFile, [httpChannel, time]);
                 else if (activitySubtype == nsISocketTransport.STATUS_SENDING_TO)
                     networkContext.post(sendingFile, [httpChannel, time]);
+                else if (activitySubtype == nsISocketTransport.STATUS_WAITING_FOR)
+                    networkContext.post(waitingForFile, [httpChannel, time]);
                 else if (activitySubtype == nsISocketTransport.STATUS_RECEIVING_FROM)
                     networkContext.post(receivingFile, [httpChannel, time]);
             }

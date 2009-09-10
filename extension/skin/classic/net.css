@@ -221,7 +221,6 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarResolving.gif) repeat-x;
-    min-width: 0px;
     z-index:60;
 }
 
@@ -231,8 +230,16 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarConnecting.gif) repeat-x;
-    min-width: 0px;
     z-index:50;
+}
+
+.netBlockingBar {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    background: #FFFFFF url(chrome://firebug/skin/netBarWaiting.gif) repeat-x;
+    z-index:40;
 }
 
 .netSendingBar {
@@ -241,28 +248,15 @@
     top: 0;
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarSending.gif) repeat-x;
-    min-width: 0px;
-    z-index:40;
+    z-index:30;
 }
-
 
 .netWaitingBar {
     position: absolute;
     left: 0;
     top: 0;
     bottom: 0;
-    background: #FFFFFF url(chrome://firebug/skin/netBarWaiting.gif) repeat-x;
-    min-width: 2px;
-    z-index:30;
-}
-
-.netRespondedBar {
-    position: absolute;
-    left: 0;
-    top: 0;
-    bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarResponded.gif) repeat-x;
-    min-width: 3px;
     z-index:20;
 }
 
@@ -271,7 +265,6 @@
     left: 0;
     top: 0;
     bottom: 0;
-    min-width: 3px;
     background: #38D63B url(chrome://firebug/skin/netBarLoading.gif) repeat-x;
     z-index:10;
 }
@@ -284,7 +277,7 @@
     bottom: 0;
     width: 1px;
     background-color: red;
-    z-index:50;
+    z-index: 70;
     opacity: 0.5;
     display: none;
     margin-bottom:-1px;
