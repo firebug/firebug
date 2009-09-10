@@ -680,7 +680,7 @@ top.FirebugChrome =
     syncStatusPath: function()
     {
         var panel = panelBar1.selectedPanel;
-        if (!panel)
+        if (!panel || (panel && !panel.selection))
         {
             panelStatus.clear();
         }
