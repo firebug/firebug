@@ -4309,29 +4309,12 @@ this.SourceFile.prototype =
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         var scripts = [];
-        if (!this.innerScriptsOrdered)
-        {
-            if (FBTrace.DBG_LINETABLE)
-                FBTrace.sysout("getScriptsAtLineNumber no innerScriptsOrdered "+this, this );
             for (var p in this.innerScripts)
             {
                 var script = this.innerScripts[p];
                 if (mustBeExecutableLine && !script.isValid) continue;
                 this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
             }
-        }
-        else
-        {
-            // No script with a lower index can match targetLineNo
-            var baseLineScriptIndex = this.getBaseLineScript(this.innerScriptsOrdered, targetLineNo);
-            for (var i = baseLineScriptIndex; i < this.innerScriptsOrdered.length; i++)
-            {
-                var script = this.innerScriptsOrdered[i];
-                var added = this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
-                if (!added) // once we find we are out of range, then we won't ever get in range.
-                    break;
-            }
-        }
         if (this.outerScript && !(mustBeExecutableLine && !this.outerScript.isValid) )
             this.addScriptAtLineNumber(scripts, this.outerScript, targetLineNo, mustBeExecutableLine, offset);
 
@@ -4369,13 +4352,13 @@ this.SourceFile.prototype =
                         {
                             if (FBTrace.DBG_LINETABLE)
                                 FBTrace.sysout("getScriptsAtLineNumber tried "+script.tag+", not executable at targetLineNo:"+targetLineNo+" pcmap:"+this.pcmap_type+"\n");
-                            return false;
+                            return;
                         }
                     }
                     catch (e)
                     {
                         // Component returned failure code: 0x80040111 (NS_ERROR_NOT_AVAILABLE) [jsdIScript.isLineExecutable]
-                        return false;
+                        return;
                     }
                 }
                 scripts.push(script);
@@ -4386,50 +4369,8 @@ this.SourceFile.prototype =
                         var checkExecutable = " isLineExecutable: "+script.isLineExecutable(targetLineNo, this.pcmap_type)+"@pc:"+script.lineToPc(targetLineNo, this.pcmap_type);
                     FBTrace.sysout("getScriptsAtLineNumber found "+script.tag+", isValid: "+script.isValid+" targetLineNo:"+targetLineNo+checkExecutable+"\n");
                 }
-                return true;
-            }
-            return false;
-        }
-        return false
-    },
-
-    getBaseLineScript: function(scriptsOrdered, targetLineNo)
-    {
-        // binary search for baseLineNumber =< targetLineNo
-        var lo = 0;
-        var hi = scriptsOrdered.length;
-
-        var mid;
-        while( lo < hi )
-        {
-            var mid = Math.floor( lo  + (hi - lo)/2 ) ;
-            var midScript = scriptsOrdered[mid];
-            var midBaseLineNumber = midScript.baseLineNumber;
-            if (FBTrace.DBG_LINETABLE)
-                FBTrace.sysout("getBaseLineScript lo-mid-hi:"+lo+"-"+mid+"-"+hi+" "+midBaseLineNumber+" ? "+targetLineNo+" ? "+midBaseLineNumber+midScript.lineExtent);
-            if (midBaseLineNumber > targetLineNo) // then mid is too high, look below
-            {
-                hi = mid - 1;
-            }
-            else  // then mid is a candidate
-            {
-                if (midBaseLineNumber + midScript.lineExtent > targetLineNo)
-                {
-                    // ok target is in this script, but there could be others, find the minimum one.
-                    // Do this by setting the |hi| here and try a |mid| half we back to |lo|
-                    hi = mid;
-                }
-                else // then mid is too low
-                    lo = mid + 1;
             }
         }
-        // if the targetLineNo is less than the lowest baseLineNumber, report |lo| (should be zero)
-        // if the targetLineNo is greater than the highest baseLineNumber+extent, report |lo| (should be length)
-        if (FBTrace.DBG_LINETABLE && !scriptsOrdered[lo])
-            FBTrace.sysout("getBaseLineScript found index:"+lo+" for "+targetLineNo+" but it is not valid:", scriptsOrdered);
-        if (FBTrace.DBG_LINETABLE)
-            FBTrace.sysout("getBaseLineScript found index:"+lo+" tag "+scriptsOrdered[lo].tag+" = "+scriptsOrdered[lo].baseLineNumber+" lt "+targetLineNo+" lt "+scriptsOrdered[lo].baseLineNumber+scriptsOrdered[lo].lineExtent, scriptsOrdered[lo].functionSource);
-        return lo;
     },
 
     scriptsIfLineCouldBeExecutable: function(lineNo)  // script may not be valid
@@ -4554,11 +4495,7 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
 
     // Attach the innerScripts for use later
     if (!sourceFile.innerScripts)
-    {
         sourceFile.innerScripts = {};
-        sourceFile.innerScriptsOrdered = [];
-    }
-
 
     var total = 0;
     while (innerScripts.hasMoreElements())
@@ -4571,11 +4508,6 @@ this.addScriptsToSourceFile = function(sourceFile, outerScript, innerScripts)
             continue;
         }
         sourceFile.innerScripts[script.tag] = script;
-
-        if (FBTrace.DBG_LINETABLE && total > 0 && script.baseLineNumber < sourceFile.innerScriptsOrdered[sourcefile.innerScriptsOrdered.length].baseLineNumber)
-            FBTrace.sysout(" OUT OF ORDER Script "+sourceFile, sourceFile);
-
-        sourceFile.innerScriptsOrdered.push(script);
         if (FBTrace.DBG_SOURCEFILES)
             total++;
     }
