@@ -1600,7 +1600,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     isError: function(file)
     {
-        var errorRange = Math.floor(file.status/100);
+        var errorRange = Math.floor(file.responseStatus/100);
         return errorRange == 4 || errorRange == 5;
     },
 
@@ -1612,7 +1612,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     getStatus: function(file)
     {
         if (file.responseStatus && file.responseStatusText)
-          return file.responseStatus + " " + file.responseStatusText;
+            return file.responseStatus + " " + file.responseStatusText;
 
         return " ";
     },
@@ -2612,6 +2612,15 @@ NetProgress.prototype =
                 FBTrace.sysout("net.respondedFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
 
+            // If there is a networ error log it into the Console panel.
+            if (Firebug.showNetworkErrors && NetRequestEntry.isError(file))
+            {
+                Firebug.Errors.increaseCount(this.context);
+                Firebug.Console.log(file.getFileLink("NetworkError: " +
+                    NetRequestEntry.getStatus(file) + " - "),
+                    this.context, "error", null, true);
+            }
+
             dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
             return file;
         }
@@ -3064,9 +3073,11 @@ NetFile.prototype =
     waitingForTime: null,
     connectingTime: null,
 
-    getFileLink: function()
+    getFileLink: function(message)
     {
-        return new FBL.NetFileLink(this.href, this.request);
+        var link = new FBL.NetFileLink(this.href, this.request);
+        link.message = message;
+        return link;
     }
 };
 
@@ -3165,7 +3176,7 @@ FBL.NetFileLink.prototype =
 {
     toString: function()
     {
-        return this.href;
+        return this.message + this.href;
     }
 };
 

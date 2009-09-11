@@ -69,7 +69,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",
     "showChromeErrors", "showChromeMessages", "showExternalErrors",
-    "showXMLHttpRequests",
+    "showXMLHttpRequests", "showNetworkErrors",
 
     // HTML
     "showFullTextNodes", "showCommentNodes", "showWhitespaceNodes",
