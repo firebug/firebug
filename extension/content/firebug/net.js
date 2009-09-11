@@ -3416,6 +3416,8 @@ function getHttpHeaders(request, file)
     }
     catch (exc)
     {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("net.getHttpHeaders FAILS xxxHonza: let me know if you can reproduce this" + file.href, exc);
     }
 }
 
