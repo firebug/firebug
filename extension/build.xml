@@ -1,29 +1,27 @@
 <?xml version="1.0" ?>
 
-<!-- This Ant build file was contributed by Paul McLanahan.  pmclanahan@gmail.com.
-    Added template and version numbers johnjbarton@johnjbarton.com
--->
-
+<!-- This Ant build file was contributed by Paul McLanahan, pmclanahan@gmail.com.
+Added template and version numbers, johnjbarton@johnjbarton.com
+Added support for js-doc-tolkit, odvarko@gmail.com -->
 <project name="firebug" default="createBranchXPI">
-
 
     <!-- Setting properties -->
     <target name="local-check">
         <available file="${basedir}/local.properties"
-           property="local.properties.available"/>
+            property="local.properties.available"/>
     </target>
 
     <target name="properties-local"
-          if="local.properties.available"
-          depends="local-check">
-      <echo message="Loading local properties file"/>
-      <property file="local.properties"/>
+            if="local.properties.available"
+            depends="local-check">
+        <echo message="Loading local properties file"/>
+        <property file="local.properties"/>
     </target>
 
     <target name="no-properties-local"
             unless="local.properties.available"
             depends="local-check">
-          <echo message="No local properties file, setting defaults"/>
+        <echo message="No local properties file, setting defaults"/>
         <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
         <property name="update.path" value="http://getfirebug.com/releases"/>
     </target>
@@ -40,8 +38,7 @@
     <!-- eg
         RELEASE=.88
         VERSION=eval
-        TRUNK=.1.05
-        -->
+        TRUNK=.1.05 -->
     <property file="content/firebug/branch.properties" />
 
     <!-- Project directories -->
@@ -82,78 +79,81 @@
 
     <target name="expand-templates" depends="expand-install-template, expand-update-template, verify-update-template-expansion" description="Fill in version info">
     </target>
+
     <target name="expand-install-template" depends="install-dependency, version" unless="install.expansion.notRequired" >
         <copy file="${src_dir}/install.rdf.tpl.xml"
-               tofile="${src_dir}/install.rdf"
-               overwrite="true">
-               <filterchain>
-                       <replacetokens>
-                            <token key="FULLVERSION" value="${FULLVERSION}"/>
-                            <token key="VERSION" value="${VERSION}J"/>
-                            <token key="RELEASE" value="${RELEASE}"/>
-                            <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
-                       </replacetokens>
-               </filterchain>
+            tofile="${src_dir}/install.rdf"
+            overwrite="true">
+            <filterchain>
+                <replacetokens>
+                    <token key="FULLVERSION" value="${FULLVERSION}"/>
+                    <token key="VERSION" value="${VERSION}J"/>
+                    <token key="RELEASE" value="${RELEASE}"/>
+                    <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
+                </replacetokens>
+            </filterchain>
         </copy>
     </target>
 
     <target name="expand-update-template" depends="update-dependency, version" unless="update.expansion.notRequired" >
         <copy file="${src_dir}/update.rdf.tpl.xml"
-               tofile="${build_dir}/update.rdf"
-               overwrite="true">
-               <filterchain>
-                       <replacetokens>
-                            <token key="FULLVERSION" value="${FULLVERSION}"/>
-                            <token key="VERSION" value="${VERSION}J"/>
-                            <token key="RELEASE" value="${RELEASE}"/>
-                            <token key="LEAF" value="firebug-${VERSION}${RELEASE}.xpi"/>
-                            <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
-                              <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
-                       </replacetokens>
-               </filterchain>
+            tofile="${build_dir}/update.rdf"
+            overwrite="true">
+            <filterchain>
+                <replacetokens>
+                    <token key="FULLVERSION" value="${FULLVERSION}"/>
+                    <token key="VERSION" value="${VERSION}J"/>
+                    <token key="RELEASE" value="${RELEASE}"/>
+                    <token key="LEAF" value="firebug-${VERSION}${RELEASE}.xpi"/>
+                    <token key="UPDATEPATH" value="${update.path}/firebug/${VERSION}"/>
+                    <token key="EXPERIMENTORURL" value="http://www.almaden.ibm.com/u/bartonjj"/>
+                </replacetokens>
+            </filterchain>
         </copy>
         <echo message="expanded ${src_dir}/update.rdf.tpl.xml"/>
     </target>
+
     <target name="verify-update-template-expansion" depends="update-dependency" if="update.expansion.notRequired">
         <echo message="update.expansion.notRequired true"/>
     </target>
 
     <target name="release-documentation" depends="clean, version, expand-templates">
         <copy file="${src_dir}/docs/index.tpl.html"
-               tofile="${src_dir}/docs/index.html"
-               overwrite="true">
-               <filterchain>
-                       <replacetokens>
-                            <token key="FIREBUG-VERSION" value="${RELEASE}"/>
-                            <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.FULLVERSION}"/>
-                            <token key="UPDATEPATH" value="${update.path}"/>
-                       </replacetokens>
-               </filterchain>
+            tofile="${src_dir}/docs/index.html"
+            overwrite="true">
+            <filterchain>
+                <replacetokens>
+                    <token key="FIREBUG-VERSION" value="${RELEASE}"/>
+                    <token key="CHROMEBUG-VERSION" value="${CHROMEBUG.FULLVERSION}"/>
+                    <token key="UPDATEPATH" value="${update.path}"/>
+                </replacetokens>
+            </filterchain>
         </copy>
     </target>
 
     <!-- Incremental Build Targets -->
     <target name="dev-setup" depends="create-extension-links, expand-templates">
-
     </target>
 
     <target name="create-extension-links" depends="version">
         <!-- These links are one line files with paths pointing into our source -->
         <echo message="Writing links from ${install.dir}/extensions to ${basedir}"/>
-
         <mkdir dir="${install.dir}/extensions" />
 
         <path id="firebug-dev">
             <pathelement location="${basedir}"/>
         </path>
+
         <pathconvert refid="firebug-dev" property="firebug-dev"/>
-
-        <echo message="${firebug-dev}" file="${install.dir}/extensions/firebug@software.joehewitt.com" />
-
+        <echo message="${firebug-dev}"
+            file="${install.dir}/extensions/firebug@software.joehewitt.com" />
     </target>
 
-    <target name="firebug-service" depends="version" description="Check compreg.dat when service changes">
-        <uptodate property="deleteCompreg.notRequired" srcfile="./components/firebug-service.js" targetfile="${install.dir}/compreg.dat" />
+    <target name="firebug-service" depends="version"
+        description="Check compreg.dat when service changes">
+        <uptodate property="deleteCompreg.notRequired"
+                  srcfile="./components/firebug-service.js"
+                  targetfile="${install.dir}/compreg.dat" />
     </target>
 
     <target name="clean-reg" depends="firebug-service" unless="deleteCompreg.notRequired"
@@ -164,8 +164,11 @@
     <!-- Distribution XPI Targets -->
     <target name="createChromeJAR">
         <mkdir dir="${build_dir}" />
-        <zip destfile="${build_dir}/${ant.project.name}.jar" update="true" basedir="${src_dir}"
-            includes="content/**, locale/**, skin/**" excludes="${excludes}"/>
+        <zip destfile="${build_dir}/${ant.project.name}.jar"
+            update="true"
+            basedir="${src_dir}"
+            includes="content/**, locale/**, skin/**"
+            excludes="${excludes}"/>
     </target>
 
     <target name="createPlatformJARs">
@@ -173,23 +176,21 @@
         <mkdir dir="${build_dir}/Linux" />
         <mkdir dir="${build_dir}/linux-gnu" />
         <mkdir dir="${build_dir}/WINNT" />
+
         <zip destfile="${build_dir}/Darwin/${ant.project.name}.jar" update="true"
             basedir="${src_dir}/platform/Darwin" includes="skin/**" excludes="${excludes}" />
         <zip destfile="${build_dir}/Linux/${ant.project.name}.jar" update="true"
             basedir="${src_dir}/platform/Linux"
             includes="skin/**"
-            excludes="${excludes}"
-        />
+            excludes="${excludes}"/>
         <zip destfile="${build_dir}/linux-gnu/${ant.project.name}.jar" update="true"
             basedir="${src_dir}/platform/linux-gnu"
             includes="skin/**"
-            excludes="${excludes}"
-        />
+            excludes="${excludes}"/>
         <zip destfile="${build_dir}/WINNT/${ant.project.name}.jar" update="true"
             basedir="${src_dir}/platform/WINNT"
             includes="skin/**"
-            excludes="${excludes}"
-        />
+            excludes="${excludes}"/>
     </target>
 
     <target name="zipIntoXPI" depends="clean, createChromeJAR, createAptanaJAR">
@@ -207,7 +208,8 @@
     </target>
 
     <target name="createDistributionXPI" depends="zipIntoXPI" >
-        <copy file="${dist_dir}/${ant.project.name}.xpi" tofile="${dist_dir}/${ant.project.name}.xpi.zip" />
+        <copy file="${dist_dir}/${ant.project.name}.xpi"
+            tofile="${dist_dir}/${ant.project.name}.xpi.zip" />
     </target>
 
     <target name="createBranchXPI" depends="clean, version, expand-templates, zipIntoXPI, release-documentation" >
@@ -218,7 +220,8 @@
     <target name="createAptanaJAR" if="aptanadebugger">
         <echo message="Create aptanadebugger.jar"/>
         <mkdir dir="${build_dir}" />
-        <zip destfile="${build_dir}/aptanadebugger.jar" update="true" basedir="${src_dir}/aptanadebugger/"
+        <zip destfile="${build_dir}/aptanadebugger.jar" update="true"
+            basedir="${src_dir}/aptanadebugger/"
             includes="content/**, locale/**, skin/**" excludes="${excludes}"/>
     </target>
 
@@ -230,5 +233,35 @@
         </concat>
     </target>
 
+    <!-- Support for generating docs from Firebug source code using js-doc-toolkit
+        See the output in $svn/jsdoc/out directory -->
+    <property name="jsdoc.dir" value="../../jsdoc/"/>
+    <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
+    <property name="jsdoc-output.dir" value="${jsdoc.dir}/out/"/>
+
+    <path id="jsdoctoolkit">
+        <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
+        <fileset dir="${jsdoc.dir}" includes="*.jar"/>
+    </path>
+
+    <taskdef name="jsdoctoolkit"
+        classpathref="jsdoctoolkit"
+        classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+
+    <target name="jsdoc">
+        <echo message="Generate doc from Firebug source ($svn/jsdoc/out/)."/>
+
+        <!-- Clean the output direcotory -->
+        <delete dir="${jsdoc-output.dir}"/>
+
+        <!-- Parse all source files -->
+        <jsdoctoolkit jsdochome="${jsdoc-toolkit.dir}"
+            template="firebug"
+            outputdir="${jsdoc-output.dir}">
+            <fileset dir=".">
+                <include name="**/*.js"/>
+            </fileset>
+        </jsdoctoolkit>
+    </target>
 
 </project>
