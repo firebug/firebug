@@ -145,7 +145,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         actAsPanel = actAsPanel ? actAsPanel : panel.name;
         //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
         this.makeFocusable(panel.panelNode, false);
-        
+
         switch (actAsPanel)
         {
             case 'console':
@@ -163,7 +163,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 }
                 else
                     panel.panelNode.setAttribute('role', 'presentation');
-                
+
                 panel.panelNode.setAttribute('aria-live', 'polite');
                 panel.panelNode.addEventListener("keypress", this.onConsoleKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
@@ -269,16 +269,16 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelType = Firebug.getPanelType(panel.name);
         if (panelType)
             title = Firebug.getPanelTitle(panelType);
-            
+
         Firebug.chrome.$('fbToolbar').setAttribute('aria-label', title + " " + $STR("panel tools"))
         var panelBrowser = Firebug.chrome.getPanelBrowser(panel);
         panelBrowser.setAttribute('showcaret', (panel.name == "script"));
         panelBrowser.contentDocument.body.setAttribute('aria-label', title + " panel");
     },
-    
+
     showSidePanel : function(browser, sidePanel)
     {
-	    var panelA11y = this.getPanelA11y(sidePanel);
+        var panelA11y = this.getPanelA11y(sidePanel);
         if (!panelA11y)
             return;
         var panelBrowser = Firebug.chrome.getPanelBrowser(sidePanel);
@@ -495,13 +495,13 @@ Firebug.A11yModel = extend(Firebug.Module,
             this.checkModifiedState(panel, tabStop, true);
         }
     },
-    
+
     checkModifiedState : function(panel, elem, makeTab)
     {
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !elem)
             return;
-        
+
         switch (panel.name)
         {
             case  'console' :
@@ -685,7 +685,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                         groupClass = "logGroupBody";
                         groupLabelClass = "logGroupLabel";
                     }
-                    
+
                     if (inExpanded)
                     { 
                         group = getAncestorByClass(target, groupClass);
@@ -841,7 +841,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         else
             this.focus(row);
     },
-    
+
     getRowIndex : function(rows, target)
     {
         return Array.indexOf(rows, target);
@@ -851,7 +851,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         return useSubRow ? getAncestorByClass(elem, 'subLogRow') || getAncestorByClass(elem, 'logRow') : getAncestorByClass(elem, 'logRow');
     },
-    
+
     onConsoleMouseDown : function(event)
     {
         var node = getAncestorByClass(event.target, 'focusRow');
@@ -866,7 +866,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             if (!focusRow)
                 return
             this.focusPanelRow(Firebug.getElementPanel(focusRow), focusRow);
-            
+
             node = getAncestorByClass(event.target, 'memberLabel')
             if (!(node && hasClass(node, 'hasChildren')))
                 cancelEvent(event);
@@ -886,7 +886,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var nodes = container.getElementsByClassName("a11yFocus")
         return Array.filter(nodes, this.isVisibleByStyle, this);
     },
-    
+
     modifyConsoleRow : function(panel, row, inTabOrder)
     {
         if (this.isDirCell(row))
@@ -895,12 +895,12 @@ Firebug.A11yModel = extend(Firebug.Module,
             this.modifyLogRow(panel, row, row.getAttribute('tabindex')=== '0');
         else return;
     },
-    
+
     modifyPanelRow : function (panel, row, inTabOrder)
     {
         if (hasClass(row, 'a11yModified'))
             return;
-        
+
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !row)
             return; 
@@ -920,10 +920,10 @@ Firebug.A11yModel = extend(Firebug.Module,
                 this.modifyNetRow(panel, row, inTabOrder);
                break;
         }
-        
+
         setClass(row, 'a11yModified');
     },
-    
+
     onConsoleSearchMatchFound : function(panel, text, matches)
     {   
         var panelA11y = this.getPanelA11y(panel);
@@ -1007,12 +1007,15 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     onObjectBoxSelected: function(objectBox)
     {
-        if (!this.isEnabled())
+        var panel = Firebug.getElementPanel(objectBox);
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
             return;
         var label = getElementByClass(objectBox.firstChild, 'nodeLabelBox');
         if (label) {
             this.makeFocusable(label, true);
-            this.focus(label);
+            if (this.panelHasFocus(panel))
+                this.focus(label);
         }
     },
 
@@ -1255,7 +1258,6 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.focusPanelRow(panel, newRow, false);
     },
 
-
     getHeadRowsAndIndex: function(panel, elem)
     {
         var rows = this.getFocusRows(panel);
@@ -1338,7 +1340,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             this.setPanelTabStop(panel, row);
         else
             this.makeFocusable(row);
-        
+
         if (rule && !hasClass(rule, 'a11yModified'))
         {
             var listBox = getElementByClass(rule, 'cssPropertyListBox');
@@ -1393,7 +1395,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             }
         }
     },
-    
+
     onCSSSearchMatchFound : function(panel, text, matchRow)
     {
         var panelA11y = this.getPanelA11y(panel);
@@ -1407,7 +1409,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var matchFeedback = $STRF('match_found_for', [text]);
         var matchType = '';
         var selector;
-        
+
         if (hasClass(matchRow, 'cssSelector'))
             matchFeedback += " " + $STRF('in_selector', [matchRow.textContent]);
         else 
@@ -1550,7 +1552,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (hasClass(event.target, 'focusGroup'))
             this.dispatchMouseEvent(event.target, 'mouseout');
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Inline Editing   
 
@@ -1988,10 +1990,10 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (watchEditTrigger)
             this.makeFocusable(watchEditTrigger, true);
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Call Stack Panel    
-    
+
     onstackCreated : function(panel)
     {
         var panelA11y = this.getPanelA11y(panel);
@@ -2028,7 +2030,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 listBox.setAttribute('aria-label', groupHeaders[i].textContent);
         }
     },
-    
+
     onScriptSearchMatchFound : function(panel, text, sourceBox, lineNo)
     {
         var panelA11y = this.getPanelA11y(panel);
@@ -2119,7 +2121,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             }
         }
     },
-    
+
     modifyMemberRow : function(panel, row, inTabOrder)
     {
         var type = this.getObjectType(row)
@@ -2131,8 +2133,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         else
             this.makeFocusable(row, false);
     },
-    
-    
+
     onBeforeDomUpdateSelection : function (panel)
     {
         var panelA11y = this.getPanelA11y(panel);
@@ -2152,14 +2153,14 @@ Firebug.A11yModel = extend(Firebug.Module,
         panelA11y.reFocusId = 2;
 
     },
-    
+
     onDomSearchMatchFound : function (panel, text, matchRow)
     {
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !text)
             return;
         var matchFeedback = "";
-        
+
         if (matchRow && matchRow.cells)
         {
             var dirCell = getElementByClass(matchRow, 'focusRow');
@@ -2175,10 +2176,9 @@ Firebug.A11yModel = extend(Firebug.Module,
         this.updateLiveElem(panel, matchFeedback, true);
     },
 
-    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Net Panel
-    
+
     onNetKeyPress : function(event)
     {
         var target = event.target;        
@@ -2270,16 +2270,16 @@ Firebug.A11yModel = extend(Firebug.Module,
         break;
         }
     },
-    
+
     isNetRow : function(elem, includeSubRow) {
-        return includeSubRow ? hasClass(elem, 'subNetRow') || hasClass(elem, 'netRow') : hasClass(elem, 'netRow');
+        return includeSubRow ? this.isSubNetRow(elem) || hasClass(elem, 'netRow') : hasClass(elem, 'netRow');
     },
 
     isSubNetRow : function(elem) 
     {
-        return hasClass(elem, 'subNetRow');
+        return hasClass(elem, 'subNetRow') || hasClass(elem, 'wrappedText');
     },
-    
+
     modifyNetRow : function(panel, row, inTabOrder)
     {
         var panelA11y = this.getPanelA11y(panel);
@@ -2295,16 +2295,16 @@ Firebug.A11yModel = extend(Firebug.Module,
                 if (hasClass(e, 'netTimeCol') && getAncestorByClass(e, 'fromCache'))
                     e.setAttribute('aria-label', e.textContent + " (cached)"); // TODO : localize
             }, this);
-            
+
         }            
         else return;
     },
-    
+
     getNetAncestorRow : function(elem, useSubRow)
     {
         return useSubRow ? getAncestorByClass(elem, 'subNetRow') || getAncestorByClass(elem, 'netRow') : getAncestorByClass(elem, 'netRow');
     },
-    
+
     onNetMouseDown : function(event)
     {
         var node = getAncestorByClass(event.target, 'focusRow');
@@ -2322,7 +2322,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             focusRow.focus();
         }        
     },
-    
+
     onNetFocus : function(e) {
         var target = e.target;
         var panel = Firebug.getElementPanel(target);
@@ -2347,9 +2347,9 @@ Firebug.A11yModel = extend(Firebug.Module,
                 fullHrefLabel.style.marginTop = (hrefLabel.offsetHeight  + 4) + "px";
             return;    
             }
-            
+
         }
-        
+
         var rangeParent = getAncestorByClass(target, 'netRow');
         var browser = Firebug.chrome.getPanelBrowser(panel);
         // these two lines are necessary, because otherwise the infoTip will not have the correct dimensions when it's positioned, and the contents
@@ -2357,9 +2357,9 @@ Firebug.A11yModel = extend(Firebug.Module,
         panel.showInfoTip(browser.infoTip, target, target.offsetLeft, target.offsetTop, rangeParent, 0); //will be called again in showInfoTip
         browser.infoTip.setAttribute("active", "true");        
         var left = hasClass(target, 'netTimeCol') ? target.offsetLeft - browser.infoTip.offsetWidth - 12 : target.offsetLeft + target.offsetWidth - 4;
-        Firebug.InfoTip.showInfoTip(browser.infoTip, panel, target, left, target.offsetTop - 12, rangeParent, 0);
+        Firebug.InfoTip.showInfoTip(browser.infoTip, panel, target, left, target.offsetTop - panel.panelNode.scrollTop - 12, rangeParent, 0);
     },
-      
+
     onNetBlur : function(e) {
         var target = e.target;
         var panel = Firebug.getElementPanel(target);
@@ -2379,7 +2379,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var browser = Firebug.chrome.getPanelBrowser(panel);
         Firebug.InfoTip.hideInfoTip(browser.infoTip);
     },
-    
+
     onNetMatchFound : function(panel, text, row)
     {
         //TODO localize for 1.5
@@ -2391,7 +2391,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             matchFeedback = "No matches found for \"" + text + "\"";            
         else
         {
-            var foundWhere = ''
+            var foundWhere = '';
             var parentRow = getAncestorByClass(row, "netRow");
             if (!parentRow)
             {
@@ -2411,7 +2411,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 foundWhere = $STR("net.header.Timeline");
             else 
                 foundWhere = "request details";
-                
+
             if (parentRow && parentRow.repObject)
             {
                 var file = parentRow.repObject;
@@ -2423,7 +2423,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },
-    
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Domplate Management
 
@@ -2454,7 +2454,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 type = "detailed error";
             else if (hasClass(elem, 'errorSourceBox'))
                 type = "error source line"; 
-            
+
             else
                 type = this.getObjectType(elem);
         }
@@ -2496,7 +2496,7 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Utils   
-    
+
     onPanelFocus : function(event)
     {
         var panel = Firebug.getElementPanel(event.target);
@@ -2521,7 +2521,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var focusChildren = target.getElementsByClassName('focusRow');
         return focusChildren.length > 0 ? focusChildren[0] : null;
     },
-    
+
     focusSiblingRow : function(panel, target, goUp)
     {
         var newRow = this[goUp ? 'getPreviousByClass' : 'getNextByClass'](target, 'focusRow', true, panel.panelNode)
@@ -2653,7 +2653,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
         return panelA11y
     },
-    
+
     //these utils are almost the same as their FBL namesakes , 
     //except that that he routine skips containers that are not visible (rather than including their childnodes)
     getPreviousByClass : function (node, className, downOnly, maxRoot)
@@ -2662,7 +2662,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return null;
 
         function criteria(node) { return node.nodeType == 1 && hasClass(node, className); } 
-        
+
         for (var sib = node.previousSibling; sib; sib = sib.previousSibling)
         {
             if (!this.isVisibleByStyle(sib) || !isVisible(sib))
@@ -2690,14 +2690,13 @@ Firebug.A11yModel = extend(Firebug.Module,
         }
     },
 
-    
     getNextByClass : function (node, className, upOnly, maxRoot)
     {
         if (!node)
             return null;
-        
+
         function criteria(node) { return node.nodeType == 1 && hasClass(node, className); } 
-        
+
         if (!upOnly)
         {
             var next = this.findNextDown(node, criteria);
@@ -2720,7 +2719,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (node.parentNode && node.parentNode != maxRoot)
             return this.getNextByClass(node.parentNode, className, true);
     },
-    
+
     findNextDown : function(node, criteria)
     {
         if (!node)
@@ -2753,7 +2752,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             if (criteria(child))
                 return child;
         }
-    }
+    }    
 });
 
 // ************************************************************************************************

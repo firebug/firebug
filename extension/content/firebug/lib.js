@@ -1816,12 +1816,12 @@ this.wrapText = function(text, noEscapeHTML)
             var subLine = line.substr(0, wrapIndex);
             line = line.substr(wrapIndex);
 
-            if (!noEscapeHTML) html.push("<code class=\"subNetRow focusRow\" role=\"listitem\">");
+            if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
             html.push(noEscapeHTML ? subLine : escapeHTML(subLine));
             if (!noEscapeHTML) html.push("</code>");
         }
 
-        if (!noEscapeHTML) html.push("<code class=\"subNetRow focusRow\" role=\"listitem\">");
+        if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
         html.push(noEscapeHTML ? line : escapeHTML(line));
         if (!noEscapeHTML) html.push("</code>");
     }
