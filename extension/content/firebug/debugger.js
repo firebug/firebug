@@ -1130,56 +1130,54 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
             var context = TabWatcher.contexts[i];
-            if (!isSet && context.dynamicURLhasBP && context.sourceFileMap.hasOwnProperty(url))
-                this.checkDynamicURLhasBP(context);
-
-            var panel = context.getPanel("script", true);
-            if (panel)
-            {
-                panel.context.invalidatePanels("breakpoints");
-
-                var sourceBox = panel.getSourceBoxByURL(url);
-                if (sourceBox)
-                {
-                    var row = sourceBox.getLineNode(lineNo);
-                    if (FBTrace.DBG_BP)
-                        FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+" context:"+context.getName()+"\n");
-                    if (!row)
-                        continue;  // we *should* only be called for lines in the viewport...
-
-                    row.setAttribute("breakpoint", isSet);
-                    if (isSet && props)
-                    {
-                        row.setAttribute("condition", props.condition ? "true" : "false");
-                        if (props.condition)  // issue 1371
-                        {
-                            var watchPanel = this.ableWatchSidePanel(context);
-
-                            // If the Console panel is disabled the watch is not available (issue 2264).
-                            if (watchPanel)
-                                watchPanel.addWatch(props.condition);
-                        }
-                        row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
-                    }
-                    else
-                    {
-                        row.removeAttribute("condition");
-                        if (props.condition)
-                        {
-                            var watchPanel = this.ableWatchSidePanel(context);
-                            if (wathPanel)
-                            {
-                                watchPanel.removeWatch(props.condition);
-                                watchPanel.rebuild();
-                            }
-                        }
-                        row.removeAttribute("disabledBreakpoint");
-                    }
-                }
-                else
-                {
-                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
-                }
+            if (context.sourceFileMap.hasOwnProperty(url)) {
+	            if (!isSet && context.dynamicURLhasBP)
+	                this.checkDynamicURLhasBP(context);
+	
+	            var panel = context.getPanel("script", true);
+	            if (panel)
+	            {
+	                panel.context.invalidatePanels("breakpoints");
+	
+	                var sourceBox = panel.getSourceBoxByURL(url);
+	                if (sourceBox)
+	                {
+	                    var row = sourceBox.getLineNode(lineNo);
+	                    if (FBTrace.DBG_BP)
+	                        FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+" context:"+context.getName()+"\n");
+	                    if (!row)
+	                        continue;  // we *should* only be called for lines in the viewport...
+	
+	                    row.setAttribute("breakpoint", isSet);
+	                    if (isSet && props)
+	                    {
+	                        row.setAttribute("condition", props.condition ? "true" : "false");
+	                        if (props.condition)  // issue 1371
+	                        {
+	                            var watchPanel = this.ableWatchSidePanel(context);
+	                            watchPanel.addWatch(props.condition);
+	                        }
+	                        row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
+	                    }
+	                    else
+	                    {
+	                        row.removeAttribute("condition");
+	                        if (props.condition)
+	                        {
+	                            var watchPanel = this.ableWatchSidePanel(context);
+	                            watchPanel.removeWatch(props.condition);
+	                            watchPanel.rebuild();
+	                        }
+	                        row.removeAttribute("disabledBreakpoint");
+	                    }
+	                    dispatch(this.fbListeners, "onToggleBreakpoint", [context, url, lineNo, isSet]);
+	
+	                }
+	                else
+	                {
+	                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
+	                }
+	            }
             }
         }
     },
@@ -1188,7 +1186,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
-            var panel = TabWatcher.contexts[i].getPanel("console", true);
+        	var context = TabWatcher.contexts[i];
+            var panel = context.getPanel("console", true);
             if (panel)
             {
                 panel.context.invalidatePanels("breakpoints");
@@ -1202,6 +1201,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                             setClass(row.firstChild, "breakForError");
                         else
                             removeClass(row.firstChild, "breakForError");
+                        
+	                    dispatch(this.fbListeners, "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
                     }
                 }
             }
