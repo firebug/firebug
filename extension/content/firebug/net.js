@@ -1337,11 +1337,11 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
             FBTrace.sysout("net.onClickHeader\n");
         if (!isLeftClick(event) && !(event.type == "keypress" && event.keyCode == 13)) //xxxHans also support enter key for sorting
             return;
-        
+
         // TODO: sorting
         //xxxHans Could you ping me when this is implemented, so that I can add the appropriate aria-sort attribute values?
     },
-    
+
     supportsObject: function(object)
     {
         return (object == this);

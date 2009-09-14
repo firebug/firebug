@@ -36,7 +36,7 @@
 
 .netHeadLabel {
     white-space: nowrap;
-    overflow: hidden;    
+    overflow: hidden;
 }
 
 /************************************************************************************************/
@@ -76,7 +76,7 @@
 
 .netHeaderSorted > .netHeaderCellBox {
     border-right-color: #6B7C93;
-    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;    
+    background: url(chrome://firebug/skin/arrowDown.png) no-repeat right;
 }
 
 .netHeaderSorted.sortedAscending > .netHeaderCellBox {
@@ -124,7 +124,7 @@
 .netCol {
     padding: 0;
     vertical-align: top;
-    border-bottom: 1px solid #EFEFEF;  
+    border-bottom: 1px solid #EFEFEF;
     white-space: nowrap;
     height: 17px;
 }
@@ -186,9 +186,9 @@
 }
 
 .useA11y .a11yShowFullLabel {
-	display: block;
-	background-image: none !important;
-   	border: 1px solid #CBE087;
+    display: block;
+    background-image: none !important;
+    border: 1px solid #CBE087;
     background-color: LightYellow;
     font-family: Monaco, monospace;
     color: #000000;
@@ -508,7 +508,7 @@
     padding: 8px;
     background-color: #FFFFFF;
     font-family: Monaco, monospace;
-    /*overflow-x: auto; HTML is damaged in case of big (2-3MB) responses */  
+    /*overflow-x: auto; HTML is damaged in case of big (2-3MB) responses */
 }
 
 .netInfoText[selected="true"] {
@@ -583,13 +583,18 @@
     padding-bottom: 3px;
 }
 
-.useA11y .panelNode-net .a11yFocus:focus, .useA11y .panelNode-net .focusRow:focus {
+.useA11y .panelNode-net .a11yFocus:focus,
+.useA11y .panelNode-net .focusRow:focus {
     outline-offset: -2px;
     background-color: #FFFFD6 !important;
 }
 
-.useA11y .panelNode-net .netHeaderCell:focus, .useA11y .panelNode-net :focus .netHeaderCell, .useA11y .panelNode-net :focus .netReceivingBar, .useA11y .netSummaryRow:focus .netBar, .useA11y .netSummaryRow :focus .netBar {
-	background-color: #FFFFD6;
-	background-image: none;
-	border-color: #FFFFD6;
+.useA11y .panelNode-net .netHeaderCell:focus,
+.useA11y .panelNode-net:focus .netHeaderCell,
+.useA11y .panelNode-net:focus .netReceivingBar,
+.useA11y .netSummaryRow:focus .netBar,
+.useA11y .netSummaryRow:focus .netBar {
+    background-color: #FFFFD6;
+    background-image: none;
+    border-color: #FFFFD6;
 }
