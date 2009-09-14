@@ -2208,7 +2208,10 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
     timingsTag:
         FOR("time", "$timings",
             TR({"class": "timeInfoTipRow", $collapsed: "$time|hideBar"},
-                TD({"class": "$time|getBarClass timeInfoTipBar"}),
+                TD({"class": "$time|getBarClass timeInfoTipBar",
+                    $loaded: "$time.loaded",
+                    $fromCache: "$time.fromCache",
+                }),
                 TD({"class": "timeInfoTipCell startTime"},
                     "$time.start|formatStartTime"
                 ),
@@ -2291,7 +2294,8 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             start: file.waitingForTime - file.startTime});
         timings.push({bar: "Receiving",
             elapsed: file.endTime - file.respondedTime,
-            start: file.respondedTime - file.startTime});
+            start: file.respondedTime - file.startTime,
+            loaded: file.loaded, fromCache: file.fromCache});
 
         var events = [];
         if (file.phase.contentLoadTime)

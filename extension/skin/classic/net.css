@@ -308,12 +308,21 @@
     min-width: 16px;
 }
 
-.loaded .netReceivingBar {
+/*
+ * Timing info tip is reusing net timeline styles to display the same
+ * colors for individual request phases. Notice that the info tip must
+ * respect also loaded and fromCache styles that also modify the
+ * actual color. These are used both on the same element in case
+ * of the tooltip.
+ */
+.loaded .netReceivingBar,
+.loaded.netReceivingBar {
     background: #B6B6B6 url(chrome://firebug/skin/netBarLoaded.gif) repeat-x;
     border-color: #B6B6B6;
 }
 
-.fromCache .netReceivingBar {
+.fromCache .netReceivingBar,
+.fromCache.netReceivingBar {
     background: #D6D6D6 url(chrome://firebug/skin/netBarCached.gif) repeat-x;
     border-color: #D6D6D6;
 }
