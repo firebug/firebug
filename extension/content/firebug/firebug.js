@@ -140,6 +140,10 @@ categoryManager.addCategoryEntry("strings_firebug",
 
 // ************************************************************************************************
 
+/**
+ * @class Represents the main Firebug application object. An instance of this object is
+ * created for each browser window (browser.xul).
+ */
 top.Firebug =
 {
     version: "1.5",
@@ -1028,8 +1032,15 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
-    // 1) the status bar icon click action
-    // 2) the activation button (within Firebug.xul) click action
+    /*
+     * Primary function to activate or minimize firebug. Used by
+     * <ol>
+     * <li>the status bar icon click action</li>
+     * <li>the activation button (within Firebug.xul) click action</li>
+     * </ol>
+     * @param forceOpen: don't minimize, stay open if open.
+     * @param panelName: eg 'script', to select a specific panel.
+     */
     toggleBar: function(forceOpen, panelName)
     {
         var browser = FirebugChrome.getCurrentBrowser();
