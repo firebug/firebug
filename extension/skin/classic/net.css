@@ -185,6 +185,17 @@
     background-color: #EFEFEF;
 }
 
+.useA11y .a11yShowFullLabel {
+	display: block;
+	background-image: none !important;
+   	border: 1px solid #CBE087;
+    background-color: LightYellow;
+    font-family: Monaco, monospace;
+    color: #000000;
+    font-size: 10px;
+    z-index: 2147483647;
+}
+
 .netSizeLabel {
     padding-left: 6px;
 }
@@ -561,4 +572,15 @@
     -moz-border-bottom-colors: #EFEFEF #999999;
     padding-top: 2px;
     padding-bottom: 3px;
+}
+
+.useA11y .panelNode-net .a11yFocus:focus, .useA11y .panelNode-net .focusRow:focus {
+    outline-offset: -2px;
+    background-color: #FFFFD6 !important;
+}
+
+.useA11y .panelNode-net .netHeaderCell:focus, .useA11y .panelNode-net :focus .netHeaderCell, .useA11y .panelNode-net :focus .netReceivingBar, .useA11y .netSummaryRow:focus .netBar, .useA11y .netSummaryRow :focus .netBar {
+	background-color: #FFFFD6;
+	background-image: none;
+	border-color: #FFFFD6;
 }

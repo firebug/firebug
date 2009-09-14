@@ -318,6 +318,21 @@ h1.groupHeader {
     outline: 2px solid #FF9933;
 }
 
+.useA11y .a11yFocus:focus, .useA11y .focusRow:focus {
+    outline: 2px solid #FF9933;
+    background-color: #FFFFD6;
+    z-index: 10000;
+    
+}
+
+.useA11y :focus .objectLink-sourceLink {
+    background-color: transparent;
+}
+
+.useA11y .objectBox-null:focus, .useA11y .objectBox-undefined:focus{
+    background-color: #888888 !important;
+}
+
 .offScreen {
     position: fixed;
     left: -10000px;
