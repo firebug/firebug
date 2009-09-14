@@ -9,6 +9,13 @@ const searchDelay = 150;
 
 // ************************************************************************************************
 
+/**
+ * @module Implements basic search box functionality. The box is displayed on the right side
+ * of the Firebug's toolbar. Specific search capabilities depends on the current panel
+ * and implemented in <code>panel.search</code> method. The search-box is automatically
+ * available for panels that have <code>searchable<code> property set to true (set to
+ * false by default).
+ */
 Firebug.Search = extend(Firebug.Module,
 {
     dispatchName: "search",
@@ -177,9 +184,12 @@ Firebug.Search = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
-
-
-
+    showPanel: function(browser, panel)
+    {
+        // Manage visibility of the search-box according to the searchable flag.
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.collapsed = !panel.searchable;
+    }
 });
 
 // ************************************************************************************************
@@ -187,5 +197,4 @@ Firebug.Search = extend(Firebug.Module,
 Firebug.registerModule(Firebug.Search);
 
 // ************************************************************************************************
-
 }});
