@@ -287,11 +287,10 @@ InsideOutBox.prototype =
         else
         {
             var parentNode = this.view.getParentObject(object);
-            var aView = this.view;
 
             if (FBTrace.DBG_HTML)
             {
-                FBTrace.sysout("insideOutBox.createObjectBoxes getObjectPath(object) ", getObjectPath(object))
+                FBTrace.sysout("insideOutBox.createObjectBoxes getObjectPath(object) ", getObjectPath(object, this.view))
                 FBTrace.sysout("insideOutBox.createObjectBoxes view.getParentObject("+formatNode(object)+")=parentNode: "+formatNode(parentNode), parentNode);
             }
 
@@ -527,7 +526,7 @@ function formatNode(object)
         return "(null object)";
 }
 
-function getObjectPath(element)
+function getObjectPath(element, aView)
 {
     var path = [];
     for (; element; element = aView.getParentObject(element))
