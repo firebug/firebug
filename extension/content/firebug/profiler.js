@@ -180,51 +180,51 @@ Firebug.Profiler = extend(Firebug.Module,
 Firebug.Profiler.ProfileTable = domplate(
 {
     tag:
-      DIV({class: "profileSizer" },
-        TABLE({class: "profileTable", cellspacing: 0, cellpadding: 0, width: "100%"},
-            TBODY({class: "profileTbody"},
-                TR({class: "headerRow", onclick: "$onClick"},
-                    TH({class: "headerCell alphaValue"},
+      DIV({class: "profileSizer", "tabindex": "-1" },
+        TABLE({class: "profileTable", cellspacing: 0, cellpadding: 0, width: "100%", "role": "grid"},
+            TBODY({class: "profileTbody", "role": "presentation"},
+                TR({class: "headerRow focusRow profileRow subFocusRow", onclick: "$onClick", "role": "row"},
+                    TH({class: "headerCell alphaValue a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox"},
                             $STR("Function")
                         )
                     ),
-                    TH({class: "headerCell"},
+                    TH({class: "headerCell a11yFocus" , "role": "columnheader"},
                         DIV({class: "headerCellBox", title: $STR("CallsHeaderTooltip")},
                             $STR("Calls")
                         )
                     ),
-                    TH({class: "headerCell headerSorted"},
+                    TH({class: "headerCell headerSorted a11yFocus", "role": "columnheader", "aria-sort": "descending"},
                         DIV({class: "headerCellBox", title: $STR("PercentTooltip")},
                             $STR("Percent")
                         )
                     ),
-                    TH({class: "headerCell"},
+                    TH({class: "headerCell a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox", title: $STR("OwnTimeHeaderTooltip")},
                             $STR("OwnTime")
                         )
                     ),
-                    TH({class: "headerCell"},
+                    TH({class: "headerCell a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox", title: $STR("TimeHeaderTooltip")},
                             $STR("Time")
                         )
                     ),
-                    TH({class: "headerCell"},
+                    TH({class: "headerCell a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox", title: $STR("AvgHeaderTooltip")},
                             $STR("Avg")
                         )
                     ),
-                    TH({class: "headerCell"},
+                    TH({class: "headerCell a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox", title: $STR("MinHeaderTooltip")},
                             $STR("Min")
                         )
                     ),
-                    TH({class: "headerCell"},
+                    TH({class: "headerCell a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox", title: $STR("MaxHeaderTooltip")},
                             $STR("Max")
                         )
                     ),
-                    TH({class: "headerCell alphaValue"},
+                    TH({class: "headerCell alphaValue a11yFocus", "role": "columnheader"},
                         DIV({class: "headerCellBox"},
                             $STR("File")
                         )
@@ -267,6 +267,8 @@ Firebug.Profiler.ProfileTable = domplate(
         var headerRow = tbody.firstChild;
         var headerSorted = getChildByClass(headerRow, "headerSorted");
         removeClass(headerSorted, "headerSorted");
+        if (headerSorted)
+            headerSorted.removeAttribute('aria-sort');
 
         var header = headerRow.childNodes[colIndex];
         setClass(header, "headerSorted");
@@ -275,6 +277,7 @@ Firebug.Profiler.ProfileTable = domplate(
         {
             removeClass(header, "sortedDescending");
             setClass(header, "sortedAscending");
+            header.setAttribute("aria-sort", "ascending");
 
             header.sorted = -1;
 
@@ -287,6 +290,7 @@ Firebug.Profiler.ProfileTable = domplate(
         {
             removeClass(header, "sortedAscending");
             setClass(header, "sortedDescending");
+            header.setAttribute("aria-sort", "descending")
 
             header.sorted = 1;
 
@@ -303,7 +307,7 @@ Firebug.Profiler.ProfileTable = domplate(
 Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
 {
     tag:
-        SPAN({class: "profileTitle"},
+        SPAN({class: "profileTitle", "role": "status"},
             SPAN({class: "profileCaption"}, "$objects"),
             " ",
             SPAN({class: "profileTime"}, "")
@@ -315,18 +319,18 @@ Firebug.Profiler.ProfileCaption = domplate(Firebug.Rep,
 Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 {
     tag:
-        TR({odd: "$object|isOddRow"},
-            TD(
+        TR({"class": "focusRow profileRow subFocusRow", odd: "$object|isOddRow", "role": "row"},
+            TD({"class": "profileCell", "role": "presentation"},
                 FirebugReps.OBJECTLINK("$object|getCallName")
             ),
-            TD("$object.callCount"),
-            TD("$object.percent%"),
-            TD("$object.totalOwnTime|roundTime\\ms"),
-            TD("$object.totalTime|roundTime\\ms"),
-            TD("$object|avgTime|roundTime\\ms"),
-            TD("$object.minTime|roundTime\\ms"),
-            TD("$object.maxTime|roundTime\\ms"),
-            TD({class: "linkCell"},
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.callCount"),
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.percent%"),
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.totalOwnTime|roundTime\\ms"),
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.totalTime|roundTime\\ms"),
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object|avgTime|roundTime\\ms"),
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.minTime|roundTime\\ms"),
+            TD({"class": "a11yFocus profileCell", "role": "gridcell"}, "$object.maxTime|roundTime\\ms"),
+            TD({class: "linkCell profileCell", "role": "presentation"},
                 TAG(FirebugReps.SourceLink.tag, {object: "$object|getSourceLink"})
             )
         ),

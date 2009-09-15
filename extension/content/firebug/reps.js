@@ -19,7 +19,7 @@ var OBJECTBOX = this.OBJECTBOX =
     SPAN({class: "objectBox objectBox-$className", role : "presentation"});
 
 var OBJECTBLOCK = this.OBJECTBLOCK =
-    DIV({class: "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
+    DIV({class: "objectBox objectBox-$className focusRow subFocusRow", role : "listitem"});
 
 var OBJECTLINK = this.OBJECTLINK =
     A({
@@ -1342,11 +1342,11 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 _stackTrace: "$object|getLastErrorStackTrace",
                 onclick: "$onToggleError"},
 
-            DIV({class: "errorTitle focusRow subLogRow", role : 'listitem'},
+            DIV({class: "errorTitle focusRow subFocusRow", role : 'listitem'},
                 "$object.message|getMessage"
             ),
             DIV({class: "errorTrace", role : 'presentation'}),
-            DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
+            DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subFocusRow", role : "listitem"},
                 IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: "Break on this error"}),
                 A({class: "errorSource a11yFocus"}, "$object|getLine"),
                 TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})

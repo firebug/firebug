@@ -320,6 +320,9 @@
     position: static;
 }
 
+.useA11y .profileTable *:focus {
+    outline-offset: -2px;
+}
 /*****************************************************************************************/
 
 .logRow-stackTrace {
