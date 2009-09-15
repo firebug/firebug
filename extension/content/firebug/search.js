@@ -188,7 +188,7 @@ Firebug.Search = extend(Firebug.Module,
     {
         // Manage visibility of the search-box according to the searchable flag.
         var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.collapsed = !panel.searchable;
+        searchBox.collapsed = panel ? !panel.searchable : false;
     }
 });
 
