@@ -12,6 +12,8 @@ const MODIFICATION = MutationEvent.MODIFICATION;
 const ADDITION = MutationEvent.ADDITION;
 const REMOVAL = MutationEvent.REMOVAL;
 
+const HTMLLib = Firebug.HTMLLib;
+
 var AttrTag =
     SPAN({class: "nodeAttr editGroup"},
         "&nbsp;", SPAN({class: "nodeName editable"}, "$attr.nodeName"), "=&quot;",
@@ -116,7 +118,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var objectNodeBox = this.ioBox.findObjectBox(elt);
         if (objectNodeBox)
         {
-            var attrBox = findNodeAttrBox(objectNodeBox, attrName);
+            var attrBox = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (attrBox)
             {
                 var attrValueBox = attrBox.childNodes[3];
@@ -167,12 +169,12 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         var lines;
 
-        var url = getSourceHref(node);
+        var url = HTMLLib.getSourceHref(node);
         if (url)
             lines = this.context.sourceCache.load(url);
         else
         {
-            var text = getSourceText(node);
+            var text = HTMLLib.getSourceText(node);
             lines = splitLines(text);
         }
 
@@ -219,7 +221,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         if (attrChange == MODIFICATION || attrChange == ADDITION)
         {
-            var nodeAttr = findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (FBTrace.DBG_HTML)
                 FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
             if (nodeAttr && nodeAttr.childNodes.length > 3)
@@ -251,7 +253,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
         else if (attrChange == REMOVAL)
         {
-            var nodeAttr = findNodeAttrBox(objectNodeBox, attrName);
+            var nodeAttr = HTMLLib.findNodeAttrBox(objectNodeBox, attrName);
             if (nodeAttr)
             {
                 nodeAttr.parentNode.removeChild(nodeAttr);
@@ -278,7 +280,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var parentTag = getNodeBoxTag(parentNodeBox);
         if (parentTag == Firebug.HTMLPanel.TextElement.tag)
         {
-            var nodeText = getTextElementTextBox(parentNodeBox);
+            var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
                 return;
 
@@ -454,7 +456,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     getChildObject: function(node, index, previousSibling)
     {
-        if (isSourceElement(node))
+        if (HTMLLib.isSourceElement(node))
         {
             if (index == 0)
                 return this.getElementSourceText(node);
@@ -485,30 +487,17 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     isWhitespaceText: function(node)
     {
-        if (node instanceof HTMLAppletElement)
-            return false;
-        return node.nodeType == 3 && isWhitespace(node.nodeValue);
+        return HTMLLib.isWhitespaceText(node);
     },
 
     findNextSibling: function (node)
     {
-        if (Firebug.showWhitespaceNodes)
-            return node.nextSibling;
-        else
-        {
-            for (var child = node.nextSibling; child; child = child.nextSibling)
-            {
-                if (!this.isWhitespaceText(child))
-                    return child;
-            }
-        }
+        return HTMLLib.findNextSibling(node);
     },
 
     isSourceElement: function(element)
     {
-        var tag = element.localName.toLowerCase();
-        return tag == "script" || tag == "link" || tag == "style"
-            || (tag == "link" && element.getAttribute("rel") == "stylesheet");
+        return HTMLLib.isSourceElement(element);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -928,9 +917,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         {
             var doc = this.context.window.document;
             if (Firebug.searchSelector)
-                search = this.lastSearch = new SelectorSearch(text, doc, this.panelNode, this.ioBox);
+                search = this.lastSearch = new HTMLLib.SelectorSearch(text, doc, this.panelNode, this.ioBox);
             else
-                search = this.lastSearch = new NodeSearch(text, doc, this.panelNode, this.ioBox);
+                search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
         var loopAround = search.find(reverse, Firebug.searchCaseSensitive);
@@ -1133,7 +1122,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             var nodes = [];
             for (var child = node.firstChild; child; child = child.nextSibling)
             {
-                if (child.nodeType != 3 || !isWhitespaceText(child))
+                if (child.nodeType != 3 || !HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1487,11 +1476,11 @@ function getNodeTag(node, expandAll)
             return getEmptyElementTag(node);
         else if (node.firebugIgnore)
             return null;
-        else if (isContainerElement(node))
+        else if (HTMLLib.isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (isEmptyElement(node))
+        else if (HTMLLib.isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (hasNoElementChildren(node))
+        else if (HTMLLib.hasNoElementChildren(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
@@ -1524,393 +1513,6 @@ function getNodeBoxTag(nodeBox)
         return Firebug.HTMLPanel.EmptyElement.tag;
 }
 
-function getSourceHref(element)
-{
-    var tag = element.localName.toLowerCase();
-    if (tag == "script" && element.src)
-        return element.src;
-    else if (tag == "link")
-        return element.href;
-    else
-        return null;
-}
-
-function getSourceText(element)
-{
-    var tag = element.localName.toLowerCase();
-    if (tag == "script" && !element.src)
-        return element.textContent;
-    else if (tag == "style")
-        return element.textContent;
-    else
-        return null;
-}
-
-function isContainerElement(element)
-{
-    var tag = element.localName.toLowerCase();
-    switch (tag)
-    {
-        case "script":
-        case "style":
-        case "iframe":
-        case "frame":
-        case "tabbrowser":
-        case "browser":
-            return true;
-        case "link":
-            return element.getAttribute("rel") == "stylesheet";
-    }
-    return false;
-}
-
-function hasNoElementChildren(element)
-{
-    if (element.childElementCount != 0)  // FF 3.5+
-        return false;
-
-    // https://developer.mozilla.org/en/XBL/XBL_1.0_Reference/DOM_Interfaces
-    if (element.ownerDocument instanceof Ci.nsIDOMDocumentXBL)
-    {
-        var anonChildren = element.ownerDocument.getAnonymousNodes(element);
-        if (anonChildren)
-        {
-            for (var i = 0; i < anonChildren.length; i++)
-            {
-                if (anonChildren[i].nodeType == 1)
-                    return false;
-            }
-        }
-    }
-    if (FBTrace.DBG_HTML)
-        FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName, element);
-    return true;
-}
-
-// Duplicate of HTMLPanel.prototype isWhitespaceText
-function isWhitespaceText(node)
-{
-    if (node instanceof HTMLAppletElement)
-        return false;
-    return node.nodeType == 3 && isWhitespace(node.nodeValue);
-}
-
-// Duplicate of HTMLPanel.prototype TODO: create a namespace for all of these functions so
-// they can be called outside of this file.
-function isSourceElement(element)
-{
-    var tag = element.localName.toLowerCase();
-    return tag == "script" || tag == "link" || tag == "style"
-        || (tag == "link" && element.getAttribute("rel") == "stylesheet");
-}
-
-function isEmptyElement(element)
-{
-    // XXXjjb the commented code causes issues 48, 240, and 244. I think the lines should be deleted.
-    // If the DOM has whitespace children, then the element is not empty even if
-    // we decide not to show the whitespace in the UI.
-
-    // XXXsroussey reverted above but added a check for self closing tags
-    if (Firebug.showWhitespaceNodes)
-    {
-        return !element.firstChild && isSelfClosing(element);
-    }
-    else
-    {
-        for (var child = element.firstChild; child; child = child.nextSibling)
-        {
-            if (!isWhitespaceText(child))
-                return false;
-        }
-    }
-    return isSelfClosing(element);
-}
-
-function findNextSibling(node)
-{
-    if (Firebug.showWhitespaceNodes)
-        return node.nextSibling;
-    else
-    {
-        // only return a non-whitespace node
-        for (var child = node.nextSibling; child; child = child.nextSibling)
-        {
-            if (!isWhitespaceText(child))
-                return child;
-        }
-    }
-}
-
-function findNodeAttrBox(objectNodeBox, attrName)
-{
-    var child = objectNodeBox.firstChild.lastChild.firstChild;
-    for (; child; child = child.nextSibling)
-    {
-        if (hasClass(child, "nodeAttr") && child.childNodes[1].firstChild
-            && child.childNodes[1].firstChild.nodeValue == attrName)
-        {
-            return child;
-        }
-    }
-}
-
-function getTextElementTextBox(nodeBox)
-{
-    var nodeLabelBox = nodeBox.firstChild.lastChild;
-    return getChildByClass(nodeLabelBox, "nodeText");
-}
-
-function findElementNameBox(objectNodeBox)
-{
-    return objectNodeBox.getElementsByClassName("nodeTag")[0];
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-function NodeSearch(text, doc, panelNode, ioBox)
-{
-    var walker = new DOMWalker(doc, doc.documentElement);
-    var re = new ReversibleRegExp(text, "m");
-    var matchCount = 0;
-
-    this.find = function(reverse, caseSensitive)
-    {
-        var match = this.findNextMatch(reverse, caseSensitive);
-        if (match)
-        {
-            this.lastMatch = match;
-            ++matchCount;
-
-            var node = match.node;
-            var nodeBox = this.openToNode(node, match.isValue);
-
-            this.selectMatched(nodeBox, node, match, reverse);
-        }
-        else if (matchCount)
-            return true;
-        else
-        {
-            this.noMatch = true;
-            dispatch([Firebug.A11yModel], 'onHTMLSearchNoMatchFound', [panelNode.ownerPanel, text]);
-        }
-    };
-
-    this.reset = function()
-    {
-        delete this.lastMatch;
-        delete this.lastRange;
-    };
-
-    this.findNextMatch = function(reverse, caseSensitive)
-    {
-
-        var innerMatch = this.findNextInnerMatch(reverse, caseSensitive);
-        if (innerMatch)
-            return innerMatch;
-        else
-            this.reset();
-
-        function walkNode() { return reverse ? walker.previousNode() : walker.nextNode(); }
-
-        var node;
-        while (node = walkNode())
-        {
-            if (node.nodeType == Node.TEXT_NODE)
-            {
-                if (isSourceElement(node.parentNode))
-                    continue;
-            }
-
-            var m = this.checkNode(node, reverse, caseSensitive);
-            if (m)
-                return m;
-        }
-    };
-
-    this.findNextInnerMatch = function(reverse, caseSensitive)
-    {
-        if (this.lastRange)
-        {
-            var lastMatchNode = this.lastMatch.node;
-            var lastReMatch = this.lastMatch.match;
-            var m = re.exec(lastReMatch.input, reverse, lastReMatch.caseSensitive, lastReMatch);
-            if (m)
-            {
-                return {
-                    node: lastMatchNode,
-                    isValue: this.lastMatch.isValue,
-                    match: m
-                };
-            }
-
-            // May need to check the pair for attributes
-            if (lastMatchNode.nodeType == Node.ATTRIBUTE_NODE
-                    && this.lastMatch.isValue == reverse)
-            {
-                return this.checkNode(lastMatchNode, reverse, caseSensitive, 1);
-            }
-        }
-    };
-
-    this.checkNode = function(node, reverse, caseSensitive, firstStep)
-    {
-        var checkOrder;
-        if (node.nodeType != Node.TEXT_NODE)
-        {
-            var nameCheck = { name: "nodeName", isValue: false, caseSensitive: false };
-            var valueCheck = { name: "nodeValue", isValue: true, caseSensitive: caseSensitive };
-            checkOrder = reverse ? [ valueCheck, nameCheck ] : [ nameCheck, valueCheck ];
-        }
-        else
-        {
-            checkOrder = [{name: "nodeValue", isValue: false, caseSensitive: caseSensitive }];
-        }
-
-        for (var i = firstStep || 0; i < checkOrder.length; i++) {
-            var m = re.exec(node[checkOrder[i].name], reverse, checkOrder[i].caseSensitive);
-            if (m)
-                return {
-                    node: node,
-                    isValue: checkOrder[i].isValue,
-                    match: m
-                };
-        }
-    };
-
-    this.openToNode = function(node, isValue)
-    {
-        if (node.nodeType == Node.ELEMENT_NODE)
-        {
-            var nodeBox = ioBox.openToObject(node);
-            return findElementNameBox(nodeBox);
-        }
-        else if (node.nodeType == Node.ATTRIBUTE_NODE)
-        {
-            var nodeBox = ioBox.openToObject(node.ownerElement);
-            if (nodeBox)
-            {
-                var attrNodeBox = findNodeAttrBox(nodeBox, node.nodeName);
-                if (isValue)
-                    return getChildByClass(attrNodeBox, "nodeValue");
-                else
-                    return getChildByClass(attrNodeBox, "nodeName");
-            }
-        }
-        else if (node.nodeType == Node.TEXT_NODE)
-        {
-            var nodeBox = ioBox.openToObject(node);
-            if (nodeBox)
-                return nodeBox;
-            else
-            {
-                var nodeBox = ioBox.openToObject(node.parentNode);
-                if (hasClass(nodeBox, "textNodeBox"))
-                    nodeBox = getTextElementTextBox(nodeBox);
-                return nodeBox;
-            }
-        }
-    };
-
-    this.selectMatched = function(nodeBox, node, match, reverse)
-    {
-        setTimeout(bindFixed(function()
-        {
-            var reMatch = match.match;
-            this.selectNodeText(nodeBox, node, reMatch[0], reMatch.index, reverse, reMatch.caseSensitive);
-            dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
-        }, this));
-    };
-
-    this.selectNodeText = function(nodeBox, node, text, index, reverse, caseSensitive)
-    {
-        var row, range;
-
-        // If we are still inside the same node as the last search, advance the range
-        // to the next substring within that node
-        if (nodeBox == this.lastNodeBox)
-        {
-            var target = this.lastRange.startContainer;
-            range = this.lastRange = panelNode.ownerDocument.createRange();
-            range.setStart(target, index);
-            range.setEnd(target, index+text.length);
-
-            row = this.lastRow;
-        }
-
-        if (!range)
-        {
-            // Search for the first instance of the string inside the node
-            function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
-            var search = new TextSearch(nodeBox, findRow);
-            row = this.lastRow = search.find(text, reverse, caseSensitive);
-            range = this.lastRange = search.range;
-            this.lastNodeBox = nodeBox;
-        }
-
-        if (row)
-        {
-            var sel = panelNode.ownerDocument.defaultView.getSelection();
-            sel.removeAllRanges();
-            sel.addRange(range);
-
-            scrollIntoCenterView(row, panelNode);
-            return true;
-        }
-    };
-
-}
-
-//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
-function SelectorSearch(text, doc, panelNode, ioBox)
-{
-    this.parent = new NodeSearch(text, doc, panelNode, ioBox);
-
-    this.find = this.parent.find;
-    this.reset = this.parent.reset;
-    this.openToNode = this.parent.openToNode;
-
-    try
-    {
-        // http://dev.w3.org/2006/webapi/selectors-api/
-        this.matchingNodes = doc.querySelectorAll(text);
-        this.matchIndex = 0;
-    }
-    catch(exc)
-    {
-        FBTrace.sysout("SelectorSearch FAILS "+exc, exc);
-    }
-
-    this.findNextMatch = function(reverse, caseSensitive)
-    {
-        if (!this.matchingNodes || !this.matchingNodes.length)
-            return undefined;
-
-        if (reverse)
-        {
-            if (this.matchIndex > 0)
-                return { node: this.matchingNodes[this.matchIndex--], isValue: false, match: "?XX?"};
-            else
-                return undefined;
-        }
-        else
-        {
-            if (this.matchIndex < this.matchingNodes.length)
-                return { node: this.matchingNodes[this.matchIndex++], isValue: false, match: "?XX?"};
-            else
-                return undefined;
-        }
-    };
-
-    this.selectMatched = function(nodeBox, node, match, reverse)
-    {
-        setTimeout(bindFixed(function()
-        {
-            ioBox.select(node, true, true);
-            dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
-        }, this));
-    };
-}
 // ************************************************************************************************
 
 Firebug.registerPanel(Firebug.HTMLPanel);
