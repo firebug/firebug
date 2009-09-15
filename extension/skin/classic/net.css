@@ -590,9 +590,9 @@
 }
 
 .useA11y .panelNode-net .netHeaderCell:focus,
-.useA11y .panelNode-net:focus .netHeaderCell,
-.useA11y .panelNode-net:focus .netReceivingBar,
-.useA11y .netSummaryRow:focus .netBar,
+.useA11y .panelNode-net :focus .netHeaderCell,
+.useA11y .panelNode-net :focus .netReceivingBar,
+.useA11y .netSummaryRow :focus .netBar,
 .useA11y .netSummaryRow:focus .netBar {
     background-color: #FFFFD6;
     background-image: none;
