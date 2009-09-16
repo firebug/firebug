@@ -525,7 +525,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                     this.insertHiddenText(panel, focusRow, 'group label: ');
             }
         }
-        else if (hasClass(row, 'logRow-errorMessage'))
+        else if (hasClass(row, 'logRow-errorMessage') || hasClass(row, 'logRow-warningMessage'))
         {
             setClass(row, 'outerFocusRow');
             row.setAttribute('role', 'presentation');
