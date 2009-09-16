@@ -1301,7 +1301,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
 
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
             TBODY({"role" : "presentation"},
-                TR({"class": "netHeaderRow netRow focusRow", onclick: "$onClickHeader", onkeypress: "$onClickHeader", "role": "row"},
+                TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
                     TD({id: "netHrefCol", width: "18%", "class": "netHeaderCell alphaValue a11yFocus", "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.URL Tooltip")},
@@ -1453,7 +1453,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 {
     fileTag:
         FOR("file", "$files",
-            TR({"class": "netRow $file.file|getCategory focusRow", onclick: "$onClick", "role" : "row", "aria-expanded" : "false",
+            TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow", onclick: "$onClick", "role" : "row", "aria-expanded" : "false",
                 $collapsed: "$file.file|hideRow",
                 $hasHeaders: "$file.file|hasResponseHeaders",
                 $loaded: "$file.file.loaded",
@@ -1505,7 +1505,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         ),
 
     netInfoTag:
-        TR({"class": "netInfoRow", "role" : "row"},
+        TR({"class": "netInfoRow outerFocusRow", "role" : "row"},
             TD({"class": "netInfoCol", colspan: 5, "role" : "gridcell"})
         ),
 
@@ -1517,7 +1517,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         ),
 
     summaryTag:
-        TR({"class": "netRow netSummaryRow focusRow", "role": "row", "aria-live": "polite"},
+        TR({"class": "netRow netSummaryRow focusRow outerFocusRow", "role": "row", "aria-live": "polite"},
             TD({"class": "netCol netHrefCol a11yFocus", "role" : "rowheader"},
                 DIV({"class": "netCountLabel netSummaryLabel"}, "-")
             ),
@@ -1678,7 +1678,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         ),
 
     infoTabs:
-        DIV({"class": "netInfoTabs focusRow subNetRow", "role": "tablist"},
+        DIV({"class": "netInfoTabs focusRow subFocusRow", "role": "tablist"},
             A({"class": "netInfoParamsTab netInfoTab a11yFocus", onclick: "$onClickTab", "role": "tab",
                 view: "Params",
                 $collapsed: "$file|hideParams"},
@@ -1716,7 +1716,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         ),
 
     infoBodies:
-        DIV({"class": "netInfoBodies"},
+        DIV({"class": "netInfoBodies outerFocusRow"},
             TABLE({"class": "netInfoParamsText netInfoText netInfoParamsTable", "role": "tabpanel",
                     cellpadding: 0, cellspacing: 0}, TBODY()),
             TABLE({"class": "netInfoHeadersText netInfoText netInfoHeadersTable", "role": "tabpanel",
@@ -1760,7 +1760,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
                 TD({"class": "netInfoParamName", "role": "presentation"}, "$param.name"),
                 TD({"class": "netInfoParamValue", "role": "list", "aria-label": "$param.name"},
                     FOR("line", "$param|getParamValueIterator",
-                        CODE({"class": "focusRow subNetRow", "role": "listitem"}, "$line")
+                        CODE({"class": "focusRow subFocusRow", "role": "listitem"}, "$line")
                     )
                 )
             )
@@ -2093,7 +2093,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         TR({"role": "presentation"},
             TD({colspan: 2, "role": "presentation"},
                 FOR("line", "$param|getParamValueIterator",
-                    CODE({"class":"focusRow subNetRow" , "role": "listitem"},"$line")
+                    CODE({"class":"focusRow subFocusRow" , "role": "listitem"},"$line")
                 )
             )
         ),

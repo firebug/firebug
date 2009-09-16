@@ -190,8 +190,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 {
     tag:
         DIV({class: "spyHead", _repObject: "$object"},
-            TABLE({cellpadding: 0, cellspacing: 0},
-                TBODY(
+            TABLE({class: "spyHeadTable focusRow outerFocusRow", cellpadding: 0, cellspacing: 0, "role": "listitem", "aria-expanded": "false"},
+                TBODY({"role": "presentation"},
                     TR({class: "spyRow"},
                         TD({class: "spyTitleCol spyCol", onclick: "$onToggleBody"},
                             DIV({class: "spyTitle"},
@@ -246,14 +246,19 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             toggleClass(logRow, "opened");
 
             var spy = getChildByClass(logRow, "spyHead").repObject;
+            var spyHeadTable = getAncestorByClass(target, 'spyHeadTable');
             if (hasClass(logRow, "opened"))
             {
                 updateHttpSpyInfo(spy);
+                if (spyHeadTable)
+                    spyHeadTable.setAttribute('aria-expanded', 'true');
             }
             else
             {
                 var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
                 dispatch(Firebug.NetMonitor.NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, spy]);
+                if (spyHeadTable)
+                    spyHeadTable.setAttribute('aria-expanded', 'false');
             }
         }
     },
