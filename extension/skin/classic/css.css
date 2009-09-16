@@ -92,3 +92,22 @@
 .stylePropValue {
     width: 50%;
 }
+
+.useA11y .a11yCSSView .focusRow:focus {
+    outline: none;
+    background-color: transparent
+ }
+ 
+ .useA11y .a11yCSSView .focusRow:focus .cssSelector, 
+ .useA11y .a11yCSSView .focusRow:focus .cssPropName, 
+ .useA11y .a11yCSSView .focusRow:focus .cssPropValue,
+ .useA11y .a11yCSSView .computedStyleRow:focus, 
+ .useA11y .a11yCSSView .groupHeader:focus {
+    outline: 2px solid #FF9933;
+    outline-offset: -2px;
+    background-color: #FFFFD6;
+ }
+ 
+ .useA11y .a11yCSSView .groupHeader:focus {
+    outline-offset: -2px;
+ }

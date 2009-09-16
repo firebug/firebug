@@ -128,6 +128,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 }
 	
 .useA11y #fbPanelBar1 toolbarbutton:focus,
+.useA11y #fbPanelBar1 textbox[focused],
 #fbStatusBar.useA11y:focus,
 .useA11y panelTab:focus {
     outline: 2px solid #FF9933;

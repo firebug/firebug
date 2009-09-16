@@ -65,6 +65,10 @@
     position: absolute;
 }
 
+.useA11y .panelStatusLabel:focus {
+    outline-offset: -2px !important;
+ }
+
 .sourceBox > .sourceRow > .sourceLine {
     cursor: pointer;
 }

@@ -398,3 +398,7 @@ panelTab[selected="true"] > .panelTab-right {
     margin-left: -5px;
     margin-right: 0px;
 }
+
+.useA11y #fbPanelBar1 textbox[focused] {
+    -moz-outline-radius: 10px !important;    
+}

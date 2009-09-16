@@ -49,6 +49,27 @@
     white-space: pre;
 }
 
+
+.useA11y .sourceBox .sourceViewport:focus .sourceLine {
+    background-color: #FFFFC0;
+    color: navy;
+    border-right: 1px solid black;
+}
+
+.useA11y .sourceBox .sourceViewport:focus {
+    outline: none;
+}
+
+.a11y1emSize {
+    width: 1em;
+    height: 1em;
+    position: absolute;
+}
+
+.useA11y .panelStatusLabel:focus {
+    outline-offset: -2px !important;
+ }
+ 
 .sourceBox > .sourceRow > .sourceLine {
     cursor: pointer;
 }

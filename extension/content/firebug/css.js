@@ -261,7 +261,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     template: domplate(
     {
         tag:
-            DIV({class: "cssSheet insertInto"},
+            DIV({class: "cssSheet insertInto a11yCSSView"},
                 FOR("rule", "$rules",
                     CSSRuleTag
                 ),
@@ -1052,7 +1052,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     template: domplate(
     {
         cascadedTag:
-            DIV({role : 'presentation'},
+            DIV({"class": "a11yCSSView",  role : 'presentation'},
                 DIV({role : 'list', 'aria-label' : 'style rules' },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
@@ -1318,7 +1318,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({role : "list", "aria-label" : "computed styles"},
+            DIV({"class": "a11yCSSView", role : "list", "aria-label" : "computed styles"},
                 FOR("group", "$groups",
                     H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
                         SPAN({class: "cssInheritLabel"}, "$group.title")
@@ -1326,7 +1326,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
                     TABLE({width: "100%", role : 'group'},
                         TBODY({role : 'presentation'},
                             FOR("prop", "$group.props",
-                                TR({class : 'focusRow', role : 'listitem'},
+                                TR({class : 'focusRow computedStyleRow', role : 'listitem'},
                                     TD({class: "stylePropName", role : 'presentation'}, "$prop.name"),
                                     TD({class: "stylePropValue", role : 'presentation'}, "$prop.value")
                                 )

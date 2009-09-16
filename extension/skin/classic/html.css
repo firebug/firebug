@@ -165,6 +165,12 @@
     padding-left: 0;
 }
 
-.useA11y .nodeLabelBox:focus {
+.useA11y .nodeLabel.focused {
     outline: 2px solid #FF9933;
+    -moz-outline-radius: 3px;
+    outline-offset: -2px;
+}
+
+.useA11y .nodeLabelBox:focus {
+    outline: none;
 }

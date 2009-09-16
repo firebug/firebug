@@ -319,7 +319,8 @@ h1.groupHeader {
 }
 
 .useA11y .a11yFocus:focus,
-.useA11y .focusRow:focus {
+.useA11y .a11yFocusNoTab:focus,
+.useA11y .focusRow:focus{
     outline: 2px solid #FF9933;
     background-color: #FFFFD6;
     z-index: 10000;
