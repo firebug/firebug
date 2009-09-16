@@ -112,11 +112,11 @@
     <!-- Extend Firefox status bar -->
     <statusbar id="status-bar">
         <statusbarpanel id="fbStatusBar" context="fbStatusContextMenu" role="button"
-                        aria-labelledby="fbStatusText" aria-describedby="fbStatusIcon"
+                        aria-labelledby="fbStatusPrefix fbStatusText" aria-describedby="fbStatusIcon"
                         onmouseup="Firebug.onClickStatusIcon(FirebugContext, event);">
             <image id="fbStatusIcon" tooltiptext="Firebug"/>
-            <label id="fbStatusText" onmouseup="Firebug.onClickStatusText(FirebugContext, event);"
-                   role="button" />
+            <label id="fbStatusPrefix" collapsed="true" />
+            <label id="fbStatusText" onmouseup="Firebug.onClickStatusText(FirebugContext, event);" />
         </statusbarpanel>
 
         <!-- Context menu -->

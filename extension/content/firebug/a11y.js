@@ -86,6 +86,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         setClass(chrome.$('fbContentBox'), 'useA11y');
         setClass(chrome.$('fbStatusBar'), 'useA11y');
         //manage all key events in toolbox (including tablists)
+        chrome.$('fbStatusPrefix').setAttribute('value', $STR("a11y.status.firebug status"));
         chrome.$("fbContentBox").addEventListener("keypress", this.handlePanelBarKeyPress , true);
         //make focus stick to inspect button when clicked
         chrome.$("fbInspectButton").addEventListener("mousedown", this.focusTarget, true);
