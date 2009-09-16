@@ -3368,7 +3368,7 @@ this.parseURLEncodedText = function(text)
                 var paramName = args[i].substring(0, index);
                 var paramValue = args[i].substring(index + 1);
 
-                if (paramValue > maxValueLength)
+                if (paramValue.length > maxValueLength)
                     paramValue = this.$STR("LargeData");
 
                 params.push({name: decodeText(paramName), value: decodeText(paramValue)});
