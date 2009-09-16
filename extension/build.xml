@@ -257,11 +257,8 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
         <!-- Parse all source files -->
         <jsdoctoolkit jsdochome="${jsdoc-toolkit.dir}"
             template="firebug"
-            outputdir="${jsdoc-output.dir}">
-            <fileset dir=".">
-                <include name="**/*.js"/>
-            </fileset>
-        </jsdoctoolkit>
+            outputdir="${jsdoc-output.dir}"
+            inputdir="." />
     </target>
 
 </project>
