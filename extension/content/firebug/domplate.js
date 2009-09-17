@@ -142,7 +142,7 @@ DomplateTag.prototype =
     {
         this.markupArgs = [];
         var topBlock = [], topOuts = [], blocks = [], info = {args: this.markupArgs, argIndex: 0};
-         
+
         this.generateMarkup(topBlock, topOuts, blocks, info);
         this.addCode(topBlock, topOuts, blocks);
 
@@ -304,7 +304,7 @@ DomplateTag.prototype =
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         topBlock.push(',"</', this.tagName, '>"');
         if (FBTrace.DBG_DOM)
-        	FBTrace.sysout("generateMarkup: "+this.tagName, topBlock.join(""));
+            FBTrace.sysout("generateMarkup: "+this.tagName, topBlock.join(""));
     },
 
     generateChildMarkup: function(topBlock, topOuts, blocks, info)
@@ -491,9 +491,12 @@ DomplateTag.prototype =
         }
         path.pop();
     },
-    
+
     getContext: function()
     {
+        if (!this.context && FBTrace.DBG_ERRORS)
+            FBTrace.sysout("DomplateTag.getContext tag has no context ", this);
+
         return this.context;
     }
 };
@@ -1038,7 +1041,7 @@ var Renderer =
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
         if (FBTrace.DBG_DOM) FBTrace.sysout("domplate.append html: "+html+"\n");
-        
+
         if (!womb || womb.ownerDocument != parent.ownerDocument)
             womb = parent.ownerDocument.createElement("div");
         womb.innerHTML = html;
