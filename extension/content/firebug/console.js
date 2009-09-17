@@ -46,6 +46,9 @@ Firebug.ConsoleBase =
         if (FBTrace.DBG_ERRORS && !context)
             FBTrace.sysout("Console.logRow has no context, skipping objects", objects);
 
+        if (!context)
+            return;
+
         if (noThrottle || !context)
         {
             var panel = this.getPanel(context);
@@ -67,6 +70,11 @@ Firebug.ConsoleBase =
         }
         else
         {
+            if (!context.throttle)
+            {
+                FBTrace.sysout("console.logRow has not context.throttle! ");
+                return;
+            }
             var args = [appender, objects, context, className, rep, sourceLink, true, noRow];
             context.throttle(this.logRow, this, args);
         }

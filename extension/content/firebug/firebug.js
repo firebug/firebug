@@ -1373,7 +1373,7 @@ top.Firebug =
         var type = typeof(object);
         for (var i = 0; i < reps.length; ++i)
         {
-            var rep = reps[i];
+                var rep = reps[i];
             try
             {
                 if (rep.supportsObject(object, type))
@@ -1393,7 +1393,10 @@ top.Firebug =
             }
         }
 
-        return (type == 'function')?defaultFuncRep:defaultRep;
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("getRep default type: "+type+" object: "+object, rep);
+
+        return rep;
     },
 
     getRepObject: function(node)
@@ -1799,14 +1802,12 @@ top.Firebug =
  */
 Firebug.Listener = function()
 {
+    this.fbListeners = [];
 }
 Firebug.Listener.prototype =
 {
     addListener: function(listener)
     {
-        if (!this.fbListeners)
-            this.fbListeners = []; // delay the creation until the objects are created so 'this' causes new array for each module
-
         this.fbListeners.push(listener);
     },
 
