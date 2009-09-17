@@ -546,6 +546,35 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             setClassTimed(row, "jumpHighlight", this.context);
     },
 
+    breakOnPropertySet: function(row)
+    {
+        var name = getRowName(row);
+        if (name == "this")
+            return;
+
+        var object = this.getRowObject(row);
+        object = this.getRealObject(object);
+        if (object)
+        {
+            try
+            {
+                object.watch(name, function handler(prop, oldval, newval)
+                {
+                    // XXXjjb Beware: in playing with this feature I hit too much recursion multiple times with console.log
+                    // TODO Do something cute in the UI with the error bubble thing
+                    Firebug.Debugger.breakNow();
+                    object.unwatch(prop);  // one time only?
+                    return newval;
+                });
+            }
+            catch(exc)
+            {
+                if(FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("dom.breakOnPropertySet FAILS "+exc, exc);
+            }
+        }
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Panel
 
@@ -844,6 +873,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                         command: bindFixed(this.deleteProperty, this, row) }
                 );
             }
+
+            items.push(
+                {label: "BreakOnPropertySet", command: bindFixed(this.breakOnPropertySet, this, row)}
+            );
         }
 
         items.push(
