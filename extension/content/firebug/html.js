@@ -533,19 +533,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         this.context.breakOnMutate = false;
 
-        Firebug.Debugger.halt(function(frame)
-        {
-            for (; frame && frame.isValid; frame = frame.callingFrame)
-            {
-                var fileName = frame.script.fileName;
-                if (fileName && fileName.indexOf("chrome://firebug/") != 0 &&
-                    fileName.indexOf("/components/firebug-") == -1)
-                    break;
-            }
-
-            if (frame)
-                Firebug.Debugger.onBreak(frame, 3);
-        });
+        Firebug.Debugger.breakNow();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

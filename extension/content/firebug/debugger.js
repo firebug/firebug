@@ -145,6 +145,23 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
 
+    breakNow: function()
+    {
+        Firebug.Debugger.halt(function(frame)
+        {
+            for (; frame && frame.isValid; frame = frame.callingFrame)
+            {
+                var fileName = frame.script.fileName;
+                if (fileName && fileName.indexOf("chrome://firebug/") != 0 &&
+                    fileName.indexOf("/components/firebug-") == -1)
+                    break;
+            }
+
+            if (frame)
+                Firebug.Debugger.onBreak(frame, 3);
+        });
+    },
+
     stop: function(context, frame, type, rv)
     {
         if (context.stopped)
