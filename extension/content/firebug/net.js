@@ -3596,10 +3596,10 @@ function getPostText(file, context)
     if (file.postText)
         return file.postText;
 
-    file.postText = readPostTextFromPage(file.href, context);
+    file.postText = readPostTextFromRequest(file.request, context);
 
-    if (!file.postText)
-        file.postText = readPostTextFromRequest(file.request, context);
+    if (!file.postText && context)
+        file.postText = readPostTextFromPage(file.href, context);
 
     if (!file.postText)
         return file.postText;
