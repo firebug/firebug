@@ -89,7 +89,8 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showRulers",
 
     // Net
-    "netFilterCategory", "collectHttpHeaders",
+    "netFilterCategory", "collectHttpHeaders", "netDisplayedResponseLimit",
+    "netDisplayedPostBodyLimit",
 
     // Stack
     "omitObjectPathStack",

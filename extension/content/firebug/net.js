@@ -1975,7 +1975,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     {
         // Get response text and make sure it doesn't exceed the max limit.
         var text = getResponseText(file, context);
-        var limit = Firebug.getPref(Firebug.prefDomain, "net.displayedResponseLimit") + 15;
+        var limit = Firebug.netDisplayedResponseLimit + 15;
         var limitReached = text.length > limit;
         if (limitReached)
             text = text.substr(0, limit) + "...";
@@ -1986,7 +1986,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         else
             insertWrappedText("", responseTextBox);
 
-        // Append a message iforming the user that the response isn't fully displayed.
+        // Append a message informing the user that the response isn't fully displayed.
         if (limitReached)
         {
             var object = {
@@ -2131,6 +2131,9 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     insertParameters: function(parentNode, params)
     {
+        if (!params || !params.length)
+            return;
+
         var paramTable = this.paramsTable.append(null, parentNode);
         var row = getElementByClass(paramTable, "netInfoPostParamsTitle");
 
@@ -2139,6 +2142,9 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     insertParts: function(parentNode, data)
     {
+        if (!data.params || !data.params.length)
+            return;
+
         var partsTable = this.partsTable.append(null, parentNode);
         var row = getElementByClass(partsTable, "netInfoPostPartsTitle");
 
@@ -3587,11 +3593,23 @@ function formatPostText(text)
 
 function getPostText(file, context)
 {
-    if (!file.postText)
-        file.postText = readPostTextFromPage(file.href, context);
+    if (file.postText)
+        return file.postText;
+
+    file.postText = readPostTextFromPage(file.href, context);
 
     if (!file.postText)
         file.postText = readPostTextFromRequest(file.request, context);
+
+    if (!file.postText)
+        return file.postText;
+
+    var limit = Firebug.netDisplayedPostBodyLimit;
+    if (file.postText.length > limit)
+    {
+        file.postText = cropString(file.postText, limit,
+            "\n\n" + $STR("net.postDataSizeLimitMessage") + "\n\n");
+    }
 
     return file.postText;
 }
@@ -3758,10 +3776,10 @@ var NetHttpObserver =
         var info = new Object();
         info.responseStatus = request.responseStatus;
         info.responseStatusText = request.responseStatusText;
-        info.postText = readPostTextFromRequest(request, context);
 
-        if (!info.postText && context)
-            info.postText = readPostTextFromPage(request.name, context);
+        // Initialize info.postText property.
+        info.request = request;
+        getPostText(info, context);
 
         if (FBTrace.DBG_NET && info.postText)
             FBTrace.sysout("net.onExamineResponse, POST data: " + info.postText, info);

@@ -87,7 +87,8 @@ pref("extensions.firebug.netFilterCategory", "all");
 pref("extensions.firebug.collectHttpHeaders", true);
 pref("extensions.firebug.net.logLimit", 500);
 pref("extensions.firebug.net.enableSites", false);
-pref("extensions.firebug.net.displayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].
+pref("extensions.firebug.netDisplayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].
+pref("extensions.firebug.netDisplayedPostBodyLimit", 10240); // Maximum size limit for displayed post data source [net, console panels].
 pref("extensions.firebug.net.hiddenColumns", "");   // List of hidden columns for the Net panel (space separated)
 
 // Cache

@@ -1746,8 +1746,11 @@ this.unEscapeHTML = function(str)
         .replace(/&#39;/g, "'");
 };
 
-this.cropString = function(text, limit)
+this.cropString = function(text, limit, alterText)
 {
+    if (!alterText)
+        alterText = "...";
+
     text = text + "";
 
     if (!limit)
@@ -1756,7 +1759,7 @@ this.cropString = function(text, limit)
         var halfLimit = limit / 2;
 
     if (text.length > limit)
-        return text.substr(0, halfLimit) + "..." + text.substr(text.length-halfLimit);
+        return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
     else
         return text;
 };
