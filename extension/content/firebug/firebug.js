@@ -1397,7 +1397,7 @@ top.Firebug =
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("getRep default type: "+type+" object: "+object, rep);
 
-        return rep;
+        return (type == 'function')?defaultFuncRep:defaultRep;
     },
 
     getRepObject: function(node)
