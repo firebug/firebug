@@ -1802,12 +1802,16 @@ top.Firebug =
  */
 Firebug.Listener = function()
 {
-    this.fbListeners = [];
+    // xxxHonza, XXXjjb: why not to create the array in addListener?
+    //this.fbListeners = [];
 }
 Firebug.Listener.prototype =
 {
     addListener: function(listener)
     {
+        if (!this.fbListeners)
+            this.fbListeners = []; // delay the creation until the objects are created so 'this' causes new array for each module
+
         this.fbListeners.push(listener);
     },
 
