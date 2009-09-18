@@ -128,7 +128,7 @@ Firebug.HTMLLib =
 
                 // May need to check the pair for attributes
                 if (lastMatchNode.nodeType == Node.ATTRIBUTE_NODE
-                        && this.lastMatch.isValue == reverse)
+                        && this.lastMatch.isValue == !!reverse)
                 {
                     return this.checkNode(lastMatchNode, reverse, caseSensitive, 1);
                 }
@@ -455,7 +455,7 @@ Firebug.HTMLLib =
             {
                 for (var i = 0; i < anonChildren.length; i++)
                 {
-                    if (anonChildren[i].nodeType == 1)
+                    if (anonChildren[i].nodeType == Node.ELEMENT_NODE)
                         return false;
                 }
             }
@@ -475,7 +475,7 @@ Firebug.HTMLLib =
     {
         if (node instanceof HTMLAppletElement)
             return false;
-        return node.nodeType == 3 && isWhitespace(node.nodeValue);
+        return node.nodeType == Node.TEXT_NODE && isWhitespace(node.nodeValue);
     },
 
     /**

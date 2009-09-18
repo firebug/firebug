@@ -230,9 +230,6 @@ InsideOutBox.prototype =
         if (!object)
             return null;
 
-        if(object.nodeType == Node.TEXT_NODE)
-            object = object.parentNode;
-
         this.rootObject = this.getRootNode(object);
 
         // Get or create all of the boxes for the target and its ancestors

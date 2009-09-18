@@ -19,7 +19,7 @@ var OBJECTBOX = this.OBJECTBOX =
     SPAN({class: "objectBox objectBox-$className", role : "presentation"});
 
 var OBJECTBLOCK = this.OBJECTBLOCK =
-    DIV({class: "objectBox objectBox-$className focusRow subFocusRow", role : "listitem"});
+    DIV({class: "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
 
 var OBJECTLINK = this.OBJECTLINK =
     A({
@@ -812,7 +812,15 @@ this.TextNode = domplate(Firebug.Rep,
 
     inspectObject: function(node, context)
     {
-        Firebug.chrome.select(node, "html", "domSide");
+        // Text nodes have two displays in HTML panel, inline and distinct
+        // node. We need to examine which case we are dealing with in order to
+        // select the proper object.
+        if (Firebug.HTMLLib.hasNoElementChildren(node.parentNode))
+        {
+            node = node.parentNode;
+        }
+
+        Firebug.chrome.select(node, "html", "domSide"); 
     },
 
     supportsObject: function(object)
@@ -1342,11 +1350,11 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 _stackTrace: "$object|getLastErrorStackTrace",
                 onclick: "$onToggleError"},
 
-            DIV({class: "errorTitle focusRow subFocusRow", role : 'listitem'},
+            DIV({class: "errorTitle focusRow subLogRow", role : 'listitem'},
                 "$object.message|getMessage"
             ),
             DIV({class: "errorTrace", role : 'presentation'}),
-            DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subFocusRow", role : "listitem"},
+            DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
                 IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: "Break on this error"}),
                 A({class: "errorSource a11yFocus"}, "$object|getLine"),
                 TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
