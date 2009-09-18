@@ -2,6 +2,9 @@
 
 FBL.ns(function() { with (FBL) {
 
+const Ci = Components.interfaces;
+const SHOW_ALL = Ci.nsIDOMNodeFilter.SHOW_ALL;
+
 /**
  * @class Static utility class. Contains utilities used for displaying and
  *        searching a HTML tree.
@@ -25,7 +28,7 @@ Firebug.HTMLLib =
      */
     NodeSearch: function(text, doc, panelNode, ioBox)
     {
-        var walker = new DOMWalker(doc, doc.documentElement);
+        var walker = new Firebug.HTMLLib.DOMWalker(doc, doc.documentElement);
         var re = new ReversibleRegExp(text, "m");
         var matchCount = 0;
 
@@ -358,6 +361,131 @@ Firebug.HTMLLib =
                 dispatch([Firebug.A11yModel], 'onHTMLSearchMatchFound', [panelNode.ownerPanel, match]);
             }, this));
         };
+    },
+
+    /**
+     * Implements an ordered traveral of the document, including attributes and
+     * iframe contents within the results.
+     *
+     * Note that the order for attributes is not defined. This will follow the
+     * same order as the Element.attributes accessor.
+     */
+    DOMWalker: function(doc, root)
+    {
+        var walker;
+        var currentNode, attrIndex;
+        var pastStart, pastEnd;
+
+        function createWalker(docElement) {
+            var walk = doc.createTreeWalker(docElement, SHOW_ALL, null, true);
+            walker.unshift(walk);
+        }
+        function getLastAncestor() {
+            while (walker[0].lastChild()) {}
+            return walker[0].currentNode;
+        }
+
+        this.previousNode = function() {
+            if (pastStart) {
+                return undefined;
+            }
+
+            if (attrIndex) {
+                attrIndex--;
+            } else {
+                var prevNode;
+                if (currentNode == walker[0].root) {
+                    if (walker.length > 1) {
+                        walker.shift();
+                        prevNode = walker[0].currentNode;
+                    } else {
+                        prevNode = undefined;
+                    }
+                } else {
+                    if (!currentNode) {
+                        prevNode = getLastAncestor();
+                    } else {
+                        prevNode = walker[0].previousNode();
+                    }
+                    if (!prevNode) {    // Really shouldn't occur, but to be safe
+                        prevNode = walker[0].root;
+                    }
+                    while ((prevNode.nodeName || "").toUpperCase() == "IFRAME") {
+                        createWalker(prevNode.contentDocument.documentElement);
+                        prevNode = getLastAncestor();
+                    }
+                }
+                currentNode = prevNode;
+                attrIndex = ((prevNode || {}).attributes || []).length;
+            }
+
+            if (!currentNode) {
+                pastStart = true;
+            } else {
+                pastEnd = false;
+            }
+
+            return this.currentNode();
+        };
+        this.nextNode = function() {
+            if (pastEnd) {
+                return undefined;
+            }
+
+            if (!currentNode) {
+                // We are working with a new tree walker
+                currentNode = walker[0].root;
+                attrIndex = 0;
+            } else {
+                // First check attributes
+                var attrs = currentNode.attributes || [];
+                if (attrIndex < attrs.length) {
+                    attrIndex++;
+                } else if ((currentNode.nodeName || "").toUpperCase() == "IFRAME") {
+                    // Attributes have completed, check for iframe contents
+                    createWalker(currentNode.contentDocument.documentElement);
+                    currentNode = walker[0].root;
+                    attrIndex = 0;
+                } else {
+                    // Next node
+                    var nextNode = walker[0].nextNode();
+                    while (!nextNode && walker.length > 1) {
+                        walker.shift();
+                        nextNode = walker[0].nextNode();
+                    }
+                    currentNode = nextNode;
+                    attrIndex = 0;
+                }
+            }
+
+            if (!currentNode) {
+                pastEnd = true;
+            } else {
+                pastStart = false;
+            }
+
+            return this.currentNode();
+        };
+
+        this.currentNode = function() {
+            if (!attrIndex) {
+                return currentNode;
+            } else {
+                return currentNode.attributes[attrIndex-1];
+            }
+        };
+
+        this.reset = function() {
+            pastStart = false;
+            pastEnd = false;
+            walker = [];
+            currentNode = undefined;
+            attrIndex = 0;
+
+            createWalker(root);
+        };
+
+        this.reset();
     },
 
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
