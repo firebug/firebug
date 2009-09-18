@@ -44,8 +44,8 @@ const reFunction = /\s*Function\s*\(([^)]*)\)/m;
 Firebug.Debugger = extend(Firebug.ActivableModule,
 {
     dispatchName: "debugger",
-
     fbs: fbs, // access to firebug-service in chromebug under browser.xul.DOM.Firebug.Debugger.fbs /*@explore*/
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Debugging
 
@@ -113,6 +113,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     beginInternalOperation: function() // stop debugger operations like breakOnErrors
     {
         var state = {breakOnErrors: Firebug.breakOnErrors};
@@ -125,6 +126,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         Firebug.breakOnErrors = state.breakOnErrors;
         return true;
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     halt: function(fn)
@@ -788,6 +790,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         Firebug.resumeFirebug();
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     supportsWindow: function(win)
@@ -1123,11 +1126,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     watchSourceFile: function(context, sourceFile)
     {
         context.addSourceFile(sourceFile);  // store in the context and notify listeners
         //fbs.watchSourceFile(sourceFile);    // tell the service to watch this file
     },
+
     unwatchSourceFile: function(context, sourceFile)
     {
         //fbs.unwatchSourceFile(sourceFile);
@@ -1135,6 +1140,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     onToggleBreakpoint: function(url, lineNo, isSet, props)
     {
         if (props.debugger != this) // then not for us
@@ -1798,6 +1804,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // This event can come at any time, eg by frame reloads or ajax, so we need to update the display.
         context.invalidatePanels("script", "breakpoints");
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
 
@@ -1962,11 +1969,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("debugger.filterMenuUpdate value: "+value+" label:"+this.filterButton.label+'\n');
     },
-
-    //----------------------------------------------------------------------------------
-
 });
-
 
 // ************************************************************************************************
 
@@ -2959,36 +2962,28 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
 // ************************************************************************************************
 
-var BreakpointsTemplate = domplate(Firebug.Rep,
+Firebug.Debugger.BreakpointListRep = domplate(Firebug.Rep,
 {
     tag:
         DIV({onclick: "$onClick", role : 'list'},
             FOR("group", "$groups",
-                DIV({class: "breakpointBlock breakpointBlock-$group.name", role: 'listitem'},
-                    H1({class: "breakpointHeader groupHeader"},
+                DIV({"class": "breakpointBlock breakpointBlock-$group.name", role: 'listitem'},
+                    H1({"class": "breakpointHeader groupHeader"},
                         "$group.title"
                     ),
-                    DIV({class : "breakpointsGroupListBox", role: 'listbox'},
+                    DIV({"class": "breakpointsGroupListBox", role: 'listbox'},
                         FOR("bp", "$group.breakpoints",
-                            DIV({class: "breakpointRow focusRow", role : 'option', 'aria-checked' : "$bp.checked"},
-                                DIV({class: "breakpointBlockHead"},
-                                    INPUT({class: "breakpointCheckbox", type: "checkbox",
-                                        _checked: "$bp.checked", tabindex : '-1'}),
-                                    SPAN({class: "breakpointName"}, "$bp.name"),
-                                    TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
-                                    IMG({class: "closeButton", src: "blank.gif"})
-                                ),
-                                DIV({class: "breakpointCode"}, "$bp.sourceLine")
-                            )
+                            TAG("$bp|getBreakpointRep", {bp: "$bp"})
                         )
                     )
                 )
             )
         ),
 
-    getSourceLink: function(bp)
+    getBreakpointRep: function(bp)
     {
-        return new SourceLink(bp.href, bp.lineNumber, "js");
+        var rep = Firebug.getRep(bp);
+        return rep.tag;
     },
 
     onClick: function(event)
@@ -3032,6 +3027,43 @@ var BreakpointsTemplate = domplate(Firebug.Rep,
         }
     }
 });
+
+Firebug.Debugger.BreakpointRep = domplate(Firebug.Rep,
+{
+    tag:
+        DIV({"class": "breakpointRow focusRow", role : 'option', 'aria-checked' : "$bp.checked"},
+            DIV({"class": "breakpointBlockHead"},
+                INPUT({"class": "breakpointCheckbox", type: "checkbox",
+                    _checked: "$bp.checked", tabindex : '-1'}),
+                SPAN({"class": "breakpointName"}, "$bp.name"),
+                TAG(FirebugReps.SourceLink.tag, {object: "$bp|getSourceLink"}),
+                IMG({"class": "closeButton", src: "blank.gif"})
+            ),
+            DIV({"class": "breakpointCode"}, "$bp.sourceLine")
+        ),
+
+    getSourceLink: function(bp)
+    {
+        return new SourceLink(bp.href, bp.lineNumber, "js");
+    },
+
+    supportsObject: function(bp)
+    {
+        return (bp instanceof Firebug.Debugger.Breakpoint);
+    }
+});
+
+// ************************************************************************************************
+
+Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLine, isFuture)
+{
+    this.name = name;
+    this.href = href;
+    this.lineNumber = lineNumber;
+    this.checked = checked;
+    this.sourceLine = sourceLine;
+    this.isFuture = isFuture;
+}
 
 // ************************************************************************************************
 
@@ -3121,8 +3153,10 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
             groups.push({name: "monitors", title: $STR("LoggedFunctions"),
                 breakpoints: monitors});
 
+        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [groups]);
+
         if (groups.length)
-            BreakpointsTemplate.tag.replace({groups: groups}, this.panelNode);
+            Firebug.Debugger.BreakpointListRep.tag.replace({groups: groups}, this.panelNode);
         else
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
 
@@ -3140,6 +3174,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         var renamer = new SourceFileRenamer(context);
         var self = this;
+        var Breakpoint = Firebug.Debugger.Breakpoint;
 
         for (var url in context.sourceFileMap)
         {
@@ -3166,8 +3201,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 }
 
                 var source = context.sourceCache.getLine(url, line);
-                breakpoints.push({name : name, href: url, lineNumber: line,
-                    checked: !props.disabled, sourceLine: source, isFuture: isFuture});
+                breakpoints.push(new Breakpoint(name, url, line, !props.disabled, source, isFuture));
             }});
 
             fbs.enumerateErrorBreakpoints(url, {call: function(url, line, props)
@@ -3177,8 +3211,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
                 var name = FBL.guessEnclosingFunctionName(url, line, context);
                 var source = context.sourceCache.getLine(url, line);
-                errorBreakpoints.push({name: name, href: url, lineNumber: line, checked: true,
-                    sourceLine: source});
+                errorBreakpoints.push(new Breakpoint(name, url, line, true, source));
             }});
 
             fbs.enumerateMonitors(url, {call: function(url, line, props)
@@ -3187,8 +3220,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                     return;
 
                 var name = FBL.guessEnclosingFunctionName(url, line, context);
-                monitors.push({name: name, href: url, lineNumber: line, checked: true,
-                        sourceLine: ""});
+                monitors.push(new Breakpoint(name, url, line, true, ""));
             }});
 
         }
@@ -3929,7 +3961,7 @@ Firebug.registerActivableModule(Firebug.Debugger);
 Firebug.registerPanel(BreakpointsPanel);
 Firebug.registerPanel(CallstackPanel);
 Firebug.registerPanel(Firebug.ScriptPanel);
+Firebug.registerRep(Firebug.Debugger.BreakpointRep);
 
 // ************************************************************************************************
-
 }});

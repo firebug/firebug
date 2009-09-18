@@ -1374,7 +1374,7 @@ top.Firebug =
         var type = typeof(object);
         for (var i = 0; i < reps.length; ++i)
         {
-                var rep = reps[i];
+            var rep = reps[i];
             try
             {
                 if (rep.supportsObject(object, type))
@@ -2338,7 +2338,6 @@ Firebug.Panel =
         var url = this.getObjectLocation(object);
         return FBL.splitURLBase(url);
     }
-
 };
 
 //************************************************************************************************
