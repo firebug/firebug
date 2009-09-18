@@ -59,12 +59,17 @@ FBL.FOR = function()
 
 DomplateTag.prototype =
 {
+    /*
+     *  Initializer for DOM templates. Called to create new Functions objects like TR, TD, OBJLINK, etc. See defineTag
+     *  @param args keyword argments for the template, the {} brace stuff after the tag name, eg TR({...}, TD(...
+     *  @param oldTag a nested tag, eg the TD tag in TR({...}, TD(...
+     */
     merge: function(args, oldTag)
     {
         if (oldTag)
             this.tagName = oldTag.tagName;
 
-        this.context = oldTag ? oldTag.context : null;
+        this.context = oldTag ? oldTag.context : null;  // normally null on construction
         this.subject = oldTag ? oldTag.subject : null;
         this.attrs = oldTag ? copyObject(oldTag.attrs) : {};
         this.classes = oldTag ? copyObject(oldTag.classes) : {};
@@ -492,11 +497,12 @@ DomplateTag.prototype =
         path.pop();
     },
 
+    /*
+     * We are just hiding from javascript.options.strict. For some reasons it's ok if we return undefined here.
+     * @return null or undefined or possibly a context.
+     */
     getContext: function()
     {
-        if (!this.context && FBTrace.DBG_ERRORS)
-            FBTrace.sysout("DomplateTag.getContext tag has no context ", this);
-
         return this.context;
     }
 };
