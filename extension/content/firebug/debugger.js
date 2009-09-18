@@ -2991,8 +2991,11 @@ Firebug.Debugger.BreakpointListRep = domplate(Firebug.Rep,
 
         if (getAncestorByClass(event.target, "breakpointCheckbox"))
         {
-            var sourceLink =
-                getElementByClass(event.target.parentNode, "objectLink-sourceLink").repObject;
+            var node = getElementByClass(event.target.parentNode, "objectLink-sourceLink");
+            if (!node)
+                return;
+
+            var sourceLink = node.repObject;
 
             panel.noRefresh = true;
             if (event.target.checked)

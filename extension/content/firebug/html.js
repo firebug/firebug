@@ -15,6 +15,8 @@ const REMOVAL = MutationEvent.REMOVAL;
 const HTMLLib = Firebug.HTMLLib;
 
 const BP_BREAKONATTRCHANGE = 1;
+const BP_BREAKONCHILDCHANGE = 2;
+const BP_BREAKONREMOVE = 3;
 
 // ************************************************************************************************
 
@@ -1566,10 +1568,8 @@ Firebug.HTMLModule.MutationBreakpoints =
             return;
 
         var breakpoints = context.mutationBreakpoints;
-        breakpoints.enumerateBreakpoints(BP_BREAKONATTRCHANGE, function(bp)
-        {
-            if (bp.checked && bp.node == event.target)
-            {
+        breakpoints.enumerateBreakpoints(BP_BREAKONATTRCHANGE, function(bp) {
+            if (bp.checked && bp.node == event.target) {
                 Firebug.Debugger.breakNow();
                 return true;
             }
@@ -1586,6 +1586,54 @@ Firebug.HTMLModule.MutationBreakpoints =
     {
         if (this.breakOnMutate(event.type, context))
             return;
+
+        var node = event.target;
+        var removal = event.type == "DOMNodeRemoved";
+        var breakpoints = context.mutationBreakpoints;
+        var breaked = false;
+
+        if (removal)
+        {
+            breaked = breakpoints.enumerateBreakpoints(BP_BREAKONREMOVE, function(bp) {
+                if (bp.checked && bp.node == node) {
+                    Firebug.Debugger.breakNow();
+                    return true;
+                }
+            });
+        }
+
+        if (!breaked)
+        {
+            // Collect all parents of the mutated node.
+            var parents = [];
+            for (var parent = node.parentNode; parent; parent = parent.parentNode)
+                parents.push(parent);
+
+            // Iterate over all parents and see if some of them has a breakpoint.
+            breakpoints.enumerateBreakpoints(BP_BREAKONCHILDCHANGE, function(bp) {
+                for (var i=0; i<parents.length; i++) {
+                    if (bp.checked && bp.node == parents[i]) {
+                        Firebug.Debugger.breakNow();
+                        return true;
+                    }
+                }
+            });
+        }
+
+        if (removal)
+        {
+            // Remove all breakpoints assocaited with removed node.
+            var invalidate = false;
+            breakpoints.enumerateBreakpoints(null, function(bp) {
+                if (bp.node == node) {
+                    breakpoints.removeBreakpoint(bp);
+                    invalidate = true;
+                }
+            });
+
+            if (invalidate)
+                context.invalidatePanels("breakpoints");
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1596,6 +1644,8 @@ Firebug.HTMLModule.MutationBreakpoints =
         if (!(node && node.nodeType == 1))
             return;
 
+        var breakpoints = context.mutationBreakpoints;
+
         var attrBox = getAncestorByClass(target, "nodeAttr");
         if (getAncestorByClass(target, "nodeAttr"))
         {
@@ -1603,26 +1653,37 @@ Firebug.HTMLModule.MutationBreakpoints =
 
         if (!(nonEditableTags.hasOwnProperty(node.localName)))
         {
-            var bp = context.mutationBreakpoints.findBreakpointByNode(node);
-
             items.push(
                 "-",
-                {label: "html.label.Break On Attribute Change", type: "checkbox", checked: bp,
-                    command: bindFixed(this.breakOnAttrChange, this, context, node)}
+                {label: "html.label.Break On Attribute Change",
+                    type: "checkbox",
+                    checked: breakpoints.findBreakpointByNode(node, BP_BREAKONATTRCHANGE),
+                    command: bindFixed(this.onModifyBreakpoint, this, context, node,
+                        BP_BREAKONATTRCHANGE)},
+                {label: "html.label.Break On Child Addition or Removal",
+                    type: "checkbox",
+                    checked: breakpoints.findBreakpointByNode(node, BP_BREAKONCHILDCHANGE),
+                    command: bindFixed(this.onModifyBreakpoint, this, context, node,
+                        BP_BREAKONCHILDCHANGE)},
+                {label: "html.label.Break On Element Removal",
+                    type: "checkbox",
+                    checked: breakpoints.findBreakpointByNode(node, BP_BREAKONREMOVE),
+                    command: bindFixed(this.onModifyBreakpoint, this, context, node,
+                        BP_BREAKONREMOVE)}
             );
         }
     },
 
-    breakOnAttrChange: function(context, node)
+    onModifyBreakpoint: function(context, node, type)
     {
         var breakpoints = context.mutationBreakpoints;
-        var index = breakpoints.findBreakpointByNode(node);
+        var index = breakpoints.findBreakpointByNode(node, type);
 
-        // Remove an existing or create new.
+        // Remove an existing or create new breakpoint.
         if (index > 0)
             breakpoints.splice(index, 1);
         else
-            context.mutationBreakpoints.addBreakpoint(node, BP_BREAKONATTRCHANGE);
+            context.mutationBreakpoints.addBreakpoint(node, type);
     },
 };
 
@@ -1640,9 +1701,9 @@ Firebug.HTMLModule.BreakpointTemplate = domplate(Firebug.Rep,
     tag:
         DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
             role: "option", "aria-checked": "$bp.checked"},
-            DIV({"class": "breakpointBlockHead"},
+            DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
-                    _checked: "$bp.checked", tabindex : "-1", onclick: "$onEnable"}),
+                    _checked: "$bp.checked", tabindex : "-1"}),
                 TAG("$bp.node|getNodeTag", {object: "$bp.node"}),
                 DIV({"class": "breakpointMutationType"}, "$bp|getType"),
                 IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
@@ -1669,6 +1730,10 @@ Firebug.HTMLModule.BreakpointTemplate = domplate(Firebug.Rep,
         {
         case BP_BREAKONATTRCHANGE:
             return $STR("html.label.Break On Attribute Change");
+        case BP_BREAKONCHILDCHANGE:
+            return $STR("html.label.Break On Child Addition or Removal");
+        case BP_BREAKONREMOVE:
+            return $STR("html.label.Break On Element Removal");
         }
 
         return "";
@@ -1697,13 +1762,9 @@ Firebug.HTMLModule.BreakpointTemplate = domplate(Firebug.Rep,
 
     onEnable: function(event)
     {
-        cancelEvent(event);
-
         var checkBox = event.target;
         if (hasClass(checkBox, "breakpointCheckbox"))
         {
-            checkBox.checked = !checkBox.checked;
-
             var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
             bp.checked = checkBox.checked;
         }
@@ -1743,7 +1804,7 @@ MutationBreakpointList.prototype =
         for (var i=0; i<this.breakpoints.length; i++)
         {
             var temp = this.breakpoints[i];
-            if (temp.node == bp.node)
+            if (temp.node == bp.node && (!bp.type || bp.type == temp.type))
                 return i;
         }
         return -1;
@@ -1755,22 +1816,24 @@ MutationBreakpointList.prototype =
         return (index < 0) ? null : this.breakpoints[index];
     },
 
-    findBreakpointByNode: function(node)
+    findBreakpointByNode: function(node, type)
     {
-        return this.findBreakpoint({node: node});
+        return this.findBreakpoint({node: node, type: type});
     },
 
     enumerateBreakpoints: function(type, callback)
     {
-        for (var i=0; i<this.breakpoints.length; i++)
+        var breakpoints = cloneArray(this.breakpoints);
+        for (var i=0; i<breakpoints.length; i++)
         {
-            var bp = this.breakpoints[i];
+            var bp = breakpoints[i];
             if (!type || bp.type == type)
             {
                 if (callback(bp))
-                    break;
+                    return true;
             }
         }
+        return false;
     }
 }
 

@@ -198,7 +198,7 @@
 
 .breakpointMutationType {
     position: absolute;
-    top: 2px;
+    top: 4px;
     right: 20px;
     color: gray;
 }
