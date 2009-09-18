@@ -230,7 +230,7 @@ InsideOutBox.prototype =
         if (!object)
             return null;
 
-        if(object.nodeType == 3)
+        if(object.nodeType == Node.TEXT_NODE)
             object = object.parentNode;
 
         this.rootObject = this.getRootNode(object);
@@ -464,14 +464,14 @@ InsideOutBox.prototype =
     getRootNode: function(node)
     {
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("insideOutBox.getRootNode for ");
+            FBTrace.sysout("insideOutBox.getRootNode for ", node);
         while (1)
         {
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout(node.localName+" < ");
+                FBTrace.sysout(node.localName+" < ", node);
             var parentNode = this.view.getParentObject(node);
             if (FBTrace.DBG_HTML)
-                FBTrace.sysout((parentNode?" (parent="+parentNode.localName+")":" (null parentNode)"+"\n"));
+                FBTrace.sysout((parentNode?" (parent="+parentNode.localName+")":" (null parentNode)"+"\n"), parentNode);
 
             if (!parentNode)
                 return node;
@@ -505,7 +505,7 @@ InsideOutBox.prototype =
 
 function isVisibleTarget(node)
 {
-    if (node.repObject && node.repObject.nodeType == 1)
+    if (node.repObject && node.repObject.nodeType == Node.ELEMENT_NODE)
     {
         for (var parent = node.parentNode; parent; parent = parent.parentNode)
         {
