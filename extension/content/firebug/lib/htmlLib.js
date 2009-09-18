@@ -22,13 +22,14 @@ Firebug.HTMLLib =
      *
      * @constructor
      * @param {String} text Text to search for
-     * @param {Document} doc Document to search
+     * @param {Object} root Root of search. This may be an element or a document
      * @param {Object} panelNode Panel node containing the IO Box representing the DOM tree.
      * @param {Object} ioBox IO Box to display the search results in
      */
-    NodeSearch: function(text, doc, panelNode, ioBox)
+    NodeSearch: function(text, root, panelNode, ioBox)
     {
-        var walker = new Firebug.HTMLLib.DOMWalker(doc, doc.documentElement);
+        root = root.documentElement || root;
+        var walker = new Firebug.HTMLLib.DOMWalker(root);
         var re = new ReversibleRegExp(text, "m");
         var matchCount = 0;
 
@@ -363,18 +364,25 @@ Firebug.HTMLLib =
         };
     },
 
+
     /**
-     * Implements an ordered traveral of the document, including attributes and
-     * iframe contents within the results.
+     * Constructs a DOMWalker instance.
+     * 
+     * @constructor
+     * @class Implements an ordered traveral of the document, including attributes and
+     *        iframe contents within the results.
      *
-     * Note that the order for attributes is not defined. This will follow the
-     * same order as the Element.attributes accessor.
+     *        Note that the order for attributes is not defined. This will follow the
+     *        same order as the Element.attributes accessor.
+     * @param {Element} root Element to traverse
+     * @member FBL
      */
-    DOMWalker: function(doc, root)
+    DOMWalker: function(root)
     {
         var walker;
         var currentNode, attrIndex;
         var pastStart, pastEnd;
+        var doc = root.ownerDocument;
 
         function createWalker(docElement) {
             var walk = doc.createTreeWalker(docElement, SHOW_ALL, null, true);
@@ -385,6 +393,11 @@ Firebug.HTMLLib =
             return walker[0].currentNode;
         }
 
+        /**
+         * Move to the previous node.
+         * 
+         * @return The previous node if one exists, undefined otherwise.
+         */
         this.previousNode = function() {
             if (pastStart) {
                 return undefined;
@@ -427,6 +440,12 @@ Firebug.HTMLLib =
 
             return this.currentNode();
         };
+
+        /**
+         * Move to the next node.
+         * 
+         * @return The next node if one exists, otherwise undefined.
+         */
         this.nextNode = function() {
             if (pastEnd) {
                 return undefined;
@@ -467,6 +486,11 @@ Firebug.HTMLLib =
             return this.currentNode();
         };
 
+        /**
+         * Retrieves the current node.
+         * 
+         * @return The current node, if not past the beginning or end of the iteration.
+         */
         this.currentNode = function() {
             if (!attrIndex) {
                 return currentNode;
@@ -475,6 +499,9 @@ Firebug.HTMLLib =
             }
         };
 
+        /**
+         * Resets the walker position back to the initial position.
+         */
         this.reset = function() {
             pastStart = false;
             pastEnd = false;
