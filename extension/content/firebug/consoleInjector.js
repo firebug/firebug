@@ -152,9 +152,12 @@ top.Firebug.Console.injector =
 
     detachConsole: function(context, win)
     {
-        var element = win.document.getElementById("_firebugConsole");
-        if (element)
-            element.parentNode.removeChild(element);
+        if (win && win.document)
+        {
+            var element = win.document.getElementById("_firebugConsole");
+            if (element)
+                element.parentNode.removeChild(element);
+        }
     },
 }
 

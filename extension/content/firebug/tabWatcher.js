@@ -64,6 +64,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher destroy\n");
 
+        this.shuttingDown = true;
+
         httpObserver.removeObserver(TabWatcherHttpObserver, "firebug-http-event");
 
         if (tabBrowser)
@@ -467,6 +469,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     watchContext: function(win, context, isSystem)  // called when tabs change in firefox
     {
+        if (this.shuttingDown)
+            return;
+
         var browser = context ? context.browser : this.getBrowserByWindow(win);
         if (browser)
             browser.isSystemPage = isSystem;

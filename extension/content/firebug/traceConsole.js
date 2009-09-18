@@ -72,6 +72,7 @@ var TraceConsole =
         // If the opener is closed the console must be also closed.
         // (this console uses shared object from the opener (e.g. Firebug)
         window.opener.addEventListener("close", this.onCloseOpener, true);
+        this.addedOnCloseOpener = true;
 
         // Fetch all cached messages.
         for (var i=0; i<queue.length; i++)
@@ -110,7 +111,11 @@ var TraceConsole =
             this.modules[i].onUnloadConsole(window);
 
         // Unregister from the opener
-        window.opener.removeEventListener("close", this.onCloseOpener, true);
+        if (this.addedOnCloseOpener)
+        {
+            window.opener.removeEventListener("close", this.onCloseOpener, true);
+            delete this.addedOnCloseOpener;
+        }
     },
 
     onCloseOpener: function()

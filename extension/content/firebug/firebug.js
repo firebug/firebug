@@ -302,6 +302,7 @@ top.Firebug =
         dispatch(modules, "initializeUI", [detachArgs]);
     },
 
+
     shutdown: function()  // never called in externalMode
     {
         TabWatcher.destroy();
@@ -453,11 +454,6 @@ top.Firebug =
         {
             var label = $STR("enablement.on");
             tooltip += "\n"+label+" "+$STR("enablement.for all pages");
-        }
-        else if (Firebug.allPagesActivation != "none")
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("Firebug.allPagesActivation has an unexpected value: "+Firebug.allPagesActivation);
         }
         // else allPagesActivation == "none" we don't show it.
 
