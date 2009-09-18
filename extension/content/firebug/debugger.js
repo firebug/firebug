@@ -1154,53 +1154,53 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             var context = TabWatcher.contexts[i];
             if (context.sourceFileMap.hasOwnProperty(url)) {
-	            if (!isSet && context.dynamicURLhasBP)
-	                this.checkDynamicURLhasBP(context);
-	
-	            var panel = context.getPanel("script", true);
-	            if (panel)
-	            {
-	                panel.context.invalidatePanels("breakpoints");
-	
-	                var sourceBox = panel.getSourceBoxByURL(url);
-	                if (sourceBox)
-	                {
-	                    var row = sourceBox.getLineNode(lineNo);
-	                    if (FBTrace.DBG_BP)
-	                        FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+" context:"+context.getName()+"\n");
-	                    if (!row)
-	                        continue;  // we *should* only be called for lines in the viewport...
-	
-	                    row.setAttribute("breakpoint", isSet);
-	                    if (isSet && props)
-	                    {
-	                        row.setAttribute("condition", props.condition ? "true" : "false");
-	                        if (props.condition)  // issue 1371
-	                        {
-	                            var watchPanel = this.ableWatchSidePanel(context);
-	                            watchPanel.addWatch(props.condition);
-	                        }
-	                        row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
-	                    }
-	                    else
-	                    {
-	                        row.removeAttribute("condition");
-	                        if (props.condition)
-	                        {
-	                            var watchPanel = this.ableWatchSidePanel(context);
-	                            watchPanel.removeWatch(props.condition);
-	                            watchPanel.rebuild();
-	                        }
-	                        row.removeAttribute("disabledBreakpoint");
-	                    }
-	                    dispatch(this.fbListeners, "onToggleBreakpoint", [context, url, lineNo, isSet]);
-	
-	                }
-	                else
-	                {
-	                    if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
-	                }
-	            }
+                if (!isSet && context.dynamicURLhasBP)
+                    this.checkDynamicURLhasBP(context);
+
+                var panel = context.getPanel("script", true);
+                if (panel)
+                {
+                    panel.context.invalidatePanels("breakpoints");
+
+                    var sourceBox = panel.getSourceBoxByURL(url);
+                    if (sourceBox)
+                    {
+                        var row = sourceBox.getLineNode(lineNo);
+                        if (FBTrace.DBG_BP)
+                            FBTrace.sysout(i+") onToggleBreakpoint getLineNode="+row+" lineNo="+lineNo+" context:"+context.getName()+"\n");
+                        if (!row)
+                            continue;  // we *should* only be called for lines in the viewport...
+
+                        row.setAttribute("breakpoint", isSet);
+                        if (isSet && props)
+                        {
+                            row.setAttribute("condition", props.condition ? "true" : "false");
+                            if (props.condition)  // issue 1371
+                            {
+                                var watchPanel = this.ableWatchSidePanel(context);
+                                watchPanel.addWatch(props.condition);
+                            }
+                            row.setAttribute("disabledBreakpoint", new Boolean(props.disabled).toString());
+                        }
+                        else
+                        {
+                            row.removeAttribute("condition");
+                            if (props.condition)
+                            {
+                                var watchPanel = this.ableWatchSidePanel(context);
+                                watchPanel.removeWatch(props.condition);
+                                watchPanel.rebuild();
+                            }
+                            row.removeAttribute("disabledBreakpoint");
+                        }
+                        dispatch(this.fbListeners, "onToggleBreakpoint", [context, url, lineNo, isSet]);
+
+                    }
+                    else
+                    {
+                        if (FBTrace.DBG_BP) FBTrace.sysout("debugger("+this.debuggerName+").onToggleBreakpoint context "+i+" script panel no sourcebox for url: "+url, panel.sourceBoxes);
+                    }
+                }
             }
         }
     },
@@ -1343,14 +1343,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // end of guilt trip
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-// Called by debugger.onEval() to store eval() source.
-// The frame has the blank-function-name script and it is not the top frame.
-// The frame.script.fileName is given by spidermonkey as file of the first eval().
-// The frame.script.baseLineNumber is given by spidermonkey as the line of the first eval() call
-// The source that contains the eval() call is the source of our caller.
-// If our caller is a file, the source of our caller is at frame.script.baseLineNumber
-// If our caller is an eval, the source of our caller is TODO Check Test Case
-
+    // Called by debugger.onEval() to store eval() source.
+    // The frame has the blank-function-name script and it is not the top frame.
+    // The frame.script.fileName is given by spidermonkey as file of the first eval().
+    // The frame.script.baseLineNumber is given by spidermonkey as the line of the first eval() call
+    // The source that contains the eval() call is the source of our caller.
+    // If our caller is a file, the source of our caller is at frame.script.baseLineNumber
+    // If our caller is an eval, the source of our caller is TODO Check Test Case
     getEvalLevelSourceFile: function(frame, context, innerScripts)
     {
         var eval_expr = this.getEvalExpression(frame, context);
@@ -1896,7 +1895,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return null;
     },
 
-    //---------------------------------------------------------------------------------------------
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Menu in toolbar.
 
     onScriptFilterMenuTooltipShowing: function(tooltip, context)
