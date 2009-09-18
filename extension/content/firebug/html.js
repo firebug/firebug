@@ -38,7 +38,7 @@ Firebug.HTMLModule = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-        Firebug.Debugger.removeLitener(this.DebuggerListener);
+        Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 
     deleteNode: function(node, context)
