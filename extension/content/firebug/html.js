@@ -14,22 +14,38 @@ const REMOVAL = MutationEvent.REMOVAL;
 
 const HTMLLib = Firebug.HTMLLib;
 
-var AttrTag =
-    SPAN({class: "nodeAttr editGroup"},
-        "&nbsp;", SPAN({class: "nodeName editable"}, "$attr.nodeName"), "=&quot;",
-        SPAN({class: "nodeValue editable"}, "$attr.nodeValue"), "&quot;"
-    );
+const BP_BREAKONATTRCHANGE = 1;
 
 // ************************************************************************************************
 
 Firebug.HTMLModule = extend(Firebug.Module,
 {
+    initialize: function(prefDomain, prefNames)
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+        Firebug.Debugger.addListener(this.DebuggerListener);
+    },
+
+    initContext: function(context, persistedState)
+    {
+        Firebug.Module.initContext.apply(this, arguments);
+
+        context.mutationBreakpoints = new MutationBreakpointList();
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+        Firebug.Debugger.removeLitener(this.DebuggerListener);
+    },
+
     deleteNode: function(node, context)
     {
         dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
         node.parentNode.removeChild(node);
         dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
     },
+
     deleteAttribute: function(node, attr, context)
     {
         dispatch(this.fbListeners, "onBeginFirebugChange", [node, context]);
@@ -37,6 +53,8 @@ Firebug.HTMLModule = extend(Firebug.Module,
         dispatch(this.fbListeners, "onEndFirebugChange", [node, context]);
     }
 });
+
+// ************************************************************************************************
 
 Firebug.HTMLPanel = function() {};
 
@@ -505,35 +523,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     resume: function()
     {
-        this.context.breakOnMutate = !this.context.breakOnMutate;
-
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.resume; " + this.context.breakOnMutate + ", " + this.context.getName());
-
-        Firebug.Debugger.syncCommands(this.context);
-
-        var chrome = Firebug.chrome;
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-        if (breakable == "true")
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Disable Break On Mutate"));
-        }
-        else
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Break On Mutate"));
-        }
-    },
-
-    breakOnMutate: function(type)
-    {
-        if (!this.context.breakOnMutate)
-            return;
-
-        this.context.breakOnMutate = false;
-
-        Firebug.Debugger.breakNow();
+        this.MutationBreakpoints.resume(this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -554,7 +544,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.mutateAttr(target, attrChange, attrName, newValue);
         }, this);
 
-        this.breakOnMutate(event.type);
+        Firebug.HTMLModule.MutationBreakpoints.onMutateAttr(event, this.context);
     },
 
     onMutateText: function(event)
@@ -569,7 +559,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.mutateText(target, parent, newValue);
         }, this);
 
-        this.breakOnMutate(event.type);
+        Firebug.HTMLModule.MutationBreakpoints.onMutateText(event, this.context);
     },
 
     onMutateNode: function(event)
@@ -595,7 +585,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             }
         }, this);
 
-        this.breakOnMutate(event.type);
+        Firebug.HTMLModule.MutationBreakpoints.onMutateNode(event, this.context);
     },
 
     onClick: function(event)
@@ -1007,7 +997,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     {label: "DeleteElement", command: bindFixed(this.deleteNode, this, node) }
                 );
             }
-
         }
         else
         {
@@ -1017,6 +1006,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 {label: "DeleteNode", command: bindFixed(this.deleteNode, this, node) }
             );
         }
+
+        Firebug.HTMLModule.MutationBreakpoints.getContextMenuItems(
+            this.context,node, target, items);
 
         return items;
     },
@@ -1069,26 +1061,34 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
 // ************************************************************************************************
 
+var AttrTag =
+    SPAN({"class": "nodeAttr editGroup"},
+        "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.nodeName"), "=&quot;",
+        SPAN({"class": "nodeValue editable"}, "$attr.nodeValue"), "&quot;"
+    );
+
+// ************************************************************************************************
+
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox open $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel", role: "presentation"},
-                SPAN({class: "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+        DIV({"class": "nodeBox open $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+            DIV({"class": "nodeLabel", role: "presentation"},
+                SPAN({"class": "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
-                    SPAN({class: "nodeBracket"}, "&gt;")
+                    SPAN({"class": "nodeBracket"}, "&gt;")
                 )
             ),
-            DIV({class: "nodeChildBox", role :"group"},
+            DIV({"class": "nodeChildBox", role :"group"},
                 FOR("child", "$object|childIterator",
                     TAG("$child|getNodeTag", {object: "$child"})
                 )
             ),
-            DIV({class: "nodeCloseLabel", role:"presentation"},
+            DIV({"class": "nodeCloseLabel", role:"presentation"},
                 "&lt;/",
-                SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                 "&gt;"
              )
         ),
@@ -1121,7 +1121,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 {
     tag:
-        DIV({class: "soloElement", onmousedown: "$onMouseDown"},
+        DIV({"class": "soloElement", onmousedown: "$onMouseDown"},
             Firebug.HTMLPanel.CompleteElement.tag
         ),
 
@@ -1142,21 +1142,21 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
-            DIV({class: "nodeLabel", role: "presentation"},
-                IMG({class: "twisty", role: "presentation"}),
-                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+        DIV({"class": "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+            DIV({"class": "nodeLabel", role: "presentation"},
+                IMG({"class": "twisty", role: "presentation"}),
+                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
-                    SPAN({class: "nodeBracket editable insertBefore"}, "&gt;")
+                    SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
             ),
-            DIV({class: "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
-            DIV({class: "nodeCloseLabel", role : "presentation"},
-                SPAN({class: "nodeCloseLabelBox repTarget"},
+            DIV({"class": "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
+            DIV({"class": "nodeCloseLabel", role : "presentation"},
+                SPAN({"class": "nodeCloseLabelBox repTarget"},
                     "&lt;/",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     "&gt;"
                 )
              )
@@ -1166,16 +1166,16 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel", role: "presentation"},
-                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
+        DIV({"class": "nodeBox textNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+            DIV({"class": "nodeLabel", role: "presentation"},
+                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
-                    SPAN({class: "nodeBracket editable insertBefore"}, "&gt;"),
-                    SPAN({class: "nodeText editable"}, "$object|getNodeText"),
+                    SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;"),
+                    SPAN({"class": "nodeText editable"}, "$object|getNodeText"),
                     "&lt;/",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     "&gt;"
                 )
             )
@@ -1185,13 +1185,13 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel", role: "presentation"},
-                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+            DIV({"class": "nodeLabel", role: "presentation"},
+                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
-                    SPAN({class: "nodeBracket editable insertBefore"}, "&gt;")
+                    SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
             )
         )
@@ -1200,13 +1200,13 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
-            DIV({class: "nodeLabel", role: "presentation"},
-                SPAN({class: "nodeLabelBox repTarget", role : 'treeitem'},
+        DIV({"class": "nodeBox emptyNodeBox $object|getHidden repIgnore", _repObject: "$object", role : 'presentation'},
+            DIV({"class": "nodeLabel", role: "presentation"},
+                SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
-                    SPAN({class: "nodeBracket editable insertBefore"}, "/&gt;")
+                    SPAN({"class": "nodeBracket editable insertBefore"}, "/&gt;")
                 )
             )
         )
@@ -1220,17 +1220,17 @@ Firebug.HTMLPanel.AttrNode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox", _repObject: "$object"},
-            SPAN({class: "nodeText editable"}, "$object.nodeValue")
+        DIV({"class": "nodeBox", _repObject: "$object"},
+            SPAN({"class": "nodeText editable"}, "$object.nodeValue")
         )
 }),
 
 Firebug.HTMLPanel.WhitespaceNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox", _repObject: "$object"},
+        DIV({"class": "nodeBox", _repObject: "$object"},
             FOR("char", "$object|charIterator",
-                    SPAN({class: "nodeText nodeWhiteSpace editable"}, "$char")
+                    SPAN({"class": "nodeText nodeWhiteSpace editable"}, "$char")
                     )
         ),
     charIterator: function(node)
@@ -1240,8 +1240,8 @@ Firebug.HTMLPanel.WhitespaceNode = domplate(FirebugReps.Element,
         for(var i = 0; i < str.length; i++)
         {
             // http://www.w3.org/TR/html401/struct/text.html
-            var char = str[i];
-            switch(char)
+            var ch = str[i];
+            switch(ch)
             {
             case ' ': arr[i] = ' ';break;
             case '\t': arr[i] = '\\t';break;
@@ -1257,9 +1257,9 @@ Firebug.HTMLPanel.WhitespaceNode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox", _repObject: "$object"},
+        DIV({"class": "nodeBox", _repObject: "$object"},
             "&lt;![CDATA[",
-            SPAN({class: "nodeText editable"}, "$object.nodeValue"),
+            SPAN({"class": "nodeText editable"}, "$object.nodeValue"),
             "]]&gt;"
         )
 }),
@@ -1267,8 +1267,8 @@ Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({class: "nodeBox", _repObject: "$object"},
-            DIV({class: "nodeComment editable"},
+        DIV({"class": "nodeBox", _repObject: "$object"},
+            DIV({"class": "nodeComment editable"},
                 "&lt;!--$object.nodeValue--&gt;"
             )
         )
@@ -1362,7 +1362,7 @@ function HTMLEditor(doc)
 HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 {
     tag: DIV(
-        TEXTAREA({class: "htmlEditor fullPanelEditor", oninput: "$onInput"})
+        TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
     ),
 
     getValue: function()
@@ -1502,9 +1502,284 @@ function getNodeBoxTag(nodeBox)
 }
 
 // ************************************************************************************************
+// Mutation Breakpoints
 
-Firebug.registerPanel(Firebug.HTMLPanel);
+/**
+ * @class Represents {@link Firebug.Debugger} listener. This listener is reponsible for
+ * providing a list of mutation-breakpoints into the Breakpoints side-panel.
+ */
+Firebug.HTMLModule.DebuggerListener =
+{
+    getBreakpoints: function(context, groups)
+    {
+        var breakpoints = context.mutationBreakpoints.breakpoints;
+        if (!breakpoints.length)
+            return;
+
+        groups.push({name: "mutationBreakpoints", title: $STR("html.label.HTML Breakpoints"),
+            breakpoints: breakpoints});
+    }
+};
+
+Firebug.HTMLModule.MutationBreakpoints =
+{
+    resume: function(context)
+    {
+        context.breakOnMutate = !context.breakOnMutate;
+
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.resume; " + context.breakOnMutate + ", " + context.getName());
+
+        Firebug.Debugger.syncCommands(context);
+
+        var chrome = Firebug.chrome;
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        if (breakable == "true")
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Disable Break On Mutate"));
+        }
+        else
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Break On Mutate"));
+        }
+    },
+
+    breakOnMutate: function(type, context)
+    {
+        if (!context.breakOnMutate)
+            return false;
+
+        context.breakOnMutate = false;
+
+        Firebug.Debugger.breakNow();
+        return true;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Mutation event handlers.
+
+    onMutateAttr: function(event, context)
+    {
+        if (this.breakOnMutate(event.type, context))
+            return;
+
+        var breakpoints = context.mutationBreakpoints;
+        breakpoints.enumerateBreakpoints(BP_BREAKONATTRCHANGE, function(bp)
+        {
+            if (bp.checked && bp.node == event.target)
+            {
+                Firebug.Debugger.breakNow();
+                return true;
+            }
+        });
+    },
+
+    onMutateText: function(event, context)
+    {
+        if (this.breakOnMutate(event.type, context))
+            return;
+    },
+
+    onMutateNode: function(event, context)
+    {
+        if (this.breakOnMutate(event.type, context))
+            return;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Context menu items
+
+    getContextMenuItems: function(context, node, target, items)
+    {
+        if (!(node && node.nodeType == 1))
+            return;
+
+        var attrBox = getAncestorByClass(target, "nodeAttr");
+        if (getAncestorByClass(target, "nodeAttr"))
+        {
+        }
+
+        if (!(nonEditableTags.hasOwnProperty(node.localName)))
+        {
+            var bp = context.mutationBreakpoints.findBreakpointByNode(node);
+
+            items.push(
+                "-",
+                {label: "html.label.Break On Attribute Change", type: "checkbox", checked: bp,
+                    command: bindFixed(this.breakOnAttrChange, this, context, node)}
+            );
+        }
+    },
+
+    breakOnAttrChange: function(context, node)
+    {
+        var breakpoints = context.mutationBreakpoints;
+        var index = breakpoints.findBreakpointByNode(node);
+
+        // Remove an existing or create new.
+        if (index > 0)
+            breakpoints.splice(index, 1);
+        else
+            context.mutationBreakpoints.addBreakpoint(node, BP_BREAKONATTRCHANGE);
+    },
+};
+
+Firebug.HTMLModule.Breakpoint = function(node, type)
+{
+    this.node = node;
+    this.checked = true;
+    this.type = type;
+}
+
+Firebug.HTMLModule.BreakpointTemplate = domplate(Firebug.Rep,
+{
+    inspectable: false,
+
+    tag:
+        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+            role: "option", "aria-checked": "$bp.checked"},
+            DIV({"class": "breakpointBlockHead"},
+                INPUT({"class": "breakpointCheckbox", type: "checkbox",
+                    _checked: "$bp.checked", tabindex : "-1", onclick: "$onEnable"}),
+                TAG("$bp.node|getNodeTag", {object: "$bp.node"}),
+                DIV({"class": "breakpointMutationType"}, "$bp|getType"),
+                IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+            ),
+            DIV({"class": "breakpointCode"},
+                TAG("$bp.node|getSourceLine", {object: "$bp.node"})
+            )
+        ),
+
+    getNodeTag: function(node)
+    {
+        var rep = Firebug.getRep(node);
+        return rep.shortTag ? rep.shortTag : rep.tag;
+    },
+
+    getSourceLine: function(node)
+    {
+        return getNodeTag(node, false);
+    },
+
+    getType: function(bp)
+    {
+        switch (bp.type)
+        {
+        case BP_BREAKONATTRCHANGE:
+            return $STR("html.label.Break On Attribute Change");
+        }
+
+        return "";
+    },
+
+    onRemove: function(event)
+    {
+        cancelEvent(event);
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+        var htmlPanel = context.getPanel("html");
+
+        if (hasClass(event.target, "closeButton"))
+        {
+            // Remove from list of breakpoints.
+            var row = getAncestorByClass(event.target, "breakpointRow");
+            context.mutationBreakpoints.removeBreakpoint(row.repObject);
+
+            // Remove from the UI.
+            bpPanel.noRefresh = true;
+            bpPanel.removeRow(row);
+            bpPanel.noRefresh = false;
+        }
+    },
+
+    onEnable: function(event)
+    {
+        cancelEvent(event);
+
+        var checkBox = event.target;
+        if (hasClass(checkBox, "breakpointCheckbox"))
+        {
+            checkBox.checked = !checkBox.checked;
+
+            var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
+            bp.checked = checkBox.checked;
+        }
+    },
+
+    supportsObject: function(object)
+    {
+        return object instanceof Firebug.HTMLModule.Breakpoint;
+    }
+});
 
 // ************************************************************************************************
 
+function MutationBreakpointList()
+{
+    this.breakpoints = [];
+}
+
+MutationBreakpointList.prototype =
+{
+    addBreakpoint: function(node, type)
+    {
+        this.breakpoints.push(new Firebug.HTMLModule.Breakpoint(node, type));
+    },
+
+    removeBreakpoint: function(bp)
+    {
+        var index = this.findBreakpointIndex(bp);
+        if (index < 0)
+            return;
+
+        this.breakpoints.splice(index, 1);
+    },
+
+    findBreakpointIndex: function(bp)
+    {
+        for (var i=0; i<this.breakpoints.length; i++)
+        {
+            var temp = this.breakpoints[i];
+            if (temp.node == bp.node)
+                return i;
+        }
+        return -1;
+    },
+
+    findBreakpoint: function(bp)
+    {
+        var index = this.findBreakpointIndex(bp);
+        return (index < 0) ? null : this.breakpoints[index];
+    },
+
+    findBreakpointByNode: function(node)
+    {
+        return this.findBreakpoint({node: node});
+    },
+
+    enumerateBreakpoints: function(type, callback)
+    {
+        for (var i=0; i<this.breakpoints.length; i++)
+        {
+            var bp = this.breakpoints[i];
+            if (!type || bp.type == type)
+            {
+                if (callback(bp))
+                    break;
+            }
+        }
+    }
+}
+
+// ************************************************************************************************
+// Registration
+
+Firebug.registerPanel(Firebug.HTMLPanel);
+Firebug.registerModule(Firebug.HTMLModule);
+Firebug.registerRep(Firebug.HTMLModule.BreakpointTemplate);
+
+// ************************************************************************************************
 }});
