@@ -2162,19 +2162,19 @@ this.findScriptForFunctionInContext = function(context, fn)
     if (!fn || !fn.toString)
         return found;
 
-    var fns = fn.toString();
-    this.forEachFunction(context, function findMatchingScript(script, aFunction)
+    var fns = fn.toSource();
+    var found = this.forEachFunction(context, function findMatchingScript(script, aFunction)
     {
-        if (!aFunction['toString'] || typeof(aFunction['toString']) != "function")
+        if (!aFunction['toSource'] || typeof(aFunction['toSource']) != "function")
             return;
         try {
-            var tfs = aFunction.toString();
+            var tfs = aFunction.toSource();
         } catch (etfs) {
-            FBTrace.sysout("unwrapped.toString fails for unwrapped: "+etfs, aFunction);
+            FBTrace.sysout("unwrapped.toSource fails for unwrapped: "+etfs, aFunction);
         }
 
         if (tfs == fns)
-            found = script;
+            return script;
     });
 
     if (FBTrace.DBG_FUNCTION_NAMES)
@@ -2190,7 +2190,7 @@ this.forEachFunction = function(context, cb)
         var sourceFile = context.sourceFileMap[url];
         if (FBTrace.DBG_FUNCTION_NAMES)
             FBTrace.sysout("lib.forEachFunction Looking in "+sourceFile+"\n");
-        var rc = sourceFile.forEachScript(function seekFn(script)
+        var rc = sourceFile.forEachScript(function seekFn(script, sourceFile)
         {
             if (!script.isValid)
                 return;
@@ -2201,7 +2201,7 @@ this.forEachFunction = function(context, cb)
                     return false;
                 var theFunction = testFunctionObject.getWrappedValue();
 
-                var rc = cb(script, theFunction);
+                var rc = cb(script, theFunction, sourceFile);
                 if (rc)
                     return rc;
             }
@@ -2209,10 +2209,10 @@ this.forEachFunction = function(context, cb)
             {
                 if (FBTrace.DBG_ERRORS)
                 {
-                    if (exc.name == "NS_ERROR_NOT_AVAILABLE")
+                    if (exc.name == "NS_ERROR_NOT_AVAILABLE" && FBTrace.DBG_FUNCTION_NAMES)
                         FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
                     else
-                       FBTrace.sysout("lib.forEachFunction FAILS ",exc);
+                       FBTrace.sysout("lib.forEachFunction FAILS "+exc,exc);
                 }
             }
         });
