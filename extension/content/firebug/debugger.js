@@ -1980,7 +1980,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     updateSourceBox: function(sourceBox)
     {
         if (this.scrollInfo && (this.scrollInfo.location == this.location))
-            sourceBox.scrollTop = this.scrollInfo.lastScrollTop;
+            this.scrollToLine(this.location, this.scrollInfo.previousCenterLine);
         delete this.scrollInfo;
     },
 
@@ -2225,7 +2225,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                         if (propertyBinding)
                         {
                             var scopeVars = propertyBinding.scope.getWrappedValue();
-                            if (scopeVars && ('hasOwnProperty' in scopeVars) && !scopeVars.hasOwnProperty("toString"))
+                            if (scopeVars && ('hasOwnProperty' in scopeVars) && !scopeVars.hasOwnProperty("toString") && typeof(scopeVars.toString) == 'function' )
                                 propertyBinding.scopeName = scope.jsClassName;
                             else
                                 propertyBinding.scopeName = scopeVars.toString();
@@ -2352,9 +2352,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var sourceBox = this.selectedSourceBox;
         if (sourceBox)
         {
-            var lines = this.getViewableLines(sourceBox);
-            state.lastLine = lines ? lines.bottom - lines.top : 0;
-
+            state.previousCenterLine = sourceBox.centerLine;
             delete this.selectedSourceBox;
         }
 
@@ -2459,7 +2457,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                     restoreLocation(this, state);
 
                     if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                        this.scrollInfo = { location: this.location, lastLine: state.lastLine};
+                        this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
                 }
                 else  // we have a location from before
                 {

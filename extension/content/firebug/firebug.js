@@ -1009,22 +1009,6 @@ top.Firebug =
     {
         var browser = FirebugChrome.getCurrentBrowser();
 
-        /*if (Firebug.isDetached())
-        {
-            // The current detached chrome object is Firebug.chrome.
-            Firebug.chrome.close();  // should call unwatchBrowser
-            detachCommand.setAttribute("checked", false);
-            return;
-        }
-
-        if (Firebug.isInBrowser())
-        {
-            Firebug.chrome.hidePanel();
-            this.showBar(false);
-        }
-        // else minimized nothing to do
-        */
-
         TabWatcher.unwatchBrowser(browser, userCommand);
         Firebug.resetTooltip();
     },
@@ -2390,7 +2374,14 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 });
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+/*
+ * MeasureBox
+ * To get pixels size.width and size.height:
+ * <ul><li>     this.startMeasuring(view); </li>
+ *     <li>     var size = this.measureText(lineNoCharsSpacer); </li>
+ *     <li>     this.stopMeasuring(); </li>
+ * </ul>
+ */
 Firebug.MeasureBox =
 {
     startMeasuring: function(target)
@@ -2403,6 +2394,11 @@ Firebug.MeasureBox =
 
         copyTextStyles(target, this.measureBox);
         target.ownerDocument.body.appendChild(this.measureBox);
+    },
+
+    getMeasuringElement: function()
+    {
+        return this.measureBox;
     },
 
     measureText: function(value)
@@ -2503,6 +2499,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (sourceBox)
         {
+            this.reView(sourceBox);
             this.updateSourceBox(sourceBox);
             collapse(sourceBox, false);
         }
@@ -2527,15 +2524,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         sourceBoxDecorator.onSourceBoxCreation(sourceBox);
 
-        sourceBox.totalMax = sourceBoxDecorator.getTotalLines(sourceBox);
-        sourceBox.maxLineNoChars = (sourceBox.totalMax + "").length;
+        sourceBox.maximumLineNumber = lines.length;
+        sourceBox.maxLineNoChars = (sourceBox.maximumLineNumber + "").length;
 
         sourceBox.min = 0;
 
         sourceBox.getLineNode =  function(lineNo)
         {
             // XXXjjb this method is supposed to return null if the lineNo is not in the viewport
-            return $(this.decorator.getIdForLine(lineNo, this), this.ownerDocument);
+            return $(this.decorator.getIdForLine(this, lineNo), this.ownerDocument);
         };
 
         var paddedSource =
@@ -2545,7 +2542,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             "<div class='sourceViewport'></div>"+
             "<div class='bottomSourcePadding'>"+
                 "<div class='sourceRow'><div class='sourceLine'></div><div class='sourceRowText'></div></div>"+
-            "<div>";
+            "</div>";
 
         appendInnerHTML(sourceBox, paddedSource);
 
@@ -2557,7 +2554,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             this.anonSourceBoxes.push(sourceBox);
 
         if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.totalMax+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
 
         return sourceBox;
     },
@@ -2574,77 +2571,18 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var size = this.measureText(lineNoCharsSpacer);
         this.stopMeasuring();
 
-        sourceBox.lineHeight = size.height + 1; //view.firstChild.clientHeight;  // sourceRow
+        sourceBox.lineHeight = size.height + 1;
         sourceBox.lineNoWidth = size.width;
+
+        var view = sourceBox.viewport; // TODO some cleaner way
+        view.previousSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
+        view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth +"px";
 
         if (FBTrace.DBG_SOURCEFILES)
         {
             FBTrace.sysout("setSourceBoxLineSizes size", size);
             FBTrace.sysout("firebug.setSourceBoxLineSizes, sourceBox.scrollTop "+sourceBox.scrollTop+ " sourceBox.lineHeight: "+sourceBox.lineHeight+" sourceBox.lineNoWidth:"+sourceBox.lineNoWidth+"\n");
         }
-    },
-
-    getViewableLines: function(sourceBox)
-    {
-        var scrollStep = sourceBox.lineHeight;
-        if (!scrollStep || scrollStep < 1)
-        {
-            this.setSourceBoxLineSizes(sourceBox);
-            scrollStep = sourceBox.lineHeight;
-
-            if (!scrollStep || scrollStep < 1)
-            {
-                if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("getViewableLines scrollTop: "+scrollTop+" no scrollStep and could not set it", sourceBox);
-                return null;
-            }
-        }
-
-        var scrollTop = sourceBox.scrollTop;
-        if (sourceBox.newScrollTop)
-        {
-            // XXXjjb for some reason sourceBox.scrollTop is being cleared, so we have to use our own value
-            scrollTop = sourceBox.newScrollTop;
-            delete sourceBox.newScrollTop;
-        }
-
-        var panelHeight = this.panelNode.clientHeight;
-        var newTopLine = Math.round(scrollTop/scrollStep);
-        var newBottomLine = Math.round((scrollTop + panelHeight)/scrollStep);
-
-        var viewableLines = newBottomLine - newTopLine;  // eg 17
-
-        if (viewableLines == sourceBox.viewableLines)  // then the size has not changed
-        {
-            if (newTopLine == sourceBox.firstViewableLine)  // then the top is also the same
-            {
-                if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("getViewableLines scrollTop: "+scrollTop+" no change to viewableLines "+viewableLines, sourceBox);
-
-                return null;
-            }
-        }
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("getViewableLines clientHeight "+panelHeight+" sourceBox.lineHeight "+sourceBox.lineHeight+" viewableLines:"+viewableLines+"\n");
-
-        return {top: newTopLine, bottom: newBottomLine};
-    },
-
-    setViewableLines: function(sourceBox, lines)  // called only by buildViewAround
-    {
-        var newTopLine = lines.top;
-        var newBottomLine = lines.bottom;
-        sourceBox.viewableLines = newBottomLine - newTopLine;
-
-        var halfViewableLines = Math.round(sourceBox.viewableLines/2.0);  //eg 8
-        sourceBox.halfViewableLines = halfViewableLines;
-
-        var newCenterLine = newTopLine + halfViewableLines;
-
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("setViewableLines scrollTop: "+sourceBox.scrollTop+" newTopLine: "+newTopLine+" newBottomLine: "+newBottomLine+" for "+sourceBox.repObject.href+"\n");
-
-        return newCenterLine;
     },
 
     getSourceBoxBySourceFile: function(sourceFile)
@@ -2692,13 +2630,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
             this.panelNode.appendChild(sourceBox);
             this.setSourceBoxLineSizes(sourceBox);
-
-            var viewableLines = this.getViewableLines(sourceBox);
-
-            if (!viewableLines)
-                return;
-
-            this.buildViewAround(sourceBox, viewableLines);
         }
 
         this.showSourceBox(sourceBox);
@@ -2709,7 +2640,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         if (!this.selectedSourceBox)
             return;
         if (!lineNo)
-            lineNo = this.selectedSourceBox.firstViewableLine + this.selectedSourceBox.halfViewableLines;
+            lineNo = this.getCentralLine(this.selectedSourceBox);
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
 
@@ -2731,13 +2662,16 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                     FBTrace.sysout("SourceBoxPanel.scrollTimeout no selectedSourceBox");
                 return;
             }
+
+            this.selectedSourceBox.targetLine = lineNo;
+
             // At this time we know which sourcebox is selected but the viewport is not selected.
             // We need to scroll, let the scroll handler set the viewport, then highlight any lines visible.
             var skipScrolling = false;
-            if (this.selectedSourceBox.firstViewableLine && this.selectedSourceBox.lastViewableLine)
+            if (this.selectedSourceBox.firstRenderedLine && this.selectedSourceBox.lastRenderedLine)
             {
-                var linesFromTop = lineNo - this.selectedSourceBox.firstViewableLine;
-                var linesFromBot = this.selectedSourceBox.lastViewableLine - lineNo;
+                var linesFromTop = lineNo - this.selectedSourceBox.firstRenderedLine;
+                var linesFromBot = this.selectedSourceBox.lastRenderedLine - lineNo;
                 skipScrolling = (linesFromTop > 3 && linesFromBot > 3);
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
             }
@@ -2752,11 +2686,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
             if (!skipScrolling)
             {
-                var halfViewableLines = 10;
-                if (this.selectedSourceBox.halfViewableLines > 0)
-                    halfViewableLines = this.selectedSourceBox.halfViewableLines;
-                if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" halfViewableLines:"+halfViewableLines+" lineHeight: "+this.selectedSourceBox.lineHeight+" for "+this.selectedSourceBox.repObject.href);
-                this.selectedSourceBox.newScrollTop = (lineNo - halfViewableLines) * this.selectedSourceBox.lineHeight
+                var viewRange = this.getViewRangeFromTargetLine(this.selectedSourceBox, lineNo);
+                this.selectedSourceBox.newScrollTop = this.getScrollTopFromViewRange(this.selectedSourceBox, viewRange);
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: newScrollTop "+this.selectedSourceBox.newScrollTop+" for "+this.selectedSourceBox.repObject.href);
                 this.selectedSourceBox.scrollTop = this.selectedSourceBox.newScrollTop; // *may* cause scrolling
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: scrollTo "+lineNo+" scrollTop:"+this.selectedSourceBox.scrollTop+ " lineHeight: "+this.selectedSourceBox.lineHeight);
@@ -2790,31 +2721,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    // should only be called onScroll
-    buildViewAround: function(sourceBox, lines)  // defaults to first viewable lines
+    buildViewAround: function(sourceBox, viewRange)
     {
+        // skip work if nothing changes.
         if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
-            return;
-        var lineNo = this.setViewableLines(sourceBox, lines);
-
-        var topLine = 1; // will be view.firstChild
-        if (lineNo)
-            topLine = lineNo - sourceBox.halfViewableLines;  // eg 2544 - 8
-
-        if (topLine < 1)  // the lineNo was less than half the viewable lines, eg 4-8 = -4
-            topLine = 1;
-
-        var bottomLine = topLine + sourceBox.viewableLines;  // eg 2544 - 8 + 17
-        if (bottomLine > sourceBox.totalMax)
         {
-            bottomLine = sourceBox.totalMax;
-            topLine = bottomLine - sourceBox.viewableLines;
-            if (topLine < 1)
-                topLine = 1;
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("buildViewAround skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
+            return;
         }
-
-        // Zero-based childNode index in view for lineNo. 2544 - (2544 - 8) = 8 or 4 - 1 = 3
-        var centralLineNumber = lineNo ? (lineNo - topLine) : -1;
 
         var view = sourceBox.viewport;
         if (!view)
@@ -2824,44 +2739,273 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             return;
         }
 
-        clearNode(view);
+        try
+        {
+            this.updateViewportCache(sourceBox, viewRange);
+        }
+        catch(exc)
+        {
+            if(FBTrace.DBG_ERRORS)
+                FBTrace.sysout("buildViewAround buildOffscreen FAILS "+exc, exc);
+        }
 
-        // Set the size on the line number field so the padding is filled with same style as source lines.
-        var newScrollTop = (topLine - 1) * sourceBox.lineHeight;
-        view.previousSibling.style.height = newScrollTop + "px";
-        view.nextSibling.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
+        this.setViewportPadding(sourceBox, viewRange);
+        sourceBox.centralLine = Math.floor( (viewRange.lastLine - viewRange.firstLine)/2 );
 
-        //sourceRow
-        view.previousSibling.firstChild.style.height = newScrollTop + "px";
-        view.nextSibling.firstChild.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
-
-        //sourceLine
-        view.previousSibling.firstChild.firstChild.style.height = newScrollTop + "px";
-        view.nextSibling.firstChild.firstChild.style.height = (sourceBox.totalMax - bottomLine) * sourceBox.lineHeight + "px";
-
-        view.previousSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth + "px";
-        view.nextSibling.firstChild.firstChild.style.width = sourceBox.lineNoWidth +"px";
-
-        sourceBox.firstViewableLine = topLine;
-        sourceBox.lastViewableLine = bottomLine;
-
-        appendScriptLines(sourceBox, topLine, bottomLine, view);
-
-        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);
+        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
 
         this.applyDecorator(sourceBox);
 
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("buildViewAround topLine "+topLine+" bottomLine: "+bottomLine+" totalMax: "+sourceBox.totalMax+" prev height: "+view.previousSibling.style.height+" next height: "+view.nextSibling.style.height+"\n");
-
         if (uiListeners.length > 0)
         {
-            var link = new SourceLink(sourceBox.repObject.href, lineNo, this.getSourceType());
+            var link = new SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
             dispatch(uiListeners, "onViewportChange", [link]);
         }
+
         sourceBox.lastScrollTop = sourceBox.scrollTop;
         sourceBox.lastClientHeight = sourceBox.clientHeight;
         return;
+    },
+
+    updateViewportCache: function(sourceBox, viewRange)
+    {
+        var topMostCachedElement = sourceBox.viewport.firstChild;
+
+        var cacheHit = this.insertedLinesOverlapCache(sourceBox, viewRange);
+
+        if (!cacheHit)
+        {
+            this.removeLines(sourceBox, topMostCachedElement, sourceBox.numberOfRenderedLines);
+            sourceBox.firstRenderedLine = viewRange.firstLine;
+            sourceBox.lastRenderedLine = viewRange.lastLine;
+        }
+        else
+        {
+            sourceBox.firstRenderedLine = Math.min(viewRange.firstLine, sourceBox.firstRenderedLine);
+            sourceBox.lastRenderedLine = Math.max(viewRange.lastLine, sourceBox.lastRenderedLine);
+        }
+        sourceBox.firstViewableLine = viewRange.firstLine;  // todo actually check that these are viewable
+        sourceBox.lastViewableLine = viewRange.lastLine;
+        sourceBox.numberOfRenderedLines = sourceBox.lastRenderedLine - sourceBox.firstRenderedLine + 1;
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("buildViewAround viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine+" rendered: "+sourceBox.firstRenderedLine+"-"+sourceBox.lastRenderedLine, sourceBox);
+    },
+
+    insertedLinesOverlapCache: function(sourceBox, viewRange)
+    {
+        var topCacheLine = null;
+        var cacheHit = false;
+        for (var line = viewRange.firstLine; line <= viewRange.lastLine; line++)
+        {
+            if (line >= sourceBox.firstRenderedLine && line <= sourceBox.lastRenderedLine )
+            {
+                cacheHit = true;
+                continue;
+            }
+
+            var lineHTML = getSourceLineHTML(sourceBox, line);
+
+            var ref = null;
+            if (line < sourceBox.firstRenderedLine)   // prepend if we are above the cache
+            {
+                if (!topCacheLine)
+                    topCacheLine = sourceBox.getLineNode(sourceBox.firstRenderedLine);
+                ref = topCacheLine;
+            }
+
+            var newElement = appendInnerHTML(sourceBox.viewport, lineHTML, ref);
+        }
+        return cacheHit;
+    },
+
+    removeLines: function(sourceBox, firstRemoval, totalRemovals)
+    {
+        for(var i = 1; i <= totalRemovals; i++)
+        {
+            var nextSourceLine = firstRemoval;
+            firstRemoval = firstRemoval.nextSibling;
+            sourceBox.viewport.removeChild(nextSourceLine);
+        }
+    },
+
+    getCentralLine: function(sourceBox)
+    {
+        return sourceBox.centralLine;
+    },
+
+    getViewRangeFromTargetLine: function(sourceBox, targetLine)
+    {
+        var viewRange = {firstLine: 1, centralLine: targetLine, lastLine: 1};
+
+        var averageLineHeight = this.getAverageLineHeight(sourceBox);
+        var panelHeight = this.panelNode.clientHeight;
+        var linesPerViewport = Math.round((panelHeight / averageLineHeight) + 1);
+
+        viewRange.firstLine = Math.round(targetLine - linesPerViewport / 2);
+
+        if (viewRange.firstLine <= 0)
+            viewRange.firstLine = 1;
+
+        viewRange.lastLine = viewRange.firstLine + linesPerViewport;
+
+        if (viewRange.lastLine > sourceBox.maximumLineNumber)
+            viewRange.lastLine = sourceBox.maximumLineNumber;
+
+        return viewRange;
+    },
+
+    /*
+     * Use the average height of source lines in the cache to estimate where the scroll bar points based on scrollTop
+     */
+    getViewRangeFromScrollTop: function(sourceBox, scrollTop)
+    {
+        var viewRange = {};
+        var averageLineHeight = this.getAverageLineHeight(sourceBox);
+        viewRange.firstLine = Math.floor(scrollTop / averageLineHeight + 1);
+
+        var panelHeight = this.panelNode.clientHeight;
+        var viewableLines = Math.ceil((panelHeight / averageLineHeight) + 1);
+        viewRange.lastLine = viewRange.firstLine + viewableLines;
+        if (viewRange.lastLine > sourceBox.maximumLineNumber)
+            viewRange.lastLine = sourceBox.maximumLineNumber;
+
+        viewRange.centralLine = Math.floor((viewRange.lastLine - viewRange.firstLine)/2);
+
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("getViewRangeFromScrollTop scrollTop:"+scrollTop+" viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine);
+            if (!this.noRecurse)
+            {
+                this.noRecurse = true;
+                var testScrollTop = this.getScrollTopFromViewRange(sourceBox, viewRange);
+                delete this.noRecurse;
+                FBTrace.sysout("getViewRangeFromScrollTop "+((scrollTop==testScrollTop)?"checks":(scrollTop+"=!scrollTop!="+testScrollTop)));
+            }
+        }
+
+        return viewRange;
+    },
+
+    /*
+     * inverse of the getViewRangeFromScrollTop.
+     * If the viewRange was set by targetLine, then this value become the new scroll top
+     *    else the value will be the same as the scrollbar's given value of scrollTop.
+     */
+    getScrollTopFromViewRange: function(sourceBox, viewRange)
+    {
+        var averageLineHeight = this.getAverageLineHeight(sourceBox);
+        var scrollTop = Math.floor(averageLineHeight * (viewRange.firstLine - 1));
+
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("getScrollTopFromViewRange viewRange:"+viewRange.firstLine+"-"+viewRange.lastLine+" averageLineHeight: "+averageLineHeight+" scrollTop "+scrollTop);
+            if (!this.noRecurse)
+            {
+                this.noRecurse = true;
+                var testViewRange = this.getViewRangeFromScrollTop(sourceBox, scrollTop);
+                delete this.noRecurse;
+                var vrStr = viewRange.firstLine+"-"+viewRange.lastLine;
+                var tvrStr = testViewRange.firstLine+"-"+testViewRange.lastLine;
+                FBTrace.sysout("getScrollTopFromCenterLine "+((viewRange==testViewRange)? "checks" : vrStr+"=!viewRange!="+tvrStr));
+            }
+        }
+
+        return scrollTop;
+    },
+
+    getAverageLineHeight: function(sourceBox)
+    {
+        var averageLineHeight = sourceBox.lineHeight;  // fall back to single line height
+
+        var renderedViewportHeight = sourceBox.viewport.clientHeight;
+        var numberOfRenderedLines = sourceBox.numberOfRenderedLines;
+        if (renderedViewportHeight && numberOfRenderedLines)
+            averageLineHeight = renderedViewportHeight / numberOfRenderedLines;
+
+        return averageLineHeight;
+    },
+
+    /*
+     * The virtual sourceBox = topPadding + sourceBox.viewport + bottomPadding
+     * The viewport grows as more lines are added to the cache
+     * The virtual sourceBox height is estimated from the average height lines in the viewport cache
+     */
+    getTotalPadding: function(sourceBox)
+    {
+        var numberOfRenderedLines = sourceBox.numberOfRenderedLines;
+        if (!numberOfRenderedLines)
+            return 0;
+
+        var max = sourceBox.maximumLineNumber;
+        var averageLineHeight = this.getAverageLineHeight(sourceBox);
+        // total box will be the average line height times total lines
+        var virtualSourceBoxHeight = Math.floor(max * averageLineHeight);
+        if (virtualSourceBoxHeight < sourceBox.clientHeight)
+        {
+            var scrollBarHeight = sourceBox.offsetHeight - sourceBox.clientHeight;
+            // the total - view-taken-up - scrollbar
+            var totalPadding = sourceBox.clientHeight - sourceBox.viewport.clientHeight - 1; // - scrollBarHeight;
+        }
+        else
+            var totalPadding = virtualSourceBoxHeight - sourceBox.viewport.clientHeight;
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("getTotalPadding clientHeight:"+sourceBox.viewport.clientHeight+"  max: "+max+" gives total padding "+totalPadding);
+
+        return totalPadding;
+    },
+
+    setViewportPadding: function(sourceBox, viewRange)
+    {
+        var firstRenderedLineElement = sourceBox.getLineNode(sourceBox.firstRenderedLine);
+        if (!firstRenderedLineElement)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("setViewportPadding FAILS, no line at "+sourceBox.firstRenderedLine, sourceBox);
+            return;
+        }
+
+        var firstRenderedLineOffset = firstRenderedLineElement.offsetTop;
+        var firstViewRangeElement = sourceBox.getLineNode(viewRange.firstLine);
+        var firstViewRangeOffset = firstViewRangeElement.offsetTop;
+        var topPadding = sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset);
+        // Because of rounding when converting from pixels to lines, topPadding can be +/- lineHeight/2, round up
+        var averageLineHeight = this.getAverageLineHeight(sourceBox);
+        var linesOfPadding = Math.floor( (topPadding + averageLineHeight)/ averageLineHeight);
+        var topPadding = (linesOfPadding - 1)* averageLineHeight;
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("setViewportPadding sourceBox.scrollTop - (firstViewRangeOffset - firstRenderedLineOffset): "+sourceBox.scrollTop+"-"+"("+firstViewRangeOffset+"-"+firstRenderedLineOffset+")="+topPadding);
+        // we want the bottomPadding to take up the rest
+        var totalPadding = this.getTotalPadding(sourceBox);
+        if (totalPadding < 0)
+            var bottomPadding = Math.abs(totalPadding);
+        else
+            var bottomPadding = Math.floor(totalPadding - topPadding);
+
+        if (bottomPadding < 0)
+            bottomPadding = 0;
+
+        if(FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("setViewportPadding viewport.offsetHeight: "+sourceBox.viewport.offsetHeight+" viewport.clientHeight "+sourceBox.viewport.clientHeight);
+            FBTrace.sysout("setViewportPadding sourceBox.offsetHeight: "+sourceBox.offsetHeight+" sourceBox.clientHeight "+sourceBox.clientHeight);
+            FBTrace.sysout("setViewportPadding scrollTop: "+sourceBox.scrollTop+" firstRenderedLine "+sourceBox.firstRenderedLine+" bottom: "+bottomPadding+" top: "+topPadding);
+        }
+        var view = sourceBox.viewport;
+
+        // Set the size on the line number field so the padding is filled with same style as source lines.
+        view.previousSibling.style.height = topPadding + "px";
+        view.nextSibling.style.height = bottomPadding + "px";
+
+        //sourceRow
+        view.previousSibling.firstChild.style.height = topPadding + "px";
+        view.nextSibling.firstChild.style.height = bottomPadding + "px";
+
+        //sourceLine
+        view.previousSibling.firstChild.firstChild.style.height = topPadding + "px";
+        view.nextSibling.firstChild.firstChild.style.height = bottomPadding + "px";
     },
 
     applyDecorator: function(sourceBox)
@@ -2899,22 +3043,26 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        var viewableLines = this.getViewableLines(sourceBox);
-
-        if (!viewableLines)
-            return;
-
-        this.buildViewAround(sourceBox, viewableLines);
+        if (sourceBox.targetLine)
+        {
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetLine);
+            delete sourceBox.targetLine;
+        }
+        else
+        {
+            var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
+        }
+        this.buildViewAround(sourceBox, viewRange);
     },
 
     resizer: function(event)
     {
         // The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
         // But our SourceBoxPanel has viewport that will change size.
-        if (this.selectedSourceBox)
+        if (this.selectedSourceBox && this.visible)
         {
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("resizer event:", event);
+                FBTrace.sysout("resizer event: "+event.type, event);
 
             this.reView(this.selectedSourceBox);
         }
@@ -2957,6 +3105,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         return unEscapeHTML(source);
     },
+
 });
 
 Firebug.SourceBoxDecorator = function() {}
@@ -2977,7 +3126,7 @@ Firebug.SourceBoxDecorator.prototype =
         // you may like to add, eg sourceBox.transformedLines here
     },
 
-    // called after onSourceBoxCreation, once.
+    // called after onSourceBoxCreation, once. deprecated!
     getTotalLines: function(sourceBox)
     {
         return sourceBox.lines.length;
@@ -2990,7 +3139,7 @@ Firebug.SourceBoxDecorator.prototype =
         {
             userVisibleLineNumber: lineNo,
             html: escapeHTML(sourceBox.lines[lineNo-1]),
-            id: this.getIdForLine(lineNo, sourceBox),
+            id: this.getIdForLine(sourceBox, lineNo),
         };
 
         // If the pref says so, replace tabs by corresponding number of spaces.
@@ -3003,17 +3152,13 @@ Firebug.SourceBoxDecorator.prototype =
         return lineData;
     },
 
-    // accessor (not a framework call)
-    getIdForLine: function(lineNo, sourceBox)
+    /*
+     * @return a string unique to the sourcebox and line number, valid in getElementById()
+     */
+    getIdForLine: function(sourceBox, lineNo)
     {
         return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
     },
-}
-
-function appendScriptLines(sourceBox, min, max, panelNode)
-{
-    var html = getSourceLineRange(sourceBox, min, max);
-    appendInnerHTML(panelNode, html);
 }
 
 // ************************************************************************************************

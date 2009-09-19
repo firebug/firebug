@@ -922,14 +922,16 @@ this.setOuterHTML = function(element, html)
     return [first, last];
 };
 
-this.appendInnerHTML = function(element, html)
+this.appendInnerHTML = function(element, html, referenceElement)
 {
     var doc = element.ownerDocument;
     var range = doc.createRange();
     range.selectNode(doc.body);
 
     var fragment = range.createContextualFragment(html);
-    element.appendChild(fragment);
+    var firstChild = fragment.firstChild;
+    element.insertBefore(fragment, referenceElement);
+    return firstChild;
 };
 
 this.insertTextIntoElement = function(element, text)
@@ -3797,27 +3799,33 @@ this.getSourceLineRange = function(sourceBox, min, max)   // min, max are indexe
 
     for (var i = min; i <= max; ++i)
     {
-        var lineData = sourceBox.decorator.getLineData(i, sourceBox);
-
-        var lineNo = lineData.userVisibleLineNumber;
-        var lineHTML = lineData.html;
-        var lineId = lineData.id;    // decorator lines may not have ids
-
-        var lineNoText = this.getTextForLineNo(lineNo, sourceBox.maxLineNoChars);
-
-        html.push(
-            '<div '
-               + (lineId ? ('id="' + lineId + '"') : "")
-               + ' class="sourceRow" role="presentation"><a class="'
-               +  'sourceLine' + '" role="presentation">',
-            lineNoText,
-            '</a><span class="sourceRowText" role="presentation">',
-            lineHTML,
-            '</span></div>'
-        );
+        html.push(this.getSourceLineHTML(sourceBox, i));
     }
 
     return html.join("");
+};
+
+this.getSourceLineHTML = function(sourceBox, i)
+{
+    var lineData = sourceBox.decorator.getLineData(i, sourceBox);
+
+    var lineNo = lineData.userVisibleLineNumber;
+    var lineHTML = lineData.html;
+    var lineId = lineData.id;    // decorator lines may not have ids
+
+    var lineNoText = this.getTextForLineNo(lineNo, sourceBox.maxLineNoChars);
+
+    var theHTML =
+        '<div '
+           + (lineId ? ('id="' + lineId + '"') : "")
+           + ' class="sourceRow" role="presentation"><a class="'
+           +  'sourceLine' + '" role="presentation">'
+           + lineNoText
+           + '</a><span class="sourceRowText" role="presentation">'
+           + lineHTML
+           + '</span></div>';
+
+    return theHTML;
 };
 
 this.getTextForLineNo = function(lineNo, maxLineNoChars)
@@ -4194,7 +4202,8 @@ this.SourceFile.prototype =
         var str = "";
         this.forEachScript(function appendARange(script)
         {
-            str += " "+script.baseLineNumber +"-("+script.tag+")-"+script.baseLineNumber+script.lineExtent;
+            var endLineNumber = script.baseLineNumber + script.lineExtent;
+            str += " "+script.baseLineNumber +"-("+script.tag+")-"+endLineNumber;
         });
         return str;
     },
