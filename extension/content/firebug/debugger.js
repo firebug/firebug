@@ -1209,7 +1209,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         for (var i = 0; i < TabWatcher.contexts.length; ++i)
         {
-        	var context = TabWatcher.contexts[i];
+            var context = TabWatcher.contexts[i];
             var panel = context.getPanel("console", true);
             if (panel)
             {
@@ -1224,8 +1224,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                             setClass(row.firstChild, "breakForError");
                         else
                             removeClass(row.firstChild, "breakForError");
-                        
-	                    dispatch(this.fbListeners, "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
+
+                        dispatch(this.fbListeners, "onToggleErrorBreakpoint", [context, url, lineNo, isSet]);
                     }
                 }
             }
@@ -1993,7 +1993,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         if (!this.decorator)
         {
-            this.decorator = Firebug.SourceBoxPanel.getDecorator();
+            this.decorator = Firebug.SourceBoxPanel.getDecorator(sourceBox);
             this.decorator.decorate = bind(this.decorateJavascript, this, sourceBox);
         }
         return this.decorator;

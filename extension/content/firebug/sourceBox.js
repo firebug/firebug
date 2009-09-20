@@ -4,7 +4,7 @@ FBL.ns(function() { with (FBL) {
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-Firebug.SourceBoxPanel = function() {} // XXjjb attach Firebug so this panel can be extended.
+Firebug.SourceBoxPanel = function() {};
 
 Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePanel),
 {
@@ -13,7 +13,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     {
         this.onResize =  bind(this.resizer, this);
 
-        this.initializeSourceBoxes();
+        this.sourceBoxes = {};
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -38,37 +38,116 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
     },
 
-    // ******* override in extenders ********
+    /*  Panel extension point.
+     *  Called just before box is shown
+     */
     updateSourceBox: function(sourceBox)
     {
-        // called just before box is shown
+
     },
 
-    getDecorator: function()
+    /* Panel extension point.
+     * @return Must implement SourceBoxDecorator API.
+     */
+    getDecorator: function(sourceBox)
     {
         if (!this.decorator)
-            this.decorator = new Firebug.SourceBoxDecorator();
+            this.decorator = new Firebug.SourceBoxDecorator(sourceBox);
 
         return this.decorator;
      },
 
+     /* Panel extension point
+      * @return string eg "js" or "css"
+      */
     getSourceType: function()
     {
-        // eg "js" or "css"
         throw "Need to override in extender";
     },
 
     // **************************************
     disablePanel: function(module)
     {
-        this.initializeSourceBoxes();  // clear so we start fresh if enabled
+        this.sourceBoxes = {};  // clear so we start fresh if enabled
         Firebug.ActivablePanel.disablePanel.apply(this, arguments);
     },
 
-    initializeSourceBoxes: function()
+    getSourceLinesFrom: function(selection)
     {
-        this.sourceBoxes = {};
-        this.anonSourceBoxes = []; // XXXjjb I don't think these are used now, everything is in the sourceCache
+        // https://developer.mozilla.org/en/DOM/Selection
+        if (selection.isCollapsed)
+            return "";
+
+        var anchorSourceRow = getAncestorByClass(selection.anchorNode, "sourceRow");
+        var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
+        if (anchorSourceRow == focusSourceRow)
+        {
+            var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset, selection.focusOffset);
+            return buf;
+        }
+        var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
+
+        var currentSourceRow = anchorSourceRow.nextSibling;
+        while(currentSourceRow && (currentSourceRow != focusSourceRow) && hasClass(currentSourceRow, "sourceRow"))
+        {
+            buf += this.getSourceLine(currentSourceRow);
+            currentSourceRow = currentSourceRow.nextSibling;
+        }
+        buf += this.getSourceLine(focusSourceRow, 0, selection.focusOffset);
+        return buf;
+    },
+
+    getSourceLine: function(sourceRow, beginOffset, endOffset)
+    {
+        var source = getChildByClass(sourceRow, "sourceRowText").innerHTML;
+        if (endOffset)
+            source = source.substring(beginOffset, endOffset);
+        else if (beginOffset)
+            source = source.substring(beginOffset);
+        else
+            source = source;
+
+        return unEscapeHTML(source);
+    },
+
+    // ****************************************************************************************
+
+    getSourceBoxBySourceFile: function(sourceFile)
+    {
+        if (sourceFile.href)
+        {
+            var sourceBox = this.getSourceBoxByURL(sourceFile.href);
+            if (sourceBox && sourceBox.repObject == sourceFile)
+                return sourceBox;
+            else
+                return null;  // cause a new one to be created
+        }
+    },
+
+    getSourceBoxByURL: function(url)
+    {
+        return url ? this.sourceBoxes[url] : null;
+    },
+
+    renameSourceBox: function(oldURL, newURL)
+    {
+        var sourceBox = this.sourceBoxes[oldURL];
+        if (sourceBox)
+        {
+            delete this.sourceBoxes[oldURL];
+            this.sourceBoxes[newURL] = sourceBox;
+        }
+    },
+
+    showSourceFile: function(sourceFile)
+    {
+        var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
+        if (!sourceBox)
+            sourceBox = this.createSourceBox(sourceFile);
+
+        this.showSourceBox(sourceBox);
     },
 
     showSourceBox: function(sourceBox)
@@ -87,34 +166,50 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    createSourceBox: function(sourceFile, sourceBoxDecorator)  // decorator(sourceFile, sourceBox)
+    /* Private, do not call outside of this object
+    * A sourceBox is a div with additional operations and state.
+    * @param sourceFile there is at most one sourceBox for each sourceFile
+    */
+    createSourceBox: function(sourceFile)  // decorator(sourceFile, sourceBox)
     {
+        var sourceBox = this.initializeSourceBox(sourceFile);
+
+        // Framework connection
+        sourceBox.decorator = this.getDecorator(sourceBox);
+
+        this.sourceBoxes[sourceFile.href] = sourceBox;
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
+
+        this.panelNode.appendChild(sourceBox);
+        this.setSourceBoxLineSizes(sourceBox);
+
+        return sourceBox;
+    },
+
+    initializeSourceBox: function(sourceFile)
+    {
+        var sourceBox = this.document.createElement("div");
+        setClass(sourceBox, "sourceBox");
+        collapse(sourceBox, true);
+
         var lines = sourceFile.loadScriptLines(this.context);
         if (!lines)
         {
             lines = ["Failed to load source for sourceFile "+sourceFile];
         }
 
-        var sourceBox = this.document.createElement("div");
-        sourceBox.repObject = sourceFile;
-        setClass(sourceBox, "sourceBox");
-        collapse(sourceBox, true);
-
         sourceBox.lines = lines;
-
-        sourceBox.decorator = sourceBoxDecorator;
-
-        sourceBoxDecorator.onSourceBoxCreation(sourceBox);
+        sourceBox.repObject = sourceFile;
 
         sourceBox.maximumLineNumber = lines.length;
         sourceBox.maxLineNoChars = (sourceBox.maximumLineNumber + "").length;
 
-        sourceBox.min = 0;
-
         sourceBox.getLineNode =  function(lineNo)
         {
             // XXXjjb this method is supposed to return null if the lineNo is not in the viewport
-            return $(this.decorator.getIdForLine(this, lineNo), this.ownerDocument);
+            return $(this.decorator.getLineId(this, lineNo), this.ownerDocument);
         };
 
         var paddedSource =
@@ -129,15 +224,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         appendInnerHTML(sourceBox, paddedSource);
 
         sourceBox.viewport = getChildByClass(sourceBox, 'sourceViewport');
-
-        if (sourceFile.href)
-            this.sourceBoxes[sourceFile.href] = sourceBox;
-        else
-            this.anonSourceBoxes.push(sourceBox);
-
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.createSourceBox with "+sourceBox.maximumLineNumber+" lines for "+sourceFile+(sourceFile.href?" sourceBoxes":" anon "), sourceBox);
-
         return sourceBox;
     },
 
@@ -167,56 +253,9 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    getSourceBoxBySourceFile: function(sourceFile)
-    {
-        if (sourceFile.href)
-        {
-            var sourceBox = this.getSourceBoxByURL(sourceFile.href);
-            if (sourceBox && sourceBox.repObject == sourceFile)
-                return sourceBox;
-            else
-                return null;  // cause a new one to be created
-        }
-
-        for (var i = 0; i < this.anonSourceBoxes.length; ++i)
-        {
-            var sourceBox = this.anonSourceBoxes[i];
-            if (sourceBox.repObject == sourceFile)
-                return sourceBox;
-        }
-    },
-
-    getSourceBoxByURL: function(url)
-    {
-        // if this.sourceBoxes is undefined, you need to call initializeSourceBoxes in your panel.initialize()
-        return url ? this.sourceBoxes[url] : null;
-    },
-
-    renameSourceBox: function(oldURL, newURL)
-    {
-        var sourceBox = this.sourceBoxes[oldURL];
-        if (sourceBox)
-        {
-            delete this.sourceBoxes[oldURL];
-            this.sourceBoxes[newURL] = sourceBox;
-        }
-    },
-
-    showSourceFile: function(sourceFile)
-    {
-        var sourceBox = this.getSourceBoxBySourceFile(sourceFile);
-        if (FBTrace.DBG_SOURCEFILES)
-            FBTrace.sysout("firebug.showSourceFile: "+sourceFile, sourceBox);
-        if (!sourceBox)
-        {
-            sourceBox = this.createSourceBox(sourceFile, this.getDecorator());
-            this.panelNode.appendChild(sourceBox);
-            this.setSourceBoxLineSizes(sourceBox);
-        }
-
-        this.showSourceBox(sourceBox);
-    },
-
+    /*
+     * @return SourceLink to currently selected source file
+     */
     getSourceLink: function(lineNo)
     {
         if (!this.selectedSourceBox)
@@ -226,6 +265,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return new SourceLink(this.selectedSourceBox.repObject.href, lineNo, this.getSourceType());
     },
 
+    /* Select sourcebox with href, scroll lineNo into center, highlight lineNo with highlighter given
+     * @param href a URL, null means the selected sourcefile
+     * @param lineNo integer 1-maximumLineNumber
+     * @param highlighter callback, a function(sourceBox). sourceBox.centralLine will be lineNo
+     */
     scrollToLine: function(href, lineNo, highlighter)
     {
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollToLine: "+lineNo+"@"+href+"\n");
@@ -234,6 +278,18 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         {
             this.context.clearTimeout(this.contextscrollTimeout);
             delete this.context.scrollTimeout
+        }
+
+        if (href)
+        {
+            var sourceFile = this.context.sourceFileMap[href];
+            if (!sourceFile)
+            {
+                if(FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("scrollToLine FAILS, no sourceFile for href "+href, this.context.sourceFileMap);
+                return;
+            }
+            this.showSourceFile(sourceFile);
         }
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
@@ -281,6 +337,9 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }, this));
     },
 
+    /*
+     * @return a highlighter function(sourceBox) that puts a class on the line for a time slice
+     */
     jumpHighlightFactory: function(lineNo, context)
     {
         return function jumpHighlightIfInView(sourceBox)
@@ -291,7 +350,6 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                 setClassTimed(lineNode, "jumpHighlight", context);
                 if (FBTrace.DBG_SOURCEFILES)
                     FBTrace.sysout("jumpHighlightFactory on line "+lineNo+" lineNode:"+lineNode.innerHTML+"\n");
-
             }
             else
             {
@@ -303,24 +361,57 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    buildViewAround: function(sourceBox, viewRange)
+    /*
+     * resize and scroll event handler
+     */
+    resizer: function(event)
     {
+        // The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
+        // But our SourceBoxPanel has viewport that will change size.
+        if (this.selectedSourceBox && this.visible)
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("resizer event: "+event.type, event);
+
+            this.reView(this.selectedSourceBox);
+        }
+    },
+
+    reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
+    {
+        if (sourceBox.targetLine)
+        {
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetLine);
+            delete sourceBox.targetLine;
+        }
+        else
+        {
+            var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
+        }
+
         // skip work if nothing changes.
         if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
         {
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("buildViewAround skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
+                FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
             return;
         }
 
-        var view = sourceBox.viewport;
-        if (!view)
+        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
+        this.buildViewAround(sourceBox, viewRange);
+
+        if (Firebug.uiListeners.length > 0)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("buildViewAround got no viewport form sourceBox", sourceBox);
-            return;
+            var link = new SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
+            dispatch(Firebug.uiListeners, "onViewportChange", [link]);
         }
 
+        sourceBox.lastScrollTop = sourceBox.scrollTop;
+        sourceBox.lastClientHeight = sourceBox.clientHeight;
+    },
+
+    buildViewAround: function(sourceBox, viewRange)
+    {
         try
         {
             this.updateViewportCache(sourceBox, viewRange);
@@ -332,20 +423,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
 
         this.setViewportPadding(sourceBox, viewRange);
-        sourceBox.centralLine = Math.floor( (viewRange.lastLine - viewRange.firstLine)/2 );
 
-        dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
+        sourceBox.centralLine = Math.floor( (viewRange.lastLine - viewRange.firstLine)/2 );
 
         this.applyDecorator(sourceBox);
 
-        if (Firebug.uiListeners.length > 0)
-        {
-            var link = new SourceLink(sourceBox.repObject.href, sourceBox.centralLine, this.getSourceType());
-            dispatch(Firebug.uiListeners, "onViewportChange", [link]);
-        }
-
-        sourceBox.lastScrollTop = sourceBox.scrollTop;
-        sourceBox.lastClientHeight = sourceBox.clientHeight;
         return;
     },
 
@@ -386,7 +468,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                 continue;
             }
 
-            var lineHTML = getSourceLineHTML(sourceBox, line);
+            var lineHTML = this.getSourceLineHTML(sourceBox, line);
 
             var ref = null;
             if (line < sourceBox.firstRenderedLine)   // prepend if we are above the cache
@@ -399,6 +481,37 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var newElement = appendInnerHTML(sourceBox.viewport, lineHTML, ref);
         }
         return cacheHit;
+    },
+
+    getSourceLineHTML: function(sourceBox, i)
+    {
+        var lineNo = sourceBox.decorator.getUserVisibleLineNumber(sourceBox, i);
+        var lineHTML = sourceBox.decorator.getLineHTML(sourceBox, i);
+        var lineId = sourceBox.decorator.getLineId(sourceBox, i);    // decorator lines may not have ids
+
+        var lineNoText = this.getTextForLineNo(lineNo, sourceBox.maxLineNoChars);
+
+        var theHTML =
+            '<div '
+               + (lineId ? ('id="' + lineId + '"') : "")
+               + ' class="sourceRow" role="presentation"><a class="'
+               +  'sourceLine' + '" role="presentation">'
+               + lineNoText
+               + '</a><span class="sourceRowText" role="presentation">'
+               + lineHTML
+               + '</span></div>';
+
+        return theHTML;
+    },
+
+    getTextForLineNo: function(lineNo, maxLineNoChars)
+    {
+        // Make sure all line numbers are the same width (with a fixed-width font)
+        var lineNoText = lineNo + "";
+        while (lineNoText.length < maxLineNoChars)
+            lineNoText = " " + lineNoText;
+
+        return lineNoText;
     },
 
     removeLines: function(sourceBox, firstRemoval, totalRemovals)
@@ -496,6 +609,10 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return scrollTop;
     },
 
+    /*
+     * The virtual sourceBox height is the averageLineHeight * max lines
+     * @return float
+     */
     getAverageLineHeight: function(sourceBox)
     {
         var averageLineHeight = sourceBox.lineHeight;  // fall back to single line height
@@ -597,6 +714,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             this.context.clearTimeout(this.context.sourceBoxDecoratorTimeout);
             delete this.context.sourceBoxDecoratorTimeout;
         }
+
         this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
         {
             try
@@ -622,124 +740,60 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             }
         }, this));
     },
-
-    reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
-    {
-        if (sourceBox.targetLine)
-        {
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetLine);
-            delete sourceBox.targetLine;
-        }
-        else
-        {
-            var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
-        }
-        this.buildViewAround(sourceBox, viewRange);
-    },
-
-    resizer: function(event)
-    {
-        // The resize target is Firebug as a whole. But most of the UI needs no special code for resize.
-        // But our SourceBoxPanel has viewport that will change size.
-        if (this.selectedSourceBox && this.visible)
-        {
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("resizer event: "+event.type, event);
-
-            this.reView(this.selectedSourceBox);
-        }
-    },
-
-    getSourceLinesFrom: function(selection)
-    {
-        // https://developer.mozilla.org/en/DOM/Selection
-        if (selection.isCollapsed)
-            return "";
-
-        var anchorSourceRow = getAncestorByClass(selection.anchorNode, "sourceRow");
-        var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
-        if (anchorSourceRow == focusSourceRow)
-        {
-            var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset, selection.focusOffset);
-            return buf;
-        }
-        var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
-
-        var currentSourceRow = anchorSourceRow.nextSibling;
-        while(currentSourceRow && (currentSourceRow != focusSourceRow) && hasClass(currentSourceRow, "sourceRow"))
-        {
-            buf += this.getSourceLine(currentSourceRow);
-            currentSourceRow = currentSourceRow.nextSibling;
-        }
-        buf += this.getSourceLine(focusSourceRow, 0, selection.focusOffset);
-        return buf;
-    },
-
-    getSourceLine: function(sourceRow, beginOffset, endOffset)
-    {
-        var source = getChildByClass(sourceRow, "sourceRowText").innerHTML;
-        if (endOffset)
-            source = source.substring(beginOffset, endOffset);
-        else if (beginOffset)
-            source = source.substring(beginOffset);
-        else
-            source = source;
-
-        return unEscapeHTML(source);
-    },
-
 });
-
-Firebug.SourceBoxDecorator = function() {}
 
 var sourceBoxCounter = 0;
 
+/* Defines the API for SourceBoxDecorator and provides the default implementation.
+ * Decorators are passed the source box on construction, called to create the HTML,
+ * and called whenever the user scrolls the view.
+ */
+Firebug.SourceBoxDecorator = function(sourceBox)
+{
+    // allow panel-document unique ids to be generated for lines.
+    sourceBox.uniqueId = sourceBoxCounter++;
+}
+
 Firebug.SourceBoxDecorator.prototype =
 {
-    // called on a delay after the view port is updated.
+    /* called on a delay after the view port is updated, eg vertical scroll
+     * The sourceBox will contain lines from firstRenderedLine to lastRenderedLine
+     * The user will be able to see sourceBox.firstViewableLine to sourceBox.lastViewableLine
+     */
     decorate: function(sourceBox, sourceFile)
     {
         return;
     },
-    // called at source box creation, return eg decompiled lines
-    onSourceBoxCreation: function(sourceBox)
-    {
-        // allow panel-document unique ids to be generated for lines.
-        sourceBox.uniqueId = sourceBoxCounter++;
 
-        // you may like to add, eg sourceBox.transformedLines here
+    /* called once as each line is being rendered.
+    * @param lineNo integer 1-maxLineNumbers
+    */
+    getUserVisibleLineNumber: function(sourceBox, lineNo)
+    {
+        return lineNo;
     },
 
-    // called after onSourceBoxCreation, once. deprecated!
-    getTotalLines: function(sourceBox)
+    /* call once as each line is being rendered.
+    * @param lineNo integer 1-maxLineNumbers
+    */
+    getLineHTML: function(sourceBox, lineNo)
     {
-        return sourceBox.lines.length;
-    },
-
-    // called as the lines are being rendered.
-    getLineData: function(lineNo, sourceBox)
-    {
-        var lineData =
-        {
-            userVisibleLineNumber: lineNo,
-            html: escapeHTML(sourceBox.lines[lineNo-1]),
-            id: this.getIdForLine(sourceBox, lineNo),
-        };
+        var html = escapeHTML(sourceBox.lines[lineNo-1]);
 
         // If the pref says so, replace tabs by corresponding number of spaces.
         if (Firebug.replaceTabs > 0)
         {
             var space = new Array(Firebug.replaceTabs + 1).join(" ");
-            lineData.html = lineData.html.replace(/\t/g, space);
+            html = html.replace(/\t/g, space);
         }
 
-        return lineData;
+        return html;
     },
 
     /*
      * @return a string unique to the sourcebox and line number, valid in getElementById()
      */
-    getIdForLine: function(sourceBox, lineNo)
+    getLineId: function(sourceBox, lineNo)
     {
         return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
     },

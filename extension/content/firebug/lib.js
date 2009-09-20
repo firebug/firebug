@@ -3793,53 +3793,6 @@ this.makeURI = function(urlString)
 
 // ************************************************************************************************
 
-this.getSourceLineRange = function(sourceBox, min, max)   // min, max are indexes in the viewport
-{
-    var html = [];
-
-    for (var i = min; i <= max; ++i)
-    {
-        html.push(this.getSourceLineHTML(sourceBox, i));
-    }
-
-    return html.join("");
-};
-
-this.getSourceLineHTML = function(sourceBox, i)
-{
-    var lineData = sourceBox.decorator.getLineData(i, sourceBox);
-
-    var lineNo = lineData.userVisibleLineNumber;
-    var lineHTML = lineData.html;
-    var lineId = lineData.id;    // decorator lines may not have ids
-
-    var lineNoText = this.getTextForLineNo(lineNo, sourceBox.maxLineNoChars);
-
-    var theHTML =
-        '<div '
-           + (lineId ? ('id="' + lineId + '"') : "")
-           + ' class="sourceRow" role="presentation"><a class="'
-           +  'sourceLine' + '" role="presentation">'
-           + lineNoText
-           + '</a><span class="sourceRowText" role="presentation">'
-           + lineHTML
-           + '</span></div>';
-
-    return theHTML;
-};
-
-this.getTextForLineNo = function(lineNo, maxLineNoChars)
-{
-    // Make sure all line numbers are the same width (with a fixed-width font)
-    var lineNoText = lineNo + "";
-    while (lineNoText.length < maxLineNoChars)
-        lineNoText = " " + lineNoText;
-
-    return lineNoText;
-};
-
-// ************************************************************************************************
-
 this.persistObjects = function(panel, panelState)
 {
     // Persist the location and selection so we can restore them in case of a reload
