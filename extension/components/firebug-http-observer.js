@@ -62,6 +62,7 @@ var FirebugClient =
 }
 
 HttpRequestObserver.prototype =
+/** lends HttpRequestObserver */
 {
     initialize: function()
     {

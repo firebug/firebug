@@ -19,9 +19,9 @@ var contexts = [];
 // Spy Module
 
 /**
- * Represents the Spy module that is responsible for attaching/detaching an HTTP observer
+ * Represents a Spy module that is responsible for attaching/detaching a Spy HTTP Observer
  * when Firebug is activated/deactivated for a site. This {@link SpyHttpObserver} is
- * consequently responsible for monitoring all XHR.
+ * consequently responsible for monitoring all XHRs.
  */
 Firebug.Spy = extend(Firebug.Module,
 {
@@ -138,7 +138,14 @@ Firebug.Spy = extend(Firebug.Module,
 
 // ************************************************************************************************
 
+/**
+ * This observer uses {@link HttpRequestObserver} to monitor start and end of all XHRs.
+ * using http-on-modify-request and http-on-examine-response events. For every new XHR
+ * an instance of {@link Firebug.Spy.XMLHttpRequestSpy} object is created and removed
+ * when the XHR is finished.
+ */
 var SpyHttpObserver =
+/** @lends SpyHttpObserver */
 {
     observe: function(request, topic, data)
     {
@@ -193,7 +200,12 @@ var SpyHttpObserver =
 
 // ************************************************************************************************
 
+/**
+ * @domplate Represents a template for XHRs logged in the Console panel. The body of the
+ * log (displayed when expanded) is rendered using {@link Firebug.NetMonitor.NetInfoBody}.
+ */
 Firebug.Spy.XHR = domplate(Firebug.Rep,
+/** @lends Firebug.Spy.XHR */
 {
     tag:
         DIV({"class": "spyHead", _repObject: "$object"},
