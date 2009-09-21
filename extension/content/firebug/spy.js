@@ -19,7 +19,7 @@ var contexts = [];
 // Spy Module
 
 /**
- * Represents a Spy module that is responsible for attaching/detaching a Spy HTTP Observer
+ * @module Represents a Spy module that is responsible for attaching/detaching a Spy HTTP Observer
  * when Firebug is activated/deactivated for a site. This {@link SpyHttpObserver} is
  * consequently responsible for monitoring all XHRs.
  */
@@ -139,7 +139,7 @@ Firebug.Spy = extend(Firebug.Module,
 // ************************************************************************************************
 
 /**
- * This observer uses {@link HttpRequestObserver} to monitor start and end of all XHRs.
+ * @class This observer uses {@link HttpRequestObserver} to monitor start and end of all XHRs.
  * using http-on-modify-request and http-on-examine-response events. For every new XHR
  * an instance of {@link Firebug.Spy.XMLHttpRequestSpy} object is created and removed
  * when the XHR is finished.
