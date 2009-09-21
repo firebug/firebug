@@ -34,25 +34,51 @@ const ignoreVars =
     "_FirebugCommandLine": 1,
 };
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ************************************************************************************************
+
+Firebug.DOMModule = extend(Firebug.Module,
+{
+    initialize: function(prefDomain, prefNames)
+    {
+        Firebug.Module.initialize.apply(this, arguments);
+        Firebug.Debugger.addListener(this.DebuggerListener);
+    },
+
+    initContext: function(context, persistedState)
+    {
+        Firebug.Module.initContext.apply(this, arguments);
+        context.dom = {breakpoints: new DOMBreakpointList()};
+    },
+
+    shutdown: function()
+    {
+        Firebug.Module.shutdown.apply(this, arguments);
+        Firebug.Debugger.removeListener(this.DebuggerListener);
+    },
+});
+
+// ************************************************************************************************
 
 const RowTag =
-    TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren", role : 'presentation',
+    TR({"class": "memberRow $member.open $member.type\\Row", _repObject: "$member",
+        $hasChildren: "$member.hasChildren",
+        role: 'presentation',
         level: "$member.level"},
-        TD({class: "memberLabelCell", style: "padding-left: $member.indent\\px", role : 'presentation'},
-            DIV({class: "memberLabel $member.type\\Label"},
+        TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
+            role: 'presentation'},
+            DIV({"class": "memberLabel $member.type\\Label"},
                 SPAN({}, "$member.name")
             )
         ),
-        TD({class: "memberValueCell", role : 'presentation'},
+        TD({"class": "memberValueCell", role : 'presentation'},
             TAG("$member.tag", {object: "$member.value"})
         )
     );
 
 const WatchRowTag =
-    TR({class: "watchNewRow", level: 0},
-        TD({class: "watchEditCell", colspan: 2},
-            DIV({class: "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
+    TR({"class": "watchNewRow", level: 0},
+        TD({"class": "watchEditCell", colspan: 2},
+            DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
                 'aria-label' : $STR('press enter to add new watch expression')},
                     $STR("NewWatch")
             )
@@ -68,7 +94,8 @@ const SizerRow =
 const DirTablePlate = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick", role :"tree", 'aria-label' : 'DOM properties'},
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
+            role: "tree", 'aria-label': 'DOM properties'},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator", RowTag)
@@ -76,7 +103,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         ),
 
     watchTag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
                _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree'},
             TBODY({role : 'presentation'},
                 SizerRow,
@@ -85,8 +112,9 @@ const DirTablePlate = domplate(Firebug.Rep,
         ),
 
     tableTag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0,
-            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick", role : 'tree', 'aria-label' : 'DOM properties'},
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0,
+            _toggles: "$toggles", _domPanel: "$domPanel", onclick: "$onClick",
+            role: 'tree', 'aria-label': 'DOM properties'},
             TBODY({role : 'presentation'},
                 SizerRow
             )
@@ -230,8 +258,8 @@ const DirTablePlate = domplate(Firebug.Rep,
 const ToolboxPlate = domplate(
 {
     tag:
-        DIV({class: "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
-            IMG({class: "watchDeleteButton closeButton", src: "blank.gif"})
+        DIV({"class": "watchToolbox", _domPanel: "$domPanel", onclick: "$onClick"},
+            IMG({"class": "watchDeleteButton closeButton", src: "blank.gif"})
         ),
 
     onClick: function(event)
@@ -546,33 +574,31 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             setClassTimed(row, "jumpHighlight", this.context);
     },
 
-    breakOnPropertySet: function(row)
+    breakOnProperty: function(row)
     {
-        var name = getRowName(row);
+        var member = row.repObject;
+        if (!member)
+            return;
+
+        //xxxHonza: don't use getRowName to get the prop name. From some reason
+        // unwatch doesn't work if row.firstChild.textContent is used.
+        // It works only from within the watch handler method if the passed param
+        // name is used.
+        var name = member.name;
         if (name == "this")
             return;
 
         var object = this.getRowObject(row);
         object = this.getRealObject(object);
-        if (object)
-        {
-            try
-            {
-                object.watch(name, function handler(prop, oldval, newval)
-                {
-                    // XXXjjb Beware: in playing with this feature I hit too much recursion multiple times with console.log
-                    // TODO Do something cute in the UI with the error bubble thing
-                    Firebug.Debugger.breakNow();
-                    object.unwatch(prop);  // one time only?
-                    return newval;
-                });
-            }
-            catch(exc)
-            {
-                if(FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("dom.breakOnPropertySet FAILS "+exc, exc);
-            }
-        }
+        if (!object)
+            return;
+
+        // Create new or remove an existing breakpoint.
+        var breakpoints = this.context.dom.breakpoints;
+        if (breakpoints.findBreakpointIndex(object) >= 0)
+            breakpoints.removeBreakpoint(object);
+        else
+            breakpoints.addBreakpoint(name, object);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -793,13 +819,13 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             this.pathIndex = pathIndex;
 
             var view = this.viewPath[pathIndex];
-            this.toggles = view.toggles;
+            this.toggles = view ? view.toggles : {};
 
             // Persist the current scroll location
             if (previousView && this.panelNode.scrollTop)
                 previousView.scrollTop = this.panelNode.scrollTop;
 
-            this.rebuild(false, view.scrollTop);
+            this.rebuild(false, view ? view.scrollTop : 0);
         }
 
     },
@@ -874,9 +900,15 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 );
             }
 
-            items.push(
-                {label: "BreakOnPropertySet", command: bindFixed(this.breakOnPropertySet, this, row)}
-            );
+            if (!isDOMMember(rowObject, rowName))
+            {
+                items.push(
+                    "-",
+                    {label: "html.dom.label.Break On Property Change", type: "checkbox",
+                        checked: this.context.dom.breakpoints.findBreakpointIndex(rowObject) >= 0,
+                        command: bindFixed(this.breakOnProperty, this, row)}
+                );
+            }
         }
 
         items.push(
@@ -1337,8 +1369,10 @@ function DOMEditor(doc)
 
 DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
-    tag: INPUT({class: "fixedWidthEditor a11yFocusNoTab", type: "text", title:$STR("NewWatch"),
-                oninput: "$onInput", onkeypress: "$onKeyPress"}),
+    tag:
+        INPUT({"class": "fixedWidthEditor a11yFocusNoTab",
+            type: "text", title:$STR("NewWatch"),
+            oninput: "$onInput", onkeypress: "$onKeyPress"}),
 
     endEditing: function(target, value, cancel)
     {
@@ -1620,9 +1654,182 @@ function getPath(row)
 
 // ************************************************************************************************
 
+Firebug.DOMModule.DebuggerListener =
+{
+    getBreakpoints: function(context, groups)
+    {
+        var breakpoints = context.dom.breakpoints.breakpoints;
+        if (!breakpoints.length)
+            return;
+
+        groups.push({name: "domBreakpoints", title: $STR("dom.label.DOM Breakpoints"),
+            breakpoints: breakpoints});
+    }
+};
+
+Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
+{
+    inspectable: false,
+
+    tag:
+        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+            role: "option", "aria-checked": "$bp.checked"},
+            DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
+                INPUT({"class": "breakpointCheckbox", type: "checkbox",
+                    _checked: "$bp.checked", tabindex : "-1"}),
+                SPAN({"class": "breakpointName"}, "$bp.propName"),
+                IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+            ),
+            DIV({"class": "breakpointCode"},
+                TAG("$bp.object|getObjectTag", {object: "$bp.object"})
+            )
+        ),
+
+    getObjectTag: function(object)
+    {
+        var rep = Firebug.getRep(object);
+        return rep.shortTag ? rep.shortTag : rep.tag;
+    },
+
+    onRemove: function(event)
+    {
+        cancelEvent(event);
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+        var domPanel = context.getPanel("dom");
+
+        if (hasClass(event.target, "closeButton"))
+        {
+            // Remove from list of breakpoints.
+            var row = getAncestorByClass(event.target, "breakpointRow");
+            context.dom.breakpoints.removeBreakpoint(row.repObject.object);
+
+            // Remove from the UI.
+            bpPanel.noRefresh = true;
+            bpPanel.removeRow(row);
+            bpPanel.noRefresh = false;
+        }
+    },
+
+    onEnable: function(event)
+    {
+        var checkBox = event.target;
+        if (hasClass(checkBox, "breakpointCheckbox"))
+        {
+            var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
+            bp.checked = checkBox.checked;
+        }
+    },
+
+    supportsObject: function(object)
+    {
+        return object instanceof Breakpoint;
+    }
+});
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+function Breakpoint(propName, object)
+{
+    this.propName = propName;
+    this.object = object;
+    this.checked = true;
+}
+
+Breakpoint.prototype =
+{
+    watchProperty: function()
+    {
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.watch; property: " + this.propName);
+
+        try
+        {
+            var self = this;
+            this.object.watch(this.propName, function handler(prop, oldval, newval)
+            {
+                // XXXjjb Beware: in playing with this feature I hit too much recursion multiple times with console.log
+                // TODO Do something cute in the UI with the error bubble thing
+                if (self.checked)
+                    Firebug.Debugger.breakNow();
+                return newval;
+            });
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("dom.watch; object FAILS " + exc, exc);
+            return false;
+        }
+
+        return true;
+    },
+
+    unwatchProperty: function()
+    {
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.unwatch; property: " + this.propName, this.object);
+
+        try
+        {
+            this.object.unwatch(this.propName);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("dom.unwatch; object FAILS " + exc, exc);
+        }
+    }
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+function DOMBreakpointList()
+{
+    this.breakpoints = [];
+}
+
+DOMBreakpointList.prototype =
+{
+    addBreakpoint: function(propName, object)
+    {
+        var bp = new Breakpoint(propName, object);
+        if (bp.watchProperty());
+            this.breakpoints.push(bp);
+    },
+
+    removeBreakpoint: function(object)
+    {
+        var index = this.findBreakpointIndex(object);
+        if (index < 0)
+            return;
+
+        var bp = this.breakpoints[index];
+        bp.unwatchProperty();
+
+        this.breakpoints.splice(index, 1);
+    },
+
+    findBreakpointIndex: function(object)
+    {
+        for (var i=0; i<this.breakpoints.length; i++)
+        {
+            var temp = this.breakpoints[i];
+            if (temp.object == object)
+                return i;
+        }
+        return -1;
+    },
+}
+
+// ************************************************************************************************
+
+Firebug.registerModule(Firebug.DOMModule);
 Firebug.registerPanel(DOMMainPanel);
 Firebug.registerPanel(DOMSidePanel);
 Firebug.registerPanel(WatchPanel);
+Firebug.registerRep(Firebug.DOMModule.BreakpointRep);
 
 // ************************************************************************************************
 
