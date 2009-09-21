@@ -2779,7 +2779,11 @@ NetProgress.prototype =
                 FBTrace.sysout("net.stopFile +" + (now() - file.startTime) + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
-            file.endTime = time;
+            // xxxHonza: spy should measure time using the activity observer too.
+            // Don't ruin the endTime if it was already set.
+            if (file.endTime == file.startTime)
+                file.endTime = time;
+
             file.postText = postText;
             file.responseText = responseText;
 
