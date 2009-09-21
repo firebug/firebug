@@ -2,10 +2,19 @@
 
 FBL.ns(function() { with (FBL) {
 
-//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+/*
+ * @panel Firebug.SourceBoxPanel: Intermediate level class for showing lines of source, eg Script Panel
+ * Implements a 'viewport' to render only the lines the user is viewing or has recently viewed.
+ * Scroll events or scrollToLine calls are converted to viewableRange line number range.
+ * The range of lines is rendered, skipping any that have already been rendered. Then if the
+ * new line range overlaps the old line range, done; else delete the old range.
+ * That way the lines kept contiguous.
+ * The rendering details are delegated to SourceBoxDecorator; each source line may be expanded into
+ * more rendered lines.
+ */
 
 Firebug.SourceBoxPanel = function() {};
-
+/* @lends */
 Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePanel),
 {
 
