@@ -3,10 +3,10 @@
 var Firebug = null;
 var FirebugContext = null;
 
-if(!XPCOMUtils)
+if(!fbXPCOMUtils)
     throw "Failed to load FBL";
 
-(function() { with (XPCOMUtils) {
+(function() { with (fbXPCOMUtils) {
 
 // ************************************************************************************************
 // Constants

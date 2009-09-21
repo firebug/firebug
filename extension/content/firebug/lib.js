@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-var FBL = XPCOMUtils;
+var FBL = fbXPCOMUtils;
 
 try { /*@explore*/
 

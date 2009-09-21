@@ -35,7 +35,7 @@
          if ( item.executable )
          {
             try {
-                var file = XPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
+                var file = fbXPCOMUtils.CCIN("@mozilla.org/file/local;1", "nsILocalFile");
                 file.initWithPath(item.executable);
                 document.getElementById("executable").file = file;
             }
@@ -93,7 +93,7 @@
       {
         const Ci = Components.interfaces;
         const nsIFilePicker = Ci.nsIFilePicker;
-        var picker = XPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
+        var picker = fbXPCOMUtils.CCIN("@mozilla.org/filepicker;1", "nsIFilePicker");
         picker.init(window, "", nsIFilePicker.modeOpen);
         picker.appendFilters(nsIFilePicker.filterApps);
         if ( picker.show() == nsIFilePicker.returnOK && picker.file )

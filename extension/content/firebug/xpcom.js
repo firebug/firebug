@@ -1,6 +1,6 @@
 /* See license.txt for terms of usage */
 
-function XPCOMUtils() {}
+function fbXPCOMUtils() {}
 
 (function() {
 
@@ -30,4 +30,4 @@ this.QI = function(obj, iface)
 
 // ************************************************************************************************
 
-}).apply(XPCOMUtils);
+}).apply(fbXPCOMUtils);
