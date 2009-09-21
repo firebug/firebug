@@ -481,7 +481,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return items;
 
         var object = Firebug.getObjectByURL(this.context, file.href);
-        var isPost = isURLEncodedRequest(file, this.context);
+        var isPost = Utils.isURLEncodedRequest(file, this.context);
 
         items.push(
             {label: "CopyLocation", command: bindFixed(copyToClipboard, FBL, file.href) }
@@ -544,7 +544,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     // Context menu commands
     copyParams: function(file)
     {
-        var text = getPostText(file, this.context);
+        var text = Utils.getPostText(file, this.context);
         var url = reEncodeURL(file, text);
         copyToClipboard(url);
     },
@@ -575,7 +575,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         }
 
         // Copy response to the clipboard
-        copyToClipboard(getResponseText(file, this.context));
+        copyToClipboard(Utils.getResponseText(file, this.context));
 
         // Try to update file.cacheEntry flag.
         getCacheEntry(file, this.context.netProgress);
@@ -590,7 +590,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         try
         {
-            var response = getResponseText(file, this.context);
+            var response = Utils.getResponseText(file, this.context);
             var inputStream = getInputStreamFromString(response);
             var stream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
             stream.setInputStream(inputStream);
@@ -903,7 +903,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 file.category = null;
                 for (var category in fileCategories)
                     removeClass(row, "category-" + category);
-                setClass(row, "category-" + getFileCategory(file));
+                setClass(row, "category-" + Utils.getFileCategory(file));
             }
 
             if (file.responseHeaders)
@@ -1571,7 +1571,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
 
             NetInfoBody.selectTabByName(netInfoBox, "Headers");
-            var category = getFileCategory(row.repObject);
+            var category = Utils.getFileCategory(row.repObject);
             if (category)
                 setClass(netInfoBox, "category-" + category);
             row.setAttribute('aria-expanded', 'true');
@@ -1590,7 +1590,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getCategory: function(file)
     {
-        var category = getFileCategory(file);
+        var category = Utils.getFileCategory(file);
         if (category)
             return "category-" + category;
 
@@ -1962,7 +1962,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             netInfoBox.htmlPresented = true;
 
-            var text = getResponseText(file, context);
+            var text = Utils.getResponseText(file, context);
             var iframe = getElementByClass(netInfoBox, "netInfoHtmlPreview");
             iframe.contentWindow.document.body.innerHTML = text;
         }
@@ -1974,7 +1974,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     setResponseText: function(file, netInfoBox, responseTextBox, context)
     {
         // Get response text and make sure it doesn't exceed the max limit.
-        var text = getResponseText(file, context);
+        var text = Utils.getResponseText(file, context);
         var limit = Firebug.netDisplayedResponseLimit + 15;
         var limitReached = text.length > limit;
         if (limitReached)
@@ -2105,11 +2105,11 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     render: function(context, parentNode, file)
     {
-        var text = getPostText(file, context);
+        var text = Utils.getPostText(file, context);
         if (text == undefined)
             return;
 
-        if (isURLEncodedRequest(file, context))
+        if (Utils.isURLEncodedRequest(file, context))
         {
             var lines = text.split("\n");
             var params = parseURLEncodedText(lines[lines.length-1]);
@@ -2117,14 +2117,14 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
                 this.insertParameters(parentNode, params);
         }
 
-        if (isMultiPartRequest(file, context))
+        if (Utils.isMultiPartRequest(file, context))
         {
             var data = this.parseMultiPartText(file, context);
             if (data)
                 this.insertParts(parentNode, data);
         }
 
-        var postText = formatPostText(text);
+        var postText = Utils.formatPostText(text);
         if (postText)
             this.insertSource(parentNode, postText);
     },
@@ -2162,7 +2162,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     parseMultiPartText: function(file, context)
     {
-        var text = getPostText(file, context);
+        var text = Utils.getPostText(file, context);
         if (text == undefined)
             return null;
 
@@ -2630,7 +2630,7 @@ NetProgress.prototype =
             else if (!file.fromCache)
                 file.fromCache = false;
 
-            getHttpHeaders(request, file);
+            Utils.getHttpHeaders(request, file);
 
             file.responseStatus = info.responseStatus;
             file.responseStatusText = info.responseStatusText;
@@ -2783,7 +2783,7 @@ NetProgress.prototype =
             file.postText = postText;
             file.responseText = responseText;
 
-            getHttpHeaders(request, file);
+            Utils.getHttpHeaders(request, file);
 
             // Don't mark this file as "loaded". Only request for which the http-on-examine-response
             // event is received is displayed within the list. This method is used by spy.
@@ -3348,13 +3348,13 @@ function getCacheEntry(file, netProgress)
                         }
                         file.cacheEntry = [
                           { name: "Last Modified",
-                            value: getDateFromSeconds(descriptor.lastModified)
+                            value: Utils.getDateFromSeconds(descriptor.lastModified)
                           },
                           { name: "Last Fetched",
-                            value: getDateFromSeconds(descriptor.lastFetched)
+                            value: Utils.getDateFromSeconds(descriptor.lastFetched)
                           },
                           { name: "Expires",
-                            value: getDateFromSeconds(descriptor.expirationTime)
+                            value: Utils.getDateFromSeconds(descriptor.expirationTime)
                           },
                           { name: "Data Size",
                             value: descriptor.dataSize
@@ -3373,7 +3373,7 @@ function getCacheEntry(file, netProgress)
                                 if (key == "response-head")
                                 {
                                     var contentType = getContentTypeFromResponseHead(value);
-                                    file.mimeType = getMimeType(contentType, file.href);
+                                    file.mimeType = Utils.getMimeType(contentType, file.href);
                                     return false;
                                 }
 
@@ -3404,140 +3404,6 @@ function getContentTypeFromResponseHead(value)
         if (option[0] == "Content-Type")
             return option[1];
     }
-}
-
-function getDateFromSeconds(s)
-{
-    var d = new Date();
-    d.setTime(s*1000);
-    return d;
-}
-
-function getHttpHeaders(request, file)
-{
-    try
-    {
-        var http = QI(request, Ci.nsIHttpChannel);
-        file.status = request.responseStatus;
-
-        // xxxHonza: is there any problem to do this in requestedFile method?
-        file.method = http.requestMethod;
-        file.urlParams = parseURLParams(file.href);
-        file.mimeType = getMimeType(request.contentType, request.name);
-
-        // Disable temporarily
-        if (!file.responseHeaders && Firebug.collectHttpHeaders)
-        {
-            var requestHeaders = [], responseHeaders = [];
-
-            http.visitRequestHeaders({
-                visitHeader: function(name, value)
-                {
-                    requestHeaders.push({name: name, value: value});
-                }
-            });
-            http.visitResponseHeaders({
-                visitHeader: function(name, value)
-                {
-                    responseHeaders.push({name: name, value: value});
-                }
-            });
-
-            file.requestHeaders = requestHeaders;
-            file.responseHeaders = responseHeaders;
-        }
-    }
-    catch (exc)
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("net.getHttpHeaders FAILS xxxHonza: let me know if you can reproduce this" + file.href, exc);
-    }
-}
-
-function isXHR(request)
-{
-    try
-    {
-        var callbacks = request.notificationCallbacks;
-        var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
-
-        return (xhrRequest != null);
-    }
-    catch (exc)
-    {
-    }
-
-    return false;
-}
-
-function safeGetName(request)
-{
-    try
-    {
-        return request.name;
-    }
-    catch (exc)
-    {
-    }
-
-    return null;
-}
-
-function getFileCategory(file)
-{
-    if (file.category)
-    {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.getFileCategory; current: " + file.category + " for: " + file.href, file);
-        return file.category;
-    }
-
-    if (file.isXHR)
-    {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.getFileCategory; XHR for: " + file.href, file);
-        return file.category = "xhr";
-    }
-
-    if (!file.mimeType)
-    {
-        var ext = getFileExtension(file.href);
-        if (ext)
-            file.mimeType = mimeExtensionMap[ext.toLowerCase()];
-    }
-
-    if (FBTrace.DBG_NET)
-        FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
-            ", mimeType: " + file.mimeType + " for: " + file.href, file);
-
-    if (!file.mimeType)
-        return "";
-
-    // Solve cases when charset is also specified, eg "text/html; charset=UTF-8".
-    var mimeType = file.mimeType;
-    if (mimeType)
-        mimeType = mimeType.split(";")[0];
-
-    return (file.category = mimeCategoryMap[mimeType]);
-}
-
-function getMimeType(mimeType, uri)
-{
-    if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
-    {
-        var ext = getFileExtension(uri);
-        if (!ext)
-            return mimeType;
-        else
-        {
-            var extMimeType = mimeExtensionMap[ext.toLowerCase()];
-            return extMimeType ? extMimeType : mimeType;
-        }
-    }
-    else
-        return mimeType;
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -3574,75 +3440,214 @@ function doublePostForbiddenMessage(url)
 
 // ************************************************************************************************
 
-function findHeader(headers, name)
+Firebug.NetMonitor.Utils =
 {
-    for (var i = 0; i < headers.length; ++i)
+    findHeader: function(headers, name)
     {
-        if (headers[i].name == name)
-            return headers[i].value;
-    }
-}
+        for (var i = 0; i < headers.length; ++i)
+        {
+            if (headers[i].name == name)
+                return headers[i].value;
+        }
+    },
 
-function formatPostText(text)
-{
-    if (text instanceof XMLDocument)
-        return getElementXML(text.documentElement);
-    else
-        return text;
-}
-
-function getPostText(file, context)
-{
-    if (file.postText)
-        return file.postText;
-
-    file.postText = readPostTextFromRequest(file.request, context);
-
-    if (!file.postText && context)
-        file.postText = readPostTextFromPage(file.href, context);
-
-    if (!file.postText)
-        return file.postText;
-
-    var limit = Firebug.netDisplayedPostBodyLimit;
-    if (file.postText.length > limit)
+    formatPostText: function(text)
     {
-        file.postText = cropString(file.postText, limit,
-            "\n\n" + $STR("net.postDataSizeLimitMessage") + "\n\n");
+        if (text instanceof XMLDocument)
+            return getElementXML(text.documentElement);
+        else
+            return text;
+    },
+
+    getPostText: function(file, context)
+    {
+        if (file.postText)
+            return file.postText;
+
+        file.postText = readPostTextFromRequest(file.request, context);
+
+        if (!file.postText && context)
+            file.postText = readPostTextFromPage(file.href, context);
+
+        if (!file.postText)
+            return file.postText;
+
+        var limit = Firebug.netDisplayedPostBodyLimit;
+        if (file.postText.length > limit)
+        {
+            file.postText = cropString(file.postText, limit,
+                "\n\n" + $STR("net.postDataSizeLimitMessage") + "\n\n");
+        }
+
+        return file.postText;
+    },
+
+    getResponseText: function(file, context)
+    {
+        // The response can be also empty string so, check agains "undefined".
+        return (typeof(file.responseText) != "undefined")? file.responseText :
+            context.sourceCache.loadText(file.href, file.method, file);
+    },
+
+    isURLEncodedRequest: function(file, context)
+    {
+        var text = Utils.getPostText(file, context);
+        if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") == 0)
+            return true;
+
+        // The header value doesn't have to be always exactly "application/x-www-form-urlencoded",
+        // there can be even charset specified. So, use indexOf rather than just "==".
+        var headerValue = Utils.findHeader(file.requestHeaders, "Content-Type");
+        if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)
+            return true;
+
+        return false;
+    },
+
+    isMultiPartRequest: function(file, context)
+    {
+        var text = Utils.getPostText(file, context);
+        if (text && text.indexOf("Content-Type: multipart/form-data") == 0)
+            return true;
+        return false;
+    },
+
+    getMimeType: function(mimeType, uri)
+    {
+        if (!mimeType || !(mimeCategoryMap.hasOwnProperty(mimeType)))
+        {
+            var ext = getFileExtension(uri);
+            if (!ext)
+                return mimeType;
+            else
+            {
+                var extMimeType = mimeExtensionMap[ext.toLowerCase()];
+                return extMimeType ? extMimeType : mimeType;
+            }
+        }
+        else
+            return mimeType;
+    },
+
+    getDateFromSeconds: function(s)
+    {
+        var d = new Date();
+        d.setTime(s*1000);
+        return d;
+    },
+
+    getHttpHeaders: function(request, file)
+    {
+        try
+        {
+            var http = QI(request, Ci.nsIHttpChannel);
+            file.status = request.responseStatus;
+
+            // xxxHonza: is there any problem to do this in requestedFile method?
+            file.method = http.requestMethod;
+            file.urlParams = parseURLParams(file.href);
+            file.mimeType = Utils.getMimeType(request.contentType, request.name);
+
+            // Disable temporarily
+            if (!file.responseHeaders && Firebug.collectHttpHeaders)
+            {
+                var requestHeaders = [], responseHeaders = [];
+
+                http.visitRequestHeaders({
+                    visitHeader: function(name, value)
+                    {
+                        requestHeaders.push({name: name, value: value});
+                    }
+                });
+                http.visitResponseHeaders({
+                    visitHeader: function(name, value)
+                    {
+                        responseHeaders.push({name: name, value: value});
+                    }
+                });
+
+                file.requestHeaders = requestHeaders;
+                file.responseHeaders = responseHeaders;
+            }
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.getHttpHeaders FAILS xxxHonza: let me know if you can reproduce this" + file.href, exc);
+        }
+    },
+
+    isXHR: function(request)
+    {
+        try
+        {
+            var callbacks = request.notificationCallbacks;
+            var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
+    
+            return (xhrRequest != null);
+        }
+        catch (exc)
+        {
+        }
+
+       return false;
+    },
+
+    getFileCategory: function(file)
+    {
+        if (file.category)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.getFileCategory; current: " + file.category + " for: " + file.href, file);
+            return file.category;
+        }
+
+        if (file.isXHR)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.getFileCategory; XHR for: " + file.href, file);
+            return file.category = "xhr";
+        }
+
+        if (!file.mimeType)
+        {
+            var ext = getFileExtension(file.href);
+            if (ext)
+                file.mimeType = mimeExtensionMap[ext.toLowerCase()];
+        }
+
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
+                ", mimeType: " + file.mimeType + " for: " + file.href, file);
+
+        if (!file.mimeType)
+            return "";
+
+        // Solve cases when charset is also specified, eg "text/html; charset=UTF-8".
+        var mimeType = file.mimeType;
+        if (mimeType)
+            mimeType = mimeType.split(";")[0];
+
+        return (file.category = mimeCategoryMap[mimeType]);
+    }
+};
+
+var Utils = Firebug.NetMonitor.Utils;
+
+// xxxHonza: should ba shared via lib.js
+function safeGetName(request)
+{
+    try
+    {
+        return request.name;
+    }
+    catch (exc)
+    {
     }
 
-    return file.postText;
-}
-
-function getResponseText(file, context)
-{
-    // The response can be also empty string so, check agains "undefined".
-    return (typeof(file.responseText) != "undefined")? file.responseText :
-        context.sourceCache.loadText(file.href, file.method, file);
-}
-
-function isURLEncodedRequest(file, context)
-{
-    var text = getPostText(file, context);
-    if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") == 0)
-        return true;
-
-    // The header value doesn't have to be always exactly "application/x-www-form-urlencoded",
-    // there can be even charset specified. So, use indexOf rather than just "==".
-    var headerValue = findHeader(file.requestHeaders, "Content-Type");
-    if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)
-        return true;
-
-    return false;
-}
-
-function isMultiPartRequest(file, context)
-{
-    var text = getPostText(file, context);
-    if (text && text.indexOf("Content-Type: multipart/form-data") == 0) 
-        return true;
-
-    return false;
+    return null;
 }
 
 // ************************************************************************************************
@@ -3762,7 +3767,7 @@ var NetHttpObserver =
 
         if (networkContext)
         {
-            var xhr = isXHR(request);
+            var xhr = Utils.isXHR(request);
             networkContext.post(requestedFile, [request, now(), win, xhr]);
         }
     },
@@ -3779,7 +3784,7 @@ var NetHttpObserver =
 
         // Initialize info.postText property.
         info.request = request;
-        getPostText(info, context);
+        Utils.getPostText(info, context);
 
         if (FBTrace.DBG_NET && info.postText)
             FBTrace.sysout("net.onExamineResponse, POST data: " + info.postText, info);
@@ -3932,7 +3937,7 @@ var NetHttpActivityObserver =
             if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
             {
                 if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
-                    networkContext.post(requestedFile, [httpChannel, time, win, isXHR(httpChannel)]);
+                    networkContext.post(requestedFile, [httpChannel, time, win, Utils.isXHR(httpChannel)]);
                 else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
                     networkContext.post(completedFile, [httpChannel, time]);
             }
