@@ -13,67 +13,16 @@ const nsIRequest = Ci.nsIRequest;
 const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
 const nsIWebProgress = Ci.nsIWebProgress;
 
-// ************************************************************************************************
-
 var contexts = [];
-const SpyHttpObserver =
-{
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIObserver
-
-    observe: function(request, topic, data)
-    {
-        try
-        {
-            // If a progress listener is set for the XHR, the loadFlags doesn't have
-            // nsIRequest.LOAD_BACKGROUND flag set. So, don't use it as a condition for displaying
-            // the XHR in Firebug console (Issue #1229).
-            if ((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
-            {
-                request = QI(request, nsIHttpChannel);
-                if (request.notificationCallbacks)
-                {
-                    try
-                    {
-                        var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
-                    }
-                    catch (e)
-                    {
-                        if (e.name == "NS_NOINTERFACE")
-                        {
-                            if (FBTrace.DBG_SPY)
-                                FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);
-                        }
-                    }
-                    if (xhrRequest && request.loadGroup)
-                    {
-                        var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
-                        for( var i = 0; i < contexts.length; ++i )
-                        {
-                            if (contexts[i].win == win)
-                            {
-                                if (topic == "http-on-modify-request")
-                                  requestStarted(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
-                                else if (topic == "http-on-examine-response")
-                                  requestStopped(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
-
-                                return;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        catch(exc)
-        {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.SpyHttpObserver FAILS", exc);
-        }
-    }
-};
 
 // ************************************************************************************************
+// Spy Module
 
+/**
+ * Represents the Spy module that is responsible for attaching/detaching an HTTP observer
+ * when Firebug is activated/deactivated for a site. This {@link SpyHttpObserver} is
+ * consequently responsible for monitoring all XHR.
+ */
 Firebug.Spy = extend(Firebug.Module,
 {
     dispatchName: "spy",
@@ -132,7 +81,7 @@ Firebug.Spy = extend(Firebug.Module,
     {
         context.spies = [];
 
-        if (Firebug.showXMLHttpRequests  && Firebug.Console.isAlwaysEnabled())
+        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
             this.attachObserver(context, context.window);
 
         if (FBTrace.DBG_SPY)
@@ -157,10 +106,13 @@ Firebug.Spy = extend(Firebug.Module,
 
     unwatchWindow: function(context, win)
     {
-        try {
+        try
+        {
             // This make sure that the existing context is properly removed from "contexts" array.
             this.detachObserver(context, win);
-        } catch (ex) {
+        }
+        catch (ex)
+        {
             // Get exceptions here sometimes, so let's just ignore them
             // since the window is going away anyhow
             ERROR(ex);
@@ -186,11 +138,67 @@ Firebug.Spy = extend(Firebug.Module,
 
 // ************************************************************************************************
 
+var SpyHttpObserver =
+{
+    observe: function(request, topic, data)
+    {
+        try
+        {
+            // If a progress listener is set for the XHR, the loadFlags doesn't have
+            // nsIRequest.LOAD_BACKGROUND flag set. So, don't use it as a condition for displaying
+            // the XHR in Firebug console (Issue #1229).
+            if ((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
+            {
+                request = QI(request, nsIHttpChannel);
+                if (request.notificationCallbacks)
+                {
+                    try
+                    {
+                        var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
+                    }
+                    catch (e)
+                    {
+                        if (e.name == "NS_NOINTERFACE")
+                        {
+                            if (FBTrace.DBG_SPY)
+                                FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);
+                        }
+                    }
+                    if (xhrRequest && request.loadGroup)
+                    {
+                        var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
+                        for( var i = 0; i < contexts.length; ++i )
+                        {
+                            if (contexts[i].win == win)
+                            {
+                                if (topic == "http-on-modify-request")
+                                  requestStarted(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
+                                else if (topic == "http-on-examine-response")
+                                  requestStopped(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
+
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("spy.SpyHttpObserver FAILS", exc);
+        }
+    }
+};
+
+// ************************************************************************************************
+
 Firebug.Spy.XHR = domplate(Firebug.Rep,
 {
     tag:
         DIV({"class": "spyHead", _repObject: "$object"},
-            TABLE({"class": "spyHeadTable focusRow outerFocusRow", cellpadding: 0, cellspacing: 0, "role": "listitem", "aria-expanded": "false"},
+            TABLE({"class": "spyHeadTable focusRow outerFocusRow", cellpadding: 0, cellspacing: 0,
+                "role": "listitem", "aria-expanded": "false"},
                 TBODY({"role": "presentation"},
                     TR({"class": "spyRow"},
                         TD({"class": "spyTitleCol spyCol", onclick: "$onToggleBody"},
@@ -246,7 +254,8 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
             toggleClass(logRow, "opened");
 
             var spy = getChildByClass(logRow, "spyHead").repObject;
-            var spyHeadTable = getAncestorByClass(target, 'spyHeadTable');
+            var spyHeadTable = getAncestorByClass(target, "spyHeadTable");
+
             if (hasClass(logRow, "opened"))
             {
                 updateHttpSpyInfo(spy);
@@ -393,6 +402,8 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     },
 };
 
+// ************************************************************************************************
+
 Firebug.XHRSpyListener =
 {
     onStart: function(context, spy)
@@ -485,6 +496,7 @@ function requestStopped(request, xhrRequest, context, method, url)
     spy.endTime = new Date().getTime();
     spy.responseTime = spy.endTime - spy.sendTime;
     spy.loaded = true;
+    spy.mimeType = Firebug.NetMonitor.Utils.getMimeType(request.contentType, request.name);
 
     if (!spy.responseHeaders)
         spy.responseHeaders = getResponseHeaders(spy);
@@ -499,8 +511,7 @@ function requestStopped(request, xhrRequest, context, method, url)
         catch (exc)
         {
             if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.requestStopped " + spy.href +
-                    ", status access FAILED", exc);
+                FBTrace.sysout("spy.requestStopped " + spy.href + ", status access FAILED", exc);
         }
     }
 
@@ -533,7 +544,10 @@ function onHTTPSpyReadyStateChange(spy, event)
             FBTrace.sysout("spy.onHTTPSpyReadyStateChange: EXCEPTION "+exc, [exc, event]);
 
         if (exc.name != "NS_ERROR_XPC_JAVASCRIPT_ERROR_WITH_DETAILS")
-            Firebug.Console.logFormatted(["onreadystatechange FAILS "+exc, exc, event], spy.context, "error", true);
+        {
+            Firebug.Console.logFormatted(["onreadystatechange FAILS "+exc, exc, event],
+                spy.context, "error", true);
+        }
         else
         {
             var error = Firebug.Errors.reparseXPC(exc, spy.context);
@@ -640,7 +654,9 @@ function updateLogRow(spy, responseTime)
         if (errorRange == 4 || errorRange == 5)
             setClass(spy.logRow, "error");
     }
-    catch (exc) { }
+    catch (exc)
+    {
+    }
 }
 
 function updateHttpSpyInfo(spy)
@@ -671,7 +687,7 @@ function updateHttpSpyInfo(spy)
         template.updateInfo(netInfoBox, spy, spy.context);
 }
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// ************************************************************************************************
 
 function getRequestHeaders(spy)
 {
@@ -714,10 +730,10 @@ function getResponseHeaders(spy)
 }
 
 // ************************************************************************************************
+// Registration
 
 Firebug.registerModule(Firebug.Spy);
 Firebug.registerRep(Firebug.Spy.XHR);
 
 // ************************************************************************************************
-
 }});
