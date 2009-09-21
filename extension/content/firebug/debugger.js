@@ -643,6 +643,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
 
                 context.executingSourceFile = null;
+                delete context.breakLineNumber;
             }
         }
         catch (exc)
@@ -1008,9 +1009,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace);
 
             if (Firebug.breakOnErrors)
-                context.breakingError = error;
+                context.breakingCause = {type: "error", message: error};
             else
-                delete context.breakingError;
+                delete context.breakingCause;
         }
         catch (exc) {
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError getStackTrace FAILED:", exc);
@@ -2063,7 +2064,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (FBTrace.DBG_STACK)
                 FBTrace.sysout("showStackFrame executionFile:"+this.executionFile+"@"+this.executionLineNo+"\n");
 
-            this.navigate(this.executionFile);
+            if (this.context.breakingCause)
+                this.context.breakingCause.lineNo = this.executionLineNo;
+
             this.scrollToLine(url, this.executionLineNo, bind(this.highlightExecutionLine, this) );
             this.context.throttle(this.updateInfoTip, this);
             return;
@@ -2118,28 +2121,28 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.executionLine = lineNode;  // if null, clears
 
+        if (sourceBox.breakCauseBox)
+        {
+            sourceBox.breakCauseBox.hide();
+            delete sourceBox.breakCauseBox;
+        }
+
         if (lineNode)
         {
             lineNode.setAttribute("exeLine", "true");
-            if (this.context.breakingError)
+            if (this.context.breakingCause && !this.context.breakingCause.shown)
             {
-                var error = this.context.breakingError;
+                this.context.breakingCause.shown = true;
+                var error = this.context.breakingCause.message;
                 if (error.message)
                 {
                     var sourceLine = getChildByClass(lineNode, "sourceLine");
-                    sourceBox.breakingError = new ErrorNotification(this.document, error);
-                    sourceBox.breakingError.show(sourceLine, this, "not an editor, yet?");
+                    sourceBox.breakCauseBox = new ErrorNotification(this.document, error);
+                    sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
                 }
             }
         }
-        else
-        {
-            if (sourceBox.breakingError)
-            {
-                sourceBox.breakingError.hide();
-                delete sourceBox.breakingError;
-            }
-        }
+
         if (FBTrace.DBG_BP || FBTrace.DBG_STACK)
             FBTrace.sysout("debugger.highlightExecutionLine lineNo: "+this.executionLineNo+" lineNode="+lineNode+"\n");
         return true; // sticky
@@ -2258,6 +2261,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     onMouseDown: function(event)
     {
+        var sourceBox = getAncestorByClass(event.target, "sourceBox");
+        if (sourceBox && sourceBox.breakCauseBox)
+            sourceBox.breakCauseBox.hide();
+
         var sourceLine = getAncestorByClass(event.target, "sourceLine");
         if (!sourceLine)
             return;
@@ -3691,7 +3698,7 @@ function ErrorNotification(doc, errorObject)
 ErrorNotification.prototype = domplate(Firebug.MeasureBox,
 {
     tag:
-        DIV({class: "conditionEditor"},
+        DIV({class: "conditionEditor breakNotification", onclick: "$hide"},
             DIV({class: "conditionEditorTop1"},
                 DIV({class: "conditionEditorTop2"})
             ),
@@ -3700,7 +3707,7 @@ ErrorNotification.prototype = domplate(Firebug.MeasureBox,
                     DIV({class: "conditionEditorInner"},
                         DIV({class: "conditionCaption"},
                                 SPAN("$object|getCategory"),
-                                BUTTON({class: "errorNotificationButton", onclick: "$hide"}, $STR("ok"))
+                                BUTTON({class: "errorNotificationButton"}, $STR("ok"))
                            ),
                         DIV({class: "conditionCaption"}, "$object|getCause")
                     )
