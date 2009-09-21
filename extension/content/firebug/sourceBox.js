@@ -291,14 +291,17 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (href)
         {
-            var sourceFile = this.context.sourceFileMap[href];
-            if (!sourceFile)
+            if (this.selectedSourceBox.repObject.href != href)
             {
-                if(FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("scrollToLine FAILS, no sourceFile for href "+href, this.context.sourceFileMap);
-                return;
+                var sourceFile = this.context.sourceFileMap[href];
+                if (!sourceFile)
+                {
+                    if(FBTrace.DBG_SOURCEFILES)
+                        FBTrace.sysout("scrollToLine FAILS, no sourceFile for href "+href, this.context.sourceFileMap);
+                    return;
+                }
+                this.showSourceFile(sourceFile);
             }
-            this.showSourceFile(sourceFile);
         }
 
         this.context.scrollTimeout = this.context.setTimeout(bindFixed(function()
@@ -310,15 +313,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                 return;
             }
 
-            this.selectedSourceBox.targetLine = lineNo;
+            this.selectedSourceBox.targetedLine = lineNo;
 
             // At this time we know which sourcebox is selected but the viewport is not selected.
             // We need to scroll, let the scroll handler set the viewport, then highlight any lines visible.
             var skipScrolling = false;
-            if (this.selectedSourceBox.firstRenderedLine && this.selectedSourceBox.lastRenderedLine)
+            if (this.selectedSourceBox.firstViewableLine && this.selectedSourceBox.lastViewableLine)
             {
-                var linesFromTop = lineNo - this.selectedSourceBox.firstRenderedLine;
-                var linesFromBot = this.selectedSourceBox.lastRenderedLine - lineNo;
+                var linesFromTop = lineNo - this.selectedSourceBox.firstViewableLine;
+                var linesFromBot = this.selectedSourceBox.lastViewableLine - lineNo;
                 skipScrolling = (linesFromTop > 3 && linesFromBot > 3);
                 if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("SourceBoxPanel.scrollTimeout: skipScrolling: "+skipScrolling+" fromTop:"+linesFromTop+" fromBot:"+linesFromBot);
             }
@@ -388,10 +391,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
-        if (sourceBox.targetLine)
+        if (sourceBox.targetedLine)
         {
-            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetLine);
-            delete sourceBox.targetLine;
+            sourceBox.targetLineNumber = sourceBox.targetedLine;
+            var viewRange = this.getViewRangeFromTargetLine(sourceBox, sourceBox.targetedLine);
+            delete sourceBox.targetedLine;
         }
         else
         {
@@ -538,15 +542,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return sourceBox.centralLine;
     },
 
-    getViewRangeFromTargetLine: function(sourceBox, targetLine)
+    getViewRangeFromTargetLine: function(sourceBox, targetLineNumber)
     {
-        var viewRange = {firstLine: 1, centralLine: targetLine, lastLine: 1};
+        var viewRange = {firstLine: 1, centralLine: targetLineNumber, lastLine: 1};
 
         var averageLineHeight = this.getAverageLineHeight(sourceBox);
         var panelHeight = this.panelNode.clientHeight;
         var linesPerViewport = Math.round((panelHeight / averageLineHeight) + 1);
 
-        viewRange.firstLine = Math.round(targetLine - linesPerViewport / 2);
+        viewRange.firstLine = Math.round(targetLineNumber - linesPerViewport / 2);
 
         if (viewRange.firstLine <= 0)
             viewRange.firstLine = 1;
@@ -593,7 +597,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     /*
      * inverse of the getViewRangeFromScrollTop.
-     * If the viewRange was set by targetLine, then this value become the new scroll top
+     * If the viewRange was set by targetLineNumber, then this value become the new scroll top
      *    else the value will be the same as the scrollbar's given value of scrollTop.
      */
     getScrollTopFromViewRange: function(sourceBox, viewRange)
