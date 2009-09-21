@@ -189,28 +189,28 @@ Firebug.Spy = extend(Firebug.Module,
 Firebug.Spy.XHR = domplate(Firebug.Rep,
 {
     tag:
-        DIV({class: "spyHead", _repObject: "$object"},
-            TABLE({class: "spyHeadTable focusRow outerFocusRow", cellpadding: 0, cellspacing: 0, "role": "listitem", "aria-expanded": "false"},
+        DIV({"class": "spyHead", _repObject: "$object"},
+            TABLE({"class": "spyHeadTable focusRow outerFocusRow", cellpadding: 0, cellspacing: 0, "role": "listitem", "aria-expanded": "false"},
                 TBODY({"role": "presentation"},
-                    TR({class: "spyRow"},
-                        TD({class: "spyTitleCol spyCol", onclick: "$onToggleBody"},
-                            DIV({class: "spyTitle"},
+                    TR({"class": "spyRow"},
+                        TD({"class": "spyTitleCol spyCol", onclick: "$onToggleBody"},
+                            DIV({"class": "spyTitle"},
                                 "$object|getCaption"
                             ),
-                            DIV({class: "spyFullTitle spyTitle"},
+                            DIV({"class": "spyFullTitle spyTitle"},
                                 "$object|getFullUri"
                             )
                         ),
-                        TD({class: "spyCol"},
-                            DIV({class: "spyStatus"}, "$object|getStatus")
+                        TD({"class": "spyCol"},
+                            DIV({"class": "spyStatus"}, "$object|getStatus")
                         ),
-                        TD({class: "spyCol"},
-                            IMG({class: "spyIcon", src: "blank.gif"})
+                        TD({"class": "spyCol"},
+                            IMG({"class": "spyIcon", src: "blank.gif"})
                         ),
-                        TD({class: "spyCol"},
-                            SPAN({class: "spyTime"})
+                        TD({"class": "spyCol"},
+                            SPAN({"class": "spyTime"})
                         ),
-                        TD({class: "spyCol"},
+                        TD({"class": "spyCol"},
                             TAG(FirebugReps.SourceLink.tag, {object: "$object.sourceLink"})
                         )
                     )
@@ -294,7 +294,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     supportsObject: function(object)
     {
-        return object instanceof XMLHttpRequestSpy;
+        return object instanceof Firebug.Spy.XMLHttpRequestSpy;
     },
 
     browseObject: function(spy, context)
@@ -334,7 +334,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-top.XMLHttpRequestSpy = function(request, xhrRequest, context)
+Firebug.Spy.XMLHttpRequestSpy = function(request, xhrRequest, context)
 {
     this.request = request;
     this.xhrRequest = xhrRequest;
@@ -343,7 +343,7 @@ top.XMLHttpRequestSpy = function(request, xhrRequest, context)
     this.isXHR = true;
 };
 
-top.XMLHttpRequestSpy.prototype =
+Firebug.Spy.XMLHttpRequestSpy.prototype =
 {
     attach: function()
     {
@@ -417,7 +417,7 @@ function getSpyForXHR(request, xhrRequest, context)
             return spy;
     }
 
-    spy = new XMLHttpRequestSpy(request, xhrRequest, context);
+    spy = new Firebug.Spy.XMLHttpRequestSpy(request, xhrRequest, context);
     context.spies.push(spy);
 
     var name = request.URI.asciiSpec;
