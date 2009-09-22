@@ -525,7 +525,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     resume: function()
     {
-        this.MutationBreakpoints.resume(this.context);
+        Firebug.HTMLModule.MutationBreakpoints.resume(this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
