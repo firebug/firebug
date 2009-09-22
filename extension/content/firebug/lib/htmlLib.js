@@ -25,11 +25,12 @@ Firebug.HTMLLib =
      * @param {Object} root Root of search. This may be an element or a document
      * @param {Object} panelNode Panel node containing the IO Box representing the DOM tree.
      * @param {Object} ioBox IO Box to display the search results in
+     * @param {Object} walker Optional walker parameter.
      */
-    NodeSearch: function(text, root, panelNode, ioBox)
+    NodeSearch: function(text, root, panelNode, ioBox, walker)
     {
         root = root.documentElement || root;
-        var walker = new Firebug.HTMLLib.DOMWalker(root);
+        walker = walker || new Firebug.HTMLLib.DOMWalker(root);
         var re = new ReversibleRegExp(text, "m");
         var matchCount = 0;
 
@@ -68,7 +69,6 @@ Firebug.HTMLLib =
         this.reset = function()
         {
             delete this.lastMatch;
-            delete this.lastRange;
         };
 
         /**
@@ -116,7 +116,7 @@ Firebug.HTMLLib =
          */
         this.findNextInnerMatch = function(reverse, caseSensitive)
         {
-            if (this.lastRange)
+            if (this.lastMatch)
             {
                 var lastMatchNode = this.lastMatch.node;
                 var lastReMatch = this.lastMatch.match;
@@ -230,27 +230,21 @@ Firebug.HTMLLib =
          */
         this.selectNodeText = function(nodeBox, node, text, index, reverse, caseSensitive)
         {
-            var row, range;
+            var row;
 
             // If we are still inside the same node as the last search, advance the range
             // to the next substring within that node
             if (nodeBox == this.lastNodeBox)
             {
-                var target = this.lastRange.startContainer;
-                range = this.lastRange = panelNode.ownerDocument.createRange();
-                range.setStart(target, index);
-                range.setEnd(target, index+text.length);
-
-                row = this.lastRow;
+                row = this.textSearch.findNext(false, true, reverse, caseSensitive);
             }
 
-            if (!range)
+            if (!row)
             {
                 // Search for the first instance of the string inside the node
-                function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
-                var search = new TextSearch(nodeBox, findRow);
-                row = this.lastRow = search.find(text, reverse, caseSensitive);
-                range = this.lastRange = search.range;
+                function findRow(node) { return node.nodeType == Node.ELEMENT_NODE ? node : node.parentNode; }
+                this.textSearch = new TextSearch(nodeBox, findRow);
+                row = this.textSearch.find(text, reverse, caseSensitive);
                 this.lastNodeBox = nodeBox;
             }
 
@@ -258,7 +252,7 @@ Firebug.HTMLLib =
             {
                 var sel = panelNode.ownerDocument.defaultView.getSelection();
                 sel.removeAllRanges();
-                sel.addRange(range);
+                sel.addRange(this.textSearch.range);
 
                 scrollIntoCenterView(row, panelNode);
                 return true;
@@ -375,7 +369,6 @@ Firebug.HTMLLib =
      *        Note that the order for attributes is not defined. This will follow the
      *        same order as the Element.attributes accessor.
      * @param {Element} root Element to traverse
-     * @member FBL
      */
     DOMWalker: function(root)
     {

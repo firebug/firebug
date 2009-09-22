@@ -3926,11 +3926,27 @@ this.ErrorMessage.prototype =
 
 // ************************************************************************************************
 
+/**
+ * @class Searches for text in a given node.
+ * 
+ * @constructor
+ * @param {Node} rootNode Node to search
+ * @param {Function} rowFinder results filter. On find this method will be called
+ *      with the node containing the matched text as the first parameter. This may
+ *      be undefined to return the node as is.
+ */
 this.TextSearch = function(rootNode, rowFinder)
 {
     var doc = rootNode.ownerDocument;
     var count, searchRange, startPt;
 
+    /**
+     * Find the first result in the node.
+     * 
+     * @param {String} text Text to search for
+     * @param {boolean} reverse true to perform a reverse search
+     * @param {boolean} caseSensitive true to perform a case sensitive search
+     */
     this.find = function(text, reverse, caseSensitive)
     {
         this.text = text;
@@ -3946,35 +3962,61 @@ this.TextSearch = function(rootNode, rowFinder)
         return this.currentNode = (rowFinder && match ? rowFinder(match) : match);
     };
 
+    /**
+     * Find the next search result
+     * 
+     * @param {boolean} wrapAround true to wrap the search if the end of range is reached
+     * @param {boolean} sameNode true to return multiple results from the same text node
+     * @param {boolean} reverse true to search in reverse
+     * @param {boolean} caseSensitive true to perform a case sensitive search
+     */
     this.findNext = function(wrapAround, sameNode, reverse, caseSensitive)
     {
-        var curNode = this.currentNode ? this.currentNode : rootNode;
-        startPt = doc.createRange();
-        try
+        startPt = undefined;
+
+        if (sameNode && this.range)
         {
+            startPt = this.range.cloneRange();
             if (reverse)
             {
-                startPt.setStartBefore(curNode);
+                startPt.setEnd(startPt.startContainer, startPt.startOffset);
             }
             else
             {
-                startPt.setStartAfter(curNode);
+                startPt.setStart(startPt.startContainer, startPt.startOffset+1);
             }
         }
-        catch (e)
+        
+        if (!startPt)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
-            try {
-                FBTrace.sysout("setStart try\n");
-                startPt.setStart(curNode);
-                FBTrace.sysout("setStart success\n");
-            } catch (exc) {
-                return;
+            var curNode = this.currentNode ? this.currentNode : rootNode;
+            startPt = doc.createRange();
+            try
+            {
+                if (reverse)
+                {
+                    startPt.setStartBefore(curNode);
+                }
+                else
+                {
+                    startPt.setStartAfter(curNode);
+                }
+            }
+            catch (e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("lib.TextSearch.findNext setStartAfter fails for nodeType:"+(this.currentNode?this.currentNode.nodeType:rootNode.nodeType),e);
+                try {
+                    FBTrace.sysout("setStart try\n");
+                    startPt.setStart(curNode);
+                    FBTrace.sysout("setStart success\n");
+                } catch (exc) {
+                    return;
+                }
             }
         }
 
-        var match = this.find(this.text, reverse, caseSensitive);
+        var match = startPt && this.find(this.text, reverse, caseSensitive);
         if (!match && wrapAround)
         {
             this.reset();
@@ -3984,12 +4026,13 @@ this.TextSearch = function(rootNode, rowFinder)
         return match;
     };
 
+    /**
+     * Resets the instance state to the initial state.
+     */
     this.reset = function()
     {
-        count = rootNode.childNodes.length;
         searchRange = doc.createRange();
-        searchRange.setStart(rootNode, 0);
-        searchRange.setEnd(rootNode, count);
+        searchRange.selectNode(rootNode);
 
         startPt = searchRange;
     };
