@@ -2,6 +2,67 @@
 
 FBL.ns(function() { with (FBL) {
 
+
+
+/* Defines the API for SourceBoxDecorator and provides the default implementation.
+ * Decorators are passed the source box on construction, called to create the HTML,
+ * and called whenever the user scrolls the view.
+ */
+Firebug.SourceBoxDecorator = function(sourceBox){}
+
+Firebug.SourceBoxDecorator.sourceBoxCounter = 0;
+
+Firebug.SourceBoxDecorator.prototype =
+{
+    onSourceBoxCreation: function(sourceBox)
+    {
+        // allow panel-document unique ids to be generated for lines.
+        sourceBox.uniqueId = ++Firebug.SourceBoxDecorator.sourceBoxCounter;
+    },
+    /* called on a delay after the view port is updated, eg vertical scroll
+     * The sourceBox will contain lines from firstRenderedLine to lastRenderedLine
+     * The user will be able to see sourceBox.firstViewableLine to sourceBox.lastViewableLine
+     */
+    decorate: function(sourceBox, sourceFile)
+    {
+        return;
+    },
+
+    /* called once as each line is being rendered.
+    * @param lineNo integer 1-maxLineNumbers
+    */
+    getUserVisibleLineNumber: function(sourceBox, lineNo)
+    {
+        return lineNo;
+    },
+
+    /* call once as each line is being rendered.
+    * @param lineNo integer 1-maxLineNumbers
+    */
+    getLineHTML: function(sourceBox, lineNo)
+    {
+        var html = escapeHTML(sourceBox.lines[lineNo-1]);
+
+        // If the pref says so, replace tabs by corresponding number of spaces.
+        if (Firebug.replaceTabs > 0)
+        {
+            var space = new Array(Firebug.replaceTabs + 1).join(" ");
+            html = html.replace(/\t/g, space);
+        }
+
+        return html;
+    },
+
+    /*
+     * @return a string unique to the sourcebox and line number, valid in getElementById()
+     */
+    getLineId: function(sourceBox, lineNo)
+    {
+        return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
+    },
+}
+
+
 /*
  * @panel Firebug.SourceBoxPanel: Intermediate level class for showing lines of source, eg Script Panel
  * Implements a 'viewport' to render only the lines the user is viewing or has recently viewed.
@@ -23,6 +84,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.onResize =  bind(this.resizer, this);
 
         this.sourceBoxes = {};
+        this.decorator = this.getDecorator();
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -47,6 +109,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
     },
 
+    // **************************************
     /*  Panel extension point.
      *  Called just before box is shown
      */
@@ -55,15 +118,12 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     },
 
-    /* Panel extension point.
+    /* Panel extension point. Called on panel initialization
      * @return Must implement SourceBoxDecorator API.
      */
-    getDecorator: function(sourceBox)
+    getDecorator: function()
     {
-        if (!this.decorator)
-            this.decorator = new Firebug.SourceBoxDecorator(sourceBox);
-
-        return this.decorator;
+        return new Firebug.SourceBoxDecorator();
      },
 
      /* Panel extension point
@@ -183,8 +243,10 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     {
         var sourceBox = this.initializeSourceBox(sourceFile);
 
+        sourceBox.decorator = this.decorator;
+
         // Framework connection
-        sourceBox.decorator = this.getDecorator(sourceBox);
+        sourceBox.decorator.onSourceBoxCreation(sourceBox);
 
         this.sourceBoxes[sourceFile.href] = sourceBox;
 
@@ -291,7 +353,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (href)
         {
-            if (this.selectedSourceBox.repObject.href != href)
+            if (!this.selectedSourceBox || this.selectedSourceBox.repObject.href != href)
             {
                 var sourceFile = this.context.sourceFileMap[href];
                 if (!sourceFile)
@@ -300,7 +362,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
                         FBTrace.sysout("scrollToLine FAILS, no sourceFile for href "+href, this.context.sourceFileMap);
                     return;
                 }
-                this.showSourceFile(sourceFile);
+                this.navigate(sourceFile);
             }
         }
 
@@ -432,7 +494,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         catch(exc)
         {
             if(FBTrace.DBG_ERRORS)
-                FBTrace.sysout("buildViewAround buildOffscreen FAILS "+exc, exc);
+                FBTrace.sysout("buildViewAround updateViewportCache FAILS "+exc, exc);
         }
 
         this.setViewportPadding(sourceBox, viewRange);
@@ -657,7 +719,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         {
             var scrollBarHeight = sourceBox.offsetHeight - sourceBox.clientHeight;
             // the total - view-taken-up - scrollbar
-            var totalPadding = sourceBox.clientHeight - sourceBox.viewport.clientHeight - 1; // - scrollBarHeight;
+            var totalPadding = sourceBox.clientHeight - sourceBox.viewport.clientHeight - 1;
         }
         else
             var totalPadding = virtualSourceBoxHeight - sourceBox.viewport.clientHeight;
@@ -755,62 +817,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     },
 });
 
-var sourceBoxCounter = 0;
 
-/* Defines the API for SourceBoxDecorator and provides the default implementation.
- * Decorators are passed the source box on construction, called to create the HTML,
- * and called whenever the user scrolls the view.
- */
-Firebug.SourceBoxDecorator = function(sourceBox)
-{
-    // allow panel-document unique ids to be generated for lines.
-    sourceBox.uniqueId = sourceBoxCounter++;
-}
-
-Firebug.SourceBoxDecorator.prototype =
-{
-    /* called on a delay after the view port is updated, eg vertical scroll
-     * The sourceBox will contain lines from firstRenderedLine to lastRenderedLine
-     * The user will be able to see sourceBox.firstViewableLine to sourceBox.lastViewableLine
-     */
-    decorate: function(sourceBox, sourceFile)
-    {
-        return;
-    },
-
-    /* called once as each line is being rendered.
-    * @param lineNo integer 1-maxLineNumbers
-    */
-    getUserVisibleLineNumber: function(sourceBox, lineNo)
-    {
-        return lineNo;
-    },
-
-    /* call once as each line is being rendered.
-    * @param lineNo integer 1-maxLineNumbers
-    */
-    getLineHTML: function(sourceBox, lineNo)
-    {
-        var html = escapeHTML(sourceBox.lines[lineNo-1]);
-
-        // If the pref says so, replace tabs by corresponding number of spaces.
-        if (Firebug.replaceTabs > 0)
-        {
-            var space = new Array(Firebug.replaceTabs + 1).join(" ");
-            html = html.replace(/\t/g, space);
-        }
-
-        return html;
-    },
-
-    /*
-     * @return a string unique to the sourcebox and line number, valid in getElementById()
-     */
-    getLineId: function(sourceBox, lineNo)
-    {
-        return 'sb' + sourceBox.uniqueId + '-L' + lineNo;
-    },
-}
 
 
     // ************************************************************************************************
