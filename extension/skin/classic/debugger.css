@@ -122,19 +122,6 @@
     background-image: url(chrome://firebug/skin/breakpoint.png);
 }
 
-.breakingError {
-    text-align: right;
-    float:right;
-    color: red;
-    margin-right: 1ex;
-    cursor: pointer;
-}
-
-.breakingError:hover {
-    display: none;
-    cursor: pointer;
-    }
-
 /************************************************************************************************/
 
 .conditionEditor {
@@ -338,4 +325,8 @@
 
 .errorNotificationButton {
     float: right;
+}
+
+.breakNotification {
+    background-color: #FF9933;
 }
