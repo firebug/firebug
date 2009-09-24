@@ -60,7 +60,7 @@ Firebug.DOMModule = extend(Firebug.Module,
 // ************************************************************************************************
 
 const RowTag =
-    TR({"class": "memberRow $member.open $member.type\\Row", _repObject: "$member",
+    TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
         $hasChildren: "$member.hasChildren",
         role: 'presentation',
         level: "$member.level"},
@@ -576,7 +576,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     breakOnProperty: function(row)
     {
-        var member = row.repObject;
+        var member = row.domObject;
         if (!member)
             return;
 
