@@ -308,9 +308,9 @@ h1.groupHeader {
 }
 
 .disabledPanelDescription img {
-    margin-top: 5px; 
-    margin-left: 0; 
-    margin-bottom: 5px; 
+    margin-top: 5px;
+    margin-left: 0;
+    margin-bottom: 5px;
     vertical-align: middle;
 }
 
@@ -341,6 +341,45 @@ h1.groupHeader {
     width: 1px;
     height: 1px;
     overflow: hidden;
+}
+
+/************************************************************************************************/
+/* These are copies of the classes from debugger.css that start .condition */
+.notationEditorInner1 {
+    padding-left: 37px;
+    background: url(noteBorders.png) repeat-y;
+}
+
+.notationEditorInner2 {
+    padding-right: 25px;
+    background: url(noteBorders.png) repeat-y 100% 0;
+}
+
+.notationEditorTop1 {
+    background: url(noteCorners.png) no-repeat 100% 0;
+    margin-left: 37px;
+    height: 35px;
+}
+
+.notationEditorTop2 {
+    position: relative;
+    left: -37px;
+    width: 37px;
+    height: 35px;
+    background: url(noteCorners.png) no-repeat;
+}
+
+.notationEditorBottom1 {
+    background: url(noteCorners.png) no-repeat 100% 100%;
+    margin-left: 37px;
+    height: 33px;
+}
+
+.notationEditorBottom2 {
+    position: relative;    left: -37px;
+    width: 37px;
+    height: 33px;
+    background: url(noteCorners.png) no-repeat 0 100%;
 }
 
 /************************************************************************************************/

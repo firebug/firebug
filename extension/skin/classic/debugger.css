@@ -49,6 +49,10 @@
     white-space: pre;
 }
 
+.noteInToolTip { /* below sourceLine, so it overrides it */
+    background-color: #FFD472;
+}
+
 .useA11y .sourceBox .sourceViewport:focus .sourceLine {
     background-color: #FFFFC0;
     color: navy;
@@ -323,6 +327,6 @@
     font-weight: bold;
 }
 
-.errorNotificationButton {
+.BreakNotificationButton {
     float: right;
 }

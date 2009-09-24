@@ -2177,7 +2177,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (error.message)
                 {
                     var sourceLine = getChildByClass(lineNode, "sourceLine");
-                    sourceBox.breakCauseBox = new ErrorNotification(this.document, error);
+                    sourceBox.breakCauseBox = new BreakNotification(this.document, error);
                     sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
                 }
             }
@@ -2193,6 +2193,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var lineNode = this.selectedSourceBox.getLineNode(lineNo);
         if (!this.location && FBTrace.DBG_ERRORS)
             FBTrace.sysout("toggleBreakpoint no this.location! ", this);
+        if (this.location.href != this.selectedSourceBox.repObject.href && FBTrace.DBG_ERRORS)
+            FBTrace.sysout("toggleBreakpoint this.location != selectedSourceBox ", this);
 
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger.toggleBreakpoint lineNo="+lineNo+" this.location.href:"+this.location.href+" lineNode.breakpoint:"+(lineNode?lineNode.getAttribute("breakpoint"):"(no lineNode)")+"\n", this.selectedSourceBox);
         if (lineNode.getAttribute("breakpoint") == "true")
@@ -3732,36 +3734,37 @@ ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function ErrorNotification(doc, errorObject)
+function BreakNotification(doc, errorObject)
 {
     this.initialize(doc, errorObject);
 }
 
-ErrorNotification.prototype = domplate(Firebug.MeasureBox,
+BreakNotification.prototype = domplate(Firebug.MeasureBox,
 {
     tag:
         DIV({class: "conditionEditor breakNotification", onclick: "$hide"},
-            DIV({class: "conditionEditorTop1"},
-                DIV({class: "conditionEditorTop2"})
+            DIV({class: "notationEditorTop1"},
+                DIV({class: "notationEditorTop2"})
             ),
-            DIV({class: "conditionEditorInner1"},
-                DIV({class: "conditionEditorInner2"},
+            DIV({class: "notationEditorInner1"},
+                DIV({class: "notationEditorInner2"},
                     DIV({class: "conditionEditorInner"},
                         DIV({class: "conditionCaption"},
                                 SPAN("$object|getCategory"),
-                                BUTTON({class: "errorNotificationButton"}, $STR("ok"))
+                                BUTTON({class: "BreakNotificationButton", onclick: "$object|FirebugReps.ErrorMessage.copyError"}, $STR("CopyError"))
                            ),
                         DIV({class: "conditionCaption"}, "$object|getCause")
                     )
                 )
             ),
-            DIV({class: "conditionEditorBottom1"},
-                DIV({class: "conditionEditorBottom2"})
+            DIV({class: "notationEditorBottom1"},
+                DIV({class: "notationEditorBottom2"})
             )
         ),
 
     initialize: function(doc, errorObject)
     {
+        this.noteObject = errorObject;
         this.box = this.tag.replace({object: errorObject}, doc, this);
     },
 
@@ -3775,12 +3778,66 @@ ErrorNotification.prototype = domplate(Firebug.MeasureBox,
         return $STR("Break on Error");
     },
 
-    show: ConditionEditor.prototype.show,
+    show: function(sourceLine, panel, value)
+    {
+        this.target = sourceLine;
+        this.panel = panel;
+
+        hide(this.box, true);
+        panel.selectedSourceBox.appendChild(this.box);
+
+        setTimeout(bindFixed(function()
+        {
+            var offset = getClientOffset(sourceLine);
+
+            var bottom = offset.y+sourceLine.offsetHeight;
+            var y = bottom - this.box.offsetHeight;
+            if (y < panel.selectedSourceBox.scrollTop)
+            {
+                y = offset.y;
+                setClass(this.box, "upsideDown");
+            }
+            else
+                removeClass(this.box, "upsideDown");
+
+            this.box.style.top = y + "px";
+            hide(this.box, false);
+        }, this));
+    },
 
     hide: function()
     {
         if (this.panel)
-            ConditionEditor.prototype.hide.apply(this);
+        {
+            var guts = getElementByClass(this.box, "conditionEditorInner");
+            clearNode(guts);
+
+            var msg = this.getCause(this.noteObject);
+
+            if (msg)
+            {
+                var self = this;
+                var interval = setInterval(function slide(event)
+                {
+                    if (self.box.clientWidth < 20)
+                    {
+                        clearInterval(interval);
+                        self.box.parentNode.removeChild(self.box);
+                        self.target.setAttribute('title', msg);
+                        setClass(self.target, "noteInToolTip");
+                        delete self.target;
+                        delete self.panel;
+                    }
+                    else
+                        self.box.style.width = (self.box.clientWidth - 20)+"px";
+                }, 2);
+            }
+            else
+            {
+                delete this.target;
+                delete this.panel;
+            }
+        }
         // else we already called hide
     }
 });

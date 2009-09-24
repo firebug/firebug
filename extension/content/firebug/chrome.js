@@ -1124,6 +1124,11 @@ top.FirebugChrome =
             }
         }
 
+        if (hasClass(target, 'noteInToolTip'))
+            setClass(tooltip, 'noteInToolTip');
+        else
+            removeClass(tooltip, 'noteInToolTip');
+
         if (target.hasAttribute("title"))
         {
             tooltip.setAttribute("label", target.getAttribute("title"));
