@@ -59,25 +59,9 @@ Firebug.DOMModule = extend(Firebug.Module,
 
 // ************************************************************************************************
 
-const RowTag =
-    TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
-        $hasChildren: "$member.hasChildren",
-        role: 'presentation',
-        level: "$member.level"},
-        TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
-            role: 'presentation'},
-            DIV({"class": "memberLabel $member.type\\Label"},
-                SPAN({}, "$member.name")
-            )
-        ),
-        TD({"class": "memberValueCell", role : 'presentation'},
-            TAG("$member.tag", {object: "$member.value"})
-        )
-    );
-
 const WatchRowTag =
     TR({"class": "watchNewRow", level: 0},
-        TD({"class": "watchEditCell", colspan: 2},
+        TD({"class": "watchEditCell", colspan: 3},
             DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
                 'aria-label' : $STR('press enter to add new watch expression')},
                     $STR("NewWatch")
@@ -87,18 +71,45 @@ const WatchRowTag =
 
 const SizerRow =
     TR({role : 'presentation'},
+        TD(),
         TD({width: "30%"}),
         TD({width: "70%"})
     );
 
 const DirTablePlate = domplate(Firebug.Rep,
 {
+    memberRowTag:
+        TR({"class": "memberRow $member.open $member.type\\Row", _domObject: "$member",
+            $hasChildren: "$member.hasChildren",
+            role: "presentation",
+            level: "$member.level",
+            breakable: "$member.breakable",
+            breakpoint: "$member.breakpoint",
+            disabledBreakpoint: "$member.disabledBreakpoint"},
+            TD({"class": "memberHeaderCell"},
+               DIV({"class": "memberRowHeader", onclick: "$onClickRowHeader"},
+                    "&nbsp;"
+               )
+            ),
+            TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
+                role: 'presentation'},
+                DIV({"class": "memberLabel $member.type\\Label"},
+                    SPAN({}, "$member.name")
+                )
+            ),
+            TD({"class": "memberValueCell", role : 'presentation'},
+                TAG("$member.tag", {object: "$member.value"})
+            )
+        ),
+
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
             role: "tree", 'aria-label': 'DOM properties'},
             TBODY({role: 'presentation'},
                 SizerRow,
-                FOR("member", "$object|memberIterator", RowTag)
+                FOR("member", "$object|memberIterator",
+                    TAG("$memberRowTag", {member: "$member"})
+                )
             )
         ),
 
@@ -121,11 +132,13 @@ const DirTablePlate = domplate(Firebug.Rep,
         ),
 
     rowTag:
-        FOR("member", "$members", RowTag),
+        FOR("member", "$members",
+            TAG("$memberRowTag", {member: "$member"})
+        ),
 
     memberIterator: function(object, level)
     {
-        return getMembers(object, level);
+        return getMembers(object, level, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -223,8 +236,11 @@ const DirTablePlate = domplate(Firebug.Rep,
                 }
             }
 
+            var panel = row.parentNode.parentNode.domPanel;
+            var context = panel ? panel.context : null;
+
             var value = row.lastChild.firstChild.repObject;
-            var members = getMembers(value, level+1);
+            var members = getMembers(value, level+1, context);
 
             var rowTag = this.rowTag;
             var lastRow = row;
@@ -252,6 +268,23 @@ const DirTablePlate = domplate(Firebug.Rep,
 
             row.insertTimeout = delay;
         }
+    },
+
+    onClickRowHeader: function(event)
+    {
+        cancelEvent(event);
+
+        var rowHeader = event.target;
+        if (!hasClass(rowHeader, "memberRowHeader"))
+            return;
+
+        var row = getAncestorByClass(event.target, "memberRow");
+        if (!row)
+            return;
+
+        var panel = row.parentNode.parentNode.domPanel;
+        if (panel)
+            panel.breakOnProperty(row);
     }
 });
 
@@ -290,8 +323,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     rebuild: function(update, scrollTop)
     {
         dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
-        var members = getMembers(this.selection);
-        expandMembers(members, this.toggles, 0, 0);
+        var members = getMembers(this.selection, 0, this.context);
+        expandMembers(members, this.toggles, 0, 0, this.context);
 
         this.showMembers(members, update, scrollTop);
     },
@@ -580,6 +613,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         if (!member)
             return;
 
+        // xxxHonza: Support for object change not implemented yet.
+        if (member.hasChildren)
+            return;
+
         //xxxHonza: don't use getRowName to get the prop name. From some reason
         // unwatch doesn't work if row.firstChild.textContent is used.
         // It works only from within the watch handler method if the passed param
@@ -595,10 +632,17 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
         // Create new or remove an existing breakpoint.
         var breakpoints = this.context.dom.breakpoints;
-        if (breakpoints.findBreakpointIndex(object) >= 0)
-            breakpoints.removeBreakpoint(object);
+        var bp = breakpoints.findBreakpoint(object, name);
+        if (bp)
+        {
+            row.removeAttribute("breakpoint");
+            breakpoints.removeBreakpoint(object, name);
+        }
         else
-            breakpoints.addBreakpoint(name, object);
+        {
+            breakpoints.addBreakpoint(object, name);
+            row.setAttribute("breakpoint", "true");
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -905,7 +949,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 items.push(
                     "-",
                     {label: "html.dom.label.Break On Property Change", type: "checkbox",
-                        checked: this.context.dom.breakpoints.findBreakpointIndex(rowObject) >= 0,
+                        checked: this.context.dom.breakpoints.findBreakpoint(rowObject, rowName),
                         command: bindFixed(this.breakOnProperty, this, row)}
                 );
             }
@@ -1273,26 +1317,27 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                     }
                 );
 
-                addMember("watch", members, expr, value, 0);
+                addMember(object, "watch", members, expr, value, 0);
             }
         }
 
         if (frame && frame.isValid)
         {
             var thisVar = frame.thisValue.getWrappedValue();
-            addMember("user", members, "this", thisVar, 0);
+            addMember(object, "user", members, "this", thisVar, 0);
 
             var scopeChain = this.generateScopeChain(frame.scope);
-            addMember("scopes", members, "scopeChain", scopeChain, 0);
+            addMember(object, "scopes", members, "scopeChain", scopeChain, 0);
 
-            members.push.apply(members, getMembers(scopeChain[0]));
+            members.push.apply(members, getMembers(scopeChain[0], 0, this.context));
         }
 
-        expandMembers(members, this.toggles, 0, 0);
+        expandMembers(members, this.toggles, 0, 0, this.context);
         this.showMembers(members, !newFrame);
     },
 
-    generateScopeChain: function (scope) {
+    generateScopeChain: function (scope)
+    {
         var ret = [];
         while (scope) {
             var scopeVars;
@@ -1396,7 +1441,7 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 // ************************************************************************************************
 // Local Helpers
 
-function getMembers(object, level)  // we expect object to be user-level object wrapped in security blanket
+function getMembers(object, level, context)  // we expect object to be user-level object wrapped in security blanket
 {
     if (!level)
         level = 0;
@@ -1439,16 +1484,16 @@ function getMembers(object, level)  // we expect object to be user-level object 
             var ordinal = parseInt(name);
             if (ordinal || ordinal == 0)
             {
-                addMember("ordinal", ordinals, name, val, level);
+                addMember(object, "ordinal", ordinals, name, val, level, 0, context);
             }
             else if (typeof(val) == "function")
             {
                 if (isClassFunction(val))
-                    addMember("userClass", userClasses, name, val, level);
+                    addMember(object, "userClass", userClasses, name, val, level, 0, context);
                 else if (name in domMembers)
-                    addMember("domFunction", domFuncs, name, val, level, domMembers[name]);
+                    addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
                 else
-                    addMember("userFunction", userFuncs, name, val, level);
+                    addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
             }
             else
             {
@@ -1460,11 +1505,11 @@ function getMembers(object, level)  // we expect object to be user-level object 
                     prefix = "get ";
 
                 if (name in domMembers)
-                    addMember("dom", domProps, (prefix+name), val, level, domMembers[name]);
+                    addMember(object, "dom", domProps, (prefix+name), val, level, domMembers[name], context);
                 else if (name in domConstantMap)
-                    addMember("dom", domConstants, (prefix+name), val, level);
+                    addMember(object, "dom", domConstants, (prefix+name), val, level, 0, context);
                 else
-                    addMember("user", userProps, (prefix+name), val, level);
+                    addMember(object, "user", userProps, (prefix+name), val, level, 0, context);
             }
         }
     }
@@ -1517,7 +1562,7 @@ function getMembers(object, level)  // we expect object to be user-level object 
     return members;
 }
 
-function expandMembers(members, toggles, offset, level)  // recursion starts with offset=0, level=0
+function expandMembers(members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
 {
     var expanded = 0;
     for (var i = offset; i < members.length; ++i)
@@ -1530,7 +1575,7 @@ function expandMembers(members, toggles, offset, level)  // recursion starts wit
         {
             member.open = "opened";  // member.level <= level && member.name in toggles.
 
-            var newMembers = getMembers(member.value, level+1);  // sets newMembers.level to level+1
+            var newMembers = getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
 
             var args = [i+1, 0];
             args.push.apply(args, newMembers);
@@ -1544,7 +1589,7 @@ function expandMembers(members, toggles, offset, level)  // recursion starts wit
             }
 
             expanded += newMembers.length;
-            i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1);
+            i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1, context);
         }
     }
 
@@ -1573,7 +1618,7 @@ function hasProperties(ob)
     return false;
 }
 
-function addMember(type, props, name, value, level, order)
+function addMember(object, type, props, name, value, level, order, context)
 {
     var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents
     var tag = rep.shortTag ? rep.shortTag : rep.tag;
@@ -1583,7 +1628,8 @@ function addMember(type, props, name, value, level, order)
         (valueType == "function" || (valueType == "object" && value != null)
         || (valueType == "string" && value.length > Firebug.stringCropLength));
 
-    props.push({
+    var member = {
+        object: object,
         name: name,
         value: value,
         type: type,
@@ -1594,7 +1640,25 @@ function addMember(type, props, name, value, level, order)
         indent: level*16,
         hasChildren: hasChildren,
         tag: tag
-    });
+    };
+
+    // The context doesn't have to be specified (e.g. in case of Watch panel that is based
+    // on the same template as the DOM panel, but doesn't show any breakpoints).
+    if (context)
+    {
+        member.breakable = !hasChildren;
+
+        var breakpoints = context.dom.breakpoints;
+        var bp = breakpoints.findBreakpoint(object, name);
+        if (bp)
+        {
+            member.breakpoint = true;
+            member.disabledBreakpoint = !bp.checked;
+        }
+    }
+
+    props.push(member);
+    return member;
 }
 
 function getWatchRowIndex(row)
@@ -1652,6 +1716,19 @@ function getPath(row)
     return path;
 }
 
+function findRow(parentNode, object)
+{
+    var rows = getElementsByClass(parentNode, "memberRow");
+    for (var i=0; i<rows.length; i++)
+    {
+        var row = rows[i];
+        if (object == row.domObject.object)
+            return row;
+    }
+
+    return row;
+}
+
 // ************************************************************************************************
 
 Firebug.DOMModule.DebuggerListener =
@@ -1695,30 +1772,52 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
     {
         cancelEvent(event);
 
+        if (!hasClass(event.target, "closeButton"))
+            return;
+
         var bpPanel = Firebug.getElementPanel(event.target);
         var context = bpPanel.context;
-        var domPanel = context.getPanel("dom");
 
-        if (hasClass(event.target, "closeButton"))
+        // Remove from list of breakpoints.
+        var row = getAncestorByClass(event.target, "breakpointRow");
+        var bp = row.repObject;
+        context.dom.breakpoints.removeBreakpoint(bp.object, bp.propName);
+
+        // Remove from the UI.
+        bpPanel.noRefresh = true;
+        bpPanel.removeRow(row);
+        bpPanel.noRefresh = false;
+
+        var domPanel = context.getPanel("dom", true);
+        if (domPanel)
         {
-            // Remove from list of breakpoints.
-            var row = getAncestorByClass(event.target, "breakpointRow");
-            context.dom.breakpoints.removeBreakpoint(row.repObject.object);
-
-            // Remove from the UI.
-            bpPanel.noRefresh = true;
-            bpPanel.removeRow(row);
-            bpPanel.noRefresh = false;
+            var domRow = findRow(domPanel.panelNode, bp.object);
+            if (domRow)
+            {
+                domRow.removeAttribute("breakpoint");
+                domRow.removeAttribute("disabledBreakpoint");
+            }
         }
     },
 
     onEnable: function(event)
     {
         var checkBox = event.target;
-        if (hasClass(checkBox, "breakpointCheckbox"))
+        if (!hasClass(checkBox, "breakpointCheckbox"))
+            return;
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+
+        var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
+        bp.checked = checkBox.checked;
+
+        var domPanel = context.getPanel("dom", true);
+        if (domPanel)
         {
-            var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
-            bp.checked = checkBox.checked;
+            var row = findRow(domPanel.panelNode, bp.object);
+            if (row)
+                row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");
         }
     },
 
@@ -1730,7 +1829,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function Breakpoint(propName, object)
+function Breakpoint(object, propName)
 {
     this.propName = propName;
     this.object = object;
@@ -1792,16 +1891,19 @@ function DOMBreakpointList()
 
 DOMBreakpointList.prototype =
 {
-    addBreakpoint: function(propName, object)
+    addBreakpoint: function(object, propName)
     {
-        var bp = new Breakpoint(propName, object);
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.addBreakpoint for: " + propName, object);
+
+        var bp = new Breakpoint(object, propName);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
     },
 
-    removeBreakpoint: function(object)
+    removeBreakpoint: function(object, propName)
     {
-        var index = this.findBreakpointIndex(object);
+        var index = this.findBreakpointIndex(object, propName);
         if (index < 0)
             return;
 
@@ -1811,12 +1913,18 @@ DOMBreakpointList.prototype =
         this.breakpoints.splice(index, 1);
     },
 
-    findBreakpointIndex: function(object)
+    findBreakpoint: function(object, propName)
+    {
+        var index = this.findBreakpointIndex(object, propName);
+        return (index < 0) ? null : this.breakpoints[index];
+    },
+
+    findBreakpointIndex: function(object, propName)
     {
         for (var i=0; i<this.breakpoints.length; i++)
         {
             var temp = this.breakpoints[i];
-            if (temp.object == object)
+            if (temp.object == object && temp.propName == propName)
                 return i;
         }
         return -1;
