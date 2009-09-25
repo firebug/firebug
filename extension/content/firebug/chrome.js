@@ -1124,10 +1124,10 @@ top.FirebugChrome =
             }
         }
 
-        if (hasClass(target, 'noteInToolTip'))
-            setClass(tooltip, 'noteInToolTip');
+        if (FBL.hasClass(target, 'noteInToolTip'))
+            FBL.setClass(tooltip, 'noteInToolTip');
         else
-            removeClass(tooltip, 'noteInToolTip');
+            FBL.removeClass(tooltip, 'noteInToolTip');
 
         if (target.hasAttribute("title"))
         {
