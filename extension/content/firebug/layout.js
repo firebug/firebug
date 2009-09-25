@@ -22,10 +22,10 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                         SPAN({class: "editable focusStart", 'aria-label' : $STR('offset top')}, '$outerTop')
                     ),
                     DIV({class: "layoutLabelRight layoutLabel v$outerRight"},
-                        SPAN({class: "editable", 'aria-label' : $STR('offset right')}, '')
+                        SPAN({class: "editable", 'aria-label' : $STR('offset right')}, '$outerRight')
                     ),
                     DIV({class: "layoutLabelBottom layoutLabel v$outerBottom"},
-                        SPAN({class: "editable", 'aria-label' : $STR('offset bottom')}, '')
+                        SPAN({class: "editable", 'aria-label' : $STR('offset bottom')}, '$outerLeft')
                     ),
                     DIV({class: "layoutLabelLeft layoutLabel v$outerLeft"},
                         SPAN({class: "editable", 'aria-label' : $STR('offset left')}, '$outerLeft')
@@ -189,11 +189,25 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
 
         var position = style.getPropertyCSSValue("position").cssText;
-        if (!Firebug.showAdjacentLayout || position == "absolute" || position == "fixed")
+        if (Firebug.showBoundingClientRect)
+        {
+            args.outerLabel = $STR("BoundingClientRect");
+            var rect = element.getBoundingClientRect().wrappedJSObject;
+
+            args = extend(args, rect);
+            args.outerLeft = args.left;
+            args.outerTop = args.top;
+            args.outerRight = args.right;
+            args.outerBottom = args.bottom;
+            // these Modes are classes on the domplate
+            args.outerLeftMode = args.outerRightMode = args.outerTopMode
+            = args.outerBottomMode = "boundingClientRect";
+        }
+        else if (!Firebug.showAdjacentLayout || position == "absolute" || position == "fixed")
         {
             args.outerLabel = $STR("LayoutOffset");
-            args.outerLeft = element.offsetLeft;
-            args.outerTop = element.offsetTop;
+            args.outerLeft = element.offSetLeft ? element.offsetLeft : 0;
+            args.outerTop = element.offsetTop ? element.offsetLeft : 0;
             args.outerRight = args.outerBottom = 0;
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
                 = args.outerBottomMode = "absoluteEdge";
@@ -277,12 +291,12 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                 args.outerLabel = "";
         }
         var node = this.template.tag.replace(args, this.panelNode);
-        dispatch([Firebug.A11yModel], 'onLayoutBoxCreated', [this, node, args]); 
+        dispatch([Firebug.A11yModel], 'onLayoutBoxCreated', [this, node, args]);
     },
 
     updateOption: function(name, value)
     {
-        if (name == "showAdjacentLayout")
+        if (name == "showAdjacentLayout" || name == "showBoundingClientRect")
         {
             this.updateSelection(this.selection);
         }
@@ -292,6 +306,8 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     {
         return [
             optionMenu("ShowRulers", "showRulers"),
+            optionMenu("ShowBoundingClientRect", 'showBoundingClientRect'),
+            // Unclear what this does. optionMenu("ShowAdjacentLayout", "showAdjacentLayout"),
         ];
     },
 
