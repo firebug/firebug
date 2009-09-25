@@ -192,7 +192,9 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         if (Firebug.showBoundingClientRect)
         {
             args.outerLabel = $STR("BoundingClientRect");
-            var rect = element.getBoundingClientRect().wrappedJSObject;
+            var rect = element.getBoundingClientRect();
+            if (rect.wrappedJSObject)
+                rect = rect.wrappedJSObject;
 
             args = extend(args, rect);
             args.outerLeft = args.left;
