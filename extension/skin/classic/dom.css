@@ -9,7 +9,7 @@
 }
 
 .memberLabelCell {
-    padding: 2px 0 2px 0;
+    padding: 2px 0 2px 0px;
     vertical-align: top;
 }
 
@@ -33,7 +33,18 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Breakpoints */
 
+/* In orerder to set memberRowHeader's height to 100%, memberRow and
+ * memberHeaderCell (parents) has to also be set to height: 100%,
+ * otherwise it wouldn't work */
 .memberHeaderCell {
+    margin-right: 16px;
+    border-right: 16px;
+    padding-right: 16px;
+    height: 100%;
+}
+
+.memberRow {
+    height: 100%;
 }
 
 .memberRowHeader {
@@ -46,12 +57,13 @@
     background: #EEEEEE no-repeat 2px 0px;
     color: #888888;
     white-space: pre;
-    line-height: 18px;
     display: none;
+    height: 100%;
 }
 
-/* Show breakpoints bar only in the DOM panel so far */
-.panelNode-dom .memberRowHeader {
+/* Show breakpoints bar only in the DOM panel (and DOM side panel) so far */
+.panelNode-dom .memberRowHeader,
+.panelNode-domSide .memberRowHeader {
     display: block;
 }
 
