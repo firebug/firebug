@@ -87,7 +87,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             breakpoint: "$member.breakpoint",
             disabledBreakpoint: "$member.disabledBreakpoint"},
             TD({"class": "memberHeaderCell"},
-               DIV({"class": "memberRowHeader", onclick: "$onClickRowHeader"},
+               DIV({"class": "sourceLine memberRowHeader", onclick: "$onClickRowHeader"},
                     "&nbsp;"
                )
             ),

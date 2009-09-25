@@ -33,13 +33,10 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Breakpoints */
 
-/* In orerder to set memberRowHeader's height to 100%, memberRow and
+/* In order to set memberRowHeader's height to 100%, memberRow and
  * memberHeaderCell (parents) has to also be set to height: 100%,
  * otherwise it wouldn't work */
 .memberHeaderCell {
-    margin-right: 16px;
-    border-right: 16px;
-    padding-right: 16px;
     height: 100%;
 }
 
@@ -49,14 +46,6 @@
 
 .memberRowHeader {
     cursor: pointer;
-    -moz-user-select: none;
-    margin-right: 10px;
-    border-bottom: 1px solid #EEEEEE;
-    border-right: 1px solid #CCCCCC;
-    padding: 0px 4px 0 16px;
-    background: #EEEEEE no-repeat 2px 0px;
-    color: #888888;
-    white-space: pre;
     display: none;
     height: 100%;
 }
