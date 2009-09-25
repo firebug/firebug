@@ -47,11 +47,12 @@
     color: #888888;
     white-space: pre;
     line-height: 18px;
+    display: none;
 }
 
-/* Hide breakpoints in the watch panel so far */
-.panelNode-watches .memberRowHeader {
-    display: none;
+/* Show breakpoints bar only in the DOM panel so far */
+.panelNode-dom .memberRowHeader {
+    display: block;
 }
 
 .memberRow .memberRowHeader {
