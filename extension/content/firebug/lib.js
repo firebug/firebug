@@ -746,7 +746,7 @@ this.getBody = function(doc)
     if (body)
         return body;
 
-    return doc.firstChild;  // For non-HTML docs
+    return doc.documentElement;  // For non-HTML docs
 };
 
 this.findNextDown = function(node, criteria)
@@ -1186,7 +1186,7 @@ this.getLTRBWH = function(elt)
             dims.height = dims.bottom - dims.top;
         }
 
-        if(odb.scrollTop)
+        if(odb && odb.scrollTop)
         {
             dims.top += odb.scrollTop;
             dims.left += odb.scrollLeft;
@@ -1202,22 +1202,24 @@ this.getLTRBWH = function(elt)
 
 this.applyBodyOffsets = function(elt, clientRect)
 {
-    var borderLeft, borderTop, marginLeft, marginTop, paddingLeft, paddingTop, offsetX, offsetY,
-        od = elt.ownerDocument,
-        style = od.defaultView.getComputedStyle(od.body, null),
-        pos = style.getPropertyValue('position');
+    var od = elt.ownerDocument;
+    if (!od.body)
+        return clientRect;
 
+    var style = od.defaultView.getComputedStyle(od.body, null);
+
+    var pos = style.getPropertyValue('position');
     if(pos === 'absolute' || pos === 'relative')
     {
-        borderLeft = parseInt(style.getPropertyValue('border-left-width').replace('px', ''),10) || 0;
-        borderTop = parseInt(style.getPropertyValue('border-top-width').replace('px', ''),10) || 0;
-        paddingLeft = parseInt(style.getPropertyValue('padding-left').replace('px', ''),10) || 0;
-        paddingTop = parseInt(style.getPropertyValue('padding-top').replace('px', ''),10) || 0;
-        marginLeft = parseInt(style.getPropertyValue('margin-left').replace('px', ''),10) || 0;
-        marginTop = parseInt(style.getPropertyValue('margin-top').replace('px', ''),10) || 0;
+        var borderLeft = parseInt(style.getPropertyValue('border-left-width').replace('px', ''),10) || 0;
+        var borderTop = parseInt(style.getPropertyValue('border-top-width').replace('px', ''),10) || 0;
+        var paddingLeft = parseInt(style.getPropertyValue('padding-left').replace('px', ''),10) || 0;
+        var paddingTop = parseInt(style.getPropertyValue('padding-top').replace('px', ''),10) || 0;
+        var marginLeft = parseInt(style.getPropertyValue('margin-left').replace('px', ''),10) || 0;
+        var marginTop = parseInt(style.getPropertyValue('margin-top').replace('px', ''),10) || 0;
 
-        offsetX = borderLeft + paddingLeft + marginLeft;
-        offsetY = borderTop + paddingTop + marginTop;
+        var offsetX = borderLeft + paddingLeft + marginLeft;
+        var offsetY = borderTop + paddingTop + marginTop;
 
         clientRect.left -= offsetX;
         clientRect.top -= offsetY;
@@ -1457,7 +1459,7 @@ this.readBoxStyles = function(style)
         "border-top-width": "borderTop", "border-right-width": "borderRight",
         "border-left-width": "borderLeft", "border-bottom-width": "borderBottom",
         "padding-top": "paddingTop", "padding-right": "paddingRight",
-        "padding-left": "paddingLeft", "padding-bottom": "paddingBottom"
+        "padding-left": "paddingLeft", "padding-bottom": "paddingBottom",
     };
 
     var styles = {};
@@ -3928,7 +3930,7 @@ this.ErrorMessage.prototype =
 
 /**
  * @class Searches for text in a given node.
- * 
+ *
  * @constructor
  * @param {Node} rootNode Node to search
  * @param {Function} rowFinder results filter. On find this method will be called
@@ -3942,7 +3944,7 @@ this.TextSearch = function(rootNode, rowFinder)
 
     /**
      * Find the first result in the node.
-     * 
+     *
      * @param {String} text Text to search for
      * @param {boolean} reverse true to perform a reverse search
      * @param {boolean} caseSensitive true to perform a case sensitive search
@@ -3964,7 +3966,7 @@ this.TextSearch = function(rootNode, rowFinder)
 
     /**
      * Find the next search result
-     * 
+     *
      * @param {boolean} wrapAround true to wrap the search if the end of range is reached
      * @param {boolean} sameNode true to return multiple results from the same text node
      * @param {boolean} reverse true to search in reverse
@@ -3986,7 +3988,7 @@ this.TextSearch = function(rootNode, rowFinder)
                 startPt.setStart(startPt.startContainer, startPt.startOffset+1);
             }
         }
-        
+
         if (!startPt)
         {
             var curNode = this.currentNode ? this.currentNode : rootNode;
@@ -4315,12 +4317,13 @@ this.SourceFile.prototype =
         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
 
         var scripts = [];
-            for (var p in this.innerScripts)
-            {
-                var script = this.innerScripts[p];
-                if (mustBeExecutableLine && !script.isValid) continue;
-                this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
-            }
+        for (var p in this.innerScripts)
+        {
+            var script = this.innerScripts[p];
+            if (mustBeExecutableLine && !script.isValid) continue;
+            this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
+        }
+
         if (this.outerScript && !(mustBeExecutableLine && !this.outerScript.isValid) )
             this.addScriptAtLineNumber(scripts, this.outerScript, targetLineNo, mustBeExecutableLine, offset);
 
@@ -4339,7 +4342,7 @@ this.SourceFile.prototype =
 
         return (scripts.length > 0) ? scripts : false;
     },
-    // TODO XXXjjb the scripts are probably ordered, at least do a binary search
+
     addScriptAtLineNumber: function(scripts, script, targetLineNo, mustBeExecutableLine, offset)
     {
         // script.isValid will be true.
