@@ -211,13 +211,15 @@ this.safeToString = function(ob)
     {
         if (ob && (typeof (ob['toString']) == "function") )
             return ob.toString();
+        if (typeof ob == 'function' && typeof (ob['toSource']) == 'function')
+            return ob.toSource();
     }
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("safeToString FAILS "+exc, exc);
     }
-    return "[unsupported: no toString() function]";
+    return "[unsupported: no toString() function in type "+typeof(ob)+"]";
 };
 
 this.convertToUnicode = function(text, charset)
