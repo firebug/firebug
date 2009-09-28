@@ -241,10 +241,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (Firebug.NetMonitor.isAlwaysEnabled())
             monitorContext(context);
 
-        // Load existing breakpoints
-        var persistedPanelState = getPersistedState(context, panelName);
-        context.netProgress.breakpoints = persistedPanelState.breakpoints ?
-            persistedPanelState.breakpoints : new NetBreakpointList();
+        if (context.netProgress)
+        {
+            // Load existing breakpoints
+            var persistedPanelState = getPersistedState(context, panelName);
+            context.netProgress.breakpoints = persistedPanelState.breakpoints ?
+                    persistedPanelState.breakpoints : new NetBreakpointList();
+        }
     },
 
     reattachContext: function(browser, context)
@@ -257,9 +260,12 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
 
-        // Remember existing breakpoints.
-        var persistedPanelState = getPersistedState(context, panelName);
-        persistedPanelState.breakpoints = context.netProgress.breakpoints;
+        if (context.netProgress)
+        {
+            // Remember existing breakpoints.
+            var persistedPanelState = getPersistedState(context, panelName);
+            persistedPanelState.breakpoints = context.netProgress.breakpoints;
+        }
 
         if (Firebug.NetMonitor.isAlwaysEnabled())
             unmonitorContext(context);
@@ -713,7 +719,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         return this.conditionEditor;
     },
- 
+
     // Support for activation.
     disablePanel: function(module)
     {
@@ -777,7 +783,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 this.infoTipURL = infoTipURL;
                 return this.populateTimeInfoTip(infoTip, row.repObject);
             }
-            else if (hasClass(row, "category-image") && 
+            else if (hasClass(row, "category-image") &&
                 !getAncestorByClass(target, "netRowHeader"))
             {
                 var infoTipURL = row.repObject.href + "-image";
@@ -1512,7 +1518,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         items.push("-");
         items.push({
             label: $STR("net.header.Reset_Header"),
-            nol10n: true, 
+            nol10n: true,
             command: bindFixed(this.onResetColumns, this, context)
         });
 
@@ -3751,7 +3757,7 @@ Firebug.NetMonitor.Utils =
             var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
-    
+
             return (xhrRequest != null);
         }
         catch (exc)
@@ -4070,7 +4076,7 @@ var NetHttpActivityObserver =
                 FBTrace.sysout("activityObserver.observeActivity; " +
                     getTimeLabel(time) + ", " +
                     safeGetName(httpChannel) + ", " +
-                    getActivityTypeDescription(activityType) + ", " + 
+                    getActivityTypeDescription(activityType) + ", " +
                     getActivitySubtypeDescription(activitySubtype) + ", " +
                     extraSizeData,
                     extraStringData);
