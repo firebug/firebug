@@ -87,10 +87,6 @@
     background: #536B90 url(chrome://firebug/skin/tableHeaderSortedActive.gif) repeat-x;
 }
 
-#netHrefCol > .netHeaderCellBox {
-    border-left: 0px;
-}
-
 /************************************************************************************************/
 /* Breakpoints */
 
@@ -119,6 +115,18 @@
 
 .netRow.category-xhr:hover .netRowHeader {
     background-color: #F6F6F6;
+}
+
+#netBreakpointBar {
+    max-width: 38px;
+}
+
+#netHrefCol > .netHeaderCellBox {
+    border-left: 0px;
+}
+
+.netRow .netRowHeader {
+    width: 3px;
 }
 
 /************************************************************************************************/

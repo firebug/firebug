@@ -1353,7 +1353,10 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
             TBODY({"role" : "presentation"},
                 TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
-                    TD({"class": "netHeaderCell", "role": "columnheader"}, "&nbsp;"),
+                    TD({id: "netBreakpointBar", width: "1%", "class": "netHeaderCell",
+                        "role": "columnheader"},
+                        "&nbsp;"
+                    ),
                     TD({id: "netHrefCol", width: "18%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
@@ -1378,7 +1381,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                         title: $STR("net.header.Size Tooltip")},
                         $STR("net.header.Size"))
                     ),
-                    TD({id: "netTimeCol", width: "54%", "class": "netHeaderCell alphaValue a11yFocus",
+                    TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell alphaValue a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Timeline Tooltip")},
@@ -1422,10 +1425,13 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         var lastVisibleIndex;
         var visibleColCount = 0;
 
+        // Iterate all columns except of the first one for breakpoints.
         var header = getAncestorByClass(target, "netHeaderRow");
-        for (var i=0; i<header.childNodes.length; i++)
+        var columns = cloneArray(header.childNodes);
+        columns.shift();
+        for (var i=0; i<columns.length; i++)
         {
-            var column = header.childNodes[i];
+            var column = columns[i];
             var visible = (hiddenCols.indexOf(column.id) == -1);
 
             items.push({
@@ -1519,7 +1525,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 $fromCache: "$file.file.fromCache",
                 $inFrame: "$file.file|getInFrame"},
                 TD({"class": "netCol"},
-                   DIV({"class": "sourceLine netRowHeader", onclick: "$onClickRowHeader"},
+                   DIV({"class": "sourceLine netRowHeader",
+                   onclick: "$onClickRowHeader"},
                         "&nbsp;"
                    )
                 ),
