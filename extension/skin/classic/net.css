@@ -87,6 +87,10 @@
     background: #536B90 url(chrome://firebug/skin/tableHeaderSortedActive.gif) repeat-x;
 }
 
+#netHrefCol > .netHeaderCellBox {
+    border-left: 0px;
+}
+
 /************************************************************************************************/
 /* Breakpoints */
 
