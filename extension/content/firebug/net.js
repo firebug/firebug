@@ -240,6 +240,11 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         }
         if (Firebug.NetMonitor.isAlwaysEnabled())
             monitorContext(context);
+
+        // Load existing breakpoints
+        var persistedPanelState = getPersistedState(context, panelName);
+        context.netProgress.breakpoints = persistedPanelState.breakpoints ?
+            persistedPanelState.breakpoints : new NetBreakpointList();
     },
 
     reattachContext: function(browser, context)
@@ -248,9 +253,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         this.syncFilterButtons(Firebug.chrome);
     },
 
-    destroyContext: function(context)
+    destroyContext: function(context, persistedState)
     {
         Firebug.ActivableModule.destroyContext.apply(this, arguments);
+
+        // Remember existing breakpoints.
+        var persistedPanelState = getPersistedState(context, panelName);
+        persistedPanelState.breakpoints = context.netProgress.breakpoints;
 
         if (Firebug.NetMonitor.isAlwaysEnabled())
             unmonitorContext(context);
@@ -3362,8 +3371,6 @@ function monitorContext(context)
     // Activate net panel sub-context.
     var panel = context.getPanel(panelName);
     context.netProgress.activate(panel);
-
-    context.netProgress.breakpoints = new NetBreakpointList();
 
     // Display info message
     panel.insertActivationMessage();
