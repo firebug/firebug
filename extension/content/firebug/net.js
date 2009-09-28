@@ -335,7 +335,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 {
     name: panelName,
     searchable: true,
-    editable: false,
+    editable: true,
 
     initialize: function(context, doc)
     {
@@ -347,6 +347,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         // we listen for showUI/hideUI for panel activation
         Firebug.registerUIListener(this);
 
+        this.onContextMenu = bind(this.onContextMenu, this);
+
         Firebug.ActivablePanel.initialize.apply(this, arguments);
     },
 
@@ -356,14 +358,18 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         Firebug.unregisterUIListener(this);
     },
-    
+
     initializeNode : function()
     {
+        this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
+
         dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
     },
 
     destroyNode : function()
     {
+        this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
+
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
     },
 
@@ -552,12 +558,21 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (file.isXHR)
         {
+            var bp = this.context.netProgress.breakpoints.findBreakpoint(file.getFileURL());
+
             items.push(
                 "-",
-                {label: "net.label.Break On Request", type: "checkbox",
-                    checked: this.context.netProgress.breakpoints.findBreakpoint(file.href),
+                {label: "net.label.Break On Request", type: "checkbox", checked: !!bp,
                     command: bindFixed(this.breakOnRequest, this, file) }
             );
+
+            if (bp)
+            {
+                items.push(
+                    {label: "editBreakpointCondition",
+                        command: bindFixed(this.editBreakpointCondition, this, file) }
+                );
+            }
         }
 
         return items;
@@ -636,21 +651,22 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // Create new or remove an existing breakpoint.
         var breakpoints = this.context.netProgress.breakpoints;
-        var bp = breakpoints.findBreakpoint(file.href);
+        var url = file.getFileURL();
+        var bp = breakpoints.findBreakpoint(url);
         if (bp)
         {
             row.removeAttribute("breakpoint");
-            breakpoints.removeBreakpoint(file.href);
+            breakpoints.removeBreakpoint(url);
         }
         else
         {
-            breakpoints.addBreakpoint(file.href);
+            breakpoints.addBreakpoint(url);
             row.setAttribute("breakpoint", "true");
         }
 
         this.enumerateRequests(function(currFile)
         {
-            if (file.href != currFile.href)
+            if (url != currFile.getFileURL())
                 return;
 
             if (bp)
@@ -667,6 +683,37 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         file.request.cancel(NS_BINDING_ABORTED);
     },
 
+    // Support for xhr breakpoint conditions.
+    onContextMenu: function(event)
+    {
+        if (!hasClass(event.target, "sourceLine"))
+            return;
+
+        var row = getAncestorByClass(event.target, "netRow");
+        if (row)
+        {
+            this.editBreakpointCondition(row.repObject);
+            cancelEvent(event);
+        }
+    },
+
+    editBreakpointCondition: function(file)
+    {
+        var bp = this.context.netProgress.breakpoints.findBreakpoint(file.getFileURL());
+        var condition = bp ? bp.condition : "";
+
+        this.selectedSourceBox = this.panelNode;
+        Firebug.Editor.startEditing(file.row, condition);
+    },
+
+    getEditor: function(target, value)
+    {
+        if (!this.conditionEditor)
+            this.conditionEditor = new Firebug.NetMonitor.ConditionEditor(this.document);
+
+        return this.conditionEditor;
+    },
+ 
     // Support for activation.
     disablePanel: function(module)
     {
@@ -913,7 +960,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 file.row = row;
 
                 // Make sure a breakpoint is displayed.
-                if (this.context.netProgress.breakpoints.findBreakpoint(file.href))
+                if (this.context.netProgress.breakpoints.findBreakpoint(file.getFileURL()))
                     row.setAttribute("breakpoint", "true");
 
                 // Allow customization of request entries in the list. A row is represented
@@ -2681,7 +2728,8 @@ NetProgress.prototype =
     breakOnXHR: function(file)
     {
         var breakpoints = this.context.netProgress.breakpoints;
-        if (!(breakpoints && breakpoints.findBreakpoint(file.href) || this.context.breakOnXHR))
+        var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
+        if (!(bp && bp.enabled || this.context.breakOnXHR))
             return;
 
         // Even if the execution was stopped at breakpoint reset the global
@@ -3220,6 +3268,12 @@ NetFile.prototype =
         var link = new FBL.NetFileLink(this.href, this.request);
         link.message = message;
         return link;
+    },
+
+    getFileURL: function()
+    {
+        var index = this.href.indexOf("?");
+        return this.href.substring(0, index);
     }
 };
 
@@ -4344,10 +4398,18 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
             DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
                     _checked: "$bp.checked", tabindex : "-1"}),
-                SPAN({"class": "breakpointName"}, "$bp|getName"),
+                SPAN({"class": "breakpointName", title: "$bp|getTitle"}, "$bp|getName"),
                 IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+            ),
+            DIV({"class": "breakpointCondition"},
+                SPAN("$bp.condition")
             )
         ),
+
+    getTitle: function(bp)
+    {
+        return bp.href;
+    },
 
     getName: function(bp)
     {
@@ -4380,7 +4442,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
 
         this.enumerateRequests(function(file)
         {
-            if (file.href == bp.href)
+            if (file.getFileURL() == bp.href)
             {
                 file.row.removeAttribute("breakpoint");
                 file.row.removeAttribute("disabledBreakpoint");
@@ -4406,7 +4468,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
 
         panel.enumerateRequests(function(file)
         {
-            if (file.href == bp.href)
+            if (file.getFileURL() == bp.href)
                 file.row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");
         });
     },
@@ -4423,6 +4485,7 @@ function Breakpoint(href)
 {
     this.href = href;
     this.checked = true;
+    this.condition = "";
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -4463,6 +4526,28 @@ NetBreakpointList.prototype =
         return -1;
     },
 }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+Firebug.NetMonitor.ConditionEditor = function(doc)
+{
+    Firebug.Debugger.ConditionEditor.apply(this, arguments);
+}
+
+Firebug.NetMonitor.ConditionEditor.prototype = domplate(Firebug.Debugger.ConditionEditor.prototype,
+{
+    endEditing: function(target, value, cancel)
+    {
+        if (cancel)
+            return;
+
+        var file = target.repObject;
+        var panel = Firebug.getElementPanel(target);
+        var bp = panel.context.netProgress.breakpoints.findBreakpoint(file.getFileURL());
+        if (bp)
+            bp.condition = value;
+    }
+});
 
 // ************************************************************************************************
 

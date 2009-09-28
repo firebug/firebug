@@ -3001,7 +3001,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getEditor: function(target, value)
     {
         if (!this.conditionEditor)
-            this.conditionEditor = new ConditionEditor(this.document);
+            this.conditionEditor = new Firebug.Debugger.ConditionEditor(this.document);
 
         return this.conditionEditor;
     },
@@ -3634,29 +3634,28 @@ CallstackPanel.prototype = extend(Firebug.Panel,
 // ************************************************************************************************
 // Local Helpers
 
-function ConditionEditor(doc)
+Firebug.Debugger.ConditionEditor = function(doc)
 {
     this.initialize(doc);
 }
 
-
-ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+Firebug.Debugger.ConditionEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag:
-        DIV({class: "conditionEditor"},
-            DIV({class: "conditionEditorTop1"},
-                DIV({class: "conditionEditorTop2"})
+        DIV({"class": "conditionEditor"},
+            DIV({"class": "conditionEditorTop1"},
+                DIV({"class": "conditionEditorTop2"})
             ),
-            DIV({class: "conditionEditorInner1"},
-                DIV({class: "conditionEditorInner2"},
-                    DIV({class: "conditionEditorInner"},
-                        DIV({class: "conditionCaption"}, $STR("ConditionInput")),
-                        INPUT({class: "conditionInput", type: "text", 'aria-label' : $STR("ConditionInput")})
+            DIV({"class": "conditionEditorInner1"},
+                DIV({"class": "conditionEditorInner2"},
+                    DIV({"class": "conditionEditorInner"},
+                        DIV({"class": "conditionCaption"}, $STR("ConditionInput")),
+                        INPUT({"class": "conditionInput", type: "text", 'aria-label' : $STR("ConditionInput")})
                     )
                 )
             ),
-            DIV({class: "conditionEditorBottom1"},
-                DIV({class: "conditionEditorBottom2"})
+            DIV({"class": "conditionEditorBottom1"},
+                DIV({"class": "conditionEditorBottom2"})
             )
         ),
 
@@ -3742,23 +3741,23 @@ function BreakNotification(doc, errorObject)
 BreakNotification.prototype = domplate(Firebug.MeasureBox,
 {
     tag:
-        DIV({class: "conditionEditor breakNotification", onclick: "$hide"},
-            DIV({class: "notationEditorTop1"},
-                DIV({class: "notationEditorTop2"})
+        DIV({"class": "conditionEditor breakNotification", onclick: "$hide"},
+            DIV({"class": "notationEditorTop1"},
+                DIV({"class": "notationEditorTop2"})
             ),
-            DIV({class: "notationEditorInner1"},
-                DIV({class: "notationEditorInner2"},
-                    DIV({class: "conditionEditorInner"},
-                        DIV({class: "conditionCaption"},
+            DIV({"class": "notationEditorInner1"},
+                DIV({"class": "notationEditorInner2"},
+                    DIV({"class": "conditionEditorInner"},
+                        DIV({"class": "conditionCaption"},
                                 SPAN("$object|getCategory"),
-                                BUTTON({class: "BreakNotificationButton", onclick: "$object|FirebugReps.ErrorMessage.copyError"}, $STR("CopyError"))
+                                BUTTON({"class": "BreakNotificationButton", onclick: "$object|FirebugReps.ErrorMessage.copyError"}, $STR("CopyError"))
                            ),
-                        DIV({class: "conditionCaption"}, "$object|getCause")
+                        DIV({"class": "conditionCaption"}, "$object|getCause")
                     )
                 )
             ),
-            DIV({class: "notationEditorBottom1"},
-                DIV({class: "notationEditorBottom2"})
+            DIV({"class": "notationEditorBottom1"},
+                DIV({"class": "notationEditorBottom2"})
             )
         ),
 

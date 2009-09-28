@@ -284,6 +284,15 @@
     color: DarkGreen;
 }
 
+.breakpointCondition {
+    white-space: nowrap;
+    padding-left: 24px;
+    padding-bottom: 2px;
+    border-bottom: 1px solid #D7D7D7;
+    font-family: Monaco, monospace;
+    color: Gray;
+}
+
 .breakpointBlock-breakpoints > .groupHeader {
     display: none;
 }
