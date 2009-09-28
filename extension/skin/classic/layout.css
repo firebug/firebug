@@ -100,6 +100,16 @@
     text-align: center;
 }
 
+.layoutLabelPosition {
+    left: 0;
+    bottom: 2px;
+    width: 100%;
+    text-align: left;
+}
+.layoutZIndex {
+    float: right;
+}
+
 .layoutLabelLeft {
     top: 50%;
     left: 0;

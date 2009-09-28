@@ -25,13 +25,18 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                         SPAN({class: "editable", 'aria-label' : $STR('offset right')}, '$outerRight')
                     ),
                     DIV({class: "layoutLabelBottom layoutLabel v$outerBottom"},
-                        SPAN({class: "editable", 'aria-label' : $STR('offset bottom')}, '$outerLeft')
+                        SPAN({class: "editable", 'aria-label' : $STR('offset bottom')}, '$outerBottom')
                     ),
                     DIV({class: "layoutLabelLeft layoutLabel v$outerLeft"},
                         SPAN({class: "editable", 'aria-label' : $STR('offset left')}, '$outerLeft')
                     ),
 
                     DIV({class: "layoutCaption"}, '$outerLabel'),
+
+                    DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
+                            SPAN({class: "editable layoutPosition layoutCaption", 'aria-label' : $STR('position')}, '$position'),
+                            SPAN({class: "editable layoutZIndex layoutLable v$zIndex", 'aria-label' : $STR('z-index')}, '$zIndex')
+                        ),
 
                     DIV({class: "marginLayoutBox layoutBox editGroup focusGroup"},
                         DIV({class: "layoutCaption"}, $STR("LayoutMargin")),
@@ -187,8 +192,10 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = 0;
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
+        args.zIndex = 0;
 
         var position = style.getPropertyCSSValue("position").cssText;
+
         if (Firebug.showBoundingClientRect)
         {
             args.outerLabel = $STR("BoundingClientRect");
@@ -196,11 +203,14 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             if (rect.wrappedJSObject)
                 rect = rect.wrappedJSObject;
 
-            args = extend(args, rect);
-            args.outerLeft = args.left;
-            args.outerTop = args.top;
-            args.outerRight = args.right;
-            args.outerBottom = args.bottom;
+            args.width = Math.round(rect.width);
+            args.height = Math.round(rect.height);
+            args.outerLeft = Math.round(rect.left);
+            args.outerTop = Math.round(rect.top);
+            args.outerRight = Math.round(rect.right);
+            args.outerBottom = Math.round(rect.bottom);
+
+            args.position = position;
             // these Modes are classes on the domplate
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
             = args.outerBottomMode = "boundingClientRect";
