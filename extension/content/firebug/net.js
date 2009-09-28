@@ -196,6 +196,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
         NetHttpObserver.registerObserver();
+
+        Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
     shutdown: function()
@@ -205,6 +207,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             Firebug.TraceModule.removeListener(this.TraceListener);
 
         NetHttpObserver.unregisterObserver();
+        Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
@@ -538,6 +541,16 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             }
         }
 
+        if (file.isXHR)
+        {
+            items.push(
+                "-",
+                {label: "net.label.Break On Request", type: "checkbox",
+                    checked: this.context.netProgress.breakpoints.findBreakpoint(file.href),
+                    command: bindFixed(this.breakOnRequest, this, file) }
+            );
+        }
+
         return items;
     },
 
@@ -603,6 +616,39 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("net.openResponseInTab EXCEPTION", err);
         }
+    },
+
+    breakOnRequest: function(file)
+    {
+        if (!file.isXHR)
+            return;
+
+        var row = file.row;
+
+        // Create new or remove an existing breakpoint.
+        var breakpoints = this.context.netProgress.breakpoints;
+        var bp = breakpoints.findBreakpoint(file.href);
+        if (bp)
+        {
+            row.removeAttribute("breakpoint");
+            breakpoints.removeBreakpoint(file.href);
+        }
+        else
+        {
+            breakpoints.addBreakpoint(file.href);
+            row.setAttribute("breakpoint", "true");
+        }
+
+        this.enumerateRequests(function(currFile)
+        {
+            if (file.href != currFile.href)
+                return;
+
+            if (bp)
+                currFile.row.removeAttribute("breakpoint");
+            else
+                currFile.row.setAttribute("breakpoint", "true");
+        })
     },
 
     stopLoading: function(file)
@@ -675,7 +721,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 this.infoTipURL = infoTipURL;
                 return this.populateTimeInfoTip(infoTip, row.repObject);
             }
-            else if (hasClass(row, "category-image"))
+            else if (hasClass(row, "category-image") && 
+                !getAncestorByClass(target, "netRowHeader"))
             {
                 var infoTipURL = row.repObject.href + "-image";
                 if (infoTipURL == this.infoTipURL)
@@ -856,6 +903,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 row.repObject = file;
                 file.row = row;
 
+                // Make sure a breakpoint is displayed.
+                if (this.context.netProgress.breakpoints.findBreakpoint(file.href))
+                    row.setAttribute("breakpoint", "true");
+
                 // Allow customization of request entries in the list. A row is represented
                 // by <TR> HTML element.
                 dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
@@ -888,13 +939,13 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            var sizeLabel = row.childNodes[3].firstChild;
+            var sizeLabel = row.childNodes[4].firstChild;
             sizeLabel.firstChild.nodeValue = NetRequestEntry.getSize(file);
 
-            var methodLabel = row.childNodes[1].firstChild;
+            var methodLabel = row.childNodes[2].firstChild;
             methodLabel.firstChild.nodeValue = NetRequestEntry.getStatus(file);
 
-            var hrefLabel = row.childNodes[0].firstChild;
+            var hrefLabel = row.childNodes[1].firstChild;
             hrefLabel.firstChild.nodeValue = NetRequestEntry.getHref(file);
 
             if (file.mimeType)
@@ -922,7 +973,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 hrefLabel.nodeValue = NetRequestEntry.getHref(file);
             }
 
-            var timeLabel = row.childNodes[4].firstChild.lastChild.firstChild;
+            var timeLabel = row.childNodes[5].firstChild.lastChild.firstChild;
 
             if (file.loaded)
             {
@@ -962,7 +1013,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
-            var blockingBar = row.childNodes[4].firstChild.childNodes[1];
+            var blockingBar = row.childNodes[5].firstChild.childNodes[1];
             var resolvingBar = blockingBar.nextSibling;
             var connectingBar = resolvingBar.nextSibling;
             var sendingBar = connectingBar.nextSibling;
@@ -1071,12 +1122,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!row)
             return;
 
-        var countLabel = row.firstChild.firstChild;
+        var countLabel = row.childNodes[1].firstChild;
         countLabel.firstChild.nodeValue = fileCount == 1
             ? $STR("Request")
             : $STRF("RequestCount", [fileCount]);
 
-        var sizeLabel = row.childNodes[3].firstChild;
+        var sizeLabel = row.childNodes[5].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
         sizeLabel.firstChild.nodeValue = NetRequestEntry.formatSize(totalSize);
 
@@ -1302,6 +1353,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
             TBODY({"role" : "presentation"},
                 TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
+                    TD({"class": "netHeaderCell"}, "&nbsp;"),
                     TD({id: "netHrefCol", width: "18%", "class": "netHeaderCell alphaValue a11yFocus", "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.URL Tooltip")},
@@ -1453,13 +1505,19 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 {
     fileTag:
         FOR("file", "$files",
-            TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow", onclick: "$onClick", "role" : "row", "aria-expanded" : "false",
+            TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow",
+                onclick: "$onClick", "role": "row", "aria-expanded": "false",
                 $collapsed: "$file.file|hideRow",
                 $hasHeaders: "$file.file|hasResponseHeaders",
                 $loaded: "$file.file.loaded",
                 $responseError: "$file.file|isError",
                 $fromCache: "$file.file.fromCache",
                 $inFrame: "$file.file|getInFrame"},
+                TD({"class": "netCol"},
+                   DIV({"class": "sourceLine netRowHeader", onclick: "$onClickRowHeader"},
+                        "&nbsp;"
+                   )
+                ),
                 TD({"class": "netHrefCol netCol a11yFocus", "role": "rowheader"},
                     DIV({"class": "netHrefLabel netLabel",
                          style: "margin-left: $file.file|getIndent\\px"},
@@ -1499,25 +1557,26 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     headTag:
         TR({"class": "netHeadRow"},
-            TD({"class": "netHeadCol", colspan: 5},
+            TD({"class": "netHeadCol", colspan: 6},
                 DIV({"class": "netHeadLabel"}, "$doc.rootFile.href")
             )
         ),
 
     netInfoTag:
         TR({"class": "netInfoRow outerFocusRow", "role" : "row"},
-            TD({"class": "netInfoCol", colspan: 5, "role" : "gridcell"})
+            TD({"class": "netInfoCol", colspan: 6, "role" : "gridcell"})
         ),
 
     activationTag:
         TR({"class": "netRow netActivationRow"},
-            TD({"class": "netCol netActivationLabel", colspan: 5, "role": "status"},
+            TD({"class": "netCol netActivationLabel", colspan: 6, "role": "status"},
                 $STR("net.ActivationMessage")
             )
         ),
 
     summaryTag:
         TR({"class": "netRow netSummaryRow focusRow outerFocusRow", "role": "row", "aria-live": "polite"},
+            TD({"class": "netCol"}, "&nbsp;"),
             TD({"class": "netCol netHrefCol a11yFocus", "role" : "rowheader"},
                 DIV({"class": "netCountLabel netSummaryLabel"}, "-")
             ),
@@ -1541,6 +1600,24 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
+    onClickRowHeader: function(event)
+    {
+        cancelEvent(event);
+
+        var rowHeader = event.target;
+        if (!hasClass(rowHeader, "netRowHeader"))
+            return;
+
+        var row = getAncestorByClass(event.target, "netRow");
+        if (!row)
+            return;
+
+        var context = Firebug.getElementPanel(row).context;
+        var panel = context.getPanel(panelName, true);
+        if (panel)
+            panel.breakOnRequest(row.repObject);
+    },
+
     onClick: function(event)
     {
         if (isLeftClick(event))
@@ -1548,6 +1625,10 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             var row = getAncestorByClass(event.target, "netRow");
             if (row)
             {
+                // Click on the rowHeader element inserts a breakpoint.
+                if (getAncestorByClass(event.target, "netRowHeader"))
+                    return;
+
                 this.toggleHeadersRow(row);
                 cancelEvent(event);
             }
@@ -1658,7 +1739,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     {
         // Use formatTime util from the lib.
         return formatTime(elapsed);
-    },
+    }
 });
 
 var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
@@ -2357,7 +2438,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
 
     limitTag:
         TR({"class": "netRow netLimitRow", $collapsed: "$isCollapsed"},
-            TD({"class": "netCol netLimitCol", colspan: 5},
+            TD({"class": "netCol netLimitCol", colspan: 6},
                 TABLE({cellpadding: 0, cellspacing: 0},
                     TBODY(
                         TR(
@@ -2565,7 +2646,7 @@ NetProgress.prototype =
 
             dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
 
-            this.breakOnXHR();
+            this.breakOnXHR(file);
 
             return file;
         }
@@ -2576,11 +2657,14 @@ NetProgress.prototype =
         }
     },
 
-    breakOnXHR: function()
+    breakOnXHR: function(file)
     {
-        if (!this.context.breakOnXHR)
+        var breakpoints = this.context.netProgress.breakpoints;
+        if (!(breakpoints && breakpoints.findBreakpoint(file.href) || this.context.breakOnXHR))
             return;
 
+        // Even if the execution was stopped at breakpoint reset the global
+        // breakOnXHR flag.
         this.context.breakOnXHR = false;
 
         Firebug.Debugger.halt(function(frame)
@@ -3266,6 +3350,8 @@ function monitorContext(context)
     // Activate net panel sub-context.
     var panel = context.getPanel(panelName);
     context.netProgress.activate(panel);
+
+    context.netProgress.breakpoints = new NetBreakpointList();
 
     // Display info message
     panel.insertActivationMessage();
@@ -4214,10 +4300,157 @@ var NetPanelSearch = function(panel, rowFinder)
 };
 
 // ************************************************************************************************
+// Breakpoints
+
+Firebug.NetMonitor.DebuggerListener =
+{
+    getBreakpoints: function(context, groups)
+    {
+        var breakpoints = context.netProgress.breakpoints.breakpoints;
+        if (!breakpoints.length)
+            return;
+
+        groups.push({name: "netBreakpoints", title: $STR("net.label.Network Breakpoints"),
+            breakpoints: breakpoints});
+    }
+};
+
+Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
+{
+    inspectable: false,
+
+    tag:
+        DIV({"class": "breakpointRow focusRow", _repObject: "$bp",
+            role: "option", "aria-checked": "$bp.checked"},
+            DIV({"class": "breakpointBlockHead", onclick: "$onEnable"},
+                INPUT({"class": "breakpointCheckbox", type: "checkbox",
+                    _checked: "$bp.checked", tabindex : "-1"}),
+                SPAN({"class": "breakpointName"}, "$bp|getName"),
+                IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
+            )
+        ),
+
+    getName: function(bp)
+    {
+        return getFileName(bp.href);
+    },
+
+    onRemove: function(event)
+    {
+        cancelEvent(event);
+
+        if (!hasClass(event.target, "closeButton"))
+            return;
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+
+        // Remove from list of breakpoints.
+        var row = getAncestorByClass(event.target, "breakpointRow");
+        var bp = row.repObject;
+        context.netProgress.breakpoints.removeBreakpoint(bp.href);
+
+        // Remove from the UI.
+        bpPanel.noRefresh = true;
+        bpPanel.removeRow(row);
+        bpPanel.noRefresh = false;
+
+        var panel = context.getPanel(panelName, true);
+        if (!panel)
+            return;
+
+        this.enumerateRequests(function(file)
+        {
+            if (file.href == bp.href)
+            {
+                file.row.removeAttribute("breakpoint");
+                file.row.removeAttribute("disabledBreakpoint");
+            }
+        })
+    },
+
+    onEnable: function(event)
+    {
+        var checkBox = event.target;
+        if (!hasClass(checkBox, "breakpointCheckbox"))
+            return;
+
+        var bpPanel = Firebug.getElementPanel(event.target);
+        var context = bpPanel.context;
+
+        var bp = getAncestorByClass(checkBox, "breakpointRow").repObject;
+        bp.checked = checkBox.checked;
+
+        var panel = context.getPanel(panelName, true);
+        if (!panel)
+            return;
+
+        panel.enumerateRequests(function(file)
+        {
+            if (file.href == bp.href)
+                file.row.setAttribute("disabledBreakpoint", bp.checked ? "false" : "true");
+        });
+    },
+
+    supportsObject: function(object)
+    {
+        return object instanceof Breakpoint;
+    }
+});
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+function Breakpoint(href)
+{
+    this.href = href;
+    this.checked = true;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+function NetBreakpointList()
+{
+    this.breakpoints = [];
+}
+
+NetBreakpointList.prototype =
+{
+    addBreakpoint: function(href)
+    {
+        this.breakpoints.push(new Breakpoint(href));
+    },
+
+    removeBreakpoint: function(href)
+    {
+        var index = this.findBreakpointIndex(href);
+        if (index >= 0)
+            this.breakpoints.splice(index, 1);
+    },
+
+    findBreakpoint: function(href)
+    {
+        var index = this.findBreakpointIndex(href);
+        return (index < 0) ? null : this.breakpoints[index];
+    },
+
+    findBreakpointIndex: function(href)
+    {
+        for (var i=0; i<this.breakpoints.length; i++)
+        {
+            var temp = this.breakpoints[i];
+            if (temp.href == href)
+                return i;
+        }
+        return -1;
+    },
+}
+
+// ************************************************************************************************
 
 Firebug.registerRep(Firebug.NetMonitor.NetRequestTable);
 Firebug.registerActivableModule(Firebug.NetMonitor);
 Firebug.registerPanel(NetPanel);
+Firebug.registerRep(Firebug.NetMonitor.BreakpointRep);
 
 // ************************************************************************************************
 }});

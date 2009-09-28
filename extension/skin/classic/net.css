@@ -88,6 +88,36 @@
 }
 
 /************************************************************************************************/
+/* Breakpoints */
+
+.panelNode-net .netRowHeader {
+    display: block;
+}
+
+.netRowHeader {
+    cursor: pointer;
+    display: none;
+    height: 15px;
+}
+
+/* Display brekpoint disc */
+.netRow .netRowHeader {
+    background-position: 5px 1px;
+}
+
+.netRow[breakpoint="true"] .netRowHeader {
+    background-image: url(chrome://firebug/skin/breakpoint.png);
+}
+
+.netRow[breakpoint="true"][disabledBreakpoint="true"] .netRowHeader {
+    background-image: url(chrome://firebug/skin/breakpointDisabled.png);
+}
+
+.netRow.category-xhr:hover .netRowHeader {
+    background-color: #F6F6F6;
+}
+
+/************************************************************************************************/
 /* Column visibility */
 
 .netTable[hiddenCols~=netHrefCol] TD[id="netHrefCol"],
@@ -181,7 +211,7 @@
     display: block;
 }
 
-.netRow.loaded:hover > .netCol > .netFullHrefLabel {
+.netRow.loaded:hover .netCol > .netFullHrefLabel {
     background-color: #EFEFEF;
 }
 
@@ -456,7 +486,7 @@
 
 .netInfoTabs {
     position: relative;
-    padding-left: 14px;
+    padding-left: 17px;
 }
 
 .netInfoTab {
