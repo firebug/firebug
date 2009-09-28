@@ -569,7 +569,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             if (bp)
             {
                 items.push(
-                    {label: "editBreakpointCondition",
+                    {label: "EditBreakpointCondition",
                         command: bindFixed(this.editBreakpointCondition, this, file) }
                 );
             }
@@ -2729,7 +2729,10 @@ NetProgress.prototype =
     {
         var breakpoints = this.context.netProgress.breakpoints;
         var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
-        if (!(bp && bp.enabled || this.context.breakOnXHR))
+        if (!(bp && bp.checked || this.context.breakOnXHR))
+            return;
+
+        if (bp.condition && !bp.evaluateCondition(this.context, file))
             return;
 
         // Even if the execution was stopped at breakpoint reset the global
@@ -4383,7 +4386,7 @@ Firebug.NetMonitor.DebuggerListener =
         if (!breakpoints.length)
             return;
 
-        groups.push({name: "netBreakpoints", title: $STR("net.label.Network Breakpoints"),
+        groups.push({name: "netBreakpoints", title: $STR("net.label.XHR Breakpoints"),
             breakpoints: breakpoints});
     }
 };
@@ -4486,6 +4489,35 @@ function Breakpoint(href)
     this.href = href;
     this.checked = true;
     this.condition = "";
+}
+
+Breakpoint.prototype =
+{
+    evaluateCondition: function(context, file)
+    {
+        var scope = {};
+        for (var i=0; i<file.urlParams.length; i++)
+        {
+            var param = file.urlParams[i];
+            scope[param.name] = param.value;
+        }
+
+        // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
+        try
+        {
+            var sandbox = new Components.utils.Sandbox(context.window);
+            sandbox.scope = scope;
+
+            var expr = "with (scope) {" + this.condition + "}";
+            return Components.utils.evalInSandbox(expr, sandbox);
+        }
+        catch (err)
+        {
+            FBTrace.sysout("net.evaluateCondition; EXCEPTION", err);
+        }
+
+        return false;
+    }
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
