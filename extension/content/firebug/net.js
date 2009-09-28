@@ -562,7 +562,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
             items.push(
                 "-",
-                {label: "net.label.Break On Request", type: "checkbox", checked: !!bp,
+                {label: "net.label.Break On XHR", type: "checkbox", checked: !!bp,
                     command: bindFixed(this.breakOnRequest, this, file) }
             );
 
