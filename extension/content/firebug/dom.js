@@ -473,7 +473,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 row.innerHTML = $STR("warning.Console must be enabled");
         }
         else if (hasClass(row, "watchRow"))
+        {
             Firebug.Editor.startEditing(row, getRowName(row));
+        }
         else
         {
             var object = this.getRowObject(row);
@@ -495,7 +497,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 else
                     editValue = "this." + getRowName(row);
             }
-
 
             Firebug.Editor.startEditing(row, editValue);
         }
@@ -1671,12 +1672,14 @@ function getWatchRowIndex(row)
 
 function getRowName(row)
 {
-    return row.firstChild.textContent;
+    var labelNode = getElementByClass(row, "memberLabelCell");
+    return labelNode.textContent;
 }
 
 function getRowValue(row)
 {
-    return row.lastChild.firstChild.repObject;
+    var valueNode = getElementByClass(row, "memberValueCell");
+    return valueNode.firstChild.repObject;
 }
 
 function getRowOwnerObject(row)
