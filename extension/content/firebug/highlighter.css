@@ -12,7 +12,7 @@
 
 .firebugHighlight {
     z-index: 2147483647;
-    position: absolute;
+    position: fixed;
     background-color: #3875d7;
     margin: 0;
     padding: 0;
@@ -22,7 +22,7 @@
 
 .firebugLayoutBoxParent {
     z-index: 2147483647;
-    position: absolute;
+    position: fixed;
     background-color: transparent;
     border-top: 0 none;
     border-right: 1px dashed #BBBBBB;
@@ -34,7 +34,7 @@
 }
 
 .firebugRuler {
-    position: absolute;
+    position: fixed;
     margin: 0;
     padding: 0;
     outline: 0;
@@ -81,7 +81,7 @@
 
 .firebugLayoutBoxOffset {
     z-index: 2147483647;
-    position: absolute;
+    position: fixed;
     opacity: 0.8;
 }
 
@@ -128,7 +128,7 @@
 
 .firebugLayoutLineTop,
 .firebugLayoutLineBottom {
-    position: absolute;
+    position: fixed;
     width: 100%;
     height: 1px;
 }
