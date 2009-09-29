@@ -941,7 +941,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var url = getURLForStyleSheet(styleSheet);
         var instance = getInstanceForStyleSheet(styleSheet);
-        
+
         var baseDescription = splitURLBase(url);
         if (instance) {
           baseDescription.name = baseDescription.name + " #" + (instance + 1);
@@ -1145,7 +1145,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var rule = QI(inspectedRules.GetElementAt(i), nsIDOMCSSStyleRule);
 
                 var href = rule.parentStyleSheet.href;  // Null means inline
-                
+
                 var instance = getInstanceForStyleSheet(rule.parentStyleSheet, element.ownerDocument);
 
                 var isSystemSheet = isSystemStyleSheet(rule.parentStyleSheet);
@@ -1171,7 +1171,8 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             }
         }
 
-        this.getStyleProperties(element, rules, usedProps, inheritMode);
+        if (element.style)
+            this.getStyleProperties(element, rules, usedProps, inheritMode);
 
         if (FBTrace.DBG_CSS)
             FBTrace.sysout("getElementRules "+rules.length+" rules for "+getElementXPath(element), rules);
