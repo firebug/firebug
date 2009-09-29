@@ -4569,10 +4569,10 @@ NetBreakpointList.prototype =
 
 Firebug.NetMonitor.ConditionEditor = function(doc)
 {
-    Firebug.Debugger.ConditionEditor.apply(this, arguments);
+    Firebug.Breakpoint.ConditionEditor.apply(this, arguments);
 }
 
-Firebug.NetMonitor.ConditionEditor.prototype = domplate(Firebug.Debugger.ConditionEditor.prototype,
+Firebug.NetMonitor.ConditionEditor.prototype = domplate(Firebug.Breakpoint.ConditionEditor.prototype,
 {
     endEditing: function(target, value, cancel)
     {
