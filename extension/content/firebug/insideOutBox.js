@@ -167,7 +167,7 @@ InsideOutBox.prototype =
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
             {
                 setClass(parentBox, "open");
-                labelBox = getChildByClass(parentBox.firstChild, 'nodeLabelBox');
+                labelBox = getElementByClass(parentBox, 'nodeLabelBox');
                 if (labelBox)
                     labelBox.setAttribute('aria-expanded', 'true')
             }
@@ -185,7 +185,7 @@ InsideOutBox.prototype =
             var firstChild = this.view.getChildObject(objectBox.repObject, 0);
             this.populateChildBox(firstChild, nodeChildBox);
         }
-        var labelBox = getChildByClass(objectBox.firstChild, 'nodeLabelBox');
+        var labelBox = getElementByClass(objectBox, 'nodeLabelBox');
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'true');
         setClass(objectBox, "open");
@@ -194,7 +194,8 @@ InsideOutBox.prototype =
     contractObjectBox: function(objectBox)
     {
         removeClass(objectBox, "open");
-        var labelBox = getChildByClass(objectBox.firstChild, 'nodeLabelBox');
+        var nodeLabel = getElementByClass(objectBox, "nodeLabel");
+        var labelBox = getElementByClass(nodeLabel, 'nodeLabelBox');
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'false');
     },
@@ -202,7 +203,8 @@ InsideOutBox.prototype =
     toggleObjectBox: function(objectBox, forceOpen)
     {
         var isOpen = hasClass(objectBox, "open");
-        var labelBox = getChildByClass(objectBox.firstChild, 'nodeLabelBox');
+        var nodeLabel = getElementByClass(objectBox, "nodeLabel");
+        var labelBox = getElementByClass(nodeLabel, 'nodeLabelBox');
         if (labelBox)
             labelBox.setAttribute('aria-expanded', isOpen);
         if (!forceOpen && isOpen)
@@ -379,7 +381,7 @@ InsideOutBox.prototype =
         if (!repObject)
             return null;
 
-        var parentObjectBox = nodeChildBox.parentNode;
+        var parentObjectBox = getAncestorByClass(nodeChildBox, "nodeBox");
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("+++insideOutBox.populateChildBox("+(repObject.localName?repObject.localName:repObject)+") parentObjectBox.populated "+parentObjectBox.populated+"\n");
         if (parentObjectBox.populated)
@@ -440,7 +442,7 @@ InsideOutBox.prototype =
 
     getChildObjectBox: function(objectBox)
     {
-        return getChildByClass(objectBox, "nodeChildBox");
+        return getElementByClass(objectBox, "nodeChildBox");
     },
 
     findChildObjectBox: function(parentNodeBox, repObject)

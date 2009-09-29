@@ -128,7 +128,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (objectNodeBox)
         {
             var labelBox = objectNodeBox.firstChild.lastChild;
-            var bracketBox = getChildByClass(labelBox, "nodeBracket");
+            var bracketBox = getElementByClass(labelBox, "nodeBracket");
             Firebug.Editor.insertRow(bracketBox, "before");
         }
     },
@@ -264,7 +264,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                             this.document);
 
                     var labelBox = objectNodeBox.firstChild.lastChild;
-                    var bracketBox = getChildByClass(labelBox, "nodeBracket");
+                    var bracketBox = getElementByClass(labelBox, "nodeBracket");
                     labelBox.insertBefore(nodeAttr, bracketBox);
 
                     this.highlightMutation(nodeAttr, objectNodeBox, "mutated");
@@ -1161,7 +1161,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
                     SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
                     "&gt;"
                 )
-             )
+            )
         )
 });
 
