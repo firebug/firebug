@@ -34,8 +34,8 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                     DIV({class: "layoutCaption"}, '$outerLabel'),
 
                     DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
-                            SPAN({class: "editable layoutPosition layoutCaption", 'aria-label' : $STR('position')}, '$position'),
-                            SPAN({class: "editable layoutZIndex v$zIndex", 'aria-label' : $STR('z-index')}, '$zIndex')
+                            SPAN({class: "editable layoutPosition layoutCaption", 'aria-label' : $STR('position')}, $STR('position')+": "+'$position'),
+                            SPAN({class: "editable layoutZIndex v$zIndex", 'aria-label' : $STR('z-index')}, "z: "+'$zIndex')
                         ),
 
                     DIV({class: "marginLayoutBox layoutBox editGroup focusGroup"},
