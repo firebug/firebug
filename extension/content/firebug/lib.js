@@ -1460,6 +1460,7 @@ this.readBoxStyles = function(style)
         "border-left-width": "borderLeft", "border-bottom-width": "borderBottom",
         "padding-top": "paddingTop", "padding-right": "paddingRight",
         "padding-left": "paddingLeft", "padding-bottom": "paddingBottom",
+        "z-index": "zIndex",
     };
 
     var styles = {};

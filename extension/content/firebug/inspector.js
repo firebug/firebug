@@ -848,7 +848,8 @@ BoxModelHighlighter.prototype =
             }
             else if (nodes.lines.top.parentNode)
             {
-                body.removeChild(nodes.parent);
+                if (nodes.parent)
+                    body.removeChild(nodes.parent);
 
                 for (var line in nodes.lines)
                     body.removeChild(nodes.lines[line]);

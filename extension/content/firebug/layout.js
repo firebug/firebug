@@ -35,7 +35,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
                     DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
                             SPAN({class: "editable layoutPosition layoutCaption", 'aria-label' : $STR('position')}, '$position'),
-                            SPAN({class: "editable layoutZIndex layoutLable v$zIndex", 'aria-label' : $STR('z-index')}, '$zIndex')
+                            SPAN({class: "editable layoutZIndex v$zIndex", 'aria-label' : $STR('z-index')}, '$zIndex')
                         ),
 
                     DIV({class: "marginLayoutBox layoutBox editGroup focusGroup"},
@@ -192,7 +192,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
         args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = 0;
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
-        args.zIndex = 0;
+        args.zIndex = args.zIndex ? args.zIndex : "auto";
 
         var position = style.getPropertyCSSValue("position").cssText;
 
