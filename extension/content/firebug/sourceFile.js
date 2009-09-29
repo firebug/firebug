@@ -2,6 +2,8 @@
 
 FBL.ns(function() { with (FBL)
 {
+    const Cc = Components.classes;
+    const Ci = Components.interfaces;
 
     const PCMAP_SOURCETEXT = Ci.jsdIScript.PCMAP_SOURCETEXT;
     const PCMAP_PRETTYPRINT = Ci.jsdIScript.PCMAP_PRETTYPRINT;
