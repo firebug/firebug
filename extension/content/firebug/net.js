@@ -696,16 +696,24 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             return;
 
         var row = getAncestorByClass(event.target, "netRow");
-        if (row)
-        {
-            this.editBreakpointCondition(row.repObject);
-            cancelEvent(event);
-        }
+        if (!row)
+            return;
+
+        var file = row.repObject;
+        var bp = this.context.netProgress.breakpoints.findBreakpoint(file.getFileURL());
+        if (!bp)
+            return;
+
+        this.editBreakpointCondition(file);
+        cancelEvent(event);
     },
 
     editBreakpointCondition: function(file)
     {
         var bp = this.context.netProgress.breakpoints.findBreakpoint(file.getFileURL());
+        if (!bp)
+            return;
+
         var condition = bp ? bp.condition : "";
 
         this.selectedSourceBox = this.panelNode;
@@ -3282,6 +3290,9 @@ NetFile.prototype =
     getFileURL: function()
     {
         var index = this.href.indexOf("?");
+        if (index < 0)
+            return this.href;
+
         return this.href.substring(0, index);
     }
 };
@@ -4501,16 +4512,20 @@ Breakpoint.prototype =
 {
     evaluateCondition: function(context, file)
     {
-        var scope = {};
-        for (var i=0; i<file.urlParams.length; i++)
-        {
-            var param = file.urlParams[i];
-            scope[param.name] = param.value;
-        }
-
-        // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
         try
         {
+            var scope = {};
+
+            var params = file.urlParams;
+            for (var i=0; params && i<params.length; i++)
+            {
+                var param = params[i];
+                scope[param.name] = param.value;
+            }
+
+            scope["$postBody"] = Utils.getPostText(file, context);
+
+            // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
             var sandbox = new Components.utils.Sandbox(context.window);
             sandbox.scope = scope;
 
