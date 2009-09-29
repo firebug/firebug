@@ -233,7 +233,7 @@ this.Func = domplate(Firebug.Rep,
         if (!script)
             return;
 
-        var scriptInfo = getSourceFileAndLineByScript(context, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
         var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
 
         var name = script ? getFunctionName(script, context) : fn.name;
@@ -300,7 +300,7 @@ this.jsdScript = domplate(Firebug.Rep,
     {
         var fn = script.functionObject.getWrappedValue();
 
-        var scriptInfo = getSourceFileAndLineByScript(context, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
            var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
 
         var name = getFunctionName(script, context);
@@ -1174,7 +1174,7 @@ this.SourceFile = domplate(this.SourceLink,
 
     supportsObject: function(object)
     {
-        return object instanceof SourceFile;
+        return object instanceof Firebug.SourceFile;
     },
 
     persistObject: function(sourceFile)
@@ -1323,7 +1323,7 @@ this.jsdStackFrame = domplate(Firebug.Rep,
     getTooltip: function(frame, context)
     {
         if (!frame.isValid) return "(invalid frame; did Firebug suspend?)";  // XXXjjb avoid frame.script == null
-        var sourceInfo = FBL.getSourceFileAndLineByScript(context, frame.script, frame);
+        var sourceInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, frame.script, frame);
         if (sourceInfo)
             return $STRF("Line", [sourceInfo.sourceFile.href, sourceInfo.lineNo]);
         else

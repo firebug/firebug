@@ -20,9 +20,11 @@
     <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/lib.js"/>
 
+
     <script type="application/x-javascript" src="chrome://firebug/content/domplate.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/insideOutBox.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/firebug.js"/>
+    <script type="application/x-javascript" src="chrome://firebug/content/sourceFile.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/sourceBox.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/tabWatcher.js"/>
     <script type="application/x-javascript" src="chrome://firebug/content/activation.js"/>

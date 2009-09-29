@@ -511,7 +511,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     monitorScript: function(fn, script, mode)
     {
-        var scriptInfo = getSourceFileAndLineByScript(FirebugContext, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(FirebugContext, script);
         if (scriptInfo)
         {
             if (mode == "debug")
@@ -523,7 +523,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     unmonitorScript: function(fn, script, mode)
     {
-        var scriptInfo = getSourceFileAndLineByScript(FirebugContext, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(FirebugContext, script);
         if (scriptInfo)
         {
             if (mode == "debug")
@@ -560,14 +560,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     traceScriptCalls: function(context, script)
     {
-        var scriptInfo = getSourceFileAndLineByScript(context, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
         if (scriptInfo)
             fbs.traceCalls(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
     },
 
     untraceScriptCalls: function(context, script)
     {
-        var scriptInfo = getSourceFileAndLineByScript(context, script);
+        var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
         if (scriptInfo)
             fbs.untraceCalls(scriptInfo.sourceFile, scriptInfo.lineNo, Firebug.Debugger);
     },
@@ -583,7 +583,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             context.currentFrame = context.debugFrame;
 
-            context.executingSourceFile = FBL.getSourceFileByScript(context, context.currentFrame.script);
+            context.executingSourceFile = Firebug.SourceFile.getSourceFileByScript(context, context.currentFrame.script);
 
             if (!context.executingSourceFile)  // bail out, we don't want the user stuck in debug with out source.
             {
@@ -1079,7 +1079,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var url = urlDescribed.href;
 
         var lines = context.sourceCache.store(url, source);
-        var sourceFile = new FBL.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
+        var sourceFile = new Firebug.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
         this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_EVENTS)
@@ -1108,16 +1108,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated outerScript.tag="+outerScript.tag+" has fileName="+outerScript.fileName+"\n");
 
         var sourceFile = context.sourceFileMap[url];
-        if (sourceFile && (sourceFile instanceof FBL.TopLevelSourceFile) )      // TODO test multiple script tags in one html file
+        if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile) )      // TODO test multiple script tags in one html file
         {
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated reuse sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
             if (!sourceFile.outerScript || !sourceFile.outerScript.isValid)
                 sourceFile.outerScript = outerScript;
-            FBL.addScriptsToSourceFile(sourceFile, outerScript, innerScripts);
+            Firebug.SourceFile.addScriptsToSourceFile(sourceFile, outerScript, innerScripts);
         }
         else
         {
-            sourceFile = new FBL.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
+            sourceFile = new Firebug.TopLevelSourceFile(url, script, script.lineExtent, innerScripts);
             this.watchSourceFile(context, sourceFile);
             if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onTopLevelScriptCreated create sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
         }
@@ -1125,6 +1125,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         dispatch(this.fbListeners,"onTopLevelScriptCreated",[context, frame, sourceFile.href]);
         return sourceFile;
     },
+
+
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -1315,7 +1317,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var url = this.getDynamicURL(context, normalizeURL(caller_frame.script.fileName), source, "Function");
 
         var lines = context.sourceCache.store(url.href, source);
-        var sourceFile = new FBL.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
+        var sourceFile = new Firebug.FunctionConstructorSourceFile(url, caller_frame.script, ctor_expr, lines.length);
         this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.onNewFunction sourcefile="+sourceFile.toString()+" -> "+context.getName()+"\n");
@@ -1385,7 +1387,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         context.sourceCache.invalidate(url.href);
         context.sourceCache.storeSplitLines(url.href, lines);
 
-        var sourceFile = new FBL.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
+        var sourceFile = new Firebug.EvalLevelSourceFile(url, frame.script, eval_expr, lines, mapType, innerScripts);
         this.watchSourceFile(context, sourceFile);
 
         if (FBTrace.DBG_SOURCEFILES)
@@ -1572,7 +1574,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     getEvalExpressionFromEval: function(frame, context)
     {
         var callingFrame = frame.callingFrame;
-        var sourceFile = FBL.getSourceFileByScript(context, callingFrame.script);
+        var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, callingFrame.script);
         if (sourceFile)
         {
             if (FBTrace.DBG_EVAL) {
@@ -2106,7 +2108,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
 
         this.context.currentFrame = frame;
-        var sourceFile = FBL.getSourceFileByScript(this.context, this.context.currentFrame.script);
+        var sourceFile = Firebug.SourceFile.getSourceFileByScript(this.context, this.context.currentFrame.script);
         if (!sourceFile)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("showStackFrame no sourceFile in context "+this.context.getName()+"for currentFrame.script: "+frame.script.fileName);
@@ -2120,6 +2122,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             var url = this.executionFile.href;
             var analyzer = this.executionFile.getScriptAnalyzer(frame.script);
+            FBTrace.sysout("analyzer "+url, analyzer);
             this.executionLineNo = analyzer.getSourceLineFromFrame(this.context, frame);  // TODo implement for each type
 
             if (FBTrace.DBG_STACK)
@@ -2656,7 +2659,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     supportsObject: function(object)
     {
         if( object instanceof jsdIStackFrame
-            || object instanceof SourceFile
+            || object instanceof Firebug.SourceFile
             || (object instanceof SourceLink && object.type == "js")
             || typeof(object) == "function" )
             return 1;
@@ -2666,7 +2669,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     hasObject: function(object)
     {
         FBTrace.sysout("debugger.hasObject in "+this.context.getName()+" SourceLink: "+(object instanceof SourceLink), object);
-        if (object instanceof SourceFile)
+        if (object instanceof Firebug.SourceFile)
             return (object.href in this.context.sourceFileMap);
         else if (object instanceof SourceLink)
             return (object.href in this.context.sourceFileMap);
@@ -2723,7 +2726,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             FBTrace.sysout("debugger updateSelection object:"+object+" of type "+typeof(object)+"\n");
             if (object instanceof jsdIStackFrame)
                 FBTrace.sysout("debugger updateSelection this.showStackFrame(object)", object);
-            else if (object instanceof SourceFile)
+            else if (object instanceof Firebug.SourceFile)
                 FBTrace.sysout("debugger updateSelection this.navigate(object)", object);
             else if (object instanceof SourceLink)
                 FBTrace.sysout("debugger updateSelection this.showSourceLink(object)", object);
@@ -2735,7 +2738,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (object instanceof jsdIStackFrame)
             this.showStackFrame(object);
-        else if (object instanceof SourceFile)
+        else if (object instanceof Firebug.SourceFile)
             this.navigate(object);
         else if (object instanceof SourceLink)
             this.showSourceLink(object);
@@ -2765,7 +2768,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         if (!context.onLoadWindowContent) // then context was not active during load
-            updateScriptFiles(context);
+            this.updateScriptFiles(context);
 
         var allSources = sourceFilesAsArray(context.sourceFileMap);
 
@@ -2789,6 +2792,85 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("debugger.getLocationList enabledOnLoad:"+context.onLoadWindowContent+" all:"+allSources.length+" filtered:"+list.length, list);
         return list;
     },
+
+    updateScriptFiles: function(context, eraseSourceFileMap)  // scan windows for 'script' tags (only if debugger is not enabled)
+    {
+        var oldMap = eraseSourceFileMap ? null : context.sourceFileMap;
+
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("updateScriptFiles oldMap "+oldMap+"\n");
+            this.sourceFilesAsArray(context.sourceFileMap);  // just for length trace
+        }
+
+        function addFile(url, scriptTagNumber, dependentURL)
+        {
+                if (oldMap && url in oldMap)
+                {
+                    var sourceFile = oldMap[url];
+                    sourceFile.dependentURL = dependentURL;
+                    context.addSourceFile(sourceFile);
+                    return false;
+                }
+                else
+                {
+                    var sourceFile = new Firebug.ScriptTagSourceFile(context, url, scriptTagNumber);
+                    sourceFile.dependentURL = dependentURL;
+                    context.addSourceFile(sourceFile);
+                    return true;
+                }
+        }
+
+        iterateWindows(context.window, function updateEachWin(win)
+        {
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("updateScriptFiles iterateWindows: "+win.location.href, " documentElement: "+win.document.documentElement);
+            if (!win.document.documentElement)
+                return;
+
+            var url = normalizeURL(win.location.href);
+
+            if (url)
+            {
+                if (!context.sourceFileMap.hasOwnProperty(url))
+                {
+                    var URLOnly = new Firebug.NoScriptSourceFile(context, url);
+                    context.addSourceFile(URLOnly);
+                    if (FBTrace.DBG_SOURCEFILES) FBTrace.sysout("updateScriptFiles created NoScriptSourceFile for URL:"+url, URLOnly);
+                }
+            }
+
+            var baseUrl = win.location.href;
+            var bases = win.document.documentElement.getElementsByTagName("base");
+            if (bases && bases[0])
+            {
+                baseUrl = bases[0].href;
+            }
+
+            var scripts = win.document.documentElement.getElementsByTagName("script");
+            for (var i = 0; i < scripts.length; ++i)
+            {
+                var scriptSrc = scripts[i].getAttribute('src'); // for XUL use attribute
+                var url = scriptSrc ? absoluteURL(scriptSrc, baseUrl) : win.location.href;
+                url = normalizeURL(url ? url : win.location.href);
+                var added = addFile(url, i, (scriptSrc?win.location.href:null));
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("updateScriptFiles "+(scriptSrc?"inclusion":"inline")+" script #"+i+"/"+scripts.length+(added?" adding ":" readded ")+url+" to context="+context.getName()+"\n");
+            }
+        });
+
+        var notificationURL = "firebug:// Warning. Script Panel was inactive during page load/Reload to see all sources";
+        var dummySourceFile = new Firebug.NoScriptSourceFile(context, notificationURL);
+        context.sourceCache.store(notificationURL, 'reload to see all source files');
+        context.addSourceFile(dummySourceFile);
+        context.notificationSourceFile = dummySourceFile;
+
+        if (FBTrace.DBG_SOURCEFILES)
+        {
+            FBTrace.sysout("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
+        }
+    },
+
 
     getDefaultLocation: function(context)
     {
@@ -3166,7 +3248,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
     refresh: function()
     {
         if (!Firebug.Debugger.isAlwaysEnabled(this.context))
-            updateScriptFiles(this.context);
+            this.updateScriptFiles(this.context);
 
         var extracted = this.extractBreakpoints(this.context, breakpoints, errorBreakpoints, monitors);
 
@@ -3237,7 +3319,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
                 if (script)  // then this is a current (not future) breakpoint
                 {
-                    var analyzer = getScriptAnalyzer(context, script);
+                    var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
                     if (FBTrace.DBG_BP) FBTrace.sysout("debugger.refresh enumerateBreakpoints for script="+script.tag+(analyzer?" has analyzer":" no analyzer")+"\n");
                     if (analyzer)
                         var name = analyzer.getFunctionDescription(script, context).name;
@@ -3260,7 +3342,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
 
-                var name = FBL.guessEnclosingFunctionName(url, line, context);
+                var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
                 var source = context.sourceCache.getLine(url, line);
                 errorBreakpoints.push(new Breakpoint(name, url, line, true, source));
             }});
@@ -3270,7 +3352,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
                 if (renamer.checkForRename(url, line, props)) // some url in this sourceFileMap has changed, we'll be back.
                     return;
 
-                var name = FBL.guessEnclosingFunctionName(url, line, context);
+                var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
                 monitors.push(new Breakpoint(name, url, line, true, ""));
             }});
 
@@ -3296,7 +3378,7 @@ BreakpointsPanel.prototype = extend(Firebug.Panel,
 
         var context = this.context;
         if (!Firebug.Debugger.isAlwaysEnabled(context))
-            updateScriptFiles(context);
+            this.updateScriptFiles(context);
 
         var bpCount = 0, disabledCount = 0;
         for (var url in context.sourceFileMap)
