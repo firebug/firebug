@@ -3572,8 +3572,8 @@ function getCacheEntry(file, netProgress)
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
+            //if (FBTrace.DBG_ERRORS)
+            //    FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
         }
     });
 }
@@ -4534,7 +4534,8 @@ Breakpoint.prototype =
         }
         catch (err)
         {
-            FBTrace.sysout("net.evaluateCondition; EXCEPTION", err);
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.evaluateCondition; EXCEPTION", err);
         }
 
         return false;
