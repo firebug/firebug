@@ -4449,7 +4449,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
         if (!panel)
             return;
 
-        this.enumerateRequests(function(file)
+        panel.enumerateRequests(function(file)
         {
             if (file.getFileURL() == bp.href)
             {
