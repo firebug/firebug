@@ -720,7 +720,7 @@ Firebug.SourceFile.guessEnclosingFunctionName = function(url, line, context)
             line = analyzer.getBaseLineNumberByScript(script);
         }
     }
-    return this.guessFunctionName(url, line-1, context);
+    return FBL.guessFunctionName(url, line-1, context);
 };
 
 }});
