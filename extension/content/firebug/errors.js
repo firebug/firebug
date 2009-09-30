@@ -264,12 +264,12 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             var correctedError =
             {
                     errorMessage: object.errorMessage,
-                    dsourceName: sourceName,
+                    sourceName: sourceName,
                     sourceLine: object.sourceLine,
                     lineNumber: lineNumber,
                     columnNumber: object.columnNumber,
                     flags: object.flags,
-                    categor: object.category
+                    category: object.category
             };
             object = correctedError;
 
