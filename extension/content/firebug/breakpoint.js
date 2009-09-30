@@ -534,12 +534,12 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 
 // ************************************************************************************************
 
-Firebug.Breakpoint.BreakNotification = function(doc, errorObject)
+Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
-    this.initialize(doc, errorObject);
+    this.initialize(doc, cause);
 }
 
-Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.MeasureBox,
+Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.prototype,
 {
     tag:
         DIV({"class": "conditionEditor breakNotification", onclick: "$hide"},
@@ -549,14 +549,13 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.MeasureBox,
             DIV({"class": "notationEditorInner1"},
                 DIV({"class": "notationEditorInner2"},
                     DIV({"class": "conditionEditorInner"},
-                        DIV({"class": "conditionCaption"},
-                                SPAN("$object|getCategory"),
-                                BUTTON({"class": "BreakNotificationButton",
-                                    onclick: "$object|FirebugReps.ErrorMessage.copyError"},
-                                    $STR("CopyError")
-                                )
-                           ),
-                        DIV({"class": "conditionCaption"}, "$object|getCause")
+                        DIV({"class": "notationCaption"},
+                            SPAN({"class": "notationTitle"}, "$cause.title"),
+                            BUTTON({"class": "notationButton", onclick: "$onCopyAction"},
+                                $STR("Copy")
+                            )
+                        ),
+                        DIV({"class": "notationCaption"}, "$cause.message")
                     )
                 )
             ),
@@ -565,20 +564,10 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.MeasureBox,
             )
         ),
 
-    initialize: function(doc, errorObject)
+    initialize: function(doc, cause)
     {
-        this.noteObject = errorObject;
-        this.box = this.tag.replace({object: errorObject}, doc, this);
-    },
-
-    getCause: function(errorObject)
-    {
-        return errorObject.message;
-    },
-
-    getCategory: function(errorObject)
-    {
-        return $STR("Break on Error");
+        this.cause = cause;
+        this.box = this.tag.replace({cause: cause}, doc, this);
     },
 
     show: function(sourceLine, panel, value)
@@ -615,8 +604,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.MeasureBox,
             var guts = getElementByClass(this.box, "conditionEditorInner");
             clearNode(guts);
 
-            var msg = this.getCause(this.noteObject);
-
+            var msg = this.cause.message;
             if (msg)
             {
                 var self = this;
@@ -642,6 +630,12 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.MeasureBox,
             }
         }
         // else we already called hide
+    },
+
+    onCopyAction: function(event)
+    {
+        if (this.cause.copyAction)
+            this.cause.copyAction();
     }
 });
 

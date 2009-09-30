@@ -1009,9 +1009,18 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace);
 
             if (Firebug.breakOnErrors)
-                context.breakingCause = {type: "error", message: error};
+            {
+                context.breakingCause = {
+                    title: $STR("Break on Error"),
+                    message: error.message,
+                    copyAction: bindFixed(FirebugReps.ErrorMessage.copyError,
+                        FirebugReps.ErrorMessage, error)
+                };
+            }
             else
+            {
                 delete context.breakingCause;
+            }
         }
         catch (exc)
         {
@@ -2183,11 +2192,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             if (this.context.breakingCause && !this.context.breakingCause.shown)
             {
                 this.context.breakingCause.shown = true;
-                var error = this.context.breakingCause.message;
-                if (error.message)
+                var cause = this.context.breakingCause;
+                if (cause)
                 {
                     var sourceLine = getChildByClass(lineNode, "sourceLine");
-                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, error);
+                    sourceBox.breakCauseBox = new Firebug.Breakpoint.BreakNotification(this.document, cause);
                     sourceBox.breakCauseBox.show(sourceLine, this, "not an editor, yet?");
                 }
             }
@@ -2316,6 +2325,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     onMouseDown: function(event)
     {
+        if (hasClass(event.target, "notationButton"))
+            return;
+
         var sourceBox = getAncestorByClass(event.target, "sourceBox");
         if (sourceBox && sourceBox.breakCauseBox)
             sourceBox.breakCauseBox.hide();

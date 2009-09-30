@@ -345,6 +345,7 @@ h1.groupHeader {
 
 /************************************************************************************************/
 /* These are copies of the classes from debugger.css that start .condition */
+
 .notationEditorInner1 {
     padding-left: 37px;
     background: url(noteBorders.png) repeat-y;
@@ -376,10 +377,27 @@ h1.groupHeader {
 }
 
 .notationEditorBottom2 {
-    position: relative;    left: -37px;
+    position: relative;
+    left: -37px;
     width: 37px;
     height: 33px;
     background: url(noteCorners.png) no-repeat 0 100%;
+}
+
+.notationCaption {
+    padding-top: 3px;
+    margin-bottom: 2px;
+    font-family: Lucida Grande, sans-serif;
+    font-size: 11px;
+    color: #226679;
+}
+
+.notationTitle {
+    font-weight: bold;
+}
+
+.notationButton {
+    float: right;
 }
 
 /************************************************************************************************/
