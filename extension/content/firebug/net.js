@@ -2744,11 +2744,19 @@ NetProgress.prototype =
     {
         var halt = false;
 
-        // If break on XHR flag is set le't break. 
+        // If break on XHR flag is set, let's break.
         if (this.context.breakOnXHR)
-            halt = true;
+        {
+            this.context.breakingCause = {
+                title: $STR("net.Break_On_XHR"),
+                message: cropString(file.href, 200),
+                copyAction: bindFixed(copyToClipboard, FBL, file.href)
+            };
 
-        // If there is an enabled breakpont with condition evaluated to tru let's also break.
+            halt = true;
+        }
+
+        // If there is an enabled breakpoint with condition == true, let's break.
         var breakpoints = this.context.netProgress.breakpoints;
         var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
         if (bp && bp.checked)
