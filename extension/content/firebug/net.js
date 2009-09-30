@@ -974,7 +974,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 file.row = row;
 
                 // Make sure a breakpoint is displayed.
-                if (this.context.netProgress.breakpoints.findBreakpoint(file.getFileURL()))
+                var breakpoints = this.context.netProgress.breakpoints;
+                if (breakpoints && breakpoints.findBreakpoint(file.getFileURL()))
                     row.setAttribute("breakpoint", "true");
 
                 // Allow customization of request entries in the list. A row is represented
@@ -2741,12 +2742,24 @@ NetProgress.prototype =
 
     breakOnXHR: function(file)
     {
+        var halt = false;
+
+        // If break on XHR flag is set le't break. 
+        if (this.context.breakOnXHR)
+            halt = true;
+
+        // If there is an enabled breakpont with condition evaluated to tru let's also break.
         var breakpoints = this.context.netProgress.breakpoints;
         var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
-        if (!(bp && bp.checked || this.context.breakOnXHR))
-            return;
+        if (bp && bp.checked)
+        {
+            if (condition)
+                halt = bp.evaluateCondition(this.context, file);
+            else
+                halt = true;
+        }
 
-        if (bp.condition && !bp.evaluateCondition(this.context, file))
+        if (!halt)
             return;
 
         // Even if the execution was stopped at breakpoint reset the global
