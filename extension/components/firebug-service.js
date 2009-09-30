@@ -167,6 +167,7 @@ function FirebugService()
     this.timeStamp = new Date();  /* explore */
     this.breakpoints = breakpoints; // so chromebug can see it /* explore */
     this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
+    fbs._lastErrorDebuggr = null;
 
     var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
                     getService(Components.interfaces.nsIAppShellService);
@@ -1210,9 +1211,22 @@ FirebugService.prototype =
             return RETURN_CONTINUE_THROW;
         // Remember the error where the last exception is thrown - this will
         // be used later when the console service reports the error, since
-        // it doesn't currently report the window where the error occured
+        // it doesn't currently report the window where the error occurred
 
         this._lastErrorWindow =  getFrameGlobal(frame);
+
+        if (this.showStackTrace)  // store these in case the throw is not caught
+        {
+            var debuggr = this.findDebugger(frame);  // sets debuggr.breakContext
+            if (debuggr)
+            {
+                fbs._lastErrorScript = frame.script;
+                fbs._lastErrorLine = frame.line;
+                fbs._lastErrorDebuggr = debuggr;
+            }
+            else
+                delete fbs._lastErrorDebuggr;
+        }
 
         if (fbs.trackThrowCatch)
         {
@@ -1245,7 +1259,7 @@ FirebugService.prototype =
         }
 
         // global to pass info to onDebug
-        errorInfo = { message: message, fileName: fileName, lineNo: lineNo, pos: pos, flags: flags, errnum: errnum, exc: exc };
+        errorInfo = { errorMessage: message, sourceName: fileName, lineNumber: lineNo, columnNumber: pos, flags: flags, category: "js", errnum: errnum, exc: exc };
 
         if (message=="out of memory")  // bail
         {
@@ -1256,6 +1270,30 @@ FirebugService.prototype =
 
         if (this.showStackTrace)
         {
+            if (fbs._lastErrorDebuggr && (flags & jsdIErrorHook.REPORT_EXCEPTION) && !fileName) // uncaught-exception
+            {
+                if (FBTrace.DBG_FBS_ERRORS)
+                    FBTrace.sysout("fbs.onError onError thinks: uncaught exception at "+lineNo+"@"+fileName+"(unknown)", errorInfo);
+
+                errorInfo.lineNumber = fbs._lastErrorLine;
+                errorInfo.scriptTag = fbs._lastErrorScript.tag;
+                errorInfo.sourceName = fbs._lastErrorScript.fileName;
+                if (FBTrace.DBG_FBS_ERRORS)
+                    FBTrace.sysout("fbs.onError uncaught exception at "+fbs._lastErrorLine+"@"+fbs._lastErrorScript.fileName+"("+fbs._lastErrorScript.tag+")");
+                try
+                {
+                    if (FBTrace.DBG_FBS_ERRORS)
+                        FBTrace.sysout("fbs.onError fbs._lastErrorDebuggr "+fbs._lastErrorDebuggr, fbs._lastErrorDebuggr);
+
+                    fbs._lastErrorDebuggr.onUncaughtException(errorInfo);
+                }
+                finally
+                {
+                    fbs._lastErrorDebuggr = null;
+                }
+
+                return true;
+            }
             reportNextError = true;
             if (FBTrace.DBG_FBS_ERRORS)
             {

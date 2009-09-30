@@ -1044,6 +1044,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return -2; /* let firebug service decide to break or not */
     },
 
+    onUncaughtException: function(errorInfo)
+    {
+        var context = this.breakContext;
+        delete this.breakContext;
+
+        Firebug.Errors.logScriptError(context, errorInfo, false);
+        return -2;
+    },
+
     onEvalScriptCreated: function(frame, outerScript, innerScripts)
     {
         try
