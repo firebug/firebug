@@ -1013,14 +1013,21 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             else
                 delete context.breakingCause;
         }
-        catch (exc) {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError getStackTrace FAILED:", exc);
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("debugger.onError getStackTrace FAILED:", exc);
         }
 
         var hookReturn = dispatch2(this.fbListeners,"onError",[context, frame, error]);
 
         if (Firebug.breakOnErrors)
+        {
+            // xxxHonza: Since Break On All Errors is now controlled by the "Break On Next"
+            // button it's one time operation.
+            Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", false);
             return -1;  // break
+        }
 
         if (hookReturn)
             return hookReturn;
@@ -2989,7 +2996,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         var context = this.context;
 
         return [
-            serviceOptionMenu("BreakOnAllErrors", "breakOnErrors"),
             optionMenu("DecompileEvals", "decompileEvals"),
             serviceOptionMenu("ShowAllSourceFiles", "showAllSourceFiles"),
             // 1.2: always check last line; optionMenu("UseLastLineForEvalName", "useLastLineForEvalName"),

@@ -2318,30 +2318,31 @@ this.guessFunctionName = function(url, lineNo, context)
     return "? in "+this.getFileName(url)+"@"+lineNo;
 };
 
-this.guessFunctionNameFromLines = function(url, lineNo, sourceCache) {
-        // Walk backwards from the first line in the function until we find the line which
-        // matches the pattern above, which is the function definition
-        var line = "";
-        if (FBTrace.DBG_FUNCTION_NAMES) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");
-        for (var i = 0; i < 4; ++i)
+this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
+{
+    // Walk backwards from the first line in the function until we find the line which
+    // matches the pattern above, which is the function definition
+    var line = "";
+    if (FBTrace.DBG_FUNCTION_NAMES) FBTrace.sysout("getFunctionNameFromLines for line@URL="+lineNo+"@"+url+"\n");
+    for (var i = 0; i < 4; ++i)
+    {
+        line = sourceCache.getLine(url, lineNo-i) + line;
+        if (line != undefined)
         {
-            line = sourceCache.getLine(url, lineNo-i) + line;
-            if (line != undefined)
+            var m = reGuessFunction.exec(line);
+            if (m)
+                return m[1];
+            else
             {
-                var m = reGuessFunction.exec(line);
-                if (m)
-                    return m[1];
-                else
-                {
-                    if (FBTrace.DBG_FUNCTION_NAMES)
-                        FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");
-                }
-                m = reFunctionArgNames.exec(line);
-                if (m && m[1])
-                    return m[1];
+                if (FBTrace.DBG_FUNCTION_NAMES)
+                    FBTrace.sysout("lib.guessFunctionName re failed for lineNo-i="+lineNo+"-"+i+" line="+line+"\n");
             }
+            m = reFunctionArgNames.exec(line);
+            if (m && m[1])
+                return m[1];
         }
-        return "(?)";
+    }
+    return "(?)";
 };
 
 this.getFunctionArgNames = function(fn)

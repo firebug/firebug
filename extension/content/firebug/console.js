@@ -2,6 +2,9 @@
 
 FBL.ns(function() { with (FBL) {
 
+// ************************************************************************************************
+// Constants
+
 const Cc = Components.classes;
 const Ci = Components.interfaces;
 const nsIPrefBranch2 = Ci.nsIPrefBranch2;
@@ -110,11 +113,14 @@ Firebug.ConsoleBase =
 
 };
 
+// ************************************************************************************************
+
 var ActivableConsole = extend(Firebug.ActivableModule, Firebug.ConsoleBase);
 
 Firebug.Console = extend(ActivableConsole,
 {
     dispatchName: "console",
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
 
@@ -153,7 +159,9 @@ Firebug.Console = extend(ActivableConsole,
     isReadyElsePreparing: function(context, win) // this is the only code that should call injector.attachIfNeeded
     {
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.isReadyElsePreparing, win is "+(win?"an argument: ":"null, context.window: ")+(win?win.location:context.window.location), (win?win:context.window));
+            FBTrace.sysout("console.isReadyElsePreparing, win is " +
+                (win?"an argument: ":"null, context.window: ") +
+                (win?win.location:context.window.location), (win?win:context.window));
 
         if (win)
             return this.injector.attachIfNeeded(context, win);
@@ -173,6 +181,7 @@ Firebug.Console = extend(ActivableConsole,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends ActivableModule
+
     initialize: function()
     {
         this.panelName = "console";
@@ -228,7 +237,7 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.Console.injector.detachConsole(context, context.window);  // TODO iterate windows?
     },
 
-    // -----------------------------------------------------------------------------------------------------
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onPanelEnable: function(panelName)
     {
@@ -279,7 +288,7 @@ Firebug.Console = extend(ActivableConsole,
         $('fbStatusIcon').removeAttribute("console");
     },
 
-    // ----------------------------------------------------------------------------------------------------
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Firebug.Debugger listener
 
     onMonitorScript: function(context, frame)
@@ -295,7 +304,8 @@ Firebug.Console = extend(ActivableConsole,
             Firebug.Console.closeGroup(context);
     },
 
-    // ----------------------------------------------------------------------------------------------------
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     logRow: function(appender, objects, context, className, rep, sourceLink, noThrottle, noRow)
     {
         if (!context)
@@ -306,7 +316,6 @@ Firebug.Console = extend(ActivableConsole,
         if (this.isAlwaysEnabled())
             return Firebug.ConsoleBase.logRow.apply(this, arguments);
     },
-
 });
 
 Firebug.ConsoleListener =
@@ -596,6 +605,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.hide(state);
             Firebug.Console.disabledPanelPage.show(this);
         }
+
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+            $STR("console.Break On All Errors"));
     },
 
     enablePanel: function(module)
@@ -701,6 +714,31 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         dispatch([Firebug.A11yModel], 'onConsoleSearchMatchFound', [this, text, this.matchSet]);
         return true;
+    },
+
+    resume: function()
+    {
+        Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
+
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("console.resume; " + Firebug.breakOnErrors + ", " + this.context.getName());
+
+        Firebug.Debugger.syncCommands(this.context);
+
+        var chrome = Firebug.chrome;
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        if (breakable == "true")
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+                $STR("console.Disable Break On All Errors"));
+        }
+        else
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
+                $STR("console.Break On All Errors"));
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -866,5 +904,4 @@ Firebug.registerActivableModule(Firebug.Console);
 Firebug.registerPanel(Firebug.ConsolePanel);
 
 // ************************************************************************************************
-
 }});
