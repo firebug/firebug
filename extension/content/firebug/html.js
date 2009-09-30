@@ -17,6 +17,7 @@ const HTMLLib = Firebug.HTMLLib;
 const BP_BREAKONATTRCHANGE = 1;
 const BP_BREAKONCHILDCHANGE = 2;
 const BP_BREAKONREMOVE = 3;
+const BP_BREAKONTEXT = 4;
 
 // ************************************************************************************************
 
@@ -1548,12 +1549,22 @@ Firebug.HTMLModule.MutationBreakpoints =
         }
     },
 
-    breakOnMutate: function(type, context)
+    breakOnMutate: function(event, context, type)
     {
         if (!context.breakOnMutate)
             return false;
 
         context.breakOnMutate = false;
+
+        FBTrace.sysout("breakOnMutate", event.target);
+
+        var typeLabel = Firebug.HTMLModule.BreakpointRep.getType({type: type});
+        var targetName = event.target.localName ? event.target.localName : "";
+        context.breakingCause = {
+            title: $STR("net.Break On Mutate"),
+            message: typeLabel + (targetName ? ": " + targetName : ""),
+            copyAction: null
+        };
 
         Firebug.Debugger.breakNow();
         return true;
@@ -1564,7 +1575,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onMutateAttr: function(event, context)
     {
-        if (this.breakOnMutate(event.type, context))
+        if (this.breakOnMutate(event, context, BP_BREAKONATTRCHANGE))
             return;
 
         var breakpoints = context.mutationBreakpoints;
@@ -1578,17 +1589,18 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onMutateText: function(event, context)
     {
-        if (this.breakOnMutate(event.type, context))
+        if (this.breakOnMutate(event, context, BP_BREAKONTEXT))
             return;
     },
 
     onMutateNode: function(event, context)
     {
-        if (this.breakOnMutate(event.type, context))
-            return;
-
         var node = event.target;
         var removal = event.type == "DOMNodeRemoved";
+
+        if (this.breakOnMutate(event, context, removal ? BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
+            return;
+
         var breakpoints = context.mutationBreakpoints;
         var breaked = false;
 
@@ -1694,7 +1706,7 @@ Firebug.HTMLModule.Breakpoint = function(node, type)
     this.type = type;
 }
 
-Firebug.HTMLModule.BreakpointTemplate = domplate(Firebug.Rep,
+Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 {
     inspectable: false,
 
@@ -1734,6 +1746,8 @@ Firebug.HTMLModule.BreakpointTemplate = domplate(Firebug.Rep,
             return $STR("html.label.Break On Child Addition or Removal");
         case BP_BREAKONREMOVE:
             return $STR("html.label.Break On Element Removal");
+        case BP_BREAKONTEXT:
+            return $STR("html.label.Break On Text Change");
         }
 
         return "";
@@ -1842,7 +1856,7 @@ MutationBreakpointList.prototype =
 
 Firebug.registerPanel(Firebug.HTMLPanel);
 Firebug.registerModule(Firebug.HTMLModule);
-Firebug.registerRep(Firebug.HTMLModule.BreakpointTemplate);
+Firebug.registerRep(Firebug.HTMLModule.BreakpointRep);
 
 // ************************************************************************************************
 }});

@@ -551,7 +551,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                     DIV({"class": "conditionEditorInner"},
                         DIV({"class": "notationCaption"},
                             SPAN({"class": "notationTitle"}, "$cause.title"),
-                            BUTTON({"class": "notationButton", onclick: "$onCopyAction"},
+                            BUTTON({"class": "notationButton", onclick: "$onCopyAction",
+                                $collapsed: "$cause|hideCopyAction"},
                                 $STR("Copy")
                             )
                         ),
@@ -630,6 +631,11 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             }
         }
         // else we already called hide
+    },
+
+    hideCopyAction: function(cause)
+    {
+        return !cause.copyAction;
     },
 
     onCopyAction: function(event)

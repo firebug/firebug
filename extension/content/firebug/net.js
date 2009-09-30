@@ -2748,7 +2748,7 @@ NetProgress.prototype =
         if (this.context.breakOnXHR)
         {
             this.context.breakingCause = {
-                title: $STR("net.Break_On_XHR"),
+                title: $STR("net.Break On XHR"),
                 message: cropString(file.href, 200),
                 copyAction: bindFixed(copyToClipboard, FBL, file.href)
             };
