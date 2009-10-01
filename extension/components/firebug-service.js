@@ -1258,8 +1258,10 @@ FirebugService.prototype =
                    +this.breakOnErrors+" kind="+messageKind+" msg="+message+"@"+fileName+":"+lineNo+"."+pos+"\n");
         }
 
-        // global to pass info to onDebug
-        errorInfo = { errorMessage: message, sourceName: fileName, lineNumber: lineNo, columnNumber: pos, flags: flags, category: "js", errnum: errnum, exc: exc };
+        // global to pass info to onDebug. Some duplicate values to support different apis
+        errorInfo = { errorMessage: message, sourceName: fileName, lineNumber: lineNo,
+                message: message, fileName: fileName, lineNo: lineNo,
+                columnNumber: pos, flags: flags, category: "js", errnum: errnum, exc: exc };
 
         if (message=="out of memory")  // bail
         {

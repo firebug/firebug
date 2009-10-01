@@ -203,6 +203,10 @@ top.Firebug =
         }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize prefDomain "+this.prefDomain);
+
+        // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
+        // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
+        window.addEventListener('unload', shutdownFirebug, false);
     },
 
     getVersion: function()
@@ -301,8 +305,10 @@ top.Firebug =
     },
 
 
-    shutdown: function()  // never called in externalMode
+    shutdown: function()  // called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
     {
+        window.removeEventListener('unload', shutdownFirebug, false);
+
         TabWatcher.destroy();
 
         // Remove the listener after the TabWatcher.destroy() method is called so,
@@ -2892,4 +2898,19 @@ Firebug.ModuleManager =
 }
 
 // ************************************************************************************************
+
+function shutdownFirebug() {
+    try
+    {
+        if (Firebug.isDetached())
+            Firebug.chrome.close();
+    }
+    catch (exc)
+    {
+        window.dump("shutdownFirebug FAILS: "+exc+"\n");
+    }
+
+    Firebug.shutdown();
+}
+
 }});
