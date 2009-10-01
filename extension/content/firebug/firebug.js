@@ -2898,7 +2898,9 @@ Firebug.ModuleManager =
 }
 
 // ************************************************************************************************
-
+/*
+ * If we are detached and the main Firefox window closes, also close the matching Firebug window.
+ */
 function shutdownFirebug() {
     try
     {
