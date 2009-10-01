@@ -739,23 +739,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         this.context.breakOnXHR = !this.context.breakOnXHR;
 
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.resume; " + this.context.breakOnXHR + ", " + this.context.getName());
-
-        Firebug.Debugger.syncCommands(this.context);
-
-        var chrome = Firebug.chrome;
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-        if (breakable == "true")
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("net.Disable Break On XHR"));
-        }
-        else
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("net.Break On XHR"));
-        }
+        Firebug.Breakpoint.resume(this.context, $STR("net.Break On XHR"),
+            $STR("net.Disable Break On XHR"));
     },
 
     // Support for info tips.

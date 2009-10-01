@@ -7,7 +7,29 @@ FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 
-Firebug.Breakpoint = {};
+Firebug.Breakpoint =
+{
+    resume: function(context, tooltip, disableTooltip)
+    {
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("breakpoint.resume; " + context.getName());
+
+        Firebug.Debugger.syncCommands(context);
+
+        var chrome = Firebug.chrome;
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        if (breakable == "true")
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", disableTooltip);
+        }
+        else
+        {
+            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", tooltip);
+        }
+    },
+};
 
 // ************************************************************************************************
 

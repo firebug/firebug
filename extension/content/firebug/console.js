@@ -720,25 +720,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
 
-        if (FBTrace.DBG_BP)
-            FBTrace.sysout("console.resume; " + Firebug.breakOnErrors + ", " + this.context.getName());
-
-        Firebug.Debugger.syncCommands(this.context);
-
-        var chrome = Firebug.chrome;
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-        if (breakable == "true")
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-                $STR("console.Disable Break On All Errors"));
-        }
-        else
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-                $STR("console.Break On All Errors"));
-        }
+        Firebug.Breakpoint.resume(context, $STR("console.Break On All Errors"),
+            $STR("console.Disable Break On All Errors"));
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

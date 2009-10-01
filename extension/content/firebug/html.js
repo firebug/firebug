@@ -1595,23 +1595,8 @@ Firebug.HTMLModule.MutationBreakpoints =
     {
         context.breakOnMutate = !context.breakOnMutate;
 
-        if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.resume; " + context.breakOnMutate + ", " + context.getName());
-
-        Firebug.Debugger.syncCommands(context);
-
-        var chrome = Firebug.chrome;
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-        if (breakable == "true")
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Disable Break On Mutate"));
-        }
-        else
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("html.Break On Mutate"));
-        }
+        Firebug.Breakpoint.resume(context, $STR("html.Break On Mutate"),
+            $STR("html.Disable Break On Mutate"));
     },
 
     breakOnMutate: function(event, context, type)
@@ -1621,14 +1606,11 @@ Firebug.HTMLModule.MutationBreakpoints =
 
         context.breakOnMutate = false;
 
-        FBTrace.sysout("breakOnMutate", event.target);
-
         var typeLabel = Firebug.HTMLModule.BreakpointRep.getType({type: type});
         var targetName = event.target.localName ? event.target.localName : "";
         context.breakingCause = {
             title: $STR("net.Break On Mutate"),
-            message: typeLabel + (targetName ? ": " + targetName : ""),
-            copyAction: null
+            message: typeLabel + (targetName ? ": " + targetName : "")
         };
 
         Firebug.Debugger.breakNow();
