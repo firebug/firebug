@@ -748,6 +748,13 @@ BoxModelHighlighter.prototype =
                 return;
 
             var style = win.getComputedStyle(element, "");
+            if (!style)
+            {
+                if (FBTrace.DBG_INSPECT)
+                    FBTrace.sysout("highlight: no style for element "+element, element);
+                return;
+            }
+
             var styles = readBoxStyles(style);
 
             var offset = getLTRBWH(element);
