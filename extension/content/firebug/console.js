@@ -720,7 +720,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
 
-        Firebug.Breakpoint.resume(context, $STR("console.Break On All Errors"),
+        Firebug.Breakpoint.resume(this.context, $STR("console.Break On All Errors"),
             $STR("console.Disable Break On All Errors"));
     },
 
