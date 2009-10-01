@@ -245,8 +245,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         {
             // Load existing breakpoints
             var persistedPanelState = getPersistedState(context, panelName);
-            context.netProgress.breakpoints = persistedPanelState.breakpoints ?
-                    persistedPanelState.breakpoints : new NetBreakpointList();
+            if (persistedPanelState.breakpoints)
+                context.netProgress.breakpoints = persistedPanelState.breakpoints;
         }
     },
 
@@ -2616,6 +2616,7 @@ function NetProgress(context)
         FBTrace.sysout("net.NetProgress.constructor; " + (context ? context.getName() : "NULL Context"));
 
     this.context = context;
+    this.breakpoints = new NetBreakpointList();
 
     var panel = null;
     var queue = [];
