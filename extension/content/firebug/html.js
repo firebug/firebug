@@ -444,66 +444,131 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (node instanceof SourceText)
             return node.owner;
 
-        if (this.rootElement && node == this.rootElement)  // this.rootElement is never set
-            return null;
-
         var parentNode = node ? node.parentNode : null;
+
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("ChromeBugPanel.getParentObject for "+node.localName+" parentNode:"+(parentNode?parentNode.localName:"null-or-false")+"\n");
+
         if (parentNode)
-            if (parentNode.nodeType == 9)
+        {
+            if (!parentNode.localName)
             {
                 if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("html.getParentObject parentNode.nodeType 9\n");
-                if (parentNode.defaultView)
-                    return parentNode.defaultView.frameElement;
-                else
+                    FBTrace.sysout("getParentObject: null localName must be window, no parentObject");
+                return null;
+            }
+
+            if (parentNode.nodeType == 9) // then parentNode is Document element
+            {
+                if (this.embeddedBrowserParents)
                 {
-                    if (FBTrace.DBG_HTML || FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("html.getParentObject parentNode.nodeType 9 but no defaultView?", parentNode);
+                    var skipParent = this.embeddedBrowserParents[node];  // better be HTML element, could be iframe
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.localName:"none")+"\n");                  /*@explore*/
+                    if (skipParent)
+                        return skipParent;
                 }
+                if (parentNode.defaultView)
+                {
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");                  /*@explore*/
+                    return parentNode.defaultView.frameElement;
+                }
+                else // parent is document element, but no window at defaultView.
+                    return null;
             }
             else
                 return parentNode;
-        else
+        }
+        else  // Documents have no parentNode; Attr, Document, DocumentFragment, Entity, and Notation. top level windows have no parentNode
+        {
             if (node && node.nodeType == 9) // document type
             {
-                var embeddingFrame = node.defaultView.frameElement;
-                if (embeddingFrame)
-                    return embeddingFrame.parentNode;
-                else
+                if (node.defaultView) // generally a reference to the window object for the document, however that is not defined in the specification
+                {
+                    var embeddingFrame = node.defaultView.frameElement;
+                    if (embeddingFrame)
+                        return embeddingFrame.parentNode;
+                }
+                else // a Document object without a parentNode or window
                     return null;  // top level has no parent
             }
-
+        }
     },
 
     getChildObject: function(node, index, previousSibling)
     {
-        if (HTMLLib.isSourceElement(node))
+        if (!node)
+        {
+            FBTrace.sysout("getChildObject: null node");
+            return;
+        }
+
+        if (this.isSourceElement(node))
         {
             if (index == 0)
                 return this.getElementSourceText(node);
+            else
+                return null;  // no syblings of source elements
         }
-        else if (previousSibling)
+        else if (node.contentDocument)  // then the node is a frame
         {
-            return this.findNextSibling(previousSibling);
+            if (index == 0)
+            {
+                if (!this.embeddedBrowserParents)
+                    this.embeddedBrowserParents = {};
+                var skipChild = node.contentDocument.documentElement; // unwrap
+                this.embeddedBrowserParents[skipChild] = node;
+
+                return node.contentDocument.documentElement;  // (the node's).(type 9 document).(HTMLElement)
+            }
+            else
+                return null;
         }
+        var child = null;
+        if (previousSibling)  // then we are walking, maybe anonymous or not
+        {
+            var nextSibling = this.findNextSibling(previousSibling);
+            if (nextSibling) // ok we be walking.
+                return nextSibling;
+            // either we finished the anonymous or all of them, let's decide which
+            var anon = this.getAnonymousChildren(node);
+            if (anon) // then we had anonymous and we finished them
+                child = node.firstChild;
+            else // then we did not have anonymous and we finished regular nodes
+                return null;
+        }
+        else  // then we are not walking, better get on it
+        {
+            var anon = this.getAnonymousChildren(node);
+
+            if (anon && anon.length)  // then we have anonymous
+                child = anon[0];
+            else
+                child = node.firstChild;
+        }
+        // when we reach here, child is set to at the beginning of an interation.
+
+        if (Firebug.showWhitespaceNodes)  // then the index is true to the node list
+            return child;
         else
         {
-            if (index == 0 && node.contentDocument)
-                return node.contentDocument.documentElement;
-            else if (Firebug.showWhitespaceNodes)
-                return node.childNodes[index];
-            else
+            for (; child; child = child.nextSibling)
             {
-                var childIndex = 0;
-                for (var child = node.firstChild; child; child = child.nextSibling)
-                {
-                    if (!this.isWhitespaceText(child) && childIndex++ == index)
-                        return child;
-                }
+                if (!this.isWhitespaceText(child))
+                    return child;
             }
         }
-
         return null;
+    },
+
+    getAnonymousChildren: function(node)
+    {
+        var doc = node.ownerDocument;
+        if ( !(doc instanceof Ci.nsIDOMDocumentXBL))
+            return null;
+
+        return doc.getAnonymousNodes(node);
     },
 
     isWhitespaceText: function(node)

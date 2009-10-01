@@ -16,7 +16,7 @@ top.InsideOutBoxView = {
     /**
      * Retrieves a given child node.
      *
-     * If both index and previousSibling are pased, the implementation
+     * If both index and previousSibling are passed, the implementation
      * may assume that previousSibling will be the return for getChildObject
      * with index-1.
      */
