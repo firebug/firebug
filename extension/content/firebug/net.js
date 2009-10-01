@@ -2746,7 +2746,7 @@ NetProgress.prototype =
         var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
         if (bp && bp.checked)
         {
-            if (condition)
+            if (bp.condition)
                 halt = bp.evaluateCondition(this.context, file);
             else
                 halt = true;
