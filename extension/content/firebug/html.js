@@ -362,6 +362,12 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 }
                 else
                 {
+                    if (!Firebug.showWhitespaceNodes && Firebug.HTMLLib.isWhitespaceText(nextSibling) )
+                        nextSibling = this.findNextSibling(nextSibling);
+                    else if (!Firebug.showCommentNodes)
+                        while (nextSibling instanceof Comment)
+                            nextSibling = this.findNextSibling(nextSibling);
+
                     var objectBox = nextSibling
                         ? this.ioBox.insertChildBoxBefore(parentNodeBox, target, nextSibling)
                         : this.ioBox.appendChildBox(parentNodeBox, target);
