@@ -594,9 +594,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
 
             if (context != FirebugContext || Firebug.isDetached())
-            {
                 Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
-            }
+
+            if (Firebug.isMinimized()) // then open the UI to show we are stopped
+                Firebug.unMinimize();
 
             this.syncCommands(context);
             this.syncListeners(context);
