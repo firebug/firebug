@@ -565,7 +565,7 @@ Firebug.SourceFile.CommonBase =
 
     getOuterScriptAnalyzer: function()
     {
-        return Firebug.ToplevelSourceFile.OuterScriptAnalyzer;
+        return Firebug.TopLevelSourceFile.OuterScriptAnalyzer;
     },
 
 }
@@ -580,7 +580,7 @@ Firebug.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScrip
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
-Firebug.TopLevelSourceFile.prototype = new Firebug.SourceFile("top-level");
+Firebug.TopLevelSourceFile.prototype = extend(new Firebug.SourceFile("top-level"), Firebug.SourceFile.CommonBase);
 
 
 Firebug.TopLevelSourceFile.OuterScriptAnalyzer = {
