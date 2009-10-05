@@ -157,28 +157,6 @@
     border-bottom: none;
 }
 
-#fbSearchBox {
-    -moz-appearance: none;
-    margin: 0 6px 1px 2px;
-    border: 1px solid;
-    -moz-border-top-colors: #96969D !important;
-    -moz-border-right-colors: #96969D !important;
-    -moz-border-bottom-colors: #96969D !important;
-    -moz-border-left-colors: #96969D !important;
-    padding: 2px 0 1px 3px;
-    background: -moz-field;
-    font: icon;
-    font-size: 11px;
-}
-
-#fbSearchBox[disabled="true"] {
-    opacity: 0.5;
-}
-
-#fbSearchBox > .autocomplete-textbox-container > .autocomplete-icon {
-    list-style-image: url(chrome://firebug/skin/win/search.png);
-}
-
 /************************************************************************************************/
 
 .panelTabBox {

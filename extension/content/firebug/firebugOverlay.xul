@@ -55,8 +55,6 @@
         <command id="cmd_decompileEvals" oncommand="Firebug.togglePref('decompileEvals')"/>
 
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
-        <command id="cmd_searchNext" oncommand="Firebug.Search.update(FirebugContext, true, false)"/>
-        <command id="cmd_searchPrev" oncommand="Firebug.Search.update(FirebugContext, true, true)"/>
 
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
         <command id="cmd_detachFirebug" oncommand="Firebug.detachBar(FirebugContext)"/>
@@ -130,8 +128,7 @@
                     <!-- Search Box -->
                     <vbox>
                         <spacer flex="1"/>
-                        <menupopup id="fbSearchOptionsPopup" position="before_start" open="true" ignorekeys="true" />
-                        <textbox id="fbSearchBox" autocomplete="true" rows="1" label="firebug search"/>
+                        <textbox id="fbSearchBox" type="fbSearchBox" />
                         <spacer flex="1"/>
                     </vbox>
 

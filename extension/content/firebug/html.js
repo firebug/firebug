@@ -987,6 +987,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     getSearchOptionsMenuItems: function()
     {
         return [
+            optionMenu("search.Case_Sensitive", "searchCaseSensitive"),
             optionMenu("search.html.CSS_Selector", "searchSelector")
         ];
     },

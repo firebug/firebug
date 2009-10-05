@@ -20,13 +20,8 @@ window[chromehidden~="toolbar"] #fbToolbar {
     -moz-binding: url("chrome://firebug/content/bindings.xml#largeCommandLine");
 }
 
-#fbSearchBox {
+textbox[type="fbSearchBox"] {
     -moz-binding: url("chrome://firebug/content/bindings.xml#searchBox");
-}
-
-.fbSearchBox-attention {
-    color: red;
-    font-weight: bold;
 }
 
 panelBar {

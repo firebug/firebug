@@ -246,7 +246,7 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("Firebug.internationalizeUI");
 
-        var elements = ["fbSearchBox", "menu_clearConsole", "menu_resetAllOptions",
+        var elements = ["menu_clearConsole", "menu_resetAllOptions",
             "menu_enablePanels", "menu_disablePanels",
             "fbCommandLine", "fbFirebugMenu", "fbLargeCommandLine", "menu_customizeShortcuts",
             "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
@@ -1521,6 +1521,9 @@ top.Firebug =
 
     setPlacement: function(toPlacement)
     {
+        // TODO : This should probably be an event so others can link into this
+        Firebug.chrome.$("fbSearchBox").hideOptions();
+
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("Firebug.setPlacement from "+Firebug.getPlacement()+" to "+toPlacement+" with chrome "+Firebug.chrome.window.location);
 
@@ -2245,7 +2248,9 @@ Firebug.Panel =
      */
     getSearchOptionsMenuItems: function()
     {
-        return null;
+        return [
+            optionMenu("search.Case_Sensitive", "searchCaseSensitive")
+        ];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

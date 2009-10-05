@@ -74,18 +74,20 @@
     margin-right: 5px;   /* add some space between last button and first tab */
 }
 
-#fbSearchBox {
-    -moz-appearance: none;
-    margin: 4px 6px 1px 6px;
-    border: none !important;
-    padding: 2px 8px 4px 20px;
-    background: url(chrome://firebug/skin/mac/searchBox.png) no-repeat;
-    font: icon;
-    font-size: 11px;
+
+.fbsearch-textbox {
+    -moz-border-radius: 10px !important;
+    padding-left: 5px !important;
 }
 
-#fbSearchBox[disabled="true"] {
-    opacity: 0.5;
+.fbsearch-options-icon {
+    margin-right: 2px !important;
+}
+
+.fbsearch-textbox .innerToolbar,
+.fbsearch-options-icon > .toolbarbutton-text {
+    /* On the mac we have to override what might be a bug in the style for toolbarbutton-text */
+    margin: 0px !important;
 }
 
 .toolbarbutton-iconic {

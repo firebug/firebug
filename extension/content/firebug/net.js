@@ -813,9 +813,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
+            optionMenu("search.Case_Sensitive", "searchCaseSensitive"),
             //optionMenu("search.net.Headers", "netSearchHeaders"),
             //optionMenu("search.net.Parameters", "netSearchParameters"),
-            optionMenu("search.net.Response Bodies", "netSearchResponseBody")
+            optionMenu("search.net.Response_Bodies", "netSearchResponseBody")
         ];
     },
 

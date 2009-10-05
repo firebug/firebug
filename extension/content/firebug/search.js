@@ -25,28 +25,11 @@ Firebug.Search = extend(Firebug.Module,
         searchBox.value = text;
         this.update(context);
     },
-
-    enter: function(context)
-    {
-        var panel = Firebug.chrome.getSelectedPanel();
-        if (!panel.searchable)
-            return;
-
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        var value = searchBox.value;
-
-        panel.search(value, true);
+    searchNext: function(context) {
+      this.update(context, true, false);
     },
-
-    cancel: function(context)
-    {
-        this.search("", context);
-    },
-
-    clear: function(context)
-    {
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.value = "";
+    searchPrev: function(context) {
+      this.update(context, true, true);
     },
 
     displayOnly: function(text, context)
@@ -59,6 +42,16 @@ Firebug.Search = extend(Firebug.Module,
             removeClass(searchBox, "fbSearchBox-attention");
 
         searchBox.value = text;
+    },
+
+    panelChanged: function(context)
+    {
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.value = "";
+        removeClass(searchBox, "fbSearchBox-attention");
+
+        var panel = Firebug.chrome.getSelectedPanel();
+        searchBox.updateOptions(panel.getSearchOptionsMenuItems());
     },
 
     focus: function(context)
@@ -117,8 +110,6 @@ Firebug.Search = extend(Firebug.Module,
             // After a delay, perform the search
             panelNode.searchTimeout = setTimeout(function()
             {
-                Firebug.Search.showOptions(context);
-
                 var found = panel.search(value, reverse);
                 if (!found && value)
                     Firebug.Search.onNotFound(value);
@@ -142,43 +133,6 @@ Firebug.Search = extend(Firebug.Module,
     onNotFound: function()
     {
         beep();
-    },
-
-    showOptions: function(context)
-    {
-        var panel = Firebug.chrome.getSelectedPanel();
-        if (!panel.searchable)
-            return;
-
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-
-        // Get search options popup menu.
-        var optionsPopup = Firebug.chrome.$("fbSearchOptionsPopup");
-        if (optionsPopup.state == "closed")
-        {
-            eraseNode(optionsPopup);
-
-            // The list of options is provided by the current panel.
-            var menuItems = panel.getSearchOptionsMenuItems();
-            if (menuItems)
-            {
-                for (var i=0; i<menuItems.length; i++)
-                    FBL.createMenuItem(optionsPopup, menuItems[i]);
-
-                optionsPopup.openPopup(searchBox, "before_start", 0, -5, false, false);
-            }
-        }
-
-        // Update search caseSensitive option according to the current capitalization.
-        var searchString = searchBox.value;
-        Firebug.searchCaseSensitive = (searchString != searchString.toLowerCase());
-    },
-
-    hideOptions: function()
-    {
-        var searchOptions = Firebug.chrome.$("fbSearchOptionsPopup");
-        if (searchOptions)
-            searchOptions.hidePopup();
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

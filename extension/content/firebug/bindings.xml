@@ -211,6 +211,8 @@
                 ev.initEvent("selectPanel", true, false);
                 this.dispatchEvent(ev);
 
+                Firebug.Search.panelChanged(FirebugContext);
+
                 return panel;
             ]]></body>
         </method>
@@ -596,7 +598,7 @@
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectObject", true, false);
                 this.dispatchEvent(ev);
-                Firebug.Search.displayOnly("", FirebugContext);
+                Firebug.Search.panelChanged(FirebugContext);
             ]]></body>
         </method>
 
@@ -791,23 +793,144 @@
     </handlers>
 </binding>
 
-<binding id="searchBox" extends="chrome://global/content/bindings/autocomplete.xml#autocomplete">
-    <handlers>
-        <handler event="keypress"><![CDATA[
-            if (event.keyCode == 13)
-            {
-                if (FBL.isControl(event))
+<binding id="searchBox">
+    <content>
+        <xul:textbox type="autocomplete" anonid="searchBox"
+                rows="1" label="search.Firebug_Search" class="fbsearch-textbox">
+            <xul:hbox class="innerToolbar">
+                <xul:toolbarbutton anonid="expandButton" tooltiptext="search.Options"
+                        role="button" aria-haspopup="true"
+                        class="fbsearch-options-icon" oncommand="toggleOptions()" />
+            </xul:hbox>
+        </xul:textbox>
+        <xul:panel anonid="searchOptionsPopup" noautofocus="true" noautohide="true" ignorekeys="true">
+            <xul:vbox>
+              <xul:vbox anonid="searchOptionsList"/>
+              <xul:hbox pack="center" align="center">
+                  <xul:button anonid="searchPrev" label="search.Previous" oncommand="searchPrev()" />
+                  <xul:button anonid="searchNext" label="search.Next" oncommand="searchNext()"/>
+              </xul:hbox>
+            </xul:vbox>
+        </xul:panel>
+    </content>
+    
+    <implementation>
+        <constructor><![CDATA[
+            var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
+                searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev"),
+                searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext"),
+                searchOptionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup"),
+                expandButton = document.getAnonymousElementByAttribute(this, "anonid", "expandButton");
+            FBL.internationalize(searchBox, "label");
+            FBL.internationalize(searchPrev, "label");
+            FBL.internationalize(searchNext, "label");
+            FBL.internationalize(expandButton, "tooltiptext");
+        ]]></constructor>
+        <property name="value">
+            <xbl:getter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                return searchBox.value;
+            ]]></xbl:getter>
+            <xbl:setter><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                searchBox.value = val;
+            ]]></xbl:setter>
+        </property>
+        <property name="optionsShown">
+            <xbl:getter><![CDATA[
+                var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup");
+                return optionsPopup.state == "open";
+            ]]></xbl:getter>
+        </property>
+
+        <method name="updateOptions">
+            <parameter name="menuItems" />
+            <body><![CDATA[
+                var searchOptions = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsList");
+                FBL.eraseNode(searchOptions);
+
+                if (menuItems)
                 {
-                    if (!event.ctrlKey)
-                        Firebug.Search.enter(FirebugContext);
-                    else
-                        FBL.dispatch([Firebug.A11yModel], 'moveToSearchMatch');
+                    for (var i=0; i<menuItems.length; i++)
+                    {
+                        var checkbox = document.createElement("checkbox");
+                        FBL.setItemIntoElement(checkbox, menuItems[i]);
+
+                        searchOptions.appendChild(checkbox);
+                    }
                 }
+            ]]></body>
+        </method>
+        <method name="showOptions">
+            <body><![CDATA[
+                var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup"),
+                    searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
+                    expandButton = document.getAnonymousElementByAttribute(this, "anonid", "expandButton");
+                optionsPopup.openPopup(searchBox, "before_end", 0, 0, false, false);
+
+                FBL.setClass(expandButton, "open");
+                clearTimeout(this.blurTimeout);
+                delete this.blurTimeout;
+            ]]></body>
+        </method>
+        <method name="hideOptions">
+            <body><![CDATA[
+                var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup"),
+                    expandButton = document.getAnonymousElementByAttribute(this, "anonid", "expandButton");
+                optionsPopup.hidePopup();
+
+                FBL.removeClass(expandButton, "open");
+                clearTimeout(this.blurTimeout);
+                delete this.blurTimeout;
+            ]]></body>
+        </method>
+        <method name="toggleOptions">
+            <body><![CDATA[
+                if (this.optionsShown)
+                    this.hideOptions();
                 else
-                    Firebug.Search.update(FirebugContext, true);
+                    this.showOptions();
+            ]]></body>
+        </method>
+        <method name="searchNext">
+            <body><![CDATA[
+                Firebug.Search.searchNext(FirebugContext);
+            ]]></body>
+        </method>
+        <method name="searchPrev">
+            <body><![CDATA[
+                Firebug.Search.searchPrev(FirebugContext);
+            ]]></body>
+        </method>
+
+        <method name="focus">
+            <body><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                searchBox.focus();
+            ]]></body>
+        </method>
+        <method name="select">
+            <body><![CDATA[
+                var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
+                searchBox.select();
+            ]]></body>
+        </method>
+    </implementation>
+    <handlers>
+            <handler event="keypress"><![CDATA[
+            if (event.keyCode ==  KeyEvent.DOM_VK_RETURN)
+            {
+                if (FBL.isShift(event))
+                    this.searchPrev();
+                else if (FBL.isControl(event))
+                    FBL.dispatch([Firebug.A11yModel], 'moveToSearchMatch');
+                else
+                    this.searchNext();
             }
-            else if (event.keyCode == 27)
-                Firebug.Search.cancel(FirebugContext);
+            else if (event.keyCode == KeyEvent.DOM_VK_ESCAPE)
+                hideOptions();
+            else if (!this.optionsShown && (event.keyCode == KeyEvent.DOM_VK_UP || event.keyCode == KeyEvent.DOM_VK_DOWN))
+                this.showOptions();
             else
                 return;
 
@@ -816,6 +939,16 @@
 
         <handler event="input"><![CDATA[
             Firebug.Search.update(FirebugContext);
+        ]]></handler>
+
+        <handler event="focus" phase="capturing"><![CDATA[
+            clearTimeout(this.blurTimeout);
+            delete this.blurTimeout;
+        ]]></handler>
+        <handler event="blur" phase="capturing"><![CDATA[
+            this.blurTimeout = setTimeout(function() {
+                hideOptions();
+            }, 0);
         ]]></handler>
     </handlers>
 </binding>

@@ -138,6 +138,50 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     width: 158px;
 }
 
+.fbsearch-textbox {
+    -moz-appearance: none;
+    margin: 0 6px 1px 2px;
+    border: 1px solid;
+    -moz-border-radius: 5px;  /* Matched to the a11y outline impl */
+    -moz-border-top-colors: #96969D;
+    -moz-border-right-colors: #96969D;
+    -moz-border-bottom-colors: #96969D;
+    -moz-border-left-colors: #96969D;
+    padding: 2px 0 2px 3px;
+    background: -moz-field;
+    font: icon;
+    font-size: 11px;
+}
+
+
+.fbsearch-textbox > .autocomplete-textbox-container > .autocomplete-icon {
+    list-style-image: url(chrome://firebug/skin/search.png);
+}
+
+.fbsearch-options-icon {
+    -moz-appearance: none;
+    -moz-user-focus: normal;
+    border: none;
+    margin: 0px;
+    padding: 0px;
+    height: 13px;
+    width: 13px;
+    min-width: 0px;
+    list-style-image: url(chrome://firebug/skin/plus-active.png);
+}
+.fbsearch-options-icon.open {
+    list-style-image: url(chrome://firebug/skin/minus-active.png);
+}
+
+textbox[type="fbSearchBox"] panel {
+    -moz-border-radius: 1px;    /* This prevents the drop shadow from appearing See nsLayoutUtils::GetFrameTransparency*/
+}
+
+.fbSearchBox-attention textbox {
+    color: red;
+    font-weight: bold;
+}
+
 #fbCommandBox {
     border-top: 1px solid #CCCCCC;
     background-color: #FFFFFF;
