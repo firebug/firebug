@@ -211,7 +211,7 @@
                 ev.initEvent("selectPanel", true, false);
                 this.dispatchEvent(ev);
 
-                Firebug.Search.panelChanged(FirebugContext);
+                // see onPanelSelect Firebug.Search.panelChanged(FirebugContext);
 
                 return panel;
             ]]></body>
@@ -598,7 +598,7 @@
                 var ev = document.createEvent("Events");
                 ev.initEvent("selectObject", true, false);
                 this.dispatchEvent(ev);
-                Firebug.Search.panelChanged(FirebugContext);
+                // see onPanelSelect Firebug.Search.panelChanged(FirebugContext);
             ]]></body>
         </method>
 
@@ -813,7 +813,7 @@
             </xul:vbox>
         </xul:panel>
     </content>
-    
+
     <implementation>
         <constructor><![CDATA[
             var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),

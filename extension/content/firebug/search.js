@@ -43,7 +43,7 @@ Firebug.Search = extend(Firebug.Module,
 
         searchBox.value = text;
     },
-
+/* see onPanelSelect
     panelChanged: function(context)
     {
         var searchBox = Firebug.chrome.$("fbSearchBox");
@@ -53,7 +53,7 @@ Firebug.Search = extend(Firebug.Module,
         var panel = Firebug.chrome.getSelectedPanel();
         searchBox.updateOptions(panel.getSearchOptionsMenuItems());
     },
-
+*/
     focus: function(context)
     {
         if (Firebug.isDetached())
@@ -137,6 +137,26 @@ Firebug.Search = extend(Firebug.Module,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // extends Module
+
+    initializeUI: function()
+    {
+        // we listen for panel update
+        Firebug.registerUIListener(this);
+    },
+
+    shutdown: function()
+    {
+        Firebug.unregisterUIListener(this);
+    },
+
+    onPanelSelect: function(object, panel)
+    {
+        var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.value = "";
+        removeClass(searchBox, "fbSearchBox-attention");
+
+        searchBox.updateOptions(panel.getSearchOptionsMenuItems());
+    },
 
     showPanel: function(browser, panel)
     {
