@@ -432,7 +432,20 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Support for context menus within inline editors.
+
+    getContextMenuItems: function(target)
+    {
+        var items = [];
+        items.push({label: "Cut", commandID: "cmd_cut"});
+        items.push({label: "Copy", commandID: "cmd_copy"});
+        items.push({label: "Paste", commandID: "cmd_paste"});
+        return items;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Editor Module listeners will get "onBeginEditing" just before this call
+
     beginEditing: function(target, value)
     {
     },
@@ -451,7 +464,6 @@ Firebug.BaseEditor = extend(Firebug.MeasureBox,
     insertNewRow: function(target, insertWhere)
     {
     },
-
 });
 
 // ************************************************************************************************
@@ -464,32 +476,35 @@ Firebug.InlineEditor = function(doc)
 
 Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
 {
+    enterOnBlur: true,
+    outerMargin: 8,
+    shadowExpand: 7,
+
     tag:
-        DIV({class: "inlineEditor"},
-            DIV({class: "textEditorTop1"},
-                DIV({class: "textEditorTop2"})
+        DIV({"class": "inlineEditor"},
+            DIV({"class": "textEditorTop1"},
+                DIV({"class": "textEditorTop2"})
             ),
-            DIV({class: "textEditorInner1"},
-                DIV({class: "textEditorInner2"},
-                    INPUT({class: "textEditorInner", type: "text",
-                        oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
+            DIV({"class": "textEditorInner1"},
+                DIV({"class": "textEditorInner2"},
+                    INPUT({"class": "textEditorInner", type: "text",
+                        oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow",
+                        oncontextmenu: "$onContextMenu"}
                     )
                 )
             ),
-            DIV({class: "textEditorBottom1"},
-                DIV({class: "textEditorBottom2"})
+            DIV({"class": "textEditorBottom1"},
+                DIV({"class": "textEditorBottom2"})
             )
         ),
 
     inputTag :
-        INPUT({class: "textEditorInner", type: "text",
+        INPUT({"class": "textEditorInner", type: "text",
             oninput: "$onInput", onkeypress: "$onKeyPress", onoverflow: "$onOverflow"}
         ),
-    expanderTag: IMG({class: "inlineExpander", src: "blank.gif"}),
 
-    enterOnBlur: true,
-    outerMargin: 8,
-    shadowExpand: 7,
+    expanderTag:
+        IMG({"class": "inlineExpander", src: "blank.gif"}),
 
     initialize: function()
     {
@@ -759,6 +774,28 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             this.getAutoCompleter().reset();
 
         Firebug.Editor.update();
+    },
+
+    onContextMenu: function(event)
+    {
+        cancelEvent(event);
+
+        var popup = $("fbInlineEditorPopup");
+        FBL.eraseNode(popup);
+
+        var target = event.target;
+        var menu = this.getContextMenuItems(target);
+        if (menu)
+        {
+            for (var i = 0; i < menu.length; ++i)
+                FBL.createMenuItem(popup, menu[i]);
+        }
+
+        if (!popup.firstChild)
+            return false;
+
+        popup.openPopupAtScreen(event.screenX, event.screenY, true);
+        return true;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
