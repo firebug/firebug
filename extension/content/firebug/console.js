@@ -221,7 +221,7 @@ Firebug.Console = extend(ActivableConsole,
     togglePersist: function(context)
     {
         var panel = context.getPanel(this.panelName);
-        panel.persistContent = panel.persistContent? false : true;
+        panel.persistContent = panel.persistContent ? false : true;
         Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", panel.persistContent);
     },
 

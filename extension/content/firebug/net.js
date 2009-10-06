@@ -200,6 +200,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
+    internationalizeUI: function(doc)
+    {
+        var element = doc.getElementById("fbNetPersist");
+        FBL.internationalize(element, "label");
+        FBL.internationalize(element, "tooltiptext");
+    },
+
     shutdown: function()
     {
         prefs.removeObserver(Firebug.prefDomain, this, false);
@@ -326,6 +333,13 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (Firebug.NetMonitor.isAlwaysEnabled())
             TabWatcher.iterateContexts(unmonitorContext);
     },
+
+    togglePersist: function(context)
+    {
+        var panel = context.getPanel(panelName);
+        panel.persistContent = panel.persistContent ? false : true;
+        Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", panel.persistContent);
+    }
 });
 
 // ************************************************************************************************
@@ -369,14 +383,37 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         this.panelNode.addEventListener("contextmenu", this.onContextMenu, false);
 
-        dispatch([Firebug.A11yModel], 'onInitializeNode', [this]);
+        dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
     },
 
     destroyNode : function()
     {
         this.panelNode.removeEventListener("contextmenu", this.onContextMenu, false);
 
-        dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
+        dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
+    },
+
+    loadPersistedContent: function(persistedState)
+    {
+        this.initLayout();
+
+        var tbody = this.table.firstChild;
+        var lastRow = tbody.lastChild.previousSibling;
+
+        // Move all net-rows from the persistedState to this panel.
+        var prevTableBody = getElementByClass(persistedState.panelNode, "netTableBody");
+        if (!prevTableBody)
+            return;
+
+        while (prevTableBody.firstChild)
+        {
+            if (hasClass(prevTableBody.firstChild, "netRow", "hasHeaders"))
+                tbody.insertBefore(prevTableBody.firstChild, lastRow);
+            else
+                prevTableBody.removeChild(prevTableBody.firstChild);
+        }
+
+        scrollToBottom(this.panelNode);
     },
 
     // UI Listener
@@ -1408,7 +1445,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     tableTag:
 
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
-            TBODY({"role" : "presentation"},
+            TBODY({"class": "netTableBody", "role" : "presentation"},
                 TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
                     TD({id: "netBreakpointBar", width: "1%", "class": "netHeaderCell",
                         "role": "columnheader"},

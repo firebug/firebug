@@ -1969,7 +1969,14 @@ Firebug.Panel =
 
         setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
 
-        this.loadPersistedContent();
+        // Load persistent conent if any.
+        var persistedState = Firebug.getPanelState(this);
+        if (persistedState)
+        {
+            this.persistContent = persistedState.persistContent;
+            if (this.persistContent && persistedState.panelNode)
+                this.loadPersistedContent(persistedState);
+        }
 
         doc.body.appendChild(this.panelNode);
 
@@ -2003,21 +2010,13 @@ Firebug.Panel =
         state.persistContent = this.persistContent;
     },
 
-    loadPersistedContent: function()
+    loadPersistedContent: function(persistedState)
     {
-        var persistedState = Firebug.getPanelState(this);
-        if (persistedState)
-        {
-            this.persistContent = persistedState.persistContent;
-            if (this.persistContent && persistedState.panelNode)
-            {
-                // move the nodes from the persistedState to the panel
-                while(persistedState.panelNode.firstChild)
-                    this.panelNode.appendChild(persistedState.panelNode.firstChild);
+        // move the nodes from the persistedState to the panel
+        while (persistedState.panelNode.firstChild)
+            this.panelNode.appendChild(persistedState.panelNode.firstChild);
 
-                scrollToBottom(this.panelNode);
-            }
-        }
+        scrollToBottom(this.panelNode);
     },
 
     // called when a panel in one XUL window is about to appear in another one.

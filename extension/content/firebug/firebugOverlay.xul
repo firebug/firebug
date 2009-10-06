@@ -66,6 +66,8 @@
         <command id="cmd_clearActivationList" oncommand="Firebug.Activation.clearAnnotations()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
+
+        <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(FirebugContext)"/>
     </commandset>
 
     <keyset id="mainKeyset">
@@ -92,7 +94,8 @@
         <popup id="fbContextMenu" onpopupshowing="return FirebugChrome.onContextShowing(event);">
             <menuitem label="&copyCmd.label;" accesskey="&copyCmd.accesskey;" command="cmd_copy"/>
         </popup>
-        <tooltip id="fbTooltip" class="fbURLMenuItem" onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
+        <tooltip id="fbTooltip" class="fbURLMenuItem"
+            onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
     </popupset>
 
     <!-- Main UI -->
@@ -122,7 +125,8 @@
                     </hbox>
 
                     <!-- Tab Bar -->
-                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist" aria-label="firebug panels" />
+                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
+                        aria-label="firebug panels" />
                     <spacer flex="1"/>
 
                     <!-- Search Box -->
@@ -133,15 +137,14 @@
                     </vbox>
 
                     <!-- Open In New Window & Minimize & Close -->
-                    <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="firebug window">
-
+                    <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar"
+                        aria-label="firebug window">
                         <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-text-button"
                             tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
                         <toolbarbutton id="fbDetachButton" class="toolbarbutton-text-button"
                             tooltiptext="&firebug.DetachFirebug;" command="cmd_detachFirebug"/>
                         <toolbarbutton id="fbCloseButton" class="toolbar-text-button"
                             tooltiptext="&firebug.CloseFirebug;" command="cmd_closeFirebug"/>
-
                     </hbox>
                 </hbox>
 
@@ -191,6 +194,10 @@
                                     <hbox id="fbNetButtons" collapsed="true">
                                         <toolbarbutton label="&firebug.Clear;" class="toolbar-text-button"
                                                         tooltiptext="&firebug.ClearTooltip;" command="cmd_clearNet"/>
+                                        <toolbarbutton id="fbNetPersist" label="firebug.console.Persist"
+                                                        class="toolbar-text-button"
+                                                        tooltiptext="firebug.console.Do Not Clear On Reload"
+                                                        command="cmd_togglePersistNet"/>
                                         <hbox id="fbNetButtonsFilter" class="noTabStop">
                                             <toolbarseparator/>
                                             <toolbarbutton id="fbNetFilter-all" label="&firebug.All;" type="radio" class="toolbar-text-button"
@@ -320,7 +327,8 @@
 
             <!-- Editors -->
             <menu label="&firebug.OpenWith;" id="FirebugMenu_OpenWith">
-                <menupopup id="fbFirebugMenu_OpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
+                <menupopup id="fbFirebugMenu_OpenWith"
+                    onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
                         <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
                 </menupopup>
             </menu>
@@ -398,7 +406,8 @@
 
             <menuseparator id="menu_aboutSeparator"/>
 
-            <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
+            <menuitem id="Firebug_About" label="&firebug.About;"
+                      oncommand="FirebugChrome.openAboutDialog()"/>
         </menupopup>
 
     </vbox>
