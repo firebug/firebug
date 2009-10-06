@@ -1600,24 +1600,29 @@ Firebug.HTMLModule.MutationBreakpoints =
 {
     resume: function(context)
     {
-        context.breakOnMutate = !context.breakOnMutate;
+        context.breakOnAnyMutate = !context.breakOnAnyMutate;
 
         Firebug.Breakpoint.resume(context, $STR("html.Break On Mutate"),
             $STR("html.Disable Break On Mutate"));
     },
 
-    breakOnMutate: function(event, context, type)
+    breakOnAnyMutate: function(event, context, type)
     {
-        if (!context.breakOnMutate)
+        if (!context.breakOnAnyMutate)
             return false;
 
-        context.breakOnMutate = false;
+        context.breakOnAnyMutate = false;
 
-        var typeLabel = Firebug.HTMLModule.BreakpointRep.getType({type: type});
+        this.breakWithCause(event, context, type);
+    },
+
+    breakWithCause: function(event, context, type)
+    {
+        var changeLabel = Firebug.HTMLModule.BreakpointRep.getChangeLabel({type: type});
         var targetName = event.target.localName ? event.target.localName : "";
         context.breakingCause = {
             title: $STR("net.Break On Mutate"),
-            message: typeLabel + (targetName ? ": " + targetName : "")
+            message: changeLabel + (targetName ? ": " + targetName : "")
         };
 
         Firebug.Debugger.breakNow();
@@ -1629,13 +1634,14 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onMutateAttr: function(event, context)
     {
-        if (this.breakOnMutate(event, context, BP_BREAKONATTRCHANGE))
+        if (this.breakOnAnyMutate(event, context, BP_BREAKONATTRCHANGE))
             return;
 
         var breakpoints = context.mutationBreakpoints;
+        var self = this;
         breakpoints.enumerateBreakpoints(BP_BREAKONATTRCHANGE, function(bp) {
             if (bp.checked && bp.node == event.target) {
-                Firebug.Debugger.breakNow();
+                self.breakWithCause(event, context, BP_BREAKONATTRCHANGE);
                 return true;
             }
         });
@@ -1643,7 +1649,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onMutateText: function(event, context)
     {
-        if (this.breakOnMutate(event, context, BP_BREAKONTEXT))
+        if (this.breakOnAnyMutate(event, context, BP_BREAKONTEXT))
             return;
     },
 
@@ -1652,7 +1658,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         var node = event.target;
         var removal = event.type == "DOMNodeRemoved";
 
-        if (this.breakOnMutate(event, context, removal ? BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
+        if (this.breakOnAnyMutate(event, context, removal ? BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
             return;
 
         var breakpoints = context.mutationBreakpoints;
@@ -1660,9 +1666,10 @@ Firebug.HTMLModule.MutationBreakpoints =
 
         if (removal)
         {
+            var self = this;
             breaked = breakpoints.enumerateBreakpoints(BP_BREAKONREMOVE, function(bp) {
                 if (bp.checked && bp.node == node) {
-                    Firebug.Debugger.breakNow();
+                    self.breakWithCause(event, context, BP_BREAKONREMOVE);
                     return true;
                 }
             });
@@ -1676,10 +1683,11 @@ Firebug.HTMLModule.MutationBreakpoints =
                 parents.push(parent);
 
             // Iterate over all parents and see if some of them has a breakpoint.
+            var self = this;
             breakpoints.enumerateBreakpoints(BP_BREAKONCHILDCHANGE, function(bp) {
                 for (var i=0; i<parents.length; i++) {
                     if (bp.checked && bp.node == parents[i]) {
-                        Firebug.Debugger.breakNow();
+                        self.breakWithCause(event, context, BP_BREAKONCHILDCHANGE);
                         return true;
                     }
                 }
@@ -1771,7 +1779,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
                 INPUT({"class": "breakpointCheckbox", type: "checkbox",
                     _checked: "$bp.checked", tabindex : "-1"}),
                 TAG("$bp.node|getNodeTag", {object: "$bp.node"}),
-                DIV({"class": "breakpointMutationType"}, "$bp|getType"),
+                DIV({"class": "breakpointMutationType"}, "$bp|getChangeLabel"),
                 IMG({"class": "closeButton", src: "blank.gif", onclick: "$onRemove"})
             ),
             DIV({"class": "breakpointCode"},
@@ -1790,7 +1798,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
         return getNodeTag(node, false);
     },
 
-    getType: function(bp)
+    getChangeLabel: function(bp)
     {
         switch (bp.type)
         {
