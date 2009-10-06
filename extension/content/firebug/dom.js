@@ -614,8 +614,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         if (!member)
             return;
 
-        // xxxHonza: Support for object change not implemented yet.
-        if (member.hasChildren)
+        // Bail out if this property is not breakable.
+        if (!member.breakable)
             return;
 
         //xxxHonza: don't use getRowName to get the prop name. From some reason
@@ -945,7 +945,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 );
             }
 
-            if (!isDOMMember(rowObject, rowName))
+            var member = row ? row.domObject : null;
+            if (!isDOMMember(rowObject, rowName) && member && member.breakable)
             {
                 items.push(
                     "-",
@@ -1647,7 +1648,12 @@ function addMember(object, type, props, name, value, level, order, context)
     // on the same template as the DOM panel, but doesn't show any breakpoints).
     if (context)
     {
+        // xxxHonza: Support for object change not implemented yet.
         member.breakable = !hasChildren;
+
+        // xxxHonza: Disable breaking on direct window properties, see #520572
+        if (object instanceof Ci.nsIDOMWindow)
+            member.breakable = false;
 
         var breakpoints = context.dom.breakpoints;
         var bp = breakpoints.findBreakpoint(object, name);
