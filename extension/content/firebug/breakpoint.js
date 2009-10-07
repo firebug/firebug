@@ -578,7 +578,13 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                                 $STR("Copy")
                             )
                         ),
-                        DIV({"class": "notationCaption"}, "$cause.message")
+                        DIV({"class": "notationCaption"},
+                            SPAN({"class":"notationTitle"}, "$cause|getTitle"),
+                            SPAN({"class":"notationTitle"}, "$cause|getDiff"),
+                            TAG(FirebugReps.Element.shortTag, {object: "$cause.target"}) /* FAILS because click event to go hide*/
+                            /*, FAILS since relatedNode can be null
+                            TAG(FirebugReps.Element.shortTag, {object: "$cause.relatedNode"})*/
+                            )
                     )
                 )
             ),
@@ -586,6 +592,21 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                 DIV({"class": "notationEditorBottom2"})
             )
         ),
+
+    getDiff: function(cause)
+    {
+        var str = "";
+        if (cause.prevValue)
+            str += cropString(cause.prevValue, 40) +" -> ";
+        if (cause.newValue)
+            str += cropString(cause.newValue, 40);
+        return str + " in ";  // the element will be rendered after the diff
+    },
+
+    getTitle: function(cause)
+    {
+        return cause.message + (cause.attrName ? (" \'"+cause.attrName+"\": ") : "");
+    },
 
     initialize: function(doc, cause)
     {
@@ -620,12 +641,12 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         }, this));
     },
 
-    hide: function()
+    hide: function(event) // the argument event does not come thru??
     {
         if (this.panel)
         {
             var guts = getElementByClass(this.box, "conditionEditorInner");
-            clearNode(guts);
+            collapse(guts, true);  // as the box shrinks you don't want text to spill
 
             var msg = this.cause.message;
             if (msg)
@@ -635,6 +656,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                 {
                     if (self.box.clientWidth < 20)
                     {
+                        clearNode(guts);
+
                         clearInterval(interval);
                         self.box.parentNode.removeChild(self.box);
                         self.target.setAttribute('title', msg);

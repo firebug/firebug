@@ -1619,10 +1619,16 @@ Firebug.HTMLModule.MutationBreakpoints =
     breakWithCause: function(event, context, type)
     {
         var changeLabel = Firebug.HTMLModule.BreakpointRep.getChangeLabel({type: type});
-        var targetName = event.target.localName ? event.target.localName : "";
         context.breakingCause = {
             title: $STR("net.Break On Mutate"),
-            message: changeLabel + (targetName ? ": " + targetName : "")
+            message: changeLabel,
+            type: event.type,
+            target: event.target,
+            relatedNode: event.relatedNode, // http://www.w3.org/TR/DOM-Level-2-Events/events.html
+            prevValue: event.prevValue,
+            newValue: event.newValue,
+            attrName: event.attrName,
+            attrChange: event.attrChange,
         };
 
         Firebug.Debugger.breakNow();
