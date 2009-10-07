@@ -438,6 +438,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             Firebug.NetMonitor.disabledPanelPage.hide(this);
             if (!this.context.stopped)
                 Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
+
+            Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
         }
         else
         {
