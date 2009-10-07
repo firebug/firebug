@@ -207,10 +207,24 @@ this.safeToString = function(ob)
 {
     try
     {
+        if (!ob)
+        {
+            if (ob == undefined)
+                return 'undefined';
+            if (ob == null)
+                return 'null';
+            if (ob == false)
+                return 'false';
+            return "";
+        }
         if (ob && (typeof (ob['toString']) == "function") )
             return ob.toString();
-        if (typeof ob == 'function' && typeof (ob['toSource']) == 'function')
+        if (ob && typeof (ob['toSource']) == 'function')
             return ob.toSource();
+        var str = "[";
+        for (var p in ob)
+            str += p+',';
+        return str + ']';
     }
     catch (exc)
     {
@@ -2001,6 +2015,14 @@ this.getStackFrame = function(frame, context)
     }
     try
     {
+        var propertyBinding = Firebug.PropertyBinding.getPropertyBinding(frame);
+        if (propertyBinding)
+        {
+            var args = FBL.getFunctionArgValues(propertyBinding.object, frame);
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+propertyBinding.name, {propertyBinding: propertyBinding, script: frame.script, args: args});
+            return new this.StackFrame(context, propertyBinding.name, frame.script, url, lineNo, args, frame.pc);
+        }
+
         var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
         if (sourceFile)
         {
@@ -2012,7 +2034,7 @@ this.getStackFrame = function(frame, context)
             if (!fncSpec.name)
                 fncSpec.name = frame.script.functionName;
 
-            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame for sourceFile", sourceFile);
+            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+fncSpec.name, {sourceFile: sourceFile, script: frame.script, fncSpec: fncSpec});
             return new this.StackFrame(context, fncSpec.name, frame.script, url, lineNo, fncSpec.args, frame.pc);
         }
         else
