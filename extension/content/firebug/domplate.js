@@ -154,22 +154,22 @@ DomplateTag.prototype =
         var fnBlock = ['(function (__code__, __context__, __in__, __out__'];
         for (var i = 0; i < info.argIndex; ++i)
             fnBlock.push(', s', i);
-        fnBlock.push(') {');
+        fnBlock.push(') {\n');
 
         if (this.subject)
-            fnBlock.push('with (this) {');
+            fnBlock.push('with (this) {\n');
         if (this.context)
-            fnBlock.push('with (__context__) {');
-        fnBlock.push('with (__in__) {');
+            fnBlock.push('with (__context__) {\n');
+        fnBlock.push('with (__in__) {\n');
 
         fnBlock.push.apply(fnBlock, blocks);
 
         if (this.subject)
-            fnBlock.push('}');
+            fnBlock.push('}\n');
         if (this.context)
-            fnBlock.push('}');
+            fnBlock.push('}\n');
 
-        fnBlock.push('}})');
+        fnBlock.push('}})\n');
 
         function __link__(tag, code, outputs, args)
         {
@@ -327,9 +327,9 @@ DomplateTag.prototype =
     addCode: function(topBlock, topOuts, blocks)
     {
         if (topBlock.length)
-            blocks.push('__code__.push(""', topBlock.join(""), ');');
+            blocks.push('__code__.push(""', topBlock.join(""), ');\n');
         if (topOuts.length)
-            blocks.push('__out__.push(', topOuts.join(","), ');');
+            blocks.push('__out__.push(', topOuts.join(","), ');\n');
         topBlock.splice(0, topBlock.length);
         topOuts.splice(0, topOuts.length);
     },
@@ -348,7 +348,7 @@ DomplateTag.prototype =
 
             map[name] = 1;
             var names = name.split(".");
-            blocks.push('var ', names[0] + ' = ' + '__in__.' + names[0] + ';');
+            blocks.push('var ', names[0] + ' = ' + '__in__.' + names[0] + ';\n');
         }
     },
 
@@ -371,26 +371,26 @@ DomplateTag.prototype =
         for (var i = 0; i < path.renderIndex; ++i)
             fnBlock.push(', ', 'd'+i);
 
-        fnBlock.push(') {');
+        fnBlock.push(') {\n');
         for (var i = 0; i < path.loopIndex; ++i)
-            fnBlock.push('var l', i, ' = 0;');
+            fnBlock.push('var l', i, ' = 0;\n');
         for (var i = 0; i < path.embedIndex; ++i)
-            fnBlock.push('var e', i, ' = 0;');
+            fnBlock.push('var e', i, ' = 0;\n');
 
         if (this.subject)
-            fnBlock.push('with (this) {');
+            fnBlock.push('with (this) {\n');
         if (this.context)
-            fnBlock.push('with (context) {');
+            fnBlock.push('with (context) {\n');
 
         fnBlock.push(blocks.join(""));
 
         if (this.subject)
-            fnBlock.push('}');
+            fnBlock.push('}\n');
         if (this.context)
-            fnBlock.push('}');
+            fnBlock.push('}\n');
 
-        fnBlock.push('return ', nodeCount, ';');
-        fnBlock.push('})');
+        fnBlock.push('return ', nodeCount, ';\n');
+        fnBlock.push('})\n');
 
         function __bind__(object, fn)
         {
@@ -457,7 +457,7 @@ DomplateTag.prototype =
             {
                 var val = this.listeners[i+1];
                 var arg = generateArg(val, path, args);
-                blocks.push('node.addEventListener("', this.listeners[i], '", __bind__(this, ', arg, '), false);');
+                blocks.push('node.addEventListener("', this.listeners[i], '", __bind__(this, ', arg, '), false);\n');
             }
         }
 
@@ -467,7 +467,7 @@ DomplateTag.prototype =
             {
                 var val = this.props[name];
                 var arg = generateArg(val, path, args);
-                blocks.push('node.', name, ' = ', arg, ';');
+                blocks.push('node.', name, ' = ', arg, ';\n');
             }
         }
 
@@ -480,7 +480,7 @@ DomplateTag.prototype =
         blocks.push("var node = __path__(root, o");
         for (var i = 0; i < path.length; ++i)
             blocks.push(",", path[i]);
-        blocks.push(");");
+        blocks.push(");\n");
     },
 
     generateChildDOM: function(path, blocks, args)
@@ -543,7 +543,7 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
 
         blocks.push('__link__(');
         addParts(this.value, '', blocks, info);
-        blocks.push(', __code__, __out__, {');
+        blocks.push(', __code__, __out__, {\n');
 
         var lastName = null;
         for (var name in this.attrs)
@@ -557,7 +557,7 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
             addParts(val, '', blocks, info);
         }
 
-        blocks.push('});');
+        blocks.push('});\n');
         //this.generateChildMarkup(topBlock, topOuts, blocks, info);
     },
 
@@ -569,7 +569,7 @@ DomplateEmbed.prototype = copyObject(DomplateTag.prototype,
 
         var valueName = 'd' + path.renderIndex++;
         var argsName = 'd' + path.renderIndex++;
-        blocks.push(embedName + ' = __link__(node, ', valueName, ', ', argsName, ');');
+        blocks.push(embedName + ' = __link__(node, ', valueName, ', ', argsName, ');\n');
 
         return embedName;
     }
@@ -621,10 +621,10 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
         else
             iterName = this.iter;
 
-        blocks.push('__loop__.apply(this, [', iterName, ', __out__, function(', this.varName, ', __out__) {');
+        blocks.push('__loop__.apply(this, [', iterName, ', __out__, function(', this.varName, ', __out__) {\n');
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         this.addCode(topBlock, topOuts, blocks);
-        blocks.push('}]);');
+        blocks.push('}]);\n');
     },
 
     generateDOM: function(path, blocks, args)
@@ -659,10 +659,10 @@ DomplateLoop.prototype = copyObject(DomplateTag.prototype,
         blocks.push(loopName,' = __loop__.apply(this, [', iterName, ', function(', counterName,',',loopName);
         for (var i = 0; i < path.renderIndex; ++i)
             blocks.push(',d'+i);
-        blocks.push(') {');
+        blocks.push(') {\n');
         blocks.push(subBlocks.join(""));
-        blocks.push('return ', nodeCount, ';');
-        blocks.push('}]);');
+        blocks.push('return ', nodeCount, ';\n');
+        blocks.push('}]);\n');
 
         path.renderIndex = preIndex;
 
