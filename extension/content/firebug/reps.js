@@ -1198,15 +1198,13 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            SPAN(
-                A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
-                "(",
-                FOR("arg", "$object|argIterator",
-                    TAG("$arg.tag", {object: "$arg.value"}),
-                    SPAN({class: "arrayComma"}, "$arg.delim")
-                ),
-                ")"
+            A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
+            SPAN("("),
+            FOR("arg", "$object|argIterator",
+                TAG("$arg.tag", {object: "$arg.value"}),
+                SPAN({class: "arrayComma"}, "$arg.delim")
             ),
+            SPAN(")"),
             SPAN({class: "objectLink-sourceLink objectLink a11yFocus",
                 _repObject: "$object|getSourceLink",
                 role: "link"},
