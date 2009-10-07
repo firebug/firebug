@@ -1198,14 +1198,19 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
-            "(",
-            FOR("arg", "$object|argIterator",
-                TAG("$arg.tag", {object: "$arg.value"}),
-                SPAN({class: "arrayComma"}, "$arg.delim")
+            SPAN(
+                A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
+                "(",
+                FOR("arg", "$object|argIterator",
+                    TAG("$arg.tag", {object: "$arg.value"}),
+                    SPAN({class: "arrayComma"}, "$arg.delim")
+                ),
+                ")"
             ),
-            ")",
-            SPAN({class: "objectLink-sourceLink objectLink a11yFocus", role : "link"}, "$object|getSourceLinkTitle")
+            SPAN({class: "objectLink-sourceLink objectLink a11yFocus",
+                _repObject: "$object|getSourceLink",
+                role: "link"},
+                "$object|getSourceLinkTitle")
         ),
 
     getCallName: function(frame)
@@ -1268,8 +1273,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     inspectObject: function(stackFrame, context)
     {
-        var sourceLink = new SourceLink(stackFrame.href, stackFrame.lineNo, "js");
-        Firebug.chrome.select(sourceLink);
+        Firebug.chrome.select(this.getSourceLink(stackFrame));
     },
 
     getTooltip: function(stackFrame, context)
@@ -1277,7 +1281,11 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
         return $STRF("Line", [stackFrame.href, stackFrame.lineNo]);
     },
 
-
+    getSourceLink: function(stackFrame)
+    {
+        var sourceLink = new SourceLink(stackFrame.href, stackFrame.lineNo, "js");
+        return sourceLink;
+    },
 });
 
 // ************************************************************************************************
