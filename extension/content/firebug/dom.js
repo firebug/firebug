@@ -1060,12 +1060,12 @@ DOMMainPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
-            row = this.currentSearch.findNext(true, undefined, reverse, Firebug.searchCaseSensitive);
+            row = this.currentSearch.findNext(true, undefined, reverse, Firebug.Search.isCaseSensitive(text));
         else
         {
             function findRow(node) { return getAncestorByClass(node, "memberRow"); }
             this.currentSearch = new TextSearch(this.panelNode, findRow);
-            row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
+            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
         if (row)

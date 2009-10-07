@@ -43,17 +43,7 @@ Firebug.Search = extend(Firebug.Module,
 
         searchBox.value = text;
     },
-/* see onPanelSelect
-    panelChanged: function(context)
-    {
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.value = "";
-        removeClass(searchBox, "fbSearchBox-attention");
 
-        var panel = Firebug.chrome.getSelectedPanel();
-        searchBox.updateOptions(panel.getSearchOptionsMenuItems());
-    },
-*/
     focus: function(context)
     {
         if (Firebug.isDetached())
@@ -133,6 +123,20 @@ Firebug.Search = extend(Firebug.Module,
     onNotFound: function()
     {
         beep();
+    },
+
+    isCaseSensitive: function(text)
+    {
+        return !!Firebug.searchCaseSensitive || text.toLowerCase() != text;
+    },
+    searchOptionMenu: function(label, option)
+    {
+      return { label: label, checked: Firebug[option], option: option,
+        command: bindFixed(this.onToggleSearchOption, this, option) };
+    },
+    onToggleSearchOption: function(option)
+    {
+        Firebug.setPref(Firebug.prefDomain, option, !Firebug[option]);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

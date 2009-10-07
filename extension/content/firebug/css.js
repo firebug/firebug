@@ -961,7 +961,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = new RegExp(text, Firebug.searchCaseSensitive ? "g" : "gi");
+        var scanRE = new RegExp(text, Firebug.Search.isCaseSensitive(text) ? "g" : "gi");
 
         function scanDoc(styleSheet) {
             // we don't care about reverse here as we are just looking for existence,
@@ -992,14 +992,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
         {
-            row = this.currentSearch.findNext(wrapSearch, false, reverse, Firebug.searchCaseSensitive);
+            row = this.currentSearch.findNext(wrapSearch, false, reverse, Firebug.Search.isCaseSensitive(text));
         }
         else
         {
             if (this.editing)
             {
                 this.currentSearch = new TextSearch(this.stylesheetEditor.box);
-                row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
+                row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
 
                 if (row)
                 {
@@ -1016,7 +1016,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 function findRow(node) { return node.nodeType == 1 ? node : node.parentNode; }
                 this.currentSearch = new TextSearch(this.panelNode, findRow);
-                row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
+                row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
             }
         }
 
@@ -1037,8 +1037,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            optionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            optionMenu("search.Multiple_Files", "searchGlobal")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal")
         ];
     }
 });

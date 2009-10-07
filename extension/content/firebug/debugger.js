@@ -2620,7 +2620,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = new RegExp(text, Firebug.searchCaseSensitive ? "g" : "gi");
+        var scanRE = new RegExp(text, Firebug.Search.isCaseSensitive(text) ? "g" : "gi");
 
         var self = this;
 
@@ -2650,11 +2650,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         var lineNo = null;
         if (this.currentSearch && text == this.currentSearch.text)
-            lineNo = this.currentSearch.findNext(wrapSearch, reverse, !!Firebug.searchCaseSensitive);
+            lineNo = this.currentSearch.findNext(wrapSearch, reverse, Firebug.Search.isCaseSensitive(text));
         else
         {
             this.currentSearch = new SourceBoxTextSearch(sourceBox);
-            lineNo = this.currentSearch.find(text, reverse, !!Firebug.searchCaseSensitive);
+            lineNo = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
         if (lineNo || lineNo === 0)
@@ -2675,8 +2675,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            optionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            optionMenu("search.Multiple_Files", "searchGlobal")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal")
         ];
     },
 

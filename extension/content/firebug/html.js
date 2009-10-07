@@ -974,7 +974,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
-        var loopAround = search.find(reverse, Firebug.searchCaseSensitive);
+        var loopAround = search.find(reverse, Firebug.Search.isCaseSensitive(text));
         if (loopAround)
         {
             this.resetSearch();
@@ -987,8 +987,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            optionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            optionMenu("search.html.CSS_Selector", "searchSelector")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
+            Firebug.Search.searchOptionMenu("search.html.CSS_Selector", "searchSelector")
         ];
     },
 

@@ -850,10 +850,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            optionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            //optionMenu("search.net.Headers", "netSearchHeaders"),
-            //optionMenu("search.net.Parameters", "netSearchParameters"),
-            optionMenu("search.net.Response_Bodies", "netSearchResponseBody")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
+            //Firebug.Search.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
+            //Firebug.Search.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
+            Firebug.Search.searchOptionMenu("search.net.Response_Bodies", "netSearchResponseBody")
         ];
     },
 
@@ -868,12 +868,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var row;
         if (this.currentSearch && text == this.currentSearch.text)
         {
-            row = this.currentSearch.findNext(true, false, reverse, Firebug.searchCaseSensitive);
+            row = this.currentSearch.findNext(true, false, reverse, Firebug.Search.isCaseSensitive(text));
         }
         else
         {
             this.currentSearch = new NetPanelSearch(this);
-            row = this.currentSearch.find(text, reverse, Firebug.searchCaseSensitive);
+            row = this.currentSearch.find(text, reverse, Firebug.Search.isCaseSensitive(text));
         }
 
         if (row)
@@ -4383,7 +4383,7 @@ var NetPanelSearch = function(panel, rowFinder)
         if (!file)
             return;
 
-        var scanRE = new RegExp(this.text, Firebug.searchCaseSensitive ? "g" : "gi");
+        var scanRE = new RegExp(this.text, Firebug.Search.isCaseSensitive(text) ? "g" : "gi");
         if (scanRE.test(file.responseText))
         {
             if (!hasClass(this.currentRow, "opened"))
