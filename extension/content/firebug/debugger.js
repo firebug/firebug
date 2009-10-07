@@ -161,6 +161,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             if (frame)
                 Firebug.Debugger.onBreak(frame, 3);
+            else
+                if (FBTrace.DBG_UI_LOOP)
+                    FBTrace.sysout("debugger.breakNow: no frame that is not firebug");
         });
     },
 
