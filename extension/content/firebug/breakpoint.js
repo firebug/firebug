@@ -581,10 +581,9 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                         DIV({"class": "notationCaption"},
                             SPAN({"class":"notationTitle"}, "$cause|getTitle"),
                             SPAN({"class":"notationTitle"}, "$cause|getDiff"),
-                            TAG(FirebugReps.Element.shortTag, {object: "$cause.target"}) /* FAILS because click event to go hide*/
-                            /*, FAILS since relatedNode can be null
-                            TAG(FirebugReps.Element.shortTag, {object: "$cause.relatedNode"})*/
-                            )
+                            TAG("$cause|getTargetTag", {object: "$cause.target"}),
+                            TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
+                        )
                     )
                 )
             ),
@@ -592,6 +591,16 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                 DIV({"class": "notationEditorBottom2"})
             )
         ),
+
+    getTargetTag: function(cause)
+    {
+        return cause.target ? FirebugReps.Element.shortTag : null;
+    },
+
+    getRelatedTargetTag: function(cause)
+    {
+        return cause.relatedTarget ? FirebugReps.Element.shortTag : null;
+    },
 
     getDiff: function(cause)
     {
