@@ -2015,6 +2015,7 @@ this.getStackFrame = function(frame, context)
     }
     try
     {
+        /* XXXjjb waiting for info
         var propertyBinding = Firebug.PropertyBinding.getPropertyBinding(frame);
         if (propertyBinding)
         {
@@ -2022,7 +2023,7 @@ this.getStackFrame = function(frame, context)
             if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+propertyBinding.name, {propertyBinding: propertyBinding, script: frame.script, args: args});
             return new this.StackFrame(context, propertyBinding.name, frame.script, url, lineNo, args, frame.pc);
         }
-
+*/
         var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
         if (sourceFile)
         {

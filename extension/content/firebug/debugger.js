@@ -2294,7 +2294,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
                 if (FBTrace.DBG_STACK)
                     FBTrace.sysout("populateInfoTip result is "+result, result);
-                try
+                /*
+                  XXXjjb waiting for info from mozilla
+                 try
                 {
                     if (context.currentFrame)
                     {
@@ -2307,7 +2309,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 {
                     FBTrace.sysout("generateScope FAILS "+exc, exc);
                 }
-
+*/
                 tag.replace({object: result}, infoTip);
 
                 Firebug.chrome.contextMenuObject = result;  // for context menu select()
