@@ -307,7 +307,7 @@ Firebug.SourceFile.prototype =
              return context.sourceCache.load(this.href);
      },
 
-     getOuterScriptAnalyzer: function(sourceFile)
+     getOuterScriptAnalyzer: function()
      {
          FBTrace.sysout("getOuterScriptAnalyzer not overridden for "+sourceFile, this);
      },
@@ -450,9 +450,9 @@ Firebug.EvalLevelSourceFile.prototype =
          return {path: containingFileDescription.path, name: containingFileDescription.name+"/eval: "+this.summary };
     },
 
-    getOuterScriptAnalyzer: function(sourceFile)
+    getOuterScriptAnalyzer: function()
     {
-        return new Firebug.EvalLevelSourceFile.OuterScriptAnalyzer(sourceFile);
+        return new Firebug.EvalLevelSourceFile.OuterScriptAnalyzer(this);
     },
 
 });
@@ -516,9 +516,9 @@ Firebug.EventSourceFile.prototype =	extend(new Firebug.SourceFile("event"),  // 
         return {path: containingFileDescription.path, name: containingFileDescription.name+"/event: "+this.summary };
     },
 
-    getOuterScriptAnalyzer: function(sourceFile)
+    getOuterScriptAnalyzer: function()
     {
-        return new Firebug.EventSourceFile.OuterScriptAnalyzer(sourceFile);
+        return new Firebug.EventSourceFile.OuterScriptAnalyzer(this);
     },
 
 });
