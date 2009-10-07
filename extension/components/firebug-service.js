@@ -1824,8 +1824,8 @@ FirebugService.prototype =
         var checkFrame = frame;
         while (checkFrame) // We may stop in a component, but want the callers Window
         {
-            var frameWin = getFrameScopeWindowAncestor(checkFrame);
-            if (frameWin)
+            var frameScopeRoot = getFrameScopeRoot(checkFrame);
+            if (frameScopeRoot)
                 break;
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER)
@@ -1837,9 +1837,9 @@ FirebugService.prototype =
         if (!checkFrame && FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("fbs.findDebugger fell thru bottom of stack", frame);
 
-        // frameWin should be the top window for the scope of the frame function
+        // frameScopeRoot should be the top window for the scope of the frame function
         // or null
-        fbs.last_debuggr = fbs.askDebuggersForSupport(frameWin, frame);
+        fbs.last_debuggr = fbs.askDebuggersForSupport(frameScopeRoot, frame);
         if (fbs.last_debuggr)
              return fbs.last_debuggr;
         else
@@ -1925,11 +1925,11 @@ FirebugService.prototype =
 
     reFindDebugger: function(frame, debuggr)
     {
-        var frameWin = getFrameScopeWindowAncestor(frame);
-        if (frameWin && debuggr.supportsGlobal(frameWin, frame)) return debuggr;
+        var frameScopeRoot = getFrameScopeRoot(frame);
+        if (frameScopeRoot && debuggr.supportsGlobal(frameScopeRoot, frame)) return debuggr;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameWin "+frameWin, frameWin);
+            FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameScopeRoot "+frameScopeRoot, frameScopeRoot);
         return null;
     },
 
@@ -2231,7 +2231,7 @@ FirebugService.prototype =
                         sourceFile.breakOnZero = script.tag;
 
                     if (FBTrace.DBG_FBS_BP)
-                        FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":" notExecutable"), sourceFile);
+                        FBTrace.sysout("setJSDBreakpoint tag: "+script.tag+" line.pc@url="+bp.lineNo +"."+pc+"@"+sourceFile.href+" using offset:"+sourceFile.getBaseLineOffset()+" jsdLine: "+jsdLine+" pcToLine: "+pcToLine+(isExecutable?" isExecuable":" notExecutable"), {sourceFile: sourceFile, script: script});
                 }
                 else
                 {
@@ -2674,7 +2674,7 @@ function hook(fn, rv)
     }
 }
 var lastWindowScope = null;
-function getFrameScopeWindowAncestor(frame)  // walk script scope chain to bottom, null unless a Window
+function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert to Window if possible
 {
     var scope = frame.scope;
     if (scope)
@@ -2693,9 +2693,9 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             var workerScope = scope.getWrappedValue();
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                    FBTrace.sysout("fbs.getFrameScopeWindowAncestor found WorkerGlobalScope: "+scope.jsClassName, workerScope);
+                    FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
             // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            //        FBTrace.sysout("fbs.getFrameScopeWindowAncestor found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
+            //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
             return lastWindowScope;
         }
 
@@ -2709,7 +2709,9 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("fbs.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
+            FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, not Window: "+scope.jsClassName, scope);
+
+        return scope;
     }
     else
         return null;
@@ -2745,7 +2747,7 @@ function getFrameWindow(frame)
         if (win instanceof Ci.nsIDOMWindow)
             return getRootWindow(win);
         else
-            return getFrameScopeWindowAncestor(frame);
+            return getFrameScopeRoot(frame);
     }
     catch (exc)
     {
