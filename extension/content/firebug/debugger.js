@@ -2298,17 +2298,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                 {
                     if (context.currentFrame)
                     {
-                        var propertyBinding = findObjectInScopeChain(context.currentFrame.scope, result);
+                        var propertyBinding = Firebug.PropertyBinding.getPropertyBinding(context.currentFrame);
                         if (propertyBinding)
-                        {
-                            var scopeVars = propertyBinding.scope.getWrappedValue();
-                            if (scopeVars && ('hasOwnProperty' in scopeVars) && !scopeVars.hasOwnProperty("toString") && typeof(scopeVars.toString) == 'function' )
-                                propertyBinding.scopeName = scope.jsClassName;
-                            else
-                                propertyBinding.scopeName = scopeVars.toString();
-
-                            FBTrace.sysout("found object in scope chain "+propertyBinding.scopeName+"["+propertyBinding.prop+"]", propertyBinding);
-                        }
+                            FBTrace.sysout("found object in scope chain ", propertyBinding);
                     }
                 }
                 catch(exc)
@@ -3401,44 +3393,123 @@ function getFrameContext(frame)
     return win ? TabWatcher.getContextByWindow(win) : null;
 }
 
-function eachScope(scope, processScopeFalseToAbort) {
-    var ret = [];
-    while (scope) {
-        var rc = processScopeFalseToAbort(scope);
-        if (rc)
-            ret.push(rc);
-        else
-            return false;
-        scope = scope.jsParent;
-    }
-    return ret;
-}
 
-function findObjectInScopeChain(newestScope, obj)
+
+/*
+ * A PropertyBinding is an object, a string name, and  value such that the obj[name]==value
+ */
+Firebug.PropertyBinding = function(object, name, value)
 {
-    var scopeInfo = {};
-    eachScope(newestScope, function findObjectInScopeThenAbort(scope)
-    {
-        var info;
-        // getWrappedValue will not contain any variables for closure
-        // scopes, so we want to special case this to get all variables
-        // in all cases.
-        if (scope.jsClassName == "Call")
-            info = findObjectInCallScope(scope, obj);
-        else
-            info = findObjectInNonCallScope(scope, obj);
-
-        if (info)
-        {
-            scopeInfo = info;
-            return false; // done, no more scopes.
-        }
-        return true;
-    });
-
-    if (scopeInfo.hasOwnProperty('scope'))
-        return scopeInfo;
+    this.name = name;
+    this.value = value;
+    this.object = object;
 }
+
+Firebug.PropertyBinding.getPropertyBinding = function(frame)
+{
+    var functionObject = frame.script.functionObject.getWrappedValue();
+    var frameThis = frame.thisValue.getWrappedValue();
+    for (var p in frameThis)
+    {
+        if (frameThis[p] === functionObject)
+            return new Firebug.PropertyBinding(frameThis, p, functionObject);
+        if (typeof (frameThis[p]) == 'function')
+        {
+            if (functionObject.toSource() == frameThis[p].toSource())
+                FBTrace.sysout("Property Binding toSource match ",{functionObject: functionObject.toSource(), frameThis_p: frameThis[p].toSource()});
+            else
+                FBTrace.sysout("Property Binding no match ",{functionObject: functionObject.toSource(), frameThis_p: frameThis[p].toSource()});
+        }
+        else
+            FBTrace.sysout("Property Binding not  function "+p);
+    }
+    FBTrace.sysout("getPropertyBinding FAILS ", {functionObject: functionObject, frameThis: frameThis});
+}
+
+Firebug.PropertyBinding.prototype =
+{
+    eachScope: function(scope, processScopeFalseToAbort)
+    {
+        var ret = [];
+        while (scope) {
+            var rc = processScopeFalseToAbort(scope);
+            if (rc)
+                ret.push(rc);
+            else
+                return false;
+            scope = scope.jsParent;
+        }
+        return ret;
+    },
+
+    findObjectInScopeChain: function(newestScope, obj)
+    {
+        var scopeInfo = {};
+        var self = this;
+        eachScope(newestScope, function findObjectInScopeThenAbort(scope)
+        {
+            var info;
+            // getWrappedValue will not contain any variables for closure
+            // scopes, so we want to special case this to get all variables
+            // in all cases.
+            if (scope.jsClassName == "Call")
+                info = self.findObjectInCallScope(scope, obj);
+            else
+                info = self.findObjectInNonCallScope(scope, obj);
+
+            if (info)
+            {
+                scopeInfo = info;
+                return false; // done, no more scopes.
+            }
+            return true;
+        });
+
+        if (scopeInfo.hasOwnProperty('scope'))
+            return scopeInfo;
+    },
+
+    findObjectInCallScope: function(scope, obj)
+    {
+        var listValue = {value: null}, lengthValue = {value: 0};
+        scope.getProperties(listValue, lengthValue);
+
+        for (var i = 0; i < lengthValue.value; ++i)
+        {
+            var prop = listValue.value[i];
+            var name = prop.name.getWrappedValue();
+            if (ignoreVars[name] == 1)
+            {
+                if (FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.generateScopeChain: ignoreVars: " + name);
+                continue;
+            }
+            var candidate = prop.value.getWrappedValue();
+            if (candidate == obj)
+                return {prop: name, scope: scope, object: obj};
+        }
+    },
+
+    findObjectInNonCallScope: function(scope, obj)
+    {
+        var scopeVars = scope.getWrappedValue();
+        if (scopeVars && scopeVars.hasOwnProperty)
+        {
+            for (var p in scopeVars)
+            {
+                if (scopeVars[p] == obj)
+                    return {prop: p, scope: scope, object: obj};
+            }
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("dom .generateScopeChain: bad scopeVars");
+        }
+        return false;
+    },
+}
+
 
 // HACK: this is a copy of the ignoreVars from dom.js FIXME
 const ignoreVars =
@@ -3461,45 +3532,6 @@ const ignoreVars =
     "_FirebugCommandLine": 1,
 };
 
-function findObjectInCallScope(scope, obj)
-{
-    var listValue = {value: null}, lengthValue = {value: 0};
-    scope.getProperties(listValue, lengthValue);
-
-    for (var i = 0; i < lengthValue.value; ++i)
-    {
-        var prop = listValue.value[i];
-        var name = prop.name.getWrappedValue();
-        if (ignoreVars[name] == 1)
-        {
-            if (FBTrace.DBG_DOM)
-                FBTrace.sysout("dom.generateScopeChain: ignoreVars: " + name);
-            continue;
-        }
-        var candidate = prop.value.getWrappedValue();
-        if (candidate == obj)
-            return {prop: name, scope: scope, object: obj};
-    }
-}
-
-function findObjectInNonCallScope(scope, obj)
-{
-    var scopeVars = scope.getWrappedValue();
-    if (scopeVars && scopeVars.hasOwnProperty)
-    {
-        for (var p in scopeVars)
-        {
-            if (scopeVars[p] == obj)
-                return {prop: p, scope: scope, object: obj};
-        }
-    }
-    else
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("dom .generateScopeChain: bad scopeVars");
-    }
-    return false;
-}
 
 function cacheAllScripts(context)
 {
