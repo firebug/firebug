@@ -2329,12 +2329,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     onMouseDown: function(event)
     {
-        if (hasClass(event.target, "notationButton"))
+        // Don't interfere with clicks made into a notification editor.
+        if (getAncestorByClass(event.target, "breakNotification"))
             return;
-
-        var sourceBox = getAncestorByClass(event.target, "sourceBox");
-        if (sourceBox && sourceBox.breakCauseBox)
-            sourceBox.breakCauseBox.hide();
 
         var sourceLine = getAncestorByClass(event.target, "sourceLine");
         if (!sourceLine)
