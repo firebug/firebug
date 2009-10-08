@@ -213,6 +213,12 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         if (contentTypes[contentType])
             return true;
 
+        // Hack to work around application/octet-stream for js files (2063).
+        // Let's cache all files with js extensions.
+        var extension = getFileExtension(safeGetName(request));
+        if (extension == "js")
+            return true;
+
         if (FBTrace.DBG_CACHE)
             FBTrace.sysout("tabCache.shouldCacheRequest; Request not cached: " +
                 request.contentType + ", " + safeGetName(request));

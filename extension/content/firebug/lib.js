@@ -3076,6 +3076,9 @@ this.splitURLTrue = function(url)
 
 this.getFileExtension = function(url)
 {
+    if (!url)
+        return null;
+
     var lastDot = url.lastIndexOf(".");
     return url.substr(lastDot+1);
 };
