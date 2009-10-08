@@ -1655,9 +1655,11 @@ FirebugService.prototype =
 
     setChromeBlockingFilters: function()
     {
+        jsd.appendFilter(this.noFilterHalter);  // must be first
         jsd.appendFilter(this.filterChrome);
         jsd.appendFilter(this.filterPrettyPrint);
         jsd.appendFilter(this.filterWrapper);
+
         for (var i = 0; i < this.componentFilters.length; i++)
             jsd.appendFilter(this.componentFilters[i]);
 
@@ -1674,6 +1676,7 @@ FirebugService.prototype =
             jsd.removeFilter(this.filterChrome);
             jsd.removeFilter(this.filterPrettyPrint);
             jsd.removeFilter(this.filterWrapper);
+            jsd.removeFilter(this.noFilterHalter);
             for (var i = 0; i < this.componentFilters.length; i++)
                 jsd.removeFilter(this.componentFilters[i]);
 
@@ -1690,6 +1693,7 @@ FirebugService.prototype =
         this.filterChrome = this.createFilter("chrome://*");
         this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");
         this.filterWrapper = this.createFilter("XPCSafeJSObjectWrapper.cpp");
+        this.noFilterHalter = this.createFilter("chrome://firebug/content/debuggerHalter.js", true);
 
         // jsdIFilter does not allow full regexp matching.
         // So to filter components, we filter their directory names, which we obtain by looking for
