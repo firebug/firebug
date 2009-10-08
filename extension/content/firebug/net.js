@@ -532,7 +532,17 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     getOptionsMenuItems: function()
     {
-        return [];
+        return [
+            this.disableCacheOption()
+        ];
+    },
+
+    disableCacheOption: function()
+    {
+        var BrowserCache = Firebug.NetMonitor.BrowserCache;
+        var disabled = !BrowserCache.isEnabled();
+        return {label: "net.option.Disable Browser Cache", type: "checkbox", checked: disabled,
+            command: bindFixed(BrowserCache.enable, BrowserCache, disabled) };
     },
 
     getContextMenuItems: function(nada, target)
@@ -4649,6 +4659,27 @@ Firebug.NetMonitor.ConditionEditor.prototype = domplate(Firebug.Breakpoint.Condi
             bp.condition = value;
     }
 });
+
+// ************************************************************************************************
+// Browser Cache
+
+Firebug.NetMonitor.BrowserCache =
+{
+    cacheDomain: "browser.cache",
+
+    isEnabled: function()
+    {
+        var diskCache = Firebug.getPref(this.cacheDomain, "disk.enable");
+        var memoryCache = Firebug.getPref(this.cacheDomain, "memory.enable");
+        return diskCache && memoryCache;
+    },
+
+    enable: function(state)
+    {
+        Firebug.setPref(this.cacheDomain, "disk.enable", state);
+        Firebug.setPref(this.cacheDomain, "memory.enable", state);
+    }
+}
 
 // ************************************************************************************************
 
