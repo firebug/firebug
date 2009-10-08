@@ -2015,15 +2015,6 @@ this.getStackFrame = function(frame, context)
     }
     try
     {
-        /* XXXjjb waiting for info
-        var propertyBinding = Firebug.PropertyBinding.getPropertyBinding(frame);
-        if (propertyBinding)
-        {
-            var args = FBL.getFunctionArgValues(propertyBinding.object, frame);
-            if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getStackFrame "+propertyBinding.name, {propertyBinding: propertyBinding, script: frame.script, args: args});
-            return new this.StackFrame(context, propertyBinding.name, frame.script, url, lineNo, args, frame.pc);
-        }
-*/
         var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
         if (sourceFile)
         {
@@ -2238,8 +2229,11 @@ this.forEachFunction = function(context, cb)
             {
                 if (FBTrace.DBG_ERRORS)
                 {
-                    if (exc.name == "NS_ERROR_NOT_AVAILABLE" && FBTrace.DBG_FUNCTION_NAMES)
-                        FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
+                    if (exc.name == "NS_ERROR_NOT_AVAILABLE")
+                    {
+                        if(FBTrace.DBG_FUNCTION_NAMES)
+                            FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
+                    }
                     else
                        FBTrace.sysout("lib.forEachFunction FAILS "+exc,exc);
                 }
