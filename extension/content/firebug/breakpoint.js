@@ -429,7 +429,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
         fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
         delete context.sourceFileMap[oldURL];  // SourceFile delete
 
-        this.watchSourceFile(context, sourceFile);
+        Firebug.Debugger.watchSourceFile(context, sourceFile);
         var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);
 
         var panel = context.getPanel("script", true);
