@@ -2292,7 +2292,7 @@ this.getSourceLinkForScript = function(script, context)
     var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
     if (sourceFile)
     {
-        var scriptAnalyzer = sourceFile.(script);
+        var scriptAnalyzer = sourceFile.getScriptAnalyzer(script);
         return scriptAnalyzer.getSourceLinkForScript(script);
     }
 };
