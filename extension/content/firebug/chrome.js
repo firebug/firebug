@@ -1309,6 +1309,13 @@ function onSelectingPanel(event)
 
     var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
     Firebug.showPanel(browser, panel);
+
+    // XXXjoe This is kind of cheating, but, feh.
+    Firebug.chrome.onPanelSelect(undefined, panel);
+    if (Firebug.uiListeners.length > 0) {
+        FBTrace.sysout("onPanelSelect: ", panel);
+        dispatch(Firebug.uiListeners, "onPanelSelect", [undefined, panel]);  // TODO: make Firebug.chrome a uiListener
+    }
 }
 
 function onSelectedSidePanel(event)
