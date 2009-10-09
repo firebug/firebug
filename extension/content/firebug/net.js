@@ -196,6 +196,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
         NetHttpObserver.registerObserver();
+        NetHttpActivityObserver.registerObserver();
 
         Firebug.Debugger.addListener(this.DebuggerListener);
     },
@@ -214,6 +215,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             Firebug.TraceModule.removeListener(this.TraceListener);
 
         NetHttpObserver.unregisterObserver();
+        NetHttpActivityObserver.unregisterObserver();
+
         Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 
@@ -303,6 +306,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onEnabled; "+context.getName());
 
+        NetHttpActivityObserver.registerObserver();
+
         monitorContext(context);
     },
 
@@ -310,6 +315,8 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onDisabled; "+context.getName());
+
+        NetHttpActivityObserver.unregisterObserver();
 
         unmonitorContext(context);
     },
@@ -3489,7 +3496,7 @@ function monitorContext(context)
     }
 
     // Register activity-distributor observer if available (#488270)
-    NetHttpActivityObserver.registerObserver();
+    //NetHttpActivityObserver.registerObserver();
 
     var listener = context.netProgress = networkContext;
 
@@ -3525,7 +3532,7 @@ function unmonitorContext(context)
     if (panel)
         panel.updateLayout();
 
-    NetHttpActivityObserver.unregisterObserver();
+    //NetHttpActivityObserver.unregisterObserver();
 
     // Remove cache listener
     context.sourceCache.removeListener(netProgress.cacheListener);
@@ -4137,6 +4144,13 @@ var NetHttpActivityObserver =
             if (!(tabId && win))
                 return;
 
+            var networkContext = contexts[tabId];
+            if (!networkContext)
+                networkContext = context ? context.netProgress : null;
+
+            if (!networkContext)
+                return;
+
             if (FBTrace.DBG_ACTIVITYOBSERVER)
             {
                 var time = new Date();
@@ -4163,13 +4177,6 @@ var NetHttpActivityObserver =
                     activeRequests.splice(index, 2);
                 }
             }
-
-            var networkContext = contexts[tabId];
-            if (!networkContext)
-                networkContext = context ? context.netProgress : null;
-
-            if (!networkContext)
-                return;
 
             var time = new Date();
             time.setTime(timestamp/1000);
