@@ -1562,6 +1562,43 @@ this.Assert = domplate(Firebug.Rep,
     }
 });
 
+// ************************************************************************************************
+
+this.SourceText = domplate(Firebug.Rep,
+{
+    tag:
+        DIV(
+            FOR("line", "$object|lineIterator",
+                DIV({class: "sourceRow", role : "presentation"},
+                    SPAN({class: "sourceLine", role : "presentation"}, "$line.lineNo"),
+                    SPAN({class: "sourceRowText", role : "presentation"}, "$line.text")
+                )
+            )
+        ),
+
+    lineIterator: function(sourceText)
+    {
+        var maxLineNoChars = (sourceText.lines.length + "").length;
+        var list = [];
+
+        for (var i = 0; i < sourceText.lines.length; ++i)
+        {
+            // Make sure all line numbers are the same width (with a fixed-width font)
+            var lineNo = (i+1) + "";
+            while (lineNo.length < maxLineNoChars)
+                lineNo = " " + lineNo;
+
+            list.push({lineNo: lineNo, text: sourceText.lines[i]});
+        }
+
+        return list;
+    },
+
+    getHTML: function(sourceText)
+    {
+        return getSourceLineRange(sourceText, 1, sourceText.lines.length);
+    }
+});
 
 //************************************************************************************************
 
