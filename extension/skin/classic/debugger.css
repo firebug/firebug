@@ -85,7 +85,7 @@
     white-space: pre;
 }
 
-.sourceRow[exeLine="true"] {
+.sourceRow[exe_line="true"] {
     outline: 1px solid #D9D9B6;
     margin-right: 1px;
     background-color: lightgoldenrodyellow;
@@ -97,7 +97,7 @@
     font-weight: bold;
 }
 
-.sourceRow[exeLine="true"] > .sourceLine {
+.sourceRow[exe_line="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/exe.png);
     color: #000000;
 }
@@ -114,11 +114,11 @@
     background-image: url(chrome://firebug/skin/breakpointDisabled.png);
 }
 
-.sourceRow[breakpoint="true"][exeLine="true"] > .sourceLine {
+.sourceRow[breakpoint="true"][exe_line="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/breakpointExe.png);
 }
 
-.sourceRow[breakpoint="true"][exeLine="true"][disabledBreakpoint="true"] > .sourceLine {
+.sourceRow[breakpoint="true"][exe_line="true"][disabledBreakpoint="true"] > .sourceLine {
     background-image: url(chrome://firebug/skin/breakpointDisabledExe.png);
 }
 

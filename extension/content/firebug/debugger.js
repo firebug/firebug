@@ -2187,7 +2187,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     highlightExecutionLine: function(sourceBox)
     {
         if (this.executionLine)  // could point to any node in any sourcebox
-            this.executionLine.removeAttribute("exeLine");
+            this.executionLine.removeAttribute("exe_line");
 
         var lineNode = sourceBox.getLineNode(this.executionLineNo);
 
@@ -2201,7 +2201,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (lineNode)
         {
-            lineNode.setAttribute("exeLine", "true");
+            lineNode.setAttribute("exe_line", "true");
             if (this.context.breakingCause && !this.context.breakingCause.shown)
             {
                 this.context.breakingCause.shown = true;

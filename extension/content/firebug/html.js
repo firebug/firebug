@@ -891,7 +891,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("html.updateSelection "+object);
         if (this.ioBox.sourceRow)
-            this.ioBox.sourceRow.removeAttribute("exeLine");
+            this.ioBox.sourceRow.removeAttribute("exe_line");
 
         if (object instanceof SourceLink) // && object.type == "css" and !reCSS(object.href) by supports
          {
@@ -921,7 +921,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     if (sourceRow)
                     {
                         this.ioBox.sourceRow = sourceRow;
-                        this.ioBox.sourceRow.setAttribute("exeLine", "true");
+                        this.ioBox.sourceRow.setAttribute("exe_line", "true");
                         scrollIntoCenterView(sourceRow);
                         this.ioBox.selectObjectBox(sourceRow, false);  // sourceRow isn't an objectBox, but the function should work anyway...
                     }

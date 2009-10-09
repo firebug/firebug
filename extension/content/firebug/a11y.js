@@ -1790,7 +1790,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 }
                 if (lineNode.getAttribute('executable') == 'true')
                     liveString += ", executable";
-                if (lineNode.getAttribute('exeline') == 'true')
+                if (lineNode.getAttribute('exe_line') == 'true')
                     liveString += ", currently stopped";
                 var sourceText = getElementByClass(lineNode, 'sourceRowText');
                 if (sourceText)
