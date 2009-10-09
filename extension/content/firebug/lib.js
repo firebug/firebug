@@ -2296,7 +2296,15 @@ this.getSourceLinkForScript = function(script, context)
     if (sourceFile)
     {
         var scriptAnalyzer = sourceFile.getScriptAnalyzer(script);
-        return scriptAnalyzer.getSourceLinkForScript(script);
+        if (scriptAnalyzer)
+            return scriptAnalyzer.getSourceLinkForScript(script);
+        else
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
+    }
+    else
+    {
+        if (FBTrace.DBG_EERRORS)
+            FBTrace.sysout("getSourceLineForScript FAILS, no sourcefile for script ", script);
     }
 };
 
