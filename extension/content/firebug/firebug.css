@@ -23,6 +23,9 @@ window[chromehidden~="toolbar"] #fbToolbar {
 textbox[type="fbSearchBox"] {
     -moz-binding: url("chrome://firebug/content/bindings.xml#searchBox");
 }
+textbox[type="fbSearchBox"] .panelFocusBound {
+    -moz-user-focus: normal;
+}
 
 panelBar {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelBar");

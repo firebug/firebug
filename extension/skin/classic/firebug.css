@@ -158,21 +158,6 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     list-style-image: url(chrome://firebug/skin/search.png);
 }
 
-.fbsearch-options-icon {
-    -moz-appearance: none;
-    -moz-user-focus: normal;
-    border: none;
-    margin: 0px;
-    padding: 0px;
-    height: 13px;
-    width: 13px;
-    min-width: 0px;
-    list-style-image: url(chrome://firebug/skin/plus-active.png);
-}
-.fbsearch-options-icon.open {
-    list-style-image: url(chrome://firebug/skin/minus-active.png);
-}
-
 textbox[type="fbSearchBox"] panel {
     -moz-border-radius: 1px;    /* This prevents the drop shadow from appearing See nsLayoutUtils::GetFrameTransparency*/
 }

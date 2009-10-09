@@ -80,16 +80,6 @@
     padding-left: 5px !important;
 }
 
-.fbsearch-options-icon {
-    margin-right: 2px !important;
-}
-
-.fbsearch-textbox .innerToolbar,
-.fbsearch-options-icon > .toolbarbutton-text {
-    /* On the mac we have to override what might be a bug in the style for toolbarbutton-text */
-    margin: 0px !important;
-}
-
 .toolbarbutton-iconic {
     margin: 0 4px 0 1px !important;
     padding: 0 !important;
