@@ -372,7 +372,8 @@ function $STR(name, bundle)
 
         if (bundle)
             return bundle.getString(name.replace(' ', '_', "g"));
-        else
+
+        if (Firebug)
             return Firebug.getStringBundle().GetStringFromName(name.replace(' ', '_', "g"));
     }
     catch (err)
@@ -383,6 +384,8 @@ function $STR(name, bundle)
             FBTrace.sysout("lib.getString FAILS ", err);
         }
     }
+
+    // XXXjjb apparently we get to this code if we get an exception above...is that best we can do?
 
     // Use only the label after last dot.
     var index = name.lastIndexOf(".");
@@ -940,10 +943,10 @@ this.setOuterHTML = function(element, html)
 this.appendInnerHTML = function(element, html, referenceElement)
 {
     var doc = element.ownerDocument;
-    var range = doc.createRange();
-    range.selectNode(doc.body);
+    var range = doc.createRange();  // a helper object
+    range.selectNodeContents(element); // the environment to interpret the html
 
-    var fragment = range.createContextualFragment(html);
+    var fragment = range.createContextualFragment(html);  // parse
     var firstChild = fragment.firstChild;
     element.insertBefore(fragment, referenceElement);
     return firstChild;
