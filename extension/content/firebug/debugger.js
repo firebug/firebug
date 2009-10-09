@@ -2873,7 +2873,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         if (FBTrace.DBG_SOURCEFILES)
         {
-            FBTrace.sysout("updateScriptFiles sourcefiles:", this.sourceFilesAsArray(context.sourceFileMap));
+            FBTrace.sysout("updateScriptFiles sourcefiles:", sourceFilesAsArray(context.sourceFileMap));
         }
     },
 
