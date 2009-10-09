@@ -166,6 +166,9 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     refresh: function()
     {
+        if (this.noRefresh)
+            return;
+
         if (!Firebug.Debugger.isAlwaysEnabled(this.context))
             this.updateScriptFiles(this.context);
 
@@ -176,7 +179,9 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         var monitors = extracted.monitors;
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh extracted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
+            FBTrace.sysout("debugger.breakpoints.refresh extracted " +
+                breakpoints.length+errorBreakpoints.length+monitors.length,
+                [breakpoints, errorBreakpoints, monitors]);
 
         function sortBreakpoints(a, b)
         {
@@ -191,7 +196,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         monitors.sort(sortBreakpoints);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh sorted "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
+            FBTrace.sysout("debugger.breakpoints.refresh sorted "+breakpoints.length+
+                errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         var groups = [];
 
@@ -213,7 +219,8 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             FirebugReps.Warning.tag.replace({object: "NoBreakpointsWarning"}, this.panelNode);
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
+            FBTrace.sysout("debugger.breakpoints.refresh "+breakpoints.length+
+                errorBreakpoints.length+monitors.length, [breakpoints, errorBreakpoints, monitors]);
 
         dispatch([Firebug.A11yModel], 'onBreakRowsRefreshed', [this, this.panelNode]);
     },
@@ -299,14 +306,12 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             this.updateScriptFiles(context);
 
         var bpCount = 0, disabledCount = 0;
-        for (var url in context.sourceFileMap)
+        var checkBoxes = getElementsByClass(this.panelNode, "breakpointCheckbox");
+        for (var i=0; i<checkBoxes.length; i++)
         {
-            fbs.enumerateBreakpoints(url, {call: function(url, line)
-            {
-                ++bpCount;
-                if (fbs.isBreakpointDisabled(url, line))
-                    ++disabledCount;
-            }});
+            ++bpCount;
+            if (!checkBoxes[i].checked)
+                ++disabledCount;
         }
 
         if (disabledCount)
@@ -335,24 +340,33 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     enableAllBreakpoints: function(context, status)
     {
-        Firebug.Debugger.enableAllBreakpoints(context);
-
-        var groups = [];
-        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [context, groups]);
-
-        for (var i=0; i<groups.length; i++)
-            groups.enableAllBreakpoints(status);
+        var checkBoxes = getElementsByClass(this.panelNode, "breakpointCheckbox");
+        for (var i=0; i<checkBoxes.length; i++)
+        {
+            var box = checkBoxes[i];
+            if (box.checked != status)
+                this.click(box);
+        }
     },
 
     clearAllBreakpoints: function(context)
     {
-        Firebug.Debugger.clearAllBreakpoints(context);
+        this.noRefresh = true;
 
-        var groups = [];
-        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [context, groups]);
+        var buttons = getElementsByClass(this.panelNode, "closeButton");
+        for (var i=0; i<buttons.length; i++)
+            this.click(buttons[i]);
 
-        for (var i=0; i<groups.length; i++)
-            groups.clearAllBreakpoints(status);
+        this.noRefresh = false;
+        this.refresh();
+    },
+
+    click: function(node)
+    {
+        var doc = node.ownerDocument, event = doc.createEvent("MouseEvents");
+        event.initMouseEvent("click", true, true, doc.defaultView, 0, 0, 0, 0, 0,
+            false, false, false, false, 0, null);
+        return node.dispatchEvent(event);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -369,6 +383,21 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
 // ************************************************************************************************
 
+function countBreakpoints(context)
+{
+    var count = 0;
+    for (var url in context.sourceFileMap)
+    {
+        fbs.enumerateBreakpoints(url, {call: function(url, lineNo)
+        {
+            ++count;
+        }});
+    }
+    return count;
+}
+
+// ************************************************************************************************
+
 Firebug.Breakpoint.BreakpointGroup = function()
 {
     this.breakpoints = [];
@@ -376,17 +405,6 @@ Firebug.Breakpoint.BreakpointGroup = function()
 
 Firebug.Breakpoint.BreakpointGroup.prototype =
 {
-    enableAllBreakpoints: function(status)
-    {
-        for (var i=0; i<this.breakpoints.length; i++)
-            this.breakpoints[i].checked = status;
-    },
-
-    clearAllBreakpoints: function()
-    {
-        this.breakpoints = [];
-    },
-
     removeBreakpoint: function(bp)
     {
         remove(this.breakpoints, bp);
@@ -426,21 +444,6 @@ Firebug.Breakpoint.BreakpointGroup.prototype =
         return !this.breakpoints.length;
     }
 };
-
-// ************************************************************************************************
-
-function countBreakpoints(context)
-{
-    var count = 0;
-    for (var url in context.sourceFileMap)
-    {
-        fbs.enumerateBreakpoints(url, {call: function(url, lineNo)
-        {
-            ++count;
-        }});
-    }
-    return count;
-}
 
 // ************************************************************************************************
 
