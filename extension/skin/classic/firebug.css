@@ -135,12 +135,11 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 #fbSearchBox {
     margin-left: 0;
     margin-right: 6px;
-    width: 158px;
 }
 
 .fbsearch-textbox {
     -moz-appearance: none;
-    margin: 0 6px 1px 2px;
+    margin: 0 0px 1px 2px;
     border: 1px solid;
     -moz-border-radius: 5px;  /* Matched to the a11y outline impl */
     -moz-border-top-colors: #96969D;
@@ -153,12 +152,11 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     font-size: 11px;
 }
 
-
 .fbsearch-textbox > .autocomplete-textbox-container > .autocomplete-icon {
     list-style-image: url(chrome://firebug/skin/search.png);
 }
 
-textbox[type="fbSearchBox"] panel {
+textbox[type="fbSearchBox"] > panel {
     -moz-border-radius: 1px;    /* This prevents the drop shadow from appearing See nsLayoutUtils::GetFrameTransparency*/
 }
 

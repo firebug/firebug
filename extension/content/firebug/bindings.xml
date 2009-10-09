@@ -791,7 +791,7 @@
 </binding>
 
 <binding id="searchBox">
-    <content>
+    <content sizetopopup="none">
         <xul:textbox type="autocomplete" anonid="searchBox"
                 rows="1" label="search.Firebug_Search" class="fbsearch-textbox" />
         <xul:panel anonid="searchOptionsPopup" norestorefocus="true" noautofocus="true" noautohide="true" ignorekeys="true">
@@ -865,7 +865,7 @@
             <body><![CDATA[
                 var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup"),
                     searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                optionsPopup.openPopup(searchBox, "before_end", 0, 0, false, false);
+                optionsPopup.openPopup(this, "before_end", 0, 0, false, false);
 
                 clearTimeout(this.blurTimeout);
                 delete this.blurTimeout;
