@@ -33,7 +33,7 @@ Firebug.HTMLModule = extend(Firebug.Module,
     {
         Firebug.Module.initContext.apply(this, arguments);
 
-        context.mutationBreakpoints = new MutationBreakpointList();
+        context.mutationBreakpoints = new MutationBreakpointGroup();
     },
 
     shutdown: function()
@@ -1590,12 +1590,8 @@ Firebug.HTMLModule.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
-        var breakpoints = context.mutationBreakpoints.breakpoints;
-        if (!breakpoints.length)
-            return;
-
-        groups.push({name: "mutationBreakpoints", title: $STR("html.label.HTML Breakpoints"),
-            breakpoints: breakpoints});
+        if (!context.mutationBreakpoints.isEmpty())
+            groups.push(context.mutationBreakpoints);
     }
 };
 
@@ -1648,8 +1644,8 @@ Firebug.HTMLModule.MutationBreakpoints =
 
         var breakpoints = context.mutationBreakpoints;
         var self = this;
-        breakpoints.enumerateBreakpoints(BP_BREAKONATTRCHANGE, function(bp) {
-            if (bp.checked && bp.node == event.target) {
+        breakpoints.enumerateBreakpoints(function(bp) {
+            if (bp.checked && bp.node == event.target && bp.type == BP_BREAKONATTRCHANGE) {
                 self.breakWithCause(event, context, BP_BREAKONATTRCHANGE);
                 return true;
             }
@@ -1676,8 +1672,8 @@ Firebug.HTMLModule.MutationBreakpoints =
         if (removal)
         {
             var self = this;
-            breaked = breakpoints.enumerateBreakpoints(BP_BREAKONREMOVE, function(bp) {
-                if (bp.checked && bp.node == node) {
+            breaked = breakpoints.enumerateBreakpoints(function(bp) {
+                if (bp.checked && bp.node == node && bp.type == BP_BREAKONREMOVE) {
                     self.breakWithCause(event, context, BP_BREAKONREMOVE);
                     return true;
                 }
@@ -1693,9 +1689,9 @@ Firebug.HTMLModule.MutationBreakpoints =
 
             // Iterate over all parents and see if some of them has a breakpoint.
             var self = this;
-            breakpoints.enumerateBreakpoints(BP_BREAKONCHILDCHANGE, function(bp) {
+            breakpoints.enumerateBreakpoints(function(bp) {
                 for (var i=0; i<parents.length; i++) {
-                    if (bp.checked && bp.node == parents[i]) {
+                    if (bp.checked && bp.node == parents[i] && bp.type == BP_BREAKONCHILDCHANGE) {
                         self.breakWithCause(event, context, BP_BREAKONCHILDCHANGE);
                         return true;
                     }
@@ -1707,7 +1703,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         {
             // Remove all breakpoints assocaited with removed node.
             var invalidate = false;
-            breakpoints.enumerateBreakpoints(null, function(bp) {
+            breakpoints.enumerateBreakpoints(function(bp) {
                 if (bp.node == node) {
                     breakpoints.removeBreakpoint(bp);
                     invalidate = true;
@@ -1740,17 +1736,17 @@ Firebug.HTMLModule.MutationBreakpoints =
                 "-",
                 {label: "html.label.Break On Attribute Change",
                     type: "checkbox",
-                    checked: breakpoints.findBreakpointByNode(node, BP_BREAKONATTRCHANGE),
+                    checked: breakpoints.findBreakpoint(node, BP_BREAKONATTRCHANGE),
                     command: bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONATTRCHANGE)},
                 {label: "html.label.Break On Child Addition or Removal",
                     type: "checkbox",
-                    checked: breakpoints.findBreakpointByNode(node, BP_BREAKONCHILDCHANGE),
+                    checked: breakpoints.findBreakpoint(node, BP_BREAKONCHILDCHANGE),
                     command: bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONCHILDCHANGE)},
                 {label: "html.label.Break On Element Removal",
                     type: "checkbox",
-                    checked: breakpoints.findBreakpointByNode(node, BP_BREAKONREMOVE),
+                    checked: breakpoints.findBreakpoint(node, BP_BREAKONREMOVE),
                     command: bindFixed(this.onModifyBreakpoint, this, context, node,
                         BP_BREAKONREMOVE)}
             );
@@ -1760,7 +1756,7 @@ Firebug.HTMLModule.MutationBreakpoints =
     onModifyBreakpoint: function(context, node, type)
     {
         var breakpoints = context.mutationBreakpoints;
-        var index = breakpoints.findBreakpointByNode(node, type);
+        var index = breakpoints.findBreakpoint(node, type);
 
         // Remove an existing or create new breakpoint.
         if (index > 0)
@@ -1863,64 +1859,24 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-function MutationBreakpointList()
+function MutationBreakpointGroup() {}
+MutationBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
-    this.breakpoints = [];
-}
+    name: "mutationBreakpoints",
+    title: $STR("html.label.HTML Breakpoints"),
 
-MutationBreakpointList.prototype =
-{
     addBreakpoint: function(node, type)
     {
         this.breakpoints.push(new Firebug.HTMLModule.Breakpoint(node, type));
     },
 
-    removeBreakpoint: function(bp)
+    matchBreakpoint: function(bp, args)
     {
-        var index = this.findBreakpointIndex(bp);
-        if (index < 0)
-            return;
-
-        this.breakpoints.splice(index, 1);
+        var node = args[0];
+        var type = args[1];
+        return (bp.node == node) && (!bp.type || bp.type == type);
     },
-
-    findBreakpointIndex: function(bp)
-    {
-        for (var i=0; i<this.breakpoints.length; i++)
-        {
-            var temp = this.breakpoints[i];
-            if (temp.node == bp.node && (!bp.type || bp.type == temp.type))
-                return i;
-        }
-        return -1;
-    },
-
-    findBreakpoint: function(bp)
-    {
-        var index = this.findBreakpointIndex(bp);
-        return (index < 0) ? null : this.breakpoints[index];
-    },
-
-    findBreakpointByNode: function(node, type)
-    {
-        return this.findBreakpoint({node: node, type: type});
-    },
-
-    enumerateBreakpoints: function(type, callback)
-    {
-        var breakpoints = cloneArray(this.breakpoints);
-        for (var i=0; i<breakpoints.length; i++)
-        {
-            var bp = breakpoints[i];
-            if (!type || bp.type == type)
-            {
-                if (callback(bp))
-                    return true;
-            }
-        }
-        return false;
-    }
-}
+});
 
 // ************************************************************************************************
 // Registration

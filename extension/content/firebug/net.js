@@ -2666,7 +2666,7 @@ function NetProgress(context)
         FBTrace.sysout("net.NetProgress.constructor; " + (context ? context.getName() : "NULL Context"));
 
     this.context = context;
-    this.breakpoints = new NetBreakpointList();
+    this.breakpoints = new NetBreakpointGroup();
 
     var panel = null;
     var queue = [];
@@ -4456,13 +4456,9 @@ Firebug.NetMonitor.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
-        var breakpoints = context.netProgress.breakpoints.breakpoints;
-        if (!breakpoints.length)
-            return;
-
-        groups.push({name: "netBreakpoints", title: $STR("net.label.XHR Breakpoints"),
-            breakpoints: breakpoints});
-    }
+        if (!context.netProgress.breakpoints.isEmpty())
+            groups.push(context.netProgress.breakpoints);
+    },
 };
 
 Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
@@ -4601,13 +4597,12 @@ Breakpoint.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function NetBreakpointList()
+function NetBreakpointGroup() {}
+NetBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
-    this.breakpoints = [];
-}
+    name: "netBreakpoints",
+    title: $STR("net.label.XHR Breakpoints"),
 
-NetBreakpointList.prototype =
-{
     addBreakpoint: function(href)
     {
         this.breakpoints.push(new Breakpoint(href));
@@ -4615,28 +4610,16 @@ NetBreakpointList.prototype =
 
     removeBreakpoint: function(href)
     {
-        var index = this.findBreakpointIndex(href);
-        if (index >= 0)
-            this.breakpoints.splice(index, 1);
+        var bp = this.findBreakpoint(href);
+        remove(this.breakpoints, bp);
     },
 
-    findBreakpoint: function(href)
+    matchBreakpoint: function(bp, args)
     {
-        var index = this.findBreakpointIndex(href);
-        return (index < 0) ? null : this.breakpoints[index];
-    },
-
-    findBreakpointIndex: function(href)
-    {
-        for (var i=0; i<this.breakpoints.length; i++)
-        {
-            var temp = this.breakpoints[i];
-            if (temp.href == href)
-                return i;
-        }
-        return -1;
-    },
-}
+        var href = args[0];
+        return bp.href == href;
+    }
+});
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 

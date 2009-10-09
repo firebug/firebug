@@ -274,7 +274,6 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
                 var name = Firebug.SourceFile.guessEnclosingFunctionName(url, line, context);
                 monitors.push(new Breakpoint(name, url, line, true, ""));
             }});
-
         }
 
         var result = null;
@@ -314,26 +313,46 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
         {
             items.push(
                 {label: "EnableAllBreakpoints",
-                    command: bindFixed(
-                        Firebug.Debugger.enableAllBreakpoints, Firebug.Debugger, context) }
+                    command: bindFixed(this.enableAllBreakpoints, this, context, true) }
             );
         }
         if (bpCount && disabledCount != bpCount)
         {
             items.push(
                 {label: "DisableAllBreakpoints",
-                    command: bindFixed(
-                        Firebug.Debugger.disableAllBreakpoints, Firebug.Debugger, context) }
+                    command: bindFixed(this.enableAllBreakpoints, this, context, false) }
             );
         }
 
         items.push(
             "-",
             {label: "ClearAllBreakpoints", disabled: !bpCount,
-                command: bindFixed(Firebug.Debugger.clearAllBreakpoints, Firebug.Debugger, context) }
+                command: bindFixed(this.clearAllBreakpoints, this, context) }
         );
 
         return items;
+    },
+
+    enableAllBreakpoints: function(context, status)
+    {
+        Firebug.Debugger.enableAllBreakpoints(context);
+
+        var groups = [];
+        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [context, groups]);
+
+        for (var i=0; i<groups.length; i++)
+            groups.enableAllBreakpoints(status);
+    },
+
+    clearAllBreakpoints: function(context)
+    {
+        Firebug.Debugger.clearAllBreakpoints(context);
+
+        var groups = [];
+        dispatch(Firebug.Debugger.fbListeners, "getBreakpoints", [context, groups]);
+
+        for (var i=0; i<groups.length; i++)
+            groups.clearAllBreakpoints(status);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -347,6 +366,68 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             this.refresh();
     },
 });
+
+// ************************************************************************************************
+
+Firebug.Breakpoint.BreakpointGroup = function()
+{
+    this.breakpoints = [];
+}
+
+Firebug.Breakpoint.BreakpointGroup.prototype =
+{
+    enableAllBreakpoints: function(status)
+    {
+        for (var i=0; i<this.breakpoints.length; i++)
+            this.breakpoints[i].checked = status;
+    },
+
+    clearAllBreakpoints: function()
+    {
+        this.breakpoints = [];
+    },
+
+    removeBreakpoint: function(bp)
+    {
+        remove(this.breakpoints, bp);
+    },
+
+    enumerateBreakpoints: function(callback)
+    {
+        var breakpoints = cloneArray(this.breakpoints);
+        for (var i=0; i<breakpoints.length; i++)
+        {
+            var bp = breakpoints[i];
+            if (callback(bp))
+                return true;
+        }
+        return false;
+    },
+
+    findBreakpoint: function()
+    {
+        for (var i=0; i<this.breakpoints.length; i++)
+        {
+            var bp = this.breakpoints[i];
+            if (this.matchBreakpoint(bp, arguments))
+                return bp;
+        }
+        return null;
+    },
+
+    matchBreakpoint: function(bp, args)
+    {
+        // TODO: must be implemented in derived objects.
+        return false;
+    },
+
+    isEmpty: function()
+    {
+        return !this.breakpoints.length;
+    }
+};
+
+// ************************************************************************************************
 
 function countBreakpoints(context)
 {

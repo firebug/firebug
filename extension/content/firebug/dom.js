@@ -47,7 +47,7 @@ Firebug.DOMModule = extend(Firebug.Module,
     initContext: function(context, persistedState)
     {
         Firebug.Module.initContext.apply(this, arguments);
-        context.dom = {breakpoints: new DOMBreakpointList()};
+        context.dom = {breakpoints: new DOMBreakpointGroup()};
     },
 
     shutdown: function()
@@ -1744,12 +1744,8 @@ Firebug.DOMModule.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
-        var breakpoints = context.dom.breakpoints.breakpoints;
-        if (!breakpoints.length)
-            return;
-
-        groups.push({name: "domBreakpoints", title: $STR("dom.label.DOM Breakpoints"),
-            breakpoints: breakpoints});
+        if (!context.dom.breakpoints.isEmpty())
+            groups.push(context.dom.breakpoints);
     }
 };
 
@@ -1893,18 +1889,14 @@ Breakpoint.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function DOMBreakpointList()
+function DOMBreakpointGroup() {}
+DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
-    this.breakpoints = [];
-}
+    name: "domBreakpoints",
+    title: $STR("dom.label.DOM Breakpoints"),
 
-DOMBreakpointList.prototype =
-{
     addBreakpoint: function(object, propName)
     {
-        if (FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.addBreakpoint for: " + propName, object);
-
         var bp = new Breakpoint(object, propName);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
@@ -1912,33 +1904,21 @@ DOMBreakpointList.prototype =
 
     removeBreakpoint: function(object, propName)
     {
-        var index = this.findBreakpointIndex(object, propName);
-        if (index < 0)
-            return;
-
-        var bp = this.breakpoints[index];
-        bp.unwatchProperty();
-
-        this.breakpoints.splice(index, 1);
-    },
-
-    findBreakpoint: function(object, propName)
-    {
-        var index = this.findBreakpointIndex(object, propName);
-        return (index < 0) ? null : this.breakpoints[index];
-    },
-
-    findBreakpointIndex: function(object, propName)
-    {
-        for (var i=0; i<this.breakpoints.length; i++)
+        var bp = this.findBreakpoint(object, propName);
+        if (bp)
         {
-            var temp = this.breakpoints[i];
-            if (temp.object == object && temp.propName == propName)
-                return i;
+            bp.unwatchProperty();
+            remove(this.breakpoints, bp);
         }
-        return -1;
     },
-}
+
+    matchBreakpoint: function(bp, args)
+    {
+        var object = args[0];
+        var propName = args[1];
+        return bp.object == object && bp.propName == propName;
+    }
+});
 
 // ************************************************************************************************
 
