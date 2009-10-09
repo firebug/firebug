@@ -149,7 +149,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return;
 
         var row = getAncestorByClass(event.target, "memberRow");
-        var label = getAncestorByClass(event.target, "memberLabel");
+        var label = getElementByClass(row, "memberLabel");
         if (label && hasClass(row, "hasChildren"))
         {
             var row = label.parentNode.parentNode;
