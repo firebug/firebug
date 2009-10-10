@@ -303,7 +303,62 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                 args.outerLabel = "";
         }
         var node = this.template.tag.replace(args, this.panelNode);
+        this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
+
         dispatch([Firebug.A11yModel], 'onLayoutBoxCreated', [this, node, args]);
+    },
+
+    /*
+     * The nested boxed of the Layout panel have digits which need to fit between the boxes.
+     * @param maxWidth: pixels the largest digit string
+     * @param node: panelNode to be adjusted (from tag:)
+     */
+    adjustCharWidth: function(maxWidth, node)
+    {
+        maxWidth += 10; // margin
+        if (maxWidth < 20)
+            maxWidth = 20;
+
+        this.adjustBoxWidth(node, "marginLayoutBox", maxWidth);
+        this.adjustBoxWidth(node, "borderLayoutBox", maxWidth);
+        this.adjustBoxWidth(node, "paddingLayoutBox", maxWidth);
+
+        var box = getElementByClass(node, "outerLayoutBox");
+        box.style.cssText = "width: "+(240 + 3*maxWidth)+"px;";  // defaults to 300px
+
+        this.adjustLabelWidth(node, "layoutLabelLeft", maxWidth);
+        this.adjustLabelWidth(node, "layoutLabelRight", maxWidth);
+    },
+
+    /*
+     * By adjusting this width, the labels can be centered.
+     */
+    adjustLabelWidth: function(node, labelName, maxWidth)
+    {
+        var labels = getElementsByClass(node, labelName);
+        for (var i = 0; i < labels.length; i++)
+            labels[i].style.cssText = "width: "+maxWidth+"px;";
+    },
+
+    adjustBoxWidth: function(node, boxName, width)
+    {
+        var box = getElementByClass(node, boxName);
+        box.style.cssText = "right: "+width + 'px;'+" left: "+width + 'px;';
+    },
+
+    getMaxCharWidth: function(args, node)
+    {
+        Firebug.MeasureBox.startMeasuring(node);
+        var maxWidth = Math.max(
+                Firebug.MeasureBox.measureText(args.marginLeft+"").width,
+                Firebug.MeasureBox.measureText(args.marginRight+"").width,
+                Firebug.MeasureBox.measureText(args.borderLeft+"").width,
+                Firebug.MeasureBox.measureText(args.borderRight+"").width,
+                Firebug.MeasureBox.measureText(args.paddingLeft+"").width,
+                Firebug.MeasureBox.measureText(args.paddingRight+"").width
+                );
+        Firebug.MeasureBox.stopMeasuring();
+        return maxWidth;
     },
 
     updateOption: function(name, value)
