@@ -179,8 +179,10 @@ const styleGroups =
     ]
 };
 
-Firebug.CSSModule = extend(Firebug.Module, {
-    freeEdit: function(styleSheet, value) {
+Firebug.CSSModule = extend(Firebug.Module,
+{
+    freeEdit: function(styleSheet, value)
+    {
         if (!styleSheet.editStyleSheet)
         {
             var ownerNode = getStyleSheetOwnerNode(styleSheet);
@@ -212,7 +214,9 @@ Firebug.CSSModule = extend(Firebug.Module, {
 
         dispatch(this.fbListener, "onCSSFreeEdit", [styleSheet, value]);
     },
-    insertRule: function(styleSheet, cssText, ruleIndex) {
+
+    insertRule: function(styleSheet, cssText, ruleIndex)
+    {
         if (FBTrace.DBG_CSS) FBTrace.sysout("Insert: " + ruleIndex + " " + cssText);
         var insertIndex = styleSheet.insertRule(cssText, ruleIndex);
 
@@ -220,13 +224,17 @@ Firebug.CSSModule = extend(Firebug.Module, {
 
         return insertIndex;
     },
-    deleteRule: function(styleSheet, ruleIndex) {
+
+    deleteRule: function(styleSheet, ruleIndex)
+    {
         if (FBTrace.DBG_CSS) FBTrace.sysout("deleteRule: " + ruleIndex + " " + styleSheet.cssRules.length, styleSheet.cssRules);
         dispatch(this.fbListeners, "onCSSDeleteRule", [styleSheet, ruleIndex]);
 
         styleSheet.deleteRule(ruleIndex);
     },
-    setProperty: function(style, propName, propValue, propPriority) {
+
+    setProperty: function(style, propName, propValue, propPriority)
+    {
         var prevValue = style.getPropertyValue(propName);
         var prevPriority = style.getPropertyPriority(propName);
 
@@ -240,7 +248,9 @@ Firebug.CSSModule = extend(Firebug.Module, {
             dispatch(this.fbListeners, "onCSSSetProperty", [style, propName, propValue, propPriority, prevValue, prevPriority]);
         }
     },
-    removeProperty: function(style, propName) {
+
+    removeProperty: function(style, propName)
+    {
         var prevValue = style.getPropertyValue(propName);
         var prevPriority = style.getPropertyPriority(propName);
 
