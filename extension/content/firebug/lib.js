@@ -634,7 +634,6 @@ this.cancelClassTimed = function(elt, name, context)
 
 this.$ = function(id, doc)
 {
-    FBTrace.sysout("lib.$ document: "+doc?doc:document);
     if (doc)
         return doc.getElementById(id);
     else
