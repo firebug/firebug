@@ -570,6 +570,94 @@ function getImageMapHighlighter(context)
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    function showQuickInfo(element, removeInfo)
+    {
+        if (removeInfo)
+        {
+            element.removeChild(element.ownerDocument.getElementById('firebugQuickInfoBox'));
+            return;
+        }
+
+        var divContent = '',
+            text,
+            body = getNonFrameBody(element),
+            doc = body.ownerDocument,
+            qidiv = doc.getElementById('firebugQuickInfoBox');
+
+        if(!qidiv)
+        {
+            qidiv = doc.createElement('div');
+            qidiv.id = 'firebugQuickInfoBox';
+            qidiv.style.left = '5px';
+            qidiv.addEventListener("mousemove", function(){moveQuickInfoBox(qidiv);}, true);
+            qidiv.firebugIgnore = true;
+            body.appendChild(qidiv);
+        }
+        else
+            qidiv.style.display = 'block';
+            
+        var cs = doc.defaultView.getComputedStyle(qidiv, null);
+        
+        text = '';
+        if (element.id) text += 'id: ' + element.id + '<br />';
+        if (element.name) text += 'name: ' + element.name + '<br />';
+        if (element.offsetWidth) text += 'offsetWidth: ' + element.offsetWidth + '<br />';
+        if (element.offsetHeight) text += 'offsetHeight: ' + element.offsetHeight + '<br />';
+        if (element.style.position) text += 'position: ' + element.style.position + '<br />';
+        if (element.style.cssText) text += 'cssText: ' + element.style.cssText + '<br />';
+
+        if(text.length > 0) divContent = '<span class="firefoxQuickInfoBoxTitle">Quick Info</span><br />' + text;
+        
+        text = '';
+        if (cs.width) text += 'width: ' + cs.width + '<br />';
+        if (cs.height) text += 'height: ' + cs.height + '<br />';
+        if (cs.zIndex) text += 'zIndex: ' + cs.zIndex + '<br />';
+
+        if (cs.position) text += 'position: ' + cs.position + '<br />';
+        if (cs.top) text += 'top: ' + cs.top + ', ';
+        if (cs.right) text += 'right: ' + cs.right + ', ';
+        if (cs.bottom) text += 'bottom: ' + cs.bottom + ', ';
+        if (cs.left) text += 'left: ' + cs.left;
+        if (cs.top || cs.right || cs.bottom ||cs.left) text += '<br />';
+        
+        if (cs.color) text += 'color: ' + cs.color + '<br />';
+        if (cs.backgroundColor) text += 'backgroundColor: ' + cs.backgroundColor + '<br />';
+        if (cs.fontFamily) text += 'fontFamily: ' + cs.fontFamily + '<br />';
+
+        if (cs.cssFloat) text += 'cssFloat: ' + cs.cssFloat + '<br />';
+        if (cs.display) text += 'display: ' + cs.display + '<br />';
+        if (cs.visibility) text += 'visibility: ' + cs.visibility + '<br />';
+        
+        if (text.length > 0)
+        {
+            if (divContent.length > 0) divContent += '<br />';
+            divContent += '<span class="firefoxQuickInfoBoxTitle">Computed Style</span><br />' + text;        
+        }
+        
+        if (divContent.length>0)
+            qidiv.innerHTML = divContent;
+        else
+            qidiv.style.display = 'none';
+    }
+    
+    function moveQuickInfoBox(qidiv)
+    {
+        if (qidiv)
+        {
+            if (mx < qidiv.clientWidth + 5 && my < qidiv.clientHeight + 5)
+            {
+                qidiv.style.left = '';
+                qidiv.style.right = '5px';
+            }
+            else
+            {
+                qidiv.style.left = '5px';
+                qidiv.style.right = '';
+            }
+        }
+    }
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 Firebug.Inspector.FrameHighlighter = function()
 {
@@ -581,7 +669,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         return false; // (element instanceof XULElement);
     },
-
+    
     highlight: function(context, element)
     {
         if (this.doNotHighlight(element))
@@ -602,6 +690,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
         if(element.tagName !== "AREA")
         {
+            showQuickInfo(element);
+        
             var nodes = this.getNodes(context, element);
 
             move(nodes.top, x, y-edgeSize);
@@ -658,6 +748,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             for (var edge in nodes)
                 body.removeChild(nodes[edge]);
+                
+            showQuickInfo(body, true);
         }
     },
 
@@ -732,6 +824,7 @@ BoxModelHighlighter.prototype =
 
         if(element.tagName !== "AREA")
         {
+            showQuickInfo(element);
             context.highlightFrame = highlightFrame;
 
             if (highlightFrame)
@@ -885,6 +978,8 @@ BoxModelHighlighter.prototype =
                     body.removeChild(nodes.lines[line]);
             }
         }
+        
+        showQuickInfo(body, true);
     },
 
     getNodes: function(context)
