@@ -1179,14 +1179,11 @@ this.getClientOffset = function(elt)
 
 this.getLTRBWH = function(elt)
 {
-    var bcrect, od, odb, odde,
+    var bcrect,
         dims = {"left": 0, "top": 0, "right": 0, "bottom": 0, "width": 0, "height": 0};
 
     if (elt)
     {
-        od = elt.ownerDocument;
-        odb = od.body;
-        odde = od.documentElement;
         bcrect = elt.getBoundingClientRect();
         dims.left = bcrect.left;
         dims.top = bcrect.top;
@@ -1202,17 +1199,6 @@ this.getLTRBWH = function(elt)
         {
             dims.width = dims.right - dims.left;
             dims.height = dims.bottom - dims.top;
-        }
-
-        if(odb && odb.scrollTop)
-        {
-            dims.top += odb.scrollTop;
-            dims.left += odb.scrollLeft;
-        }
-        else if(odde && odde.scrollTop)
-        {
-            dims.top += odde.scrollTop;
-            dims.left += odde.scrollLeft;
         }
     }
     return dims;

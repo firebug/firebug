@@ -494,7 +494,6 @@ function getImageMapHighlighter(context)
             },
             "highlight": function(eltArea, multi)
             {
-//debugger;
                 var i, j, v, images, rect, clearForFirst;
 
                 if (eltArea && eltArea.coords)
@@ -515,7 +514,7 @@ function getImageMapHighlighter(context)
                     if(images.length===0)
                         images[0] = eltArea;
 
-                    for(var j=0;j<images.length;j++)
+                    for(j=0;j<images.length;j++)
                     {
                         rect = getLTRBWH(images[j], context);
 
