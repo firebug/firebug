@@ -19,6 +19,7 @@
 <!ENTITY firebug.NormalTextSize "보통 글자 크기">
 <!ENTITY firebug.ShowTooltips "미리보기 툴팁 보임">
 <!ENTITY firebug.ShadeBoxModel "상자 모델 음영 나타냄">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug 웹사이트...">
 <!ENTITY firebug.Documentation "문서...">
 <!ENTITY firebug.KeyShortcuts "자판 단축글쇠...">

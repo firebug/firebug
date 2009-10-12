@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "重置">
 <!ENTITY firebug.ShowTooltips "显示预览提示">
 <!ENTITY firebug.ShadeBoxModel "盒模型上显示阴影">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug 官网...">
 <!ENTITY firebug.Documentation "文档...">
 <!ENTITY firebug.KeyShortcuts "快捷键...">

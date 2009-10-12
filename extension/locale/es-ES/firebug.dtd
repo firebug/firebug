@@ -21,6 +21,7 @@
 <!ENTITY  firebug.NormalTextSize        "Tamaño del Texto Normal">
 <!ENTITY  firebug.ShowTooltips          "Mostrar 'Tooltips' de Vista Previa">
 <!ENTITY  firebug.ShadeBoxModel         "Shade Box Model">
+<!ENTITY  firebug.ShowQuickInfoBox      "Show Quick Info Box">
 <!ENTITY  firebug.Website               "Sitio Web de Firebug...">
 <!ENTITY  firebug.Documentation         "Documentación...">
 <!ENTITY  firebug.KeyShortcuts          "Atajos del Teclado...">

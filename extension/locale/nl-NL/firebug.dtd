@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Normale tekstgrootte">
 <!ENTITY firebug.ShowTooltips "Voorbeeldweergavetooltips weergeven">
 <!ENTITY firebug.ShadeBoxModel "Schaduwboxmodel">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug website…">
 <!ENTITY firebug.Documentation "Documentatie…">
 <!ENTITY firebug.KeyShortcuts "Sneltoetsen…">

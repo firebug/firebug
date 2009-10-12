@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Նորմալ չափ">
 <!ENTITY firebug.ShowTooltips "Ցույց տալ օգնության տեքստեր">
 <!ENTITY firebug.ShadeBoxModel "Ստվերագծել Box Model-ը">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug- ՎեբԿայք...">
 <!ENTITY firebug.Documentation "Գրականություն...">
 <!ENTITY firebug.KeyShortcuts "Ստեղնաշարի հրամաններ...">

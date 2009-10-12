@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Стандартний розмір шрифту">
 <!ENTITY firebug.ShowTooltips "Показувати підказки передперегляду">
 <!ENTITY firebug.ShadeBoxModel "Увімкнути тіні">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Домашня сторінка Firebug...">
 <!ENTITY firebug.Documentation "Документація...">
 <!ENTITY firebug.KeyShortcuts "&quot;Гарячі&quot; клавіші...">

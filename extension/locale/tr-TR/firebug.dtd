@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Normal Metin Boyutu">
 <!ENTITY firebug.ShowTooltips "Önizleme Araç İpuçlarını Göster">
 <!ENTITY firebug.ShadeBoxModel "Gölgeli Kutu Modeli">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug Anasayfası...">
 <!ENTITY firebug.Documentation "Belgeler...">
 <!ENTITY firebug.KeyShortcuts "Klavye Kısayolları...">

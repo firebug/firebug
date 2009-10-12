@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Normalna pisava">
 <!ENTITY firebug.ShowTooltips "Prikaži namige predogleda">
 <!ENTITY firebug.ShadeBoxModel "Zasenčen box model">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebugova spletna stran...">
 <!ENTITY firebug.Documentation "Dokumentacija...">
 <!ENTITY firebug.KeyShortcuts "Bližnice s tipkovnico...">

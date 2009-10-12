@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "سایز قلم استاندارد">
 <!ENTITY firebug.ShowTooltips "نمایش Tooltip ها در صفحه">
 <!ENTITY firebug.ShadeBoxModel "پررنگ کردن عنصر انتخابی">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "وب سایت آتش افروز...">
 <!ENTITY firebug.Documentation "مستندات...">
 <!ENTITY firebug.KeyShortcuts "کلیدهای میانبر...">

@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Normal textstorlek">
 <!ENTITY firebug.ShowTooltips "Visa förhandsgranskning">
 <!ENTITY firebug.ShadeBoxModel "Shade Box Model">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebugs webbsida...">
 <!ENTITY firebug.Documentation "Dokumentation...">
 <!ENTITY firebug.KeyShortcuts "Tangentbordsgenvägar...">

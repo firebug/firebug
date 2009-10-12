@@ -20,6 +20,7 @@
 <!ENTITY  firebug.NormalTextSize        "正常文字大小">
 <!ENTITY  firebug.ShowTooltips          "顯示預覽工具提示">
 <!ENTITY  firebug.ShadeBoxModel         "區塊模型 (box model) 上色">
+<!ENTITY  firebug.ShowQuickInfoBox      "Show Quick Info Box">
 <!ENTITY  firebug.Website               "Firebug 網站...">
 <!ENTITY  firebug.Documentation         "文件...">
 <!ENTITY  firebug.KeyShortcuts          "鍵盤捷徑...">
