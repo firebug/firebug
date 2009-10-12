@@ -13,7 +13,6 @@
 <!ENTITY firebug.NormalTextSize "標準の文字サイズ">
 <!ENTITY firebug.ShowTooltips "プレビューツールチップを表示">
 <!ENTITY firebug.ShadeBoxModel "ボックスモデルに影を表示">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug の Web サイト...">
 <!ENTITY firebug.Documentation "マニュアル...">
 <!ENTITY firebug.KeyShortcuts "キーボード ショートカット...">

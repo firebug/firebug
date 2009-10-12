@@ -13,7 +13,6 @@
 <!ENTITY firebug.NormalTextSize "Text de mărime normală">
 <!ENTITY firebug.ShowTooltips "Arată indiciile la previzualizare">
 <!ENTITY firebug.ShadeBoxModel "Model de cutie umbrită">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Sait Firebug...">
 <!ENTITY firebug.Documentation "Documentație...">
 <!ENTITY firebug.KeyShortcuts "Scurtături de tastatură...">

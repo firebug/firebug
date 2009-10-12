@@ -13,7 +13,6 @@
 <!ENTITY firebug.NormalTextSize "Visszaállítás">
 <!ENTITY firebug.ShowTooltips "Tippek megjelenítése">
 <!ENTITY firebug.ShadeBoxModel "Doboz modell kiemelése">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug honlap...">
 <!ENTITY firebug.Documentation "Dokumentáció...">
 <!ENTITY firebug.KeyShortcuts "Gyorsbillentyűk...">

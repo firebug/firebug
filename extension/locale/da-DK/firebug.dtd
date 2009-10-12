@@ -13,7 +13,6 @@
 <!ENTITY firebug.NormalTextSize "Normal tekststørrelse">
 <!ENTITY firebug.ShowTooltips "Vis hjælpetekster">
 <!ENTITY firebug.ShadeBoxModel "Vis box-model med skygger">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug hjemmeside...">
 <!ENTITY firebug.Documentation "Dokumentation...">
 <!ENTITY firebug.KeyShortcuts "Tastaturgenveje...">

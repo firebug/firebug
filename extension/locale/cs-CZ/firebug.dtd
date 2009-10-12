@@ -13,7 +13,6 @@
 <!ENTITY firebug.NormalTextSize "Normální velikost textu">
 <!ENTITY firebug.ShowTooltips "Zobrazovat náhledové popisky">
 <!ENTITY firebug.ShadeBoxModel "Zvýrazňovat box model ve výhledu">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Webové stránky Firebugu...">
 <!ENTITY firebug.Documentation "Dokumentace...">
 <!ENTITY firebug.KeyShortcuts "Klávesové zkratky...">

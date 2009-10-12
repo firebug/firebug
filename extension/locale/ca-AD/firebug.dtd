@@ -13,7 +13,6 @@
 <!ENTITY firebug.NormalTextSize "Mida del text normal">
 <!ENTITY firebug.ShowTooltips "Mostra els indicadors de funció">
 <!ENTITY firebug.ShadeBoxModel "Shade Box Model">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Lloc Web de Firebug...">
 <!ENTITY firebug.Documentation "Documentació...">
 <!ENTITY firebug.KeyShortcuts "Tecles de funció...">

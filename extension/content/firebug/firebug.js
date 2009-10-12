@@ -252,7 +252,7 @@ top.Firebug =
             "menu_enableA11y", "menu_activateSameOrigin", "menu_onByDefault", "fbContinueButton",
             "fbBreakOnNextButton", "fbConsolePersist",
             "fbMinimizeButton", "FirebugMenu_Sites", "fbResumeBoxButton",
-            "menu_AllOn", "menu_clearActivationList"];
+            "menu_AllOn", "menu_clearActivationList", "showQuickInfoBox"];
 
         for (var i=0; i<elements.length; i++)
         {

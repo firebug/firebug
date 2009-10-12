@@ -13,7 +13,6 @@
 <!ENTITY firebug.Copy "Kópia">
 <!ENTITY firebug.CopyBookmarklet "Skopírovať skript ako bookmarklet">
 <!ENTITY firebug.Options "Možnosti">
-<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.TextSize "Veľkosť písma">
 <!ENTITY firebug.IncreaseTextSize "Zväčšiť písmo">
 <!ENTITY firebug.DecreaseTextSize "Zmenšiť písmo">
