@@ -1469,7 +1469,7 @@ this.readBoxStyles = function(style)
 
     var styles = {};
     for (var styleName in styleNames)
-        styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText);
+        styles[styleNames[styleName]] = parseInt(style.getPropertyCSSValue(styleName).cssText) || 0;
     if (FBTrace.DBG_INSPECT)
         FBTrace.sysout("readBoxStyles ", styles);
     return styles;
