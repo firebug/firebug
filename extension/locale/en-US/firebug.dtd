@@ -13,6 +13,7 @@
 <!ENTITY firebug.NormalTextSize "Normal Text Size">
 <!ENTITY firebug.ShowTooltips "Show Preview Tooltips">
 <!ENTITY firebug.ShadeBoxModel "Shade Box Model">
+<!ENTITY firebug.ShowQuickInfoBox "Show Quick Info Box">
 <!ENTITY firebug.Website "Firebug Website...">
 <!ENTITY firebug.Documentation "Documentation...">
 <!ENTITY firebug.KeyShortcuts "Keyboard Shortcuts...">

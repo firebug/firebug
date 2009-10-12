@@ -360,6 +360,9 @@
                     <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="shadeBoxModel"/>
+                    <menuitem type="checkbox" label="&firebug.ShowQuickInfoBox;"
+                              oncommand="FirebugChrome.onToggleOption(this)"
+                              option="showQuickInfoBox"/>
                     <menuitem type="checkbox" id="menu_enableA11y"
                               label="firebug.menu.Enable Accessibility Enhancements"
                               oncommand="FirebugChrome.onToggleOption(this)"

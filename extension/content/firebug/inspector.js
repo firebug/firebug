@@ -17,10 +17,10 @@ const highlightCSS = "chrome://firebug/content/highlighter.css";
 // ************************************************************************************************
 // Globals
 
-var boxModelHighlighter = null;
-var frameHighlighter = null;
-var popupHighlighter = null;
-var mx, my;
+var boxModelHighlighter = null,
+    frameHighlighter = null,
+    popupHighlighter = null,
+    mx, my, showQuickInfoBox;
 
 // ************************************************************************************************
 
@@ -304,6 +304,7 @@ Firebug.Inspector = extend(Firebug.Module,
         this.onInspectingClick = bind(this.onInspectingClick, this);
 
         this.updateOption("shadeBoxModel", Firebug.shadeBoxModel);
+        this.updateOption("showQuickInfoBox", Firebug.showQuickInfoBox);
     },
 
     initContext: function(context)
@@ -362,10 +363,12 @@ Firebug.Inspector = extend(Firebug.Module,
     updateOption: function(name, value)
     {
         if (name == "shadeBoxModel")
-        {
+            {
             this.highlightObject(null);
             this.defaultHighlighter = value ? getHighlighter("boxModel") : getHighlighter("frame");
-        }
+            }
+        else if(name == "showQuickInfoBox")
+            showQuickInfoBox = value;
     },
 
     getObjectByURL: function(context, url)
@@ -572,6 +575,9 @@ function getImageMapHighlighter(context)
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     function showQuickInfo(element, removeInfo)
     {
+        if (!showQuickInfoBox || !element)
+            return;
+    
         if (removeInfo)
         {
             element.removeChild(element.ownerDocument.getElementById('firebugQuickInfoBox'));
@@ -596,7 +602,7 @@ function getImageMapHighlighter(context)
         else
             qidiv.style.display = 'block';
             
-        var cs = doc.defaultView.getComputedStyle(qidiv, null);
+        var cs = doc.defaultView.getComputedStyle(element, null);
         
         text = '';
         if (element.id) text += 'id: ' + element.id + '<br />';
@@ -614,14 +620,13 @@ function getImageMapHighlighter(context)
         if (cs.zIndex) text += 'zIndex: ' + cs.zIndex + '<br />';
 
         if (cs.position) text += 'position: ' + cs.position + '<br />';
-        if (cs.top) text += 'top: ' + cs.top + ', ';
-        if (cs.right) text += 'right: ' + cs.right + ', ';
-        if (cs.bottom) text += 'bottom: ' + cs.bottom + ', ';
-        if (cs.left) text += 'left: ' + cs.left;
-        if (cs.top || cs.right || cs.bottom ||cs.left) text += '<br />';
+        if (cs.top) text += 'top: ' + cs.top + '<br />';
+        if (cs.right) text += 'right: ' + cs.right + '<br />';
+        if (cs.bottom) text += 'bottom: ' + cs.bottom + '<br />';
+        if (cs.left) text += 'left: ' + cs.left + '<br />';
         
-        if (cs.color) text += 'color: ' + cs.color + '<br />';
-        if (cs.backgroundColor) text += 'backgroundColor: ' + cs.backgroundColor + '<br />';
+        if (cs.color) text += 'color: ' + rgbToHex(cs.color) + '<br />';
+        if (cs.backgroundColor) text += 'backgroundColor: ' + rgbToHex(cs.backgroundColor) + '<br />';
         if (cs.fontFamily) text += 'fontFamily: ' + cs.fontFamily + '<br />';
 
         if (cs.cssFloat) text += 'cssFloat: ' + cs.cssFloat + '<br />';
@@ -1085,6 +1090,12 @@ function attachStyles(context, body)
         addStyleSheet(body.ownerDocument, context.highlightStyle);
 }
 
+function rgbToHex(value)
+{
+    return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b) {
+    return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
+    });
+}
 // ************************************************************************************************
 
 Firebug.registerModule(Firebug.Inspector);
