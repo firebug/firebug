@@ -88,9 +88,8 @@ textbox[type="fbSearchBox"] > panel {
     -moz-appearance: none;
     -moz-window-shadow: none;
     background-color: transparent;
-    margin-top: -4px;
-    margin-left: -12px;
-    min-width: 260px;
+    margin-bottom: 2px;
+    margin-right: -12px;
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 / 16px 50px 24px 12px repeat;
 }
 
