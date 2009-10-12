@@ -794,13 +794,13 @@
     <content sizetopopup="none">
         <xul:textbox type="autocomplete" anonid="searchBox"
                 rows="1" label="search.Firebug_Search" class="fbsearch-textbox" />
-        <xul:panel anonid="searchOptionsPopup" norestorefocus="true" noautofocus="true" noautohide="true" ignorekeys="true">
+        <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true" noautohide="true" ignorekeys="true">
             <xul:vbox>
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()"  />
               <xul:vbox anonid="searchOptionsList"/>
               <xul:hbox pack="center" align="center">
-                  <xul:button anonid="searchPrev" label="search.Previous" oncommand="searchPrev()" />
-                  <xul:button anonid="searchNext" label="search.Next" oncommand="searchNext()"/>
+                  <xul:button anonid="searchPrev" class="fbsearch-options-buttons" label="search.Previous" oncommand="searchPrev()" />
+                  <xul:button anonid="searchNext" class="fbsearch-options-buttons" label="search.Next" oncommand="searchNext()"/>
               </xul:hbox>
               <xul:box anonid="endPanelFocus" class="panelFocusBound" onfocus="endFocusHandler()" />
             </xul:vbox>
@@ -813,8 +813,8 @@
             var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
                 searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev"),
                 searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext"),
-                searchOptionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup"),
-                optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup");
+                searchOptionsPopup = document.getElementById("fbSearchOptionsPanel"),
+                optionsPopup = document.getElementById("fbSearchOptionsPanel");
             FBL.internationalize(searchBox, "label");
             FBL.internationalize(searchPrev, "label");
             FBL.internationalize(searchNext, "label");
@@ -834,7 +834,7 @@
         </property>
         <property name="optionsShown">
             <xbl:getter><![CDATA[
-                var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup");
+                var optionsPopup = document.getElementById(this, "anonid", "fbSearchOptionsPanel");
                 return optionsPopup.state == "open";
             ]]></xbl:getter>
         </property>
@@ -854,6 +854,7 @@
                     for (var i=0; i<menuItems.length; i++)
                     {
                         var checkbox = document.createElement("checkbox");
+                        checkbox.className = "fbsearch-options-label";
                         FBL.setItemIntoElement(checkbox, menuItems[i]);
 
                         searchOptions.appendChild(checkbox);
@@ -863,7 +864,7 @@
         </method>
         <method name="showOptions">
             <body><![CDATA[
-                var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup"),
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel"),
                     searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
                 optionsPopup.openPopup(this, "before_end", 0, 0, false, false);
 
@@ -873,7 +874,7 @@
         </method>
         <method name="hideOptions">
             <body><![CDATA[
-                var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup");
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 optionsPopup.hidePopup();
 
                 clearTimeout(this.blurTimeout);

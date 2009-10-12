@@ -137,6 +137,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     margin-right: 6px;
 }
 
+
 .fbsearch-textbox {
     -moz-appearance: none;
     margin: 0 0px 1px 2px;
@@ -154,6 +155,18 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 
 .fbsearch-textbox > .autocomplete-textbox-container > .autocomplete-icon {
     list-style-image: url(chrome://firebug/skin/search.png);
+}
+
+#fbSearchOptionsPanel {
+
+}
+
+.fbsearch-options-label {
+
+}
+
+.fbsearch-options-buttons {
+    
 }
 
 textbox[type="fbSearchBox"] > panel {

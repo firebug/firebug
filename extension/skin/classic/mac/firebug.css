@@ -84,6 +84,44 @@ textbox[type="fbSearchBox"] > panel {
     margin-bottom: -5px;
 }
 
+#fbSearchOptionsPanel {
+    -moz-appearance: none;
+    -moz-window-shadow: none;
+    background-color: transparent;
+    margin-top: -4px;
+    margin-left: -12px;
+    min-width: 260px;
+    -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 / 16px 50px 24px 12px repeat;
+}
+
+.fbsearch-options-label {
+    color: #ffffff;
+}
+
+.fbsearch-options-buttons {
+    -moz-appearance: none;
+    background: url("chrome://firebug/skin/mac/hud-style-button-middle-background.png") repeat-x #464646 center center;
+    border: 3px solid;
+    -moz-border-top-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
+    -moz-border-right-colors: rgba(53,53,53,1) rgba(53,53,53,1) rgba(162,162,162,1);
+    -moz-border-bottom-colors: rgba(128,128,128,0.35) rgba(0,0,0,0.5) rgba(255,255,255,0.15);
+    -moz-border-left-colors: rgba(0,0,0,0.35) rgba(26,26,26,0.5) rgba(255,255,255,0.4);
+    -moz-border-radius: 20px;
+    padding: 1px 9px;
+    margin: 10px 0 0;
+    min-height: 0px;
+    color:  #ffffff;
+}
+
+.fbsearch-options-buttons > .button-box > .button-text {
+    margin: 0 !important;
+}
+
+.fbsearch-options-buttons:hover:active {
+    background-color: #86888B; !important;
+}
+
+
 .toolbarbutton-iconic {
     margin: 0 4px 0 1px !important;
     padding: 0 !important;
