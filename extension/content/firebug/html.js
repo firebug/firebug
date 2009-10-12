@@ -512,6 +512,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             FBTrace.sysout("getChildObject: null node");
             return;
         }
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("getChildObject "+node.tagName+" index "+index+" previousSibling: "+previousSibling, {node: node, previousSibling:previousSibling});
 
         if (this.isSourceElement(node))
         {
@@ -556,7 +558,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             else
                 child = node.firstChild;
         }
-        // when we reach here, child is set to at the beginning of an interation.
+        // when we reach here, child is set to at the beginning of an iteration.
 
         if (Firebug.showWhitespaceNodes)  // then the index is true to the node list
             return child;
@@ -573,6 +575,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     getAnonymousChildren: function(node)
     {
+    	return null; // XXXjjb I don't understand getAnonymousNodes, cause infinte loop
         var doc = node.ownerDocument;
         if ( !(doc instanceof Ci.nsIDOMDocumentXBL))
             return null;
