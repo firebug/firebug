@@ -1,0 +1,51 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Loka">
+<!ENTITY firebug.View "Skoða
+">
+<!ENTITY firebug.Help "Hjálp">
+<!ENTITY firebug.Vertical "Lóðréttar rúður">
+<!ENTITY firebug.Run "Keyra">
+<!ENTITY firebug.Copy "Afrita">
+<!ENTITY firebug.CopyBookmarklet "Afrita skriftuna sem bókamerki.">
+<!ENTITY firebug.Options "Valkostir">
+<!ENTITY firebug.TextSize "Stærð texta">
+<!ENTITY firebug.IncreaseTextSize "Stækka stærð texta">
+<!ENTITY firebug.DecreaseTextSize "Minnka stærð texta">
+<!ENTITY firebug.NormalTextSize "Venjuleg texta stærð">
+<!ENTITY firebug.ShowTooltips "Sýna forskoðun á vísbendingum">
+<!ENTITY firebug.ShadeBoxModel "Skyggt box módel">
+<!ENTITY firebug.Website "Vefsvæði Firebug...">
+<!ENTITY firebug.Documentation "Skjölun...">
+<!ENTITY firebug.KeyShortcuts "Flýtihnappar...">
+<!ENTITY firebug.Forums "Umræðuhópur...">
+<!ENTITY firebug.Issues "Vandamál...">
+<!ENTITY firebug.Donate "Gefa...">
+<!ENTITY firebug.About "Um...">
+<!ENTITY firebug.AlwaysOpenInWindow "Alltaf opna í nýjum glugga">
+<!ENTITY firebug.ShowFirebug "Opna Firebug">
+<!ENTITY firebug.DetachFirebug "Opna Firebug í nýjum glugga">
+<!ENTITY firebug.OpenWith "Opna með ritli">
+<!ENTITY firebug.CloseFirebug "Gera Firebug óvirkt fyrir þetta vefsvæði">
+<!ENTITY firebug.Permissions "Vefsvæði...">
+<!ENTITY firebug.ConfigureEditors "Stilla ritla">
+<!ENTITY firebug.CommandLine "Skipanalína">
+<!ENTITY firebug.Search "Leita">
+<!ENTITY firebug.Continue "Halda áfram (F8)">
+<!ENTITY firebug.StepOver "Fara yfir (F10)">
+<!ENTITY firebug.StepInto "Fara inn í (F11)">
+<!ENTITY firebug.StepOut "Fara út">
+<!ENTITY firebug.BreakOnErrors "Stöðva á villum">
+<!ENTITY firebug.Inspect "Skoða">
+<!ENTITY firebug.InspectElement "Skoða einindi">
+<!ENTITY firebug.InspectTooltip "Smelltu á einindi á síðunni til að skoða">
+<!ENTITY firebug.Edit "Breyta">
+<!ENTITY firebug.EditHTMLTooltip "Breyta þessu HTML">
+<!ENTITY firebug.EditCSSTooltip "Breyta þessu stílblaði">
+<!ENTITY firebug.Profile "Tímamæla">
+<!ENTITY firebug.ProfileScript "Tímamæla JavaScript">
+<!ENTITY firebug.Clear "Hreinsa">
+<!ENTITY firebug.ClearConsole "Hreinsa glugga">
+<!ENTITY firebug.ClearTooltip "Hreinsa gluggann">
+<!ENTITY firebug.All "Allir">
+<!ENTITY firebug.Images "Myndir">
+<!ENTITY firebug.Flash "Flass">

@@ -15,6 +15,7 @@ locale  firebug fa-IR       jar:chrome/firebug.jar!/locale/fa-IR/
 locale  firebug fr-FR       jar:chrome/firebug.jar!/locale/fr-FR/
 locale  firebug hu-HU       jar:chrome/firebug.jar!/locale/hu-HU/
 locale  firebug hy-AM       jar:chrome/firebug.jar!/locale/hy-AM/
+locale  firebug is-IS       jar:chrome/firebug.jar!/locale/is-IS/
 locale  firebug it-IT       jar:chrome/firebug.jar!/locale/it-IT/
 locale  firebug ja-JP       jar:chrome/firebug.jar!/locale/ja-JP/
 locale  firebug ko-KR       jar:chrome/firebug.jar!/locale/ko-KR/
