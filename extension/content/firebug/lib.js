@@ -3070,6 +3070,12 @@ this.getFileExtension = function(url)
     if (!url)
         return null;
 
+    // Remove query string from the URL if any.
+    var queryString = url.indexOf("?");
+    if (queryString != -1)
+        url = url.substr(0, queryString);
+
+    // Now get the file extension.
     var lastDot = url.lastIndexOf(".");
     return url.substr(lastDot+1);
 };
