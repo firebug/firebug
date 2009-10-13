@@ -693,7 +693,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             str += cropString(cause.prevValue, 40) +" -> ";
         if (cause.newValue)
             str += cropString(cause.newValue, 40);
-        return str + " in ";  // the element will be rendered after the diff
+        return str.length ? str + " in " : "";  // the element will be rendered after the diff
     },
 
     getTitle: function(cause)
