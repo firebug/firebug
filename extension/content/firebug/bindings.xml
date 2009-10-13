@@ -155,16 +155,14 @@
                     this.tabBox.removeAttribute("collapsed");
 
                 if (this.selectedTab)
-                {
-                    this.selectedTab.removeAttribute("selected");
-                }
+                    this.selectedTab.selected = false;
 
                 this.selectedTab = tab;
                 this.selectedPanel = panel;
 
                 if (tab)
                 {
-                    tab.setAttribute("selected", "true");
+                    tab.selected = true;
                     if (Firebug.A11yModel && Firebug.A11yModel.isEnabled() && Firebug.A11yModel.tabFocused &&!forceUpdate)
                         tab.focus();
                 }
@@ -294,6 +292,15 @@
             this.tabMenu.module = module ? module : null;
             ]]></body>
         </method>
+        <property name="selected">
+            <getter><![CDATA[
+                return this.getAttribute("selected");
+            ]]></getter>
+            <setter><![CDATA[
+                this.setAttribute("selected", val);
+                this.tabMenu.updateVisibility();
+            ]]></setter>
+        </property>
     </implementation>
 </binding>
 
@@ -342,6 +349,18 @@
             <body><![CDATA[
             return {label: label, type: "radio", checked: checked,
                 command: FBL.bindFixed(command, this)};
+            ]]></body>
+        </method>
+        <method name="updateVisibility">
+            <body><![CDATA[
+            // Hide the mini-menu (displaying panel's option) if following is true:
+            // 1) The panel isn't activable (this.module == null) and so there are
+            //    no enable/disable options.
+            // 2) The panel doesn't provide any additional options.
+            var panel = this.selectedPanel;
+            var panelItems = panel ? panel.getOptionsMenuItems(FirebugContext) : null;
+            if (!this.module && !(panelItems && panelItems.length))
+                this.setAttribute("collapsed", "true");
             ]]></body>
         </method>
     </implementation>

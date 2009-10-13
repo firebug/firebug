@@ -62,6 +62,7 @@ panelStatus {
 }
 
 /************************************************************************************************/
+/* Mini-menu on the panel tab */
 
 panelTabMenu {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelTabMenu");
@@ -75,7 +76,8 @@ panelTab[aria-disabled='true'] {
     color: graytext;
 }
 
-panelTab[selected="true"] > panelTabMenu .menuTarget, panelTab:focus > panelTabMenu .menuTarget {
+panelTab[selected="true"] > panelTabMenu .menuTarget,
+panelTab:focus > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTarget.png) no-repeat center;
     width: 11px;
     height: 10px;
@@ -87,7 +89,8 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     background: url(chrome://firebug/skin/tabMenuTargetHover.png) no-repeat center;
 }
 
-/**** focus related ****/
+/************************************************************************************************/
+/* Focus related */
 
 /* Make the following selectors part of the tab order */
 
@@ -141,8 +144,8 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 /**** end focus related ****/
 
 /************************************************************************************************/
-
 /* panelFileList */
+
 .toolbarbutton-text.title[value] {
     padding-right: 5px;
 }
