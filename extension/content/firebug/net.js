@@ -869,10 +869,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
+            Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive"),
             //Firebug.Search.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
             //Firebug.Search.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
-            Firebug.Search.searchOptionMenu("search.net.Response_Bodies", "netSearchResponseBody")
+            Firebug.Search.searchOptionMenu("search.net.Response Bodies", "netSearchResponseBody")
         ];
     },
 
@@ -2767,6 +2767,8 @@ NetProgress.prototype =
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             file.method = request.requestMethod;
             file.urlParams = parseURLParams(file.href);
+
+            Utils.getPostText(file, this.context);
 
             this.extendPhase(file);
 
