@@ -2261,6 +2261,14 @@ Firebug.Panel =
         return null;
     },
 
+    /*
+     * Called by chrome.onContextMenu to build the context menu when this panel has focus.
+     * See also FirebugRep for a similar function also called by onContextMenu
+     * Extensions may monkey patch and chain off this call
+     * @param object: the 'realObject', a model value, eg a DOM property
+     * @param target: the HTML element clicked on.
+     * @return an array of menu items.
+     */
     getContextMenuItems: function(object, target)
     {
         return [];
@@ -2472,6 +2480,15 @@ Firebug.Rep = domplate(
         return null;
     },
 
+    /*
+    * Called by chrome.onContextMenu to build the context menu when the underlying object has this rep.
+    * See also Panel for a similar function also called by onContextMenu
+    * Extensions may monkey patch and chain off this call
+    * @param object: the 'realObject', a model value, eg a DOM property
+    * @param target: the HTML element clicked on.
+    * @param context: the context, probably FirebugContext
+    * @return an array of menu items.
+    */
     getContextMenuItems: function(object, target, context)
     {
         return [];
