@@ -161,11 +161,21 @@
     width: 200px;
     border: 1px solid #000;
     font-family: Monaco, monospace;
-    font-size: 10px;
+    font-size: 11px;
     opacity: 0.85;
     z-index: 2147483647;
 }
 
 .firefoxQuickInfoBoxTitle {
-    font-weight: bolder;
+    font-family: Lucida Grande, sans-serif;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.firefoxQuickInfoName {
+    color: DarkGreen;
+}
+
+.firefoxQuickInfoValue {
+    color: DarkBlue;
 }

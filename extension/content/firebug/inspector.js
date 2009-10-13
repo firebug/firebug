@@ -6,12 +6,9 @@ FBL.ns(function() { with (FBL) {
 // Constants
 
 const inspectDelay = 100;
-
 const edgeSize = 2;
-
 const defaultPrimaryPanel = "html";
 const defaultSecondaryPanel = "dom";
-
 const highlightCSS = "chrome://firebug/content/highlighter.css";
 
 // ************************************************************************************************
@@ -231,7 +228,9 @@ Firebug.Inspector = extend(Firebug.Module,
 
     detachInspectListeners: function(context)
     {
-        var win = context.window;
+        var i, keyListenersLen,
+            win = context.window;
+
         if (!win || !win.document)
             return;
 
@@ -239,7 +238,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if (this.keyListeners)  // XXXjjb for some reason this is null some times.
         {
-            for (var i = 0; i < this.keyListeners.length; ++i)
+            keyListenersLen = this.keyListeners.length;
+            for (i = 0; i < keyListenersLen; ++i)
                 chrome.keyIgnore(this.keyListeners[i]);
             delete this.keyListeners;
         }
@@ -343,13 +343,13 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         if (this.inspecting)
             this.stopInspecting(true);
-
     },
 
     showPanel: function(browser, panel)
     {
-        var chrome = Firebug.chrome;
-        var disabled = !panel || !panel.context.loaded;
+        var chrome = Firebug.chrome,
+            disabled = !panel || !panel.context.loaded;
+
         chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
         //chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
     },
@@ -433,6 +433,7 @@ function getImageMapHighlighter(context)
         {
             if(elt)
                 doc = elt.ownerDocument;
+
             canvas = doc.getElementById('firebugCanvas');
 
             if(!canvas)
@@ -459,25 +460,31 @@ function getImageMapHighlighter(context)
             {
                 if(!canvas)
                     init();
+
                 canvas.style.display = state?'block':'none';
             },
+
             "getImages": function(mapName, multi)
             {
-                var i,
+                var i, eltsLen,
                     elts = [],
                     images = [],
                     elts2 = doc.getElementsByTagName("img"),
-                    elts3 = doc.getElementsByTagName("input");
+                    elts3 = doc.getElementsByTagName("input"),
+                    elts2Len = elts2.length,
+                    elts3Len = elts3.length;
 
-                for(i=0;i<elts2.length;i++)
+                for(i = 0; i < elts2Len; i++)
                     elts.push(elts2[i]);
 
-                for(i=0;i<elts3.length;i++)
+                for(i = 0; i < elts3Len; i++)
                     elts.push(elts3[i]);
 
                 if(elts)
                 {
-                    for(i=0;i<elts.length;i++)
+                    eltsLen = elts.length;
+
+                    for(i = 0; i < eltsLen; i++)
                     {
                         if(elts[i].getAttribute('usemap') == mapName)
                         {
@@ -487,7 +494,7 @@ function getImageMapHighlighter(context)
                                 images.push(elts[i]);
                             else if(rect.left <= mx && rect.right >= mx && rect.top <= my && rect.bottom >= my)
                             {
-                                images[0]=elts[i];
+                                images[0] = elts[i];
                                 break;
                             }
                         }
@@ -495,9 +502,10 @@ function getImageMapHighlighter(context)
                 }
                 return images;
             },
+
             "highlight": function(eltArea, multi)
             {
-                var i, j, v, images, rect, clearForFirst;
+                var i, j, v, vLen, images, imagesLen, rect, shape, clearForFirst;
 
                 if (eltArea && eltArea.coords)
                 {
@@ -514,27 +522,32 @@ function getImageMapHighlighter(context)
                     ctx.strokeStyle = "rgb(29, 55, 95)";
                     ctx.lineWidth = 2;
 
-                    if(images.length===0)
+                    if(images.length === 0)
                         images[0] = eltArea;
 
-                    for(j=0;j<images.length;j++)
+                    imagesLen = images.length;
+
+                    for(j = 0; j < imagesLen; j++)
                     {
                         rect = getLTRBWH(images[j], context);
 
                         ctx.beginPath();
 
                         if(!multi || (multi && j===0))
-                            ctx.clearRect(0,0,canvas.width,canvas.height);
+                            ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-                        if (eltArea.shape.toLowerCase() === 'rect')
-                            ctx.rect(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10), v[2]-v[0], v[3]-v[1]);
-                        else if (eltArea.shape.toLowerCase() === 'circle')
-                            ctx.arc(rect.left+parseInt(v[0],10) + ctx.lineWidth / 2, rect.top+parseInt(v[1],10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
+                        shape = eltArea.shape.toLowerCase();
+
+                        if (shape === 'rect')
+                            ctx.rect(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10), v[2] - v[0], v[3] - v[1]);
+                        else if (shape === 'circle')
+                            ctx.arc(rect.left + parseInt(v[0], 10) + ctx.lineWidth / 2, rect.top + parseInt(v[1], 10) + ctx.lineWidth / 2, v[2], 0, Math.PI / 180 * 360, false);
                         else
                         {
-                            ctx.moveTo(rect.left+parseInt(v[0],10), rect.top+parseInt(v[1],10));
-                            for(i=2;i<v.length;i+=2)
-                                ctx.lineTo(rect.left+parseInt(v[i],10), rect.top+parseInt(v[i+1],10));
+                            vLen = v.length;
+                            ctx.moveTo(rect.left + parseInt(v[0], 10), rect.top + parseInt(v[1], 10));
+                            for(i=2; i < vLen; i += 2)
+                                ctx.lineTo(rect.left + parseInt(v[i], 10), rect.top + parseInt(v[i + 1], 10));
                         }
 
                         ctx.fill();
@@ -545,10 +558,9 @@ function getImageMapHighlighter(context)
                     this.show(true);
                 }
                 else
-                {
                     return;
-                }
             },
+
             "mouseMoved": function(event)
             {
                 var idata = ctx.getImageData(event.layerX, event.layerY, 1, 1);
@@ -556,11 +568,10 @@ function getImageMapHighlighter(context)
                 mx = event.clientX;
                 my = event.clientY;
 
-                if(!idata)
-                    this.show(false);
-                else if(idata.data[0]===0 && idata.data[1]===0 && idata.data[2]===0 && idata.data[3]===0)
+                if (!idata || (idata.data[0] === 0 && idata.data[1] === 0 && idata.data[2] === 0 && idata.data[3] === 0))
                     this.show(false);
             },
+
             "destroy": function()
             {
                 canvas = null;
@@ -584,11 +595,21 @@ function getImageMapHighlighter(context)
             return;
         }
 
-        var divContent = '',
-            text,
+        var i, attrib, value,
+            text = '',
+            divContent = '',
             body = getNonFrameBody(element),
             doc = body.ownerDocument,
-            qidiv = doc.getElementById('firebugQuickInfoBox');
+            cs = doc.defaultView.getComputedStyle(element, null),
+            qidiv = doc.getElementById('firebugQuickInfoBox'),
+            domAttribs = ['id', 'name', 'offsetWidth', 'offsetHeight'],
+            cssAttribs = ['position', 'cssText'],
+            compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
+                           'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
+                           'fontFamily', 'cssFloat', 'display', 'visibility'],
+            domAttribsLen = domAttribs.length,
+            cssAttribsLen = cssAttribs.length,
+            compAttribsLen = compAttribs.length;
 
         if(!qidiv)
         {
@@ -601,38 +622,36 @@ function getImageMapHighlighter(context)
         }
         else
             qidiv.style.display = 'block';
-            
-        var cs = doc.defaultView.getComputedStyle(element, null);
+
+        for (i = 0; i < domAttribsLen; i++)
+        {
+            value = element[domAttribs[i]];
+            if (value)
+                text += '<span class="firefoxQuickInfoName">' + domAttribs[i] + '</span><span class="firefoxQuickInfoValue">: ' + value + '</span><br />';
+        }
         
+        for (i = 0; i < cssAttribsLen; i++)
+        {
+            value = element.style[cssAttribs[i]];
+            if (value)
+                text += '<span class="firefoxQuickInfoName">' + cssAttribs[i] + '</span><span class="firefoxQuickInfoValue">: ' + value + '</span><br />';
+        }
+
+        if (text.length > 0)
+            divContent = '<span class="firefoxQuickInfoBoxTitle">Quick Info</span><br />' + text;
+
         text = '';
-        if (element.id) text += 'id: ' + element.id + '<br />';
-        if (element.name) text += 'name: ' + element.name + '<br />';
-        if (element.offsetWidth) text += 'offsetWidth: ' + element.offsetWidth + '<br />';
-        if (element.offsetHeight) text += 'offsetHeight: ' + element.offsetHeight + '<br />';
-        if (element.style.position) text += 'position: ' + element.style.position + '<br />';
-        if (element.style.cssText) text += 'cssText: ' + element.style.cssText + '<br />';
-
-        if(text.length > 0) divContent = '<span class="firefoxQuickInfoBoxTitle">Quick Info</span><br />' + text;
         
-        text = '';
-        if (cs.width) text += 'width: ' + cs.width + '<br />';
-        if (cs.height) text += 'height: ' + cs.height + '<br />';
-        if (cs.zIndex) text += 'zIndex: ' + cs.zIndex + '<br />';
+        for (i = 0; i < compAttribsLen; i++)
+        {
+            value = cs.getPropertyValue(compAttribs[i]);
+            if (value)
+            {
+                if (/rgb\(\d+,\s\d+,\s\d+\)/.test(value)) value = rgbToHex(value);
+                text += '<span class="firefoxQuickInfoName">' + compAttribs[i] + '</span><span class="firefoxQuickInfoValue">: ' + value + '</span><br />';
+            }
+        }
 
-        if (cs.position) text += 'position: ' + cs.position + '<br />';
-        if (cs.top) text += 'top: ' + cs.top + '<br />';
-        if (cs.right) text += 'right: ' + cs.right + '<br />';
-        if (cs.bottom) text += 'bottom: ' + cs.bottom + '<br />';
-        if (cs.left) text += 'left: ' + cs.left + '<br />';
-        
-        if (cs.color) text += 'color: ' + rgbToHex(cs.color) + '<br />';
-        if (cs.backgroundColor) text += 'backgroundColor: ' + rgbToHex(cs.backgroundColor) + '<br />';
-        if (cs.fontFamily) text += 'fontFamily: ' + cs.fontFamily + '<br />';
-
-        if (cs.cssFloat) text += 'cssFloat: ' + cs.cssFloat + '<br />';
-        if (cs.display) text += 'display: ' + cs.display + '<br />';
-        if (cs.visibility) text += 'visibility: ' + cs.visibility + '<br />';
-        
         if (text.length > 0)
         {
             if (divContent.length > 0) divContent += '<br />';
