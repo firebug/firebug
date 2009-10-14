@@ -65,7 +65,7 @@ const mimeExtensionMap =
     "css": "text/css",
     "js": "application/x-javascript",
     "jss": "application/x-javascript",
-    "jpg": "image/jpeg",
+    "jpg": "image/jpg",
     "jpeg": "image/jpeg",
     "gif": "image/gif",
     "png": "image/png",
@@ -113,6 +113,7 @@ const mimeCategoryMap =
     "text/javascript": "js",
     "application/javascript" : "js",
     "image/jpeg": "image",
+    "image/jpg": "image",
     "image/gif": "image",
     "image/png": "image",
     "image/bmp": "image",
@@ -1800,7 +1801,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (category)
             return "category-" + category;
 
-        return "";
+        return "category-undefined";
     },
 
     hideRow: function(file)
