@@ -80,10 +80,6 @@
     padding-left: 5px !important;
 }
 
-textbox[type="fbSearchBox"] > panel {
-    margin-bottom: -5px;
-}
-
 #fbSearchOptionsPanel {
     -moz-appearance: none;
     -moz-window-shadow: none;
