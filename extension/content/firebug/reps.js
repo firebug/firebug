@@ -1478,8 +1478,8 @@ this.ErrorMessage = domplate(Firebug.Rep,
         var sourceFile = context.sourceFileMap[error.href];
         if (!sourceFile)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.breakOnThisError has not source file for error.href: "+error.href, error);
+            Firebug.Console.logFormatted(["reps.breakOnThisError has not source file for error.href: "+error.href, error], context, 'error', true);
+            return;
         }
 
         if (this.hasErrorBreak(error))
