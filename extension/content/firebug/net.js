@@ -1082,7 +1082,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             {
                 setClass(row, "responseError");
 
-                var hrefLabel = row.firstChild.firstChild.firstChild;
+                var hrefLabel = getElementByClass(row, "netHrefLabel");
                 hrefLabel.nodeValue = NetRequestEntry.getHref(file);
             }
 
