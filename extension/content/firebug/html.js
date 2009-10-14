@@ -536,56 +536,50 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             else
                 return null;
         }
-        var child = null;
-        if (previousSibling)  // then we are walking, maybe anonymous or not
-        {
-            var nextSibling = this.findNextSibling(previousSibling);
-            if (nextSibling) // ok we be walking.
-                return nextSibling;
-            // either we finished the anonymous or all of them, let's decide which
-            var anon = this.getAnonymousChildren(node);
-            if (anon) // then we had anonymous and we finished them
-                child = node.firstChild;
-            else // then we did not have anonymous and we finished regular nodes
-                return null;
-        }
-        else  // then we are not walking, better get on it
-        {
-            var anon = this.getAnonymousChildren(node);
 
-            if (anon && anon.length)  // then we have anonymous
-                child = anon[0];
-            else
-                child = node.firstChild;
-        }
-        // when we reach here, child is set to at the beginning of an iteration.
+        if (previousSibling)  // then we are walking
+            return this.getNextSibling(previousSibling);  // may return null, meaning done with iteration.
+
+        var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
         if (Firebug.showWhitespaceNodes)  // then the index is true to the node list
             return child;
         else
         {
-            for (; child; child = child.nextSibling)
+            for (; child; child = this.getNextSibling(child))
             {
                 if (!this.isWhitespaceText(child))
                     return child;
             }
         }
-        return null;
-    },
-
-    getAnonymousChildren: function(node)
-    {
-    	return null; // XXXjjb I don't understand getAnonymousNodes, cause infinte loop
-        var doc = node.ownerDocument;
-        if ( !(doc instanceof Ci.nsIDOMDocumentXBL))
-            return null;
-
-        return doc.getAnonymousNodes(node);
+        return null;  // we have no children worth showing.
     },
 
     isWhitespaceText: function(node)
     {
         return HTMLLib.isWhitespaceText(node);
+    },
+
+    getFirstChild: function(node)
+    {
+        this.treeWalker = node.ownerDocument.createTreeWalker(
+                 node, NodeFilter.SHOW_ALL, null, false);
+        return this.treeWalker.firstChild();
+    },
+
+    getNextSibling: function(node)
+    {
+        if (FBTrace.DBG_HTML || FBTrace.DBG_ERRORS)
+        {
+            if (node != this.treeWalker.currentNode)
+                FBTrace.sysout("getNextSibling FAILS treeWalker "+this.treeWalker.currentNode+" out of sync with node "+node, this.treeWalker);
+        }
+        var next = this.treeWalker.nextSibling();
+
+        if (!next)
+            delete this.treeWalker;
+
+        return next;
     },
 
     findNextSibling: function (node)
