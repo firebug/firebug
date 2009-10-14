@@ -165,9 +165,8 @@ ChannelListener.prototype =
             catch(exc)
             {
                 if (FBTrace.DBG_CACHE)
-                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest cancelling request at " +
-                    "(" + offset + ", " + count + ") EXCEPTION: " +
-                    safeGetName(request), exc);
+                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest cancelling request " +
+                    "EXCEPTION: " + safeGetName(request), exc);
 
                 request.cancel(exc.result);
             }
