@@ -144,29 +144,21 @@ Firebug.Search = extend(Firebug.Module,
 
     initializeUI: function()
     {
-        // we listen for panel update
-        Firebug.registerUIListener(this);
     },
 
     shutdown: function()
     {
-        Firebug.unregisterUIListener(this);
-    },
-
-    onPanelSelect: function(object, panel)
-    {
-        var searchBox = Firebug.chrome.$("fbSearchBox");
-        searchBox.value = "";
-        removeClass(searchBox, "fbSearchBox-attention");
-
-        searchBox.updateOptions(panel.getSearchOptionsMenuItems());
     },
 
     showPanel: function(browser, panel)
     {
         // Manage visibility of the search-box according to the searchable flag.
         var searchBox = Firebug.chrome.$("fbSearchBox");
+        searchBox.value = "";
+        removeClass(searchBox, "fbSearchBox-attention");
         searchBox.collapsed = panel ? !panel.searchable : false;
+
+        searchBox.updateOptions(panel.getSearchOptionsMenuItems());
     }
 });
 

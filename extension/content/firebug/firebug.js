@@ -2119,9 +2119,7 @@ Firebug.Panel =
             this.location = object;
             this.updateLocation(object);
 
-            // XXXjoe This is kind of cheating, but, feh.
-            Firebug.chrome.onPanelNavigate(object, this);
-            if (Firebug.uiListeners.length > 0) dispatch(Firebug.uiListeners, "onPanelNavigate", [object, this]);  // TODO: make Firebug.chrome a uiListener
+            dispatch(Firebug.uiListeners, "onPanelNavigate", [object, this]);
         }
     },
 
@@ -2190,10 +2188,7 @@ Firebug.Panel =
             this.selection = object;
             this.updateSelection(object);
 
-            // XXXjoe This is kind of cheating, but, feh.
-            Firebug.chrome.onPanelSelect(object, this);
-            if (Firebug.uiListeners.length > 0)
-                dispatch(Firebug.uiListeners, "onPanelSelect", [object, this]);  // TODO: make Firebug.chrome a uiListener
+            dispatch(Firebug.uiListeners, "onObjectSelected", [object, this]);
         }
     },
 

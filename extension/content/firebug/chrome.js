@@ -138,6 +138,9 @@ top.FirebugChrome =
      */
     initializeUI: function()
     {
+        // we listen for panel update
+        Firebug.registerUIListener(this);
+
         try {
             if (window.arguments)
                 var detachArgs = window.arguments[0];
@@ -205,6 +208,9 @@ top.FirebugChrome =
         locationList.removeEventListener("selectObject", onSelectLocation, false);
 
         window.removeEventListener("blur", onBlur, true);
+
+        Firebug.unregisterUIListener(this);
+
         if (inDetachedScope)
             this.undetach();
         else
@@ -873,7 +879,7 @@ top.FirebugChrome =
         this.syncLocationList();
     },
 
-    onPanelSelect: function(object, panel)
+    onObjectSelected: function(object, panel)
     {
         if (panel == panelBar1.selectedPanel)
         {
@@ -1309,11 +1315,6 @@ function onSelectingPanel(event)
 
     var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
     Firebug.showPanel(browser, panel);
-
-    // XXXjoe This is kind of cheating, but, feh.
-    Firebug.chrome.onPanelSelect(undefined, panel);
-    if (Firebug.uiListeners.length > 0)
-        dispatch(Firebug.uiListeners, "onPanelSelect", [undefined, panel]);
 }
 
 function onSelectedSidePanel(event)
