@@ -14,6 +14,8 @@ const jsdIStackFrame = Ci.jsdIStackFrame;
 const insertSliceSize = 18;
 const insertInterval = 40;
 
+const rxIdentifier = /^[$_A-Za-z][$_A-Za-z0-9]*$/
+
 const ignoreVars =
 {
     "__firebug__": 1,
@@ -435,19 +437,56 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         return object ? object : this.selection;
     },
 
-    getRowPropertyValue: function(row)
+    getRealRowObject: function(row)
     {
         var object = this.getRowObject(row);
-        object = this.getRealObject(object);
-        if (object)
-        {
-            var propName = getRowName(row);
+        return this.getRealObject(object);
+    },
 
-            if (object instanceof jsdIStackFrame)
-                return Firebug.Debugger.evaluate(propName, this.context);
-            else
-                return object[propName];
+    getRowPropertyValue: function(row)
+    {
+        var object = this.getRealRowObject(row);
+        var propName = getRowName(row);
+        return getPropertyValue(object, propName);
+    },
+
+    getRowPathName: function(row)
+    {
+        var name = getRowName(row);
+        var seperator = "";
+
+        //getter we hope, but could be part of the name ~_~
+        if(name.lastIndexOf("get ", 0) == 0)
+        {
+            var temp = name.substr(4);
+            var object = this.getRealRowObject(row);
+            if (typeof(getPropertyValue(object, name)) == "undefined" &&
+                typeof(getPropertyValue(object, temp)) != "undefined")
+                name = temp;
         }
+
+        if(name.match(/^[\d]+$/))//ordinal
+            return ["", "["+name+"]"];
+        else if(name.match(rxIdentifier))//identifier
+            return [".", name];
+        else//map keys
+            return ["", "[\""+name.replace(/\\/g, "\\\\").replace(/"/g,"\\\"") + "\"]"];
+    },
+
+    copyName: function(row)
+    {
+        var value = this.getRowPathName(row);
+        value = value[1];//don't want the seperator
+        copyToClipboard(value);
+    },
+
+    copyPath: function(row)
+    {
+        var path = [];
+        for(var current = row; current ; current = getParentRow(current))
+            path = this.getRowPathName(current).concat(path);
+        path.splice(0,1);//don't want the first seperator
+        copyToClipboard(path.join(""));
     },
 
     copyProperty: function(row)
@@ -543,8 +582,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         if (name == "this")
             return;
 
-        var object = this.getRowObject(row);
-        object = this.getRealObject(object);
+        var object = this.getRealRowObject(row);
         if (object && !(object instanceof jsdIStackFrame))
         {
              // unwrappedJSObject.property = unwrappedJSObject
@@ -921,11 +959,18 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             var isWatch = hasClass(row, "watchRow");
             var isStackFrame = rowObject instanceof jsdIStackFrame;
 
+            items.push(
+                "-",
+                {label: "Copy Name",
+                    command: bindFixed(this.copyName, this, row) },
+                {label: "Copy Path",
+                    command: bindFixed(this.copyPath, this, row) }
+            );
+
             if (typeof(rowValue) == "string" || typeof(rowValue) == "number")
             {
                 // Functions already have a copy item in their context menu
                 items.push(
-                    "-",
                     {label: "CopyValue",
                         command: bindFixed(this.copyProperty, this, row) }
                 );
@@ -1702,6 +1747,17 @@ function getParentRow(row)
     {
         if (parseInt(row.getAttribute("level")) == level)
             return row;
+    }
+}
+
+function getPropertyValue(object, propName)
+{
+    if (object)
+    {
+        if (object instanceof jsdIStackFrame)
+            return Firebug.Debugger.evaluate(propName, this.context);
+        else
+            return object[propName];
     }
 }
 
