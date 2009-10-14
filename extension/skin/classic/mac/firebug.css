@@ -92,6 +92,9 @@ textbox[type="fbSearchBox"] > panel {
     margin-right: -12px;
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel.png) 16 50 24 12 / 16px 50px 24px 12px repeat;
 }
+#fbSearchOptionsPanel[position="after_end"] {
+    -moz-border-image: url(chrome://firebug/skin/mac/search-panel-down.png) 25 50 18 12 / 25px 50px 18px 12px repeat;
+}
 
 .fbsearch-options-label {
     color: #ffffff;

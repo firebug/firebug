@@ -884,8 +884,10 @@
         <method name="showOptions">
             <body><![CDATA[
                 var optionsPopup = document.getElementById("fbSearchOptionsPanel"),
-                    searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
-                optionsPopup.openPopup(this, "before_end", 0, 0, false, false);
+                    searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
+                    position = (Firebug.getPlacement() == "detached") ? "after_end" : "before_end";
+                optionsPopup.setAttribute("position", position);
+                optionsPopup.openPopup(this, position, 0, 0, false, false);
 
                 clearTimeout(this.blurTimeout);
                 delete this.blurTimeout;
