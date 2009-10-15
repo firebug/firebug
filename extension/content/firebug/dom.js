@@ -96,7 +96,8 @@ const DirTablePlate = domplate(Firebug.Rep,
             TD({"class": "memberLabelCell", style: "padding-left: $member.indent\\px",
                 role: 'presentation'},
                 DIV({"class": "memberLabel $member.type\\Label"},
-                    SPAN({}, "$member.name")
+                    SPAN({"class": "memberLabelPrefix"}, "$member.prefix"),
+                    SPAN("$member.name")
                 )
             ),
             TD({"class": "memberValueCell", role : 'presentation'},
@@ -314,12 +315,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getRealObject: function(object)
     {
-        // TODO: Move this to some global location
-        // TODO: Unwrapping should be centralized rather than sprinkling it around ad hoc.
-        // TODO: We might be able to make this check more authoritative with QueryInterface.
-        if (!object) return object;
-        if (object.wrappedJSObject) return object.wrappedJSObject;
-        return object;
+        return unwrapObject(object);
     },
 
     rebuild: function(update, scrollTop)
@@ -446,24 +442,24 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     getRowPropertyValue: function(row)
     {
         var object = this.getRealRowObject(row);
-        var propName = getRowName(row);
-        return getPropertyValue(object, propName);
+        return this.getObjectPropertyValue(object, row.domObject.name);
+    },
+
+    getObjectPropertyValue: function(object, propName)
+    {
+        if (object)
+        {
+            if (object instanceof jsdIStackFrame)
+                return Firebug.Debugger.evaluate(propName, this.context);
+            else
+                return object[propName];
+        }
     },
 
     getRowPathName: function(row)
     {
-        var name = getRowName(row);
+        var name = row.domObject.name;
         var seperator = "";
-
-        //getter we hope, but could be part of the name ~_~
-        if(name.lastIndexOf("get ", 0) == 0)
-        {
-            var temp = name.substr(4);
-            var object = this.getRealRowObject(row);
-            if (typeof(getPropertyValue(object, name)) == "undefined" &&
-                typeof(getPropertyValue(object, temp)) != "undefined")
-                name = temp;
-        }
 
         if(name.match(/^[\d]+$/))//ordinal
             return ["", "["+name+"]"];
@@ -1499,11 +1495,7 @@ function getMembers(object, level, context)  // we expect object to be user-leve
     try
     {
         var domMembers = getDOMMembers(object);
-
-        if (object.wrappedJSObject)
-            var insecureObject = object.wrappedJSObject;
-        else
-            var insecureObject = object;
+        var insecureObject = unwrapObject(object);
 
         for (var name in insecureObject)  // enumeration is safe
         {
@@ -1544,19 +1536,12 @@ function getMembers(object, level, context)  // we expect object to be user-leve
             }
             else
             {
-                var getterFunction = insecureObject.__lookupGetter__(name),
-                    setterFunction = insecureObject.__lookupSetter__(name),
-                    prefix = "";
-
-                if(getterFunction && !setterFunction)
-                    prefix = "get ";
-
                 if (name in domMembers)
-                    addMember(object, "dom", domProps, (prefix+name), val, level, domMembers[name], context);
+                    addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
                 else if (name in domConstantMap)
-                    addMember(object, "dom", domConstants, (prefix+name), val, level, 0, context);
+                    addMember(object, "dom", domConstants, name, val, level, 0, context);
                 else
-                    addMember(object, "user", userProps, (prefix+name), val, level, 0, context);
+                    addMember(object, "user", userProps, name, val, level, 0, context);
             }
         }
     }
@@ -1709,6 +1694,11 @@ function addMember(object, type, props, name, value, level, order, context)
         }
     }
 
+    // If the property is implemented using a getter function (and there is no setter
+    // implemented) use a "get" prefix that is displayed in the UI.
+    var o = unwrapObject(object);
+    member.prefix = (o.__lookupGetter__(name) && !o.__lookupSetter__(name)) ? "get " : "";
+
     props.push(member);
     return member;
 }
@@ -1750,17 +1740,6 @@ function getParentRow(row)
     }
 }
 
-function getPropertyValue(object, propName)
-{
-    if (object)
-    {
-        if (object instanceof jsdIStackFrame)
-            return Firebug.Debugger.evaluate(propName, this.context);
-        else
-            return object[propName];
-    }
-}
-
 function getPath(row)
 {
     var name = getRowName(row);
@@ -1792,6 +1771,20 @@ function findRow(parentNode, object)
     }
 
     return row;
+}
+
+function unwrapObject(object)
+{
+    // TODO: Move this to some global location
+    // TODO: Unwrapping should be centralized rather than sprinkling it around ad hoc.
+    // TODO: We might be able to make this check more authoritative with QueryInterface.
+    if (!object)
+        return object;
+
+    if (object.wrappedJSObject)
+        return object.wrappedJSObject;
+
+    return object;
 }
 
 // ************************************************************************************************
