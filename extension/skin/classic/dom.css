@@ -30,6 +30,10 @@
     background-color: #FFFFFF;
 }
 
+.memberLabelPrefix {
+    color: gray;
+}
+
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 /* Breakpoints */
 
