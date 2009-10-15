@@ -1964,6 +1964,20 @@ this.getCurrentStackTrace = function(context)
     return trace;
 };
 
+this.getCurrentJSDStackDump = function()
+{
+    var trace = null;
+
+    Firebug.Debugger.halt(function(frame)
+    {
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentJSDStackDump frame:", frame);
+        trace = FBL.getJSDStackDump(frame);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentJSDStackDump trace:", trace);
+    });
+
+    return trace;
+};
+
 this.getStackTrace = function(frame, context)
 {
     var trace = new this.StackTrace();
@@ -2040,6 +2054,15 @@ this.getStackDump = function()
     var lines = [];
     for (var frame = Components.stack; frame; frame = frame.caller)
         lines.push(frame.filename + " (" + frame.lineNumber + ")");
+
+    return lines.join("\n");
+};
+
+this.getJSDStackDump = function(newestFrame)
+{
+    var lines = [];
+    for (var frame = newestFrame; frame; frame = frame.callingFrame)
+        lines.push(frame.script.fileName + " (" + frame.line + ")");
 
     return lines.join("\n");
 };
