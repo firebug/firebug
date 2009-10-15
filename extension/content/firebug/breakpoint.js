@@ -693,7 +693,16 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             str += cropString(cause.prevValue, 40) +" -> ";
         if (cause.newValue)
             str += cropString(cause.newValue, 40);
-        return str.length ? str + " in " : "";  // the element will be rendered after the diff
+
+        if (!str.length)
+            return "";
+
+        if (!cause.target)
+            return str;
+
+        // the element will be rendered after the diff
+        // xxxHonza: localization
+        return str + " in ";
     },
 
     getTitle: function(cause)

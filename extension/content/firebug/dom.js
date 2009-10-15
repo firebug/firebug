@@ -675,7 +675,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            breakpoints.addBreakpoint(object, name);
+            breakpoints.addBreakpoint(object, name, this.context);
             row.setAttribute("breakpoint", "true");
         }
     },
@@ -1883,8 +1883,9 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function Breakpoint(object, propName)
+function Breakpoint(object, propName, context)
 {
+    this.context = context;
     this.propName = propName;
     this.object = object;
     this.checked = true;
@@ -1905,7 +1906,16 @@ Breakpoint.prototype =
                 // XXXjjb Beware: in playing with this feature I hit too much recursion multiple times with console.log
                 // TODO Do something cute in the UI with the error bubble thing
                 if (self.checked)
+                {
+                    self.context.breakingCause = {
+                        title: $STR("dom.Break On Property"),
+                        message: cropString(prop, 200),
+                        prevValue: oldval,
+                        newValue: newval
+                    };
+
                     Firebug.Debugger.breakNow();
+                }
                 return newval;
             });
         }
@@ -1944,9 +1954,9 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
     name: "domBreakpoints",
     title: $STR("dom.label.DOM Breakpoints"),
 
-    addBreakpoint: function(object, propName)
+    addBreakpoint: function(object, propName, context)
     {
-        var bp = new Breakpoint(object, propName);
+        var bp = new Breakpoint(object, propName, context);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
     },
