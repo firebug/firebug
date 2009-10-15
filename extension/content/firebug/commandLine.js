@@ -290,7 +290,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
         }
 
-        this.evaluate(expr, context, null, null, FBL.bind(Firebug.Console.log, Firebug.Console));
+        var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
+        this.evaluate(expr, context, null, null, goodOrBad);
     },
 
     enterMenu: function(context)
