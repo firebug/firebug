@@ -78,7 +78,7 @@
 
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
-                  oncommand="Firebug.toggleBar(true); FirebugChrome.select(document.popupNode, 'html'); "/>
+                  oncommand="Firebug.toggleBar(true); Firebug.chrome.select(document.popupNode, 'html'); "/>
     </popup>
 
     <!-- Firefox View menu -->
