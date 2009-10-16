@@ -150,32 +150,3 @@
     margin-left: -1px;
     border-left: 1px solid #999999;
 }
-
-#firebugQuickInfoBox {
-    position: fixed;
-    top: 5px;
-    -moz-box-shadow: 5px 5px 5px #777;
-    background-color: #FFF;
-    color: #000;
-    padding: 5px;
-    width: 200px;
-    border: 1px solid #000;
-    font-family: Monaco, monospace;
-    font-size: 11px;
-    opacity: 0.85;
-    z-index: 2147483647;
-}
-
-.firefoxQuickInfoBoxTitle {
-    font-family: Lucida Grande, sans-serif;
-    font-size: 11px;
-    font-weight: bold;
-}
-
-.firefoxQuickInfoName {
-    color: DarkGreen;
-}
-
-.firefoxQuickInfoValue {
-    color: DarkBlue;
-}

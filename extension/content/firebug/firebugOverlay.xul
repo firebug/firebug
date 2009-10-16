@@ -97,6 +97,9 @@
         <popup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
+        <panel id="fbQuickInfoPanel" width="210" noautohide="true">
+            <vbox></vbox>
+        </panel>
     </popupset>
 
     <!-- Main UI -->

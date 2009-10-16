@@ -17,7 +17,7 @@ const highlightCSS = "chrome://firebug/content/highlighter.css";
 var boxModelHighlighter = null,
     frameHighlighter = null,
     popupHighlighter = null,
-    mx, my, showQuickInfoBox;
+    mx, my;
 
 // ************************************************************************************************
 
@@ -368,7 +368,7 @@ Firebug.Inspector = extend(Firebug.Module,
             this.defaultHighlighter = value ? getHighlighter("boxModel") : getHighlighter("frame");
             }
         else if(name == "showQuickInfoBox")
-            showQuickInfoBox = value;
+            quickInfoBox.boxEnabled = value;
     },
 
     getObjectByURL: function(context, url)
@@ -584,102 +584,116 @@ function getImageMapHighlighter(context)
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    function showQuickInfo(element, removeInfo)
+quickInfoBox =
+{
+    boxEnabled: undefined,
+    
+    popupVisible: false,
+
+    show: function(element, removeInfo)
     {
-        if (!showQuickInfoBox || !element)
+        if (!this.boxEnabled || !element)
             return;
     
-        if (removeInfo)
-        {
-            element.removeChild(element.ownerDocument.getElementById('firebugQuickInfoBox'));
-            return;
-        }
-
-        var i, attrib, value,
-            text = '',
-            divContent = '',
-            body = getNonFrameBody(element),
-            doc = body.ownerDocument,
-            cs = doc.defaultView.getComputedStyle(element, null),
-            qidiv = doc.getElementById('firebugQuickInfoBox'),
-            domAttribs = ['id', 'name', 'offsetWidth', 'offsetHeight'],
-            cssAttribs = ['position', 'cssText'],
+        var vbox, lab,
+            needsTitle = false,
+            needsTitle2 = false,
+            _this = this,
+            domAttribs = ['nodeName', 'id', 'name', 'offsetWidth', 'offsetHeight'],
+            cssAttribs = ['position'],
             compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
                            'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
                            'fontFamily', 'cssFloat', 'display', 'visibility'],
-            domAttribsLen = domAttribs.length,
-            cssAttribsLen = cssAttribs.length,
-            compAttribsLen = compAttribs.length;
+            XULQIP = $('fbQuickInfoPanel');
 
-        if(!qidiv)
+        if (!this.popupVisible)
         {
-            qidiv = doc.createElement('div');
-            qidiv.id = 'firebugQuickInfoBox';
-            qidiv.style.left = '5px';
-            qidiv.addEventListener("mousemove", function(){moveQuickInfoBox(qidiv);}, true);
-            qidiv.firebugIgnore = true;
-            body.appendChild(qidiv);
+            XULQIP.hidePopup();
+            XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
+            XULQIP.addEventListener("mouseover", function(){_this.move();}, true);
+            this.popupVisible = true;
         }
-        else
-            qidiv.style.display = 'block';
 
-        for (i = 0; i < domAttribsLen; i++)
-        {
-            value = element[domAttribs[i]];
-            if (value)
-                text += '<span class="firefoxQuickInfoName">' + domAttribs[i] + '</span><span class="firefoxQuickInfoValue">: ' + value + '</span><br />';
-        }
+        XULQIP.removeChild(XULQIP.firstChild);
+        vbox = document.createElement("vbox");
+        XULQIP.appendChild(vbox);
         
-        for (i = 0; i < cssAttribsLen; i++)
+        needsTitle = this.addRows(element, vbox, domAttribs);
+        needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
+
+        if (needsTitle || needsTitle2)
         {
-            value = element.style[cssAttribs[i]];
-            if (value)
-                text += '<span class="firefoxQuickInfoName">' + cssAttribs[i] + '</span><span class="firefoxQuickInfoValue">: ' + value + '</span><br />';
+            lab = document.createElement("label");
+            lab.setAttribute("class", "fbQuickInfoBoxTitle");
+            lab.setAttribute("value", "Quick Info");
+            vbox.insertBefore(lab, vbox.firstChild);
         }
 
-        if (text.length > 0)
-            divContent = '<span class="firefoxQuickInfoBoxTitle">Quick Info</span><br />' + text;
+        lab = document.createElement("label");
+        lab.setAttribute("class", "fbQuickInfoBoxTitle");
+        lab.setAttribute("value", "Computed Style");
+        vbox.appendChild(lab);
 
-        text = '';
-        
-        for (i = 0; i < compAttribsLen; i++)
-        {
-            value = cs.getPropertyValue(compAttribs[i]);
-            if (value)
-            {
-                if (/rgb\(\d+,\s\d+,\s\d+\)/.test(value)) value = rgbToHex(value);
-                text += '<span class="firefoxQuickInfoName">' + compAttribs[i] + '</span><span class="firefoxQuickInfoValue">: ' + value + '</span><br />';
-            }
-        }
-
-        if (text.length > 0)
-        {
-            if (divContent.length > 0) divContent += '<br />';
-            divContent += '<span class="firefoxQuickInfoBoxTitle">Computed Style</span><br />' + text;        
-        }
-        
-        if (divContent.length>0)
-            qidiv.innerHTML = divContent;
-        else
-            qidiv.style.display = 'none';
-    }
+        this.addRows(element, vbox, compAttribs, true);
+    },
     
-    function moveQuickInfoBox(qidiv)
+    hide: function()
     {
-        if (qidiv)
+        this.popupVisible = false;
+        XULQIP = $('fbQuickInfoPanel');
+        XULQIP.hidePopup();
+    },
+
+    move: function()
+    {
+        var XULQIP = $('fbQuickInfoPanel');
+
+        XULQIP.hidePopup();
+
+        if (mx < XULQIP.clientWidth + 5)
+            XULQIP.openPopup($('content').tabContainer, "after_end", -5, 5, true);
+        else
+            XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
+    },
+    
+    addRows: function(domBase, vbox, attribs, computedStyle)
+    {
+        var i, cs, desc, hbox, lab, value,
+            needsTitle = false,
+            attribsLen = attribs.length;
+
+        for (i = 0; i < attribsLen; i++)
         {
-            if (mx < qidiv.clientWidth + 5 && my < qidiv.clientHeight + 5)
+            if(computedStyle)
             {
-                qidiv.style.left = '';
-                qidiv.style.right = '5px';
+                cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
+                value = cs.getPropertyValue(attribs[i]);
+                
+                if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
+                    value = rgbToHex(value);
             }
             else
+                value = domBase[attribs[i]];
+
+            if (value)
             {
-                qidiv.style.left = '5px';
-                qidiv.style.right = '';
+                needsTitle = true;
+                hbox = document.createElement("hbox");
+                lab = document.createElement("label");
+                lab.setAttribute("class", "fbQuickInfoName");
+                lab.setAttribute("value", attribs[i]);
+                hbox.appendChild(lab);
+                desc = document.createElement("description");
+                desc.setAttribute("class", "fbQuickInfoValue");
+                desc.appendChild(document.createTextNode(": " + value));
+                hbox.appendChild(desc);
+                vbox.appendChild(hbox);
             }
         }
+        
+        return needsTitle;
     }
+}
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -714,7 +728,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
 
         if(element.tagName !== "AREA")
         {
-            showQuickInfo(element);
+            quickInfoBox.show(element);
         
             var nodes = this.getNodes(context, element);
 
@@ -773,7 +787,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             for (var edge in nodes)
                 body.removeChild(nodes[edge]);
                 
-            showQuickInfo(body, true);
+            quickInfoBox.hide();
         }
     },
 
@@ -848,7 +862,7 @@ BoxModelHighlighter.prototype =
 
         if(element.tagName !== "AREA")
         {
-            showQuickInfo(element);
+            quickInfoBox.show(element);
             context.highlightFrame = highlightFrame;
 
             if (highlightFrame)
@@ -1003,7 +1017,7 @@ BoxModelHighlighter.prototype =
             }
         }
         
-        showQuickInfo(body, true);
+        quickInfoBox.hide();
     },
 
     getNodes: function(context)
