@@ -606,9 +606,14 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             Firebug.Console.disabledPanelPage.show(this);
         }
 
-        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-            $STR("console.Break On All Errors"));
+        // xxxHonza: shouldn't the breakOnErrors be context related?
+        var breakable = Firebug.breakOnErrors ? "false" : "true";
+        if (!enabled)
+            breakable = "disabled";
+
+        Firebug.Breakpoint.updateResume(this.context, breakable,
+            $STR("console.Break On All Errors"),
+            $STR("console.Disable Break On All Errors"));
     },
 
     enablePanel: function(module)
@@ -720,7 +725,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
 
-        Firebug.Breakpoint.resume(this.context, $STR("console.Break On All Errors"),
+        Firebug.Breakpoint.updateResume(this.context,
+            Firebug.breakOnErrors ? "false" : "true",
+            $STR("console.Break On All Errors"),
             $STR("console.Disable Break On All Errors"));
     },
 

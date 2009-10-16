@@ -455,9 +455,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (enabled)
         {
             Firebug.NetMonitor.disabledPanelPage.hide(this);
-            if (!this.context.stopped)
-                Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-
             Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
         }
         else
@@ -466,11 +463,15 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             this.table = null;
         }
 
+        var breakable = this.context.breakOnXHR ? "false" : "true";
+        if (!enabled)
+            breakable = "disabled";
+
+        Firebug.Breakpoint.updateResume(this.context, breakable,
+            $STR("net.Break On XHR"), $STR("net.Disable Break On XHR"));
+
         if (!enabled)
             return;
-
-        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-            $STR("net.Break On XHR"));
 
         if (!this.filterCategory)
             this.setFilter(Firebug.netFilterCategory);
@@ -799,8 +800,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         this.context.breakOnXHR = !this.context.breakOnXHR;
 
-        Firebug.Breakpoint.resume(this.context, $STR("net.Break On XHR"),
-            $STR("net.Disable Break On XHR"));
+        var breakable = this.context.breakOnXHR ? "false" : "true";
+        Firebug.Breakpoint.updateResume(this.context, breakable,
+            $STR("net.Break On XHR"), $STR("net.Disable Break On XHR"));
     },
 
     // Support for info tips.

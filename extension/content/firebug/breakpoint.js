@@ -7,9 +7,9 @@ FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 
-Firebug.Breakpoint =
+Firebug.Breakpoint = extend(Firebug.Module,
 {
-    resume: function(context, tooltip, disableTooltip)
+    updateResume: function(context, breakable, tooltip, disableTooltip)
     {
         if (FBTrace.DBG_BP)
             FBTrace.sysout("breakpoint.resume; " + context.getName());
@@ -17,19 +17,26 @@ Firebug.Breakpoint =
         Firebug.Debugger.syncCommands(context);
 
         var chrome = Firebug.chrome;
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+        chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", breakable);
+
         if (breakable == "true")
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "false");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", disableTooltip);
-        }
-        else
-        {
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
             chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", tooltip);
-        }
+        else if (breakable == "false")
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", disableTooltip);
+        else
+            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", "");
     },
-};
+
+    showPanel: function(browser, panel)
+    {
+        var chrome = Firebug.chrome;
+
+        // By default the Resume (break on) button is disabled.
+        // It's up to the selected panel whether it's utilized.
+        chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
+        chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", "");
+    }
+});
 
 // ************************************************************************************************
 
@@ -797,6 +804,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
 
 Firebug.registerPanel(Firebug.Breakpoint.BreakpointsPanel);
 Firebug.registerRep(Firebug.Breakpoint.BreakpointRep);
+Firebug.registerModule(Firebug.Breakpoint);
 
 // ************************************************************************************************
 }});

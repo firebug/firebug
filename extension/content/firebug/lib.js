@@ -331,6 +331,19 @@ this.addScript = function(doc, id, src)
 }
 
 // ************************************************************************************************
+
+this.isAncestorIgnored = function(node)
+{
+    for (var parent = node; parent; parent = parent.parentNode)
+    {
+        if (parent.firebugIgnore)
+            return true;
+    }
+
+    return false;
+}
+
+// ************************************************************************************************
 // Localization
 
 /*

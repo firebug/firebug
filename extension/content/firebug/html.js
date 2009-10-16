@@ -785,9 +785,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 }, this));
             }
 
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-                $STR("html.Break On Mutate"));
+            Firebug.Breakpoint.updateResume(this.context,
+                this.context.breakOnAnyMutate ? "false" : "true",
+                $STR("html.Break On Mutate"),
+                $STR("html.Disable Break On Mutate"));
 
             restoreObjects(this, state);
         }
@@ -1598,13 +1599,19 @@ Firebug.HTMLModule.MutationBreakpoints =
     {
         context.breakOnAnyMutate = !context.breakOnAnyMutate;
 
-        Firebug.Breakpoint.resume(context, $STR("html.Break On Mutate"),
+        Firebug.Breakpoint.updateResume(context,
+            context.breakOnAnyMutate ? "false" : "true",
+            $STR("html.Break On Mutate"),
             $STR("html.Disable Break On Mutate"));
     },
 
     breakOnAnyMutate: function(event, context, type)
     {
         if (!context.breakOnAnyMutate)
+            return false;
+
+        // Ignore changes in trees marked with firebugIgnore.
+        if (isAncestorIgnored(event.target))
             return false;
 
         context.breakOnAnyMutate = false;
