@@ -249,6 +249,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
             window.addEventListener("DOMContentLoaded", onContentLoadHandler, true);
         }
+
         if (Firebug.NetMonitor.isAlwaysEnabled())
             monitorContext(context);
 
@@ -292,14 +293,23 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-        if (context.netProgress)
-            context.netProgress.loaded = true;
+        var netProgress = context.netProgress;
+        if (netProgress)
+            netProgress.loaded = true;
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
 
         var tabId = Firebug.getTabIdForWindow(context.browser.contentWindow);
         delete contexts[tabId];
+
+        // Set Page title and id into the document object.
+        if (netProgress.files.length > 0)
+        {
+            var doc = netProgress.files[0].document;
+            doc.id = context.uid;
+            doc.title = context.getTitle();
+        }
     },
 
     onEnabled: function(context)
@@ -415,10 +425,11 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         while (prevTableBody.firstChild)
         {
-            if (hasClass(prevTableBody.firstChild, "netRow", "hasHeaders"))
-                tbody.insertBefore(prevTableBody.firstChild, lastRow);
+            var row = prevTableBody.firstChild;
+            if (hasClass(row, "netRow", "hasHeaders"))
+                tbody.insertBefore(row, lastRow);
             else
-                prevTableBody.removeChild(prevTableBody.firstChild);
+                prevTableBody.removeChild(row);
         }
 
         scrollToBottom(this.panelNode);
@@ -3304,7 +3315,11 @@ NetCacheListener.prototype =
  * This object is created for main page document and for every embedded document (iframe)
  * for which a request is made.
  */
-function NetDocument() { }
+function NetDocument()
+{
+    this.id = 0;
+    this.title = "";
+}
 
 NetDocument.prototype =
 {
