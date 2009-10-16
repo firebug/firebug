@@ -287,7 +287,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.showContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.showContext; ");
+            FBTrace.sysout("net.showContext; " + context.getName());
     },
 
     loadedContext: function(context)
@@ -710,22 +710,14 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!file.isXHR)
             return;
 
-        var row = file.row;
-
         // Create new or remove an existing breakpoint.
         var breakpoints = this.context.netProgress.breakpoints;
         var url = file.getFileURL();
         var bp = breakpoints.findBreakpoint(url);
         if (bp)
-        {
-            row.removeAttribute("breakpoint");
             breakpoints.removeBreakpoint(url);
-        }
         else
-        {
             breakpoints.addBreakpoint(url);
-            row.setAttribute("breakpoint", "true");
-        }
 
         this.enumerateRequests(function(currFile)
         {
