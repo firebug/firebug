@@ -538,9 +538,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
 
         if (previousSibling)  // then we are walking
-            return this.getNextSibling(previousSibling);  // may return null, meaning done with iteration.
-
-        var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
+            var child = this.getNextSibling(previousSibling);  // may return null, meaning done with iteration.
+        else
+            var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
         if (Firebug.showWhitespaceNodes)  // then the index is true to the node list
             return child;
