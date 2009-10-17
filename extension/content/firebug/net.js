@@ -2825,19 +2825,7 @@ NetProgress.prototype =
         // breakOnXHR flag.
         this.context.breakOnXHR = false;
 
-        Firebug.Debugger.halt(function(frame)
-        {
-            for (; frame && frame.isValid; frame = frame.callingFrame)
-            {
-                var fileName = frame.script.fileName;
-                if (fileName && fileName.indexOf("chrome://firebug/") != 0 &&
-                    fileName.indexOf("/components/firebug-") == -1)
-                    break;
-            }
-
-            if (frame)
-                Firebug.Debugger.onBreak(frame, 3);
-        });
+        Firebug.Debugger.breakNow();
     },
 
     completedFile: function completedFile(request, time)
