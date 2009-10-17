@@ -61,6 +61,11 @@ panelStatus {
     visibility: visible;
 }
 
+/* Lightup the text, eg on the Script tab when stopped on a breakpoint */
+panelTab[highlight="true"] {
+    color: #FF9933;
+}
+
 /************************************************************************************************/
 /* Mini-menu on the panel tab */
 
@@ -96,8 +101,8 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 /* current tab */
 .useA11y panelTab[selected="true"],
-/* Firebug  Menu */  
-.useA11y #fbFirebugMenu, 
+/* Firebug  Menu */
+.useA11y #fbFirebugMenu,
 /* Status bar icon*/
 #fbStatusBar.useA11y {
     -moz-user-focus: normal;
@@ -119,15 +124,15 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 .useA11y .innerToolbar *[collapsed="false"] ~ *.noTabStop toolbarbutton,
 .useA11y .innerToolbar *[collapsed="false"] ~ toolbarbutton.noTabStop,
 /*fbNetButtonsFilter situation, added extra id for specificity*/
-.useA11y #fbToolbox .innerToolbar toolbarbutton:not([collapsed="true"]) ~ *.noTabStop toolbarbutton { 
+.useA11y #fbToolbox .innerToolbar toolbarbutton:not([collapsed="true"]) ~ *.noTabStop toolbarbutton {
     -moz-user-focus: ignore;
 }
 
 /* Buttons in a group with .hasTabOrder (this class is briefly added during right/left arrow key event handlers in a11y.js.*/
 .innerToolbar.hasTabOrder toolbarbutton {
-    -moz-user-focus: normal !important;	
+    -moz-user-focus: normal !important;
 }
-	
+
 .useA11y #fbPanelBar1 toolbarbutton:focus,
 .useA11y #fbPanelBar1 textbox[focused],
 #fbStatusBar.useA11y:focus,

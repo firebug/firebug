@@ -2328,7 +2328,21 @@ Firebug.Panel =
     {
         var url = this.getObjectLocation(object);
         return FBL.splitURLBase(url);
-    }
+    },
+
+    /*
+     *  UI signal that a tab needs attention, eg Script panel is currently stopped on a breakpoint
+     *  @param: show boolean, true turns on.
+     */
+    highlight: function(show)
+    {
+        var tab = this.getTab();
+        if (show)
+            tab.setAttribute("highlight", "true");
+        else
+            tab.removeAttribute("highlight");
+    },
+
 };
 
 //************************************************************************************************

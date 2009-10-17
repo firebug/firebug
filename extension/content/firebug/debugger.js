@@ -649,6 +649,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (panel && panel == Firebug.chrome.getSelectedPanel())
                     panel.showNoStackFrame(); // unhighlight and remove toolbar-status line
 
+                if (panel)
+                    panel.highlight(false);
+
                 context.executingSourceFile = null;
                 delete context.breakLineNumber;
             }
@@ -2508,6 +2511,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.panelSplitter.collapsed = !enabled;
         this.sidePanelDeck.collapsed = !enabled;
 
+        this.highlight(this.context.stopped);
+
         if (enabled)
         {
             Firebug.Debugger.disabledPanelPage.hide(this);
@@ -2566,6 +2571,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
             this.showToolbarButtons("fbDebuggerButtons", false);
         } // else leave the buttons so we can see that we are stopped
+
+        this.highlight(this.context.stopped);
 
         this.showToolbarButtons("fbScriptButtons", false);
         var panelStatus = Firebug.chrome.getPanelStatusElements();
