@@ -667,6 +667,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     show: function(state)
     {
+        Firebug.Inspector.stopInspecting(true);
+
         this.showToolbarButtons("fbCSSButtons", true);
 
         if (this.context.loaded && !this.location)
