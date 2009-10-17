@@ -2851,11 +2851,7 @@ var QuitApplicationGrantedObserver =
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver start xxxxxxxxxxxxxxx\n");
-        fbs.disableDebugger();
-        fbs.shutdown();
-        if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver end xxxxxxxxxxxxxxxxx\n");
+            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationGrantedObserver "+topic+"  start xyyxxxxxxxxxxxxxx\n");
     }
 };
 var QuitApplicationRequestedObserver =
@@ -2863,7 +2859,7 @@ var QuitApplicationRequestedObserver =
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("FirebugService QuitApplicationRequestedObserver\n");
+            FBTrace.sysout("FirebugService QuitApplicationRequestedObserver "+topic);
     }
 };
 var QuitApplicationObserver =
@@ -2871,8 +2867,12 @@ var QuitApplicationObserver =
     observe: function(subject, topic, data)
     {
         if (FBTrace.DBG_FBS_ERRORS)
-            FBTrace.sysout("FirebugService QuitApplicationObserver\n");
+            FBTrace.sysout("FirebugService QuitApplicationObserver "+topic);
+        fbs.disableDebugger();
+        fbs.shutdown();
         fbs = null;
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("xxxxxxxxxxxx FirebugService QuitApplicationObserver "+topic+" end xxxxxxxxxxxxxxxxx\n");
     }
 };
 
