@@ -64,6 +64,8 @@ Firebug.CommandLine = extend(Firebug.Module,
             {
                 result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
             }
+
+            context.invalidatePanels('dom', 'html');
         }
         catch (exc)  // XXX jjb, I don't expect this to be taken, the try here is for the finally
         {
@@ -110,8 +112,6 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         var event = document.createEvent("Events");
         event.initEvent("firebugCommandLine", true, false);
-
-
         element.setAttribute("methodName", "evaluate");
 
         expr = expr.toString();
