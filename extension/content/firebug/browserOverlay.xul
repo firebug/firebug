@@ -78,6 +78,7 @@
 
         <menuseparator/>
         <menuitem id="menu_firebugInspect" label="&firebug.InspectElement;"
+                  class="menuitem-iconic" image="chrome://firebug/skin/Templarian_inspector.png"
                   oncommand="Firebug.toggleBar(true); Firebug.chrome.select(document.popupNode, 'html'); "/>
     </popup>
 
