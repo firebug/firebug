@@ -151,6 +151,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         Firebug.Debugger.halt(function(frame)
         {
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName, frame);
+
             for (; frame && frame.isValid; frame = frame.callingFrame)
             {
                 var fileName = frame.script.fileName;
