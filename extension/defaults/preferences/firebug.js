@@ -157,6 +157,7 @@ pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activi
 //Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");
 pref("extensions.firebug.key.shortcut.toggleInspecting", "accel shift c");
+pref("extensions.firebug.key.shortcut.toggleQuickInfoBox", "accel shift i");
 pref("extensions.firebug.key.shortcut.toggleProfiling", "accel shift p");
 pref("extensions.firebug.key.shortcut.focusCommandLine", "accel shift l");
 pref("extensions.firebug.key.shortcut.focusFirebugSearch", "accel shift k");

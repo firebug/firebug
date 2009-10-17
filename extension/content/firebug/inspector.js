@@ -382,6 +382,16 @@ Firebug.Inspector = extend(Firebug.Module,
         var elements = getElementsByXPath(context.window.document, xpath);
         if (elements.length)
             return elements[0];*/
+    },
+    
+    toggleQuickInfoBox: function()
+    {
+        if(quickInfoBox.popupVisible)
+            quickInfoBox.hide();
+            
+        quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
+            
+        Firebug.setPref(Firebug.prefDomain, "showQuickInfoBox", quickInfoBox.boxEnabled);
     }
 });
 
@@ -590,7 +600,7 @@ quickInfoBox =
     
     popupVisible: false,
 
-    show: function(element, removeInfo)
+    show: function(element)
     {
         if (!this.boxEnabled || !element)
             return;
@@ -643,7 +653,7 @@ quickInfoBox =
         XULQIP = $('fbQuickInfoPanel');
         XULQIP.hidePopup();
     },
-
+    
     move: function()
     {
         var XULQIP = $('fbQuickInfoPanel');
