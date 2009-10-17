@@ -721,7 +721,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         return true;
     },
 
-    resume: function()
+    breakOnAny: function()
     {
         Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
 

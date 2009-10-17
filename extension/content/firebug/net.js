@@ -796,7 +796,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.table = null;
     },
 
-    resume: function()
+    breakOnAny: function()
     {
         this.context.breakOnXHR = !this.context.breakOnXHR;
 

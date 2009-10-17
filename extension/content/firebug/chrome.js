@@ -1151,26 +1151,19 @@ top.FirebugChrome =
             "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
     },
 
-    resume: function(context)
+    breakOnAny: function(context)
     {
         if (!context)
         {
-            FBTrace.sysout("Firebug chrome: resume with no context??");
+            FBTrace.sysout("Firebug chrome: breakOnAny with no context??");
             return;
         }
 
         var panel = panelBar1.selectedPanel;
-        if (!panel)
+        if (!panel || !panel.breakOnAny)
             return;
 
-        if (!context.stopped && panel.resume)
-        {
-            panel.resume();
-            return;
-        }
-
-        // Use debugger as the default handler.
-        Firebug.Debugger.resume(context);
+        panel.breakOnAny(context);
     }
 };
 

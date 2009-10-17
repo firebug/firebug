@@ -166,7 +166,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
 }
 
 .fbsearch-options-buttons {
-    
+
 }
 
 textbox[type="fbSearchBox"] > panel {
@@ -217,57 +217,17 @@ textbox[type="fbSearchBox"] > panel {
     -moz-image-region: rect(auto,auto,auto,auto) !important;
 }
 
-/*
-fbBreakOnNextButton has four states:
-   disabled true: program control, no UI
-   breakable true: default.
-   breakable false: breakOnNext is armed.
-   breakable off: we are stopped in debugger. always goes to true
-
-   disabled true -> false: program control. if (stopped) breakable off, else breakable true
-   breakable true -> false: onBreakingNext
-   true -> off: syncCommands with context.stopped true
-   false -> true: resume w/!context.stopped and !breakable
-   false -> off: syncCommands with context.stopped true
-   off -> true:  resume w/context.stopped
-   off -> false: not allowed
-fbBreakOnNextButton
-*/
-#fbContinueButton[breakable="off"],
-#fbBreakOnNextButton[breakable="off"] {
+#fbContinueButton {
     list-style-image: url(chrome://firebug/skin/continue.png);
     padding-right: 2px;
 }
-/*
-#fbContinueButton:hover:active,
-#fbBreakOnNextButton:hover:active {
+
+#fbContinueButton:hover:active {
     list-style-image: url(chrome://firebug/skin/continueActive.png);
 }
-*/
-#fbContinueButton[breakable="disabled"],
-#fbBreakOnNextButton[breakable="disabled"] {
-    list-style-image: url(chrome://firebug/skin/breakNextDisabled.png) !important;
-}
 
-
-#fbContinueButton[breakable="true"],
-#fbBreakOnNextButton[breakable="true"] {
-    list-style-image: url(chrome://firebug/skin/breakNext.png);
-    padding-right: 2px;
-}
-#fbContinueButton:hover:active[breakable="true"],
-#fbBreakOnNextButton:hover:active[breakable="true"] {
-    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
-    padding-right: 2px;
-}
-#fbContinueButton:hover:active[breakable="false"],
-#fbBreakOnNextButton:hover:active[breakable="false"] {
-    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
-    padding-right: 2px;
-}
-#fbContinueButton[breakable="false"],
-#fbBreakOnNextButton[breakable="false"] {
-    list-style-image: url(chrome://firebug/skin/breakNextArmed.png);
+#fbContinueButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/continueDisabled.png);
     padding-right: 2px;
 }
 
@@ -321,6 +281,29 @@ fbBreakOnNextButton
 
 #fbBreakOnErrors[checked="true"] {
     list-style-image: url(chrome://firebug/skin/breakErrorsOn.png);
+}
+
+/********************************************************************************/
+
+#fbBreakOnNextButton[breakable="disabled"] {
+    list-style-image: url(chrome://firebug/skin/breakNextDisabled.png) !important;
+}
+
+#fbBreakOnNextButton[breakable="true"] {
+    list-style-image: url(chrome://firebug/skin/breakNext.png);
+    padding-right: 2px;
+}
+#fbBreakOnNextButton:hover:active[breakable="true"] {
+    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
+    padding-right: 2px;
+}
+#fbBreakOnNextButton:hover:active[breakable="false"] {
+    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
+    padding-right: 2px;
+}
+#fbBreakOnNextButton[breakable="false"] {
+    list-style-image: url(chrome://firebug/skin/breakNextArmed.png);
+    padding-right: 2px;
 }
 
 /************************************************************************************************/

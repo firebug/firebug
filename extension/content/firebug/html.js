@@ -595,9 +595,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Break on Mutate
 
-    resume: function()
+    breakOnAny: function()
     {
-        Firebug.HTMLModule.MutationBreakpoints.resume(this.context);
+        Firebug.HTMLModule.MutationBreakpoints.breakOnAny(this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1595,7 +1595,7 @@ Firebug.HTMLModule.DebuggerListener =
 
 Firebug.HTMLModule.MutationBreakpoints =
 {
-    resume: function(context)
+    breakOnAny: function(context)
     {
         context.breakOnAnyMutate = !context.breakOnAnyMutate;
 

@@ -274,24 +274,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return RETURN_CONTINUE;
     },
 
+
     resume: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
-
-        if (!context.stopped) // then resume means breakOnNext
-        {
-            try
-            {
-                this.breakOnNext(context);
-            }
-            catch (exc)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("debugger.resume breakOnNext FAILS "+exc, exc);
-            }
-            return;
-        }
 
         // in fbs we stopStepping() so allow breakOnNext again
         Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");
@@ -303,28 +290,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
-    },
-
-    breakOnNext: function(context)
-    {
-        if (!context || !Firebug.chrome)
-            return;
-
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-
-        if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
-            FBTrace.sysout("debugger.breakOnNext "+context.getName()+ " breakable: "+breakable, breakable);
-
-        if (breakable == "disabled")
-            return;
-        else if (breakable == "true")
-            this.suspend(context);  // arm breakOnNext
-        else {
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
-        }
-        this.syncCommands(context);
-        return;
     },
 
     onBreakingNext: function(debuggr, context)
@@ -678,8 +643,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.stopped)
         {
             chrome.setGlobalAttribute("fbDebuggerButtons", "stopped", "true");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "off");
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("Continue"));
+            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "false");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "false");
@@ -690,15 +654,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             chrome.setGlobalAttribute("cmd_stepOver", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepInto", "disabled", "true");
             chrome.setGlobalAttribute("cmd_stepOut", "disabled", "true");
-
-            var breakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
-            if (breakable == "true")
-                chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext",
-                    $STR("script.Break On Next"));
-
-            var panel = chrome.getSelectedPanel();
-            if (panel && panel.name != "script") // take down the disabled buttons altogether
-                panel.showToolbarButtons("fbDebuggerButtons", false);
+            chrome.setGlobalAttribute("cmd_resumeExecution", "disabled", "true");
         }
     },
 
@@ -2566,11 +2522,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     hide: function(state)
     {
-        if (!this.context.stopped)
-        {
-            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
-            this.showToolbarButtons("fbDebuggerButtons", false);
-        } // else leave the buttons so we can see that we are stopped
+        Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
+        this.showToolbarButtons("fbDebuggerButtons", false);
 
         this.highlight(this.context.stopped);
 
@@ -3103,6 +3056,24 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return this.conditionEditor;
     },
 
+    breakOnAny: function()
+    {
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_resumeExecution", "breakable").toString();
+
+        if (FBTrace.DBG_UI_LOOP || FBTrace.DBG_FBS_STEP)
+            FBTrace.sysout("debugger.breakOnNext "+context.getName()+ " breakable: "+breakable, breakable);
+
+        if (breakable == "disabled")
+            return;
+        else if (breakable == "true")
+            this.suspend(context);  // arm breakOnNext
+        else {
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "true");  // was armed, undo
+            Firebug.chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", $STR("script.Break On Next"));
+        }
+        this.syncCommands(context);
+        return;
+    },
 });
 
 // ************************************************************************************************
