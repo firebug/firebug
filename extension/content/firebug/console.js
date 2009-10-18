@@ -592,6 +592,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              this.showCommandLine(true);
              this.showToolbarButtons("fbConsoleButtons", true);
              Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", this.persistContent);
+
+             // supports breakOnNext
+             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+
              if (state && state.wasScrolledToBottom)
              {
                  this.wasScrolledToBottom = state.wasScrolledToBottom;
@@ -611,7 +615,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (!enabled)
             breakable = "disabled";
 
-        Firebug.Breakpoint.updateResume(this.context, breakable,
+        Firebug.Breakpoint.updateBreakOnNext(this.context, breakable,
             $STR("console.Break On All Errors"),
             $STR("console.Disable Break On All Errors"));
     },
@@ -721,11 +725,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         return true;
     },
 
-    breakOnAny: function()
+    breakOnNext: function()
     {
         Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
 
-        Firebug.Breakpoint.updateResume(this.context,
+        Firebug.Breakpoint.updateBreakOnNext(this.context,
             Firebug.breakOnErrors ? "false" : "true",
             $STR("console.Break On All Errors"),
             $STR("console.Disable Break On All Errors"));

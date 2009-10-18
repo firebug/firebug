@@ -595,9 +595,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Break on Mutate
 
-    breakOnAny: function()
+    breakOnNext: function()
     {
-        Firebug.HTMLModule.MutationBreakpoints.breakOnAny(this.context);
+        Firebug.HTMLModule.MutationBreakpoints.breakOnNext(this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -764,6 +764,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         this.showToolbarButtons("fbHTMLButtons", true);
 
+        // supports breakOnNext
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+
         if (!this.ioBox)
             this.ioBox = new InsideOutBox(this, this.panelNode);
 
@@ -785,8 +788,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 }, this));
             }
 
-            Firebug.Breakpoint.updateResume(this.context,
-                this.context.breakOnAnyMutate ? "false" : "true",
+            Firebug.Breakpoint.updateBreakOnNext(this.context,
+                this.context.breakOnNextMutate ? "false" : "true",
                 $STR("html.Break On Mutate"),
                 $STR("html.Disable Break On Mutate"));
 
@@ -969,10 +972,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         else
         {
             var doc = this.context.window.document;
-            if (Firebug.searchSelector)
-                search = this.lastSearch = new HTMLLib.SelectorSearch(text, doc, this.panelNode, this.ioBox);
-            else
-                search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
+            search = this.lastSearch = new HTMLLib.NodeSearch(text, doc, this.panelNode, this.ioBox);
         }
 
         var loopAround = search.find(reverse, Firebug.Search.isCaseSensitive(text));
@@ -988,8 +988,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     getSearchOptionsMenuItems: function()
     {
         return [
-            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            Firebug.Search.searchOptionMenu("search.html.CSS_Selector", "searchSelector")
+            Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive")
         ];
     },
 
@@ -1598,26 +1597,26 @@ Firebug.HTMLModule.DebuggerListener =
 
 Firebug.HTMLModule.MutationBreakpoints =
 {
-    breakOnAny: function(context)
+    breakOnNext: function(context)
     {
-        context.breakOnAnyMutate = !context.breakOnAnyMutate;
+        context.breakOnNextMutate = !context.breakOnNextMutate;
 
-        Firebug.Breakpoint.updateResume(context,
-            context.breakOnAnyMutate ? "false" : "true",
+        Firebug.Breakpoint.updateBreakOnNext(context,
+            context.breakOnNextMutate ? "false" : "true",
             $STR("html.Break On Mutate"),
             $STR("html.Disable Break On Mutate"));
     },
 
-    breakOnAnyMutate: function(event, context, type)
+    breakOnNextMutate: function(event, context, type)
     {
-        if (!context.breakOnAnyMutate)
+        if (!context.breakOnNextMutate)
             return false;
 
         // Ignore changes in trees marked with firebugIgnore.
         if (isAncestorIgnored(event.target))
             return false;
 
-        context.breakOnAnyMutate = false;
+        context.breakOnNextMutate = false;
 
         this.breakWithCause(event, context, type);
     },
@@ -1646,7 +1645,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onMutateAttr: function(event, context)
     {
-        if (this.breakOnAnyMutate(event, context, BP_BREAKONATTRCHANGE))
+        if (this.breakOnNextMutate(event, context, BP_BREAKONATTRCHANGE))
             return;
 
         var breakpoints = context.mutationBreakpoints;
@@ -1661,7 +1660,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onMutateText: function(event, context)
     {
-        if (this.breakOnAnyMutate(event, context, BP_BREAKONTEXT))
+        if (this.breakOnNextMutate(event, context, BP_BREAKONTEXT))
             return;
     },
 
@@ -1670,7 +1669,7 @@ Firebug.HTMLModule.MutationBreakpoints =
         var node = event.target;
         var removal = event.type == "DOMNodeRemoved";
 
-        if (this.breakOnAnyMutate(event, context, removal ? BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
+        if (this.breakOnNextMutate(event, context, removal ? BP_BREAKONREMOVE : BP_BREAKONCHILDCHANGE))
             return;
 
         var breakpoints = context.mutationBreakpoints;

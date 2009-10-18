@@ -262,7 +262,7 @@ Firebug.HTMLLib =
 
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    /**
+    /**  XXXjjb this code is no longer called and won't be in 1.5; if FireFinder works out we can delete this.
      * Constructs a SelectorSearch instance.
      *
      * @class Class used to search a DOM tree for elements matching the given
@@ -361,7 +361,7 @@ Firebug.HTMLLib =
 
     /**
      * Constructs a DOMWalker instance.
-     * 
+     *
      * @constructor
      * @class Implements an ordered traveral of the document, including attributes and
      *        iframe contents within the results.
@@ -388,7 +388,7 @@ Firebug.HTMLLib =
 
         /**
          * Move to the previous node.
-         * 
+         *
          * @return The previous node if one exists, undefined otherwise.
          */
         this.previousNode = function() {
@@ -436,7 +436,7 @@ Firebug.HTMLLib =
 
         /**
          * Move to the next node.
-         * 
+         *
          * @return The next node if one exists, otherwise undefined.
          */
         this.nextNode = function() {
@@ -481,7 +481,7 @@ Firebug.HTMLLib =
 
         /**
          * Retrieves the current node.
-         * 
+         *
          * @return The current node, if not past the beginning or end of the iteration.
          */
         this.currentNode = function() {

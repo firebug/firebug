@@ -715,6 +715,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
+        // supports breakOnNext
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+
         if (this.context.loaded && !this.selection)
         {
             if (!state)

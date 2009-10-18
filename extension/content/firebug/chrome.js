@@ -1151,20 +1151,22 @@ top.FirebugChrome =
             "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
     },
 
-    breakOnAny: function(context)
+    breakOnNext: function(context)
     {
         if (!context)
         {
-            FBTrace.sysout("Firebug chrome: breakOnAny with no context??");
+            FBTrace.sysout("Firebug chrome: breakOnNext with no context??");
             return;
         }
 
         var panel = panelBar1.selectedPanel;
-        if (!panel || !panel.breakOnAny)
+        if (!panel || !panel.breakOnNext)
             return;
 
-        panel.breakOnAny(context);
-    }
+        panel.breakOnNext(context);
+    },
+    
+
 };
 
 // ************************************************************************************************

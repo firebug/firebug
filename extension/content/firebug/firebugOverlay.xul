@@ -40,6 +40,8 @@
         <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
         <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
 
+        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext)"/>
+
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" disabled="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
         <command id="cmd_stepInto" oncommand="Firebug.Debugger.stepInto(FirebugContext)" disabled="true"/>
@@ -127,7 +129,7 @@
                         </toolbarbutton>
 
                         <!-- Break On Next -->
-                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_resumeExecution"
+                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
                                 tooltiptext="script.Break On Next" breakable="disabled" />
                     </hbox>
 

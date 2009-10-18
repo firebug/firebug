@@ -9,22 +9,27 @@ FBL.ns(function() { with (FBL) {
 
 Firebug.Breakpoint = extend(Firebug.Module,
 {
-    updateResume: function(context, breakable, tooltip, disableTooltip)
+    updateBreakOnNext: function(context, breakable, tooltip, disableTooltip)
     {
-        if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoint.resume; " + context.getName());
-
         Firebug.Debugger.syncCommands(context);
 
         var chrome = Firebug.chrome;
-        chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", breakable);
+        var currentBreakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable");
+
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("breakpoint.updateBreakOnNext; currentBreakable "+currentBreakable+" in " + context.getName());
+
+        if (currentBreakable == "false") // then we are already armed, bail
+            return false;
+
+        chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", breakable);
 
         if (breakable == "true")
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", tooltip);
+            chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", tooltip);
         else if (breakable == "false")
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", disableTooltip);
+            chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", disableTooltip);
         else
-            chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", "");
+            chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
     },
 
     showPanel: function(browser, panel)
@@ -33,8 +38,8 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
         // By default the Resume (break on) button is disabled.
         // It's up to the selected panel whether it's utilized.
-        chrome.setGlobalAttribute("cmd_resumeExecution", "breakable", "disabled");
-        chrome.setGlobalAttribute("cmd_resumeExecution", "tooltiptext", "");
+        chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
+        chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
     }
 });
 
