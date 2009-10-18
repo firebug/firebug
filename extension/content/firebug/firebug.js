@@ -796,83 +796,84 @@ top.Firebug =
 
     openInEditor: function(context, editorId)
     {
-        try {
-        if (!editorId)
-            return;
-
-        var location;
-        if (context)
-        {
-            var panel = Firebug.chrome.getSelectedPanel();
-            if (panel)
-            {
-                location = panel.location;
-                if (!location && panel.name == "html")
-                    location = context.window.document.location;
-                if ( location instanceof SourceFile || location instanceof CSSStyleSheet )
-                    location = location.href;
-            }
-        }
-        if (!location)
-        {
-            if (tabBrowser.currentURI)
-                location = tabBrowser.currentURI.asciiSpec;
-        }
-        if (!location)
-            return;
-        location = location.toString();
-        if (Firebug.filterSystemURLs && isSystemURL(location))
-            return;
-
-        var list = extendArray(editors, externalEditors);
-        var editor = null;
-        for( var i = 0; i < list.length; ++i )
-        {
-            if (editorId == list[i].id)
-            {
-                editor = list[i];
-                break;
-            }
-        }
-        if (editor)
-        {
-            if (editor.handler)
-            {
-                editor.handler(location);
+        try 
+	{
+            if (!editorId)
                 return;
-            }
-            var args = [];
-            var localFile = null;
-            var targetAdded = false;
-            if (editor.cmdline)
+
+            var location;
+            if (context)
             {
-                args = editor.cmdline.split(" ");
-                for( var i = 0; i < args.length; ++i )
+                var panel = Firebug.chrome.getSelectedPanel();
+                if (panel)
                 {
-                    if ( args[i] == "%url" )
-                    {
-                        args[i] = location;
-                        targetAdded = true;
-                    }
-                    else if ( args[i] == "%file" )
-                    {
-                        if (!localFile)
-                            localFile = this.getLocalSourceFile(context, location);
-                        args[i] = localFile;
-                        targetAdded = true;
-                    }
+                    location = panel.location;
+                    if (!location && panel.name == "html")
+                        location = context.window.document.location;
+                    if (location && (location instanceof SourceFile || location instanceof CSSStyleSheet ))
+                        location = location.href;
                 }
             }
-            if (!targetAdded)
+            if (!location)
             {
-                localFile = this.getLocalSourceFile(context, location);
-                if (!localFile)
-                    return;
-                args.push(localFile);
+                if (tabBrowser.currentURI)
+                    location = tabBrowser.currentURI.asciiSpec;
             }
-            FBL.launchProgram(editor.executable, args);
-        }
-        }catch(exc) { ERROR(exc); }
+            if (!location)
+                return;
+            location = location.toString();
+            if (Firebug.filterSystemURLs && isSystemURL(location))
+                return;
+
+            var list = extendArray(editors, externalEditors);
+            var editor = null;
+            for( var i = 0; i < list.length; ++i )
+            {
+                if (editorId == list[i].id)
+                {
+                    editor = list[i];
+                    break;
+                }
+            }
+            if (editor)
+            {
+                if (editor.handler)
+                {
+                    editor.handler(location);
+                    return;
+                }
+                var args = [];
+                var localFile = null;
+                var targetAdded = false;
+                if (editor.cmdline)
+                {
+                    args = editor.cmdline.split(" ");
+                    for( var i = 0; i < args.length; ++i )
+                    {
+                        if ( args[i] == "%url" )
+                        {
+                            args[i] = location;
+                            targetAdded = true;
+                        }
+                        else if ( args[i] == "%file" )
+                        {
+                            if (!localFile)
+                                localFile = this.getLocalSourceFile(context, location);
+                            args[i] = localFile;
+                            targetAdded = true;
+                        }
+                    }
+                }
+                if (!targetAdded)
+                {
+                    localFile = this.getLocalSourceFile(context, location);
+                    if (!localFile)
+                        return;
+                    args.push(localFile);
+                }
+                FBL.launchProgram(editor.executable, args);
+            }
+        } catch(exc) { ERROR(exc); }
     },
 
     getLocalSourceFile: function(context, href)
