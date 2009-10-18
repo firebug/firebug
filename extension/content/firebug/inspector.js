@@ -635,13 +635,13 @@ quickInfoBox =
         {
             lab = document.createElement("label");
             lab.setAttribute("class", "fbQuickInfoBoxTitle");
-            lab.setAttribute("value", "Quick Info");
+            lab.setAttribute("value", $STR("quickInfo"));
             vbox.insertBefore(lab, vbox.firstChild);
         }
 
         lab = document.createElement("label");
         lab.setAttribute("class", "fbQuickInfoBoxTitle");
-        lab.setAttribute("value", "Computed Style");
+        lab.setAttribute("value", $STR("computedStyle"));
         vbox.appendChild(lab);
 
         this.addRows(element, vbox, compAttribs, true);
