@@ -10,6 +10,10 @@
     outline: 0;
 }
 
+.firebugCanvas:before, .firebugCanvas:after {
+    content: "";
+}
+
 .firebugHighlight {
     z-index: 2147483646;
     position: fixed;
@@ -18,6 +22,10 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+}
+
+.firebugHighlight:before, .firebugHighlight:after {
+    content: "";
 }
 
 .firebugLayoutBoxParent {
@@ -39,6 +47,10 @@
     padding: 0;
     outline: 0;
     border: 0 none;
+}
+
+.firebugRuler:before, .firebugRuler:after {
+    content: "";
 }
 
 .firebugRulerH {
@@ -79,6 +91,10 @@
     outline: 0;
 }
 
+.firebugLayoutBox:before, .firebugLayoutBox:after {
+    content: "";
+}
+
 .firebugLayoutBoxOffset {
     z-index: 2147483646;
     position: fixed;
@@ -101,14 +117,6 @@
     background-color: SkyBlue;
 }
 
-/*.firebugHighlightGroup .firebugLayoutBox {
-    background-color: transparent;
-}
-
-.firebugHighlightBox {
-    background-color: Blue !important;
-}*/
-
 .firebugLayoutLine {
     z-index: 2147483646;
     background-color: #000000;
@@ -119,15 +127,17 @@
     border: 0 none;
 }
 
-.firebugLayoutLineLeft,
-.firebugLayoutLineRight {
+.firebugLayoutLine:before, .firebugLayoutLine:after {
+    content: "";
+}
+
+.firebugLayoutLineLeft, .firebugLayoutLineRight {
     position: fixed;
     width: 1px;
     height: 100%;
 }
 
-.firebugLayoutLineTop,
-.firebugLayoutLineBottom {
+.firebugLayoutLineTop, .firebugLayoutLineBottom {
     position: fixed;
     width: 100%;
     height: 1px;
