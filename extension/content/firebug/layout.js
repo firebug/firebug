@@ -195,6 +195,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         args.zIndex = args.zIndex ? args.zIndex : "auto";
 
         var position = style.getPropertyCSSValue("position").cssText;
+        args.position = position;
 
         if (Firebug.showBoundingClientRect)
         {
@@ -210,7 +211,6 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             args.outerRight = Math.round(rect.right);
             args.outerBottom = Math.round(rect.bottom);
 
-            args.position = position;
             // these Modes are classes on the domplate
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
             = args.outerBottomMode = "boundingClientRect";
