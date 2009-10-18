@@ -1034,7 +1034,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             "-",
             optionMenu("HighlightMutations", "highlightMutations"),
             optionMenu("ExpandMutations", "expandMutations"),
-            optionMenu("ScrollToMutations", "scrollToMutations")
+            optionMenu("ScrollToMutations", "scrollToMutations"),
+            "-",
+            optionMenu("ShadeBoxModel", "shadeBoxModel"),
+            optionMenu("ShowQuickInfoBox","showQuickInfoBox")
         ];
     },
 
