@@ -77,11 +77,13 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     height: 0;
     border: none;
     font-family: Monaco, monospace;
+    direction: ltr;
 }
 
 #fbLargeCommandLine {
     margin: 0;
     font-family: Monaco, monospace;
+    direction: ltr;
 }
 
 #fbCommandLine > .textbox-input-box > .textbox-textarea {

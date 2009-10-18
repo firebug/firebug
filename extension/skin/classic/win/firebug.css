@@ -176,6 +176,7 @@ panelTab {
     font-weight: bold;
     color: #565656;
     font-size: 11px;
+    direction: ltr;
 }
 
 panelTab[selected="true"] {
