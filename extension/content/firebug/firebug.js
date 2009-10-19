@@ -810,7 +810,7 @@ top.Firebug =
                     location = panel.location;
                     if (!location && panel.name == "html")
                         location = context.window.document.location;
-                    if (location && (location instanceof SourceFile || location instanceof CSSStyleSheet ))
+                    if (location && (location instanceof Firebug.SourceFile || location instanceof CSSStyleSheet ))
                         location = location.href;
                 }
             }
@@ -821,7 +821,7 @@ top.Firebug =
             }
             if (!location)
                 return;
-            location = location.toString();
+            location = location.href || location.toString();
             if (Firebug.filterSystemURLs && isSystemURL(location))
                 return;
 
