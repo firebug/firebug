@@ -293,22 +293,24 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
     loadedContext: function(context)
     {
-        var netProgress = context.netProgress;
-        if (netProgress)
-            netProgress.loaded = true;
-
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.loadedContext; Remove temp context (if not removed yet) " + tabId);
 
         var tabId = Firebug.getTabIdForWindow(context.browser.contentWindow);
         delete contexts[tabId];
 
-        // Set Page title and id into the document object.
-        if (netProgress.files.length > 0)
+        var netProgress = context.netProgress;
+        if (netProgress)
         {
-            var doc = netProgress.files[0].document;
-            doc.id = context.uid;
-            doc.title = context.getTitle();
+            netProgress.loaded = true;
+
+            // Set Page title and id into the document object.
+            if (netProgress.files.length > 0)
+            {
+                var doc = netProgress.files[0].document;
+                doc.id = context.uid;
+                doc.title = context.getTitle();
+            }
         }
     },
 
