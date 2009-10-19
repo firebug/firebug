@@ -796,7 +796,7 @@ top.Firebug =
 
     openInEditor: function(context, editorId)
     {
-        try
+        try 
         {
             if (!editorId)
                 return;

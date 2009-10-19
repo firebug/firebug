@@ -935,6 +935,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
         else
         {
+            Firebug.chrome.getSelectedSidePanel().panelNode.scrollTop = 0;
             this.ioBox.select(object, true, false, this.noScrollIntoView);
             this.inspectorHistory.unshift(object);
             if (this.inspectorHistory.length > 5)
