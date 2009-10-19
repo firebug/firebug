@@ -30,6 +30,7 @@ locale  firebug sl-SI       jar:chrome/firebug.jar!/locale/sl-SI/
 locale  firebug sv-SE       jar:chrome/firebug.jar!/locale/sv-SE/
 locale  firebug tr-TR       jar:chrome/firebug.jar!/locale/tr-TR/
 locale  firebug uk-UA       jar:chrome/firebug.jar!/locale/uk-UA/
+locale  firebug vi-VN       jar:chrome/firebug.jar!/locale/vi-VN/
 locale  firebug zh-CN       jar:chrome/firebug.jar!/locale/zh-CN/
 locale  firebug zh-TW       jar:chrome/firebug.jar!/locale/zh-TW/
 

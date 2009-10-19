@@ -1,0 +1,12 @@
+<!ENTITY editors.Description "Trình soạn thảo cho Firebug:">
+<!ENTITY editors.NameColumn "Trình soạn thảo">
+<!ENTITY editors.ExecutableColumn "Thực thi">
+<!ENTITY editors.ParamsColumn "Chạy tham số">
+<!ENTITY add.label "Thêm">
+<!ENTITY remove.label "Xóa">
+<!ENTITY change.label "Thay đổi">
+<!ENTITY close.label "Đóng">
+<!ENTITY browse.label "Duyệt...">
+<!ENTITY changeEditor.Name "Tên:">
+<!ENTITY changeEditor.Executable "Thực thi:">
+<!ENTITY changeEditor.CmdLine "Tham số:">
