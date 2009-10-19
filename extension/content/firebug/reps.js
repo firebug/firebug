@@ -1213,9 +1213,9 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     getCallName: function(frame)
     {
-        if (frame.fn)
+        if (frame.fn && frame.fn != "anonymous")
             return frame.fn;
-        return getFunctionName(frame.script, frame.context);
+        return getFunctionName(frame.script, frame.context, null, true);
     },
 
     getSourceLinkTitle: function(frame)

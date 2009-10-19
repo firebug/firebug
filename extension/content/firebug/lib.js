@@ -2330,7 +2330,7 @@ this.getSourceLinkForScript = function(script, context)
     }
 };
 
-this.getFunctionName = function(script, context, frame)
+this.getFunctionName = function(script, context, frame, noArgs)
 {
     if (!script)
     {
@@ -2346,7 +2346,7 @@ this.getFunctionName = function(script, context, frame)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
-            name = functionSpec.name +"("+functionSpec.args.join(',')+")";
+            name = functionSpec.name + (noArgs ? "" : "("+functionSpec.args.join(',')+")");
         }
         else
         {
