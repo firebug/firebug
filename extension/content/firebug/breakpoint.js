@@ -54,8 +54,8 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
         // Get proper tooltip for the break-on-next button from the current panel.
         // If breakable is set to "false" the feature is already activated (throbbing).
-        var enabled = breakable == "false";
-        var tooltip = panel.getBreakOnNextTooltip(enabled);
+        var armed = (breakable == "false");
+        var tooltip = panel.getBreakOnNextTooltip(armed);
         if (!tooltip)
             tooltip = "";
 

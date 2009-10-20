@@ -796,7 +796,7 @@ top.Firebug =
 
     openInEditor: function(context, editorId)
     {
-        try 
+        try
         {
             if (!editorId)
                 return;
@@ -2350,16 +2350,17 @@ Firebug.Panel =
 
     /**
      * Called by the framework when the user clicks on the Break On Next button.
-     * @param {Boolean} enabled Set to true if the Break On Next feature is
-     * activated and set to false if the feature is deactivated.
+     * @param {Boolean} armed Set to true if the Break On Next feature is
+     * to be armed for action and set to false if the Break On Next should be disarmed.
+     * If 'armed' is true, then the next call to shouldBreakOnNext should be |true|.
      */
-    breakOnNext: function(enabled)
+    breakOnNext: function(armed)
     {
     },
 
     /**
      * Called when a panel is selected/displayed. The method should return true
-     * if the Break On Next feature is currently enabled (activated) for this panel.
+     * if the Break On Next feature is currently armed for this panel.
      */
     shouldBreakOnNext: function()
     {
