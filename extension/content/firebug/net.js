@@ -468,13 +468,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             this.table = null;
         }
 
-        var breakable = this.context.breakOnXHR ? "false" : "true";
-        if (!enabled)
-            breakable = "disabled";
-
-        Firebug.Breakpoint.updateBreakOnNext(this.context, breakable,
-            $STR("net.Break On XHR"), $STR("net.Disable Break On XHR"));
-
         if (!enabled)
             return;
 
@@ -504,6 +497,11 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         clearInterval(this.layoutInterval);
         delete this.layoutInterval;
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled ? $STR("net.Break On XHR") : $STR("net.Disable Break On XHR"));
     },
 
     updateOption: function(name, value)
@@ -801,13 +799,14 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.table = null;
     },
 
-    breakOnNext: function()
+    breakOnNext: function(breaking)
     {
-        this.context.breakOnXHR = !this.context.breakOnXHR;
+        this.context.breakOnXHR = breakding;
+    },
 
-        var breakable = this.context.breakOnXHR ? "false" : "true";
-        Firebug.Breakpoint.updateBreakOnNext(this.context, breakable,
-            $STR("net.Break On XHR"), $STR("net.Disable Break On XHR"));
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled? $STR("net.Break On XHR") :  $STR("net.Disable Break On XHR"));
     },
 
     // Support for info tips.

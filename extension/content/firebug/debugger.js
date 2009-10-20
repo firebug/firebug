@@ -2480,10 +2480,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             Firebug.Debugger.disabledPanelPage.hide(this);
 
-            Firebug.Breakpoint.updateBreakOnNext(this.context, !this.context.stopped,
-                    $STR("script.Break On Next"),
-                    $STR("script.Disable Break On Next"));
-
             if (this.context.loaded)
             {
                 if(!this.location)
@@ -2539,6 +2535,11 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         FBL.hide(panelStatus, false);
 
         delete this.infoTipExpr;
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled? $STR("script.Break On Next") : $STR("script.Disable Break On Next"));
     },
 
     search: function(text, reverse)

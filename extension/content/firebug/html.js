@@ -764,9 +764,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         this.showToolbarButtons("fbHTMLButtons", true);
 
-        // supports breakOnNext
-        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
-
         if (!this.ioBox)
             this.ioBox = new InsideOutBox(this, this.panelNode);
 
@@ -788,11 +785,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 }, this));
             }
 
-            Firebug.Breakpoint.updateBreakOnNext(this.context,
-                this.context.breakOnNextMutate ? "false" : "true",
-                $STR("html.Break On Mutate"),
-                $STR("html.Disable Break On Mutate"));
-
             restoreObjects(this, state);
         }
     },
@@ -802,6 +794,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         this.showToolbarButtons("fbHTMLButtons", false);
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
+    },
+
+    getBreakOnNextTooltip: function(enable)
+    {
+        return (enable? $STR("html.Break On Mutate") : $STR("html.Disable Break On Mutate"));
     },
 
     watchWindow: function(win)
@@ -1598,14 +1595,9 @@ Firebug.HTMLModule.DebuggerListener =
 
 Firebug.HTMLModule.MutationBreakpoints =
 {
-    breakOnNext: function(context)
+    breakOnNext: function(breaking)
     {
-        context.breakOnNextMutate = !context.breakOnNextMutate;
-
-        Firebug.Breakpoint.updateBreakOnNext(context,
-            context.breakOnNextMutate ? "false" : "true",
-            $STR("html.Break On Mutate"),
-            $STR("html.Disable Break On Mutate"));
+        context.breakOnNextMutate = breaking;
     },
 
     breakOnNextMutate: function(event, context, type)

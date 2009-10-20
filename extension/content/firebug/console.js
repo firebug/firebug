@@ -593,9 +593,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              this.showToolbarButtons("fbConsoleButtons", true);
              Firebug.chrome.setGlobalAttribute("cmd_togglePersistConsole", "checked", this.persistContent);
 
-             // supports breakOnNext
-             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
-
              if (state && state.wasScrolledToBottom)
              {
                  this.wasScrolledToBottom = state.wasScrolledToBottom;
@@ -611,13 +608,14 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
 
         // xxxHonza: shouldn't the breakOnErrors be context related?
-        var breakable = Firebug.breakOnErrors ? "false" : "true";
-        if (!enabled)
-            breakable = "disabled";
+        // xxxJJB, yes, but we can't support it because we can't yet tell which window the error is on.
 
-        Firebug.Breakpoint.updateBreakOnNext(this.context, breakable,
-            $STR("console.Break On All Errors"),
-            $STR("console.Disable Break On All Errors"));
+
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled?  $STR("console.Break On All Errors") : $STR("console.Disable Break On All Errors"));
     },
 
     enablePanel: function(module)
@@ -725,16 +723,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         return true;
     },
 
-    breakOnNext: function()
+    breakOnNext: function(breaking)
     {
-        Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", !Firebug.breakOnErrors);
-
-        Firebug.Breakpoint.updateBreakOnNext(this.context,
-            Firebug.breakOnErrors ? "false" : "true",
-            $STR("console.Break On All Errors"),
-            $STR("console.Disable Break On All Errors"));
+        Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", breaking);
     },
-
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // private
 

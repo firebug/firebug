@@ -9,37 +9,47 @@ FBL.ns(function() { with (FBL) {
 
 Firebug.Breakpoint = extend(Firebug.Module,
 {
-    updateBreakOnNext: function(context, breakable, tooltip, disableTooltip)
+    toggleBreakOnNext: function(panel)
     {
-        Firebug.Debugger.syncCommands(context);
-
-        var chrome = Firebug.chrome;
-        var currentBreakable = chrome.getGlobalAttribute("cmd_resumeExecution", "breakable");
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoint.updateBreakOnNext; currentBreakable "+currentBreakable+" in " + context.getName());
-
-        if (currentBreakable == "false") // then we are already armed, bail
-            return false;
-
-        chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", breakable);
+            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+" in " + context.getName());
 
         if (breakable == "true")
-            chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", tooltip);
-        else if (breakable == "false")
-            chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", disableTooltip);
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "false");
         else
-            chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+
+        this.setBreakOnNextTooltips(panel);
+    },
+
+    setBreakOnNextTooltips: function(panel)
+    {
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
+        if (breakable == "false")
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", panel.getBreakOnNextTooltip(false));
+        else  // true or disabled becomes true.
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", panel.getBreakOnNextTooltip(true));
+    },
+
+    enableBreakOnNext: function(enable)
+    {
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", enable?"false":"disabled");
     },
 
     showPanel: function(browser, panel)
     {
-        var chrome = Firebug.chrome;
-
-        // By default the Resume (break on) button is disabled.
-        // It's up to the selected panel whether it's utilized.
-        chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
-        chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
+        if (panel.breakOnNext)  // then the panel supports the feature, set the tooltips
+        {
+            this.enableBreakOnNext(true);
+            this.setBreakOnNextTooltips(panel);
+        }
+        else
+        {
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
+            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
+        }
     }
 });
 

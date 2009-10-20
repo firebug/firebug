@@ -715,9 +715,6 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
-        // supports breakOnNext
-        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
-
         if (this.context.loaded && !this.selection)
         {
             if (!state)
@@ -793,6 +790,11 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         var view = this.viewPath[this.pathIndex];
         if (view && this.panelNode.scrollTop)
             view.scrollTop = this.panelNode.scrollTop;
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled ? $STR("dom.Break On Property Change") : $STR("dom.Disable Break On Property Change"));
     },
 
     supportsObject: function(object)

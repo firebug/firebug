@@ -1160,12 +1160,14 @@ top.FirebugChrome =
         }
 
         var panel = panelBar1.selectedPanel;
+        FBTrace.sysout("Firebug chrome: breakOnNext for panel "+panel.name, panel);
         if (!panel || !panel.breakOnNext)
             return;
 
-        panel.breakOnNext(context);
+        var breaking = Firebug.Breakpoint.toggleBreakOnNext(panel);
+        panel.breakOnNext(breaking);
     },
-    
+
 
 };
 
