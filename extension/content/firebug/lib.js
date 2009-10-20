@@ -617,6 +617,10 @@ this.setClassTimed = function(elt, name, context, timeout)
         else
             elt.__invisibleAtSetPoint = 5;
     }
+    else
+    {
+        delete elt.__invisibleAtSetPoint;
+    }
 
     elt.__setClassTimeout = context.setTimeout(function()
     {
