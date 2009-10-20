@@ -288,7 +288,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         Firebug.ActivableModule.showContext.apply(this, arguments);
 
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.showContext; " + context.getName());
+            FBTrace.sysout("net.showContext; " + (context ? context.getName() : "NULL"));
     },
 
     loadedContext: function(context)
