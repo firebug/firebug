@@ -151,7 +151,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                             FBTrace.sysout("errors.observe nsIConsoleMessage: "+object.message, object);
 
                         var context = this.getErrorContext(object);  // after instanceof
-                        if (lessTalkMoreAction(context, object, isWarning))
+                        var msgId = lessTalkMoreAction(context, object, isWarning);
+                        if (!msgId)
                             return;
                         if (context)
                             Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
@@ -226,7 +227,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             object = correctLineNumbersOnExceptions(context, object);
         }
 
-        if (lessTalkMoreAction(context, object, isWarning))
+        var msgId = lessTalkMoreAction(context, object, isWarning);
+        if (!msgId)
             return null;
 
         Firebug.errorStackTrace = null;  // clear global: either we copied it or we don't use it.
@@ -235,7 +237,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             this.increaseCount(context);
 
         var error = new ErrorMessage(object.errorMessage, object.sourceName,
-            object.lineNumber, object.sourceLine, category, context, trace);  // the sourceLine will cause the source to be loaded.
+            object.lineNumber, object.sourceLine, category, context, trace, msgId);  // the sourceLine will cause the source to be loaded.
 
         var className = isWarning ? "warningMessage" : "errorMessage";
 
@@ -365,7 +367,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
     initContext: function(context)
     {
-        context.errorCount = 0;
+        this.clear(context);
+
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         {
             FBL.totalSheets = 0;
@@ -560,7 +563,7 @@ function lessTalkMoreAction(context, object, isWarning)
 
     var enabled = Firebug.Console.isAlwaysEnabled();
     if (!enabled) {
-        return true;
+        return null;
     }
 
     var why = whyNotShown(object.sourceName, object.category, isWarning);
@@ -569,7 +572,7 @@ function lessTalkMoreAction(context, object, isWarning)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.observe dropping "+object.category+" because: "+why);
-        return true;
+        return null;
     }
 
     var incoming_message = object.errorMessage;  // nsIScriptError
@@ -587,7 +590,7 @@ function lessTalkMoreAction(context, object, isWarning)
                 {
                     if (FBTrace.DBG_ERRORS)
                         FBTrace.sysout("errors.observe dropping pointlessError: "+msg+"\n");
-                    return true;
+                    return null;
                 }
             }
         }
@@ -599,11 +602,15 @@ function lessTalkMoreAction(context, object, isWarning)
         context.errorMap[msgId] += 1;
         if (context.errorMap[msgId] < 9)
         {
+            var console = context.getPanel("console");
+            if (console)
+                console.refresh();
+
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("errors.observe dropping duplicate msg count:"+context.errorMap[msgId]+"\n");
-            return true;
+            return null;
         }
-        // else put out another 1, something bad is happening....
+        // else put out another one, something bad is happening....
     }
 
     if (!context.errorMap)
@@ -611,7 +618,7 @@ function lessTalkMoreAction(context, object, isWarning)
 
     context.errorMap[msgId] = 1;
 
-    return false;
+    return msgId;
 }
 
 function checkForUncaughtException(context, object)

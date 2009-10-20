@@ -1357,7 +1357,8 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 onclick: "$onToggleError"},
 
             DIV({class: "errorTitle focusRow subLogRow", role : 'listitem'},
-                "$object.message|getMessage"
+                "$object.message|getMessage",
+                SPAN({class: "errorDuplication"}, "$object.msgId|getDuplication")
             ),
             DIV({class: "errorTrace", role : 'presentation'}),
             DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
@@ -1394,6 +1395,11 @@ this.ErrorMessage = domplate(Firebug.Rep,
         var re = /\[Exception... "(.*?)" nsresult:/;
         var m = re.exec(message);
         return m ? m[1] : message;
+    },
+
+    getDuplication: function(msgId)
+    {
+        return ""; // filled in later
     },
 
     getLine: function(error)

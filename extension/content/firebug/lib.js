@@ -3916,7 +3916,7 @@ this.getPersistedState = function(context, panelName)
 
 // ************************************************************************************************
 
-this.ErrorMessage = function(message, href, lineNo, source, category, context, trace)
+this.ErrorMessage = function(message, href, lineNo, source, category, context, trace, msgId)
 {
     this.message = message;
     this.href = href;
@@ -3925,6 +3925,7 @@ this.ErrorMessage = function(message, href, lineNo, source, category, context, t
     this.category = category;
     this.context = context;
     this.trace = trace;
+    this.msgId = msgId;
 };
 
 this.ErrorMessage.prototype =
