@@ -400,4 +400,52 @@ h1.groupHeader {
     float: right;
 }
 
+
+.upsideDown {
+    margin-top: 2px;
+}
+
+.upsideDown .notationEditorInner {
+    top: -8px;
+}
+
+.upsideDown .notationEditorInner1 {
+    padding-left: 33px;
+    background: url(noteBordersUps.png) repeat-y;
+}
+
+.upsideDown .notationEditorInner2 {
+    padding-right: 25px;
+    background: url(noteBordersUps.png) repeat-y 100% 0;
+}
+
+.upsideDown .notationEditorTop1 {
+    background: url(noteCornersUps.png) no-repeat 100% 0;
+    margin-left: 33px;
+    height: 25px;
+}
+
+.upsideDown .notationEditorTop2 {
+    position: relative;
+    left: -33px;
+    width: 33px;
+    height: 25px;
+    background: url(noteCornersUps.png) no-repeat;
+}
+
+.upsideDown .notationEditorBottom1 {
+    background: url(noteCornersUps.png) no-repeat 100% 100%;
+    margin-left: 33px;
+    height: 43px;
+}
+
+.upsideDown .notationEditorBottom2 {
+    position: relative;
+    left: -33px;
+    width: 33px;
+    height: 43px;
+    background: url(noteCornersUps.png) no-repeat 0 100%;
+}
+
+/************************************************************************************************/
 /************************************************************************************************/
