@@ -1950,6 +1950,7 @@ Firebug.Panel =
 {
     searchable: false,
     editable: true,
+    breakable: false,
     order: 2147483647,
     statusSeparator: "<",
 
@@ -2344,6 +2345,22 @@ Firebug.Panel =
             tab.removeAttribute("highlight");
     },
 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Support for Break On Next
+
+    breakOnNext: function(enabled)
+    {
+    },
+
+    shouldBreakOnNext: function()
+    {
+        return false;
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return null;
+    },
 };
 
 //************************************************************************************************

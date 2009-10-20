@@ -593,14 +593,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // Break on Mutate
-
-    breakOnNext: function()
-    {
-        Firebug.HTMLModule.MutationBreakpoints.breakOnNext(this.context);
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Events
 
     onMutateAttr: function(event)
@@ -717,6 +709,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     name: "html",
     searchable: true,
+    breakable: true,
     dependents: ["css", "computed", "layout", "dom", "domSide", "watch"],
     inspectorHistory: new Array(5),
 
@@ -794,11 +787,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         this.showToolbarButtons("fbHTMLButtons", false);
         delete this.infoTipURL;  // clear the state that is tracking the infotip so it is reset after next show()
         this.panelNode.ownerDocument.removeEventListener("keypress", this.onKeyPress, true);
-    },
-
-    getBreakOnNextTooltip: function(enable)
-    {
-        return (enable? $STR("html.Break On Mutate") : $STR("html.Disable Break On Mutate"));
     },
 
     watchWindow: function(win)
@@ -1132,6 +1120,24 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             vars["$"+i] = this.inspectorHistory[i];
 
         return vars;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Break on Mutate
+
+    breakOnNext: function(breaking)
+    {
+        Firebug.HTMLModule.MutationBreakpoints.breakOnNext(this.context, breaking);
+    },
+
+    shouldBreakOnNext: function()
+    {
+        return this.context.breakOnNextMutate;
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled ? $STR("html.Disable Break On Mutate") : $STR("html.Break On Mutate"));
     },
 });
 
@@ -1595,7 +1601,7 @@ Firebug.HTMLModule.DebuggerListener =
 
 Firebug.HTMLModule.MutationBreakpoints =
 {
-    breakOnNext: function(breaking)
+    breakOnNext: function(context, breaking)
     {
         context.breakOnNextMutate = breaking;
     },

@@ -14,43 +14,63 @@ Firebug.Breakpoint = extend(Firebug.Module,
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+" in " + context.getName());
+            FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+
+                " in " + context.getName());
 
-        if (breakable == "true")
-            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "false");
-        else
-            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
+        // Toggle button's state.
+        breakable = (breakable == "true" ? "false" : "true");
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", breakable);
 
-        this.setBreakOnNextTooltips(panel);
-    },
+        // Call the current panel's logic related to break-on-next.
+        // If breakable == "true" the feature is currently disabled.
+        var enabled = (breakable == "true" ? false : true);
+        panel.breakOnNext(enabled);
 
-    setBreakOnNextTooltips: function(panel)
-    {
-        var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
-        if (breakable == "false")
-            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", panel.getBreakOnNextTooltip(false));
-        else  // true or disabled becomes true.
-            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", panel.getBreakOnNextTooltip(true));
-    },
+        // Make sure the correct tooltip (coming from the current panel) is used.
+        this.updateBreakOnNextTooltips(panel);
 
-    enableBreakOnNext: function(enable)
-    {
-        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", (enable?"true":"disabled") );
+        return enabled;
     },
 
     showPanel: function(browser, panel)
     {
-        if (panel.breakOnNext)  // then the panel supports the feature, set the tooltips
+        // If the panel supports the feature, set the tooltips and update
+        // break-on-next button's state.
+        if (panel.breakable)
         {
-            this.enableBreakOnNext(true);
-            this.setBreakOnNextTooltips(panel);
+            this.updateBreakOnNextState(panel);
+            this.updateBreakOnNextTooltips(panel);
         }
         else
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
         }
-    }
+    },
+
+    updateBreakOnNextTooltips: function(panel)
+    {
+        var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
+
+        // Get proper tooltip for the break-on-next button from the current panel.
+        // If breakable is set to "false" the feature is already activated (throbbing).
+        var enabled = breakable == "false";
+        var tooltip = panel.getBreakOnNextTooltip(enabled);
+        if (!tooltip)
+            tooltip = "";
+
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", tooltip);
+    },
+
+    updateBreakOnNextState: function(panel)
+    {
+        var shouldBreak = panel.shouldBreakOnNext();
+
+        // If the panel should break at the next chance, set the button to not breakable,
+        // which means already active (throbbing).
+        var breakable = shouldBreak ? "false" : "true";
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", breakable);
+    },
 });
 
 // ************************************************************************************************

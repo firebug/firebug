@@ -1155,20 +1155,20 @@ top.FirebugChrome =
     {
         if (!context)
         {
-            FBTrace.sysout("Firebug chrome: breakOnNext with no context??");
+            if (FBTrace.DBG_BP)
+                FBTrace.sysout("Firebug chrome: breakOnNext with no context??");
             return;
         }
 
         var panel = panelBar1.selectedPanel;
-        FBTrace.sysout("Firebug chrome: breakOnNext for panel "+panel.name, panel);
-        if (!panel || !panel.breakOnNext)
-            return;
 
-        var breaking = Firebug.Breakpoint.toggleBreakOnNext(panel);
-        panel.breakOnNext(breaking);
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("Firebug chrome: breakOnNext for panel " + 
+                (panel ? panel.name : "NO panel"), panel);
+
+        if (panel && panel.breakable)
+            Firebug.Breakpoint.toggleBreakOnNext(panel);
     },
-
-
 };
 
 // ************************************************************************************************

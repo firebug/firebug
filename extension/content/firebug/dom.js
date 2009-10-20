@@ -794,7 +794,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled ? $STR("dom.Break On Property Change") : $STR("dom.Disable Break On Property Change"));
+        return (enabled ? $STR("dom.Disable Break On Property Change") :
+            $STR("dom.Break On Property Change"));
     },
 
     supportsObject: function(object)

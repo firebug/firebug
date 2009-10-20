@@ -541,6 +541,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     name: "console",
     searchable: true,
+    breakable: true,
     editable: false,
 
     initialize: function()
@@ -606,16 +607,20 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.hide(state);
             Firebug.Console.disabledPanelPage.show(this);
         }
+    },
 
+    shouldBreakOnNext: function()
+    {
         // xxxHonza: shouldn't the breakOnErrors be context related?
-        // xxxJJB, yes, but we can't support it because we can't yet tell which window the error is on.
-
-
+        // xxxJJB, yes, but we can't support it because we can't yet tell
+        // which window the error is on.
+        return Firebug.getPref(Firebug.servicePrefDomain, "breakOnErrors");
     },
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled?  $STR("console.Break On All Errors") : $STR("console.Disable Break On All Errors"));
+        return (enabled ? $STR("console.Disable Break On All Errors") :
+            $STR("console.Break On All Errors"));
     },
 
     enablePanel: function(module)
@@ -727,6 +732,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", breaking);
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // private
 

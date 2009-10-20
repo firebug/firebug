@@ -288,18 +288,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
 
-    /*
-     * We have just armed breakOnNext
-     */
-    onBreakingNext: function(debuggr, context)
-    {
-        var chrome = Firebug.chrome;
-        chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "false");  // mark armed
-        chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", $STR("DisableBreakOnNext"));
-        if (FBTrace.DBG_UI_LOOP)
-            FBTrace.sysout("debugger.onBreakingNext "+context.getName()+ " breakable: "+chrome.getGlobalAttribute("cmd_breakOnNext", "breakable"));
-    },
-
     abort: function(context)
     {
         if (context.stopped)
@@ -2358,6 +2346,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     name: "script",
     searchable: true,
+    breakable: true,
 
     initialize: function(context, doc)
     {
@@ -2535,11 +2524,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         FBL.hide(panelStatus, false);
 
         delete this.infoTipExpr;
-    },
-
-    getBreakOnNextTooltip: function(enabled)
-    {
-        return (enabled? $STR("script.Break On Next") : $STR("script.Disable Break On Next"));
     },
 
     search: function(text, reverse)
@@ -3064,9 +3048,19 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         return this.conditionEditor;
     },
 
-    breakOnNext: function()
+    breakOnNext: function(enabled)
     {
-        Firebug.Debugger.suspend(this.context);  // arm breakOnNext
+        // xxxHonza, xxxJJB: activate or deactivate BON.
+    },
+
+    getBreakOnNextTooltip: function(enabled)
+    {
+        return (enabled? $STR("script.Break On Next") : $STR("script.Disable Break On Next"));
+    },
+
+    shouldBreakOnNext: function()
+    {
+        // xxxHonza, xxxJJB: return true if BON is activated.
     },
 });
 

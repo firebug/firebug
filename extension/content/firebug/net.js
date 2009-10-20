@@ -376,6 +376,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     name: panelName,
     searchable: true,
     editable: true,
+    breakable: true,
 
     initialize: function(context, doc)
     {
@@ -458,9 +459,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             Firebug.NetMonitor.disabledPanelPage.hide(this);
             Firebug.chrome.setGlobalAttribute("cmd_togglePersistNet", "checked", this.persistContent);
-
-            // supports breakOnNext
-            Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
         }
         else
         {
@@ -801,12 +799,17 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     breakOnNext: function(breaking)
     {
-        this.context.breakOnXHR = breakding;
+        this.context.breakOnXHR = breaking;
+    },
+
+    shouldBreakOnNext: function()
+    {
+        return this.context.breakOnXHR;
     },
 
     getBreakOnNextTooltip: function(enabled)
     {
-        return (enabled? $STR("net.Break On XHR") :  $STR("net.Disable Break On XHR"));
+        return (enabled ? $STR("net.Disable Break On XHR") : $STR("net.Break On XHR"));
     },
 
     // Support for info tips.
