@@ -35,7 +35,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
     enableBreakOnNext: function(enable)
     {
-        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", enable?"false":"disabled");
+        Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", (enable?"true":"disabled") );
     },
 
     showPanel: function(browser, panel)
