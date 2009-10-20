@@ -1374,6 +1374,7 @@ this.scrollIntoCenterView = function(element, scrollBox, notX, notY)
 var cssKeywordMap = null;
 var cssPropNames = null;
 var cssColorNames = null;
+var imageRules = null;
 
 this.getCSSKeywordsByProperty = function(propName)
 {
@@ -1432,6 +1433,24 @@ this.isColorKeyword = function(keyword)
     }
 
     return cssColorNames.indexOf(keyword.toLowerCase()) != -1;
+};
+
+this.isImageRule = function(rule)
+{
+    if (!imageRules)
+    {
+        imageRules = [];
+
+        for (var i in this.cssInfo)
+        {
+            var r = i.toLowerCase();
+            var suffix = "image";
+            if (r.match(suffix + "$") == suffix)
+                imageRules.push(r);
+        }
+    }
+
+    return imageRules.indexOf(rule.toLowerCase()) != -1;
 };
 
 this.copyTextStyles = function(fromNode, toNode, style)

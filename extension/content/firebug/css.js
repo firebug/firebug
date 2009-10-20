@@ -897,16 +897,20 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
                 else if (cssValue.type == "url")
                 {
-                    var style = Firebug.getRepObject(target);
-                    var baseURL = this.getStylesheetURL(style);
-                    var relURL = parseURLValue(cssValue.value);
-                    var absURL = isDataURL(relURL) ? relURL:absoluteURL(relURL, baseURL);
-                    var repeat = parseRepeatValue(text);
+                    var propNameNode = getElementByClass(target.parentNode, "cssPropName");
+                    if (propNameNode && isImageRule(propNameNode.textContent))
+                    {
+                        var style = Firebug.getRepObject(target);
+                        var baseURL = this.getStylesheetURL(style);
+                        var relURL = parseURLValue(cssValue.value);
+                        var absURL = isDataURL(relURL) ? relURL:absoluteURL(relURL, baseURL);
+                        var repeat = parseRepeatValue(text);
 
-                    this.infoTipType = "image";
-                    this.infoTipObject = absURL;
+                        this.infoTipType = "image";
+                        this.infoTipObject = absURL;
 
-                    return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                        return Firebug.InfoTip.populateImageInfoTip(infoTip, absURL, repeat);
+                    }
                 }
             }
         }
