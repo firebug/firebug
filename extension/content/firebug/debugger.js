@@ -331,6 +331,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         fbs.suspend(this, context);
     },
 
+    unSuspend: function(context)
+    {
+        fbs.stopStepping();  // TODO per context
+    },
+
     runUntil: function(context, sourceFile, lineNo)
     {
         if (!context.debugFrame || !context.debugFrame.isValid)
@@ -3050,7 +3055,10 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     breakOnNext: function(enabled)
     {
-        // xxxHonza, xxxJJB: activate or deactivate BON.
+        if (enabled)
+            Firebug.Debugger.suspend(this.context);
+        else
+            Firebug.Debugger.unSuspend(this.context);
     },
 
     getBreakOnNextTooltip: function(enabled)
@@ -3060,7 +3068,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     shouldBreakOnNext: function()
     {
-        // xxxHonza, xxxJJB: return true if BON is activated.
+        var stepMode = fbs.getStepMode();
+        return stepMode && (stepMode == "STEP_SUSPEND");
     },
 });
 

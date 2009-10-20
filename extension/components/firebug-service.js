@@ -2319,6 +2319,14 @@ FirebugService.prototype =
         jsd.functionHook = null;
     },
 
+    /*
+     * Returns a string describing the step mode or null for not stepping.
+     */
+    getStepMode: function()
+    {
+        return getStepName(stepMode);
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     hookFunctions: function()
