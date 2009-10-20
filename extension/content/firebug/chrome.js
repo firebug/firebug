@@ -182,7 +182,6 @@ top.FirebugChrome =
         } catch (exc) {
             FBTrace.sysout("chrome.initializeUI fails "+exc, exc);
         }
-        var toolbar = $('fbToolbar');
     },
 
     shutdown: function()
