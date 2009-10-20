@@ -2417,6 +2417,14 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
         // The panel was disabled so, show the disabled page. This page also replaces the
         // old content so, the panel is fresh empty after it's enabled again.
         module.disabledPanelPage.show(this);
+
+        // Make sure toolbar buttons are not visible for disabled panels.
+        if (this.context.panelName == this.name)
+        {
+            if(FBTrace.DBG_PANELS)
+                FBTrace.sysout("Firebug.disablePanel state", persistedPanelState);
+            this.hide(persistedPanelState);
+        }
     },
 
     getTab: function()
