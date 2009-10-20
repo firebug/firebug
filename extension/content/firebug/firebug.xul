@@ -69,7 +69,7 @@
     <popupset id="mainPopupSet"/>
 
     <!-- A menu used within this external Firebug window. -->
-    <toolbox id="fbToolbox">
+    <toolbox id="fbExternalWindowMenuBar">
         <menubar>
             <menu id="file-menu" label="&fileMenu.label;"
                   accesskey="&fileMenu.accesskey;">
