@@ -2348,15 +2348,29 @@ Firebug.Panel =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Support for Break On Next
 
+    /**
+     * Called by the framework when the user clicks on the Break On Next button.
+     * @param {Boolean} enabled Set to true if the Break On Next feature is
+     * activated and set to false if the feature is deactivated.
+     */
     breakOnNext: function(enabled)
     {
     },
 
+    /**
+     * Called when a panel is selected/displayed. The method should return true
+     * if the Break On Next feature is currently enabled (activated) for this panel.
+     */
     shouldBreakOnNext: function()
     {
         return false;
     },
 
+    /**
+     * Returns labels for Break On Next tooltip (one for enabled and one for disabled state).
+     * @param {Boolean} enabled Set to true if the Break On Next feature is
+     * currently activated for this panel.
+     */
     getBreakOnNextTooltip: function(enabled)
     {
         return null;
