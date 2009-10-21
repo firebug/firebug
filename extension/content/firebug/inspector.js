@@ -609,6 +609,8 @@ quickInfoBox =
     boxEnabled: undefined,
     
     popupVisible: false,
+    
+    boxLeft: true,
 
     show: function(element)
     {
@@ -630,7 +632,7 @@ quickInfoBox =
         {
             XULQIP.hidePopup();
             XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
-            XULQIP.addEventListener("mouseover", function(){_this.move();}, true);
+            XULQIP.addEventListener("mousemove", function(){_this.move();}, false);
             this.popupVisible = true;
         }
 
@@ -670,10 +672,12 @@ quickInfoBox =
 
         XULQIP.hidePopup();
 
-        if (mx < XULQIP.clientWidth + 5)
+        if (this.boxLeft)
             XULQIP.openPopup($('content').tabContainer, "after_end", -5, 5, true);
         else
             XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
+
+        this.boxLeft = !this.boxLeft;
     },
     
     addRows: function(domBase, vbox, attribs, computedStyle)
