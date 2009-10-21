@@ -1354,8 +1354,8 @@ FirebugService.prototype =
                         FBTrace.sysout("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName);
                 }
             } catch(exc) {
-                FBTrace.sysout("onEventScriptCreated failed: ", exc);
-                ERROR("onEventScriptCreated failed: "+exc);
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("onEventScriptCreated failed: "+exc, exc);
             }
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
                 FBTrace.sysout("onEventScriptCreated frame.script.tag:"+frame.script.tag+" href: "+(sourceFile?sourceFile.href:"no sourceFile"), sourceFile);
