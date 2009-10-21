@@ -1066,10 +1066,14 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var source = creatorURL + "/"+getUniqueId();
         }
 
+        var lines = splitLines(source);
+
         var urlDescribed = this.getDynamicURL(context, normalizeURL(frame.script.fileName), source, "event");
         var url = urlDescribed.href;
 
-        var lines = context.sourceCache.store(url, source);
+        context.sourceCache.invalidate(url);
+        context.sourceCache.storeSplitLines(url, lines);
+
         var sourceFile = new Firebug.EventSourceFile(url, frame.script, "event:"+script.functionName+"."+script.tag, lines, new ArrayEnumerator(innerScriptArray));
         this.watchSourceFile(context, sourceFile);
 
@@ -1404,7 +1408,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (url)
             return url;
 
-           var url = this.getURLFromMD5(callerURL, lines, kind);
+        var url = this.getURLFromMD5(callerURL, lines, kind);
         if (url)
             return url;
 
