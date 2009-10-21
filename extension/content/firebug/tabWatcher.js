@@ -618,6 +618,8 @@ var TabProgressListener = extend(BaseProgressListener,
                 TabWatcher.watchTopWindow(progress.DOMWindow, uri);
             else // the location change to a non-uri means we need to hide
                 TabWatcher.watchContext(progress.DOMWindow, null, true);
+
+            Firebug.Inspector.hideQuickInfoBox();
         }
     },
 

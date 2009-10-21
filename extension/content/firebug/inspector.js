@@ -394,6 +394,14 @@ Firebug.Inspector = extend(Firebug.Module,
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
             
         Firebug.setPref(Firebug.prefDomain, "showQuickInfoBox", quickInfoBox.boxEnabled);
+    },
+    
+    hideQuickInfoBox: function()
+    {
+        if(quickInfoBox.popupVisible)
+            quickInfoBox.hide();
+
+        this.inspectNode(null);
     }
 });
 
