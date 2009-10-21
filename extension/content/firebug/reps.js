@@ -1387,7 +1387,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     hasErrorBreak: function(error)
     {
-        return fbs.hasErrorBreakpoint(error.href, error.lineNo);
+        return fbs.hasErrorBreakpoint(normalizeURL(error.href), error.lineNo);
     },
 
     getMessage: function(message)
@@ -1481,7 +1481,8 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     breakOnThisError: function(error, context)
     {
-        var sourceFile = context.sourceFileMap[error.href];
+
+        var sourceFile = context.sourceFileMap[normalizeURL(error.href)];
         if (!sourceFile)
         {
             Firebug.Console.logFormatted(["reps.breakOnThisError has not source file for error.href: "+error.href, error], context, 'error', true);
