@@ -4465,7 +4465,7 @@ Firebug.NetMonitor.DebuggerListener =
 {
     getBreakpoints: function(context, groups)
     {
-        if (!context.netProgress.breakpoints.isEmpty())
+        if (context.netProgress && !context.netProgress.breakpoints.isEmpty())
             groups.push(context.netProgress.breakpoints);
     },
 };
