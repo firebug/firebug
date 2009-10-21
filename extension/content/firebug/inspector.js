@@ -66,7 +66,9 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if (element)
         {
-            if (context && context.window && context.window.document)
+            if(!isVisibleElement(element))
+                highlighter.unhighlight(context);
+            else if (context && context.window && context.window.document)
                 highlighter.highlight(context, element, boxFrame);
         }
         else if (oldContext)
@@ -1138,6 +1140,25 @@ function rgbToHex(value)
     return value.replace(/\brgb\((\d{1,3}),\s*(\d{1,3}),\s*(\d{1,3})\)/gi, function(_, r, g, b) {
     return '#' + ((1 << 24) + (r << 16) + (g << 8) + (b << 0)).toString(16).substr(-6).toUpperCase();
     });
+}
+
+function isVisibleElement(elt)
+{
+    var invisibleElements =
+        {
+            "head": true,
+            "base": true,
+            "basefont": true,
+            "isindex": true,
+            "link": true,
+            "meta": true,
+            "script": true,
+            "style": true,
+            "title": true,
+            "isindex": true
+        }
+
+    return !invisibleElements[elt.nodeName.toLowerCase()];
 }
 // ************************************************************************************************
 
