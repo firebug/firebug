@@ -497,11 +497,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         delete this.layoutInterval;
     },
 
-    getBreakOnNextTooltip: function(enabled)
-    {
-        return (enabled ? $STR("net.Break On XHR") : $STR("net.Disable Break On XHR"));
-    },
-
     updateOption: function(name, value)
     {
         if (name == "netFilterCategory")
