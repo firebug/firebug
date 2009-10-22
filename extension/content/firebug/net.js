@@ -1094,11 +1094,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 hrefLabel.nodeValue = NetRequestEntry.getHref(file);
             }
 
-            var timeLabel = row.childNodes[5].firstChild.lastChild.firstChild;
+            var timeLabel = row.childNodes[5].childNodes[1].lastChild.firstChild;
 
             if (file.loaded)
             {
-                removeClass(row, "collapsed");
                 setClass(row, "loaded");
                 timeLabel.innerHTML = NetRequestEntry.formatTime(this.elapsed);
             }
@@ -1118,7 +1117,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     updateTimeline: function(rightNow)
     {
-        //var rootFile = this.context.netProgress.rootFile; // XXXjjb never read?
         var tbody = this.table.firstChild;
 
         // XXXjoe Don't update rows whose phase is done and layed out already
@@ -1137,7 +1135,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
-            var blockingBar = row.childNodes[5].firstChild.childNodes[1];
+            var blockingBar = row.childNodes[5].childNodes[1].childNodes[1];
             var resolvingBar = blockingBar.nextSibling;
             var connectingBar = resolvingBar.nextSibling;
             var sendingBar = connectingBar.nextSibling;
@@ -1192,7 +1190,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             this.phaseElapsed = this.phaseEndTime - phase.startTime;
         }
 
-        var elapsed = file.loaded ? file.endTime - file.startTime : this.phaseEndTime - file.startTime;
+        var elapsed = file.loaded ? file.endTime - file.startTime : 0; /*this.phaseEndTime - file.startTime*/
         this.barOffset = Math.floor(((file.startTime-this.phaseStartTime)/this.phaseElapsed) * 100);
 
         var blockingEnd = (file.sendingTime != file.startTime) ? file.sendingTime : file.waitingForTime;
@@ -1776,6 +1774,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                     DIV({"class": "netSizeLabel netLabel"}, "$file.file|getSize")
                 ),
                 TD({"class": "netTimeCol netCol a11yFocus", "role": "gridcell", "aria-describedby": "fbNetTimeInfoTip"  },
+                    DIV({"class": "netLoadingIcon"}),
                     DIV({"class": "netBar"},
                         "&nbsp;",
                         DIV({"class": "netBlockingBar", style: "left: $file.offset"}),
@@ -1824,7 +1823,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
             TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role" : "gridcell"},
-                DIV({"class": "netBar"},
+                DIV({"class": "netSummaryBar"},
                     DIV({"class": "netCacheSizeLabel netSummaryLabel"},
                         "(",
                         SPAN("0KB"),

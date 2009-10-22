@@ -263,7 +263,31 @@
 
 /************************************************************************************************/
 
+.netLoadingIcon {
+    position: absolute;
+    border: 0;
+    margin-left: 14px;
+    width: 16px;
+    height: 16px;
+    background: transparent no-repeat 0 0;
+    background-image: url(chrome://firebug/skin/loading_16.gif);
+    display:inline-block;
+}
+
+.loaded .netLoadingIcon {
+    display: none;
+}
+
+/************************************************************************************************/
+
 .netBar {
+    position: relative;
+    border-right: 50px solid transparent;
+    width: 100%;
+    display:inline-block;
+}
+
+.netSummaryBar {
     position: relative;
     border-right: 50px solid transparent;
 }
