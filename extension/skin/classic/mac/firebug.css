@@ -92,6 +92,10 @@
     -moz-border-image: url(chrome://firebug/skin/mac/search-panel-down.png) 25 50 18 12 / 25px 50px 18px 12px repeat;
 }
 
+#fbSearchOptionsPanel > vbox {
+  margin-right: -38px;
+}
+
 .fbsearch-options-label {
     color: #ffffff;
 }
