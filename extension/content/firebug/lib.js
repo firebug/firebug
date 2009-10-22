@@ -6289,7 +6289,7 @@ this.formatSize = function(bytes)
 this.formatTime = function(elapsed)
 {
     if (elapsed == -1)
-        return "_"; // should be &nbsp; but this will be escaped so we need something that is no whitespace
+        return "";
     else if (elapsed == 0)
         return "0";
     else if (elapsed < 1000)
