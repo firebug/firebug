@@ -1496,13 +1496,13 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                         title: $STR("net.header.Domain Tooltip")},
                         $STR("net.header.Domain"))
                     ),
-                    TD({id: "netSizeCol", width: "4%", "class": "netHeaderCell alphaValue a11yFocus",
+                    TD({id: "netSizeCol", width: "4%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Size Tooltip")},
                         $STR("net.header.Size"))
                     ),
-                    TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell alphaValue a11yFocus",
+                    TD({id: "netTimeCol", width: "53%", "class": "netHeaderCell a11yFocus",
                         "role": "columnheader"},
                         DIV({"class": "netHeaderCellBox",
                         title: $STR("net.header.Timeline Tooltip")},
@@ -1516,11 +1516,114 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     {
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.onClickHeader\n");
-        if (!isLeftClick(event) && !(event.type == "keypress" && event.keyCode == 13)) //xxxHans also support enter key for sorting
+
+        // Also support enter key for sorting
+        if (!isLeftClick(event) && !(event.type == "keypress" && event.keyCode == 13))
             return;
 
-        // TODO: sorting
-        //xxxHans Could you ping me when this is implemented, so that I can add the appropriate aria-sort attribute values?
+        var table = getAncestorByClass(event.target, "netTable");
+        var column = getAncestorByClass(event.target, "netHeaderCell");
+        this.sortColumn(table, column);
+    },
+
+    sortColumn: function(table, col, direction)
+    {
+        if (!col)
+            return;
+
+        var numerical = !hasClass(col, "alphaValue");
+
+        var colIndex = 0;
+        for (col = col.previousSibling; col; col = col.previousSibling)
+            ++colIndex;
+
+        // the first breakpoint bar column is not sortable.
+        if (colIndex == 0)
+            return;
+
+        this.sort(table, colIndex, numerical, direction);
+    },
+
+    sort: function(table, colIndex, numerical, direction)
+    {
+        var tbody = table.lastChild;
+        var headerRow = tbody.firstChild;
+
+        // Remove class from the currently sorted column
+        var headerSorted = getChildByClass(headerRow, "netHeaderSorted");
+        removeClass(headerSorted, "netHeaderSorted");
+
+        // Mark new column as sorted.
+        var header = headerRow.childNodes[colIndex];
+        setClass(header, "netHeaderSorted");
+
+        // If the column is already using required sort direction, bubble out.
+        if ((direction == "desc" && header.sorted == 1) ||
+            (direction == "asc" && header.sorted == -1))
+            return;
+
+        var colID = header.getAttribute("id");
+
+        var values = [];
+        for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
+        {
+            if (!row.repObject)
+                continue;
+
+            var cell = row.childNodes[colIndex];
+            var value = numerical ? parseFloat(cell.textContent) : cell.textContent;
+
+            if (colID == "netTimeCol")
+                value = row.repObject.startTime;
+            else if (colID == "netSizeCol")
+                value = row.repObject.size;
+
+            if (hasClass(row, "opened"))
+            {
+                var netInfoRow = row.nextSibling;
+                values.push({row: row, value: value, info: netInfoRow});
+                row = netInfoRow;
+            }
+            else
+            {
+                values.push({row: row, value: value});
+            }
+        }
+
+        values.sort(function(a, b) { return a.value < b.value ? -1 : 1; });
+
+        if ((header.sorted && header.sorted == 1) || (!header.sorted && direction == "asc"))
+        {
+            removeClass(header, "sortedDescending");
+            setClass(header, "sortedAscending");
+
+            header.sorted = -1;
+
+            for (var i = 0; i < values.length; ++i)
+            {
+                tbody.appendChild(values[i].row);
+                if (values[i].info)
+                    tbody.appendChild(values[i].info);
+            }
+        }
+        else
+        {
+            removeClass(header, "sortedAscending");
+            setClass(header, "sortedDescending");
+
+            header.sorted = 1;
+
+            for (var i = values.length-1; i >= 0; --i)
+            {
+                tbody.appendChild(values[i].row);
+                if (values[i].info)
+                    tbody.appendChild(values[i].info);
+            }
+        }
+
+        // Make sure the summary row is again at the end.
+        var summaryRow = getElementByClass(tbody, "netSummaryRow");
+        tbody.appendChild(summaryRow);
     },
 
     supportsObject: function(object)
