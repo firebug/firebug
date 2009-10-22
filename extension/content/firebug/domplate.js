@@ -443,6 +443,7 @@ DomplateTag.prototype =
             return parent;
         }
         var js = fnBlock.join("");
+        // Exceptions on this line are often in the eval
         this.renderDOM = eval(js);
     },
 
