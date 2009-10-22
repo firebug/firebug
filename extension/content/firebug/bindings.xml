@@ -280,8 +280,11 @@
         <![CDATA[
             this.setAttribute('role', 'tab');
             this.setAttribute('aria-haspopup', 'true');
-            this.tabMenu = document.createElement("panelTabMenu");
-            this.appendChild(this.tabMenu);
+            if (!this.tabMenu)
+            {
+                this.tabMenu = document.createElement("panelTabMenu");
+                this.appendChild(this.tabMenu);
+            }
             return this.tabMenu;
         ]]>
         </constructor>
