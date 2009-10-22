@@ -1131,6 +1131,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             if (!file)
                 continue;
 
+            if (!file.loaded)
+                continue;
+
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
@@ -1742,7 +1745,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         FOR("file", "$files",
             TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow",
                 onclick: "$onClick", "role": "row", "aria-expanded": "false",
-                $collapsed: "$file.file|hideRow",
                 $hasHeaders: "$file.file|hasResponseHeaders",
                 $loaded: "$file.file.loaded",
                 $responseError: "$file.file|isError",
@@ -1912,11 +1914,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             return "category-" + category;
 
         return "category-undefined";
-    },
-
-    hideRow: function(file)
-    {
-        return !file.loaded;
     },
 
     getInFrame: function(file)
