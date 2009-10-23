@@ -369,7 +369,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
 
                 stream.close();
-                return ["Failed to load source for: " + url]; // xxxHonza: localization?
+                return [$STR("message.Failed to load source for") + ": " + url];
             }
 
             // Don't load responses that shouldn't be cached.
