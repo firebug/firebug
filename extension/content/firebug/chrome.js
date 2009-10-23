@@ -122,11 +122,11 @@ top.FirebugChrome =
         // Initialize Firebug Tools & Firebug Icon menus.
         var firebugMenuPopup = $("fbFirebugMenuPopup");
         var toolsMenu = $("menu_firebug");
-        if (toolsMenu)
+        if (toolsMenu && !getElementByClass(toolsMenu, "fbFirebugMenuPopup"))
             toolsMenu.appendChild(firebugMenuPopup.cloneNode(true));
 
         var iconMenu = $("fbFirebugMenu");
-        if (iconMenu)
+        if (iconMenu && !getElementByClass(iconMenu, "fbFirebugMenuPopup"))
             iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
 
         if (FBTrace.DBG_INITIALIZE)

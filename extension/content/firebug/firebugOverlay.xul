@@ -323,7 +323,7 @@
         </hbox>
 
         <!-- Firebug Tools & Icon menu -->
-        <menupopup id="fbFirebugMenuPopup" role="menu"
+        <menupopup id="fbFirebugMenuPopup" role="menu" class="fbFirebugMenuPopup"
                    onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
 
             <!-- Open -->
