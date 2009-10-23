@@ -280,14 +280,7 @@
 
 /************************************************************************************************/
 
-.netBar {
-    position: relative;
-    border-right: 50px solid transparent;
-    width: 100%;
-    display:inline-block;
-}
-
-.netSummaryBar {
+.netBar, .netSummaryBar {
     position: relative;
     border-right: 50px solid transparent;
 }
