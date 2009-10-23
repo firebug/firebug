@@ -28,7 +28,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
-        if(context && context.window.document)
+        if(context && context.window && context.window.document)
         {
             context.window.document.addEventListener("mousemove", function(event)
             {
