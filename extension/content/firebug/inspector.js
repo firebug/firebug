@@ -335,6 +335,7 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         try {
             win.removeEventListener("mouseover", context.onPreInspectMouseOver, true);
+            this.hideQuickInfoBox();
         } catch (ex) {
             // Get unfortunate errors here sometimes, so let's just ignore them
             // since the window is going away anyhow
