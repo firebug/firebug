@@ -1553,16 +1553,18 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         // Remove class from the currently sorted column
         var headerSorted = getChildByClass(headerRow, "netHeaderSorted");
         removeClass(headerSorted, "netHeaderSorted");
+        if (headerSorted)
+            headerSorted.removeAttribute("aria-sort");
 
         // Mark new column as sorted.
         var header = headerRow.childNodes[colIndex];
         setClass(header, "netHeaderSorted");
-
         // If the column is already using required sort direction, bubble out.
         if ((direction == "desc" && header.sorted == 1) ||
             (direction == "asc" && header.sorted == -1))
             return;
-
+        if (header)
+            header.setAttribute("aria-sort", header.sorted === -1 ? "descending" : "ascending");
         var colID = header.getAttribute("id");
 
         var values = [];
@@ -1597,7 +1599,6 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         {
             removeClass(header, "sortedDescending");
             setClass(header, "sortedAscending");
-
             header.sorted = -1;
 
             for (var i = 0; i < values.length; ++i)
