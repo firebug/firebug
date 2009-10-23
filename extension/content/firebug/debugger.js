@@ -3065,9 +3065,9 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.Debugger.unSuspend(this.context);
     },
 
-    getBreakOnNextTooltip: function(enabled)
+    getBreakOnNextTooltip: function(armed)
     {
-        return (enabled? $STR("script.Break On Next") : $STR("script.Disable Break On Next"));
+        return (armed ? $STR("script.Disable Break On Next") : $STR("script.Break On Next"));
     },
 
     shouldBreakOnNext: function()
