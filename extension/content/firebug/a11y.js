@@ -652,7 +652,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             if (this.isDirCell(target))
             {
                 var row = getAncestorByClass(target, 'memberRow');
-                var toggleElem = getChildByClass(row.cells[0], "memberLabel")
+                var toggleElem = getChildByClass(row.cells[1], "memberLabel")
                 if (!goLeft && hasClass(row, 'hasChildren'))
                 {
                     if (hasClass(row, 'opened'))
@@ -680,7 +680,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                             return e.rowIndex < row.rowIndex && e.getAttribute('level') == targetLevel;
                             }, this);
                         if (newRows.length)
-                            this.focus(newRows[newRows.length -1].cells[1].firstChild);
+                            this.focus(newRows[newRows.length -1].cells[2].firstChild);
                     }
                 }
                 cancelEvent(event);
@@ -1616,8 +1616,8 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
             case 'dom':
             case 'domSide':
-                if (target.cells && target.cells[0])
-                    editor.input.setAttribute('aria-label', target.cells[0].textContent);
+                if (target.cells && target.cells[1])
+                    editor.input.setAttribute('aria-label', target.cells[1].textContent);
                 break;
         }
     },
@@ -2077,9 +2077,9 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y|| !row)
             return;
-        if (!row.cells[1])
+        if (!row.cells[2])
             return;
-        var cellChild = row.cells[1].firstChild;
+        var cellChild = row.cells[2].firstChild;
         if (cellChild)
         {
             if (hasClass(row, 'hasChildren'))
