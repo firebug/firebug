@@ -1,11 +1,11 @@
 Release Notes for Firebug 1.5
-Firebug 1.5 is Firebug 1.4 with additions by John J. Barton, Jan Odvarko Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins, Rob Campbell.
-Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodríguez Colmeiro, Curtis Bartley, Mike Collins, Rob Campbell and Templarian
+Firebug 1.5 is Firebug 1.4 with additions by John J. Barton, Jan Odvarko Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodrï¿½guez Colmeiro, Curtis Bartley, Mike Collins, Rob Campbell.
+Firebug 1.4 is Firebug 1.3 with additions by John J. Barton, Jan Odvarko, Hans Hillen, Kevin Decker, Mike Radcliffe, Hernan Rodrï¿½guez Colmeiro, Curtis Bartley, Mike Collins, Rob Campbell and Templarian
 Firebug 1.3 is Firebug 1.2 with additions by John J. Barton, Jan Odvarko.
 Firebug 1.2 is Firebug 1.1 with additions by John J. Barton and Jan Odvarko.
 Firebug 1.1 is Firebug 1.05 by Joe Hewitt with additions by John J. Barton and Max Stepanov
 
-Firebug 1.5 supports Firefox 3.0 and Firefox 3.5
+Firebug 1.5 supports Firefox 3.0 (min 3.0.11) and Firefox 3.5
 
 == New Features ==
  * Implement ActivateSameDomain option, default true, to cause an activate foo.bar.com to activate *.foo.com.
@@ -63,12 +63,12 @@ getfirebug.com has Firebug 1.5a18 with the following fixes planned for 1.4.1:
 
     * Issue 2077: Reload after break on error results in blank page
     * Issue 1948: AJAX callback not fired in Firefox 3.5 + Firebug 1.4b3
-    * Issue 1860: console.log prints undefined where alert prints a value when ‘%’ appears in log string.
+    * Issue 1860: console.log prints undefined where alert prints a value when ï¿½%ï¿½ appears in log string.
     * Locale updates: Hungarian hu-HU, Polish pl-PL. Romanian ro-RO, Russian ru-RU
 
-In addition there are previews of two features that will ultimately be moved into Honza’s Activation extension:
+In addition there are previews of two features that will ultimately be moved into Honzaï¿½s Activation extension:
 
-    * Implement onByDefault option (Firebug > Firebug Icon Menu > Options > On By Default). Firebug will be active on every page, unless you hit “Off”. Once you hit Off on a page, Firebug won’t open for that page until you explicitly turn it on.
+    * Implement onByDefault option (Firebug > Firebug Icon Menu > Options > On By Default). Firebug will be active on every page, unless you hit ï¿½Offï¿½. Once you hit Off on a page, Firebug wonï¿½t open for that page until you explicitly turn it on.
     * Implement log activation URIs. (Firebug Status bar icon > Right click > Log Activation URIs). Prints into the Console panel of the seletected web page in the tab browser.
 
 ---------------
