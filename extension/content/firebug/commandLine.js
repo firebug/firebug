@@ -273,25 +273,38 @@ Firebug.CommandLine = extend(Firebug.Module,
     enter: function(context, command)
     {
         var commandLine = getCommandLine(context);
+        var currentURI = Firebug.chrome.getCurrentURI();
         var expr = command ? command : commandLine.value;
+        var noscript = noscriptOverlay && noscriptOverlay.ns;
+        var noscriptAllows = noscript ? noscript.jsEnabled || noscript.isJSEnabled(noscript.getSite(currentURI.spec)) : true;
+        var MozJSEnabled = navigator.preference("javascript.enabled");
+        var jsEnabled = MozJSEnabled && noscriptAllows;
+
         if (expr == "")
             return;
 
-        if (!Firebug.largeCommandLine)
+        if(jsEnabled)
         {
-            this.clear(context);
-            this.appendToHistory(expr);
+            if (!Firebug.largeCommandLine)
+            {
+                this.clear(context);
+                this.appendToHistory(expr);
 
-            Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
+                Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
+            }
+            else
+            {
+                var shortExpr = cropString(stripNewLines(expr), 100);
+                Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
+            }
+
+            var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
+            this.evaluate(expr, context, null, null, goodOrBad);
         }
+        else if(!MozJSEnabled)
+            Firebug.Console.log($STR("console.JSDisabledInFirefoxPrefs"), context, "info");
         else
-        {
-            var shortExpr = cropString(stripNewLines(expr), 100);
-            Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
-        }
-
-        var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
-        this.evaluate(expr, context, null, null, goodOrBad);
+            Firebug.Console.log($STR("console.JSDisabledInNoScript"), context, "info");
     },
 
     enterMenu: function(context)
