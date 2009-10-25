@@ -273,23 +273,17 @@ Firebug.CommandLine = extend(Firebug.Module,
     enter: function(context, command)
     {
         var commandLine = getCommandLine(context);
-        var currentURI = Firebug.chrome.getCurrentURI();
         var expr = command ? command : commandLine.value;
-        var noscript = noscriptOverlay && noscriptOverlay.ns;
-        var noscriptAllows = noscript ? noscript.jsEnabled || noscript.isJSEnabled(noscript.getSite(currentURI.spec)) : true;
-        var MozJSEnabled = navigator.preference("javascript.enabled");
-        var jsEnabled = MozJSEnabled && noscriptAllows;
-
         if (expr == "")
             return;
+        var MozJSEnabled = navigator.preference("javascript.enabled");
 
-        if(jsEnabled)
+        if(MozJSEnabled)
         {
             if (!Firebug.largeCommandLine)
             {
                 this.clear(context);
                 this.appendToHistory(expr);
-
                 Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
             }
             else
@@ -299,12 +293,19 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
 
             var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
-            this.evaluate(expr, context, null, null, goodOrBad);
+            var noscript = noscriptOverlay && noscriptOverlay.ns;
+            var uri = noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+            if(noscript && !(noscript.jsEnabled || noscript.isJSEnabled(uri)))
+            {
+                noscript.setJSEnabled(uri, true);
+                this.evaluate(expr, context, null, null, goodOrBad);
+                noscript.setJSEnabled(uri, false);
+            }
+            else
+                this.evaluate(expr, context, null, null, goodOrBad);
         }
-        else if(!MozJSEnabled)
-            Firebug.Console.log($STR("console.JSDisabledInFirefoxPrefs"), context, "info");
         else
-            Firebug.Console.log($STR("console.JSDisabledInNoScript"), context, "info");
+            Firebug.Console.log($STR("console.JSDisabledInFirefoxPrefs"), context, "info");
     },
 
     enterMenu: function(context)
