@@ -104,7 +104,7 @@ Firebug.Inspector = extend(Firebug.Module,
         var htmlPanel = Firebug.chrome.switchToPanel(context, "html");
 
         if (Firebug.isDetached())
-            Firebug.chrome.focus();
+            context.window.focus();
         else if (Firebug.isMinimized())
             Firebug.showBar(true);
 
