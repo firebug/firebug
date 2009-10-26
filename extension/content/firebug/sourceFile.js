@@ -663,17 +663,23 @@ Firebug.SourceFile.getSourceFileByScript = function(context, script)
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below
     var lucky = context.sourceFileMap[script.fileName];  // we won't be lucky for file:/ urls, no normalizeURL applied
-    if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
+    if (FBTrace.DBG_SOURCEFILES && lucky)
+        FBTrace.sysout("getSourceFileByScript trying to be lucky for "+
+            script.tag + " in "+lucky, script);
+
     if (lucky && lucky.hasScript(script))
         return lucky;
-     if (FBTrace.DBG_SOURCEFILES)
-     FBTrace.sysout("getSourceFileByScript looking for "+script.tag+"@"+script.fileName+" in "+context.getName()+": ", context.sourceFileMap);
-     for (var url in context.sourceFileMap)
-     {
-         var sourceFile = context.sourceFileMap[url];
-         if (sourceFile.hasScript(script))
-             return sourceFile;
-     }
+
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("getSourceFileByScript looking for "+script.tag+"@"+script.fileName+" in "+
+            context.getName()+": ", context.sourceFileMap);
+
+    for (var url in context.sourceFileMap)
+    {
+        var sourceFile = context.sourceFileMap[url];
+        if (sourceFile.hasScript(script))
+            return sourceFile;
+    }
 };
 
 Firebug.SourceFile.getScriptAnalyzer = function(context, script)
