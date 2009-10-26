@@ -460,6 +460,25 @@ InsideOutBox.prototype =
         }
     },
 
+    /**
+     * Determines if the given node is an ancestor of the current root.
+     */
+    isInExistingRoot: function(node)
+    {
+        if (FBTrace.DBG_HTML)
+          FBTrace.sysout("insideOutBox.isInExistingRoot for ", node);
+        var parentNode = node;
+        while (parentNode && parentNode != this.rootObject)
+        {
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout(parentNode.localName+" < ", parentNode);
+            var parentNode = this.view.getParentObject(parentNode);
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout((parentNode?" (parent="+parentNode.localName+")":" (null parentNode)"+"\n"), parentNode);
+        }
+        return parentNode == this.rootObject;
+    },
+
     getRootNode: function(node)
     {
         if (FBTrace.DBG_HTML)

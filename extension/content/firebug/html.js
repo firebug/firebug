@@ -223,6 +223,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // is only bad for performance
         if (attrName == "curpos")
             return;
+
+        // Due to the delay call this may or may not exist in the tree anymore
+        if (!this.ioBox.isInExistingRoot(target))
+        {
+            if (FBTrace.DBG_HTML)   FBTrace.sysout("mutateAttr: different tree " + target, target);
+            return;
+        }
+
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName, target);
 
@@ -278,14 +286,23 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             if (nodeAttr)
             {
                 nodeAttr.parentNode.removeChild(nodeAttr);
-
-                this.highlightMutation(objectNodeBox, objectNodeBox, "mutated");
             }
+
+            // We want to highlight regardless as the domplate may have been
+            // generated after the attribute was removed from the node
+            this.highlightMutation(objectNodeBox, objectNodeBox, "mutated");
         }
     },
 
     mutateText: function(target, parent, textValue)
     {
+        // Due to the delay call this may or may not exist in the tree anymore
+        if (!this.ioBox.isInExistingRoot(target))
+        {
+            if (true || FBTrace.DBG_HTML)   FBTrace.sysout("mutateText: different tree " + target, target);
+            return;
+        }
+
         this.markChange();
 
         var parentNodeBox = Firebug.scrollToMutations || Firebug.expandMutations
@@ -322,6 +339,12 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
                 this.highlightMutation(textNodeBox, parentNodeBox, "mutated");
             }
+            else if (Firebug.scrollToMutations || Firebug.expandMutations)
+            {
+                // We are not currently rendered but we are set to highlight
+                var objectBox = this.ioBox.createObjectBox(target);
+                this.highlightMutation(objectBox, objectBox, "mutated");
+            }
         }
     },
 
@@ -329,6 +352,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         if (FBTrace.DBG_HTML)
             FBTrace.sysout("\nhtml.mutateNode target:"+target+" parent:"+parent+(removal?"REMOVE":"")+"\n");
+
+        // Due to the delay call this may or may not exist in the tree anymore
+        if (!removal && !this.ioBox.isInExistingRoot(target))
+        {
+            if (FBTrace.DBG_HTML)   FBTrace.sysout("mutateNode: different tree " + target, target);
+            return;
+        }
 
         this.markChange();  // This invalidates the panels for every mutate
 
@@ -385,7 +415,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
                 this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
 
-                if (Firebug.scrollToMutations || Firebug.expandMutations)
+                if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
                 {
                     var objectBox = this.ioBox.createObjectBox(target);
                     this.highlightMutation(objectBox, objectBox, "mutated");
@@ -405,6 +435,12 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 this.ioBox.select(parent, true);
 
             this.highlightMutation(newParentNodeBox, newParentNodeBox, "mutated");
+
+            if (!removal && (Firebug.scrollToMutations || Firebug.expandMutations))
+            {
+                var objectBox = this.ioBox.createObjectBox(target);
+                this.highlightMutation(objectBox, objectBox, "mutated");
+            }
         }
     },
 
