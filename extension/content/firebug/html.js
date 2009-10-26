@@ -299,7 +299,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // Due to the delay call this may or may not exist in the tree anymore
         if (!this.ioBox.isInExistingRoot(target))
         {
-            if (true || FBTrace.DBG_HTML)   FBTrace.sysout("mutateText: different tree " + target, target);
+            if (FBTrace.DBG_HTML)   FBTrace.sysout("mutateText: different tree " + target, target);
             return;
         }
 
