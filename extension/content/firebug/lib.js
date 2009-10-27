@@ -6368,6 +6368,18 @@ this.ReversibleRegExp = function(regex, flags)
     };
 };
 
+this.unwrapObject = function(object)
+{
+    // TODO: We might be able to make this check more authoritative with QueryInterface.
+    if (!object)
+        return object;
+
+    if (object.wrappedJSObject)
+        return object.wrappedJSObject;
+
+    return object;
+}
+
 }).apply(FBL);
 } catch(e) /*@explore*/
 { /*@explore*/

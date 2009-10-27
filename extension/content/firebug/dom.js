@@ -1779,20 +1779,6 @@ function findRow(parentNode, object)
     return row;
 }
 
-function unwrapObject(object)
-{
-    // TODO: Move this to some global location
-    // TODO: Unwrapping should be centralized rather than sprinkling it around ad hoc.
-    // TODO: We might be able to make this check more authoritative with QueryInterface.
-    if (!object)
-        return object;
-
-    if (object.wrappedJSObject)
-        return object.wrappedJSObject;
-
-    return object;
-}
-
 // ************************************************************************************************
 
 Firebug.DOMModule.DebuggerListener =
