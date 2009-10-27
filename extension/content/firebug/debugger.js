@@ -2458,9 +2458,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var enabled = Firebug.Debugger.isAlwaysEnabled();
 
-        // The "enable/disable" button is always visible.
-        this.showToolbarButtons("fbScriptButtons", true);
-
         // These buttons are visible only if debugger is enabled.
         this.showToolbarButtons("fbLocationSeparator", enabled);
         this.showToolbarButtons("fbDebuggerButtons", enabled);
