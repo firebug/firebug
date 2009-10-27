@@ -2339,6 +2339,9 @@ Firebug.Panel =
     highlight: function(show)
     {
         var tab = this.getTab();
+        if (!tab)
+            return;
+
         if (show)
             tab.setAttribute("highlight", "true");
         else
