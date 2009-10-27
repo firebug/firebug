@@ -121,7 +121,6 @@ pref("extensions.firebug.DBG_TOPLEVEL", false);     // top level jsd scripts    
 pref("extensions.firebug.DBG_STACK", false);        // call stack, mostly debugger.js            /*@explore*/
 pref("extensions.firebug.DBG_UI_LOOP", false);      // debugger.js                               /*@explore*/
 pref("extensions.firebug.DBG_ERRORS", false);       // error.js                                  /*@explore*/
-pref("extensions.firebug.DBG_EVENTS", false);       // debugger.js for event handlers, need more /*@explore*/
 pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon functions          /*@explore*/
 pref("extensions.firebug.DBG_EVAL", false);         // debugger.js and firebug-service.js        /*@explore*/
 pref("extensions.firebug.DBG_PANELS", false);       // panel selection                           /*@explore*/
