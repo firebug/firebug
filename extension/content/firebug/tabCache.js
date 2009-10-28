@@ -379,7 +379,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not text: " + url);
 
                 stream.close();
-                return ["The resource from this URL is not text: " + url]; // xxxHonza: localization?
+                return [$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
             responseText = readFromStream(stream, charset);
