@@ -1,4 +1,4 @@
-8/29/2007/* See license.txt for terms of usage */
+/* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
 
@@ -28,7 +28,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
-        if(context && context.window.document)
+        if(context && context.window && context.window.document)
         {
             context.window.document.addEventListener("mousemove", function(event)
             {
