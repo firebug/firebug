@@ -1447,7 +1447,7 @@ this.isImageRule = function(rule)
         {
             var r = i.toLowerCase();
             var suffix = "image";
-            if (r.match(suffix + "$") == suffix)
+            if (r.match(suffix + "$") == suffix || r == "background")
                 imageRules.push(r);
         }
     }
