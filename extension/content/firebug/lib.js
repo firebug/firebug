@@ -5395,6 +5395,7 @@ this.cssInfo =
     "top": ["auto"],
     "unicode-bidi": [],
     "vertical-align": ["verticalAlign"],
+    "visibility": ["visibility"],
     "white-space": ["whiteSpace"],
     "width": ["width", "auto"],
     "word-spacing": [],
@@ -6036,6 +6037,14 @@ this.cssKeywords =
         "normal",
         "embed",
         "bidi-override"
+    ],
+    
+    "visibility":
+    [
+        "visible",
+        "hidden",
+        "collapse",
+        "inherit"
     ],
 
     "whiteSpace":
