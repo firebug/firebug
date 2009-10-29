@@ -22,6 +22,9 @@ const reDBG_FBS = /DBG_FBS_(.*)/;
 
 var EOF = "<br/>";
 
+// Register locale file with strings for the Tracing Console window.
+Firebug.registerStringBundle("chrome://firebug/locale/firebug-tracing.properties");
+
 //************************************************************************************************
 //  The controller for the prefDomain Model.
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
