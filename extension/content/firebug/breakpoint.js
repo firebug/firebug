@@ -705,9 +705,12 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                             )
                         ),
                         DIV({"class": "notationCaption"},
-                            SPAN({"class":"notationTitle"}, "$cause|getTitle"),
-                            SPAN({"class":"notationTitle"}, "$cause|getDiff"),
+                            SPAN({"class": "notationTitle"}, "$cause|getTitle"),
+                            SPAN("&nbsp;"),
+                            SPAN({"class": "notationTitle diff"}, "$cause|getDiff"),
+                            SPAN("&nbsp;"),
                             TAG("$cause|getTargetTag", {object: "$cause.target"}),
+                            SPAN("&nbsp;"),
                             TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
                         )
                     )
@@ -732,7 +735,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
     {
         var str = "";
         if (cause.prevValue)
-            str += cropString(cause.prevValue, 40) +" -> ";
+            str += cropString(cause.prevValue, 40) + " -> ";
         if (cause.newValue)
             str += cropString(cause.newValue, 40);
 
@@ -742,14 +745,15 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         if (!cause.target)
             return str;
 
-        // the element will be rendered after the diff
-        // xxxHonza: localization
-        return str + " in ";
+        return str;
     },
 
     getTitle: function(cause)
     {
-        return cause.message + (cause.attrName ? (" \'"+cause.attrName+"\": ") : "");
+        var str = cause.message + (cause.attrName ? (" '"+cause.attrName+"'") : "");
+        if (this.getDiff(cause))
+            str += ":";
+        return str;
     },
 
     initialize: function(doc, cause)

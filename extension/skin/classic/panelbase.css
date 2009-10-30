@@ -396,10 +396,13 @@ h1.groupHeader {
     font-weight: bold;
 }
 
+.notationTitle.diff {
+    font-weight: normal;
+}
+
 .notationButton {
     float: right;
 }
-
 
 .upsideDown {
     margin-top: 2px;
