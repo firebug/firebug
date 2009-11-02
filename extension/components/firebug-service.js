@@ -1751,7 +1751,7 @@ FirebugService.prototype =
         {
                 try
                 {
-                    var global = jscontext.globalObject.getWrappedValue();
+                    var global = unwrapIValue(jscontext.globalObject);
 
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
                         FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
@@ -1919,10 +1919,12 @@ FirebugService.prototype =
         {
             var prop = listValue.value[i];
             try {
-            var name = prop.name.getWrappedValue();
-            FBTrace.sysout(i+"]"+name+"="+prop.value.getWrappedValue());
-            } catch (e) {
-            FBTrace.sysout(i+"]"+e);
+                var name = unwrapIValue(prop.name);
+                FBTrace.sysout(i+"]"+name+"="+unwrapIValue(prop.value));
+            }
+            catch (e)
+            {
+                FBTrace.sysout(i+"]"+e);
             }
         }
     },
@@ -2696,13 +2698,13 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
 
         if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
         {
-            lastWindowScope = scope.getWrappedValue();
-            return  scope.getWrappedValue();
+            lastWindowScope = unwrapIValue(scope);
+            return  lastWindowScope;
         }
 
         if (scope.jsClassName == "DedicatedWorkerGlobalScope")
         {
-            var workerScope = scope.getWrappedValue();
+            var workerScope = unwrapIValue(scope);
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER)
                     FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
@@ -2717,7 +2719,7 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
             if (proto.jsClassName == "XPCNativeWrapper")
                 proto = proto.jsParent;
             if (proto.jsClassName == "Window")
-                return proto.getWrappedValue();
+                return unwrapIValue(proto);
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
@@ -2736,7 +2738,7 @@ function getFrameGlobal(frame)
     {
         return getFrameWindow(frame);
     }
-    var frameGlobal = jscontext.globalObject.getWrappedValue();
+    var frameGlobal = unwrapIValue(jscontext.globalObject);
     if (frameGlobal)
         return frameGlobal;
     else
@@ -2755,7 +2757,7 @@ function getFrameWindow(frame)
             FBTrace.sysout("fbs: resort to getFrameWindow");
         var result = {};
         frame.eval("window", "", 1, result);
-        var win = result.value.getWrappedValue();
+        var win = unwrapIValue(result.value);
         if (win instanceof Ci.nsIDOMWindow)
             return getRootWindow(win);
         else
@@ -2810,7 +2812,7 @@ function testBreakpoint(frame, bp)
                     return false;
             } else
             {
-                var value = result.value.getWrappedValue();
+                var value = unwrapIValue(result.value);
                 if (typeof bp.lastValue == "undefined")
                 {
                     bp.lastValue = value;
@@ -2885,6 +2887,12 @@ var QuitApplicationObserver =
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+function unwrapIValue(obj)
+{
+    return obj.getWrappedValue(); // this should be the only place we call getWrappedValue()
+}
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 var consoleService = null;
 
@@ -2953,7 +2961,7 @@ var trackFiles  = {
     {
         var jscontext = frame.executionContext;
         if (jscontext)
-            frameGlobal = jscontext.globalObject.getWrappedValue();
+            frameGlobal = unwrapIValue(jscontext.globalObject);
 
         var scopeName = fbs.getLocationSafe(frameGlobal);
         if (!scopeName)
