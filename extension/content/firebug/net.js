@@ -2068,12 +2068,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             ),
             DIV({"class": "netInfoPostText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPutText netInfoText", "role": "tabpanel"}),
-            DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"},
-                DIV({"class": "loadResponseMessage"}),
-                BUTTON({onclick: "$onLoadResponse"},
-                    SPAN("Load Response")
-                )
-            ),
+            DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoCacheText netInfoText", "role": "tabpanel"},
                 TABLE({"class": "netInfoCacheTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
                     TBODY({"role": "list", "aria-label": $STR("Cache")})
@@ -2257,24 +2252,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             }
             else if (!(binaryCategoryMap.hasOwnProperty(file.category)))
             {
-                var allowDoublePost = Firebug.getPref(Firebug.prefDomain, "allowDoublePost");
-
-                // If the response is in the cache get it and display it;
-                // otherwise display a button, which can be used by the user
-                // to re-request the response from the server.
-
-                // xxxHonza this is a workaround, which should be removed
-                // as soon as the #430155 is fixed.
-                // xxxHonza: OK, #430155 is fixed this must be removed.
-                if (Ci.nsITraceableChannel || allowDoublePost || file.cacheEntry)
-                {
-                    this.setResponseText(file, netInfoBox, responseTextBox, context);
-                }
-                else
-                {
-                    var msgBox = getElementByClass(netInfoBox, "loadResponseMessage");
-                    msgBox.innerHTML = doublePostForbiddenMessage(file.href);
-                }
+                this.setResponseText(file, netInfoBox, responseTextBox, context);
             }
         }
 
@@ -2338,15 +2316,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.setResponseText; response text updated");
-    },
-
-    onLoadResponse: function(event)
-    {
-        var file = Firebug.getRepObject(event.target);
-        var netInfoBox = getAncestorByClass(event.target, "netInfoBody");
-        var responseTextBox = getElementByClass(netInfoBox, "netInfoResponseText");
-
-        this.setResponseText(file, netInfoBox, responseTextBox, FirebugContext);
     },
 
     insertHeaderRows: function(netInfoBox, headers, tableName, rowName)
@@ -3807,21 +3776,6 @@ function getFrameLevel(win)
         ++level;
 
     return level;
-}
-
-function doublePostForbiddenMessage(url)
-{
-    var msg = "Firebug needs to POST to the server to get this information for url:<br/><b>" + url + "</b><br/><br/>";
-    msg += "This second POST can interfere with some sites.";
-    msg += " If you want to send the POST again, open a new tab in Firefox, use URL 'about:config', ";
-    msg += "set boolean value 'extensions.firebug.allowDoublePost' to true<br/>";
-    msg += " This value is reset every time you restart Firefox";
-    msg += " This problem will disappear when https://bugzilla.mozilla.org/show_bug.cgi?id=430155 is shipped.<br/><br/>";
-
-    if (FBTrace.DBG_CACHE)
-        FBTrace.sysout(msg);
-
-    return msg;
 }
 
 // ************************************************************************************************
