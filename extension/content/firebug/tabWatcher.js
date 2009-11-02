@@ -268,7 +268,13 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var persistedState = browser.persistedState;
         delete browser.persistedState;
         var location = safeGetWindowLocation(win).toString();
-        if (!persistedState || persistedState.location != location)
+        //if (!persistedState || persistedState.location != location)
+        //    persistedState = null;
+
+        // xxxHonza, xxxJJB: web application detection. Based on domain check.
+        var prevDomain = persistedState ? getDomain(persistedState.location) : null;
+        var domain = getDomain(location);
+        if (!persistedState || prevDomain != domain)
             persistedState = null;
 
         // The proper instance of FirebugChrome object (different for detached Firebug and
