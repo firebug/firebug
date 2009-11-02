@@ -293,8 +293,10 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
 
             var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
-            var noscript = Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;
-            var uri = noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+            var noscript = Cc["@maone.net/noscript-service;1"] &&
+                Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;
+            var uri = noscript && noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+            
             if(noscript && !(noscript.jsEnabled || noscript.isJSEnabled(uri)))
             {
                 noscript.setJSEnabled(uri, true);
