@@ -1,3 +1,4 @@
+
 /* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
@@ -250,10 +251,14 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     getStatus: function(spy)
     {
-        if (spy.statusCode && spy.statusText)
-            return spy.statusCode + " " + spy.statusText;
+        var text = "";
+        if (spy.statusCode)
+            text += spy.statusCode + " ";
 
-        return "";
+        if (spy.statusText)
+            return text += spy.statusText;
+
+        return text;
     },
 
     onToggleBody: function(event)
@@ -372,6 +377,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         this.onReadyStateChange = function(event) { onHTTPSpyReadyStateChange(spy, event); };
         this.onLoad = function() { onHTTPSpyLoad(spy); };
         this.onError = function() { onHTTPSpyError(spy); };
+        this.onAbort = function() { onHTTPSpyAbort(spy); };
 
         this.onreadystatechange = this.xhrRequest.onreadystatechange;
 
@@ -382,6 +388,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         //this.xhrRequest.onreadystatechange = this.onReadyStateChange;
         this.xhrRequest.addEventListener("load", this.onLoad, true);
         this.xhrRequest.addEventListener("error", this.onError, true);
+        this.xhrRequest.addEventListener("abort", this.onAbort, true);
 
         // Use tabCache to get XHR response. Notice that the tabCache isn't
         // supported till Firefox 3.0.4
@@ -393,10 +400,18 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         this.xhrRequest.onreadystatechange = this.onreadystatechange;
         try { this.xhrRequest.removeEventListener("load", this.onLoad, true); } catch (e) {}
         try { this.xhrRequest.removeEventListener("error", this.onError, true); } catch (e) {}
+        try { this.xhrRequest.removeEventListener("abort", this.onAbort, true); } catch (e) {}
 
         this.onreadystatechange = null;
         this.onLoad = null;
         this.onError = null;
+        this.onAbort = null;
+
+        if (!this.context.sourceCache)
+        {
+            FBTrace.sysout("spy.detach; ERROR" + this.context.getName());
+            return;
+        }
 
         this.context.sourceCache.removeListener(this);  // XXXjjb I see null sourceCache errors here, from onReadyStateChange
     },
@@ -646,6 +661,21 @@ function onHTTPSpyError(spy)
 
     if (spy.context.spies)
         remove(spy.context.spies, spy);
+}
+
+function onHTTPSpyAbort(spy)
+{
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.onHTTPSpyAbort: " + spy.href, spy);
+
+    onHTTPSpyError(spy);
+
+    spy.statusText = "Aborted";
+    updateLogRow(spy);
+
+    var netProgress = spy.context.netProgress;
+    if (netProgress)
+        netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 }
 
 function updateLogRow(spy, responseTime)

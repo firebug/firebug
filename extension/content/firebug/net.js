@@ -1786,7 +1786,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                         DIV({"class": "netContentLoadBar", style: "left: $file.offset"}),
                         DIV({"class": "netWindowLoadBar", style: "left: $file.offset"}),
                         DIV({"class": "netReceivingBar", style: "left: $file.offset; width: $file.width"},
-                            SPAN({"class": "netTimeLabel"}, "$file.elapsed|formatTime")
+                            SPAN({"class": "netTimeLabel"}, "$file|getElapsedTime")
                         )
                     )
                 )
@@ -1931,6 +1931,9 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     isError: function(file)
     {
+        if (file.aborted)
+            return true;
+
         var errorRange = Math.floor(file.responseStatus/100);
         return errorRange == 4 || errorRange == 5;
     },
@@ -1942,10 +1945,15 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     getStatus: function(file)
     {
-        if (file.responseStatus && file.responseStatusText)
-            return file.responseStatus + " " + file.responseStatusText;
+        var text = "";
 
-        return " ";
+        if (file.responseStatus)
+            text += file.responseStatus + " ";
+
+        if (file.responseStatusText)
+            text += file.responseStatusText;
+
+        return text ? text : " ";
     },
 
     getDomain: function(file)
@@ -1956,6 +1964,14 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
     getSize: function(file)
     {
         return this.formatSize(file.size);
+    },
+
+    getElapsedTime:function(file)
+    {
+        if (!file.elapsed)
+            return "";
+
+        return this.formatTime(file.elapsed);
     },
 
     hasResponseHeaders: function(file)
@@ -2852,6 +2868,12 @@ NetProgress.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    startFile: function startFile(request, win)
+    {
+        // Make sure the file object exists since the http-on-modify-request event is sent.
+        return this.getRequestFile(request, win);
+    },
+
     requestedFile: function requestedFile(request, time, win, xhr)
     {
         var file = this.getRequestFile(request, win);
@@ -3121,14 +3143,24 @@ NetProgress.prototype =
 
             Utils.getHttpHeaders(request, file);
 
-            // Don't mark this file as "loaded". Only request for which the http-on-examine-response
-            // event is received is displayed within the list. This method is used by spy.
-            //this.endLoad(file);
+            this.endLoad(file);
 
             getCacheEntry(file, this);
         }
 
         return file;
+    },
+
+    abortFile: function abortFile(request, time, postText, responseText)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            file.aborted = true;
+            file.responseStatusText = "Aborted";
+        }
+
+        return this.stopFile(request, time, postText, responseText);
     },
 
     windowLoad: function windowLoad(window, time)
@@ -3353,6 +3385,7 @@ NetProgress.prototype =
     onLinkIconAvailable : function() {},
 };
 
+var startFile = NetProgress.prototype.startFile;
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
 var completedFile = NetProgress.prototype.completedFile;
@@ -3364,9 +3397,12 @@ var sendingFile = NetProgress.prototype.sendingFile;
 var receivingFile = NetProgress.prototype.receivingFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
-var stopFile = NetProgress.prototype.stopFile;
 var windowLoad = NetProgress.prototype.windowLoad;
 var contentLoad = NetProgress.prototype.contentLoad;
+
+// XHR Spy
+var stopFile = NetProgress.prototype.stopFile;
+var abortFile = NetProgress.prototype.abortFile;
 
 // ************************************************************************************************
 
@@ -3897,7 +3933,6 @@ Firebug.NetMonitor.Utils =
             file.urlParams = parseURLParams(file.href);
             file.mimeType = Utils.getMimeType(request.contentType, request.name);
 
-            // Disable temporarily
             if (!file.responseHeaders && Firebug.collectHttpHeaders)
             {
                 var requestHeaders = [], responseHeaders = [];
@@ -3921,8 +3956,10 @@ Firebug.NetMonitor.Utils =
         }
         catch (exc)
         {
+            // An exception can be throwed e.g. when the request is aborted and
+            // request.responseStatus is accessed.
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.getHttpHeaders FAILS xxxHonza: let me know if you can reproduce this" + file.href, exc);
+                FBTrace.sysout("net.getHttpHeaders FAILS " + file.href, exc);
         }
     },
 
@@ -4107,17 +4144,20 @@ var NetHttpObserver =
             }
         }
 
-        if (Ci.nsIHttpActivityDistributor)
-            return;
-
         var networkContext = contexts[tabId];
         if (!networkContext)
             networkContext = context ? context.netProgress : null;
 
         if (networkContext)
         {
-            var xhr = Utils.isXHR(request);
-            networkContext.post(requestedFile, [request, now(), win, xhr]);
+            networkContext.post(startFile, [request, win]);
+
+            // If activity-distributor is available (Fx 3.6) it's used instead.
+            if (!Ci.nsIHttpActivityDistributor)
+            {
+                var xhr = Utils.isXHR(request);
+                networkContext.post(requestedFile, [request, now(), win, xhr]);
+            }
         }
     },
 
