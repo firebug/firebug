@@ -64,7 +64,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         // be evil and get Components.classes results in a permission denied error.
         var ok = frame.eval(scriptToEval, "", 1, result);
 
-        var value = result.value.getWrappedValue();
+        var value = unwrapIValue(result.value);
         if (ok)
             return value;
         else
@@ -89,7 +89,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         for (var i = 0; i < lengthValue.value; ++i)
         {
             var prop = listValue.value[i];
-            var name = prop.name.getWrappedValue();
+            var name = unwrapIValue(prop.name);
             names.push(name);
         }
         return names;
@@ -1613,7 +1613,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             if (evaled)
             {
-                var src = result_src.value.getWrappedValue();
+                var src = unwrapIValue(result_src.value);
                 return src;
             }
             else
@@ -3322,7 +3322,7 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             scope = scope.jsParent;
 
         if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
-            return  scope.getWrappedValue();
+            return  unwrapIValue(scope);
 
         if (scope.jsClassName == "Sandbox")
         {
@@ -3330,7 +3330,7 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             if (proto.jsClassName == "XPCNativeWrapper")
                 proto = proto.jsParent;
             if (proto.jsClassName == "Window")
-                return proto.getWrappedValue();
+                return unwrapIValue(proto);
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
@@ -3345,7 +3345,7 @@ function getFrameWindow(frame)
     var result = {};
     if (frame.eval("window", "", 1, result))
     {
-        var win = result.value.getWrappedValue();
+        var win = unwrapIValue(result.value);
         return getRootWindow(win);
     }
 }

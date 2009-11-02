@@ -1372,7 +1372,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         if (frame && frame.isValid)
         {
-            var thisVar = frame.thisValue.getWrappedValue();
+            var thisVar = unwrapIValue(frame.thisValue);
             addMember(object, "user", members, "this", thisVar, 0);
 
             var scopeChain = this.generateScopeChain(frame.scope);
@@ -1401,7 +1401,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                 for (var i = 0; i < lengthValue.value; ++i)
                 {
                     var prop = listValue.value[i];
-                    var name = prop.name.getWrappedValue();
+                    var name = unwrapIValue(prop.name);
                     if (ignoreVars[name] == 1)
                     {
                         if (FBTrace.DBG_DOM)
@@ -1409,10 +1409,10 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                         continue;
                     }
 
-                    scopeVars[name] = prop.value.getWrappedValue();
+                    scopeVars[name] = unwrapIValue(prop.value);
                 }
             } else {
-                scopeVars = scope.getWrappedValue();
+                scopeVars = unwrapIValue(scope);
             }
 
             if (scopeVars && scopeVars.hasOwnProperty)

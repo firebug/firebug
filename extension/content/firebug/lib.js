@@ -2269,7 +2269,7 @@ this.forEachFunction = function(context, cb)
                 var testFunctionObject = script.functionObject;
                 if (!testFunctionObject.isValid)
                     return false;
-                var theFunction = testFunctionObject.getWrappedValue();
+                var theFunction = unwrapIValue(testFunctionObject);
 
                 var rc = cb(script, theFunction, sourceFile);
                 if (rc)
@@ -2307,7 +2307,7 @@ this.findScriptForFunction = function(fn)
 
                 var iValueFunctionObject = script.functionObject;
                 //FBTrace.dumpIValue("lib.findScriptForFunction iValueFunctionObject", iValueFunctionObject);
-                var testFunctionObject = script.functionObject.getWrappedValue();
+                var testFunctionObject = unwrapIValue(script.functionObject);
                 if (testFunctionObject instanceof Function)
                     FBTrace.sysout("lib.findScriptForFunction testFunctionObject "+testFunctionObject+" vs "+fn+"\n");
                 if (testFunctionObject == fn)
@@ -2442,7 +2442,7 @@ this.getFunctionArgValues = function(fn, frame)
     {
         var argName = argNames[i];
         var pvalue = frame.scope.getProperty(argName);
-        var value = pvalue ? pvalue.value.getWrappedValue() : undefined;
+        var value = pvalue ? unwrapIValue(pvalue.value) : undefined;
         values.push({name: argName, value: value});
     }
 
@@ -6387,6 +6387,11 @@ this.unwrapObject = function(object)
         return object.wrappedJSObject;
 
     return object;
+}
+
+this.unwrapIValue = function(object)
+{
+	return object.getWrappedValue();  // this should be the only call to getWrappedValue in firebug
 }
 
 }).apply(FBL);

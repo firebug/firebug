@@ -1339,8 +1339,8 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 var prop = listValue.value[i];
                 try {
-                    var name = prop.name.getWrappedValue();
-                    this.props[name] = "" + prop.value.getWrappedValue();
+                    var name = unwrapIValue(prop.name);
+                    this.props[name] = "" + unwrapIValue(prop.value);
                 } catch (e) {
                     onPanic("instanceof jsdIValue, i="+i, e);
                 }
@@ -1421,8 +1421,8 @@ Firebug.TraceModule.TraceMessage.prototype =
                for (var i=lengthValue.value-1; i>=0; i--)
                {
                    var prop = listValue.value[i];
-                   var name = prop.name.getWrappedValue();
-                   var value = prop.value.getWrappedValue();
+                   var name = unwrapIValue(prop.name);
+                   var value = unwrapIValue(prop.value);
 
                    if ((typeof(value) != "function") && name && value)
                        scope[name.toString()] = value.toString();

@@ -253,13 +253,13 @@ this.jsdScript = domplate(Firebug.Rep,
 {
     copySource: function(script)
     {
-        var fn = script.functionObject.getWrappedValue();
+        var fn = unwrapIValue(script.functionObject);
         return FirebugReps.Func.copySource(fn);
     },
 
     monitor: function(fn, script, monitored)
     {
-        fn = script.functionObject.getWrappedValue();
+        fn = unwrapIValue(script.functionObject);
         return FirebugReps.Func.monitor(fn, script, monitored);
     },
 
@@ -292,13 +292,13 @@ this.jsdScript = domplate(Firebug.Rep,
 
     getTitle: function(script, context)
     {
-        var fn = script.functionObject.getWrappedValue();
+        var fn = unwrapIValue(script.functionObject);
         return FirebugReps.Func.getTitle(fn, context);
     },
 
     getContextMenuItems: function(script, target, context)
     {
-        var fn = script.functionObject.getWrappedValue();
+        var fn = unwrapIValue(script.functionObject);
 
         var scriptInfo = Firebug.SourceFile.getSourceFileAndLineByScript(context, script);
            var monitored = scriptInfo ? fbs.isMonitored(scriptInfo.sourceFile.href, scriptInfo.lineNo) : false;
@@ -1338,7 +1338,7 @@ this.jsdStackFrame = domplate(Firebug.Rep,
 
     getContextMenuItems: function(frame, target, context)
     {
-        var fn = frame.script.functionObject.getWrappedValue();
+        var fn = unwrapIValue(frame.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, target, context, frame.script);
     }
 });
