@@ -2870,8 +2870,11 @@ NetProgress.prototype =
 
     startFile: function startFile(request, win)
     {
-        // Make sure the file object exists since the http-on-modify-request event is sent.
-        return this.getRequestFile(request, win);
+        var file = this.getRequestFile(request, win);
+        if (file)
+        {
+            this.breakOnXHR(file);
+        }
     },
 
     requestedFile: function requestedFile(request, time, win, xhr)
@@ -2903,8 +2906,6 @@ NetProgress.prototype =
             this.extendPhase(file);
 
             dispatch(Firebug.NetMonitor.fbListeners, "onRequest", [this.context, file]);
-
-            this.breakOnXHR(file);
 
             return file;
         }
