@@ -477,7 +477,7 @@ function getImageMapHighlighter(context)
     {
         context.imageMapHighlighter =
         {
-            "show": function(state)
+            show: function(state)
             {
                 if(!canvas)
                     init();
@@ -485,7 +485,7 @@ function getImageMapHighlighter(context)
                 canvas.style.display = state?'block':'none';
             },
 
-            "getImages": function(mapName, multi)
+            getImages: function(mapName, multi)
             {
                 var i, eltsLen,
                     elts = [],
@@ -524,7 +524,7 @@ function getImageMapHighlighter(context)
                 return images;
             },
 
-            "highlight": function(eltArea, multi)
+            highlight: function(eltArea, multi)
             {
                 var i, j, v, vLen, images, imagesLen, rect, shape, clearForFirst;
 
@@ -582,7 +582,7 @@ function getImageMapHighlighter(context)
                     return;
             },
 
-            "mouseMoved": function(event)
+            mouseMoved: function(event)
             {
                 var idata = ctx.getImageData(event.layerX, event.layerY, 1, 1);
 
@@ -593,7 +593,7 @@ function getImageMapHighlighter(context)
                     this.show(false);
             },
 
-            "destroy": function()
+            destroy: function()
             {
                 canvas = null;
                 ctx = null;
@@ -931,7 +931,8 @@ BoxModelHighlighter.prototype =
                     styles.paddingLeft);
             resize(nodes.content, w, h);
 
-            var showLines = Firebug.showRulers && boxFrame;
+            // element.tagName !== "BODY" for issue 2447. hopefully temporary, robc
+            var showLines = Firebug.showRulers && boxFrame && element.tagName !== "BODY";
             if (showLines)
             {
                 var offsetParent = element.offsetParent;
