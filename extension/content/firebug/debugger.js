@@ -3322,7 +3322,7 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             scope = scope.jsParent;
 
         if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
-            return  unwrapIValue(scope);
+            return new XPCNativeWrapper(scope.getWrappedValue());
 
         if (scope.jsClassName == "Sandbox")
         {
@@ -3330,7 +3330,7 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
             if (proto.jsClassName == "XPCNativeWrapper")
                 proto = proto.jsParent;
             if (proto.jsClassName == "Window")
-                return unwrapIValue(proto);
+                return new XPCNativeWrapper(proto.getWrappedValue());
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)

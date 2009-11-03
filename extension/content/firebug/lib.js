@@ -6038,7 +6038,7 @@ this.cssKeywords =
         "embed",
         "bidi-override"
     ],
-    
+
     "visibility":
     [
         "visible",
@@ -6391,7 +6391,17 @@ this.unwrapObject = function(object)
 
 this.unwrapIValue = function(object)
 {
-	return object.getWrappedValue();  // this should be the only call to getWrappedValue in firebug
+    var unwrapped = object.getWrappedValue();
+    try
+    {
+        if (unwrapped)
+            return XPCSafeJSObjectWrapper(unwrapped);  // this should be the only call to getWrappedValue in firebug
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("unwrapIValue FAILS for "+object,{exc: exc, object: object, unwrapped: unwrapped});
+    }
 }
 
 }).apply(FBL);

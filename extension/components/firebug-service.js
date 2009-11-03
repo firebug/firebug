@@ -1751,7 +1751,7 @@ FirebugService.prototype =
         {
                 try
                 {
-                    var global = unwrapIValue(jscontext.globalObject);
+                    var global = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
 
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
                         FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
@@ -2698,13 +2698,13 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
 
         if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
         {
-            lastWindowScope = unwrapIValue(scope);
+            lastWindowScope = new XPCNativeWrapper(scope.getWrappedValue());
             return  lastWindowScope;
         }
 
         if (scope.jsClassName == "DedicatedWorkerGlobalScope")
         {
-            var workerScope = unwrapIValue(scope);
+            var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER)
                     FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
@@ -2719,7 +2719,7 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
             if (proto.jsClassName == "XPCNativeWrapper")
                 proto = proto.jsParent;
             if (proto.jsClassName == "Window")
-                return unwrapIValue(proto);
+                return new XPCNativeWrapper(proto.getWrappedValue());
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
@@ -2738,7 +2738,7 @@ function getFrameGlobal(frame)
     {
         return getFrameWindow(frame);
     }
-    var frameGlobal = unwrapIValue(jscontext.globalObject);
+    var frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
     if (frameGlobal)
         return frameGlobal;
     else
@@ -2887,9 +2887,19 @@ var QuitApplicationObserver =
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-function unwrapIValue(obj)
+function unwrapIValue(object)
 {
-    return obj.getWrappedValue(); // this should be the only place we call getWrappedValue()
+    var unwrapped = object.getWrappedValue();
+    try
+    {
+        if (unwrapped)
+            return XPCSafeJSObjectWrapper(unwrapped);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("fbs.unwrapIValue FAILS for "+object,{exc: exc, object: object, unwrapped: unwrapped});
+    }
 }
 
 //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2961,7 +2971,7 @@ var trackFiles  = {
     {
         var jscontext = frame.executionContext;
         if (jscontext)
-            frameGlobal = unwrapIValue(jscontext.globalObject);
+            frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
 
         var scopeName = fbs.getLocationSafe(frameGlobal);
         if (!scopeName)
