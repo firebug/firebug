@@ -1376,6 +1376,13 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // Don't forget to remove the phase whose last file has been removed.
         var phase = file.phase;
+
+        // xxxHonza: This needs to be examined yet. Looks like the queue contains
+        // requests from the previous page. When flushed the requestedFile isn't called
+        // and the phase is not set.
+        if (!phase)
+            return true;
+
         phase.removeFile(file);
         if (!phase.files.length)
         {
