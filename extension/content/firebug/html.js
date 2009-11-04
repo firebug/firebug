@@ -29,11 +29,17 @@ Firebug.HTMLModule = extend(Firebug.Module,
         Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
-    initContext: function(context, persistedState)
+    loadedContext: function(context, persistedState)
     {
-        Firebug.Module.initContext.apply(this, arguments);
-
         context.mutationBreakpoints = new MutationBreakpointGroup();
+        context.mutationBreakpoints.load(context);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.Module.destroyContext.apply(this, arguments);
+
+        context.mutationBreakpoints.store(context);
     },
 
     shutdown: function()
@@ -1796,12 +1802,15 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onModifyBreakpoint: function(context, node, type)
     {
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.onModifyBreakpoint " + getElementXPath(node));
+
         var breakpoints = context.mutationBreakpoints;
-        var index = breakpoints.findBreakpoint(node, type);
+        var bp = breakpoints.findBreakpoint(node, type);
 
         // Remove an existing or create new breakpoint.
-        if (index > 0)
-            breakpoints.splice(index, 1);
+        if (bp)
+            breakpoints.removeBreakpoint(bp);
         else
             context.mutationBreakpoints.addBreakpoint(node, type);
     },
@@ -1810,6 +1819,7 @@ Firebug.HTMLModule.MutationBreakpoints =
 Firebug.HTMLModule.Breakpoint = function(node, type)
 {
     this.node = node;
+    this.xpath = getElementXPath(node);
     this.checked = true;
     this.type = type;
 }
@@ -1900,7 +1910,11 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-function MutationBreakpointGroup() {}
+function MutationBreakpointGroup()
+{
+    this.breakpoints = [];
+}
+
 MutationBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "mutationBreakpoints",
@@ -1916,6 +1930,36 @@ MutationBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGrou
         var node = args[0];
         var type = args[1];
         return (bp.node == node) && (!bp.type || bp.type == type);
+    },
+
+    removeBreakpoint: function(bp)
+    {
+        remove(this.breakpoints, bp);
+    },
+
+    // Persistence
+    load: function(context)
+    {
+        var panelState = getPersistedState(context, "html");
+        if (panelState.breakpoints)
+            this.breakpoints = panelState.breakpoints;
+
+        this.enumerateBreakpoints(function(bp)
+        {
+            var elts = getElementsByXPath(context.window.document, bp.xpath);
+            bp.node = elts && elts.length ? elts[0] : null;
+        });
+    },
+
+    store: function(context)
+    {
+        this.enumerateBreakpoints(function(bp)
+        {
+            bp.node = null;
+        });
+
+        var panelState = getPersistedState(context, "html");
+        panelState.breakpoints = this.breakpoints;
     },
 });
 

@@ -1940,7 +1940,11 @@ Breakpoint.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function DOMBreakpointGroup() {}
+function DOMBreakpointGroup()
+{
+    this.breakpoints = [];
+}
+
 DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "domBreakpoints",

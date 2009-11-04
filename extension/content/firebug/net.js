@@ -4708,7 +4708,11 @@ Breakpoint.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function NetBreakpointGroup() {}
+function NetBreakpointGroup()
+{
+    this.breakpoints = [];
+}
+
 NetBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "netBreakpoints",

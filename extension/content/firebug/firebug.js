@@ -1971,7 +1971,7 @@ Firebug.Panel =
 
         setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
 
-        // Load persistent conent if any.
+        // Load persistent content if any.
         var persistedState = Firebug.getPanelState(this);
         if (persistedState)
         {
