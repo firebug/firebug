@@ -121,16 +121,23 @@ top.FirebugChrome =
 
         // Initialize Firebug Tools & Firebug Icon menus.
         var firebugMenuPopup = $("fbFirebugMenuPopup");
-        var toolsMenu = $("menu_firebug");
-        if (toolsMenu && !getElementByClass(toolsMenu, "fbFirebugMenuPopup"))
-            toolsMenu.appendChild(firebugMenuPopup.cloneNode(true));
-
-        var iconMenu = $("fbFirebugMenu");
-        if (iconMenu && !getElementByClass(iconMenu, "fbFirebugMenuPopup"))
-            iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
+        this.initializeMenu($("menu_firebug"), firebugMenuPopup);
+        this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized ", window);
+    },
+
+    initializeMenu: function(parentMenu, popupMenu)
+    {
+        if (!parentMenu)
+            return;
+
+        if (parentMenu.getAttribute("initialized"))
+            return;
+
+        parentMenu.appendChild(popupMenu.cloneNode(true));
+        parentMenu.setAttribute("initialized", "true");
     },
 
     /**
