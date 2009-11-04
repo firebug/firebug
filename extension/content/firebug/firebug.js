@@ -2416,7 +2416,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         var tab = this.getTab();
         if (tab)
-            tab.setAttribute('aria-label', tab.getAttribute('label') + " (inactive panel)");
+            tab.setAttribute('aria-label', tab.getAttribute('label') + " ("+ $STR('aria.labels.inactive panel') +")");
 
         // The panel was disabled so, show the disabled page. This page also replaces the
         // old content so, the panel is fresh empty after it's enabled again.
