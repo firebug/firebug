@@ -65,7 +65,7 @@ const WatchRowTag =
     TR({"class": "watchNewRow", level: 0},
         TD({"class": "watchEditCell", colspan: 3},
             DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
-                'aria-label' : $STR('press enter to add new watch expression')},
+                'aria-label' : $STR('a11y.labels.press enter to add new watch expression')},
                     $STR("NewWatch")
             )
         )
@@ -107,7 +107,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            role: "tree", 'aria-label': 'DOM properties'},
+            role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator",

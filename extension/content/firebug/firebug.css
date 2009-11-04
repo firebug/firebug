@@ -124,7 +124,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 .useA11y .innerToolbar *[collapsed="false"] ~ *.noTabStop toolbarbutton,
 .useA11y .innerToolbar *[collapsed="false"] ~ toolbarbutton.noTabStop,
 /*fbNetButtonsFilter situation, added extra id for specificity*/
-.useA11y #fbToolbox .innerToolbar toolbarbutton:not([collapsed="true"]) ~ *.noTabStop toolbarbutton {
+.useA11y .innerToolbar toolbarbutton:not([collapsed="true"]) ~ *.noTabStop toolbarbutton {
     -moz-user-focus: ignore;
 }
 

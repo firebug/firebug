@@ -1291,7 +1291,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 this.StackTrace = domplate(Firebug.Rep,
 {
     tag:
-        DIV({role : "group", 'aria-label' : 'stack trace'},
+        DIV({role : "group", 'aria-label' : $STR('aria.labels.stack trace')},
             FOR("frame", "$object.frames",
                 TAG(this.StackFrame.tag, {object: "$frame"})
             )

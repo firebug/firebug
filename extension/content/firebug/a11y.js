@@ -93,7 +93,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         setClass(chrome.$('fbContentBox'), 'useA11y');
         setClass(chrome.$('fbStatusBar'), 'useA11y');
         //manage all key events in toolbox (including tablists)
-        chrome.$('fbStatusPrefix').setAttribute('value', $STR("a11y.status.firebug status"));
+        chrome.$('fbStatusPrefix').setAttribute('value', $STR("a11y.labels.firebug status"));
         chrome.$("fbContentBox").addEventListener("keypress", this.handlePanelBarKeyPress , true);
         //make focus stick to inspect button when clicked
         chrome.$("fbInspectButton").addEventListener("mousedown", this.focusTarget, true);
@@ -143,14 +143,14 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panelA11y.manageFocus = true;
                 if (panel.name == "console")
                 {
-                    panel.panelNode.setAttribute('aria-label', 'log rows');
+                    panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.log rows'));
                     panelA11y.lastIsDefault = true;
                     panel.panelNode.setAttribute('role', 'list');
                 }
                 else if (panel.name == "callstack")
                 {
                     panel.panelNode.setAttribute('role', 'list');
-                    panel.panelNode.setAttribute('aria-label', 'call stack');
+                    panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.call stack'));
                 }
                 else
                     panel.panelNode.setAttribute('role', 'presentation');
@@ -163,7 +163,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
             case 'html':
                 panel.panelNode.setAttribute('role', 'tree');
-                panel.panelNode.setAttribute('aria-label', 'document structure');
+                panel.panelNode.setAttribute('aria-label', $STR('a11y.labels.document structue'));
                 panel.panelNode.addEventListener("keypress", this.onHTMLKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onHTMLFocus, true);
                 panel.panelNode.addEventListener("blur", this.onHTMLBlur, true);
@@ -174,7 +174,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panel.panelNode.addEventListener("mousedown", this.onCSSMouseDown, false);
                 panel.panelNode.addEventListener("focus", this.onPanelFocus, true);
                 panel.panelNode.addEventListener('contextmenu', this.onCSSPanelContextMenu, false)
-                this.insertHiddenText(panel, panel.panelNode, $STR('overridden'), false, "CSSOverriddenDescription");
+                this.insertHiddenText(panel, panel.panelNode, $STR('a11y.labels.overridden'), false, "CSSOverriddenDescription");
                 panel.panelNode.setAttribute('role', panel.name == "stylesheet" ? 'list' : "presentation");
                 break;
             case 'layout':
@@ -182,7 +182,6 @@ Firebug.A11yModel = extend(Firebug.Module,
                 panel.panelNode.addEventListener("keypress", this.onLayoutKeyPress, false);
                 panel.panelNode.addEventListener("focus", this.onLayoutFocus, true);
                 panel.panelNode.addEventListener("blur", this.onLayoutBlur, true);
-                this.insertHiddenText(panel, panel.panelNode, $STR('press enter to edit values'), false, "layoutPressEnterDesc");
                 break;
             case 'script':
                 panel.panelNode.addEventListener('contextmenu', this.onScriptContextMenu, true);
@@ -259,10 +258,10 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelType = Firebug.getPanelType(panel.name);
         if (panelType)
             title = Firebug.getPanelTitle(panelType);
-        Firebug.chrome.$('fbToolbar').setAttribute('aria-label', title + " " + $STR("panel tools"))
+        Firebug.chrome.$('fbToolbar').setAttribute('aria-label', title + " " + $STR("a11y.labels.panel tools"))
         var panelBrowser = Firebug.chrome.getPanelBrowser(panel);
         panelBrowser.setAttribute('showcaret', (panel.name == "script"));
-        panelBrowser.contentDocument.body.setAttribute('aria-label', title + " panel");
+        panelBrowser.contentDocument.body.setAttribute('aria-label', $STRF("a11y.labels.title panel", [title]));
     },
 
     showSidePanel : function(browser, sidePanel)
@@ -274,7 +273,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelType = Firebug.getPanelType(sidePanel.name);
         if (panelType)
             title = Firebug.getPanelTitle(panelType);
-            panelBrowser.contentDocument.body.setAttribute('aria-label', title + " side panel");
+            panelBrowser.contentDocument.body.setAttribute('aria-label', $STRF("a11y.labels.title side panel", [title]));
     },
 
     addLiveElem : function(panel, role, politeness)
@@ -928,11 +927,10 @@ Firebug.A11yModel = extend(Firebug.Module,
         if (!panelA11y)
             return;
         var matchFeedback = "";
-        //TODO: localize these for 1.5
         if (!matches || matches.length == 0)
-            matchFeedback = "No matching log rows for \"" + text + "\"";
+            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
         else
-            matchFeedback = $STRF('match found for', [text]) + " in " + matches.length + " log rows";
+            matchFeedback = $STRF('a11y.updates.match found in logrows', [text, matches.length]);
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },
 
@@ -1039,29 +1037,30 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var node = match.node;
         var elem;
-        var matchFeedback = $STRF("match found for", [match.match[0]]) + " ";
-        if (node.nodeType == 1)//element
+        var matchFeedback = ""; 
+        switch (node.nodeType)
         {
-            elem = node;
-            matchFeedback += $STRF("in element", [elem.nodeName]);
+            case 1: //element
+                elem = node;
+                matchFeedback += $STRF("a11y.updates.match found in element", [match.match[0], elem.nodeName, getElementTreeXPath(elem)]);
+                break;
+            case 2: //attribute
+                elem = node.ownerElement;
+                matchFeedback += $STRF("a11y.updates.match found in attribute", 
+                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName, getElementTreeXPath(elem)]);   
+                break;
+                
+            case 3: //text content
+                elem = node.parentNode;
+                matchFeedback += $STRF("a11y.updates.match found in text content", [match.match[0], match.match.input]); 
+                break;
         }
-        else if (node.nodeType == 2)//attribute
-        {
-            elem = node.ownerElement;
-            matchFeedback += $STRF("in attribute", [node.nodeName, node.nodeValue, elem.nodeName]);
-        }
-        else if (node.nodeType == 3) // text
-        {
-            elem = node.parentNode;
-            matchFeedback += $STRF("in text content", [match.match.input, elem.nodeName]);
-        }
-        matchFeedback += " " + $STRF("at path", [getElementTreeXPath(elem)]);
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },
 
     onHTMLSearchNoMatchFound: function(panel, text)
     {
-        this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
+        this.updateLiveElem(panel, $STRF('a11y.updates.no matches found', [text]), true); //should not use alert
     },
 
     moveToSearchMatch: function()
@@ -1342,23 +1341,23 @@ Firebug.A11yModel = extend(Firebug.Module,
             var listBox = getElementByClass(rule, 'cssPropertyListBox');
             var selector = getElementByClass(rule, 'cssSelector');
             if (listBox && selector)
-                listBox.setAttribute('aria-label', $STRF("declarations for selector", [selector.textContent]));
+                listBox.setAttribute('aria-label', $STRF("a11y.labels.declarations for selector", [selector.textContent]));
             setClass(rule, 'a11yModified')
         }
         if (hasClass(row, 'cssHead'))
         {
             if (panel.name == "css")
             {
-                var sourceLink = rule.lastChild;
+                var sourceLink = rule.parentNode.lastChild;
                 if (sourceLink && hasClass(sourceLink, "objectLink"))
-                    row.setAttribute('aria-label', row.textContent + " " + $STRF('defined in file', [sourceLink.textContent]));
+                    row.setAttribute('aria-label', row.textContent + " " + $STRF('a11y.labels.defined in file', [sourceLink.textContent]));
             }
         }
         else if (hasClass(row, 'cssProp'))
         {
             row.setAttribute('aria-checked', !hasClass(row, 'disabledStyle'));
             if (hasClass(row, 'cssOverridden'))
-                row.setAttribute('aria-label', $STR('overridden') + " " + row.textContent);
+                row.setAttribute('aria-label', $STR('aria.labels.overridden') + " " + row.textContent);
         }
         return;
     },
@@ -1399,14 +1398,14 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         if (!matchRow)
         {
-            this.updateLiveElem(panel, $STRF('no matches found', [text]), true); //should not use alert
+            this.updateLiveElem(panel, $STRF('a11y.updates.no matches found', [text]), true); //should not use alert
             return;
         }
-        var matchFeedback = $STRF('match_found_for', [text]);
+        var matchFeedback = "";
         var matchType = '';
         var selector;
         if (hasClass(matchRow, 'cssSelector'))
-            matchFeedback += " " + $STRF('in_selector', [matchRow.textContent]);
+            matchFeedback = " " + $STRF('a11y.updates.match found in selector', [text, matchRow.textContent]);
         else
         {
             selector = getPreviousByClass(matchRow, 'cssSelector');
@@ -1415,7 +1414,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 var propRow = getAncestorByClass(matchRow, 'cssProp');
                 if (propRow)
-                    matchFeedback += " " + $STRF('in_style_property', [propRow.textContent]) + " " + $STRF('in_selector', [selector]);
+                    matchFeedback = $STRF('a11y.updates.match found in style property', [text, propRow.textContent, selector]);
             }
         }
         this.updateLiveElem(panel, matchFeedback, true); // should not use alert
@@ -1436,7 +1435,6 @@ Firebug.A11yModel = extend(Firebug.Module,
             else
                 this.makeFocusable(e, false);
             e.setAttribute('role', 'group');
-            e.setAttribute('aria-describedby', 'layoutPressEnterDesc');
             e.setAttribute('aria-label', this.getLayoutBoxLabel(e, detailsObj));
             e.setAttribute('aria-setsize', a.length);
             e.setAttribute('aria-posinset', i + 1);
@@ -1445,7 +1443,6 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     getLayoutBoxLabel : function(elem, detailsObj )
     {
-        //TODO: uncessesarily big, make smaller
         var className = elem.className.match(/\b(\w+)LayoutBox\b/);
         if (!className)
             return "";
@@ -1454,48 +1451,52 @@ Firebug.A11yModel = extend(Firebug.Module,
         switch(styleName)
         {
             case "offset":
-                output += $STR("LayoutOffset");
+                output += hasClass(elem, "boundingClientRect") ? $STR("a11y.layout.clientBoundingRect") : $STR("a11y.layout.offset");
                 styleName = "outer";
                 break;
             case "margin":
-                output += $STR("LayoutMargin");
+                output += $STR("a11y.layout.margin");
                 break;
             case "border":
-                output += $STR("LayoutBorder");
+                output += $STR("a11y.layout.border");
                 break;
             case "padding":
-                output += $STR("LayoutPadding");
+                output += $STR("a11y.layout.padding");
                 break;
             case "content":
-                output += $STR("LayoutSize");
+                output += $STR("a11y.layout.size");
                 break;
         }
         output += ": ";
         var valNames = [];
         var vals = {};
-        if (styleName == "outer")
+        switch (styleName)
         {
-            valNames = ['top', 'left'];
-            vals.top = detailsObj[styleName + 'Top'];
-            vals.left = detailsObj[styleName + 'Left'];
+            case "outer":        
+                valNames = ['top', 'left', "position", "z-index"];
+                vals.top = detailsObj[styleName + 'Top'];
+                vals.left = detailsObj[styleName + 'Left'];
+                vals.position = detailsObj.position;
+                vals["z-index"] = detailsObj.zIndex;
+                break;
+            case "content":
+                valNames = ['width', 'height']
+                vals.width = detailsObj['width'];
+                vals.height = detailsObj['height'];
+                break;
+            default:
+                valNames = ['top', 'right', 'bottom', 'left'];
+                vals.top = detailsObj[styleName + 'Top'];
+                vals.right = detailsObj[styleName + 'Right'];
+                vals.bottom = detailsObj[styleName + 'Bottom'];
+                vals.left = detailsObj[styleName + 'Left'];
+                break;
         }
-        else if (styleName == "content")
-        {
-            valNames = ['width', 'height']
-            vals.width = detailsObj['width'];
-            vals.height = detailsObj['height'];
-        }
-        else
-        {
-            valNames = ['top', 'right', 'bottom', 'left'];
-            vals.top = detailsObj[styleName + 'Top'];
-            vals.right = detailsObj[styleName + 'Right'];
-            vals.bottom = detailsObj[styleName + 'Bottom'];
-            vals.left = detailsObj[styleName + 'Left'];
-        }
+        
         for (var i = 0 ; i < valNames.length; i++)
         {
-            output += $STR(valNames[i]) + " = " + vals[valNames[i]] + " ";
+            output += $STR("a11y.layout." + valNames[i]) + " = " + vals[valNames[i]];
+            output += i == valNames.length -1 ? "" : ", ";
         }
         return output;
     },
@@ -1567,7 +1568,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 'html':
                 var tagName= nodeName = null;
                 var setSize = posInSet = 0; var setElems;
-                var label = $STR("inline editor") + ": ";
+                var label = $STR("a11y.labels.inline editor") + ": ";
                 if (hasClass(target, 'nodeName') || hasClass(target, 'nodeValue'))
                 {
                     var isName = hasClass(target, 'nodeName');
@@ -1581,15 +1582,15 @@ Firebug.A11yModel = extend(Firebug.Module,
                     if (!isName)
                     {
                         nodeName = getPreviousByClass(target, 'nodeName');
-                        label += $STRF('value for attribute in element', [nodeName.textContent, nodeTag.textContent]);
+                        label += $STRF('a11y.labels.value for attribute in element', [nodeName.textContent, nodeTag.textContent]);
                     }
                     else
-                        label += $STRF("attribute for element", [nodeTag.textContent]);
+                        label += $STRF("a11y.label.attribute for element", [nodeTag.textContent]);
                 }
                 else if (hasClass(target, 'nodeText'))
                 {
                     nodeTag = getPreviousByClass(target, 'nodeTag');
-                    label += $STRF("text contents for element", [nodeTag.textContent]);
+                    label += $STRF("a11y.labels.text contents for element", [nodeTag.textContent]);
                 }
                 editor.input.setAttribute('aria-label', label);
                 break;
@@ -1597,17 +1598,17 @@ Firebug.A11yModel = extend(Firebug.Module,
             case 'stylesheet':
                 var selector = getPreviousByClass(target, 'cssSelector');
                 selector = selector ? selector.textContent : "";
-                var label = $STR("inline editor") + ": ";
+                var label = $STR("a11y.labels.inline editor") + ": ";
                 if (hasClass(target, 'cssPropName'))
-                    label += $STRF('property for selector', [selector]);
+                    label += $STRF('a11y.labels.property for selector', [selector]);
                 else if (hasClass(target, 'cssPropValue'))
                 {
                     var propName = getPreviousByClass(target, 'cssPropName');
                     propName = propName ? propName.textContent : "";
-                    label += $STRF('value property in selector', [propName, selector]);
+                    label += $STRF('a11y.labels.value property in selector', [propName, selector]);
                 }
                 else if (hasClass(target, 'cssSelector'))
-                    label += $STR('cssSelector');
+                    label += $STR('a11y.labels.css selector');
                 editor.input.setAttribute('aria-label', label);
                 editor.setAttribute('aria-autocomplete', 'inline');
                 break;
@@ -1673,7 +1674,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var fileName =  frame.script.fileName.split("/");
         fileName = fileName.pop();
-        var alertString = $STRF("scriptSuspendedOnLineInFile",[frame.line, frame.functionName, fileName]);
+        var alertString = $STRF("a11y.updates.script_suspended_on_line_in_file",[frame.line, frame.functionName, fileName]);
         this.updateLiveElem(panel, alertString, true);
         this.onShowSourceLink(panel, frame.line);
     },
@@ -1783,10 +1784,10 @@ Firebug.A11yModel = extend(Firebug.Module,
                 {
                     var breakpointStr;
                     if (lineNode.getAttribute('disabledbreakpoint') == 'true')
-                        breakpointStr = "a11y.has_disabled_break_point";
+                        breakpointStr = "a11y.updates.hasdisabled breakpoint";
                     if (lineNode.getAttribute('condition') == 'true')
-                        breakpointStr = "a11y.has_conditional_break_point";
-                    liveString += ", " + $STRF(breakpointStr);
+                        breakpointStr = "a11y.updates.has conditional breakpoint";
+                    liveString += ", " + $STR(breakpointStr);
                 }
                 if (lineNode.getAttribute('executable') == 'true')
                     liveString += ", executable";
@@ -1912,7 +1913,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         viewport.setAttribute('aria-multiline', 'true');
         viewport.setAttribute('aria-readonly', 'true');
         fileName = getFileName(file.href);
-        viewport.setAttribute('aria-label', $STRF('source code for file', [fileName]));
+        viewport.setAttribute('aria-label', $STRF('a11y.labels.source code for file', [fileName]));
         //bit ugly, but not sure how else I can get the caret into the sourcebox without a mouse
         var focusElem = Firebug.chrome.window.document.commandDispatcher.focusedElement;
         var line = box.getLineNode(box.firstViewableLine);
@@ -2019,12 +2020,12 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var matchFeedback = "";
         if (!sourceBox || lineNo === null)
-            matchFeedback = $STRF('no matches found', [text]);
+            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
         else
         {
             var line = sourceBox.getLine(panel.context, lineNo + 1);
             if (!line) line = "";
-            matchFeedback = $STRF("match found for", [text]) + " " + $STRF("on line", [lineNo + 1]) + ": " + line + " in " + getFileName(sourceBox.href);
+            matchFeedback = $STRF("a11y.updates.match found for on line", [text, lineNo + 1, getFileName(sourceBox.href)]);
         }
         this.updateLiveElem(panel, matchFeedback, true);
     },
@@ -2146,11 +2147,11 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 this.modifyPanelRow(panel, dirCell);
                 var rowLabel = dirCell.getAttribute('aria-label');
-                matchFeedback += $STRF('match found for', [text]) + " " + $STRF('in dom property', [rowLabel]);
+                matchFeedback = $STRF('a11y.updates.match found in dom property', [text, rowLabel]);
             }
         }
         else
-            matchFeedback = $STRF('no matches found', [text]);
+            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
         this.updateLiveElem(panel, matchFeedback, true);
     },
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2176,7 +2177,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             Array.forEach(focusObjects, function(e,i,a) {
                 this.makeFocusable(e);
                 if (hasClass(e, 'netTimeCol') && getAncestorByClass(e, 'fromCache'))
-                    e.setAttribute('aria-label', e.textContent + " (cached)"); // TODO : localize
+                    e.setAttribute('aria-label', e.textContent + " (" + $STR("a11y.labels.cached") +")"); // TODO : localize
             }, this);
         }
         else return;
@@ -2264,7 +2265,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var matchFeedback = "";
         if (!row)
-            matchFeedback = "No matches found for \"" + text + "\"";
+            matchFeedback = $STRF('a11y.updates.no matches found', [text]);
         else
         {
             var foundWhere = '';
@@ -2291,10 +2292,10 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 var file = parentRow.repObject;
                 var href =  (file.method ? file.method.toUpperCase() : "?") + " " + getFileName(file.href);
-                matchFeedback = "Match found for " + text + " in " + href + ", " + foundWhere + ": " + row.textContent;
+                matchFeedback = $STRF("a11y.updates.match found in net row",[text, href, foundWhere, row.textContent]);
             }
             else if (getAncestorByClass(row, "netSummaryRow"))
-                matchFeedback = "Match found for " + text + "in summary row: " + row.textContent;
+                matchFeedback = $STRF("a11y.updates.match found in net summary row",[text, row.textContent]);
         }
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
     },

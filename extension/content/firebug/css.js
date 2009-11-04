@@ -1069,12 +1069,12 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({"class": "a11yCSSView",  role : 'presentation'},
-                DIV({role : 'list', 'aria-label' : 'style rules' },
+                DIV({role : 'list', 'aria-label' : $STR('aria.labels.style rules') },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role : "list", 'aria-label' :'inherited style rules'},
+                DIV({role : "list", 'aria-label' :$STR('aria.labels.inherited style rules')},
                     FOR("section", "$inherited",
 
                         H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
@@ -1335,7 +1335,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role : "list", "aria-label" : "computed styles"},
+            DIV({"class": "a11yCSSView", role : "list", "aria-label" : $STR('aria.labels.computed styles')},
                 FOR("group", "$groups",
                     H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
                         SPAN({class: "cssInheritLabel"}, "$group.title")
