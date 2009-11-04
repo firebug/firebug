@@ -221,12 +221,12 @@ this.safeToString = function(ob)
             return ob.toString();
         if (ob && typeof (ob['toSource']) == 'function')
             return ob.toSource();
-       /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590
-        * var str = "[";
+       /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590 */
+        var str = "[";
         for (var p in ob)
             str += p+',';
         return str + ']';
-        */
+
     }
     catch (exc)
     {
@@ -2350,7 +2350,7 @@ this.getSourceLinkForScript = function(script, context)
     }
     else
     {
-        if (FBTrace.DBG_EERRORS)
+        if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("getSourceLineForScript FAILS, no sourcefile for script ", script);
     }
 };
