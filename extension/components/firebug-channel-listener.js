@@ -93,13 +93,21 @@ ChannelListener.prototype =
     {
         try
         {
+            var newStream;
             var context = this.getContext(this.window);
             if (context)
             {
-                var newStream = this.onCollectData(request, context, inputStream, offset, count);
+                newStream = this.onCollectData(request, context, inputStream, offset, count);
                 if (newStream)
                     inputStream = newStream;
             }
+
+            // Use wrappedJSObject to bypass IDL definition that doesn't return any value.
+            newStream = this.proxyListener.wrappedJSObject.onDataAvailable(request, requestContext,
+                inputStream, offset, count);
+
+            if (newStream)
+                inputStream = newStream;
         }
         catch (err)
         {
@@ -146,8 +154,7 @@ ChannelListener.prototype =
                 // onStartRequest). Let's ignore the response if it should not be cached.
                 this.ignore = !this.shouldCacheRequest(request);
 
-                if (!this.ignore)
-                    this.proxyListener.onStartRequest(request, requestContext);
+                this.proxyListener.onStartRequest(request, requestContext);
             }
         }
         catch (err)
@@ -178,7 +185,7 @@ ChannelListener.prototype =
         try
         {
             var context = this.getContext(this.window);
-            if (context && !this.ignore)
+            if (context)
                 this.proxyListener.onStopRequest(request, requestContext, statusCode);
         }
         catch (err)

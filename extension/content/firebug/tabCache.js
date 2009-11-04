@@ -418,6 +418,25 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         dispatch(this.fbListeners, "onStartRequest", [this.context, request]);
     },
 
+    onDataAvailable: function(request, requestContext, inputStream, offset, count)
+    {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.channel.onDataAvailable: " + safeGetName(request));
+
+        // If the stream is read a new one must be provided (the stream doesn't implement
+        // nsISeekableStream).
+        var stream = {
+            value: inputStream
+        };
+
+        dispatch(Firebug.TabCacheModel.fbListeners, "onDataAvailable",
+            [this.context, request, requestContext, stream, offset, count]);
+        dispatch(this.fbListeners, "onDataAvailable", [this.context,
+            request, requestContext, stream, offset, count]);
+
+        return stream.value;
+    },
+
     onStopRequest: function(request, requestContext, statusCode)
     {
         if (FBTrace.DBG_CACHE)
@@ -441,6 +460,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
 function ChannelListenerProxy(win)
 {
+    this.wrappedJSObject = this;
     this.window = win;
 }
 
@@ -456,10 +476,11 @@ ChannelListenerProxy.prototype =
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
-        // Not sent to custom listneres since if the stream is read a new one
-        // must be provided (the stream doesn't implement nsISeekableStream)
-        // Custom extensions must read the response from the tabCache or register
-        // own nsIStreamListener using nsITraceableChannel.
+        var context = this.getContext();
+        if (!context)
+            return null;
+
+        return context.sourceCache.onDataAvailable(request, requestContext, inputStream, offset, count);
     },
 
     onStopRequest: function(request, requestContext, statusCode)
