@@ -52,6 +52,18 @@ Firebug.DOMModule = extend(Firebug.Module,
         context.dom = {breakpoints: new DOMBreakpointGroup()};
     },
 
+    loadedContext: function(context, persistedState)
+    {
+        context.dom.breakpoints.load(context);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.Module.destroyContext.apply(this, arguments);
+
+        context.dom.breakpoints.store(context);
+    },
+
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
@@ -478,11 +490,17 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     copyPath: function(row)
     {
+        var path = this.getPropertyPath(row);
+        copyToClipboard(path.join(""));
+    },
+
+    getPropertyPath: function(row)
+    {
         var path = [];
         for(var current = row; current ; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
-        path.splice(0,1);//don't want the first seperator
-        copyToClipboard(path.join(""));
+        path.splice(0,1); //don't want the first seperator
+        return path;
     },
 
     copyProperty: function(row)
@@ -675,7 +693,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            breakpoints.addBreakpoint(object, name, this.context);
+            breakpoints.addBreakpoint(object, name, this, row);
             row.setAttribute("breakpoint", "true");
         }
     },
@@ -1875,10 +1893,11 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function Breakpoint(object, propName, context)
+function Breakpoint(object, propName, objectPath, context)
 {
     this.context = context;
     this.propName = propName;
+    this.objectPath = objectPath;
     this.object = object;
     this.checked = true;
 }
@@ -1889,6 +1908,9 @@ Breakpoint.prototype =
     {
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.watch; property: " + this.propName);
+
+        if (!this.object)
+            return;
 
         try
         {
@@ -1926,6 +1948,9 @@ Breakpoint.prototype =
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.unwatch; property: " + this.propName, this.object);
 
+        if (!this.object)
+            return;
+
         try
         {
             this.object.unwatch(this.propName);
@@ -1950,9 +1975,20 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
     name: "domBreakpoints",
     title: $STR("dom.label.DOM Breakpoints"),
 
-    addBreakpoint: function(object, propName, context)
+    addBreakpoint: function(object, propName, panel, row)
     {
-        var bp = new Breakpoint(object, propName, context);
+        var path = panel.getPropertyPath(row);
+        path.pop();
+
+        // We don't want the last dot.
+        if (path.length > 0 && path[path.length-1] == ".")
+            path.pop();
+
+        var objectPath = path.join("");
+        //if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.addBreakpoint; " + objectPath, path);
+
+        var bp = new Breakpoint(object, propName, objectPath, panel.context);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
     },
@@ -1972,7 +2008,46 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
         var object = args[0];
         var propName = args[1];
         return bp.object == object && bp.propName == propName;
-    }
+    },
+
+    // Persistence
+    load: function(context)
+    {
+        var panelState = getPersistedState(context, "dom");
+        if (panelState.breakpoints)
+            this.breakpoints = panelState.breakpoints;
+
+        this.enumerateBreakpoints(function(bp)
+        {
+            try
+            {
+                // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
+                // xxxJJB: The Components.utils.evalInSandbox fails from some reason.
+                var expr = "context.window.wrappedJSObject." + bp.objectPath;
+                bp.object = eval(expr);
+                bp.watchProperty();
+
+                if (FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.DOMBreakpointGroup.load; " + bp.objectPath, bp);
+            }
+            catch (err)
+            {
+                if (FBTrace.DBG_ERROR || FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.DOMBreakpointGroup.load; ERROR " + bp.objectPath, err);
+            }
+        });
+    },
+
+    store: function(context)
+    {
+        this.enumerateBreakpoints(function(bp)
+        {
+            bp.object = null;
+        });
+
+        var panelState = getPersistedState(context, "dom");
+        panelState.breakpoints = this.breakpoints;
+    },
 });
 
 // ************************************************************************************************
