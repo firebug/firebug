@@ -1,4 +1,5 @@
 content firebug content/firebug/
+content firebug content/firebug/ contentaccessible=yes
 
 skin    firebug classic/1.0 skin/classic/
 skin    firebug-os  classic/1.0 skin/classic/win/
