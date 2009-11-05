@@ -38,8 +38,6 @@ const nsIConsoleService = Ci.nsIConsoleService;
 const nsITimer = Ci.nsITimer;
 const nsITimerCallback = Ci.nsITimerCallback;
 
-const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const NS_ERROR_NO_INTERFACE = Components.results.NS_ERROR_NO_INTERFACE;
@@ -199,7 +197,6 @@ function FirebugService()
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
     this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
                         .createInstance(Components.interfaces.nsIMutableArray);  // scripts contained in leveledScript that have not been drained
-    this.FF3p5 = versionChecker.compare(appInfo.version, "3.5*") >= 0;
 }
 
 FirebugService.prototype =
@@ -1594,7 +1591,7 @@ FirebugService.prototype =
             var msg = [];
             for (var frame = Components.stack; frame; frame = frame.caller)
                 msg.push( frame.filename + "@" + frame.lineNumber +": "+frame.sourceLine  );
-            FBTrace.sysout("createdScriptHasCaller "+msg.length+" FF3.1:"+this.FF3p5, msg);
+            FBTrace.sysout("createdScriptHasCaller "+msg.length, msg);
         }
 
         var frame = Components.stack; // createdScriptHasCaller
@@ -1602,11 +1599,6 @@ FirebugService.prototype =
         frame = frame.caller;         // onScriptCreated
         if (!frame) return frame;
 
-        if (!this.FF3p5)
-        {
-            frame = frame.caller;         // native jsd?
-            if (!frame) return frame;
-        }
         frame = frame.caller;         // hook apply
         if (!frame) return frame;
         frame = frame.caller;         // native interpret?
