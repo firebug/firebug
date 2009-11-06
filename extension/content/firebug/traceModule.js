@@ -1366,10 +1366,12 @@ Firebug.TraceModule.TraceMessage.prototype =
                         if (getter)
                             var value = "" + getter;
                         else
-                            var value = "" + this.obj[p]; // script takes too much time error
+                            var value = safeToString(this.obj[p]);
                         this.props[p] = value;
                     }
                     catch (err) {
+                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS with "+err+"\n");
+                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS on object "+this.obj+"\n");
                         this.props[p] = "{Error}";
                     }
                 }
