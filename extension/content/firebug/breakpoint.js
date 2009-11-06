@@ -681,7 +681,14 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 });
 
 // ************************************************************************************************
-
+/*
+ * Construct a break notification popup
+ * @param doc the document to contain the popup
+ * @param cause info object for the popup, with these optional fields:
+ *   strings: title, message, attrName
+ *   elements: target, relatedTarget: element
+ *   objects: prevValue, newValue
+ */
 Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
     this.initialize(doc, cause);
