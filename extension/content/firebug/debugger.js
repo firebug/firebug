@@ -212,15 +212,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try {
             executionContext.scriptsEnabled = false;
-            var suppressed = false;
-            var utils = context.window.getInterface(Ci.nsIDOMWindowUtils);
-            if (utils)
-            {
-                utils.suppressEventHandling(true);
-                suppressed = true;
-            }
+
+            context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
+            if (context.eventSuppressor)
+                context.eventSuppressor.suppressEventHandling(true);
+
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop try to disable scripts "+(suppressed?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+                FBTrace.sysout("debugger.stop try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
             // Unfortunately, due to quirks in Firefox's networking system, we must
             // be sure to load and cache all scripts NOW before we enter the nested
             // event loop, or run the risk that some of them won't load while
@@ -253,20 +251,21 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try {
             if (executionContext.isValid)
             {
-                var utils = context.window.getInterface(Ci.nsIDOMWindowUtils);
-                if (utils)
-                    utils.suppressEventHandling(false);
+                if (context.eventSuppressor)
+                {
+                    context.eventSuppressor.suppressEventHandling(false);
+                    delete context.eventSuppressor;
+                }
 
                 executionContext.scriptsEnabled = true;
-                if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.stop  try to enable scripts executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
             }
             else
             {
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("debugger.stop "+executionContext.tag+" executionContext is not valid");
             }
-
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.stop try to ensable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
         } catch (exc) {
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
         }
