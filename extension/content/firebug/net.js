@@ -2849,6 +2849,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, win);
         if (file)
         {
+            // XXXjjb Honza I have to set these to get the conditional to work
+            file.urlParams = parseURLParams(file.href);
             this.breakOnXHR(file);
         }
     },
@@ -4670,6 +4672,8 @@ function Breakpoint(href)
     this.href = href;
     this.checked = true;
     this.condition = "";
+    this.onEvaluateFails = bind(this.onEvaluateFails, this);
+    this.onEvaluateSucceeds =  bind(this.onEvaluateSucceeds, this);
 }
 
 Breakpoint.prototype =
@@ -4689,21 +4693,37 @@ Breakpoint.prototype =
 
             scope["$postBody"] = Utils.getPostText(file, context);
 
-            // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
-            var sandbox = new Components.utils.Sandbox(context.window);
-            sandbox.scope = scope;
+            // The properties of scope are all strings; we pass them in then unpack them using 'with'. The function is called immediately.
+            var expr = "(function (){var scope = "+JSON.stringify(scope)+"; with (scope) { return  " + this.condition + ";}})();"
 
-            var expr = "with (scope) {" + this.condition + "}";
-            return Components.utils.evalInSandbox(expr, sandbox);
+            delete context.breakingCause;  // the callbacks will set this if the condition is true or if the eval faults.
+
+            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window, this.onEvaluateSucceeds, this.onEvaluateFails );
+
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.evaluateCondition; rc "+rc, {expr: expr,scope: scope, json: JSON.stringify(scope)});
+
+            return context.breakingCause;
         }
         catch (err)
         {
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.evaluateCondition; EXCEPTION", err);
+                FBTrace.sysout("net.evaluateCondition; EXCEPTION "+err, err);
         }
 
         return false;
-    }
+    },
+
+    onEvaluateSucceeds: function(result, context)
+    {
+        if (result)
+            context.breakingCause = {title: $STR("net.Break On XHR"), message: this.condition};
+    },
+
+    onEvaluateFails: function(result, context)
+    {
+        context.breakingCause = {title: $STR("net.Break On XHR"), message: "Breakpoint condition evaluation fails ", prevValue: this.condition, newValue:result};
+    },
 }
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
