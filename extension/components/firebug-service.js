@@ -167,12 +167,9 @@ function FirebugService()
     this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
     fbs._lastErrorDebuggr = null;
 
-    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
-                    getService(Components.interfaces.nsIAppShellService);
-    this.hiddenWindow = appShellService.hiddenDOMWindow;
 
     if(FBTrace.DBG_FBS_ERRORS)
-        this.hiddenWindow.dump("FirebugService Starting, FBTrace should be up\n");
+        this.osOut("FirebugService Starting, FBTrace should be up\n");
 
     this.enabled = false;
     this.profiling = false;
@@ -201,6 +198,30 @@ function FirebugService()
 
 FirebugService.prototype =
 {
+    osOut: function(str)
+    {
+        if (!this.outChannel)
+        {
+            try
+            {
+                var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
+                    getService(Components.interfaces.nsIAppShellService);
+                this.hiddenWindow = appShellService.hiddenDOMWindow;
+                this.outChannel = "hidden";
+            }
+            catch(exc)
+            {
+                var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+                this.outChannel = "service"
+                this.outChannel("Using consoleService because nsIAppShellService.hiddenDOMWindow not available "+exc);
+            }
+        }
+        if (this.outChannel === "hidden")  // apparently can't call via JS function
+            this.hiddenWindow.dump(str);
+        else
+            consoleService.logStringMessage(str);
+    },
+
     shutdown: function()  // call disableDebugger first
     {
         timer = null;
@@ -1263,7 +1284,7 @@ FirebugService.prototype =
         if (message=="out of memory")  // bail
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                fbs.hiddenWindow.dump("fbs.onError sees out of memory "+fileName+":"+lineNo+"\n");
+                fbs.osOut("fbs.onError sees out of memory "+fileName+":"+lineNo+"\n");
             return true;
         }
 

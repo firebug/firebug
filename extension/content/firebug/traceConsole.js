@@ -7,7 +7,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const traceService = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsIObserverService);
-const hiddenWindow = Cc["@mozilla.org/appshell/appShellService;1"].getService(Ci.nsIAppShellService).hiddenDOMWindow;
 
 const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const prefs = PrefService.getService(Ci.nsIPrefBranch2);
@@ -302,7 +301,8 @@ var TraceConsole =
     onExitFirefox: function()
     {
         goQuitApplication();
-    }
+    },
+
 };
 
 // ************************************************************************************************
