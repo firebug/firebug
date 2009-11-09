@@ -1099,7 +1099,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             if (file.loaded)
             {
                 setClass(row, "loaded");
-                timeLabel.innerHTML = NetRequestEntry.formatTime(this.elapsed);
+                timeLabel.innerHTML = NetRequestEntry.getElapsedTime(this.elapsed);
             }
             else
             {
@@ -1204,6 +1204,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // Total request time doesn't include the time spent in queue.
         this.elapsed = elapsed - (file.sendingTime - file.connectedTime);
+
+        // The nspr timer doesn't have 1ms precision, so it can happen that entire
+        // request is executed in l ms (so the total is zero). Let's display at least
+        // one bar in such a case so the timeline is visible. 
+        if (this.elapsed <= 0)
+            this.barReceivingWidth = "1";
 
         // Compute also offset for the contentLoadBar and windowLoadBar, which are
         // displayed for the first phase.
@@ -1973,9 +1979,9 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         return this.formatSize(file.size);
     },
 
-    getElapsedTime:function(file)
+    getElapsedTime: function(file)
     {
-        if (!file.elapsed)
+        if (!file.elapsed || file.elapsed < 0)
             return "";
 
         return this.formatTime(file.elapsed);
