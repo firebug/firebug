@@ -1249,7 +1249,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             ? $STR("Request")
             : $STRF("RequestCount", [fileCount]);
 
-        var sizeLabel = row.childNodes[5].firstChild;
+        var sizeLabel = row.childNodes[4].firstChild;
         sizeLabel.setAttribute("totalSize", totalSize);
         sizeLabel.firstChild.nodeValue = NetRequestEntry.formatSize(totalSize);
 
