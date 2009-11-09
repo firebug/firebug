@@ -324,6 +324,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var parentTag = getNodeBoxTag(parentNodeBox);
         if (parentTag == Firebug.HTMLPanel.TextElement.tag)
         {
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout("html.mutateText target: " + target + " parent: " + parent);
+
             var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
                 return;
@@ -657,6 +660,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     onMutateText: function(event)
     {
+        if (FBTrace.DBG_HTML)
+            FBTrace.sysout("html.onMutateText; ", event);
+
         var target = event.target;
         var parent = target.parentNode;
 
