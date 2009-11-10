@@ -29,9 +29,14 @@ Firebug.HTMLModule = extend(Firebug.Module,
         Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
+    initContext: function(context, persistedState)
+    {
+        Firebug.Module.initContext.apply(this, arguments);
+        context.mutationBreakpoints = new MutationBreakpointGroup();
+    },
+
     loadedContext: function(context, persistedState)
     {
-        context.mutationBreakpoints = new MutationBreakpointGroup();
         context.mutationBreakpoints.load(context);
     },
 
