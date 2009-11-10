@@ -25,6 +25,7 @@ var contexts = [];
  * consequently responsible for monitoring all XHRs.
  */
 Firebug.Spy = extend(Firebug.Module,
+/** @lends Firebug.Spy */
 {
     dispatchName: "spy",
 
