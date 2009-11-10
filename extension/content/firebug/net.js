@@ -1773,7 +1773,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                          style: "margin-left: $file.file|getIndent\\px"},
                         "$file.file|getHref"
                     ),
-                    DIV({"class": "netFullHrefLabel netHrefLabel netLabel",
+                    DIV({"class": "netFullHrefLabel netHrefLabel",
                          style: "margin-left: $file.file|getIndent\\px"},
                         "$file.file.href"
                     )

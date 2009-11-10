@@ -155,10 +155,6 @@
     background: #FFFFFF;
 }
 
-.netHrefCol:hover {
-    background: LightYellow;
-}
-
 .netRow.loaded:hover {
     background: #EFEFEF;
 }
@@ -196,7 +192,7 @@
 .netHrefLabel {
     -moz-box-sizing: padding-box;
     overflow: hidden;
-    z-index: 100;
+    z-index: 10;
     position: absolute;
     padding-left: 18px;
     padding-top: 1px;
@@ -211,12 +207,7 @@
     padding-bottom: 3px;
     max-width: 100%;
     background: #FFFFFF;
-}
-
-.netHrefCol:hover > .netStatusLabel,
-.netHrefCol:hover > .netDomainLabel,
-.netHrefCol:hover > .netHrefLabel {
-    display: none;
+    z-index: 200;
 }
 
 .netHrefCol:hover > .netFullHrefLabel {
