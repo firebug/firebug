@@ -831,7 +831,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         var isScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
         if(FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onScroll /\/\/\/\/\/\/\/\/\//\/\/\/\/\/ scrolledToBottom: "+isScrolledToBottom, event);
+            FBTrace.sysout("console.onScroll ------------------ scrolledToBottom: "+isScrolledToBottom, event);
     },
 });
 

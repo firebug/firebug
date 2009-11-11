@@ -165,8 +165,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (frame)
                 Firebug.Debugger.onBreak(frame, 3);
             else
+            {
+                // XXXrobc no-op, added for detrace
                 if (FBTrace.DBG_UI_LOOP)
                     FBTrace.sysout("debugger.breakNow: no frame that is not firebug");
+            }
         });
     },
 
