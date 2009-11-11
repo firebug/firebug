@@ -310,7 +310,7 @@ Firebug.TraceModule.CommonBaseUI = {
             var frameDoc = logTabIframe.contentWindow.document;
 
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/panelbase.css"));
-            addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceconsole.css"));
+            addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceConsole.css"));
 
             var rootNode = frameDoc.getElementById("traceLogContent");
             outputNodes.setScrollingNode(rootNode);
