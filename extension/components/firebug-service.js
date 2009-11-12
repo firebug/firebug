@@ -212,8 +212,8 @@ FirebugService.prototype =
             catch(exc)
             {
                 var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
-                this.outChannel = "service"
-                this.outChannel("Using consoleService because nsIAppShellService.hiddenDOMWindow not available "+exc);
+                consoleService.logStringMessage("Using consoleService because nsIAppShellService.hiddenDOMWindow not available "+exc);
+                this.outChannel = "service";
             }
         }
         if (this.outChannel === "hidden")  // apparently can't call via JS function
@@ -1764,7 +1764,18 @@ FirebugService.prototype =
         {
                 try
                 {
-                    var global = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
+                    if (!jscontext.isValid)
+                        return;
+
+                    var wrappedGlobal = jscontext.globalObject;
+                    if (!wrappedGlobal)
+                        return;
+
+                    var unwrappedGlobal = wrappedGlobal.getWrappedValue();
+                    if (!unwrappedGlobal)
+                        return;
+
+                    var global = new XPCNativeWrapper(unwrappedGlobal);
 
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
                         FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
@@ -1824,7 +1835,7 @@ FirebugService.prototype =
                 }
                 catch(e)
                 {
-                    FBTrace.sysout("jscontext dump FAILED "+e);
+                    FBTrace.sysout("jscontext dump FAILED "+e, e);
                 }
 
         }});
