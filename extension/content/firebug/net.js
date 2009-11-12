@@ -3269,7 +3269,9 @@ NetProgress.prototype =
         file.loaded = true;
 
         // Update last finished file of the associated phase.
-        file.phase.lastFinishedFile = file;
+        //xxxHonza: verify this.
+        if (file.phase)
+            file.phase.lastFinishedFile = file;
     },
 
     extendPhase: function(file)
