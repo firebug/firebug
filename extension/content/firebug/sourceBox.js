@@ -466,7 +466,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (clearCache)
         {
-            this.clearSourceBox(sourcebox, viewRange);
+            this.clearSourceBox(sourceBox, viewRange);
         }
         else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
         {
