@@ -102,6 +102,7 @@ const reXUL = /\.xul$|\.xml$/;
 // Globals
 
 var jsd, fbs, prefs;
+var consoleService; 
 
 var contextCount = 0;
 
@@ -211,7 +212,7 @@ FirebugService.prototype =
             }
             catch(exc)
             {
-                var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+                consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
                 consoleService.logStringMessage("Using consoleService because nsIAppShellService.hiddenDOMWindow not available "+exc);
                 this.outChannel = "service";
             }
