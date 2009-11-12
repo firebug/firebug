@@ -451,7 +451,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
+    reView: function(sourceBox, clearCache)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
         if (sourceBox.targetedLine)
         {
@@ -464,11 +464,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
         }
 
-        // skip work if nothing changes.
-        if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
+        if (clearCache)
+        {
+            this.clearSourceBox(sourcebox, viewRange);
+        }
+        else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
         {
             if (FBTrace.DBG_SOURCEFILES)
                 FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
+            // skip work if nothing changes.
             return;
         }
 
@@ -512,7 +516,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (!cacheHit)
         {
-            this.clearSourceBox(sourceBox);
+            this.clearSourceBox(sourceBox, viewRange);
         }
         else
         {
@@ -554,7 +558,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return cacheHit;
     },
 
-    clearSourceBox: function(sourceBox)
+    clearSourceBox: function(sourceBox, viewRange)
     {
         var topMostCachedElement = sourceBox.viewport.firstChild;
         this.removeLines(sourceBox, topMostCachedElement, sourceBox.numberOfRenderedLines);
