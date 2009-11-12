@@ -645,12 +645,14 @@ this.Element = domplate(Firebug.Rep,
              for (var i = 0; i < elt.attributes.length; ++i)
              {
                  var attr = elt.attributes[i];
+                 if (attr.localName.indexOf("-moz-math") != -1)
+                     continue;
                  if (attr.localName.indexOf("firebug-") != -1)
-                    continue;
+                     continue;
                  else if (attr.localName == "id")
                      idAttr = attr;
-                else if (attr.localName == "class")
-                    classAttr = attr;
+                 else if (attr.localName == "class")
+                     classAttr = attr;
                  else
                      attrs.push(attr);
              }
@@ -688,24 +690,37 @@ this.Element = domplate(Firebug.Rep,
          return getElementTreeXPath(elt);
      },
 
-     getNodeText: function(element)
+     getNodeTextGroups: function(element)
      {
-         if (Firebug.showWhitespaceNodes)
+         var text =  element.textContent;
+         if (!Firebug.showFullTextNodes)
          {
-            var text = element.innerHTML;
-            if (Firebug.showFullTextNodes)
-                return escapeNewLines(text);
-            else
-                return cropMultipleLines(text, 50);
+             text=cropString(text,50);
          }
+         
+         var escapeGroups=[];
+         
+         if (Firebug.showTextNodesWithWhitespace)
+             escapeGroups.push({
+                'group': 'whitespace',
+                'class': 'nodeWhiteSpace',
+                'extra': {
+                    '\t': '_Tab',
+					'\n': '_Para',
+                    ' ' : '_Space'
+                }
+             });
+         if (Firebug.showTextNodesAsSource)
+             escapeGroups.push({
+                 'group':'text',
+                 'class':'nodeTextEntity',
+                 'extra':{}
+             });
+                  
+         if (escapeGroups.length)
+             return escapeGroupsForEntities(text, escapeGroups);
          else
-         {
-             var text = element.textContent;
-             if (Firebug.showFullTextNodes)
-                 return text;
-             else
-                 return cropString(text, 50);
-         }
+             return [{str:text,'class':'',extra:''}];
      },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -780,17 +795,24 @@ this.Element = domplate(Firebug.Rep,
     getContextMenuItems: function(elt, target, context)
     {
         var monitored = areEventsMonitored(elt, null, context);
-
-        return [
-            {label: "CopyHTML", command: bindFixed(this.copyHTML, this, elt) },
-            {label: "CopyInnerHTML", command: bindFixed(this.copyInnerHTML, this, elt) },
+        var CopyElement = "CopyHTML";
+        if (isElementSVG(elt))
+            CopyElement = "CopySVG";
+        if (isElementMathML(elt))
+            CopyElement = "CopyMathML";
+        
+        var items=[{label: CopyElement, command: bindFixed(this.copyHTML, this, elt)}];
+        if (!isElementSVG(elt) && !isElementMathML(elt))
+            items.push({label: "CopyInnerHTML", command: bindFixed(this.copyInnerHTML, this, elt) });
+        
+        return items.concat([
             {label: "CopyXPath", command: bindFixed(this.copyXPath, this, elt) },
             "-",
             {label: "ShowEventsInConsole", type: "checkbox", checked: monitored,
              command: bindFixed(toggleMonitorEvents, FBL, elt, null, monitored, context) },
             "-",
             {label: "ScrollIntoView", command: bindFixed(elt.scrollIntoView, elt) }
-        ];
+        ]);
     }
 });
 

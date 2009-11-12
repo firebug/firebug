@@ -119,6 +119,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (window.closed)
                 this.stopObserving();
+            if (typeof FBTrace == 'undefined')
+                return;
             if (!FBTrace)
                 return;
         }

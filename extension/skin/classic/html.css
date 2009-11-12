@@ -58,8 +58,21 @@
 }
 
 .nodeWhiteSpace {
+    border: 1px solid LightGray;
+    white-space: pre; /* otherwise the border will be collapsed around zero pixels */
+    margin-left: 1px;
+    color: gray;
+}
+
+
+.nodeWhiteSpace_Space {
+    border: 1px solid #ddd;
+}
+
+.nodeTextEntity {
     border: 1px solid gray;
     white-space: pre; /* otherwise the border will be collapsed around zero pixels */
+    margin-left: 1px;
 }
 
 .nodeComment {

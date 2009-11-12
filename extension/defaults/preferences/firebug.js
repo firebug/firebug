@@ -44,7 +44,8 @@ pref("extensions.firebug.console.enableSites", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
-pref("extensions.firebug.showWhitespaceNodes", false);
+pref("extensions.firebug.showTextNodesWithWhitespace", false);
+pref("extensions.firebug.showTextNodesAsSource", false);
 pref("extensions.firebug.showFullTextNodes", true);
 pref("extensions.firebug.highlightMutations", true);
 pref("extensions.firebug.expandMutations", false);

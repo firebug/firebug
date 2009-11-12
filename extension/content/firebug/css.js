@@ -1426,7 +1426,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     saveEdit: function(target, value, previousValue)
     {
-        target.innerHTML = escapeHTML(value);
+        target.innerHTML = escapeForCss(value);
 
         var row = getAncestorByClass(target, "cssProp");
         if (hasClass(row, "disabledStyle"))
@@ -1536,7 +1536,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     saveEdit: function(target, value, previousValue)
     {
         if (FBTrace.DBG_CSS)    FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
-        target.innerHTML = escapeHTML(value);
+        target.innerHTML = escapeForCss(value);
 
         if (value === previousValue)     return;
 
@@ -1591,7 +1591,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             catch (err)
             {
                 if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS) FBTrace.sysout("CSS Insert Error: "+err, err);
-                target.innerHTML = escapeHTML(previousValue);
+                target.innerHTML = escapeForCss(previousValue);
                 row.repObject = undefined;
                 return;
             }

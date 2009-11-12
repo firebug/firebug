@@ -164,8 +164,44 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         Firebug.HTMLModule.deleteAttribute(elt, attrName, this.context);
     },
-
+    
     editNode: function(node)
+    {
+        if (isElementSVG(node))
+            this.editSVGNode(node);
+        if (isElementMathML(node))
+            this.editMathMLNode(node);
+        else
+            this.editHTMLNode(node);
+    },
+
+    editSVGNode: function(node)
+    {
+        var objectNodeBox = this.ioBox.findObjectBox(node);
+        if (objectNodeBox)
+        {
+            if (!this.svgEditor)
+                this.svgEditor = new Firebug.HTMLPanel.Editors.SVG(this.document);
+
+            var xml = getElementXML(node);
+            Firebug.Editor.startEditing(objectNodeBox, xml, this.svgEditor);
+        }
+    },
+
+    editMathMLNode: function(node)
+    {
+        var objectNodeBox = this.ioBox.findObjectBox(node);
+        if (objectNodeBox)
+        {
+            if (!this.mathmlEditor)
+                this.mathmlEditor = new Firebug.HTMLPanel.Editors.MathML(this.document);
+
+            var xml = getElementXML(node);
+            Firebug.Editor.startEditing(objectNodeBox, xml, this.mathmlEditor);
+        }
+    },
+
+    editHTMLNode: function(node)
     {
         if ( nonEditableTags.hasOwnProperty(node.localName) )
             return;
@@ -174,7 +210,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (objectNodeBox)
         {
             if (!this.htmlEditor)
-                this.htmlEditor = new HTMLEditor(this.document);
+                this.htmlEditor = new Firebug.HTMLPanel.Editors.HTML(this.document);
 
             this.htmlEditor.innerEditMode = node.localName in innerEditableTags;
 
@@ -321,7 +357,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             : this.ioBox.findObjectBox(parent);
 
         if (!parentNodeBox)
+        {
+            if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, parent node box does not exist");
             return;
+        }
 
         if (!Firebug.showFullTextNodes)
             textValue = cropMultipleLines(textValue, 50);
@@ -334,7 +373,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
             var nodeText = HTMLLib.getTextElementTextBox(parentNodeBox);
             if (!nodeText.firstChild)
+            {
+                if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, TextElement firstChild does not exist");
                 return;
+            }
 
             nodeText.firstChild.nodeValue = textValue;
 
@@ -344,7 +386,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         {
             var childBox = this.ioBox.getChildObjectBox(parentNodeBox);
             if (!childBox)
+            {
+                if (FBTrace.DBG_HTML)   FBTrace.sysout("html.mutateText failed to update text, no child object box found");
                 return;
+            }
 
             var textNodeBox = this.ioBox.findChildObjectBox(childBox, target);
             if (textNodeBox)
@@ -386,7 +431,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (!parentNodeBox)
             return;
 
-        if (!Firebug.showWhitespaceNodes && this.isWhitespaceText(target))
+        if (!Firebug.showTextNodesWithWhitespace && this.isWhitespaceText(target))
             return;
 
         // target is only whitespace
@@ -408,11 +453,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 {
                     if (nextSibling)
                     {
-                        if (!Firebug.showWhitespaceNodes && Firebug.HTMLLib.isWhitespaceText(nextSibling) )
+                        while (
+                                (!Firebug.showTextNodesWithWhitespace && Firebug.HTMLLib.isWhitespaceText(nextSibling)) || 
+                                (!Firebug.showCommentNodes && nextSibling instanceof Comment)
+                              ) 
+                        {
                             nextSibling = this.findNextSibling(nextSibling);
-                        else if (!Firebug.showCommentNodes)
-                            while (nextSibling instanceof Comment)
-                                nextSibling = this.findNextSibling(nextSibling);
+                        }
                     }
 
                     var objectBox = nextSibling
@@ -506,7 +553,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var parentNode = node ? node.parentNode : null;
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("ChromeBugPanel.getParentObject for "+node.localName+" parentNode:"+(parentNode?parentNode.localName:"null-or-false")+"\n");
+            FBTrace.sysout("ChromeBugPanel.getParentObject for "+node.nodeName+" parentNode:"+(parentNode?parentNode.nodeName:"null-or-false")+"\n");
 
         if (parentNode)
         {
@@ -523,7 +570,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 {
                     var skipParent = this.embeddedBrowserParents[node];  // better be HTML element, could be iframe
                     if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.localName:"none")+"\n");                  /*@explore*/
+                        FBTrace.sysout("getParentObject skipParent:"+(skipParent?skipParent.nodeName:"none")+"\n");                  /*@explore*/
                     if (skipParent)
                         return skipParent;
                 }
@@ -570,7 +617,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             if (index == 0)
                 return this.getElementSourceText(node);
             else
-                return null;  // no syblings of source elements
+                return null;  // no siblings of source elements
         }
         else if (node.contentDocument)  // then the node is a frame
         {
@@ -592,7 +639,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         else
             var child = this.getFirstChild(node); // child is set to at the beginning of an iteration.
 
-        if (Firebug.showWhitespaceNodes)  // then the index is true to the node list
+        if (Firebug.showTextNodesWithWhitespace)  // then the index is true to the node list
             return child;
         else
         {
@@ -912,7 +959,12 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        var viewOptionNames = {showCommentNodes:1, showWhitespaceNodes:1 , showFullTextNodes:1};
+        var viewOptionNames = {
+                showCommentNodes:1, 
+                showTextNodesAsSource:1, 
+                showTextNodesWithWhitespace:1, 
+                showFullTextNodes:1
+        };
         if (name in viewOptionNames)
         {
             this.resetSearch();
@@ -1067,8 +1119,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         return [
             optionMenu("ShowFullText", "showFullTextNodes"),
-            optionMenu("ShowWhitespace", "showWhitespaceNodes"),
+            optionMenu("ShowWhitespace", "showTextNodesWithWhitespace"),
             optionMenu("ShowComments", "showCommentNodes"),
+            optionMenu("ShowTextNodesAsSource", "showTextNodesAsSource"),
             "-",
             optionMenu("HighlightMutations", "highlightMutations"),
             optionMenu("ExpandMutations", "expandMutations"),
@@ -1108,11 +1161,16 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
             if (!( nonEditableTags.hasOwnProperty(node.localName) ))
             {
-                items.push(
-                    "-",
-                    {label: "EditElement", command: bindFixed(this.editNode, this, node) },
-                    {label: "DeleteElement", command: bindFixed(this.deleteNode, this, node) }
-                );
+                var EditElement = "EditHTMLElement";
+                
+                if (isElementMathML(node)) 
+                    EditElement = "EditMathMLElement"
+                else if (isElementSVG(node)) 
+                    EditElement = "EditSVGElement";
+                
+                items.push("-", { label: EditElement, command: bindFixed(this.editNode, this, node)}, 
+                            { label: "DeleteElement", command: bindFixed(this.deleteNode, this, node)}
+                           );
             }
         }
         else
@@ -1152,17 +1210,17 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (hasClass(target, "nodeName") || hasClass(target, "nodeValue") || hasClass(target, "nodeBracket"))
         {
             if (!this.attrEditor)
-                this.attrEditor = new AttributeEditor(this.document);
+                this.attrEditor = new Firebug.HTMLPanel.Editors.Attribute(this.document);
 
             return this.attrEditor;
         }
         else if (hasClass(target, "nodeText"))
         {
             // XXXjoe Implement special text node editor
-            if (!this.textEditor)
-                this.textEditor = new AttributeEditor(this.document);
+            if (!this.textNodeEditor)
+                this.textNodeEditor = new Firebug.HTMLPanel.Editors.TextNode(this.document);
 
-            return this.textEditor;
+            return this.textNodeEditor;
         }
     },
 
@@ -1202,6 +1260,13 @@ var AttrTag =
         SPAN({"class": "nodeValue editable"}, "$attr.nodeValue"), "&quot;"
     );
 
+var TextTag =
+    SPAN({"class": "nodeText editable"}, 
+        FOR("char", "$object|getNodeTextGroups",
+            SPAN({"class": "$char.class $char.extra"}, "$char.str")
+        )
+    );
+
 // ************************************************************************************************
 
 Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
@@ -1211,7 +1276,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket"}, "&gt;")
                 )
@@ -1223,7 +1288,7 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
             ),
             DIV({"class": "nodeCloseLabel", role:"presentation"},
                 "&lt;/",
-                SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                 "&gt;"
              )
         ),
@@ -1238,14 +1303,14 @@ Firebug.HTMLPanel.CompleteElement = domplate(FirebugReps.Element,
         if (node.contentDocument)
             return [node.contentDocument.documentElement];
 
-        if (Firebug.showWhitespaceNodes)
+        if (Firebug.showTextNodesWithWhitespace)
             return cloneArray(node.childNodes);
         else
         {
             var nodes = [];
             for (var child = node.firstChild; child; child = child.nextSibling)
             {
-                if (child.nodeType != 3 || !HTMLLib.isWhitespaceText(child))
+                if (child.nodeType != Node.TEXT_NODE || !HTMLLib.isWhitespaceText(child))
                     nodes.push(child);
             }
             return nodes;
@@ -1282,7 +1347,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
                 IMG({"class": "twisty", role: "presentation"}),
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
@@ -1291,7 +1356,7 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
             DIV({"class": "nodeCloseLabel", role : "presentation"},
                 SPAN({"class": "nodeCloseLabelBox repTarget"},
                     "&lt;/",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     "&gt;"
                 )
             )
@@ -1305,12 +1370,12 @@ Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;"),
-                    SPAN({"class": "nodeText editable"}, "$object|getNodeText"),
+                    TextTag,
                     "&lt;/",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     "&gt;"
                 )
             )
@@ -1324,7 +1389,7 @@ Firebug.HTMLPanel.EmptyElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
                 )
@@ -1339,7 +1404,7 @@ Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
             DIV({"class": "nodeLabel", role: "presentation"},
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem'},
                     "&lt;",
-                    SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
+                    SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
                     FOR("attr", "$object|attrIterator", AttrTag),
                     SPAN({"class": "nodeBracket editable insertBefore"}, "/&gt;")
                 )
@@ -1350,67 +1415,120 @@ Firebug.HTMLPanel.XEmptyElement = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.AttrNode = domplate(FirebugReps.Element,
 {
     tag: AttrTag
-}),
+});
 
 Firebug.HTMLPanel.TextNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object"},
-            SPAN({"class": "nodeText editable"}, "$object.nodeValue")
+        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
+            TextTag
         )
-}),
-
-Firebug.HTMLPanel.WhitespaceNode = domplate(FirebugReps.Element,
-{
-    tag:
-        DIV({"class": "nodeBox", _repObject: "$object"},
-            FOR("char", "$object|charIterator",
-                    SPAN({"class": "nodeText nodeWhiteSpace editable"}, "$char")
-                    )
-        ),
-    charIterator: function(node)
-    {
-        var str = node.nodeValue;
-        var arr = [];
-        for(var i = 0; i < str.length; i++)
-        {
-            // http://www.w3.org/TR/html401/struct/text.html
-            var ch = str[i];
-            switch(ch)
-            {
-            case ' ': arr[i] = ' ';break;
-            case '\t': arr[i] = '\\t';break;
-            case '\n': arr[i] = '\\n';break;
-            case '\u200B': arr[i] = '\\u200B';break;  // Zero width space http://www.fileformat.info/info/unicode/char/200b/index.htm
-            default: arr[i] = '?'; break;
-            }
-        }
-        return arr;
-    },
-}),
+});
 
 Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object"},
+        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
             "&lt;![CDATA[",
             SPAN({"class": "nodeText editable"}, "$object.nodeValue"),
             "]]&gt;"
         )
-}),
+});
 
 Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object"},
+        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
             DIV({"class": "nodeComment editable"},
                 "&lt;!--$object.nodeValue--&gt;"
             )
         )
 });
 
+
 // ************************************************************************************************
-// AttributeEditor
+// TextNodeEditor
+
+/* 
+ * TextNodeEditor deals with text nodes that do and do not have sibling elements. If
+ * there are no sibling elements, the parent is known as a TextElement. In other cases  
+ * we keep track of their position via a range (this is in part because as people type 
+ * html, the range will keep track of the text nodes and elements that the user 
+ * is creating as they type, and this range could be in the middle of the parent 
+ * elements children).
+ */
+
+function TextNodeEditor(doc)
+{
+    this.initializeInline(doc);
+}
+
+TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+{
+
+    beginEditing: function(target, value)
+    {
+        var node = Firebug.getRepObject(target);
+        if (!node || node instanceof Element)
+            return;
+        var document = node.ownerDocument;
+        this.range = document.createRange();
+        this.range.setStartBefore(node);
+        this.range.setEndAfter(node);
+    },
+
+    endEditing: function(target, value, cancel)
+    {
+        if (this.range)
+        {
+            this.range.detach();
+            delete this.range;
+        }
+        // Remove empty groups by default
+        return true;
+    },
+
+    saveEdit: function(target, value, previousValue)
+    {
+        var node = Firebug.getRepObject(target);
+        if (!node)
+            return;
+        value = unescapeForTextNode(value || '');
+        target.innerHTML = escapeForTextNode(value);
+        if (node instanceof Element) 
+        {
+            if (isElementMathML(node) || isElementSVG(node))
+                node.textContent=value;
+            else
+                node.innerHTML=value;
+        }
+        else 
+        {
+            try
+            {
+                var documentFragment = this.range.createContextualFragment(value);
+                var cnl=documentFragment.childNodes.length;
+                this.range.deleteContents();
+                this.range.insertNode(documentFragment);
+                var r = this.range, sc = r.startContainer, so = r.startOffset;
+                this.range.setEnd(sc,so+cnl);
+            } catch (e) {}
+        }
+    },
+   
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+   
+    getAutoCompleteRange: function(value, offset)
+    {
+    },
+   
+    getAutoCompleteList: function(preExpr, expr, postExpr)
+    {
+    }
+});
+
+//************************************************************************************************
+//AttributeEditor
 
 function AttributeEditor(doc)
 {
@@ -1424,14 +1542,15 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var element = Firebug.getRepObject(target);
         if (!element)
             return;
-
-        target.innerHTML = escapeHTML(value);
-
+        
+        // XXXstr unescape value
+        
+        target.innerHTML = escapeForElementAttribute(value);
+    
         if (hasClass(target, "nodeName"))
         {
             if (value != previousValue)
                 element.removeAttribute(previousValue);
-
             if (value)
             {
                 var attrValue = getNextByClass(target, "nodeValue").textContent;
@@ -1445,147 +1564,152 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             var attrName = getPreviousByClass(target, "nodeName").textContent;
             element.setAttribute(attrName, value);
         }
-        else if (hasClass(target, "nodeText"))
-        {
-            if (element instanceof Element)
-                element.innerHTML = value;
-            else
-                element.nodeValue = value;
-        }
-
         //this.panel.markChange();
     },
-
+    
     advanceToNext: function(target, charCode)
     {
         if (charCode == 61 && hasClass(target, "nodeName"))
             return true;
     },
-
+    
     insertNewRow: function(target, insertWhere)
     {
         var emptyAttr = {nodeName: "", nodeValue: ""};
         var sibling = insertWhere == "before" ? target.previousSibling : target;
-
         return AttrTag.insertAfter({attr: emptyAttr}, sibling);
     },
-
+    
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
+    
     getAutoCompleteRange: function(value, offset)
     {
     },
-
+    
     getAutoCompleteList: function(preExpr, expr, postExpr)
     {
     }
 });
 
-// ************************************************************************************************
-// HTMLEditor
+//************************************************************************************************
+//HTMLEditor
 
 function HTMLEditor(doc)
 {
-    this.box = this.tag.replace({}, doc, this);
-    this.input = this.box.firstChild;
+ this.box = this.tag.replace({}, doc, this);
+ this.input = this.box.firstChild;
 
-    this.multiLine = true;
-    this.tabNavigation = false;
-    this.arrowCompletion = false;
+ this.multiLine = true;
+ this.tabNavigation = false;
+ this.arrowCompletion = false;
 }
 
 HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 {
-    tag: DIV(
-        TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
-    ),
+ tag: DIV(
+     TEXTAREA({"class": "htmlEditor fullPanelEditor", oninput: "$onInput"})
+ ),
 
-    getValue: function()
-    {
-        return this.input.value;
-    },
+ getValue: function()
+ {
+     return this.input.value;
+ },
 
-    setValue: function(value)
-    {
-        return this.input.value = value;
-    },
+ setValue: function(value)
+ {
+     return this.input.value = value;
+ },
 
-    show: function(target, panel, value, textSize, targetSize)
-    {
-        this.target = target;
-        this.panel = panel;
-        this.editingElements = [target.repObject, null];
+ show: function(target, panel, value, textSize, targetSize)
+ {
+     this.target = target;
+     this.panel = panel;
+     this.editingElements = [target.repObject, null];
 
-        this.panel.panelNode.appendChild(this.box);
+     this.panel.panelNode.appendChild(this.box);
 
-        this.input.value = value;
-        this.input.focus();
+     this.input.value = value;
+     this.input.focus();
 
-        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
-        command.setAttribute("checked", true);
-    },
+     var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+     command.setAttribute("checked", true);
+ },
 
-    hide: function()
-    {
-        var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
-        command.setAttribute("checked", false);
+ hide: function()
+ {
+     var command = Firebug.chrome.$("cmd_toggleHTMLEditing");
+     command.setAttribute("checked", false);
 
-        this.panel.panelNode.removeChild(this.box);
+     this.panel.panelNode.removeChild(this.box);
 
-        delete this.editingElements;
-        delete this.target;
-        delete this.panel;
-    },
+     delete this.editingElements;
+     delete this.target;
+     delete this.panel;
+ },
 
-    saveEdit: function(target, value, previousValue)
-    {
-        // Remove all of the nodes in the last range we created, except for
-        // the first one, because setOuterHTML will replace it
-        var first = this.editingElements[0], last = this.editingElements[1];
-        if (last && last != first)
-        {
-            for (var child = first.nextSibling; child;)
-            {
-                var next = child.nextSibling;
-                child.parentNode.removeChild(child);
-                if (child == last)
-                    break;
-                else
-                    child = next;
-            }
-        }
+ saveEdit: function(target, value, previousValue)
+ {
+     // Remove all of the nodes in the last range we created, except for
+     // the first one, because setOuterHTML will replace it
+     var first = this.editingElements[0], last = this.editingElements[1];
+     if (last && last != first)
+     {
+         for (var child = first.nextSibling; child;)
+         {
+             var next = child.nextSibling;
+             child.parentNode.removeChild(child);
+             if (child == last)
+                 break;
+             else
+                 child = next;
+         }
+     }
 
-        // Make sure that we create at least one node here, even if it's just
-        // an empty space, because this code depends on having something to replace
-        if (!value)
-            value = " ";
+     // Make sure that we create at least one node here, even if it's just
+     // an empty space, because this code depends on having something to replace
+     if (!value)
+         value = " ";
 
-        if (this.innerEditMode)
-            this.editingElements[0].innerHTML = value;
-        else
-            this.editingElements = setOuterHTML(this.editingElements[0], value);
-    },
+     if (this.innerEditMode)
+         this.editingElements[0].innerHTML = value;
+     else
+         this.editingElements = setOuterHTML(this.editingElements[0], value);
+ },
 
-    endEditing: function()
-    {
-        //this.panel.markChange();
-        return true;
-    },
+ endEditing: function()
+ {
+     //this.panel.markChange();
+     return true;
+ },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+ // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    onInput: function()
-    {
-        Firebug.Editor.update();
-    }
+ onInput: function()
+ {
+     Firebug.Editor.update();
+ }
 });
+
+
+// ************************************************************************************************
+// Editors
+
+Firebug.HTMLPanel.Editors = {
+    HTML : HTMLEditor,
+    MathML : HTMLEditor,
+    SVG: HTMLEditor,
+    Attribute : AttributeEditor,
+    TextNode: TextNodeEditor
+};
+
 
 // ************************************************************************************************
 // Local Helpers
 
 function getEmptyElementTag(node)
 {
-    if (node.ownerDocument.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml")
+    var isXhtml= isElementXHTML(node);
+    if (isXhtml)
         return Firebug.HTMLPanel.XEmptyElement.tag;
     else
         return Firebug.HTMLPanel.EmptyElement.tag;
@@ -1603,13 +1727,15 @@ function getNodeTag(node, expandAll)
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
         else if (HTMLLib.isEmptyElement(node))
             return getEmptyElementTag(node);
-        else if (HTMLLib.hasNoElementChildren(node))
+        else if (Firebug.showCommentNodes && HTMLLib.hasCommentChildren(node))
+            return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
+        else if (HTMLLib.hasNoElementChildren(node)) 
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
     }
     else if (node instanceof Text)
-        return Firebug.showWhitespaceNodes ? Firebug.HTMLPanel.WhitespaceNode.tag : Firebug.HTMLPanel.TextNode.tag;
+        return Firebug.HTMLPanel.TextNode.tag;
     else if (node instanceof CDATASection)
         return Firebug.HTMLPanel.CDATANode.tag;
     else if (node instanceof Comment && (Firebug.showCommentNodes || expandAll))
@@ -1973,6 +2099,9 @@ MutationBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGrou
         panelState.breakpoints = this.breakpoints;
     },
 });
+
+
+
 
 // ************************************************************************************************
 // Registration

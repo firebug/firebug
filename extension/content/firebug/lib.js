@@ -481,9 +481,7 @@ this.isVisible = function(elt)
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
         return (!elt.hidden && !elt.collapsed);
     }
-    return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags
-        || elt.namespaceURI == "http://www.w3.org/2000/svg"
-        || elt.namespaceURI == "http://www.w3.org/1998/Math/MathML";
+    return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags || isElementSVG(elt) || isElementMathML(elt);
 };
 
 this.collapse = function(elt, collapsed)
@@ -949,12 +947,17 @@ this.setOuterHTML = function(element, html)
     var doc = element.ownerDocument;
     var range = doc.createRange();
     range.selectNode(element || doc.documentElement);
-
-    var fragment = range.createContextualFragment(html);
-    var first = fragment.firstChild;
-    var last = fragment.lastChild;
-    element.parentNode.replaceChild(fragment, element);
-    return [first, last];
+    try
+    {
+        var fragment = range.createContextualFragment(html);
+        var first = fragment.firstChild;
+        var last = fragment.lastChild;
+        element.parentNode.replaceChild(fragment, element);
+        return [first, last];
+    } catch (e)
+    {
+        return [element,element]
+    }
 };
 
 this.appendInnerHTML = function(element, html, referenceElement)
@@ -983,6 +986,7 @@ this.insertTextIntoElement = function(element, text)
     controller = this.QI(controller, Ci.nsICommandController);
     controller.doCommandWithParams(command, params);
 };
+
 
 // ************************************************************************************************
 // XPath
@@ -1578,23 +1582,42 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 // ************************************************************************************************
 // HTML and XML Serialization
 
-
-this.isSelfClosing = function (element)
+var isElementHTML = this.isElementHTML = function(node)
 {
+    return node.nodeName == node.nodeName.toUpperCase();
+}
+
+var isElementXHTML = this.isElementXHTML = function(node)
+{
+    return node.nodeName == node.nodeName.toLowerCase();
+}
+
+var isElementMathML = this.isElementMathML = function(node)
+{
+    return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
+}
+
+var isElementSVG = this.isElementSVG = function(node)
+{
+    return node.namespaceURI == 'http://www.w3.org/2000/svg';
+}
+
+this.isSelfClosing = function(element)
+{
+    if (isElementSVG(element) || isElementMathML(element))
+        return true;
     var tag = element.localName.toLowerCase();
     return (this.selfClosingTags.hasOwnProperty(tag));
 };
 
 this.getElementHTML = function(element)
 {
-    var isXhtml= element.ownerDocument.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml";
-
     var self=this;
     function toHTML(elt)
     {
-        if (elt.nodeType == 1)
+        if (elt.nodeType == Node.ELEMENT_NODE)
         {
-            html.push('<', elt.localName.toLowerCase());
+            html.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -1604,7 +1627,14 @@ this.getElementHTML = function(element)
                 if (attr.localName.indexOf("firebug-") == 0)
                     continue;
 
-                html.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
+                // MathML
+                if (attr.localName.indexOf("-moz-math") == 0)
+                {
+                    // just hide for now
+                    continue;
+                }
+
+                html.push(' ', attr.nodeName, '="', escapeForElementAttribute(attr.nodeValue),'"');
             }
 
             if (elt.firstChild)
@@ -1613,31 +1643,35 @@ this.getElementHTML = function(element)
 
                 var pureText=true;
                 for (var child = element.firstChild; child; child = child.nextSibling)
-                    pureText=pureText && (child.nodeType == 3);
+                    pureText=pureText && (child.nodeType == Node.TEXT_NODE);
 
                 if (pureText)
-                    html.push(elt.innerHTML)
+                    html.push(escapeForHtmlEditor(elt.textContent));
                 else {
                     for (var child = elt.firstChild; child; child = child.nextSibling)
                         toHTML(child);
                 }
 
-                html.push('</', elt.localName.toLowerCase(), '>');
+                html.push('</', elt.nodeName.toLowerCase(), '>');
+            }
+            else if (isElementSVG(elt) || isElementMathML(elt))
+            {
+                html.push('/>');
             }
             else if (self.isSelfClosing(elt))
             {
-                html.push(isXhtml?'/>':'>');
+                html.push((isElementXHTML(elt))?'/>':'>');
             }
             else
             {
-                html.push('></', elt.localName.toLowerCase(), '>');
+                html.push('></', elt.nodeName.toLowerCase(), '>');
             }
         }
-        else if (elt.nodeType == 3)
-            html.push(escapeHTMLnoQuote(elt.nodeValue));
-        else if (elt.nodeType == 4)
+        else if (elt.nodeType == Node.TEXT_NODE)
+            html.push(escapeForTextNode(elt.textContent));
+        else if (elt.nodeType == Node.CDATA_SECTION_NODE)
             html.push('<![CDATA[', elt.nodeValue, ']]>');
-        else if (elt.nodeType == 8)
+        else if (elt.nodeType == Node.COMMENT_NODE)
             html.push('<!--', elt.nodeValue, '-->');
     }
 
@@ -1650,9 +1684,9 @@ this.getElementXML = function(element)
 {
     function toXML(elt)
     {
-        if (elt.nodeType == 1)
+        if (elt.nodeType == Node.ELEMENT_NODE)
         {
-            xml.push('<', elt.localName.toLowerCase());
+            xml.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -1662,7 +1696,14 @@ this.getElementXML = function(element)
                 if (attr.localName.indexOf("firebug-") == 0)
                     continue;
 
-                xml.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
+                // MathML
+                if (attr.localName.indexOf("-moz-math") == 0)
+                {
+                    // just hide for now
+                    continue;
+                }
+
+                xml.push(' ', attr.nodeName, '="', escapeForElementAttribute(attr.nodeValue),'"');
             }
 
             if (elt.firstChild)
@@ -1672,16 +1713,16 @@ this.getElementXML = function(element)
                 for (var child = elt.firstChild; child; child = child.nextSibling)
                     toXML(child);
 
-                xml.push('</', elt.localName.toLowerCase(), '>');
+                xml.push('</', elt.nodeName.toLowerCase(), '>');
             }
             else
                 xml.push('/>');
         }
-        else if (elt.nodeType == 3)
+        else if (elt.nodeType == Node.TEXT_NODE)
             xml.push(elt.nodeValue);
-        else if (elt.nodeType == 4)
+        else if (elt.nodeType == Node.CDATA_SECTION_NODE)
             xml.push('<![CDATA[', elt.nodeValue, ']]>');
-        else if (elt.nodeType == 8)
+        else if (elt.nodeType == Node.COMMENT_NODE)
             xml.push('<!--', elt.nodeValue, '-->');
     }
 
@@ -1691,102 +1732,270 @@ this.getElementXML = function(element)
 };
 
 // ************************************************************************************************
+// Whitespace and Entity conversions
+
+var entityConversionLists = this.entityConversionLists = {
+    normal : {
+        whitespace : {
+            '\t' : '\u200c\u2192',
+            '\n' : '\u200c\u00b6',
+            '\r' : '\u200c\u00ac',
+            ' '  : '\u200c\u00b7'
+        }
+    },
+    reverse : {
+        whitespace : {
+            '&Tab;' : '\t',
+            '&NewLine;' : '\n',
+            '\u200c\u2192' : '\t',
+            '\u200c\u00b6' : '\n',
+            '\u200c\u00ac' : '\r',
+            '\u200c\u00b7' : ' '
+        }
+    }
+};
+
+var normal = entityConversionLists.normal,
+    reverse = entityConversionLists.reverse;
+
+function addEntityMapToList(ccode, entity)
+{
+    var lists = Array.slice(arguments, 2),
+        len = lists.length,
+        ch = String.fromCharCode(ccode);
+    for (var i = 0; i < len; i++)
+    {
+        var list = lists[i];
+        normal[list]=normal[list] || {};
+        normal[list][ch] = '&' + entity + ';';
+        reverse[list]=reverse[list] || {};
+        reverse[list]['&' + entity + ';'] = ch;
+    }
+}
+
+var e = addEntityMapToList,
+    white = 'whitespace',
+    text = 'text',
+    attr = 'attributes',
+    css = 'css',
+    editor = 'editor';
+
+e(0x0022, 'quot', attr, css);
+e(0x0026, 'amp', attr, text, css);
+e(0x0027, 'apos', css);
+e(0x003c, 'lt', attr, text, css);
+e(0x003e, 'gt', attr, text, css);
+e(0xa9, 'copy', text, editor);
+e(0xae, 'reg', text, editor);
+e(0x2122, 'trade', text, editor);
+
+e(0x00a0, 'nbsp', attr, text, white, editor);
+e(0x2002, 'ensp', attr, text, white, editor);
+e(0x2003, 'emsp', attr, text, white, editor);
+e(0x2009, 'thinsp', attr, text, white, editor);
+e(0x200c, 'zwnj', attr, text, white, editor);
+e(0x200d, 'zwj', attr, text, white, editor);
+e(0x200e, 'lrm', attr, text, white, editor);
+e(0x200f, 'rlm', attr, text, white, editor);
+e(0x200b, '#8203', attr, text, white, editor); // zero-width space (ZWSP)
+
+//************************************************************************************************
+// Entity escaping
+
+var entityConversionRegexes = {
+        normal : {},
+        reverse : {}
+    };
+
+var escapeEntitiesRegEx = {
+    normal : function(list)
+    {
+        var chars = [];
+        for ( var ch in list)
+        {
+            chars.push(ch);
+        }
+        return new RegExp('([' + chars.join('') + '])', 'gm');
+    },
+    reverse : function(list)
+    {
+        var chars = [];
+        for ( var ch in list)
+        {
+            chars.push(ch);
+        }
+        return new RegExp('(' + chars.join('|') + ')', 'gm');
+    }
+};
+
+function getEscapeRegexp(direction, lists)
+{
+    var name = '', re;
+    var groups = [].concat(lists);
+    for (i = 0; i < groups.length; i++)
+    {
+        name += groups[i].group;
+    }
+    re = entityConversionRegexes[direction][name];
+    if (!re)
+    {
+        var list = {};
+        if (groups.length > 1)
+        {
+            for ( var i = 0; i < groups.length; i++)
+            {
+                var aList = entityConversionLists[direction][groups[i].group];
+                for ( var item in aList)
+                    list[item] = aList[item];
+            }
+        } else if (groups.length==1)
+        {
+            list = entityConversionLists[direction][groups[0].group]; // faster for special case
+        } else {
+            list = {}; // perhaps should print out an error here?
+        }
+        re = entityConversionRegexes[direction][name] = escapeEntitiesRegEx[direction](list);
+    }
+    return re;
+}
+
+function createSimpleEscape(name, direction)
+{
+    return function(value)
+    {
+        var list = entityConversionLists[direction][name];
+        return String(value).replace(
+                getEscapeRegexp(direction, {
+                    group : name,
+                    list : list
+                }),
+                function(ch)
+                {
+                    return list[ch];
+                }
+               );
+    }
+}
+
+function escapeGroupsForEntities(str, lists)
+{
+    lists = [].concat(lists);
+    var re = getEscapeRegexp('normal', lists),
+        split = String(str).split(re),
+        len = split.length,
+        results = [],
+        cur, r, i, ri = 0, l, list, last = '';
+    if (!len)
+        return [ {
+            str : String(str),
+            group : '',
+            name : ''
+        } ];
+    for (i = 0; i < len; i++)
+    {
+        cur = split[i];
+        if (cur == '')
+            continue;
+        for (l = 0; l < lists.length; l++)
+        {
+            list = lists[l];
+            r = entityConversionLists.normal[list.group][cur];
+            // if (cur == ' ' && list.group == 'whitespace' && last == ' ') // only show for runs of more than one space
+            //     r = ' ';
+            if (r)
+            {
+                results[ri] = {
+                    'str' : r,
+                    'class' : list['class'],
+                    'extra' : list.extra[cur] ? list['class']
+                            + list.extra[cur] : ''
+                };
+                break;
+            }
+        }
+        // last=cur;
+        if (!r)
+            results[ri] = {
+                'str' : cur,
+                'class' : '',
+                'extra' : ''
+            };
+        ri++;
+    }
+    return results;
+}
+
+this.escapeGroupsForEntities = escapeGroupsForEntities;
+
+
+function unescapeEntities(str, lists)
+{
+    var re = getEscapeRegexp('reverse', lists),
+        split = String(str).split(re),
+        len = split.length,
+        results = [],
+        cur, r, i, ri = 0, l, list;
+    if (!len)
+        return str;
+    lists = [].concat(lists);
+    for (i = 0; i < len; i++)
+    {
+        cur = split[i];
+        if (cur == '')
+            continue;
+        for (l = 0; l < lists.length; l++)
+        {
+            list = lists[l];
+            r = entityConversionLists.reverse[list.group][cur];
+            if (r)
+            {
+                results[ri] = r;
+                break;
+            }
+        }
+        if (!r)
+            results[ri] = cur;
+        ri++;
+    }
+    return results.join('') || '';
+}
+
+
+// ************************************************************************************************
 // String escaping
+
+var escapeForTextNode = this.escapeForTextNode = createSimpleEscape('text', 'normal');
+var escapeForHtmlEditor = this.escapeForHtmlEditor = createSimpleEscape('editor', 'normal');
+var escapeForElementAttribute = this.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
+var escapeForCss = this.escapeForCss = createSimpleEscape('css', 'normal');
+
+var escapeForSourceLine = this.escapeForSourceLine = createSimpleEscape('text', 'normal');
+var unescapeForSourceLine = this.unescapeForSourceLine = createSimpleEscape('text', 'reverse');
+
+var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
+
+this.unescapeForTextNode = function(str)
+{
+    if (Firebug.showTextNodesWithWhitespace)
+        str = unescapeWhitespace(str);
+    if (!Firebug.showTextNodesAsSource)
+        str = escapeForElementAttribute(str);
+    return str;
+}
 
 this.escapeNewLines = function(value)
 {
-    return value.replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+    return value.replace(/\r/g, "\\r").replace(/\n/gm, "\\n");
 };
 
 this.stripNewLines = function(value)
 {
-    return typeof(value) == "string" ? value.replace(/[\r\n]/g, " ") : value;
+    return typeof(value) == "string" ? value.replace(/[\r\n]/gm, " ") : value;
 };
 
 this.escapeJS = function(value)
 {
-    return value.replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace('"', '\\"', "g");
-};
-
-function escapeHTMLAttribute(value)
-{
-    function replaceChars(ch)
-    {
-        switch (ch)
-        {
-            case "&":
-                return "&amp;";
-            case "'":
-                return apos;
-            case '"':
-                return quot;
-        }
-        return "?";
-    };
-    var apos = "&#39;", quot = "&quot;", around = '"';
-    if( value.indexOf('"') == -1 ) {
-        quot = '"';
-        apos = "'";
-    } else if( value.indexOf("'") == -1 ) {
-        quot = '"';
-        around = "'";
-    }
-    return around + (String(value).replace(/[&'"]/g, replaceChars)) + around;
-}
-
-function escapeHTML(value)
-{
-    function replaceChars(ch)
-    {
-        switch (ch)
-        {
-            case "<":
-                return "&lt;";
-            case ">":
-                return "&gt;";
-            case "&":
-                return "&amp;";
-            case "'":
-                return "&#39;";
-            case '"':
-                return "&quot;";
-        }
-        return "?";
-    };
-    return String(value).replace(/[<>&"']/g, replaceChars);
-}
-
-this.escapeHTML = escapeHTML;
-
-function escapeHTMLnoQuote(value)
-{
-    function replaceChars(ch)
-    {
-        switch (ch)
-        {
-            case "<":
-                return "&lt;";
-            case ">":
-                return "&gt;";
-            case "&":
-                return "&amp;";
-            case "\xa0":
-                return "&nbsp;";
-        }
-        return "?";
-    };
-    return String(value).replace(/[<>&\xa0]/g, replaceChars);
-};
-
-this.escapeHTMLnoQuote = escapeHTMLnoQuote;
-
-this.unEscapeHTML = function(str)
-{
-    return str.replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+    return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
 this.cropString = function(text, limit, alterText)
@@ -1863,12 +2072,12 @@ this.wrapText = function(text, noEscapeHTML)
             line = line.substr(wrapIndex);
 
             if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
-            html.push(noEscapeHTML ? subLine : escapeHTML(subLine));
+            html.push(noEscapeHTML ? subLine : escapeForTextNode(subLine));
             if (!noEscapeHTML) html.push("</code>");
         }
 
         if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
-        html.push(noEscapeHTML ? line : escapeHTML(line));
+        html.push(noEscapeHTML ? line : escapeForTextNode(line));
         if (!noEscapeHTML) html.push("</code>");
     }
 
@@ -3077,7 +3286,7 @@ this.splitDataURL = function(url)
 
     var props = { encodedContent: url.substr(point+1) };
 
-    var metadataBuffer = url.substr(mark+1, point);
+    var metadataBuffer = url.substring(mark+1, point);
     var metadata = metadataBuffer.split(';');
     for (var i = 0; i < metadata.length; i++)
     {
@@ -3091,6 +3300,8 @@ this.splitDataURL = function(url)
     {
          var caller_URL = decodeURIComponent(props['fileName']);
          var caller_split = this.splitURLTrue(caller_URL);
+
+         props['fileName'] = caller_URL;
 
         if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
         {
@@ -4161,7 +4372,7 @@ this.SourceText = function(lines, owner)
 
 this.SourceText.getLineAsHTML = function(lineNo)
 {
-    return escapeHTML(this.lines[lineNo-1]);
+    return escapeForSourceLine(this.lines[lineNo-1]);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -6203,16 +6414,18 @@ this.innerEditableTags =
 };
 
 this.selfClosingTags =
-{
+{ // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
     "meta": 1,
     "link": 1,
     "area": 1,
     "base": 1,
-    "basefont": 1,
+    "col": 1,
     "input": 1,
     "img": 1,
     "br": 1,
-    "hr": 1
+    "hr": 1,
+    "param":1,
+    "embed":1
 };
 
 const invisibleTags = this.invisibleTags =
@@ -6226,6 +6439,8 @@ const invisibleTags = this.invisibleTags =
     "SCRIPT": 1,
     "NOSCRIPT": 1,
     "BR": 1,
+    "PARAM": 1,
+    "COL": 1,
 
     "html": 1,
     "head": 1,
@@ -6236,6 +6451,8 @@ const invisibleTags = this.invisibleTags =
     "script": 1,
     "noscript": 1,
     "br": 1,
+    "param": 1,
+    "col": 1,
     /*
     "window": 1,
     "browser": 1,

@@ -41,7 +41,7 @@ Firebug.SourceBoxDecorator.prototype =
     */
     getLineHTML: function(sourceBox, lineNo)
     {
-        var html = escapeHTML(sourceBox.lines[lineNo-1]);
+        var html = escapeForSourceLine(sourceBox.lines[lineNo-1]);
 
         // If the pref says so, replace tabs by corresponding number of spaces.
         if (Firebug.replaceTabs > 0)
@@ -176,7 +176,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         else
             source = source;
 
-        return unEscapeHTML(source);
+        return unescapeForSourceLine(source);
     },
 
     // ****************************************************************************************

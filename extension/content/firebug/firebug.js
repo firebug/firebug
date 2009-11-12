@@ -72,7 +72,8 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showXMLHttpRequests", "showNetworkErrors",
 
     // HTML
-    "showFullTextNodes", "showCommentNodes", "showWhitespaceNodes",
+    "showFullTextNodes", "showCommentNodes", 
+    "showTextNodesWithWhitespace", "showTextNodesAsSource", 
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
     "showQuickInfoBox",
 
@@ -2472,7 +2473,16 @@ Firebug.MeasureBox =
 
     measureText: function(value)
     {
-        this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
+        this.measureBox.innerHTML = value ? escapeForSourceLine(value) : "m";
+        return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
+    },
+
+    measureInputText: function(value)
+    {
+        value = value ? escapeForTextNode(value) : "m";
+        if (!Firebug.showTextNodesWithWhitespace)
+            value = value.replace(/\t/g,'mmmmmm').replace(/\ /g,'m');
+        this.measureBox.innerHTML = value;
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
