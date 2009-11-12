@@ -31,9 +31,9 @@
 <!ENTITY firebug.CommandLine "Skipanalína">
 <!ENTITY firebug.Search "Leita">
 <!ENTITY firebug.Continue "Halda áfram (F8)">
-<!ENTITY firebug.StepOver "Fara yfir (F10)">
+<!ENTITY firebug.StepOver "Hoppa yfir (F10)">
 <!ENTITY firebug.StepInto "Fara inn í (F11)">
-<!ENTITY firebug.StepOut "Fara út">
+<!ENTITY firebug.StepOut "Hoppa út">
 <!ENTITY firebug.BreakOnErrors "Stöðva á villum">
 <!ENTITY firebug.Inspect "Skoða">
 <!ENTITY firebug.InspectElement "Skoða einindi">
