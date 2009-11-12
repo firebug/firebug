@@ -466,7 +466,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (clearCache)
         {
-            this.clearSourceBox(sourceBox, viewRange);
+            this.clearSourceBox(sourceBox);
         }
         else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
         {
@@ -516,9 +516,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (!cacheHit)
         {
-            this.clearSourceBox(sourceBox, viewRange);
+            this.clearSourceBox(sourceBox);  // no overlap, remove old range
+            sourceBox.firstRenderedLine = viewRange.firstLine; // reset cached range
+            sourceBox.lastRenderedLine = viewRange.lastLine;
         }
-        else
+        else  // cache overlap, expand range of cache
         {
             sourceBox.firstRenderedLine = Math.min(viewRange.firstLine, sourceBox.firstRenderedLine);
             sourceBox.lastRenderedLine = Math.max(viewRange.lastLine, sourceBox.lastRenderedLine);
@@ -531,6 +533,10 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             FBTrace.sysout("buildViewAround viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine+" rendered: "+sourceBox.firstRenderedLine+"-"+sourceBox.lastRenderedLine, sourceBox);
     },
 
+    /*
+     * Add lines from viewRange, but do not adjust first/lastRenderedLine.
+     * @return true if viewRange overlaps first/lastRenderedLine
+     */
     insertedLinesOverlapCache: function(sourceBox, viewRange)
     {
         var topCacheLine = null;
@@ -558,12 +564,18 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return cacheHit;
     },
 
-    clearSourceBox: function(sourceBox, viewRange)
+    clearSourceBox: function(sourceBox)
     {
-        var topMostCachedElement = sourceBox.viewport.firstChild;
-        this.removeLines(sourceBox, topMostCachedElement, sourceBox.numberOfRenderedLines);
-        sourceBox.firstRenderedLine = viewRange.firstLine;
-        sourceBox.lastRenderedLine = viewRange.lastLine;
+        if (sourceBox.firstRenderedLine)
+        {
+            var topMostCachedElement = sourceBox.getLineNode(sourceBox.firstRenderedLine);  // eg 1
+            var totalCached = sourceBox.lastRenderedLine - sourceBox.firstRenderedLine + 1;   // eg 20 - 1 + 1 = 19
+            if (topMostCachedElement && totalCached)
+            	this.removeLines(sourceBox, topMostCachedElement, totalCached);
+        }
+        sourceBox.lastRenderedLine = 0;
+        sourceBox.firstRenderedLine = 0;
+        sourceBox.numberOfRenderedLines = 0;
     },
 
     getSourceLineHTML: function(sourceBox, i)
