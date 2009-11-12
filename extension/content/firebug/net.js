@@ -2903,9 +2903,26 @@ NetProgress.prototype =
     breakOnXHR: function(file)
     {
         var halt = false;
+        var conditionIsFalse = false;
 
-        // If break on XHR flag is set, let's break.
-        if (this.context.breakOnXHR)
+        // If there is an enabled breakpoint with condition:
+        // 1) break if the condition is evaluated to true.
+        var breakpoints = this.context.netProgress.breakpoints;
+        var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
+        if (bp && bp.checked)
+        {
+            halt = true;
+            if (bp.condition)
+            {
+                halt = bp.evaluateCondition(this.context, file);
+                conditionIsFalse = !halt;
+            }
+        }
+
+        // 2) If break on XHR flag is set and there is no condition evaluated to false,
+        // break with "break on next" breaking cause (this new breaking cause can override
+        // an existing one that is set when evaluating a breakpoint condition).
+        if (this.context.breakOnXHR && !conditionIsFalse)
         {
             this.context.breakingCause = {
                 title: $STR("net.Break On XHR"),
@@ -2916,17 +2933,7 @@ NetProgress.prototype =
             halt = true;
         }
 
-        // If there is an enabled breakpoint with condition == true, let's break.
-        var breakpoints = this.context.netProgress.breakpoints;
-        var bp = breakpoints ? breakpoints.findBreakpoint(file.getFileURL()) : null;
-        if (bp && bp.checked)
-        {
-            if (bp.condition)
-                halt = bp.evaluateCondition(this.context, file);
-            else
-                halt = true;
-        }
-
+        // Ignore if there is no reason to break.
         if (!halt)
             return;
 
@@ -4699,17 +4706,22 @@ Breakpoint.prototype =
 
             scope["$postBody"] = Utils.getPostText(file, context);
 
-            // The properties of scope are all strings; we pass them in then unpack them using 'with'. The function is called immediately.
-            var expr = "(function (){var scope = "+JSON.stringify(scope)+"; with (scope) { return  " + this.condition + ";}})();"
+            // The properties of scope are all strings; we pass them in then
+            // unpack them using 'with'. The function is called immediately.
+            var expr = "(function (){var scope = " + JSON.stringify(scope) +
+                "; with (scope) { return  " + this.condition + ";}})();"
 
-            delete context.breakingCause;  // the callbacks will set this if the condition is true or if the eval faults.
+            // The callbacks will set this if the condition is true or if the eval faults.
+            delete context.breakingCause;
 
-            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window, this.onEvaluateSucceeds, this.onEvaluateFails );
+            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window,
+                this.onEvaluateSucceeds, this.onEvaluateFails );
 
             if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.evaluateCondition; rc "+rc, {expr: expr,scope: scope, json: JSON.stringify(scope)});
+                FBTrace.sysout("net.evaluateCondition; rc " + rc, {expr: expr,scope: scope,
+                    json: JSON.stringify(scope)});
 
-            return context.breakingCause;
+            return !!context.breakingCause;
         }
         catch (err)
         {
@@ -4722,13 +4734,25 @@ Breakpoint.prototype =
 
     onEvaluateSucceeds: function(result, context)
     {
-        if (result)
-            context.breakingCause = {title: $STR("net.Break On XHR"), message: this.condition};
+        // Don't break if the result is false.
+        if (!result)
+            return;
+
+        context.breakingCause = {
+            title: $STR("net.Break On XHR"),
+            message: this.condition
+        };
     },
 
     onEvaluateFails: function(result, context)
     {
-        context.breakingCause = {title: $STR("net.Break On XHR"), message: "Breakpoint condition evaluation fails ", prevValue: this.condition, newValue:result};
+        // Break if there is an error when evaluating the condition (to display the error).
+        context.breakingCause = {
+            title: $STR("net.Break On XHR"),
+            message: "Breakpoint condition evaluation fails ",
+            prevValue: this.condition,
+            newValue:result
+        };
     },
 }
 
