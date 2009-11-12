@@ -89,10 +89,25 @@
                   key="key_toggleFirebug" command="cmd_toggleFirebug"/>
     </menupopup>
 
+    <!-- SeaMonkey View menu -->
+    <menupopup id="menu_View_Popup">
+        <menuitem id="menu_viewToggleFirebug" insertafter="menuitem_fullScreen"
+                  label="&firebug.Firebug;" type="checkbox"
+                  key="key_toggleFirebug" command="cmd_toggleFirebug"/>
+    </menupopup>
+
     <!-- Firefox Tools menu -->
     <menupopup id="menu_ToolsPopup">
         <menu id="menu_firebug" class="menuitem-iconic" image="chrome://firebug/skin/firebug16.png"
               label="&firebug.Firebug;" insertbefore="javascriptConsole">
+              <!-- Content comes from fbFirebugMenuPopup -->
+        </menu>
+    </menupopup>
+
+    <!-- SeaMonkey Tools menu -->
+    <menupopup id="toolsPopup">
+        <menu id="menu_firebug" class="menuitem-iconic" image="chrome://firebug/skin/firebug16.png"
+              label="&firebug.Firebug;">
               <!-- Content comes from fbFirebugMenuPopup -->
         </menu>
     </menupopup>
