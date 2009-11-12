@@ -508,15 +508,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     updateViewportCache: function(sourceBox, viewRange)
     {
-        var topMostCachedElement = sourceBox.viewport.firstChild;
-
         var cacheHit = this.insertedLinesOverlapCache(sourceBox, viewRange);
 
         if (!cacheHit)
         {
-            this.removeLines(sourceBox, topMostCachedElement, sourceBox.numberOfRenderedLines);
-            sourceBox.firstRenderedLine = viewRange.firstLine;
-            sourceBox.lastRenderedLine = viewRange.lastLine;
+            this.clearSourceBox(sourceBox);
         }
         else
         {
@@ -556,6 +552,14 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var newElement = appendInnerHTML(sourceBox.viewport, lineHTML, ref);
         }
         return cacheHit;
+    },
+
+    clearSourceBox: function(sourceBox)
+    {
+        var topMostCachedElement = sourceBox.viewport.firstChild;
+        this.removeLines(sourceBox, topMostCachedElement, sourceBox.numberOfRenderedLines);
+        sourceBox.firstRenderedLine = viewRange.firstLine;
+        sourceBox.lastRenderedLine = viewRange.lastLine;
     },
 
     getSourceLineHTML: function(sourceBox, i)
