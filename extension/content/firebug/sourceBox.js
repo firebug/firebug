@@ -151,8 +151,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
         if (anchorSourceRow == focusSourceRow)
         {
-            var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset, selection.focusOffset);
-            return buf;
+            return selection.toString();// trivial case
         }
         var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
 
@@ -168,7 +167,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     getSourceLine: function(sourceRow, beginOffset, endOffset)
     {
-        var source = getChildByClass(sourceRow, "sourceRowText").innerHTML;
+        var source = getChildByClass(sourceRow, "sourceRowText").textContent;
         if (endOffset)
             source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
@@ -176,7 +175,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         else
             source = source;
 
-        return unescapeForSourceLine(source);
+        return source;
     },
 
     // ****************************************************************************************

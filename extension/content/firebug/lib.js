@@ -1970,7 +1970,6 @@ var escapeForElementAttribute = this.escapeForElementAttribute = createSimpleEsc
 var escapeForCss = this.escapeForCss = createSimpleEscape('css', 'normal');
 
 var escapeForSourceLine = this.escapeForSourceLine = createSimpleEscape('text', 'normal');
-var unescapeForSourceLine = this.unescapeForSourceLine = createSimpleEscape('text', 'reverse');
 
 var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
 
