@@ -504,14 +504,45 @@ this.hide = function(elt, hidden)
 
 this.clearNode = function(node)
 {
+    this.cleanDomplate(node);
     node.innerHTML = "";
 };
 
 this.eraseNode = function(node)
 {
+    this.cleanDomplate(node);
     while (node.lastChild)
         node.removeChild(node.lastChild);
 };
+
+this.cleanDomplate = function(node)
+{
+    var walker = node.ownerDocument.createTreeWalker(node,
+        Ci.nsIDOMNodeFilter.SHOW_ALL, null, true);
+
+    while (node)
+    {
+        if (node.repObject)
+            node.repObject = null;
+
+        if (node.stackTrace)
+            node.stackTrace = null;
+
+        if (node.checked)
+            node.checked = null;
+
+        if (node.domObject)
+            node.domObject = null;
+
+        if (node.toggles)
+            node.toggles = null;
+
+        if (node.domPanel)
+            node.domPanel = null;
+
+        node = walker.nextNode();
+    }
+}
 
 // ************************************************************************************************
 // Window iteration

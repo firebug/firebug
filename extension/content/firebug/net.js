@@ -1356,6 +1356,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             // The file is loaded and there is a row that has to be removed from the UI.
             var tbody = this.table.firstChild;
+            cleanDomplate(file.row);
             tbody.removeChild(file.row);
         }
 

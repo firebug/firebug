@@ -2005,6 +2005,8 @@ Firebug.Panel =
         }
 
         this.destroyNode();
+
+        cleanDomplate(this.panelNode);
     },
 
     savePersistedContent: function(state)
