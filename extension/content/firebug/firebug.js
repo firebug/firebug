@@ -95,6 +95,9 @@ const prefNames =  // XXXjjb TODO distribute to modules
 
     // Stack
     "omitObjectPathStack",
+
+    // Debugging
+    "clearDomplate"
 ];
 
 const servicePrefNames = [
@@ -2006,7 +2009,7 @@ Firebug.Panel =
 
         this.destroyNode();
 
-        cleanDomplate(this.panelNode);
+        clearDomplate(this.panelNode);
     },
 
     savePersistedContent: function(state)

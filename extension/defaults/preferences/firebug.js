@@ -1,4 +1,3 @@
-
 // Global
 pref("javascript.options.strict.debug", false);
 pref("extensions.firebug.defaultPanelName", "html");
@@ -153,7 +152,7 @@ pref("extensions.firebug.DBG_ANNOTATIONS", false);  // Page annotations service 
 pref("extensions.firebug.DBG_XMLVIEWER", false);    // xml explorer                              /*@explore*/
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activity observer      /*@explore*/
 
-//Keyboard
+// Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");
 pref("extensions.firebug.key.shortcut.toggleInspecting", "accel shift c");
 pref("extensions.firebug.key.shortcut.toggleQuickInfoBox", "accel shift i");
@@ -172,6 +171,8 @@ pref("extensions.firebug.key.shortcut.previousFirebugTab", "control `");
 pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
 
-//Accessibility
+// Accessibility
 pref("extensions.firebug.a11y.enable", false);
 
+// Debugging
+pref("extensions.firebug.clearDomplate", false);

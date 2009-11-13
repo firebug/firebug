@@ -504,19 +504,22 @@ this.hide = function(elt, hidden)
 
 this.clearNode = function(node)
 {
-    this.cleanDomplate(node);
+    this.clearDomplate(node);
     node.innerHTML = "";
 };
 
 this.eraseNode = function(node)
 {
-    this.cleanDomplate(node);
+    this.clearDomplate(node);
     while (node.lastChild)
         node.removeChild(node.lastChild);
 };
 
-this.cleanDomplate = function(node)
+this.clearDomplate = function(node)
 {
+    if (!Firebug.clearDomplate)
+        return;
+
     var walker = node.ownerDocument.createTreeWalker(node,
         Ci.nsIDOMNodeFilter.SHOW_ALL, null, true);
 

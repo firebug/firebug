@@ -63,7 +63,7 @@ Firebug.ConsoleBase =
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
-                    cleanDomplate(container.firstChild.nextSibling);
+                    clearDomplate(container.firstChild.nextSibling);
                     container.removeChild(container.firstChild.nextSibling);
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
