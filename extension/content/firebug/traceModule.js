@@ -1371,14 +1371,15 @@ Firebug.TraceModule.TraceMessage.prototype =
                     }
                     catch (err) {
                         window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS with "+err+"\n");
-                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS on object "+this.obj+"\n");
+                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS on object "+safeToString(this.obj)+"\n");
                         this.props[p] = "{Error}";
                     }
                 }
             }
             catch (exc)
             {
-                window.dump("traceModule getProperties "+exc);
+                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS with "+exc+"\n");
+                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS on object "+safeToString(this.obj)+"\n");
             }
         }
 
