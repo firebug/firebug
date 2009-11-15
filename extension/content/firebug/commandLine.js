@@ -4,6 +4,8 @@ FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 const commandHistoryMax = 1000;
 const commandPrefix = ">>>";
@@ -293,12 +295,13 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
 
             var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
-            var noscript = Cc["@maone.net/noscript-service;1"] &&
-                Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;
+
+            var noscript = getNoScript();
             var uri = noscript && noscript.getSite(Firebug.chrome.getCurrentURI().spec);
-            
+
             if(noscript && !(noscript.jsEnabled || noscript.isJSEnabled(uri)))
             {
+
                 noscript.setJSEnabled(uri, true);
                 this.evaluate(expr, context, null, null, goodOrBad);
                 noscript.setJSEnabled(uri, false);
@@ -1092,6 +1095,14 @@ function CommandLineHandler(context, win)
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+(context.baseWindow?context.baseWindow.location:"no basewindow"), context.baseWindow);
     };
+}
+
+function getNoScript()
+{
+    if (!this.noscript)
+        this.noscript = Cc["@maone.net/noscript-service;1"] &&
+            Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;
+    return this.noscript;
 }
 
 // ************************************************************************************************
