@@ -19,7 +19,8 @@ this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerServ
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-
+const consoleService = Components.classes["@mozilla.org/consoleservice;1"].
+    getService(Components.interfaces["nsIConsoleService"]);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -2003,6 +2004,12 @@ var escapeForHtmlEditor = this.escapeForHtmlEditor = createSimpleEscape('editor'
 var escapeForElementAttribute = this.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
 var escapeForCss = this.escapeForCss = createSimpleEscape('css', 'normal');
 
+// deprecated compatibility functions
+this.deprecateEscapeHTML = createSimpleEscape('text', 'normal');
+this.deprecatedUnescapeHTML = createSimpleEscape('text', 'reverse');
+this.escapeHTML = deprecated("use appropriate escapeFor... function", this.deprecateEscapeHTML);
+this.unescapeHTML = deprecated("use appropriate unescapeFor... function", this.deprecatedUnescapeHTML);
+
 var escapeForSourceLine = this.escapeForSourceLine = createSimpleEscape('text', 'normal');
 
 var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
@@ -2327,7 +2334,7 @@ this.getStackFrame = function(frame, context)
     }
 };
 
-this.getStackDump = function()
+function getStackDump()
 {
     var lines = [];
     for (var frame = Components.stack; frame; frame = frame.caller)
@@ -2335,6 +2342,7 @@ this.getStackDump = function()
 
     return lines.join("\n");
 };
+this.getStackDump = getStackDump;
 
 this.getJSDStackDump = function(newestFrame)
 {
@@ -6501,7 +6509,7 @@ const invisibleTags = this.invisibleTags =
 // ************************************************************************************************
 // Debug Logging
 
-this.ERROR = function(exc)
+function ERROR(exc)
 {
     if (FBTrace) {
         if (exc.stack) exc.stack = exc.stack.split('\n');
@@ -6510,6 +6518,34 @@ this.ERROR = function(exc)
 
         ddd("FIREBUG WARNING: " + exc);
 }
+this.ERROR = ERROR;
+
+function ddd(text)
+{
+    consoleService.logStringMessage(text + "");
+}
+this.ddd = ddd;
+
+function deprecated(msg, fnc)
+{
+    return function deprecationWrapper()
+    {
+        if (!this.nagged)
+        {
+            var explain = "Deprecated function ("+fnc.name+") "+msg;
+            if (FBTrace)
+                FBTrace.sysout(explain, getStackDump());
+
+            var caller = Components.stack.caller;  // drop frame with deprecated()
+            ERROR(explain+" "+ caller.toString());
+
+            debugger;
+            this.nagged = true;
+        }
+        return fnc.apply(this, arguments);
+    }
+}
+this.deprecated = deprecated;
 
 // ************************************************************************************************
 // Math Utils

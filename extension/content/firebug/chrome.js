@@ -1169,7 +1169,7 @@ top.FirebugChrome =
         var panel = panelBar1.selectedPanel;
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("Firebug chrome: breakOnNext for panel " + 
+            FBTrace.sysout("Firebug chrome: breakOnNext for panel " +
                 (panel ? panel.name : "NO panel"), panel);
 
         if (panel && panel.breakable)
@@ -1489,13 +1489,6 @@ if (top.hasOwnProperty('TidyBrowser'))
 }
 
 // ************************************************************************************************
-
-function ddd(text)
-{
-    const consoleService = Components.classes["@mozilla.org/consoleservice;1"].
-        getService(Components.interfaces["nsIConsoleService"]);
-    consoleService.logStringMessage(text + "");
-}
 
 function dddx()
 {
