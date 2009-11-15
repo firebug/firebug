@@ -216,9 +216,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try {
             executionContext.scriptsEnabled = false;
 
-            context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
-            if (context.eventSuppressor)
-                context.eventSuppressor.suppressEventHandling(true);
+            if (context.window instanceof nsIInterfaceRequestor)
+            {
+                context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
+                if (context.eventSuppressor)
+                    context.eventSuppressor.suppressEventHandling(true);
+            }
 
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.stop try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
