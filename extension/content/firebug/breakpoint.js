@@ -15,7 +15,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
         if (FBTrace.DBG_BP)
             FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+
-                " in " + context.getName());
+                " in " + panel.context.getName());
 
         // Toggle button's state.
         breakable = (breakable == "true" ? "false" : "true");
