@@ -29,6 +29,9 @@ Firebug.Breakpoint = extend(Firebug.Module,
         // Make sure the correct tooltip (coming from the current panel) is used.
         this.updateBreakOnNextTooltips(panel);
 
+        // Light up the tab whenever break on next is selected
+        this.updatePanelTab(panel, enabled);
+
         return enabled;
     },
 
@@ -38,8 +41,10 @@ Firebug.Breakpoint = extend(Firebug.Module,
         // break-on-next button's state.
         if (panel.breakable)
         {
-            this.updateBreakOnNextState(panel);
+            var shouldBreak = panel.shouldBreakOnNext();
+            this.updateBreakOnNextState(panel, shouldBreak);
             this.updateBreakOnNextTooltips(panel);
+            this.updatePanelTab(panel, shouldBreak);
         }
         else
         {
@@ -62,15 +67,30 @@ Firebug.Breakpoint = extend(Firebug.Module,
         Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", tooltip);
     },
 
-    updateBreakOnNextState: function(panel)
+    updateBreakOnNextState: function(panel, armed)
     {
-        var shouldBreak = panel.shouldBreakOnNext();
-
         // If the panel should break at the next chance, set the button to not breakable,
         // which means already active (throbbing).
-        var breakable = shouldBreak ? "false" : "true";
+        var breakable = armed ? "false" : "true";
         Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", breakable);
     },
+
+    updatePanelTab: function(panel, armed)
+    {
+        if (!panel)
+            return;
+
+        var panelBar = Firebug.chrome.$("fbPanelBar1");
+        var tab = panelBar.getTab(panel.name);
+        if (tab)
+            tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
+    },
+
+    breakNow: function(panel)
+    {
+        this.updatePanelTab(panel, false);
+        Firebug.Debugger.breakNow();
+    }
 });
 
 // ************************************************************************************************

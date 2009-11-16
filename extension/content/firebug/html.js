@@ -1814,7 +1814,7 @@ Firebug.HTMLModule.MutationBreakpoints =
             attrChange: event.attrChange,
         };
 
-        Firebug.Debugger.breakNow();
+        Firebug.Breakpoint.breakNow(context.getPanel("html", true));
         return true;
     },
 

@@ -2942,7 +2942,7 @@ NetProgress.prototype =
         // breakOnXHR flag.
         this.context.breakOnXHR = false;
 
-        Firebug.Debugger.breakNow();
+        Firebug.Breakpoint.breakNow(this.context.getPanel(panelName, true));
     },
 
     completedFile: function completedFile(request, time)

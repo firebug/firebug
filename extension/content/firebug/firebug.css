@@ -186,3 +186,9 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     margin-bottom: 0;
     -moz-margin-start:0;
 }
+
+/************************************************************************************************/
+
+panelTab[breakOnNextArmed="true"] > .panelTab-text {
+    text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange;
+}

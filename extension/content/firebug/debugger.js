@@ -588,6 +588,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.syncCommands(context);
             this.syncListeners(context);
 
+            // Update Break on Next lightning.
+            var panel = context.getPanel("script", true);
+            Firebug.Breakpoint.updatePanelTab(panel, false);
+
             Firebug.chrome.select(context.currentFrame, "script", null, true);
             Firebug.chrome.focus();
         }
@@ -1016,6 +1020,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // xxxHonza: Since Break On All Errors is now controlled by the "Break On Next"
             // button it's one time operation.
             Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", false);
+
+            // Switch of Break on Next tab lightning.
+            var panel = context.getPanel("console", true);
+            Firebug.Breakpoint.updatePanelTab(panel, false);
+
             return -1;  // break
         }
 

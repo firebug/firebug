@@ -1928,7 +1928,7 @@ Breakpoint.prototype =
                         newValue: newval
                     };
 
-                    Firebug.Debugger.breakNow();
+                    Firebug.Breakpoint.breakNow(self.context.getPanel("dom", true));
                 }
                 return newval;
             });
