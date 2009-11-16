@@ -1095,17 +1095,12 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             }
 
             var timeLabel = row.childNodes[5].childNodes[1].lastChild.firstChild;
+            timeLabel.innerHTML = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
 
             if (file.loaded)
-            {
                 setClass(row, "loaded");
-                timeLabel.innerHTML = NetRequestEntry.getElapsedTime(this.elapsed);
-            }
             else
-            {
                 removeClass(row, "loaded");
-                timeLabel.innerHTML = "&nbsp;";
-            }
 
             if (hasClass(row, "opened"))
             {
@@ -3085,6 +3080,10 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.receivingFile +" + time + " " +
+                    getPrintableTime() + ", " + request.URI.path, file);
+
             file.endTime = time;
         }
 
