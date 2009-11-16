@@ -2298,7 +2298,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         // Get response text and make sure it doesn't exceed the max limit.
         var text = Utils.getResponseText(file, context);
         var limit = Firebug.netDisplayedResponseLimit + 15;
-        var limitReached = text.length > limit;
+        var limitReached = text ? (text.length > limit) : false;
         if (limitReached)
             text = text.substr(0, limit) + "...";
 
