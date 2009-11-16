@@ -385,8 +385,8 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         // xxxHonza: Workaround for FB issue 1948 and FF bug #502959
         // Don't replace the original onreadystatechange callback since there is an 
         // exception when the callback is executed (see onHTTPSpyReadyStateChange)
-        // Only the "load" and "error" event handlers are used to monitor the XHR. 
-        //this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+        // xxxHonza: OK, the bug is now fixed to use the method again.
+        this.xhrRequest.onreadystatechange = this.onReadyStateChange;
         this.xhrRequest.addEventListener("load", this.onLoad, true);
         this.xhrRequest.addEventListener("error", this.onError, true);
         this.xhrRequest.addEventListener("abort", this.onAbort, true);
@@ -560,6 +560,9 @@ function requestStopped(request, xhrRequest, context, method, url)
 
 function onHTTPSpyReadyStateChange(spy, event)
 {
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState);
+
     try
     {
         spy.context.onReadySpy = spy; // maybe the handler will eval(), we want the URL.
@@ -593,6 +596,13 @@ function onHTTPSpyReadyStateChange(spy, event)
     finally
     {
         delete spy.context.onReadySpy;
+    }
+
+    if (spy.xhrRequest.readyState == 3)
+    {
+        spy.endTime = new Date().getTime();
+        spy.responseTime = spy.endTime - spy.sendTime;
+        updateTime(spy, spy.responseTime);
     }
 
     if (spy.xhrRequest.readyState == 4)
@@ -679,11 +689,16 @@ function onHTTPSpyAbort(spy)
         netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 }
 
-function updateLogRow(spy, responseTime)
+function updateTime(spy, responseTime)
 {
     var timeBox = getElementByClass(spy.logRow, "spyTime");
     if (responseTime)
         timeBox.textContent = " " + formatTime(responseTime);
+}
+
+function updateLogRow(spy, responseTime)
+{
+    updateTime(spy, responseTime);
 
     var statusBox = getElementByClass(spy.logRow, "spyStatus");
     statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
