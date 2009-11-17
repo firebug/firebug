@@ -24,61 +24,21 @@ Firebug.Spy = extend(Firebug.Module,
 {
     dispatchName: "spy",
 
-    skipSpy: function(win)
+    initialize: function()
     {
-        if (!win)
-            return true;
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.addListener(this.TraceListener);
 
-        var uri = safeGetWindowLocation(win); // don't attach spy to chrome
-        if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
-            return true;
+        Firebug.Module.initialize.apply(this, arguments);
     },
 
-    attachObserver: function(context, win)
+    shutdown: function()
     {
-        if (Firebug.Spy.skipSpy(win))
-            return;
+        Firebug.Module.shutdown.apply(this, arguments);
 
-        for (var i=0; i<contexts.length; ++i)
-        {
-            if ((contexts[i].context == context) && (contexts[i].win == win))
-                return;
-        }
-
-        // Register HTTP observer only once.
-        if (contexts.length == 0)
-            httpObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
-
-        contexts.push({context: context, win: win});
-
-        if (FBTrace.DBG_SPY)
-            FBTrace.sysout("spy.attachObserver " + contexts.length + " ", context.getName());
+        if (Firebug.TraceModule)
+            Firebug.TraceModule.removeListener(this.TraceListener);
     },
-
-    detachObserver: function(context, win)
-    {
-        for (var i=0; i<contexts.length; ++i)
-        {
-            if (contexts[i].context == context)
-            {
-                if (win && (contexts[i].win != win))
-                    continue;
-
-                contexts.splice(i, 1);
-
-                // If no context is using spy, remvove the (only one) HTTP observer.
-                if (contexts.length == 0)
-                    httpObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
-
-                if (FBTrace.DBG_SPY)
-                    FBTrace.sysout("spy.detachObserver " + contexts.length + " ", context.getName());
-                return;
-            }
-        }
-    },
-
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // extends Module
 
     initContext: function(context)
     {
@@ -138,7 +98,63 @@ Firebug.Spy = extend(Firebug.Module,
                 });
             }
         }
-    }
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // Attaching Spy to XHR requests.
+
+    skipSpy: function(win)
+    {
+        if (!win)
+            return true;
+
+        var uri = safeGetWindowLocation(win); // don't attach spy to chrome
+        if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+            return true;
+    },
+
+    attachObserver: function(context, win)
+    {
+        if (Firebug.Spy.skipSpy(win))
+            return;
+
+        for (var i=0; i<contexts.length; ++i)
+        {
+            if ((contexts[i].context == context) && (contexts[i].win == win))
+                return;
+        }
+
+        // Register HTTP observer only once.
+        if (contexts.length == 0)
+            httpObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
+
+        contexts.push({context: context, win: win});
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.attachObserver " + contexts.length + " ", context.getName());
+    },
+
+    detachObserver: function(context, win)
+    {
+        for (var i=0; i<contexts.length; ++i)
+        {
+            if (contexts[i].context == context)
+            {
+                if (win && (contexts[i].win != win))
+                    continue;
+
+                contexts.splice(i, 1);
+
+                // If no context is using spy, remvove the (only one) HTTP observer.
+                if (contexts.length == 0)
+                    httpObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
+
+                if (FBTrace.DBG_SPY)
+                    FBTrace.sysout("spy.detachObserver " + contexts.length + " ", context.getName());
+                return;
+            }
+        }
+    },
 });
 
 // ************************************************************************************************
@@ -813,6 +829,24 @@ function getResponseHeaders(spy)
 
     return headers;
 }
+
+// ************************************************************************************************
+// Tracing Listener
+
+Firebug.Spy.TraceListener =
+{
+    onDump: function(message)
+    {
+        var prefix = "spy.";
+        var index = message.text.indexOf(prefix);
+        if (index == 0)
+        {
+            message.text = message.text.substr(prefix.length);
+            message.text = trimLeft(message.text);
+            message.type = "DBG_SPY";
+        }
+    }
+};
 
 // ************************************************************************************************
 // Registration
