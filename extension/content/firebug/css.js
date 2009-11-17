@@ -1176,7 +1176,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
                 var line = domUtils.getRuleLine(rule);
                 var ruleId = rule.selectorText+"/"+line;
-                var sourceLink = new SourceLink(href, line, "css", rule, instance);
+                var sourceLink = new SourceLink(href, line, "css", rule, instance, isSystemSheet);
 
                 this.markOverridenProps(props, usedProps, inheritMode);
 

@@ -1072,7 +1072,10 @@ this.Event = domplate(Firebug.Rep,
 this.SourceLink = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTLINK({$collapsed: "$object|hideSourceLink"}, "$object|getSourceLinkTitle"),
+        OBJECTLINK(
+            {$collapsed: "$object|hideSourceLink"},
+            DIV("$object|getSourceLinkTitle"),
+            DIV({ $systemLink: "$object.isSystemLink"}, "$object|getSystemFlagTitle")),
 
     hideSourceLink: function(sourceLink)
     {
@@ -1099,6 +1102,14 @@ this.SourceLink = domplate(Firebug.Rep,
             return $STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
         else
             return $STRF("Line", [fileName, sourceLink.line]);
+    },
+
+    getSystemFlagTitle: function(sourceLink)
+    {
+        if (sourceLink && sourceLink.isSystemLink)
+            return $STRF("SystemItem", [""]);
+        else
+            return "";
     },
 
     copyLink: function(sourceLink)

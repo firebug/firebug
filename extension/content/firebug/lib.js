@@ -4378,13 +4378,14 @@ this.Continued.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-this.SourceLink = function(url, line, type, object, instance)
+this.SourceLink = function(url, line, type, object, instance, isSystemLink)
 {
     this.href = url;
     this.instance = instance;
     this.line = line;
     this.type = type;
     this.object = object;
+    this.isSystemLink = isSystemLink;
 };
 
 this.SourceLink.prototype =

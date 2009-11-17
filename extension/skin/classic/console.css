@@ -170,6 +170,10 @@
     font-weight: bold;
     color: #0000FF;
 }
+.objectLink-sourceLink .systemLink {
+    float: right;
+    color: #FF0000;
+}
 
 /************************************************************************************************/
 
