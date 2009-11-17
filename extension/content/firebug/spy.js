@@ -1,4 +1,3 @@
-
 /* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
@@ -8,12 +7,8 @@ FBL.ns(function() { with (FBL) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
-const nsIHttpChannel = Ci.nsIHttpChannel;
-const nsIUploadChannel = Ci.nsIUploadChannel;
-const nsIRequest = Ci.nsIRequest;
-const nsIXMLHttpRequest = Ci.nsIXMLHttpRequest;
-const nsIWebProgress = Ci.nsIWebProgress;
 
+// List of contexts with XHR spy attached.
 var contexts = [];
 
 // ************************************************************************************************
@@ -31,6 +26,9 @@ Firebug.Spy = extend(Firebug.Module,
 
     skipSpy: function(win)
     {
+        if (!win)
+            return true;
+
         var uri = safeGetWindowLocation(win); // don't attach spy to chrome
         if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
             return true;
@@ -38,35 +36,38 @@ Firebug.Spy = extend(Firebug.Module,
 
     attachObserver: function(context, win)
     {
-        if (win)
+        if (Firebug.Spy.skipSpy(win))
+            return;
+
+        for (var i=0; i<contexts.length; ++i)
         {
-            if (Firebug.Spy.skipSpy(win))
+            if ((contexts[i].context == context) && (contexts[i].win == win))
                 return;
-
-            for( var i = 0; i < contexts.length; ++i )
-            {
-                if ( (contexts[i].context == context) && (contexts[i].win == win) )
-                    return;
-            }
-            if ( contexts.length == 0 )
-                httpObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
-            contexts.push({ context: context, win: win });
-
-            if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.attachObserver " + contexts.length + " ", context.getName());
         }
+
+        // Register HTTP observer only once.
+        if (contexts.length == 0)
+            httpObserver.addObserver(SpyHttpObserver, "firebug-http-event", false);
+
+        contexts.push({context: context, win: win});
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.attachObserver " + contexts.length + " ", context.getName());
     },
 
     detachObserver: function(context, win)
     {
-        for( var i = 0; i < contexts.length; ++i )
+        for (var i=0; i<contexts.length; ++i)
         {
-            if ( (contexts[i].context == context) )
+            if (contexts[i].context == context)
             {
-                if (win && (contexts[i].win != win) )
+                if (win && (contexts[i].win != win))
                     continue;
+
                 contexts.splice(i, 1);
-                if ( contexts.length == 0 )
+
+                // If no context is using spy, remvove the (only one) HTTP observer.
+                if (contexts.length == 0)
                     httpObserver.removeObserver(SpyHttpObserver, "firebug-http-event");
 
                 if (FBTrace.DBG_SPY)
@@ -123,7 +124,9 @@ Firebug.Spy = extend(Firebug.Module,
 
     updateOption: function(name, value)
     {
-        if (name == "showXMLHttpRequests")  // XXXjjb Honza, if Console.isEnabled(context) false, then this can't be called, but somehow seems not correct
+        // XXXjjb Honza, if Console.isEnabled(context) false, then this can't be called,
+        // but somehow seems not correct
+        if (name == "showXMLHttpRequests")
         {
             var tach = value ? this.attachObserver : this.detachObserver;
             for (var i = 0; i < TabWatcher.contexts.length; ++i)
@@ -153,51 +156,243 @@ var SpyHttpObserver =
     {
         try
         {
-            // If a progress listener is set for the XHR, the loadFlags doesn't have
-            // nsIRequest.LOAD_BACKGROUND flag set. So, don't use it as a condition for displaying
-            // the XHR in Firebug console (Issue #1229).
-            if ((topic == "http-on-modify-request") || (topic == "http-on-examine-response"))
+            if (topic != "http-on-modify-request" &&
+                topic != "http-on-examine-response" &&
+                topic != "http-on-examine-cached-response")
             {
-                request = QI(request, nsIHttpChannel);
-                if (request.notificationCallbacks)
-                {
-                    try
-                    {
-                        var xhrRequest = request.notificationCallbacks.getInterface(nsIXMLHttpRequest);
-                    }
-                    catch (e)
-                    {
-                        if (e.name == "NS_NOINTERFACE")
-                        {
-                            if (FBTrace.DBG_SPY)
-                                FBTrace.sysout("spy.observe - request has no nsIXMLHttpRequest interface: ", request);
-                        }
-                    }
-                    if (xhrRequest && request.loadGroup)
-                    {
-                        var win = QI(request.loadGroup.groupObserver, nsIWebProgress).DOMWindow;
-                        for( var i = 0; i < contexts.length; ++i )
-                        {
-                            if (contexts[i].win == win)
-                            {
-                                if (topic == "http-on-modify-request")
-                                  requestStarted(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
-                                else if (topic == "http-on-examine-response")
-                                  requestStopped(request, xhrRequest, contexts[i].context, request.requestMethod, request.URI.asciiSpec);
+                if (FBTrace.DBG_ERRORS || FBTrace.DBG_SPY)
+                    FBTrace.sysout("spy.SpyHttpObserver.observe; ERROR Unknown topic: " + topic);
+                return;
+            }
 
-                                return;
-                            }
-                        }
-                    }
-                }
+            this.observeRequest(request, topic);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS || FBTrace.DBG_SPY)
+                FBTrace.sysout("spy.SpyHttpObserver EXCEPTION", exc);
+        }
+    },
+
+    observeRequest: function(request, topic)
+    {
+        var win = getWindowForRequest(request);
+        var xhr = this.getXHR(request);
+
+        // The request must be associated with window (i.e. tab) and it also must be 
+        // real XHR request.
+        if (!win || !xhr)
+            return;
+
+        for (var i=0; i<contexts.length; ++i)
+        {
+            var context = contexts[i];
+            if (context.win == win)
+            {
+                var spyContext = context.context;
+                var requestName = request.URI.asciiSpec;
+                var requestMethod = request.requestMethod;
+
+                if (topic == "http-on-modify-request")
+                    this.requestStarted(request, xhr, spyContext, requestMethod, requestName);
+                else if (topic == "http-on-examine-response")
+                    this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
+                else if (topic == "http-on-examine-cached-response")
+                    this.requestStopped(request, xhr, spyContext, requestMethod, requestName);
+
+                return;
             }
         }
-        catch(exc)
+    },
+
+    getXHR: function(request)
+    {
+        // Does also query-interface for nsIHttpChannel.
+        if (!(request instanceof Ci.nsIHttpChannel))
+            return null;
+
+        try
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("spy.SpyHttpObserver FAILS", exc);
+            var callbacks = request.notificationCallbacks;
+            return (callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null);
         }
+        catch (exc)
+        {
+            if (exc.name == "NS_NOINTERFACE")
+            {
+                if (FBTrace.DBG_SPY)
+                    FBTrace.sysout("spy.getXHR; Request is not nsIXMLHttpRequest: " +
+                        safeGetRequestName(request));
+            }
+        }
+
+       return null;
+    },
+
+    requestStarted: function(request, xhr, context, method, url)
+    {
+        var spy = getSpyForXHR(request, xhr, context);
+        spy.method = method;
+        spy.href = url;
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.requestStarted; " + spy.href, spy);
+
+        // Get "body" for POST and PUT requests. It will be displayed in
+        // appropriate tab of the XHR.
+        if (method == "POST" || method == "PUT")
+            spy.postText = readPostTextFromRequest(request, context);
+
+        spy.urlParams = parseURLParams(spy.href);
+
+        // In case of redirects there is no stack and the source link is null.
+        spy.sourceLink = getStackSourceLink();
+
+        if (!spy.requestHeaders)
+            spy.requestHeaders = getRequestHeaders(spy);
+
+        // If it's enabled log the request into the console tab.
+        if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
+        {
+            spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
+            setClass(spy.logRow, "loading");
+        }
+
+        // Notify registered listeners. The onStart event is fired once for entire XHR
+        // (even if there is more redirects within the process).
+        var name = request.URI.asciiSpec;
+        var origName = request.originalURI.asciiSpec;
+        if (name == origName)
+            dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
+
+        // Remember the start time et the end, so it's most accurate.
+        spy.sendTime = new Date().getTime();
+    },
+
+    requestStopped: function(request, xhr, context, method, url)
+    {
+        var spy = getSpyForXHR(request, xhr, context);
+        if (!spy)
+            return;
+
+        spy.endTime = new Date().getTime();
+        spy.responseTime = spy.endTime - spy.sendTime;
+        spy.loaded = true;
+        spy.mimeType = Firebug.NetMonitor.Utils.getMimeType(request.contentType, request.name);
+
+        if (!spy.responseHeaders)
+            spy.responseHeaders = getResponseHeaders(spy);
+
+        if (!spy.statusText)
+        {
+            try
+            {
+                spy.statusCode = request.responseStatus;
+                spy.statusText = request.responseStatusText;
+            }
+            catch (exc)
+            {
+                if (FBTrace.DBG_SPY)
+                    FBTrace.sysout("spy.requestStopped " + spy.href + ", status access FAILED", exc);
+            }
+        }
+
+        if (spy.logRow)
+        {
+            updateLogRow(spy, spy.responseTime);
+            updateHttpSpyInfo(spy);
+        }
+
+        if (spy.context.spies)  // XXXjjb don't we need to spy.detach() ?
+            remove(spy.context.spies, spy);
+
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
+                spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) +
+                " bytes", request);
     }
+};
+
+// ************************************************************************************************
+
+function getSpyForXHR(request, xhrRequest, context)
+{
+    var spy = null;
+
+    // Iterate all existing spy objects in this context and look for one that is
+    // already created for this request.
+    var length = context.spies.length;
+    for (var i=0; i<length; i++)
+    {
+        spy = context.spies[i];
+        if (spy.request == request)
+            return spy;
+    }
+
+    spy = new Firebug.Spy.XMLHttpRequestSpy(request, xhrRequest, context);
+    context.spies.push(spy);
+
+    var name = request.URI.asciiSpec;
+    var origName = request.originalURI.asciiSpec;
+
+    // Attach spy only to the original request. Notice that there can be more network requests
+    // made by the same XHR if redirects are involved.
+    if (name == origName)
+        spy.attach();
+
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.getSpyForXHR; New spy object created for: " + name, spy);
+
+    return spy;
+}
+
+// ************************************************************************************************
+
+Firebug.Spy.XMLHttpRequestSpy = function(request, xhrRequest, context)
+{
+    this.request = request;
+    this.xhrRequest = xhrRequest;
+    this.context = context;
+    this.responseText = null;
+
+    // For compatibility with the Net templates.
+    this.isXHR = true;
+};
+
+Firebug.Spy.XMLHttpRequestSpy.prototype =
+{
+    attach: function()
+    {
+        var spy = this;
+        this.onReadyStateChange = function(event) { onHTTPSpyReadyStateChange(spy, event); };
+        this.onLoad = function() { onHTTPSpyLoad(spy); };
+        this.onError = function() { onHTTPSpyError(spy); };
+        this.onAbort = function() { onHTTPSpyAbort(spy); };
+
+        this.onreadystatechange = this.xhrRequest.onreadystatechange;
+        this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+        this.xhrRequest.addEventListener("load", this.onLoad, false);
+        this.xhrRequest.addEventListener("error", this.onError, false);
+        this.xhrRequest.addEventListener("abort", this.onAbort, false);
+    },
+
+    detach: function()
+    {
+        this.xhrRequest.onreadystatechange = this.onreadystatechange;
+        try { this.xhrRequest.removeEventListener("load", this.onLoad, false); } catch (e) {}
+        try { this.xhrRequest.removeEventListener("error", this.onError, false); } catch (e) {}
+        try { this.xhrRequest.removeEventListener("abort", this.onAbort, false); } catch (e) {}
+
+        this.onreadystatechange = null;
+        this.onLoad = null;
+        this.onError = null;
+        this.onAbort = null;
+    },
+
+    getURL: function()
+    {
+        return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
+    },
 };
 
 // ************************************************************************************************
@@ -361,77 +556,6 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
 // ************************************************************************************************
 
-Firebug.Spy.XMLHttpRequestSpy = function(request, xhrRequest, context)
-{
-    this.request = request;
-    this.xhrRequest = xhrRequest;
-    this.context = context;
-    this.responseText = null;
-    this.isXHR = true;
-};
-
-Firebug.Spy.XMLHttpRequestSpy.prototype =
-{
-    attach: function()
-    {
-        var spy = this;
-        this.onReadyStateChange = function(event) { onHTTPSpyReadyStateChange(spy, event); };
-        this.onLoad = function() { onHTTPSpyLoad(spy); };
-        this.onError = function() { onHTTPSpyError(spy); };
-        this.onAbort = function() { onHTTPSpyAbort(spy); };
-
-        this.onreadystatechange = this.xhrRequest.onreadystatechange;
-
-        // xxxHonza: Workaround for FB issue 1948 and FF bug #502959
-        // Don't replace the original onreadystatechange callback since there is an 
-        // exception when the callback is executed (see onHTTPSpyReadyStateChange)
-        // xxxHonza: OK, the bug is now fixed to use the method again.
-        this.xhrRequest.onreadystatechange = this.onReadyStateChange;
-        this.xhrRequest.addEventListener("load", this.onLoad, true);
-        this.xhrRequest.addEventListener("error", this.onError, true);
-        this.xhrRequest.addEventListener("abort", this.onAbort, true);
-
-        // Use tabCache to get XHR response. Notice that the tabCache isn't
-        // supported till Firefox 3.0.4
-        this.context.sourceCache.addListener(this);
-    },
-
-    detach: function()
-    {
-        this.xhrRequest.onreadystatechange = this.onreadystatechange;
-        try { this.xhrRequest.removeEventListener("load", this.onLoad, true); } catch (e) {}
-        try { this.xhrRequest.removeEventListener("error", this.onError, true); } catch (e) {}
-        try { this.xhrRequest.removeEventListener("abort", this.onAbort, true); } catch (e) {}
-
-        this.onreadystatechange = null;
-        this.onLoad = null;
-        this.onError = null;
-        this.onAbort = null;
-
-        if (!this.context.sourceCache)
-        {
-            FBTrace.sysout("spy.detach; ERROR" + this.context.getName());
-            return;
-        }
-
-        this.context.sourceCache.removeListener(this);  // XXXjjb I see null sourceCache errors here, from onReadyStateChange
-    },
-
-    getURL: function()
-    {
-        return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
-    },
-
-    // Cache listener
-    onStopRequest: function(context, request, responseText)
-    {
-        if (request == this.request)
-            this.responseText = responseText
-    },
-};
-
-// ************************************************************************************************
-
 Firebug.XHRSpyListener =
 {
     onStart: function(context, spy)
@@ -445,129 +569,36 @@ Firebug.XHRSpyListener =
 
 // ************************************************************************************************
 
-function getSpyForXHR(request, xhrRequest, context)
-{
-    var spy = null;
-    var length = context.spies.length;
-    for (var i=0; i<length; i++)
-    {
-        spy = context.spies[i];
-        if (spy.request == request)
-            return spy;
-    }
-
-    spy = new Firebug.Spy.XMLHttpRequestSpy(request, xhrRequest, context);
-    context.spies.push(spy);
-
-    var name = request.URI.asciiSpec;
-    var origName = request.originalURI.asciiSpec;
-
-    // Attach spy only to the original request. Notice that there
-    // can be more network requests made by the same XHR if there
-    // are redirects.
-    if (name == origName)
-        spy.attach();
-
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.getSpyForXHR new spy object created for: " + name, spy);
-
-    return spy;
-}
-
-// ************************************************************************************************
-
-function requestStarted(request, xhrRequest, context, method, url)
-{
-    var spy = getSpyForXHR(request, xhrRequest, context);
-    spy.method = method;
-    spy.href = url;
-
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.requestStarted: "+spy.href, spy);
-
-    // Get "body" for POST and PUT requests. It will be displayed in
-    // appropriate tab of the XHR.
-    if (method == "POST" || method == "PUT")
-        spy.postText = readPostTextFromRequest(request, context);
-
-    spy.urlParams = parseURLParams(spy.href);
-    spy.sourceLink = getStackSourceLink();
-
-    if (!spy.requestHeaders)
-        spy.requestHeaders = getRequestHeaders(spy);
-
-    // If it's enabled log the request into the console tab.
-    if (Firebug.showXMLHttpRequests && Firebug.Console.isAlwaysEnabled())
-    {
-        spy.logRow = Firebug.Console.log(spy, spy.context, "spy", null, true);
-        setClass(spy.logRow, "loading");
-    }
-
-    // Notify registered listeners. The onStart event is fired
-    // once for entire XHR (even if there is more redirects within
-    // the process).
-    var name = request.URI.asciiSpec;
-    var origName = request.originalURI.asciiSpec;
-    if (name == origName)
-        dispatch(Firebug.Spy.fbListeners, "onStart", [context, spy]);
-
-    // Remember the start time et the end, so it's most accurate.
-    spy.sendTime = new Date().getTime();
-}
-
-function requestStopped(request, xhrRequest, context, method, url)
-{
-    var spy = getSpyForXHR(request, xhrRequest, context);
-    if (!spy)
-        return;
-
-    spy.endTime = new Date().getTime();
-    spy.responseTime = spy.endTime - spy.sendTime;
-    spy.loaded = true;
-    spy.mimeType = Firebug.NetMonitor.Utils.getMimeType(request.contentType, request.name);
-
-    if (!spy.responseHeaders)
-        spy.responseHeaders = getResponseHeaders(spy);
-
-    if (!spy.statusText)
-    {
-        try
-        {
-            spy.statusCode = request.responseStatus;
-            spy.statusText = request.responseStatusText;
-        }
-        catch (exc)
-        {
-            if (FBTrace.DBG_SPY)
-                FBTrace.sysout("spy.requestStopped " + spy.href + ", status access FAILED", exc);
-        }
-    }
-
-    if (spy.logRow)
-    {
-        updateLogRow(spy, spy.responseTime);
-        updateHttpSpyInfo(spy);
-    }
-
-    if (spy.context.spies)  // XXXjjb don't we need to spy.detach() ?
-        remove(spy.context.spies, spy);
-
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.requestStopped: " + spy.href + ", responseTime: " +
-            spy.responseTime + "ms, spy.responseText: " + (spy.reponseText?spy.responseText.length:0) +
-            " bytes", request);
-}
-
 function onHTTPSpyReadyStateChange(spy, event)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState);
+        FBTrace.sysout("spy.onHTTPSpyReadyStateChange " + spy.xhrRequest.readyState +
+            ", multipart: " + spy.xhrRequest.multipart);
+
+    // If the request is loading update the end time.
+    if (spy.xhrRequest.readyState == 3)
+    {
+        spy.endTime = new Date().getTime();
+        spy.responseTime = spy.endTime - spy.sendTime;
+        updateTime(spy, spy.responseTime);
+    }
+
+    var originalHandler = spy.onreadystatechange;
+
+    // Request loaded. Get all the info from the request now, just in case the 
+    // XHR were aborted in the original onReadyStateChange handler.
+    if (spy.xhrRequest.readyState == 4)
+        onHTTPSpyLoad(spy);
 
     try
     {
-        spy.context.onReadySpy = spy; // maybe the handler will eval(), we want the URL.
-        if (spy.onreadystatechange)
-            spy.onreadystatechange.handleEvent(event);  // This throws an exception see #502959
+        // Maybe the handler will eval(), we want the URL (used by debuggger.js).
+        spy.context.onReadySpy = spy;
+
+        // Calling the page handler throwed an exception (see #502959)
+        // This should be fixed in Firefox 3.5
+        if (originalHandler)
+            originalHandler.handleEvent(event);
     }
     catch (exc)
     {
@@ -598,67 +629,55 @@ function onHTTPSpyReadyStateChange(spy, event)
         delete spy.context.onReadySpy;
     }
 
-    if (spy.xhrRequest.readyState == 3)
-    {
-        spy.endTime = new Date().getTime();
-        spy.responseTime = spy.endTime - spy.sendTime;
-        updateTime(spy, spy.responseTime);
-    }
-
-    if (spy.xhrRequest.readyState == 4)
-        onHTTPSpyLoad(spy);
-
+    // xxxHonza: Since #502959 is fixed, this should never happen. Keep it here for Firebug 1.5
+    // to see it's relly working. If yes, it can be removed from 1.6
     if (rethrow)
         throw rethrow;  // does nothing?
 }
 
 function onHTTPSpyLoad(spy)
 {
+    if (FBTrace.DBG_SPY)
+        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
+
     // If we were already detached, don't do this again
     if (!spy.onLoad)
         return;
 
-    // The main XHR object has to be dettached now (i.e. listeners removed).
+    // Detach all listeners from the XHR object.
     spy.detach();
 
-    // The tabCache listener is used to get the actuall response since the
-    // spy.xhrRequest.responseText is empty if the request is aborted at this
-    // moment. Anyway, this way is used also for following cases:
-    // (a) nsITraceableChannel is not available until FF 3.0.4
-    // (b) specified response content-type doesn't have to be cached.
     if (!spy.responseText)
+    {
+        if (spy.logRow)
+        {
+            // Force response text to be updated in the UI (in case the console entry
+            // has been already expanded and the response tab selected).
+            var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
+            if (netInfoBox)
+            {
+                netInfoBox.htmlPresented = false;
+                netInfoBox.responsePresented = false;
+            }
+        }
+
         spy.responseText = spy.xhrRequest.responseText;
+    }
 
     var netProgress = spy.context.netProgress;
     if (netProgress)
         netProgress.post(netProgress.stopFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 
-    // If the response is get from FF cache the http-on-examine-response is never sent
-    // (https://bugzilla.mozilla.org/show_bug.cgi?id=449198) and so, the requestStopped
-    // method is never called.
-    // Let's simulate the event for all spy objects that have been registered for this request.
-    // Notice that there can be more spy objects (using the same request object) in case of
-    // redirects.
-    var spies = spy.context.spies;
-    for (var i=0; spies && i<spies.length; i++)
-    {
-        if (spy.request == spies[i].request) {
-            requestStopped(spy.request, spy.xhrRequest, spy.context, spy.method, spy.href);
-            i--;
-        }
-    }
+    updateHttpSpyInfo(spy);
 
     // Notify registered listeners about finish of the XHR.
     dispatch(Firebug.Spy.fbListeners, "onLoad", [spy.context, spy]);
-
-    if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
 }
 
 function onHTTPSpyError(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyError: " + spy.href, spy);
+        FBTrace.sysout("spy.onHTTPSpyError; " + spy.href, spy);
 
     var now = new Date().getTime();
 
@@ -688,6 +707,8 @@ function onHTTPSpyAbort(spy)
     if (netProgress)
         netProgress.post(netProgress.abortFile, [spy.request, spy.endTime, spy.postText, spy.responseText]);
 }
+
+// ************************************************************************************************
 
 function updateTime(spy, responseTime)
 {
@@ -722,8 +743,6 @@ function updateHttpSpyInfo(spy)
     if (!spy.logRow || !hasClass(spy.logRow, "opened"))
         return;
 
-    var template = Firebug.NetMonitor.NetInfoBody;
-
     if (!spy.params)
         spy.params = parseURLParams(spy.href+"");
 
@@ -733,6 +752,7 @@ function updateHttpSpyInfo(spy)
     if (!spy.responseHeaders && spy.loaded)
         spy.responseHeaders = getResponseHeaders(spy);
 
+    var template = Firebug.NetMonitor.NetInfoBody;
     var netInfoBox = getChildByClass(spy.logRow, "spyHead", "netInfoBody");
     if (!netInfoBox)
     {
@@ -742,7 +762,9 @@ function updateHttpSpyInfo(spy)
         template.selectTabByName(netInfoBox, "Response");
     }
     else
+    {
         template.updateInfo(netInfoBox, spy, spy.context);
+    }
 }
 
 // ************************************************************************************************
@@ -751,10 +773,10 @@ function getRequestHeaders(spy)
 {
     var headers = [];
 
-    if (spy.xhrRequest.channel instanceof nsIHttpChannel)
+    var channel = spy.xhrRequest.channel;
+    if (channel instanceof Ci.nsIHttpChannel)
     {
-        var http = QI(spy.xhrRequest.channel, nsIHttpChannel);
-        http.visitRequestHeaders({
+        channel.visitRequestHeaders({
             visitHeader: function(name, value)
             {
                 headers.push({name: name, value: value});
@@ -771,10 +793,10 @@ function getResponseHeaders(spy)
 
     try
     {
-        if (spy.xhrRequest.channel instanceof nsIHttpChannel)
+        var channel = spy.xhrRequest.channel;
+        if (channel instanceof Ci.nsIHttpChannel)
         {
-            var http = QI(spy.xhrRequest.channel, nsIHttpChannel);
-            http.visitResponseHeaders({
+            channel.visitResponseHeaders({
                 visitHeader: function(name, value)
                 {
                     headers.push({name: name, value: value});
@@ -782,7 +804,12 @@ function getResponseHeaders(spy)
             });
         }
     }
-    catch (exc) { }
+    catch (exc)
+    {
+        if (FBTrace.DBG_SPY || FBTrace.DBG_ERRORS)
+            FBTrace.sysout("spy.getResponseHeaders; EXCEPTION " +
+                safeGetRequestName(spy.request), exc);
+    }
 
     return headers;
 }
