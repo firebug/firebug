@@ -326,7 +326,7 @@ var SpyHttpObserver =
 
         if (spy.logRow)
         {
-            updateLogRow(spy, spy.responseTime);
+            updateLogRow(spy);
             updateHttpSpyInfo(spy);
         }
 
@@ -356,7 +356,9 @@ var SpyHttpActivityObserver = extend(Firebug.NetMonitor.NetHttpActivityObserver,
     observeRequest: function(request, activityType, activitySubtype, timestamp,
         extraSizeData, extraStringData)
     {
-        if (activityType != Ci.nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
+        if (activityType != Ci.nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION &&
+           (activityType == Ci.nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT &&
+            activitySubtype != Ci.nsISocketTransport.STATUS_RECEIVING_FROM))
             return;
 
         var win = getWindowForRequest(request);
@@ -415,6 +417,10 @@ var SpyHttpActivityObserver = extend(Firebug.NetMonitor.NetHttpActivityObserver,
             // than actual TRANSACTION_CLOSE.
             if (spy.loaded)
                 spy.detach();
+        }
+        else if (activitySubtype == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
+        {
+            spy.endTime = time;
         }
     }
 });
@@ -553,6 +559,13 @@ function onHTTPSpyReadyStateChange(spy, event)
             netInfoBox.htmlPresented = false;
             netInfoBox.responsePresented = false;
         }
+    }
+
+    // If the request is loading update the end time.
+    if (spy.xhrRequest.readyState == 3)
+    {
+        spy.responseTime = spy.endTime - spy.sendTime;
+        updateTime(spy);
     }
 
     // Request loaded. Get all the info from the request now, just in case the 
@@ -848,16 +861,16 @@ Firebug.XHRSpyListener =
 
 // ************************************************************************************************
 
-function updateTime(spy, responseTime)
+function updateTime(spy)
 {
     var timeBox = getElementByClass(spy.logRow, "spyTime");
-    if (responseTime)
-        timeBox.textContent = " " + formatTime(responseTime);
+    if (spy.responseTime)
+        timeBox.textContent = " " + formatTime(spy.responseTime);
 }
 
-function updateLogRow(spy, responseTime)
+function updateLogRow(spy)
 {
-    updateTime(spy, responseTime);
+    updateTime(spy);
 
     var statusBox = getElementByClass(spy.logRow, "spyStatus");
     statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
