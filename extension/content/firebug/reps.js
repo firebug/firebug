@@ -1075,7 +1075,12 @@ this.SourceLink = domplate(Firebug.Rep,
         OBJECTLINK(
             {$collapsed: "$object|hideSourceLink"},
             DIV("$object|getSourceLinkTitle"),
-            DIV({ $systemLink: "$object.isSystemLink"}, "$object|getSystemFlagTitle")),
+            DIV({$systemLink: "$object|isSystemLink"}, "$object|getSystemFlagTitle")),
+
+    isSystemLink: function(sourceLink)
+    {
+        return sourceLink ? sourceLink.isSystemLink : false;
+    },
 
     hideSourceLink: function(sourceLink)
     {
