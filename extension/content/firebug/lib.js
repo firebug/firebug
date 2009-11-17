@@ -2689,12 +2689,21 @@ this.getFunctionArgValues = function(fn, frame)
     var values = [];
 
     var argNames = this.getFunctionArgNames(fn);
+    var scope = FBL.unwrapIValue(frame.scope);
+
     for (var i = 0; i < argNames.length; ++i)
     {
         var argName = argNames[i];
-        var pvalue = frame.scope.getProperty(argName);
-        var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
-        values.push({name: argName, value: value});
+        if (scope)
+        {
+            var pvalue = scope.argName;
+            var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+            values.push({name: argName, value: value});
+        }
+        else
+        {
+            values.push({name: argName});
+        }
     }
 
     return values;
