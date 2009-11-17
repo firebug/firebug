@@ -216,7 +216,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try {
             executionContext.scriptsEnabled = false;
 
-            if (context.window instanceof nsIInterfaceRequestor)
+            if (context.window instanceof Ci.nsIInterfaceRequestor)
             {
                 context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
                 if (context.eventSuppressor)
