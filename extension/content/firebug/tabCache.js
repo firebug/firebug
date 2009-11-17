@@ -439,9 +439,6 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
     onStopRequest: function(request, requestContext, statusCode)
     {
-        if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetName(request));
-
         // The response is finally received so, remove the request from the list of
         // current responses.
         var url = safeGetName(request);
@@ -449,6 +446,9 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
         var lines = this.cache[url];
         var responseText = lines ? lines.join("") : "";
+
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetRequestName(request), responseText);
 
         dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest", [this.context, request, responseText]);
         dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
