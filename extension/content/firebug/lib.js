@@ -2940,6 +2940,19 @@ this.safeGetWindowLocation = function(window)
     }
 };
 
+this.safeGetRequestName = function(request)
+{
+    try
+    {
+        return request.name;
+    }
+    catch (exc)
+    {
+    }
+
+    return null;
+}
+
 this.safeGetContentType = function(request)
 {
     try
