@@ -4186,7 +4186,7 @@ var NetHttpObserver =
 // ************************************************************************************************
 // Activity Observer
 
-var NetHttpActivityObserver =
+Firebug.NetMonitor.NetHttpActivityObserver =
 {
     registered: false,
 
@@ -4249,85 +4249,90 @@ var NetHttpActivityObserver =
     {
         try
         {
-            if (!(httpChannel instanceof Ci.nsIHttpChannel))
-                return;
-
-            var win = getWindowForRequest(httpChannel);
-            if (!win)
-            {
-                var index = activeRequests.indexOf(httpChannel);
-                if (!(win = activeRequests[index+1]))
-                    return;
-            }
-
-            var context = TabWatcher.getContextByWindow(win);
-            var tabId = Firebug.getTabIdForWindow(win);
-            if (!(tabId && win))
-                return;
-
-            var networkContext = contexts[tabId];
-            if (!networkContext)
-                networkContext = context ? context.netProgress : null;
-
-            if (!networkContext)
-                return;
-
-            if (FBTrace.DBG_ACTIVITYOBSERVER)
-            {
-                var time = new Date();
-                time.setTime(timestamp/1000);
-                FBTrace.sysout("activityObserver.observeActivity; " +
-                    getTimeLabel(time) + ", " +
-                    safeGetName(httpChannel) + ", " +
-                    getActivityTypeDescription(activityType) + ", " +
-                    getActivitySubtypeDescription(activitySubtype) + ", " +
-                    extraSizeData,
-                    extraStringData);
-            }
-
-            if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
-            {
-                if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
-                {
-                    activeRequests.push(httpChannel);
-                    activeRequests.push(win);
-                }
-                else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
-                {
-                    var index = activeRequests.indexOf(httpChannel);
-                    activeRequests.splice(index, 2);
-                }
-            }
-
-            var time = new Date();
-            time.setTime(timestamp/1000);
-
-            if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
-            {
-                if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
-                    networkContext.post(requestedFile, [httpChannel, time, win, Utils.isXHR(httpChannel)]);
-                else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
-                    networkContext.post(completedFile, [httpChannel, time]);
-            }
-            else if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT)
-            {
-                if (activitySubtype == nsISocketTransport.STATUS_RESOLVING)
-                    networkContext.post(resolvingFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_CONNECTING_TO)
-                    networkContext.post(connectingFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
-                    networkContext.post(connectedFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_SENDING_TO)
-                    networkContext.post(sendingFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_WAITING_FOR)
-                    networkContext.post(waitingForFile, [httpChannel, time]);
-                else if (activitySubtype == nsISocketTransport.STATUS_RECEIVING_FROM)
-                    networkContext.post(receivingFile, [httpChannel, time]);
-            }
+            if (httpChannel instanceof Ci.nsIHttpChannel)
+                this.observeRequest(httpChannel, activityType, activitySubtype, timestamp,
+                    extraSizeData, extraStringData);
         }
         catch (exc)
         {
             FBTrace.sysout("net.observeActivity: EXCEPTION ", exc);
+        }
+    },
+
+    observeRequest: function(httpChannel, activityType, activitySubtype, timestamp,
+        extraSizeData, extraStringData)
+    {
+        var win = getWindowForRequest(httpChannel);
+        if (!win)
+        {
+            var index = activeRequests.indexOf(httpChannel);
+            if (!(win = activeRequests[index+1]))
+                return;
+        }
+
+        var context = TabWatcher.getContextByWindow(win);
+        var tabId = Firebug.getTabIdForWindow(win);
+        if (!(tabId && win))
+            return;
+
+        var networkContext = contexts[tabId];
+        if (!networkContext)
+            networkContext = context ? context.netProgress : null;
+
+        if (!networkContext)
+            return;
+
+        if (FBTrace.DBG_ACTIVITYOBSERVER)
+        {
+            var time = new Date();
+            time.setTime(timestamp/1000);
+            FBTrace.sysout("activityObserver.observeActivity; " +
+                getTimeLabel(time) + ", " +
+                safeGetName(httpChannel) + ", " +
+                getActivityTypeDescription(activityType) + ", " +
+                getActivitySubtypeDescription(activitySubtype) + ", " +
+                extraSizeData,
+                extraStringData);
+        }
+
+        if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
+        {
+            if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
+            {
+                activeRequests.push(httpChannel);
+                activeRequests.push(win);
+            }
+            else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
+            {
+                var index = activeRequests.indexOf(httpChannel);
+                activeRequests.splice(index, 2);
+            }
+        }
+
+        var time = new Date();
+        time.setTime(timestamp/1000);
+
+        if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
+        {
+            if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
+                networkContext.post(requestedFile, [httpChannel, time, win, Utils.isXHR(httpChannel)]);
+            else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
+                networkContext.post(completedFile, [httpChannel, time]);
+        }
+        else if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT)
+        {
+            if (activitySubtype == nsISocketTransport.STATUS_RESOLVING)
+                networkContext.post(resolvingFile, [httpChannel, time]);
+            else if (activitySubtype == nsISocketTransport.STATUS_CONNECTING_TO)
+                networkContext.post(connectingFile, [httpChannel, time]);
+            else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
+                networkContext.post(connectedFile, [httpChannel, time]);
+            else if (activitySubtype == nsISocketTransport.STATUS_SENDING_TO)
+                networkContext.post(sendingFile, [httpChannel, time]);
+            else if (activitySubtype == nsISocketTransport.STATUS_WAITING_FOR)
+                networkContext.post(waitingForFile, [httpChannel, time]);
+            else if (activitySubtype == nsISocketTransport.STATUS_RECEIVING_FROM)
+                networkContext.post(receivingFile, [httpChannel, time]);
         }
     },
 
@@ -4342,6 +4347,8 @@ var NetHttpActivityObserver =
         throw Cr.NS_ERROR_NO_INTERFACE;
     }
 }
+
+var NetHttpActivityObserver = Firebug.NetMonitor.NetHttpActivityObserver;
 
 // ************************************************************************************************
 // Activity Observer Tracing Support
