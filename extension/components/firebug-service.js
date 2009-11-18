@@ -102,7 +102,7 @@ const reXUL = /\.xul$|\.xml$/;
 // Globals
 
 var jsd, fbs, prefs;
-var consoleService; 
+var consoleService;
 
 var contextCount = 0;
 
@@ -2750,7 +2750,15 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, not Window: "+scope.jsClassName, scope);
 
-        return scope;
+        try
+        {
+             return new XPCNativeWrapper(scope.getWrappedValue());
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, but failed to unwrap it: "+scope.jsClassName, scope);
+        }
     }
     else
         return null;
@@ -2763,9 +2771,17 @@ function getFrameGlobal(frame)
     {
         return getFrameWindow(frame);
     }
-    var frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
+    try
+    {
+        var frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
+    }
+    catch(exc)
+    {
+        if (FBTrace.FBS_ERRORS)
+            FBTrace.sysout("fbs.getFrameGlobal FAILS for "+jscontext.globalObject.getWrappedValue());
+    }
     if (frameGlobal)
-        return frameGlobal;
+            return frameGlobal;
     else
     {
         return getFrameWindow(frame);
