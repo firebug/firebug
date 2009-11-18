@@ -2964,7 +2964,7 @@ NetProgress.prototype =
                 file.endTime = time;
             }
 
-            if (request.contentLength != undefined)
+            if (request.contentLength >= 0)
                 file.size = request.contentLength;
 
             if (info.responseStatus == 304)
@@ -3085,6 +3085,22 @@ NetProgress.prototype =
                     getPrintableTime() + ", " + request.URI.path, file);
 
             file.endTime = time;
+        }
+
+        return file;
+    },
+
+    completeFile: function completeFile(request, time, responseSize)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.completeFile +" + time + " " +
+                    getPrintableTime() + ", " + request.URI.path, file);
+
+            if (responseSize > 0)
+                file.size = responseSize;
         }
 
         return file;
@@ -3389,6 +3405,7 @@ var connectedFile = NetProgress.prototype.connectedFile;
 var waitingForFile = NetProgress.prototype.waitingForFile;
 var sendingFile = NetProgress.prototype.sendingFile;
 var receivingFile = NetProgress.prototype.receivingFile;
+var completeFile = NetProgress.prototype.completeFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
 var windowLoad = NetProgress.prototype.windowLoad;
@@ -4318,6 +4335,8 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 networkContext.post(requestedFile, [httpChannel, time, win, Utils.isXHR(httpChannel)]);
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
                 networkContext.post(completedFile, [httpChannel, time]);
+            else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_COMPLETE)
+                networkContext.post(completeFile, [httpChannel, time, extraSizeData]);
         }
         else if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_SOCKET_TRANSPORT)
         {
