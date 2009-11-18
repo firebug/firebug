@@ -1649,7 +1649,7 @@ top.Firebug =
 
         if (Firebug.openInWindow && !Firebug.isDetached())  // user wants detached but we are not yet
         {
-            if (context)
+            if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
                 this.detachBar(context);  //   the placement will be set once the external window opens
             else  // just make sure we are not showing
                 this.showBar(false);
