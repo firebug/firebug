@@ -1254,13 +1254,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
 // ************************************************************************************************
 
-var AttrTag =
+var AttrTag = Firebug.HTMLPanel.AttrTag =
     SPAN({"class": "nodeAttr editGroup"},
         "&nbsp;", SPAN({"class": "nodeName editable"}, "$attr.nodeName"), "=&quot;",
         SPAN({"class": "nodeValue editable"}, "$attr.nodeValue"), "&quot;"
     );
 
-var TextTag =
+var TextTag = Firebug.HTMLPanel.TextTag =
     SPAN({"class": "nodeText editable"}, 
         FOR("char", "$object|getNodeTextGroups",
             SPAN({"class": "$char.class $char.extra"}, "$char.str")
