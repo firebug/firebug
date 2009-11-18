@@ -15,9 +15,13 @@ var contexts = [];
 // Spy Module
 
 /**
- * @module Represents a Spy module that is responsible for attaching/detaching a Spy HTTP Observer
- * when Firebug is activated/deactivated for a site. This {@link SpyHttpObserver} is
- * consequently responsible for monitoring all XHRs.
+ * @module Represents a XHR Spy module. The main purpose of the XHR Spy feature is to monitor
+ * XHR activity of the current page and create appropriate log into the Console panel.
+ * This feature can be controlled by an option <i>Show XMLHttpRequests</i> (from within the
+ * console panel).
+ * 
+ * The module is responsible for attaching/detaching a HTTP Observers when Firebug is
+ * activated/deactivated for a site.
  */
 Firebug.Spy = extend(Firebug.Module,
 /** @lends Firebug.Spy */
@@ -108,13 +112,17 @@ Firebug.Spy = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Attaching Spy to XHR requests.
 
+    /**
+     * Returns false if Spy should not be attached to XHRs executed by the specified window.
+     */
     skipSpy: function(win)
     {
         if (!win)
             return true;
 
-        var uri = safeGetWindowLocation(win); // don't attach spy to chrome
-        if (uri &&  (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
+        // Don't attach spy to chrome.
+        var uri = safeGetWindowLocation(win);
+        if (uri && (uri.indexOf("about:") == 0 || uri.indexOf("chrome:") == 0))
             return true;
     },
 
@@ -168,6 +176,10 @@ Firebug.Spy = extend(Firebug.Module,
         }
     },
 
+    /**
+     * Return XHR object that is associated with specified request <i>nsIHttpChannel</i>.
+     * Returns null if the request doesn't represent XHR.
+     */
     getXHR: function(request)
     {
         // Does also query-interface for nsIHttpChannel.
@@ -197,8 +209,9 @@ Firebug.Spy = extend(Firebug.Module,
 
 /**
  * @class This observer uses {@link HttpRequestObserver} to monitor start and end of all XHRs.
- * using http-on-modify-request and http-on-examine-response events. For every new XHR
- * an instance of {@link Firebug.Spy.XMLHttpRequestSpy} object is created and removed
+ * using <code>http-on-modify-request</code>, <code>http-on-examine-response</code> and
+ * <code>http-on-examine-cached-response</code> events. For every monitored XHR a new 
+ * instance of {@link Firebug.Spy.XMLHttpRequestSpy} object is created. This instance is removed
  * when the XHR is finished.
  */
 var SpyHttpObserver =
@@ -349,7 +362,12 @@ var SpyHttpObserver =
 // ************************************************************************************************
 // Activity Observer
 
+/**
+ * @class This observer is used to properly monitor even mulipart XHRs. It's based on
+ * an activity-observer component that has been introduced in Firefox 3.6.
+ */
 var SpyHttpActivityObserver = extend(Firebug.NetMonitor.NetHttpActivityObserver,
+/** @lends SpyHttpActivityObserver */
 {
     activeRequests: [],
 
@@ -464,6 +482,11 @@ function getSpyForXHR(request, xhrRequest, context, noCreate)
 
 // ************************************************************************************************
 
+/**
+ * @class This class represents a Spy object that is attached to XHR. This object
+ * registers various listeners into the XHR in order to monitor various events fired
+ * during the request process (onLoad, onAbort, etc.)
+ */
 Firebug.Spy.XMLHttpRequestSpy = function(request, xhrRequest, context)
 {
     this.request = request;
@@ -480,6 +503,7 @@ Firebug.Spy.XMLHttpRequestSpy = function(request, xhrRequest, context)
 };
 
 Firebug.Spy.XMLHttpRequestSpy.prototype =
+/** @lends Firebug.Spy.XMLHttpRequestSpy */
 {
     attach: function()
     {
