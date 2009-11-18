@@ -1202,7 +1202,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // The nspr timer doesn't have 1ms precision, so it can happen that entire
         // request is executed in l ms (so the total is zero). Let's display at least
-        // one bar in such a case so the timeline is visible. 
+        // one bar in such a case so the timeline is visible.
         if (this.elapsed <= 0)
             this.barReceivingWidth = "1";
 
@@ -4087,10 +4087,11 @@ var NetHttpObserver =
             // The context doesn't have to exist yet. In such cases a temp Net context is
             // created within onModifyRequest.
 
-            // Some requests are not associted with any page (e.g. favicon).
+            // Some requests are not associated with any page (e.g. favicon).
             // These are ignored as Net panel shows only page requests.
-            var tabId = Firebug.getTabIdForWindow(win);
-            if (!(tabId && win))
+            if (win)
+                var tabId = Firebug.getTabIdForWindow(win);
+            if (!tabId)
             {
                 if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.observe NO TAB " + safeGetName(subject) +

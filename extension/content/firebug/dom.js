@@ -494,6 +494,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         copyToClipboard(path.join(""));
     },
 
+    /*
+     * Walk from the current row up to the most ancient parent, building an array. 
+     * @return array of property names and separators, eg ['foo','.','bar'].
+     */
     getPropertyPath: function(row)
     {
         var path = [];

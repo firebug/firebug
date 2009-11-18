@@ -3915,14 +3915,8 @@ this.getRequestWebProgress = function(request)
 this.getBrowserForWindow = function(win)
 {
     var tabBrowser = document.getElementById("content");
-    for (var i=0; i<tabBrowser.browsers.length; ++i)
-    {
-        var browser = tabBrowser.browsers[i];
-        if (browser.contentWindow == win)
-            return browser;
-    }
-
-    return null;
+    if (tabBrowser && win.document)
+        return tabBrowser.getBrowserForDocument(win.document);
 };
 
 // ************************************************************************************************

@@ -111,10 +111,11 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
-
+// XXXjjb this same code is in net.js, better to have it only once
             var win = getWindowForRequest(subject);
-            var tabId = Firebug.getTabIdForWindow(win);
-            if (!(tabId && win))
+            if (win)
+                var tabId = Firebug.getTabIdForWindow(win);
+            if (!tabId)
                 return;
 
             if (topic == "http-on-modify-request")
