@@ -557,16 +557,16 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         if (parentNode)
         {
-            if (!parentNode.localName)
-            {
-                if (FBTrace.DBG_HTML)
-                    FBTrace.sysout("getParentObject: null localName must be window, no parentObject");
-                return null;
-            }
 
             if (parentNode.nodeType == 9) // then parentNode is Document element
             {
-                if (this.embeddedBrowserParents)
+                if (parentNode.defaultView)
+                {
+                    if (FBTrace.DBG_HTML)
+                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");                  /*@explore*/
+                    return parentNode.defaultView.frameElement;
+                }
+                else if (this.embeddedBrowserParents)
                 {
                     var skipParent = this.embeddedBrowserParents[node];  // better be HTML element, could be iframe
                     if (FBTrace.DBG_HTML)
@@ -574,14 +574,14 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     if (skipParent)
                         return skipParent;
                 }
-                if (parentNode.defaultView)
-                {
-                    if (FBTrace.DBG_HTML)
-                        FBTrace.sysout("getParentObject parentNode.nodeType 9, frameElement:"+parentNode.defaultView.frameElement+"\n");                  /*@explore*/
-                    return parentNode.defaultView.frameElement;
-                }
                 else // parent is document element, but no window at defaultView.
                     return null;
+            }
+            else if (!parentNode.localName)
+            {
+                if (FBTrace.DBG_HTML)
+                    FBTrace.sysout("getParentObject: null localName must be window, no parentObject");
+                return null;
             }
             else
                 return parentNode;
