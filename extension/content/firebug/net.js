@@ -3085,6 +3085,17 @@ NetProgress.prototype =
                     getPrintableTime() + ", " + request.URI.path, file);
 
             file.endTime = time;
+
+            // Force update UI.
+            if (file.row && hasClass(file.row, "opened"))
+            {
+                var netInfoBox = getElementByClass(file.row.nextSibling, "netInfoBody");
+                if (netInfoBox)
+                {
+                    netInfoBox.responsePresented = false;
+                    netInfoBox.htmlPresented = false;
+                }
+            }
         }
 
         return file;
