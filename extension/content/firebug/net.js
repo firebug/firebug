@@ -3039,7 +3039,12 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            file.sendingTime = time;
+            // Remember when the send started.
+            if (!file.sendStarted)
+            {
+                file.sendingTime = time;
+                file.sendStarted = true;
+            }
 
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.sendingFile +" + (now() - file.startTime) + " " +
@@ -4311,10 +4316,11 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         if (!networkContext)
             return;
 
+        var time = new Date();
+        time.setTime(timestamp/1000);
+
         if (FBTrace.DBG_ACTIVITYOBSERVER)
         {
-            var time = new Date();
-            time.setTime(timestamp/1000);
             FBTrace.sysout("activityObserver.observeActivity; " +
                 getTimeLabel(time) + ", " +
                 safeGetName(httpChannel) + ", " +
@@ -4338,8 +4344,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
             }
         }
 
-        var time = new Date();
-        time.setTime(timestamp/1000);
+        time = time.getTime();
 
         if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
         {
