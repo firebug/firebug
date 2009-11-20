@@ -4258,12 +4258,15 @@ Firebug.NetMonitor.NetHttpActivityObserver =
 
     getActivityDistributor: function()
     {
-        if(!this.activityDistributor)
+        if (!this.activityDistributor)
         {
             try
             {
-                this.activityDistributor = Cc["@mozilla.org/network/http-activity-distributor;1"]
-                    .getService(Ci.nsIHttpActivityDistributor);
+                var hadClass = Cc["@mozilla.org/network/http-activity-distributor;1"];
+                if (!hadClass)
+                    return null;
+
+                this.activityDistributor = hadClass.getService(Ci.nsIHttpActivityDistributor);
 
                 if (FBTrace.DBG_NET)
                     FBTrace.sysout("net.NetHttpActivityObserver; Activity Observer Registered");
