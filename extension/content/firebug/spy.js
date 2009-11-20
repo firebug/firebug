@@ -513,8 +513,14 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         this.onError = function() { onHTTPSpyError(spy); };
         this.onAbort = function() { onHTTPSpyAbort(spy); };
 
-        this.onreadystatechange = this.xhrRequest.onreadystatechange;
-        this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+        // xxxHonza: #502959 is still failing on Fx 3.5
+        // Use activity distributor to identify 3.6 
+        if (SpyHttpActivityObserver.getActivityDistributor())
+        {
+            this.onreadystatechange = this.xhrRequest.onreadystatechange;
+            this.xhrRequest.onreadystatechange = this.onReadyStateChange;
+        }
+
         this.xhrRequest.addEventListener("load", this.onLoad, false);
         this.xhrRequest.addEventListener("error", this.onError, false);
         this.xhrRequest.addEventListener("abort", this.onAbort, false);
@@ -545,7 +551,9 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         // Remove itself from the list of active spies.
         remove(this.context.spies, this);
 
-        this.xhrRequest.onreadystatechange = this.onreadystatechange;
+        if (this.onreadystatechange)
+            this.xhrRequest.onreadystatechange = this.onreadystatechange;
+
         try { this.xhrRequest.removeEventListener("load", this.onLoad, false); } catch (e) {}
         try { this.xhrRequest.removeEventListener("error", this.onError, false); } catch (e) {}
         try { this.xhrRequest.removeEventListener("abort", this.onAbort, false); } catch (e) {}
@@ -626,8 +634,9 @@ function onHTTPSpyLoad(spy)
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
 
-    // xxxHonza: I don't think this is necessary any more. Readystatechange handler
-    // should be enough.
+    // xxxHonza: Still needed for Fx 3.5 (#502959)
+    if (!SpyHttpActivityObserver.getActivityDistributor())
+        onHTTPSpyReadyStateChange(spy, null);
 }
 
 function onHTTPSpyError(spy)
