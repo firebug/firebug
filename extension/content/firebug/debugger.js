@@ -1017,9 +1017,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (Firebug.breakOnErrors)
         {
-            // xxxHonza: Since Break On All Errors is now controlled by the "Break On Next"
-            // button it's one time operation.
-            Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", false);
+            // Deactivate "Break On All Errors" only if the other options says so.
+            if (!Firebug.persistBreakOnError)
+                Firebug.setPref(Firebug.servicePrefDomain, "breakOnErrors", false);
 
             // Switch of Break on Next tab lightning.
             var panel = context.getPanel("console", true);

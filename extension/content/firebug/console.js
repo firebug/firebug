@@ -697,6 +697,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             command: bindFixed(Firebug.setPref, Firebug, strictDomain, strictName, !strictValue) };
     },
 
+    getBreakOnMenuItems: function()
+    {
+        return [
+            optionMenu("console.option.Persist Break On Error", "persistBreakOnError")
+        ];
+    },
+
     search: function(text)
     {
         if (!text)

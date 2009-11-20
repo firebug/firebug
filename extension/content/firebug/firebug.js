@@ -71,6 +71,8 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showChromeErrors", "showChromeMessages", "showExternalErrors",
     "showXMLHttpRequests", "showNetworkErrors",
 
+    "persistBreakOnError",
+
     // HTML
     "showFullTextNodes", "showCommentNodes", 
     "showTextNodesWithWhitespace", "showTextNodesAsSource", 
@@ -2273,6 +2275,11 @@ Firebug.Panel =
      * @return an array of menu items.
      */
     getContextMenuItems: function(object, target)
+    {
+        return [];
+    },
+
+    getBreakOnMenuItems: function()
     {
         return [];
     },

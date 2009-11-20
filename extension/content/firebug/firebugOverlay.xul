@@ -40,7 +40,7 @@
         <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
         <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
 
-        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext);"/>
+        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext, event);"/>
 
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" disabled="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
@@ -130,12 +130,17 @@
 
                         <!-- Break On Next -->
                         <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
-                                tooltiptext="script.Break On Next" breakable="disabled" />
+                                tooltiptext="script.Break On Next" breakable="disabled">
+                            <menupopup id="fbBreakOnNextOptions" />
+                        </toolbarbutton>
                     </hbox>
+
+                    <spacer width="5"/>
 
                     <!-- Tab Bar -->
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
                         aria-label="firebug panels" />
+
                     <spacer flex="1"/>
 
                     <!-- Search Box -->

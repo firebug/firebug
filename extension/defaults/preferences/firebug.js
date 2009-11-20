@@ -40,6 +40,7 @@ pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug.service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
+pref("extensions.firebug.persistBreakOnError", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);

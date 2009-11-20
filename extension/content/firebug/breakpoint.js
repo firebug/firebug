@@ -37,20 +37,34 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        // If the panel supports the feature, set the tooltips and update
-        // break-on-next button's state.
-        if (panel.breakable)
-        {
-            var shouldBreak = panel.shouldBreakOnNext();
-            this.updateBreakOnNextState(panel, shouldBreak);
-            this.updateBreakOnNextTooltips(panel);
-            this.updatePanelTab(panel, shouldBreak);
-        }
-        else
+        var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
+        breakButton.removeAttribute("type");
+
+        // Disable break-on-next if it isn't supported by the current panel.
+        if (!panel.breakable)
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
+            return;
         }
+
+        // Set the tooltips and update break-on-next button's state.
+        var shouldBreak = panel.shouldBreakOnNext();
+        this.updateBreakOnNextState(panel, shouldBreak);
+        this.updateBreakOnNextTooltips(panel);
+        this.updatePanelTab(panel, shouldBreak);
+
+        var menuItems = panel.getBreakOnMenuItems();
+        if (!menuItems || !menuItems.length)
+            return;
+
+        breakButton.setAttribute("type", "menu-button");
+
+        var menuPopup = Firebug.chrome.$("fbBreakOnNextOptions");
+        eraseNode(menuPopup);
+
+        for (var i=0; i<menuItems.length; ++i)
+            FBL.createMenuItem(menuPopup, menuItems[i]);
     },
 
     updateBreakOnNextTooltips: function(panel)

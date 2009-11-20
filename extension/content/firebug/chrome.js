@@ -1157,8 +1157,12 @@ top.FirebugChrome =
             "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
     },
 
-    breakOnNext: function(context)
+    breakOnNext: function(context, event)
     {
+        // Avoid bubbling from associated options.
+        if (event.target.id != "cmd_breakOnNext")
+            return;
+
         if (!context)
         {
             if (FBTrace.DBG_BP)
