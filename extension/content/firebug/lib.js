@@ -6637,44 +6637,6 @@ this.ReversibleIterator = function(length, start, reverse)
     };
 };
 
-/**
- * Implements a RegExp-like object that will search for the literal value
- * of a given string, rather than the regular expression. This allows for
- * iterative literal searches without having to escape user input strings
- * to prevent invalid regular expressions from being used.
- */
-this.LiteralRegExp = function(literal, reverse, caseSensitive)
-{
-    var searchToken = (!caseSensitive) ? literal.toLowerCase() : literal;
-
-    this.exec = function(text)
-    {
-      if (!text)
-        return null;
-
-        // TODO : Check this for iterative functionality
-        var searchText = (!caseSensitive) ? text.toLowerCase() : text;
-        var index = reverse ? searchText.lastIndexOf(searchToken) : searchText.indexOf(searchToken);
-        
-        if (index >= 0)
-        {
-            var ret = [ literal.substr(index, searchToken.length) ];
-            ret.index = index;
-            return ret;
-        }
-
-        return null;
-    };
-    this.test = function(text)
-    {
-        if (!text)
-            return false;
-
-        var searchText = (!caseSensitive) ? text.toLowerCase() : text;
-        return searchText.indexOf(searchToken) >= 0;
-    };
-};
-
 this.ReversibleRegExp = function(regex, flags)
 {
     var re = {};
@@ -6692,16 +6654,7 @@ this.ReversibleRegExp = function(regex, flags)
         var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i");
         if (!re[key])
         {
-            try
-            {
-                re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
-            }
-            catch (ex)
-            {
-                // The user likely entered an invalid regular expression or is in the
-                // process of entering a valid one. Treat this as a plain text search
-                re[key] = new FBL.LiteralRegExp(regex, reverse, caseSensitive);
-            }
+            re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
         }
 
         // Modify as needed to all for iterative searches
