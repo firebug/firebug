@@ -37,6 +37,9 @@ Firebug.Breakpoint = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
+        if(!panel)  // there is no selectedPanel?
+            return;
+
         var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
         breakButton.removeAttribute("type");
 
