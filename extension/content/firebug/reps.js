@@ -1079,7 +1079,7 @@ this.SourceLink = domplate(Firebug.Rep,
 
     isSystemLink: function(sourceLink)
     {
-        return sourceLink ? sourceLink.isSystemLink : false;
+        return sourceLink && isSystemURL(sourceLink.href);
     },
 
     hideSourceLink: function(sourceLink)
@@ -1111,7 +1111,7 @@ this.SourceLink = domplate(Firebug.Rep,
 
     getSystemFlagTitle: function(sourceLink)
     {
-        if (sourceLink && sourceLink.isSystemLink)
+        if (this.isSystemLink(sourceLink))
             return $STRF("SystemItem", [""]);
         else
             return "";

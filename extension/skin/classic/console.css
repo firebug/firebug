@@ -170,9 +170,15 @@
     font-weight: bold;
     color: #0000FF;
 }
-.objectLink-sourceLink .systemLink {
+.objectLink-sourceLink > .systemLink {
     float: right;
     color: #FF0000;
+}
+
+.logRow > .objectLink-sourceLink > div,
+.errorSourceBox > .objectLink-sourceLink > div {
+    float: left;
+    padding-left: 5px;
 }
 
 /************************************************************************************************/
