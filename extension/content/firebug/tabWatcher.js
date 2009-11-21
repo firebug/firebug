@@ -762,6 +762,9 @@ var TabWatcherHttpObserver = extend(Object,
                 // we can get all onStateChange events and init context for all opened tabs.
                 var browser = TabWatcher.getBrowserByWindow(win);
 
+                if (!browser)
+                    return;
+
                 delete browser.FirebugLink;
 
                 if (safeGetWindowLocation(win).toString() == "about:blank") // then this page is opened in new tab or window
