@@ -6638,15 +6638,6 @@ this.ReversibleIterator = function(length, start, reverse)
 };
 
 /**
- * @class Searches for text in a given node.
- *
- * @constructor
- * @param {Node} rootNode Node to search
- * @param {Function} rowFinder results filter. On find this method will be called
- *      with the node containing the matched text as the first parameter. This may
- *      be undefined to return the node as is.
- */
-/**
  * @class Implements a RegExp-like object that will search for the literal value
  * of a given string, rather than the regular expression. This allows for
  * iterative literal searches without having to escape user input strings
