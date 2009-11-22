@@ -58,8 +58,20 @@ Firebug.TabContext.prototype =
 
     getName: function()
     {
-        if (!this.name)
-            this.name = normalizeURL(this.getWindowLocation().toString());
+        if (!this.name || this.name === "about:blank")
+        {
+            var url = this.getWindowLocation().toString();
+            if (isDataURL(url))
+            {
+                var props = splitDataURL(url);
+                if (props.fileName)
+                     this.name = "data url from "+props.fileName;
+            }
+            else
+            {
+                this.name = normalizeURL(url);
+            }
+        }
         return this.name;
     },
 
