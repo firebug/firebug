@@ -129,6 +129,21 @@ Firebug.Search = extend(Firebug.Module,
     {
         return !!Firebug.searchCaseSensitive || text.toLowerCase() != text;
     },
+    getTestingRegex: function(text)
+    {
+      var caseSensitive = Firebug.Search.isCaseSensitive(text);
+      try
+      {
+          return new RegExp(text, caseSensitive ? "g" : "gi");
+      }
+      catch (err)
+      {
+          // The user entered an invalid regex. Duck type the regex object
+          // to support literal searches when an invalid regex is entered
+          return new LiteralRegExp(text, false, caseSensitive);
+      }
+    },
+
     searchOptionMenu: function(label, option)
     {
       return { label: label, checked: Firebug[option], option: option,

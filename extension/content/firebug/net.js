@@ -4569,7 +4569,7 @@ var NetPanelSearch = function(panel, rowFinder)
         if (!file)
             return;
 
-        var scanRE = new RegExp(this.text, Firebug.Search.isCaseSensitive(this.text) ? "g" : "gi");
+        var scanRE = Firebug.Search.getTestingRegex(this.text);
         if (scanRE.test(file.responseText))
         {
             if (!hasClass(this.currentRow, "opened"))

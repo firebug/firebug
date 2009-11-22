@@ -6637,6 +6637,73 @@ this.ReversibleIterator = function(length, start, reverse)
     };
 };
 
+/**
+ * @class Searches for text in a given node.
+ *
+ * @constructor
+ * @param {Node} rootNode Node to search
+ * @param {Function} rowFinder results filter. On find this method will be called
+ *      with the node containing the matched text as the first parameter. This may
+ *      be undefined to return the node as is.
+ */
+/**
+ * @class Implements a RegExp-like object that will search for the literal value
+ * of a given string, rather than the regular expression. This allows for
+ * iterative literal searches without having to escape user input strings
+ * to prevent invalid regular expressions from being used.
+ * 
+ * @constructor
+ * @param {String} literal Text to search for
+ * @param {Boolean} reverse Truthy to preform a reverse search, falsy to perform a forward seach
+ * @param {Boolean} caseSensitive Truthy to perform a case sensitive search, falsy to perform a case insensitive search.
+ */
+this.LiteralRegExp = function(literal, reverse, caseSensitive)
+{
+    var searchToken = (!caseSensitive) ? literal.toLowerCase() : literal;
+
+    this.__defineGetter__("global", function() { return true; });
+    this.__defineGetter__("multiline", function() { return true; });
+    this.__defineGetter__("reverse", function() { return reverse; });
+    this.__defineGetter__("ignoreCase", function() { return !caseSensitive; });
+    this.lastIndex = 0;
+
+    this.exec = function(text)
+    {
+        if (!text)
+            return null;
+
+        var searchText = (!caseSensitive) ? text.toLowerCase() : text,
+            startIndex = (reverse ? text.length-1 : 0) + this.lastIndex,
+            index;
+
+        if (0 <= startIndex && startIndex < text.length)
+            index = searchText[reverse ? "lastIndexOf" : "indexOf"](searchToken, startIndex);
+        else
+            index = -1;
+
+        if (index >= 0)
+        {
+            var ret = [ text.substr(index, searchToken.length) ];
+            ret.index = index;
+            ret.input = text;
+            this.lastIndex = index + (reverse ? -1*text.length : searchToken.length);
+            return ret;
+        }
+        else
+            this.lastIndex = 0;
+
+        return null;
+    };
+    this.test = function(text)
+    {
+        if (!text)
+            return false;
+
+        var searchText = (!caseSensitive) ? text.toLowerCase() : text;
+        return searchText.indexOf(searchToken) >= 0;
+    };
+};
+
 this.ReversibleRegExp = function(regex, flags)
 {
     var re = {};
@@ -6654,7 +6721,16 @@ this.ReversibleRegExp = function(regex, flags)
         var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i");
         if (!re[key])
         {
-            re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+            try
+            {
+                re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+            }
+            catch (ex)
+            {
+                // The user likely entered an invalid regular expression or is in the
+                // process of entering a valid one. Treat this as a plain text search
+                re[key] = new FBL.LiteralRegExp(regex, reverse, caseSensitive);
+            }
         }
 
         // Modify as needed to all for iterative searches
@@ -6669,7 +6745,9 @@ this.ReversibleRegExp = function(regex, flags)
             }
         }
 
-        var ret = re[key].exec(searchText);
+        var curRe = re[key];
+        curRe.lastIndex = 0;
+        var ret = curRe.exec(searchText);
         if (ret) {
             ret.input = text;
             ret.index = ret.index + indexOffset;

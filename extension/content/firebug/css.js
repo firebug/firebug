@@ -977,8 +977,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = new RegExp(text, Firebug.Search.isCaseSensitive(text) ? "g" : "gi");
-
+        var scanRE = Firebug.Search.getTestingRegex(text);
         function scanDoc(styleSheet) {
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display

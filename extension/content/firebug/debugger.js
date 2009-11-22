@@ -2590,7 +2590,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = new RegExp(text, Firebug.Search.isCaseSensitive(text) ? "g" : "gi");
+        var scanRE = Firebug.Search.getTestingRegex(text);
 
         var self = this;
 
