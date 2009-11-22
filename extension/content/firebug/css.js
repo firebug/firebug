@@ -1259,6 +1259,25 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             if (this.context.loaded)  // keep forcing until we are loaded
                 this.context.forcedUniqueStyleSheets = true;
 
+            // Due to the manner in which the layout engine handles multiple
+            // references to the same sheet we need to kick it a little bit.
+            // The injecting a simple stylesheet then removing it will force
+            // Firefox to regenerate it's CSS hierarchy.
+            //
+            // WARN: This behavior was determined anecdotally.
+            // See http://code.google.com/p/fbug/issues/detail?id=2440
+            iterateWindows(this.context.window, function(subwin)
+            {
+                var doc = subwin.document;
+                var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+                style.setAttribute("charset","utf-8");
+                style.firebugIgnore = true;
+                style.setAttribute("type", "text/css");
+                style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+                addStyleSheet(doc, style);
+                style.parentNode.removeChild(style);
+            });
+
             var styleSheets = getAllStyleSheets(this.context);
             for(var i = 0; i < styleSheets.length; i++)
             {

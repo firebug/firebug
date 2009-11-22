@@ -1598,6 +1598,7 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
         return 0;
 
     // ownerDocument is an optional hint for performance
+    if (FBTrace.DBG_CSS) FBTrace.sysout("getInstanceForStyleSheet: " + styleSheet.href + " " + styleSheet.media.mediaText + " " + (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
     ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
 
     var ret = 0,
@@ -1606,6 +1607,7 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     for (var i = 0; i < styleSheets.length; i++)
     {
         var curSheet = styleSheets[i];
+        if (FBTrace.DBG_CSS) FBTrace.sysout("getInstanceForStyleSheet: compare href " + i + " " + curSheet.href + " " + curSheet.media.mediaText + " " + (curSheet.ownerNode && FBL.getElementXPath(curSheet.ownerNode)));
         if (curSheet == styleSheet)
             break;
         if (curSheet.href == href)
