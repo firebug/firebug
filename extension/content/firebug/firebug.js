@@ -160,7 +160,7 @@ top.Firebug =
     prefDomain: "extensions.firebug",
     servicePrefDomain: "extensions.firebug.service",
 
-    stringCropLength: 80,
+    stringCropLength: 50,
 
     tabBrowser: tabBrowser,
     originalChrome: FirebugChrome,
@@ -1363,6 +1363,9 @@ top.Firebug =
     getRep: function(object)
     {
         var type = typeof(object);
+        if (type == 'object' && object instanceof String)
+            type = 'string';
+        
         for (var i = 0; i < reps.length; ++i)
         {
             var rep = reps[i];

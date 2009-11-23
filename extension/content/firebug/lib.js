@@ -2027,7 +2027,7 @@ this.unescapeForTextNode = function(str)
 
 this.escapeNewLines = function(value)
 {
-    return value.replace(/\r/g, "\\r").replace(/\n/gm, "\\n");
+    return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n");
 };
 
 this.stripNewLines = function(value)
@@ -2048,9 +2048,8 @@ this.cropString = function(text, limit, alterText)
     text = text + "";
 
     if (!limit)
-        var halfLimit = 50;
-    else
-        var halfLimit = limit / 2;
+        limit = Firebug.stringCropLength;
+    var halfLimit = limit / 2;
 
     if (text.length > limit)
         return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);

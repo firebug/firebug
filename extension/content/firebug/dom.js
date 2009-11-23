@@ -165,14 +165,19 @@ const DirTablePlate = domplate(Firebug.Rep,
 
         var row = getAncestorByClass(event.target, "memberRow");
         var label = getElementByClass(row, "memberLabel");
-        if (label && hasClass(row, "hasChildren"))
+        var valueCell = getElementByClass(row, "memberValueCell");
+        var object = Firebug.getRepObject(event.target);
+        var target = row.lastChild.firstChild;
+        var isString = hasClass(target,"objectBox-string");
+        var inValueCell = event.target == valueCell || event.target == target;
+
+        if (label && hasClass(row, "hasChildren") && !(isString && inValueCell))
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
         }
         else
         {
-            var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
             {
                 Firebug.chrome.select(object, "script");
@@ -200,88 +205,105 @@ const DirTablePlate = domplate(Firebug.Rep,
         var level = parseInt(row.getAttribute("level"));
         var toggles = row.parentNode.parentNode.toggles;
 
+        var panel = row.parentNode.parentNode.domPanel;
+        var target = row.lastChild.firstChild;
+        var isString = hasClass(target,"objectBox-string");
+        
         if (hasClass(row, "opened"))
         {
             removeClass(row, "opened");
 
-            if (toggles)
+            if (isString)
             {
-                var path = getPath(row);
-
-                // Remove the path from the toggle tree
-                for (var i = 0; i < path.length; ++i)
-                {
-                    if (i == path.length-1)
-                        delete toggles[path[i]];
-                    else
-                        toggles = toggles[path[i]];
-                }
+                var rowValue = panel.getRowPropertyValue(row);
+                row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
             }
-
-            var rowTag = this.rowTag;
-            var tbody = row.parentNode;
-
-            setTimeout(function()
+            else
             {
-                for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
+                if (toggles)
                 {
-                    if (parseInt(firstRow.getAttribute("level")) <= level)
-                        break;
+                    var path = getPath(row);
 
-                    tbody.removeChild(firstRow);
+                    // Remove the path from the toggle tree
+                    for (var i = 0; i < path.length; ++i)
+                    {
+                        if (i == path.length-1)
+                            delete toggles[path[i]];
+                        else
+                            toggles = toggles[path[i]];
+                    }
                 }
-            }, row.insertTimeout ? row.insertTimeout : 0);
+                
+                var rowTag = this.rowTag;
+                var tbody = row.parentNode;
+    
+                setTimeout(function()
+                {
+                    for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
+                    {
+                        if (parseInt(firstRow.getAttribute("level")) <= level)
+                            break;
+    
+                        tbody.removeChild(firstRow);
+                    }
+                }, row.insertTimeout ? row.insertTimeout : 0);
+            }
         }
         else
         {
             setClass(row, "opened");
-
-            if (toggles)
+            if (isString)
             {
-                var path = getPath(row);
-
-                // Mark the path in the toggle tree
-                for (var i = 0; i < path.length; ++i)
-                {
-                    var name = path[i];
-                    if (toggles.hasOwnProperty(name))
-                        toggles = toggles[name];
-                    else
-                        toggles = toggles[name] = {};
-                }
+                var rowValue = panel.getRowPropertyValue(row);
+                row.lastChild.firstChild.textContent = '"' + rowValue + '"';
             }
-
-            var panel = row.parentNode.parentNode.domPanel;
-            var context = panel ? panel.context : null;
-
-            var value = row.lastChild.firstChild.repObject;
-            var members = getMembers(value, level+1, context);
-
-            var rowTag = this.rowTag;
-            var lastRow = row;
-
-            var delay = 0;
-            var setSize = members.length;
-            var rowCount = 1;
-            while (members.length)
+            else
             {
-                setTimeout(function(slice, isLast)
+
+                if (toggles)
                 {
-                    if (lastRow.parentNode)
+                    var path = getPath(row);
+
+                    // Mark the path in the toggle tree
+                    for (var i = 0; i < path.length; ++i)
                     {
-                        var result = rowTag.insertRows({members: slice}, lastRow);
-                        lastRow = result[1];
-                        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
-                        rowCount += insertSliceSize;
+                        var name = path[i];
+                        if (toggles.hasOwnProperty(name))
+                            toggles = toggles[name];
+                        else
+                            toggles = toggles[name] = {};
                     }
-                    if (isLast)
-                        delete row.insertTimeout;
-                }, delay, members.splice(0, insertSliceSize), !members.length);
+                }
 
-                delay += insertInterval;
+                var context = panel ? panel.context : null;
+                var members = getMembers(target.repObject, level+1, context);
+    
+                var rowTag = this.rowTag;
+                var lastRow = row;
+    
+                var delay = 0;
+                var setSize = members.length;
+                var rowCount = 1;
+                while (members.length)
+                {
+                    setTimeout(function(slice, isLast)
+                    {
+                        if (lastRow.parentNode)
+                        {
+                            var result = rowTag.insertRows({members: slice}, lastRow);
+                            lastRow = result[1];
+                            dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                            rowCount += insertSliceSize;
+                        }
+                        if (isLast)
+                            delete row.insertTimeout;
+                    }, delay, members.splice(0, insertSliceSize), !members.length);
+    
+                    delay += insertInterval;
+                }
+    
+                row.insertTimeout = delay;
             }
-
-            row.insertTimeout = delay;
         }
     },
 
@@ -830,7 +852,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         else if (object instanceof SourceLink)
             return 0;
         else
-            return 1; // just agree to support everything but not agressively.
+            return 1; // just agree to support everything but not aggressively.
     },
 
     refresh: function()
@@ -1634,7 +1656,8 @@ function expandMembers(members, toggles, offset, level, context)  // recursion s
         if ( toggles.hasOwnProperty(member.name) )
         {
             member.open = "opened";  // member.level <= level && member.name in toggles.
-
+            if (member.type == 'string')
+                continue;
             var newMembers = getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
 
             var args = [i+1, 0];
@@ -1647,7 +1670,7 @@ function expandMembers(members, toggles, offset, level, context)  // recursion s
                 FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
                 FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
             }
-
+            
             expanded += newMembers.length;
             i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1, context);
         }
