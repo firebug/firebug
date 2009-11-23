@@ -2329,6 +2329,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     insertHeaderRows: function(netInfoBox, headers, tableName, rowName)
     {
+        if (!headers.length)
+            return;
+
         var headersTable = getElementByClass(netInfoBox, "netInfo"+tableName+"Table");
         var tbody = getChildByClass(headersTable, "netInfo" + rowName + "Body");
         if (!tbody)
