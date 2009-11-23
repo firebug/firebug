@@ -604,8 +604,6 @@ function onHTTPSpyReadyStateChange(spy, event)
     // XHR would be aborted in the original onReadyStateChange handler.
     if (spy.xhrRequest.readyState == 4)
     {
-        spy.detach();
-
         // Cumulate response so, multipart response content is properly displayed.
         spy.responseText += spy.xhrRequest.responseText;
 
@@ -633,6 +631,10 @@ function onHTTPSpyLoad(spy)
 {
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.onHTTPSpyLoad: " + spy.href, spy);
+
+    // Detach must be done in onLoad (not in onreadystatechange) otherwise
+    // onAbort would not be handled.
+    spy.detach();
 
     // xxxHonza: Still needed for Fx 3.5 (#502959)
     if (!SpyHttpActivityObserver.getActivityDistributor())
