@@ -221,7 +221,7 @@ Firebug.Activation = extend(Firebug.Module,
 
     unwatchBrowser: function(browser, userCommands)  // Firebug closes in browser
     {
-    	var uri = browser.currentURI.spec;
+        var uri = browser.currentURI.spec;
         if (userCommands)  // then mark to not open virally.
             this.setPageAnnotation(uri, "firebugged.closed");
         else
