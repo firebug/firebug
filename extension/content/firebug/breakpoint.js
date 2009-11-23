@@ -844,9 +844,10 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
             if (msg)
             {
                 var self = this;
+                var delta = Math.max(20,Math.floor(self.box.clientWidth/15));
                 var interval = setInterval(function slide(event)
                 {
-                    if (self.box.clientWidth < 20)
+                    if (self.box.clientWidth < delta)
                     {
                         clearNode(guts);
 
@@ -858,8 +859,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                         delete self.panel;
                     }
                     else
-                        self.box.style.width = (self.box.clientWidth - 20)+"px";
-                }, 2);
+                        self.box.style.width = (self.box.clientWidth - delta)+"px";
+                }, 20);
             }
             else
             {
