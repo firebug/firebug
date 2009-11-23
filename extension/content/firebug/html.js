@@ -165,58 +165,51 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         Firebug.HTMLModule.deleteAttribute(elt, attrName, this.context);
     },
     
+    localEditors:{}, // instantiated editor cache
     editNode: function(node)
     {
-        if (isElementSVG(node))
-            this.editSVGNode(node);
-        if (isElementMathML(node))
-            this.editMathMLNode(node);
-        else
-            this.editHTMLNode(node);
-    },
-
-    editSVGNode: function(node)
-    {
         var objectNodeBox = this.ioBox.findObjectBox(node);
         if (objectNodeBox)
         {
-            if (!this.svgEditor)
-                this.svgEditor = new Firebug.HTMLPanel.Editors.SVG(this.document);
-
-            var xml = getElementXML(node);
-            Firebug.Editor.startEditing(objectNodeBox, xml, this.svgEditor);
+            var type = getElementType(node);
+            var editor = this.localEditors[type];
+            if (!editor)
+            {
+             // look for special purpose editor (inserted by an extension), otherwise use our html editor
+                var specializedEditor = Firebug.HTMLPanel.Editors[type] || Firebug.HTMLPanel.Editors['html'];
+                editor = this.localEditors[type] = new specializedEditor(this.document);
+            }
+            this.startEditingNode(node, objectNodeBox, editor, type);
         }
     },
 
-    editMathMLNode: function(node)
+    startEditingNode: function(node, box, editor, type)
     {
-        var objectNodeBox = this.ioBox.findObjectBox(node);
-        if (objectNodeBox)
+        switch (type)
         {
-            if (!this.mathmlEditor)
-                this.mathmlEditor = new Firebug.HTMLPanel.Editors.MathML(this.document);
-
-            var xml = getElementXML(node);
-            Firebug.Editor.startEditing(objectNodeBox, xml, this.mathmlEditor);
+            case 'html':
+            case 'xhtml':
+                this.startEditingHTMLNode(node, box, editor);
+                break;
+            default:
+                this.startEditingXMLNode(node, box, editor);
         }
     },
 
-    editHTMLNode: function(node)
+    startEditingXMLNode: function(node, box, editor)
+    {
+        var xml = getElementXML(node);
+        Firebug.Editor.startEditing(box, xml, editor);
+    },
+
+    startEditingHTMLNode: function(node, box, editor)
     {
         if ( nonEditableTags.hasOwnProperty(node.localName) )
             return;
+        editor.innerEditMode = node.localName in innerEditableTags;
 
-        var objectNodeBox = this.ioBox.findObjectBox(node);
-        if (objectNodeBox)
-        {
-            if (!this.htmlEditor)
-                this.htmlEditor = new Firebug.HTMLPanel.Editors.HTML(this.document);
-
-            this.htmlEditor.innerEditMode = node.localName in innerEditableTags;
-
-            var html = this.htmlEditor.innerEditMode ? node.innerHTML : getElementHTML(node);
-            Firebug.Editor.startEditing(objectNodeBox, html, this.htmlEditor);
-        }
+        var html = editor.innerEditMode ? node.innerHTML : getElementHTML(node);
+        Firebug.Editor.startEditing(box, html, editor);
     },
 
     deleteNode: function(node)
@@ -1695,9 +1688,7 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 // Editors
 
 Firebug.HTMLPanel.Editors = {
-    HTML : HTMLEditor,
-    MathML : HTMLEditor,
-    SVG: HTMLEditor,
+    html : HTMLEditor,
     Attribute : AttributeEditor,
     TextNode: TextNodeEditor
 };

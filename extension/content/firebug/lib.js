@@ -477,7 +477,7 @@ this.internationalize = function(element, attr, args)
 
 this.isVisible = function(elt)
 {
-    if (elt instanceof XULElement)
+    if (isElementXUL(elt))
     {
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
         return (!elt.hidden && !elt.collapsed);
@@ -1619,6 +1619,21 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 // ************************************************************************************************
 // HTML and XML Serialization
 
+
+var getElementType = this.getElementType = function(node)
+{
+    if (isElementXUL(node))
+        return 'xul';
+    else if (isElementSVG(node))
+        return 'svg';
+    else if (isElementMathML(node))
+        return 'mathml';
+    else if (isElementXHTML(node))
+        return 'xhtml';
+    else if (isElementHTML(node))
+        return 'html';
+}
+
 var isElementHTML = this.isElementHTML = function(node)
 {
     return node.nodeName == node.nodeName.toUpperCase();
@@ -1637,6 +1652,11 @@ var isElementMathML = this.isElementMathML = function(node)
 var isElementSVG = this.isElementSVG = function(node)
 {
     return node.namespaceURI == 'http://www.w3.org/2000/svg';
+}
+
+var isElementXUL = this.isElementXUL = function(node)
+{
+    return node instanceof XULElement;
 }
 
 this.isSelfClosing = function(element)
@@ -2043,15 +2063,16 @@ this.escapeJS = function(value)
 this.cropString = function(text, limit, alterText)
 {
     if (!alterText)
-        alterText = "...";
+        alterText = "..."; //…
 
     text = text + "";
 
     if (!limit)
         limit = Firebug.stringCropLength;
-    var halfLimit = limit / 2;
-
-    if (text.length > limit)
+    var halfLimit = (limit / 2);
+    halfLimit -= 2; // adjustment for alterText's increase in size
+    
+    if (text.length > limit) 
         return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
     else
         return text;
