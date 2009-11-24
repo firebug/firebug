@@ -4144,10 +4144,10 @@ var NetHttpObserver =
             win == win.parent && !isRedirect)
         {
             var browser = getBrowserForWindow(win);
-            if (!Firebug.Activation.shouldCreateContext(browser, name, null))
+            if (!TabWatcher.shouldCreateContext(browser, name, null))
             {
                 if (FBTrace.DBG_NET)
-                    FBTrace.sysout("net.onModifyRequest; Activation module says don't create temp context.");
+                    FBTrace.sysout("net.onModifyRequest; Activation logic says don't create temp context.");
                 return;
             }
 
