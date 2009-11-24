@@ -1378,7 +1378,7 @@ Firebug.TraceModule.TraceMessage.prototype =
             }
             catch (exc)
             {
-                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS with "+exc+"\n");
+                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS after "+propsTotal+ " with "+exc+"\n");
                 window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS on object "+safeToString(this.obj)+"\n");
             }
         }
