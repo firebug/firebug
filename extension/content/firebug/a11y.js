@@ -1414,7 +1414,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 var propRow = getAncestorByClass(matchRow, 'cssProp');
                 if (propRow)
-                    matchFeedback = $STRF('a11y.updates.match found in style property', [text, propRow.textContent, selector]);
+                    matchFeedback = $STRF('a11y.updates.match found in style declaration', [text, propRow.textContent, selector]);
             }
         }
         this.updateLiveElem(panel, matchFeedback, true); // should not use alert
