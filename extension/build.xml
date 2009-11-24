@@ -235,20 +235,22 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
 
     <!-- Support for generating docs from Firebug source code using js-doc-toolkit
         See the output in $svn/jsdoc/out directory -->
-    <property name="jsdoc.dir" value="../../jsdoc/"/>
-    <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
-    <property name="jsdoc-output.dir" value="${jsdoc.dir}/out/"/>
+    <target name="jsdoc" depends="properties-local, no-properties-local"
+        description="Generate documentation">
 
-    <path id="jsdoctoolkit">
-        <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
-        <fileset dir="${jsdoc.dir}" includes="*.jar"/>
-    </path>
+        <property name="jsdoc.dir" value="../../jsdoc/"/>
+        <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
+        <property name="jsdoc-output.dir" value="${jsdoc.dir}/out/"/>
 
-    <taskdef name="jsdoctoolkit"
-        classpathref="jsdoctoolkit"
-        classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+        <path id="jsdoctoolkit">
+            <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
+            <fileset dir="${jsdoc.dir}" includes="*.jar"/>
+        </path>
 
-    <target name="jsdoc">
+        <taskdef name="jsdoctoolkit"
+            classpathref="jsdoctoolkit"
+            classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+
         <echo message="Generate doc from Firebug source ($svn/jsdoc/out/)."/>
 
         <!-- Clean the output direcotory -->
