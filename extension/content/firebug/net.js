@@ -3126,6 +3126,33 @@ NetProgress.prototype =
         return file;
     },
 
+    closedFile: function closedFile(request, time)
+    {
+        var file = this.getRequestFile(request, null, true);
+        if (file)
+        {
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.closedFile +" + time + " " +
+                    getPrintableTime() + ", " + request.URI.path, file);
+
+            // If the response never came, stop the loading and set time info.
+            // In this case the request is marked with "Timeout" and the
+            // respondedTime is set to the time when ACTIVITY_SUBTYPE_TRANSACTION_CLOSE
+            // is received (after timeout).
+            if (!file.loaded)
+            {
+                this.endLoad(file);
+
+                file.aborted = true;
+                file.responseStatusText = "Timeout";
+                file.respondedTime = time;
+                file.endTime = time;
+            }
+        }
+
+        return file;
+    },
+
     resolvingFile: function resolvingFile(request, time)
     {
         var file = this.getRequestFile(request, null, true);
@@ -3145,8 +3172,6 @@ NetProgress.prototype =
             file.size = progress;
             file.expectedSize = expectedSize;
             file.endTime = time;
-
-            //this.endLoad(file);
         }
 
         return file;
@@ -3426,6 +3451,7 @@ var waitingForFile = NetProgress.prototype.waitingForFile;
 var sendingFile = NetProgress.prototype.sendingFile;
 var receivingFile = NetProgress.prototype.receivingFile;
 var completeFile = NetProgress.prototype.completeFile;
+var closedFile = NetProgress.prototype.closedFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
 var windowLoad = NetProgress.prototype.windowLoad;
@@ -4337,6 +4363,8 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 extraStringData);
         }
 
+        time = time.getTime();
+
         if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
         {
             if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
@@ -4348,10 +4376,10 @@ Firebug.NetMonitor.NetHttpActivityObserver =
             {
                 var index = activeRequests.indexOf(httpChannel);
                 activeRequests.splice(index, 2);
+
+                networkContext.post(closedFile, [httpChannel, time]);
             }
         }
-
-        time = time.getTime();
 
         if (activityType == nsIHttpActivityObserver.ACTIVITY_TYPE_HTTP_TRANSACTION)
         {
