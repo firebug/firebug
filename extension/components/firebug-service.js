@@ -1242,6 +1242,7 @@ FirebugService.prototype =
                 fbs._lastErrorScript = frame.script;
                 fbs._lastErrorLine = frame.line;
                 fbs._lastErrorDebuggr = debuggr;
+                delete debuggr.breakContext; // XXXjjb this is bad API
             }
             else
                 delete fbs._lastErrorDebuggr;
