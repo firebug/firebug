@@ -5,6 +5,16 @@ Added template and version numbers, johnjbarton@johnjbarton.com
 Added support for js-doc-tolkit, odvarko@gmail.com -->
 <project name="firebug" default="createBranchXPI">
 
+    <condition property="isWindows">
+        <os family="windows" />
+    </condition>
+    
+    <condition property="isUnix">
+        <os family="unix" />
+    </condition>
+
+    <property environment="env"/>
+
     <!-- Setting properties -->
     <target name="local-check">
         <available file="${basedir}/local.properties"
@@ -18,11 +28,25 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
         <property file="local.properties"/>
     </target>
 
+    <target name="properties-default-win" if="isWindows">
+        <input
+            message="Please enter Profile folder name:"
+            addproperty="profilefolder"
+        />
+        <property name="install.dir" value="${env.APPDATA}\Mozilla\Firefox\Profiles\${profilefolder}"/>
+    </target>
+
+    <target name="properties-default-unix" if="isUnix">
+        <input
+            message="Please enter Profile folder name:"
+            addproperty="profilefolder"
+        />
+        <property name="install.dir" value="OS Specific Path to:/Mozilla/Firefox/Profiles/${profilefolder}"/>
+    </target>
+
     <target name="no-properties-local"
             unless="local.properties.available"
-            depends="local-check">
-        <echo message="No local properties file, setting defaults"/>
-        <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
+            depends="local-check,properties-default-win,properties-default-unix">
         <property name="update.path" value="http://getfirebug.com/releases"/>
     </target>
 
