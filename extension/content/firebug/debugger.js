@@ -393,8 +393,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
         else
         {
-            fbs.enumerateBreakpoints(null, {call: function(url, lineNo) // null means all urls
+            fbs.enumerateBreakpoints(null, {call: function(url, lineNo, bp) // null means all urls
             {
+                if (bp.debugger !== this) // skip breakpoints of other debuggers.
+                    return;
+
                 if (Firebug.filterSystemURLs) // then there are not system urls, clear all
                     fbs.clearBreakpoint(url, lineNo);
                 else
