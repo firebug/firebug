@@ -2865,8 +2865,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, win);
         if (file)
         {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.requestedFile +0 " + getPrintableTime() + ", " +
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.requestedFile +0 " + getPrintableTime() + ", " +
                     request.URI.path, file);
 
             // For cached image files, we may never hear another peep from any observers
@@ -2986,8 +2986,8 @@ NetProgress.prototype =
             if (file.fromCache)
                 getCacheEntry(file, this);
 
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.respondedFile +" + (now() - file.startTime) + " " +
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.respondedFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
 
             // If there is a networ error log it into the Console panel.
@@ -3009,8 +3009,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.respondedCacheFile; " + safeGetName(request));
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.respondedCacheFile; " + safeGetName(request));
 
             this.panel.removeLogEntry(file, true);
         }
@@ -3049,8 +3049,8 @@ NetProgress.prototype =
                 file.sendStarted = true;
             }
 
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.sendingFile +" + (now() - file.startTime) + " " +
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.sendingFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
         }
 
@@ -3088,8 +3088,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.receivingFile +" + time + " " +
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.receivingFile +" + time + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
             file.endTime = time;
@@ -3114,8 +3114,8 @@ NetProgress.prototype =
         var file = this.getRequestFile(request, null, true);
         if (file)
         {
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.completeFile +" + time + " " +
+            if (FBTrace.DBG_NET_EVENTS)
+                FBTrace.sysout("net.events.completeFile +" + time + " " +
                     getPrintableTime() + ", " + request.URI.path, file);
 
             if (responseSize > 0)
@@ -3296,8 +3296,8 @@ NetProgress.prototype =
 
     endLoad: function(file)
     {
-        if (FBTrace.DBG_NET)
-            FBTrace.sysout("net.endLoad +" + (now() - file.startTime) + " " +
+        if (FBTrace.DBG_NET_EVENTS)
+            FBTrace.sysout("net.events.endLoad +" + (now() - file.startTime) + " " +
                 getPrintableTime() + ", " + file.request.URI.path, file);
 
         // Set file as loaded.
@@ -4019,9 +4019,9 @@ Firebug.NetMonitor.Utils =
                 file.mimeType = mimeExtensionMap[ext.toLowerCase()];
         }
 
-        if (FBTrace.DBG_NET)
+        /*if (FBTrace.DBG_NET)
             FBTrace.sysout("net.getFileCategory; " + mimeCategoryMap[file.mimeType] +
-                ", mimeType: " + file.mimeType + " for: " + file.href, file);
+                ", mimeType: " + file.mimeType + " for: " + file.href, file);*/
 
         if (!file.mimeType)
             return "";
@@ -4090,9 +4090,9 @@ var NetHttpObserver =
     {
         try
         {
-            if (FBTrace.DBG_NET)
+            if (FBTrace.DBG_NET_EVENTS)
             {
-                FBTrace.sysout("net.observe " + (topic ? topic.toUpperCase() : topic) +
+                FBTrace.sysout("net.events.observe " + (topic ? topic.toUpperCase() : topic) +
                     ", " + ((subject instanceof Ci.nsIRequest) ? safeGetName(subject) : "") +
                     ", Browser: " + Firebug.chrome.window.document.title);
             }
