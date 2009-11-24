@@ -45,7 +45,7 @@ AnnotationService.prototype =
     setPageAnnotation: function(uri, value)
     {
         if (FBTrace.DBG_ANNOTATIONS)
-            FBTrace.sysout("AnnotationService.setPageAnnotation; " + value + ", " + uri);
+            FBTrace.sysout("AnnotationService.setPageAnnotation; " + value + ", " + uri.spec);
 
         this.annotations[uri.spec] = value;
     },
@@ -63,7 +63,7 @@ AnnotationService.prototype =
     removePageAnnotation: function(uri)
     {
         if (FBTrace.DBG_ANNOTATIONS)
-            FBTrace.sysout("AnnotationService.removePageAnnotation; " + uri);
+            FBTrace.sysout("AnnotationService.removePageAnnotation; " + uri.spec);
 
         delete this.annotations[uri.spec];
     },
