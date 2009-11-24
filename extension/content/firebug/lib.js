@@ -3647,7 +3647,7 @@ this.parseURLParams = function(url)
     return this.parseURLEncodedText(search);
 };
 
-this.parseURLEncodedText = function(text)
+this.parseURLEncodedText = function(text, noLimit)
 {
     const maxValueLength = 25000;
 
@@ -3680,7 +3680,7 @@ this.parseURLEncodedText = function(text)
                 var paramName = args[i].substring(0, index);
                 var paramValue = args[i].substring(index + 1);
 
-                if (paramValue.length > maxValueLength)
+                if (paramValue.length > maxValueLength && !noLimit)
                     paramValue = this.$STR("LargeData");
 
                 params.push({name: decodeText(paramName), value: decodeText(paramValue)});
@@ -3706,10 +3706,10 @@ this.parseURLEncodedText = function(text)
     return params;
 };
 
-this.reEncodeURL = function(file, text)
+this.reEncodeURL = function(file, text, noLimit)
 {
     var lines = text.split("\n");
-    var params = this.parseURLEncodedText(lines[lines.length-1]);
+    var params = this.parseURLEncodedText(lines[lines.length-1], noLimit);
 
     var args = [];
     for (var i = 0; i < params.length; ++i)

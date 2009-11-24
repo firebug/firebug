@@ -652,8 +652,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     // Context menu commands
     copyParams: function(file)
     {
-        var text = Utils.getPostText(file, this.context);
-        var url = reEncodeURL(file, text);
+        var text = Utils.getPostText(file, this.context, true);
+        var url = reEncodeURL(file, text, true);
         copyToClipboard(url);
     },
 
@@ -2416,7 +2416,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
     render: function(context, parentNode, file)
     {
-        var text = Utils.getPostText(file, context);
+        var text = Utils.getPostText(file, context, true);
         if (text == undefined)
             return;
 
@@ -2435,7 +2435,8 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
                 this.insertParts(parentNode, data);
         }
 
-        var postText = Utils.formatPostText(text);
+        var postText = Utils.getPostText(file, context);
+        postText = Utils.formatPostText(postText);
         if (postText)
             this.insertSource(parentNode, postText);
     },
@@ -3859,24 +3860,24 @@ Firebug.NetMonitor.Utils =
             return text;
     },
 
-    getPostText: function(file, context)
+    getPostText: function(file, context, noLimit)
     {
-        if (file.postText)
-            return file.postText;
+        if (!file.postText)
+        {
+            file.postText = readPostTextFromRequest(file.request, context);
 
-        file.postText = readPostTextFromRequest(file.request, context);
-
-        if (!file.postText && context)
-            file.postText = readPostTextFromPage(file.href, context);
+            if (!file.postText && context)
+                file.postText = readPostTextFromPage(file.href, context);
+        }
 
         if (!file.postText)
             return file.postText;
 
         var limit = Firebug.netDisplayedPostBodyLimit;
-        if (file.postText.length > limit)
+        if (file.postText.length > limit && !noLimit)
         {
-            file.postText = cropString(file.postText, limit,
-                "\n\n" + $STR("net.postDataSizeLimitMessage") + "\n\n");
+            return cropString(file.postText, limit,
+                "\n\n... " + $STR("net.postDataSizeLimitMessage") + " ...\n\n");
         }
 
         return file.postText;

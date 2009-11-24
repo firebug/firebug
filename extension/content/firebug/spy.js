@@ -825,7 +825,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
         if (!text)
             return;
 
-        var url = reEncodeURL(spy, text);
+        var url = reEncodeURL(spy, text, true);
         copyToClipboard(url);
     },
 
