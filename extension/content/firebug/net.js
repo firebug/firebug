@@ -3139,7 +3139,8 @@ NetProgress.prototype =
             // In this case the request is marked with "Timeout" and the
             // respondedTime is set to the time when ACTIVITY_SUBTYPE_TRANSACTION_CLOSE
             // is received (after timeout).
-            if (!file.loaded)
+            // If respondedTime and starteTime are equal the response didn't come.
+            if (!file.loaded && file.respondedTime == file.startTime)
             {
                 this.endLoad(file);
 
