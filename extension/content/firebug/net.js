@@ -4295,7 +4295,7 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         }
         catch (exc)
         {
-            FBTrace.sysout("net.observeActivity: EXCEPTION ", exc);
+            FBTrace.sysout("net.observeActivity: EXCEPTION "+exc, exc);
         }
     },
 
