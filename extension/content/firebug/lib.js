@@ -6813,11 +6813,11 @@ this.unwrapObject = function(object)
 
 this.unwrapIValue = function(object)
 {
+
     var unwrapped = object.getWrappedValue();
     try
     {
-        if (unwrapped)
-            return XPCSafeJSObjectWrapper(unwrapped);  // this should be the only call to getWrappedValue in firebug
+        return XPCSafeJSObjectWrapper(unwrapped);  // this should be the only call to getWrappedValue in firebug
     }
     catch (exc)
     {
