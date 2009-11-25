@@ -222,6 +222,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> rushShowContext: Do not show context as it's not the active tab: " +
                     context.browser.currentURI.spec + "\n");
+            return;
         }
 
         this.watchContext(win, context);  // calls showContext
