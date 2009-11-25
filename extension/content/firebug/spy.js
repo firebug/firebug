@@ -524,6 +524,10 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         this.xhrRequest.addEventListener("load", this.onLoad, false);
         this.xhrRequest.addEventListener("error", this.onError, false);
         this.xhrRequest.addEventListener("abort", this.onAbort, false);
+
+        // xxxHonza: should be removed from FB 3.6
+        if (!SpyHttpActivityObserver.getActivityDistributor())
+            this.context.sourceCache.addListener(this);
     },
 
     detach: function()
@@ -562,11 +566,25 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         this.onLoad = null;
         this.onError = null;
         this.onAbort = null;
+
+        // xxxHonza: shouuld be removed from FB 1.6
+        if (!SpyHttpActivityObserver.getActivityDistributor())
+            this.context.sourceCache.removeListener(this);
     },
 
     getURL: function()
     {
         return this.xhrRequest.channel ? this.xhrRequest.channel.name : this.href;
+    },
+
+    // Cache listener
+    onStopRequest: function(context, request, responseText)
+    {
+        if (!responseText)
+            return;
+
+        if (request == this.request)
+            this.responseText = responseText;
     },
 };
 
@@ -605,7 +623,14 @@ function onHTTPSpyReadyStateChange(spy, event)
     if (spy.xhrRequest.readyState == 4)
     {
         // Cumulate response so, multipart response content is properly displayed.
-        spy.responseText += spy.xhrRequest.responseText;
+        if (SpyHttpActivityObserver.getActivityDistributor())
+            spy.responseText += spy.xhrRequest.responseText;
+        else
+        {
+            // xxxHonza: remove from FB 1.6
+            if (!spy.responseText)
+                spy.responseText = spy.xhrRequest.responseText;
+        }
 
         // The XHR is loaded now (used also by the activity observer).
         spy.loaded = true;
