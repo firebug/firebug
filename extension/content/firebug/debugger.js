@@ -914,7 +914,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var isCatch = this.isCatchFromPreviousThrow(frame, context);
             if (!isCatch)
             {
-                context.thrownStackTrace = getStackTrace(frame, context);
+                context.thrownStackTrace = getCorrectedStackTrace(frame, context);
                 if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onThrow reset context.thrownStackTrace", context.thrownStackTrace.frames);
             }
             else
@@ -992,7 +992,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try
         {
-            Firebug.errorStackTrace = getStackTrace(frame, context);
+            Firebug.errorStackTrace = getCorrectedStackTrace(frame, context);
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError: "+error.errorMessage+" in "+(context?context.getName():"no context"), error);
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace);
 
@@ -1013,7 +1013,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         catch (exc)
         {
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("debugger.onError getStackTrace FAILED:", exc);
+                FBTrace.sysout("debugger.onError getCorrectedStackTrace FAILED:", exc);
         }
 
         var hookReturn = dispatch2(this.fbListeners,"onError",[context, frame, error]);
@@ -1057,7 +1057,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             var sourceFile = this.getEvalLevelSourceFile(frame, context, innerScripts);
 
             if (FBTrace.DBG_EVAL)
-                FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href, FBL.getStackTrace(frame, context));
+                FBTrace.sysout("debugger.onEvalScriptCreated url="+sourceFile.href, FBL.getCorrectedStackTrace(frame, context));
 
             dispatch(this.fbListeners,"onEvalScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
@@ -1310,7 +1310,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_EVAL)
             {
                 FBTrace.sysout("debugger.onFunctionConstructor tag="+ctor_script.tag+" url="+sourceFile.href+"\n");
-                FBTrace.sysout( traceToString(FBL.getStackTrace(frame, context))+"\n" );
+                FBTrace.sysout( traceToString(FBL.getCorrectedStackTrace(frame, context))+"\n" );
             }
 
             dispatch(this.fbListeners,"onFunctionConstructor",[context, frame, ctor_script, sourceFile.href]);

@@ -2071,8 +2071,8 @@ this.cropString = function(text, limit, alterText)
         limit = Firebug.stringCropLength;
     var halfLimit = (limit / 2);
     halfLimit -= 2; // adjustment for alterText's increase in size
-    
-    if (text.length > limit) 
+
+    if (text.length > limit)
         return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
     else
         return text;
@@ -2264,7 +2264,7 @@ this.getCurrentStackTrace = function(context)
     Firebug.Debugger.halt(function(frame)
     {
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
-        trace = FBL.getStackTrace(frame, context);
+        trace = FBL.getCorrectedStackTrace(frame, context);
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace);
     });
 
@@ -2285,7 +2285,10 @@ this.getCurrentJSDStackDump = function()
     return trace;
 };
 
-this.getStackTrace = function(frame, context)
+
+this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
+
+this.getCorrectedStackTrace = function(frame, context)
 {
     var trace = new this.StackTrace();
 
@@ -2300,7 +2303,7 @@ this.getStackTrace = function(frame, context)
         else
         {
             if (FBTrace.DBG_STACK)
-                FBTrace.sysout("lib.getStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
+                FBTrace.sysout("lib.getCorrectedStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
         }
     }
 
@@ -2351,7 +2354,7 @@ this.getStackFrame = function(frame, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_STACK) FBTrace.sysout("getStackTrace fails:", exc);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("getCorrectedStackTrace fails:", exc);
         return null;
     }
 };
@@ -4226,8 +4229,33 @@ this.ErrorMessage.prototype =
     getSourceLine: function()
     {
         return this.context.sourceCache.getLine(this.href, this.lineNo);
-    }
+    },
+
+    resetSource: function()
+    {
+        if (this.href && this.lineNo)
+            this.source = this.getSourceLine();
+    },
+
+    correctWithStackTrace: function(trace)
+    {
+        var frame = trace.frames[0];
+        if (frame)
+        {
+            this.href = frame.href;
+            this.lineNo = frame.line;
+            this.trace = trace;
+        }
+    },
+
+    correctSourcePoint: function(sourceName, lineNumber)
+    {
+        this.href = sourceName;
+        this.lineNo = lineNumber;
+    },
 };
+
+
 
 // ************************************************************************************************
 
@@ -4505,7 +4533,7 @@ this.StackFrame = function(context, fn, script, href, lineNo, args, pc)
     this.fn = fn;
     this.script = script;
     this.href = href;
-    this.lineNo = lineNo;
+    this.line = lineNo;
     this.args = args;
     this.flags = (script?script.flags:null);
     this.pc = pc;
@@ -4518,7 +4546,7 @@ this.StackFrame.prototype =
         // XXXjjb analyze args and fn?
         if (this.script)
             return "("+this.flags+")"+this.href+":"+this.script.baseLineNumber+"-"
-                  +(this.script.baseLineNumber+this.script.lineExtent)+"@"+this.lineNo;
+                  +(this.script.baseLineNumber+this.script.lineExtent)+"@"+this.line;
         else
             return this.href;
     },
@@ -6664,7 +6692,7 @@ this.ReversibleIterator = function(length, start, reverse)
  * of a given string, rather than the regular expression. This allows for
  * iterative literal searches without having to escape user input strings
  * to prevent invalid regular expressions from being used.
- * 
+ *
  * @constructor
  * @param {String} literal Text to search for
  * @param {Boolean} reverse Truthy to preform a reverse search, falsy to perform a forward seach

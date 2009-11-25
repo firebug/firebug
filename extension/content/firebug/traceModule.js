@@ -1153,13 +1153,11 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
         var trace = Firebug.errorStackTrace;
         if (trace)
         {
-            if (Firebug.Errors.correctLineNumbersWithStack(trace, obj))
+            for (var i=0; i<trace.frames.length; i++)
             {
-                for (var i=0; i<trace.frames.length; i++) {
-                    var frame = trace.frames[i];
-                    if (frame.href && frame.lineNo)
-                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo, funcName:""});
-                }
+                var frame = trace.frames[i];
+                if (frame.href && frame.line)
+                    this.stack.push({fileName:frame.href, lineNumber:frame.line, funcName:""});
             }
         }
         else
@@ -1380,6 +1378,8 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS after "+propsTotal+ " with "+exc+"\n");
                 window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS on object "+safeToString(this.obj)+"\n");
+                if (this.obj instanceof Window)
+                    window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS window closed:"+this.obj.closed+"\n");
             }
         }
 

@@ -697,16 +697,16 @@ this.Element = domplate(Firebug.Rep,
          {
              text=cropString(text,50);
          }
-         
+
          var escapeGroups=[];
-         
+
          if (Firebug.showTextNodesWithWhitespace)
              escapeGroups.push({
                 'group': 'whitespace',
                 'class': 'nodeWhiteSpace',
                 'extra': {
                     '\t': '_Tab',
-					'\n': '_Para',
+                    '\n': '_Para',
                     ' ' : '_Space'
                 }
              });
@@ -716,7 +716,7 @@ this.Element = domplate(Firebug.Rep,
                  'class':'nodeTextEntity',
                  'extra':{}
              });
-                  
+
          if (escapeGroups.length)
              return escapeGroupsForEntities(text, escapeGroups);
          else
@@ -800,11 +800,11 @@ this.Element = domplate(Firebug.Rep,
             CopyElement = "CopySVG";
         if (isElementMathML(elt))
             CopyElement = "CopyMathML";
-        
+
         var items=[{label: CopyElement, command: bindFixed(this.copyHTML, this, elt)}];
         if (!isElementSVG(elt) && !isElementMathML(elt))
             items.push({label: "CopyInnerHTML", command: bindFixed(this.copyInnerHTML, this, elt) });
-        
+
         return items.concat([
             {label: "CopyXPath", command: bindFixed(this.copyXPath, this, elt) },
             "-",
@@ -1259,7 +1259,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
     getSourceLinkTitle: function(frame)
     {
         var fileName = cropString(getFileName(frame.href), 17);
-        return $STRF("Line", [fileName, frame.lineNo]);
+        return $STRF("Line", [fileName, frame.line]);
     },
 
     argIterator: function(frame)
@@ -1314,12 +1314,12 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     getTooltip: function(stackFrame, context)
     {
-        return $STRF("Line", [stackFrame.href, stackFrame.lineNo]);
+        return $STRF("Line", [stackFrame.href, stackFrame.line]);
     },
 
     getSourceLink: function(stackFrame)
     {
-        var sourceLink = new SourceLink(stackFrame.href, stackFrame.lineNo, "js");
+        var sourceLink = new SourceLink(stackFrame.href, stackFrame.line, "js");
         return sourceLink;
     },
 });

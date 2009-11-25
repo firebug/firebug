@@ -218,15 +218,17 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
 
+        var error = new ErrorMessage(object.errorMessage, object.sourceName,
+                object.lineNumber, object.sourceLine, category, context, null, msgId);  // the sourceLine will cause the source to be loaded.
+
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
-            var trace = Firebug.errorStackTrace;
-            trace = this.correctLineNumbersWithStack(trace, object) ? trace : null;
+            error.correctWithStackTrace(Firebug.errorStackTrace);
         }
         else if (checkForUncaughtException(context, object))
         {
             context = getExceptionContext(context);
-            object = correctLineNumbersOnExceptions(context, object);
+            correctLineNumbersOnExceptions(object, error);
         }
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
@@ -237,9 +239,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         if (!isWarning)
             this.increaseCount(context);
-
-        var error = new ErrorMessage(object.errorMessage, object.sourceName,
-            object.lineNumber, object.sourceLine, category, context, trace, msgId);  // the sourceLine will cause the source to be loaded.
 
         var className = isWarning ? "warningMessage" : "errorMessage";
 
@@ -255,36 +254,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             Firebug.Console.log(error, FirebugContext,  className);
         }
         return context;
-    },
-
-    correctLineNumbersWithStack: function(trace, object)
-    {
-        var stack_frame = trace.frames[0];
-        if (stack_frame)
-        {
-            var sourceName = stack_frame.href;
-            var lineNumber = stack_frame.lineNo;
-
-            var correctedError =
-            {
-                    errorMessage: object.errorMessage,
-                    sourceName: sourceName,
-                    sourceLine: object.sourceLine,
-                    lineNumber: lineNumber,
-                    columnNumber: object.columnNumber,
-                    flags: object.flags,
-                    category: object.category
-            };
-            object = correctedError;
-
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());
-            return true;
-        }
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);
-
-        return false;
     },
 
     getErrorContext: function(object)
@@ -666,7 +635,7 @@ function getExceptionContext(context)
     return context;
 }
 
-function correctLineNumbersOnExceptions(context, object)
+function correctLineNumbersOnExceptions(object, error)
 {
     var m = reException.exec(object.errorMessage);
     if (m)
@@ -680,24 +649,11 @@ function correctLineNumbersOnExceptions(context, object)
         var sourceName = m[3];
         var lineNumber = parseInt(m[4]);
 
-        var correctedError =
-        {
-                errorMessage: object.errorMessage,
-                sourceName: sourceName,
-                sourceLine: object.sourceLine,
-                lineNumber: lineNumber,
-                columnNumber: object.columnNumber,
-                flags: object.flags,
-                category: object.category
-        };
+        error.correctSourcePoint(sourceName, lineNumber);
 
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.correctLineNumbersOnExceptions corrected message with sourceName: "+sourceName+"@"+lineNumber);
-
-        return correctedError;
     }
-    else
-        return object;
 }
 
 // ************************************************************************************************
