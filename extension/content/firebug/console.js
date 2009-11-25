@@ -699,9 +699,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     getBreakOnMenuItems: function()
     {
-        return [
+        //xxxHonza: no BON options for now.
+        /*return [
             optionMenu("console.option.Persist Break On Error", "persistBreakOnError")
-        ];
+        ];*/
+       return [];
     },
 
     search: function(text)
