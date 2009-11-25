@@ -204,11 +204,9 @@ LayoutPanel.prototype = extend(Firebug.Panel,
             if (rect.wrappedJSObject)
                 rect = rect.wrappedJSObject;
 
-            var scrollX = 0; // view.scrollX
-            var scrollY = 0; // view.scrollY
+            var scrollX = view.scrollX;
+            var scrollY = view.scrollY;
             
-            args.width = Math.round(rect.width);
-            args.height = Math.round(rect.height);
             args.outerLeft = Math.round(scrollX + rect.left);
             args.outerTop = Math.round(scrollY + rect.top);
             args.outerRight = Math.round(scrollX + rect.right);
