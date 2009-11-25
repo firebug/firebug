@@ -184,15 +184,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
                     (uri instanceof nsIURI ? uri.spec : uri)+"\n");
         }
 
-        // Call showContext only for currently active tab.
-        if (Firebug.chrome.getCurrentURI().spec != context.browser.currentURI.spec)
-        {
-            if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> watchTopWindow: Do not show context as it's not the active tab: " +
-                    context.browser.currentURI.spec + "\n");
-            return context;  // we did create or find a context
-        }
-
         if (context && !context.loaded && !context.showContextTimeout)
         {
             // still loading, we want to showContext one time but not too agressively
@@ -224,6 +215,14 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (context.showContextTimeout) // then the timeout even has not run, we'll not need it after all.
             clearTimeout(context.showContextTimeout);
         delete context.showContextTimeout;
+
+        // Call showContext only for currently active tab.
+        if (Firebug.chrome.getCurrentURI().spec != context.browser.currentURI.spec)
+        {
+            if (FBTrace.DBG_WINDOWS)
+                FBTrace.sysout("-> rushShowContext: Do not show context as it's not the active tab: " +
+                    context.browser.currentURI.spec + "\n");
+        }
 
         this.watchContext(win, context);  // calls showContext
     },
