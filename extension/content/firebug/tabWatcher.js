@@ -201,7 +201,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> watchTopWindow delayShowContext id:"+context.showContextTimeout, context);
                 if (context.window)   // Sometimes context.window is not defined ?
-                    this.watchContext(win, context);  // calls showContext
+                    this.rushShowContext(win, context);  // calls showContext
                 else
                 {
                     if(FBTrace.DBG_ERRORS)
@@ -221,7 +221,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     rushShowContext: function(win, context)
     {
-        if (context.showContextTimeout)
+        if (context.showContextTimeout) // then the timeout even has not run, we'll not need it after all.
             clearTimeout(context.showContextTimeout);
         delete context.showContextTimeout;
 
@@ -331,7 +331,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             dispatch(this.fbListeners, "loadedContext", [context]);
 
-            if (context.showContextTimeout)
+            if (context.showContextTimeout) // then our timeout has never run, let's get on with it.
                 this.rushShowContext(win, context);
         }
     },
