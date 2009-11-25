@@ -171,9 +171,14 @@ Firebug.Search = extend(Firebug.Module,
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = "";
         removeClass(searchBox, "fbSearchBox-attention");
-        searchBox.collapsed = panel ? !panel.searchable : false;
-
-        searchBox.updateOptions(panel.getSearchOptionsMenuItems());
+        
+        if (panel)
+        {
+            searchBox.collapsed = !panel.searchable;
+            searchBox.updateOptions(panel.getSearchOptionsMenuItems());
+        }
+        else
+            searchBox.collapsed = false;  
     }
 });
 
