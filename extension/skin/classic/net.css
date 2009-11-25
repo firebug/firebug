@@ -614,6 +614,20 @@
 }
 
 /************************************************************************************************/
+/* Request & Response Headers */
+
+.netHeadersViewSource {
+    color: #bdbdbd;
+    margin-left: 200px;
+    font-weight: normal;
+}
+
+.netHeadersViewSource:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+/************************************************************************************************/
 
 .netActivationRow {
     background: rgb(229, 229, 229) !important;

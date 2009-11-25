@@ -2058,23 +2058,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         DIV({"class": "netInfoBodies outerFocusRow"},
             TABLE({"class": "netInfoParamsText netInfoText netInfoParamsTable", "role": "tabpanel",
                     cellpadding: 0, cellspacing: 0}, TBODY()),
-            TABLE({"class": "netInfoHeadersText netInfoText netInfoHeadersTable", "role": "tabpanel",
-                    cellpadding: 0, cellspacing: 0},
-                TBODY({"class":"netInfoResponseHeadersBody", "role": "list", "aria-label": $STR("ResponseHeaders")},
-                    TR({"class": "netInfoResponseHeadersTitle", "role": "presentation"},
-                        TD({colspan: 2, "role": "presentation"},
-                            DIV({"class": "netInfoHeadersGroup"}, $STR("ResponseHeaders"))
-                        )
-                    )
-                ),
-                TBODY({"class": "netInfoRequestHeadersBody", "role": "list", "aria-label": $STR("RequestHeaders")},
-                    TR({"class": "netInfoRequestHeadersTitle", "role": "presentation"},
-                        TD({colspan: 2, "role": "presentation"},
-                            DIV({"class": "netInfoHeadersGroup"}, $STR("RequestHeaders"))
-                        )
-                    )
-                )
-            ),
+            DIV({"class": "netInfoHeadersText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPostText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoPutText netInfoText", "role": "tabpanel"}),
             DIV({"class": "netInfoResponseText netInfoText", "role": "tabpanel"}),
@@ -2213,16 +2197,18 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
         if (hasClass(tab, "netInfoHeadersTab"))
         {
+            var headersText = getElementByClass(netInfoBox, "netInfoHeadersText");
+
             if (file.responseHeaders && !netInfoBox.responseHeadersPresented)
             {
                 netInfoBox.responseHeadersPresented = true;
-                this.insertHeaderRows(netInfoBox, file.responseHeaders, "Headers", "ResponseHeaders");
+                NetInfoHeaders.renderHeaders(headersText, file.responseHeaders, "ResponseHeaders");
             }
 
             if (file.requestHeaders && !netInfoBox.requestHeadersPresented)
             {
                 netInfoBox.requestHeadersPresented = true;
-                this.insertHeaderRows(netInfoBox, file.requestHeaders, "Headers", "RequestHeaders");
+                NetInfoHeaders.renderHeaders(headersText, file.requestHeaders, "RequestHeaders");
             }
         }
 
@@ -2509,6 +2495,129 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 });
 
 var NetInfoPostData = Firebug.NetMonitor.NetInfoPostData;
+
+// ************************************************************************************************
+
+/**
+ * @domplate Used within the Net panel to display raw source of request and response headers
+ * as well as pretty-formatted summary of these headers.
+ */
+Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener(),
+{
+    tag:
+        DIV({"class": "netInfoHeadersTable", "role": "tabpanel"},
+            DIV({"class": "netInfoHeadersGroup netInfoResponseHeadersTitle"},
+                SPAN($STR("ResponseHeaders")),
+                SPAN({"class": "netHeadersViewSource response collapsed", onclick: "$onViewSource",
+                    _sourceDisplayed: false, _rowName: "ResponseHeaders"},
+                    $STR("net.headers.view source")
+                )
+            ),
+            TABLE({cellpadding: 0, cellspacing: 0},
+                TBODY({"class": "netInfoResponseHeadersBody", "role": "list",
+                    "aria-label": $STR("ResponseHeaders")})
+            ),
+            DIV({"class": "netInfoHeadersGroup netInfoRequestHeadersTitle"},
+                SPAN($STR("RequestHeaders")),
+                SPAN({"class": "netHeadersViewSource request collapsed", onclick: "$onViewSource",
+                    _sourceDisplayed: false, _rowName: "RequestHeaders"},
+                    $STR("net.headers.view source")
+                )
+            ),
+            TABLE({cellpadding: 0, cellspacing: 0},
+                TBODY({"class": "netInfoRequestHeadersBody", "role": "list",
+                    "aria-label": $STR("RequestHeaders")})
+            )
+        ),
+
+    sourceTag:
+        TR({"role": "presentation"},
+            TD({colspan: 2, "role": "presentation"},
+                PRE({"class": "source"})
+            )
+        ),
+
+    onViewSource: function(event)
+    {
+        var target = event.target;
+        var requestHeaders = (target.rowName == "RequestHeaders");
+
+        var netInfoBox = getAncestorByClass(target, "netInfoBody");
+        var file = netInfoBox.repObject;
+
+        if (target.sourceDisplayed)
+        {
+            var headers = requestHeaders ? file.requestHeaders : file.responseHeaders;
+            this.insertHeaderRows(netInfoBox, headers, target.rowName);
+            target.innerHTML = $STR("net.headers.view source");
+        }
+        else
+        {
+            var source = requestHeaders ? file.requestHeadersText : file.responseHeadersText;
+            this.insertSource(netInfoBox, source, target.rowName);
+            target.innerHTML = $STR("net.headers.pretty print");
+        } 
+
+        target.sourceDisplayed = !target.sourceDisplayed;
+
+        cancelEvent(event);
+    },
+
+    insertSource: function(netInfoBox, source, rowName)
+    {
+        if (source)
+            source = source.replace(/\r\n/gm, "<span style='color:lightgray'>\\r\\n</span>\r\n");
+
+        var tbody = getElementByClass(netInfoBox, "netInfo" + rowName + "Body");
+        var node = this.sourceTag.replace({}, tbody);
+        var sourceNode = getElementByClass(node, "source");
+        sourceNode.innerHTML = source;
+    },
+
+    insertHeaderRows: function(netInfoBox, headers, rowName)
+    {
+        var headersTable = getElementByClass(netInfoBox, "netInfoHeadersTable");
+        var tbody = getElementByClass(headersTable, "netInfo" + rowName + "Body");
+
+        clearNode(tbody);
+
+        if (!headers.length)
+            return;
+
+        NetInfoBody.headerDataTag.insertRows({headers: headers}, tbody);
+
+        var titleRow = getChildByClass(headersTable, "netInfo" + rowName + "Title");
+        removeClass(titleRow, "collapsed");
+    },
+
+    init: function(parent)
+    {
+        var rootNode = this.tag.append({}, parent);
+
+        var netInfoBox = getAncestorByClass(parent, "netInfoBody");
+        var file = netInfoBox.repObject;
+
+        var viewSource;
+
+        viewSource = getElementByClass(rootNode, "netHeadersViewSource", "request");
+        if (file.requestHeadersText)
+            removeClass(viewSource, "collapsed");
+
+        viewSource = getElementByClass(rootNode, "netHeadersViewSource", "response");
+        if (file.responseHeadersText)
+            removeClass(viewSource, "collapsed");
+    },
+
+    renderHeaders: function(parent, headers, rowName)
+    {
+        if (!parent.firstChild)
+            this.init(parent);
+
+        this.insertHeaderRows(parent, headers, rowName);
+    }
+});
+
+var NetInfoHeaders = Firebug.NetMonitor.NetInfoHeaders;
 
 // ************************************************************************************************
 
@@ -2942,6 +3051,20 @@ NetProgress.prototype =
         this.context.breakOnXHR = false;
 
         Firebug.Breakpoint.breakNow(this.context.getPanel(panelName, true));
+    },
+
+    requestHeadersFile: function(request, time, requestHeadersText)
+    {
+        var file = this.getRequestFile(request);
+        if (file)
+            file.requestHeadersText = requestHeadersText;
+    },
+
+    responseHeadersFile: function(request, time, responseHeadersText)
+    {
+        var file = this.getRequestFile(request);
+        if (file)
+            file.responseHeadersText = responseHeadersText;
     },
 
     completedFile: function completedFile(request, time)
@@ -3442,6 +3565,8 @@ NetProgress.prototype =
 };
 
 var startFile = NetProgress.prototype.startFile;
+var requestHeadersFile = NetProgress.prototype.requestHeadersFile;
+var responseHeadersFile = NetProgress.prototype.responseHeadersFile;
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
 var completedFile = NetProgress.prototype.completedFile;
@@ -4372,6 +4497,8 @@ Firebug.NetMonitor.NetHttpActivityObserver =
             {
                 activeRequests.push(httpChannel);
                 activeRequests.push(win);
+
+                networkContext.post(requestHeadersFile, [httpChannel, time, extraStringData]);
             }
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_TRANSACTION_CLOSE)
             {
@@ -4379,6 +4506,10 @@ Firebug.NetMonitor.NetHttpActivityObserver =
                 activeRequests.splice(index, 2);
 
                 networkContext.post(closedFile, [httpChannel, time]);
+            }
+            else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_HEADER)
+            {
+                networkContext.post(responseHeadersFile, [httpChannel, time, extraStringData]);
             }
         }
 
