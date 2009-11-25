@@ -2565,8 +2565,9 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
     insertSource: function(netInfoBox, source, rowName)
     {
-        if (source)
-            source = source.replace(/\r\n/gm, "<span style='color:lightgray'>\\r\\n</span>\r\n");
+        // This breaks copy to clipboard.
+        //if (source)
+        //    source = source.replace(/\r\n/gm, "<span style='color:lightgray'>\\r\\n</span>\r\n");
 
         var tbody = getElementByClass(netInfoBox, "netInfo" + rowName + "Body");
         var node = this.sourceTag.replace({}, tbody);
