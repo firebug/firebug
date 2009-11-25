@@ -2967,7 +2967,7 @@ this.safeGetWindowLocation = function(window)
     }
     catch(exc)
     {
-        //if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
             FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
             FBTrace.sysout("TabContext.getWindowLocation failed window:", window);
         return "(getWindowLocation: "+exc+")";

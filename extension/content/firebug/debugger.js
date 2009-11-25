@@ -624,9 +624,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             {
                 var chrome = Firebug.chrome;
 
-                //if ( chrome.updateViewOnShowHook )
-                //    delete chrome.updateViewOnShowHook;
-
                 this.syncCommands(context);
                 this.syncListeners(context);
 

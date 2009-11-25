@@ -208,7 +208,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         var panel = row.parentNode.parentNode.domPanel;
         var target = row.lastChild.firstChild;
         var isString = hasClass(target,"objectBox-string");
-        
+
         if (hasClass(row, "opened"))
         {
             removeClass(row, "opened");
@@ -233,17 +233,17 @@ const DirTablePlate = domplate(Firebug.Rep,
                             toggles = toggles[path[i]];
                     }
                 }
-                
+
                 var rowTag = this.rowTag;
                 var tbody = row.parentNode;
-    
+
                 setTimeout(function()
                 {
                     for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
                     {
                         if (parseInt(firstRow.getAttribute("level")) <= level)
                             break;
-    
+
                         tbody.removeChild(firstRow);
                     }
                 }, row.insertTimeout ? row.insertTimeout : 0);
@@ -277,10 +277,10 @@ const DirTablePlate = domplate(Firebug.Rep,
 
                 var context = panel ? panel.context : null;
                 var members = getMembers(target.repObject, level+1, context);
-    
+
                 var rowTag = this.rowTag;
                 var lastRow = row;
-    
+
                 var delay = 0;
                 var setSize = members.length;
                 var rowCount = 1;
@@ -298,10 +298,10 @@ const DirTablePlate = domplate(Firebug.Rep,
                         if (isLast)
                             delete row.insertTimeout;
                     }, delay, members.splice(0, insertSliceSize), !members.length);
-    
+
                     delay += insertInterval;
                 }
-    
+
                 row.insertTimeout = delay;
             }
         }
@@ -517,7 +517,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     },
 
     /*
-     * Walk from the current row up to the most ancient parent, building an array. 
+     * Walk from the current row up to the most ancient parent, building an array.
      * @return array of property names and separators, eg ['foo','.','bar'].
      */
     getPropertyPath: function(row)
@@ -1670,7 +1670,7 @@ function expandMembers(members, toggles, offset, level, context)  // recursion s
                 FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
                 FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
             }
-            
+
             expanded += newMembers.length;
             i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1, context);
         }
@@ -2012,7 +2012,7 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
             path.pop();
 
         var objectPath = path.join("");
-        //if (FBTrace.DBG_DOM)
+        if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.addBreakpoint; " + objectPath, path);
 
         var bp = new Breakpoint(object, propName, objectPath, panel.context);

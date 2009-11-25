@@ -407,19 +407,19 @@ function FirebugConsoleHandler(context, win)
         {
             var trace = Firebug.errorStackTrace;
             delete Firebug.errorStackTrace;
-            //if (FBTrace.DBG_CONSOLE)
+            if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from errorStackTrace", trace);
         }
         else if (msg.stack)
         {
             var trace = parseToStackTrace(msg.stack);
-            //if (FBTrace.DBG_CONSOLE)
+            if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
         else
         {
             var trace = getJSDUserStack();
-            //if (FBTrace.DBG_CONSOLE)
+            if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 

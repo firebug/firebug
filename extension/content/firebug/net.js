@@ -1309,7 +1309,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (!netProgress)  // XXXjjb Honza, please check, I guess we are getting here with the context not setup
         {
-            //if (FBTrace.DBG_NET)
+            if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.updateLogLimit; NO NET CONTEXT for: " + this.context.getName());
             return;
         }
@@ -2556,7 +2556,7 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
             var source = requestHeaders ? file.requestHeadersText : file.responseHeadersText;
             this.insertSource(netInfoBox, source, target.rowName);
             target.innerHTML = $STR("net.headers.pretty print");
-        } 
+        }
 
         target.sourceDisplayed = !target.sourceDisplayed;
 
