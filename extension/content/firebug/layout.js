@@ -218,8 +218,8 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         else if (!Firebug.showAdjacentLayout || position == "absolute" || position == "fixed")
         {
             args.outerLabel = $STR("LayoutOffset");
-            args.outerLeft = element.offSetLeft ? element.offsetLeft : 0;
-            args.outerTop = element.offsetTop ? element.offsetLeft : 0;
+            args.outerLeft = element.offsetLeft ? element.offsetLeft : 0;
+            args.outerTop = element.offsetTop ? element.offsetTop : 0;
             args.outerRight = args.outerBottom = 0;
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
                 = args.outerBottomMode = "absoluteEdge";
