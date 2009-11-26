@@ -1,0 +1,7 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet href="chrome://firebug/skin/about.css" type="text/css"?> 
+
+<overlay id="FirebugAboutOverlay"
+        xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+</overlay>
