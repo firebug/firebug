@@ -3776,7 +3776,7 @@ this.parseJSONString = function(jsonString, originURL)
     }
     catch(e)
     {
-        if (e.message.indexOf("is not defined"))
+        if (e.message.indexOf("is not defined") > 0)  // XXXjjb what is this for?
         {
             var parts = e.message.split(" ");
             s[parts[0]] = function(str){ return str; };
@@ -3791,7 +3791,7 @@ this.parseJSONString = function(jsonString, originURL)
         else
         {
             if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+                FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+"\" with EXCEPTION "+e, e);
             return null;
         }
     }
