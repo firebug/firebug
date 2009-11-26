@@ -15,7 +15,7 @@
 <!ENTITY firebug.ShadeBoxModel "Shade Box Model">
 <!ENTITY firebug.Website "Firebugs webbsida...">
 <!ENTITY firebug.Documentation "Dokumentation...">
-<!ENTITY firebug.KeyShortcuts "Tangentbordsgenvägar...">
+<!ENTITY firebug.KeyShortcuts "Tangentkombinationer...">
 <!ENTITY firebug.Forums "Diskussionsgrupp...">
 <!ENTITY firebug.Issues "Issue Tracker...">
 <!ENTITY firebug.Donate "Bidra...">
@@ -23,23 +23,23 @@
 <!ENTITY firebug.AlwaysOpenInWindow "Öppna alltid i nytt fönster">
 <!ENTITY firebug.ShowFirebug "Öppna Firebug">
 <!ENTITY firebug.DetachFirebug "Öppna Firebug i nytt fönster">
-<!ENTITY firebug.OpenWith "Öppna med redigera">
-<!ENTITY firebug.CloseFirebug "Stäng Firebug">
+<!ENTITY firebug.OpenWith "Öppna med redigeringsprogram">
+<!ENTITY firebug.CloseFirebug "Inaktivera Firebug för denna websida">
 <!ENTITY firebug.Permissions "Platser...">
-<!ENTITY firebug.ConfigureEditors "Konfigurera redigerare">
+<!ENTITY firebug.ConfigureEditors "Konfigurera redigeraringsprogram">
 <!ENTITY firebug.CommandLine "Kommandorad">
 <!ENTITY firebug.Search "Sök">
 <!ENTITY firebug.Continue "Fortsätt (F8)">
 <!ENTITY firebug.StepOver "Stega över (F10)">
 <!ENTITY firebug.StepInto "Stega in i (F11)">
 <!ENTITY firebug.StepOut "Stega ur">
-<!ENTITY firebug.BreakOnErrors "Bryt vid fel">
+<!ENTITY firebug.BreakOnErrors "Stanna vid fel">
 <!ENTITY firebug.Inspect "Inspektera">
 <!ENTITY firebug.InspectElement "Inspektera element">
-<!ENTITY firebug.InspectTooltip "Klicka ett element på sidan för att inspektera det">
+<!ENTITY firebug.InspectTooltip "Klicka på ett element i sidan för att inspektera det">
 <!ENTITY firebug.Edit "Redigera">
 <!ENTITY firebug.EditHTMLTooltip "Redigera denna HTML">
-<!ENTITY firebug.EditCSSTooltip "Redigera denna style sheet">
+<!ENTITY firebug.EditCSSTooltip "Redigera denna stilmall">
 <!ENTITY firebug.Profile "Profilera">
 <!ENTITY firebug.ProfileScript "Profilera JavaScript">
 <!ENTITY firebug.Clear "Rensa">
