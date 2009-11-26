@@ -414,6 +414,25 @@
 }
 
 /************************************************************************************************/
+/* Size Info tip */
+
+.sizeInfoLabelCol {
+    font-weight: bold;
+    padding-right: 10px;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-size: 11px;
+}
+
+.sizeInfoSizeCol {
+    font-weight: bold;
+}
+
+.sizeInfoDetailCol {
+    color: gray;
+    text-align: right;
+}
+
+/************************************************************************************************/
 /* Summary */
 
 .netSummaryRow .netReceivingBar {

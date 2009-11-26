@@ -861,7 +861,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     populateSizeInfoTip: function(infoTip, file)
     {
-        Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
+        Firebug.NetMonitor.SizeInfoTip.render(file, infoTip);
         return true;
     },
 
@@ -2755,12 +2755,60 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 {
     tag:
-        DIV({"class": "sizeInfoTip", "id" : "fbNetSizeInfoTip"}, "$file|getSize"),
+        TABLE({"class": "sizeInfoTip", "id": "fbNetSizeInfoTip"},
+            TBODY(
+                FOR("size", "$sizeInfo",
+                    TAG("$size|getRowTag", {size: "$size"})
+                )
+            )
+        ),
 
-    getSize: function(file)
+    sizeTag:
+        TR({"class": "sizeInfoRow", $collapsed: "$size|hideRow"},
+            TD({"class": "sizeInfoLabelCol"}, "$size.label"),
+            TD({"class": "sizeInfoSizeCol"}, "$size|formatSize"),
+            TD({"class": "sizeInfoDetailCol"}, "$size|formatNumber")
+        ),
+
+    separatorTag:
+        TR(
+            TD({"colspan": 3, "height": "7px"})
+        ),
+
+    getRowTag: function(size)
     {
-        return $STRF("net.file.SizeInfotip", [formatSize(file.size),
-            (file.size < 0) ? "?" : formatNumber(file.size)]);
+        return (size.label == "-") ? this.separatorTag : this.sizeTag;
+    },
+
+    hideRow: function(size)
+    {
+        return size.size < 0;
+    },
+
+    formatSize: function(size)
+    {
+        return formatSize(size.size);
+    },
+
+    formatNumber: function(size)
+    {
+        return size.size ? ("(" + formatNumber(size.size) + ")") : "";
+    },
+
+    render: function(file, parentNode)
+    {
+        var sizeInfo = [];
+        sizeInfo.push({label: $STR("net.sizeinfo.Response Body"),
+            size: file.size});
+
+        if (file.requestHeadersText)
+        {
+            sizeInfo.push({label: "-", size: 0});
+            sizeInfo.push({label: $STR("net.sizeinfo.Sent"), size: file.totalSent});
+            sizeInfo.push({label: $STR("net.sizeinfo.Received"), size: file.totalReceived});
+        }
+
+        this.tag.replace({sizeInfo: sizeInfo}, parentNode);
     },
 });
 
@@ -3162,7 +3210,7 @@ NetProgress.prototype =
         return null;
     },
 
-    sendingFile: function sendingFile(request, time)
+    sendingFile: function sendingFile(request, time, size)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
@@ -3173,6 +3221,8 @@ NetProgress.prototype =
                 file.sendingTime = time;
                 file.sendStarted = true;
             }
+
+            file.totalSent = size;
 
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.sendingFile +" + (now() - file.startTime) + " " +
@@ -3208,7 +3258,7 @@ NetProgress.prototype =
         return null;
     },
 
-    receivingFile: function receivingFile(request, time)
+    receivingFile: function receivingFile(request, time, size)
     {
         var file = this.getRequestFile(request, null, true);
         if (file)
@@ -3218,6 +3268,7 @@ NetProgress.prototype =
                     getPrintableTime() + ", " + request.URI.path, file);
 
             file.endTime = time;
+            file.totalReceived = size;
 
             // Force update UI.
             if (file.row && hasClass(file.row, "opened"))
@@ -3551,11 +3602,11 @@ NetProgress.prototype =
             else if (status == Ci.nsISocketTransport.STATUS_CONNECTED_TO)
                 this.post(connectedFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_SENDING_TO)
-                this.post(sendingFile, [request, now()]);
+                this.post(sendingFile, [request, now(), -1]);
             else if (status == Ci.nsISocketTransport.STATUS_WAITING_FOR)
                 this.post(waitingForFile, [request, now()]);
             else if (status == Ci.nsISocketTransport.STATUS_RECEIVING_FROM)
-                this.post(receivingFile, [request, now()]);
+                this.post(receivingFile, [request, now(), -1]);
         }
     },
 
@@ -4532,11 +4583,11 @@ Firebug.NetMonitor.NetHttpActivityObserver =
             else if (activitySubtype == nsISocketTransport.STATUS_CONNECTED_TO)
                 networkContext.post(connectedFile, [httpChannel, time]);
             else if (activitySubtype == nsISocketTransport.STATUS_SENDING_TO)
-                networkContext.post(sendingFile, [httpChannel, time]);
+                networkContext.post(sendingFile, [httpChannel, time, extraSizeData]);
             else if (activitySubtype == nsISocketTransport.STATUS_WAITING_FOR)
                 networkContext.post(waitingForFile, [httpChannel, time]);
             else if (activitySubtype == nsISocketTransport.STATUS_RECEIVING_FROM)
-                networkContext.post(receivingFile, [httpChannel, time]);
+                networkContext.post(receivingFile, [httpChannel, time, extraSizeData]);
         }
     },
 
