@@ -3364,17 +3364,17 @@ this.splitURLBase = function(url)
 
 this.splitDataURL = function(url)
 {
-    var mark = url.indexOf(':', 3);
-    if (mark != 4)
+    var mark = url.indexOf('data:');
+    if (mark != 0)
         return false; //  the first 5 chars must be 'data:'
 
-    var point = url.indexOf(',', mark+1);
-    if (point < mark)
+    var point = url.indexOf(',', 5);
+    if (point < 5)
         return false; // syntax error
 
     var props = { encodedContent: url.substr(point+1) };
 
-    var metadataBuffer = url.substring(mark+1, point);
+    var metadataBuffer = url.substring(5, point);
     var metadata = metadataBuffer.split(';');
     for (var i = 0; i < metadata.length; i++)
     {
