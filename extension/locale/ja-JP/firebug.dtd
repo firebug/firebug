@@ -42,9 +42,9 @@
 <!ENTITY firebug.EditCSSTooltip "このスタイルシートを編集します">
 <!ENTITY firebug.Profile "プロファイル">
 <!ENTITY firebug.ProfileScript "JavaScript のプロファイル">
-<!ENTITY firebug.Clear "消去">
-<!ENTITY firebug.ClearConsole "コンソールを消去">
-<!ENTITY firebug.ClearTooltip "コンソールを消去します">
+<!ENTITY firebug.Clear "クリア">
+<!ENTITY firebug.ClearConsole "コンソールをクリア">
+<!ENTITY firebug.ClearTooltip "コンソールをクリア">
 <!ENTITY firebug.All "すべて">
 <!ENTITY firebug.Images "画像">
 <!ENTITY firebug.Flash "Flash">
