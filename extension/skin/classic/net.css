@@ -98,6 +98,7 @@
     cursor: pointer;
     display: none;
     height: 15px;
+    margin-right: 0 !important;
 }
 
 /* Display brekpoint disc */
@@ -127,6 +128,10 @@
 
 .netRow .netRowHeader {
     width: 3px;
+}
+
+.netInfoRow .netRowHeader {
+    display: table-cell;
 }
 
 /************************************************************************************************/

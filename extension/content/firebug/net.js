@@ -1811,7 +1811,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 
     netInfoTag:
         TR({"class": "netInfoRow outerFocusRow", "role" : "row"},
-            TD({"class": "netInfoCol", colspan: 6, "role" : "gridcell"})
+            TD({"class": "sourceLine netRowHeader"}),
+            TD({"class": "netInfoCol", colspan: 5, "role" : "gridcell"})
         ),
 
     activationTag:
@@ -1893,7 +1894,8 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (hasClass(row, "opened"))
         {
             var netInfoRow = this.netInfoTag.insertRows({}, row)[0];
-            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoRow.firstChild);
+            var netInfoCol = getElementByClass(netInfoRow, "netInfoCol");
+            var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoCol);
 
             // Notify listeners so additional tabs can be created.
             dispatch(NetInfoBody.fbListeners, "initTabBody", [netInfoBox, file]);
@@ -1935,7 +1937,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         // XXXjoe Turn off indenting for now, it's confusing since we don't
         // actually place nested files directly below their parent
         //return file.document.level * indentWidth;
-        return 0;
+        return 10;
     },
 
     isError: function(file)
