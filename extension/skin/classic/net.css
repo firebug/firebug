@@ -621,8 +621,12 @@
 }
 
 .netInfoPostParamsTable,
-.netInfoPostPartsTable {
+.netInfoPostPartsTable,
+.netInfoPostJSONTable,
+.netInfoPostXMLTable,
+.netInfoPostSourceTable {
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .netInfoPostContentType {

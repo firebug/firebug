@@ -3790,8 +3790,9 @@ this.parseJSONString = function(jsonString, originURL)
         }
         else
         {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+"\" with EXCEPTION "+e, e);
+            if (FBTrace.DBG_JSONVIEWER)
+                FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
+                    "\" with EXCEPTION "+e, e);
             return null;
         }
     }

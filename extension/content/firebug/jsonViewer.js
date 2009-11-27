@@ -32,20 +32,8 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         // The JSON is still no there, try to parse most common cases.
         if (!file.jsonObject)
         {
-            const maybeHarmful = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
-            const jsonStrings = /"(\\.|[^"\\\n\r])*"/g;
-
-            var contentType = safeGetContentType(file.request);
-            if (!contentType)
-                return;
-
-            if ((contentType.indexOf("application/json") != 0) &&
-                (contentType.indexOf("text/plain") != 0) &&
-                (contentType.indexOf("text/x-json") != 0) &&
-                (contentType.indexOf("text/javascript") != 0))
-                return;
-
-            file.jsonObject = this.parseJSON(file);
+            if (this.isJSON(safeGetContentType(file.request)))
+                file.jsonObject = this.parseJSON(file);
         }
 
         // The jsonObject is created so, the JSON tab can be displayed.
@@ -57,6 +45,20 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
             if (FBTrace.DBG_JSONVIEWER)
                 FBTrace.sysout("jsonviewer.initTabBody; JSON object available", file.jsonObject);
         }
+    },
+
+    isJSON: function(contentType)
+    {
+        if (!contentType)
+            return false;
+
+        if ((contentType.indexOf("application/json") != 0) &&
+            (contentType.indexOf("text/plain") != 0) &&
+            (contentType.indexOf("text/x-json") != 0) &&
+            (contentType.indexOf("text/javascript") != 0))
+            return false;
+
+        return true;
     },
 
     // Update listener for TabView
@@ -80,7 +82,6 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         var jsonString = new String(file.responseText);
         return parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
-
 });
 
 // ************************************************************************************************

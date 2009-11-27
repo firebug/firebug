@@ -2375,6 +2375,40 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             )
         ),
 
+    // application/json
+    jsonTable:
+        TABLE({"class": "netInfoPostJSONTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+            TBODY({"role": "list", "aria-label": $STR("jsonviewer.tab.JSON")},
+                TR({"class": "netInfoPostJSONTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        DIV({"class": "netInfoPostParams"},
+                            $STR("jsonviewer.tab.JSON")
+                        )
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostJSONBody"})
+                )
+            )
+        ),
+
+    // application/xml
+    xmlTable:
+        TABLE({"class": "netInfoPostXMLTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
+            TBODY({"role": "list", "aria-label": $STR("xmlviewer.tab.XML")},
+                TR({"class": "netInfoPostXMLTitle", "role": "presentation"},
+                    TD({"role": "presentation" },
+                        DIV({"class": "netInfoPostParams"},
+                            $STR("xmlviewer.tab.XML")
+                        )
+                    )
+                ),
+                TR(
+                    TD({"class": "netInfoPostXMLBody"})
+                )
+            )
+        ),
+
     sourceTable:
         TABLE({"class": "netInfoPostSourceTable", cellpadding: 0, cellspacing: 0, "role": "presentation"},
             TBODY({"role": "list", "aria-label": $STR("net.label.Source")},
@@ -2423,6 +2457,14 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
                 this.insertParts(parentNode, data);
         }
 
+        var contentType = Utils.findHeader(file.requestHeaders, "Content-Type");
+
+        if (Firebug.JSONViewerModel.isJSON(contentType))
+            this.insertJSON(parentNode, file, context);
+
+        if (Firebug.XMLViewerModel.isXML(contentType))
+            this.insertXML(parentNode, file, context);
+
         var postText = Utils.getPostText(file, context);
         postText = Utils.formatPostText(postText);
         if (postText)
@@ -2449,6 +2491,33 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         var row = getElementByClass(partsTable, "netInfoPostPartsTitle");
 
         NetInfoBody.headerDataTag.insertRows({headers: data.params}, row);
+    },
+
+    insertJSON: function(parentNode, file, context)
+    {
+        var text = Utils.getPostText(file, context);
+        var data = parseJSONString(text, "http://" + file.request.originalURI.host);
+        if (!data)
+            return;
+
+        var jsonTable = this.jsonTable.append(null, parentNode);
+        var jsonBody = getElementByClass(jsonTable, "netInfoPostJSONBody");
+
+        if (!this.toggles)
+            this.toggles = {};
+
+        Firebug.DOMPanel.DirTable.tag.replace(
+            {object: data, toggles: this.toggles}, jsonBody);
+    },
+
+    insertXML: function(parentNode, file, context)
+    {
+        var text = Utils.getPostText(file, context);
+
+        var jsonTable = this.xmlTable.append(null, parentNode);
+        var jsonBody = getElementByClass(jsonTable, "netInfoPostXMLBody");
+
+        Firebug.XMLViewerModel.insertXML(jsonBody, text);
     },
 
     insertSource: function(parentNode, text)
@@ -2493,7 +2562,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         return postData;
-    },
+    }
 });
 
 var NetInfoPostData = Firebug.NetMonitor.NetInfoPostData;
