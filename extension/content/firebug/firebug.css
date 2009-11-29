@@ -165,6 +165,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     font-family: Monaco, monospace;
     font-size: 11px;
     padding-bottom: 5px;
+    cursor: move;
 }
 
 .fbQuickInfoBoxTitle {
@@ -173,18 +174,21 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     font-weight: bold;
     margin-top: 8px;
     margin-bottom: 0;
+    cursor: move;
 }
 
 .fbQuickInfoName {
     color: DarkGreen;
     margin-bottom: 0;
     -moz-margin-end: 0;
+    cursor: move;
 }
 
 .fbQuickInfoValue {
     color: DarkBlue;
     margin-bottom: 0;
     -moz-margin-start:0;
+    cursor: move;
 }
 
 /************************************************************************************************/

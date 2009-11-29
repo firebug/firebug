@@ -389,7 +389,9 @@ Firebug.Inspector = extend(Firebug.Module,
     
     toggleQuickInfoBox: function()
     {
-        if(quickInfoBox.popupVisible)
+        var qiBox = $('fbQuickInfoPanel');
+
+        if (qiBox.state==="open")
             quickInfoBox.hide();
             
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
@@ -399,10 +401,27 @@ Firebug.Inspector = extend(Firebug.Module,
     
     hideQuickInfoBox: function()
     {
-        if(quickInfoBox.popupVisible)
+        var qiBox = $('fbQuickInfoPanel');
+
+        if (qiBox.state==="open")
             quickInfoBox.hide();
 
         this.inspectNode(null);
+    },
+
+    quickInfoBoxDragStart: function(event)
+    {
+        quickInfoBox.dragStart(event);
+    },
+
+    quickInfoBoxDrag: function(event)
+    {
+        quickInfoBox.drag(event);
+    },
+
+    quickInfoBoxDragEnd: function(event)
+    {
+        quickInfoBox.dragEnd(event);
     }
 });
 
@@ -608,10 +627,11 @@ function getImageMapHighlighter(context)
 quickInfoBox =
 {
     boxEnabled: undefined,
-    
-    popupVisible: false,
-    
-    boxLeft: true,
+    dragging: false,
+    storedX: null,
+    storedY: null,
+    prevX: null,
+    prevY: null,
 
     show: function(element)
     {
@@ -621,25 +641,29 @@ quickInfoBox =
         var vbox, lab,
             needsTitle = false,
             needsTitle2 = false,
-            _this = this,
             domAttribs = ['nodeName', 'id', 'name', 'offsetWidth', 'offsetHeight'],
             cssAttribs = ['position'],
             compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
                            'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
                            'fontFamily', 'cssFloat', 'display', 'visibility'],
-            XULQIP = $('fbQuickInfoPanel');
+            qiBox = $('fbQuickInfoPanel');
 
-        if (!this.popupVisible)
+        if (qiBox.state==="closed")
         {
-            XULQIP.hidePopup();
-            XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
-            XULQIP.addEventListener("mousemove", function(){_this.move();}, false);
-            this.popupVisible = true;
+            qiBox.hidePopup();
+            
+            if(!this.storedX)
+                this.storedX = $('content').tabContainer.boxObject.screenX + 5;
+            
+            if(!this.storedY)
+                this.storedY = $('content').tabContainer.boxObject.screenY + 35;
+                
+            qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
-        XULQIP.removeChild(XULQIP.firstChild);
+        qiBox.removeChild(qiBox.firstChild);
         vbox = document.createElement("vbox");
-        XULQIP.appendChild(vbox);
+        qiBox.appendChild(vbox);
         
         needsTitle = this.addRows(element, vbox, domAttribs);
         needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
@@ -662,23 +686,59 @@ quickInfoBox =
     
     hide: function()
     {
-        this.popupVisible = false;
-        XULQIP = $('fbQuickInfoPanel');
-        XULQIP.hidePopup();
+        this.prevX = null;
+        this.prevY = null;
+        qiBox = $('fbQuickInfoPanel');
+        qiBox.hidePopup();
     },
     
-    move: function()
+    dragStart: function(event)
     {
-        var XULQIP = $('fbQuickInfoPanel');
+        this.dragging = true;
+    },
+    
+    dragEnd: function(event)
+    {
+        this.dragging = false;
+        this.prevX = null;
+        this.prevY = null;
+    },
+    
+    drag: function(event)
+    {
+        if(this.dragging)
+        {
+            var diffX, diffY, newX, newY,
+                qiBox = $('fbQuickInfoPanel'),
+                boxX = qiBox.boxObject.screenX,
+                boxY = qiBox.boxObject.screenY,
+                x = event.screenX,
+                y = event.screenY;
 
-        XULQIP.hidePopup();
+            this.prevX = this.prevX || x;
+            this.prevY = this.prevY || y;
+            diffX = x - this.prevX;
+            diffY = y - this.prevY;
+            newX = boxX + diffX;
+            newY = boxY + diffY;
+            
+            if(newX < 0)
+                newX = 0;
 
-        if (this.boxLeft)
-            XULQIP.openPopup($('content').tabContainer, "after_end", -5, 5, true);
-        else
-            XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
+            if(newY < 0)
+                newY = 0;
 
-        this.boxLeft = !this.boxLeft;
+            if(newY + qiBox.boxObject.height > window.screen.height - 5)
+                newY = window.screen.height - qiBox.boxObject.height - 5;
+
+            qiBox.hidePopup();
+            qiBox.openPopupAtScreen(newX, newY, false);
+            
+            this.prevX = x;
+            this.prevY = y;
+            this.storedX = boxX;
+            this.storedY = boxY;
+        }
     },
     
     addRows: function(domBase, vbox, attribs, computedStyle)
