@@ -2785,9 +2785,16 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         timings.push({bar: "Blocking",
             elapsed: blockingEnd - file.connectedTime,
             start: file.connectedTime - file.startTime});
+
+        // In Fx3.6 the STATUS_SENDING_TO is always fired (nsIActivityDistributor)
+        // In Fx3.5 the STATUS_SENDING_TO (nsIWebProgressListener) doesn't have to come
+        // This workaround is for 3.5
+        var sendElapsed = file.sendStarted ? file.waitingForTime - file.sendingTime : 0;
+        var sendStarted = timings[0].elapsed + timings[1].elapsed + timings[2].elapsed;
+
         timings.push({bar: "Sending",
-            elapsed: file.waitingForTime - file.sendingTime,
-            start: file.sendingTime - file.startTime});
+            elapsed: sendElapsed,
+            start: file.sendStarted ? file.sendingTime - file.startTime : sendStarted});
         timings.push({bar: "Waiting",
             elapsed: file.respondedTime - file.waitingForTime,
             start: file.waitingForTime - file.startTime});
