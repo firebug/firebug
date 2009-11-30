@@ -1198,7 +1198,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.barReceivingWidth = Math.round((elapsed / this.phaseElapsed) * 100);
 
         // Total request time doesn't include the time spent in queue.
-        this.elapsed = elapsed - (file.sendingTime - file.connectedTime);
+        // xxxHonza: since all phases are now graphically distinguished it's easy to 
+        // see blocking requests. It's make sense to display the real total time now. 
+        this.elapsed = elapsed/* - (file.sendingTime - file.connectedTime)*/;
 
         // The nspr timer doesn't have 1ms precision, so it can happen that entire
         // request is executed in l ms (so the total is zero). Let's display at least
