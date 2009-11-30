@@ -1087,12 +1087,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 removeClass(row, "fromCache");
 
             if (NetRequestEntry.isError(file))
-            {
                 setClass(row, "responseError");
-
-                var hrefLabel = getElementByClass(row, "netHrefLabel");
-                hrefLabel.nodeValue = NetRequestEntry.getHref(file);
-            }
+            else
+                removeClass(row, "responseError");
 
             var timeLabel = row.childNodes[5].childNodes[1].lastChild.firstChild;
             timeLabel.innerHTML = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
@@ -3398,6 +3395,9 @@ NetProgress.prototype =
             // If file.responseHeadersText is null the response didn't come.
             if (!file.loaded && !file.responseHeadersText)
             {
+                if (FBTrace.DBG_NET_EVENTS)
+                    FBTrace.sysout("net.events; TIMEOUT " + safeGetRequestName(request));
+
                 this.endLoad(file);
 
                 file.aborted = true;
