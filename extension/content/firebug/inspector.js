@@ -652,11 +652,8 @@ quickInfoBox =
         {
             qiBox.hidePopup();
             
-            if(!this.storedX)
-                this.storedX = $('content').tabContainer.boxObject.screenX + 5;
-            
-            if(!this.storedY)
-                this.storedY = $('content').tabContainer.boxObject.screenY + 35;
+            this.storedX = this.storedX || $('content').tabContainer.boxObject.screenX + 5;
+            this.storedY = this.storedY || $('content').tabContainer.boxObject.screenY + 35;
                 
             qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
@@ -664,7 +661,7 @@ quickInfoBox =
         qiBox.removeChild(qiBox.firstChild);
         vbox = document.createElement("vbox");
         qiBox.appendChild(vbox);
-        
+
         needsTitle = this.addRows(element, vbox, domAttribs);
         needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
 
@@ -743,6 +740,9 @@ quickInfoBox =
     
     addRows: function(domBase, vbox, attribs, computedStyle)
     {
+        if(!domBase)
+            return;
+    
         var i, cs, desc, hbox, lab, value,
             needsTitle = false,
             attribsLen = attribs.length;
