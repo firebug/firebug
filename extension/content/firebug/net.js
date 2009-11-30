@@ -2459,7 +2459,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
                 this.insertParts(parentNode, data);
         }
 
-        var contentType = Utils.findHeader(file.requestHeaders, "Content-Type");
+        var contentType = Utils.findHeader(file.requestHeaders, "content-type");
 
         if (Firebug.JSONViewerModel.isJSON(contentType))
             this.insertJSON(parentNode, file, context);
@@ -4102,7 +4102,8 @@ function getContentTypeFromResponseHead(value)
     for (var i=0; i<values.length; i++)
     {
         var option = values[i].split(": ");
-        if (option[0] == "Content-Type")
+        var headerName = option[0];
+        if (headerName && headerName.toLowerCase() == "content-type")
             return option[1];
     }
 }
@@ -4130,9 +4131,11 @@ Firebug.NetMonitor.Utils =
 {
     findHeader: function(headers, name)
     {
+        name = name.toLowerCase();
         for (var i = 0; i < headers.length; ++i)
         {
-            if (headers[i].name == name)
+            var headerName = headers[i].name.toLowerCase();
+            if (headerName == name)
                 return headers[i].value;
         }
     },
@@ -4178,12 +4181,12 @@ Firebug.NetMonitor.Utils =
     isURLEncodedRequest: function(file, context)
     {
         var text = Utils.getPostText(file, context);
-        if (text && text.indexOf("Content-Type: application/x-www-form-urlencoded") == 0)
+        if (text && text.toLowerCase().indexOf("content-type: application/x-www-form-urlencoded") == 0)
             return true;
 
         // The header value doesn't have to be always exactly "application/x-www-form-urlencoded",
         // there can be even charset specified. So, use indexOf rather than just "==".
-        var headerValue = Utils.findHeader(file.requestHeaders, "Content-Type");
+        var headerValue = Utils.findHeader(file.requestHeaders, "content-type");
         if (headerValue && headerValue.indexOf("application/x-www-form-urlencoded") == 0)
             return true;
 
@@ -4193,7 +4196,7 @@ Firebug.NetMonitor.Utils =
     isMultiPartRequest: function(file, context)
     {
         var text = Utils.getPostText(file, context);
-        if (text && text.indexOf("Content-Type: multipart/form-data") == 0)
+        if (text && text.toLowerCase().indexOf("content-type: multipart/form-data") == 0)
             return true;
         return false;
     },
