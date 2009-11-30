@@ -304,10 +304,10 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         {
             netProgress.loaded = true;
 
-            // Set Page title and id into the document object.
-            if (netProgress.files.length > 0)
+            // Set Page title and id into all document objects.
+            for (var i; i<netProgress.documents.length; i++)
             {
-                var doc = netProgress.files[0].document;
+                var doc = netProgress.documents[i];
                 doc.id = context.uid;
                 doc.title = context.getTitle();
             }
