@@ -440,6 +440,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (!objects || !objects.length)
             return;
 
+        function logText(text, row)
+        {
+            var node = row.ownerDocument.createTextNode(text);
+            row.appendChild(node);
+        }
+
         var format = objects[0];
         var objIndex = 0;
 
@@ -448,11 +454,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             format = "";
             objIndex = -1;
         }
-
-        function logText(text)
+        else  // a string
         {
-            var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(node);
+            if (objects.length === 1) // then we have only a string...
+            {
+                if (format.length < 1) { // ...and it has no characters.
+                    logText("(an empty string)", row);
+                    return;
+                }
+            }
         }
 
         var parts = parseFormat(format);
