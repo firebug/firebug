@@ -3233,6 +3233,7 @@ NetProgress.prototype =
             file.responseStatus = info.responseStatus;
             file.responseStatusText = info.responseStatusText;
             file.postText = info.postText;
+            file.aborted = false;
 
             this.endLoad(file);
 
@@ -3243,7 +3244,7 @@ NetProgress.prototype =
                 FBTrace.sysout("net.events.respondedFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
 
-            // If there is a networ error log it into the Console panel.
+            // If there is a network error, log it into the Console panel.
             if (Firebug.showNetworkErrors && NetRequestEntry.isError(file))
             {
                 Firebug.Errors.increaseCount(this.context);
@@ -3388,7 +3389,7 @@ NetProgress.prototype =
         {
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.closedFile +" + time + " " +
-                    getPrintableTime() + ", " + request.URI.path, file);
+                    getPrintableTime() + ", " + request.URI.path);
 
             // If the response never came, stop the loading and set time info.
             // In this case the request is marked with "Timeout" and the
