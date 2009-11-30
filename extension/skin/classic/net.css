@@ -324,6 +324,7 @@
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarResponded.gif) repeat-x;
     z-index:20;
+    min-width: 1px;
 }
 
 .netReceivingBar {
