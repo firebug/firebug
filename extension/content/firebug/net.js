@@ -3486,11 +3486,9 @@ NetProgress.prototype =
         var firstPhase = this.phases[0];
         firstPhase.windowLoadTime = time;
 
-        // xxxHonza: this should not be necessary.
-        //for (var i=0; i<firstPhase.files.length; i++)
-        //    this.panel.updateFile(firstPhase.files[i]);
-
-        return null;
+        // Return the first file, so the layout is updated. I can happen that the
+        // onLoad event is the last one and the graph end-time must be recalculated.
+        return firstPhase.files[0];
     },
 
     contentLoad: function contentLoad(window, time)
@@ -3505,9 +3503,6 @@ NetProgress.prototype =
         // Update all requests that belong to the first phase.
         var firstPhase = this.phases[0];
         firstPhase.contentLoadTime = time;
-        // xxxHonza: this should not be necessary.
-        //for (var i=0; i<firstPhase.files.length; i++)
-        //    this.panel.updateFile(firstPhase.files[i]);
 
         return null;
     },
