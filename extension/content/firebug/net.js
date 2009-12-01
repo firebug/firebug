@@ -2720,6 +2720,15 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
             )
         ),
 
+    startTimeTag:
+        TR(
+            TD(),
+            TD("$startTime.time|formatStartTime"),
+            TD({"colspan": 3},
+                "$startTime|getLabel"
+            )
+        ),
+
     separatorTag:
         TR(
             TD({"colspan": 4, "height": "10px"})
@@ -2804,21 +2813,28 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 
         var events = [];
         if (file.phase.contentLoadTime)
-            events.push({bar: "ContentLoad", start: file.phase.contentLoadTime- file.startTime});
+            events.push({bar: "ContentLoad", start: file.phase.contentLoadTime - file.startTime});
         if (file.phase.windowLoadTime)
             events.push({bar: "WindowLoad", start: file.phase.windowLoadTime - file.startTime});
 
-        // Insert request timing info.
-        this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
-
-        if (!events.length)
-            return;
+        // Insert start request time.
+        var startTime = {};
+        startTime.time = file.startTime - file.phase.startTime;
+        startTime.bar = $STR("requestinfo.Started");
+        this.startTimeTag.insertRows({startTime: startTime}, infoTip.firstChild);
 
         // Insert separator.
         this.separatorTag.insertRows({}, infoTip.firstChild);
 
+        // Insert request timing info.
+        this.timingsTag.insertRows({timings: timings}, infoTip.firstChild);
+
         // Insert events timing info.
-        this.eventsTag.insertRows({events: events}, infoTip.firstChild);
+        if (events.length)
+        {
+            this.separatorTag.insertRows({}, infoTip.firstChild);
+            this.eventsTag.insertRows({events: events}, infoTip.firstChild);
+        }
 
         return true;
     }
