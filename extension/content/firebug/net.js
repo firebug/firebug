@@ -2822,7 +2822,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         // Insert start request time.
         var startTime = {};
         startTime.time = file.startTime - file.phase.startTime;
-        startTime.bar = $STR("requestinfo.Started");
+        startTime.bar = "Started";
         this.startTimeTag.insertRows({startTime: startTime}, infoTip.firstChild);
 
         // Insert separator.
