@@ -825,19 +825,21 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             else if (getAncestorByClass(target, "netSizeCol"))
             {
                 var infoTipURL = row.repObject.href + "-netsize";
-                if (infoTipURL == this.infoTipURL)
+                if (infoTipURL == this.infoTipURL && row.repObject == this.infoTipFile)
                     return true;
 
                 this.infoTipURL = infoTipURL;
+                this.infoTipFile = row.repObject;
                 return this.populateSizeInfoTip(infoTip, row.repObject);
             }
             else if (getAncestorByClass(target, "netTimeCol"))
             {
                 var infoTipURL = row.repObject.href + "-nettime";
-                if (infoTipURL == this.infoTipURL)
+                if (infoTipURL == this.infoTipURL && row.repObject == this.infoTipFile)
                     return true;
 
                 this.infoTipURL = infoTipURL;
+                this.infoTipFile = row.repObject;
                 return this.populateTimeInfoTip(infoTip, row.repObject);
             }
             else if (hasClass(row, "category-image") &&
@@ -2724,7 +2726,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
         TR(
             TD(),
             TD("$startTime.time|formatStartTime"),
-            TD({"colspan": 3},
+            TD({"colspan": 2},
                 "$startTime|getLabel"
             )
         ),
