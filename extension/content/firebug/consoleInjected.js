@@ -93,7 +93,11 @@ window._getFirebugConsoleElement = function()  // could this be done in extensio
         element.firebugIgnore = true;
         element.setAttribute("style", "display:none");
 
-        document.documentElement.appendChild(element);
+        var body = document.body ? document.body : document.getElementsByTagName("body")[0];
+        if (!body)
+            body = document.documentElement;  // For non-HTML docs
+
+        body.appendChild(element);
     }
     return element;
 };
