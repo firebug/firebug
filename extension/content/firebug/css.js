@@ -200,6 +200,10 @@ Firebug.CSSModule = extend(Firebug.Module,
                 "http://www.w3.org/XML/1998/namespace",
                 "base",
                 url.directory);
+            if (ownerNode.hasAttribute("media"))
+            {
+              editStyleSheet.setAttribute("media", ownerNode.getAttribute("media"));
+            }
 
             // Insert the edited stylesheet directly after the old one to ensure the styles
             // cascade properly.
