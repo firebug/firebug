@@ -134,12 +134,8 @@
 
                         <!-- Break On Next -->
                         <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
-                                tooltiptext="script.Break On Next" breakable="disabled">
-                            <menupopup id="fbBreakOnNextOptions" />
-                        </toolbarbutton>
+                                tooltiptext="script.Break On Next" breakable="disabled" />
                     </hbox>
-
-                    <spacer width="5"/>
 
                     <!-- Tab Bar -->
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
