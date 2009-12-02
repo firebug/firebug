@@ -120,7 +120,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
-        if (node && node.firebugIgnore)
+        if (node && node.firebugIgnore && !node.fbProxyFor)
             return;
 
         var context = this.inspectingContext;
@@ -130,6 +130,9 @@ Firebug.Inspector = extend(Firebug.Module,
             context.clearTimeout(this.inspectTimeout);
             delete this.inspectTimeout;
         }
+
+        if(node && node.fbProxyFor)
+            node = node.fbProxyFor;
 
         this.highlightObject(node, context, "frame");
 
@@ -852,6 +855,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
                             FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body "+body+" "+exc, exc);
                     }
                 }
+
+                createProxiesForDisabledElements(body);
             }
         }
         else
@@ -1203,10 +1208,41 @@ function attachStyles(context, body)
 {
     var doc = body.ownerDocument;
     if (!context.highlightStyle)
+    {
         context.highlightStyle = createStyleSheet(doc, highlightCSS);
+        context.highlightStyle.firebugIgnore = true;
+    }
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
         addStyleSheet(body.ownerDocument, context.highlightStyle);
+}
+
+function createProxiesForDisabledElements(body)
+{
+    var i, rect, div,
+        doc = body.ownerDocument,
+        nodes = doc.getElementsByTagName("*");
+    
+    for(i = 0; i < nodes.length; i++)
+    {
+        if(nodes[i].hasAttribute("disabled") && !nodes[i].fbHasProxyElement)
+        {
+            rect = nodes[i].getBoundingClientRect();
+            
+            div = document.createElement("DIV");
+            div.className = "fbProxyElement";
+            div.style.left = rect.left + "px";
+            div.style.top = rect.top + body.scrollTop + "px";
+            div.style.width = rect.width + "px";
+            div.style.height = rect.height + "px";
+            div.firebugIgnore = true;
+
+            div.fbProxyFor = nodes[i];
+            nodes[i].fbHasProxyElement = true;
+            
+            body.appendChild(div);
+        }
+    }
 }
 
 function rgbToHex(value)

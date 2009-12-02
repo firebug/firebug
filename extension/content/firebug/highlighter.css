@@ -160,3 +160,13 @@
     margin-left: -1px;
     border-left: 1px solid #999999;
 }
+
+.fbProxyElement {
+    position: absolute;
+    background-color: transparent;
+    z-index: 2147483646;
+    margin: 0;
+    padding: 0;
+    outline: 0;
+    border: 0 none;
+}
