@@ -688,7 +688,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     onMutateAttr: function(event)
     {
         var target = event.target;
-        if (target.firebugIgnore)
+        if (unwrapObject(target).firebugIgnore)
             return;
 
         var attrChange = event.attrChange;
@@ -724,7 +724,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     onMutateNode: function(event)
     {
         var target = event.target;
-        if (target.firebugIgnore)
+        if (unwrapObject(target).firebugIgnore)
             return;
 
         var parent = event.relatedNode;
@@ -1712,7 +1712,7 @@ function getNodeTag(node, expandAll)
     {
         if (node instanceof HTMLAppletElement)
             return getEmptyElementTag(node);
-        else if (node.firebugIgnore)
+        else if (unwrapObject(node).firebugIgnore)
             return null;
         else if (HTMLLib.isContainerElement(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;

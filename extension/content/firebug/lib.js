@@ -337,7 +337,7 @@ this.isAncestorIgnored = function(node)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
-        if (parent.firebugIgnore)
+        if (this.unwrapObject(parent).firebugIgnore)
             return true;
     }
 
