@@ -2870,8 +2870,16 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
             TD({"colspan": 3, "height": "7px"})
         ),
 
+    descTag:
+        TR(
+            TD({"colspan": 3, "class": "sizeInfoDescCol"}, "$size.label")
+        ),
+
     getRowTag: function(size)
     {
+        if (size.size == -2)
+            return this.descTag;
+
         return (size.label == "-") ? this.separatorTag : this.sizeTag;
     },
 
@@ -2892,15 +2900,23 @@ Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 
     render: function(file, parentNode)
     {
+        var postText = Utils.getPostText(file, FirebugContext, true);
+        postText = postText ? postText : "";
+
         var sizeInfo = [];
-        sizeInfo.push({label: $STR("net.sizeinfo.Response Body"),
-            size: file.size});
+        sizeInfo.push({label: $STR("net.sizeinfo.Response Body"), size: file.size});
+        sizeInfo.push({label: $STR("net.sizeinfo.Post Body"), size: postText.length});
 
         if (file.requestHeadersText)
         {
+            var responseHeaders = file.responseHeadersText ? file.responseHeadersText : 0;
+
             sizeInfo.push({label: "-", size: 0});
-            sizeInfo.push({label: $STR("net.sizeinfo.Sent"), size: file.totalSent});
-            sizeInfo.push({label: $STR("net.sizeinfo.Received"), size: file.totalReceived});
+            sizeInfo.push({label: $STR("net.sizeinfo.Total Received") + "*",
+                size: responseHeaders.length + file.size});
+            sizeInfo.push({label: $STR("net.sizeinfo.Total Sent") + "*",
+                size: file.requestHeadersText.length + postText.length});
+            sizeInfo.push({label: "*Including Headers", size: -2});
         }
 
         this.tag.replace({sizeInfo: sizeInfo}, parentNode);
@@ -4410,8 +4426,7 @@ var NetHttpObserver =
 
             // Some requests are not associated with any page (e.g. favicon).
             // These are ignored as Net panel shows only page requests.
-            if (win)
-                var tabId = Firebug.getTabIdForWindow(win);
+            var tabId = win ? Firebug.getTabIdForWindow(win) : null;
             if (!tabId)
             {
                 if (FBTrace.DBG_NET)
