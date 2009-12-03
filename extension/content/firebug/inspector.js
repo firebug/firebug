@@ -482,7 +482,7 @@ function getImageMapHighlighter(context)
             if(!canvas)
             {
                 canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-                canvas.firebugIgnore = true;
+                canvas.wrappedJSObject.firebugIgnore = true;
                 canvas.id = "firebugCanvas";
                 canvas.className = "firebugCanvas";
                 canvas.width = context.window.innerWidth;
@@ -890,7 +890,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             function createEdge(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                div.wrappedJSObject.firebugIgnore = true;
                 div.className = "firebugHighlight";
                 return div;
             }
@@ -1123,7 +1123,7 @@ BoxModelHighlighter.prototype =
             function createRuler(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                div.wrappedJSObject.firebugIgnore = true;
                 div.className = "firebugRuler firebugRuler"+name;
                 return div;
             }
@@ -1131,7 +1131,7 @@ BoxModelHighlighter.prototype =
             function createBox(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                div.wrappedJSObject.firebugIgnore = true;
                 div.className = "firebugLayoutBox firebugLayoutBox"+name;
                 return div;
             }
@@ -1139,7 +1139,7 @@ BoxModelHighlighter.prototype =
             function createLine(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                div.wrappedJSObject.firebugIgnore = true;
                 div.className = "firebugLayoutLine firebugLayoutLine"+name;
                 return div;
             }
@@ -1210,7 +1210,7 @@ function attachStyles(context, body)
     if (!context.highlightStyle)
     {
         context.highlightStyle = createStyleSheet(doc, highlightCSS);
-        context.highlightStyle.firebugIgnore = true;
+        context.highlightStyle.wrappedJSObject.firebugIgnore = true;
     }
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
@@ -1229,13 +1229,13 @@ function createProxiesForDisabledElements(body)
         {
             rect = nodes[i].getBoundingClientRect();
             
-            div = document.createElement("DIV");
+            div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
             div.className = "fbProxyElement";
             div.style.left = rect.left + "px";
             div.style.top = rect.top + body.scrollTop + "px";
             div.style.width = rect.width + "px";
             div.style.height = rect.height + "px";
-            div.firebugIgnore = true;
+            div.wrappedJSObject.firebugIgnore = true;
 
             div.fbProxyFor = nodes[i];
             nodes[i].fbHasProxyElement = true;
