@@ -298,7 +298,7 @@ this.createStyleSheet = function(doc, url)
     style.setAttribute("charset","utf-8");
     style.setAttribute("type", "text/css");
     style.innerHTML = this.getResource(url);
-    this.unwrapObject(style).firebugIgnore = true;
+    FBL.unwrapObject(style).firebugIgnore = true;
     return style;
 }
 
@@ -317,7 +317,7 @@ this.addScript = function(doc, id, src)
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
-        this.unwrapObject(element).firebugIgnore = true;
+        FBL.unwrapObject(element).firebugIgnore = true;
 
     element.innerHTML = src;
     if (doc.documentElement)
@@ -337,7 +337,7 @@ this.isAncestorIgnored = function(node)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
-        if (this.unwrapObject(parent).firebugIgnore)
+        if (FBL.unwrapObject(parent).firebugIgnore)
             return true;
     }
 
@@ -2692,23 +2692,32 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     return "(?)";
 };
 
-this.getFunctionArgNames = function(fn)
+this.getFunctionArgNames = function(frame)
 {
-    var m = reFunctionArgNames.exec(this.safeToString(fn));
-    if (m)
+    var script = frame.script;
+    if (script.getParameterNames)  // FF 3.6 or later
     {
-        var argNames = m[2].split(", ");
-        if (argNames.length && argNames[0])
-            return argNames;
+        return script.getParameterNames();
     }
-    return [];
+    else // FF 3.5 or eariler
+    {
+        return []; // TODO
+        var m = reFunctionArgNames.exec(this.safeToString(fn));
+        if (m)
+        {
+            var argNames = m[2].split(", ");
+            if (argNames.length && argNames[0])
+                return argNames;
+        }
+        return [];
+    }
 };
 
-this.getFunctionArgValues = function(fn, frame)
+this.getFunctionArgValues = function(frame)
 {
     var values = [];
 
-    var argNames = this.getFunctionArgNames(fn);
+    var argNames = this.getFunctionArgNames(frame);
     var scope = FBL.unwrapIValue(frame.scope);
 
     for (var i = 0; i < argNames.length; ++i)
@@ -6798,7 +6807,7 @@ this.ReversibleRegExp = function(regex, flags)
 this.unwrapObject = function(object)
 {
     // TODO: We might be able to make this check more authoritative with QueryInterface.
-    if (!object)
+    if (typeof(object) === 'undefined' || object == null)
         return object;
 
     if (object.wrappedJSObject)
@@ -6809,7 +6818,8 @@ this.unwrapObject = function(object)
 
 this.unwrapIValue = function(object)
 {
-
+    if (object.jsType === 3)  // function type jsdIValues cannot be re-wrappered.
+        return;
     var unwrapped = object.getWrappedValue();
     try
     {
