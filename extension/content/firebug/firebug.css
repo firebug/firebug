@@ -191,11 +191,6 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
     cursor: move;
 }
 
-/************************************************************************************************/
-
-panelTab[breakOnNextArmed="true"] > .panelTab-text {
-    text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange;
-}
 
 /************************************************************************************************/
 /* Don't let Personas to destroy Firebug's CSS */
@@ -208,11 +203,13 @@ panelTab[selected="true"] {
     color: black !important;
 }
 
-.panelTab-text {
-    text-shadow: none !important;
-}
-
 .toolbar-text-button, .panelStatusLabel {
     text-shadow: none !important;
     color: black !important;
+}
+
+/************************************************************************************************/
+
+panelTab[breakOnNextArmed="true"] > .panelTab-text {
+    text-shadow: 1px 1px 2px darkGray, 0 0 1em orange, 0 0 0.2em orange !important;
 }
