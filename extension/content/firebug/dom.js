@@ -31,9 +31,12 @@ const ignoreVars =
     "JavaObject": 1,
     "JavaClass": 1,
     "JavaPackage": 1,
+    // internal firebug things
     "_firebug": 1,
     "_FirebugConsole": 1,
     "_FirebugCommandLine": 1,
+    "loadFirebugConsole": 1,
+    "_getFirebugConsoleElement": 1,
 };
 
 // ************************************************************************************************
