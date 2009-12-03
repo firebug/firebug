@@ -38,7 +38,7 @@ this.reUpperCase = /[A-Z]/;
 
 const reSplitLines = /\r\n|\r|\n/;
 const reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
-const reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
+const reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
 const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 
 const overrideDefaultsWithPersistedValuesTimeout = 500;
@@ -2623,11 +2623,6 @@ this.getSourceLinkForScript = function(script, context)
             // no-op for detrace
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
         }
-    }
-    else
-    {
-        if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("getSourceLineForScript FAILS, no sourcefile for script ", script);
     }
 };
 

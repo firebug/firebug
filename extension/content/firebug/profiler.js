@@ -112,18 +112,20 @@ Firebug.Profiler = extend(Firebug.Module,
         {
             if (script.callCount)
             {
-                var sourceLink = FBL.getSourceLinkForScript(script, context);
-                if (sourceLink && sourceLink.href in sourceFileMap)
+                if (!Firebug.filterSystemURLs || !isSystemURL(script.fileName))
                 {
-                    var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,
-                        script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime, sourceLink);
-                    calls.push(call);
+                    var sourceLink = FBL.getSourceLinkForScript(script, context);
+                    if (sourceLink && sourceLink.href in sourceFileMap)
+                    {
+                        var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,
+                                script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime, sourceLink);
+                        calls.push(call);
 
-                    totalCalls += script.callCount;
-                    totalTime += script.totalOwnExecutionTime;
-
-                    script.clearProfileData();
+                        totalCalls += script.callCount;
+                        totalTime += script.totalOwnExecutionTime;
+                    }
                 }
+                script.clearProfileData();
             }
         }});
 
