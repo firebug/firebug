@@ -11,6 +11,9 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
+const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
+
 var FBTrace = null;
 
 // ************************************************************************************************
@@ -26,6 +29,8 @@ function ChannelListener()
     this.wrappedJSObject = this;
 
     this.window = null;
+    this.request = null;
+
     this.endOfLine = false;
     this.ignore = false;
 
@@ -35,6 +40,14 @@ function ChannelListener()
     // The proxy listener is used to send events to possible listeners (e.g. net panel)
     // and properly pass the request object through nsIStreamListner to chrome-window space.
     this.proxyListener = null;
+
+    if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
+    {
+        // The response will be written into the outputStream of this pipe.
+        // Both ends of the pipe must be blocking.
+        this.sink = CCIN("@mozilla.org/pipe;1", "nsIPipe");
+        this.sink.init(true, true, 0, 0, null);
+    }
 
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports)
         .wrappedJSObject.getTracer("extensions.firebug");
@@ -49,16 +62,25 @@ ChannelListener.prototype =
 
         try
         {
-            var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-            var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-            var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
+            if (this.sink)
+            {
+                var bis = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                bis.setInputStream(inputStream);
+                var data = bis.readBytes(count);
+            }
+            else
+            {
+                var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
+                var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
 
-            binaryInputStream.setInputStream(inputStream);
-            storageStream.init(8192, count, null);
-            binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
+                binaryInputStream.setInputStream(inputStream);
+                storageStream.init(8192, count, null);
+                binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
 
-            var data = binaryInputStream.readBytes(count);
-            binaryOutputStream.writeBytes(data, count);
+                var data = binaryInputStream.readBytes(count);
+                binaryOutputStream.writeBytes(data, count);
+            }
 
             // Avoid creating additional empty line if response comes in more pieces
             // and the split is made just between "\r" and "\n" (Win line-end).
@@ -77,7 +99,8 @@ ChannelListener.prototype =
                 this.ignore = true;
 
             // Let other listeners use the stream.
-            return storageStream.newInputStream(0);
+            if (storageStream)
+                return storageStream.newInputStream(0);
         }
         catch (err)
         {
@@ -93,7 +116,13 @@ ChannelListener.prototype =
     {
         try
         {
-            var newStream;
+            // Use wrappedJSObject to bypass IDL definition that doesn't return any value.
+            var newStream = this.proxyListener.wrappedJSObject.onDataAvailable(request, requestContext,
+                inputStream, offset, count);
+
+            if (newStream)
+                inputStream = newStream;
+
             var context = this.getContext(this.window);
             if (context)
             {
@@ -101,13 +130,6 @@ ChannelListener.prototype =
                 if (newStream)
                     inputStream = newStream;
             }
-
-            // Use wrappedJSObject to bypass IDL definition that doesn't return any value.
-            newStream = this.proxyListener.wrappedJSObject.onDataAvailable(request, requestContext,
-                inputStream, offset, count);
-
-            if (newStream)
-                inputStream = newStream;
         }
         catch (err)
         {
@@ -139,7 +161,7 @@ ChannelListener.prototype =
     {
         try
         {
-            request = request.QueryInterface(Ci.nsIChannel);
+            this.request = request.QueryInterface(Ci.nsIHttpChannel);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest; " +
@@ -154,7 +176,12 @@ ChannelListener.prototype =
                 // onStartRequest). Let's ignore the response if it should not be cached.
                 this.ignore = !this.shouldCacheRequest(request);
 
+                // Notify proxy listener.
                 this.proxyListener.onStartRequest(request, requestContext);
+
+                // Listen for incoming data.
+                if (!this.ignore && this.sink)
+                    this.sink.inputStream.asyncWait(this, 0, 0, null);
             }
         }
         catch (err)
@@ -187,6 +214,10 @@ ChannelListener.prototype =
             var context = this.getContext(this.window);
             if (context)
                 this.proxyListener.onStopRequest(request, requestContext, statusCode);
+
+            // Make sure the listener for incoming data is removed.
+            if (this.sink)
+                this.sink.inputStream.asyncWait(null, 0, 0, null);
         }
         catch (err)
         {
@@ -205,10 +236,36 @@ ChannelListener.prototype =
         return null;
     },
 
+    /* nsIInputStreamCallback */
+    onInputStreamReady : function(stream)
+    {
+        try
+        {
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady " +
+                    safeGetName(this.request));
+
+            if (stream instanceof Ci.nsIAsyncInputStream)
+            {
+                this.onDataAvailable(this.request, null, stream, 0, stream.available());
+
+                // Listen for further incoming data.
+                if (!this.ignore)
+                    stream.asyncWait(this, 0, 0, null);
+            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION\n", err);
+        }
+    },
+
     /* nsISupports */
     QueryInterface: function(iid)
     {
         if (iid.equals(Ci.nsIStreamListener) ||
+            iid.equals(Ci.nsIInputStreamCallback) ||
             iid.equals(Ci.nsISupportsWeakReference) ||
             iid.equals(Ci.nsITraceableChannel) ||
             iid.equals(Ci.nsISupports))
@@ -226,6 +283,8 @@ ChannelListener.prototype =
         return null;
     }
 }
+
+// ************************************************************************************************
 
 function safeGetName(request)
 {

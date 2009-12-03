@@ -10,6 +10,8 @@ const Ci = Components.interfaces;
 
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 
 // Maximum cached size of a signle response (bytes)
 var responseSizeLimit = 1024 * 1024 * 5;
@@ -156,15 +158,30 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
             request.QueryInterface(Ci.nsITraceableChannel);
 
-            // Register traceable channel listener in order to intercept all incoming data for
-            // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
+            // Create Firebug's stream listener that is tracing HTTP responses.
             var newListener = CCIN("@joehewitt.com/firebug-channel-listener;1", "nsIStreamListener");
             newListener.wrappedJSObject.window = win;
-            newListener.wrappedJSObject.listener = request.setNewListener(newListener);
 
-            // Set proxy for proper passing nsIRequest objects from XPCOM scope.
+            // Set proxy listener for back notifiction from XPCOM to chrome (using real interface
+            // so nsIRequest object is properly passed from XPCOM scope).
             newListener.QueryInterface(Ci.nsITraceableChannel);
             newListener.setNewListener(new ChannelListenerProxy(win));
+
+            if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
+            {
+                var tee = CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
+                var init = (tee instanceof Ci.nsIStreamListenerTee_1_9_2) ? tee.initWithObserver : tee.init;
+
+                // Add tee listener into the chain of request stream listeners so, the chain
+                // doesn't include a JS code. This way all exceptions are propertly distributed
+                // (#515051).
+                var originalListener = request.setNewListener(tee);
+                init(originalListener, newListener.wrappedJSObject.sink.outputStream, newListener);
+            }
+            else
+            {
+                newListener.wrappedJSObject.listener = request.setNewListener(newListener);
+            }
 
             // xxxHonza: this is a workaround for #489317. Just passing
             // shouldCacheRequest method to the component so, onStartRequest
