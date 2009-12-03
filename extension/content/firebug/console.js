@@ -265,7 +265,7 @@ Firebug.Console = extend(ActivableConsole,
 
         // Make sure possible errors coming from the page and displayed in the Firefox
         // status bar are removed.
-        Firebug.Console.clear();
+        this.clear();
     },
 
     onSuspendFirebug: function()
