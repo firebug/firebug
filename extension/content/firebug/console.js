@@ -588,6 +588,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.onScroller = bind(this.onScroll, this);
             this.panelNode.addEventListener("scroll", this.onScroller, true);
         }
+
+        this.onResizer = bind(this.onResize, this);
+        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
+        this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
     },
 
     destroyNode : function()
@@ -595,6 +599,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
         if (this.onScroller)
             this.panelNode.removeEventListener("scroll", this.onScroller, true);
+
+        this.resizeEventTarget.removeEventListener("resize", this.onResizer, true);
     },
 
     shutdown: function()
@@ -860,6 +866,16 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if(FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.onScroll ------------------ scrolledToBottom: "+isScrolledToBottom, event);
     },
+
+    onResize: function(event)
+    {
+        if(FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onResize ------------------ scrolledToBottom: "+this.wasScrolledToBottom, event);
+
+        if (this.wasScrolledToBottom)
+            scrollToBottom(this.panelNode);
+    },
+
 });
 
 // ************************************************************************************************
