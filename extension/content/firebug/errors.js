@@ -185,7 +185,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (context)
                 {
                     if (context.window)
-                        FBTrace.sysout((isWarning?"warning":"error")+" logged to ",  context.window.location+"\n");
+                        FBTrace.sysout((isWarning?"warning":"error")+" logged to "+ context.getName());
                     else
                     {
                         FBTrace.sysout("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
@@ -201,8 +201,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             // Errors prior to console init will come out here, eg error message from Firefox startup jjb.
             if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.sysout("errors.observe FAILS", exc);
-                FBTrace.sysout("errors.observe object", object);
+                FBTrace.sysout("errors.observe FAILS "+exc, exc);
+                FBTrace.sysout("errors.observe object "+object, object);
             }
         }
     },
@@ -213,7 +213,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);
+            FBTrace.sysout("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", {object: object, errorStackTrace: Firebug.errorStackTrace});
 
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
