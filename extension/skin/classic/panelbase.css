@@ -221,6 +221,7 @@ code {
     color: #000000;
     display: none;
     white-space: nowrap;
+    pointer-events: none;
 }
 
 .infoTip[active="true"] {
