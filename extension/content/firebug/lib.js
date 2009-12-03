@@ -1674,6 +1674,9 @@ this.getElementHTML = function(element)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
+            if (unwrapObject(elt).firebugIgnore)
+                return;
+            
             html.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -1743,6 +1746,9 @@ this.getElementXML = function(element)
     {
         if (elt.nodeType == Node.ELEMENT_NODE)
         {
+            if (unwrapObject(elt).firebugIgnore)
+                return;
+            
             xml.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -6804,7 +6810,7 @@ this.ReversibleRegExp = function(regex, flags)
     };
 };
 
-this.unwrapObject = function(object)
+function unwrapObject(object)
 {
     // TODO: We might be able to make this check more authoritative with QueryInterface.
     if (typeof(object) === 'undefined' || object == null)
@@ -6815,6 +6821,7 @@ this.unwrapObject = function(object)
 
     return object;
 }
+this.unwrapObject = unwrapObject;
 
 this.unwrapIValue = function(object)
 {
