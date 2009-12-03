@@ -153,7 +153,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     memberIterator: function(object, level)
     {
-        return this.getMembers(object, level, this.context);
+        return Firebug.DOMBasePanel.prototype.getMembers(object, level, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
