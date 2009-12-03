@@ -890,7 +890,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             function createEdge(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.wrappedJSObject.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugHighlight";
                 return div;
             }
@@ -1123,7 +1123,7 @@ BoxModelHighlighter.prototype =
             function createRuler(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.wrappedJSObject.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugRuler firebugRuler"+name;
                 return div;
             }
@@ -1131,7 +1131,7 @@ BoxModelHighlighter.prototype =
             function createBox(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.wrappedJSObject.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugLayoutBox firebugLayoutBox"+name;
                 return div;
             }
@@ -1139,7 +1139,7 @@ BoxModelHighlighter.prototype =
             function createLine(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.wrappedJSObject.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugLayoutLine firebugLayoutLine"+name;
                 return div;
             }
@@ -1208,10 +1208,7 @@ function attachStyles(context, body)
 {
     var doc = body.ownerDocument;
     if (!context.highlightStyle)
-    {
         context.highlightStyle = createStyleSheet(doc, highlightCSS);
-        context.highlightStyle.wrappedJSObject.firebugIgnore = true;
-    }
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
         addStyleSheet(body.ownerDocument, context.highlightStyle);
@@ -1235,7 +1232,7 @@ function createProxiesForDisabledElements(body)
             div.style.top = rect.top + body.scrollTop + "px";
             div.style.width = rect.width + "px";
             div.style.height = rect.height + "px";
-            div.wrappedJSObject.firebugIgnore = true;
+            unwrapObject(div).firebugIgnore = true;
 
             div.fbProxyFor = nodes[i];
             nodes[i].fbHasProxyElement = true;

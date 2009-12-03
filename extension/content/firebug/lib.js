@@ -296,9 +296,9 @@ this.createStyleSheet = function(doc, url)
 {
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
     style.setAttribute("charset","utf-8");
-    style.firebugIgnore = true;
     style.setAttribute("type", "text/css");
     style.innerHTML = this.getResource(url);
+    this.unwrapObject(style).firebugIgnore = true;
     return style;
 }
 
@@ -317,7 +317,7 @@ this.addScript = function(doc, id, src)
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
-        element.firebugIgnore = true;
+        this.unwrapObject(element).firebugIgnore = true;
 
     element.innerHTML = src;
     if (doc.documentElement)

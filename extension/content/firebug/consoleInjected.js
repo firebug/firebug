@@ -84,13 +84,10 @@ window._getFirebugConsoleElement = function()  // could this be done in extensio
     var element = document.getElementById("_firebugConsole");
     if (!element)
     {
-        if (document.documentElement.nodeName == document.documentElement.nodeName.toUpperCase())
-            element = document.createElement("div"); 
-        else
-            element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
+        element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
 
         element.setAttribute("id", "_firebugConsole");
-        element.firebugIgnore = true;
+        unwrapObject(element).firebugIgnore = true;
         element.setAttribute("style", "display:none");
 
         var body = document.body ? document.body : document.getElementsByTagName("body")[0];

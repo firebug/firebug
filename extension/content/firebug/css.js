@@ -194,7 +194,7 @@ Firebug.CSSModule = extend(Firebug.Module,
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
                 "http://www.w3.org/1999/xhtml",
                 "style");
-            editStyleSheet.firebugIgnore = true;
+            unwrapObject(editStyleSheet).firebugIgnore = true;
             editStyleSheet.setAttribute("type", "text/css");
             editStyleSheet.setAttributeNS(
                 "http://www.w3.org/XML/1998/namespace",
@@ -1275,7 +1275,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 var doc = subwin.document;
                 var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
                 style.setAttribute("charset","utf-8");
-                style.firebugIgnore = true;
+                unwrapObject(style).firebugIgnore = true;
                 style.setAttribute("type", "text/css");
                 style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
                 addStyleSheet(doc, style);
