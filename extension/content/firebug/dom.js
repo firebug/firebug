@@ -153,7 +153,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     memberIterator: function(object, level)
     {
-        return getMembers(object, level, this.context);
+        return this.getMembers(object, level, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -276,7 +276,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                 }
 
                 var context = panel ? panel.context : null;
-                var members = getMembers(target.repObject, level+1, context);
+                var members = Firebug.DOMBasePanel.prototype.getMembers(target.repObject, level+1, context);
 
                 var rowTag = this.rowTag;
                 var lastRow = row;
@@ -355,10 +355,159 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     rebuild: function(update, scrollTop)
     {
         dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
-        var members = getMembers(this.selection, 0, this.context);
-        expandMembers(members, this.toggles, 0, 0, this.context);
+        var members = this.getMembers(this.selection, 0, this.context);
+        this.expandMembers(members, this.toggles, 0, 0, this.context);
 
         this.showMembers(members, update, scrollTop);
+    },
+    /*
+     *  @param object a user-level object wrapped in security blanket
+     *  @param level for a.b.c, level is 2
+     *  @param context
+     */
+    getMembers: function(object, level, context)
+    {
+        if (!level)
+            level = 0;
+
+        var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
+            domProps = [], domFuncs = [], domConstants = [];
+
+        try
+        {
+            var domMembers = getDOMMembers(object);
+            var insecureObject = unwrapObject(object);
+
+            for (var name in insecureObject)  // enumeration is safe
+            {
+                // Ignore only global variables (properties of the |window| object).
+                // javascript.options.strict says ignoreVars is undefined.
+                if (ignoreVars[name] == 1 && (object instanceof Window))
+                {
+                    if (FBTrace.DBG_DOM)
+                        FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
+                    continue;
+                }
+
+                var val;
+                try
+                {
+                    val = insecureObject[name];  // getter is safe
+                }
+                catch (exc)
+                {
+                    // Sometimes we get exceptions trying to access certain members
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+                        FBTrace.sysout("dom.getMembers cannot access "+name, exc);
+                }
+
+                var ordinal = parseInt(name);
+                if (ordinal || ordinal == 0)
+                {
+                    addMember(object, "ordinal", ordinals, name, val, level, 0, context);
+                }
+                else if (typeof(val) == "function")
+                {
+                    if (isClassFunction(val))
+                        addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                    else if (name in domMembers)
+                        addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                    else
+                        addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                }
+                else
+                {
+                    if (name in domMembers)
+                        addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
+                    else if (name in domConstantMap)
+                        addMember(object, "dom", domConstants, name, val, level, 0, context);
+                    else
+                        addMember(object, "user", userProps, name, val, level, 0, context);
+                }
+            }
+        }
+        catch (exc)
+        {
+            // Sometimes we get exceptions just from trying to iterate the members
+            // of certain objects, like StorageList, but don't let that gum up the works
+            //throw exc;
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+                FBTrace.sysout("dom.getMembers FAILS: ", exc);
+        }
+
+        function sortName(a, b) { return a.name > b.name ? 1 : -1; }
+        function sortOrder(a, b) { return a.order > b.order ? 1 : -1; }
+
+        var members = [];
+
+        members.push.apply(members, ordinals);
+
+        if (Firebug.showUserProps)
+        {
+            userProps.sort(sortName);
+            members.push.apply(members, userProps);
+        }
+
+        if (Firebug.showUserFuncs)
+        {
+            userClasses.sort(sortName);
+            members.push.apply(members, userClasses);
+
+            userFuncs.sort(sortName);
+            members.push.apply(members, userFuncs);
+        }
+
+        if (Firebug.showDOMProps)
+        {
+            domProps.sort(sortName);
+            members.push.apply(members, domProps);
+        }
+
+        if (Firebug.showDOMFuncs)
+        {
+            domFuncs.sort(sortName);
+            members.push.apply(members, domFuncs);
+        }
+
+        if (Firebug.showDOMConstants)
+            members.push.apply(members, domConstants);
+
+        return members;
+    },
+
+    expandMembers: function (members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
+    {
+        var expanded = 0;
+        for (var i = offset; i < members.length; ++i)
+        {
+            var member = members[i];
+            if (member.level > level)
+                break;
+
+            if ( toggles.hasOwnProperty(member.name) )
+            {
+                member.open = "opened";  // member.level <= level && member.name in toggles.
+                if (member.type == 'string')
+                    continue;
+                var newMembers = this.getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
+
+                var args = [i+1, 0];
+                args.push.apply(args, newMembers);
+                members.splice.apply(members, args);
+                if (FBTrace.DBG_DOM)
+                {
+                    FBTrace.sysout("expandMembers member.name", member.name);
+                    FBTrace.sysout("expandMembers toggles", toggles);
+                    FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
+                    FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
+                }
+
+                expanded += newMembers.length;
+                i += newMembers.length + this.expandMembers(members, toggles[member.name], i+1, level+1, context);
+            }
+        }
+
+        return expanded;
     },
 
     showMembers: function(members, update, scrollTop)
@@ -1422,10 +1571,10 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
             var scopeChain = this.generateScopeChain(frame.scope);
             addMember(object, "scopes", members, "scopeChain", scopeChain, 0);
 
-            members.push.apply(members, getMembers(scopeChain[0], 0, this.context));
+            members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
         }
 
-        expandMembers(members, this.toggles, 0, 0, this.context);
+        this.expandMembers(members, this.toggles, 0, 0, this.context);
         this.showMembers(members, !newFrame);
     },
 
@@ -1533,153 +1682,6 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
 // ************************************************************************************************
 // Local Helpers
-
-function getMembers(object, level, context)  // we expect object to be user-level object wrapped in security blanket
-{
-    if (!level)
-        level = 0;
-
-    var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
-        domProps = [], domFuncs = [], domConstants = [];
-
-    try
-    {
-        var domMembers = getDOMMembers(object);
-        var insecureObject = unwrapObject(object);
-
-        for (var name in insecureObject)  // enumeration is safe
-        {
-            // Ignore only global variables (properties of the |window| object).
-            // javascript.options.strict says ignoreVars is undefined.
-            if (ignoreVars[name] == 1 && (object instanceof Window))
-            {
-                if (FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
-                continue;
-            }
-
-            var val;
-            try
-            {
-                val = insecureObject[name];  // getter is safe
-            }
-            catch (exc)
-            {
-                // Sometimes we get exceptions trying to access certain members
-                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.getMembers cannot access "+name, exc);
-            }
-
-            var ordinal = parseInt(name);
-            if (ordinal || ordinal == 0)
-            {
-                addMember(object, "ordinal", ordinals, name, val, level, 0, context);
-            }
-            else if (typeof(val) == "function")
-            {
-                if (isClassFunction(val))
-                    addMember(object, "userClass", userClasses, name, val, level, 0, context);
-                else if (name in domMembers)
-                    addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
-                else
-                    addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
-            }
-            else
-            {
-                if (name in domMembers)
-                    addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                else if (name in domConstantMap)
-                    addMember(object, "dom", domConstants, name, val, level, 0, context);
-                else
-                    addMember(object, "user", userProps, name, val, level, 0, context);
-            }
-        }
-    }
-    catch (exc)
-    {
-        // Sometimes we get exceptions just from trying to iterate the members
-        // of certain objects, like StorageList, but don't let that gum up the works
-        //throw exc;
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.getMembers FAILS: ", exc);
-    }
-
-    function sortName(a, b) { return a.name > b.name ? 1 : -1; }
-    function sortOrder(a, b) { return a.order > b.order ? 1 : -1; }
-
-    var members = [];
-
-    members.push.apply(members, ordinals);
-
-    if (Firebug.showUserProps)
-    {
-        userProps.sort(sortName);
-        members.push.apply(members, userProps);
-    }
-
-    if (Firebug.showUserFuncs)
-    {
-        userClasses.sort(sortName);
-        members.push.apply(members, userClasses);
-
-        userFuncs.sort(sortName);
-        members.push.apply(members, userFuncs);
-    }
-
-    if (Firebug.showDOMProps)
-    {
-        domProps.sort(sortName);
-        members.push.apply(members, domProps);
-    }
-
-    if (Firebug.showDOMFuncs)
-    {
-        domFuncs.sort(sortName);
-        members.push.apply(members, domFuncs);
-    }
-
-    if (Firebug.showDOMConstants)
-        members.push.apply(members, domConstants);
-
-    return members;
-}
-
-function expandMembers(members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
-{
-    var expanded = 0;
-    for (var i = offset; i < members.length; ++i)
-    {
-        var member = members[i];
-        if (member.level > level)
-            break;
-
-        if ( toggles.hasOwnProperty(member.name) )
-        {
-            member.open = "opened";  // member.level <= level && member.name in toggles.
-            if (member.type == 'string')
-                continue;
-            var newMembers = getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
-
-            var args = [i+1, 0];
-            args.push.apply(args, newMembers);
-            members.splice.apply(members, args);
-            if (FBTrace.DBG_DOM)
-            {
-                FBTrace.sysout("expandMembers member.name", member.name);
-                FBTrace.sysout("expandMembers toggles", toggles);
-                FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
-                FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
-            }
-
-            expanded += newMembers.length;
-            i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1, context);
-        }
-    }
-
-    return expanded;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 function isClassFunction(fn)
 {
