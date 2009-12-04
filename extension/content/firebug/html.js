@@ -129,7 +129,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 this.ioBox.contractObject(this.selection);
         }
         else if (dir == "right")
-            this.ioBox.expandObject(this.selection);
+        {
+            var box = this.ioBox.createObjectBox(this.selection);
+            if (!hasClass(box, "open"))
+                this.ioBox.expandObject(this.selection);
+            else 
+                this.selectNext();
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -212,8 +218,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         Firebug.Editor.startEditing(box, html, editor);
     },
 
-    deleteNode: function(node)
+    deleteNode: function(node, dir)
     {
+        if (dir)
+            this.selectNodeBy(dir);
         Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
@@ -792,6 +800,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.selectNodeBy("left");
         else if (event.keyCode == KeyEvent.DOM_VK_RIGHT)
             this.selectNodeBy("right");
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE)
+            this.deleteNode(this.selection, "up");
+        else if (event.keyCode == KeyEvent.DOM_VK_DELETE)
+            this.deleteNode(this.selection, "down");
         else
             return;
 
