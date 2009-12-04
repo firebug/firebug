@@ -305,7 +305,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
             netProgress.loaded = true;
 
             // Set Page title and id into all document objects.
-            for (var i; i<netProgress.documents.length; i++)
+            for (var i=0; i<netProgress.documents.length; i++)
             {
                 var doc = netProgress.documents[i];
                 doc.id = context.uid;
@@ -3812,7 +3812,7 @@ NetDocument.prototype =
 function NetFile(href, document)
 {
     this.href = href;
-    this.document = document
+    this.document = document;
 }
 
 NetFile.prototype =
