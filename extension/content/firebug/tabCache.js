@@ -169,7 +169,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             newListener.QueryInterface(Ci.nsITraceableChannel);
             newListener.setNewListener(new ChannelListenerProxy(win));
 
-            if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
+            if (versionChecker.compare(appInfo.version, "3.6*") >= 0 && Ci.nsIStreamListenerTee_1_9_2)
             {
                 var tee = CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
                 var init = (tee instanceof Ci.nsIStreamListenerTee_1_9_2) ? tee.initWithObserver : tee.init;
