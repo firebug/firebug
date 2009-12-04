@@ -144,6 +144,7 @@ Firebug.Inspector = extend(Firebug.Module,
             {
                 Firebug.chrome.select(node);
             }, inspectDelay);
+            dispatch(this.fbListeners, "onInspectNode", [context, node] );
         }
     },
 
@@ -171,6 +172,8 @@ Firebug.Inspector = extend(Firebug.Module,
         var htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", cancelled);
 
         htmlPanel.stopInspecting(htmlPanel.selection, cancelled);
+
+        dispatch(this.fbListeners, "onStopInspecting", [context] );
 
         this.inspectNode(null);
     },
