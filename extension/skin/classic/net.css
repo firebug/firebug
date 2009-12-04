@@ -662,7 +662,8 @@
 
 /************************************************************************************************/
 
-.netActivationRow {
+.netActivationRow,
+.netPageSeparatorRow {
     background: rgb(229, 229, 229) !important;
     font-weight: normal;
     color: black;
@@ -671,6 +672,15 @@
 .netActivationLabel {
     background: url(chrome://firebug/skin/infoIcon.png) no-repeat 3px 2px;
     padding-left: 22px;
+}
+
+.netPageSeparatorRow {
+    height: 5px !important;
+}
+
+.netPageSeparatorLabel {
+    padding-left: 22px;
+    height: 5px !important;
 }
 
 .netActivationRow > .netCol {

@@ -431,9 +431,13 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             var row = prevTableBody.firstChild;
             if (hasClass(row, "netRow", "hasHeaders"))
                 tbody.insertBefore(row, lastRow);
+            else if (hasClass(row, "netPageSeparatorRow"))
+                tbody.insertBefore(row, lastRow);
             else
                 prevTableBody.removeChild(row);
         }
+
+        NetRequestEntry.pageSeparatorTag.insertRows({}, lastRow);
 
         scrollToBottom(this.panelNode);
     },
@@ -1821,6 +1825,11 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             TD({"class": "netCol netActivationLabel", colspan: 6, "role": "status"},
                 $STR("net.ActivationMessage")
             )
+        ),
+
+    pageSeparatorTag:
+        TR({"class": "netRow netPageSeparatorRow"},
+            TD({"class": "netCol netPageSeparatorLabel", colspan: 6, "role": "separator"})
         ),
 
     summaryTag:
