@@ -387,7 +387,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             var textNodeBox = this.ioBox.findChildObjectBox(childBox, target);
             if (textNodeBox)
             {
-                textNodeBox.firstChild.lastChild.nodeValue = textValue;
+                // structure for comment and cdata. Are there others?
+                textNodeBox.children[0].firstChild.nodeValue = textValue;
 
                 this.highlightMutation(textNodeBox, parentNodeBox, "mutated");
             }
@@ -1207,9 +1208,15 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
             return this.attrEditor;
         }
+        else if (hasClass(target, "nodeComment") || hasClass(target, "nodeCDATA"))
+        {
+            if (!this.textDataEditor)
+                this.textDataEditor = new Firebug.HTMLPanel.Editors.TextData(this.document);
+
+            return this.textDataEditor;
+        }
         else if (hasClass(target, "nodeText"))
         {
-            // XXXjoe Implement special text node editor
             if (!this.textNodeEditor)
                 this.textNodeEditor = new Firebug.HTMLPanel.Editors.TextNode(this.document);
 
@@ -1423,7 +1430,7 @@ Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
     tag:
         DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
             "&lt;![CDATA[",
-            SPAN({"class": "nodeText editable"}, "$object.nodeValue"),
+            SPAN({"class": "nodeText nodeCDATA editable"}, "$object.nodeValue"),
             "]]&gt;"
         )
 });
@@ -1431,15 +1438,40 @@ Firebug.HTMLPanel.CDATANode = domplate(FirebugReps.Element,
 Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox", _repObject: "$object", role : 'presentation'},
-            DIV({"class": "nodeComment editable"},
-                "&lt;!--$object.nodeValue--&gt;"
-            )
+        DIV({"class": "nodeBox nodeComment", _repObject: "$object", role : 'presentation'},
+            "&lt;!--",
+            SPAN({"class": "nodeComment editable"}, "$object.nodeValue"),
+            "--&gt;"
         )
 });
 
 
 // ************************************************************************************************
+// TextDataEditor
+
+/* 
+ * TextDataEditor deals with text of comments and cdata nodes
+ */
+
+function TextDataEditor(doc)
+{
+    this.initializeInline(doc);
+}
+
+TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
+{
+
+    saveEdit: function(target, value, previousValue)
+    {
+        var node = Firebug.getRepObject(target);
+        if (!node)
+            return;
+        target.data = value;
+        node.data = value;
+    }
+});
+
+//************************************************************************************************
 // TextNodeEditor
 
 /* 
@@ -1507,16 +1539,6 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                 this.range.setEnd(sc,so+cnl);
             } catch (e) {}
         }
-    },
-   
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-   
-    getAutoCompleteRange: function(value, offset)
-    {
-    },
-   
-    getAutoCompleteList: function(preExpr, expr, postExpr)
-    {
     }
 });
 
@@ -1571,16 +1593,6 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var emptyAttr = {nodeName: "", nodeValue: ""};
         var sibling = insertWhere == "before" ? target.previousSibling : target;
         return AttrTag.insertAfter({attr: emptyAttr}, sibling);
-    },
-    
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    
-    getAutoCompleteRange: function(value, offset)
-    {
-    },
-    
-    getAutoCompleteList: function(preExpr, expr, postExpr)
-    {
     }
 });
 
@@ -1690,7 +1702,8 @@ HTMLEditor.prototype = domplate(Firebug.BaseEditor,
 Firebug.HTMLPanel.Editors = {
     html : HTMLEditor,
     Attribute : AttributeEditor,
-    TextNode: TextNodeEditor
+    TextNode: TextNodeEditor,
+    TextData: TextDataEditor
 };
 
 
