@@ -53,6 +53,8 @@ var contentTypes =
     "application/http-index-format": 1,
     "application/json": 1,
     "application/x-js": 1,
+    "multipart/mixed" : 1,
+    "multipart/x-mixed-replace" : 1
 };
 
 // ************************************************************************************************
