@@ -1800,8 +1800,10 @@ top.Firebug =
  */
 Firebug.Listener = function()
 {
-    // xxxHonza, XXXjjb: why not to create the array in addListener?
-    //this.fbListeners = [];
+    // The array is created when the first listeners is added.
+    // It can't be created here since derived objects would share
+    // the same array.
+    this.fbListeners = null;
 }
 Firebug.Listener.prototype =
 {
