@@ -18,6 +18,11 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                     DIV({class: "layoutEdgeBottom layoutEdge"}),
                     DIV({class: "layoutEdgeLeft layoutEdge"}),
 
+                    DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
+                            SPAN({class: "layoutPosition layoutCaption", 'aria-label' : $STR('a11y.layout.position')}, $STR('position')+": "+'$position'),
+                            SPAN({class: "layoutZIndex v$zIndex", 'aria-label' : $STR('a11y.layout.z-index')}, "z: "+'$zIndex')
+                        ),
+
                     DIV({class: "layoutLabelTop layoutLabel v$outerTop"},
                         SPAN({class: "editable focusStart", 'aria-label' : $STR('a11y.layout.offset top')}, '$outerTop')
                     ),
@@ -33,10 +38,6 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
                     DIV({class: "layoutCaption"}, '$outerLabel'),
 
-                    DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
-                            SPAN({class: "editable layoutPosition layoutCaption", 'aria-label' : $STR('a11y.layout.position')}, $STR('position')+": "+'$position'),
-                            SPAN({class: "editable layoutZIndex v$zIndex", 'aria-label' : $STR('a11y.layout.z-index')}, "z: "+'$zIndex')
-                        ),
 
                     DIV({class: "marginLayoutBox layoutBox editGroup focusGroup"},
                         DIV({class: "layoutCaption"}, $STR("LayoutMargin")),
@@ -186,123 +187,45 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         var prevStyle = prev ? view.getComputedStyle(prev, "") : null;
         var nextStyle = next ? view.getComputedStyle(next, "") : null;
 
-        function getStyle(st, name) { return parseInt(st.getPropertyCSSValue(name).cssText); }
-
         var args = getBoxFromStyles(style, element);
 
-        args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = 0;
+        args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = '';
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
         args.zIndex = args.zIndex ? args.zIndex : "auto";
 
         var position = style.getPropertyCSSValue("position").cssText;
         args.position = position;
-
-        if (Firebug.showBoundingClientRect || isElementSVG(element) || isElementMathML(element) || isElementXUL(element))
+        args.outerLabel = '';
+        
+        if (isElementSVG(element) || isElementMathML(element) || isElementXUL(element))
         {
-            args.outerLabel = $STR("BoundingClientRect");
             var rect = element.getBoundingClientRect();
             if (rect.wrappedJSObject)
                 rect = rect.wrappedJSObject;
 
-            var scrollX = view.scrollX;
-            var scrollY = view.scrollY;
-            
-            args.outerLeft = Math.round(scrollX + rect.left);
-            args.outerTop = Math.round(scrollY + rect.top);
-            args.outerRight = Math.round(scrollX + rect.right);
-            args.outerBottom = Math.round(scrollY + rect.bottom);
-
-            // these Modes are classes on the domplate
-            args.outerLeftMode = args.outerRightMode = args.outerTopMode
-            = args.outerBottomMode = "boundingClientRect";
+            args.width = Math.round(rect.width);
+            args.height = Math.round(rect.height);
         }
-        else if (!Firebug.showAdjacentLayout || position == "absolute" || position == "fixed")
+        
+        // these Modes are classes on the domplate
+        args.outerLeftMode = args.outerRightMode = args.outerTopMode
+        = args.outerBottomMode = "blankEdge";
+        
+        if (position == "absolute" || position == "fixed" || position == "relative")
         {
+            function getStyle(style, name) { var v = style.getPropertyCSSValue(name); return (v && v.cssText) ? parseInt(v.cssText) : ' '; }
+
             args.outerLabel = $STR("LayoutOffset");
-            args.outerLeft = element.offsetLeft ? element.offsetLeft : 0;
-            args.outerTop = element.offsetTop ? element.offsetTop : 0;
-            args.outerRight = args.outerBottom = 0;
+            
+            args.outerLeft = getStyle(style,'left');
+            args.outerTop = getStyle(style,'top');
+            args.outerRight = getStyle(style,'right');
+            args.outerBottom = getStyle(style,'bottom');
+            
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
                 = args.outerBottomMode = "absoluteEdge";
         }
-        else
-        {
-            var parentStyle = isElement(element.parentNode)
-                ? view.getComputedStyle(element.parentNode, "")
-                : null;
-
-            if (parentStyle)
-            {
-                var display = style.getPropertyCSSValue("display").cssText;
-                if (display == "block")
-                {
-                    var firstSibling = getNextElement(element.parentNode.firstChild);
-                    var lastSibling = getPreviousElement(element.parentNode.lastChild);
-
-                    if (firstSibling == element)
-                    {
-                        args.outerTop = getStyle(parentStyle, "padding-top");
-                        args.outerTopMode = "parentTop";
-                    }
-                    else if (prev)
-                    {
-                        args.outerTop = getStyle(prevStyle, "margin-bottom");
-                        args.outerTopMode = "siblingTop";
-                    }
-
-                    if (lastSibling == element)
-                    {
-                        args.outerBottom = getStyle(parentStyle, "padding-bottom");
-                        args.outerBottomMode = "parentBottom";
-                    }
-                    else if (next)
-                    {
-                        args.outerBottom = getStyle(nextStyle, "margin-top");
-                        args.outerBottomMode = "siblingBottom";
-                    }
-
-                    args.outerLeft = getStyle(parentStyle, "padding-left");
-                    args.outerLeftMode = "parentLeft";
-
-                    args.outerRight = getStyle(parentStyle, "padding-right");
-                    args.outerRightMode = "parentRight";
-                }
-                else
-                {
-                    if (prevStyle)
-                    {
-                        args.outerLeft = getStyle(prevStyle, "margin-right");
-                        args.outerLeftMode = "siblingLeft";
-                    }
-                    else
-                    {
-                        args.outerLeft = getStyle(parentStyle, "padding-left");
-                        args.outerLeftMode = "parentLeft";
-                    }
-
-                    if (nextStyle)
-                    {
-                        args.outerRight = getStyle(nextStyle, "margin-left");
-                        args.outerRightMode = "siblingRight";
-                    }
-                    else
-                    {
-                        args.outerRight = getStyle(parentStyle, "padding-right");
-                        args.outerRightMode = "parentRight";
-                    }
-
-                    args.outerTop = getStyle(parentStyle, "padding-top");
-                    args.outerTopMode = "parentTop";
-
-                    args.outerBottom = getStyle(parentStyle, "padding-bottom");
-                    args.outerBottomMode = "parentBottom";
-                }
-
-                args.outerLabel = $STR("LayoutAdjacent");
-            }
-            else
-                args.outerLabel = "";
-        }
+        
         var node = this.template.tag.replace(args, this.panelNode);
         this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
 
@@ -310,7 +233,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     },
 
     /*
-     * The nested boxed of the Layout panel have digits which need to fit between the boxes.
+     * The nested boxes of the Layout panel have digits which need to fit between the boxes.
      * @param maxWidth: pixels the largest digit string
      * @param node: panelNode to be adjusted (from tag:)
      */
@@ -364,18 +287,18 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        if (name == "showAdjacentLayout" || name == "showBoundingClientRect")
+        /*
+        if (name == "newOptionHere")
         {
             this.updateSelection(this.selection);
         }
+        */
     },
 
     getOptionsMenuItems: function()
     {
         return [
-            optionMenu("ShowRulers", "showRulers"),
-            optionMenu("ShowBoundingClientRect", 'showBoundingClientRect'),
-            // Unclear what this does. optionMenu("ShowAdjacentLayout", "showAdjacentLayout"),
+            optionMenu("ShowRulers", "showRulers")
         ];
     },
 

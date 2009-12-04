@@ -80,8 +80,6 @@ pref("extensions.firebug.showDOMFuncs", false);
 pref("extensions.firebug.showDOMConstants", false);
 
 // Layout
-pref("extensions.firebug.showAdjacentLayout", false);
-pref("extensions.firebug.showBoundingClientRect", false);
 pref("extensions.firebug.showRulers", true);
 
 // Net

@@ -1204,21 +1204,21 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             var prop = props[i];
             if ( usedProps.hasOwnProperty(prop.name) )
             {
-                var deadProps = usedProps[prop.name]; // all previous occurances of this property
+                var deadProps = usedProps[prop.name]; // all previous occurrences of this property
                 for (var j = 0; j < deadProps.length; ++j)
                 {
                     var deadProp = deadProps[j];
                     if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important && !prop.important)
-                        prop.overridden = true;  // new occurance overridden
+                        prop.overridden = true;  // new occurrence overridden
                     else if (!prop.disabled)
-                        deadProp.overridden = true;  // previous occurances overridden
+                        deadProp.overridden = true;  // previous occurrences overridden
                 }
             }
             else
                 usedProps[prop.name] = [];
 
             prop.wasInherited = inheritMode ? true : false;
-            usedProps[prop.name].push(prop);  // all occurances of a property seen so far, by name
+            usedProps[prop.name].push(prop);  // all occurrences of a property seen so far, by name
         }
     },
 

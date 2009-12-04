@@ -89,7 +89,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
 
     // Layout
-    "showRulers","showAdjacentLayout","showBoundingClientRect",
+    "showRulers",
 
     // Net
     "netFilterCategory", "collectHttpHeaders", "netDisplayedResponseLimit",

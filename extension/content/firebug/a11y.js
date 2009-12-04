@@ -1451,7 +1451,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         switch(styleName)
         {
             case "offset":
-                output += hasClass(elem, "boundingClientRect") ? $STR("a11y.layout.clientBoundingRect") : $STR("a11y.layout.offset");
+                output += hasClass(elem, "blankEdge") ? '' : $STR("a11y.layout.offset");
                 styleName = "outer";
                 break;
             case "margin":
