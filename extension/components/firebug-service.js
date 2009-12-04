@@ -2730,13 +2730,13 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
 
         if (scope.jsClassName == "DedicatedWorkerGlobalScope")
         {
-            var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
+            //var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
 
-            if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                    FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
+            //if (FBTrace.DBG_FBS_FINDDEBUGGER)
+            //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
             // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
             //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
-            return lastWindowScope;
+            return null; // https://bugzilla.mozilla.org/show_bug.cgi?id=507783
         }
 
         if (scope.jsClassName == "Sandbox")
