@@ -241,7 +241,7 @@ ChannelListener.prototype =
     {
         try
         {
-            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+            if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady " +
                     safeGetName(this.request));
 
