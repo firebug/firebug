@@ -780,10 +780,15 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.select(node);
             delete this.noScrollIntoView;
             var box = this.ioBox.createObjectBox(node);
-            if (!hasClass(box, "open"))
-                this.ioBox.expandObject(node);
-            else
-                this.ioBox.contractObject(this.selection);
+
+            // Expand/collapse only if the user clicked on the twisty button.
+            if (hasClass(event.target, "twisty"))
+            {
+                if (!hasClass(box, "open"))
+                    this.ioBox.expandObject(node);
+                else
+                    this.ioBox.contractObject(this.selection);
+            }
         }
     },
 
