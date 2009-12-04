@@ -334,7 +334,7 @@ this.Obj = domplate(Firebug.Rep,
             return [];
 
         var props = [];
-        var len = 0;
+        var len = 0, iteration = 0;
 
         try
         {
@@ -358,11 +358,14 @@ this.Obj = domplate(Firebug.Rep,
                         ? Firebug.getRep(val).getTitle(val)
                         : val+"";
 
-                    len += name.length + title.length + 1;
-                    if (len < 50)
-                        props.push({name: name, value: title});
-                    else
-                        break;
+                    iteration++;
+                    if (iteration > 3)
+                    {
+                        if (len < 50)
+                            props.push({name: name, value: title});
+                        else
+                            break;
+                    }
                 }
             }
         }
@@ -373,7 +376,6 @@ this.Obj = domplate(Firebug.Rep,
             // XXXjjb also History.previous fails because object is a web-page object which does not have
             // permission to read the history
         }
-
         return props;
     },
 
@@ -428,7 +430,7 @@ this.Arr = domplate(Firebug.Rep,
 
             items.push({object: value, tag: tag, delim: delim});
         }
-
+        
         return items;
     },
 
