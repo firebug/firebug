@@ -3993,8 +3993,9 @@ function monitorContext(context)
     var panel = context.getPanel(panelName);
     context.netProgress.activate(panel);
 
-    // Display info message
-    panel.insertActivationMessage();
+    // Display info message, but only if the panel isn't just reloaded or Persist == true.
+    if (!context.persistedState)
+        panel.insertActivationMessage();
 
     // Update status bar icon.
     $('fbStatusIcon').setAttribute("net", "on");
