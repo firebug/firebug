@@ -247,7 +247,16 @@ ChannelListener.prototype =
 
             if (stream instanceof Ci.nsIAsyncInputStream)
             {
-                this.onDataAvailable(this.request, null, stream, 0, stream.available());
+                try
+                {
+                    this.onDataAvailable(this.request, null, stream, 0, stream.available());
+                }
+                catch (err)
+                {
+                    // stream.available throws an exception if the stream is closed,
+                    // which is ok, since this callback can be called even in this
+                    // situations.
+                }
 
                 // Listen for further incoming data.
                 if (!this.ignore)
@@ -257,7 +266,8 @@ ChannelListener.prototype =
         catch (err)
         {
             if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
-                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION\n", err);
+                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION " +
+                    safeGetName(this.request), err);
         }
     },
 
