@@ -1852,6 +1852,12 @@ e(0xa9, 'copy', text, editor);
 e(0xae, 'reg', text, editor);
 e(0x2122, 'trade', text, editor);
 
+// See http://en.wikipedia.org/wiki/Dash
+e(0x2012, '#8210', attr, text, editor); // figure dash
+e(0x2013, 'ndash', attr, text, editor); // en dash
+e(0x2014, 'mdash', attr, text, editor); // em dash
+e(0x2015, '#8213', attr, text, editor); // horizontal bar
+
 e(0x00a0, 'nbsp', attr, text, white, editor);
 e(0x2002, 'ensp', attr, text, white, editor);
 e(0x2003, 'emsp', attr, text, white, editor);
