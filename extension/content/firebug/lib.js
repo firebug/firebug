@@ -723,18 +723,11 @@ this.getAncestorByClass = function(node, className)
 
 this.getElementByClass = function(node, className)  // className, className, ...
 {
-    var args = cloneArray(arguments); args.splice(0, 1);
-    for (var child = node.firstChild; child; child = child.nextSibling)
+    for (var i = 0; i < arguments.length; ++i)
     {
-        var args1 = cloneArray(args); args1.unshift(child);
-        if (FBL.hasClass.apply(null, args1))
-            return child;
-        else
-        {
-            var found = FBL.getElementByClass.apply(null, args1);
-            if (found)
-                return found;
-        }
+        var elements = node.getElementsByClassName(arguments[i]);
+        if (elements.length)
+            return elements[0];
     }
 
     return null;
@@ -742,21 +735,10 @@ this.getElementByClass = function(node, className)  // className, className, ...
 
 this.getElementsByClass = function(node, className)  // className, className, ...
 {
-    function iteratorHelper(node, classNames, result)
-    {
-        for (var child = node.firstChild; child; child = child.nextSibling)
-        {
-            var args1 = cloneArray(classNames); args1.unshift(child);
-            if (FBL.hasClass.apply(null, args1))
-                result.push(child);
-
-            iteratorHelper(child, classNames, result);
-        }
-    }
-
     var result = [];
-    var args = cloneArray(arguments); args.shift();
-    iteratorHelper(node, args, result);
+    for (var i = 0; i < arguments.length; ++i)
+        result.join(result, node.getElementsByClassName(arguments[i]));
+
     return result;
 };
 
@@ -1676,7 +1658,7 @@ this.getElementHTML = function(element)
         {
             if (unwrapObject(elt).firebugIgnore)
                 return;
-            
+
             html.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -1748,7 +1730,7 @@ this.getElementXML = function(element)
         {
             if (unwrapObject(elt).firebugIgnore)
                 return;
-            
+
             xml.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
@@ -2551,14 +2533,16 @@ this.forEachFunction = function(context, cb)
                 return;
             try
             {
-                var testFunctionObject = script.functionObject;
+                var testFunctionObject = script.functionObject;  // Boris says this object is bogus.
                 if (!testFunctionObject.isValid)
                     return false;
                 var theFunction = FBL.unwrapIValue(testFunctionObject);
-
-                var rc = cb(script, theFunction, sourceFile);
-                if (rc)
-                    return rc;
+                if (theFunction)
+                {
+                    var rc = cb(script, theFunction, sourceFile);
+                    if (rc)
+                        return rc;
+                }
             }
             catch(exc)
             {
