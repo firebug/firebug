@@ -9,6 +9,7 @@
     position: relative;
     font-family: Monaco, monospace;
     padding-left: 13px;
+	min-width: 100%;
 }
 
 .twisty {
