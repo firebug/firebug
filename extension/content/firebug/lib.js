@@ -727,7 +727,7 @@ this.getElementByClass = function(node, className)  // className, className, ...
     var className = args.join(" ");
 
     var elements = node.getElementsByClassName(className);
-    if (elements.length)
+    if (elements.item(0))
         return elements[0];
 
     return null;
