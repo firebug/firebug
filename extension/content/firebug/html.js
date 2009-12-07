@@ -133,7 +133,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             var box = this.ioBox.createObjectBox(this.selection);
             if (!hasClass(box, "open"))
                 this.ioBox.expandObject(this.selection);
-            else 
+            else
                 this.selectNext();
         }
     },
@@ -170,7 +170,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         Firebug.HTMLModule.deleteAttribute(elt, attrName, this.context);
     },
-    
+
     localEditors:{}, // instantiated editor cache
     editNode: function(node)
     {
@@ -280,7 +280,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
 
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName, target);
+            FBTrace.sysout("html.mutateAttr target:"+target+" attrChange:"+attrChange+" attrName:"+attrName+" attrValue: "+attrValue, target);
 
         this.markChange();
 
@@ -456,9 +456,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     if (nextSibling)
                     {
                         while (
-                                (!Firebug.showTextNodesWithWhitespace && Firebug.HTMLLib.isWhitespaceText(nextSibling)) || 
+                                (!Firebug.showTextNodesWithWhitespace && Firebug.HTMLLib.isWhitespaceText(nextSibling)) ||
                                 (!Firebug.showCommentNodes && nextSibling instanceof Comment)
-                              ) 
+                              )
                         {
                             nextSibling = this.findNextSibling(nextSibling);
                         }
@@ -971,9 +971,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     updateOption: function(name, value)
     {
         var viewOptionNames = {
-                showCommentNodes:1, 
-                showTextNodesAsSource:1, 
-                showTextNodesWithWhitespace:1, 
+                showCommentNodes:1,
+                showTextNodesAsSource:1,
+                showTextNodesWithWhitespace:1,
                 showFullTextNodes:1
         };
         if (name in viewOptionNames)
@@ -1173,13 +1173,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             if (!( nonEditableTags.hasOwnProperty(node.localName) ))
             {
                 var EditElement = "EditHTMLElement";
-                
-                if (isElementMathML(node)) 
+
+                if (isElementMathML(node))
                     EditElement = "EditMathMLElement"
-                else if (isElementSVG(node)) 
+                else if (isElementSVG(node))
                     EditElement = "EditSVGElement";
-                
-                items.push("-", { label: EditElement, command: bindFixed(this.editNode, this, node)}, 
+
+                items.push("-", { label: EditElement, command: bindFixed(this.editNode, this, node)},
                             { label: "DeleteElement", command: bindFixed(this.deleteNode, this, node)}
                            );
             }
@@ -1278,7 +1278,7 @@ var AttrTag = Firebug.HTMLPanel.AttrTag =
     );
 
 var TextTag = Firebug.HTMLPanel.TextTag =
-    SPAN({"class": "nodeText editable"}, 
+    SPAN({"class": "nodeText editable"},
         FOR("char", "$object|getNodeTextGroups",
             SPAN({"class": "$char.class $char.extra"}, "$char.str")
         )
@@ -1466,7 +1466,7 @@ Firebug.HTMLPanel.CommentNode = domplate(FirebugReps.Element,
 // ************************************************************************************************
 // TextDataEditor
 
-/* 
+/*
  * TextDataEditor deals with text of comments and cdata nodes
  */
 
@@ -1491,12 +1491,12 @@ TextDataEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 //************************************************************************************************
 // TextNodeEditor
 
-/* 
+/*
  * TextNodeEditor deals with text nodes that do and do not have sibling elements. If
- * there are no sibling elements, the parent is known as a TextElement. In other cases  
- * we keep track of their position via a range (this is in part because as people type 
- * html, the range will keep track of the text nodes and elements that the user 
- * is creating as they type, and this range could be in the middle of the parent 
+ * there are no sibling elements, the parent is known as a TextElement. In other cases
+ * we keep track of their position via a range (this is in part because as people type
+ * html, the range will keep track of the text nodes and elements that the user
+ * is creating as they type, and this range could be in the middle of the parent
  * elements children).
  */
 
@@ -1537,14 +1537,14 @@ TextNodeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             return;
         value = unescapeForTextNode(value || '');
         target.innerHTML = escapeForTextNode(value);
-        if (node instanceof Element) 
+        if (node instanceof Element)
         {
             if (isElementMathML(node) || isElementSVG(node))
                 node.textContent=value;
             else
                 node.innerHTML=value;
         }
-        else 
+        else
         {
             try
             {
@@ -1574,11 +1574,11 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var element = Firebug.getRepObject(target);
         if (!element)
             return;
-        
+
         // XXXstr unescape value
-        
+
         target.innerHTML = escapeForElementAttribute(value);
-    
+
         if (hasClass(target, "nodeName"))
         {
             if (value != previousValue)
@@ -1598,13 +1598,13 @@ AttributeEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         }
         //this.panel.markChange();
     },
-    
+
     advanceToNext: function(target, charCode)
     {
         if (charCode == 61 && hasClass(target, "nodeName"))
             return true;
     },
-    
+
     insertNewRow: function(target, insertWhere)
     {
         var emptyAttr = {nodeName: "", nodeValue: ""};
@@ -1750,7 +1750,7 @@ function getNodeTag(node, expandAll)
             return getEmptyElementTag(node);
         else if (Firebug.showCommentNodes && HTMLLib.hasCommentChildren(node))
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
-        else if (HTMLLib.hasNoElementChildren(node)) 
+        else if (HTMLLib.hasNoElementChildren(node))
             return Firebug.HTMLPanel.TextElement.tag;
         else
             return expandAll ? Firebug.HTMLPanel.CompleteElement.tag : Firebug.HTMLPanel.Element.tag;
