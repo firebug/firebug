@@ -723,23 +723,21 @@ this.getAncestorByClass = function(node, className)
 
 this.getElementByClass = function(node, className)  // className, className, ...
 {
-    for (var i = 0; i < arguments.length; ++i)
-    {
-        var elements = node.getElementsByClassName(arguments[i]);
-        if (elements.length)
-            return elements[0];
-    }
+    var args = cloneArray(arguments); args.splice(0, 1);
+    var className = args.join(" ");
+
+    var elements = node.getElementsByClassName(className);
+    if (elements.length)
+        return elements[0];
 
     return null;
 };
 
 this.getElementsByClass = function(node, className)  // className, className, ...
 {
-    var result = [];
-    for (var i = 0; i < arguments.length; ++i)
-        result.join(result, node.getElementsByClassName(arguments[i]));
-
-    return result;
+    var args = cloneArray(arguments); args.splice(0, 1);
+    var className = args.join(" ");
+    return node.getElementsByClassName(className);
 };
 
 this.getElementsByAttribute = function(node, attrName, attrValue)
