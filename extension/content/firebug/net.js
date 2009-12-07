@@ -2087,7 +2087,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     headerDataTag:
         FOR("param", "$headers",
             TR({"role": "listitem"},
-                TD({"class": "netInfoParamName", "role": "presentation"}, "$param.name"),
+                TD({"class": "netInfoParamName", "role": "presentation"},
+                    TAG("$param|getNameTag", {param: "$param"})
+                ),
                 TD({"class": "netInfoParamValue", "role": "list", "aria-label": "$param.name"},
                     FOR("line", "$param|getParamValueIterator",
                         CODE({"class": "focusRow subFocusRow", "role": "listitem"}, "$line")
@@ -2103,6 +2105,41 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     customBody:
         DIV({"class": "netInfo$tabId\\Text netInfoText", "role": "tabpanel"}),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    nameTag:
+        SPAN("$param|getParamName"),
+
+    nameWithTooltipTag:
+        SPAN({title: "$param.name"}, "$param|getParamName"),
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    getNameTag: function(param)
+    {
+        return (this.getParamName(param) == param.name) ? this.nameTag : this.nameWithTooltipTag;
+    },
+
+    getParamName: function(param)
+    {
+        var limit = 25;
+        var name = param.name;
+        if (name.length > limit)
+            name = name.substr(0, limit) + "...";
+        return name;
+    },
+
+    getParamTitle: function(param)
+    {
+        var limit = 25;
+        var name = param.name;
+        if (name.length > limit)
+            return name;
+        return "";
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     hideParams: function(file)
     {
