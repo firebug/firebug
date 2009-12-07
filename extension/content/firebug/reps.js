@@ -401,7 +401,8 @@ this.Arr = domplate(Firebug.Rep,
                 TAG("$item.tag", {object: "$item.object"}),
                 SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
             ),
-            SPAN({class: "arrayRightBracket", role : "presentation"}, "]")
+            SPAN({class: "arrayRightBracket", role : "presentation"}, "]"),
+            SPAN({role: "presentation"},"$object|getSpecialProperties")
         ),
 
     shortTag:
@@ -415,7 +416,8 @@ this.Arr = domplate(Firebug.Rep,
                     " $prop.name=",
                     SPAN({class: "objectPropValue"}, "$prop.value|cropString")
             ),
-            SPAN({class: "arrayRightBracket"}, "]")
+            SPAN({class: "arrayRightBracket"}, "]"),
+            SPAN({role: "presentation"},"$object|getSpecialProperties")
         ),
 
     arrayIterator: function(array)
@@ -430,7 +432,7 @@ this.Arr = domplate(Firebug.Rep,
 
             items.push({object: value, tag: tag, delim: delim});
         }
-        
+
         return items;
     },
 
@@ -464,6 +466,14 @@ this.Arr = domplate(Firebug.Rep,
                 ++arrayIndex;
         }
         return arrayIndex;
+    },
+
+    getSpecialProperties: function(array)
+    {
+        if (array.length == array.__count__)
+            return "";
+        else
+            return " (object-like)";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
