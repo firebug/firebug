@@ -11,9 +11,6 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
-
 var FBTrace = null;
 
 // ************************************************************************************************
@@ -41,13 +38,9 @@ function ChannelListener()
     // and properly pass the request object through nsIStreamListner to chrome-window space.
     this.proxyListener = null;
 
-    if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
-    {
-        // The response will be written into the outputStream of this pipe.
-        // Both ends of the pipe must be blocking.
-        this.sink = CCIN("@mozilla.org/pipe;1", "nsIPipe");
-        this.sink.init(true, true, 0, 0, null);
-    }
+    // The response will be written into the outputStream of this pipe.
+    // Both ends of the pipe must be blocking. Initialized in TabCacheModel.registerStreamListener.
+    this.sink = null;
 
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports)
         .wrappedJSObject.getTracer("extensions.firebug");
