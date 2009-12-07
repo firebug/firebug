@@ -175,7 +175,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
             // The nsIStreamListenerTee differes in following branches:
             // 1.9.1: not possible to registere nsIRequestObserver with tee
             // 1.9.2: implements nsIStreamListenerTee_1_9_2 with initWithObserver methods
-            // 1.9.3: should also implement initWithObserver, but it isn't available now (#533248).
+            // 1.9.3: adds third parameter to the existing init method.
             if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
             {
                 var tee = CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
@@ -189,16 +189,13 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 var sink = CCIN("@mozilla.org/pipe;1", "nsIPipe");
                 sink.init(true, true, 0, 0, null);
 
+                var originalListener = request.setNewListener(tee);
+                newListener.wrappedJSObject.sink = sink;
+
                 if (tee.initWithObserver)
-                {
-                    var originalListener = request.setNewListener(tee);
-                    newListener.wrappedJSObject.sink = sink;
                     tee.initWithObserver(originalListener, sink.outputStream, newListener);
-                }
                 else
-                {
-                    newListener.wrappedJSObject.listener = request.setNewListener(newListener);
-                }
+                    tee.init(originalListener, sink.outputStream, newListener);
             }
             else
             {
