@@ -2142,7 +2142,6 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             var url = this.executionFile.href;
             var analyzer = this.executionFile.getScriptAnalyzer(frame.script);
-            FBTrace.sysout("analyzer "+url, analyzer);
             this.executionLineNo = analyzer.getSourceLineFromFrame(this.context, frame);  // TODo implement for each type
 
             if (FBTrace.DBG_STACK)
