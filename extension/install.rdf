@@ -5,7 +5,7 @@
 
   <Description about="urn:mozilla:install-manifest">
     <em:id>firebug@software.joehewitt.com</em:id>
-    <em:version>1.5X.0b5</em:version>
+    <em:version>1.5X.0b6</em:version>
     <em:type>2</em:type>
 
     <!-- Any suitably modern toolkit application -->
@@ -24,11 +24,11 @@
     <em:contributor>Jan Odvarko (All Peers Inc.)</em:contributor>
     <em:contributor>Max Stepanov (Aptana Inc.)</em:contributor>
     <em:contributor>Rob Campbell (Mozilla Corp.)</em:contributor>
-    <em:contributor>Hans Hillen, (Paciello Group, Mozilla)</em:contributor>
-    <em:contributor>Curtis Bartley, (Mozilla Corp.)</em:contributor>
-    <em:contributor>Mike Collins, (IBM Almaden)</em:contributor>
+    <em:contributor>Hans Hillen (Paciello Group, Mozilla)</em:contributor>
+    <em:contributor>Curtis Bartley (Mozilla Corp.)</em:contributor>
+    <em:contributor>Mike Collins (IBM Almaden)</em:contributor>
     <em:contributor>Kevin Decker</em:contributor>
-    <em:contributor>Mike Ratcliffe, (Comartis AG)</em:contributor>
+    <em:contributor>Mike Ratcliffe (Comartis AG)</em:contributor>
     <em:contributor>Hernan Rodríguez Colmeiro</em:contributor>
     <em:contributor>Austin Andrews</em:contributor>
     <em:contributor>Christoph Dorn</em:contributor>
