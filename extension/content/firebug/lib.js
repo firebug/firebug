@@ -7,6 +7,11 @@ try { /*@explore*/
 (function() {
 
 // ************************************************************************************************
+// Modules
+
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
+
+// ************************************************************************************************
 // Constants
 
 const Cc = Components.classes;
@@ -350,6 +355,7 @@ this.isAncestorIgnored = function(node)
 /*
  * $STR - intended for localization of a static string.
  * $STRF - intended for localization of a string with dynamically inserted values.
+ * $STRP - intended for localization of a string with dynamically plural forms.
  *
  * Notes:
  * 1) Name with _ in place of spaces is the key in the firebug.properties file.
@@ -443,8 +449,44 @@ function $STRF(name, args, bundle)
     return name;
 }
 
+function $STRP(name, args, index, bundle)
+{
+    // xxxHonza:
+    // pluralRule from chrome://global/locale/intl.properties for Chinese is 1,
+    // which is wrong, it should be 0.
+
+    var getPluralForm = PluralForm.get;
+    var getNumForms = PluralForm.numForms;
+
+    // Get custom plural rule; otherwise the rule from chrome://global/locale/intl.properties
+    // (depends on the current locale) is used.
+    var pluralRule = Firebug.getPluralRule();
+    if (!isNaN(parseInt(pluralRule, 10)))
+        [getPluralForm, getNumForms] = PluralForm.makeGetter(pluralRule);
+
+    // Index of the argument with plural form (there must be only one arg that needs plural form).
+    if (!index)
+        index = 0;
+
+    var margs = [];
+    var numForms = getNumForms();
+
+    // Repeat the args for numForms time(s)
+    for (var i = 0; i < numForms; i++)
+        margs = margs.concat(args);
+
+    // Get proper plural form from the string (depends on the current Firefox locale).
+    var translatedString = $STRF(name, margs, bundle);
+    if (translatedString.search(";") > 0)
+        return getPluralForm(args[index], translatedString);
+
+    // translatedString contains no ";", either rule 0 or getString fails
+    return translatedString;
+}
+
 this.$STR = $STR;
 this.$STRF = $STRF;
+this.$STRP = $STRP;
 
 /*
  * Use the current value of the attribute as a key to look up the localized value.

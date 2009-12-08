@@ -454,11 +454,7 @@ top.Firebug =
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-        {
-            var total = TabWatcher.contexts.length;
-            tooltip += "\n"+total+" "+ ((total == 1)?
-                $STR("Total_Firebug"):$STR("Total_Firebugs"));
-        }
+            tooltip += "\n" + $STRP("plural.Total_Firebugs", [TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {
@@ -651,6 +647,13 @@ top.Firebug =
         if (!this.stringBundle)
             this.stringBundle = stringBundleService.createExtensibleBundle("strings_firebug");
         return this.stringBundle;
+    },
+
+    getPluralRule: function()
+    {
+        try {
+            return this.getStringBundle().GetStringFromName("pluralRule");
+        } catch (err) { }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
