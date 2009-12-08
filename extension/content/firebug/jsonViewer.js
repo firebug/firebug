@@ -3,6 +3,18 @@
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
+
+// List of JSON content types.
+var contentTypes =
+{
+    "application/json": 1,
+    "text/plain": 1,
+    "text/x-json": 1,
+    "text/json": 1,
+    "text/javascript": 1
+};
+
+// ************************************************************************************************
 // Model implementation
 
 Firebug.JSONViewerModel = extend(Firebug.Module,
@@ -52,13 +64,8 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         if (!contentType)
             return false;
 
-        if ((contentType.indexOf("application/json") != 0) &&
-            (contentType.indexOf("text/plain") != 0) &&
-            (contentType.indexOf("text/x-json") != 0) &&
-            (contentType.indexOf("text/javascript") != 0))
-            return false;
-
-        return true;
+        contentType = contentType.split(";")[0];
+        return contentTypes[contentType];
     },
 
     // Update listener for TabView
@@ -88,4 +95,6 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
 // Registration
 
 Firebug.registerModule(Firebug.JSONViewerModel);
+
+// ************************************************************************************************
 }});
