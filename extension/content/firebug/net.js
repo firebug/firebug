@@ -2716,11 +2716,11 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
         var viewSource;
 
-        viewSource = rootNode.getElementsByClassName("netHeadersViewSource request");
+        viewSource = rootNode.getElementsByClassName("netHeadersViewSource request").item(0);
         if (file.requestHeadersText)
             removeClass(viewSource, "collapsed");
 
-        viewSource = rootNode.getElementsByClassName("netHeadersViewSource response");
+        viewSource = rootNode.getElementsByClassName("netHeadersViewSource response").item(0);
         if (file.responseHeadersText)
             removeClass(viewSource, "collapsed");
     },
