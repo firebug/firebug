@@ -468,6 +468,16 @@
 
 /*****************************************************************************************/
 
+.logRow-log > .objectBox-array.hasTwisty {
+    padding-left: 18px;
+}
+
+.logRow-log > .objectBox-array > .arrayProperties {
+    padding-left: 18px;
+}
+
+/*****************************************************************************************/
+
 .logRow-spy {
     padding: 0px 0 1px 0;
 }

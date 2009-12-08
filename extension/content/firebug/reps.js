@@ -395,29 +395,33 @@ this.Obj = domplate(Firebug.Rep,
 this.Arr = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTBOX({_repObject: "$object"},
-            SPAN({class: "arrayLeftBracket", role : "presentation"}, "["),
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
             FOR("item", "$object|arrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
-                SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
             ),
-            SPAN({class: "arrayRightBracket", role : "presentation"}, "]"),
-            SPAN({role: "presentation"},"$object|getSpecialProperties")
+            SPAN({"class": "arrayRightBracket", role: "presentation"}, "]"),
+            DIV({"class": "arrayProperties", role: "group"})
         ),
 
     shortTag:
-        OBJECTBOX({_repObject: "$object"},
-            SPAN({class: "arrayLeftBracket", role : "presentation"}, "["),
+        OBJECTBOX({_repObject: "$object",
+            $hasTwisty: "$object|hasSpecialProperties",
+            onclick: "$onToggleProperties"},
+            SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
-                SPAN({class: "arrayComma", role : "presentation"}, "$item.delim")
+                SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
             ),
             FOR("prop", "$object|shortPropIterator",
-                    " $prop.name=",
-                    SPAN({class: "objectPropValue"}, "$prop.value|cropString")
+                " $prop.name=",
+                SPAN({"class": "objectPropValue"}, "$prop.value|cropString")
             ),
-            SPAN({class: "arrayRightBracket"}, "]"),
-            SPAN({role: "presentation"},"$object|getSpecialProperties")
+            SPAN({"class": "arrayRightBracket"}, "]"),
+            DIV({"class": "arrayProperties", role: "group"})
         ),
 
     arrayIterator: function(array)
@@ -450,12 +454,14 @@ this.Arr = domplate(Firebug.Rep,
         }
 
         if (array.length > 3)
-            items.push({object: (array.length-3) + " more...", tag: FirebugReps.Caption.tag, delim: ""});
+            items.push({object: (array.length-3) + " more...", //xxxHonza localization
+                tag: FirebugReps.Caption.tag, delim: ""});
 
         return items;
     },
 
-    shortPropIterator:    this.Obj.propIterator,
+    shortPropIterator: this.Obj.propIterator,
+    toggles: {},
 
     getItemIndex: function(child)
     {
@@ -468,12 +474,25 @@ this.Arr = domplate(Firebug.Rep,
         return arrayIndex;
     },
 
-    getSpecialProperties: function(array)
+    hasSpecialProperties: function(array)
     {
-        if (array.length == array.__count__)
-            return "";
-        else
-            return " (object-like)";
+        return (array.length != array.__count__);
+    },
+
+    onToggleProperties: function(event)
+    {
+        var target = event.originalTarget;
+        if (hasClass(target, "objectBox-array"))
+        {
+            toggleClass(target, "opened");
+
+            var propBox = getElementByClass(target, "arrayProperties");
+            if (hasClass(target, "opened"))
+                Firebug.DOMPanel.DirTable.tag.replace(
+                    {object: target.repObject, toggles: this.toggles}, propBox);
+            else
+                clearNode(propBox);
+        }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1485,7 +1504,6 @@ this.ErrorMessage = domplate(Firebug.Rep,
 
     onToggleError: function(event)
     {
-
         var target = event.currentTarget;
         if (hasClass(event.target, "errorBreak"))
         {
