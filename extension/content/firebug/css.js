@@ -378,7 +378,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 else if (rule instanceof CSSMediaRule)
                     appendRules.apply(this, [rule.cssRules]);
                 else
-                    if (DBG_ERRORS || DBG_CSS)
+                    if (FBTrace.DBG_ERRORS || FBTrace.DBG_CSS)
                         FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
             }
         }
