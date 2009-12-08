@@ -797,6 +797,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (this.editing || isControl(event) || isShift(event))
             return;
 
+        var node = this.selection;
+        if (!node)
+        	return;
         if (event.keyCode == KeyEvent.DOM_VK_UP)
             this.selectNodeBy("up");
         else if (event.keyCode == KeyEvent.DOM_VK_DOWN)
@@ -805,10 +808,10 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.selectNodeBy("left");
         else if (event.keyCode == KeyEvent.DOM_VK_RIGHT)
             this.selectNodeBy("right");
-        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE)
-            this.deleteNode(this.selection, "up");
-        else if (event.keyCode == KeyEvent.DOM_VK_DELETE)
-            this.deleteNode(this.selection, "down");
+        else if (event.keyCode == KeyEvent.DOM_VK_BACK_SPACE && !(node.localName in innerEditableTags) && !(nonEditableTags.hasOwnProperty(node.localName)))
+            this.deleteNode(node, "up");
+        else if (event.keyCode == KeyEvent.DOM_VK_DELETE && !(node.localName in innerEditableTags) && !(nonEditableTags.hasOwnProperty(node.localName)))
+            this.deleteNode(node, "down");
         else
             return;
 
@@ -1180,7 +1183,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     EditElement = "EditSVGElement";
 
                 items.push("-", { label: EditElement, command: bindFixed(this.editNode, this, node)},
-                            { label: "DeleteElement", command: bindFixed(this.deleteNode, this, node)}
+                            { label: "DeleteElement", command: bindFixed(this.deleteNode, this, node), disabled:(node.localName in innerEditableTags)}
                            );
             }
         }
