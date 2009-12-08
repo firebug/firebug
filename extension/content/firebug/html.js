@@ -146,7 +146,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         if (objectNodeBox)
         {
             var labelBox = objectNodeBox.firstChild.lastChild;
-            var bracketBox = getElementByClass(labelBox, "nodeBracket");
+            var bracketBox = labelBox.getElementsByClassName("nodeBracket").item(0);
             Firebug.Editor.insertRow(bracketBox, "before");
         }
     },
@@ -321,7 +321,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                             this.document);
 
                     var labelBox = objectNodeBox.firstChild.lastChild;
-                    var bracketBox = getElementByClass(labelBox, "nodeBracket");
+                    var bracketBox = labelBox.getElementsByClassName("nodeBracket").item(0);
                     labelBox.insertBefore(nodeAttr, bracketBox);
 
                     this.highlightMutation(nodeAttr, objectNodeBox, "mutated");
@@ -1014,7 +1014,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
                     // XXXjjb seems like this could be bad for errors at the end of long files
                     //
-                    var sourceRow = FBL.getElementByClass(objectbox, "sourceRow"); // first source row in style
+                    var sourceRow = objectbox.getElementsByClassName("sourceRow").item(0); // first source row in style
                     for (var lineNo = 1; lineNo < sourceLink.line; lineNo++)
                     {
                         if (!sourceRow) break;

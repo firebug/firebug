@@ -142,7 +142,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
         if (getAncestorByClass(event.target, "breakpointCheckbox"))
         {
-            var node = getElementByClass(event.target.parentNode, "objectLink-sourceLink");
+            var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
             if (!node)
                 return;
 
@@ -158,7 +158,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
         else if (getAncestorByClass(event.target, "closeButton"))
         {
             var sourceLink =
-                getElementByClass(event.target.parentNode, "objectLink-sourceLink").repObject;
+                event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
 
             panel.noRefresh = true;
 
@@ -385,7 +385,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             this.updateScriptFiles(context);
 
         var bpCount = 0, disabledCount = 0;
-        var checkBoxes = getElementsByClass(this.panelNode, "breakpointCheckbox");
+        var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
         for (var i=0; i<checkBoxes.length; i++)
         {
             ++bpCount;
@@ -419,7 +419,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     enableAllBreakpoints: function(context, status)
     {
-        var checkBoxes = getElementsByClass(this.panelNode, "breakpointCheckbox");
+        var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
         for (var i=0; i<checkBoxes.length; i++)
         {
             var box = checkBoxes[i];
@@ -432,7 +432,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
     {
         this.noRefresh = true;
 
-        var buttons = getElementsByClass(this.panelNode, "closeButton");
+        var buttons = this.panelNode.getElementsByClassName("closeButton");
         for (var i=0; i<buttons.length; i++)
             this.click(buttons[i]);
 
@@ -837,7 +837,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
     {
         if (this.panel)
         {
-            var guts = getElementByClass(this.box, "conditionEditorInner");
+            var guts = this.box.getElementsByClassName("conditionEditorInner").item(0);
             collapse(guts, true);  // as the box shrinks you don't want text to spill
 
             var msg = this.cause.message;

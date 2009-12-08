@@ -1012,7 +1012,7 @@ top.Firebug =
         if (!this.fbOnlyKeys)
         {
             var keyset = document.getElementById("mainKeyset");
-            this.fbOnlyKeys = FBL.getElementByClass(keyset, "fbOnlyKey");
+            this.fbOnlyKeys = keyset.getElementsByClassName("fbOnlyKey").item(0);
         }
         var keys = this.fbOnlyKeys;
         for (var i = 0; i < keys.length; i++)

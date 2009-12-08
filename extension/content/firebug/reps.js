@@ -486,7 +486,7 @@ this.Arr = domplate(Firebug.Rep,
         {
             toggleClass(target, "opened");
 
-            var propBox = getElementByClass(target, "arrayProperties");
+            var propBox = target.getElementsByClassName("arrayProperties").item(0);
             if (hasClass(target, "opened"))
                 Firebug.DOMPanel.DirTable.tag.replace(
                     {object: target.repObject, toggles: this.toggles}, propBox);

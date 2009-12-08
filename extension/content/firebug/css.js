@@ -904,7 +904,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
                 else if (cssValue.type == "url")
                 {
-                    var propNameNode = getElementByClass(target.parentNode, "cssPropName");
+                    var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
                     if (propNameNode && isImageRule(propNameNode.textContent))
                     {
                         var style = Firebug.getRepObject(target);

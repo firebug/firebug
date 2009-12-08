@@ -422,7 +422,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var lastRow = tbody.lastChild.previousSibling;
 
         // Move all net-rows from the persistedState to this panel.
-        var prevTableBody = getElementByClass(persistedState.panelNode, "netTableBody");
+        var prevTableBody = persistedState.panelNode.getElementsByClassName("netTableBody").item(0);
         if (!prevTableBody)
             return;
 
@@ -873,7 +873,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     populateTotalSizeInfoTip: function(infoTip, row)
     {
-        var totalSizeLabel = getElementByClass(row, "netTotalSizeLabel");
+        var totalSizeLabel = row.getElementsByClassName("netTotalSizeLabel").item(0);
         var file = {size: totalSizeLabel.getAttribute("totalSize")};
         Firebug.NetMonitor.SizeInfoTip.tag.replace({file: file}, infoTip);
         return true;
@@ -1427,7 +1427,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.table)
             return;
 
-        var rows = getElementsByClass(this.table, "netRow");
+        var rows = this.table.getElementsByClassName("netRow");
         for (var i=0; i<rows.length; i++)
         {
             var row = rows[i];
@@ -1636,7 +1636,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         }
 
         // Make sure the summary row is again at the end.
-        var summaryRow = getElementByClass(tbody, "netSummaryRow");
+        var summaryRow = tbody.getElementsByClassName("netSummaryRow").item(0);
         tbody.appendChild(summaryRow);
     },
 
@@ -1726,7 +1726,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     onResetColumns: function(context)
     {
         var panel = context.getPanel(panelName, true);
-        var header = getElementByClass(panel.panelNode, "netHeaderRow");
+        var header = panel.panelNode.getElementsByClassName("netHeaderRow").item(0);
 
         // Reset widths
         var columns = header.childNodes;
@@ -1902,7 +1902,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (hasClass(row, "opened"))
         {
             var netInfoRow = this.netInfoTag.insertRows({}, row)[0];
-            var netInfoCol = getElementByClass(netInfoRow, "netInfoCol");
+            var netInfoCol = netInfoRow.getElementsByClassName("netInfoCol").item(0);
             var netInfoBox = NetInfoBody.tag.replace({file: file}, netInfoCol);
 
             // Notify listeners so additional tabs can be created.
@@ -1917,7 +1917,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         else
         {
             var netInfoRow = row.nextSibling;
-            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+            var netInfoBox = netInfoRow.getElementsByClassName("netInfoBody").item(0);
 
             dispatch(NetInfoBody.fbListeners, "destroyTabBody", [netInfoBox, file]);
 
@@ -2190,8 +2190,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     {
         // Create new tab and body.
         var args = {tabId: tabId, tabTitle: tabTitle};
-        this.customTab.append(args, getElementByClass(netInfoBox, "netInfoTabs"));
-        this.customBody.append(args, getElementByClass(netInfoBox, "netInfoBodies"));
+        this.customTab.append(args, netInfoBox.getElementsByClassName("netInfoTabs").item(0));
+        this.customBody.append(args, netInfoBox.getElementsByClassName("netInfoBodies").item(0));
     },
 
     selectTabByName: function(netInfoBox, tabName)
@@ -2216,7 +2216,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         var textBodyName = "netInfo" + view + "Text";
 
         netInfoBox.selectedTab = tab;
-        netInfoBox.selectedText = getElementByClass(netInfoBox, textBodyName);
+        netInfoBox.selectedText = netInfoBox.getElementsByClassName(textBodyName).item(0);
 
         netInfoBox.selectedTab.setAttribute("selected", "true");
         netInfoBox.selectedText.setAttribute("selected", "true");
@@ -2244,7 +2244,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
         if (hasClass(tab, "netInfoHeadersTab"))
         {
-            var headersText = getElementByClass(netInfoBox, "netInfoHeadersText");
+            var headersText = netInfoBox.getElementsByClassName("netInfoHeadersText").item(0);
 
             if (file.responseHeaders && !netInfoBox.responseHeadersPresented)
             {
@@ -2264,7 +2264,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (!netInfoBox.postPresented)
             {
                 netInfoBox.postPresented  = true;
-                var postText = getElementByClass(netInfoBox, "netInfoPostText");
+                var postText = netInfoBox.getElementsByClassName("netInfoPostText").item(0);
                 NetInfoPostData.render(context, postText, file);
             }
         }
@@ -2274,14 +2274,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             if (!netInfoBox.putPresented)
             {
                 netInfoBox.putPresented  = true;
-                var putText = getElementByClass(netInfoBox, "netInfoPutText");
+                var putText = netInfoBox.getElementsByClassName("netInfoPutText").item(0);
                 NetInfoPostData.render(context, putText, file);
             }
         }
 
         if (hasClass(tab, "netInfoResponseTab") && file.loaded && !netInfoBox.responsePresented)
         {
-            var responseTextBox = getElementByClass(netInfoBox, "netInfoResponseText");
+            var responseTextBox = netInfoBox.getElementsByClassName("netInfoResponseText").item(0);
             if (file.category == "image")
             {
                 netInfoBox.responsePresented = true;
@@ -2302,7 +2302,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         {
             netInfoBox.cachePresented = true;
 
-            var responseTextBox = getElementByClass(netInfoBox, "netInfoCacheText");
+            var responseTextBox = netInfoBox.getElementsByClassName("netInfoCacheText").item(0);
             if (file.cacheEntry) {
                 this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
@@ -2313,7 +2313,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
             netInfoBox.htmlPresented = true;
 
             var text = Utils.getResponseText(file, context);
-            var iframe = getElementByClass(netInfoBox, "netInfoHtmlPreview");
+            var iframe = netInfoBox.getElementsByClassName("netInfoHtmlPreview").item(0);
             iframe.contentWindow.document.body.innerHTML = text;
         }
 
@@ -2365,7 +2365,7 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         if (!headers.length)
             return;
 
-        var headersTable = getElementByClass(netInfoBox, "netInfo"+tableName+"Table");
+        var headersTable = netInfoBox.getElementsByClassName("netInfo"+tableName+"Table").item(0);
         var tbody = getChildByClass(headersTable, "netInfo" + rowName + "Body");
         if (!tbody)
             tbody = headersTable.firstChild;
@@ -2522,7 +2522,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             return;
 
         var paramTable = this.paramsTable.append(null, parentNode);
-        var row = getElementByClass(paramTable, "netInfoPostParamsTitle");
+        var row = paramTable.getElementsByClassName("netInfoPostParamsTitle").item(0);
 
         NetInfoBody.headerDataTag.insertRows({headers: params}, row);
     },
@@ -2533,7 +2533,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             return;
 
         var partsTable = this.partsTable.append(null, parentNode);
-        var row = getElementByClass(partsTable, "netInfoPostPartsTitle");
+        var row = partsTable.getElementsByClassName("netInfoPostPartsTitle").item(0);
 
         NetInfoBody.headerDataTag.insertRows({headers: data.params}, row);
     },
@@ -2546,7 +2546,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             return;
 
         var jsonTable = this.jsonTable.append(null, parentNode);
-        var jsonBody = getElementByClass(jsonTable, "netInfoPostJSONBody");
+        var jsonBody = jsonTable.getElementsByClassName("netInfoPostJSONBody").item(0);
 
         if (!this.toggles)
             this.toggles = {};
@@ -2560,7 +2560,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
         var text = Utils.getPostText(file, context);
 
         var jsonTable = this.xmlTable.append(null, parentNode);
-        var jsonBody = getElementByClass(jsonTable, "netInfoPostXMLBody");
+        var jsonBody = jsonTable.getElementsByClassName("netInfoPostXMLBody").item(0);
 
         Firebug.XMLViewerModel.insertXML(jsonBody, text);
     },
@@ -2568,7 +2568,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
     insertSource: function(parentNode, text)
     {
         var sourceTable = this.sourceTable.append(null, parentNode);
-        var row = getElementByClass(sourceTable, "netInfoPostSourceTitle");
+        var row = sourceTable.getElementsByClassName("netInfoPostSourceTitle").item(0);
 
         var param = {value: text};
         this.sourceBodyTag.insertRows({param: param}, row);
@@ -2685,16 +2685,16 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
         //if (source)
         //    source = source.replace(/\r\n/gm, "<span style='color:lightgray'>\\r\\n</span>\r\n");
 
-        var tbody = getElementByClass(netInfoBox, "netInfo" + rowName + "Body");
+        var tbody = netInfoBox.getElementsByClassName("netInfo" + rowName + "Body").item(0);
         var node = this.sourceTag.replace({}, tbody);
-        var sourceNode = getElementByClass(node, "source");
+        var sourceNode = node.getElementsByClassName("source").item(0);
         sourceNode.innerHTML = source;
     },
 
     insertHeaderRows: function(netInfoBox, headers, rowName)
     {
-        var headersTable = getElementByClass(netInfoBox, "netInfoHeadersTable");
-        var tbody = getElementByClass(headersTable, "netInfo" + rowName + "Body");
+        var headersTable = netInfoBox.getElementsByClassName("netInfoHeadersTable").item(0);
+        var tbody = headersTable.getElementsByClassName("netInfo" + rowName + "Body").item(0);
 
         clearNode(tbody);
 
@@ -2716,11 +2716,11 @@ Firebug.NetMonitor.NetInfoHeaders = domplate(Firebug.Rep, new Firebug.Listener()
 
         var viewSource;
 
-        viewSource = getElementByClass(rootNode, "netHeadersViewSource", "request");
+        viewSource = rootNode.getElementsByClassName("netHeadersViewSource request");
         if (file.requestHeadersText)
             removeClass(viewSource, "collapsed");
 
-        viewSource = getElementByClass(rootNode, "netHeadersViewSource", "response");
+        viewSource = rootNode.getElementsByClassName("netHeadersViewSource response");
         if (file.responseHeadersText)
             removeClass(viewSource, "collapsed");
     },
@@ -3020,7 +3020,7 @@ Firebug.NetMonitor.NetLimit = domplate(Firebug.Rep,
         removeClass(row, "collapsed");
 
         // Update info within the limit row.
-        var limitLabel = getElementByClass(row, "netLimitLabel");
+        var limitLabel = row.getElementsByClassName("netLimitLabel").item(0);
         limitLabel.firstChild.nodeValue = $STRP("plural.Limit_Exceeded", [row.limitInfo.totalCount]);
     },
 
@@ -3429,7 +3429,7 @@ NetProgress.prototype =
             // Force update UI.
             if (file.row && hasClass(file.row, "opened"))
             {
-                var netInfoBox = getElementByClass(file.row.nextSibling, "netInfoBody");
+                var netInfoBox = file.row.nextSibling.getElementsByClassName("netInfoBody").item(0);
                 if (netInfoBox)
                 {
                     netInfoBox.responsePresented = false;
@@ -4949,7 +4949,7 @@ var NetPanelSearch = function(panel, rowFinder)
                 NetRequestEntry.toggleHeadersRow(this.currentRow);
 
             var netInfoRow = this.currentRow.nextSibling;
-            var netInfoBox = getElementByClass(netInfoRow, "netInfoBody");
+            var netInfoBox = netInfoRow.getElementsByClassName("netInfoBody").item(0);
             NetInfoBody.selectTabByName(netInfoBox, "Response");
 
             // Before the search is started, the new content must be properly
@@ -4972,7 +4972,7 @@ var NetPanelSearch = function(panel, rowFinder)
 
     this.getFirstRow = function()
     {
-        var table = getElementByClass(panelNode, "netTable");
+        var table = panelNode.getElementsByClassName("netTable").item(0);
         return table.firstChild.firstChild;
     }
 

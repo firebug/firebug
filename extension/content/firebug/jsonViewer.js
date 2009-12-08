@@ -73,7 +73,7 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
     updateTabBody: function(infoBox, file, context)
     {
         var tab = infoBox.selectedTab;
-        var tabBody = getElementByClass(infoBox, "netInfoJSONText");
+        var tabBody = infoBox.getElementsByClassName("netInfoJSONText").item(0);
         if (!hasClass(tab, "netInfoJSONTab") || tabBody.updated)
             return;
 

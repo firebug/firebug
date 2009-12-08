@@ -917,7 +917,7 @@ Firebug.XHRSpyListener =
 
 function updateTime(spy)
 {
-    var timeBox = getElementByClass(spy.logRow, "spyTime");
+    var timeBox = spy.logRow.getElementsByClassName("spyTime").item(0);
     if (spy.responseTime)
         timeBox.textContent = " " + formatTime(spy.responseTime);
 }
@@ -926,7 +926,7 @@ function updateLogRow(spy)
 {
     updateTime(spy);
 
-    var statusBox = getElementByClass(spy.logRow, "spyStatus");
+    var statusBox = spy.logRow.getElementsByClassName("spyStatus").item(0);
     statusBox.textContent = Firebug.Spy.XHR.getStatus(spy);
 
     removeClass(spy.logRow, "loading");

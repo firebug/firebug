@@ -763,6 +763,7 @@ this.getAncestorByClass = function(node, className)
     return null;
 };
 
+/* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
 this.getElementByClass = function(node, className)  // className, className, ...
 {
     var args = cloneArray(arguments); args.splice(0, 1);
@@ -772,6 +773,7 @@ this.getElementByClass = function(node, className)  // className, className, ...
     return elements[0];
 };
 
+/* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
 this.getElementsByClass = function(node, className)  // className, className, ...
 {
     var args = cloneArray(arguments); args.splice(0, 1);

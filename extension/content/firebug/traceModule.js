@@ -303,7 +303,7 @@ Firebug.TraceModule.CommonBaseUI = {
         rep.tag.replace({}, parentNode, rep);
 
         // This IFRAME is the container for all logs.
-        var logTabIframe = FBL.getElementByClass(parentNode, "traceInfoLogsFrame");
+        var logTabIframe = parentNode.getElementsByClassName("traceInfoLogsFrame").item(0);
         var self = this;
         logTabIframe.addEventListener("load", function(event)
         {
@@ -331,7 +331,7 @@ Firebug.TraceModule.CommonBaseUI = {
         }, true);
 
         // Initialize content for Options tab (a button for each DBG_ option).
-        var optionsBody = FBL.getElementByClass(parentNode, "traceInfoOptionsText");
+        var optionsBody = parentNode.getElementsByClassName("traceInfoOptionsText").item(0);
         this.optionsController = new Firebug.TraceOptionsController(prefDomain, function updateButton(optionName, optionValue)
         {
             var button = parentNode.ownerDocument.getElementById(optionName);
@@ -404,7 +404,7 @@ Firebug.TraceModule.PanelTemplate = domplate({
 
     selectTabByName: function(parentNode, tabName)
     {
-        var tab = getElementByClass(parentNode, "traceInfo" + tabName + "Tab");
+        var tab = parentNode.getElementsByClassName("traceInfo" + tabName + "Tab").item(0);
         if (tab)
             this.selectTab(tab);
     },

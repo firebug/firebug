@@ -247,7 +247,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         this.adjustBoxWidth(node, "borderLayoutBox", maxWidth);
         this.adjustBoxWidth(node, "paddingLayoutBox", maxWidth);
 
-        var box = getElementByClass(node, "outerLayoutBox");
+        var box = node.getElementsByClassName("outerLayoutBox").item(0);
         box.style.cssText = "width: "+(240 + 3*maxWidth)+"px;";  // defaults to 300px
 
         this.adjustLabelWidth(node, "layoutLabelLeft", maxWidth);
@@ -259,14 +259,14 @@ LayoutPanel.prototype = extend(Firebug.Panel,
      */
     adjustLabelWidth: function(node, labelName, maxWidth)
     {
-        var labels = getElementsByClass(node, labelName);
+        var labels = node.getElementsByClassName(labelName);
         for (var i = 0; i < labels.length; i++)
             labels[i].style.cssText = "width: "+maxWidth+"px;";
     },
 
     adjustBoxWidth: function(node, boxName, width)
     {
-        var box = getElementByClass(node, boxName);
+        var box = node.getElementsByClassName(boxName).item(0);
         box.style.cssText = "right: "+width + 'px;'+" left: "+width + 'px;';
     },
 

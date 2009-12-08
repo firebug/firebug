@@ -79,7 +79,7 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
     updateTabBody: function(infoBox, file, context)
     {
         var tab = infoBox.selectedTab;
-        var tabBody = getElementByClass(infoBox, "netInfoXMLText");
+        var tabBody = infoBox.getElementsByClassName("netInfoXMLText").item(0);
         if (!hasClass(tab, "netInfoXMLTab") || tabBody.updated)
             return;
 

@@ -167,8 +167,8 @@ const DirTablePlate = domplate(Firebug.Rep,
             return;
 
         var row = getAncestorByClass(event.target, "memberRow");
-        var label = getElementByClass(row, "memberLabel");
-        var valueCell = getElementByClass(row, "memberValueCell");
+        var label = row.getElementsByClassName("memberLabel").item(0);
+        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
         var isString = hasClass(target,"objectBox-string");
@@ -1394,7 +1394,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     editNewWatch: function(value)
     {
-        var watchNewRow = getElementByClass(this.panelNode, "watchNewRow");
+        var watchNewRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         if (watchNewRow)
             this.editProperty(watchNewRow, value);
     },
@@ -1769,13 +1769,13 @@ function getWatchRowIndex(row)
 
 function getRowName(row)
 {
-    var labelNode = getElementByClass(row, "memberLabelCell");
+    var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
     return labelNode.textContent;
 }
 
 function getRowValue(row)
 {
-    var valueNode = getElementByClass(row, "memberValueCell");
+    var valueNode = row.getElementsByClassName("memberValueCell").item(0);
     return valueNode.firstChild.repObject;
 }
 
@@ -1818,7 +1818,7 @@ function getPath(row)
 
 function findRow(parentNode, object)
 {
-    var rows = getElementsByClass(parentNode, "memberRow");
+    var rows = parentNode.getElementsByClassName("memberRow");
     for (var i=0; i<rows.length; i++)
     {
         var row = rows[i];
