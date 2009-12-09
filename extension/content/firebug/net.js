@@ -1066,7 +1066,14 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         else
         {
             var sizeLabel = row.childNodes[4].firstChild;
-            sizeLabel.firstChild.nodeValue = NetRequestEntry.getSize(file);
+
+            var sizeText = NetRequestEntry.getSize(file);
+
+            // Show also total downloaded size for requests in progress.
+            if (file.totalReceived)
+                sizeText += " (" + formatSize(file.totalReceived) + ")";
+
+            sizeLabel.firstChild.nodeValue = sizeText; 
 
             var methodLabel = row.childNodes[2].firstChild;
             methodLabel.firstChild.nodeValue = NetRequestEntry.getStatus(file);
@@ -3428,10 +3435,17 @@ NetProgress.prototype =
         {
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.receivingFile +" + time + " " +
-                    getPrintableTime() + ", " + request.URI.path, file);
+                    getPrintableTime() + ", " +
+                    formatSize(size) + " (" + size + "B), " +
+                    request.URI.path, file);
 
             file.endTime = time;
             file.totalReceived = size;
+
+            // Update phase's lastFinishedFile in case of long time downloads.
+            // This forces the timeline to have proper extent.
+            if (file.phase && file.phase.endTime < time)
+                file.phase.lastFinishedFile = file;
 
             // Force update UI.
             if (file.row && hasClass(file.row, "opened"))
@@ -3459,6 +3473,9 @@ NetProgress.prototype =
 
             if (responseSize > 0)
                 file.size = responseSize;
+
+            // This was only a helper to show download progress.
+            file.totalReceived = 0;
         }
 
         return file;
