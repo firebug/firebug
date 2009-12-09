@@ -136,6 +136,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             else
                 this.selectNext();
         }
+        Firebug.Inspector.highlightObject(this.selection, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
