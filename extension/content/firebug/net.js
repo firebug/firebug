@@ -3147,6 +3147,7 @@ function NetProgress(context)
         this.phases = [];
         this.documents = [];
         this.windows = [];
+        this.currentPhase = null;
 
         queue = [];
     };
