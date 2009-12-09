@@ -952,7 +952,7 @@ var TraceListener =
         if (message.text.indexOf(prefix) == 0)
         {
             message.text = message.text.substr(prefix.length);
-            message.text = trimLeft(message.text);
+            message.text = trim(message.text);
             message.type = "DBG_WINDOWS";
         }
     }

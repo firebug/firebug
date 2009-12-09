@@ -65,7 +65,7 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
             return false;
 
         contentType = contentType.split(";")[0];
-        contentType = trimLeft(contentType);
+        contentType = trim(contentType);
         return contentTypes[contentType];
     },
 

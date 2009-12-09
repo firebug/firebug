@@ -247,7 +247,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         if (contentType)
             contentType = contentType.split(";")[0];
 
-        contentType = trimLeft(contentType);
+        contentType = trim(contentType);
         if (contentTypes[contentType])
             return true;
 

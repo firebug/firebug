@@ -1097,7 +1097,7 @@ this.cssToXPath = function(rule)
         lastRule = rule;
 
         // Trim leading whitespace
-        rule = this.trimLeft(rule);
+        rule = this.trim(rule);
         if (!rule.length)
             break;
 
@@ -2138,9 +2138,19 @@ this.splitLines = function(text)
     return lines;
 };
 
-this.trimLeft = function(text)
+this.trim = function(text)
 {
     return text.replace(/^\s*|\s*$/g,"");
+}
+
+this.trimLeft = function(text)
+{
+    return text.replace(/^\s+/,"");
+}
+
+this.trimRight = function(text)
+{
+    return text.replace(/\s+$/,"");
 }
 
 this.wrapText = function(text, noEscapeHTML)

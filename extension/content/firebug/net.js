@@ -2602,7 +2602,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
             var m = part[0].match(/\s*name=\"(.*)\"(;|$)/);
             postData.params.push({
                 name: (m && m.length > 1) ? m[1] : "",
-                value: trimLeft(part[1])
+                value: trim(part[1])
             })
         }
 
@@ -4848,7 +4848,7 @@ Firebug.NetMonitor.TraceListener =
         if (index == 0)
         {
             message.text = message.text.substr("net.".length);
-            message.text = trimLeft(message.text);
+            message.text = trim(message.text);
             message.type = "DBG_NET";
         }
 
@@ -4857,7 +4857,7 @@ Firebug.NetMonitor.TraceListener =
         if (index == 0)
         {
             message.text = message.text.substr(prefix.length);
-            message.text = trimLeft(message.text);
+            message.text = trim(message.text);
             message.type = "DBG_ACTIVITYOBSERVER";
         }
     }
