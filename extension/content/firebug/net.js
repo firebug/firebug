@@ -1106,7 +1106,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
             if (hasClass(row, "opened"))
             {
-                var netInfoBox = row.nextSibling.firstChild.firstChild;
+                var netInfoBox = row.nextSibling.getElementsByClassName("netInfoBody").item(0);
                 NetInfoBody.updateInfo(netInfoBox, file, this.context);
             }
         }
@@ -2229,7 +2229,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
     updateInfo: function(netInfoBox, file, context)
     {
         if (FBTrace.DBG_NET)
-            FBTrace.sysout("updateInfo file", file);
+            FBTrace.sysout("net.updateInfo; file", file);
+
+        if (!netInfoBox)
+        {
+            if (FBTrace.DBG_NET || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.updateInfo; ERROR netInfo == null " + file.href, file);
+            return;
+        }
 
         var tab = netInfoBox.selectedTab;
         if (hasClass(tab, "netInfoParamsTab"))
