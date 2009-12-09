@@ -90,6 +90,7 @@ pref("extensions.firebug.net.enableSites", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].
 pref("extensions.firebug.netDisplayedPostBodyLimit", 10240); // Maximum size limit for displayed post data source [net, console panels].
 pref("extensions.firebug.net.hiddenColumns", "");   // List of hidden columns for the Net panel (space separated)
+pref("extensions.firebug.netPhaseInterval", 1000);    // Specifies an interval (ms) after which a new phase (session) in the timeline graph is started. Set to 0 to not start new phase at all.
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.

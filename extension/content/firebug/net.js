@@ -43,7 +43,6 @@ var nsISocketTransport = Ci.nsISocketTransport;
 
 const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
 const layoutInterval = 300;
-const phaseInterval = 1000;
 const indentWidth = 18;
 
 var cacheSession = null;
@@ -3672,8 +3671,9 @@ NetProgress.prototype =
             // If the new request has been started within a "phaseInterval" after the
             // previous reqeust has been started, associate it with the current phase;
             // otherwise create a new phase.
+            var phaseInterval = Firebug.netPhaseInterval;
             var lastStartTime = this.currentPhase.lastStartTime;
-            if (this.loaded && file.startTime - lastStartTime >= phaseInterval)
+            if (phaseInterval > 0 && this.loaded && file.startTime - lastStartTime >= phaseInterval)
                 this.startPhase(file);
             else
                 this.currentPhase.addFile(file);
