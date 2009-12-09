@@ -213,30 +213,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return hookReturn;
         }
 
-        try {
-            executionContext.scriptsEnabled = false;
-
-            if (context.window instanceof Ci.nsIInterfaceRequestor)
-            {
-                context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
-                if (context.eventSuppressor)
-                    context.eventSuppressor.suppressEventHandling(true);
-            }
-
-            if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
-            // Unfortunately, due to quirks in Firefox's networking system, we must
-            // be sure to load and cache all scripts NOW before we enter the nested
-            // event loop, or run the risk that some of them won't load while
-            // the new event loop is nested.  It seems that the networking system
-            // can't communicate with the nested loop.
-            // XXXjjb recheck this when we have Honza's new hook
-            cacheAllScripts(context);
-
-        } catch (exc) {
-            // This attribute is only valid for contexts which implement nsIScriptContext.
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, cacheAll exception:", exc);
-        }
+        this.freeze(context, executionContext);
 
         try
         {
@@ -254,28 +231,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
 
-        try {
-            if (executionContext.isValid)
-            {
-                if (context.eventSuppressor)
-                {
-                    context.eventSuppressor.suppressEventHandling(false);
-                    delete context.eventSuppressor;
-                }
-
-                executionContext.scriptsEnabled = true;
-            }
-            else
-            {
-                if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.stop "+executionContext.tag+" executionContext is not valid");
-            }
-            if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop try to ensable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
-        } catch (exc) {
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
-        }
-
+        this.thaw(context, executionContext);
         this.stopDebugging(context);
 
         dispatch(this.fbListeners,"onResume",[context]);
@@ -360,6 +316,52 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.resume(context);
     },
 
+    freeze: function(context, executionContext)
+    {
+        try {
+            executionContext.scriptsEnabled = false;
+
+            if (context.window instanceof Ci.nsIInterfaceRequestor)
+            {
+                context.eventSuppressor = context.window.getInterface(Ci.nsIDOMWindowUtils);
+                if (context.eventSuppressor)
+                    context.eventSuppressor.suppressEventHandling(true);
+            }
+
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.stop try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+
+        } catch (exc) {
+            // This attribute is only valid for contexts which implement nsIScriptContext.
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, cacheAll exception:", exc);
+        }
+    },
+
+    thaw: function(context, executionContext)
+    {
+        try {
+            if (executionContext.isValid)
+            {
+                if (context.eventSuppressor)
+                {
+                    context.eventSuppressor.suppressEventHandling(false);
+                    delete context.eventSuppressor;
+                }
+
+                executionContext.scriptsEnabled = true;
+            }
+            else
+            {
+                if (FBTrace.DBG_UI_LOOP)
+                    FBTrace.sysout("debugger.stop "+executionContext.tag+" executionContext is not valid");
+            }
+            if (FBTrace.DBG_UI_LOOP)
+                FBTrace.sysout("debugger.stop try to ensable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+        } catch (exc) {
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
+        }
+
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Breakpoints
@@ -793,53 +795,58 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     supportsGlobal: function(frameWin) // This is call from fbs for almost all fbs operations
     {
         var context = ( (frameWin && TabWatcher) ? TabWatcher.getContextByWindow(frameWin) : null);
+        if (!context)
+            return false;
 
-        if (context)
+        // Apparently the frameWin is a XPCSafeJSObjectWrapper that looks like a Window.
+        // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
+        if (!frameWin._getFirebugConsoleElement)
         {
-            // Apparently the frameWin is a XPCSafeJSObjectWrapper that looks like a Window.
-            // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
-            if (!frameWin._getFirebugConsoleElement)
-            {
-                if (context.notificationSourceFile)
-                {
-                    delete context.sourceFileMap[context.notificationSourceFile.href];
-                    delete context.notificationSourceFile;
-                }
-                if (Firebug.Console.isAlwaysEnabled())
-                {
-                    // This is how the console is injected ahead of JS running on the page
-                    fbs.filterConsoleInjections = true;
-                    try
-                    {
-                        var consoleReady = Firebug.Console.isReadyElsePreparing(context, frameWin);
-                    }
-                    catch(exc)
-                    {
-                        if (FBTrace.DBG_ERRORS)
-                            FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady FAILS: "+exc, exc);
-                    }
-                    finally
-                    {
-                        fbs.filterConsoleInjections = false;
-                    }
-                    if (FBTrace.DBG_CONSOLE)
-                        FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady:"+consoleReady, frameWin);
-                }
-                else
-                {
-                    if (FBTrace.DBG_CONSOLE)
-                        FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement console NOT enabled ", frameWin);
-                }
-            }
-            else
-            {
-                if (FBTrace.DBG_CONSOLE)
-                    FBTrace.sysout("debugger.supportsGlobal frameWin._getFirebugConsoleElement exists", frameWin);
-            }
+            this.injectConsole(context, frameWin);
+        }
+        else
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("debugger.supportsGlobal frameWin._getFirebugConsoleElement exists", frameWin);
         }
 
         this.breakContext = context;
-        return !!context;
+        //FBTrace.sysout("debugger.js this.breakContext "+this.breakContext.getName());
+        return true;
+    },
+
+    injectConsole: function(context, frameWin)
+    {
+        if (context.notificationSourceFile)
+        {
+            delete context.sourceFileMap[context.notificationSourceFile.href];
+            delete context.notificationSourceFile;
+        }
+        if (Firebug.Console.isAlwaysEnabled())
+        {
+            // This is how the console is injected ahead of JS running on the page
+            fbs.filterConsoleInjections = true;
+            try
+            {
+                var consoleReady = Firebug.Console.isReadyElsePreparing(context, frameWin);
+            }
+            catch(exc)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady FAILS: "+exc, exc);
+            }
+            finally
+            {
+                fbs.filterConsoleInjections = false;
+            }
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement consoleReady:"+consoleReady, frameWin);
+        }
+        else
+        {
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("debugger.supportsGlobal !frameWin._getFirebugConsoleElement console NOT enabled ", frameWin);
+        }
     },
 
     onLock: function(state)
@@ -2086,6 +2093,12 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
     getDecorator: function(sourceBox)
     {
         return Firebug.ScriptPanel.decorator;
+    },
+
+    initialize: function(context, doc)
+    {
+        this.location = null;
+        Firebug.SourceBoxPanel.initialize.apply(this, arguments);
     },
 
     // *************************************************************************************
@@ -3378,14 +3391,6 @@ function getFrameContext(frame)
 {
     var win = getFrameScopeWindowAncestor(frame);
     return win ? TabWatcher.getContextByWindow(win) : null;
-}
-
-function cacheAllScripts(context)
-{
-    return;
-    // TODO the scripts should all be ready
-    for (var url in context.sourceFileMap)
-        context.sourceFileMap[url].cache(context);
 }
 
 function ArrayEnumerator(array)
