@@ -975,7 +975,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         var viewOptionNames = {
                 showCommentNodes:1,
-                showTextNodesAsSource:1,
+                showTextNodesWithEntities:1,
                 showTextNodesWithWhitespace:1,
                 showFullTextNodes:1
         };
@@ -1135,7 +1135,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             optionMenu("ShowFullText", "showFullTextNodes"),
             optionMenu("ShowWhitespace", "showTextNodesWithWhitespace"),
             optionMenu("ShowComments", "showCommentNodes"),
-            optionMenu("ShowTextNodesAsSource", "showTextNodesAsSource"),
+            optionMenu("ShowTextNodesWithEntities", "showTextNodesWithEntities"),
             "-",
             optionMenu("HighlightMutations", "highlightMutations"),
             optionMenu("ExpandMutations", "expandMutations"),

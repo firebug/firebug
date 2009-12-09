@@ -2073,7 +2073,7 @@ this.unescapeForTextNode = function(str)
 {
     if (Firebug.showTextNodesWithWhitespace)
         str = unescapeWhitespace(str);
-    if (!Firebug.showTextNodesAsSource)
+    if (!Firebug.showTextNodesWithEntities)
         str = escapeForElementAttribute(str);
     return str;
 }

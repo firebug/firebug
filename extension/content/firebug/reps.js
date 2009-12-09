@@ -741,7 +741,7 @@ this.Element = domplate(Firebug.Rep,
                     ' ' : '_Space'
                 }
              });
-         if (Firebug.showTextNodesAsSource)
+         if (Firebug.showTextNodesWithEntities)
              escapeGroups.push({
                  'group':'text',
                  'class':'nodeTextEntity',

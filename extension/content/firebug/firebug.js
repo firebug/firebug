@@ -75,7 +75,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
 
     // HTML
     "showFullTextNodes", "showCommentNodes", 
-    "showTextNodesWithWhitespace", "showTextNodesAsSource", 
+    "showTextNodesWithWhitespace", "showTextNodesWithEntities", 
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
     "showQuickInfoBox",
 

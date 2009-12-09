@@ -45,7 +45,7 @@ pref("extensions.firebug.persistBreakOnError", false);
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
 pref("extensions.firebug.showTextNodesWithWhitespace", false);
-pref("extensions.firebug.showTextNodesAsSource", false);
+pref("extensions.firebug.showTextNodesWithEntities", true);
 pref("extensions.firebug.showFullTextNodes", true);
 pref("extensions.firebug.highlightMutations", true);
 pref("extensions.firebug.expandMutations", false);
