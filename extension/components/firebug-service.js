@@ -1242,7 +1242,7 @@ FirebugService.prototype =
                 fbs._lastErrorScript = frame.script;
                 fbs._lastErrorLine = frame.line;
                 fbs._lastErrorDebuggr = debuggr;
-                delete debuggr.breakContext; // XXXjjb this is bad API
+                fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
             }
             else
                 delete fbs._lastErrorDebuggr;
@@ -1307,11 +1307,15 @@ FirebugService.prototype =
                     if (FBTrace.DBG_FBS_ERRORS)
                         FBTrace.sysout("fbs.onError fbs._lastErrorDebuggr "+fbs._lastErrorDebuggr, fbs._lastErrorDebuggr);
 
+                    var saveContext = fbs._lastErrorDebuggr.breakContext;
+                    fbs._lastErrorDebuggr.breakContext = fbs._lastErrorContext;
                     fbs._lastErrorDebuggr.onUncaughtException(errorInfo);
+                    fbs._lastErrorDebuggr.breakContext = saveContext;
                 }
                 finally
                 {
                     fbs._lastErrorDebuggr = null;
+                    fbs._lastErrorContext = null;
                 }
 
                 return true;
@@ -1925,13 +1929,13 @@ FirebugService.prototype =
                     if (!debuggr.breakContext)
                         FBTrace.sysout("Debugger with no breakContext:",debuggr.supportsGlobal);
                     if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                        FBTrace.sysout(" findDebugger found debuggr ("+debuggr.debuggerName+") at "+i+" for global "+global+" while processing "+frame.script.fileName);
+                        FBTrace.sysout(" findDebugger found debuggr ("+debuggr.debuggerName+") at "+i+" with breakContext "+debuggr.breakContext.getName()+" for global "+fbs.getLocationSafe(global)+" while processing "+frame.script.fileName);
                     return debuggr;
                 }
             }
             catch (exc)
             {
-                FBTrace.sysout("firebug-service askDebuggersForSupport FAILS: ",exc);
+                FBTrace.sysout("firebug-service askDebuggersForSupport FAILS: "+exc,exc);
             }
         }
         return null;
