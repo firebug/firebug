@@ -111,6 +111,9 @@ Firebug.Inspector = extend(Firebug.Module,
         htmlPanel.panelNode.focus();
         htmlPanel.startInspecting();
 
+        if (context.stopped)
+            Firebug.Debugger.thaw(context);
+
         if (context.hoverNode)
             this.inspectNode(context.hoverNode);
     },
@@ -154,6 +157,9 @@ Firebug.Inspector = extend(Firebug.Module,
             return;
 
         var context = this.inspectingContext;
+
+        if (context.stopped)
+            Firebug.Debugger.freeze(context);
 
         if (this.inspectTimeout)
         {
@@ -356,8 +362,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        var chrome = Firebug.chrome,
-            disabled = !panel || !panel.context.loaded;
+        var chrome = Firebug.chrome;
+        var disabled = !panel || !panel.context.loaded;
 
         chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
         //chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
@@ -392,19 +398,19 @@ Firebug.Inspector = extend(Firebug.Module,
         if (elements.length)
             return elements[0];*/
     },
-    
+
     toggleQuickInfoBox: function()
     {
         var qiBox = $('fbQuickInfoPanel');
 
         if (qiBox.state==="open")
             quickInfoBox.hide();
-            
+
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
-            
+
         Firebug.setPref(Firebug.prefDomain, "showQuickInfoBox", quickInfoBox.boxEnabled);
     },
-    
+
     hideQuickInfoBox: function()
     {
         var qiBox = $('fbQuickInfoPanel');
@@ -643,7 +649,7 @@ quickInfoBox =
     {
         if (!this.boxEnabled || !element)
             return;
-    
+
         var vbox, lab,
             needsTitle = false,
             needsTitle2 = false,
@@ -657,10 +663,10 @@ quickInfoBox =
         if (qiBox.state==="closed")
         {
             qiBox.hidePopup();
-            
+
             this.storedX = this.storedX || $('content').tabContainer.boxObject.screenX + 5;
             this.storedY = this.storedY || $('content').tabContainer.boxObject.screenY + 35;
-                
+
             qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
@@ -686,7 +692,7 @@ quickInfoBox =
 
         this.addRows(element, vbox, compAttribs, true);
     },
-    
+
     hide: function()
     {
         this.prevX = null;
@@ -694,19 +700,19 @@ quickInfoBox =
         qiBox = $('fbQuickInfoPanel');
         qiBox.hidePopup();
     },
-    
+
     dragStart: function(event)
     {
         this.dragging = true;
     },
-    
+
     dragEnd: function(event)
     {
         this.dragging = false;
         this.prevX = null;
         this.prevY = null;
     },
-    
+
     drag: function(event)
     {
         if(this.dragging)
@@ -724,7 +730,7 @@ quickInfoBox =
             diffY = y - this.prevY;
             newX = boxX + diffX;
             newY = boxY + diffY;
-            
+
             if(newX < 0)
                 newX = 0;
 
@@ -736,19 +742,19 @@ quickInfoBox =
 
             qiBox.hidePopup();
             qiBox.openPopupAtScreen(newX, newY, false);
-            
+
             this.prevX = x;
             this.prevY = y;
             this.storedX = boxX;
             this.storedY = boxY;
         }
     },
-    
+
     addRows: function(domBase, vbox, attribs, computedStyle)
     {
         if(!domBase)
             return;
-    
+
         var i, cs, desc, hbox, lab, value,
             needsTitle = false,
             attribsLen = attribs.length;
@@ -759,7 +765,7 @@ quickInfoBox =
             {
                 cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
                 value = cs.getPropertyValue(attribs[i]);
-                
+
                 if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
                     value = rgbToHex(value);
             }
@@ -781,7 +787,7 @@ quickInfoBox =
                 vbox.appendChild(hbox);
             }
         }
-        
+
         return needsTitle;
     }
 }
@@ -798,7 +804,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         return false; // (element instanceof XULElement);
     },
-    
+
     highlight: function(context, element)
     {
         if (this.doNotHighlight(element))
@@ -820,7 +826,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if(element.tagName !== "AREA")
         {
             quickInfoBox.show(element);
-        
+
             var nodes = this.getNodes(context, element);
 
             move(nodes.top, x, y-edgeSize);
@@ -879,7 +885,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             for (var edge in nodes)
                 body.removeChild(nodes[edge]);
-                
+
             quickInfoBox.hide();
         }
     },
@@ -1110,7 +1116,7 @@ BoxModelHighlighter.prototype =
                     body.removeChild(nodes.lines[line]);
             }
         }
-        
+
         quickInfoBox.hide();
     },
 
@@ -1222,13 +1228,13 @@ function createProxiesForDisabledElements(body)
     var i, rect, div,
         doc = body.ownerDocument,
         nodes = doc.getElementsByTagName("*");
-    
+
     for(i = 0; i < nodes.length; i++)
     {
         if(nodes[i].hasAttribute("disabled") && !nodes[i].fbHasProxyElement)
         {
             rect = nodes[i].getBoundingClientRect();
-            
+
             div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
             div.className = "fbProxyElement";
             div.style.left = rect.left + "px";
@@ -1239,7 +1245,7 @@ function createProxiesForDisabledElements(body)
 
             div.fbProxyFor = nodes[i];
             nodes[i].fbHasProxyElement = true;
-            
+
             body.appendChild(div);
         }
     }

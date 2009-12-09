@@ -213,7 +213,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return hookReturn;
         }
 
-        this.freeze(context, executionContext);
+        this.freeze(context);
 
         try
         {
@@ -231,7 +231,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
 
-        this.thaw(context, executionContext);
+        this.thaw(context);
         this.stopDebugging(context);
 
         dispatch(this.fbListeners,"onResume",[context]);
@@ -251,9 +251,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
 
-        delete context.stopped;
-        delete context.debugFrame;
-        delete context.currentFrame;
 
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
@@ -316,8 +313,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.resume(context);
     },
 
-    freeze: function(context, executionContext)
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    freeze: function(context)
     {
+        var executionContext = context.debugFrame.executionContext;
         try {
             executionContext.scriptsEnabled = false;
 
@@ -337,8 +337,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
     },
 
-    thaw: function(context, executionContext)
+    thaw: function(context)
     {
+        var executionContext = context.debugFrame.executionContext;
         try {
             if (executionContext.isValid)
             {
@@ -624,6 +625,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             // the current context will be destroyed just before
             if (context && context.window && !context.aborted)
             {
+                delete context.stopped;
+                delete context.debugFrame;
+                delete context.currentFrame;
+
                 var chrome = Firebug.chrome;
 
                 this.syncCommands(context);
