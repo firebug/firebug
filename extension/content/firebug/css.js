@@ -12,6 +12,11 @@ const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 const nsISelectionDisplay = Ci.nsISelectionDisplay;
 const nsISelectionController = Ci.nsISelectionController;
 
+// See: http://mxr.mozilla.org/mozilla1.9.2/source/content/events/public/nsIEventStateManager.h#153
+const STATE_ACTIVE  = 0x01;
+const STATE_FOCUS   = 0x02;
+const STATE_HOVER   = 0x04;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 var domUtils = null;
@@ -1303,6 +1308,44 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
                 }
             }
         }
+
+        if (this.context.loaded && domUtils)
+        {
+            if (!this.context.attachedStateCheck)
+            {
+                this.context.attachedStateCheck = true;
+
+
+                this.onStateChange = bindFixed(this.contentStateCheck, this);
+                this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
+                this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+
+                iterateWindows(this.context.window, bind(this.watchWindow, this), this);
+            }
+        }
+    },
+
+    watchWindow: function(win)
+    {
+        if (domUtils)
+        {
+            // Normally these would not be required, but in order to update after the state is set
+            // using the options menu we need to monitor these global events as well
+            var doc = win.document;
+            doc.addEventListener("mouseover", this.onHoverChange, false);
+            doc.addEventListener("mousedown", this.onActiveChange, false);
+        }
+    },
+    unwatchWindow: function(win)
+    {
+        var doc = win.document;
+        doc.removeEventListener("mouseover", this.onHoverChange, false);
+        doc.removeEventListener("mousedown", this.onActiveChange, false);
+
+        if (isAncestor(this.stateChangeEl, doc))
+        {
+            this.removeStateChangeHandlers();
+        }
     },
 
     supportsObject: function(object)
@@ -1313,6 +1356,11 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     updateView: function(element)
     {
         this.updateCascadeView(element);
+        if (domUtils)
+        {
+            this.contentState = domUtils.getContentState(element);
+            this.addStateChangeHandlers(element);
+        }
     },
 
     updateSelection: function(element)
@@ -1346,10 +1394,70 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     getOptionsMenuItems: function()
     {
-        return [
+        var ret = [
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
                     command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }
         ];
+        if (domUtils && this.selection)
+        {
+            var state = domUtils.getContentState(this.selection);
+    
+            ret.push("-");
+            ret.push({label: ":active", type: "checkbox", checked: state & STATE_ACTIVE,
+              command: bindFixed(this.updateContentState, this, STATE_ACTIVE, state & STATE_ACTIVE)});
+            ret.push({label: ":hover", type: "checkbox", checked: state & STATE_HOVER,
+              command: bindFixed(this.updateContentState, this, STATE_HOVER, state & STATE_HOVER)});
+        }
+        return ret;
+    },
+    updateContentState: function(state, remove)
+    {
+        domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement : this.selection, state);
+        this.refresh();
+    },
+
+    addStateChangeHandlers: function(el)
+    {
+      this.removeStateChangeHandlers();
+
+      el.addEventListener("focus", this.onStateChange, true);
+      el.addEventListener("blur", this.onStateChange, true);
+      el.addEventListener("mouseup", this.onStateChange, false);
+      el.addEventListener("mousedown", this.onStateChange, false);
+      el.addEventListener("mouseover", this.onStateChange, false);
+      el.addEventListener("mouseout", this.onStateChange, false);
+
+      this.stateChangeEl = el;
+    },
+    removeStateChangeHandlers: function()
+    {
+        var sel = this.stateChangeEl;
+        if (sel)
+        {
+            sel.removeEventListener("focus", this.onStateChange, true);
+            sel.removeEventListener("blur", this.onStateChange, true);
+            sel.removeEventListener("mouseup", this.onStateChange, false);
+            sel.removeEventListener("mousedown", this.onStateChange, false);
+            sel.removeEventListener("mouseover", this.onStateChange, false);
+            sel.removeEventListener("mouseout", this.onStateChange, false);
+        }
+    },
+    contentStateCheck: function(state)
+    {
+      if (!state || this.contentState & state)
+      {
+          var timeoutRunner = bindFixed(function()
+              {
+                  var newState = domUtils.getContentState(this.selection);
+                  if (newState != this.contentState)
+                  { 
+                      this.context.invalidatePanels(this.name);
+                  }
+              }, this);
+  
+          // Delay exec until after the event has processed and the state has been updated
+          setTimeout(timeoutRunner, 0);
+      }
     }
 });
 
