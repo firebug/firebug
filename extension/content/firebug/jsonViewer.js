@@ -7,11 +7,15 @@ FBL.ns(function() { with (FBL) {
 // List of JSON content types.
 var contentTypes =
 {
-    "application/json": 1,
     "text/plain": 1,
-    "text/x-json": 1,
+    "text/javascript": 1,
+    "text/x-javascript": 1,
     "text/json": 1,
-    "text/javascript": 1
+    "text/x-json": 1,
+    "application/json": 1,
+    "application/x-json": 1,
+    "application/javascript": 1,
+    "application/x-javascript": 1
 };
 
 // ************************************************************************************************
