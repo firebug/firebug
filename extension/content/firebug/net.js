@@ -29,9 +29,6 @@ const LOAD_BACKGROUND = Ci.nsIRequest.LOAD_BACKGROUND;
 const LOAD_FROM_CACHE = Ci.nsIRequest.LOAD_FROM_CACHE;
 const LOAD_DOCUMENT_URI = Ci.nsIChannel.LOAD_DOCUMENT_URI;
 
-const ACCESS_READ = Ci.nsICache.ACCESS_READ;
-const STORE_ANYWHERE = Ci.nsICache.STORE_ANYWHERE;
-
 const NS_ERROR_CACHE_KEY_NOT_FOUND = 0x804B003D;
 const NS_ERROR_CACHE_WAIT_FOR_VALIDATION = 0x804B0040;
 
@@ -687,9 +684,6 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         // Copy response to the clipboard
         copyToClipboard(Utils.getResponseText(file, this.context));
-
-        // Try to update file.cacheEntry flag.
-        getCacheEntry(file, this.context.netProgress);
     },
 
     openRequestInTab: function(file)
@@ -2167,7 +2161,8 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     hideCache: function(file)
     {
-        return !file.cacheEntry || file.category=="image";
+        //xxxHonza: I don't see any reason why not to display the cache also info for images.
+        return !file.cacheEntry/* || file.category=="image"*/;
     },
 
     hideHtml: function(file)
@@ -2363,11 +2358,6 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
         }
 
         netInfoBox.responsePresented = true;
-
-        // Try to get the data from cache and update file.cacheEntry so,
-        // the response is displayed automatically the next time the
-        // net-entry is expanded again.
-        getCacheEntry(file, context.netProgress);
 
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.setResponseText; response text updated");
@@ -3326,8 +3316,12 @@ NetProgress.prototype =
 
             this.endLoad(file);
 
-            if (file.fromCache)
-                getCacheEntry(file, this);
+            // Use ACTIVITY_SUBTYPE_RESPONSE_COMPLETE to get the info if possible.
+            if (!Ci.nsIHttpActivityDistributor)
+            {
+                if (file.fromCache)
+                    getCacheEntry(file, this);
+            }
 
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.respondedFile +" + (now() - file.startTime) + " " +
@@ -3476,6 +3470,9 @@ NetProgress.prototype =
 
             // This was only a helper to show download progress.
             file.totalReceived = 0;
+
+            // The request is completed, get cache entry.
+            getCacheEntry(file, this);
         }
 
         return file;
@@ -4106,91 +4103,106 @@ function unmonitorContext(context)
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function initCacheSession()
-{
-    if (!cacheSession)
-    {
-        var cacheService = CacheService.getService(Ci.nsICacheService);
-        cacheSession = cacheService.createSession("HTTP", STORE_ANYWHERE, true);
-        cacheSession.doomEntriesIfExpired = false;
-    }
-}
-
 function getCacheEntry(file, netProgress)
 {
+    // Bail out if the cache is disabled.
+    if (!Firebug.NetMonitor.BrowserCache.isEnabled())
+        return;
+
+    // Don't request the cache entry twice.
+    if (file.cacheEntryRequested)
+        return;
+
+    file.cacheEntryRequested = true;
+
     if (FBTrace.DBG_NET)
         FBTrace.sysout("net.getCacheEntry for file.href: " + file.href + "\n");
 
     // Pause first because this is usually called from stopFile, at which point
     // the file's cache entry is locked
-    setTimeout(function delayGetCacheEntry()
+    setTimeout(function()
     {
         try
         {
-            initCacheSession();
-            if (FBTrace.DBG_NET)
-                FBTrace.sysout("net.delayGetCacheEntry for file.href=" + file.href + "\n");
-            cacheSession.asyncOpenCacheEntry(file.href, ACCESS_READ, {
-                onCacheEntryAvailable: function(descriptor, accessGranted, status)
-                {
-                    if (FBTrace.DBG_NET)
-                        FBTrace.sysout("net.onCacheEntryAvailable for file.href=" + file.href + "\n");
-
-                    if (descriptor)
-                    {
-                        if(file.size == -1)
-                        {
-                            file.size = descriptor.dataSize;
-                        }
-                        if(descriptor.lastModified && descriptor.lastFetched &&
-                            descriptor.lastModified < Math.floor(file.startTime/1000)) {
-                            file.fromCache = true;
-                        }
-                        file.cacheEntry = [
-                          { name: "Last Modified",
-                            value: Utils.getDateFromSeconds(descriptor.lastModified)
-                          },
-                          { name: "Last Fetched",
-                            value: Utils.getDateFromSeconds(descriptor.lastFetched)
-                          },
-                          { name: "Expires",
-                            value: Utils.getDateFromSeconds(descriptor.expirationTime)
-                          },
-                          { name: "Data Size",
-                            value: descriptor.dataSize
-                          },
-                          { name: "Fetch Count",
-                            value: descriptor.fetchCount
-                          },
-                          { name: "Device",
-                            value: descriptor.deviceID
-                          }
-                        ];
-
-                        // Get contentType from the cache.
-                        descriptor.visitMetaData({
-                            visitMetaDataElement: function(key, value) {
-                                if (key == "response-head")
-                                {
-                                    var contentType = getContentTypeFromResponseHead(value);
-                                    file.mimeType = Utils.getMimeType(contentType, file.href);
-                                    return false;
-                                }
-
-                                return true;
-                            }
-                        });
-
-                        descriptor.close();
-                        netProgress.update(file);
-                    }
-                }
-            });
+            delayGetCacheEntry(file, netProgress);
         }
         catch (exc)
         {
-            //if (FBTrace.DBG_ERRORS)
-            //    FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
+        }
+    });
+}
+
+function delayGetCacheEntry(file, netProgress)
+{
+    if (FBTrace.DBG_NET)
+        FBTrace.sysout("net.delayGetCacheEntry for file.href=" + file.href + "\n");
+
+    // Init cache session.
+    if (!cacheSession)
+    {
+        var cacheService = CacheService.getService(Ci.nsICacheService);
+        cacheSession = cacheService.createSession("HTTP", Ci.nsICache.STORE_ANYWHERE, true);
+        cacheSession.doomEntriesIfExpired = false;
+    }
+
+    cacheSession.asyncOpenCacheEntry(file.href, Ci.nsICache.ACCESS_READ,
+    {
+        onCacheEntryAvailable: function(descriptor, accessGranted, status)
+        {
+            if (FBTrace.DBG_NET)
+                FBTrace.sysout("net.onCacheEntryAvailable for file.href=" + file.href + "\n");
+
+            if (descriptor)
+            {
+                if (file.size == -1)
+                    file.size = descriptor.dataSize;
+
+                if (descriptor.lastModified && descriptor.lastFetched &&
+                    descriptor.lastModified < Math.floor(file.startTime/1000)) {
+                    file.fromCache = true;
+                }
+
+                file.cacheEntry = [
+                  { name: "Last Modified",
+                    value: Utils.getDateFromSeconds(descriptor.lastModified)
+                  },
+                  { name: "Last Fetched",
+                    value: Utils.getDateFromSeconds(descriptor.lastFetched)
+                  },
+                  { name: "Expires",
+                    value: Utils.getDateFromSeconds(descriptor.expirationTime)
+                  },
+                  { name: "Data Size",
+                    value: descriptor.dataSize
+                  },
+                  { name: "Fetch Count",
+                    value: descriptor.fetchCount
+                  },
+                  { name: "Device",
+                    value: descriptor.deviceID
+                  }
+                ];
+
+                // Get contentType from the cache.
+                descriptor.visitMetaData(
+                {
+                    visitMetaDataElement: function(key, value)
+                    {
+                        if (key == "response-head")
+                        {
+                            var contentType = getContentTypeFromResponseHead(value);
+                            file.mimeType = Utils.getMimeType(contentType, file.href);
+                            return false;
+                        }
+                        return true;
+                    }
+                });
+
+                descriptor.close();
+                netProgress.update(file);
+            }
         }
     });
 }
