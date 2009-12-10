@@ -2308,10 +2308,9 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
         if (hasClass(tab, "netInfoCacheTab") && file.loaded && !netInfoBox.cachePresented)
         {
-            netInfoBox.cachePresented = true;
-
             var responseTextBox = netInfoBox.getElementsByClassName("netInfoCacheText").item(0);
             if (file.cacheEntry) {
+                netInfoBox.cachePresented = true;
                 this.insertHeaderRows(netInfoBox, file.cacheEntry, "Cache");
             }
         }
