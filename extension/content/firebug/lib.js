@@ -1318,22 +1318,24 @@ this.isScrolledToBottom = function(element)
 {
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
     if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("isScrolledToBottom offsetHeight: "+element.offsetHeight +" onBottom:"+onBottom);
+        FBTrace.sysout("isScrolledToBottom offsetHeight: " + element.offsetHeight +
+            ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
+            ", onBottom: " + onBottom);
     return onBottom;
 };
 
 this.scrollToBottom = function(element)
 {
-        element.scrollTop = element.scrollHeight;
+    element.scrollTop = element.scrollHeight;
 
-        if (FBTrace.DBG_CONSOLE)
-        {
-            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
-            if (element.scrollHeight == element.offsetHeight)
-                FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
-        }
+    if (FBTrace.DBG_CONSOLE)
+    {
+        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
+        if (element.scrollHeight == element.offsetHeight)
+            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
+    }
 
-        return (element.scrollTop == element.scrollHeight);
+    return (element.scrollTop == element.scrollHeight);
 };
 
 this.move = function(element, x, y)
