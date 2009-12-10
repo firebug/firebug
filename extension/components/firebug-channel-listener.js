@@ -48,6 +48,23 @@ function ChannelListener()
 
 ChannelListener.prototype =
 {
+    setAsyncListener: function(request, stream, listener)
+    {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
+                "set=" + (listener != null) + " " + safeGetName(request));
+
+        try
+        {
+            stream.asyncWait(listener, 0, 0, null);
+        }
+        catch (err)
+        {
+            FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                safeGetName(request), err);
+        }
+    },
+
     onCollectData: function(request, context, inputStream, offset, count)
     {
         if (this.ignore)
@@ -174,7 +191,7 @@ ChannelListener.prototype =
 
                 // Listen for incoming data.
                 if (!this.ignore && this.sink)
-                    this.sink.inputStream.asyncWait(this, 0, 0, null);
+                    this.setAsyncListener(request, this.sink.inputStream, this);
             }
         }
         catch (err)
@@ -210,7 +227,7 @@ ChannelListener.prototype =
 
             // Make sure the listener for incoming data is removed.
             if (this.sink)
-                this.sink.inputStream.asyncWait(null, 0, 0, null);
+                this.setAsyncListener(request, this.sink.inputStream, null);
         }
         catch (err)
         {
@@ -253,7 +270,7 @@ ChannelListener.prototype =
 
                 // Listen for further incoming data.
                 if (!this.ignore)
-                    stream.asyncWait(this, 0, 0, null);
+                    this.setAsyncListener(this.request, stream, this);
             }
         }
         catch (err)
