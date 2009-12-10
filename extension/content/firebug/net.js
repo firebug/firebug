@@ -428,7 +428,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         while (prevTableBody.firstChild)
         {
             var row = prevTableBody.firstChild;
-            if (hasClass(row, "netRow", "hasHeaders"))
+            if (hasClass(row, "netRow") && hasClass(row, "hasHeaders"))
                 tbody.insertBefore(row, lastRow);
             else if (hasClass(row, "netPageSeparatorRow"))
                 tbody.insertBefore(row, lastRow);

@@ -623,22 +623,17 @@ this.getRootWindow = function(win)
 // ************************************************************************************************
 // CSS classes
 
-this.hasClass = function(node, name) // className, className, ...
+var classNameReCache={};
+this.hasClass = function(node, name) 
 {
     if (!node || node.nodeType != 1)
         return false;
-    else
-    {
-        for (var i=1; i<arguments.length; ++i)
-        {
-            var name = arguments[i];
-            var re = new RegExp("(^|\\s)"+name+"($|\\s)");
-            if (!re.exec(node.getAttribute("class")))
-                return false;
-        }
-
-        return true;
-    }
+        
+    if (name.indexOf(" ") == -1)
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g");
+    else // XXXsroussey don't cache these, fix these callers later
+        re = new RegExp('\\b' + name + '\\b', "g")
+    return node.className.search(re) != -1;
 };
 
 this.setClass = function(node, name)
@@ -658,12 +653,10 @@ this.removeClass = function(node, name)
 {
     if (node && node.className)
     {
-        var index = node.className.indexOf(name);
-        if (index >= 0)
-        {
-            var size = name.length;
-            node.className = node.className.substr(0,index-1) + node.className.substr(index+size);
-        }
+        node.className = node.className.replace(
+            classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g"),
+            ""
+        )
     }
 };
 
@@ -766,11 +759,7 @@ this.getAncestorByClass = function(node, className)
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
 this.getElementByClass = function(node, className)  // className, className, ...
 {
-    var args = cloneArray(arguments); args.splice(0, 1);
-    var className = args.join(" ");
-
-    var elements = node.getElementsByClassName(className);
-    return elements[0];
+    return FBL.getElementsByClass.apply(this,arguments).item(0);
 };
 
 /* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */

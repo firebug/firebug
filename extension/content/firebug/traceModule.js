@@ -929,7 +929,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     collapseRow: function(row)
     {
-        if (hasClass(row, "messageRow", "opened"))
+        if (hasClass(row, "messageRow") && hasClass(row, "opened"))
             this.toggleRow(row);
     },
 
