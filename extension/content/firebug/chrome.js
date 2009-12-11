@@ -960,7 +960,10 @@ top.FirebugChrome =
 
         FBL.eraseNode(popup);
 
-        if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled"))
+        // Make sure the Copy action is only available if there is actually someting
+        // selected in the panel.
+        var sel = target.ownerDocument.defaultView.getSelection();
+        if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled") && !sel.isCollapsed)
         {
             var menuitem = FBL.createMenuItem(popup, {label: "Copy"});
             menuitem.setAttribute("command", "cmd_copy");
