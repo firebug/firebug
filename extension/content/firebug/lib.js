@@ -639,7 +639,7 @@ this.hasClass = function(node, name)
 this.setClass = function(node, name)
 {
     if (node && !this.hasClass(node, name))
-        node.className += " " + name;
+        node.className = this.trimRight(node.className) + " " + name;
 };
 
 this.getClassValue = function(node, name)
