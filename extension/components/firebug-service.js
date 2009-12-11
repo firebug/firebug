@@ -2557,6 +2557,7 @@ function getStepName(mode)
     if (mode==STEP_INTO) return "STEP_INTO";
     if (mode==STEP_OUT) return "STEP_OUT";
     if (mode==STEP_SUSPEND) return "STEP_SUSPEND";
+    else return "(not a step mode)";
 }
 
 // ************************************************************************************************
