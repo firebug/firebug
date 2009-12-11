@@ -74,8 +74,8 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "persistBreakOnError",
 
     // HTML
-    "showFullTextNodes", "showCommentNodes", 
-    "showTextNodesWithWhitespace", "showTextNodesWithEntities", 
+    "showFullTextNodes", "showCommentNodes",
+    "showTextNodesWithWhitespace", "showTextNodesWithEntities",
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
     "showQuickInfoBox",
 
@@ -1371,7 +1371,7 @@ top.Firebug =
         var type = typeof(object);
         if (type == 'object' && object instanceof String)
             type = 'string';
-        
+
         for (var i = 0; i < reps.length; ++i)
         {
             var rep = reps[i];
@@ -2550,11 +2550,18 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
-        var label = safeToString(object);
+        var label = safeToString(object); // eg [object XPCWrappedNative [object foo]]
 
-        var re = /\[object (.*?)\]/;
+        const re =/\[object ([^\]]*)/;
         var m = re.exec(label);
-        return m ? m[1] : label;
+        var n = null;
+        if (m)
+            n = re.exec(m[1]);  // eg XPCWrappedNative [object foo
+
+        if (n)
+            return n[1];  // eg foo
+        else
+            return m ? m[1] : label;
     },
 
     getTooltip: function(object)
