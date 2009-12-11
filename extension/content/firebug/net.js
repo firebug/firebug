@@ -3199,7 +3199,7 @@ NetProgress.prototype =
             file.isXHR = xhr;
             file.isBackground = request.loadFlags & LOAD_BACKGROUND;
             file.method = request.requestMethod;
-            file.urlParams = parseURLParams(file.href);
+            //file.urlParams = parseURLParams(file.href);
 
             Utils.getPostText(file, this.context);
 
@@ -4127,8 +4127,11 @@ function getCacheEntry(file, netProgress)
         }
         catch (exc)
         {
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
+            if (exc.name != "NS_ERROR_CACHE_KEY_NOT_FOUND")
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("net.delayGetCacheEntry FAILS " + file.href, exc);
+            }
         }
     });
 }
@@ -4241,6 +4244,9 @@ Firebug.NetMonitor.Utils =
 {
     findHeader: function(headers, name)
     {
+        if (!headers)
+            return null;
+
         name = name.toLowerCase();
         for (var i = 0; i < headers.length; ++i)
         {
