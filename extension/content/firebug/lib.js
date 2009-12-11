@@ -3237,7 +3237,7 @@ this.dispatch2 = function(listeners, name, args)
                 if ( result )
                 {
                     if (FBTrace.DBG_DISPATCH)
-                        FBTrace.sysout("dispatch2 result "+result, result);
+                        FBTrace.sysout("dispatch2 "+name+" to "+listeners.length+" listeners, result "+result, result);
                     return result;
                 }
             }
