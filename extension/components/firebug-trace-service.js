@@ -68,13 +68,12 @@ TraceConsoleService =
         if (this.getPref("extensions.firebug-tracing-service.DBG_toOSConsole"))
         {
              toOSConsole = true;  // also need browser.dom.window.dump.enabled true
+             TraceConsoleService.osOut("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
         }
 
         if (!this.optionMaps[prefDomain])
             this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
 
-        if (toOSConsole)
-            TraceConsoleService.osOut("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
         return this.optionMaps[prefDomain];
     },
 
