@@ -152,6 +152,7 @@ pref("extensions.firebug.DBG_INFOTIP", false);      // popup info tip in panels 
 pref("extensions.firebug.DBG_ANNOTATIONS", false);  // Page annotations service                  /*@explore*/
 pref("extensions.firebug.DBG_XMLVIEWER", false);    // xml explorer                              /*@explore*/
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activity observer      /*@explore*/
+pref("extensions.firebug.DBG_TOOLTIP", false);      // tooltip debugging      /*@explore*/
 
 // Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");

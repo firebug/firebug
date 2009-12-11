@@ -175,7 +175,7 @@ top.Firebug =
         if (version)
         {
             this.version = version;
-            $('fbStatusIcon').setAttribute("tooltiptext", "Firebug "+version);
+            $('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
 
             var about = $('Firebug_About');
             if (about)
@@ -447,9 +447,12 @@ top.Firebug =
 
     resetTooltip: function()
     {
-        var tooltip = "Firebug "+ Firebug.getVersion();
+        if (FBTrace.DBG_TOOLTIP)
+          FBTrace.sysout("resetTooltip called");
 
-        tooltip += "\n"+Firebug.getEnablementStatus();
+        var tooltip = "Firebug " + Firebug.getVersion();
+
+        tooltip += "\n" + Firebug.getEnablementStatus();
 
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
@@ -465,7 +468,7 @@ top.Firebug =
 
         tooltip += "\n" + $STR(Firebug.getPlacement());
 
-        $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
+        $('fbStatusBar').setAttribute("tooltiptext", tooltip);
     },
 
     getURLsForAllActiveContexts: function()
@@ -1544,12 +1547,12 @@ top.Firebug =
         {
             if (toPlacement == Firebug.placements[i])
             {
-                Firebug.resetTooltip();
                 if (Firebug.placement != i) // then we are changing the value
                 {
                     Firebug.placement = i;
                     delete Firebug.previousPlacement;
                     Firebug.setPref(Firebug.prefDomain, "previousPlacement", Firebug.placement);
+                    Firebug.resetTooltip();
                 }
                 return Firebug.placement;
             }
@@ -1627,8 +1630,7 @@ top.Firebug =
                 Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
         }
         else // this browser has no context
-            Firebug.suspend();
-
+        Firebug.suspend();
         Firebug.resetTooltip();
     },
 
@@ -1640,22 +1642,14 @@ top.Firebug =
             clearContextTimeout = 0;
         }
 
-        if (context)
-        {
-            FirebugContext = context;
-            Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
-            this.updateActiveContexts(context);  // resume, after setting FirebugContext
-        }
-        else
-        {
-            Firebug.chrome.setFirebugContext(context); // null context
-            FirebugContext = context;
-            this.updateActiveContexts(context);  // suspend, after setting FirebugContext
-        }
+        FirebugContext = context;
+        Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
+        this.updateActiveContexts(context);  // resume, after setting FirebugContext
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
-        if (Firebug.openInWindow && !Firebug.isDetached())  // user wants detached but we are not yet
+        // user wants detached but we are not yet
+        if (Firebug.openInWindow && !Firebug.isDetached())
         {
             if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
                 this.detachBar(context);  //   the placement will be set once the external window opens
@@ -1665,7 +1659,8 @@ top.Firebug =
             return;
         }
 
-        if (Firebug.openMinimized() && !Firebug.isMinimized())  // previous browser.xul had placement minimized
+        // previous browser.xul had placement minimized
+        if (Firebug.openMinimized() && !Firebug.isMinimized())
         {
             this.minimizeBar();
             return;
@@ -2428,6 +2423,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
                 FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
             this.show(persistedPanelState);
         }
+        
+        Firebug.resetTooltip();
     },
 
     disablePanel: function(module)
@@ -2450,6 +2447,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
                 FBTrace.sysout("Firebug.disablePanel state", persistedPanelState);
             this.hide(persistedPanelState);
         }
+
+        Firebug.resetTooltip();
     },
 
     getTab: function()
