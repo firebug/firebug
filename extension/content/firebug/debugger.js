@@ -333,7 +333,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         } catch (exc) {
             // This attribute is only valid for contexts which implement nsIScriptContext.
-            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, cacheAll exception:", exc);
+            if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, freeze exception in "+context.getName(), exc);
         }
     },
 
@@ -872,9 +872,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             if (!context)
             {
-                context = getFrameContext(frame);
+                context = this.getContextByFrame(frame);
                 if (FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.onBreak no breakContext, trying getFrameContext " + (context ? context.getName() : " none!") );
+                    FBTrace.sysout("debugger.onBreak no breakContext, trying getContextByFrame " + (context ? context.getName() : " none!") );
             }
             if (!context)
                 return RETURN_CONTINUE;
@@ -909,7 +909,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context)
         {
             FBTrace.sysout("debugger.onThrow, no context, try to get from frame\n");
-            context = getFrameContext(frame);
+            context = this.getContextByFrame(frame);
         }
         if (FBTrace.DBG_BP) FBTrace.sysout("debugger.onThrow context:"+(context?context.getName():"undefined")+"\n");
         if (!context)
@@ -971,7 +971,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         delete this.breakContext;
 
         if (!context)
-            context = getFrameContext(frame);
+            context = this.getContextByFrame(frame);
         if (!context)
             return RETURN_CONTINUE;
 
@@ -983,7 +983,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     onFunctionCall: function(context, frame, depth, calling)
     {
         if (!context)
-            context = getFrameContext(frame);
+            context = this.getContextByFrame(frame);
         if (!context)
             return RETURN_CONTINUE;
 
@@ -1158,7 +1158,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return sourceFile;
     },
 
-
+    getContextByFrame: function(frame)
+    {
+        var win = getFrameScopeWindowAncestor(frame);
+        return win ? TabWatcher.getContextByWindow(win) : null;
+    },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -3392,11 +3396,6 @@ function getFrameWindow(frame)
     }
 }
 
-function getFrameContext(frame)
-{
-    var win = getFrameScopeWindowAncestor(frame);
-    return win ? TabWatcher.getContextByWindow(win) : null;
-}
 
 function ArrayEnumerator(array)
 {
