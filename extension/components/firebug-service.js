@@ -97,6 +97,7 @@ const COMPONENTS_FILTERS = [
 
 const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
+const reTooMuchRecursion = /too\smuch\srecursion/;
 
 // ************************************************************************************************
 // Globals
@@ -172,7 +173,6 @@ function FirebugService()
     if(FBTrace.DBG_FBS_ERRORS)
         this.osOut("FirebugService Starting, FBTrace should be up\n");
 
-    this.enabled = false;
     this.profiling = false;
 
     prefs = PrefService.getService(nsIPrefBranch2);
@@ -282,24 +282,6 @@ FirebugService.prototype =
         var win = this._lastErrorWindow;
         this._lastErrorWindow = null; // Release to avoid leaks
         return win;
-    },
-
-    countContext: function(on)
-    {
-        contextCount += on ? 1 : -1;
-
-        if (on && contextCount == 1)
-        {
-            this.enabled = true;
-            dispatch(clients, "enable");
-        }
-        else if (contextCount == 0)
-        {
-            this.enabled = false;
-            dispatch(clients, "disable");
-        }
-
-        return true;
     },
 
     registerClient: function(client)  // clients are essentially XUL windows
@@ -1228,6 +1210,37 @@ FirebugService.prototype =
     {
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE_THROW;
+
+        if (rv && rv.value && rv.value.isValid)
+        {
+            var value = rv.value;
+            if (value.jsClassName == "Error" && reTooMuchRecursion.test(value.stringValue))
+            {
+                if (fbs._lastErrorCaller)
+                {
+                    if (fbs._lastErrorCaller == frame.script.tag) // then are unwinding recursion
+                    {
+                        fbs._lastErrorCaller = frame.callingFrame ? frame.callingFrame.script.tag : null;
+                        return RETURN_CONTINUE_THROW;
+                    }
+                }
+                else
+                {
+                    fbs._lastErrorCaller = frame.callingFrame.script.tag;
+                    frame = fbs.discardRecursionFrames(frame);
+                    // go on to process the throw.
+                }
+            }
+            else
+            {
+                delete fbs._lastErrorCaller; // throw is not recursion
+            }
+        }
+        else
+        {
+            delete fbs._lastErrorCaller; // throw is not recursion either
+        }
+
         // Remember the error where the last exception is thrown - this will
         // be used later when the console service reports the error, since
         // it doesn't currently report the window where the error occurred
@@ -1967,6 +1980,27 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameScopeRoot "+frameScopeRoot, frameScopeRoot);
         return null;
+    },
+
+    discardRecursionFrames: function(frame)
+    {
+        var i = 0;
+        var rest = 0;
+        var mark = frame;  // a in abcabcabcdef
+        var point = frame;
+        while (point = point.callingFrame)
+        {
+            i++;
+            if (point.script.tag == mark.script.tag) // then we found a repeating caller abcabcdef
+            {
+                mark = point;
+                rest = i;
+            }
+        }
+        // here point is null and mark is the last repeater, abcdef
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("fbs.discardRecursionFrames dropped "+rest+" of "+i, mark);
+        return mark;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
