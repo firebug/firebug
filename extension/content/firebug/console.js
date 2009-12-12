@@ -190,8 +190,18 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
 
+    },
+
+    enable: function()
+    {
         if (Firebug.Console.isAlwaysEnabled())
             this.watchForErrors();
+    },
+
+    disable: function()
+    {
+        if (Firebug.Console.isAlwaysEnabled())
+            this.unwatchForErrors();
     },
 
     initContext: function(context, persistedState)

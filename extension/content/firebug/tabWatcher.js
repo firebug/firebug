@@ -263,6 +263,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     createContext: function(win, browser, contextType)
     {
+        if (contexts.length == 0)
+            Firebug.broadcast('enableXULWindow', []);
+
         // If the page is reloaded, store the persisted state from the previous
         // page on the new context
         var persistedState = browser.persistedState;
@@ -283,7 +286,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
-        context.uid = FBL.getUniqueId();
+        context.uid = contexts.length;
 
         browser.showFirebug = true; // this is the only place we should set showFirebug.
 
@@ -514,8 +517,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         dispatch(this.fbListeners, "destroyContext", [context, persistedState, context.browser]);
 
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context for: "+
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context "+context.uid+" for: "+
                 (context.window?context.window.location:"no window")+" this.cancelNextLoad: "+this.cancelNextLoad+"\n");
 
         // this flag may be set by the debugger.destroyContext
@@ -531,6 +534,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var currentBrowser = Firebug.chrome.getCurrentBrowser();
         if (!currentBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected
             dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
+
+        if (contexts.length == 0)
+            Firebug.broadcast("disableXULWindow", []);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

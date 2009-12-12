@@ -1699,6 +1699,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
 
+        fbs.registerClient(Firebug);  // per-XUL window registration; should be in chrome.js or firebug.js; hiding fbs
+
         // This is a service operation, a way of encapsulating fbs which is in turn implementing this
         // simple service. We could implment a whole component for this service, but it hardly makes sense.
         Firebug.broadcast = function encapsulateFBSBroadcast(message, args)
@@ -1712,9 +1714,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     enable: function()
     {
-        fbs.registerClient(this);   // allow callbacks for jsd
         if (this.isAlwaysEnabled())
-            this.registerDebugger();
+            this.registerDebugger(); // allow callbacks for jsd
     },
 
     initializeUI: function()

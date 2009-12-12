@@ -301,13 +301,7 @@ top.Firebug =
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
 
-        // If another window is opened, then the creation of our first context won't
-        // result in calling of enable, so we have to enable our modules ourself
-        //if (fbs.enabled)
-        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
-
-        // Initialize all modules.
-        dispatch(modules, "initializeUI", [detachArgs]);
+        this.detachArgs = detachArgs ? detachArgs : [];
     },
 
 
@@ -1503,14 +1497,25 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugClient  These are per XUL window callbacks
 
-    enable: function()  // Called by firebug-service when the first context is created.
+    enableXULWindow: function()  // Called when the first context is created.
     {
-        dispatch(modules, "enable", [FirebugChrome]);
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++", Firebug.detachArgs);
+
+        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
+
+        if (Firebug.detachArgs)  // first time only we initialize the UI
+        {
+            dispatch(modules, "initializeUI", [Firebug.detachArgs]);
+            delete Firebug.detachArgs;
+        }
     },
 
-    disable: function()
+    disableXULWindow: function()
     {
         dispatch(modules, "disable", [FirebugChrome]);
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("disable XUL Window --------------------------------------");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2423,7 +2428,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
                 FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
             this.show(persistedPanelState);
         }
-        
+
         Firebug.resetTooltip();
     },
 
