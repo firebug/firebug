@@ -906,7 +906,7 @@ FirebugService.prototype =
         dispatch(clients, "onJSDDeactivate", [jsd, "fbs disableDebugger"]);
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger);
+            FBTrace.sysout("fbs.disableDebugger jsd.isOn:"+jsd.isOn+" for enabledDebugger: "+enabledDebugger);
     },
 
     pause: function()  // must support multiple calls
@@ -921,11 +921,7 @@ FirebugService.prototype =
             if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
             {
                 jsd.pause();
-                 fbs.unhookScripts();
-                 /* jsd.off();
-                if (FBTrace.DBG_ACTIVATION)
-                    FBTrace.sysout("fbs.pause turned jsd OFF,  depth "+jsd.pauseDepth);
-                    */
+                fbs.unhookScripts();
             }
             dispatch(clients, "onJSDDeactivate", [jsd, "pause depth "+jsd.pauseDepth]);
         }
