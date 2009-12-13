@@ -1718,6 +1718,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             this.registerDebugger(); // allow callbacks for jsd
     },
 
+    disable: function()
+    {
+        this.unregisterDebugger();
+    },
+
     initializeUI: function()
     {
         Firebug.ActivableModule.initializeUI.apply(this, arguments);
