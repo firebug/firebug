@@ -17,7 +17,8 @@ body {
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
-.hasHeaders .netHrefLabel {
+.hasHeaders .netHrefLabel,
+.netPageRow > .netCol > .netPageTitle {
     background-image: url(chrome://firebug/skin/mac/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px 3px;
@@ -30,7 +31,8 @@ body {
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
 .nodeBox.highlightOpen > .nodeLabel > .twisty,
 .nodeBox.open > .nodeLabel > .twisty,
-.netRow.opened > .netCol > .netHrefLabel {
+.netRow.opened > .netCol > .netHrefLabel,
+.netPageRow.opened > .netCol > .netPageTitle {
     background-image: url(chrome://firebug/skin/mac/twistyOpen.png);
 }
 

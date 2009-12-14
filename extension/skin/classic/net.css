@@ -674,6 +674,8 @@
     padding-left: 22px;
 }
 
+/************************************************************************************************/
+
 .netPageSeparatorRow {
     height: 5px !important;
 }
@@ -682,6 +684,21 @@
     padding-left: 22px;
     height: 5px !important;
 }
+
+.netPageRow {
+    background-color: rgb(255, 255, 255);
+}
+
+.netPageRow:hover {
+    background: #EFEFEF;
+}
+
+.netPageLabel {
+    padding: 1px 0 2px 18px !important;
+    font-weight: bold;
+}
+
+/************************************************************************************************/
 
 .netActivationRow > .netCol {
     border-bottom: 2px solid;

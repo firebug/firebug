@@ -410,7 +410,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         dispatch([Firebug.A11yModel], "onDestroyNode", [this]);
     },
 
-    loadPersistedContent: function(persistedState)
+    loadPersistedContent: function(state)
     {
         this.initLayout();
 
@@ -418,24 +418,54 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         var lastRow = tbody.lastChild.previousSibling;
 
         // Move all net-rows from the persistedState to this panel.
-        var prevTableBody = persistedState.panelNode.getElementsByClassName("netTableBody").item(0);
+        var prevTableBody = state.panelNode.getElementsByClassName("netTableBody").item(0);
         if (!prevTableBody)
             return;
+
+        var files = [];
 
         while (prevTableBody.firstChild)
         {
             var row = prevTableBody.firstChild;
-            if (hasClass(row, "netRow") && hasClass(row, "hasHeaders"))
+            if (hasClass(row, "netRow") && hasClass(row, "hasHeaders") && !hasClass(row, "history"))
+            {
+                row.repObject.history = true;
+                files.push({
+                    file: row.repObject,
+                    offset: 0 + "%",
+                    width: 0 + "%",
+                    elapsed:  -1
+                });
+            }
+
+            if (hasClass(row, "netPageRow"))
+            {
+                removeClass(row, "opened");
                 tbody.insertBefore(row, lastRow);
-            else if (hasClass(row, "netPageSeparatorRow"))
-                tbody.insertBefore(row, lastRow);
+            }
             else
                 prevTableBody.removeChild(row);
         }
 
-        NetRequestEntry.pageSeparatorTag.insertRows({}, lastRow);
+        if (files.length)
+        {
+            var pageRow = NetPage.pageTag.insertRows({page: state}, lastRow)[0];
+            pageRow.files = files;
+
+            lastRow = tbody.lastChild.previousSibling;
+        }
+
+        if (this.table.getElementsByClassName("netPageRow").item(0))
+            NetPage.separatorTag.insertRows({}, lastRow);
 
         scrollToBottom(this.panelNode);
+    },
+
+    savePersistedContent: function(state)
+    {
+        Firebug.ActivablePanel.savePersistedContent.apply(this, arguments);
+
+        state.pageTitle = this.context.getTitle();
     },
 
     // UI Listener
@@ -1014,25 +1044,30 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         {
             var tbody = this.table.firstChild;
             var lastRow = tbody.lastChild.previousSibling;
-            var row = NetRequestEntry.fileTag.insertRows({files: newFileData}, lastRow)[0];
+            this.insertRows(newFileData, lastRow);
+        }
+    },
 
-            for (var i = 0; i < newFileData.length; ++i)
-            {
-                var file = newFileData[i].file;
-                row.repObject = file;
-                file.row = row;
+    insertRows: function(files, lastRow)
+    {
+        var row = NetRequestEntry.fileTag.insertRows({files: files}, lastRow)[0];
 
-                // Make sure a breakpoint is displayed.
-                var breakpoints = this.context.netProgress.breakpoints;
-                if (breakpoints && breakpoints.findBreakpoint(file.getFileURL()))
-                    row.setAttribute("breakpoint", "true");
+        for (var i = 0; i < files.length; ++i)
+        {
+            var file = files[i].file;
+            row.repObject = file;
+            file.row = row;
 
-                // Allow customization of request entries in the list. A row is represented
-                // by <TR> HTML element.
-                dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
+            // Make sure a breakpoint is displayed.
+            var breakpoints = this.context.netProgress.breakpoints;
+            if (breakpoints && breakpoints.findBreakpoint(file.getFileURL()))
+                row.setAttribute("breakpoint", "true");
 
-                row = row.nextSibling;
-            }
+            // Allow customization of request entries in the list. A row is represented
+            // by <TR> HTML element.
+            dispatch(NetRequestTable.fbListeners, "onCreateRequestEntry", [this, row]);
+
+            row = row.nextSibling;
         }
     },
 
@@ -1431,8 +1466,20 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         for (var i=0; i<rows.length; i++)
         {
             var row = rows[i];
-            if (hasClass(row, "collapsed"))
+            var pageRow = hasClass(row, "netPageRow");
+
+            if (hasClass(row, "collapsed") && !pageRow)
                 continue;
+
+            if (hasClass(row, "history"))
+                continue;
+
+            // Export also history. These requests can be collpased and so not visible.
+            if (row.files)
+            {
+                for (var j=0; j<row.files.length; j++)
+                    fn(row.files[j].file);
+            }
 
             var file = Firebug.getRepObject(row);
             if (file)
@@ -1583,6 +1630,9 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         for (var row = tbody.childNodes[1]; row; row = row.nextSibling)
         {
             if (!row.repObject)
+                continue;
+
+            if (hasClass(row, "history"))
                 continue;
 
             var cell = row.childNodes[colIndex];
@@ -1757,6 +1807,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow",
                 onclick: "$onClick", "role": "row", "aria-expanded": "false",
                 $hasHeaders: "$file.file|hasResponseHeaders",
+                $history: "$file.file.history",
                 $loaded: "$file.file.loaded",
                 $responseError: "$file.file|isError",
                 $fromCache: "$file.file.fromCache",
@@ -1823,11 +1874,6 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
             TD({"class": "netCol netActivationLabel", colspan: 6, "role": "status"},
                 $STR("net.ActivationMessage")
             )
-        ),
-
-    pageSeparatorTag:
-        TR({"class": "netRow netPageSeparatorRow"},
-            TD({"class": "netCol netPageSeparatorLabel", colspan: 6, "role": "separator"})
         ),
 
     summaryTag:
@@ -2011,6 +2057,62 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
 });
 
 var NetRequestEntry = Firebug.NetMonitor.NetRequestEntry;
+
+// ************************************************************************************************
+
+Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
+{
+    separatorTag:
+        TR({"class": "netRow netPageSeparatorRow"},
+            TD({"class": "netCol netPageSeparatorLabel", colspan: 6, "role": "separator"})
+        ),
+
+    pageTag:
+        TR({"class": "netRow netPageRow", onclick: "$onPageClick"},
+            TD({"class": "netCol netPageCol", colspan: 6, "role": "separator"},
+                DIV({"class": "netLabel netPageLabel netPageTitle"}, "$document.title")
+            )
+        ),
+
+    onPageClick: function(event)
+    {
+        if (!isLeftClick(event))
+            return;
+
+        var target = event.target;
+        var pageRow = getAncestorByClass(event.target, "netPageRow");
+        var panel = Firebug.getElementPanel(pageRow);
+
+        if (!hasClass(pageRow, "opened"))
+        {
+            setClass(pageRow, "opened");
+
+            var files = pageRow.files;
+
+            // Move all net-rows from the persistedState to this panel.
+            panel.insertRows(files, pageRow);
+
+            for (var i=0; i<files.length; i++)
+                panel.queue.push(files[i].file);
+
+            panel.layout();
+        }
+        else
+        {
+            removeClass(pageRow, "opened");
+
+            var nextRow = pageRow.nextSibling;
+            while (!hasClass(nextRow, "netPageRow") && !hasClass(nextRow, "netPageSeparatorRow"))
+            {
+                var nextSibling = nextRow.nextSibling;
+                nextRow.parentNode.removeChild(nextRow);
+                nextRow = nextSibling;
+            }
+        }
+    },
+});
+
+var NetPage = Firebug.NetMonitor.NetPage;
 
 // ************************************************************************************************
 
