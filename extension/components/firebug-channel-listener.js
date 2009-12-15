@@ -50,12 +50,29 @@ ChannelListener.prototype =
 {
     setAsyncListener: function(request, stream, listener)
     {
-        if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
-                "set=" + (listener != null) + " " + safeGetName(request));
+        try
+        {
+            // xxxHonza: is there any other way how to find out the stream is closed?
+            // Throws NS_BASE_STREAM_CLOSED if the stream is closed normally or at end-of-file.
+            var available = stream.available();
+        }
+        catch (err)
+        {
+            if (err.name == "NS_BASE_STREAM_CLOSED")
+            {
+                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
+                    "Don't set, the stream is closed.");
+                return;
+            }
+
+            FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                safeGetName(request), err);
+            return;
+        }
 
         try
         {
+            // Asynchronously wait for the stream to be readable or closed.
             stream.asyncWait(listener, 0, 0, null);
         }
         catch (err)
@@ -224,10 +241,6 @@ ChannelListener.prototype =
             var context = this.getContext(this.window);
             if (context)
                 this.proxyListener.onStopRequest(request, requestContext, statusCode);
-
-            // Make sure the listener for incoming data is removed.
-            if (this.sink)
-                this.setAsyncListener(request, this.sink.inputStream, null);
         }
         catch (err)
         {
