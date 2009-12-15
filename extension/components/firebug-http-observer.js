@@ -48,13 +48,13 @@ function HttpRequestObserver()
 /* nsIFireBugClient */
 var FirebugClient =
 {
-    disable: function()
+    disableXULWindow: function()
     {
         if (gHttpObserverSingleton)
             gHttpObserverSingleton.unregisterObservers();
     },
 
-    enable: function()
+    enableXULWindow: function()
     {
         if (gHttpObserverSingleton)
             gHttpObserverSingleton.registerObservers();
