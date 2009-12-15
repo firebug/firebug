@@ -6674,6 +6674,17 @@ this.formatNumber = function(number)
 
 this.formatSize = function(bytes)
 {
+    // Get size precision (number of decimal places from the preferences)
+    // and make sure it's within limits.
+    var sizePrecision = Firebug.sizePrecision;
+    sizePrecision = (sizePrecision > 2) ? 2 : sizePrecision;
+    sizePrecision = (sizePrecision < -1) ? -1 : sizePrecision;
+
+    if (sizePrecision == -1)
+        return bytes + " B";
+
+    var a = Math.pow(10, sizePrecision);
+
     if (bytes == -1 || bytes == undefined)
         return "?";
     else if (bytes == 0)
@@ -6681,9 +6692,9 @@ this.formatSize = function(bytes)
     else if (bytes < 1024)
         return bytes + " B";
     else if (bytes < (1024*1024))
-        return Math.round(bytes/1024) + " KB";
+        return Math.round((bytes/1024)*a)/a + " KB";
     else
-        return Math.round((bytes/(1024*1024))*100)/100 + " MB";
+        return Math.round((bytes/(1024*1024))*a)/a + " MB";
 }
 
 // ************************************************************************************************
