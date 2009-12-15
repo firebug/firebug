@@ -3804,41 +3804,61 @@ this.parseJSONString = function(jsonString, originURL)
             jsonString = matches[1];
     }
 
-    // throw on the extra parentheses
-    jsonString = "(" + jsonString + ")";
-
-    var s = Components.utils.Sandbox(originURL);
     var jsonObject = null;
 
     try
     {
-        jsonObject = Components.utils.evalInSandbox(jsonString, s);
+        var s = Components.utils.Sandbox(originURL);
+
+        // throw on the extra parentheses
+        jsonObject = Components.utils.evalInSandbox("(" + jsonString + ")", s);
     }
     catch(e)
     {
-        if (e.message.indexOf("is not defined") > 0)  // XXXjjb what is this for?
-        {
-            var parts = e.message.split(" ");
-            s[parts[0]] = function(str){ return str; };
-            try {
-                jsonObject = Components.utils.evalInSandbox(jsonString, s);
-            } catch(ex) {
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
-                    FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
-                return null;
-            }
-        }
-        else
-        {
-            if (FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
-                    "\" with EXCEPTION "+e, e);
-            return null;
-        }
+        // This exception indicates a callback function that is used in JSONP responses
+        // Let's try to parse it as JSONP.
+        if (e.message.indexOf("is not defined") > 0)
+            return this.parseJSONPString(jsonString, originURL);
+
+        if (FBTrace.DBG_JSONVIEWER)
+            FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
+                "\" with EXCEPTION "+e, e);
+
+        return null;
     }
 
     return jsonObject;
 };
+
+this.parseJSONPString = function(jsonString, originURL)
+{
+    var reJSONP = /^\s*([A-Za-z0-9_.]+\s*(?:\[.*\]|))\s*\(.*\)/;
+    var m = reJSONP.exec(jsonString);
+    if (!m || !m[1])
+        return null;
+
+    var callbackName = m[1];
+
+    if (FBTrace.DBG_JSONVIEWER)
+        FBTrace.sysout("jsonviewer.parseJSONP; Look like we have a JSONP callback: " + callbackName);
+
+    // Replace the original callback (it can be e.g. foo.bar[1]) with simple function name.
+    jsonString = jsonString.replace(callbackName, "callback");
+
+    try
+    {
+        var s = Components.utils.Sandbox(originURL);
+        s["callback"] = function(object) { return object; };
+        return Components.utils.evalInSandbox(jsonString, s);
+    }
+    catch(ex)
+    {
+        if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
+            FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+    }
+
+    return null;
+}
 
 // ************************************************************************************************
 // Network
