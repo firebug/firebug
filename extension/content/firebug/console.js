@@ -109,7 +109,8 @@ Firebug.ConsoleBase =
     // Override to direct output to your panel
     getPanel: function(context, noCreate)
     {
-        return context.getPanel("console", noCreate);
+        if (context)
+            return context.getPanel("console", noCreate);
     },
 
 };
