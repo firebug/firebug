@@ -244,6 +244,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
     {
         // called when win has no context, answers the question: create one, true or false?
 
+        if (!this.fbListeners)
+            return userCommands;
+
         // Create if any listener says true to showCreateContext
         if (dispatch2(this.fbListeners, "shouldCreateContext", [browser, url, userCommands]))
             return true;
@@ -549,8 +552,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         var rootWindow = getRootWindow(winIn);
 
-        if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+safeGetWindowLocation(rootWindow));
+        //if (FBTrace.DBG_INITIALIZE)
+        //    FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+safeGetWindowLocation(rootWindow));
 
         if (rootWindow)
         {

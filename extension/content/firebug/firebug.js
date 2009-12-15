@@ -213,9 +213,6 @@ top.Firebug =
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
         window.addEventListener('unload', shutdownFirebug, false);
-
-        // Connect to the tabWatcher to allow contexts to be created.
-        TabWatcher.addListener(this);
     },
 
     getVersion: function()
@@ -301,7 +298,11 @@ top.Firebug =
             FBTrace.sysout("firebug.initializeUI this.disabledAlways="+this.disabledAlways+
                     " detachArgs:", detachArgs);
 
-        this.detachArgs = detachArgs ? detachArgs : [];
+        TabWatcher.initialize(this);
+        TabWatcher.addListener(this);
+
+        // Initialize all modules.
+        dispatch(modules, "initializeUI", [detachArgs]);
     },
 
 
@@ -1503,12 +1504,6 @@ top.Firebug =
             FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++", Firebug.detachArgs);
 
         dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
-
-        if (Firebug.detachArgs)  // first time only we initialize the UI
-        {
-            dispatch(modules, "initializeUI", [Firebug.detachArgs]);
-            delete Firebug.detachArgs;
-        }
     },
 
     disableXULWindow: function()
