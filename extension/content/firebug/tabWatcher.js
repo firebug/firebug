@@ -217,7 +217,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         delete context.showContextTimeout;
 
         // Call showContext only for currently active tab.
-        if (Firebug.chrome.getCurrentURI().spec != context.browser.currentURI.spec)
+        var currentURI = Firebug.chrome.getCurrentURI();
+        if (!currentURI || currentURI.spec != context.browser.currentURI.spec)
         {
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> rushShowContext: Do not show context as it's not the active tab: " +

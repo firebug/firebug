@@ -213,6 +213,9 @@ top.Firebug =
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
         window.addEventListener('unload', shutdownFirebug, false);
+
+        // Connect to the tabWatcher to allow contexts to be created.
+        TabWatcher.addListener(this);
     },
 
     getVersion: function()
@@ -297,9 +300,6 @@ top.Firebug =
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initializeUI this.disabledAlways="+this.disabledAlways+
                     " detachArgs:", detachArgs);
-
-        TabWatcher.initialize(this);
-        TabWatcher.addListener(this);
 
         this.detachArgs = detachArgs ? detachArgs : [];
     },
