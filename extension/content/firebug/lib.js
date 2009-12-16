@@ -626,20 +626,53 @@ this.getRootWindow = function(win)
 var classNameReCache={};
 this.hasClass = function(node, name) 
 {
-    if (!node || node.nodeType != 1)
+    if (!node || node.nodeType != 1 || name == '')
         return false;
-        
-    if (name.indexOf(" ") == -1)
+    
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length, found=false;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                if (this.hasClass(node, cls) == false)
+                    return false;
+                found = true;
+            }
+        }
+        return found;
+    }
+    
+    var re;
+    if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g");
-    else // XXXsroussey don't cache these, fix these callers later
+    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
         re = new RegExp('\\b' + name + '\\b', "g")
     return node.className.search(re) != -1;
 };
 
 this.setClass = function(node, name)
 {
-    if (node && !this.hasClass(node, name))
-        node.className = this.trimRight(node.className) + " " + name;
+    if (!node || node.nodeType != 1 || name == '')
+        return;
+    
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                this.setClass(node, cls);
+            }
+        }
+        return;
+    }
+    if (!this.hasClass(node, name))
+        node.className = node.className.trim() + " " + name;
 };
 
 this.getClassValue = function(node, name)
@@ -651,13 +684,32 @@ this.getClassValue = function(node, name)
 
 this.removeClass = function(node, name)
 {
-    if (node && node.className)
+    if (!node || node.nodeType != 1 || node.className == '' || name == '')
+        return;
+    
+    if (name.indexOf(" ") != -1)
     {
-        node.className = node.className.replace(
-            classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g"),
-            ""
-        )
+        var classes = name.split(" "), len = classes.length;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                if (this.hasClass(node, cls) == false)
+                    this.removeClass(node, cls);
+            }
+        }
+        return;
     }
+ 
+    var re;
+    if (name.indexOf("-") == -1)
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g");
+    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
+        re = new RegExp('\\b' + name + '\\b', "g")
+
+    node.className = node.className.replace(re, "");
+    
 };
 
 this.toggleClass = function(elt, name)
