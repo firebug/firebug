@@ -50,8 +50,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (Firebug.TraceModule)
             Firebug.TraceModule.addListener(TraceListener);
 
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> tabWatcher initialize\n");
+        if (FBTrace.DBG_INITIALIZE)
+            FBTrace.sysout("-> tabWatcher initialize "+tabBrowser);
 
         if (tabBrowser)
             tabBrowser.addProgressListener(TabProgressListener, NOTIFY_STATE_DOCUMENT);
