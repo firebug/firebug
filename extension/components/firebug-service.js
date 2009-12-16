@@ -2333,7 +2333,7 @@ FirebugService.prototype =
         // install the necessary hooks
         hookFrameCount = countFrames(frame);
         this.startStepping();
-        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger returning "+returned);
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" returning "+returned);
         return returned;
     },
 
@@ -2757,7 +2757,8 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
         while(scope.jsParent)
             scope = scope.jsParent;
 
-        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
+        // These are just determined by trial and error.
+        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
         {
             lastWindowScope = new XPCNativeWrapper(scope.getWrappedValue());
             return  lastWindowScope;

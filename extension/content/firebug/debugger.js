@@ -135,7 +135,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.haltCallback = fn; // called in this.onHalt as fn(frame);
         fbs.halt(this);
 
-        debuggerHalter(); // a function with a URL that passes jsdIFilter
+        debuggerHalter(); // a function with a URL that passes jsdIFilter and says "debugger;"
 
         if (this.haltCallback) // so we have a second try
         {
@@ -823,14 +823,15 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         try {
             var context = this.breakContext;
-            delete this.breakContext;
 
             if (!context)
-            {
                 context = this.getContextByFrame(frame);
-                if (FBTrace.DBG_BP)
-                    FBTrace.sysout("debugger.onBreak no breakContext, trying getContextByFrame " + (context ? context.getName() : " none!") );
-            }
+
+            if (FBTrace.DBG_BP)
+                FBTrace.sysout("debugger.onBreak "+(this.breakContext?" no breakContext, tried getContextByFrame ":"breakContext: ") + (context ? context.getName() : " none!"), getJSDStackDump(frame) );
+
+            delete this.breakContext;
+
             if (!context)
                 return RETURN_CONTINUE;
 
@@ -3307,7 +3308,7 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
         while(scope.jsParent)
             scope = scope.jsParent;
 
-        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
+        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
             return new XPCNativeWrapper(scope.getWrappedValue());
 
         if (scope.jsClassName == "Sandbox")
