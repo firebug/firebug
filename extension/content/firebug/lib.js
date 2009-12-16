@@ -3892,25 +3892,19 @@ this.parseJSONString = function(jsonString, originURL)
     }
     catch(e)
     {
-        // This exception indicates a callback function that is used in JSONP responses
-        // Let's try to parse it as JSONP.
-        if (e.message.indexOf("is not defined") > 0)
-            return this.parseJSONPString(jsonString, originURL);
-
         if (FBTrace.DBG_JSONVIEWER)
             FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
                 "\" with EXCEPTION "+e, e);
     }
 
-    return null;
-};
-
-this.parseJSONPString = function(jsonString, originURL)
-{
+    // Let's try to parse it as JSONP.
     var reJSONP = /^\s*([A-Za-z0-9_.]+\s*(?:\[.*\]|))\s*\(.*\)/;
     var m = reJSONP.exec(jsonString);
     if (!m || !m[1])
         return null;
+
+    if (FBTrace.DBG_JSONVIEWER)
+        FBTrace.sysout("jsonviewer.parseJSONP; " + jsonString);
 
     var callbackName = m[1];
 
@@ -3928,11 +3922,15 @@ this.parseJSONPString = function(jsonString, originURL)
     }
     catch(ex)
     {
-        if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
+        if (FBTrace.DBG_JSONVIEWER)
             FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
     }
 
     return null;
+};
+
+this.parseJSONPString = function(jsonString, originURL)
+{
 }
 
 // ************************************************************************************************
