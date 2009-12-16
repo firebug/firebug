@@ -872,15 +872,7 @@ FirebugService.prototype =
                 FBTrace.DBG_BP = true;
                 FBTrace.DBG_FBS_CREATION = true;
             }
-            if (!FBTrace.DBG_FF_START)
-            {
-                fbs.resetBP = FBTrace.DBG_BP;
-                FBTrace.DBG_BP = false;
-                fbs.resetCreation = FBTrace.DBG_FBS_CREATION;
-                FBTrace.DBG_FBS_CREATION = false;
-                if (fbs.resetBP || fbs.resetCreation)
-                    FBTrace.sysout("firebug-service has DBG_FF_START:"+FBTrace.DBG_FF_START+" delaying BP and CREATION");
-            }
+
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+this.showStackTrace+" breakOnErrors:"+this.breakOnErrors+" trackThrowCatch:"+this.trackThrowCatch+" scriptFilter:"+this.scriptsFilter+" filterSystemURLs:"+this.filterSystemURLs);
         }
