@@ -246,7 +246,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return RETURN_CONTINUE;
     },
 
-
     resume: function(context)
     {
         if (FBTrace.DBG_UI_LOOP)
@@ -1395,13 +1394,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getDynamicURL: function(context, callerURL, lines, kind)
     {
-        if (kind == "eval")
-        {
-            var url = this.getURLFromSpy(context);
-            if (url)
-                return url;
-        }
-
         var url = this.getURLFromLastLine(context, lines);
         if (url)
             return url;
@@ -1417,25 +1409,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var url = this.getDataURLForScript(callerURL, lines);
         if (url)
             return url;
-
-        return url;
-    },
-
-    getURLFromSpy: function(context)
-    {
-        var url = null;
-        if (context.onReadySpy)  // coool we can get the request URL.
-        {
-            var href = new String(context.onReadySpy.getURL());
-            if (context.sourceFileName && context.sourceFileName[href]) // oops taken
-                return null;
-            else
-            {
-                url = {href: href, kind: "data"};
-                if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("debugger.getURLFromSpy "+url.href, url);
-            }
-        }
 
         return url;
     },

@@ -711,9 +711,6 @@ function callPageHandler(spy, event, originalHandler)
 {
     try
     {
-        // Maybe the handler will eval(), we want the URL (used by debuggger.js).
-        spy.context.onReadySpy = spy;
-
         // Calling the page handler throwed an exception (see #502959)
         // This should be fixed in Firefox 3.5
         if (originalHandler)
@@ -734,10 +731,6 @@ function callPageHandler(spy, event, originalHandler)
             // Make sure the exception is displayed in both Firefox & Firebug console.
             throw new Error(error.message, error.href, error.lineNo);
         }
-    }
-    finally
-    {
-        delete spy.context.onReadySpy;
     }
 }
 
