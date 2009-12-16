@@ -1514,6 +1514,52 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // These are XUL window level call backs and should be moved into Firebug where is says nsIFirebugClient
+    // xxxHonza: so I did 
+
+    onPauseJSDRequested: function(rejection)
+    {
+        if (FirebugContext)  // then we are active in this browser.xul
+            rejection.push(true); // so reject the
+
+        dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
+    },
+
+    onJSDActivate: function(jsd, why)  // just before hooks are set
+    {
+        var active = this.setIsJSDActive();
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
+
+        dispatch2(Firebug.Debugger.fbListeners,"onJSDActivate",[fbs, why]);
+    },
+
+    onJSDDeactivate: function(jsd, why)
+    {
+        var active = this.setIsJSDActive();
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
+
+        dispatch2(Firebug.Debugger.fbListeners,"onJSDDeactivate",[fbs, why]);
+    },
+
+    setIsJSDActive: function()  // should only be call on the jsd activation events, so it correctly reflects jsd state
+    {
+        var active = fbs.isJSDActive();
+        if (active)
+            $('fbStatusIcon').setAttribute("script", "on");
+        else
+            $('fbStatusIcon').setAttribute("script", "off");
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
+
+        return active;
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Placement
 
     isDetached: function()
