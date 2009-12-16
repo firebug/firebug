@@ -404,7 +404,7 @@ this.Arr = domplate(Firebug.Rep,
                 SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
             ),
             SPAN({"class": "arrayRightBracket", role: "presentation"}, "]"),
-            DIV({"class": "arrayProperties", role: "group"})
+            SPAN({"class": "arrayProperties", role: "group"})
         ),
 
     shortTag:
@@ -421,7 +421,7 @@ this.Arr = domplate(Firebug.Rep,
                 SPAN({"class": "objectPropValue"}, "$prop.value|cropString")
             ),
             SPAN({"class": "arrayRightBracket"}, "]"),
-            DIV({"class": "arrayProperties", role: "group"})
+            SPAN({"class": "arrayProperties", role: "group"})
         ),
 
     arrayIterator: function(array)
@@ -476,7 +476,7 @@ this.Arr = domplate(Firebug.Rep,
 
     hasSpecialProperties: function(array)
     {
-        return (array.length != array.__count__);
+        return (array.length != array.__count__) && hasProperties(array);
     },
 
     onToggleProperties: function(event)
