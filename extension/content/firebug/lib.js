@@ -3255,7 +3255,7 @@ this.dispatch2 = function(listeners, name, args)
         if (FBTrace.DBG_ERRORS)
         {
             if (exc.stack) exc.stack = exc.stack.split('/n');
-            FBTrace.sysout(" Exception in lib.dispatch2 "+ name, exc);
+            FBTrace.sysout(" Exception in lib.dispatch2 "+ name+" exc:"+exc, exc);
         }
     }
 };
