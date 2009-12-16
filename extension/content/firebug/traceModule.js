@@ -1679,7 +1679,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
         var valueType = typeof(value);
 
-        var hasChildren = this.hasProperties(value) && !(value instanceof ErrorCopy) &&
+        var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
@@ -1694,15 +1694,6 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
             hasChildren: hasChildren,
             tag: tag
         };
-    },
-
-    hasProperties: function(ob)
-    {
-        try {
-            for (var name in ob)
-                return true;
-        } catch (exc) {}
-        return false;
     }
 });
 

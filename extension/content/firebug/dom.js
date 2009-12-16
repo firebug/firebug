@@ -1696,16 +1696,6 @@ function isClassFunction(fn)
     return false;
 }
 
-function hasProperties(ob)
-{
-    try
-    {
-        for (var name in ob)
-            return true;
-    } catch (exc) {}
-    return false;
-}
-
 function addMember(object, type, props, name, value, level, order, context)
 {
     var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents

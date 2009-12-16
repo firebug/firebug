@@ -105,6 +105,9 @@ this.extend = function(l, r)
     return newOb;
 };
 
+// ************************************************************************************************
+// Arrays
+
 this.keys = function(map)  // At least sometimes the keys will be on user-level window objects
 {
     var keys = [];
@@ -207,6 +210,8 @@ function arrayInsert(array, index, other)
 
 this.arrayInsert = arrayInsert;
 
+// ************************************************************************************************
+
 this.safeToString = function(ob)
 {
     try
@@ -239,6 +244,20 @@ this.safeToString = function(ob)
     }
     return "[unsupported: no toString() function in type "+typeof(ob)+"]";
 };
+
+// ************************************************************************************************
+
+this.hasProperties = function(ob)
+{
+    try
+    {
+        for (var name in ob)
+            return true;
+    } catch (exc) {}
+    return false;
+};
+
+// ************************************************************************************************
 
 this.convertToUnicode = function(text, charset)
 {
@@ -296,6 +315,8 @@ this.getUniqueId = function() {
 this.getRandomInt = function(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
+
+// ************************************************************************************************
 
 this.createStyleSheet = function(doc, url)
 {
@@ -3831,8 +3852,14 @@ this.getResource = function(aURL)
     }
 };
 
+// ************************************************************************************************
+// JSON
+
 this.parseJSONString = function(jsonString, originURL)
 {
+    if (FBTrace.DBG_JSONVIEWER)
+        FBTrace.sysout("jsonviewer.parseJSON; " + jsonString);
+
     // See if this is a Prototype style *-secure request.
     var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
     var matches = regex.exec(jsonString);
@@ -3856,14 +3883,12 @@ this.parseJSONString = function(jsonString, originURL)
             jsonString = matches[1];
     }
 
-    var jsonObject = null;
-
     try
     {
         var s = Components.utils.Sandbox(originURL);
 
         // throw on the extra parentheses
-        jsonObject = Components.utils.evalInSandbox("(" + jsonString + ")", s);
+        return Components.utils.evalInSandbox("(" + jsonString + ")", s);
     }
     catch(e)
     {
@@ -3875,11 +3900,9 @@ this.parseJSONString = function(jsonString, originURL)
         if (FBTrace.DBG_JSONVIEWER)
             FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
                 "\" with EXCEPTION "+e, e);
-
-        return null;
     }
 
-    return jsonObject;
+    return null;
 };
 
 this.parseJSONPString = function(jsonString, originURL)

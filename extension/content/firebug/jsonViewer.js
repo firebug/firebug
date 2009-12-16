@@ -53,13 +53,14 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         }
 
         // The jsonObject is created so, the JSON tab can be displayed.
-        if (file.jsonObject)
+        if (file.jsonObject && hasProperties(file.jsonObject))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
                 $STR("jsonviewer.tab.JSON"));
 
             if (FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.initTabBody; JSON object available", file.jsonObject);
+                FBTrace.sysout("jsonviewer.initTabBody; JSON object available " +
+                    (typeof(file.jsonObject) != "undefined"), file.jsonObject);
         }
     },
 
