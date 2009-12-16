@@ -9,6 +9,8 @@ FBL.ns(function() { with (FBL) {
 
 Firebug.Breakpoint = extend(Firebug.Module,
 {
+    dispatchName: "breakpoints",
+
     toggleBreakOnNext: function(panel)
     {
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
