@@ -60,13 +60,15 @@ ChannelListener.prototype =
         {
             if (err.name == "NS_BASE_STREAM_CLOSED")
             {
-                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
-                    "Don't set, the stream is closed.");
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
+                        "Don't set, the stream is closed.");
                 return;
             }
 
-            FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
-                safeGetName(request), err);
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                    safeGetName(request), err);
             return;
         }
 
@@ -77,8 +79,9 @@ ChannelListener.prototype =
         }
         catch (err)
         {
-            FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
-                safeGetName(request), err);
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                    safeGetName(request), err);
         }
     },
 
