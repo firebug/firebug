@@ -8,6 +8,7 @@ locale  firebug ca-AD       jar:chrome/firebug.jar!/locale/ca-AD/
 locale  firebug cs-CZ       jar:chrome/firebug.jar!/locale/cs-CZ/
 locale  firebug da-DK       jar:chrome/firebug.jar!/locale/da-DK/
 locale  firebug de-DE       jar:chrome/firebug.jar!/locale/de-DE/
+locale  firebug el-GR       jar:chrome/firebug.jar!/locale/el-GR/
 locale  firebug en-US       jar:chrome/firebug.jar!/locale/en-US/
 locale  firebug es-AR       jar:chrome/firebug.jar!/locale/es-AR/
 locale  firebug es-ES       jar:chrome/firebug.jar!/locale/es-ES/
