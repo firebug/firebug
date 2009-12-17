@@ -361,6 +361,7 @@ this.Obj = domplate(Firebug.Rep,
                     iteration++;
                     if (iteration > 3)
                     {
+                        len += name.length + title.length + 1;
                         if (len < 50)
                             props.push({name: name, value: title});
                         else
