@@ -14,6 +14,7 @@
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px 2px;
+	min-height: 12px;
 }
 
 .logRow-errorMessage > .hasTwisty.opened > .errorTitle,
