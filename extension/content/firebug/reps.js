@@ -321,49 +321,97 @@ this.Obj = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
-            SPAN({"class": "objectTitle"}, "$object|getTitle"),
-            FOR("prop", "$object|propIterator",
-                " $prop.name=",
-                SPAN({"class": "objectPropValue"}, "$prop.value|cropMultipleLines")
-            )
+            SPAN({"class": "objectTitle"}, "$object|getTitle "),
+            SPAN({"class": "objectLeftBrace", role: "presentation"}, "{"),
+            FOR("prop", "$object|shortPropIterator",
+                " $prop.name",
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            ),
+            SPAN({"class": "objectRightBrace"}, "}")
         ),
 
-    propIterator: function (object)
+    shortTag:
+        OBJECTLINK(
+            SPAN({"class": "objectTitle"}, "$object|getTitle "),
+            SPAN({"class": "objectLeftBrace", role: "presentation"}, "{"),
+            FOR("prop", "$object|shortPropIterator",
+                " $prop.name",
+                SPAN({"class": "objectEqual", role: "presentation"}, "$prop.equal"),
+                TAG("$prop.tag", {object: "$prop.object"}),
+                SPAN({"class": "objectComma", role: "presentation"}, "$prop.delim")
+            ),
+            SPAN({"class": "objectRightBrace"}, "}")
+        ),
+    
+    titleTag:
+        SPAN({"class": "objectTitle"}, "$object|getTitle"),
+
+    longPropIterator: function (object)
     {
+        return this.propIterator(object,100);
+    },
+
+    shortPropIterator: function (object)
+    {
+        return this.propIterator(object,1);
+    },
+
+    propIterator: function (object, max)
+    {
+        max = max || 3;
         if (!object)
             return [];
 
         var props = [];
-        var len = 0;
+        var len = 0, count = 0;
 
         try
         {
             for (var name in object)
             {
-                var val;
+                var value;
                 try
                 {
-                    val = object[name];
+                    value = object[name];
                 }
                 catch (exc)
                 {
                     continue;
                 }
 
-                var t = typeof(val);
-                if (t == "boolean" || t == "number" || (t == "string" && val)
-                    || (t == "object" && val && val.toString))
+                var t = typeof(value);
+                if (t == "boolean" || t == "number" || (t == "string" && value)
+                    || (t == "object" && value && value.toString))
                 {
-                    var title = (t == "object")
-                        ? Firebug.getRep(val).getTitle(val)
-                        : val+"";
-
-                    len += name.length + title.length + 1;
-                    if (len < 50)
-                        props.push({name: name, value: title});
+                    var rep = Firebug.getRep(value);
+                    var tag = rep.shortTag || rep.tag;
+                    if (t == "object")
+                    {
+                        value = rep.getTitle(value);
+                        tag = rep.titleTag;
+                    }
+                    count++;
+                    if (count <= max)
+                        props.push({tag: tag, name: name, object: value, equal: "=", delim: ", "});
                     else
                         break;
                 }
+            }
+            if (count > max)
+            {
+                props[Math.max(1,max-1)] = {
+                    object: "more...", //xxxHonza localization
+                    tag: FirebugReps.Caption.tag, 
+                    name: "", 
+                    equal:"", 
+                    delim:""
+                };
+            }
+            else if (props.length > 0)
+            {
+                props[props.length-1].delim = '';
             }
         }
         catch (exc)
@@ -396,7 +444,7 @@ this.Arr = domplate(Firebug.Rep,
             $hasTwisty: "$object|hasSpecialProperties",
             onclick: "$onToggleProperties"},
             SPAN({"class": "arrayLeftBracket", role: "presentation"}, "["),
-            FOR("item", "$object|arrayIterator",
+            FOR("item", "$object|longArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
                 SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
             ),
@@ -417,43 +465,41 @@ this.Arr = domplate(Firebug.Rep,
             SPAN({"class": "arrayProperties", role: "group"})
         ),
 
-    arrayIterator: function(array)
+    longArrayIterator: function(array)
     {
-        var items = [];
-        for (var i = 0; i < array.length; ++i)
-        {
-            var value = array[i];
-            var rep = Firebug.getRep(value);
-            var tag = rep.shortTag ? rep.shortTag : rep.tag;
-            var delim = (i == array.length-1 ? "" : ", ");
-
-            items.push({object: value, tag: tag, delim: delim});
-        }
-
-        return items;
+       return this.arrayIterator(array,300);
     },
 
     shortArrayIterator: function(array)
     {
+       return this.arrayIterator(array,3);
+    },
+
+    arrayIterator: function(array, max)
+    {
         var items = [];
-        for (var i = 0; i < array.length && i < 3; ++i)
+        for (var i = 0; i < array.length && i <= max; ++i)
         {
             var value = array[i];
             var rep = Firebug.getRep(value);
-            var tag = rep.shortTag ? rep.shortTag : rep.tag;
+            var tag = rep.shortTag || rep.tag;
             var delim = (i == array.length-1 ? "" : ", ");
 
             items.push({object: value, tag: tag, delim: delim});
         }
 
-        if (array.length > 3)
-            items.push({object: (array.length-3) + " more...", //xxxHonza localization
-                tag: FirebugReps.Caption.tag, delim: ""});
+        if (array.length > max + 1)
+        {
+            items[max] = {
+                object: (array.length-max) + " more...", //xxxHonza localization
+                tag: FirebugReps.Caption.tag, 
+                delim: ""
+            };
+        }
 
         return items;
     },
 
-    shortPropIterator: this.Obj.propIterator,
     toggles: {},
 
     getItemIndex: function(child)

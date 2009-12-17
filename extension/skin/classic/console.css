@@ -425,21 +425,29 @@
 
 /*****************************************************************************************/
 
+.objectLeftBrace,
+.objectRightBrace,
+.objectEqual,
+.objectComma,
 .arrayLeftBracket,
 .arrayRightBracket,
 .arrayComma {
     font-family: Monaco, monospace;
 }
 
+.objectLeftBrace,
+.objectRightBrace,
 .arrayLeftBracket,
 .arrayRightBracket {
     font-weight: bold;
 }
 
+.objectLeftBrace,
 .arrayLeftBracket {
     margin-right: 4px;
 }
 
+.objectRightBrace,
 .arrayRightBracket {
     margin-left: 4px;
 }
