@@ -102,13 +102,13 @@
         <popup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
-        <panel id="fbQuickInfoPanel" width="210" noautohide="true" 
+        <popup id="fbQuickInfoPanel" width="210" noautohide="true"
             onmousedown="Firebug.Inspector.quickInfoBoxDragStart(event);"
             onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
             onmouseup="Firebug.Inspector.quickInfoBoxDragEnd(event);">
             
             <vbox></vbox>
-        </panel>
+        </popup>
     </popupset>
 
     <!-- Main UI -->
