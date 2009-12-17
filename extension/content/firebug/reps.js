@@ -334,7 +334,7 @@ this.Obj = domplate(Firebug.Rep,
             return [];
 
         var props = [];
-        var len = 0, iteration = 0;
+        var len = 0;
 
         try
         {
@@ -358,15 +358,11 @@ this.Obj = domplate(Firebug.Rep,
                         ? Firebug.getRep(val).getTitle(val)
                         : val+"";
 
-                    iteration++;
-                    if (iteration > 3)
-                    {
-                        len += name.length + title.length + 1;
-                        if (len < 50)
-                            props.push({name: name, value: title});
-                        else
-                            break;
-                    }
+                    len += name.length + title.length + 1;
+                    if (len < 50)
+                        props.push({name: name, value: title});
+                    else
+                        break;
                 }
             }
         }
@@ -416,10 +412,6 @@ this.Arr = domplate(Firebug.Rep,
             FOR("item", "$object|shortArrayIterator",
                 TAG("$item.tag", {object: "$item.object"}),
                 SPAN({"class": "arrayComma", role: "presentation"}, "$item.delim")
-            ),
-            FOR("prop", "$object|shortPropIterator",
-                " $prop.name=",
-                SPAN({"class": "objectPropValue"}, "$prop.value|cropString")
             ),
             SPAN({"class": "arrayRightBracket"}, "]"),
             SPAN({"class": "arrayProperties", role: "group"})
