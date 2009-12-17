@@ -759,13 +759,13 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     onClick: function(event)
     {
-        if (isLeftClick(event) && event.detail == 2)
+    	if (isLeftClick(event) && event.detail == 2)
         {
-            if (getAncestorByClass(event.target, "nodeTag"))
-            {
-                var node = Firebug.getRepObject(event.target);
-                this.editNode(node);
-            }
+            this.toggleNode(event);
+        }
+        else if (isAltClick(event) && event.detail == 2 && !this.editing)
+        {
+            this.editNode(this.selection);
         }
     },
 
@@ -773,24 +773,25 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     {
         if (!isLeftClick(event))
             return;
-
         if (getAncestorByClass(event.target, "nodeTag"))
         {
             var node = Firebug.getRepObject(event.target);
             this.noScrollIntoView = true;
             this.select(node);
             delete this.noScrollIntoView;
-            var box = this.ioBox.createObjectBox(node);
-
-            // Expand/collapse only if the user clicked on the twisty button.
             if (hasClass(event.target, "twisty"))
-            {
-                if (!hasClass(box, "open"))
-                    this.ioBox.expandObject(node);
-                else
-                    this.ioBox.contractObject(this.selection);
-            }
+                this.toggleNode(event);
         }
+    },
+    
+    toggleNode: function(event,toogle)
+    {
+        var node = Firebug.getRepObject(event.target);
+        var box = this.ioBox.createObjectBox(node);
+        if (!hasClass(box, "open"))
+            this.ioBox.expandObject(node);
+        else
+            this.ioBox.contractObject(this.selection);
     },
 
     onKeyPress: function(event)
@@ -800,7 +801,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
         var node = this.selection;
         if (!node)
-        	return;
+            return;
         if (event.keyCode == KeyEvent.DOM_VK_UP)
             this.selectNodeBy("up");
         else if (event.keyCode == KeyEvent.DOM_VK_DOWN)

@@ -3223,6 +3223,16 @@ this.isControl = function(event)
     return (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey;
 };
 
+this.isAlt = function(event)
+{
+    return event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey;
+};
+
+this.isAltClick = function(event)
+{
+    return event.button == 0 && this.isAlt(event);
+};
+
 this.isControlShift = function(event)
 {
     return (event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey;

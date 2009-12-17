@@ -9,7 +9,8 @@
     position: relative;
     font-family: Monaco, monospace;
     padding-left: 13px;
-	min-width: 100%;
+    min-width: 100%;
+    -moz-user-select: none;
 }
 
 .twisty {
@@ -18,6 +19,14 @@
     top: 4px;
     width: 12px;
     height: 14px;
+}
+
+.twisty {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 14px;
+    height: 18px;
 }
 
 .nodeChildBox {
