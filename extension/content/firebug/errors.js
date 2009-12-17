@@ -31,6 +31,8 @@ const pointlessErrors =
     "Key event not available on GTK2:": 1
 };
 
+const dupLimit = 10;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
@@ -41,10 +43,12 @@ const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService"
 var Errors = Firebug.Errors = extend(Firebug.Module,
 {
     dispatchName: "errors",
+
     clear: function(context)
     {
         this.setCount(context, 0); // reset the UI counter
         delete context.errorMap;   // clear the duplication-removal table
+        delete context.droppedErrors;    // clear the counts of dropped errors
     },
 
     increaseCount: function(context)
@@ -154,7 +158,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         if (!msgId)
                             return;
                         if (context)
-                            Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                            context.errorRow[msgId] = Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                     }
                     else if (object.message)
                     {
@@ -243,7 +247,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.getName()+"\n");
              // then report later to avoid loading sourceS
-            context.throttle(Firebug.Console.log, Firebug.Console, [error, context,  className, false, true], true);
+            context.throttle(this.delayedLogging, this, [msgId, context, error, context, className, false, true], true);
         }
         else
         {
@@ -251,6 +255,32 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             Firebug.Console.log(error, FirebugContext,  className);
         }
         return context;
+    },
+
+    delayedLogging: function()
+    {
+        var args = cloneArray(arguments);
+        var msgId = args.shift();
+        var context = args.shift();
+        var row = Firebug.Console.log.apply(Firebug.Console, args);
+        if (row)
+        {
+            var dupSpan = row.getElementsByClassName("errorDuplication")[0];
+            var times = context.errorMap[msgId];
+            if (times > 1)
+            {
+                if (times > dupLimit)
+                {
+                    dupSpan.innerHTML = dupLimit+"x";
+                    context.errorMap[msgId] -= dupLimit;
+                }
+                else
+                    dupSpan.innerHTML = times + "x";
+            }
+            context.errorRow[msgId] = row;
+        }
+        if (FBTrace.DBG_ERRORS)
+        	FBTrace.sysout("errors.delayedLogging create row, dups "+context.errorMap[msgId], context.errorRow[msgId]);
     },
 
     getErrorContext: function(object)
@@ -336,6 +366,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     initContext: function(context)
     {
         this.clear(context);
+        context.errorRow = {};
 
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         {
@@ -540,6 +571,12 @@ function lessTalkMoreAction(context, object, isWarning)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.observe dropping "+object.category+" because: "+why);
+
+        if (!context.droppedErrors[object.category])
+            context.droppedErrors[object.category] = 1;
+        else
+            context.droppedErrors[object.category] += 1;
+
         return null;
     }
 
@@ -565,10 +602,14 @@ function lessTalkMoreAction(context, object, isWarning)
     }
 
     var msgId = [incoming_message, object.sourceName, object.lineNumber].join("/");
-    if (context.errorMap && msgId in context.errorMap)
+
+    if (!context.errorMap)
+        context.errorMap = {};
+
+    if (msgId in context.errorMap)
     {
         context.errorMap[msgId] += 1;
-        if (context.errorMap[msgId] < 9)
+        if (context.errorMap[msgId] % dupLimit != 1)
         {
             var console = context.getPanel("console");
             if (console)
@@ -580,11 +621,10 @@ function lessTalkMoreAction(context, object, isWarning)
         }
         // else put out another one, something bad is happening....
     }
-
-    if (!context.errorMap)
-        context.errorMap = {};
-
-    context.errorMap[msgId] = 1;
+    else
+    {
+        context.errorMap[msgId] = 1;
+    }
 
     return msgId;
 }

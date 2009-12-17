@@ -1427,8 +1427,8 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 onclick: "$onToggleError"},
 
             DIV({class: "errorTitle focusRow subLogRow", role : 'listitem'},
-                "$object.message|getMessage",
-                SPAN({class: "errorDuplication"}, "$object.msgId|getDuplication")
+                SPAN({class: "errorDuplication"}, "$object.msgId|getDuplication"),
+                "$object.message|getMessage"
             ),
             DIV({class: "errorTrace", role : 'presentation'}),
             DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
@@ -1478,7 +1478,10 @@ this.ErrorMessage = domplate(Firebug.Rep,
             return cropMultipleLines(error.source, 80);
         if (error.category == "js" && error.href && error.href.indexOf("XPCSafeJSObjectWrapper") != -1)
             return "";
-        return cropString(error.getSourceLine(), 80);
+        var source = error.getSourceLine();
+        if (source)
+            return cropString(source, 80);
+        return "";
     },
 
     getSourceLink: function(error)

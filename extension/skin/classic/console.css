@@ -194,6 +194,11 @@
     margin-left: 17px;
 }
 
+.errorDuplication {
+    margin-right: 5px;
+    font-weight: bold;
+}
+
 .errorSourceBox {
     margin: 2px 0;
 }
