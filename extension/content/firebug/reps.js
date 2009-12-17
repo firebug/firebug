@@ -16,14 +16,14 @@ const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 // Common Tags
 
 var OBJECTBOX = this.OBJECTBOX =
-    SPAN({class: "objectBox objectBox-$className", role : "presentation"});
+    SPAN({"class": "objectBox objectBox-$className", role : "presentation"});
 
 var OBJECTBLOCK = this.OBJECTBLOCK =
-    DIV({class: "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
+    DIV({"class": "objectBox objectBox-$className focusRow subLogRow", role : "listitem"});
 
 var OBJECTLINK = this.OBJECTLINK =
     A({
-        class: "objectLink objectLink-$className a11yFocus",
+        "class": "objectLink objectLink-$className a11yFocus",
         _repObject: "$object"
     });
 
@@ -149,14 +149,14 @@ this.Text = domplate(Firebug.Rep,
 
 this.Caption = domplate(Firebug.Rep,
 {
-    tag: SPAN({class: "caption"}, "$object")
+    tag: SPAN({"class": "caption"}, "$object")
 });
 
 // ************************************************************************************************
 
 this.Warning = domplate(Firebug.Rep,
 {
-    tag: DIV({class: "warning focusRow", role : 'listitem'}, "$object|STR")
+    tag: DIV({"class": "warning focusRow", role : 'listitem'}, "$object|STR")
 });
 
 // ************************************************************************************************
@@ -321,10 +321,10 @@ this.Obj = domplate(Firebug.Rep,
 {
     tag:
         OBJECTLINK(
-            SPAN({class: "objectTitle"}, "$object|getTitle"),
+            SPAN({"class": "objectTitle"}, "$object|getTitle"),
             FOR("prop", "$object|propIterator",
                 " $prop.name=",
-                SPAN({class: "objectPropValue"}, "$prop.value|cropMultipleLines")
+                SPAN({"class": "objectPropValue"}, "$prop.value|cropMultipleLines")
             )
         ),
 
@@ -603,20 +603,20 @@ this.Element = domplate(Firebug.Rep,
     tag:
         OBJECTLINK(
             "&lt;",
-            SPAN({class: "nodeTag"}, "$object.localName|toLowerCase"),
+            SPAN({"class": "nodeTag"}, "$object.localName|toLowerCase"),
             FOR("attr", "$object|attrIterator",
-                "&nbsp;$attr.localName=&quot;", SPAN({class: "nodeValue"}, "$attr.nodeValue"), "&quot;"
+                "&nbsp;$attr.localName=&quot;", SPAN({"class": "nodeValue"}, "$attr.nodeValue"), "&quot;"
             ),
             "&gt;"
          ),
 
     shortTag:
         OBJECTLINK(
-            SPAN({class: "$object|getVisible"},
-                SPAN({class: "selectorTag"}, "$object|getSelectorTag"),
-                SPAN({class: "selectorId"}, "$object|getSelectorId"),
-                SPAN({class: "selectorClass"}, "$object|getSelectorClass"),
-                SPAN({class: "selectorValue"}, "$object|getValue")
+            SPAN({"class": "$object|getVisible"},
+                SPAN({"class": "selectorTag"}, "$object|getSelectorTag"),
+                SPAN({"class": "selectorId"}, "$object|getSelectorId"),
+                SPAN({"class": "selectorClass"}, "$object|getSelectorClass"),
+                SPAN({"class": "selectorValue"}, "$object|getValue")
             )
          ),
 
@@ -847,8 +847,8 @@ this.TextNode = domplate(Firebug.Rep,
     tag:
         OBJECTLINK(
             "&lt;",
-            SPAN({class: "nodeTag"}, "TextNode"),
-            "&nbsp;textContent=&quot;", SPAN({class: "nodeValue"}, "$object.textContent|cropMultipleLines"), "&quot;",
+            SPAN({"class": "nodeTag"}, "TextNode"),
+            "&nbsp;textContent=&quot;", SPAN({"class": "nodeValue"}, "$object.textContent|cropMultipleLines"), "&quot;",
             "&gt;"
             ),
 
@@ -885,7 +885,7 @@ this.TextNode = domplate(Firebug.Rep,
 this.Document = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTLINK("Document ", SPAN({class: "objectPropValue"}, "$object|getLocation")),
+        OBJECTLINK("Document ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
 
     getLocation: function(doc)
     {
@@ -933,7 +933,7 @@ this.Document = domplate(Firebug.Rep,
 this.StyleSheet = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTLINK("StyleSheet ", SPAN({class: "objectPropValue"}, "$object|getLocation")),
+        OBJECTLINK("StyleSheet ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
 
     getLocation: function(styleSheet)
     {
@@ -997,7 +997,7 @@ this.StyleSheet = domplate(Firebug.Rep,
 this.Window = domplate(Firebug.Rep,
 {
     tag:
-        OBJECTLINK("Window ", SPAN({class: "objectPropValue"}, "$object|getLocation")),
+        OBJECTLINK("Window ", SPAN({"class": "objectPropValue"}, "$object|getLocation")),
 
     getLocation: function(win)
     {
@@ -1260,14 +1260,14 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 {
     tag:
         OBJECTBLOCK(
-            A({class: "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
+            A({"class": "objectLink a11yFocus", _repObject: "$object"}, "$object|getCallName"),
             SPAN("("),
             FOR("arg", "$object|argIterator",
                 TAG("$arg.tag", {object: "$arg.value"}),
-                SPAN({class: "arrayComma"}, "$arg.delim")
+                SPAN({"class": "arrayComma"}, "$arg.delim")
             ),
             SPAN(")"),
-            SPAN({class: "objectLink-sourceLink objectLink a11yFocus",
+            SPAN({"class": "objectLink-sourceLink objectLink a11yFocus",
                 _repObject: "$object|getSourceLink",
                 role: "link"},
                 "$object|getSourceLinkTitle")
@@ -1418,14 +1418,14 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 _stackTrace: "$object|getLastErrorStackTrace",
                 onclick: "$onToggleError"},
 
-            DIV({class: "errorTitle focusRow subLogRow", role : 'listitem'},
-                SPAN({class: "errorDuplication"}, "$object.msgId|getDuplication"),
+            DIV({"class": "errorTitle focusRow subLogRow", role : 'listitem'},
+                SPAN({"class": "errorDuplication"}, "$object.msgId|getDuplication"),
                 "$object.message|getMessage"
             ),
-            DIV({class: "errorTrace", role : 'presentation'}),
-            DIV({class: "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
-                IMG({class: "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: "Break on this error"}),
-                A({class: "errorSource a11yFocus"}, "$object|getLine"),
+            DIV({"class": "errorTrace", role : 'presentation'}),
+            DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
+                IMG({"class": "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: "Break on this error"}),
+                A({"class": "errorSource a11yFocus"}, "$object|getLine"),
                 TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
             )
         ),
@@ -1604,8 +1604,8 @@ this.Assert = domplate(Firebug.Rep,
 {
     tag:
         DIV(
-            DIV({class: "errorTitle"}),
-            DIV({class: "assertDescription"})
+            DIV({"class": "errorTitle"}),
+            DIV({"class": "assertDescription"})
         ),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1640,9 +1640,9 @@ this.SourceText = domplate(Firebug.Rep,
     tag:
         DIV(
             FOR("line", "$object|lineIterator",
-                DIV({class: "sourceRow", role : "presentation"},
-                    SPAN({class: "sourceLine", role : "presentation"}, "$line.lineNo"),
-                    SPAN({class: "sourceRowText", role : "presentation"}, "$line.text")
+                DIV({"class": "sourceRow", role : "presentation"},
+                    SPAN({"class": "sourceLine", role : "presentation"}, "$line.lineNo"),
+                    SPAN({"class": "sourceRowText", role : "presentation"}, "$line.text")
                 )
             )
         ),
