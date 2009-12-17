@@ -10,7 +10,7 @@ function _FirebugConsole()
     this.assert = function() { window._firebug.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
     this.dir = function() { window._firebug.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
     this.dirxml = function() { window._firebug.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
-    this.trace = function() { window._firebug.notifyFirebug(arguments, 'trace', 'firebugAppendConsole'); }
+    this.trace = function firebugDebuggerTracer() { debugger; }
     this.group = function() { window._firebug.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
     this.groupEnd = function() { window._firebug.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
     this.groupCollapsed = function() { window._firebug.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
@@ -85,7 +85,7 @@ window._getFirebugConsoleElement = function()  // could this be done in extensio
     if (!element)
     {
         if (document.documentElement.nodeName == document.documentElement.nodeName.toUpperCase())
-            element = document.createElement("div"); 
+            element = document.createElement("div");
         else
             element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
 

@@ -24,6 +24,7 @@ const RETURN_CONTINUE_THROW = jsdIExecutionHook.RETURN_CONTINUE_THROW;
 const RETURN_ABORT = jsdIExecutionHook.RETURN_ABORT;
 
 const TYPE_THROW = jsdIExecutionHook.TYPE_THROW;
+const TYPE_DEBUGGER_KEYWORD = jsdIExecutionHook.TYPE_DEBUGGER_KEYWORD;
 
 const STEP_OVER = 1;
 const STEP_INTO = 2;
@@ -834,6 +835,21 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
             if (!context)
                 return RETURN_CONTINUE;
+
+            if (type == TYPE_DEBUGGER_KEYWORD && frame.functionName === 'firebugDebuggerTracer')
+            {
+                var trace = FBL.getCorrectedStackTrace(frame, context);
+                if (trace)
+                {
+                    trace.frames = trace.frames.slice(1).reverse(); // drop the firebugDebuggerTracer and reorder
+                    Firebug.Console.log(trace, context, "stackTrace");
+                }
+
+                if(FBTrace.DBG_BP)
+                    FBTrace.sysout("debugger.onBreak "+(trace?"debugger trace":" debugger no trace!"));
+
+                return RETURN_CONTINUE;
+            }
 
             return this.stop(context, frame, type);
         }

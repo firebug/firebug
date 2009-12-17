@@ -263,12 +263,6 @@ function FirebugConsoleHandler(context, win)
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
     };
 
-    this.trace = function()
-    {
-        var trace = getJSDUserStack();
-        Firebug.Console.log(trace, context, "stackTrace");
-    };
-
     this.group = function()
     {
         var sourceLink = getStackLink();
