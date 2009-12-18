@@ -215,8 +215,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             return hookReturn;
         }
 
-        this.freeze(context);
-
         try
         {
             // We will pause here until resume is called
@@ -233,14 +231,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
         }
 
-        this.thaw(context);
         this.stopDebugging(context);
 
         dispatch(this.fbListeners,"onResume",[context]);
 
-        if (this.aborted)
+        if (context.aborted)
         {
-            delete this.aborted;
+            delete context.aborted;
             return RETURN_ABORT;
         }
         else
@@ -252,6 +249,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
 
+        this.thaw(context);
 
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
@@ -560,10 +558,16 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // UI Stuff
 
+    /*
+     * Called when a nestedEventLoop begins
+     */
     startDebugging: function(context)
     {
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging enter context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");
         try {
+
+        	this.freeze(context);
+
             fbs.lockDebugger();
 
             context.currentFrame = context.debugFrame;
@@ -615,6 +619,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging exit context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");
     },
 
+    /*
+     * Called in the main event loop, from jsd, after we have exited the nested event loop
+     */
+    
     stopDebugging: function(context)
     {
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.getName()+"\n");
@@ -761,7 +769,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         // Apparently the frameWin is a XPCSafeJSObjectWrapper that looks like a Window.
         // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
-        if (!frameWin._getFirebugConsoleElement)
+        if (!frameWin._getFirebugConsoleElement && !context.stopped)
         {
             this.injectConsole(context, frameWin);
         }
