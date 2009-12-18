@@ -224,16 +224,19 @@ function FirebugConsoleHandler(context, win)
 
     this.error = function()
     {
-        Firebug.Errors.increaseCount(context);
         if (arguments.length == 1)
+        {
             logAssert("error", arguments);  // add more info based on stack trace
+        }
         else
+        {
+            Firebug.Errors.increaseCount(context);
             logFormatted(arguments, "error", true);  // user already added info
+        }
     };
 
     this.exception = function()
     {
-        Firebug.Errors.increaseCount(context);
         logAssert("error", arguments);
     };
 
