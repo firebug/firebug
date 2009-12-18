@@ -668,9 +668,9 @@ this.hasClass = function(node, name)
     
     var re;
     if (name.indexOf("-") == -1)
-        re = classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g");
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('\\b' + name + '\\b', "g")
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
     return node.className.search(re) != -1;
 };
 
@@ -725,9 +725,9 @@ this.removeClass = function(node, name)
  
     var re;
     if (name.indexOf("-") == -1)
-        re = classNameReCache[name] = classNameReCache[name] || new RegExp('\\b' + name + '\\b', "g");
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
-        re = new RegExp('\\b' + name + '\\b', "g")
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
 
     node.className = node.className.replace(re, "");
     
