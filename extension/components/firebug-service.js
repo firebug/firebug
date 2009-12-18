@@ -1443,7 +1443,8 @@ FirebugService.prototype =
                 if (firstScript.tag in fbs.onXScriptCreatedByTag)
                 {
                     delete  fbs.onXScriptCreatedByTag[firstScript.tag];
-                    firstScript.clearBreakpoint(0);
+                    if (firstScript.isValid)
+                        firstScript.clearBreakpoint(0);
                     if (FBTrace.DBG_FBS_SRCUNITS)
                         FBTrace.sysout("fbs.onTopLevelScriptCreated clear bp@0 for firstScript.tag: "+firstScript.tag+"\n");
                 }
