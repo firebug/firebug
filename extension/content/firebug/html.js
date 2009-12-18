@@ -221,8 +221,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     deleteNode: function(node, dir)
     {
-        if (dir)
-            this.selectNodeBy(dir);
+        dir = dir || 'up';
+        var box = this.ioBox.createObjectBox(node);
+        if (hasClass(box, "open"))
+            this.ioBox.contractObject(this.selection);
+        this.selectNodeBy(dir);
         Firebug.HTMLModule.deleteNode(node, this.context);
     },
 
