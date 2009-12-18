@@ -572,6 +572,7 @@ function lessTalkMoreAction(context, object, isWarning)
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.observe dropping "+object.category+" because: "+why);
 
+        context.droppedErrors = context.droppedErrors || {};
         if (!context.droppedErrors[object.category])
             context.droppedErrors[object.category] = 1;
         else

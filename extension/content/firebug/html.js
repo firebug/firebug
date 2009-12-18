@@ -801,7 +801,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         }
     },
     
-    toggleNode: function(event,toogle)
+    toggleNode: function(event)
     {
         var node = Firebug.getRepObject(event.target);
         var box = this.ioBox.createObjectBox(node);
