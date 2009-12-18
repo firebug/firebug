@@ -729,7 +729,7 @@ this.removeClass = function(node, name)
     else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
         re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
 
-    node.className = node.className.replace(re, "");
+    node.className = node.className.replace(re, " ");
     
 };
 
