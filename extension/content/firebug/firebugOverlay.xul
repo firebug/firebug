@@ -61,7 +61,7 @@
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
 
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
-        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar(FirebugContext)"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
         <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
@@ -106,7 +106,7 @@
             onmousedown="Firebug.Inspector.quickInfoBoxDragStart(event);"
             onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
             onmouseup="Firebug.Inspector.quickInfoBoxDragEnd(event);">
-            
+
             <vbox></vbox>
         </popup>
     </popupset>

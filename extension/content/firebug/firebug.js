@@ -1080,7 +1080,8 @@ top.Firebug =
         if (Firebug.isDetached())  // TODO disable minimize on externalMode
         {
             // TODO reattach
-            Firebug.chrome.focus();
+            Firebug.toggleDetachBar(false, false);
+            Firebug.chrome.focus() ;
         }
         else // inBrowser -> minimized
         {
@@ -1096,12 +1097,19 @@ top.Firebug =
         Firebug.showBar(true);
     },
 
-    toggleDetachBar: function(forceOpen)  // detached -> closed; inBrowser -> detached TODO reattach
+    toggleDetachBar: function(forceOpen, reopenInBrowser)  // detached -> closed; inBrowser -> detached TODO reattach
     {
         if (!forceOpen && Firebug.isDetached())  // detached -> minimized
         {
             Firebug.chrome.close();
             detachCommand.setAttribute("checked", false);
+            if (reopenInBrowser)
+            {
+                setTimeout(function delayMinimize()
+                {
+                    Firebug.unMinimize()
+                });
+            }
         }
         else
             this.detachBar(FirebugContext);
@@ -1515,7 +1523,7 @@ top.Firebug =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // These are XUL window level call backs and should be moved into Firebug where is says nsIFirebugClient
-    // xxxHonza: so I did 
+    // xxxHonza: so I did
 
     onPauseJSDRequested: function(rejection)
     {

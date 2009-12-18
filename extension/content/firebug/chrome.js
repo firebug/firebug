@@ -248,9 +248,6 @@ top.FirebugChrome =
         {
             Firebug.setChrome(this, "detached"); // 1.4
 
-            FBL.collapse($("fbMinimizeButton"), true);  // Closing the external window will minimize
-            FBL.collapse($("fbDetachButton"), true);    // we are already detached.
-
             var browser = context ? context.browser : this.getCurrentBrowser();
             Firebug.showContext(browser, context);
 
