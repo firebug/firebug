@@ -645,11 +645,11 @@ this.getRootWindow = function(win)
 // CSS classes
 
 var classNameReCache={};
-this.hasClass = function(node, name) 
+this.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != 1 || name == '')
+    if (!node || node.nodeType != 1 || !node.className || name == '')
         return false;
-    
+
     if (name.indexOf(" ") != -1)
     {
         var classes = name.split(" "), len = classes.length, found=false;
@@ -665,7 +665,7 @@ this.hasClass = function(node, name)
         }
         return found;
     }
-    
+
     var re;
     if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
@@ -678,7 +678,7 @@ this.setClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || name == '')
         return;
-    
+
     if (name.indexOf(" ") != -1)
     {
         var classes = name.split(" "), len = classes.length;
@@ -707,7 +707,7 @@ this.removeClass = function(node, name)
 {
     if (!node || node.nodeType != 1 || node.className == '' || name == '')
         return;
-    
+
     if (name.indexOf(" ") != -1)
     {
         var classes = name.split(" "), len = classes.length;
@@ -722,7 +722,7 @@ this.removeClass = function(node, name)
         }
         return;
     }
- 
+
     var re;
     if (name.indexOf("-") == -1)
         re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
@@ -730,7 +730,7 @@ this.removeClass = function(node, name)
         re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
 
     node.className = node.className.replace(re, " ");
-    
+
 };
 
 this.toggleClass = function(elt, name)
