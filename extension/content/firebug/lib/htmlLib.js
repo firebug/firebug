@@ -580,6 +580,8 @@ Firebug.HTMLLib =
                 return true;
             case "link":
                 return element.getAttribute("rel") == "stylesheet";
+            case "embed":
+                return element.getSVGDocument();
         }
         return false;
     },

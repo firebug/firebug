@@ -631,7 +631,21 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 var skipChild = node.contentDocument.documentElement; // unwrap
                 this.embeddedBrowserParents[skipChild] = node;
 
-                return node.contentDocument.documentElement;  // (the node's).(type 9 document).(HTMLElement)
+                return skipChild;  // (the node's).(type 9 document).(HTMLElement)
+            }
+            else
+                return null;
+        }
+        else if (node.getSVGDocument && node.getSVGDocument())  // then the node is a frame
+        {
+            if (index == 0)
+            {
+                if (!this.embeddedBrowserParents)
+                    this.embeddedBrowserParents = {};
+                var skipChild = node.getSVGDocument().documentElement; // unwrap
+                this.embeddedBrowserParents[skipChild] = node;
+
+                return skipChild;  // (the node's).(type 9 document).(SVGElement)
             }
             else
                 return null;
@@ -959,7 +973,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         // document.documentElement    Returns the Element that is a direct child of document. For HTML documents, this normally the HTML element.
         var target = win.document.documentElement;
         var parent = win.frameElement;
-        var nextSibling = this.findNextSibling(target);
+        var nextSibling = this.findNextSibling(target || parent);
         this.mutateNode(target, parent, nextSibling, remove);
     },
 
