@@ -633,12 +633,24 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getObjectPropertyValue: function(object, propName)
     {
-        if (object)
+        if (!object)
+            return;
+
+        // Get the value with try-catch statement. This method is used also wihin
+        // getContextMenuItems where the exception would break the context menu.
+        // 1) The Firebug.Debugger.evaluate can throw
+        // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
+        try
         {
             if (object instanceof jsdIStackFrame)
                 return Firebug.Debugger.evaluate(propName, this.context);
             else
                 return object[propName];
+        }
+        catch (err)
+        {
+            if(FBTrace.DBG_DOM || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("dom.getObjectPropertyValue; EXCEPTION " + propName, object);
         }
     },
 
@@ -1144,6 +1156,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getContextMenuItems: function(object, target)
     {
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.getContextMenuItems;", object);
+
         var row = getAncestorByClass(target, "memberRow");
 
         var items = [];
