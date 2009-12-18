@@ -268,6 +268,67 @@ Firebug.CSSModule = extend(Firebug.Module,
         if (propName) {
             dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority]);
         }
+    },
+
+    cleanupSheets: function(doc, context)
+    {
+        // Due to the manner in which the layout engine handles multiple
+        // references to the same sheet we need to kick it a little bit.
+        // The injecting a simple stylesheet then removing it will force
+        // Firefox to regenerate it's CSS hierarchy.
+        //
+        // WARN: This behavior was determined anecdotally.
+        // See http://code.google.com/p/fbug/issues/detail?id=2440
+        var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+        style.setAttribute("charset","utf-8");
+        unwrapObject(style).firebugIgnore = true;
+        style.setAttribute("type", "text/css");
+        style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+        addStyleSheet(doc, style);
+        style.parentNode.removeChild(style);
+
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
+        // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
+        var styleSheets = getAllStyleSheets(context);
+        for(var i = 0; i < styleSheets.length; i++)
+        {
+            try
+            {
+                var rules = styleSheets[i].cssRules;
+                if (rules.length > 0)
+                    var touch = rules[0];
+                if (FBTrace.DBG_CSS && touch)
+                    FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+(styleSheets[i].href?styleSheets[i].href:context.getName()));
+            }
+            catch(e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("css.show: sheet.cssRules FAILS for "+(styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
+            }
+        }
+    },
+    cleanupSheetHandler: function(event, context)
+    {
+        var target = event.target,
+            tagName = (target.tagName || "").toLowerCase();
+        if (tagName == "link")
+        {
+            this.cleanupSheets(target.ownerDocument, context);
+        }
+    },
+    watchWindow: function(context, win)
+    {
+        var cleanupSheets = bind(this.cleanupSheets, this),
+            cleanupSheetHandler = bind(this.cleanupSheetHandler, this, context);
+        iterateWindows(win, function(subwin)
+        {
+            var doc = subwin.document;
+
+            cleanupSheets(doc, context);
+
+            doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
+            doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
+        });
     }
 });
 
@@ -1264,51 +1325,6 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     show: function(state)
     {
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
-        // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
-        if (!this.context.forcedUniqueStyleSheets)
-        {
-            if (this.context.loaded)  // keep forcing until we are loaded
-                this.context.forcedUniqueStyleSheets = true;
-
-            // Due to the manner in which the layout engine handles multiple
-            // references to the same sheet we need to kick it a little bit.
-            // The injecting a simple stylesheet then removing it will force
-            // Firefox to regenerate it's CSS hierarchy.
-            //
-            // WARN: This behavior was determined anecdotally.
-            // See http://code.google.com/p/fbug/issues/detail?id=2440
-            iterateWindows(this.context.window, function(subwin)
-            {
-                var doc = subwin.document;
-                var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
-                style.setAttribute("charset","utf-8");
-                unwrapObject(style).firebugIgnore = true;
-                style.setAttribute("type", "text/css");
-                style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
-                addStyleSheet(doc, style);
-                style.parentNode.removeChild(style);
-            });
-
-            var styleSheets = getAllStyleSheets(this.context);
-            for(var i = 0; i < styleSheets.length; i++)
-            {
-                try
-                {
-                    var rules = styleSheets[i].cssRules;
-                    if (rules.length > 0)
-                        var touch = rules[0];
-                    if (FBTrace.DBG_CSS && touch)
-                        FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+(styleSheets[i].href?styleSheets[i].href:this.context.getName()));
-                }
-                catch(e)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("css.show: sheet.cssRules FAILS for "+(styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
-                }
-            }
-        }
-
         if (this.context.loaded && domUtils)
         {
             if (!this.context.attachedStateCheck)
