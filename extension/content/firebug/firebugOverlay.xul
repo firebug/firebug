@@ -70,6 +70,7 @@
         <command id="cmd_clearActivationList" oncommand="Firebug.Activation.clearAnnotations()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
+        <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(FirebugContext)"/>
     </commandset>

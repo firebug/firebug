@@ -986,6 +986,9 @@ top.Firebug =
         var shouldShow = show/* && !Firebug.isDetached()*/;
         contentBox.setAttribute("collapsed", !shouldShow);
 
+        if(!show)
+            Firebug.Inspector.inspectNode(null);
+        
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
 
