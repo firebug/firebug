@@ -344,7 +344,7 @@ this.Obj = domplate(Firebug.Rep,
             ),
             SPAN({"class": "objectRightBrace"}, "}")
         ),
-    
+
     titleTag:
         SPAN({"class": "objectTitle"}, "$object|getTitle"),
 
@@ -403,9 +403,9 @@ this.Obj = domplate(Firebug.Rep,
             {
                 props[Math.max(1,max-1)] = {
                     object: "more...", //xxxHonza localization
-                    tag: FirebugReps.Caption.tag, 
-                    name: "", 
-                    equal:"", 
+                    tag: FirebugReps.Caption.tag,
+                    name: "",
+                    equal:"",
                     delim:""
                 };
             }
@@ -492,7 +492,7 @@ this.Arr = domplate(Firebug.Rep,
         {
             items[max] = {
                 object: (array.length-max) + " more...", //xxxHonza localization
-                tag: FirebugReps.Caption.tag, 
+                tag: FirebugReps.Caption.tag,
                 delim: ""
             };
         }
@@ -1172,11 +1172,14 @@ this.SourceLink = domplate(Firebug.Rep,
         {
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'"+fileName+"\': "+exc, exc);
+            fileName = sourceLink.href;
         }
         if (sourceLink.instance)
             return $STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
-        else
+        else if (sourceLink.line)
             return $STRF("Line", [fileName, sourceLink.line]);
+        else
+            return fileName;
     },
 
     getSystemFlagTitle: function(sourceLink)
@@ -1242,6 +1245,10 @@ this.SourceLink = domplate(Firebug.Rep,
                 if (panel && panel.getRuleByLine(stylesheet, sourceLink.line))
                     return Firebug.chrome.select(sourceLink);
             }
+        }
+        else if (sourceLink.type == "net")
+        {
+            return Firebug.chrome.select(sourceLink);
         }
 
         // Fallback is to just open the view-source window on the file

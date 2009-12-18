@@ -573,7 +573,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     supportsObject: function(object)
     {
-        return (object instanceof NetFileLink ? 2 : 0);
+        return ((object instanceof SourceLink && object.type == "net") ? 2 : 0);
     },
 
     getOptionsMenuItems: function()
@@ -1102,7 +1102,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             if (file.totalReceived)
                 sizeText += " (" + formatSize(file.totalReceived) + ")";
 
-            sizeLabel.firstChild.nodeValue = sizeText; 
+            sizeLabel.firstChild.nodeValue = sizeText;
 
             var methodLabel = row.childNodes[2].firstChild;
             methodLabel.firstChild.nodeValue = NetRequestEntry.getStatus(file);
@@ -1236,8 +1236,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.barReceivingWidth = Math.round((elapsed / this.phaseElapsed) * 100);
 
         // Total request time doesn't include the time spent in queue.
-        // xxxHonza: since all phases are now graphically distinguished it's easy to 
-        // see blocking requests. It's make sense to display the real total time now. 
+        // xxxHonza: since all phases are now graphically distinguished it's easy to
+        // see blocking requests. It's make sense to display the real total time now.
         this.elapsed = elapsed/* - (file.sendingTime - file.connectedTime)*/;
 
         // The nspr timer doesn't have 1ms precision, so it can happen that entire
@@ -3432,9 +3432,8 @@ NetProgress.prototype =
             if (Firebug.showNetworkErrors && NetRequestEntry.isError(file))
             {
                 Firebug.Errors.increaseCount(this.context);
-                Firebug.Console.log(file.getFileLink("NetworkError: " +
-                    NetRequestEntry.getStatus(file) + " - "),
-                    this.context, "error", null, true);
+                var message = "NetworkError: " + NetRequestEntry.getStatus(file) + " - "+file.href;
+                Firebug.Console.log(message, this.context, "error", null, true, file.getFileLink(message));
             }
 
             dispatch(Firebug.NetMonitor.fbListeners, "onResponse", [this.context, file]);
@@ -3996,8 +3995,7 @@ NetFile.prototype =
 
     getFileLink: function(message)
     {
-        var link = new FBL.NetFileLink(this.href, this.request);
-        link.message = message;
+        var link = new FBL.SourceLink(this.href, null, "net", this.request);  // this.SourceLink = function(url, line, type, object, instance)
         return link;
     },
 
