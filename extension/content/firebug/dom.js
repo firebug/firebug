@@ -378,6 +378,10 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
         try
         {
+            // Special case for "arguments", which is not enumerable by for...in statement.
+            if (isArguments(object))
+                object = cloneArray(object);
+
             var domMembers = getDOMMembers(object);
             var insecureObject = unwrapObject(object);
 
@@ -1711,6 +1715,15 @@ function isClassFunction(fn)
     return false;
 }
 
+function isArguments(obj)
+{
+    try
+    {
+        return isFinite(obj.length) && obj.length > 0 && typeof obj.callee === "function";
+    } catch (exc) {}
+    return false;
+}
+
 function addMember(object, type, props, name, value, level, order, context)
 {
     var rep = Firebug.getRep(value);    // do this first in case a call to instanceof reveals contents
@@ -1720,6 +1733,11 @@ function addMember(object, type, props, name, value, level, order, context)
     var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
         (valueType == "function" || (valueType == "object" && value != null)
         || (valueType == "string" && value.length > Firebug.stringCropLength));
+
+    // Special case for "arguments", which is not enumerable by for...in statement
+    // and so, hasProperties always returns false.
+    if (!hasChildren)
+        hasChildren = isArguments(value);
 
     var member = {
         object: object,
