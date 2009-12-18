@@ -305,6 +305,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     runUntil: function(context, sourceFile, lineNo)
     {
+        if (FBTrace.DBG_UI_LOOP)
+            FBTrace.sysout("runUntil "+lineNo+" @"+sourceFile);
+
         if (!context.debugFrame || !context.debugFrame.isValid)
             return;
 
@@ -566,7 +569,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging enter context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");
         try {
 
-        	this.freeze(context);
+            this.freeze(context);
 
             fbs.lockDebugger();
 
@@ -622,7 +625,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     /*
      * Called in the main event loop, from jsd, after we have exited the nested event loop
      */
-    
+
     stopDebugging: function(context)
     {
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("stopDebugging enter context: "+context.getName()+"\n");
@@ -3033,7 +3036,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             var sourceRow = getAncestorByClass(target, "sourceRow");
             if (sourceRow)
             {
-                var sourceFile = sourceRow.parentNode.repObject;
+                var sourceFile = getAncestorByClass(sourceRow, "sourceBox").repObject;
                 var lineNo = parseInt(sourceRow.firstChild.textContent);
 
                 var debuggr = Firebug.Debugger;
