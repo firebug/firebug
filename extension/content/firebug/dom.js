@@ -1736,7 +1736,7 @@ function addMember(object, type, props, name, value, level, order, context)
 
     // Special case for "arguments", which is not enumerable by for...in statement
     // and so, hasProperties always returns false.
-    if (!hasChildren)
+    if (!hasChildren && value) // arguments will never be falsy if the arguments exist
         hasChildren = isArguments(value);
 
     var member = {
