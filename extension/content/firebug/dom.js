@@ -167,7 +167,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return;
 
         var row = getAncestorByClass(event.target, "memberRow");
-        var label = row.getElementsByClassName("memberLabel").item(0);
+        var label = getAncestorByClass(target, "memberLabel");
         var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
@@ -1088,7 +1088,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             {
                 this.toggles = {};
 
-                var win = this.context.getGlobalScope();
+                var win = unwrapObject(this.context.getGlobalScope());
                 if (object == win)
                 {
                     this.pathIndex = 0;
@@ -1134,7 +1134,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getDefaultSelection: function()
     {
-        return this.context.getGlobalScope();
+        return unwrapObject(this.context.getGlobalScope());
     },
 
     updateOption: function(name, value)
