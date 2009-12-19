@@ -186,12 +186,12 @@ Firebug.Inspector = extend(Firebug.Module,
     
     inspectFromContextMenu: function(elt)
     {
-        var context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView),
-            htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", false);
+        var context, htmlPanel;
 
         Firebug.toggleBar(true);
-        Firebug.chrome.select(elt, 'html');
-        Firebug.chrome.focus();
+        Firebug.chrome.select(elt, "html");
+        context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+        htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", false);
         htmlPanel.panelNode.focus();
     },
     
