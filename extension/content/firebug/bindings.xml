@@ -809,6 +809,17 @@
                 this.selectObject(object);
             }, this));
         ]]></handler>
+
+        <handler event="mouseover"><![CDATA[
+            var object = Firebug.getRepObject(event.target);
+            if (object)
+            {
+                var locator = this.getLocator();
+                event.target.setAttribute('tooltiptext',locator.getObjectLocation(object));
+            }
+
+            return;
+        ]]></handler>
     </handlers>
 </binding>
 
