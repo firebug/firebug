@@ -221,6 +221,7 @@ code {
     color: #000000;
     display: none;
     white-space: nowrap;
+    pointer-events: none;
 }
 
 .infoTip[active="true"] {
@@ -396,10 +397,13 @@ h1.groupHeader {
     font-weight: bold;
 }
 
+.notationTitle.diff {
+    font-weight: normal;
+}
+
 .notationButton {
     float: right;
 }
-
 
 .upsideDown {
     margin-top: 2px;
@@ -447,5 +451,4 @@ h1.groupHeader {
     background: url(noteCornersUps.png) no-repeat 0 100%;
 }
 
-/************************************************************************************************/
 /************************************************************************************************/

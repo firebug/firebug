@@ -280,8 +280,11 @@
         <![CDATA[
             this.setAttribute('role', 'tab');
             this.setAttribute('aria-haspopup', 'true');
-            this.tabMenu = document.createElement("panelTabMenu");
-            this.appendChild(this.tabMenu);
+            if (!this.tabMenu)
+            {
+                this.tabMenu = document.createElement("panelTabMenu");
+                this.appendChild(this.tabMenu);
+            }
             return this.tabMenu;
         ]]>
         </constructor>
@@ -806,6 +809,17 @@
                 this.selectObject(object);
             }, this));
         ]]></handler>
+
+        <handler event="mouseover"><![CDATA[
+            var object = Firebug.getRepObject(event.target);
+            if (object)
+            {
+                var locator = this.getLocator();
+                event.target.setAttribute('tooltiptext',locator.getObjectLocation(object));
+            }
+
+            return;
+        ]]></handler>
     </handlers>
 </binding>
 
@@ -813,7 +827,7 @@
     <content sizetopopup="none">
         <xul:textbox type="autocomplete" anonid="searchBox"
                 rows="1" label="search.Firebug_Search" class="fbsearch-textbox" />
-        <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true" noautohide="true" ignorekeys="true">
+        <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true" ignorekeys="true">
             <xul:vbox>
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()"  />
               <xul:vbox anonid="searchOptionsList"/>
@@ -832,7 +846,6 @@
             var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox"),
                 searchPrev = document.getAnonymousElementByAttribute(this, "anonid", "searchPrev"),
                 searchNext = document.getAnonymousElementByAttribute(this, "anonid", "searchNext"),
-                searchOptionsPopup = document.getElementById("fbSearchOptionsPanel"),
                 optionsPopup = document.getElementById("fbSearchOptionsPanel");
             FBL.internationalize(searchBox, "label");
             FBL.internationalize(searchPrev, "label");
@@ -853,7 +866,7 @@
         </property>
         <property name="optionsShown">
             <xbl:getter><![CDATA[
-                var optionsPopup = document.getElementById(this, "anonid", "fbSearchOptionsPanel");
+                var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                 return optionsPopup.state == "open";
             ]]></xbl:getter>
         </property>
@@ -964,7 +977,7 @@
                     this.panelHasFocus = false;
                 } else if (this.optionsShown) {
                     // The user has just tabbed out of the search box (and into the panel)
-                    var optionsPopup = document.getAnonymousElementByAttribute(this, "anonid", "searchOptionsPopup");
+                    var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                     document.commandDispatcher.advanceFocusIntoSubtree(optionsPopup);
                 } else {
                     // The user has just reverse tabbed from the next tab target

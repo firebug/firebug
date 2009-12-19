@@ -22,6 +22,9 @@ const reDBG_FBS = /DBG_FBS_(.*)/;
 
 var EOF = "<br/>";
 
+// Register locale file with strings for the Tracing Console window.
+Firebug.registerStringBundle("chrome://firebug/locale/firebug-tracing.properties");
+
 //************************************************************************************************
 //  The controller for the prefDomain Model.
 //  getOptionsMenuItems to create View, onPrefChangeHandler for View update
@@ -300,14 +303,14 @@ Firebug.TraceModule.CommonBaseUI = {
         rep.tag.replace({}, parentNode, rep);
 
         // This IFRAME is the container for all logs.
-        var logTabIframe = FBL.getElementByClass(parentNode, "traceInfoLogsFrame");
+        var logTabIframe = parentNode.getElementsByClassName("traceInfoLogsFrame").item(0);
         var self = this;
         logTabIframe.addEventListener("load", function(event)
         {
             var frameDoc = logTabIframe.contentWindow.document;
 
             addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/panelbase.css"));
-            addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceconsole.css"));
+            addStyleSheet(frameDoc, createStyleSheet(frameDoc, "chrome://firebug/skin/traceConsole.css"));
 
             var rootNode = frameDoc.getElementById("traceLogContent");
             outputNodes.setScrollingNode(rootNode);
@@ -328,7 +331,7 @@ Firebug.TraceModule.CommonBaseUI = {
         }, true);
 
         // Initialize content for Options tab (a button for each DBG_ option).
-        var optionsBody = FBL.getElementByClass(parentNode, "traceInfoOptionsText");
+        var optionsBody = parentNode.getElementsByClassName("traceInfoOptionsText").item(0);
         this.optionsController = new Firebug.TraceOptionsController(prefDomain, function updateButton(optionName, optionValue)
         {
             var button = parentNode.ownerDocument.getElementById(optionName);
@@ -401,7 +404,7 @@ Firebug.TraceModule.PanelTemplate = domplate({
 
     selectTabByName: function(parentNode, tabName)
     {
-        var tab = getElementByClass(parentNode, "traceInfo" + tabName + "Tab");
+        var tab = parentNode.getElementsByClassName("traceInfo" + tabName + "Tab").item(0);
         if (tab)
             this.selectTab(tab);
     },
@@ -926,7 +929,7 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     collapseRow: function(row)
     {
-        if (hasClass(row, "messageRow", "opened"))
+        if (hasClass(row, "messageRow") && hasClass(row, "opened"))
             this.toggleRow(row);
     },
 
@@ -1150,13 +1153,11 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
         var trace = Firebug.errorStackTrace;
         if (trace)
         {
-            if (Firebug.Errors.correctLineNumbersWithStack(trace, obj))
+            for (var i=0; i<trace.frames.length; i++)
             {
-                for (var i=0; i<trace.frames.length; i++) {
-                    var frame = trace.frames[i];
-                    if (frame.href && frame.lineNo)
-                        this.stack.push({fileName:frame.href, lineNumber:frame.lineNo, funcName:""});
-                }
+                var frame = trace.frames[i];
+                if (frame.href && frame.line)
+                    this.stack.push({fileName:frame.href, lineNumber:frame.line, funcName:""});
             }
         }
         else
@@ -1336,8 +1337,8 @@ Firebug.TraceModule.TraceMessage.prototype =
             {
                 var prop = listValue.value[i];
                 try {
-                    var name = prop.name.getWrappedValue();
-                    this.props[name] = "" + prop.value.getWrappedValue();
+                    var name = unwrapIValue(prop.name);
+                    this.props[name] = "" + unwrapIValue(prop.value);
                 } catch (e) {
                     onPanic("instanceof jsdIValue, i="+i, e);
                 }
@@ -1363,17 +1364,22 @@ Firebug.TraceModule.TraceMessage.prototype =
                         if (getter)
                             var value = "" + getter;
                         else
-                            var value = "" + this.obj[p]; // script takes too much time error
+                            var value = safeToString(this.obj[p]);
                         this.props[p] = value;
                     }
                     catch (err) {
+                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS with "+err+"\n");
+                        window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties FAILS on object "+safeToString(this.obj)+"\n");
                         this.props[p] = "{Error}";
                     }
                 }
             }
             catch (exc)
             {
-                window.dump("traceModule getProperties "+exc);
+                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS after "+propsTotal+ " with "+exc+"\n");
+                window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS on object "+safeToString(this.obj)+"\n");
+                if (this.obj instanceof Window)
+                    window.dump(">>>>>>>>>>>>>>>> traceModule.getProperties enumeration FAILS window closed:"+this.obj.closed+"\n");
             }
         }
 
@@ -1418,8 +1424,8 @@ Firebug.TraceModule.TraceMessage.prototype =
                for (var i=lengthValue.value-1; i>=0; i--)
                {
                    var prop = listValue.value[i];
-                   var name = prop.name.getWrappedValue();
-                   var value = prop.value.getWrappedValue();
+                   var name = unwrapIValue(prop.name);
+                   var value = unwrapIValue(prop.value);
 
                    if ((typeof(value) != "function") && name && value)
                        scope[name.toString()] = value.toString();
@@ -1673,7 +1679,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         var tag = rep.shortTag ? rep.shortTag : rep.tag;
         var valueType = typeof(value);
 
-        var hasChildren = this.hasProperties(value) && !(value instanceof ErrorCopy) &&
+        var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
             (valueType == "function" || (valueType == "object" && value != null)
             || (valueType == "string" && value.length > Firebug.stringCropLength));
 
@@ -1688,15 +1694,6 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
             hasChildren: hasChildren,
             tag: tag
         };
-    },
-
-    hasProperties: function(ob)
-    {
-        try {
-            for (var name in ob)
-                return true;
-        } catch (exc) {}
-        return false;
     }
 });
 

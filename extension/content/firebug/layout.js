@@ -18,76 +18,77 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                     DIV({class: "layoutEdgeBottom layoutEdge"}),
                     DIV({class: "layoutEdgeLeft layoutEdge"}),
 
+                    DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
+                            SPAN({class: "layoutPosition layoutCaption", 'aria-label' : $STR('a11y.layout.position')}, $STR('position')+": "+'$position'),
+                            SPAN({class: "layoutZIndex v$zIndex", 'aria-label' : $STR('a11y.layout.z-index')}, "z: "+'$zIndex')
+                        ),
+
                     DIV({class: "layoutLabelTop layoutLabel v$outerTop"},
-                        SPAN({class: "editable focusStart", 'aria-label' : $STR('offset top')}, '$outerTop')
+                        SPAN({class: "editable focusStart", 'aria-label' : $STR('a11y.layout.offset top')}, '$outerTop')
                     ),
                     DIV({class: "layoutLabelRight layoutLabel v$outerRight"},
-                        SPAN({class: "editable", 'aria-label' : $STR('offset right')}, '$outerRight')
+                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.offset right')}, '$outerRight')
                     ),
                     DIV({class: "layoutLabelBottom layoutLabel v$outerBottom"},
-                        SPAN({class: "editable", 'aria-label' : $STR('offset bottom')}, '$outerBottom')
+                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.offset bottom')}, '$outerBottom')
                     ),
                     DIV({class: "layoutLabelLeft layoutLabel v$outerLeft"},
-                        SPAN({class: "editable", 'aria-label' : $STR('offset left')}, '$outerLeft')
+                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.offset left')}, '$outerLeft')
                     ),
 
                     DIV({class: "layoutCaption"}, '$outerLabel'),
 
-                    DIV({class: "layoutLabelBottom layoutLabel layoutLabelPosition"},
-                            SPAN({class: "editable layoutPosition layoutCaption", 'aria-label' : $STR('position')}, $STR('position')+": "+'$position'),
-                            SPAN({class: "editable layoutZIndex v$zIndex", 'aria-label' : $STR('z-index')}, "z: "+'$zIndex')
-                        ),
 
                     DIV({class: "marginLayoutBox layoutBox editGroup focusGroup"},
                         DIV({class: "layoutCaption"}, $STR("LayoutMargin")),
                         DIV({class: "layoutLabelTop layoutLabel v$marginTop"},
-                            SPAN({class: "editable focusStart", 'aria-label' : $STR('margin top')}, '$marginTop')
+                            SPAN({class: "editable focusStart", 'aria-label' : $STR('a11y.layout.margin top')}, '$marginTop')
                         ),
                         DIV({class: "layoutLabelRight layoutLabel v$marginRight"},
-                            SPAN({class: "editable", 'aria-label' : $STR('margin right')}, '$marginRight')
+                            SPAN({class: "editable", 'aria-label' : $STR('a11y.layout..margin right')}, '$marginRight')
                         ),
                         DIV({class: "layoutLabelBottom layoutLabel v$marginBottom"},
-                            SPAN({class: "editable", 'aria-label' : $STR('margin bottom')}, '$marginBottom')
+                            SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.margin bottom')}, '$marginBottom')
                         ),
                         DIV({class: "layoutLabelLeft layoutLabel v$marginLeft"},
-                            SPAN({class: "editable", 'aria-label' : $STR('margin left')}, '$marginLeft')
+                            SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.margin left')}, '$marginLeft')
                         ),
 
                         DIV({class: "borderLayoutBox layoutBox editGroup focusGroup"},
                             DIV({class: "layoutCaption"}, $STR("LayoutBorder")),
                             DIV({class: "layoutLabelTop layoutLabel v$borderTop"},
-                                SPAN({class: "editable  focusStart", 'aria-label' : $STR('border top')}, '$borderTop')
+                                SPAN({class: "editable  focusStart", 'aria-label' : $STR('a11y.layout.border top')}, '$borderTop')
                             ),
                             DIV({class: "layoutLabelRight layoutLabel v$borderRight"},
-                                SPAN({class: "editable", 'aria-label' : $STR('border right')}, '$borderRight')
+                                SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.border right')}, '$borderRight')
                             ),
                             DIV({class: "layoutLabelBottom layoutLabel v$borderBottom"},
-                                SPAN({class: "editable", 'aria-label' : $STR('border bottom')}, '$borderBottom')
+                                SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.border bottom')}, '$borderBottom')
                             ),
                             DIV({class: "layoutLabelLeft layoutLabel v$borderLeft"},
-                                SPAN({class: "editable", 'aria-label' : $STR('border left')}, '$borderLeft')
+                                SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.border left')}, '$borderLeft')
                             ),
 
                             DIV({class: "paddingLayoutBox layoutBox editGroup focusGroup"},
                                 DIV({class: "layoutCaption"}, $STR("LayoutPadding")),
                                 DIV({class: "layoutLabelTop layoutLabel v$paddingTop"},
-                                    SPAN({class: "editable focusStart", 'aria-label' : $STR('padding top')}, '$paddingTop')
+                                    SPAN({class: "editable focusStart", 'aria-label' : $STR('a11y.layout.padding top')}, '$paddingTop')
                                 ),
                                 DIV({class: "layoutLabelRight layoutLabel v$paddingRight"},
-                                    SPAN({class: "editable", 'aria-label' : $STR('padding right')}, '$paddingRight')
+                                    SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.padding right')}, '$paddingRight')
                                 ),
                                 DIV({class: "layoutLabelBottom layoutLabel v$paddingBottom"},
-                                    SPAN({class: "editable", 'aria-label' : $STR('padding bottom')}, '$paddingBottom')
+                                    SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.padding bottom')}, '$paddingBottom')
                                 ),
                                 DIV({class: "layoutLabelLeft layoutLabel v$paddingLeft"},
-                                    SPAN({class: "editable", 'aria-label' : $STR('padding left')}, '$paddingLeft')
+                                    SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.padding left')}, '$paddingLeft')
                                 ),
 
                                 DIV({class: "contentLayoutBox layoutBox editGroup focusGroup"},
                                     DIV({class: "layoutLabelCenter layoutLabel"},
-                                        SPAN({class: "layoutLabelWidth layoutLabel editable focusStart", 'aria-label' : $STR('width')}, '$width'),
+                                        SPAN({class: "layoutLabelWidth layoutLabel editable focusStart", 'aria-label' : $STR('a11y.layout.width')}, '$width'),
                                         " x ",
-                                        SPAN({class: "layoutLabelHeight layoutLabel editable", 'aria-label' : $STR('height')}, '$height')
+                                        SPAN({class: "layoutLabelHeight layoutLabel editable", 'aria-label' : $STR('a11y.layout.height')}, '$height')
                                     )
                                 )
                             )
@@ -186,122 +187,45 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         var prevStyle = prev ? view.getComputedStyle(prev, "") : null;
         var nextStyle = next ? view.getComputedStyle(next, "") : null;
 
-        function getStyle(st, name) { return parseInt(st.getPropertyCSSValue(name).cssText); }
-
         var args = getBoxFromStyles(style, element);
 
-        args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = 0;
+        args.outerLeft = args.outerRight = args.outerTop = args.outerBottom = '';
         args.outerLeftMode = args.outerRightMode = args.outerTopMode = args.outerBottomMode = "";
         args.zIndex = args.zIndex ? args.zIndex : "auto";
 
         var position = style.getPropertyCSSValue("position").cssText;
         args.position = position;
-
-        if (Firebug.showBoundingClientRect)
+        args.outerLabel = '';
+        
+        if (isElementSVG(element) || isElementMathML(element) || isElementXUL(element))
         {
-            args.outerLabel = $STR("BoundingClientRect");
             var rect = element.getBoundingClientRect();
             if (rect.wrappedJSObject)
                 rect = rect.wrappedJSObject;
 
             args.width = Math.round(rect.width);
             args.height = Math.round(rect.height);
-            args.outerLeft = Math.round(rect.left);
-            args.outerTop = Math.round(rect.top);
-            args.outerRight = Math.round(rect.right);
-            args.outerBottom = Math.round(rect.bottom);
-
-            // these Modes are classes on the domplate
-            args.outerLeftMode = args.outerRightMode = args.outerTopMode
-            = args.outerBottomMode = "boundingClientRect";
         }
-        else if (!Firebug.showAdjacentLayout || position == "absolute" || position == "fixed")
+        
+        // these Modes are classes on the domplate
+        args.outerLeftMode = args.outerRightMode = args.outerTopMode
+        = args.outerBottomMode = "blankEdge";
+        
+        if (position == "absolute" || position == "fixed" || position == "relative")
         {
+            function getStyle(style, name) { var v = style.getPropertyCSSValue(name); return (v && v.cssText) ? parseInt(v.cssText) : ' '; }
+
             args.outerLabel = $STR("LayoutOffset");
-            args.outerLeft = element.offSetLeft ? element.offsetLeft : 0;
-            args.outerTop = element.offsetTop ? element.offsetLeft : 0;
-            args.outerRight = args.outerBottom = 0;
+            
+            args.outerLeft = getStyle(style,'left');
+            args.outerTop = getStyle(style,'top');
+            args.outerRight = getStyle(style,'right');
+            args.outerBottom = getStyle(style,'bottom');
+            
             args.outerLeftMode = args.outerRightMode = args.outerTopMode
                 = args.outerBottomMode = "absoluteEdge";
         }
-        else
-        {
-            var parentStyle = isElement(element.parentNode)
-                ? view.getComputedStyle(element.parentNode, "")
-                : null;
-
-            if (parentStyle)
-            {
-                var display = style.getPropertyCSSValue("display").cssText;
-                if (display == "block")
-                {
-                    var firstSibling = getNextElement(element.parentNode.firstChild);
-                    var lastSibling = getPreviousElement(element.parentNode.lastChild);
-
-                    if (firstSibling == element)
-                    {
-                        args.outerTop = getStyle(parentStyle, "padding-top");
-                        args.outerTopMode = "parentTop";
-                    }
-                    else if (prev)
-                    {
-                        args.outerTop = getStyle(prevStyle, "margin-bottom");
-                        args.outerTopMode = "siblingTop";
-                    }
-
-                    if (lastSibling == element)
-                    {
-                        args.outerBottom = getStyle(parentStyle, "padding-bottom");
-                        args.outerBottomMode = "parentBottom";
-                    }
-                    else if (next)
-                    {
-                        args.outerBottom = getStyle(nextStyle, "margin-top");
-                        args.outerBottomMode = "siblingBottom";
-                    }
-
-                    args.outerLeft = getStyle(parentStyle, "padding-left");
-                    args.outerLeftMode = "parentLeft";
-
-                    args.outerRight = getStyle(parentStyle, "padding-right");
-                    args.outerRightMode = "parentRight";
-                }
-                else
-                {
-                    if (prevStyle)
-                    {
-                        args.outerLeft = getStyle(prevStyle, "margin-right");
-                        args.outerLeftMode = "siblingLeft";
-                    }
-                    else
-                    {
-                        args.outerLeft = getStyle(parentStyle, "padding-left");
-                        args.outerLeftMode = "parentLeft";
-                    }
-
-                    if (nextStyle)
-                    {
-                        args.outerRight = getStyle(nextStyle, "margin-left");
-                        args.outerRightMode = "siblingRight";
-                    }
-                    else
-                    {
-                        args.outerRight = getStyle(parentStyle, "padding-right");
-                        args.outerRightMode = "parentRight";
-                    }
-
-                    args.outerTop = getStyle(parentStyle, "padding-top");
-                    args.outerTopMode = "parentTop";
-
-                    args.outerBottom = getStyle(parentStyle, "padding-bottom");
-                    args.outerBottomMode = "parentBottom";
-                }
-
-                args.outerLabel = $STR("LayoutAdjacent");
-            }
-            else
-                args.outerLabel = "";
-        }
+        
         var node = this.template.tag.replace(args, this.panelNode);
         this.adjustCharWidth(this.getMaxCharWidth(args, node), this.panelNode);
 
@@ -309,7 +233,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     },
 
     /*
-     * The nested boxed of the Layout panel have digits which need to fit between the boxes.
+     * The nested boxes of the Layout panel have digits which need to fit between the boxes.
      * @param maxWidth: pixels the largest digit string
      * @param node: panelNode to be adjusted (from tag:)
      */
@@ -323,7 +247,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         this.adjustBoxWidth(node, "borderLayoutBox", maxWidth);
         this.adjustBoxWidth(node, "paddingLayoutBox", maxWidth);
 
-        var box = getElementByClass(node, "outerLayoutBox");
+        var box = node.getElementsByClassName("outerLayoutBox").item(0);
         box.style.cssText = "width: "+(240 + 3*maxWidth)+"px;";  // defaults to 300px
 
         this.adjustLabelWidth(node, "layoutLabelLeft", maxWidth);
@@ -335,14 +259,14 @@ LayoutPanel.prototype = extend(Firebug.Panel,
      */
     adjustLabelWidth: function(node, labelName, maxWidth)
     {
-        var labels = getElementsByClass(node, labelName);
+        var labels = node.getElementsByClassName(labelName);
         for (var i = 0; i < labels.length; i++)
             labels[i].style.cssText = "width: "+maxWidth+"px;";
     },
 
     adjustBoxWidth: function(node, boxName, width)
     {
-        var box = getElementByClass(node, boxName);
+        var box = node.getElementsByClassName(boxName).item(0);
         box.style.cssText = "right: "+width + 'px;'+" left: "+width + 'px;';
     },
 
@@ -363,18 +287,18 @@ LayoutPanel.prototype = extend(Firebug.Panel,
 
     updateOption: function(name, value)
     {
-        if (name == "showAdjacentLayout" || name == "showBoundingClientRect")
+        /*
+        if (name == "newOptionHere")
         {
             this.updateSelection(this.selection);
         }
+        */
     },
 
     getOptionsMenuItems: function()
     {
         return [
-            optionMenu("ShowRulers", "showRulers"),
-            optionMenu("ShowBoundingClientRect", 'showBoundingClientRect'),
-            // Unclear what this does. optionMenu("ShowAdjacentLayout", "showAdjacentLayout"),
+            optionMenu("ShowRulers", "showRulers")
         ];
     },
 

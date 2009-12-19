@@ -1,0 +1,50 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Κλείσιμο">
+<!ENTITY firebug.View "Προβολή">
+<!ENTITY firebug.Help "Βοήθεια">
+<!ENTITY firebug.Vertical "Κατακόρυφος πίνακας">
+<!ENTITY firebug.Run "Έναρξη">
+<!ENTITY firebug.Copy "Αντιγραφή">
+<!ENTITY firebug.CopyBookmarklet "Αντιγραφή σεναρίου εντολών ως bookmarklet.">
+<!ENTITY firebug.Options "Επιλογές">
+<!ENTITY firebug.TextSize "Μέγεθος κειμένου">
+<!ENTITY firebug.IncreaseTextSize "Αύξηση μεγέθους κειμένου">
+<!ENTITY firebug.DecreaseTextSize "Μείωση μεγέθους κειμένου">
+<!ENTITY firebug.NormalTextSize "Κανονικό μέγεθος κειμένου">
+<!ENTITY firebug.ShowTooltips "Εμφάνιση συμβουλών εργαλείων προεπισκόπησης">
+<!ENTITY firebug.ShadeBoxModel "Σκίαση μοντέλων πλαισίων">
+<!ENTITY firebug.Website "Ιστοσελίδα του Firebug...">
+<!ENTITY firebug.Documentation "Τεκμηρίωση...">
+<!ENTITY firebug.KeyShortcuts "Συντομεύσεις πληκτρολογίου...">
+<!ENTITY firebug.Forums "Ομάδα συζητήσεων...">
+<!ENTITY firebug.Issues "Ανιχνευτής προβλημάτων...">
+<!ENTITY firebug.Donate "Συνεισφορά...">
+<!ENTITY firebug.About "Περί...">
+<!ENTITY firebug.AlwaysOpenInWindow "Άνοιγμα πάντα σε νέο παράθυρο">
+<!ENTITY firebug.ShowFirebug "Άνοιγμα του Firebug">
+<!ENTITY firebug.DetachFirebug "Άνοιγμα του Firebug σε νέο παράθυρο">
+<!ENTITY firebug.OpenWith "Άνοιγμα με επεξεργαστή">
+<!ENTITY firebug.CloseFirebug "Κλείσιμο Firebug">
+<!ENTITY firebug.Permissions "Ιστότοποι...">
+<!ENTITY firebug.ConfigureEditors "Ρύθμιση επεξεργαστών">
+<!ENTITY firebug.CommandLine "Γραμμή εντολών">
+<!ENTITY firebug.Search "Αναζήτηση">
+<!ENTITY firebug.Continue "Συνέχεια (F8)">
+<!ENTITY firebug.StepOver "Προσπέρασμα (F10)">
+<!ENTITY firebug.StepInto "Βήμα μέσα (F11)">
+<!ENTITY firebug.StepOut "Βήμα έξω">
+<!ENTITY firebug.BreakOnErrors "Διακοπή σε λάθη">
+<!ENTITY firebug.Inspect "Επιτήρηση">
+<!ENTITY firebug.InspectElement "Επιτήρηση αντικειμένου">
+<!ENTITY firebug.InspectTooltip "Πατήστε σε ένα αντικείμενο για να το επιτηρήσετε">
+<!ENTITY firebug.Edit "Επεξεργασία">
+<!ENTITY firebug.EditHTMLTooltip "Επεξεργασία αυτού του HTML">
+<!ENTITY firebug.EditCSSTooltip "Επεξεργασία αυτού του αρχείου μορφοποίησης">
+<!ENTITY firebug.Profile "Προφίλ">
+<!ENTITY firebug.ProfileScript "JavaScript προφίλ">
+<!ENTITY firebug.Clear "Καθαρισμός">
+<!ENTITY firebug.ClearConsole "Καθάρισμα κονσόλας">
+<!ENTITY firebug.ClearTooltip "Καθάρισμα της κονσόλας">
+<!ENTITY firebug.All "Όλα">
+<!ENTITY firebug.Images "Εικόνες">
+<!ENTITY firebug.Flash "Flash">

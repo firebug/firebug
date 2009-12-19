@@ -349,8 +349,7 @@ Firebug.SourceFile.NestedScriptAnalyzer.prototype =
         if (frame)
         {
             var name = frame.name;
-            var fnc = script.functionObject.getWrappedValue();
-            var args = FBL.getFunctionArgValues(fnc, frame);
+            var args = FBL.getFunctionArgValues(frame);
         }
         else
         {
@@ -540,9 +539,9 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
-        var fn = script.functionObject.getWrappedValue();  //?? should be name of?
+        var fn = unwrapIValue(script.functionObject);  //?? should be name of?
         if (frame)
-            var args = FBL.getFunctionArgValues(fn, frame);
+            var args = FBL.getFunctionArgValues(frame);
         else
             var args = [];
         return {name: fn, args: args};
@@ -663,17 +662,23 @@ Firebug.SourceFile.getSourceFileByScript = function(context, script)
     //   We could store an index, context.sourceFileByTag
     //   Or we could build a tree keyed by url, with SpiderMonkey script.fileNames at the top and our urls below
     var lucky = context.sourceFileMap[script.fileName];  // we won't be lucky for file:/ urls, no normalizeURL applied
-    if (FBTrace.DBG_SOURCEFILES && lucky) FBTrace.sysout("getSourceFileByScript trying to be lucky for "+script.tag, " in "+lucky);
+    if (FBTrace.DBG_SOURCEFILES && lucky)
+        FBTrace.sysout("getSourceFileByScript trying to be lucky for "+
+            script.tag + " in "+lucky, script);
+
     if (lucky && lucky.hasScript(script))
         return lucky;
-     if (FBTrace.DBG_SOURCEFILES)
-     FBTrace.sysout("getSourceFileByScript looking for "+script.tag+"@"+script.fileName+" in "+context.getName()+": ", context.sourceFileMap);
-     for (var url in context.sourceFileMap)
-     {
-         var sourceFile = context.sourceFileMap[url];
-         if (sourceFile.hasScript(script))
-             return sourceFile;
-     }
+
+    if (FBTrace.DBG_SOURCEFILES)
+        FBTrace.sysout("getSourceFileByScript looking for "+script.tag+"@"+script.fileName+" in "+
+            context.getName()+": ", context.sourceFileMap);
+
+    for (var url in context.sourceFileMap)
+    {
+        var sourceFile = context.sourceFileMap[url];
+        if (sourceFile.hasScript(script))
+            return sourceFile;
+    }
 };
 
 Firebug.SourceFile.getScriptAnalyzer = function(context, script)

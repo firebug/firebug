@@ -40,7 +40,7 @@
         <command id="cmd_focusWatchEditor" oncommand="if (FirebugContext) Firebug.Debugger.focusWatch(FirebugContext);"/>
         <command id="cmd_focusLocation" oncommand="if (FirebugContext) FirebugChrome.focusLocationList(FirebugContext);"/>
 
-        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext);"/>
+        <command id="cmd_breakOnNext" oncommand="FirebugChrome.breakOnNext(FirebugContext, event);"/>
 
         <command id="cmd_resumeExecution" oncommand="Firebug.Debugger.resume(FirebugContext)" disabled="true"/>
         <command id="cmd_stepOver" oncommand="Firebug.Debugger.stepOver(FirebugContext)" disabled="true"/>
@@ -61,7 +61,7 @@
         <command id="cmd_toggleTraceConsole" oncommand="Firebug.TraceModule.openConsole()"/>
 
         <command id="cmd_toggleFirebug" oncommand="Firebug.toggleBar()"/>
-        <command id="cmd_detachFirebug" oncommand="Firebug.detachBar(FirebugContext)"/>
+        <command id="cmd_detachFirebug" oncommand="Firebug.toggleDetachBar(false, true)"/>
         <command id="cmd_minimizeFirebug" oncommand="Firebug.minimizeBar()"/>
         <command id="cmd_toggleDetachFirebug" oncommand="Firebug.toggleDetachBar()"/>
         <command id="cmd_enablePanels" oncommand="Firebug.ModuleManager.enableModules()"/>
@@ -70,6 +70,7 @@
         <command id="cmd_clearActivationList" oncommand="Firebug.Activation.clearAnnotations()"/>
         <command id="cmd_customizeFBKeys" oncommand="Firebug.ShortcutsModel.customizeShortcuts()"/>
         <command id="cmd_resetAllOptions" oncommand="Firebug.resetAllOptions(true);"/>
+        <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(FirebugContext)"/>
     </commandset>
@@ -102,9 +103,13 @@
         <popup id="fbInlineEditorPopup" />
         <tooltip id="fbTooltip" class="fbURLMenuItem"
             onpopupshowing="return FirebugChrome.onTooltipShowing(event);"/>
-        <panel id="fbQuickInfoPanel" width="210" noautohide="true">
+        <popup id="fbQuickInfoPanel" width="210" noautohide="true"
+            onmousedown="Firebug.Inspector.quickInfoBoxDragStart(event);"
+            onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
+            onmouseup="Firebug.Inspector.quickInfoBoxDragEnd(event);">
+
             <vbox></vbox>
-        </panel>
+        </popup>
     </popupset>
 
     <!-- Main UI -->
@@ -136,6 +141,7 @@
                     <!-- Tab Bar -->
                     <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
                         aria-label="firebug panels" />
+
                     <spacer flex="1"/>
 
                     <!-- Search Box -->

@@ -12,6 +12,11 @@ const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 const nsISelectionDisplay = Ci.nsISelectionDisplay;
 const nsISelectionController = Ci.nsISelectionController;
 
+// See: http://mxr.mozilla.org/mozilla1.9.2/source/content/events/public/nsIEventStateManager.h#153
+const STATE_ACTIVE  = 0x01;
+const STATE_FOCUS   = 0x02;
+const STATE_HOVER   = 0x04;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 var domUtils = null;
@@ -194,12 +199,16 @@ Firebug.CSSModule = extend(Firebug.Module,
             var editStyleSheet = ownerNode.ownerDocument.createElementNS(
                 "http://www.w3.org/1999/xhtml",
                 "style");
-            editStyleSheet.firebugIgnore = true;
+            unwrapObject(editStyleSheet).firebugIgnore = true;
             editStyleSheet.setAttribute("type", "text/css");
             editStyleSheet.setAttributeNS(
                 "http://www.w3.org/XML/1998/namespace",
                 "base",
                 url.directory);
+            if (ownerNode.hasAttribute("media"))
+            {
+              editStyleSheet.setAttribute("media", ownerNode.getAttribute("media"));
+            }
 
             // Insert the edited stylesheet directly after the old one to ensure the styles
             // cascade properly.
@@ -259,6 +268,67 @@ Firebug.CSSModule = extend(Firebug.Module,
         if (propName) {
             dispatch(this.fbListeners, "onCSSRemoveProperty", [style, propName, prevValue, prevPriority]);
         }
+    },
+
+    cleanupSheets: function(doc, context)
+    {
+        // Due to the manner in which the layout engine handles multiple
+        // references to the same sheet we need to kick it a little bit.
+        // The injecting a simple stylesheet then removing it will force
+        // Firefox to regenerate it's CSS hierarchy.
+        //
+        // WARN: This behavior was determined anecdotally.
+        // See http://code.google.com/p/fbug/issues/detail?id=2440
+        var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+        style.setAttribute("charset","utf-8");
+        unwrapObject(style).firebugIgnore = true;
+        style.setAttribute("type", "text/css");
+        style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+        addStyleSheet(doc, style);
+        style.parentNode.removeChild(style);
+
+        // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
+        // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
+        var styleSheets = getAllStyleSheets(context);
+        for(var i = 0; i < styleSheets.length; i++)
+        {
+            try
+            {
+                var rules = styleSheets[i].cssRules;
+                if (rules.length > 0)
+                    var touch = rules[0];
+                if (FBTrace.DBG_CSS && touch)
+                    FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+(styleSheets[i].href?styleSheets[i].href:context.getName()));
+            }
+            catch(e)
+            {
+                if (FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("css.show: sheet.cssRules FAILS for "+(styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
+            }
+        }
+    },
+    cleanupSheetHandler: function(event, context)
+    {
+        var target = event.target,
+            tagName = (target.tagName || "").toLowerCase();
+        if (tagName == "link")
+        {
+            this.cleanupSheets(target.ownerDocument, context);
+        }
+    },
+    watchWindow: function(context, win)
+    {
+        var cleanupSheets = bind(this.cleanupSheets, this),
+            cleanupSheetHandler = bind(this.cleanupSheetHandler, this, context);
+        iterateWindows(win, function(subwin)
+        {
+            var doc = subwin.document;
+
+            cleanupSheets(doc, context);
+
+            doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
+            doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
+        });
     }
 });
 
@@ -373,6 +443,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     rules.push({tag: CSSImportRuleTag.tag, rule: rule});
                 else if (rule instanceof CSSMediaRule)
                     appendRules.apply(this, [rule.cssRules]);
+                else
+                    if (FBTrace.DBG_ERRORS || FBTrace.DBG_CSS)
+                        FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
             }
         }
 
@@ -897,7 +970,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 }
                 else if (cssValue.type == "url")
                 {
-                    var propNameNode = getElementByClass(target.parentNode, "cssPropName");
+                    var propNameNode = target.parentNode.getElementsByClassName("cssPropName").item(0);
                     if (propNameNode && isImageRule(propNameNode.textContent))
                     {
                         var style = Firebug.getRepObject(target);
@@ -977,8 +1050,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     searchOtherDocs: function(text, reverse)
     {
-        var scanRE = new RegExp(text, Firebug.Search.isCaseSensitive(text) ? "g" : "gi");
-
+        var scanRE = Firebug.Search.getTestingRegex(text);
         function scanDoc(styleSheet) {
             // we don't care about reverse here as we are just looking for existence,
             // if we do have a result we will handle the reverse logic on display
@@ -1069,12 +1141,12 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         cascadedTag:
             DIV({"class": "a11yCSSView",  role : 'presentation'},
-                DIV({role : 'list', 'aria-label' : 'style rules' },
+                DIV({role : 'list', 'aria-label' : $STR('aria.labels.style rules') },
                     FOR("rule", "$rules",
                         TAG("$ruleTag", {rule: "$rule"})
                     )
                 ),
-                DIV({role : "list", 'aria-label' :'inherited style rules'},
+                DIV({role : "list", 'aria-label' :$STR('aria.labels.inherited style rules')},
                     FOR("section", "$inherited",
 
                         H1({class: "cssInheritHeader groupHeader focusRow", role : 'listitem' },
@@ -1201,21 +1273,21 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             var prop = props[i];
             if ( usedProps.hasOwnProperty(prop.name) )
             {
-                var deadProps = usedProps[prop.name]; // all previous occurances of this property
+                var deadProps = usedProps[prop.name]; // all previous occurrences of this property
                 for (var j = 0; j < deadProps.length; ++j)
                 {
                     var deadProp = deadProps[j];
                     if (!deadProp.disabled && !deadProp.wasInherited && deadProp.important && !prop.important)
-                        prop.overridden = true;  // new occurance overridden
+                        prop.overridden = true;  // new occurrence overridden
                     else if (!prop.disabled)
-                        deadProp.overridden = true;  // previous occurances overridden
+                        deadProp.overridden = true;  // previous occurrences overridden
                 }
             }
             else
                 usedProps[prop.name] = [];
 
             prop.wasInherited = inheritMode ? true : false;
-            usedProps[prop.name].push(prop);  // all occurances of a property seen so far, by name
+            usedProps[prop.name].push(prop);  // all occurrences of a property seen so far, by name
         }
     },
 
@@ -1253,30 +1325,42 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     show: function(state)
     {
-        // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
-        // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
-        if (!this.context.forcedUniqueStyleSheets)
+        if (this.context.loaded && domUtils)
         {
-            if (this.context.loaded)  // keep forcing until we are loaded
-                this.context.forcedUniqueStyleSheets = true;
-
-            var styleSheets = getAllStyleSheets(this.context);
-            for(var i = 0; i < styleSheets.length; i++)
+            if (!this.context.attachedStateCheck)
             {
-                try
-                {
-                    var rules = styleSheets[i].cssRules;
-                    if (rules.length > 0)
-                        var touch = rules[0];
-                    if (FBTrace.DBG_CSS && touch)
-                        FBTrace.sysout("css.show() touch "+typeof(touch)+" in "+(styleSheets[i].href?styleSheets[i].href:this.context.getName()));
-                }
-                catch(e)
-                {
-                    if (FBTrace.DBG_ERRORS)
-                        FBTrace.sysout("css.show: sheet.cssRules FAILS for "+(styleSheets[i]?styleSheets[i].href:"null sheet")+e, e);
-                }
+                this.context.attachedStateCheck = true;
+
+
+                this.onStateChange = bindFixed(this.contentStateCheck, this);
+                this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
+                this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+
+                iterateWindows(this.context.window, bind(this.watchWindow, this), this);
             }
+        }
+    },
+
+    watchWindow: function(win)
+    {
+        if (domUtils)
+        {
+            // Normally these would not be required, but in order to update after the state is set
+            // using the options menu we need to monitor these global events as well
+            var doc = win.document;
+            doc.addEventListener("mouseover", this.onHoverChange, false);
+            doc.addEventListener("mousedown", this.onActiveChange, false);
+        }
+    },
+    unwatchWindow: function(win)
+    {
+        var doc = win.document;
+        doc.removeEventListener("mouseover", this.onHoverChange, false);
+        doc.removeEventListener("mousedown", this.onActiveChange, false);
+
+        if (isAncestor(this.stateChangeEl, doc))
+        {
+            this.removeStateChangeHandlers();
         }
     },
 
@@ -1288,6 +1372,11 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     updateView: function(element)
     {
         this.updateCascadeView(element);
+        if (domUtils)
+        {
+            this.contentState = domUtils.getContentState(element);
+            this.addStateChangeHandlers(element);
+        }
     },
 
     updateSelection: function(element)
@@ -1321,10 +1410,70 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     getOptionsMenuItems: function()
     {
-        return [
+        var ret = [
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
                     command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }
         ];
+        if (domUtils && this.selection)
+        {
+            var state = domUtils.getContentState(this.selection);
+    
+            ret.push("-");
+            ret.push({label: ":active", type: "checkbox", checked: state & STATE_ACTIVE,
+              command: bindFixed(this.updateContentState, this, STATE_ACTIVE, state & STATE_ACTIVE)});
+            ret.push({label: ":hover", type: "checkbox", checked: state & STATE_HOVER,
+              command: bindFixed(this.updateContentState, this, STATE_HOVER, state & STATE_HOVER)});
+        }
+        return ret;
+    },
+    updateContentState: function(state, remove)
+    {
+        domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement : this.selection, state);
+        this.refresh();
+    },
+
+    addStateChangeHandlers: function(el)
+    {
+      this.removeStateChangeHandlers();
+
+      el.addEventListener("focus", this.onStateChange, true);
+      el.addEventListener("blur", this.onStateChange, true);
+      el.addEventListener("mouseup", this.onStateChange, false);
+      el.addEventListener("mousedown", this.onStateChange, false);
+      el.addEventListener("mouseover", this.onStateChange, false);
+      el.addEventListener("mouseout", this.onStateChange, false);
+
+      this.stateChangeEl = el;
+    },
+    removeStateChangeHandlers: function()
+    {
+        var sel = this.stateChangeEl;
+        if (sel)
+        {
+            sel.removeEventListener("focus", this.onStateChange, true);
+            sel.removeEventListener("blur", this.onStateChange, true);
+            sel.removeEventListener("mouseup", this.onStateChange, false);
+            sel.removeEventListener("mousedown", this.onStateChange, false);
+            sel.removeEventListener("mouseover", this.onStateChange, false);
+            sel.removeEventListener("mouseout", this.onStateChange, false);
+        }
+    },
+    contentStateCheck: function(state)
+    {
+      if (!state || this.contentState & state)
+      {
+          var timeoutRunner = bindFixed(function()
+              {
+                  var newState = domUtils.getContentState(this.selection);
+                  if (newState != this.contentState)
+                  { 
+                      this.context.invalidatePanels(this.name);
+                  }
+              }, this);
+  
+          // Delay exec until after the event has processed and the state has been updated
+          setTimeout(timeoutRunner, 0);
+      }
     }
 });
 
@@ -1335,7 +1484,7 @@ CSSComputedElementPanel.prototype = extend(CSSElementPanel.prototype,
     template: domplate(
     {
         computedTag:
-            DIV({"class": "a11yCSSView", role : "list", "aria-label" : "computed styles"},
+            DIV({"class": "a11yCSSView", role : "list", "aria-label" : $STR('aria.labels.computed styles')},
                 FOR("group", "$groups",
                     H1({class: "cssInheritHeader groupHeader focusRow", role : "listitem"},
                         SPAN({class: "cssInheritLabel"}, "$group.title")
@@ -1426,7 +1575,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     saveEdit: function(target, value, previousValue)
     {
-        target.innerHTML = escapeHTML(value);
+        target.innerHTML = escapeForCss(value);
 
         var row = getAncestorByClass(target, "cssProp");
         if (hasClass(row, "disabledStyle"))
@@ -1536,7 +1685,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     saveEdit: function(target, value, previousValue)
     {
         if (FBTrace.DBG_CSS)    FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
-        target.innerHTML = escapeHTML(value);
+        target.innerHTML = escapeForCss(value);
 
         if (value === previousValue)     return;
 
@@ -1591,7 +1740,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             catch (err)
             {
                 if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS) FBTrace.sysout("CSS Insert Error: "+err, err);
-                target.innerHTML = escapeHTML(previousValue);
+                target.innerHTML = escapeForCss(previousValue);
                 row.repObject = undefined;
                 return;
             }

@@ -38,8 +38,6 @@ const nsIConsoleService = Ci.nsIConsoleService;
 const nsITimer = Ci.nsITimer;
 const nsITimerCallback = Ci.nsITimerCallback;
 
-const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
-const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const NS_ERROR_NO_INTERFACE = Components.results.NS_ERROR_NO_INTERFACE;
@@ -99,11 +97,13 @@ const COMPONENTS_FILTERS = [
 
 const reDBG = /DBG_(.*)/;
 const reXUL = /\.xul$|\.xml$/;
+const reTooMuchRecursion = /too\smuch\srecursion/;
 
 // ************************************************************************************************
 // Globals
 
 var jsd, fbs, prefs;
+var consoleService;
 
 var contextCount = 0;
 
@@ -169,14 +169,10 @@ function FirebugService()
     this.onDebugRequests = 0;  // the number of times we called onError but did not call onDebug
     fbs._lastErrorDebuggr = null;
 
-    var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
-                    getService(Components.interfaces.nsIAppShellService);
-    this.hiddenWindow = appShellService.hiddenDOMWindow;
 
     if(FBTrace.DBG_FBS_ERRORS)
-        this.hiddenWindow.dump("FirebugService Starting, FBTrace should be up\n");
+        this.osOut("FirebugService Starting, FBTrace should be up\n");
 
-    this.enabled = false;
     this.profiling = false;
 
     prefs = PrefService.getService(nsIPrefBranch2);
@@ -199,11 +195,34 @@ function FirebugService()
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
     this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
                         .createInstance(Components.interfaces.nsIMutableArray);  // scripts contained in leveledScript that have not been drained
-    this.FF3p5 = versionChecker.compare(appInfo.version, "3.5*") >= 0;
 }
 
 FirebugService.prototype =
 {
+    osOut: function(str)
+    {
+        if (!this.outChannel)
+        {
+            try
+            {
+                var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
+                    getService(Components.interfaces.nsIAppShellService);
+                this.hiddenWindow = appShellService.hiddenDOMWindow;
+                this.outChannel = "hidden";
+            }
+            catch(exc)
+            {
+                consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+                consoleService.logStringMessage("Using consoleService because nsIAppShellService.hiddenDOMWindow not available "+exc);
+                this.outChannel = "service";
+            }
+        }
+        if (this.outChannel === "hidden")  // apparently can't call via JS function
+            this.hiddenWindow.dump(str);
+        else
+            consoleService.logStringMessage(str);
+    },
+
     shutdown: function()  // call disableDebugger first
     {
         timer = null;
@@ -263,24 +282,6 @@ FirebugService.prototype =
         var win = this._lastErrorWindow;
         this._lastErrorWindow = null; // Release to avoid leaks
         return win;
-    },
-
-    countContext: function(on)
-    {
-        contextCount += on ? 1 : -1;
-
-        if (on && contextCount == 1)
-        {
-            this.enabled = true;
-            dispatch(clients, "enable");
-        }
-        else if (contextCount == 0)
-        {
-            this.enabled = false;
-            dispatch(clients, "disable");
-        }
-
-        return true;
     },
 
     registerClient: function(client)  // clients are essentially XUL windows
@@ -871,15 +872,7 @@ FirebugService.prototype =
                 FBTrace.DBG_BP = true;
                 FBTrace.DBG_FBS_CREATION = true;
             }
-            if (!FBTrace.DBG_FF_START)
-            {
-                fbs.resetBP = FBTrace.DBG_BP;
-                FBTrace.DBG_BP = false;
-                fbs.resetCreation = FBTrace.DBG_FBS_CREATION;
-                FBTrace.DBG_FBS_CREATION = false;
-                if (fbs.resetBP || fbs.resetCreation)
-                    FBTrace.sysout("firebug-service has DBG_FF_START:"+FBTrace.DBG_FF_START+" delaying BP and CREATION");
-            }
+
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+this.showStackTrace+" breakOnErrors:"+this.breakOnErrors+" trackThrowCatch:"+this.trackThrowCatch+" scriptFilter:"+this.scriptsFilter+" filterSystemURLs:"+this.filterSystemURLs);
         }
@@ -904,8 +897,10 @@ FirebugService.prototype =
         jsd.off();
         dispatch(clients, "onJSDDeactivate", [jsd, "fbs disableDebugger"]);
 
+        fbs.onXScriptCreatedByTag = {};  // clear any uncleared top level scripts
+
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
-            FBTrace.sysout("fbs.disableDebugger for enabledDebugger: "+enabledDebugger);
+            FBTrace.sysout("fbs.disableDebugger jsd.isOn:"+jsd.isOn+" for enabledDebugger: "+enabledDebugger);
     },
 
     pause: function()  // must support multiple calls
@@ -920,11 +915,7 @@ FirebugService.prototype =
             if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
             {
                 jsd.pause();
-                 fbs.unhookScripts();
-                 /* jsd.off();
-                if (FBTrace.DBG_ACTIVATION)
-                    FBTrace.sysout("fbs.pause turned jsd OFF,  depth "+jsd.pauseDepth);
-                    */
+                fbs.unhookScripts();
             }
             dispatch(clients, "onJSDDeactivate", [jsd, "pause depth "+jsd.pauseDepth]);
         }
@@ -1055,7 +1046,8 @@ FirebugService.prototype =
     // When engine encounters debugger keyword (only)
     onDebugger: function(frame, type, rv)
     {
-        if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger);
+        if (FBTrace.DBG_FBS_BP)
+            FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+" in "+frame.script.fileName, frame.script);
         try {
             if (haltDebugger)
             {
@@ -1065,7 +1057,7 @@ FirebugService.prototype =
             }
             else
                 return this.onBreak(frame, type, rv);
-            }
+         }
          catch(exc)
          {
             if (FBTrace.DBG_FBS_ERRORS)
@@ -1209,6 +1201,37 @@ FirebugService.prototype =
     {
         if ( isFilteredURL(frame.script.fileName) )
             return RETURN_CONTINUE_THROW;
+
+        if (rv && rv.value && rv.value.isValid)
+        {
+            var value = rv.value;
+            if (value.jsClassName == "Error" && reTooMuchRecursion.test(value.stringValue))
+            {
+                if (fbs._lastErrorCaller)
+                {
+                    if (fbs._lastErrorCaller == frame.script.tag) // then are unwinding recursion
+                    {
+                        fbs._lastErrorCaller = frame.callingFrame ? frame.callingFrame.script.tag : null;
+                        return RETURN_CONTINUE_THROW;
+                    }
+                }
+                else
+                {
+                    fbs._lastErrorCaller = frame.callingFrame.script.tag;
+                    frame = fbs.discardRecursionFrames(frame);
+                    // go on to process the throw.
+                }
+            }
+            else
+            {
+                delete fbs._lastErrorCaller; // throw is not recursion
+            }
+        }
+        else
+        {
+            delete fbs._lastErrorCaller; // throw is not recursion either
+        }
+
         // Remember the error where the last exception is thrown - this will
         // be used later when the console service reports the error, since
         // it doesn't currently report the window where the error occurred
@@ -1223,6 +1246,7 @@ FirebugService.prototype =
                 fbs._lastErrorScript = frame.script;
                 fbs._lastErrorLine = frame.line;
                 fbs._lastErrorDebuggr = debuggr;
+                fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
             }
             else
                 delete fbs._lastErrorDebuggr;
@@ -1266,7 +1290,7 @@ FirebugService.prototype =
         if (message=="out of memory")  // bail
         {
             if (FBTrace.DBG_FBS_ERRORS)
-                fbs.hiddenWindow.dump("fbs.onError sees out of memory "+fileName+":"+lineNo+"\n");
+                fbs.osOut("fbs.onError sees out of memory "+fileName+":"+lineNo+"\n");
             return true;
         }
 
@@ -1287,11 +1311,15 @@ FirebugService.prototype =
                     if (FBTrace.DBG_FBS_ERRORS)
                         FBTrace.sysout("fbs.onError fbs._lastErrorDebuggr "+fbs._lastErrorDebuggr, fbs._lastErrorDebuggr);
 
+                    var saveContext = fbs._lastErrorDebuggr.breakContext;
+                    fbs._lastErrorDebuggr.breakContext = fbs._lastErrorContext;
                     fbs._lastErrorDebuggr.onUncaughtException(errorInfo);
+                    fbs._lastErrorDebuggr.breakContext = saveContext;
                 }
                 finally
                 {
                     fbs._lastErrorDebuggr = null;
+                    fbs._lastErrorContext = null;
                 }
 
                 return true;
@@ -1418,7 +1446,8 @@ FirebugService.prototype =
                 if (firstScript.tag in fbs.onXScriptCreatedByTag)
                 {
                     delete  fbs.onXScriptCreatedByTag[firstScript.tag];
-                    firstScript.clearBreakpoint(0);
+                    if (firstScript.isValid)
+                        firstScript.clearBreakpoint(0);
                     if (FBTrace.DBG_FBS_SRCUNITS)
                         FBTrace.sysout("fbs.onTopLevelScriptCreated clear bp@0 for firstScript.tag: "+firstScript.tag+"\n");
                 }
@@ -1594,7 +1623,7 @@ FirebugService.prototype =
             var msg = [];
             for (var frame = Components.stack; frame; frame = frame.caller)
                 msg.push( frame.filename + "@" + frame.lineNumber +": "+frame.sourceLine  );
-            FBTrace.sysout("createdScriptHasCaller "+msg.length+" FF3.1:"+this.FF3p5, msg);
+            FBTrace.sysout("createdScriptHasCaller "+msg.length, msg);
         }
 
         var frame = Components.stack; // createdScriptHasCaller
@@ -1602,11 +1631,6 @@ FirebugService.prototype =
         frame = frame.caller;         // onScriptCreated
         if (!frame) return frame;
 
-        if (!this.FF3p5)
-        {
-            frame = frame.caller;         // native jsd?
-            if (!frame) return frame;
-        }
         frame = frame.caller;         // hook apply
         if (!frame) return frame;
         frame = frame.caller;         // native interpret?
@@ -1751,7 +1775,18 @@ FirebugService.prototype =
         {
                 try
                 {
-                    var global = jscontext.globalObject.getWrappedValue();
+                    if (!jscontext.isValid)
+                        return;
+
+                    var wrappedGlobal = jscontext.globalObject;
+                    if (!wrappedGlobal)
+                        return;
+
+                    var unwrappedGlobal = wrappedGlobal.getWrappedValue();
+                    if (!unwrappedGlobal)
+                        return;
+
+                    var global = new XPCNativeWrapper(unwrappedGlobal);
 
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
                         FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
@@ -1811,7 +1846,7 @@ FirebugService.prototype =
                 }
                 catch(e)
                 {
-                    FBTrace.sysout("jscontext dump FAILED "+e);
+                    FBTrace.sysout("jscontext dump FAILED "+e, e);
                 }
 
         }});
@@ -1899,13 +1934,13 @@ FirebugService.prototype =
                     if (!debuggr.breakContext)
                         FBTrace.sysout("Debugger with no breakContext:",debuggr.supportsGlobal);
                     if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                        FBTrace.sysout(" findDebugger found debuggr ("+debuggr.debuggerName+") at "+i+" for global "+global+" while processing "+frame.script.fileName);
+                        FBTrace.sysout(" findDebugger found debuggr ("+debuggr.debuggerName+") at "+i+" with breakContext "+debuggr.breakContext.getName()+" for global "+fbs.getLocationSafe(global)+" while processing "+frame.script.fileName);
                     return debuggr;
                 }
             }
             catch (exc)
             {
-                FBTrace.sysout("firebug-service askDebuggersForSupport FAILS: ",exc);
+                FBTrace.sysout("firebug-service askDebuggersForSupport FAILS: "+exc,exc);
             }
         }
         return null;
@@ -1919,10 +1954,12 @@ FirebugService.prototype =
         {
             var prop = listValue.value[i];
             try {
-            var name = prop.name.getWrappedValue();
-            FBTrace.sysout(i+"]"+name+"="+prop.value.getWrappedValue());
-            } catch (e) {
-            FBTrace.sysout(i+"]"+e);
+                var name = unwrapIValue(prop.name);
+                FBTrace.sysout(i+"]"+name+"="+unwrapIValue(prop.value));
+            }
+            catch (e)
+            {
+                FBTrace.sysout(i+"]"+e);
             }
         }
     },
@@ -1935,6 +1972,27 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("reFindDebugger debuggr "+debuggr.debuggerName+" does not support frameScopeRoot "+frameScopeRoot, frameScopeRoot);
         return null;
+    },
+
+    discardRecursionFrames: function(frame)
+    {
+        var i = 0;
+        var rest = 0;
+        var mark = frame;  // a in abcabcabcdef
+        var point = frame;
+        while (point = point.callingFrame)
+        {
+            i++;
+            if (point.script.tag == mark.script.tag) // then we found a repeating caller abcabcdef
+            {
+                mark = point;
+                rest = i;
+            }
+        }
+        // here point is null and mark is the last repeater, abcdef
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("fbs.discardRecursionFrames dropped "+rest+" of "+i, mark);
+        return mark;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2271,7 +2329,7 @@ FirebugService.prototype =
         // install the necessary hooks
         hookFrameCount = countFrames(frame);
         this.startStepping();
-        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger returning "+returned);
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.breakIntoDebugger called "+debuggr.debuggerName+" returning "+returned);
         return returned;
     },
 
@@ -2525,6 +2583,7 @@ function getStepName(mode)
     if (mode==STEP_INTO) return "STEP_INTO";
     if (mode==STEP_OUT) return "STEP_OUT";
     if (mode==STEP_SUSPEND) return "STEP_SUSPEND";
+    else return "(not a step mode)";
 }
 
 // ************************************************************************************************
@@ -2694,21 +2753,22 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
         while(scope.jsParent)
             scope = scope.jsParent;
 
-        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow")
+        // These are just determined by trial and error.
+        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
         {
-            lastWindowScope = scope.getWrappedValue();
-            return  scope.getWrappedValue();
+            lastWindowScope = new XPCNativeWrapper(scope.getWrappedValue());
+            return  lastWindowScope;
         }
 
         if (scope.jsClassName == "DedicatedWorkerGlobalScope")
         {
-            var workerScope = scope.getWrappedValue();
+            //var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
 
-            if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                    FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
+            //if (FBTrace.DBG_FBS_FINDDEBUGGER)
+            //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
             // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
             //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
-            return lastWindowScope;
+            return null; // https://bugzilla.mozilla.org/show_bug.cgi?id=507783
         }
 
         if (scope.jsClassName == "Sandbox")
@@ -2717,13 +2777,21 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
             if (proto.jsClassName == "XPCNativeWrapper")
                 proto = proto.jsParent;
             if (proto.jsClassName == "Window")
-                return proto.getWrappedValue();
+                return new XPCNativeWrapper(proto.getWrappedValue());
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, not Window: "+scope.jsClassName, scope);
 
-        return scope;
+        try
+        {
+             return new XPCNativeWrapper(scope.getWrappedValue());
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, but failed to unwrap it: "+scope.jsClassName, scope);
+        }
     }
     else
         return null;
@@ -2736,9 +2804,17 @@ function getFrameGlobal(frame)
     {
         return getFrameWindow(frame);
     }
-    var frameGlobal = jscontext.globalObject.getWrappedValue();
+    try
+    {
+        var frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
+    }
+    catch(exc)
+    {
+        if (FBTrace.FBS_ERRORS)
+            FBTrace.sysout("fbs.getFrameGlobal FAILS for "+jscontext.globalObject.getWrappedValue());
+    }
     if (frameGlobal)
-        return frameGlobal;
+            return frameGlobal;
     else
     {
         return getFrameWindow(frame);
@@ -2755,7 +2831,7 @@ function getFrameWindow(frame)
             FBTrace.sysout("fbs: resort to getFrameWindow");
         var result = {};
         frame.eval("window", "", 1, result);
-        var win = result.value.getWrappedValue();
+        var win = unwrapIValue(result.value);
         if (win instanceof Ci.nsIDOMWindow)
             return getRootWindow(win);
         else
@@ -2810,7 +2886,7 @@ function testBreakpoint(frame, bp)
                     return false;
             } else
             {
-                var value = result.value.getWrappedValue();
+                var value = unwrapIValue(result.value);
                 if (typeof bp.lastValue == "undefined")
                 {
                     bp.lastValue = value;
@@ -2885,6 +2961,22 @@ var QuitApplicationObserver =
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+function unwrapIValue(object)
+{
+    var unwrapped = object.getWrappedValue();
+    try
+    {
+        if (unwrapped)
+            return XPCSafeJSObjectWrapper(unwrapped);
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("fbs.unwrapIValue FAILS for "+object,{exc: exc, object: object, unwrapped: unwrapped});
+    }
+}
+
+//* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 var consoleService = null;
 
@@ -2953,7 +3045,7 @@ var trackFiles  = {
     {
         var jscontext = frame.executionContext;
         if (jscontext)
-            frameGlobal = jscontext.globalObject.getWrappedValue();
+            frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
 
         var scopeName = fbs.getLocationSafe(frameGlobal);
         if (!scopeName)

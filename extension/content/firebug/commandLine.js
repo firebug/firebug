@@ -4,6 +4,8 @@ FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
 // Constants
+const Cc = Components.classes;
+const Ci = Components.interfaces;
 
 const commandHistoryMax = 1000;
 const commandPrefix = ">>>";
@@ -276,22 +278,39 @@ Firebug.CommandLine = extend(Firebug.Module,
         var expr = command ? command : commandLine.value;
         if (expr == "")
             return;
+        var MozJSEnabled = navigator.preference("javascript.enabled");
 
-        if (!Firebug.largeCommandLine)
+        if(MozJSEnabled)
         {
-            this.clear(context);
-            this.appendToHistory(expr);
+            if (!Firebug.largeCommandLine)
+            {
+                this.clear(context);
+                this.appendToHistory(expr);
+                Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
+            }
+            else
+            {
+                var shortExpr = cropString(stripNewLines(expr), 100);
+                Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
+            }
 
-            Firebug.Console.log(commandPrefix + " " + expr, context, "command", FirebugReps.Text);
+            var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
+
+            var noscript = getNoScript();
+            var uri = noscript && noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+
+            if(noscript && !(noscript.jsEnabled || noscript.isJSEnabled(uri)))
+            {
+
+                noscript.setJSEnabled(uri, true);
+                this.evaluate(expr, context, null, null, goodOrBad);
+                noscript.setJSEnabled(uri, false);
+            }
+            else
+                this.evaluate(expr, context, null, null, goodOrBad);
         }
         else
-        {
-            var shortExpr = cropString(stripNewLines(expr), 100);
-            Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
-        }
-
-        var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
-        this.evaluate(expr, context, null, null, goodOrBad);
+            Firebug.Console.log($STR("console.JSDisabledInFirefoxPrefs"), context, "info");
     },
 
     enterMenu: function(context)
@@ -1076,6 +1095,14 @@ function CommandLineHandler(context, win)
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("commandline.handleEvent() "+event.target.getAttribute("methodName")+" context.baseWindow: "+(context.baseWindow?context.baseWindow.location:"no basewindow"), context.baseWindow);
     };
+}
+
+function getNoScript()
+{
+    if (!this.noscript)
+        this.noscript = Cc["@maone.net/noscript-service;1"] &&
+            Cc["@maone.net/noscript-service;1"].getService().wrappedJSObject;
+    return this.noscript;
 }
 
 // ************************************************************************************************

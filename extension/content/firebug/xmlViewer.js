@@ -47,23 +47,8 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
         if (FBTrace.DBG_XMLVIEWER)
             FBTrace.sysout("xmlviewer.initTabBody", infoBox);
 
-        var contentType = safeGetContentType(file.request);
-        if (!contentType)
-            return;
-
-        // Look if the response is XML based.
-        var xmlResponse = false;
-        for (var i=0; i<xmlContentTypes.length; i++)
-        {
-            if (contentType.indexOf(xmlContentTypes[i]) == 0)
-            {
-                xmlResponse = true;
-                break;
-            }
-        }
-
         // If the response is XML let's display a pretty preview.
-        if (xmlResponse)
+        if (this.isXML(safeGetContentType(file.request)))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "XML",
                 $STR("xmlviewer.tab.XML"));
@@ -73,20 +58,40 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
         }
     },
 
+    isXML: function(contentType)
+    {
+        if (!contentType)
+            return false;
+
+        // Look if the response is XML based.
+        for (var i=0; i<xmlContentTypes.length; i++)
+        {
+            if (contentType.indexOf(xmlContentTypes[i]) == 0)
+                return true;
+        }
+
+        return false;
+    },
+
     /**
      * Parse XML response and render pretty printed preview.
      */
     updateTabBody: function(infoBox, file, context)
     {
         var tab = infoBox.selectedTab;
-        var tabBody = getElementByClass(infoBox, "netInfoXMLText");
+        var tabBody = infoBox.getElementsByClassName("netInfoXMLText").item(0);
         if (!hasClass(tab, "netInfoXMLTab") || tabBody.updated)
             return;
 
         tabBody.updated = true;
 
+        this.insertXML(tabBody, file.responseText);
+    },
+
+    insertXML: function(parentNode, text)
+    {
         var parser = CCIN("@mozilla.org/xmlextras/domparser;1", "nsIDOMParser");
-        var doc = parser.parseFromString(file.responseText, "text/xml");
+        var doc = parser.parseFromString(text, "text/xml");
         var root = doc.documentElement;
 
         // Error handling
@@ -96,7 +101,7 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
             this.ParseError.tag.replace({error: {
                 message: root.firstChild.nodeValue,
                 source: root.lastChild.textContent
-            }}, tabBody);
+            }}, parentNode);
             return;
         }
 
@@ -104,7 +109,7 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
             FBTrace.sysout("xmlviewer.updateTabBody; XML response parsed", doc);
 
         // Generate XML preview.
-        Firebug.HTMLPanel.CompleteElement.tag.replace({object: doc.documentElement}, tabBody);
+        Firebug.HTMLPanel.CompleteElement.tag.replace({object: doc.documentElement}, parentNode);
     }
 });
 

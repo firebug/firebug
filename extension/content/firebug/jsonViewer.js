@@ -3,6 +3,22 @@
 FBL.ns(function() { with (FBL) {
 
 // ************************************************************************************************
+
+// List of JSON content types.
+var contentTypes =
+{
+    "text/plain": 1,
+    "text/javascript": 1,
+    "text/x-javascript": 1,
+    "text/json": 1,
+    "text/x-json": 1,
+    "application/json": 1,
+    "application/x-json": 1,
+    "application/javascript": 1,
+    "application/x-javascript": 1
+};
+
+// ************************************************************************************************
 // Model implementation
 
 Firebug.JSONViewerModel = extend(Firebug.Module,
@@ -32,38 +48,37 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         // The JSON is still no there, try to parse most common cases.
         if (!file.jsonObject)
         {
-            const maybeHarmful = /[^,:{}\[\]0-9.\-+Eaeflnr-u \n\r\t]/;
-            const jsonStrings = /"(\\.|[^"\\\n\r])*"/g;
-
-            var contentType = safeGetContentType(file.request);
-            if (!contentType)
-                return;
-
-            if ((contentType.indexOf("application/json") != 0) &&
-                (contentType.indexOf("text/plain") != 0) &&
-                (contentType.indexOf("text/x-json") != 0) &&
-                (contentType.indexOf("text/javascript") != 0))
-                return;
-
-            file.jsonObject = this.parseJSON(file);
+            if (this.isJSON(safeGetContentType(file.request)))
+                file.jsonObject = this.parseJSON(file);
         }
 
         // The jsonObject is created so, the JSON tab can be displayed.
-        if (file.jsonObject)
+        if (file.jsonObject && hasProperties(file.jsonObject))
         {
             Firebug.NetMonitor.NetInfoBody.appendTab(infoBox, "JSON",
                 $STR("jsonviewer.tab.JSON"));
 
             if (FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.initTabBody; JSON object available", file.jsonObject);
+                FBTrace.sysout("jsonviewer.initTabBody; JSON object available " +
+                    (typeof(file.jsonObject) != "undefined"), file.jsonObject);
         }
+    },
+
+    isJSON: function(contentType)
+    {
+        if (!contentType)
+            return false;
+
+        contentType = contentType.split(";")[0];
+        contentType = trim(contentType);
+        return contentTypes[contentType];
     },
 
     // Update listener for TabView
     updateTabBody: function(infoBox, file, context)
     {
         var tab = infoBox.selectedTab;
-        var tabBody = getElementByClass(infoBox, "netInfoJSONText");
+        var tabBody = infoBox.getElementsByClassName("netInfoJSONText").item(0);
         if (!hasClass(tab, "netInfoJSONTab") || tabBody.updated)
             return;
 
@@ -80,11 +95,12 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         var jsonString = new String(file.responseText);
         return parseJSONString(jsonString, "http://" + file.request.originalURI.host);
     },
-
 });
 
 // ************************************************************************************************
 // Registration
 
 Firebug.registerModule(Firebug.JSONViewerModel);
+
+// ************************************************************************************************
 }});

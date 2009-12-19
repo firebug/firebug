@@ -572,7 +572,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
         else
         {
             this.startMeasuring(target);
-            this.textSize = this.measureText(value);
+            this.textSize = this.measureInputText(value);
 
             // Correct the height of the box to make the funky CSS drop-shadow line up
             var parent = this.input.parentNode;
@@ -631,7 +631,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
     layout: function(forceAll)
     {
         if (!this.fixedWidth)
-            this.textSize = this.measureText(this.input.value);
+            this.textSize = this.measureInputText(this.input.value);
 
         if (forceAll)
             this.targetOffset = getClientOffset(this.expander);
@@ -843,7 +843,7 @@ Firebug.InlineEditor.prototype = domplate(Firebug.BaseEditor,
             {
                 // Make the input one character wider than the text value so that
                 // typing does not ever cause the textbox to scroll
-                var charWidth = this.textSize.width / Math.max(this.input.value.length, 1);
+                var charWidth = this.measureInputText('m').width;
 
                 // Sometimes we need to make the editor a little wider, specifically when
                 // an overflow happens, otherwise it will scroll off some text on the left

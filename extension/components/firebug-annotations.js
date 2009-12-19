@@ -44,6 +44,9 @@ AnnotationService.prototype =
 
     setPageAnnotation: function(uri, value)
     {
+        if (FBTrace.DBG_ANNOTATIONS)
+            FBTrace.sysout("AnnotationService.setPageAnnotation; " + value + ", " + uri.spec);
+
         this.annotations[uri.spec] = value;
     },
 
@@ -59,6 +62,9 @@ AnnotationService.prototype =
 
     removePageAnnotation: function(uri)
     {
+        if (FBTrace.DBG_ANNOTATIONS)
+            FBTrace.sysout("AnnotationService.removePageAnnotation; " + uri.spec);
+
         delete this.annotations[uri.spec];
     },
 
@@ -103,17 +109,18 @@ AnnotationService.prototype =
             if (!data.value.length)
                 return;
 
-            // Convert to map for faster lookup.
-            var arr = eval(data.value);
+            var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+            var arr = nativeJSON.decode(data.value);
             if (!arr)
                 return;
 
+            // Convert to map for faster lookup.
             for (var i=0; i<arr.length; i++)
                 this.annotations[arr[i].uri] = arr[i].value;
 
             if (FBTrace.DBG_ANNOTATIONS)
                 FBTrace.sysout("AnnotationService.initialize; Annotations loaded from " +
-                    this.file.path);
+                    this.file.path, arr);
         }
         catch (err)
         {
@@ -134,8 +141,13 @@ AnnotationService.prototype =
             // Convert data to JSON.
             var arr = [];
             for (var uri in this.annotations)
-                arr.push("{" + "'uri': '" + uri + "', 'value': '" + this.annotations[uri]+ "'}");
-            var jsonString = "[\n" + arr.join(",\n") + "\n]\n";
+                arr.push({
+                    uri: uri,
+                    value: this.annotations[uri]
+                });
+
+            var nativeJSON = Cc["@mozilla.org/dom/json;1"].createInstance(Ci.nsIJSON);
+            var jsonString = nativeJSON.encode(arr);
 
             // Store annotations.
             outputStream.write(jsonString, jsonString.length);

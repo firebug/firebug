@@ -1,7 +1,7 @@
 <!ENTITY editors.Description "Edytory Firebuga:">
 <!ENTITY editors.NameColumn "Edytor">
 <!ENTITY editors.ExecutableColumn "Plik wykonywalny">
-<!ENTITY editors.ParamsColumn "Argumenty uruchomieniowe">
+<!ENTITY editors.ParamsColumn "Argumenty">
 <!ENTITY add.label "Dodaj">
 <!ENTITY remove.label "Usuń">
 <!ENTITY change.label "Zmień">

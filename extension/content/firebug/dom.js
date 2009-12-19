@@ -31,9 +31,12 @@ const ignoreVars =
     "JavaObject": 1,
     "JavaClass": 1,
     "JavaPackage": 1,
+    // internal firebug things
     "_firebug": 1,
     "_FirebugConsole": 1,
     "_FirebugCommandLine": 1,
+    "loadFirebugConsole": 1,
+    "_getFirebugConsoleElement": 1,
 };
 
 // ************************************************************************************************
@@ -52,6 +55,18 @@ Firebug.DOMModule = extend(Firebug.Module,
         context.dom = {breakpoints: new DOMBreakpointGroup()};
     },
 
+    loadedContext: function(context, persistedState)
+    {
+        context.dom.breakpoints.load(context);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+        Firebug.Module.destroyContext.apply(this, arguments);
+
+        context.dom.breakpoints.store(context);
+    },
+
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
@@ -65,7 +80,7 @@ const WatchRowTag =
     TR({"class": "watchNewRow", level: 0},
         TD({"class": "watchEditCell", colspan: 3},
             DIV({"class": "watchEditBox a11yFocusNoTab", role: "button", 'tabindex' : '0',
-                'aria-label' : $STR('press enter to add new watch expression')},
+                'aria-label' : $STR('a11y.labels.press enter to add new watch expression')},
                     $STR("NewWatch")
             )
         )
@@ -107,7 +122,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            role: "tree", 'aria-label': 'DOM properties'},
+            role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator",
@@ -141,7 +156,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     memberIterator: function(object, level)
     {
-        return getMembers(object, level, this.context);
+        return Firebug.DOMBasePanel.prototype.getMembers(object, level, this.context);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -152,15 +167,20 @@ const DirTablePlate = domplate(Firebug.Rep,
             return;
 
         var row = getAncestorByClass(event.target, "memberRow");
-        var label = getElementByClass(row, "memberLabel");
-        if (label && hasClass(row, "hasChildren"))
+        var label = row.getElementsByClassName("memberLabel").item(0);
+        var valueCell = row.getElementsByClassName("memberValueCell").item(0);
+        var object = Firebug.getRepObject(event.target);
+        var target = row.lastChild.firstChild;
+        var isString = hasClass(target,"objectBox-string");
+        var inValueCell = event.target == valueCell || event.target == target;
+
+        if (label && hasClass(row, "hasChildren") && !(isString && inValueCell))
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
         }
         else
         {
-            var object = Firebug.getRepObject(event.target);
             if (typeof(object) == "function")
             {
                 Firebug.chrome.select(object, "script");
@@ -188,88 +208,105 @@ const DirTablePlate = domplate(Firebug.Rep,
         var level = parseInt(row.getAttribute("level"));
         var toggles = row.parentNode.parentNode.toggles;
 
+        var panel = row.parentNode.parentNode.domPanel;
+        var target = row.lastChild.firstChild;
+        var isString = hasClass(target,"objectBox-string");
+
         if (hasClass(row, "opened"))
         {
             removeClass(row, "opened");
 
-            if (toggles)
+            if (isString)
             {
-                var path = getPath(row);
-
-                // Remove the path from the toggle tree
-                for (var i = 0; i < path.length; ++i)
-                {
-                    if (i == path.length-1)
-                        delete toggles[path[i]];
-                    else
-                        toggles = toggles[path[i]];
-                }
+                var rowValue = panel.getRowPropertyValue(row);
+                row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
             }
-
-            var rowTag = this.rowTag;
-            var tbody = row.parentNode;
-
-            setTimeout(function()
+            else
             {
-                for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
+                if (toggles)
                 {
-                    if (parseInt(firstRow.getAttribute("level")) <= level)
-                        break;
+                    var path = getPath(row);
 
-                    tbody.removeChild(firstRow);
+                    // Remove the path from the toggle tree
+                    for (var i = 0; i < path.length; ++i)
+                    {
+                        if (i == path.length-1)
+                            delete toggles[path[i]];
+                        else
+                            toggles = toggles[path[i]];
+                    }
                 }
-            }, row.insertTimeout ? row.insertTimeout : 0);
+
+                var rowTag = this.rowTag;
+                var tbody = row.parentNode;
+
+                setTimeout(function()
+                {
+                    for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling)
+                    {
+                        if (parseInt(firstRow.getAttribute("level")) <= level)
+                            break;
+
+                        tbody.removeChild(firstRow);
+                    }
+                }, row.insertTimeout ? row.insertTimeout : 0);
+            }
         }
         else
         {
             setClass(row, "opened");
-
-            if (toggles)
+            if (isString)
             {
-                var path = getPath(row);
-
-                // Mark the path in the toggle tree
-                for (var i = 0; i < path.length; ++i)
-                {
-                    var name = path[i];
-                    if (toggles.hasOwnProperty(name))
-                        toggles = toggles[name];
-                    else
-                        toggles = toggles[name] = {};
-                }
+                var rowValue = panel.getRowPropertyValue(row);
+                row.lastChild.firstChild.textContent = '"' + rowValue + '"';
             }
-
-            var panel = row.parentNode.parentNode.domPanel;
-            var context = panel ? panel.context : null;
-
-            var value = row.lastChild.firstChild.repObject;
-            var members = getMembers(value, level+1, context);
-
-            var rowTag = this.rowTag;
-            var lastRow = row;
-
-            var delay = 0;
-            var setSize = members.length;
-            var rowCount = 1;
-            while (members.length)
+            else
             {
-                setTimeout(function(slice, isLast)
+
+                if (toggles)
                 {
-                    if (lastRow.parentNode)
+                    var path = getPath(row);
+
+                    // Mark the path in the toggle tree
+                    for (var i = 0; i < path.length; ++i)
                     {
-                        var result = rowTag.insertRows({members: slice}, lastRow);
-                        lastRow = result[1];
-                        dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
-                        rowCount += insertSliceSize;
+                        var name = path[i];
+                        if (toggles.hasOwnProperty(name))
+                            toggles = toggles[name];
+                        else
+                            toggles = toggles[name] = {};
                     }
-                    if (isLast)
-                        delete row.insertTimeout;
-                }, delay, members.splice(0, insertSliceSize), !members.length);
+                }
 
-                delay += insertInterval;
+                var context = panel ? panel.context : null;
+                var members = Firebug.DOMBasePanel.prototype.getMembers(target.repObject, level+1, context);
+
+                var rowTag = this.rowTag;
+                var lastRow = row;
+
+                var delay = 0;
+                var setSize = members.length;
+                var rowCount = 1;
+                while (members.length)
+                {
+                    setTimeout(function(slice, isLast)
+                    {
+                        if (lastRow.parentNode)
+                        {
+                            var result = rowTag.insertRows({members: slice}, lastRow);
+                            lastRow = result[1];
+                            dispatch([Firebug.A11yModel], 'onMemberRowSliceAdded', [null, result, rowCount, setSize]);
+                            rowCount += insertSliceSize;
+                        }
+                        if (isLast)
+                            delete row.insertTimeout;
+                    }, delay, members.splice(0, insertSliceSize), !members.length);
+
+                    delay += insertInterval;
+                }
+
+                row.insertTimeout = delay;
             }
-
-            row.insertTimeout = delay;
         }
     },
 
@@ -321,10 +358,163 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
     rebuild: function(update, scrollTop)
     {
         dispatch([Firebug.A11yModel], 'onBeforeDomUpdateSelection', [this]);
-        var members = getMembers(this.selection, 0, this.context);
-        expandMembers(members, this.toggles, 0, 0, this.context);
+        var members = this.getMembers(this.selection, 0, this.context);
+        this.expandMembers(members, this.toggles, 0, 0, this.context);
 
         this.showMembers(members, update, scrollTop);
+    },
+    /*
+     *  @param object a user-level object wrapped in security blanket
+     *  @param level for a.b.c, level is 2
+     *  @param context
+     */
+    getMembers: function(object, level, context)
+    {
+        if (!level)
+            level = 0;
+
+        var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
+            domProps = [], domFuncs = [], domConstants = [];
+
+        try
+        {
+            // Special case for "arguments", which is not enumerable by for...in statement.
+            if (isArguments(object))
+                object = cloneArray(object);
+
+            var domMembers = getDOMMembers(object);
+            var insecureObject = unwrapObject(object);
+
+            for (var name in insecureObject)  // enumeration is safe
+            {
+                // Ignore only global variables (properties of the |window| object).
+                // javascript.options.strict says ignoreVars is undefined.
+                if (ignoreVars[name] == 1 && (object instanceof Window))
+                {
+                    if (FBTrace.DBG_DOM)
+                        FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
+                    continue;
+                }
+
+                var val;
+                try
+                {
+                    val = insecureObject[name];  // getter is safe
+                }
+                catch (exc)
+                {
+                    // Sometimes we get exceptions trying to access certain members
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+                        FBTrace.sysout("dom.getMembers cannot access "+name, exc);
+                }
+
+                var ordinal = parseInt(name);
+                if (ordinal || ordinal == 0)
+                {
+                    addMember(object, "ordinal", ordinals, name, val, level, 0, context);
+                }
+                else if (typeof(val) == "function")
+                {
+                    if (isClassFunction(val))
+                        addMember(object, "userClass", userClasses, name, val, level, 0, context);
+                    else if (name in domMembers)
+                        addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
+                    else
+                        addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
+                }
+                else
+                {
+                    if (name in domMembers)
+                        addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
+                    else if (name in domConstantMap)
+                        addMember(object, "dom", domConstants, name, val, level, 0, context);
+                    else
+                        addMember(object, "user", userProps, name, val, level, 0, context);
+                }
+            }
+        }
+        catch (exc)
+        {
+            // Sometimes we get exceptions just from trying to iterate the members
+            // of certain objects, like StorageList, but don't let that gum up the works
+            //throw exc;
+            if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
+                FBTrace.sysout("dom.getMembers FAILS: ", exc);
+        }
+
+        function sortName(a, b) { return a.name > b.name ? 1 : -1; }
+        function sortOrder(a, b) { return a.order > b.order ? 1 : -1; }
+
+        var members = [];
+
+        members.push.apply(members, ordinals);
+
+        if (Firebug.showUserProps)
+        {
+            userProps.sort(sortName);
+            members.push.apply(members, userProps);
+        }
+
+        if (Firebug.showUserFuncs)
+        {
+            userClasses.sort(sortName);
+            members.push.apply(members, userClasses);
+
+            userFuncs.sort(sortName);
+            members.push.apply(members, userFuncs);
+        }
+
+        if (Firebug.showDOMProps)
+        {
+            domProps.sort(sortName);
+            members.push.apply(members, domProps);
+        }
+
+        if (Firebug.showDOMFuncs)
+        {
+            domFuncs.sort(sortName);
+            members.push.apply(members, domFuncs);
+        }
+
+        if (Firebug.showDOMConstants)
+            members.push.apply(members, domConstants);
+
+        return members;
+    },
+
+    expandMembers: function (members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
+    {
+        var expanded = 0;
+        for (var i = offset; i < members.length; ++i)
+        {
+            var member = members[i];
+            if (member.level > level)
+                break;
+
+            if ( toggles.hasOwnProperty(member.name) )
+            {
+                member.open = "opened";  // member.level <= level && member.name in toggles.
+                if (member.type == 'string')
+                    continue;
+                var newMembers = this.getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
+
+                var args = [i+1, 0];
+                args.push.apply(args, newMembers);
+                members.splice.apply(members, args);
+                if (FBTrace.DBG_DOM)
+                {
+                    FBTrace.sysout("expandMembers member.name", member.name);
+                    FBTrace.sysout("expandMembers toggles", toggles);
+                    FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
+                    FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
+                }
+
+                expanded += newMembers.length;
+                i += newMembers.length + this.expandMembers(members, toggles[member.name], i+1, level+1, context);
+            }
+        }
+
+        return expanded;
     },
 
     showMembers: function(members, update, scrollTop)
@@ -447,12 +637,24 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getObjectPropertyValue: function(object, propName)
     {
-        if (object)
+        if (!object)
+            return;
+
+        // Get the value with try-catch statement. This method is used also wihin
+        // getContextMenuItems where the exception would break the context menu.
+        // 1) The Firebug.Debugger.evaluate can throw
+        // 2) object[propName] can also throws in case of e.g. non existing "abc.abc" prop name.
+        try
         {
             if (object instanceof jsdIStackFrame)
                 return Firebug.Debugger.evaluate(propName, this.context);
             else
                 return object[propName];
+        }
+        catch (err)
+        {
+            if(FBTrace.DBG_DOM || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("dom.getObjectPropertyValue; EXCEPTION " + propName, object);
         }
     },
 
@@ -478,11 +680,21 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     copyPath: function(row)
     {
+        var path = this.getPropertyPath(row);
+        copyToClipboard(path.join(""));
+    },
+
+    /*
+     * Walk from the current row up to the most ancient parent, building an array.
+     * @return array of property names and separators, eg ['foo','.','bar'].
+     */
+    getPropertyPath: function(row)
+    {
         var path = [];
         for(var current = row; current ; current = getParentRow(current))
             path = this.getRowPathName(current).concat(path);
-        path.splice(0,1);//don't want the first seperator
-        copyToClipboard(path.join(""));
+        path.splice(0,1); //don't want the first seperator
+        return path;
     },
 
     copyProperty: function(row)
@@ -675,7 +887,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            breakpoints.addBreakpoint(object, name, this.context);
+            breakpoints.addBreakpoint(object, name, this, row);
             row.setAttribute("breakpoint", "true");
         }
     },
@@ -808,7 +1020,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         else if (object instanceof SourceLink)
             return 0;
         else
-            return 1; // just agree to support everything but not agressively.
+            return 1; // just agree to support everything but not aggressively.
     },
 
     refresh: function()
@@ -948,6 +1160,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     getContextMenuItems: function(object, target)
     {
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.getContextMenuItems;", object);
+
         var row = getAncestorByClass(target, "memberRow");
 
         var items = [];
@@ -1198,7 +1413,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
     editNewWatch: function(value)
     {
-        var watchNewRow = getElementByClass(this.panelNode, "watchNewRow");
+        var watchNewRow = this.panelNode.getElementsByClassName("watchNewRow").item(0);
         if (watchNewRow)
             this.editProperty(watchNewRow, value);
     },
@@ -1372,16 +1587,16 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
 
         if (frame && frame.isValid)
         {
-            var thisVar = frame.thisValue.getWrappedValue();
+            var thisVar = unwrapIValue(frame.thisValue);
             addMember(object, "user", members, "this", thisVar, 0);
 
             var scopeChain = this.generateScopeChain(frame.scope);
             addMember(object, "scopes", members, "scopeChain", scopeChain, 0);
 
-            members.push.apply(members, getMembers(scopeChain[0], 0, this.context));
+            members.push.apply(members, this.getMembers(scopeChain[0], 0, this.context));
         }
 
-        expandMembers(members, this.toggles, 0, 0, this.context);
+        this.expandMembers(members, this.toggles, 0, 0, this.context);
         this.showMembers(members, !newFrame);
     },
 
@@ -1401,7 +1616,7 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                 for (var i = 0; i < lengthValue.value; ++i)
                 {
                     var prop = listValue.value[i];
-                    var name = prop.name.getWrappedValue();
+                    var name = unwrapIValue(prop.name);
                     if (ignoreVars[name] == 1)
                     {
                         if (FBTrace.DBG_DOM)
@@ -1409,10 +1624,10 @@ WatchPanel.prototype = extend(Firebug.DOMBasePanel.prototype,
                         continue;
                     }
 
-                    scopeVars[name] = prop.value.getWrappedValue();
+                    scopeVars[name] = unwrapIValue(prop.value);
                 }
             } else {
-                scopeVars = scope.getWrappedValue();
+                scopeVars = unwrapIValue(scope);
             }
 
             if (scopeVars && scopeVars.hasOwnProperty)
@@ -1490,152 +1705,6 @@ DOMEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 // ************************************************************************************************
 // Local Helpers
 
-function getMembers(object, level, context)  // we expect object to be user-level object wrapped in security blanket
-{
-    if (!level)
-        level = 0;
-
-    var ordinals = [], userProps = [], userClasses = [], userFuncs = [],
-        domProps = [], domFuncs = [], domConstants = [];
-
-    try
-    {
-        var domMembers = getDOMMembers(object);
-        var insecureObject = unwrapObject(object);
-
-        for (var name in insecureObject)  // enumeration is safe
-        {
-            // Ignore only global variables (properties of the |window| object).
-            // javascript.options.strict says ignoreVars is undefined.
-            if (ignoreVars[name] == 1 && (object instanceof Window))
-            {
-                if (FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.getMembers: ignoreVars: " + name + ", " + level, object);
-                continue;
-            }
-
-            var val;
-            try
-            {
-                val = insecureObject[name];  // getter is safe
-            }
-            catch (exc)
-            {
-                // Sometimes we get exceptions trying to access certain members
-                if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
-                    FBTrace.sysout("dom.getMembers cannot access "+name, exc);
-            }
-
-            var ordinal = parseInt(name);
-            if (ordinal || ordinal == 0)
-            {
-                addMember(object, "ordinal", ordinals, name, val, level, 0, context);
-            }
-            else if (typeof(val) == "function")
-            {
-                if (isClassFunction(val))
-                    addMember(object, "userClass", userClasses, name, val, level, 0, context);
-                else if (name in domMembers)
-                    addMember(object, "domFunction", domFuncs, name, val, level, domMembers[name], context);
-                else
-                    addMember(object, "userFunction", userFuncs, name, val, level, 0, context);
-            }
-            else
-            {
-                if (name in domMembers)
-                    addMember(object, "dom", domProps, name, val, level, domMembers[name], context);
-                else if (name in domConstantMap)
-                    addMember(object, "dom", domConstants, name, val, level, 0, context);
-                else
-                    addMember(object, "user", userProps, name, val, level, 0, context);
-            }
-        }
-    }
-    catch (exc)
-    {
-        // Sometimes we get exceptions just from trying to iterate the members
-        // of certain objects, like StorageList, but don't let that gum up the works
-        //throw exc;
-        if (FBTrace.DBG_ERRORS && FBTrace.DBG_DOM)
-            FBTrace.sysout("dom.getMembers FAILS: ", exc);
-    }
-
-    function sortName(a, b) { return a.name > b.name ? 1 : -1; }
-    function sortOrder(a, b) { return a.order > b.order ? 1 : -1; }
-
-    var members = [];
-
-    members.push.apply(members, ordinals);
-
-    if (Firebug.showUserProps)
-    {
-        userProps.sort(sortName);
-        members.push.apply(members, userProps);
-    }
-
-    if (Firebug.showUserFuncs)
-    {
-        userClasses.sort(sortName);
-        members.push.apply(members, userClasses);
-
-        userFuncs.sort(sortName);
-        members.push.apply(members, userFuncs);
-    }
-
-    if (Firebug.showDOMProps)
-    {
-        domProps.sort(sortName);
-        members.push.apply(members, domProps);
-    }
-
-    if (Firebug.showDOMFuncs)
-    {
-        domFuncs.sort(sortName);
-        members.push.apply(members, domFuncs);
-    }
-
-    if (Firebug.showDOMConstants)
-        members.push.apply(members, domConstants);
-
-    return members;
-}
-
-function expandMembers(members, toggles, offset, level, context)  // recursion starts with offset=0, level=0
-{
-    var expanded = 0;
-    for (var i = offset; i < members.length; ++i)
-    {
-        var member = members[i];
-        if (member.level > level)
-            break;
-
-        if ( toggles.hasOwnProperty(member.name) )
-        {
-            member.open = "opened";  // member.level <= level && member.name in toggles.
-
-            var newMembers = getMembers(member.value, level+1, context);  // sets newMembers.level to level+1
-
-            var args = [i+1, 0];
-            args.push.apply(args, newMembers);
-            members.splice.apply(members, args);
-            if (FBTrace.DBG_DOM)
-            {
-                FBTrace.sysout("expandMembers member.name", member.name);
-                FBTrace.sysout("expandMembers toggles", toggles);
-                FBTrace.sysout("expandMembers toggles[member.name]", toggles[member.name]);
-                FBTrace.sysout("dom.expandedMembers level: "+level+" member", member);
-            }
-
-            expanded += newMembers.length;
-            i += newMembers.length + expandMembers(members, toggles[member.name], i+1, level+1, context);
-        }
-    }
-
-    return expanded;
-}
-
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-
 function isClassFunction(fn)
 {
     try
@@ -1646,12 +1715,11 @@ function isClassFunction(fn)
     return false;
 }
 
-function hasProperties(ob)
+function isArguments(obj)
 {
     try
     {
-        for (var name in ob)
-            return true;
+        return isFinite(obj.length) && obj.length > 0 && typeof obj.callee === "function";
     } catch (exc) {}
     return false;
 }
@@ -1665,6 +1733,11 @@ function addMember(object, type, props, name, value, level, order, context)
     var hasChildren = hasProperties(value) && !(value instanceof ErrorCopy) &&
         (valueType == "function" || (valueType == "object" && value != null)
         || (valueType == "string" && value.length > Firebug.stringCropLength));
+
+    // Special case for "arguments", which is not enumerable by for...in statement
+    // and so, hasProperties always returns false.
+    if (!hasChildren && value) // arguments will never be falsy if the arguments exist
+        hasChildren = isArguments(value);
 
     var member = {
         object: object,
@@ -1719,13 +1792,13 @@ function getWatchRowIndex(row)
 
 function getRowName(row)
 {
-    var labelNode = getElementByClass(row, "memberLabelCell");
+    var labelNode = row.getElementsByClassName("memberLabelCell").item(0);
     return labelNode.textContent;
 }
 
 function getRowValue(row)
 {
-    var valueNode = getElementByClass(row, "memberValueCell");
+    var valueNode = row.getElementsByClassName("memberValueCell").item(0);
     return valueNode.firstChild.repObject;
 }
 
@@ -1768,7 +1841,7 @@ function getPath(row)
 
 function findRow(parentNode, object)
 {
-    var rows = getElementsByClass(parentNode, "memberRow");
+    var rows = parentNode.getElementsByClassName("memberRow");
     for (var i=0; i<rows.length; i++)
     {
         var row = rows[i];
@@ -1777,20 +1850,6 @@ function findRow(parentNode, object)
     }
 
     return row;
-}
-
-function unwrapObject(object)
-{
-    // TODO: Move this to some global location
-    // TODO: Unwrapping should be centralized rather than sprinkling it around ad hoc.
-    // TODO: We might be able to make this check more authoritative with QueryInterface.
-    if (!object)
-        return object;
-
-    if (object.wrappedJSObject)
-        return object.wrappedJSObject;
-
-    return object;
 }
 
 // ************************************************************************************************
@@ -1889,10 +1948,11 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function Breakpoint(object, propName, context)
+function Breakpoint(object, propName, objectPath, context)
 {
     this.context = context;
     this.propName = propName;
+    this.objectPath = objectPath;
     this.object = object;
     this.checked = true;
 }
@@ -1903,6 +1963,9 @@ Breakpoint.prototype =
     {
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.watch; property: " + this.propName);
+
+        if (!this.object)
+            return;
 
         try
         {
@@ -1920,7 +1983,7 @@ Breakpoint.prototype =
                         newValue: newval
                     };
 
-                    Firebug.Debugger.breakNow();
+                    Firebug.Breakpoint.breakNow(self.context.getPanel("dom", true));
                 }
                 return newval;
             });
@@ -1940,6 +2003,9 @@ Breakpoint.prototype =
         if (FBTrace.DBG_DOM)
             FBTrace.sysout("dom.unwatch; property: " + this.propName, this.object);
 
+        if (!this.object)
+            return;
+
         try
         {
             this.object.unwatch(this.propName);
@@ -1954,15 +2020,30 @@ Breakpoint.prototype =
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-function DOMBreakpointGroup() {}
+function DOMBreakpointGroup()
+{
+    this.breakpoints = [];
+}
+
 DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
 {
     name: "domBreakpoints",
     title: $STR("dom.label.DOM Breakpoints"),
 
-    addBreakpoint: function(object, propName, context)
+    addBreakpoint: function(object, propName, panel, row)
     {
-        var bp = new Breakpoint(object, propName, context);
+        var path = panel.getPropertyPath(row);
+        path.pop();
+
+        // We don't want the last dot.
+        if (path.length > 0 && path[path.length-1] == ".")
+            path.pop();
+
+        var objectPath = path.join("");
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.addBreakpoint; " + objectPath, path);
+
+        var bp = new Breakpoint(object, propName, objectPath, panel.context);
         if (bp.watchProperty());
             this.breakpoints.push(bp);
     },
@@ -1982,7 +2063,46 @@ DOMBreakpointGroup.prototype = extend(new Firebug.Breakpoint.BreakpointGroup(),
         var object = args[0];
         var propName = args[1];
         return bp.object == object && bp.propName == propName;
-    }
+    },
+
+    // Persistence
+    load: function(context)
+    {
+        var panelState = getPersistedState(context, "dom");
+        if (panelState.breakpoints)
+            this.breakpoints = panelState.breakpoints;
+
+        this.enumerateBreakpoints(function(bp)
+        {
+            try
+            {
+                // xxxHonza: Firebug.CommandLine.evaluate should be reused if possible.
+                // xxxJJB: The Components.utils.evalInSandbox fails from some reason.
+                var expr = "context.window.wrappedJSObject." + bp.objectPath;
+                bp.object = eval(expr);
+                bp.watchProperty();
+
+                if (FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.DOMBreakpointGroup.load; " + bp.objectPath, bp);
+            }
+            catch (err)
+            {
+                if (FBTrace.DBG_ERROR || FBTrace.DBG_DOM)
+                    FBTrace.sysout("dom.DOMBreakpointGroup.load; ERROR " + bp.objectPath, err);
+            }
+        });
+    },
+
+    store: function(context)
+    {
+        this.enumerateBreakpoints(function(bp)
+        {
+            bp.object = null;
+        });
+
+        var panelState = getPersistedState(context, "dom");
+        panelState.breakpoints = this.breakpoints;
+    },
 });
 
 // ************************************************************************************************

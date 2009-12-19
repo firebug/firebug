@@ -167,13 +167,13 @@
     </vbox>
 
     <!-- If Firebug is displayed in this external window, but not active for currently selected
-         Firefox tab, the following button allows to resume it.
-         xxxHonza: localization -->
+         Firefox tab, the following button allows to resume it. -->
     <vbox id="fbResumeBox" flex="1" collapsed="true">
         <spacer flex="1"/>
         <hbox>
             <spacer flex="1"/>
-            <button id="fbResumeBoxButton" label="Activate Firebug for the selected Firefox tab"
+            <button id="fbResumeBoxButton"
+                label="label.Activate Firebug for the selected Firefox tab"
                 command="cmd_toggleSuspendFirebug" />
             <spacer flex="1"/>
         </hbox>

@@ -41,7 +41,7 @@ Firebug.SourceBoxDecorator.prototype =
     */
     getLineHTML: function(sourceBox, lineNo)
     {
-        var html = escapeHTML(sourceBox.lines[lineNo-1]);
+        var html = escapeForSourceLine(sourceBox.lines[lineNo-1]);
 
         // If the pref says so, replace tabs by corresponding number of spaces.
         if (Firebug.replaceTabs > 0)
@@ -151,8 +151,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         var focusSourceRow = getAncestorByClass(selection.focusNode, "sourceRow");
         if (anchorSourceRow == focusSourceRow)
         {
-            var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset, selection.focusOffset);
-            return buf;
+            return selection.toString();// trivial case
         }
         var buf = this.getSourceLine(anchorSourceRow, selection.anchorOffset);
 
@@ -168,7 +167,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     getSourceLine: function(sourceRow, beginOffset, endOffset)
     {
-        var source = getChildByClass(sourceRow, "sourceRowText").innerHTML;
+        var source = getChildByClass(sourceRow, "sourceRowText").textContent;
         if (endOffset)
             source = source.substring(beginOffset, endOffset);
         else if (beginOffset)
@@ -176,7 +175,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         else
             source = source;
 
-        return unEscapeHTML(source);
+        return source;
     },
 
     // ****************************************************************************************
@@ -451,7 +450,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    reView: function(sourceBox)  // called for all scroll events, including any time sourcebox.scrollTop is set
+    reView: function(sourceBox, clearCache)  // called for all scroll events, including any time sourcebox.scrollTop is set
     {
         if (sourceBox.targetedLine)
         {
@@ -464,12 +463,19 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var viewRange = this.getViewRangeFromScrollTop(sourceBox, sourceBox.scrollTop);
         }
 
-        // skip work if nothing changes.
-        if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
+        if (clearCache)
         {
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
-            return;
+            this.clearSourceBox(sourceBox);
+        }
+        else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
+        {
+            if (sourceBox.firstRenderedLine <= viewRange.firstLine && sourceBox.lastRenderedLine >= viewRange.lastLine)
+            {
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
+                // skip work if nothing changes.
+                return;
+            }
         }
 
         dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
@@ -508,17 +514,15 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
     updateViewportCache: function(sourceBox, viewRange)
     {
-        var topMostCachedElement = sourceBox.viewport.firstChild;
-
         var cacheHit = this.insertedLinesOverlapCache(sourceBox, viewRange);
 
         if (!cacheHit)
         {
-            this.removeLines(sourceBox, topMostCachedElement, sourceBox.numberOfRenderedLines);
-            sourceBox.firstRenderedLine = viewRange.firstLine;
+            this.clearSourceBox(sourceBox);  // no overlap, remove old range
+            sourceBox.firstRenderedLine = viewRange.firstLine; // reset cached range
             sourceBox.lastRenderedLine = viewRange.lastLine;
         }
-        else
+        else  // cache overlap, expand range of cache
         {
             sourceBox.firstRenderedLine = Math.min(viewRange.firstLine, sourceBox.firstRenderedLine);
             sourceBox.lastRenderedLine = Math.max(viewRange.lastLine, sourceBox.lastRenderedLine);
@@ -531,6 +535,10 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             FBTrace.sysout("buildViewAround viewRange: "+viewRange.firstLine+"-"+viewRange.lastLine+" rendered: "+sourceBox.firstRenderedLine+"-"+sourceBox.lastRenderedLine, sourceBox);
     },
 
+    /*
+     * Add lines from viewRange, but do not adjust first/lastRenderedLine.
+     * @return true if viewRange overlaps first/lastRenderedLine
+     */
     insertedLinesOverlapCache: function(sourceBox, viewRange)
     {
         var topCacheLine = null;
@@ -556,6 +564,20 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var newElement = appendInnerHTML(sourceBox.viewport, lineHTML, ref);
         }
         return cacheHit;
+    },
+
+    clearSourceBox: function(sourceBox)
+    {
+        if (sourceBox.firstRenderedLine)
+        {
+            var topMostCachedElement = sourceBox.getLineNode(sourceBox.firstRenderedLine);  // eg 1
+            var totalCached = sourceBox.lastRenderedLine - sourceBox.firstRenderedLine + 1;   // eg 20 - 1 + 1 = 19
+            if (topMostCachedElement && totalCached)
+                this.removeLines(sourceBox, topMostCachedElement, totalCached);
+        }
+        sourceBox.lastRenderedLine = 0;
+        sourceBox.firstRenderedLine = 0;
+        sourceBox.numberOfRenderedLines = 0;
     },
 
     getSourceLineHTML: function(sourceBox, i)

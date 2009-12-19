@@ -7,6 +7,11 @@ try { /*@explore*/
 (function() {
 
 // ************************************************************************************************
+// Modules
+
+Components.utils.import("resource://gre/modules/PluralForm.jsm");
+
+// ************************************************************************************************
 // Constants
 
 const Cc = Components.classes;
@@ -15,13 +20,12 @@ const Ci = Components.interfaces;
 this.fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
 this.httpObserver = this.CCSV("@joehewitt.com/firebug-http-observer;1", "nsIObserverService");
 this.jsd = this.CCSV("@mozilla.org/js/jsd/debugger-service;1", "jsdIDebuggerService");
-this.versionChecker = this.CCSV("@mozilla.org/xpcom/version-comparator;1", Ci.nsIVersionComparator);
-this.appInfo = this.CCSV("@mozilla.org/xre/app-info;1", Ci.nsIXULAppInfo);
 
 const finder = this.finder = this.CCIN("@mozilla.org/embedcomp/rangefind;1", "nsIFind");
 const wm = this.CCSV("@mozilla.org/appshell/window-mediator;1", "nsIWindowMediator");
 const ioService = this.CCSV("@mozilla.org/network/io-service;1", "nsIIOService");
-
+const consoleService = Components.classes["@mozilla.org/consoleservice;1"].
+    getService(Components.interfaces["nsIConsoleService"]);
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
@@ -39,7 +43,7 @@ this.reUpperCase = /[A-Z]/;
 
 const reSplitLines = /\r\n|\r|\n/;
 const reFunctionArgNames = /function ([^(]*)\(([^)]*)\)/;
-const reGuessFunction = /['"]?([0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
+const reGuessFunction = /['"]?([$0-9A-Za-z_]+)['"]?\s*[:=]\s*(function|eval|new Function)/;
 const reWord = /([A-Za-z_$][A-Za-z_$0-9]*)(\.([A-Za-z_$][A-Za-z_$0-9]*))*/;
 
 const overrideDefaultsWithPersistedValuesTimeout = 500;
@@ -100,6 +104,9 @@ this.extend = function(l, r)
         newOb[n] = r[n];
     return newOb;
 };
+
+// ************************************************************************************************
+// Arrays
 
 this.keys = function(map)  // At least sometimes the keys will be on user-level window objects
 {
@@ -203,6 +210,8 @@ function arrayInsert(array, index, other)
 
 this.arrayInsert = arrayInsert;
 
+// ************************************************************************************************
+
 this.safeToString = function(ob)
 {
     try
@@ -221,12 +230,12 @@ this.safeToString = function(ob)
             return ob.toString();
         if (ob && typeof (ob['toSource']) == 'function')
             return ob.toSource();
-       /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590
-        * var str = "[";
+       /* https://bugzilla.mozilla.org/show_bug.cgi?id=522590 */
+        var str = "[";
         for (var p in ob)
             str += p+',';
         return str + ']';
-        */
+
     }
     catch (exc)
     {
@@ -235,6 +244,20 @@ this.safeToString = function(ob)
     }
     return "[unsupported: no toString() function in type "+typeof(ob)+"]";
 };
+
+// ************************************************************************************************
+
+this.hasProperties = function(ob)
+{
+    try
+    {
+        for (var name in ob)
+            return true;
+    } catch (exc) {}
+    return false;
+};
+
+// ************************************************************************************************
 
 this.convertToUnicode = function(text, charset)
 {
@@ -293,13 +316,15 @@ this.getRandomInt = function(min, max) {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+// ************************************************************************************************
+
 this.createStyleSheet = function(doc, url)
 {
     var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
     style.setAttribute("charset","utf-8");
-    style.firebugIgnore = true;
     style.setAttribute("type", "text/css");
     style.innerHTML = this.getResource(url);
+    FBL.unwrapObject(style).firebugIgnore = true;
     return style;
 }
 
@@ -318,7 +343,7 @@ this.addScript = function(doc, id, src)
     element.setAttribute("type", "text/javascript");
     element.setAttribute("id", id);
     if (!FBTrace.DBG_CONSOLE)
-        element.firebugIgnore = true;
+        FBL.unwrapObject(element).firebugIgnore = true;
 
     element.innerHTML = src;
     if (doc.documentElement)
@@ -338,7 +363,7 @@ this.isAncestorIgnored = function(node)
 {
     for (var parent = node; parent; parent = parent.parentNode)
     {
-        if (parent.firebugIgnore)
+        if (FBL.unwrapObject(parent).firebugIgnore)
             return true;
     }
 
@@ -351,6 +376,7 @@ this.isAncestorIgnored = function(node)
 /*
  * $STR - intended for localization of a static string.
  * $STRF - intended for localization of a string with dynamically inserted values.
+ * $STRP - intended for localization of a string with dynamically plural forms.
  *
  * Notes:
  * 1) Name with _ in place of spaces is the key in the firebug.properties file.
@@ -444,8 +470,44 @@ function $STRF(name, args, bundle)
     return name;
 }
 
+function $STRP(name, args, index, bundle)
+{
+    // xxxHonza:
+    // pluralRule from chrome://global/locale/intl.properties for Chinese is 1,
+    // which is wrong, it should be 0.
+
+    var getPluralForm = PluralForm.get;
+    var getNumForms = PluralForm.numForms;
+
+    // Get custom plural rule; otherwise the rule from chrome://global/locale/intl.properties
+    // (depends on the current locale) is used.
+    var pluralRule = Firebug.getPluralRule();
+    if (!isNaN(parseInt(pluralRule, 10)))
+        [getPluralForm, getNumForms] = PluralForm.makeGetter(pluralRule);
+
+    // Index of the argument with plural form (there must be only one arg that needs plural form).
+    if (!index)
+        index = 0;
+
+    var margs = [];
+    var numForms = getNumForms();
+
+    // Repeat the args for numForms time(s)
+    for (var i = 0; i < numForms; i++)
+        margs = margs.concat(args);
+
+    // Get proper plural form from the string (depends on the current Firefox locale).
+    var translatedString = $STRF(name, margs, bundle);
+    if (translatedString.search(";") > 0)
+        return getPluralForm(args[index], translatedString);
+
+    // translatedString contains no ";", either rule 0 or getString fails
+    return translatedString;
+}
+
 this.$STR = $STR;
 this.$STRF = $STRF;
+this.$STRP = $STRP;
 
 /*
  * Use the current value of the attribute as a key to look up the localized value.
@@ -478,14 +540,12 @@ this.internationalize = function(element, attr, args)
 
 this.isVisible = function(elt)
 {
-    if (elt instanceof XULElement)
+    if (isElementXUL(elt))
     {
         //FBTrace.sysout("isVisible elt.offsetWidth: "+elt.offsetWidth+" offsetHeight:"+ elt.offsetHeight+" localName:"+ elt.localName+" nameSpace:"+elt.nameSpaceURI+"\n");
         return (!elt.hidden && !elt.collapsed);
     }
-    return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags
-        || elt.namespaceURI == "http://www.w3.org/2000/svg"
-        || elt.namespaceURI == "http://www.w3.org/1998/Math/MathML";
+    return elt.offsetWidth > 0 || elt.offsetHeight > 0 || elt.localName in invisibleTags || isElementSVG(elt) || isElementMathML(elt);
 };
 
 this.collapse = function(elt, collapsed)
@@ -508,14 +568,48 @@ this.hide = function(elt, hidden)
 
 this.clearNode = function(node)
 {
+    this.clearDomplate(node);
     node.innerHTML = "";
 };
 
 this.eraseNode = function(node)
 {
+    this.clearDomplate(node);
     while (node.lastChild)
         node.removeChild(node.lastChild);
 };
+
+this.clearDomplate = function(node)
+{
+    if (!Firebug.clearDomplate)
+        return;
+
+    var walker = node.ownerDocument.createTreeWalker(node,
+        Ci.nsIDOMNodeFilter.SHOW_ALL, null, true);
+
+    while (node)
+    {
+        if (node.repObject)
+            node.repObject = null;
+
+        if (node.stackTrace)
+            node.stackTrace = null;
+
+        if (node.checked)
+            node.checked = null;
+
+        if (node.domObject)
+            node.domObject = null;
+
+        if (node.toggles)
+            node.toggles = null;
+
+        if (node.domPanel)
+            node.domPanel = null;
+
+        node = walker.nextNode();
+    }
+}
 
 // ************************************************************************************************
 // Window iteration
@@ -550,28 +644,56 @@ this.getRootWindow = function(win)
 // ************************************************************************************************
 // CSS classes
 
-this.hasClass = function(node, name) // className, className, ...
+var classNameReCache={};
+this.hasClass = function(node, name)
 {
-    if (!node || node.nodeType != 1)
+    if (!node || node.nodeType != 1 || !node.className || name == '')
         return false;
-    else
-    {
-        for (var i=1; i<arguments.length; ++i)
-        {
-            var name = arguments[i];
-            var re = new RegExp("(^|\\s)"+name+"($|\\s)");
-            if (!re.exec(node.getAttribute("class")))
-                return false;
-        }
 
-        return true;
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length, found=false;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                if (this.hasClass(node, cls) == false)
+                    return false;
+                found = true;
+            }
+        }
+        return found;
     }
+
+    var re;
+    if (name.indexOf("-") == -1)
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
+    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+    return node.className.search(re) != -1;
 };
 
 this.setClass = function(node, name)
 {
-    if (node && !this.hasClass(node, name))
-        node.className += " " + name;
+    if (!node || node.nodeType != 1 || name == '')
+        return;
+
+    if (name.indexOf(" ") != -1)
+    {
+        var classes = name.split(" "), len = classes.length;
+        for (var i = 0; i < len; i++)
+        {
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                this.setClass(node, cls);
+            }
+        }
+        return;
+    }
+    if (!this.hasClass(node, name))
+        node.className = node.className.trim() + " " + name;
 };
 
 this.getClassValue = function(node, name)
@@ -583,15 +705,32 @@ this.getClassValue = function(node, name)
 
 this.removeClass = function(node, name)
 {
-    if (node && node.className)
+    if (!node || node.nodeType != 1 || node.className == '' || name == '')
+        return;
+
+    if (name.indexOf(" ") != -1)
     {
-        var index = node.className.indexOf(name);
-        if (index >= 0)
+        var classes = name.split(" "), len = classes.length;
+        for (var i = 0; i < len; i++)
         {
-            var size = name.length;
-            node.className = node.className.substr(0,index-1) + node.className.substr(index+size);
+            var cls = classes[i].trim();
+            if (cls != "")
+            {
+                if (this.hasClass(node, cls) == false)
+                    this.removeClass(node, cls);
+            }
         }
+        return;
     }
+
+    var re;
+    if (name.indexOf("-") == -1)
+        re = classNameReCache[name] = classNameReCache[name] || new RegExp('(^|\\s)' + name + '(\\s|$)', "g");
+    else // XXXsroussey don't cache these, they are often setting values. Should be using setUserData/getUserData???
+        re = new RegExp('(^|\\s)' + name + '(\\s|$)', "g")
+
+    node.className = node.className.replace(re, " ");
+
 };
 
 this.toggleClass = function(elt, name)
@@ -690,43 +829,18 @@ this.getAncestorByClass = function(node, className)
     return null;
 };
 
+/* @Deprecated  Use native Firefox: node.getElementsByClassName(names).item(0) */
 this.getElementByClass = function(node, className)  // className, className, ...
 {
-    var args = cloneArray(arguments); args.splice(0, 1);
-    for (var child = node.firstChild; child; child = child.nextSibling)
-    {
-        var args1 = cloneArray(args); args1.unshift(child);
-        if (FBL.hasClass.apply(null, args1))
-            return child;
-        else
-        {
-            var found = FBL.getElementByClass.apply(null, args1);
-            if (found)
-                return found;
-        }
-    }
-
-    return null;
+    return FBL.getElementsByClass.apply(this,arguments).item(0);
 };
 
+/* @Deprecated  Use native Firefox: node.getElementsByClassName(names) */
 this.getElementsByClass = function(node, className)  // className, className, ...
 {
-    function iteratorHelper(node, classNames, result)
-    {
-        for (var child = node.firstChild; child; child = child.nextSibling)
-        {
-            var args1 = cloneArray(classNames); args1.unshift(child);
-            if (FBL.hasClass.apply(null, args1))
-                result.push(child);
-
-            iteratorHelper(child, classNames, result);
-        }
-    }
-
-    var result = [];
-    var args = cloneArray(arguments); args.shift();
-    iteratorHelper(node, args, result);
-    return result;
+    var args = cloneArray(arguments); args.splice(0, 1);
+    var className = args.join(" ");
+    return node.getElementsByClassName(className);
 };
 
 this.getElementsByAttribute = function(node, attrName, attrValue)
@@ -951,12 +1065,17 @@ this.setOuterHTML = function(element, html)
     var doc = element.ownerDocument;
     var range = doc.createRange();
     range.selectNode(element || doc.documentElement);
-
-    var fragment = range.createContextualFragment(html);
-    var first = fragment.firstChild;
-    var last = fragment.lastChild;
-    element.parentNode.replaceChild(fragment, element);
-    return [first, last];
+    try
+    {
+        var fragment = range.createContextualFragment(html);
+        var first = fragment.firstChild;
+        var last = fragment.lastChild;
+        element.parentNode.replaceChild(fragment, element);
+        return [first, last];
+    } catch (e)
+    {
+        return [element,element]
+    }
 };
 
 this.appendInnerHTML = function(element, html, referenceElement)
@@ -985,6 +1104,7 @@ this.insertTextIntoElement = function(element, text)
     controller = this.QI(controller, Ci.nsICommandController);
     controller.doCommandWithParams(command, params);
 };
+
 
 // ************************************************************************************************
 // XPath
@@ -1039,7 +1159,7 @@ this.cssToXPath = function(rule)
         lastRule = rule;
 
         // Trim leading whitespace
-        rule = this.trimLeft(rule);
+        rule = this.trim(rule);
         if (!rule.length)
             break;
 
@@ -1271,22 +1391,24 @@ this.isScrolledToBottom = function(element)
 {
     var onBottom = (element.scrollTop + element.offsetHeight) == element.scrollHeight;
     if (FBTrace.DBG_CONSOLE)
-        FBTrace.sysout("isScrolledToBottom offsetHeight: "+element.offsetHeight +" onBottom:"+onBottom);
+        FBTrace.sysout("isScrolledToBottom offsetHeight: " + element.offsetHeight +
+            ", scrollTop: " + element.scrollTop + ", scrollHeight: " + element.scrollHeight +
+            ", onBottom: " + onBottom);
     return onBottom;
 };
 
 this.scrollToBottom = function(element)
 {
-        element.scrollTop = element.scrollHeight;
+    element.scrollTop = element.scrollHeight;
 
-        if (FBTrace.DBG_CONSOLE)
-        {
-            FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
-            if (element.scrollHeight == element.offsetHeight)
-                FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
-        }
+    if (FBTrace.DBG_CONSOLE)
+    {
+        FBTrace.sysout("scrollToBottom reset scrollTop "+element.scrollTop+" = "+element.scrollHeight);
+        if (element.scrollHeight == element.offsetHeight)
+            FBTrace.sysout("scrollToBottom attempt to scroll non-scrollable element "+element, element);
+    }
 
-        return (element.scrollTop == element.scrollHeight);
+    return (element.scrollTop == element.scrollHeight);
 };
 
 this.move = function(element, x, y)
@@ -1447,7 +1569,7 @@ this.isImageRule = function(rule)
         {
             var r = i.toLowerCase();
             var suffix = "image";
-            if (r.match(suffix + "$") == suffix)
+            if (r.match(suffix + "$") == suffix || r == "background")
                 imageRules.push(r);
         }
     }
@@ -1561,6 +1683,7 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
         return 0;
 
     // ownerDocument is an optional hint for performance
+    if (FBTrace.DBG_CSS) FBTrace.sysout("getInstanceForStyleSheet: " + styleSheet.href + " " + styleSheet.media.mediaText + " " + (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
     ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
 
     var ret = 0,
@@ -1569,6 +1692,7 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
     for (var i = 0; i < styleSheets.length; i++)
     {
         var curSheet = styleSheets[i];
+        if (FBTrace.DBG_CSS) FBTrace.sysout("getInstanceForStyleSheet: compare href " + i + " " + curSheet.href + " " + curSheet.media.mediaText + " " + (curSheet.ownerNode && FBL.getElementXPath(curSheet.ownerNode)));
         if (curSheet == styleSheet)
             break;
         if (curSheet.href == href)
@@ -1581,22 +1705,64 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
 // HTML and XML Serialization
 
 
-this.isSelfClosing = function (element)
+var getElementType = this.getElementType = function(node)
 {
+    if (isElementXUL(node))
+        return 'xul';
+    else if (isElementSVG(node))
+        return 'svg';
+    else if (isElementMathML(node))
+        return 'mathml';
+    else if (isElementXHTML(node))
+        return 'xhtml';
+    else if (isElementHTML(node))
+        return 'html';
+}
+
+var isElementHTML = this.isElementHTML = function(node)
+{
+    return node.nodeName == node.nodeName.toUpperCase();
+}
+
+var isElementXHTML = this.isElementXHTML = function(node)
+{
+    return node.nodeName == node.nodeName.toLowerCase();
+}
+
+var isElementMathML = this.isElementMathML = function(node)
+{
+    return node.namespaceURI == 'http://www.w3.org/1998/Math/MathML';
+}
+
+var isElementSVG = this.isElementSVG = function(node)
+{
+    return node.namespaceURI == 'http://www.w3.org/2000/svg';
+}
+
+var isElementXUL = this.isElementXUL = function(node)
+{
+    return node instanceof XULElement;
+}
+
+this.isSelfClosing = function(element)
+{
+    if (isElementSVG(element) || isElementMathML(element))
+        return true;
     var tag = element.localName.toLowerCase();
     return (this.selfClosingTags.hasOwnProperty(tag));
 };
 
 this.getElementHTML = function(element)
 {
-    var isXhtml= element.ownerDocument.documentElement.namespaceURI == "http://www.w3.org/1999/xhtml";
-
     var self=this;
     function toHTML(elt)
     {
-        if (elt.nodeType == 1)
+        if (elt.nodeType == Node.ELEMENT_NODE)
         {
-            html.push('<', elt.localName.toLowerCase());
+            if (unwrapObject(elt).firebugIgnore)
+                return;
+
+            html.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -1606,7 +1772,14 @@ this.getElementHTML = function(element)
                 if (attr.localName.indexOf("firebug-") == 0)
                     continue;
 
-                html.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
+                // MathML
+                if (attr.localName.indexOf("-moz-math") == 0)
+                {
+                    // just hide for now
+                    continue;
+                }
+
+                html.push(' ', attr.nodeName, '="', escapeForElementAttribute(attr.nodeValue),'"');
             }
 
             if (elt.firstChild)
@@ -1615,31 +1788,35 @@ this.getElementHTML = function(element)
 
                 var pureText=true;
                 for (var child = element.firstChild; child; child = child.nextSibling)
-                    pureText=pureText && (child.nodeType == 3);
+                    pureText=pureText && (child.nodeType == Node.TEXT_NODE);
 
                 if (pureText)
-                    html.push(elt.innerHTML)
+                    html.push(escapeForHtmlEditor(elt.textContent));
                 else {
                     for (var child = elt.firstChild; child; child = child.nextSibling)
                         toHTML(child);
                 }
 
-                html.push('</', elt.localName.toLowerCase(), '>');
+                html.push('</', elt.nodeName.toLowerCase(), '>');
+            }
+            else if (isElementSVG(elt) || isElementMathML(elt))
+            {
+                html.push('/>');
             }
             else if (self.isSelfClosing(elt))
             {
-                html.push(isXhtml?'/>':'>');
+                html.push((isElementXHTML(elt))?'/>':'>');
             }
             else
             {
-                html.push('></', elt.localName.toLowerCase(), '>');
+                html.push('></', elt.nodeName.toLowerCase(), '>');
             }
         }
-        else if (elt.nodeType == 3)
-            html.push(escapeHTMLnoQuote(elt.nodeValue));
-        else if (elt.nodeType == 4)
+        else if (elt.nodeType == Node.TEXT_NODE)
+            html.push(escapeForTextNode(elt.textContent));
+        else if (elt.nodeType == Node.CDATA_SECTION_NODE)
             html.push('<![CDATA[', elt.nodeValue, ']]>');
-        else if (elt.nodeType == 8)
+        else if (elt.nodeType == Node.COMMENT_NODE)
             html.push('<!--', elt.nodeValue, '-->');
     }
 
@@ -1652,9 +1829,12 @@ this.getElementXML = function(element)
 {
     function toXML(elt)
     {
-        if (elt.nodeType == 1)
+        if (elt.nodeType == Node.ELEMENT_NODE)
         {
-            xml.push('<', elt.localName.toLowerCase());
+            if (unwrapObject(elt).firebugIgnore)
+                return;
+
+            xml.push('<', elt.nodeName.toLowerCase());
 
             for (var i = 0; i < elt.attributes.length; ++i)
             {
@@ -1664,7 +1844,14 @@ this.getElementXML = function(element)
                 if (attr.localName.indexOf("firebug-") == 0)
                     continue;
 
-                xml.push(' ', attr.localName, '=', escapeHTMLAttribute(attr.nodeValue));
+                // MathML
+                if (attr.localName.indexOf("-moz-math") == 0)
+                {
+                    // just hide for now
+                    continue;
+                }
+
+                xml.push(' ', attr.nodeName, '="', escapeForElementAttribute(attr.nodeValue),'"');
             }
 
             if (elt.firstChild)
@@ -1674,16 +1861,16 @@ this.getElementXML = function(element)
                 for (var child = elt.firstChild; child; child = child.nextSibling)
                     toXML(child);
 
-                xml.push('</', elt.localName.toLowerCase(), '>');
+                xml.push('</', elt.nodeName.toLowerCase(), '>');
             }
             else
                 xml.push('/>');
         }
-        else if (elt.nodeType == 3)
+        else if (elt.nodeType == Node.TEXT_NODE)
             xml.push(elt.nodeValue);
-        else if (elt.nodeType == 4)
+        else if (elt.nodeType == Node.CDATA_SECTION_NODE)
             xml.push('<![CDATA[', elt.nodeValue, ']]>');
-        else if (elt.nodeType == 8)
+        else if (elt.nodeType == Node.COMMENT_NODE)
             xml.push('<!--', elt.nodeValue, '-->');
     }
 
@@ -1693,115 +1880,294 @@ this.getElementXML = function(element)
 };
 
 // ************************************************************************************************
+// Whitespace and Entity conversions
+
+var entityConversionLists = this.entityConversionLists = {
+    normal : {
+        whitespace : {
+            '\t' : '\u200c\u2192',
+            '\n' : '\u200c\u00b6',
+            '\r' : '\u200c\u00ac',
+            ' '  : '\u200c\u00b7'
+        }
+    },
+    reverse : {
+        whitespace : {
+            '&Tab;' : '\t',
+            '&NewLine;' : '\n',
+            '\u200c\u2192' : '\t',
+            '\u200c\u00b6' : '\n',
+            '\u200c\u00ac' : '\r',
+            '\u200c\u00b7' : ' '
+        }
+    }
+};
+
+var normal = entityConversionLists.normal,
+    reverse = entityConversionLists.reverse;
+
+function addEntityMapToList(ccode, entity)
+{
+    var lists = Array.slice(arguments, 2),
+        len = lists.length,
+        ch = String.fromCharCode(ccode);
+    for (var i = 0; i < len; i++)
+    {
+        var list = lists[i];
+        normal[list]=normal[list] || {};
+        normal[list][ch] = '&' + entity + ';';
+        reverse[list]=reverse[list] || {};
+        reverse[list]['&' + entity + ';'] = ch;
+    }
+}
+
+var e = addEntityMapToList,
+    white = 'whitespace',
+    text = 'text',
+    attr = 'attributes',
+    css = 'css',
+    editor = 'editor';
+
+e(0x0022, 'quot', attr, css);
+e(0x0026, 'amp', attr, text, css);
+e(0x0027, 'apos', css);
+e(0x003c, 'lt', attr, text, css);
+e(0x003e, 'gt', attr, text, css);
+e(0xa9, 'copy', text, editor);
+e(0xae, 'reg', text, editor);
+e(0x2122, 'trade', text, editor);
+
+// See http://en.wikipedia.org/wiki/Dash
+e(0x2012, '#8210', attr, text, editor); // figure dash
+e(0x2013, 'ndash', attr, text, editor); // en dash
+e(0x2014, 'mdash', attr, text, editor); // em dash
+e(0x2015, '#8213', attr, text, editor); // horizontal bar
+
+e(0x00a0, 'nbsp', attr, text, white, editor);
+e(0x2002, 'ensp', attr, text, white, editor);
+e(0x2003, 'emsp', attr, text, white, editor);
+e(0x2009, 'thinsp', attr, text, white, editor);
+e(0x200c, 'zwnj', attr, text, white, editor);
+e(0x200d, 'zwj', attr, text, white, editor);
+e(0x200e, 'lrm', attr, text, white, editor);
+e(0x200f, 'rlm', attr, text, white, editor);
+e(0x200b, '#8203', attr, text, white, editor); // zero-width space (ZWSP)
+
+//************************************************************************************************
+// Entity escaping
+
+var entityConversionRegexes = {
+        normal : {},
+        reverse : {}
+    };
+
+var escapeEntitiesRegEx = {
+    normal : function(list)
+    {
+        var chars = [];
+        for ( var ch in list)
+        {
+            chars.push(ch);
+        }
+        return new RegExp('([' + chars.join('') + '])', 'gm');
+    },
+    reverse : function(list)
+    {
+        var chars = [];
+        for ( var ch in list)
+        {
+            chars.push(ch);
+        }
+        return new RegExp('(' + chars.join('|') + ')', 'gm');
+    }
+};
+
+function getEscapeRegexp(direction, lists)
+{
+    var name = '', re;
+    var groups = [].concat(lists);
+    for (i = 0; i < groups.length; i++)
+    {
+        name += groups[i].group;
+    }
+    re = entityConversionRegexes[direction][name];
+    if (!re)
+    {
+        var list = {};
+        if (groups.length > 1)
+        {
+            for ( var i = 0; i < groups.length; i++)
+            {
+                var aList = entityConversionLists[direction][groups[i].group];
+                for ( var item in aList)
+                    list[item] = aList[item];
+            }
+        } else if (groups.length==1)
+        {
+            list = entityConversionLists[direction][groups[0].group]; // faster for special case
+        } else {
+            list = {}; // perhaps should print out an error here?
+        }
+        re = entityConversionRegexes[direction][name] = escapeEntitiesRegEx[direction](list);
+    }
+    return re;
+}
+
+function createSimpleEscape(name, direction)
+{
+    return function(value)
+    {
+        var list = entityConversionLists[direction][name];
+        return String(value).replace(
+                getEscapeRegexp(direction, {
+                    group : name,
+                    list : list
+                }),
+                function(ch)
+                {
+                    return list[ch];
+                }
+               );
+    }
+}
+
+function escapeGroupsForEntities(str, lists)
+{
+    lists = [].concat(lists);
+    var re = getEscapeRegexp('normal', lists),
+        split = String(str).split(re),
+        len = split.length,
+        results = [],
+        cur, r, i, ri = 0, l, list, last = '';
+    if (!len)
+        return [ {
+            str : String(str),
+            group : '',
+            name : ''
+        } ];
+    for (i = 0; i < len; i++)
+    {
+        cur = split[i];
+        if (cur == '')
+            continue;
+        for (l = 0; l < lists.length; l++)
+        {
+            list = lists[l];
+            r = entityConversionLists.normal[list.group][cur];
+            // if (cur == ' ' && list.group == 'whitespace' && last == ' ') // only show for runs of more than one space
+            //     r = ' ';
+            if (r)
+            {
+                results[ri] = {
+                    'str' : r,
+                    'class' : list['class'],
+                    'extra' : list.extra[cur] ? list['class']
+                            + list.extra[cur] : ''
+                };
+                break;
+            }
+        }
+        // last=cur;
+        if (!r)
+            results[ri] = {
+                'str' : cur,
+                'class' : '',
+                'extra' : ''
+            };
+        ri++;
+    }
+    return results;
+}
+
+this.escapeGroupsForEntities = escapeGroupsForEntities;
+
+
+function unescapeEntities(str, lists)
+{
+    var re = getEscapeRegexp('reverse', lists),
+        split = String(str).split(re),
+        len = split.length,
+        results = [],
+        cur, r, i, ri = 0, l, list;
+    if (!len)
+        return str;
+    lists = [].concat(lists);
+    for (i = 0; i < len; i++)
+    {
+        cur = split[i];
+        if (cur == '')
+            continue;
+        for (l = 0; l < lists.length; l++)
+        {
+            list = lists[l];
+            r = entityConversionLists.reverse[list.group][cur];
+            if (r)
+            {
+                results[ri] = r;
+                break;
+            }
+        }
+        if (!r)
+            results[ri] = cur;
+        ri++;
+    }
+    return results.join('') || '';
+}
+
+
+// ************************************************************************************************
 // String escaping
+
+var escapeForTextNode = this.escapeForTextNode = createSimpleEscape('text', 'normal');
+var escapeForHtmlEditor = this.escapeForHtmlEditor = createSimpleEscape('editor', 'normal');
+var escapeForElementAttribute = this.escapeForElementAttribute = createSimpleEscape('attributes', 'normal');
+var escapeForCss = this.escapeForCss = createSimpleEscape('css', 'normal');
+
+// deprecated compatibility functions
+this.deprecateEscapeHTML = createSimpleEscape('text', 'normal');
+this.deprecatedUnescapeHTML = createSimpleEscape('text', 'reverse');
+this.escapeHTML = deprecated("use appropriate escapeFor... function", this.deprecateEscapeHTML);
+this.unescapeHTML = deprecated("use appropriate unescapeFor... function", this.deprecatedUnescapeHTML);
+
+var escapeForSourceLine = this.escapeForSourceLine = createSimpleEscape('text', 'normal');
+
+var unescapeWhitespace = createSimpleEscape('whitespace', 'reverse');
+
+this.unescapeForTextNode = function(str)
+{
+    if (Firebug.showTextNodesWithWhitespace)
+        str = unescapeWhitespace(str);
+    if (!Firebug.showTextNodesWithEntities)
+        str = escapeForElementAttribute(str);
+    return str;
+}
 
 this.escapeNewLines = function(value)
 {
-    return value.replace(/\r/g, "\\r").replace(/\n/g, "\\n");
+    return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n");
 };
 
 this.stripNewLines = function(value)
 {
-    return typeof(value) == "string" ? value.replace(/[\r\n]/g, " ") : value;
+    return typeof(value) == "string" ? value.replace(/[\r\n]/gm, " ") : value;
 };
 
 this.escapeJS = function(value)
 {
-    return value.replace(/\r/g, "\\r").replace(/\n/g, "\\n").replace('"', '\\"', "g");
-};
-
-function escapeHTMLAttribute(value)
-{
-    function replaceChars(ch)
-    {
-        switch (ch)
-        {
-            case "&":
-                return "&amp;";
-            case "'":
-                return apos;
-            case '"':
-                return quot;
-        }
-        return "?";
-    };
-    var apos = "&#39;", quot = "&quot;", around = '"';
-    if( value.indexOf('"') == -1 ) {
-        quot = '"';
-        apos = "'";
-    } else if( value.indexOf("'") == -1 ) {
-        quot = '"';
-        around = "'";
-    }
-    return around + (String(value).replace(/[&'"]/g, replaceChars)) + around;
-}
-
-function escapeHTML(value)
-{
-    function replaceChars(ch)
-    {
-        switch (ch)
-        {
-            case "<":
-                return "&lt;";
-            case ">":
-                return "&gt;";
-            case "&":
-                return "&amp;";
-            case "'":
-                return "&#39;";
-            case '"':
-                return "&quot;";
-        }
-        return "?";
-    };
-    return String(value).replace(/[<>&"']/g, replaceChars);
-}
-
-this.escapeHTML = escapeHTML;
-
-function escapeHTMLnoQuote(value)
-{
-    function replaceChars(ch)
-    {
-        switch (ch)
-        {
-            case "<":
-                return "&lt;";
-            case ">":
-                return "&gt;";
-            case "&":
-                return "&amp;";
-            case "\xa0":
-                return "&nbsp;";
-        }
-        return "?";
-    };
-    return String(value).replace(/[<>&\xa0]/g, replaceChars);
-};
-
-this.escapeHTMLnoQuote = escapeHTMLnoQuote;
-
-this.unEscapeHTML = function(str)
-{
-    return str.replace(/&amp;/g, "&")
-        .replace(/&lt;/g, "<")
-        .replace(/&gt;/g, ">")
-        .replace(/&quot;/g, '"')
-        .replace(/&#39;/g, "'");
+    return value.replace(/\r/gm, "\\r").replace(/\n/gm, "\\n").replace('"', '\\"', "g");
 };
 
 this.cropString = function(text, limit, alterText)
 {
     if (!alterText)
-        alterText = "...";
+        alterText = "..."; //…
 
     text = text + "";
 
     if (!limit)
-        var halfLimit = 50;
-    else
-        var halfLimit = limit / 2;
+        limit = Firebug.stringCropLength;
+    var halfLimit = (limit / 2);
+    halfLimit -= 2; // adjustment for alterText's increase in size
 
     if (text.length > limit)
         return text.substr(0, halfLimit) + alterText + text.substr(text.length-halfLimit);
@@ -1836,9 +2202,19 @@ this.splitLines = function(text)
     return lines;
 };
 
-this.trimLeft = function(text)
+this.trim = function(text)
 {
     return text.replace(/^\s*|\s*$/g,"");
+}
+
+this.trimLeft = function(text)
+{
+    return text.replace(/^\s+/,"");
+}
+
+this.trimRight = function(text)
+{
+    return text.replace(/\s+$/,"");
 }
 
 this.wrapText = function(text, noEscapeHTML)
@@ -1865,12 +2241,12 @@ this.wrapText = function(text, noEscapeHTML)
             line = line.substr(wrapIndex);
 
             if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
-            html.push(noEscapeHTML ? subLine : escapeHTML(subLine));
+            html.push(noEscapeHTML ? subLine : escapeForTextNode(subLine));
             if (!noEscapeHTML) html.push("</code>");
         }
 
         if (!noEscapeHTML) html.push("<code class=\"wrappedText focusRow\" role=\"listitem\">");
-        html.push(noEscapeHTML ? line : escapeHTML(line));
+        html.push(noEscapeHTML ? line : escapeForTextNode(line));
         if (!noEscapeHTML) html.push("</code>");
     }
 
@@ -1995,7 +2371,7 @@ this.getCurrentStackTrace = function(context)
     Firebug.Debugger.halt(function(frame)
     {
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace frame:", frame);
-        trace = FBL.getStackTrace(frame, context);
+        trace = FBL.getCorrectedStackTrace(frame, context);
         if (FBTrace.DBG_STACK) FBTrace.sysout("lib.getCurrentStackTrace trace:", trace);
     });
 
@@ -2016,7 +2392,10 @@ this.getCurrentJSDStackDump = function()
     return trace;
 };
 
-this.getStackTrace = function(frame, context)
+
+this.getStackTrace = deprecated("name change for self-documentation", this.getCorrectedStackTrace);
+
+this.getCorrectedStackTrace = function(frame, context)
 {
     var trace = new this.StackTrace();
 
@@ -2031,7 +2410,7 @@ this.getStackTrace = function(frame, context)
         else
         {
             if (FBTrace.DBG_STACK)
-                FBTrace.sysout("lib.getStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
+                FBTrace.sysout("lib.getCorrectedStackTrace isSystemURL frame.script.fileName "+frame.script.fileName+"\n");
         }
     }
 
@@ -2082,12 +2461,12 @@ this.getStackFrame = function(frame, context)
     }
     catch (exc)
     {
-        if (FBTrace.DBG_STACK) FBTrace.sysout("getStackTrace fails:", exc);
+        if (FBTrace.DBG_STACK) FBTrace.sysout("getCorrectedStackTrace fails:", exc);
         return null;
     }
 };
 
-this.getStackDump = function()
+function getStackDump()
 {
     var lines = [];
     for (var frame = Components.stack; frame; frame = frame.caller)
@@ -2095,6 +2474,7 @@ this.getStackDump = function()
 
     return lines.join("\n");
 };
+this.getStackDump = getStackDump;
 
 this.getJSDStackDump = function(newestFrame)
 {
@@ -2266,14 +2646,16 @@ this.forEachFunction = function(context, cb)
                 return;
             try
             {
-                var testFunctionObject = script.functionObject;
+                var testFunctionObject = script.functionObject;  // Boris says this object is bogus.
                 if (!testFunctionObject.isValid)
                     return false;
-                var theFunction = testFunctionObject.getWrappedValue();
-
-                var rc = cb(script, theFunction, sourceFile);
-                if (rc)
-                    return rc;
+                var theFunction = FBL.unwrapIValue(testFunctionObject);
+                if (theFunction)
+                {
+                    var rc = cb(script, theFunction, sourceFile);
+                    if (rc)
+                        return rc;
+                }
             }
             catch(exc)
             {
@@ -2307,7 +2689,7 @@ this.findScriptForFunction = function(fn)
 
                 var iValueFunctionObject = script.functionObject;
                 //FBTrace.dumpIValue("lib.findScriptForFunction iValueFunctionObject", iValueFunctionObject);
-                var testFunctionObject = script.functionObject.getWrappedValue();
+                var testFunctionObject = FBL.unwrapIValue(script.functionObject);
                 if (testFunctionObject instanceof Function)
                     FBTrace.sysout("lib.findScriptForFunction testFunctionObject "+testFunctionObject+" vs "+fn+"\n");
                 if (testFunctionObject == fn)
@@ -2346,12 +2728,10 @@ this.getSourceLinkForScript = function(script, context)
         if (scriptAnalyzer)
             return scriptAnalyzer.getSourceLinkForScript(script);
         else
+        {
+            // no-op for detrace
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("getSourceLineForScript FAILS no scriptAnalyser for sourceFile "+sourceFile);
-    }
-    else
-    {
-        if (FBTrace.DBG_EERRORS)
-            FBTrace.sysout("getSourceLineForScript FAILS, no sourcefile for script ", script);
+        }
     }
 };
 
@@ -2421,29 +2801,47 @@ this.guessFunctionNameFromLines = function(url, lineNo, sourceCache)
     return "(?)";
 };
 
-this.getFunctionArgNames = function(fn)
+this.getFunctionArgNames = function(frame)
 {
-    var m = reFunctionArgNames.exec(this.safeToString(fn));
-    if (m)
+    var script = frame.script;
+    if (script.getParameterNames)  // FF 3.6 or later
     {
-        var argNames = m[2].split(", ");
-        if (argNames.length && argNames[0])
-            return argNames;
+        return script.getParameterNames();
     }
-    return [];
+    else // FF 3.5 or eariler
+    {
+        return []; // TODO
+        var m = reFunctionArgNames.exec(this.safeToString(fn));
+        if (m)
+        {
+            var argNames = m[2].split(", ");
+            if (argNames.length && argNames[0])
+                return argNames;
+        }
+        return [];
+    }
 };
 
-this.getFunctionArgValues = function(fn, frame)
+this.getFunctionArgValues = function(frame)
 {
     var values = [];
 
-    var argNames = this.getFunctionArgNames(fn);
+    var argNames = this.getFunctionArgNames(frame);
+    var scope = FBL.unwrapIValue(frame.scope);
+
     for (var i = 0; i < argNames.length; ++i)
     {
         var argName = argNames[i];
-        var pvalue = frame.scope.getProperty(argName);
-        var value = pvalue ? pvalue.value.getWrappedValue() : undefined;
-        values.push({name: argName, value: value});
+        if (scope)
+        {
+            var pvalue = scope.argName;
+            var value = pvalue ? FBL.unwrapIValue(pvalue.value) : undefined;
+            values.push({name: argName, value: value});
+        }
+        else
+        {
+            values.push({name: argName});
+        }
     }
 
     return values;
@@ -2682,12 +3080,25 @@ this.safeGetWindowLocation = function(window)
     }
     catch(exc)
     {
-        //if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
+        if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ERRORS)
             FBTrace.sysout("TabContext.getWindowLocation failed "+exc, exc);
             FBTrace.sysout("TabContext.getWindowLocation failed window:", window);
         return "(getWindowLocation: "+exc+")";
     }
 };
+
+this.safeGetRequestName = function(request)
+{
+    try
+    {
+        return request.name;
+    }
+    catch (exc)
+    {
+    }
+
+    return null;
+}
 
 this.safeGetContentType = function(request)
 {
@@ -2812,6 +3223,16 @@ this.isControl = function(event)
     return (event.metaKey || event.ctrlKey) && !event.shiftKey && !event.altKey;
 };
 
+this.isAlt = function(event)
+{
+    return event.altKey && !event.ctrlKey && !event.shiftKey && !event.metaKey;
+};
+
+this.isAltClick = function(event)
+{
+    return event.button == 0 && this.isAlt(event);
+};
+
 this.isControlShift = function(event)
 {
     return (event.metaKey || event.ctrlKey) && event.shiftKey && !event.altKey;
@@ -2899,7 +3320,7 @@ this.dispatch2 = function(listeners, name, args)
                 if ( result )
                 {
                     if (FBTrace.DBG_DISPATCH)
-                        FBTrace.sysout("dispatch2 result "+result, result);
+                        FBTrace.sysout("dispatch2 "+name+" to "+listeners.length+" listeners, result "+result, result);
                     return result;
                 }
             }
@@ -2917,7 +3338,7 @@ this.dispatch2 = function(listeners, name, args)
         if (FBTrace.DBG_ERRORS)
         {
             if (exc.stack) exc.stack = exc.stack.split('/n');
-            FBTrace.sysout(" Exception in lib.dispatch2 "+ name, exc);
+            FBTrace.sysout(" Exception in lib.dispatch2 "+ name+" exc:"+exc, exc);
         }
     }
 };
@@ -3066,17 +3487,17 @@ this.splitURLBase = function(url)
 
 this.splitDataURL = function(url)
 {
-    var mark = url.indexOf(':', 3);
-    if (mark != 4)
+    var mark = url.indexOf('data:');
+    if (mark != 0)
         return false; //  the first 5 chars must be 'data:'
 
-    var point = url.indexOf(',', mark+1);
-    if (point < mark)
+    var point = url.indexOf(',', 5);
+    if (point < 5)
         return false; // syntax error
 
     var props = { encodedContent: url.substr(point+1) };
 
-    var metadataBuffer = url.substr(mark+1, point);
+    var metadataBuffer = url.substring(5, point);
     var metadata = metadataBuffer.split(';');
     for (var i = 0; i < metadata.length; i++)
     {
@@ -3090,6 +3511,8 @@ this.splitDataURL = function(url)
     {
          var caller_URL = decodeURIComponent(props['fileName']);
          var caller_split = this.splitURLTrue(caller_URL);
+
+         props['fileName'] = caller_URL;
 
         if (props.hasOwnProperty('baseLineNumber'))  // this means it's probably an eval()
         {
@@ -3350,7 +3773,7 @@ this.parseURLParams = function(url)
     return this.parseURLEncodedText(search);
 };
 
-this.parseURLEncodedText = function(text)
+this.parseURLEncodedText = function(text, noLimit)
 {
     const maxValueLength = 25000;
 
@@ -3383,7 +3806,7 @@ this.parseURLEncodedText = function(text)
                 var paramName = args[i].substring(0, index);
                 var paramValue = args[i].substring(index + 1);
 
-                if (paramValue.length > maxValueLength)
+                if (paramValue.length > maxValueLength && !noLimit)
                     paramValue = this.$STR("LargeData");
 
                 params.push({name: decodeText(paramName), value: decodeText(paramValue)});
@@ -3409,10 +3832,10 @@ this.parseURLEncodedText = function(text)
     return params;
 };
 
-this.reEncodeURL = function(file, text)
+this.reEncodeURL = function(file, text, noLimit)
 {
     var lines = text.split("\n");
-    var params = this.parseURLEncodedText(lines[lines.length-1]);
+    var params = this.parseURLEncodedText(lines[lines.length-1], noLimit);
 
     var args = [];
     for (var i = 0; i < params.length; ++i)
@@ -3439,8 +3862,14 @@ this.getResource = function(aURL)
     }
 };
 
+// ************************************************************************************************
+// JSON
+
 this.parseJSONString = function(jsonString, originURL)
 {
+    if (FBTrace.DBG_JSONVIEWER)
+        FBTrace.sysout("jsonviewer.parseJSON; " + jsonString);
+
     // See if this is a Prototype style *-secure request.
     var regex = new RegExp(/^\/\*-secure-([\s\S]*)\*\/\s*$/);
     var matches = regex.exec(jsonString);
@@ -3464,40 +3893,55 @@ this.parseJSONString = function(jsonString, originURL)
             jsonString = matches[1];
     }
 
-    // throw on the extra parentheses
-    jsonString = "(" + jsonString + ")";
-
-    var s = Components.utils.Sandbox(originURL);
-    var jsonObject = null;
-
     try
     {
-        jsonObject = Components.utils.evalInSandbox(jsonString, s);
+        var s = Components.utils.Sandbox(originURL);
+
+        // throw on the extra parentheses
+        return Components.utils.evalInSandbox("(" + jsonString + ")", s);
     }
     catch(e)
     {
-        if (e.message.indexOf("is not defined"))
-        {
-            var parts = e.message.split(" ");
-            s[parts[0]] = function(str){ return str; };
-            try {
-                jsonObject = Components.utils.evalInSandbox(jsonString, s);
-            } catch(ex) {
-                if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
-                    FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
-                return null;
-            }
-        }
-        else
-        {
-            if (FBTrace.DBG_ERRORS || FBTrace.DBG_JSONVIEWER)
-                FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
-            return null;
-        }
+        if (FBTrace.DBG_JSONVIEWER)
+            FBTrace.sysout("jsonviewer.parseJSON FAILS on "+originURL+" for \""+jsonString+
+                "\" with EXCEPTION "+e, e);
     }
 
-    return jsonObject;
+    // Let's try to parse it as JSONP.
+    var reJSONP = /^\s*([A-Za-z0-9_.]+\s*(?:\[.*\]|))\s*\(.*\)/;
+    var m = reJSONP.exec(jsonString);
+    if (!m || !m[1])
+        return null;
+
+    if (FBTrace.DBG_JSONVIEWER)
+        FBTrace.sysout("jsonviewer.parseJSONP; " + jsonString);
+
+    var callbackName = m[1];
+
+    if (FBTrace.DBG_JSONVIEWER)
+        FBTrace.sysout("jsonviewer.parseJSONP; Look like we have a JSONP callback: " + callbackName);
+
+    // Replace the original callback (it can be e.g. foo.bar[1]) with simple function name.
+    jsonString = jsonString.replace(callbackName, "callback");
+
+    try
+    {
+        var s = Components.utils.Sandbox(originURL);
+        s["callback"] = function(object) { return object; };
+        return Components.utils.evalInSandbox(jsonString, s);
+    }
+    catch(ex)
+    {
+        if (FBTrace.DBG_JSONVIEWER)
+            FBTrace.sysout("jsonviewer.parseJSON EXCEPTION", e);
+    }
+
+    return null;
 };
+
+this.parseJSONPString = function(jsonString, originURL)
+{
+}
 
 // ************************************************************************************************
 // Network
@@ -3640,14 +4084,8 @@ this.getRequestWebProgress = function(request)
 this.getBrowserForWindow = function(win)
 {
     var tabBrowser = document.getElementById("content");
-    for (var i=0; i<tabBrowser.browsers.length; ++i)
-    {
-        var browser = tabBrowser.browsers[i];
-        if (browser.contentWindow == win)
-            return browser;
-    }
-
-    return null;
+    if (tabBrowser && win.document)
+        return tabBrowser.getBrowserForDocument(win.document);
 };
 
 // ************************************************************************************************
@@ -3935,8 +4373,33 @@ this.ErrorMessage.prototype =
     getSourceLine: function()
     {
         return this.context.sourceCache.getLine(this.href, this.lineNo);
-    }
+    },
+
+    resetSource: function()
+    {
+        if (this.href && this.lineNo)
+            this.source = this.getSourceLine();
+    },
+
+    correctWithStackTrace: function(trace)
+    {
+        var frame = trace.frames[0];
+        if (frame)
+        {
+            this.href = frame.href;
+            this.lineNo = frame.line;
+            this.trace = trace;
+        }
+    },
+
+    correctSourcePoint: function(sourceName, lineNumber)
+    {
+        this.href = sourceName;
+        this.lineNo = lineNumber;
+    },
 };
+
+
 
 // ************************************************************************************************
 
@@ -4160,7 +4623,7 @@ this.SourceText = function(lines, owner)
 
 this.SourceText.getLineAsHTML = function(lineNo)
 {
-    return escapeHTML(this.lines[lineNo-1]);
+    return escapeForSourceLine(this.lines[lineNo-1]);
 };
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -4214,7 +4677,7 @@ this.StackFrame = function(context, fn, script, href, lineNo, args, pc)
     this.fn = fn;
     this.script = script;
     this.href = href;
-    this.lineNo = lineNo;
+    this.line = lineNo;
     this.args = args;
     this.flags = (script?script.flags:null);
     this.pc = pc;
@@ -4227,7 +4690,7 @@ this.StackFrame.prototype =
         // XXXjjb analyze args and fn?
         if (this.script)
             return "("+this.flags+")"+this.href+":"+this.script.baseLineNumber+"-"
-                  +(this.script.baseLineNumber+this.script.lineExtent)+"@"+this.lineNo;
+                  +(this.script.baseLineNumber+this.script.lineExtent)+"@"+this.line;
         else
             return this.href;
     },
@@ -5395,6 +5858,7 @@ this.cssInfo =
     "top": ["auto"],
     "unicode-bidi": [],
     "vertical-align": ["verticalAlign"],
+    "visibility": ["visibility"],
     "white-space": ["whiteSpace"],
     "width": ["width", "auto"],
     "word-spacing": [],
@@ -6038,6 +6502,14 @@ this.cssKeywords =
         "bidi-override"
     ],
 
+    "visibility":
+    [
+        "visible",
+        "hidden",
+        "collapse",
+        "inherit"
+    ],
+
     "whiteSpace":
     [
         "normal",
@@ -6193,16 +6665,18 @@ this.innerEditableTags =
 };
 
 this.selfClosingTags =
-{
+{ // End tags for void elements are forbidden http://wiki.whatwg.org/wiki/HTML_vs._XHTML
     "meta": 1,
     "link": 1,
     "area": 1,
     "base": 1,
-    "basefont": 1,
+    "col": 1,
     "input": 1,
     "img": 1,
     "br": 1,
-    "hr": 1
+    "hr": 1,
+    "param":1,
+    "embed":1
 };
 
 const invisibleTags = this.invisibleTags =
@@ -6216,6 +6690,8 @@ const invisibleTags = this.invisibleTags =
     "SCRIPT": 1,
     "NOSCRIPT": 1,
     "BR": 1,
+    "PARAM": 1,
+    "COL": 1,
 
     "html": 1,
     "head": 1,
@@ -6226,6 +6702,8 @@ const invisibleTags = this.invisibleTags =
     "script": 1,
     "noscript": 1,
     "br": 1,
+    "param": 1,
+    "col": 1,
     /*
     "window": 1,
     "browser": 1,
@@ -6241,7 +6719,7 @@ const invisibleTags = this.invisibleTags =
 // ************************************************************************************************
 // Debug Logging
 
-this.ERROR = function(exc)
+function ERROR(exc)
 {
     if (FBTrace) {
         if (exc.stack) exc.stack = exc.stack.split('\n');
@@ -6250,6 +6728,34 @@ this.ERROR = function(exc)
 
         ddd("FIREBUG WARNING: " + exc);
 }
+this.ERROR = ERROR;
+
+function ddd(text)
+{
+    consoleService.logStringMessage(text + "");
+}
+this.ddd = ddd;
+
+function deprecated(msg, fnc)
+{
+    return function deprecationWrapper()
+    {
+        if (!this.nagged)
+        {
+            var explain = "Deprecated function ("+fnc.name+") "+msg;
+            if (FBTrace)
+                FBTrace.sysout(explain, getStackDump());
+
+            var caller = Components.stack.caller;  // drop frame with deprecated()
+            ERROR(explain+" "+ caller.toString());
+
+            debugger;
+            this.nagged = true;
+        }
+        return fnc.apply(this, arguments);
+    }
+}
+this.deprecated = deprecated;
 
 // ************************************************************************************************
 // Math Utils
@@ -6271,6 +6777,17 @@ this.formatNumber = function(number)
 
 this.formatSize = function(bytes)
 {
+    // Get size precision (number of decimal places from the preferences)
+    // and make sure it's within limits.
+    var sizePrecision = Firebug.sizePrecision;
+    sizePrecision = (sizePrecision > 2) ? 2 : sizePrecision;
+    sizePrecision = (sizePrecision < -1) ? -1 : sizePrecision;
+
+    if (sizePrecision == -1)
+        return bytes + " B";
+
+    var a = Math.pow(10, sizePrecision);
+
     if (bytes == -1 || bytes == undefined)
         return "?";
     else if (bytes == 0)
@@ -6278,9 +6795,9 @@ this.formatSize = function(bytes)
     else if (bytes < 1024)
         return bytes + " B";
     else if (bytes < (1024*1024))
-        return Math.round(bytes/1024) + " KB";
+        return Math.round((bytes/1024)*a)/a + " KB";
     else
-        return Math.round((bytes/(1024*1024))*100)/100 + " MB";
+        return Math.round((bytes/(1024*1024))*a)/a + " MB";
 }
 
 // ************************************************************************************************
@@ -6289,7 +6806,7 @@ this.formatSize = function(bytes)
 this.formatTime = function(elapsed)
 {
     if (elapsed == -1)
-        return "_"; // should be &nbsp; but this will be escaped so we need something that is no whitespace
+        return "";
     else if (elapsed == 0)
         return "0";
     else if (elapsed < 1000)
@@ -6325,6 +6842,64 @@ this.ReversibleIterator = function(length, start, reverse)
     };
 };
 
+/**
+ * @class Implements a RegExp-like object that will search for the literal value
+ * of a given string, rather than the regular expression. This allows for
+ * iterative literal searches without having to escape user input strings
+ * to prevent invalid regular expressions from being used.
+ *
+ * @constructor
+ * @param {String} literal Text to search for
+ * @param {Boolean} reverse Truthy to preform a reverse search, falsy to perform a forward seach
+ * @param {Boolean} caseSensitive Truthy to perform a case sensitive search, falsy to perform a case insensitive search.
+ */
+this.LiteralRegExp = function(literal, reverse, caseSensitive)
+{
+    var searchToken = (!caseSensitive) ? literal.toLowerCase() : literal;
+
+    this.__defineGetter__("global", function() { return true; });
+    this.__defineGetter__("multiline", function() { return true; });
+    this.__defineGetter__("reverse", function() { return reverse; });
+    this.__defineGetter__("ignoreCase", function() { return !caseSensitive; });
+    this.lastIndex = 0;
+
+    this.exec = function(text)
+    {
+        if (!text)
+            return null;
+
+        var searchText = (!caseSensitive) ? text.toLowerCase() : text,
+            startIndex = (reverse ? text.length-1 : 0) + this.lastIndex,
+            index;
+
+        if (0 <= startIndex && startIndex < text.length)
+            index = searchText[reverse ? "lastIndexOf" : "indexOf"](searchToken, startIndex);
+        else
+            index = -1;
+
+        if (index >= 0)
+        {
+            var ret = [ text.substr(index, searchToken.length) ];
+            ret.index = index;
+            ret.input = text;
+            this.lastIndex = index + (reverse ? -1*text.length : searchToken.length);
+            return ret;
+        }
+        else
+            this.lastIndex = 0;
+
+        return null;
+    };
+    this.test = function(text)
+    {
+        if (!text)
+            return false;
+
+        var searchText = (!caseSensitive) ? text.toLowerCase() : text;
+        return searchText.indexOf(searchToken) >= 0;
+    };
+};
+
 this.ReversibleRegExp = function(regex, flags)
 {
     var re = {};
@@ -6342,7 +6917,16 @@ this.ReversibleRegExp = function(regex, flags)
         var key = (reverse ? "r" : "n") + (caseSensitive ? "n" : "i");
         if (!re[key])
         {
-            re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+            try
+            {
+                re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+            }
+            catch (ex)
+            {
+                // The user likely entered an invalid regular expression or is in the
+                // process of entering a valid one. Treat this as a plain text search
+                re[key] = new FBL.LiteralRegExp(regex, reverse, caseSensitive);
+            }
         }
 
         // Modify as needed to all for iterative searches
@@ -6357,7 +6941,9 @@ this.ReversibleRegExp = function(regex, flags)
             }
         }
 
-        var ret = re[key].exec(searchText);
+        var curRe = re[key];
+        curRe.lastIndex = 0;
+        var ret = curRe.exec(searchText);
         if (ret) {
             ret.input = text;
             ret.index = ret.index + indexOffset;
@@ -6367,6 +6953,35 @@ this.ReversibleRegExp = function(regex, flags)
         return ret;
     };
 };
+
+function unwrapObject(object)
+{
+    // TODO: We might be able to make this check more authoritative with QueryInterface.
+    if (typeof(object) === 'undefined' || object == null)
+        return object;
+
+    if (object.wrappedJSObject)
+        return object.wrappedJSObject;
+
+    return object;
+}
+this.unwrapObject = unwrapObject;
+
+this.unwrapIValue = function(object)
+{
+    if (object.jsType === 3)  // function type jsdIValues cannot be re-wrappered.
+        return;
+    var unwrapped = object.getWrappedValue();
+    try
+    {
+        return XPCSafeJSObjectWrapper(unwrapped);  // this should be the only call to getWrappedValue in firebug
+    }
+    catch (exc)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("unwrapIValue FAILS for "+object,{exc: exc, object: object, unwrapped: unwrapped});
+    }
+}
 
 }).apply(FBL);
 } catch(e) /*@explore*/

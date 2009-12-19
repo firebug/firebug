@@ -1,33 +1,36 @@
-/**************************************************************************************************
-//   Copyright (C) Joe Hewitt.                                                All Rights Reserved.
-// ***********************************************************************************************/
+/* See license.txt for terms of usage */
 
 /************************************************************************************************/
 /* Twisties */
 
 .twisty,
 .logRow-errorMessage > .hasTwisty > .errorTitle,
+.logRow-log > .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
-.hasHeaders .netHrefLabel {
+.hasHeaders .netHrefLabel,
+.netPageRow > .netCol > .netPageTitle {
     background-image: url(chrome://firebug/skin/win/twistyClosed.png);
     background-repeat: no-repeat;
     background-position: 2px 2px;
+	min-height: 12px;
 }
 
 .logRow-errorMessage > .hasTwisty.opened > .errorTitle,
+.logRow-log > .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
 .nodeBox.highlightOpen > .nodeLabel > .twisty,
 .nodeBox.open > .nodeLabel > .twisty,
-.netRow.opened > .netCol > .netHrefLabel {
+.netRow.opened > .netCol > .netHrefLabel,
+.netPageRow.opened > .netCol > .netPageTitle {
     background-image: url(chrome://firebug/skin/win/twistyOpen.png);
 }
 
 .twisty {
-    background-position: 2px 0;
+    background-position: 4px 4px;
 }
 
 /************************************************************************************************/

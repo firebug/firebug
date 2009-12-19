@@ -1,4 +1,3 @@
-
 // Global
 pref("javascript.options.strict.debug", false);
 pref("extensions.firebug.defaultPanelName", "html");
@@ -41,10 +40,12 @@ pref("extensions.firebug.showXMLHttpRequests", true);
 pref("extensions.firebug.service.showStackTrace", true);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
+pref("extensions.firebug.persistBreakOnError", false);
 
 // HTML
 pref("extensions.firebug.showCommentNodes", false);
-pref("extensions.firebug.showWhitespaceNodes", false);
+pref("extensions.firebug.showTextNodesWithWhitespace", false);
+pref("extensions.firebug.showTextNodesWithEntities", true);
 pref("extensions.firebug.showFullTextNodes", true);
 pref("extensions.firebug.highlightMutations", true);
 pref("extensions.firebug.expandMutations", false);
@@ -79,8 +80,6 @@ pref("extensions.firebug.showDOMFuncs", false);
 pref("extensions.firebug.showDOMConstants", false);
 
 // Layout
-pref("extensions.firebug.showAdjacentLayout", false);
-pref("extensions.firebug.showBoundingClientRect", false);
 pref("extensions.firebug.showRulers", true);
 
 // Net
@@ -91,6 +90,8 @@ pref("extensions.firebug.net.enableSites", false);
 pref("extensions.firebug.netDisplayedResponseLimit", 102400); // Maximum size limit for displayed responses [net, console panels].
 pref("extensions.firebug.netDisplayedPostBodyLimit", 10240); // Maximum size limit for displayed post data source [net, console panels].
 pref("extensions.firebug.net.hiddenColumns", "");   // List of hidden columns for the Net panel (space separated)
+pref("extensions.firebug.netPhaseInterval", 1000);    // Specifies an interval (ms) after which a new phase (session) in the timeline graph is started. Set to 0 to not start new phase at all.
+pref("extensions.firebug.sizePrecision", 1);       // Number of displayed decimal places for size info in the UI. Allowed values: [-1 (all in bytes), 0 (no decimal places), 1 (one decimal place), 2 (two decimal places)]
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.
@@ -121,7 +122,6 @@ pref("extensions.firebug.DBG_TOPLEVEL", false);     // top level jsd scripts    
 pref("extensions.firebug.DBG_STACK", false);        // call stack, mostly debugger.js            /*@explore*/
 pref("extensions.firebug.DBG_UI_LOOP", false);      // debugger.js                               /*@explore*/
 pref("extensions.firebug.DBG_ERRORS", false);       // error.js                                  /*@explore*/
-pref("extensions.firebug.DBG_EVENTS", false);       // debugger.js for event handlers, need more /*@explore*/
 pref("extensions.firebug.DBG_FUNCTION_NAMES", false);  // heuristics for anon functions          /*@explore*/
 pref("extensions.firebug.DBG_EVAL", false);         // debugger.js and firebug-service.js        /*@explore*/
 pref("extensions.firebug.DBG_PANELS", false);       // panel selection                           /*@explore*/
@@ -137,6 +137,7 @@ pref("extensions.firebug.DBG_LOCATIONS", false);    // panelFileList            
 pref("extensions.firebug.DBG_SOURCEFILES", false);  // debugger and sourceCache                  /*@explore*/
 pref("extensions.firebug.DBG_WINDOWS", false);      // tabWatcher, dispatch events; very useful for understand modules/panels  /*@explore*/
 pref("extensions.firebug.DBG_NET", false);          // net.js                                    /*@explore*/
+pref("extensions.firebug.DBG_NET_EVENTS", false);   // net.js - network events                   /*@explore*/
 pref("extensions.firebug.DBG_INITIALIZE", false);   // registry (modules panels); initialize FB  /*@explore*/
 pref("extensions.firebug.DBG_INSPECT", false);      // inspector                                 /*@explore*/
 pref("extensions.firebug.DBG_OPTIONS", false);      //                                           /*@explore*/
@@ -152,8 +153,9 @@ pref("extensions.firebug.DBG_INFOTIP", false);      // popup info tip in panels 
 pref("extensions.firebug.DBG_ANNOTATIONS", false);  // Page annotations service                  /*@explore*/
 pref("extensions.firebug.DBG_XMLVIEWER", false);    // xml explorer                              /*@explore*/
 pref("extensions.firebug.DBG_ACTIVITYOBSERVER", false);    // Net panel's activity observer      /*@explore*/
+pref("extensions.firebug.DBG_TOOLTIP", false);      // tooltip debugging      /*@explore*/
 
-//Keyboard
+// Keyboard
 pref("extensions.firebug.key.shortcut.reenterCommand", "control shift e");
 pref("extensions.firebug.key.shortcut.toggleInspecting", "accel shift c");
 pref("extensions.firebug.key.shortcut.toggleQuickInfoBox", "accel shift i");
@@ -172,6 +174,8 @@ pref("extensions.firebug.key.shortcut.previousFirebugTab", "control `");
 pref("extensions.firebug.key.shortcut.clearConsole", "accel shift r");
 pref("extensions.firebug.key.shortcut.openTraceConsole", "shift r");                             /*@explore*/
 
-//Accessibility
+// Accessibility
 pref("extensions.firebug.a11y.enable", false);
 
+// Debugging
+pref("extensions.firebug.clearDomplate", false);

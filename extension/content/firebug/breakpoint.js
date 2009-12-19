@@ -9,13 +9,15 @@ FBL.ns(function() { with (FBL) {
 
 Firebug.Breakpoint = extend(Firebug.Module,
 {
+    dispatchName: "breakpoints",
+
     toggleBreakOnNext: function(panel)
     {
         var breakable = Firebug.chrome.getGlobalAttribute("cmd_breakOnNext", "breakable");
 
         if (FBTrace.DBG_BP)
             FBTrace.sysout("breakpoint.toggleBreakOnNext; currentBreakable "+breakable+
-                " in " + context.getName());
+                " in " + panel.context.getName());
 
         // Toggle button's state.
         breakable = (breakable == "true" ? "false" : "true");
@@ -29,23 +31,45 @@ Firebug.Breakpoint = extend(Firebug.Module,
         // Make sure the correct tooltip (coming from the current panel) is used.
         this.updateBreakOnNextTooltips(panel);
 
+        // Light up the tab whenever break on next is selected
+        this.updatePanelTab(panel, enabled);
+
         return enabled;
     },
 
     showPanel: function(browser, panel)
     {
-        // If the panel supports the feature, set the tooltips and update
-        // break-on-next button's state.
-        if (panel.breakable)
-        {
-            this.updateBreakOnNextState(panel);
-            this.updateBreakOnNextTooltips(panel);
-        }
-        else
+        if(!panel)  // there is no selectedPanel?
+            return;
+
+        var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
+        breakButton.removeAttribute("type");
+
+        // Disable break-on-next if it isn't supported by the current panel.
+        if (!panel.breakable)
         {
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "disabled");
             Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", "");
+            return;
         }
+
+        // Set the tooltips and update break-on-next button's state.
+        var shouldBreak = panel.shouldBreakOnNext();
+        this.updateBreakOnNextState(panel, shouldBreak);
+        this.updateBreakOnNextTooltips(panel);
+        this.updatePanelTab(panel, shouldBreak);
+
+        var menuItems = panel.getBreakOnMenuItems();
+        if (!menuItems || !menuItems.length)
+            return;
+
+        breakButton.setAttribute("type", "menu-button");
+
+        var menuPopup = Firebug.chrome.$("fbBreakOnNextOptions");
+        eraseNode(menuPopup);
+
+        for (var i=0; i<menuItems.length; ++i)
+            FBL.createMenuItem(menuPopup, menuItems[i]);
     },
 
     updateBreakOnNextTooltips: function(panel)
@@ -62,15 +86,30 @@ Firebug.Breakpoint = extend(Firebug.Module,
         Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "tooltiptext", tooltip);
     },
 
-    updateBreakOnNextState: function(panel)
+    updateBreakOnNextState: function(panel, armed)
     {
-        var shouldBreak = panel.shouldBreakOnNext();
-
         // If the panel should break at the next chance, set the button to not breakable,
         // which means already active (throbbing).
-        var breakable = shouldBreak ? "false" : "true";
+        var breakable = armed ? "false" : "true";
         Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", breakable);
     },
+
+    updatePanelTab: function(panel, armed)
+    {
+        if (!panel)
+            return;
+
+        var panelBar = Firebug.chrome.$("fbPanelBar1");
+        var tab = panelBar.getTab(panel.name);
+        if (tab)
+            tab.setAttribute("breakOnNextArmed", armed ? "true" : "false");
+    },
+
+    breakNow: function(panel)
+    {
+        this.updatePanelTab(panel, false);
+        Firebug.Debugger.breakNow();
+    }
 });
 
 // ************************************************************************************************
@@ -105,7 +144,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
         if (getAncestorByClass(event.target, "breakpointCheckbox"))
         {
-            var node = getElementByClass(event.target.parentNode, "objectLink-sourceLink");
+            var node = event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0);
             if (!node)
                 return;
 
@@ -121,7 +160,7 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
         else if (getAncestorByClass(event.target, "closeButton"))
         {
             var sourceLink =
-                getElementByClass(event.target.parentNode, "objectLink-sourceLink").repObject;
+                event.target.parentNode.getElementsByClassName("objectLink-sourceLink").item(0).repObject;
 
             panel.noRefresh = true;
 
@@ -348,7 +387,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
             this.updateScriptFiles(context);
 
         var bpCount = 0, disabledCount = 0;
-        var checkBoxes = getElementsByClass(this.panelNode, "breakpointCheckbox");
+        var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
         for (var i=0; i<checkBoxes.length; i++)
         {
             ++bpCount;
@@ -382,7 +421,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
 
     enableAllBreakpoints: function(context, status)
     {
-        var checkBoxes = getElementsByClass(this.panelNode, "breakpointCheckbox");
+        var checkBoxes = this.panelNode.getElementsByClassName("breakpointCheckbox");
         for (var i=0; i<checkBoxes.length; i++)
         {
             var box = checkBoxes[i];
@@ -395,7 +434,7 @@ Firebug.Breakpoint.BreakpointsPanel.prototype = extend(Firebug.Panel,
     {
         this.noRefresh = true;
 
-        var buttons = getElementsByClass(this.panelNode, "closeButton");
+        var buttons = this.panelNode.getElementsByClassName("closeButton");
         for (var i=0; i<buttons.length; i++)
             this.click(buttons[i]);
 
@@ -681,7 +720,14 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 });
 
 // ************************************************************************************************
-
+/*
+ * Construct a break notification popup
+ * @param doc the document to contain the popup
+ * @param cause info object for the popup, with these optional fields:
+ *   strings: title, message, attrName
+ *   elements: target, relatedTarget: element
+ *   objects: prevValue, newValue
+ */
 Firebug.Breakpoint.BreakNotification = function(doc, cause)
 {
     this.initialize(doc, cause);
@@ -705,9 +751,12 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                             )
                         ),
                         DIV({"class": "notationCaption"},
-                            SPAN({"class":"notationTitle"}, "$cause|getTitle"),
-                            SPAN({"class":"notationTitle"}, "$cause|getDiff"),
+                            SPAN({"class": "notationTitle"}, "$cause|getTitle"),
+                            SPAN("&nbsp;"),
+                            SPAN({"class": "notationTitle diff"}, "$cause|getDiff"),
+                            SPAN("&nbsp;"),
                             TAG("$cause|getTargetTag", {object: "$cause.target"}),
+                            SPAN("&nbsp;"),
                             TAG("$cause|getRelatedTargetTag", {object: "$cause.relatedNode"})
                         )
                     )
@@ -732,7 +781,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
     {
         var str = "";
         if (cause.prevValue)
-            str += cropString(cause.prevValue, 40) +" -> ";
+            str += cropString(cause.prevValue, 40) + " -> ";
         if (cause.newValue)
             str += cropString(cause.newValue, 40);
 
@@ -742,14 +791,15 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         if (!cause.target)
             return str;
 
-        // the element will be rendered after the diff
-        // xxxHonza: localization
-        return str + " in ";
+        return str;
     },
 
     getTitle: function(cause)
     {
-        return cause.message + (cause.attrName ? (" \'"+cause.attrName+"\": ") : "");
+        var str = cause.message + (cause.attrName ? (" '"+cause.attrName+"'") : "");
+        if (this.getDiff(cause))
+            str += ":";
+        return str;
     },
 
     initialize: function(doc, cause)
@@ -789,16 +839,17 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
     {
         if (this.panel)
         {
-            var guts = getElementByClass(this.box, "conditionEditorInner");
+            var guts = this.box.getElementsByClassName("conditionEditorInner").item(0);
             collapse(guts, true);  // as the box shrinks you don't want text to spill
 
             var msg = this.cause.message;
             if (msg)
             {
                 var self = this;
+                var delta = Math.max(20,Math.floor(self.box.clientWidth/20));
                 var interval = setInterval(function slide(event)
                 {
-                    if (self.box.clientWidth < 20)
+                    if (self.box.clientWidth < delta)
                     {
                         clearNode(guts);
 
@@ -810,8 +861,8 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                         delete self.panel;
                     }
                     else
-                        self.box.style.width = (self.box.clientWidth - 20)+"px";
-                }, 2);
+                        self.box.style.width = (self.box.clientWidth - delta)+"px";
+                }, 15);
             }
             else
             {

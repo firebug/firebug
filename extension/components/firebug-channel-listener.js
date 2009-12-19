@@ -26,6 +26,8 @@ function ChannelListener()
     this.wrappedJSObject = this;
 
     this.window = null;
+    this.request = null;
+
     this.endOfLine = false;
     this.ignore = false;
 
@@ -36,12 +38,53 @@ function ChannelListener()
     // and properly pass the request object through nsIStreamListner to chrome-window space.
     this.proxyListener = null;
 
+    // The response will be written into the outputStream of this pipe.
+    // Both ends of the pipe must be blocking. Initialized in TabCacheModel.registerStreamListener.
+    this.sink = null;
+
     FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports)
         .wrappedJSObject.getTracer("extensions.firebug");
 }
 
 ChannelListener.prototype =
 {
+    setAsyncListener: function(request, stream, listener)
+    {
+        try
+        {
+            // xxxHonza: is there any other way how to find out the stream is closed?
+            // Throws NS_BASE_STREAM_CLOSED if the stream is closed normally or at end-of-file.
+            var available = stream.available();
+        }
+        catch (err)
+        {
+            if (err.name == "NS_BASE_STREAM_CLOSED")
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; " +
+                        "Don't set, the stream is closed.");
+                return;
+            }
+
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                    safeGetName(request), err);
+            return;
+        }
+
+        try
+        {
+            // Asynchronously wait for the stream to be readable or closed.
+            stream.asyncWait(listener, 0, 0, null);
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.setAsyncListener; EXCEPTION " +
+                    safeGetName(request), err);
+        }
+    },
+
     onCollectData: function(request, context, inputStream, offset, count)
     {
         if (this.ignore)
@@ -49,16 +92,25 @@ ChannelListener.prototype =
 
         try
         {
-            var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
-            var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
-            var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
+            if (this.sink)
+            {
+                var bis = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                bis.setInputStream(inputStream);
+                var data = bis.readBytes(count);
+            }
+            else
+            {
+                var binaryInputStream = CCIN("@mozilla.org/binaryinputstream;1", "nsIBinaryInputStream");
+                var storageStream = CCIN("@mozilla.org/storagestream;1", "nsIStorageStream");
+                var binaryOutputStream = CCIN("@mozilla.org/binaryoutputstream;1", "nsIBinaryOutputStream");
 
-            binaryInputStream.setInputStream(inputStream);
-            storageStream.init(8192, count, null);
-            binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
+                binaryInputStream.setInputStream(inputStream);
+                storageStream.init(8192, count, null);
+                binaryOutputStream.setOutputStream(storageStream.getOutputStream(0));
 
-            var data = binaryInputStream.readBytes(count);
-            binaryOutputStream.writeBytes(data, count);
+                var data = binaryInputStream.readBytes(count);
+                binaryOutputStream.writeBytes(data, count);
+            }
 
             // Avoid creating additional empty line if response comes in more pieces
             // and the split is made just between "\r" and "\n" (Win line-end).
@@ -77,7 +129,8 @@ ChannelListener.prototype =
                 this.ignore = true;
 
             // Let other listeners use the stream.
-            return storageStream.newInputStream(0);
+            if (storageStream)
+                return storageStream.newInputStream(0);
         }
         catch (err)
         {
@@ -93,10 +146,17 @@ ChannelListener.prototype =
     {
         try
         {
+            // Use wrappedJSObject to bypass IDL definition that doesn't return any value.
+            var newStream = this.proxyListener.wrappedJSObject.onDataAvailable(request, requestContext,
+                inputStream, offset, count);
+
+            if (newStream)
+                inputStream = newStream;
+
             var context = this.getContext(this.window);
             if (context)
             {
-                var newStream = this.onCollectData(request, context, inputStream, offset, count);
+                newStream = this.onCollectData(request, context, inputStream, offset, count);
                 if (newStream)
                     inputStream = newStream;
             }
@@ -131,7 +191,7 @@ ChannelListener.prototype =
     {
         try
         {
-            request = request.QueryInterface(Ci.nsIChannel);
+            this.request = request.QueryInterface(Ci.nsIHttpChannel);
 
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("tabCache.ChannelListener.onStartRequest; " +
@@ -146,8 +206,12 @@ ChannelListener.prototype =
                 // onStartRequest). Let's ignore the response if it should not be cached.
                 this.ignore = !this.shouldCacheRequest(request);
 
-                if (!this.ignore)
-                    this.proxyListener.onStartRequest(request, requestContext);
+                // Notify proxy listener.
+                this.proxyListener.onStartRequest(request, requestContext);
+
+                // Listen for incoming data.
+                if (!this.ignore && this.sink)
+                    this.setAsyncListener(request, this.sink.inputStream, this);
             }
         }
         catch (err)
@@ -178,7 +242,7 @@ ChannelListener.prototype =
         try
         {
             var context = this.getContext(this.window);
-            if (context && !this.ignore)
+            if (context)
                 this.proxyListener.onStopRequest(request, requestContext, statusCode);
         }
         catch (err)
@@ -198,10 +262,46 @@ ChannelListener.prototype =
         return null;
     },
 
+    /* nsIInputStreamCallback */
+    onInputStreamReady : function(stream)
+    {
+        try
+        {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady " +
+                    safeGetName(this.request));
+
+            if (stream instanceof Ci.nsIAsyncInputStream)
+            {
+                try
+                {
+                    this.onDataAvailable(this.request, null, stream, 0, stream.available());
+                }
+                catch (err)
+                {
+                    // stream.available throws an exception if the stream is closed,
+                    // which is ok, since this callback can be called even in this
+                    // situations.
+                }
+
+                // Listen for further incoming data.
+                if (!this.ignore)
+                    this.setAsyncListener(this.request, stream, this);
+            }
+        }
+        catch (err)
+        {
+            if (FBTrace.DBG_CACHE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION " +
+                    safeGetName(this.request), err);
+        }
+    },
+
     /* nsISupports */
     QueryInterface: function(iid)
     {
         if (iid.equals(Ci.nsIStreamListener) ||
+            iid.equals(Ci.nsIInputStreamCallback) ||
             iid.equals(Ci.nsISupportsWeakReference) ||
             iid.equals(Ci.nsITraceableChannel) ||
             iid.equals(Ci.nsISupports))
@@ -219,6 +319,8 @@ ChannelListener.prototype =
         return null;
     }
 }
+
+// ************************************************************************************************
 
 function safeGetName(request)
 {

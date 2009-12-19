@@ -121,16 +121,23 @@ top.FirebugChrome =
 
         // Initialize Firebug Tools & Firebug Icon menus.
         var firebugMenuPopup = $("fbFirebugMenuPopup");
-        var toolsMenu = $("menu_firebug");
-        if (toolsMenu)
-            toolsMenu.appendChild(firebugMenuPopup.cloneNode(true));
-
-        var iconMenu = $("fbFirebugMenu");
-        if (iconMenu)
-            iconMenu.appendChild(firebugMenuPopup.cloneNode(true));
+        this.initializeMenu($("menu_firebug"), firebugMenuPopup);
+        this.initializeMenu($("fbFirebugMenu"), firebugMenuPopup);
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("chrome.initialized ", window);
+    },
+
+    initializeMenu: function(parentMenu, popupMenu)
+    {
+        if (!parentMenu)
+            return;
+
+        if (parentMenu.getAttribute("initialized"))
+            return;
+
+        parentMenu.appendChild(popupMenu.cloneNode(true));
+        parentMenu.setAttribute("initialized", "true");
     },
 
     /**
@@ -240,9 +247,6 @@ top.FirebugChrome =
         if (inDetachedScope)  // then we are initializing in external window
         {
             Firebug.setChrome(this, "detached"); // 1.4
-
-            FBL.collapse($("fbMinimizeButton"), true);  // Closing the external window will minimize
-            FBL.collapse($("fbDetachButton"), true);    // we are already detached.
 
             var browser = context ? context.browser : this.getCurrentBrowser();
             Firebug.showContext(browser, context);
@@ -953,7 +957,10 @@ top.FirebugChrome =
 
         FBL.eraseNode(popup);
 
-        if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled"))
+        // Make sure the Copy action is only available if there is actually someting
+        // selected in the panel.
+        var sel = target.ownerDocument.defaultView.getSelection();
+        if (!this.contextMenuObject && !$("cmd_copy").getAttribute("disabled") && !sel.isCollapsed)
         {
             var menuitem = FBL.createMenuItem(popup, {label: "Copy"});
             menuitem.setAttribute("command", "cmd_copy");
@@ -1150,8 +1157,12 @@ top.FirebugChrome =
             "chrome,centerscreen,modal", "urn:mozilla:item:firebug@software.joehewitt.com", extensionManager.datasource);
     },
 
-    breakOnNext: function(context)
+    breakOnNext: function(context, event)
     {
+        // Avoid bubbling from associated options.
+        if (event.target.id != "cmd_breakOnNext")
+            return;
+
         if (!context)
         {
             if (FBTrace.DBG_BP)
@@ -1162,7 +1173,7 @@ top.FirebugChrome =
         var panel = panelBar1.selectedPanel;
 
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("Firebug chrome: breakOnNext for panel " + 
+            FBTrace.sysout("Firebug chrome: breakOnNext for panel " +
                 (panel ? panel.name : "NO panel"), panel);
 
         if (panel && panel.breakable)
@@ -1482,13 +1493,6 @@ if (top.hasOwnProperty('TidyBrowser'))
 }
 
 // ************************************************************************************************
-
-function ddd(text)
-{
-    const consoleService = Components.classes["@mozilla.org/consoleservice;1"].
-        getService(Components.interfaces["nsIConsoleService"]);
-    consoleService.logStringMessage(text + "");
-}
 
 function dddx()
 {

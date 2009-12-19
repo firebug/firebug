@@ -16,17 +16,17 @@ Firebug.InfoTip = extend(Firebug.Module,
     dispatchName: "infoTip",
     tags: domplate(
     {
-        infoTipTag: DIV({class: "infoTip"}),
+        infoTipTag: DIV({"class": "infoTip"}),
 
         colorTag:
             DIV({style: "background: $rgbValue; width: 100px; height: 40px"}, "&nbsp;"),
 
         imgTag:
-            DIV({class: "infoTipImageBox infoTipLoading"},
-                IMG({class: "infoTipImage", src: "$urlValue", repeat: "$repeat",
+            DIV({"class": "infoTipImageBox infoTipLoading"},
+                IMG({"class": "infoTipImage", src: "$urlValue", repeat: "$repeat",
                     onload: "$onLoadImage"}),
-                IMG({class: "infoTipBgImage", collapsed: true, src: "blank.gif"}),
-                DIV({class: "infoTipCaption"})
+                IMG({"class": "infoTipBgImage", collapsed: true, src: "blank.gif"}),
+                DIV({"class": "infoTipCaption"})
             ),
 
         onLoadImage: function(event)
@@ -140,10 +140,10 @@ Firebug.InfoTip = extend(Firebug.Module,
             var panelWidth = htmlElt.clientWidth;
             var panelHeight = htmlElt.clientHeight;
 
-            if (x+infoTip.offsetWidth+infoTipMargin > panelWidth-infoTipWindowPadding)
+            if (x+infoTip.offsetWidth+infoTipMargin > panelWidth)
             {
-                infoTip.style.left = "auto";
-                infoTip.style.right = ((panelWidth-x)+infoTipMargin) + "px";
+                infoTip.style.left = Math.max(0, panelWidth-(infoTip.offsetWidth+infoTipMargin)) + "px";
+                infoTip.style.right = "auto";
             }
             else
             {
@@ -166,6 +166,8 @@ Firebug.InfoTip = extend(Firebug.Module,
                 FBTrace.sysout("infotip.showInfoTip; top: " + infoTip.style.top +
                     ", left: " + infoTip.style.left + ", bottom: " + infoTip.style.bottom +
                     ", right:" + infoTip.style.right + ", offsetHeight: " + infoTip.offsetHeight +
+                    ", offsetWidth: " + infoTip.offsetWidth +
+                    ", x: " + x + ", panelWidth: " + panelWidth +
                     ", y: " + y + ", panelHeight: " + panelHeight);
 
             infoTip.setAttribute("active", "true");
@@ -188,6 +190,10 @@ Firebug.InfoTip = extend(Firebug.Module,
 
     onMouseMove: function(event, browser)
     {
+        // Ignore if the mouse is moving over the existing info tip.
+        if (getAncestorByClass(event.target, "infoTip"))
+            return;
+
         if (browser.currentPanel)
         {
             var x = event.clientX, y = event.clientY;

@@ -1,4 +1,4 @@
-8/29/2007/* See license.txt for terms of usage */
+/* See license.txt for terms of usage */
 
 FBL.ns(function() { with (FBL) {
 
@@ -28,7 +28,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
     highlightObject: function(element, context, highlightType, boxFrame)
     {
-        if(context && context.window.document)
+        if(context && context.window && context.window.document)
         {
             context.window.document.addEventListener("mousemove", function(event)
             {
@@ -104,12 +104,15 @@ Firebug.Inspector = extend(Firebug.Module,
         var htmlPanel = Firebug.chrome.switchToPanel(context, "html");
 
         if (Firebug.isDetached())
-            Firebug.chrome.focus();
+            context.window.focus();
         else if (Firebug.isMinimized())
             Firebug.showBar(true);
 
         htmlPanel.panelNode.focus();
         htmlPanel.startInspecting();
+
+        if (context.stopped)
+            Firebug.Debugger.thaw(context);
 
         if (context.hoverNode)
             this.inspectNode(context.hoverNode);
@@ -120,7 +123,7 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
-        if (node && node.firebugIgnore)
+        if (node && node.firebugIgnore && !node.fbProxyFor)
             return;
 
         var context = this.inspectingContext;
@@ -130,6 +133,9 @@ Firebug.Inspector = extend(Firebug.Module,
             context.clearTimeout(this.inspectTimeout);
             delete this.inspectTimeout;
         }
+
+        if(node && node.fbProxyFor)
+            node = node.fbProxyFor;
 
         this.highlightObject(node, context, "frame");
 
@@ -141,6 +147,7 @@ Firebug.Inspector = extend(Firebug.Module,
             {
                 Firebug.chrome.select(node);
             }, inspectDelay);
+            dispatch(this.fbListeners, "onInspectNode", [context, node] );
         }
     },
 
@@ -150,6 +157,9 @@ Firebug.Inspector = extend(Firebug.Module,
             return;
 
         var context = this.inspectingContext;
+
+        if (context.stopped)
+            Firebug.Debugger.freeze(context);
 
         if (this.inspectTimeout)
         {
@@ -169,9 +179,22 @@ Firebug.Inspector = extend(Firebug.Module,
 
         htmlPanel.stopInspecting(htmlPanel.selection, cancelled);
 
+        dispatch(this.fbListeners, "onStopInspecting", [context] );
+
         this.inspectNode(null);
     },
+    
+    inspectFromContextMenu: function(elt)
+    {
+        var context, htmlPanel;
 
+        Firebug.toggleBar(true);
+        Firebug.chrome.select(elt, "html");
+        context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
+        htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", false);
+        htmlPanel.panelNode.focus();
+    },
+    
     inspectNodeBy: function(dir)
     {
         var target;
@@ -335,6 +358,7 @@ Firebug.Inspector = extend(Firebug.Module,
     {
         try {
             win.removeEventListener("mouseover", context.onPreInspectMouseOver, true);
+            this.hideQuickInfoBox();
         } catch (ex) {
             // Get unfortunate errors here sometimes, so let's just ignore them
             // since the window is going away anyhow
@@ -349,8 +373,8 @@ Firebug.Inspector = extend(Firebug.Module,
 
     showPanel: function(browser, panel)
     {
-        var chrome = Firebug.chrome,
-            disabled = !panel || !panel.context.loaded;
+        var chrome = Firebug.chrome;
+        var disabled = !panel || !panel.context.loaded;
 
         chrome.setGlobalAttribute("cmd_toggleInspecting", "disabled", disabled);
         //chrome.setGlobalAttribute("menu_firebugInspect", "disabled", disabled);
@@ -385,23 +409,42 @@ Firebug.Inspector = extend(Firebug.Module,
         if (elements.length)
             return elements[0];*/
     },
-    
+
     toggleQuickInfoBox: function()
     {
-        if(quickInfoBox.popupVisible)
+        var qiBox = $('fbQuickInfoPanel');
+
+        if (qiBox.state==="open")
             quickInfoBox.hide();
-            
+
         quickInfoBox.boxEnabled = !quickInfoBox.boxEnabled;
-            
+
         Firebug.setPref(Firebug.prefDomain, "showQuickInfoBox", quickInfoBox.boxEnabled);
     },
-    
+
     hideQuickInfoBox: function()
     {
-        if(quickInfoBox.popupVisible)
+        var qiBox = $('fbQuickInfoPanel');
+
+        if (qiBox.state==="open")
             quickInfoBox.hide();
 
         this.inspectNode(null);
+    },
+
+    quickInfoBoxDragStart: function(event)
+    {
+        quickInfoBox.dragStart(event);
+    },
+
+    quickInfoBoxDrag: function(event)
+    {
+        quickInfoBox.drag(event);
+    },
+
+    quickInfoBoxDragEnd: function(event)
+    {
+        quickInfoBox.dragEnd(event);
     }
 });
 
@@ -459,7 +502,7 @@ function getImageMapHighlighter(context)
             if(!canvas)
             {
                 canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-                canvas.firebugIgnore = true;
+                canvas.wrappedJSObject.firebugIgnore = true;
                 canvas.id = "firebugCanvas";
                 canvas.className = "firebugCanvas";
                 canvas.width = context.window.innerWidth;
@@ -476,7 +519,7 @@ function getImageMapHighlighter(context)
     {
         context.imageMapHighlighter =
         {
-            "show": function(state)
+            show: function(state)
             {
                 if(!canvas)
                     init();
@@ -484,7 +527,7 @@ function getImageMapHighlighter(context)
                 canvas.style.display = state?'block':'none';
             },
 
-            "getImages": function(mapName, multi)
+            getImages: function(mapName, multi)
             {
                 var i, eltsLen,
                     elts = [],
@@ -523,7 +566,7 @@ function getImageMapHighlighter(context)
                 return images;
             },
 
-            "highlight": function(eltArea, multi)
+            highlight: function(eltArea, multi)
             {
                 var i, j, v, vLen, images, imagesLen, rect, shape, clearForFirst;
 
@@ -581,7 +624,7 @@ function getImageMapHighlighter(context)
                     return;
             },
 
-            "mouseMoved": function(event)
+            mouseMoved: function(event)
             {
                 var idata = ctx.getImageData(event.layerX, event.layerY, 1, 1);
 
@@ -592,7 +635,7 @@ function getImageMapHighlighter(context)
                     this.show(false);
             },
 
-            "destroy": function()
+            destroy: function()
             {
                 canvas = null;
                 ctx = null;
@@ -607,39 +650,41 @@ function getImageMapHighlighter(context)
 quickInfoBox =
 {
     boxEnabled: undefined,
-    
-    popupVisible: false,
-    
-    boxLeft: true,
+    dragging: false,
+    storedX: null,
+    storedY: null,
+    prevX: null,
+    prevY: null,
 
     show: function(element)
     {
         if (!this.boxEnabled || !element)
             return;
-    
+
         var vbox, lab,
             needsTitle = false,
             needsTitle2 = false,
-            _this = this,
             domAttribs = ['nodeName', 'id', 'name', 'offsetWidth', 'offsetHeight'],
             cssAttribs = ['position'],
             compAttribs = ['width', 'height', 'zIndex', 'position', 'top', 'right', 'bottom', 'left',
                            'margin-top', 'margin-right', 'margin-bottom', 'margin-left', 'color', 'backgroundColor',
                            'fontFamily', 'cssFloat', 'display', 'visibility'],
-            XULQIP = $('fbQuickInfoPanel');
+            qiBox = $('fbQuickInfoPanel');
 
-        if (!this.popupVisible)
+        if (qiBox.state==="closed")
         {
-            XULQIP.hidePopup();
-            XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
-            XULQIP.addEventListener("mousemove", function(){_this.move();}, false);
-            this.popupVisible = true;
+            qiBox.hidePopup();
+
+            this.storedX = this.storedX || $('content').tabContainer.boxObject.screenX + 5;
+            this.storedY = this.storedY || $('content').tabContainer.boxObject.screenY + 35;
+
+            qiBox.openPopupAtScreen(this.storedX, this.storedY, false);
         }
 
-        XULQIP.removeChild(XULQIP.firstChild);
+        qiBox.removeChild(qiBox.firstChild);
         vbox = document.createElement("vbox");
-        XULQIP.appendChild(vbox);
-        
+        qiBox.appendChild(vbox);
+
         needsTitle = this.addRows(element, vbox, domAttribs);
         needsTitle2 = this.addRows(element.style, vbox, cssAttribs);
 
@@ -658,30 +703,69 @@ quickInfoBox =
 
         this.addRows(element, vbox, compAttribs, true);
     },
-    
+
     hide: function()
     {
-        this.popupVisible = false;
-        XULQIP = $('fbQuickInfoPanel');
-        XULQIP.hidePopup();
+        this.prevX = null;
+        this.prevY = null;
+        qiBox = $('fbQuickInfoPanel');
+        qiBox.hidePopup();
     },
-    
-    move: function()
+
+    dragStart: function(event)
     {
-        var XULQIP = $('fbQuickInfoPanel');
-
-        XULQIP.hidePopup();
-
-        if (this.boxLeft)
-            XULQIP.openPopup($('content').tabContainer, "after_end", -5, 5, true);
-        else
-            XULQIP.openPopup($('content').tabContainer, "after_start", 5, 5, true);
-
-        this.boxLeft = !this.boxLeft;
+        this.dragging = true;
     },
-    
+
+    dragEnd: function(event)
+    {
+        this.dragging = false;
+        this.prevX = null;
+        this.prevY = null;
+    },
+
+    drag: function(event)
+    {
+        if(this.dragging)
+        {
+            var diffX, diffY, newX, newY,
+                qiBox = $('fbQuickInfoPanel'),
+                boxX = qiBox.boxObject.screenX,
+                boxY = qiBox.boxObject.screenY,
+                x = event.screenX,
+                y = event.screenY;
+
+            this.prevX = this.prevX || x;
+            this.prevY = this.prevY || y;
+            diffX = x - this.prevX;
+            diffY = y - this.prevY;
+            newX = boxX + diffX;
+            newY = boxY + diffY;
+
+            if(newX < 0)
+                newX = 0;
+
+            if(newY < 0)
+                newY = 0;
+
+            if(newY + qiBox.boxObject.height > window.screen.height - 5)
+                newY = window.screen.height - qiBox.boxObject.height - 5;
+
+            qiBox.hidePopup();
+            qiBox.openPopupAtScreen(newX, newY, false);
+
+            this.prevX = x;
+            this.prevY = y;
+            this.storedX = boxX;
+            this.storedY = boxY;
+        }
+    },
+
     addRows: function(domBase, vbox, attribs, computedStyle)
     {
+        if(!domBase)
+            return;
+
         var i, cs, desc, hbox, lab, value,
             needsTitle = false,
             attribsLen = attribs.length;
@@ -692,7 +776,7 @@ quickInfoBox =
             {
                 cs = getNonFrameBody(domBase).ownerDocument.defaultView.getComputedStyle(domBase, null);
                 value = cs.getPropertyValue(attribs[i]);
-                
+
                 if (value && /rgb\(\d+,\s\d+,\s\d+\)/.test(value))
                     value = rgbToHex(value);
             }
@@ -714,7 +798,7 @@ quickInfoBox =
                 vbox.appendChild(hbox);
             }
         }
-        
+
         return needsTitle;
     }
 }
@@ -731,7 +815,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
     {
         return false; // (element instanceof XULElement);
     },
-    
+
     highlight: function(context, element)
     {
         if (this.doNotHighlight(element))
@@ -753,7 +837,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         if(element.tagName !== "AREA")
         {
             quickInfoBox.show(element);
-        
+
             var nodes = this.getNodes(context, element);
 
             move(nodes.top, x, y-edgeSize);
@@ -791,6 +875,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
                             FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body "+body+" "+exc, exc);
                     }
                 }
+
+                createProxiesForDisabledElements(body);
             }
         }
         else
@@ -810,7 +896,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
         {
             for (var edge in nodes)
                 body.removeChild(nodes[edge]);
-                
+
             quickInfoBox.hide();
         }
     },
@@ -824,7 +910,7 @@ Firebug.Inspector.FrameHighlighter.prototype =
             function createEdge(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugHighlight";
                 return div;
             }
@@ -930,7 +1016,8 @@ BoxModelHighlighter.prototype =
                     styles.paddingLeft);
             resize(nodes.content, w, h);
 
-            var showLines = Firebug.showRulers && boxFrame;
+            // element.tagName !== "BODY" for issue 2447. hopefully temporary, robc
+            var showLines = Firebug.showRulers && boxFrame && element.tagName !== "BODY";
             if (showLines)
             {
                 var offsetParent = element.offsetParent;
@@ -1040,7 +1127,7 @@ BoxModelHighlighter.prototype =
                     body.removeChild(nodes.lines[line]);
             }
         }
-        
+
         quickInfoBox.hide();
     },
 
@@ -1056,7 +1143,7 @@ BoxModelHighlighter.prototype =
             function createRuler(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugRuler firebugRuler"+name;
                 return div;
             }
@@ -1064,7 +1151,7 @@ BoxModelHighlighter.prototype =
             function createBox(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugLayoutBox firebugLayoutBox"+name;
                 return div;
             }
@@ -1072,7 +1159,7 @@ BoxModelHighlighter.prototype =
             function createLine(name)
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
-                div.firebugIgnore = true;
+                unwrapObject(div).firebugIgnore = true;
                 div.className = "firebugLayoutLine firebugLayoutLine"+name;
                 return div;
             }
@@ -1145,6 +1232,34 @@ function attachStyles(context, body)
 
     if (!context.highlightStyle.parentNode || context.highlightStyle.ownerDocument != doc)
         addStyleSheet(body.ownerDocument, context.highlightStyle);
+}
+
+function createProxiesForDisabledElements(body)
+{
+    var i, rect, div,
+        doc = body.ownerDocument,
+        nodes = doc.getElementsByTagName("*");
+
+    for(i = 0; i < nodes.length; i++)
+    {
+        if(nodes[i].hasAttribute("disabled") && !nodes[i].fbHasProxyElement)
+        {
+            rect = nodes[i].getBoundingClientRect();
+
+            div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
+            div.className = "fbProxyElement";
+            div.style.left = rect.left + "px";
+            div.style.top = rect.top + body.scrollTop + "px";
+            div.style.width = rect.width + "px";
+            div.style.height = rect.height + "px";
+            unwrapObject(div).firebugIgnore = true;
+
+            div.fbProxyFor = nodes[i];
+            nodes[i].fbHasProxyElement = true;
+
+            body.appendChild(div);
+        }
+    }
 }
 
 function rgbToHex(value)

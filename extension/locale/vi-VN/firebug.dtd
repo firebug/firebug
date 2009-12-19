@@ -17,14 +17,14 @@
 <!ENTITY firebug.Documentation "Tài liệu...">
 <!ENTITY firebug.KeyShortcuts "Phím tắt...">
 <!ENTITY firebug.Forums "Nhóm thảo luận...">
-<!ENTITY firebug.Issues "Bộ theo dõi Vấn đề...">
+<!ENTITY firebug.Issues "Trình theo dõi Vấn đề...">
 <!ENTITY firebug.Donate "Đóng góp...">
 <!ENTITY firebug.About "Giới thiệu...">
 <!ENTITY firebug.AlwaysOpenInWindow "Luôn Mở trong Cửa Sổ Mới">
 <!ENTITY firebug.ShowFirebug "Mở Firebug">
 <!ENTITY firebug.DetachFirebug "Mở Firebug trong Cửa Sổ Mới">
 <!ENTITY firebug.OpenWith "Mở bằng Trình soạn thảo">
-<!ENTITY firebug.CloseFirebug "Đóng Firebug">
+<!ENTITY firebug.CloseFirebug "Dừng kích hoạt Firebug trên trang web này">
 <!ENTITY firebug.Permissions "Trang...">
 <!ENTITY firebug.ConfigureEditors "Cấu hình Trình soạn thảo">
 <!ENTITY firebug.CommandLine "Dòng lệnh">

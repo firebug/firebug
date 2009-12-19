@@ -112,18 +112,20 @@ Firebug.Profiler = extend(Firebug.Module,
         {
             if (script.callCount)
             {
-                var sourceLink = FBL.getSourceLinkForScript(script, context);
-                if (sourceLink && sourceLink.href in sourceFileMap)
+                if (!Firebug.filterSystemURLs || !isSystemURL(script.fileName))
                 {
-                    var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,
-                        script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime, sourceLink);
-                    calls.push(call);
+                    var sourceLink = FBL.getSourceLinkForScript(script, context);
+                    if (sourceLink && sourceLink.href in sourceFileMap)
+                    {
+                        var call = new ProfileCall(script, context, script.callCount, script.totalExecutionTime,
+                                script.totalOwnExecutionTime, script.minExecutionTime, script.maxExecutionTime, sourceLink);
+                        calls.push(call);
 
-                    totalCalls += script.callCount;
-                    totalTime += script.totalOwnExecutionTime;
-
-                    script.clearProfileData();
+                        totalCalls += script.callCount;
+                        totalTime += script.totalOwnExecutionTime;
+                    }
                 }
+                script.clearProfileData();
             }
         }});
 
@@ -146,11 +148,11 @@ Firebug.Profiler = extend(Firebug.Module,
 
         if (totalCalls > 0)
         {
-            var captionBox = getElementByClass(groupRow, "profileCaption");
+            var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             if (!groupRow.customMessage)
                 captionBox.textContent = $STR("Profile");
-            var timeBox = getElementByClass(groupRow, "profileTime");
-            timeBox.textContent = $STRF("ProfileTime", [totalTime, totalCalls]);
+            var timeBox = groupRow.getElementsByClassName("profileTime").item(0);
+            timeBox.textContent = $STRP("plural.Profile_Time", [totalTime, totalCalls], 1);
 
             var groupBody = groupRow.lastChild;
             var sizer = Firebug.Profiler.ProfileTable.tag.replace({}, groupBody);
@@ -169,7 +171,7 @@ Firebug.Profiler = extend(Firebug.Module,
         }
         else
         {
-            var captionBox = getElementByClass(groupRow, "profileCaption");
+            var captionBox = groupRow.getElementsByClassName("profileCaption").item(0);
             captionBox.textContent = $STR("NothingToProfile");
         }
     }
@@ -381,7 +383,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     {
         try
         {
-            var fn = call.script.functionObject.getWrappedValue();
+            var fn = unwrapIValue(call.script.functionObject);
             return FirebugReps.Func.getTooltip(fn, call.context);
         }
         catch (exc)
@@ -393,7 +395,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     getContextMenuItems: function(call, target, context)
     {
-        var fn = call.script.functionObject.getWrappedValue();
+        var fn = unwrapIValue(call.script.functionObject);
         return FirebugReps.Func.getContextMenuItems(fn, call.script, context);
     }
 });

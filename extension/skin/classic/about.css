@@ -1,0 +1,19 @@
+/* See license.txt for terms of usage */
+
+/************************************************************************************************/
+/* Firebug About Dialog Overlay */
+
+#translatorsBox,
+#contributorsBox {
+    height: 150px !important;
+    overflow: auto;
+    border: 2px rgb(192, 192, 192) solid;
+    padding: 5px;
+}
+
+#extensionTranslators,
+#extensionContributors,
+#extensionDevelopers,
+#extensionCreatorLabel {
+    border-top: none !important;
+}

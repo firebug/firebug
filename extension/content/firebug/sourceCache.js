@@ -322,21 +322,5 @@ function getCacheKey(context)
      }
 }
 
-function doublePostForbiddenMessage(url)
-{
-    var msg = "Firebug needs to POST to the server to get this information for url: "+url+"\n";
-    msg += " This second POST can interfere with some sites.\n"
-    msg += " If you want to send the POST again, open a new tab in Firefox, use URL 'about:config', ";
-    msg += "set boolean value 'extensions.firebug.allowDoublePost' to true\n";
-    msg += " This value is reset every time you restart Firefox\n";
-    msg += " This problem will disappear when https://bugzilla.mozilla.org/show_bug.cgi?id=430155 is shipped\n";
-
-    if (FBTrace.DBG_CACHE)
-        FBTrace.sysout(msg);
-
-    return msg.split('\n');
-}
-
 // ************************************************************************************************
-
 }});

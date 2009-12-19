@@ -98,6 +98,7 @@
     cursor: pointer;
     display: none;
     height: 15px;
+    margin-right: 0 !important;
 }
 
 /* Display brekpoint disc */
@@ -129,6 +130,10 @@
     width: 3px;
 }
 
+.netInfoRow .netRowHeader {
+    display: table-cell;
+}
+
 /************************************************************************************************/
 /* Column visibility */
 
@@ -153,10 +158,6 @@
 
 .netRow.loaded {
     background: #FFFFFF;
-}
-
-.netHrefCol:hover {
-    background: LightYellow;
 }
 
 .netRow.loaded:hover {
@@ -196,7 +197,7 @@
 .netHrefLabel {
     -moz-box-sizing: padding-box;
     overflow: hidden;
-    z-index: 100;
+    z-index: 10;
     position: absolute;
     padding-left: 18px;
     padding-top: 1px;
@@ -211,12 +212,7 @@
     padding-bottom: 3px;
     max-width: 100%;
     background: #FFFFFF;
-}
-
-.netHrefCol:hover > .netStatusLabel,
-.netHrefCol:hover > .netDomainLabel,
-.netHrefCol:hover > .netHrefLabel {
-    display: none;
+    z-index: 200;
 }
 
 .netHrefCol:hover > .netFullHrefLabel {
@@ -263,7 +259,24 @@
 
 /************************************************************************************************/
 
-.netBar {
+.netLoadingIcon {
+    position: absolute;
+    border: 0;
+    margin-left: 14px;
+    width: 16px;
+    height: 16px;
+    background: transparent no-repeat 0 0;
+    background-image: url(chrome://firebug/skin/loading_16.gif);
+    display:inline-block;
+}
+
+.loaded .netLoadingIcon {
+    display: none;
+}
+
+/************************************************************************************************/
+
+.netBar, .netSummaryBar {
     position: relative;
     border-right: 50px solid transparent;
 }
@@ -311,6 +324,7 @@
     bottom: 0;
     background: #FFFFFF url(chrome://firebug/skin/netBarResponded.gif) repeat-x;
     z-index:20;
+    min-width: 1px;
 }
 
 .netReceivingBar {
@@ -403,6 +417,29 @@
 .timeInfoTipCell.elapsedTime {
     text-align: right;
     padding-right: 8px;
+}
+
+/************************************************************************************************/
+/* Size Info tip */
+
+.sizeInfoLabelCol {
+    font-weight: bold;
+    padding-right: 10px;
+    font-family: Lucida Grande, Tahoma, sans-serif;
+    font-size: 11px;
+}
+
+.sizeInfoSizeCol {
+    font-weight: bold;
+}
+
+.sizeInfoDetailCol {
+    color: gray;
+    text-align: right;
+}
+
+.sizeInfoDescCol {
+    font-style: italic;
 }
 
 /************************************************************************************************/
@@ -589,8 +626,12 @@
 }
 
 .netInfoPostParamsTable,
-.netInfoPostPartsTable {
+.netInfoPostPartsTable,
+.netInfoPostJSONTable,
+.netInfoPostXMLTable,
+.netInfoPostSourceTable {
     margin-bottom: 10px;
+    width: 100%;
 }
 
 .netInfoPostContentType {
@@ -606,8 +647,23 @@
 }
 
 /************************************************************************************************/
+/* Request & Response Headers */
 
-.netActivationRow {
+.netHeadersViewSource {
+    color: #bdbdbd;
+    margin-left: 200px;
+    font-weight: normal;
+}
+
+.netHeadersViewSource:hover {
+    color: blue;
+    cursor: pointer;
+}
+
+/************************************************************************************************/
+
+.netActivationRow,
+.netPageSeparatorRow {
     background: rgb(229, 229, 229) !important;
     font-weight: normal;
     color: black;
@@ -617,6 +673,32 @@
     background: url(chrome://firebug/skin/infoIcon.png) no-repeat 3px 2px;
     padding-left: 22px;
 }
+
+/************************************************************************************************/
+
+.netPageSeparatorRow {
+    height: 5px !important;
+}
+
+.netPageSeparatorLabel {
+    padding-left: 22px;
+    height: 5px !important;
+}
+
+.netPageRow {
+    background-color: rgb(255, 255, 255);
+}
+
+.netPageRow:hover {
+    background: #EFEFEF;
+}
+
+.netPageLabel {
+    padding: 1px 0 2px 18px !important;
+    font-weight: bold;
+}
+
+/************************************************************************************************/
 
 .netActivationRow > .netCol {
     border-bottom: 2px solid;

@@ -5,6 +5,16 @@ Added template and version numbers, johnjbarton@johnjbarton.com
 Added support for js-doc-tolkit, odvarko@gmail.com -->
 <project name="firebug" default="createBranchXPI">
 
+    <condition property="isWindows">
+        <os family="windows" />
+    </condition>
+    
+    <condition property="isUnix">
+        <os family="unix" />
+    </condition>
+
+    <property environment="env"/>
+
     <!-- Setting properties -->
     <target name="local-check">
         <available file="${basedir}/local.properties"
@@ -18,11 +28,25 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
         <property file="local.properties"/>
     </target>
 
+    <target name="properties-default-win" if="isWindows">
+        <input
+            message="Please enter Profile folder name:"
+            addproperty="profilefolder"
+        />
+        <property name="install.dir" value="${env.APPDATA}\Mozilla\Firefox\Profiles\${profilefolder}"/>
+    </target>
+
+    <target name="properties-default-unix" if="isUnix">
+        <input
+            message="Please enter Profile folder name:"
+            addproperty="profilefolder"
+        />
+        <property name="install.dir" value="OS Specific Path to:/Mozilla/Firefox/Profiles/${profilefolder}"/>
+    </target>
+
     <target name="no-properties-local"
             unless="local.properties.available"
-            depends="local-check">
-        <echo message="No local properties file, setting defaults"/>
-        <property name="install.dir" value="OperatingSystemPathTo:Profiles/fireclipse/"/>
+            depends="local-check,properties-default-win,properties-default-unix">
         <property name="update.path" value="http://getfirebug.com/releases"/>
     </target>
 
@@ -235,20 +259,22 @@ Added support for js-doc-tolkit, odvarko@gmail.com -->
 
     <!-- Support for generating docs from Firebug source code using js-doc-toolkit
         See the output in $svn/jsdoc/out directory -->
-    <property name="jsdoc.dir" value="../../jsdoc/"/>
-    <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
-    <property name="jsdoc-output.dir" value="${jsdoc.dir}/out/"/>
+    <target name="jsdoc" depends="properties-local, no-properties-local"
+        description="Generate documentation">
 
-    <path id="jsdoctoolkit">
-        <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
-        <fileset dir="${jsdoc.dir}" includes="*.jar"/>
-    </path>
+        <property name="jsdoc.dir" value="../../jsdoc/"/>
+        <property name="jsdoc-toolkit.dir" value="${jsdoc.dir}/jsdoc-toolkit-2.3.0/"/>
+        <property name="jsdoc-output.dir" value="${jsdoc.dir}/out/"/>
 
-    <taskdef name="jsdoctoolkit"
-        classpathref="jsdoctoolkit"
-        classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+        <path id="jsdoctoolkit">
+            <!-- Rhino js.jar 1.7.R2 must be used with jsdoctoolkit-ant-task-1.0.1.jar -->
+            <fileset dir="${jsdoc.dir}" includes="*.jar"/>
+        </path>
 
-    <target name="jsdoc">
+        <taskdef name="jsdoctoolkit"
+            classpathref="jsdoctoolkit"
+            classname="uk.co.darrenhurley.ant.tasks.JsDocToolkit"/>
+
         <echo message="Generate doc from Firebug source ($svn/jsdoc/out/)."/>
 
         <!-- Clean the output direcotory -->

@@ -1,0 +1,50 @@
+<!ENTITY firebug.Firebug "Firebug">
+<!ENTITY firebug.Close "Zatvori">
+<!ENTITY firebug.View "Vidi">
+<!ENTITY firebug.Help "Pomoc">
+<!ENTITY firebug.Vertical "Vertical Panes">
+<!ENTITY firebug.Run "Pokreni">
+<!ENTITY firebug.Copy "Kopiraj">
+<!ENTITY firebug.CopyBookmarklet "Copy the script as a bookmarklet.">
+<!ENTITY firebug.Options "Postavke">
+<!ENTITY firebug.TextSize "Velicina teksta">
+<!ENTITY firebug.IncreaseTextSize "Povecaj velicinu teksta">
+<!ENTITY firebug.DecreaseTextSize "Smanji velicinu teksta">
+<!ENTITY firebug.NormalTextSize "Normalna velicina teksta">
+<!ENTITY firebug.ShowTooltips "Vidi prosli savjet">
+<!ENTITY firebug.ShadeBoxModel "Shade Box Model">
+<!ENTITY firebug.Website "Firebug stranica...">
+<!ENTITY firebug.Documentation "Dokumentacija...">
+<!ENTITY firebug.KeyShortcuts "Skracenice...">
+<!ENTITY firebug.Forums "Discussion Group...">
+<!ENTITY firebug.Issues "Issue Tracker...">
+<!ENTITY firebug.Donate "Pridonesi...">
+<!ENTITY firebug.About "O...">
+<!ENTITY firebug.AlwaysOpenInWindow "Uvijek otvori u novom prozoru">
+<!ENTITY firebug.ShowFirebug "Otvori Firebug">
+<!ENTITY firebug.DetachFirebug "Otvori Firebug u novom prozoru">
+<!ENTITY firebug.OpenWith "Otvori sa editorom">
+<!ENTITY firebug.CloseFirebug "Deaktiviraj Firebug za ovu stranicu">
+<!ENTITY firebug.Permissions "Stranice">
+<!ENTITY firebug.ConfigureEditors "Konfiguriraj editora">
+<!ENTITY firebug.CommandLine "Komandna traka">
+<!ENTITY firebug.Search "Trazi">
+<!ENTITY firebug.Continue "Nastavi (F8)">
+<!ENTITY firebug.StepOver "Step Over (F10)">
+<!ENTITY firebug.StepInto "Step Into (F11)">
+<!ENTITY firebug.StepOut "Step Out">
+<!ENTITY firebug.BreakOnErrors "Break on Errors">
+<!ENTITY firebug.Inspect "Pregledaj">
+<!ENTITY firebug.InspectElement "Pregledaj element">
+<!ENTITY firebug.InspectTooltip "Click an element in the page to inspect">
+<!ENTITY firebug.Edit "Izmijeni">
+<!ENTITY firebug.EditHTMLTooltip "Izmijeni ovaj HTML">
+<!ENTITY firebug.EditCSSTooltip "Edit this style sheet">
+<!ENTITY firebug.Profile "Profil">
+<!ENTITY firebug.ProfileScript "JavaScript profil">
+<!ENTITY firebug.Clear "Ocisti">
+<!ENTITY firebug.ClearConsole "Ocisti konzolu">
+<!ENTITY firebug.ClearTooltip "Ocisti konzolu">
+<!ENTITY firebug.All "Sve">
+<!ENTITY firebug.Images "Slike">
+<!ENTITY firebug.Flash "Flash">

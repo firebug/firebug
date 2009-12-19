@@ -224,16 +224,19 @@ function FirebugConsoleHandler(context, win)
 
     this.error = function()
     {
-        Firebug.Errors.increaseCount(context);
         if (arguments.length == 1)
+        {
             logAssert("error", arguments);  // add more info based on stack trace
+        }
         else
+        {
+            Firebug.Errors.increaseCount(context);
             logFormatted(arguments, "error", true);  // user already added info
+        }
     };
 
     this.exception = function()
     {
-        Firebug.Errors.increaseCount(context);
         logAssert("error", arguments);
     };
 
@@ -261,12 +264,6 @@ function FirebugConsoleHandler(context, win)
             o = o.documentElement;
 
         Firebug.Console.log(o, context, "dirxml", Firebug.HTMLPanel.SoloElement);
-    };
-
-    this.trace = function()
-    {
-        var trace = getJSDUserStack();
-        Firebug.Console.log(trace, context, "stackTrace");
     };
 
     this.group = function()
@@ -403,29 +400,33 @@ function FirebugConsoleHandler(context, win)
         else
             var msg = args[0];
 
-        var sourceName = win.location;
-        var lineNumber = 0;
-        if (msg.stack)
+        if (Firebug.errorStackTrace)
+        {
+            var trace = Firebug.errorStackTrace;
+            delete Firebug.errorStackTrace;
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from errorStackTrace", trace);
+        }
+        else if (msg.stack)
+        {
             var trace = parseToStackTrace(msg.stack);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from msg.stack", trace);
+        }
         else
         {
             var trace = getJSDUserStack();
-            if (trace && trace.frames && trace.frames[0])
-            {
-                var frame = trace.frames[0];
-                sourceName = normalizeURL(frame.script.fileName);
-                lineNumber = frame.line;
-                if (lineNumber && sourceName)
-                    var sourceLine = context.sourceCache.getLine(sourceName, lineNumber);
-            }
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
-        if (msg.fileName)
-            sourceName = msg.fileName;
-        if (msg.lineNumber)
-            lineNumber = msg.lineNumber;
 
-        var errorObject = new FBL.ErrorMessage(msg, sourceName,
-                        lineNumber, (sourceLine?sourceLine:""), category, context, trace);
+        var errorObject = new FBL.ErrorMessage(msg, (msg.fileName?msg.fileName:win.location), (msg.lineNumber?msg.lineNumber:0), "", category, context, trace);
+
+
+        if (trace && trace.frames && trace.frames[0])
+           errorObject.correctWithStackTrace(trace);
+
+        errorObject.resetSource();
 
         var objects = errorObject;
         if (args.length > 1)

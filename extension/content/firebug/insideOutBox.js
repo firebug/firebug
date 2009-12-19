@@ -167,7 +167,7 @@ InsideOutBox.prototype =
             for (; parentBox; parentBox = this.getParentObjectBox(parentBox))
             {
                 setClass(parentBox, "open");
-                labelBox = getElementByClass(parentBox, 'nodeLabelBox');
+                labelBox = parentBox.getElementsByClassName('nodeLabelBox').item(0);
                 if (labelBox)
                     labelBox.setAttribute('aria-expanded', 'true')
             }
@@ -185,7 +185,7 @@ InsideOutBox.prototype =
             var firstChild = this.view.getChildObject(objectBox.repObject, 0);
             this.populateChildBox(firstChild, nodeChildBox);
         }
-        var labelBox = getElementByClass(objectBox, 'nodeLabelBox');
+        var labelBox = objectBox.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'true');
         setClass(objectBox, "open");
@@ -194,8 +194,8 @@ InsideOutBox.prototype =
     contractObjectBox: function(objectBox)
     {
         removeClass(objectBox, "open");
-        var nodeLabel = getElementByClass(objectBox, "nodeLabel");
-        var labelBox = getElementByClass(nodeLabel, 'nodeLabelBox');
+        var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
+        var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', 'false');
     },
@@ -203,8 +203,8 @@ InsideOutBox.prototype =
     toggleObjectBox: function(objectBox, forceOpen)
     {
         var isOpen = hasClass(objectBox, "open");
-        var nodeLabel = getElementByClass(objectBox, "nodeLabel");
-        var labelBox = getElementByClass(nodeLabel, 'nodeLabelBox');
+        var nodeLabel = objectBox.getElementsByClassName("nodeLabel").item(0);
+        var labelBox = nodeLabel.getElementsByClassName('nodeLabelBox').item(0);
         if (labelBox)
             labelBox.setAttribute('aria-expanded', isOpen);
         if (!forceOpen && isOpen)
@@ -442,7 +442,7 @@ InsideOutBox.prototype =
 
     getChildObjectBox: function(objectBox)
     {
-        return getElementByClass(objectBox, "nodeChildBox");
+        return objectBox.getElementsByClassName("nodeChildBox").item(0);
     },
 
     findChildObjectBox: function(parentNodeBox, repObject)
@@ -458,6 +458,25 @@ InsideOutBox.prototype =
             if (childBox.repObject == repObject)
                 return childBox;
         }
+    },
+
+    /**
+     * Determines if the given node is an ancestor of the current root.
+     */
+    isInExistingRoot: function(node)
+    {
+        if (FBTrace.DBG_HTML)
+          FBTrace.sysout("insideOutBox.isInExistingRoot for ", node);
+        var parentNode = node;
+        while (parentNode && parentNode != this.rootObject)
+        {
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout(parentNode.localName+" < ", parentNode);
+            var parentNode = this.view.getParentObject(parentNode);
+            if (FBTrace.DBG_HTML)
+                FBTrace.sysout((parentNode?" (parent="+parentNode.localName+")":" (null parentNode)"+"\n"), parentNode);
+        }
+        return parentNode == this.rootObject;
     },
 
     getRootNode: function(node)

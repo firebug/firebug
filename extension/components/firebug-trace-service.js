@@ -24,32 +24,56 @@ const appShellService = Components.classes["@mozilla.org/appshell/appShellServic
 // Service implementation
 
 
-var win = false;
+var toOSConsole = false;
 
-function TraceConsoleService()  // singleton
+TraceConsoleService =
 {
-    this.observers = [];
-    this.optionMaps = {};
+    initialize: function() {
+        this.observers = [];
+        this.optionMaps = {};
 
-    // Listen for preferences changes. Trace Options can be changed at run time.
-    prefs.addObserver("extensions", this, false);
+        // Listen for preferences changes. Trace Options can be changed at run time.
+        prefs.addObserver("extensions", this, false);
 
-    this.wrappedJSObject = this; // why not
-}
+        this.wrappedJSObject = this;
+        return this;
+    },
 
-TraceConsoleService.prototype =
-{
+    osOut: function(str)
+    {
+        if (!this.outChannel)
+        {
+            try
+            {
+                var appShellService = Components.classes["@mozilla.org/appshell/appShellService;1"].
+                    getService(Components.interfaces.nsIAppShellService);
+                this.hiddenWindow = appShellService.hiddenDOMWindow;
+                this.outChannel = "hidden";
+            }
+            catch(exc)
+            {
+                var consoleService = Cc["@mozilla.org/consoleservice;1"].getService(Ci.nsIConsoleService);
+                this.outChannel = "service"
+                this.outChannel("Using consoleService because nsIAppShellService.hiddenDOMWindow not available "+exc);
+            }
+        }
+        if (this.outChannel === "hidden")  // apparently can't call via JS function
+            this.hiddenWindow.dump(str);
+        else
+            consoleService.logStringMessage(str);
+    },
+
     getTracer: function(prefDomain)
     {
         if (this.getPref("extensions.firebug-tracing-service.DBG_toOSConsole"))
         {
-             win = appShellService.hiddenDOMWindow;  // also need browser.dom.window.dump.enabled true
+             toOSConsole = true;  // also need browser.dom.window.dump.enabled true
+             TraceConsoleService.osOut("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
         }
 
         if (!this.optionMaps[prefDomain])
             this.optionMaps[prefDomain] = this.createManagedOptionMap(prefDomain);
-        if (win)
-            win.dump("TraceConsoleService.getTracer, prefDomain: "+prefDomain+"\n");
+
         return this.optionMaps[prefDomain];
     },
 
@@ -68,8 +92,8 @@ TraceConsoleService.prototype =
             {
                 var optionName = p.substr(1); // drop leading .
                 optionMap[optionName] = this.getPref(prefDomain+p);
-                if (win)
-                    win.dump("TraceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
+                if (toOSConsole)
+                    this.osOut("TraceConsoleService.createManagedOptionMap "+optionName+"="+optionMap[optionName]+"\n");
             }
         }
 
@@ -88,8 +112,8 @@ TraceConsoleService.prototype =
                     var optionName = data.substr(prefDomain.length+1); // skip dot
                     if (optionName.substr(0, DBG_.length) == DBG_)
                         gTraceService.optionMaps[prefDomain][optionName] = this.getPref(data);
-                    if (win)
-                        win.dump("TraceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
+                    if (toOSConsole)
+                        TraceConsoleService.osOut("TraceConsoleService.observe, prefDomain: "+prefDomain+" optionName "+optionName+"\n");
                 }
             }
         }
@@ -123,8 +147,8 @@ TraceConsoleService.prototype =
             scope: scope,
             time: (new Date()).getTime()
         };
-        if (win)
-            win.dump(messageType+": "+message+"\n");
+        if (toOSConsole)
+            TraceConsoleService.osOut(messageType+": "+message+"\n");
         // Pass JS object properly through XPConnect.
         var wrappedSubject = {wrappedJSObject: messageInfo};
         gTraceService.notifyObservers(wrappedSubject, "firebug-trace-on-message", message);
@@ -202,14 +226,13 @@ TraceConsoleService.prototype =
 
 function lastResort(listeners, subject, someData)
 {
-    var hiddenWindow = appShellService.hiddenDOMWindow;
     var unwrapped = subject.wrappedJSObject;
     if (unwrapped)
         var objPart = unwrapped.obj ? (" obj: "+unwrapped.obj) : "";
     else
         var objPart = subject;
 
-    hiddenWindow.dump("FTS"+listeners.length+": "+someData+" "+objPart+"\n");
+    TraceConsoleService.osOut("FTS"+listeners.length+": "+someData+" "+objPart+"\n");
 }
 // ************************************************************************************************
 // Public TraceService API
@@ -271,8 +294,8 @@ TraceBase.prototype.sysout = function(message, obj) {
         }
         catch(exc)
         {
-            if (win)
-                win.dump("gTraceService.dispatch FAILS "+exc);
+            if (toOSConsole)
+                TraceConsoleService.osOut("gTraceService.dispatch FAILS "+exc);
         }
         finally
         {
@@ -298,7 +321,8 @@ var TraceConsoleServiceFactory =
             iid.equals(Ci.nsIObserverService))
         {
             if (!gTraceService)
-                gTraceService = new TraceConsoleService();
+                gTraceService = TraceConsoleService.initialize();
+
             return gTraceService.QueryInterface(iid);
         }
 

@@ -8,11 +8,13 @@ locale  firebug ca-AD       jar:chrome/firebug.jar!/locale/ca-AD/
 locale  firebug cs-CZ       jar:chrome/firebug.jar!/locale/cs-CZ/
 locale  firebug da-DK       jar:chrome/firebug.jar!/locale/da-DK/
 locale  firebug de-DE       jar:chrome/firebug.jar!/locale/de-DE/
+locale  firebug el-GR       jar:chrome/firebug.jar!/locale/el-GR/
 locale  firebug en-US       jar:chrome/firebug.jar!/locale/en-US/
 locale  firebug es-AR       jar:chrome/firebug.jar!/locale/es-AR/
 locale  firebug es-ES       jar:chrome/firebug.jar!/locale/es-ES/
 locale  firebug fa-IR       jar:chrome/firebug.jar!/locale/fa-IR/
 locale  firebug fr-FR       jar:chrome/firebug.jar!/locale/fr-FR/
+locale  firebug hr-HR       jar:chrome/firebug.jar!/locale/hr-HR/
 locale  firebug hu-HU       jar:chrome/firebug.jar!/locale/hu-HU/
 locale  firebug hy-AM       jar:chrome/firebug.jar!/locale/hy-AM/
 locale  firebug is-IS       jar:chrome/firebug.jar!/locale/is-IS/
@@ -34,5 +36,8 @@ locale  firebug vi-VN       jar:chrome/firebug.jar!/locale/vi-VN/
 locale  firebug zh-CN       jar:chrome/firebug.jar!/locale/zh-CN/
 locale  firebug zh-TW       jar:chrome/firebug.jar!/locale/zh-TW/
 
-overlay chrome://browser/content/browser.xul         chrome://firebug/content/browserOverlay.xul
-overlay chrome://global/content/customizeToolbar.xul         chrome://firebug/content/customizeToolbarOverlay.xul
+overlay chrome://browser/content/browser.xul            chrome://firebug/content/browserOverlay.xul
+overlay chrome://global/content/customizeToolbar.xul    chrome://firebug/content/customizeToolbarOverlay.xul
+overlay chrome://mozapps/content/extensions/about.xul   chrome://firebug/content/aboutOverlay.xul
+
+overlay chrome://navigator/content/navigator.xul        chrome://firebug/content/browserOverlay.xul

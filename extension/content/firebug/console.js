@@ -63,6 +63,7 @@ Firebug.ConsoleBase =
 
                 while (container.childNodes.length > maxQueueRequests + 1)
                 {
+                    clearDomplate(container.firstChild.nextSibling);
                     container.removeChild(container.firstChild.nextSibling);
                     panel.limit.limitInfo.totalCount++;
                     template.updateCounter(panel.limit);
@@ -108,7 +109,8 @@ Firebug.ConsoleBase =
     // Override to direct output to your panel
     getPanel: function(context, noCreate)
     {
-        return context.getPanel("console", noCreate);
+        if (context)
+            return context.getPanel("console", noCreate);
     },
 
 };
@@ -189,8 +191,18 @@ Firebug.Console = extend(ActivableConsole,
         Firebug.ActivableModule.initialize.apply(this, arguments);
         Firebug.Debugger.addListener(this);
 
+    },
+
+    enable: function()
+    {
         if (Firebug.Console.isAlwaysEnabled())
             this.watchForErrors();
+    },
+
+    disable: function()
+    {
+        if (Firebug.Console.isAlwaysEnabled())
+            this.unwatchForErrors();
     },
 
     initContext: function(context, persistedState)
@@ -256,8 +268,15 @@ Firebug.Console = extend(ActivableConsole,
         if (panelName != this.panelName)  // we don't care about other panels
             return;
 
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onPanelDisable**************");
+
         Firebug.Debugger.removeDependentModule(this); // we inject the console during JS compiles so we need jsd
         this.unwatchForErrors();
+
+        // Make sure possible errors coming from the page and displayed in the Firefox
+        // status bar are removed.
+        this.clear();
     },
 
     onSuspendFirebug: function()
@@ -351,8 +370,11 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            if (this.panelNode.offsetHeight)
-                this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+            // xxxHonza: Don't update the this.wasScrolledToBottom flag now.
+            // At the beginning (when the first log is created) the isScrolledToBottom
+            // always returns true.
+            //if (this.panelNode.offsetHeight)
+            //    this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
             var row = this.createRow("logRow", className);
             appender.apply(this, [objects, row, rep]);
@@ -432,6 +454,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (!objects || !objects.length)
             return;
 
+        function logText(text, row)
+        {
+            var node = row.ownerDocument.createTextNode(text);
+            row.appendChild(node);
+        }
+
         var format = objects[0];
         var objIndex = 0;
 
@@ -440,11 +468,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             format = "";
             objIndex = -1;
         }
-
-        function logText(text)
+        else  // a string
         {
-            var node = row.ownerDocument.createTextNode(text);
-            row.appendChild(node);
+            if (objects.length === 1) // then we have only a string...
+            {
+                if (format.length < 1) { // ...and it has no characters.
+                    logText("(an empty string)", row);
+                    return;
+                }
+            }
         }
 
         var parts = parseFormat(format);
@@ -570,6 +602,10 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             this.onScroller = bind(this.onScroll, this);
             this.panelNode.addEventListener("scroll", this.onScroller, true);
         }
+
+        this.onResizer = bind(this.onResize, this);
+        this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
+        this.resizeEventTarget.addEventListener("resize", this.onResizer, true);
     },
 
     destroyNode : function()
@@ -577,6 +613,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
         if (this.onScroller)
             this.panelNode.removeEventListener("scroll", this.onScroller, true);
+
+        this.resizeEventTarget.removeEventListener("resize", this.onResizer, true);
     },
 
     shutdown: function()
@@ -586,6 +624,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.panel show; " + this.context.getName(), state);
+
         var enabled = Firebug.Console.isAlwaysEnabled();
         if (enabled)
         {
@@ -599,14 +640,45 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
                  this.wasScrolledToBottom = state.wasScrolledToBottom;
                  delete state.wasScrolledToBottom;
              }
+
              if (this.wasScrolledToBottom)
                  scrollToBottom(this.panelNode);
+
+             if (FBTrace.DBG_CONSOLE)
+                 FBTrace.sysout("console.show ------------------ wasScrolledToBottom: " +
+                    this.wasScrolledToBottom + ", " + this.context.getName());
         }
         else
         {
             this.hide(state);
             Firebug.Console.disabledPanelPage.show(this);
         }
+    },
+
+    hide: function(state)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("Console.panel hide; " + this.context.getName(), state);
+
+        this.showToolbarButtons("fbConsoleButtons", false);
+        this.showCommandLine(false);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.hide ------------------ wasScrolledToBottom: " +
+                this.wasScrolledToBottom + ", " + this.context.getName());
+    },
+
+    destroy: function(state)
+    {
+        if (this.panelNode.offsetHeight)
+            this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+
+        if (state)
+            state.wasScrolledToBottom = this.wasScrolledToBottom;
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.destroy ------------------ wasScrolledToBottom: " +
+                this.wasScrolledToBottom + ", " + this.context.getName());
     },
 
     shouldBreakOnNext: function()
@@ -646,20 +718,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         this.showCommandLine(false);
     },
 
-    hide: function(state)
-    {
-        if (FBTrace.DBG_PANELS)
-            FBTrace.sysout("Console.panel hide\n");
-
-        this.showToolbarButtons("fbConsoleButtons", false);
-        this.showCommandLine(false);
-
-        if (this.panelNode.offsetHeight)
-            this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
-        if (state)
-            state.wasScrolledToBottom = this.wasScrolledToBottom;
-    },
-
     getOptionsMenuItems: function()
     {
         return [
@@ -694,6 +752,15 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         var strictValue = prefs.getBoolPref(strictDomain+"."+strictName);
         return {label: "JavascriptOptionsStrict", type: "checkbox", checked: strictValue,
             command: bindFixed(Firebug.setPref, Firebug, strictDomain, strictName, !strictValue) };
+    },
+
+    getBreakOnMenuItems: function()
+    {
+        //xxxHonza: no BON options for now.
+        /*return [
+            optionMenu("console.option.Persist Break On Error", "persistBreakOnError")
+        ];*/
+       return [];
     },
 
     search: function(text)
@@ -829,9 +896,25 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     onScroll: function(event)
     {
-        var isScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
-        if(FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("console.onScroll /\/\/\/\/\/\/\/\/\//\/\/\/\/\/ scrolledToBottom: "+isScrolledToBottom, event);
+        // Update the scroll position flag if the position changes.
+        this.wasScrolledToBottom = FBL.isScrolledToBottom(this.panelNode);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onScroll ------------------ wasScrolledToBottom: " +
+                this.wasScrolledToBottom + ", wasScrolledToBottom: " +
+                this.context.getName(), event);
+    },
+
+    onResize: function(event)
+    {
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("console.onResize ------------------ wasScrolledToBottom: " +
+                this.wasScrolledToBottom + ", offsetHeight: " + this.panelNode.offsetHeight +
+                ", scrollTop: " + this.panelNode.scrollTop + ", scrollHeight: " +
+                this.panelNode.scrollHeight + ", " + this.context.getName(), event);
+
+        if (this.wasScrolledToBottom)
+            scrollToBottom(this.panelNode);
     },
 });
 

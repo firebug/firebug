@@ -1,4 +1,4 @@
-<!ENTITY editors.Description "Configurar Editores de Firebug:">
+<!ENTITY editors.Description "Configurar editores de Firebug:">
 <!ENTITY editors.NameColumn "Editor">
 <!ENTITY editors.ExecutableColumn "Ejecutable">
 <!ENTITY editors.ParamsColumn "Parámetros de inicialización">

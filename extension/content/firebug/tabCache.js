@@ -10,6 +10,8 @@ const Ci = Components.interfaces;
 
 const ioService = Cc["@mozilla.org/network/io-service;1"].getService(Ci.nsIIOService);
 const prefs = Cc["@mozilla.org/preferences-service;1"].getService(Ci.nsIPrefBranch2);
+const versionChecker = Cc["@mozilla.org/xpcom/version-comparator;1"].getService(Ci.nsIVersionComparator);
+const appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
 
 // Maximum cached size of a signle response (bytes)
 var responseSizeLimit = 1024 * 1024 * 5;
@@ -51,6 +53,8 @@ var contentTypes =
     "application/http-index-format": 1,
     "application/json": 1,
     "application/x-js": 1,
+    "multipart/mixed" : 1,
+    "multipart/x-mixed-replace" : 1
 };
 
 // ************************************************************************************************
@@ -111,10 +115,11 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         {
             if (!(subject instanceof Ci.nsIHttpChannel))
                 return;
-
+// XXXjjb this same code is in net.js, better to have it only once
             var win = getWindowForRequest(subject);
-            var tabId = Firebug.getTabIdForWindow(win);
-            if (!(tabId && win))
+            if (win)
+                var tabId = Firebug.getTabIdForWindow(win);
+            if (!tabId)
                 return;
 
             if (topic == "http-on-modify-request")
@@ -155,15 +160,47 @@ Firebug.TabCacheModel = extend(Firebug.Module,
 
             request.QueryInterface(Ci.nsITraceableChannel);
 
-            // Register traceable channel listener in order to intercept all incoming data for
-            // this context/tab. nsITraceableChannel interface is introduced in Firefox 3.0.4
+            // Create Firebug's stream listener that is tracing HTTP responses.
             var newListener = CCIN("@joehewitt.com/firebug-channel-listener;1", "nsIStreamListener");
             newListener.wrappedJSObject.window = win;
-            newListener.wrappedJSObject.listener = request.setNewListener(newListener);
 
-            // Set proxy for proper passing nsIRequest objects from XPCOM scope.
+            // Set proxy listener for back notifiction from XPCOM to chrome (using real interface
+            // so nsIRequest object is properly passed from XPCOM scope).
             newListener.QueryInterface(Ci.nsITraceableChannel);
             newListener.setNewListener(new ChannelListenerProxy(win));
+
+            // Add tee listener into the chain of request stream listeners so, the chain
+            // doesn't include a JS code. This way all exceptions are propertly distributed
+            // (#515051).
+            // The nsIStreamListenerTee differes in following branches:
+            // 1.9.1: not possible to registere nsIRequestObserver with tee
+            // 1.9.2: implements nsIStreamListenerTee_1_9_2 with initWithObserver methods
+            // 1.9.3: adds third parameter to the existing init method.
+            if (versionChecker.compare(appInfo.version, "3.6*") >= 0)
+            {
+                var tee = CCIN("@mozilla.org/network/stream-listener-tee;1", "nsIStreamListenerTee");
+                tee = tee.QueryInterface(Ci.nsIStreamListenerTee);
+
+                if (Ci.nsIStreamListenerTee_1_9_2)
+                    tee = tee.QueryInterface(Ci.nsIStreamListenerTee_1_9_2);
+
+                // The response will be written into the outputStream of this pipe.
+                // Both ends of the pipe must be blocking.
+                var sink = CCIN("@mozilla.org/pipe;1", "nsIPipe");
+                sink.init(true, true, 0, 0, null);
+
+                var originalListener = request.setNewListener(tee);
+                newListener.wrappedJSObject.sink = sink;
+
+                if (tee.initWithObserver)
+                    tee.initWithObserver(originalListener, sink.outputStream, newListener);
+                else
+                    tee.init(originalListener, sink.outputStream, newListener);
+            }
+            else
+            {
+                newListener.wrappedJSObject.listener = request.setNewListener(newListener);
+            }
 
             // xxxHonza: this is a workaround for #489317. Just passing
             // shouldCacheRequest method to the component so, onStartRequest
@@ -210,6 +247,7 @@ Firebug.TabCacheModel = extend(Firebug.Module,
         if (contentType)
             contentType = contentType.split(";")[0];
 
+        contentType = trim(contentType);
         if (contentTypes[contentType])
             return true;
 
@@ -369,7 +407,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; Failed to load source for: " + url);
 
                 stream.close();
-                return ["Failed to load source for: " + url]; // xxxHonza: localization?
+                return [$STR("message.Failed to load source for") + ": " + url];
             }
 
             // Don't load responses that shouldn't be cached.
@@ -379,7 +417,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
                     FBTrace.sysout("tabCache.loadFromCache; The resource from this URL is not text: " + url);
 
                 stream.close();
-                return ["The resource from this URL is not text: " + url]; // xxxHonza: localization?
+                return [$STR("message.The resource from this URL is not text") + ": " + url];
             }
 
             responseText = readFromStream(stream, charset);
@@ -418,11 +456,27 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         dispatch(this.fbListeners, "onStartRequest", [this.context, request]);
     },
 
-    onStopRequest: function(request, requestContext, statusCode)
+    onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
         if (FBTrace.DBG_CACHE)
-            FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetName(request));
+            FBTrace.sysout("tabCache.channel.onDataAvailable: " + safeGetName(request));
 
+        // If the stream is read a new one must be provided (the stream doesn't implement
+        // nsISeekableStream).
+        var stream = {
+            value: inputStream
+        };
+
+        dispatch(Firebug.TabCacheModel.fbListeners, "onDataAvailable",
+            [this.context, request, requestContext, stream, offset, count]);
+        dispatch(this.fbListeners, "onDataAvailable", [this.context,
+            request, requestContext, stream, offset, count]);
+
+        return stream.value;
+    },
+
+    onStopRequest: function(request, requestContext, statusCode)
+    {
         // The response is finally received so, remove the request from the list of
         // current responses.
         var url = safeGetName(request);
@@ -430,6 +484,9 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
         var lines = this.cache[url];
         var responseText = lines ? lines.join("") : "";
+
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.channel.stopRequest: " + safeGetRequestName(request), responseText);
 
         dispatch(Firebug.TabCacheModel.fbListeners, "onStopRequest", [this.context, request, responseText]);
         dispatch(this.fbListeners, "onStopRequest", [this.context, request, responseText]);
@@ -441,6 +498,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
 function ChannelListenerProxy(win)
 {
+    this.wrappedJSObject = this;
     this.window = win;
 }
 
@@ -456,10 +514,11 @@ ChannelListenerProxy.prototype =
 
     onDataAvailable: function(request, requestContext, inputStream, offset, count)
     {
-        // Not sent to custom listneres since if the stream is read a new one
-        // must be provided (the stream doesn't implement nsISeekableStream)
-        // Custom extensions must read the response from the tabCache or register
-        // own nsIStreamListener using nsITraceableChannel.
+        var context = this.getContext();
+        if (!context)
+            return null;
+
+        return context.sourceCache.onDataAvailable(request, requestContext, inputStream, offset, count);
     },
 
     onStopRequest: function(request, requestContext, statusCode)

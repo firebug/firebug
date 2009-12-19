@@ -31,6 +31,8 @@ const pointlessErrors =
     "Key event not available on GTK2:": 1
 };
 
+const dupLimit = 10;
+
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const fbs = Cc["@joehewitt.com/firebug;1"].getService().wrappedJSObject;
@@ -41,10 +43,12 @@ const consoleService = CCSV("@mozilla.org/consoleservice;1", "nsIConsoleService"
 var Errors = Firebug.Errors = extend(Firebug.Module,
 {
     dispatchName: "errors",
+
     clear: function(context)
     {
         this.setCount(context, 0); // reset the UI counter
         delete context.errorMap;   // clear the duplication-removal table
+        delete context.droppedErrors;    // clear the counts of dropped errors
     },
 
     increaseCount: function(context)
@@ -79,10 +83,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (Firebug.showErrorCount)
             {
-                var errorLabel = errorCount > 1
-                    ? $STRF("ErrorsCount", [errorCount])
-                    : $STRF("ErrorCount", [errorCount]);
-
+                var errorLabel = $STRP("plural.Error_Count", [errorCount]);
                 statusText.setAttribute("value", errorLabel);
             }
 
@@ -119,6 +120,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         {
             if (window.closed)
                 this.stopObserving();
+            if (typeof FBTrace == 'undefined')
+                return;
             if (!FBTrace)
                 return;
         }
@@ -155,7 +158,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                         if (!msgId)
                             return;
                         if (context)
-                            Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
+                            context.errorRow[msgId] = Firebug.Console.log(object.message, context, "consoleMessage", FirebugReps.Text);
                     }
                     else if (object.message)
                     {
@@ -183,7 +186,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                 if (context)
                 {
                     if (context.window)
-                        FBTrace.sysout((isWarning?"warning":"error")+" logged to ",  context.window.location+"\n");
+                        FBTrace.sysout((isWarning?"warning":"error")+" logged to "+ context.getName());
                     else
                     {
                         FBTrace.sysout("errors.observe, context with no window, "+(isWarning?"warning":"error")+" object:", object);
@@ -199,8 +202,8 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             // Errors prior to console init will come out here, eg error message from Firefox startup jjb.
             if (FBTrace.DBG_ERRORS)
             {
-                FBTrace.sysout("errors.observe FAILS", exc);
-                FBTrace.sysout("errors.observe object", object);
+                FBTrace.sysout("errors.observe FAILS "+exc, exc);
+                FBTrace.sysout("errors.observe object "+object, object);
             }
         }
     },
@@ -211,20 +214,22 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             return;
 
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", object);
+            FBTrace.sysout("errors.observe logScriptError "+(Firebug.errorStackTrace?"have ":"NO ")+"errorStackTrace error object:", {object: object, errorStackTrace: Firebug.errorStackTrace});
 
         var category = getBaseCategory(object.category);
         var isJSError = category == "js" && !isWarning;
 
+        var error = new ErrorMessage(object.errorMessage, object.sourceName,
+                object.lineNumber, object.sourceLine, category, context, null, msgId);  // the sourceLine will cause the source to be loaded.
+
         if (Firebug.showStackTrace && Firebug.errorStackTrace)
         {
-            var trace = Firebug.errorStackTrace;
-            trace = this.correctLineNumbersWithStack(trace, object) ? trace : null;
+            error.correctWithStackTrace(Firebug.errorStackTrace);
         }
         else if (checkForUncaughtException(context, object))
         {
             context = getExceptionContext(context);
-            object = correctLineNumbersOnExceptions(context, object);
+            correctLineNumbersOnExceptions(object, error);
         }
 
         var msgId = lessTalkMoreAction(context, object, isWarning);
@@ -236,16 +241,13 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         if (!isWarning)
             this.increaseCount(context);
 
-        var error = new ErrorMessage(object.errorMessage, object.sourceName,
-            object.lineNumber, object.sourceLine, category, context, trace, msgId);  // the sourceLine will cause the source to be loaded.
-
         var className = isWarning ? "warningMessage" : "errorMessage";
 
         if (context)
         {
             if (FBTrace.DBG_ERRORS) FBTrace.sysout("errors.observe delayed log to "+context.getName()+"\n");
              // then report later to avoid loading sourceS
-            context.throttle(Firebug.Console.log, Firebug.Console, [error, context,  className, false, true], true);
+            context.throttle(this.delayedLogging, this, [msgId, context, error, context, className, false, true], true);
         }
         else
         {
@@ -255,34 +257,30 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
         return context;
     },
 
-    correctLineNumbersWithStack: function(trace, object)
+    delayedLogging: function()
     {
-        var stack_frame = trace.frames[0];
-        if (stack_frame)
+        var args = cloneArray(arguments);
+        var msgId = args.shift();
+        var context = args.shift();
+        var row = Firebug.Console.log.apply(Firebug.Console, args);
+        if (row)
         {
-            var sourceName = stack_frame.href;
-            var lineNumber = stack_frame.lineNo;
-
-            var correctedError =
+            var dupSpan = row.getElementsByClassName("errorDuplication")[0];
+            var times = context.errorMap[msgId];
+            if (times > 1)
             {
-                    errorMessage: object.errorMessage,
-                    sourceName: sourceName,
-                    sourceLine: object.sourceLine,
-                    lineNumber: lineNumber,
-                    columnNumber: object.columnNumber,
-                    flags: object.flags,
-                    category: object.category
-            };
-            object = correctedError;
-
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("errors.correctLineNumbersWithStack corrected message with frame:",stack_frame.toString());
-            return true;
+                if (times > dupLimit)
+                {
+                    dupSpan.innerHTML = dupLimit+"x";
+                    context.errorMap[msgId] -= dupLimit;
+                }
+                else
+                    dupSpan.innerHTML = times + "x";
+            }
+            context.errorRow[msgId] = row;
         }
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("errors.correctLineNumbersWithStack fails for object.sourceName "+object.sourceName+" and frame:", stack_frame);
-
-        return false;
+        	FBTrace.sysout("errors.delayedLogging create row, dups "+context.errorMap[msgId], context.errorRow[msgId]);
     },
 
     getErrorContext: function(object)
@@ -368,6 +366,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
     initContext: function(context)
     {
         this.clear(context);
+        context.errorRow = {};
 
         if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
         {
@@ -572,6 +571,13 @@ function lessTalkMoreAction(context, object, isWarning)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.observe dropping "+object.category+" because: "+why);
+
+        context.droppedErrors = context.droppedErrors || {};
+        if (!context.droppedErrors[object.category])
+            context.droppedErrors[object.category] = 1;
+        else
+            context.droppedErrors[object.category] += 1;
+
         return null;
     }
 
@@ -597,10 +603,14 @@ function lessTalkMoreAction(context, object, isWarning)
     }
 
     var msgId = [incoming_message, object.sourceName, object.lineNumber].join("/");
-    if (context.errorMap && msgId in context.errorMap)
+
+    if (!context.errorMap)
+        context.errorMap = {};
+
+    if (msgId in context.errorMap)
     {
         context.errorMap[msgId] += 1;
-        if (context.errorMap[msgId] < 9)
+        if (context.errorMap[msgId] % dupLimit != 1)
         {
             var console = context.getPanel("console");
             if (console)
@@ -612,11 +622,10 @@ function lessTalkMoreAction(context, object, isWarning)
         }
         // else put out another one, something bad is happening....
     }
-
-    if (!context.errorMap)
-        context.errorMap = {};
-
-    context.errorMap[msgId] = 1;
+    else
+    {
+        context.errorMap[msgId] = 1;
+    }
 
     return msgId;
 }
@@ -664,7 +673,7 @@ function getExceptionContext(context)
     return context;
 }
 
-function correctLineNumbersOnExceptions(context, object)
+function correctLineNumbersOnExceptions(object, error)
 {
     var m = reException.exec(object.errorMessage);
     if (m)
@@ -678,24 +687,11 @@ function correctLineNumbersOnExceptions(context, object)
         var sourceName = m[3];
         var lineNumber = parseInt(m[4]);
 
-        var correctedError =
-        {
-                errorMessage: object.errorMessage,
-                sourceName: sourceName,
-                sourceLine: object.sourceLine,
-                lineNumber: lineNumber,
-                columnNumber: object.columnNumber,
-                flags: object.flags,
-                category: object.category
-        };
+        error.correctSourcePoint(sourceName, lineNumber);
 
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("errors.correctLineNumbersOnExceptions corrected message with sourceName: "+sourceName+"@"+lineNumber);
-
-        return correctedError;
     }
-    else
-        return object;
 }
 
 // ************************************************************************************************

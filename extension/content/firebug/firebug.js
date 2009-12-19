@@ -71,8 +71,11 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showChromeErrors", "showChromeMessages", "showExternalErrors",
     "showXMLHttpRequests", "showNetworkErrors",
 
+    "persistBreakOnError",
+
     // HTML
-    "showFullTextNodes", "showCommentNodes", "showWhitespaceNodes",
+    "showFullTextNodes", "showCommentNodes",
+    "showTextNodesWithWhitespace", "showTextNodesWithEntities",
     "highlightMutations", "expandMutations", "scrollToMutations", "shadeBoxModel",
     "showQuickInfoBox",
 
@@ -86,14 +89,17 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "showUserProps", "showUserFuncs", "showDOMProps", "showDOMFuncs", "showDOMConstants",
 
     // Layout
-    "showRulers","showAdjacentLayout","showBoundingClientRect",
+    "showRulers",
 
     // Net
     "netFilterCategory", "collectHttpHeaders", "netDisplayedResponseLimit",
-    "netDisplayedPostBodyLimit",
+    "netDisplayedPostBodyLimit", "netPhaseInterval", "sizePrecision",
 
     // Stack
     "omitObjectPathStack",
+
+    // Debugging
+    "clearDomplate"
 ];
 
 const servicePrefNames = [
@@ -154,7 +160,7 @@ top.Firebug =
     prefDomain: "extensions.firebug",
     servicePrefDomain: "extensions.firebug.service",
 
-    stringCropLength: 80,
+    stringCropLength: 50,
 
     tabBrowser: tabBrowser,
     originalChrome: FirebugChrome,
@@ -169,7 +175,7 @@ top.Firebug =
         if (version)
         {
             this.version = version;
-            $('fbStatusIcon').setAttribute("tooltiptext", "Firebug "+version);
+            $('fbStatusBar').setAttribute("tooltiptext", "Firebug " + version);
 
             var about = $('Firebug_About');
             if (about)
@@ -294,11 +300,6 @@ top.Firebug =
 
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
-
-        // If another window is opened, then the creation of our first context won't
-        // result in calling of enable, so we have to enable our modules ourself
-        //if (fbs.enabled)
-        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
 
         // Initialize all modules.
         dispatch(modules, "initializeUI", [detachArgs]);
@@ -441,18 +442,17 @@ top.Firebug =
 
     resetTooltip: function()
     {
-        var tooltip = "Firebug "+ Firebug.getVersion();
+        if (FBTrace.DBG_TOOLTIP)
+          FBTrace.sysout("resetTooltip called");
 
-        tooltip += "\n"+Firebug.getEnablementStatus();
+        var tooltip = "Firebug " + Firebug.getVersion();
+
+        tooltip += "\n" + Firebug.getEnablementStatus();
 
         if (Firebug.getSuspended())
             tooltip += "\n" + Firebug.getSuspended();
         else
-        {
-            var total = TabWatcher.contexts.length;
-            tooltip += "\n"+total+" "+ ((total == 1)?
-                $STR("Total_Firebug"):$STR("Total_Firebugs"));
-        }
+            tooltip += "\n" + $STRP("plural.Total_Firebugs", [TabWatcher.contexts.length]);
 
         if (Firebug.allPagesActivation == "on")
         {
@@ -463,7 +463,7 @@ top.Firebug =
 
         tooltip += "\n" + $STR(Firebug.getPlacement());
 
-        $('fbStatusIcon').setAttribute("tooltiptext", tooltip);
+        $('fbStatusBar').setAttribute("tooltiptext", tooltip);
     },
 
     getURLsForAllActiveContexts: function()
@@ -645,6 +645,13 @@ top.Firebug =
         if (!this.stringBundle)
             this.stringBundle = stringBundleService.createExtensibleBundle("strings_firebug");
         return this.stringBundle;
+    },
+
+    getPluralRule: function()
+    {
+        try {
+            return this.getStringBundle().GetStringFromName("pluralRule");
+        } catch (err) { }
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -979,6 +986,9 @@ top.Firebug =
         var shouldShow = show/* && !Firebug.isDetached()*/;
         contentBox.setAttribute("collapsed", !shouldShow);
 
+        if(!show)
+            Firebug.Inspector.inspectNode(null);
+        
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
 
@@ -1003,7 +1013,7 @@ top.Firebug =
         if (!this.fbOnlyKeys)
         {
             var keyset = document.getElementById("mainKeyset");
-            this.fbOnlyKeys = FBL.getElementByClass(keyset, "fbOnlyKey");
+            this.fbOnlyKeys = keyset.getElementsByClassName("fbOnlyKey").item(0);
         }
         var keys = this.fbOnlyKeys;
         for (var i = 0; i < keys.length; i++)
@@ -1073,7 +1083,8 @@ top.Firebug =
         if (Firebug.isDetached())  // TODO disable minimize on externalMode
         {
             // TODO reattach
-            Firebug.chrome.focus();
+            Firebug.toggleDetachBar(false, false);
+            Firebug.chrome.focus() ;
         }
         else // inBrowser -> minimized
         {
@@ -1089,12 +1100,19 @@ top.Firebug =
         Firebug.showBar(true);
     },
 
-    toggleDetachBar: function(forceOpen)  // detached -> closed; inBrowser -> detached TODO reattach
+    toggleDetachBar: function(forceOpen, reopenInBrowser)  // detached -> closed; inBrowser -> detached TODO reattach
     {
         if (!forceOpen && Firebug.isDetached())  // detached -> minimized
         {
             Firebug.chrome.close();
             detachCommand.setAttribute("checked", false);
+            if (reopenInBrowser)
+            {
+                setTimeout(function delayMinimize()
+                {
+                    Firebug.unMinimize()
+                });
+            }
         }
         else
             this.detachBar(FirebugContext);
@@ -1357,6 +1375,9 @@ top.Firebug =
     getRep: function(object)
     {
         var type = typeof(object);
+        if (type == 'object' && object instanceof String)
+            type = 'string';
+
         for (var i = 0; i < reps.length; ++i)
         {
             var rep = reps[i];
@@ -1488,14 +1509,65 @@ top.Firebug =
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // nsIFireBugClient  These are per XUL window callbacks
 
-    enable: function()  // Called by firebug-service when the first context is created.
+    enableXULWindow: function()  // Called when the first context is created.
     {
-        dispatch(modules, "enable", [FirebugChrome]);
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++", Firebug.detachArgs);
+
+        dispatch(modules, "enable", [FirebugChrome]);  // allows errors to flow thru fbs and callbacks to supportWindow to begin
     },
 
-    disable: function()
+    disableXULWindow: function()
     {
         dispatch(modules, "disable", [FirebugChrome]);
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("disable XUL Window --------------------------------------");
+    },
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    // These are XUL window level call backs and should be moved into Firebug where is says nsIFirebugClient
+    // xxxHonza: so I did
+
+    onPauseJSDRequested: function(rejection)
+    {
+        if (FirebugContext)  // then we are active in this browser.xul
+            rejection.push(true); // so reject the
+
+        dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
+    },
+
+    onJSDActivate: function(jsd, why)  // just before hooks are set
+    {
+        var active = this.setIsJSDActive();
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
+
+        dispatch2(Firebug.Debugger.fbListeners,"onJSDActivate",[fbs, why]);
+    },
+
+    onJSDDeactivate: function(jsd, why)
+    {
+        var active = this.setIsJSDActive();
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
+
+        dispatch2(Firebug.Debugger.fbListeners,"onJSDDeactivate",[fbs, why]);
+    },
+
+    setIsJSDActive: function()  // should only be call on the jsd activation events, so it correctly reflects jsd state
+    {
+        var active = fbs.isJSDActive();
+        if (active)
+            $('fbStatusIcon').setAttribute("script", "on");
+        else
+            $('fbStatusIcon').setAttribute("script", "off");
+
+        if (FBTrace.DBG_ACTIVATION)
+            FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
+
+        return active;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1532,12 +1604,12 @@ top.Firebug =
         {
             if (toPlacement == Firebug.placements[i])
             {
-                Firebug.resetTooltip();
                 if (Firebug.placement != i) // then we are changing the value
                 {
                     Firebug.placement = i;
                     delete Firebug.previousPlacement;
                     Firebug.setPref(Firebug.prefDomain, "previousPlacement", Firebug.placement);
+                    Firebug.resetTooltip();
                 }
                 return Firebug.placement;
             }
@@ -1615,8 +1687,7 @@ top.Firebug =
                 Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
         }
         else // this browser has no context
-            Firebug.suspend();
-
+        Firebug.suspend();
         Firebug.resetTooltip();
     },
 
@@ -1628,24 +1699,16 @@ top.Firebug =
             clearContextTimeout = 0;
         }
 
-        if (context)
-        {
-            FirebugContext = context;
-            Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
-            this.updateActiveContexts(context);  // resume, after setting FirebugContext
-        }
-        else
-        {
-            Firebug.chrome.setFirebugContext(context); // null context
-            FirebugContext = context;
-            this.updateActiveContexts(context);  // suspend, after setting FirebugContext
-        }
+        FirebugContext = context;
+        Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
+        this.updateActiveContexts(context);  // resume, after setting FirebugContext
 
         dispatch(modules, "showContext", [browser, context]);  // tell modules we may show UI
 
-        if (Firebug.openInWindow && !Firebug.isDetached())  // user wants detached but we are not yet
+        // user wants detached but we are not yet
+        if (Firebug.openInWindow && !Firebug.isDetached())
         {
-            if (context)
+            if (context && !Firebug.isMinimized()) // don't detach if it's minimized 2067
                 this.detachBar(context);  //   the placement will be set once the external window opens
             else  // just make sure we are not showing
                 this.showBar(false);
@@ -1653,7 +1716,8 @@ top.Firebug =
             return;
         }
 
-        if (Firebug.openMinimized() && !Firebug.isMinimized())  // previous browser.xul had placement minimized
+        // previous browser.xul had placement minimized
+        if (Firebug.openMinimized() && !Firebug.isMinimized())
         {
             this.minimizeBar();
             return;
@@ -1791,8 +1855,10 @@ top.Firebug =
  */
 Firebug.Listener = function()
 {
-    // xxxHonza, XXXjjb: why not to create the array in addListener?
-    //this.fbListeners = [];
+    // The array is created when the first listeners is added.
+    // It can't be created here since derived objects would share
+    // the same array.
+    this.fbListeners = null;
 }
 Firebug.Listener.prototype =
 {
@@ -1971,7 +2037,7 @@ Firebug.Panel =
 
         setClass(this.panelNode, "panelNode panelNode-"+this.name+" contextUID="+context.uid);
 
-        // Load persistent conent if any.
+        // Load persistent content if any.
         var persistedState = Firebug.getPanelState(this);
         if (persistedState)
         {
@@ -2004,6 +2070,8 @@ Firebug.Panel =
         }
 
         this.destroyNode();
+
+        clearDomplate(this.panelNode);
     },
 
     savePersistedContent: function(state)
@@ -2271,6 +2339,11 @@ Firebug.Panel =
         return [];
     },
 
+    getBreakOnMenuItems: function()
+    {
+        return [];
+    },
+
     getEditor: function(target, value)
     {
     },
@@ -2339,6 +2412,9 @@ Firebug.Panel =
     highlight: function(show)
     {
         var tab = this.getTab();
+        if (!tab)
+            return;
+
         if (show)
             tab.setAttribute("highlight", "true");
         else
@@ -2404,6 +2480,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
                 FBTrace.sysout("Firebug.enablePanel state", persistedPanelState);
             this.show(persistedPanelState);
         }
+
+        Firebug.resetTooltip();
     },
 
     disablePanel: function(module)
@@ -2413,7 +2491,7 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
 
         var tab = this.getTab();
         if (tab)
-            tab.setAttribute('aria-label', tab.getAttribute('label') + " (inactive panel)");
+            tab.setAttribute('aria-label', tab.getAttribute('label') + " ("+ $STR('aria.labels.inactive panel') +")");
 
         // The panel was disabled so, show the disabled page. This page also replaces the
         // old content so, the panel is fresh empty after it's enabled again.
@@ -2426,6 +2504,8 @@ Firebug.ActivablePanel = extend(Firebug.Panel,
                 FBTrace.sysout("Firebug.disablePanel state", persistedPanelState);
             this.hide(persistedPanelState);
         }
+
+        Firebug.resetTooltip();
     },
 
     getTab: function()
@@ -2469,7 +2549,16 @@ Firebug.MeasureBox =
 
     measureText: function(value)
     {
-        this.measureBox.innerHTML = value ? escapeHTML(value) : "m";
+        this.measureBox.innerHTML = value ? escapeForSourceLine(value) : "m";
+        return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
+    },
+
+    measureInputText: function(value)
+    {
+        value = value ? escapeForTextNode(value) : "m";
+        if (!Firebug.showTextNodesWithWhitespace)
+            value = value.replace(/\t/g,'mmmmmm').replace(/\ /g,'m');
+        this.measureBox.innerHTML = value;
         return {width: this.measureBox.offsetWidth, height: this.measureBox.offsetHeight-1};
     },
 
@@ -2518,11 +2607,18 @@ Firebug.Rep = domplate(
 
     getTitle: function(object)
     {
-        var label = safeToString(object);
+        var label = safeToString(object); // eg [object XPCWrappedNative [object foo]]
 
-        var re = /\[object (.*?)\]/;
+        const re =/\[object ([^\]]*)/;
         var m = re.exec(label);
-        return m ? m[1] : label;
+        var n = null;
+        if (m)
+            n = re.exec(m[1]);  // eg XPCWrappedNative [object foo
+
+        if (n)
+            return n[1];  // eg foo
+        else
+            return m ? m[1] : label;
     },
 
     getTooltip: function(object)

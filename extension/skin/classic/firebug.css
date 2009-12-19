@@ -153,6 +153,7 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     background: -moz-field;
     font: icon;
     font-size: 11px;
+    direction: ltr;
 }
 
 .fbsearch-textbox > .autocomplete-textbox-container > .autocomplete-icon {

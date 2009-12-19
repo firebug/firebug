@@ -9,6 +9,8 @@
     position: relative;
     font-family: Monaco, monospace;
     padding-left: 13px;
+    min-width: 100%;
+    -moz-user-select: none;
 }
 
 .twisty {
@@ -17,6 +19,14 @@
     top: 4px;
     width: 12px;
     height: 14px;
+}
+
+.twisty {
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    width: 14px;
+    height: 18px;
 }
 
 .nodeChildBox {
@@ -58,8 +68,21 @@
 }
 
 .nodeWhiteSpace {
+    border: 1px solid LightGray;
+    white-space: pre; /* otherwise the border will be collapsed around zero pixels */
+    margin-left: 1px;
+    color: gray;
+}
+
+
+.nodeWhiteSpace_Space {
+    border: 1px solid #ddd;
+}
+
+.nodeTextEntity {
     border: 1px solid gray;
     white-space: pre; /* otherwise the border will be collapsed around zero pixels */
+    margin-left: 1px;
 }
 
 .nodeComment {

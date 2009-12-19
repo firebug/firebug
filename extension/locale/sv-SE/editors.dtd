@@ -1,10 +1,10 @@
-<!ENTITY editors.Description "Konfigurera Firebugs redigerare:">
-<!ENTITY editors.NameColumn "Redigerare">
+<!ENTITY editors.Description "Konfigurera Firebugs redigeringsprogram:">
+<!ENTITY editors.NameColumn "Redigeringsprogram">
 <!ENTITY editors.ExecutableColumn "Program">
-<!ENTITY editors.ParamsColumn "Argument">
+<!ENTITY editors.ParamsColumn "Startargument">
 <!ENTITY add.label "Lägg till">
 <!ENTITY remove.label "Ta bort">
-<!ENTITY change.label "Redigera">
+<!ENTITY change.label "Ändra">
 <!ENTITY close.label "Stäng">
 <!ENTITY browse.label "Bläddra...">
 <!ENTITY changeEditor.Name "Namn:">

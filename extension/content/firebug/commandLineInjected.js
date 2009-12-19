@@ -2,7 +2,7 @@
 
 var _FirebugCommandLine =
 {
-    init: function()
+    initFirebugCommandLine: function()
     {
         // Define console functions.
         var commands = ["$", "$$", "$x", "$n", "cd", "clear", "inspect", "keys",
@@ -87,7 +87,7 @@ var _FirebugCommandLine =
     try
     {
         // DBG window.dump("_FirebugCommandLine init console is "+window.console+" in "+window.location+"\n");
-        _FirebugCommandLine.init();
+        _FirebugCommandLine.initFirebugCommandLine();
     }
     catch(exc)
     {

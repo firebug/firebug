@@ -170,6 +170,16 @@
     font-weight: bold;
     color: #0000FF;
 }
+.objectLink-sourceLink > .systemLink {
+    float: right;
+    color: #FF0000;
+}
+
+.logRow > .objectLink-sourceLink > div,
+.errorSourceBox > .objectLink-sourceLink > div {
+    float: left;
+    padding-left: 5px;
+}
 
 /************************************************************************************************/
 
@@ -182,6 +192,11 @@
 
 .errorTrace {
     margin-left: 17px;
+}
+
+.errorDuplication {
+    margin-right: 5px;
+    font-weight: bold;
 }
 
 .errorSourceBox {
@@ -410,21 +425,29 @@
 
 /*****************************************************************************************/
 
+.objectLeftBrace,
+.objectRightBrace,
+.objectEqual,
+.objectComma,
 .arrayLeftBracket,
 .arrayRightBracket,
 .arrayComma {
     font-family: Monaco, monospace;
 }
 
+.objectLeftBrace,
+.objectRightBrace,
 .arrayLeftBracket,
 .arrayRightBracket {
     font-weight: bold;
 }
 
+.objectLeftBrace,
 .arrayLeftBracket {
     margin-right: 4px;
 }
 
+.objectRightBrace,
 .arrayRightBracket {
     margin-left: 4px;
 }
@@ -454,6 +477,16 @@
 .logRow-spy .spyHead .spyTitle:hover,
 .logGroup > .logRow:hover {
     text-decoration: underline;
+}
+
+/*****************************************************************************************/
+
+.logRow-log > .objectBox-array.hasTwisty {
+    padding-left: 18px;
+}
+
+.logRow-log > .objectBox-array > .arrayProperties {
+    padding-left: 18px;
 }
 
 /*****************************************************************************************/

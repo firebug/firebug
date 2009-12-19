@@ -580,6 +580,8 @@ Firebug.HTMLLib =
                 return true;
             case "link":
                 return element.getAttribute("rel") == "stylesheet";
+            case "embed":
+                return element.getSVGDocument();
         }
         return false;
     },
@@ -612,6 +614,28 @@ Firebug.HTMLLib =
             FBTrace.sysout("hasNoElementChildren TRUE "+element.tagName, element);
         return true;
     },
+    
+    
+    /**
+     * Determines if the given node has any children which are comments.
+     *
+     * @param {Element} element Element to test.
+     * @return true if immediate children of type Comment exist, false otherwise
+     */
+    hasCommentChildren: function(element)
+    {
+        if (element.hasChildNodes())
+        {
+            var children = element.childNodes;
+            for (var i = 0; i < children.length; i++) 
+            {
+              if (children[i] instanceof Comment)
+                 return true;
+            }
+        };
+        return false;
+    },
+
 
     /**
      * Determines if the given node consists solely of whitespace text.
@@ -628,7 +652,7 @@ Firebug.HTMLLib =
 
     /**
      * Determines if a given element is empty. When the
-     * {@link Firebug#showWhitespaceNodes} parameter is true, an element is
+     * {@link Firebug#showTextNodesWithWhitespace} parameter is true, an element is
      * considered empty if it has no child elements and is self closing. When
      * false, an element is considered empty if the only children are whitespace
      * nodes.
@@ -643,7 +667,7 @@ Firebug.HTMLLib =
         // we decide not to show the whitespace in the UI.
 
         // XXXsroussey reverted above but added a check for self closing tags
-        if (Firebug.showWhitespaceNodes)
+        if (Firebug.showTextNodesWithWhitespace)
         {
             return !element.firstChild && isSelfClosing(element);
         }
@@ -660,7 +684,7 @@ Firebug.HTMLLib =
 
     /**
      * Finds the next sibling of the given node. If the
-     * {@link Firebug#showWhitespaceNodes} parameter is set to true, the next
+     * {@link Firebug#showTextNodesWithWhitespace} parameter is set to true, the next
      * sibling may be a whitespace, otherwise the next is the first adjacent
      * non-whitespace node.
      *
@@ -669,7 +693,7 @@ Firebug.HTMLLib =
      */
     findNextSibling: function(node)
     {
-        if (Firebug.showWhitespaceNodes)
+        if (Firebug.showTextNodesWithWhitespace)
             return node.nextSibling;
         else
         {

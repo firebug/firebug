@@ -178,8 +178,8 @@ function addShortcutRow(element, index, array)
 
     var resetBtn = document.createElement('button');
     resetBtn.id = element + "_reset";
-    resetBtn.setAttribute('label', FBL.$STR("reset"));
-    resetBtn.setAttribute('aria-label', FBL.$STR("reset") + " " + labelText + ' shortcut');
+    resetBtn.setAttribute('label', FBL.$STR("a11y.labels.reset"));
+    resetBtn.setAttribute('aria-label', FBL.$STRF("a11y.labels.reset_shortcut", [labelText]));
     resetBtn.className = "shortcutResetBtn";
     row.appendChild(resetBtn);
     rows.appendChild(row);

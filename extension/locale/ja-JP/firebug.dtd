@@ -12,9 +12,9 @@
 <!ENTITY firebug.DecreaseTextSize "文字サイズを小さく">
 <!ENTITY firebug.NormalTextSize "標準の文字サイズ">
 <!ENTITY firebug.ShowTooltips "プレビューツールチップを表示">
-<!ENTITY firebug.ShadeBoxModel "ボックスモデルに影を表示">
+<!ENTITY firebug.ShadeBoxModel "ボックスモデルを色づけ">
 <!ENTITY firebug.Website "Firebug の Web サイト...">
-<!ENTITY firebug.Documentation "マニュアル...">
+<!ENTITY firebug.Documentation "ドキュメント...">
 <!ENTITY firebug.KeyShortcuts "キーボード ショートカット...">
 <!ENTITY firebug.Forums "ディスカッション グループ...">
 <!ENTITY firebug.Issues "バグトラッキング...">
@@ -42,9 +42,9 @@
 <!ENTITY firebug.EditCSSTooltip "このスタイルシートを編集します">
 <!ENTITY firebug.Profile "プロファイル">
 <!ENTITY firebug.ProfileScript "JavaScript のプロファイル">
-<!ENTITY firebug.Clear "消去">
-<!ENTITY firebug.ClearConsole "コンソールを消去">
-<!ENTITY firebug.ClearTooltip "コンソールを消去します">
+<!ENTITY firebug.Clear "クリア">
+<!ENTITY firebug.ClearConsole "コンソールをクリア">
+<!ENTITY firebug.ClearTooltip "コンソールをクリア">
 <!ENTITY firebug.All "すべて">
 <!ENTITY firebug.Images "画像">
 <!ENTITY firebug.Flash "Flash">
