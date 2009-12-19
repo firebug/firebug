@@ -469,10 +469,13 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
         else if (sourceBox.scrollTop === sourceBox.lastScrollTop && sourceBox.clientHeight === sourceBox.lastClientHeight)
         {
-            if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
-            // skip work if nothing changes.
-            return;
+            if (sourceBox.firstRenderedLine <= viewRange.firstLine && sourceBox.lastRenderedLine >= viewRange.lastLine)
+            {
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("reView skipping sourceBox "+sourceBox.scrollTop+"=scrollTop="+sourceBox.lastScrollTop+", "+ sourceBox.clientHeight+"=clientHeight="+sourceBox.lastClientHeight, sourceBox);
+                // skip work if nothing changes.
+                return;
+            }
         }
 
         dispatch([Firebug.A11yModel], "onBeforeViewportChange", [this]);  // XXXjjb TODO where should this be?
@@ -570,7 +573,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             var topMostCachedElement = sourceBox.getLineNode(sourceBox.firstRenderedLine);  // eg 1
             var totalCached = sourceBox.lastRenderedLine - sourceBox.firstRenderedLine + 1;   // eg 20 - 1 + 1 = 19
             if (topMostCachedElement && totalCached)
-            	this.removeLines(sourceBox, topMostCachedElement, totalCached);
+                this.removeLines(sourceBox, topMostCachedElement, totalCached);
         }
         sourceBox.lastRenderedLine = 0;
         sourceBox.firstRenderedLine = 0;
