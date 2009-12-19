@@ -897,6 +897,8 @@ FirebugService.prototype =
         jsd.off();
         dispatch(clients, "onJSDDeactivate", [jsd, "fbs disableDebugger"]);
 
+        fbs.onXScriptCreatedByTag = {};  // clear any uncleared top level scripts
+
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("fbs.disableDebugger jsd.isOn:"+jsd.isOn+" for enabledDebugger: "+enabledDebugger);
     },
@@ -1044,7 +1046,8 @@ FirebugService.prototype =
     // When engine encounters debugger keyword (only)
     onDebugger: function(frame, type, rv)
     {
-        if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger);
+        if (FBTrace.DBG_FBS_BP)
+            FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+" in "+frame.script.fileName, frame.script);
         try {
             if (haltDebugger)
             {
@@ -1054,7 +1057,7 @@ FirebugService.prototype =
             }
             else
                 return this.onBreak(frame, type, rv);
-            }
+         }
          catch(exc)
          {
             if (FBTrace.DBG_FBS_ERRORS)
