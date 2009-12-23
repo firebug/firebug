@@ -553,16 +553,28 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     editElementStyle: function()
     {
         var elementStyle = this.selection.style;
-        var rulesBox = this.panelNode.firstChild;
-        var styleRuleBox = Firebug.getElementByRepObject(rulesBox, elementStyle);
-        if (styleRuleBox)
-            Firebug.Editor.insertRowForObject(styleRuleBox);
-        else
+        var rulesBox = this.panelNode.getElementsByClassName("cssElementRuleContainer")[0];
+        var styleRuleBox = rulesBox && Firebug.getElementByRepObject(rulesBox, elementStyle);
+        if (!styleRuleBox)
         {
             var rule = {rule: this.selection, inherited: false, selector: "element.style", props: []};
-            var styleRuleBox = this.template.ruleTag.insertBefore({rule: rule}, rulesBox.firstChild);
-            Firebug.Editor.insertRowForObject(styleRuleBox);
+            if (!rulesBox)
+            {
+                // The element did not have any displayed styles. We need to create the whole tree and remove
+                // the no styles message
+                styleRuleBox = this.template.cascadedTag.replace({
+                    rules: [rule], inherited: [], inheritLabel: $STR("InheritedFrom")
+                }, this.panelNode);
+
+                styleRuleBox = styleRuleBox.getElementsByClassName("cssElementRuleContainer")[0];
+            }
+            else
+                styleRuleBox = this.template.ruleTag.insertBefore({rule: rule}, rulesBox);
+
+            styleRuleBox = styleRuleBox.getElementsByClassName("insertInto")[0];
         }
+
+        Firebug.Editor.insertRowForObject(styleRuleBox);
     },
 
     insertPropertyRow: function(row)
@@ -1565,7 +1577,7 @@ CSSEditor.prototype = domplate(Firebug.InlineEditor.prototype,
     insertNewRow: function(target, insertWhere)
     {
         var rule = Firebug.getRepObject(target);
-        var emptyProp = {name: "", value: ""};
+        var emptyProp = {name: "", value: "", important: ""};
 
         if (insertWhere == "before")
             return CSSPropTag.tag.insertBefore({prop: emptyProp, rule: rule}, target);
