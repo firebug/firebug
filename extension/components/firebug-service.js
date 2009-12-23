@@ -90,7 +90,7 @@ const COMPONENTS_FILTERS = [
     new RegExp("^(file:/.*/)extensions/firebug@software\\.joehewitt\\.com/components/.*\\.js$"),
     new RegExp("^(file:/.*/extensions/)\\w+@mozilla\\.org/components/.*\\.js$"),
     new RegExp("^(file:/.*/components/)ns[A-Z].*\\.js$"),
-    new RegExp("^(file:/.*/components/)firebug-service\\.js$"),
+    new RegExp("^(file:/.*/components/)firebug-[^\\.]*\\.js$"),
     new RegExp("^(file:/.*/Contents/MacOS/extensions/.*/components/).*\\.js$"),
     new RegExp("^(file:/.*/modules/).*\\.jsm$"),
     ];
@@ -253,6 +253,17 @@ FirebugService.prototype =
             FBTrace.sysout("fbs prefs.removeObserver fails "+exc, exc);
         }
 
+        try
+        {
+            observerService.removeObserver(QuitApplicationGrantedObserver);
+            observerService.removeObserver(QuitApplicationRequestedObserver);
+            observerService.removeObserver(QuitApplicationObserver);
+        }
+        catch (exc)
+        {
+            FBTrace.sysout("fbs quit-application-observers removeObserver fails "+exc, exc);
+        }
+
         jsd = null;
         if (!jsd)
             FBTrace.sysout("*********************** SHUTDOWN JSD NULL ");
@@ -287,6 +298,7 @@ FirebugService.prototype =
     registerClient: function(client)  // clients are essentially XUL windows
     {
         clients.push(client);
+        return clients.length;
     },
 
     unregisterClient: function(client)
@@ -841,17 +853,19 @@ FirebugService.prototype =
 
         if (!jsd.isOn)
         {
-            jsd.on();
+            jsd.on(); // this should be the only call to jsd.on().
             jsd.flags |= DISABLE_OBJECT_TRACE;
-        }
 
-        while(jsd.pauseDepth)  // unwind completely
-            jsd.unPause();
+            if (jsd.pauseDepth && FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("fbs.enableDebugger found non-zero jsd.pauseDepth !! "+jsd.pauseDepth)
+        }
 
         if (!this.filterChrome)
             this.createChromeBlockingFilters();
 
-        dispatch(clients, "onJSDActivate", [jsd, "fbs enableDebugger"]);
+        var active = fbs.isJSDActive();
+
+        dispatch(clients, "onJSDActivate", [active, "fbs enableDebugger"]);
         this.hookScripts();
     },
 
@@ -892,10 +906,19 @@ FirebugService.prototype =
 
         enabledDebugger = false;
 
-        jsd.pause();
-        fbs.unhookScripts();
-        jsd.off();
-        dispatch(clients, "onJSDDeactivate", [jsd, "fbs disableDebugger"]);
+        if (jsd.isOn)
+        {
+            jsd.pause();
+            fbs.unhookScripts();
+
+            while (jsd.pauseDepth > 0)  // unwind completely
+                jsd.unPause();
+
+            jsd.off();
+        }
+
+        var active = fbs.isJSDActive();
+        dispatch(clients, "onJSDDeactivate", [active, "fbs disableDebugger"]);
 
         fbs.onXScriptCreatedByTag = {};  // clear any uncleared top level scripts
 
@@ -910,18 +933,19 @@ FirebugService.prototype =
         var rejection = [];
         dispatch(clients, "onPauseJSDRequested", [rejection]);
 
-        if (rejection.length == 0)
+        if (rejection.length == 0)  // then everyone wants to pause
         {
-            if (jsd.pauseDepth == 0)  // marker only UI in debugger.js
+            if (jsd.pauseDepth == 0)  // don't pause if we are paused.
             {
                 jsd.pause();
                 fbs.unhookScripts();
             }
-            dispatch(clients, "onJSDDeactivate", [jsd, "pause depth "+jsd.pauseDepth]);
+            var active = fbs.isJSDActive();
+            dispatch(clients, "onJSDDeactivate", [active, "pause depth "+jsd.pauseDepth]);
         }
-        else
+        else // we don't want to pause
         {
-            while (jsd.pauseDepth > 0)
+            while (jsd.pauseDepth > 0)  // make sure we are not paused.
                 jsd.unPause();
         }
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
@@ -935,22 +959,23 @@ FirebugService.prototype =
 
     unPause: function()
     {
-        if (jsd.pauseDepth || !jsd.isOn)
+        if (jsd.pauseDepth)
         {
-            if (!jsd.isOn)
-            {
-                jsd.on();
-                if (FBTrace.DBG_ACTIVATION)
-                    FBTrace.sysout("fbs.unpause turned on jsd and hooked scripts pauseDepth:"+jsd.pauseDepth);
-            }
+            if (FBTrace.DBG_ACTIVATION && !jsd.isOn)
+                FBTrace.sysout("fbs.unpause while jsd.isOn is false!! and hooked scripts pauseDepth:"+jsd.pauseDepth);
+
             fbs.hookScripts();
+
             var depth = jsd.unPause();
+            var active = fbs.isJSDActive();
+
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause hooked scripts and unPaused depth "+depth+" jsd.isOn: "+jsd.isOn);
-            dispatch(clients, "onJSDActivate", [jsd, "unpause depth"+jsd.pauseDepth]);
+                FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+depth+" jsd.isOn: "+jsd.isOn);
+
+            dispatch(clients, "onJSDActivate", [active, "unpause depth"+jsd.pauseDepth]);
 
         }
-        else
+        else  // we were not paused.
         {
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+ jsd.pauseDepth+" || "+ !jsd.isOn+")");
@@ -1679,18 +1704,25 @@ FirebugService.prototype =
 
     setChromeBlockingFilters: function()
     {
-        jsd.appendFilter(this.noFilterHalter);  // must be first
-        jsd.appendFilter(this.filterChrome);
-        jsd.appendFilter(this.filterPrettyPrint);
-        jsd.appendFilter(this.filterWrapper);
+        if (!fbs.isChromeBlocked)
+        {
+            jsd.appendFilter(this.noFilterHalter);  // must be first
+            jsd.appendFilter(this.filterChrome);
+            jsd.appendFilter(this.filterComponents);
+            jsd.appendFilter(this.filterFirebugComponents);
+            jsd.appendFilter(this.filterModules);
+            jsd.appendFilter(this.filterStringBundle);
+            jsd.appendFilter(this.filterPrettyPrint);
+            jsd.appendFilter(this.filterWrapper);
 
-        for (var i = 0; i < this.componentFilters.length; i++)
-            jsd.appendFilter(this.componentFilters[i]);
+            for (var i = 0; i < this.componentFilters.length; i++)
+                jsd.appendFilter(this.componentFilters[i]);
 
-        fbs.isChromeBlocked = true;
+            fbs.isChromeBlocked = true;
 
-        if (FBTrace.DBG_FBS_BP)
-            this.traceFilters("setChromeBlockingFilters with "+this.componentFilters.length+" component filters");
+            if (FBTrace.DBG_FBS_BP)
+                this.traceFilters("setChromeBlockingFilters with "+this.componentFilters.length+" component filters");
+        }
     },
 
     removeChromeBlockingFilters: function()
@@ -1698,6 +1730,10 @@ FirebugService.prototype =
         if (fbs.isChromeBlocked)
         {
             jsd.removeFilter(this.filterChrome);
+            jsd.removeFilter(this.filterComponents);
+            jsd.removeFilter(this.filterFirebugComponents);
+            jsd.removeFilter(this.filterModules);
+            jsd.removeFilter(this.filterStringBundle);
             jsd.removeFilter(this.filterPrettyPrint);
             jsd.removeFilter(this.filterWrapper);
             jsd.removeFilter(this.noFilterHalter);
@@ -1714,38 +1750,42 @@ FirebugService.prototype =
     {
         try
         {
-        this.filterChrome = this.createFilter("chrome://*");
-        this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");
-        this.filterWrapper = this.createFilter("XPCSafeJSObjectWrapper.cpp");
-        this.noFilterHalter = this.createFilter("chrome://firebug/content/debuggerHalter.js", true);
+            this.filterModules = this.createFilter("*/firefox/modules/*");
+            this.filterComponents = this.createFilter("*/firefox/components/*");
+            this.filterFirebugComponents = this.createFilter("*/components/firebug-*");
+            this.filterStringBundle = this.createFilter("XStringBundle");
+            this.filterChrome = this.createFilter("chrome://*");
+            this.filterPrettyPrint = this.createFilter("x-jsd:ppbuffer*");
+            this.filterWrapper = this.createFilter("XPCSafeJSObjectWrapper.cpp");
+            this.noFilterHalter = this.createFilter("chrome://firebug/content/debuggerHalter.js", true);
 
-        // jsdIFilter does not allow full regexp matching.
-        // So to filter components, we filter their directory names, which we obtain by looking for
-        // scripts that match regexps
+            // jsdIFilter does not allow full regexp matching.
+            // So to filter components, we filter their directory names, which we obtain by looking for
+            // scripts that match regexps
 
-        var componentsUnfound = [];
-        for( var i = 0; i < COMPONENTS_FILTERS.length; ++i )
-        {
-            componentsUnfound.push(COMPONENTS_FILTERS[i]);
-        }
+            var componentsUnfound = [];
+            for( var i = 0; i < COMPONENTS_FILTERS.length; ++i )
+            {
+                componentsUnfound.push(COMPONENTS_FILTERS[i]);
+            }
 
-        this.componentFilters = [];
+            this.componentFilters = [];
 
-        jsd.enumerateScripts( {
-            enumerateScript: function(script) {
-                var fileName = script.fileName;
+            jsd.enumerateScripts( {
+                enumerateScript: function(script) {
+                    var fileName = script.fileName;
                 for( var i = 0; i < componentsUnfound.length; ++i )
-                {
-                    if ( componentsUnfound[i].test(fileName) )
                     {
-                        var match = componentsUnfound[i].exec(fileName);
-                        fbs.componentFilters.push(fbs.createFilter(match[1]));
-                        componentsUnfound.splice(i, 1);
-                        return;
+                        if ( componentsUnfound[i].test(fileName) )
+                        {
+                            var match = componentsUnfound[i].exec(fileName);
+                            fbs.componentFilters.push(fbs.createFilter(match[1]));
+                            componentsUnfound.splice(i, 1);
+                            return;
+                        }
                     }
                 }
-            }
-        });
+            });
         } catch (exc) {
             FBTrace.sysout("createChromeblockingFilters fails >>>>>>>>>>>>>>>>> "+exc, exc);
         }

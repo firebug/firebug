@@ -458,10 +458,23 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var props = [];
 
-        var ruleRE = /\{(.*?)\}$/;
-        var m = ruleRE.exec(rule.cssText);
-        if (!m)
-            return props;
+        if (Firebug.expandShorthandProps)
+        {
+            var style = rule.style,
+                count = style.length-1,
+                index = style.length;
+            while (index--)
+            {
+                var propName = style.item(count - index);
+                this.addProperty(propName, style.getPropertyValue(propName), !!style.getPropertyPriority(propName), false, inheritMode, props);
+            }
+        }
+        else
+        {
+            var ruleRE = /\{(.*?)\}$/;
+            var m = ruleRE.exec(rule.cssText);
+            if (!m)
+                return props;
 
             var lines = m[1].match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
             var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(! important)?;?$/;
@@ -474,6 +487,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 if (m[2])
                     this.addProperty(m[1], m[2], !!m[3], false, inheritMode, props);
             };
+        }
 
         line = domUtils.getRuleLine(rule);
         var ruleId = rule.selectorText+"/"+line;
@@ -858,6 +872,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
     },
 
+    updateOption: function(name, value)
+    {
+        if (name == "expandShorthandProps")
+            this.refresh();
+    },
+
     getLocationList: function()
     {
         var styleSheets = getAllStyleSheets(this.context);
@@ -867,6 +887,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     getOptionsMenuItems: function()
     {
         return [
+            {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
+                    command: bindFixed(Firebug.togglePref, Firebug, "expandShorthandProps") },
+            "-",
             {label: "Refresh", command: bind(this.refresh, this) }
         ];
     },
@@ -1386,7 +1409,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         this.updateCascadeView(element);
         if (domUtils)
         {
-            this.contentState = domUtils.getContentState(element);
+            this.contentState = safeGetContentState(element);
             this.addStateChangeHandlers(element);
         }
     },
@@ -1416,7 +1439,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     updateOption: function(name, value)
     {
-        if (name == "showUserAgentCSS")
+        if (name == "showUserAgentCSS" || name == "expandShorthandProps")
             this.refresh();
     },
 
@@ -1424,12 +1447,14 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     {
         var ret = [
             {label: "Show User Agent CSS", type: "checkbox", checked: Firebug.showUserAgentCSS,
-                    command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") }
+                    command: bindFixed(Firebug.togglePref, Firebug, "showUserAgentCSS") },
+            {label: "Expand Shorthand Properties", type: "checkbox", checked: Firebug.expandShorthandProps,
+                    command: bindFixed(Firebug.togglePref, Firebug, "expandShorthandProps") }
         ];
         if (domUtils && this.selection)
         {
-            var state = domUtils.getContentState(this.selection);
-    
+            var state = safeGetContentState(this.selection);
+
             ret.push("-");
             ret.push({label: ":active", type: "checkbox", checked: state & STATE_ACTIVE,
               command: bindFixed(this.updateContentState, this, STATE_ACTIVE, state & STATE_ACTIVE)});
@@ -1438,6 +1463,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
         return ret;
     },
+
     updateContentState: function(state, remove)
     {
         domUtils.setContentState(remove ? this.selection.ownerDocument.documentElement : this.selection, state);
@@ -1457,6 +1483,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
       this.stateChangeEl = el;
     },
+
     removeStateChangeHandlers: function()
     {
         var sel = this.stateChangeEl;
@@ -1470,24 +1497,40 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             sel.removeEventListener("mouseout", this.onStateChange, false);
         }
     },
+
     contentStateCheck: function(state)
     {
       if (!state || this.contentState & state)
       {
           var timeoutRunner = bindFixed(function()
               {
-                  var newState = domUtils.getContentState(this.selection);
+                  var newState = safeGetContentState(this.selection);
                   if (newState != this.contentState)
                   { 
                       this.context.invalidatePanels(this.name);
                   }
               }, this);
-  
+
           // Delay exec until after the event has processed and the state has been updated
           setTimeout(timeoutRunner, 0);
       }
     }
 });
+
+function safeGetContentState(selection)
+{
+    try
+    {
+        return domUtils.getContentState(selection);
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+            FBTrace.sysout("css.safeGetContentState; EXCEPTION", e)
+    }
+}
+
+// ************************************************************************************************
 
 function CSSComputedElementPanel() {}
 

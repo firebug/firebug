@@ -292,6 +292,10 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
 
     storePartialResponse: function(request, responseText, win)
     {
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("tabCache.storePartialResponse " + safeGetName(request),
+                request.contentCharset);
+
         try
         {
             responseText = FBL.convertToUnicode(responseText, win.document.characterSet);

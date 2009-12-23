@@ -55,6 +55,7 @@ pref("extensions.firebug.showQuickInfoBox", false);
 
 // CSS
 pref("extensions.firebug.showUserAgentCSS", false);
+pref("extensions.firebug.expandShorthandProps", false);
 
 // Script
 pref("extensions.firebug.service.breakOnErrors", false);

@@ -308,12 +308,30 @@ h1.groupHeader {
     color: blue;
 }
 
-.disabledPanelDescription img {
+.disabledPanelBox .descImage {
     margin-top: 5px;
     margin-left: 0;
     margin-bottom: 5px;
     vertical-align: middle;
+    height: 20px;
+    width: 100px;
+    display: inline-block;
+    background-repeat: no-repeat;
 }
+
+.disabledPanelBox .descImage-console {
+    background-image: url(chrome://firebug/skin/activation-menu-console.png);
+}
+
+.disabledPanelBox .descImage-script {
+    background-image: url(chrome://firebug/skin/activation-menu-script.png);
+}
+
+.disabledPanelBox .descImage-net {
+    background-image: url(chrome://firebug/skin/activation-menu-net.png);
+}
+
+/************************************************************************************************/
 
 .useA11y .textEditorInner:focus {
     outline: 2px solid #FF9933;

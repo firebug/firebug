@@ -1655,8 +1655,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         this.wrappedJSObject = this;  // how we communicate with fbs
         this.panelName = "script";
 
-        fbs.registerClient(Firebug);  // per-XUL window registration; should be in chrome.js or firebug.js; hiding fbs
-
         // This is a service operation, a way of encapsulating fbs which is in turn implementing this
         // simple service. We could implment a whole component for this service, but it hardly makes sense.
         Firebug.broadcast = function encapsulateFBSBroadcast(message, args)
@@ -1666,6 +1664,20 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         this.onFunctionCall = bind(this.onFunctionCall, this);
         Firebug.ActivableModule.initialize.apply(this, arguments);
+    },
+
+    /*
+     * per-XUL window registration; this method just allows us to keep fbs in this file.
+     * @param clientAPI an object that implements functions called by fbs for clients.
+     */
+    registerClient: function(clientAPI)
+    {
+        return fbs.registerClient(clientAPI);
+    },
+
+    unregisterClient: function(clientAPI)
+    {
+        fbs.unregisterClient(clientAPI);
     },
 
     enable: function()
@@ -1779,7 +1791,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     shutdown: function()
     {
         fbs.unregisterDebugger(this);
-        fbs.unregisterClient(this);
     },
 
     registerDebugger: function() // 1.3.1 safe for multiple calls
@@ -1883,6 +1894,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onSuspendFirebug paused: "+paused+" isAlwaysEnabled " +Firebug.Debugger.isAlwaysEnabled()+"\n");
+
+        if (!paused)  // then we failed to suspend, undo
+            return true;
+
+        return false;
     },
 
     onResumeFirebug: function()
@@ -3104,19 +3120,32 @@ Firebug.Debugger.Breakpoint = function(name, href, lineNumber, checked, sourceLi
 
 Firebug.DebuggerListener =
 {
+    /*
+     * Called before pausing JSD to allow listeners to prevent the pause
+     * @param rejection an array, push boolean true to cause rejection.
+     */
     onPauseJSDRequested: function(rejection)
     {
-        // push true to cause rejection
     },
 
-    onJSDActivate: function(jsd, why)  // start or unPause
+    /*
+     * @param active the current value of  (jsd && jsd.isOn && (jsd.pauseDepth == 0) )
+     * @param why a string explaining the change
+     */
+    onJSDActivate: function(active, why)  // start or unPause
     {
 
     },
-    onJSDDeactivate: function(jsd, why) // stop or pause
+
+    /*
+     * @param active the current value of  (jsd && jsd.isOn && (jsd.pauseDepth == 0) )
+     * @param why a string explaining the change
+     */
+    onJSDDeactivate: function(active, why) // stop or pause
     {
 
     },
+
     onStop: function(context, frame, type, rv)
     {
     },

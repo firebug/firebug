@@ -81,6 +81,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
 
     // CSS
     "showUserAgentCSS",
+    "expandShorthandProps",
 
     // Script
     "decompileEvals", "replaceTabs",
@@ -197,6 +198,8 @@ top.Firebug =
 
         var basePrefNames = prefNames.length;
 
+        this.clientID = Firebug.Debugger.registerClient(this);
+
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
@@ -208,7 +211,7 @@ top.Firebug =
                 FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");
         }
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.initialize prefDomain "+this.prefDomain);
+            FBTrace.sysout("firebug.initialize client: "+this.clientID+" with prefDomain "+this.prefDomain);
 
         // In the case that the user opens firebug in a new window but then closes Firefox window, we don't get the
         // quitApplicationGranted event (platform is still running) and we call shutdown (Firebug isDetached).
@@ -310,6 +313,8 @@ top.Firebug =
     {
         window.removeEventListener('unload', shutdownFirebug, false);
 
+        Firebug.Debugger.unregisterClient(this);
+
         TabWatcher.destroy();
 
         // Remove the listener after the TabWatcher.destroy() method is called so,
@@ -327,8 +332,9 @@ top.Firebug =
 
         this.closeDeadWindows();
         this.deleteTemporaryFiles();
+
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.shutdown exited\n");
+            FBTrace.sysout("firebug.shutdown exited client "+this.clientID);
     },
 
     // ----------------------------------------------------------------------------------------------------------------
@@ -399,8 +405,13 @@ top.Firebug =
     suspendFirebug: function() // dispatch onSuspendFirebug to all modules
     {
         this.setSuspended("suspending");
-        dispatch(activableModules, 'onSuspendFirebug', [FirebugContext]);  // TODO no context arg
-        this.setSuspended("suspended");
+
+        var cancelSuspend = dispatch2(activableModules, 'onSuspendFirebug', [FirebugContext]);  // TODO no context arg
+
+        if (cancelSuspend)
+            Firebug.resume();
+        else
+            this.setSuspended("suspended");
     },
 
     resume: function()
@@ -988,7 +999,7 @@ top.Firebug =
 
         if(!show)
             Firebug.Inspector.inspectNode(null);
-        
+
         if (contentSplitter)
             contentSplitter.setAttribute("collapsed", !shouldShow);
 
@@ -1507,10 +1518,13 @@ top.Firebug =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
-    // nsIFireBugClient  These are per XUL window callbacks
+    // nsIFireBugClient  These are per Firefox XUL window callbacks
 
     enableXULWindow: function()  // Called when the first context is created.
     {
+        if (window.closed)
+            throw new Error("enableXULWindow window is closed!!");
+
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("enable XUL Window +++++++++++++++++++++++++++++++++++++++", Firebug.detachArgs);
 
@@ -1530,35 +1544,34 @@ top.Firebug =
 
     onPauseJSDRequested: function(rejection)
     {
-        if (FirebugContext)  // then we are active in this browser.xul
-            rejection.push(true); // so reject the
+        if (top.FirebugContext)  // then we are active in this browser.xul
+            rejection.push(true); // so reject the request
 
         dispatch2(Firebug.Debugger.fbListeners, "onPauseJSDRequested", [rejection]);
     },
 
-    onJSDActivate: function(jsd, why)  // just before hooks are set
+    onJSDActivate: function(active, why)  // just before hooks are set
     {
-        var active = this.setIsJSDActive();
+        this.setIsJSDActive(active);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onJSDActivate "+why+" active:"+active+"\n");
 
-        dispatch2(Firebug.Debugger.fbListeners,"onJSDActivate",[fbs, why]);
+        dispatch2(Firebug.Debugger.fbListeners, "onJSDActivate", [active, why]);
     },
 
-    onJSDDeactivate: function(jsd, why)
+    onJSDDeactivate: function(active, why)
     {
-        var active = this.setIsJSDActive();
+        this.setIsJSDActive(active);
 
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.onJSDDeactivate "+why+" active:"+active+"\n");
 
-        dispatch2(Firebug.Debugger.fbListeners,"onJSDDeactivate",[fbs, why]);
+        dispatch2(Firebug.Debugger.fbListeners, "onJSDDeactivate", [active, why]);
     },
 
-    setIsJSDActive: function()  // should only be call on the jsd activation events, so it correctly reflects jsd state
+    setIsJSDActive: function(active)  // should only be call on the jsd activation events, so it correctly reflects jsd state
     {
-        var active = fbs.isJSDActive();
         if (active)
             $('fbStatusIcon').setAttribute("script", "on");
         else
@@ -1567,7 +1580,6 @@ top.Firebug =
         if (FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("debugger.setIsJSDActive "+active+"\n");
 
-        return active;
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -1687,7 +1699,10 @@ top.Firebug =
                 Firebug.resume();  // This will cause onResumeFirebug for every context including this one.
         }
         else // this browser has no context
-        Firebug.suspend();
+        {
+            Firebug.suspend();
+        }
+
         Firebug.resetTooltip();
     },
 
@@ -2914,14 +2929,14 @@ Firebug.DisabledPanelPage = function(module)
 Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
 {
     tag:
-        DIV({class: "disabledPanelBox"},
-            H1({class: "disabledPanelHead"},
+        DIV({"class": "disabledPanelBox"},
+            H1({"class": "disabledPanelHead"},
                 SPAN("$pageTitle")
             ),
-            P({class: "disabledPanelDescription", style: "margin-top: 15px;"},
-                $STR("moduleManager.desc3"),
+            P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
+                $STR("moduleManager.desc4"),
                 SPAN("&nbsp;"),
-                IMG({src: "chrome://firebug/skin/activation-menu.png"})
+                SPAN({"class": "descImage descImage-$panelName"})
             )
             /* need something here that pushes down any thing appended to the panel */
          ),
@@ -2970,6 +2985,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
         // Prepare arguments for the template.
         var args = {
             pageTitle: $STRF("moduleManager.title", [this.getModuleName(this.module)]),
+            panelName: this.module.panelName
         };
 
         // Render panel HTML

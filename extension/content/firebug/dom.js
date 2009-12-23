@@ -167,7 +167,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             return;
 
         var row = getAncestorByClass(event.target, "memberRow");
-        var label = getAncestorByClass(target, "memberLabel");
+        var label = getAncestorByClass(event.target, "memberLabel");
         var valueCell = row.getElementsByClassName("memberValueCell").item(0);
         var object = Firebug.getRepObject(event.target);
         var target = row.lastChild.firstChild;
