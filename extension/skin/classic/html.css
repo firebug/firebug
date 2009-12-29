@@ -126,25 +126,26 @@
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox,
-.nodeBox.nodeHidden > .nodeCloseLabel,
-.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox > .nodeText {
+.nodeBox.nodeHidden .nodeLabel > .nodeLabelBox,
+.nodeBox.nodeHidden .nodeCloseLabel,
+.nodeBox.nodeHidden .nodeLabel > .nodeLabelBox > .nodeText,
+.nodeBox.nodeHidden .nodeText {
     color: #888888;
 }
 
-.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox > .nodeTag,
-.nodeBox.nodeHidden > .nodeCloseLabel > .nodeCloseLabelBox > .nodeTag {
+.nodeBox.nodeHidden .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.nodeHidden .nodeCloseLabel > .nodeCloseLabelBox > .nodeTag {
     color: #5F82D9;
 }
 
-.nodeBox.nodeHidden > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue {
+.nodeBox.nodeHidden .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue {
     color: #D86060;
 }
 
-.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox,
-.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeTag,
-.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
-.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeText {
+.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox,
+.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
+.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox > .nodeText {
     color: SkyBlue !important;
 }
 
