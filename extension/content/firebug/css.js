@@ -331,15 +331,18 @@ Firebug.CSSModule = extend(Firebug.Module,
     watchWindow: function(context, win)
     {
         var cleanupSheets = bind(this.cleanupSheets, this),
-            cleanupSheetHandler = bind(this.cleanupSheetHandler, this, context);
-        iterateWindows(win, function(subwin)
+            cleanupSheetHandler = bind(this.cleanupSheetHandler, this, context),
+            doc = win.document;
+
+        doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
+        doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
+    },
+    loadedContext: function(context)
+    {
+        var self = this;
+        iterateWindows(context.browser.contentWindow, function(subwin)
         {
-            var doc = subwin.document;
-
-            cleanupSheets(doc, context);
-
-            doc.addEventListener("DOMAttrModified", cleanupSheetHandler, false);
-            doc.addEventListener("DOMNodeInserted", cleanupSheetHandler, false);
+            self.cleanupSheets(subwin.document, context);
         });
     }
 });
@@ -1369,22 +1372,17 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
     parentPanel: "html",
     order: 0,
 
+    initialize: function()
+    {
+        Firebug.CSSStyleSheetPanel.prototype.initialize.apply(this, arguments);
+
+        this.onStateChange = bindFixed(this.contentStateCheck, this);
+        this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
+        this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
+    },
+
     show: function(state)
     {
-        if (this.context.loaded && domUtils)
-        {
-            if (!this.context.attachedStateCheck)
-            {
-                this.context.attachedStateCheck = true;
-
-
-                this.onStateChange = bindFixed(this.contentStateCheck, this);
-                this.onHoverChange = bindFixed(this.contentStateCheck, this, STATE_HOVER);
-                this.onActiveChange = bindFixed(this.contentStateCheck, this, STATE_ACTIVE);
-
-                iterateWindows(this.context.window, bind(this.watchWindow, this), this);
-            }
-        }
     },
 
     watchWindow: function(win)
