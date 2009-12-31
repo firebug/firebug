@@ -142,10 +142,10 @@
     color: #D86060;
 }
 
-.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox,
-.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox > .nodeTag,
-.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
-.nodeBox.nodeHidden.selected .nodeLabel > .nodeLabelBox > .nodeText {
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox,
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeTag,
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeAttr > .nodeValue,
+.nodeBox.nodeHidden.selected > .nodeLabel > .nodeLabelBox > .nodeText {
     color: SkyBlue !important;
 }
 
