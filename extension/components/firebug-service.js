@@ -21,6 +21,7 @@ const PrefService = Cc["@mozilla.org/preferences-service;1"];
 const DebuggerService = Cc["@mozilla.org/js/jsd/debugger-service;1"];
 const ConsoleService = Cc["@mozilla.org/consoleservice;1"];
 const Timer = Cc["@mozilla.org/timer;1"];
+const ObserverServiceFactory = Cc["@mozilla.org/observer-service;1"];
 
 const jsdIDebuggerService = Ci.jsdIDebuggerService;
 const jsdIScript = Ci.jsdIScript;
@@ -104,6 +105,7 @@ const reTooMuchRecursion = /too\smuch\srecursion/;
 
 var jsd, fbs, prefs;
 var consoleService;
+var observerService;
 
 var contextCount = 0;
 
@@ -179,8 +181,7 @@ function FirebugService()
     fbs.prefDomain = "extensions.firebug.service."
     prefs.addObserver(fbs.prefDomain, fbs, false);
 
-    var observerService = Cc["@mozilla.org/observer-service;1"]
-        .getService(Ci.nsIObserverService);
+    observerService = ObserverServiceFactory.getService(Ci.nsIObserverService);
     observerService.addObserver(QuitApplicationGrantedObserver, "quit-application-granted", false);
     observerService.addObserver(QuitApplicationRequestedObserver, "quit-application-requested", false);
     observerService.addObserver(QuitApplicationObserver, "quit-application", false);
@@ -255,9 +256,9 @@ FirebugService.prototype =
 
         try
         {
-            observerService.removeObserver(QuitApplicationGrantedObserver);
-            observerService.removeObserver(QuitApplicationRequestedObserver);
-            observerService.removeObserver(QuitApplicationObserver);
+            observerService.removeObserver(QuitApplicationGrantedObserver, "quit-application-granted");
+            observerService.removeObserver(QuitApplicationRequestedObserver, "quit-application-requested");
+            observerService.removeObserver(QuitApplicationObserver, "quit-application");
         }
         catch (exc)
         {
