@@ -290,7 +290,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
-        context.uid = contexts.length;
+        context.uid =  FBL.getUniqueId();
 
         browser.showFirebug = true; // this is the only place we should set showFirebug.
 
