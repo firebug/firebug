@@ -927,7 +927,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     show: function(state)
     {
-        if (this.context.loaded && !this.selection)
+        if (!this.selection)
         {
             if (!state)
             {
@@ -956,44 +956,47 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 this.objectPath = [defaultObject];
 
             if (this.propertyPath.length > 1)
-            {
-                for (var i = 1; i < this.propertyPath.length; ++i)
-                {
-                    var name = this.propertyPath[i];
-                    if (!name)
-                        continue;
-
-                    var object = selectObject;
-                    try
-                    {
-                        selectObject = object[name];
-                    }
-                    catch (exc)
-                    {
-                        selectObject = null;
-                    }
-
-                    if (selectObject)
-                    {
-                        this.objectPath.push(new Property(object, name));
-                    }
-                    else
-                    {
-                        // If we can't access a property, just stop
-                        this.viewPath.splice(i);
-                        this.propertyPath.splice(i);
-                        this.objectPath.splice(i);
-                        selectObject = this.getPathObject(this.objectPath.length-1);
-                        break;
-                    }
-                }
-            }
+                selectObject = this.resetPaths(selectObject);
 
             var selection = state.pathIndex <= this.objectPath.length-1
                 ? this.getPathObject(state.pathIndex)
                 : this.getPathObject(this.objectPath.length-1);
 
             this.select(selection);
+        }
+    },
+
+    resetPaths: function(selectObject)
+    {
+        for (var i = 1; i < this.propertyPath.length; ++i)
+        {
+            var name = this.propertyPath[i];
+            if (!name)
+                continue;
+
+            var object = selectObject;
+            try
+            {
+                selectObject = object[name];
+            }
+            catch (exc)
+            {
+                selectObject = null;
+            }
+
+            if (selectObject)
+            {
+                this.objectPath.push(new Property(object, name));
+            }
+            else
+            {
+                // If we can't access a property, just stop
+                this.viewPath.splice(i);
+                this.propertyPath.splice(i);
+                this.objectPath.splice(i);
+                selectObject = this.getPathObject(this.objectPath.length-1);
+                break;
+            }
         }
     },
 
