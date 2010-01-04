@@ -119,6 +119,9 @@ Firebug.Activation = extend(Firebug.Module,
         if (userCommands)
             return true;
 
+        if (browser.showFirebug && url.substr(0, 8) === "wyciwyg:")  // document.open on a firebugged page
+            return true;
+
         try
         {
             var uri = this.convertToURIKey(url, Firebug.activateSameOrigin);

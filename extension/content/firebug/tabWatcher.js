@@ -29,7 +29,8 @@ const STOP_ALL = nsIWebNavigation.STOP_ALL;
 const dummyURI = "about:layout-dummy-request";
 const aboutBlank = "about:blank";
 
-// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+// * * * * * * * * *
 
 const tabBrowser = $("content");
 
@@ -87,8 +88,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     /**
-     * Called when tabBrowser browsers get a new location OR when we get a explicit user op to open firebug
-     * Attaches to a top-level window. Creates context unless we just re-activated on an existing context
+     * Called when tabBrowser browsers get a new location OR when we get a
+     * explicit user op to open firebug Attaches to a top-level window. Creates
+     * context unless we just re-activated on an existing context
      */
     watchTopWindow: function(win, uri, userCommands)
     {
@@ -107,7 +109,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (selectedBrowser.cancelNextLoad)
         {
             // We need to cancel this load and try again after a delay... this is used
-            // mainly to prevent chaos while when the debugger is active when a page
+            // mainly to prevent chaos while when the debugger is active when a
+            // page
             // is unloaded
             delete selectedBrowser.cancelNextLoad;
             selectedBrowser.webNavigation.stop(STOP_ALL);
@@ -120,7 +123,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         }
 
         var context = this.getContextByWindow(win);
-        if (context) // then we've looked at this window before in this FF session...
+        if (context) // then we've looked at this window before in this FF
+                        // session...
         {
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("-> tabWatcher.watchTopWindow context exists "+context.getName());
@@ -131,7 +135,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
                     delete context.browser.showFirebug;
                 this.unwatchContext(win, context);
 
-                // There shouldn't be context for this window so, remove it from the
+                // There shouldn't be context for this window so, remove it from
+                // the
                 // global array.
                 remove(contexts, context);
 
@@ -170,7 +175,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         // Dispatch watchWindow for the outer most DOM window
         this.watchWindow(win, context);
 
-        // This is one of two places that loaded is set. The other is in watchLoadedTopWindow
+        // This is one of two places that loaded is set. The other is in
+        // watchLoadedTopWindow
         if (context && !context.loaded)
         {
             context.loaded = !context.browser.webProgress.isLoadingDocument;
@@ -191,7 +197,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
             {
                 if (FBTrace.DBG_WINDOWS)
                     FBTrace.sysout("-> watchTopWindow delayShowContext id:"+context.showContextTimeout, context);
-                if (context.window)   // Sometimes context.window is not defined ?
+                if (context.window)   // Sometimes context.window is not
+                                        // defined ?
                     this.rushShowContext(win, context);  // calls showContext
                 else
                 {
@@ -212,7 +219,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
     rushShowContext: function(win, context)
     {
-        if (context.showContextTimeout) // then the timeout even has not run, we'll not need it after all.
+        if (context.showContextTimeout) // then the timeout even has not run,
+                                        // we'll not need it after all.
             clearTimeout(context.showContextTimeout);
         delete context.showContextTimeout;
 
@@ -275,8 +283,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         var persistedState = browser.persistedState;
         delete browser.persistedState;
         var location = safeGetWindowLocation(win).toString();
-        //if (!persistedState || persistedState.location != location)
-        //    persistedState = null;
+        // if (!persistedState || persistedState.location != location)
+        // persistedState = null;
 
         // xxxHonza, xxxJJB: web application detection. Based on domain check.
         var prevDomain = persistedState ? getDomain(persistedState.location) : null;
@@ -284,15 +292,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
         if (!persistedState || prevDomain != domain)
             persistedState = null;
 
-        // The proper instance of FirebugChrome object (different for detached Firebug and
-        // accessible as Firebug.chrome property) must be used for the context object.
-        // (the global context object FirebugContext is also different for detached firebug).
+        // The proper instance of FirebugChrome object (different for detached
+        // Firebug and
+        // accessible as Firebug.chrome property) must be used for the context
+        // object.
+        // (the global context object FirebugContext is also different for
+        // detached firebug).
         var context = new contextType(win, browser, Firebug.chrome, persistedState);
         contexts.push(context);
 
         context.uid =  FBL.getUniqueId();
 
-        browser.showFirebug = true; // this is the only place we should set showFirebug.
+        browser.showFirebug = true; // this is the only place we should set
+                                    // showFirebug.
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION) {
             FBTrace.sysout("-> tabWatcher *** INIT *** context, id: "+context.uid+
@@ -338,7 +350,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             dispatch(this.fbListeners, "loadedContext", [context]);
 
-            if (context.showContextTimeout) // then our timeout has never run, let's get on with it.
+            if (context.showContextTimeout) // then our timeout has never run,
+                                            // let's get on with it.
                 this.rushShowContext(win, context);
         }
     },
@@ -480,7 +493,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
         return false;
     },
 
-    watchContext: function(win, context, isSystem)  // called when tabs change in firefox
+    watchContext: function(win, context, isSystem)  // called when tabs change
+                                                    // in firefox
     {
         if (this.shuttingDown)
             return;
@@ -493,7 +507,16 @@ top.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> tabWatcher context *** SHOW *** (watchContext), id: " +
                 (context?context.uid:"null")+", uri: "+win.location.href+"\n");
 
-        dispatch(this.fbListeners, "showContext", [browser, context]); // context is null if we don't want to debug this browser
+        dispatch(this.fbListeners, "showContext", [browser, context]); // context
+                                                                        // is
+                                                                        // null
+                                                                        // if we
+                                                                        // don't
+                                                                        // want
+                                                                        // to
+                                                                        // debug
+                                                                        // this
+                                                                        // browser
     },
 
     unwatchContext: function(win, context)
@@ -505,14 +528,25 @@ top.TabWatcher = extend(new Firebug.Listener(),
             {
                 browser.persistedState = {};
                 delete browser.showFirebug;
-                dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
+                dispatch(this.fbListeners, "showContext", [browser, null]); // context
+                                                                            // is
+                                                                            // null
+                                                                            // if
+                                                                            // we
+                                                                            // don't
+                                                                            // want
+                                                                            // to
+                                                                            // debug
+                                                                            // this
+                                                                            // browser
             }
             dispatch(this.fbListeners, "destroyContext", [null, (browser?browser.persistedState:null), browser]);
             return;
         }
 
         var persistedState = {location: context.getWindowLocation()};
-        context.browser.persistedState = persistedState;  // store our state on FF browser elt
+        context.browser.persistedState = persistedState;  // store our state
+                                                            // on FF browser elt
 
         iterateWindows(context.window, function(win)
         {
@@ -536,8 +570,19 @@ top.TabWatcher = extend(new Firebug.Listener(),
         remove(contexts, context);
 
         var currentBrowser = Firebug.chrome.getCurrentBrowser();
-        if (!currentBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected
-            dispatch(this.fbListeners, "showContext", [browser, null]); // context is null if we don't want to debug this browser
+        if (!currentBrowser.showFirebug)  // unwatchContext can be called on
+                                            // an unload event after another tab
+                                            // is selected
+            dispatch(this.fbListeners, "showContext", [browser, null]); // context
+                                                                        // is
+                                                                        // null
+                                                                        // if we
+                                                                        // don't
+                                                                        // want
+                                                                        // to
+                                                                        // debug
+                                                                        // this
+                                                                        // browser
 
         if (contexts.length == 0)
             Firebug.broadcast("disableXULWindow", []);
@@ -552,8 +597,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         var rootWindow = getRootWindow(winIn);
 
-        //if (FBTrace.DBG_INITIALIZE)
-        //    FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+" rootWindow: "+safeGetWindowLocation(rootWindow));
+        // if (FBTrace.DBG_INITIALIZE)
+        // FBTrace.sysout("winIn: "+safeGetWindowLocation(winIn).substr(0,50)+"
+        // rootWindow: "+safeGetWindowLocation(rootWindow));
 
         if (rootWindow)
         {
@@ -630,6 +676,10 @@ var TabProgressListener = extend(BaseProgressListener,
                     (uri?uri.spec:"null location")+
                     (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
             }
+
+            if (uri.scheme === "wyciwyg")  // document.open() was called, the document was cleared.
+                evictTopWindow(progress.DOMWindow, uri);
+
             if (uri)
                 TabWatcher.watchTopWindow(progress.DOMWindow, uri);
             else // the location change to a non-uri means we need to hide
@@ -661,15 +711,19 @@ var FrameProgressListener = extend(BaseProgressListener,
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
         {
             // We need to get the hook in as soon as the new DOMWindow is created, but before
-            // it starts executing any scripts in the page.  After lengthy analysis, it seems
-            // that the start of these "dummy" requests is the only state that works.
+            // it starts executing any scripts in the page. After lengthy
+            // analysis, it seems
+            // that the start of these "dummy" requests is the only state that
+            // works.
 
             var safeName = safeGetName(request);
             if (safeName && ((safeName == dummyURI) || safeName == "about:document-onload-blocker") )
             {
                 var win = progress.DOMWindow;
-                // Another weird edge case here - when opening a new tab with about:blank,
-                // "unload" is dispatched to the document, but onLocationChange is not called
+                // Another weird edge case here - when opening a new tab with
+                // about:blank,
+                // "unload" is dispatched to the document, but onLocationChange
+                // is not called
                 // again, so we have to call watchTopWindow here
 
                 if (win.parent == win && (win.location.href == "about:blank"))
@@ -699,7 +753,8 @@ function registerFrameListener(browser)
     if (browser.frameListener)
         return;
 
-    browser.frameListener = FrameProgressListener;  // just a mark saying we've registered. TODO remove!
+    browser.frameListener = FrameProgressListener;  // just a mark saying we've
+                                                    // registered. TODO remove!
     browser.addProgressListener(FrameProgressListener, NOTIFY_STATE_DOCUMENT);
 
     if (FBTrace.DBG_WINDOWS)
@@ -756,7 +811,8 @@ var TabWatcherHttpObserver = extend(Object,
         if (request.URI.spec != request.originalURI.spec)
             return;
 
-        // A document request for the specified tab is here. It can be a top window
+        // A document request for the specified tab is here. It can be a top
+        // window
         // request (win == win.parent) or embedded iframe request.
         if (request.loadFlags & Ci.nsIHttpChannel.LOAD_DOCUMENT_URI)
         {
@@ -777,7 +833,16 @@ var TabWatcherHttpObserver = extend(Object,
 
                 delete browser.FirebugLink;
 
-                if (safeGetWindowLocation(win).toString() == "about:blank") // then this page is opened in new tab or window
+                if (safeGetWindowLocation(win).toString() == "about:blank") // then
+                                                                            // this
+                                                                            // page
+                                                                            // is
+                                                                            // opened
+                                                                            // in
+                                                                            // new
+                                                                            // tab
+                                                                            // or
+                                                                            // window
                 {
                     var referer = getRefererHeader(request);
                     if (referer)
@@ -834,7 +899,8 @@ function onPageHideTopWindow(event)
     win.removeEventListener("pagehide", onPageHideTopWindow, false);
 
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
-    if (event.persisted) // then the page is cached and there cannot be an unload handler
+    if (event.persisted) // then the page is cached and there cannot be an
+                            // unload handler
     {
         //  see Bug 484710 -  add pageIgnore event for pages that are ejected from the bfcache
 
@@ -849,6 +915,13 @@ function onPageHideTopWindow(event)
         if (FBTrace.DBG_WINDOWS)
             FBTrace.sysout("-> tabWatcher onPageHideTopWindow set unload handler "+safeGetWindowLocation(win)+"\n");
     }
+}
+
+function evictTopWindow(win, uri)
+{
+    if (FBTrace.DBG_WINDOWS)
+        FBTrace.sysout("-> tabWatcher evictTopWindow win "+safeGetWindowLocation(win)+" uri "+uri.spec);
+    TabWatcher.unwatchTopWindow(win);
 }
 
 function onUnloadTopWindow(event)
