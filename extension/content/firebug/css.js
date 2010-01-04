@@ -784,7 +784,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         this.showToolbarButtons("fbCSSButtons", true);
 
-        if (this.context.loaded && !this.location)
+        if (this.context.loaded && !this.location) // wait for loadedContext to restore the panel
         {
             restoreObjects(this, state);
 
@@ -1064,14 +1064,19 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     getDefaultLocation: function()
     {
-        if (!this.context.loaded)
-            return null;
-
-        var styleSheets = this.context.window.document.styleSheets;
-        if (styleSheets.length)
+        try
         {
-            var sheet = styleSheets[0];
-            return (Firebug.filterSystemURLs && isSystemURL(getURLForStyleSheet(sheet))) ? null : sheet;
+            var styleSheets = this.context.window.document.styleSheets;
+            if (styleSheets.length)
+            {
+                var sheet = styleSheets[0];
+                return (Firebug.filterSystemURLs && isSystemURL(getURLForStyleSheet(sheet))) ? null : sheet;
+            }
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_LOCATIONS)
+                FBTrace.sysout("css.getDefaultLocation FAILS "+exc, exc);
         }
     },
 
@@ -1515,7 +1520,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
               {
                   var newState = safeGetContentState(this.selection);
                   if (newState != this.contentState)
-                  { 
+                  {
                       this.context.invalidatePanels(this.name);
                   }
               }, this);
