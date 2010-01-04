@@ -2522,6 +2522,8 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                         this.navigate(this.location);
                 }
             }
+            else // show default
+                this.navigate(this.location);
 
             var breakpointPanel = this.context.getPanel("breakpoints", true);
             if (breakpointPanel)
