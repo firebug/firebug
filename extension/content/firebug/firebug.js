@@ -2063,6 +2063,10 @@ Firebug.Panel =
 
         doc.body.appendChild(this.panelNode);
 
+        // Update panel's tab in case the break-on-next (BON) is active.
+        var shouldBreak = this.shouldBreakOnNext();
+        Firebug.Breakpoint.updatePanelTab(this, shouldBreak);
+
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize panelNode for "+this.name+"\n");
 
