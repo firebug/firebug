@@ -280,7 +280,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             context.errorRow[msgId] = row;
         }
         if (FBTrace.DBG_ERRORS)
-        	FBTrace.sysout("errors.delayedLogging create row, dups "+context.errorMap[msgId], context.errorRow[msgId]);
+            FBTrace.sysout("errors.delayedLogging create row, dups "+context.errorMap[msgId], context.errorRow[msgId]);
     },
 
     getErrorContext: function(object)
@@ -315,27 +315,17 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
                     }
                 }
 
-                if (context.loaded)
+                if (FBL.getStyleSheetByHref(url, context))
                 {
-                    if (FBL.getStyleSheetByHref(url, context))
-                    {
-                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-                            FBTrace.sysout("findContextByURL found match to in loaded styleSheetMap");
-                        return errorContext = context;
-                    }
-                    else
-                        return false;
+                    if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
+                        FBTrace.sysout("findContextByURL found match to in loaded styleSheetMap");
+                    errorContext = context;
                 }
-                else  // then new stylesheets are still coming in.
-                {
-                    if (FBL.getStyleSheetByHref(url, context))
-                    {
-                        if (FBTrace.DBG_ERRORS && FBTrace.DBG_CSS)
-                            FBTrace.sysout("findContextByURL found match to in non-loaded styleSheetMap");
-                        errorContext = context;  // but we already have this one.
-                    }
+
+                if (!context.loaded)
                     delete context.styleSheetMap; // clear the cache for next time.
-                }
+
+                return errorContext;
             }
         );
 
