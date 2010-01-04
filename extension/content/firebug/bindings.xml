@@ -815,7 +815,7 @@
             if (object)
             {
                 var locator = this.getLocator();
-                event.target.setAttribute('tooltiptext',locator.getObjectLocation(object));
+                event.target.setAttribute('tooltiptext', locator.getObjectLocation(object));
             }
 
             return;

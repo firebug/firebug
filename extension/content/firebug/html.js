@@ -776,7 +776,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     onClick: function(event)
     {
-    	if (isLeftClick(event) && event.detail == 2)
+        if (isLeftClick(event) && event.detail == 2)
         {
             this.toggleNode(event);
         }
@@ -800,7 +800,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 this.toggleNode(event);
         }
     },
-    
+
     toggleNode: function(event)
     {
         var node = Firebug.getRepObject(event.target);
@@ -867,6 +867,9 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
 
     initializeNode: function(oldPanelNode)
     {
+        if (!this.ioBox)
+            this.ioBox = new InsideOutBox(this, this.panelNode);
+
         this.panelNode.addEventListener("click", this.onClick, false);
         this.panelNode.addEventListener("mousedown", this.onMouseDown, false);
         dispatch([Firebug.A11yModel], "onInitializeNode", [this]);
@@ -889,9 +892,6 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
     show: function(state)
     {
         this.showToolbarButtons("fbHTMLButtons", true);
-
-        if (!this.ioBox)
-            this.ioBox = new InsideOutBox(this, this.panelNode);
 
         this.panelNode.ownerDocument.addEventListener("keypress", this.onKeyPress, true);
 

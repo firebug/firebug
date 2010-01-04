@@ -339,7 +339,7 @@ top.FirebugChrome =
         return file.path;
     },
 
-    updatePanelBar1: function(panelTypes)
+    updatePanelBar1: function(panelTypes)  // part of initializeUI
     {
         var mainPanelTypes = [];
         for (var i = 0; i < panelTypes.length; ++i)
@@ -1316,12 +1316,19 @@ function onSelectingPanel(event)
             : null;
     }
 
-    FirebugChrome.syncLocationList();
-    FirebugChrome.syncStatusPath();
-    FirebugChrome.syncSidePanels();
+    if (panel)
+    {
+        panel.navigate(); // calls syncLocationList() after setting location
+        FirebugChrome.syncSidePanels();
+        panel.select(panel.selection); // calls syncStatusPath() after setting selection
 
-    var browser = panel ? panel.context.browser : FirebugChrome.getCurrentBrowser();
-    Firebug.showPanel(browser, panel);
+        Firebug.showPanel(panel.context.browser, panel);
+    }
+    else
+    {
+        var browser = FirebugChrome.getCurrentBrowser();
+        Firebug.showPanel(browser, null);
+    }
 }
 
 function onSelectedSidePanel(event)
