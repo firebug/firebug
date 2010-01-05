@@ -491,15 +491,16 @@
 
 /*****************************************************************************************/
 
-.logRow-spy {
-    padding: 0px 0 1px 0;
-}
-
 .logRow-spy,
 .logRow-spy .objectLink-sourceLink {
     background: url(chrome://firebug/skin/group.gif) repeat-x #FFFFFF;
     padding-right: 4px;
     right: 0;
+}
+
+/* padding-right should be zero for .logRow-spy so, declare after the previus selector */
+.logRow-spy {
+    padding: 0px 0 1px 0;
 }
 
 .logRow-spy.opened {
