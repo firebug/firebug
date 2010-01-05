@@ -9,7 +9,7 @@
     position: relative;
     font-family: Monaco, monospace;
     padding-left: 13px;
-    -moz-user-select: none;
+    -moz-user-select: -moz-none;
 }
 
 .twisty {

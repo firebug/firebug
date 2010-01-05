@@ -30,6 +30,7 @@
 
 .sourceRow {
     white-space: nowrap;
+    -moz-user-select: text;
 }
 
 .sourceRow.hovered {
