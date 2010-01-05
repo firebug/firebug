@@ -677,7 +677,7 @@ var TabProgressListener = extend(BaseProgressListener,
                     (requestFromFirebuggedWindow?" from firebugged window":" no firebug"));
             }
 
-            if (uri.scheme === "wyciwyg")  // document.open() was called, the document was cleared.
+            if (uri && uri.scheme === "wyciwyg")  // document.open() was called, the document was cleared.
                 evictTopWindow(progress.DOMWindow, uri);
 
             if (uri)
