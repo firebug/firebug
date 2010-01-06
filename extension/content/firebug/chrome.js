@@ -594,7 +594,7 @@ top.FirebugChrome =
             panelBar2.hideSelectedPanel()
     },
 
-    syncPanel: function()  // we've decided to have Firebug open
+    syncPanel: function()
     {
         if (FBTrace.DBG_PANELS) FBTrace.sysout("chrome.syncPanel FirebugContext="+
             (FirebugContext ? FirebugContext.getName() : "undefined")+"\n");
@@ -1320,7 +1320,7 @@ function onSelectingPanel(event)
     {
         panel.navigate(panel.location); // calls syncLocationList() after setting location
         FirebugChrome.syncSidePanels();
-        panel.select(panel.selection); // calls syncStatusPath() after setting selection
+        panel.select(panel.selection, true); // calls syncStatusPath() after setting selection because of forceUpdate
 
         Firebug.showPanel(panel.context.browser, panel);
     }
