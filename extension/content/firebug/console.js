@@ -647,6 +647,14 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
              if (FBTrace.DBG_CONSOLE)
                  FBTrace.sysout("console.show ------------------ wasScrolledToBottom: " +
                     this.wasScrolledToBottom + ", " + this.context.getName());
+
+             if (state && state.profileRow) // then we reloaded while profiling
+             {
+                 FBTrace.sysout("console.initialize state.profileRow:", state.profileRow);
+                 this.context.profileRow = state.profileRow;
+                 this.panelNode.appendChild(state.profileRow);
+                 delete state.profileRow;
+             }
         }
         else
         {
@@ -675,6 +683,13 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
         if (state)
             state.wasScrolledToBottom = this.wasScrolledToBottom;
+
+        // If we are profiling and reloading, save the profileRow for the new context
+        if (this.context.profileRow && this.context.profileRow.ownerDocument)
+        {
+            this.context.profileRow.parentNode.removeChild(this.context.profileRow);
+            state.profileRow = this.context.profileRow;
+        }
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.destroy ------------------ wasScrolledToBottom: " +
