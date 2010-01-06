@@ -341,8 +341,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     thaw: function(context)
     {
-        var executionContext = context.debugFrame.executionContext;
         try {
+            var executionContext = context.debugFrame.executionContext;
             if (executionContext.isValid)
             {
                 if (context.eventSuppressor)
