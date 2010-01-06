@@ -469,14 +469,13 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         return rules;
     },
 
-    getRuleProperties: function(context, rule, inheritMode)
+    parseCSSProps: function(style, inheritMode)
     {
         var props = [];
 
         if (Firebug.expandShorthandProps)
         {
-            var style = rule.style,
-                count = style.length-1,
+            var count = style.length-1,
                 index = style.length;
             while (index--)
             {
@@ -486,12 +485,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         }
         else
         {
-            var ruleRE = /\{(.*?)\}$/;
-            var m = ruleRE.exec(rule.cssText);
-            if (!m)
-                return props;
-
-            var lines = m[1].match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
+            var lines = style.cssText.match(/(?:[^;\(]*(?:\([^\)]*?\))?[^;\(]*)*;?/g);
             var propRE = /\s*([^:\s]*)\s*:\s*(.*?)\s*(! important)?;?$/;
             var line,i=0;
             while(line=lines[i++]){
@@ -503,6 +497,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                     this.addProperty(m[1], m[2], !!m[3], false, inheritMode, props);
             };
         }
+
+        return props;
+    },
+    getRuleProperties: function(context, rule, inheritMode)
+    {
+        var props = this.parseCSSProps(rule.style, inheritMode);
 
         line = domUtils.getRuleLine(rule);
         var ruleId = rule.selectorText+"/"+line;
@@ -1347,18 +1347,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
 
     getStyleProperties: function(element, rules, usedProps, inheritMode)
     {
-        var props = [];
-
-        var style = element.style;
-        for (var i = 0; i < style.length; ++i)
-        {
-            var name = style.item(i);
-            var value = style.getPropertyValue(name);
-            var important = style.getPropertyPriority(name) == "important";
-            if (value)
-                this.addProperty(name, value, important, false, inheritMode, props);
-        }
-
+        var props = this.parseCSSProps(element.style, inheritMode);
         this.addOldProperties(this.context, getElementXPath(element), inheritMode, props);
 
         sortProperties(props);
