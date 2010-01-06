@@ -1322,34 +1322,6 @@ FirebugService.prototype =
 
         if (this.showStackTrace)
         {
-            if (fbs._lastErrorDebuggr && (flags & jsdIErrorHook.REPORT_EXCEPTION) && !fileName) // uncaught-exception
-            {
-                if (FBTrace.DBG_FBS_ERRORS)
-                    FBTrace.sysout("fbs.onError onError thinks: uncaught exception at "+lineNo+"@"+fileName+"(unknown)", errorInfo);
-
-                errorInfo.lineNumber = fbs._lastErrorLine;
-                errorInfo.scriptTag = fbs._lastErrorScript.tag;
-                errorInfo.sourceName = fbs._lastErrorScript.fileName;
-                if (FBTrace.DBG_FBS_ERRORS)
-                    FBTrace.sysout("fbs.onError uncaught exception at "+fbs._lastErrorLine+"@"+fbs._lastErrorScript.fileName+"("+fbs._lastErrorScript.tag+")");
-                try
-                {
-                    if (FBTrace.DBG_FBS_ERRORS)
-                        FBTrace.sysout("fbs.onError fbs._lastErrorDebuggr "+fbs._lastErrorDebuggr, fbs._lastErrorDebuggr);
-
-                    var saveContext = fbs._lastErrorDebuggr.breakContext;
-                    fbs._lastErrorDebuggr.breakContext = fbs._lastErrorContext;
-                    fbs._lastErrorDebuggr.onUncaughtException(errorInfo);
-                    fbs._lastErrorDebuggr.breakContext = saveContext;
-                }
-                finally
-                {
-                    fbs._lastErrorDebuggr = null;
-                    fbs._lastErrorContext = null;
-                }
-
-                return true;
-            }
             reportNextError = true;
             if (FBTrace.DBG_FBS_ERRORS)
             {
