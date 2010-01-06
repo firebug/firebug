@@ -129,6 +129,7 @@ var defaultRep = null;
 var defaultFuncRep = null;
 var editors = [];
 var externalEditors = [];
+var menuItemControllers = [];
 
 var panelTypeMap = {};
 var optionUpdateMap = {};
@@ -201,6 +202,7 @@ top.Firebug =
         this.clientID = Firebug.Debugger.registerClient(this);
 
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
+        dispatch(menuItemControllers, "initialize", []);
 
         for (var i = basePrefNames; i < prefNames.length; ++i)
             this[prefNames[i]] = this.getPref(this.prefDomain, prefNames[i]);
@@ -646,6 +648,12 @@ top.Firebug =
     {
         categoryManager.addCategoryEntry("strings_firebug", bundleURI, "", true, true);
         this.stringBundle = null;
+    },
+
+    registerMenuItem: function(menuItemController)
+    {
+        FBTrace.sysout("Firebug.registerMenuItem");
+        menuItemControllers.push(menuItemController);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
