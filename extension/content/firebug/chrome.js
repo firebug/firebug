@@ -1318,7 +1318,7 @@ function onSelectingPanel(event)
 
     if (panel)
     {
-        panel.navigate(); // calls syncLocationList() after setting location
+        panel.navigate(panel.location); // calls syncLocationList() after setting location
         FirebugChrome.syncSidePanels();
         panel.select(panel.selection); // calls syncStatusPath() after setting selection
 
