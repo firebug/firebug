@@ -1741,7 +1741,6 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
                  selector: "",
                  id: "",
                  props: [],
-                 rule: {},
                  isSelectorEditable: true
          };
 
@@ -1819,7 +1818,7 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
         // Update the rep object
         row.repObject = rule;
-        if (!oldStyle)
+        if (!oldRule)
         {
             // Who knows what the domutils will return for rule line
             // for a recently created rule. To be safe we just generate
