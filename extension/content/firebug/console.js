@@ -678,6 +678,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     destroy: function(state)
     {
+        Firebug.ActivablePanel.destroy.apply(this, arguments);
+
         if (this.panelNode.offsetHeight)
             this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
