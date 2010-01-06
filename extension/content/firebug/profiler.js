@@ -68,6 +68,11 @@ Firebug.Profiler = extend(Firebug.Module,
         context.profileRow.customMessage = isCustomMessage ;
     },
 
+    isProfiling: function()
+    {
+        return (Firebug.chrome.getGlobalAttribute("cmd_toggleProfiling", "checked") === "true")
+    },
+
     stopProfiling: function(context, cancelReport)
     {
         var totalTime = fbs.stopProfiling();
