@@ -542,6 +542,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     updateSelection: function(object)
     {
+        if (!object)
+            return;
+
         var netProgress = this.context.netProgress;
         var file = netProgress.getRequestFile(object.request);
         if (!file)
