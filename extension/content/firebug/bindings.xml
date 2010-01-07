@@ -223,7 +223,38 @@
 
                     var state = Firebug.getPanelState(panel);
                     panel.show(state);
+
+                    this.updateToolbarVisibility();
                 }
+            ]]></body>
+        </method>
+
+        <method name="updateToolbarVisibility">
+            <body><![CDATA[
+                var noButtons = true;
+                var toolbarInner = FBL.$("fbToolbarInner");
+                var box = toolbarInner.firstChild;
+                while (box)
+                {
+                    var tagName = box.tagName.toLowerCase();
+                    var collapsed = box.getAttribute("collapsed");
+                    if (collapsed != "true")
+                    {
+                        if (tagName == "panelstatus" && !box.firstChild)
+                        {
+                            box = box.nextSibling;
+                            continue;
+                        }
+
+                        noButtons = false;
+                        break;
+                    }
+
+                    box = box.nextSibling;
+                }
+
+                var toolbar = FBL.$("fbToolbox");
+                FBL.collapse(toolbar, noButtons);
             ]]></body>
         </method>
 
