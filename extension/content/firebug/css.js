@@ -788,6 +788,9 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         {
             restoreObjects(this, state);
 
+            if (!this.location)
+                this.location = this.getDefaultLocation();
+
             if (state && state.scrollTop)
                 this.panelNode.scrollTop = state.scrollTop;
         }
