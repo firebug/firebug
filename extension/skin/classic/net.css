@@ -676,6 +676,10 @@
 
 /************************************************************************************************/
 
+.netPageCol {
+    cursor: pointer;
+}
+
 .netPageSeparatorRow {
     height: 5px !important;
 }
