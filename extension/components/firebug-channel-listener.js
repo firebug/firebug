@@ -11,7 +11,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 const Cr = Components.results;
 
-var FBTrace = null;
+var FBTrace = {DBG_FAKE: "fake"};
 
 // ************************************************************************************************
 // ChannelListener implementation
@@ -42,8 +42,11 @@ function ChannelListener()
     // Both ends of the pipe must be blocking. Initialized in TabCacheModel.registerStreamListener.
     this.sink = null;
 
-    FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports)
-        .wrappedJSObject.getTracer("extensions.firebug");
+    if (FBTrace.DBG_FAKE)  // cause the detrace to remove this statement and check for cached tracer
+    {
+        FBTrace = Cc["@joehewitt.com/firebug-trace-service;1"].getService(Ci.nsISupports)
+            .wrappedJSObject.getTracer("extensions.firebug");
+    }
 }
 
 ChannelListener.prototype =
