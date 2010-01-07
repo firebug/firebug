@@ -1683,7 +1683,9 @@ this.getInstanceForStyleSheet = function(styleSheet, ownerDocument)
         return 0;
 
     // ownerDocument is an optional hint for performance
-    if (FBTrace.DBG_CSS) FBTrace.sysout("getInstanceForStyleSheet: " + styleSheet.href + " " + styleSheet.media.mediaText + " " + (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+    if (FBTrace.DBG_CSS)
+        FBTrace.sysout("getInstanceForStyleSheet href:" + styleSheet.href + " mediaText:" + styleSheet.media.mediaText + " path to ownerNode" + (styleSheet.ownerNode && FBL.getElementXPath(styleSheet.ownerNode)), ownerDocument);
+
     ownerDocument = ownerDocument || FBL.getDocumentForStyleSheet(styleSheet);
 
     var ret = 0,
