@@ -241,12 +241,16 @@ var TraceConsole =
 
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
                 var currLocale = Firebug.getPref("general.useragent", "locale");
+                var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag); 
+                var name = systemInfo.getProperty("name");
+                var version = systemInfo.getProperty("version");
 
                 // Store head info.
                 var head = "Firebug: " + Firebug.version + "\n" +
                     appInfo.name + ": " + appInfo.version + ", " +
                     appInfo.platformVersion + ", " +
                     appInfo.appBuildID + ", " + currLocale + "\n" +
+                    "OS: " + name + " " + version + "\n" +
                     "Export Date: " + (new Date()).toGMTString() +
                     "\n==========================================\n\n";
                 foStream.write(head, head.length);
