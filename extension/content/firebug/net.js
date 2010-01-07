@@ -2070,9 +2070,14 @@ Firebug.NetMonitor.NetPage = domplate(Firebug.Rep,
     pageTag:
         TR({"class": "netRow netPageRow", onclick: "$onPageClick"},
             TD({"class": "netCol netPageCol", colspan: 6, "role": "separator"},
-                DIV({"class": "netLabel netPageLabel netPageTitle"}, "$document.title")
+                DIV({"class": "netLabel netPageLabel netPageTitle"}, "$page|getTitle")
             )
         ),
+
+    getTitle: function(page)
+    {
+        return page.pageTitle;
+    },
 
     onPageClick: function(event)
     {
