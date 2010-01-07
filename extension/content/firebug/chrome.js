@@ -1319,8 +1319,10 @@ function onSelectingPanel(event)
     if (panel)
     {
         panel.navigate(panel.location); // calls syncLocationList() after setting location
-        FirebugChrome.syncSidePanels();
-        panel.select(panel.selection, true); // calls syncStatusPath() after setting selection because of forceUpdate
+        Firebug.chrome.syncSidePanels();
+        Firebug.chrome.syncStatusPath();
+        if (!panel.selection) // Give the panel a chance to have default content
+            panel.select();
 
         Firebug.showPanel(panel.context.browser, panel);
     }
