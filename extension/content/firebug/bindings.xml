@@ -600,6 +600,7 @@
                 // The locator needs
                 //     getObjectDescription(object): return {path, name}
                 //     getLocationList(), a list of objects that can be fed into getObjectDescription
+                //     getObjectLocation(object)
                 return this.locator(this);
             ]]></body>
         </method>
@@ -815,7 +816,13 @@
             if (object)
             {
                 var locator = this.getLocator();
-                event.target.setAttribute('tooltiptext', locator.getObjectLocation(object));
+                if (locator.getObjectLocation)
+                    event.target.setAttribute('tooltiptext', locator.getObjectLocation(object));
+                else
+                {
+                    if (FBTrace.DBG_LOCATIONS)
+                        FBTrace.sysout("!locator.getObjectLocation for "+ this.getAttribute('label'), locator);
+                }
             }
 
             return;
