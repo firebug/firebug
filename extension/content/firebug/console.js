@@ -502,7 +502,9 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
             if (part && typeof(part) == "object")
             {
                 var object = objects[++objIndex];
-                if (typeof(object) != "undefined")
+                if (part.type == "%c")
+                    row.setAttribute("style", object.toString());
+                else if (typeof(object) != "undefined")
                     this.appendObject(object, row, part.rep);
                 else
                     this.appendObject(part.type, row, FirebugReps.Text);
@@ -968,6 +970,7 @@ function parseFormat(format)
                     rep = FirebugReps.Number;
                     break;
                 case "o":
+                case "c":
                     rep = null;
                     break;
             }
