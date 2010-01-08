@@ -459,8 +459,10 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
                 else if (rule instanceof CSSMediaRule)
                     appendRules.apply(this, [rule.cssRules]);
                 else
+                {
                     if (FBTrace.DBG_ERRORS || FBTrace.DBG_CSS)
                         FBTrace.sysout("css getStyleSheetRules failed to classify a rule ", rule);
+                }
             }
         }
 
@@ -1532,7 +1534,7 @@ function safeGetContentState(selection)
     catch (e)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("css.safeGetContentState; EXCEPTION", e)
+            FBTrace.sysout("css.safeGetContentState; EXCEPTION", e);
     }
 }
 
@@ -1744,7 +1746,9 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
 
     saveEdit: function(target, value, previousValue)
     {
-        if (FBTrace.DBG_CSS)    FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("CSSRuleEditor.saveEdit: '" + value + "'  '" + previousValue + "'", target);
+
         target.innerHTML = escapeForCss(value);
 
         if (value === previousValue)     return;
@@ -1799,7 +1803,9 @@ CSSRuleEditor.prototype = domplate(Firebug.InlineEditor.prototype,
             }
             catch (err)
             {
-                if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS) FBTrace.sysout("CSS Insert Error: "+err, err);
+                if (FBTrace.DBG_CSS || FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("CSS Insert Error: "+err, err);
+
                 target.innerHTML = escapeForCss(previousValue);
                 row.repObject = undefined;
                 return;
