@@ -338,8 +338,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             dispatch(this.fbListeners, "loadedContext", [context]);
 
-            if (context.showContextTimeout) // then our timeout has never run, let's get on with it.
-                this.rushShowContext(win, context);
+            // DOMContentLoaded arrived. Whether or not we did showContext at 400ms, do it now.
+            this.rushShowContext(win, context);
         }
     },
 
