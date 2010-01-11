@@ -77,15 +77,15 @@
 #fbCloseButton {
     margin: 0 4px 0 0;
     -moz-image-region: rect(auto, auto, auto, auto);
-    list-style-image: url("chrome://firebug/skin/win/off.png");
+    list-style-image: url("chrome://firebug/skin/win/close.png");
 }
 
 #fbCloseButton:hover {
-    list-style-image: url("chrome://firebug/skin/win/offHover.png");
+    list-style-image: url("chrome://firebug/skin/win/closeHover.png");
 }
 
 #fbCloseButton:hover:active {
-    list-style-image: url("chrome://firebug/skin/win/offActive.png");
+    list-style-image: url("chrome://firebug/skin/win/closeActive.png");
 }
 
 #fbDetachButton {
