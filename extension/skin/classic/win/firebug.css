@@ -187,7 +187,7 @@ panelTab[selected="true"] {
 
 .panelTab-text {
     margin: 0;
-    padding: 3px 1px 4px 1px;
+    padding: 4px 1px 4px 1px;
 }
 
 .panelTab-text[disabled="true"] {

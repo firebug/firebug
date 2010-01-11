@@ -298,6 +298,34 @@
     </handlers>
 </binding>
 
+<binding id="panelBarArrowscrollbox"
+    extends="chrome://global/content/bindings/scrollbox.xml#arrowscrollbox-clicktoscroll">
+    <implementation>
+      <method name="_getScrollableElements">
+        <body><![CDATA[
+          return document.getElementById("fbPanelBar1-panelTabs").childNodes;
+        ]]></body>
+      </method>
+    </implementation>
+    <handlers>
+      <handler event="underflow"><![CDATA[
+         if (event.detail == 0)
+           return; // Ignore vertical events
+
+         var tabs = document.getElementById("fbPanelBar1-Arrowscrollbox");
+         tabs.removeAttribute("overflow");
+      ]]></handler>
+      <handler event="overflow"><![CDATA[
+         if (event.detail == 0)
+           return; // Ignore vertical events
+
+         var tabs = document.getElementById("fbPanelBar1-Arrowscrollbox");
+         tabs.setAttribute("overflow", "true");
+         this.scrollBoxObject.ensureElementIsVisible(tabs.selectedItem);
+      ]]></handler>
+    </handlers>
+</binding>
+
 <binding id="panelTab" display="xul:button">
     <content>
         <xul:image class="panelTab-left"/>

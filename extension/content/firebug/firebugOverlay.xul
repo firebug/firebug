@@ -138,11 +138,24 @@
                                 tooltiptext="script.Break On Next" breakable="disabled" />
                     </hbox>
 
-                    <!-- Tab Bar -->
-                    <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
-                        aria-label="firebug panels" />
+                    <!-- xxxHonza: ltr should come from &locale.dir; -->
+                    <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal" flex="1"
+                        style="min-width: 1px;" chromedir="ltr"
+                        clicktoscroll="true"
+                        class="tabbrowser-arrowscrollbox">
 
-                    <spacer flex="1"/>
+                        <!-- Tab Bar -->
+                        <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
+                            aria-label="firebug panels" />
+
+                    </panelBarArrowscrollbox>
+
+                    <vbox class="fbAllPanelsBox">
+                        <toolbarbutton class="fbAllPanels tabs-alltabs-button" type="menu"
+                            style="width: 17px; margin-bottom: 0px; border-right: 1px solid black; -moz-border-radius: 2px;"/>
+                    </vbox>
+
+                    <spacer flex="100"/>
 
                     <!-- Search Box -->
                     <vbox>

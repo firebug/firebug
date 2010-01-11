@@ -32,6 +32,38 @@ panelBar {
     -moz-box-orient: vertical;
 }
 
+panelBarArrowscrollbox {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarArrowscrollbox");
+}
+
+panelBarArrowscrollbox > .scrollbutton-up,
+panelBarArrowscrollbox > .scrollbutton-down,
+.fbAllPanels.tabs-alltabs-button {
+    width: 17px !important;
+    margin: 0px 1px 0px 1px !important;
+    /*padding: 0 !important;*/
+}
+
+panelBarArrowscrollbox > .scrollbutton-up
+{
+    border-left: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topleft: 2px !important;
+}
+
+panelBarArrowscrollbox > .scrollbutton-down {
+    margin: 0px 0px 0px 1px !important;
+}
+
+panelBarArrowscrollbox,
+.fbAllPanelsBox {
+    height: 20px !important;
+    padding-top: 6px !important;
+}
+
+.fbAllPanels.tabs-alltabs-button {
+    margin: 0px 1px 0px 0px !important;
+}
+
 panelTab {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelTab");
 }
