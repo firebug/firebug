@@ -123,7 +123,7 @@
 
                 // Make sure hidden panels are collapsed.
                 var prefValue = Firebug.getPref(Firebug.prefDomain, "hiddenPanels");
-                if (!prefValue.length)
+                if (!prefValue || !prefValue.length)
                     return;
 
                 var closedPanels = prefValue.split(" ");
