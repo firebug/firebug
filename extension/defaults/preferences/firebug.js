@@ -11,6 +11,7 @@ pref("extensions.firebug.previousPlacement", 0);
 pref("extensions.firebug.showErrorCount", true);
 pref("extensions.firebug.viewPanelOrient", "vertical");
 pref("extensions.firebug.allPagesActivation", "none");
+pref("extensions.firebug.hiddenPanels", "");                // List of hidden panels separated by a space
 
 pref("extensions.firebug.preferEnabled.Console", false);
 pref("extensions.firebug.preferEnabled.Script", false);

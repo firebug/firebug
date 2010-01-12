@@ -32,13 +32,20 @@ panelBar {
     -moz-box-orient: vertical;
 }
 
+/************************************************************************************************/
+/* Scrollable TabBar + TabList */
+
 panelBarArrowscrollbox {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarArrowscrollbox");
 }
 
+panelBarTabList {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabList");
+}
+
 panelBarArrowscrollbox > .scrollbutton-up,
 panelBarArrowscrollbox > .scrollbutton-down,
-.fbAllPanels.tabs-alltabs-button {
+panelBarTabList > .tabs-alltabs-button {
     width: 17px !important;
     margin: 0px 1px 0px 1px !important;
     /*padding: 0 !important;*/
@@ -55,18 +62,19 @@ panelBarArrowscrollbox > .scrollbutton-down {
 }
 
 panelBarArrowscrollbox,
-.fbAllPanelsBox {
+panelBarTabList {
     height: 20px !important;
     padding-top: 6px !important;
 }
 
-.fbAllPanels.tabs-alltabs-button {
+panelBarTabList > .tabs-alltabs-button {
     margin: 0px 1px 0px 0px !important;
+    border-right: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topright: 2px !important;
+    margin-bottom: 0 !important;
 }
 
-panelTab {
-    -moz-binding: url("chrome://firebug/content/bindings.xml#panelTab");
-}
+/************************************************************************************************/
 
 panelStatus {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelStatus");
@@ -91,6 +99,10 @@ panelStatus {
 #fbToolbar[moz-collapsed="true"] {
     /* Prevent full-screen from hiding toolbar */
     visibility: visible;
+}
+
+panelTab {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelTab");
 }
 
 /* Lightup the text, eg on the Script tab when stopped on a breakpoint */

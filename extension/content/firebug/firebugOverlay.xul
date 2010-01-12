@@ -150,10 +150,7 @@
 
                     </panelBarArrowscrollbox>
 
-                    <vbox class="fbAllPanelsBox">
-                        <toolbarbutton class="fbAllPanels tabs-alltabs-button" type="menu"
-                            style="width: 17px; margin-bottom: 0px; border-right: 1px solid black; -moz-border-radius: 2px;"/>
-                    </vbox>
+                    <panelBarTabList id="panelBarTabList" />
 
                     <spacer flex="100"/>
 

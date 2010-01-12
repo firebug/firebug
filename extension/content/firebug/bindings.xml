@@ -120,6 +120,19 @@
                     var newTab = this.createTab(panelType);
                     this.panelTabs.appendChild(newTab);
                 }
+
+                // Make sure hidden panels are collapsed.
+                var prefValue = Firebug.getPref(Firebug.prefDomain, "hiddenPanels");
+                if (!prefValue.length)
+                    return;
+
+                var closedPanels = prefValue.split(" ");
+                for (i=0; i<closedPanels.length; i++)
+                {
+                    var tab = this.tabMap[closedPanels[i]];
+                    if (tab)
+                        FBL.collapse(tab, true);
+                }
             ]]></body>
         </method>
 
@@ -278,6 +291,67 @@
                 return this.tabMap[panelName];
             ]]></body>
         </method>
+
+        <method name="closePanel">
+            <parameter name="panelName"/>
+            <body><![CDATA[
+                var tab = this.getTab(panelName);
+                FBL.collapse(tab, true);
+                this.storeHiddenPanels();
+            ]]></body>
+        </method>
+
+        <method name="openPanel">
+            <parameter name="panelName"/>
+            <body><![CDATA[
+                var tab = this.getTab(panelName);
+                FBL.collapse(tab, false);
+                this.storeHiddenPanels();
+            ]]></body>
+        </method>
+
+        <method name="togglePanel">
+            <parameter name="panelName"/>
+            <parameter name="forceOpen"/>
+            <body><![CDATA[
+                var tab = this.getTab(panelName);
+                var open = FBL.isVisible(tab);
+                if (open && forceOpen)
+                    return;
+
+                if (open)
+                    this.closePanel(panelName);
+                else
+                    this.openPanel(panelName);
+            ]]></body>
+        </method>
+
+        <method name="storeHiddenPanels">
+            <body><![CDATA[
+                var closedPanels = [];
+                var tab = this.panelTabs.firstChild;
+                while (tab)
+                {
+                    if (!FBL.isVisible(tab))
+                        closedPanels.push(tab.panelType.prototype.name);
+                    tab = tab.nextSibling;
+                }
+                Firebug.setPref(Firebug.prefDomain, "hiddenPanels", closedPanels.join(" "));
+            ]]></body>
+        </method>
+
+        <method name="openAllPanels">
+            <body><![CDATA[
+                var tab = this.panelTabs.firstChild;
+                while (tab)
+                {
+                    if (!FBL.isVisible(tab))
+                        FBL.collapse(tab, false);
+                    tab = tab.nextSibling;
+                }
+                Firebug.setPref(Firebug.prefDomain, "hiddenPanels", "");
+            ]]></body>
+        </method>
     </implementation>
 
     <handlers>
@@ -326,6 +400,57 @@
     </handlers>
 </binding>
 
+<binding id="panelBarTabList" display="xul:box">
+    <content>
+        <xul:toolbarbutton class="tabs-alltabs-button" type="menu">
+            <xul:menupopup anonid="popup" />
+        </xul:toolbarbutton>
+    </content>
+    <implementation>
+        <constructor>
+        <![CDATA[
+            this.popup = document.getAnonymousElementByAttribute(this, "anonid", "popup");
+            this.panelBar = document.getElementById("fbPanelBar1");
+        ]]>
+        </constructor>
+    </implementation>
+    <handlers>
+        <handler event="popupshowing"><![CDATA[
+            var tab = this.panelBar.panelTabs.firstChild;
+            while (tab)
+            {
+                var menuItem = document.createElement("menuitem");
+                menuItem.setAttribute("type", "checkbox");
+                menuItem.setAttribute("checked", FBL.isVisible(tab));
+                menuItem.setAttribute("label", tab.label);
+                menuItem.panelType = tab.panelType;
+                this.popup.appendChild(menuItem);
+                tab = tab.nextSibling;
+            }
+
+            // Create separator
+            this.popup.appendChild(document.createElement("menuseparator"));
+
+            // The last menu item is for opening all panels.
+            var menuItem = document.createElement("menuitem");
+            menuItem.setAttribute("label", FBL.$STR("firebug.Show_All_Panels"));
+            var listener = FBL.bindFixed(this.panelBar.openAllPanels, this.panelBar);
+            menuItem.addEventListener("command", listener, false);
+            this.popup.appendChild(menuItem);
+
+            return true;
+        ]]></handler>
+        <handler event="popuphidden"><![CDATA[
+            FBL.eraseNode(this.popup);
+        ]]></handler>
+        <handler event="command"><![CDATA[
+            var menuItem = event.originalTarget;
+            var panelName = menuItem.panelType.prototype.name;
+            this.panelBar.togglePanel(panelName);
+        ]]></handler>
+    </handlers>
+</binding>
+
 <binding id="panelTab" display="xul:button">
     <content>
         <xul:image class="panelTab-left"/>
@@ -337,6 +462,7 @@
     <implementation>
         <constructor>
         <![CDATA[
+            this.labelNode = document.getAnonymousElementByAttribute(this, "class", "panelTab-text"),
             this.setAttribute('role', 'tab');
             this.setAttribute('aria-haspopup', 'true');
             if (!this.tabMenu)
@@ -361,6 +487,14 @@
             <setter><![CDATA[
                 this.setAttribute("selected", val);
                 this.tabMenu.updateVisibility();
+            ]]></setter>
+        </property>
+        <property name="label">
+            <getter><![CDATA[
+                return this.labelNode.getAttribute("value");
+            ]]></getter>
+            <setter><![CDATA[
+                this.labelNode.setAttribute(val);
             ]]></setter>
         </property>
     </implementation>
