@@ -204,11 +204,12 @@
 .panelTabBox {
     background: #e0e0e0 url(chrome://firebug/skin/mac/tabBar.gif) repeat-x;
     border-bottom: 1px solid #BBB9BA;
-    padding: 0 2px 0 2px;
+    padding: 0;
     overflow: hidden;
 }
 
 .panelTabs {
+    padding: 0 2px 0 2px;
     -moz-box-align: end;
 }
 

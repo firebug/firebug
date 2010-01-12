@@ -377,7 +377,12 @@
     <implementation>
       <method name="_getScrollableElements">
         <body><![CDATA[
-          return document.getElementById("fbPanelBar1-panelTabs").childNodes;
+          return this.getScrollableArea().childNodes;
+        ]]></body>
+      </method>
+      <method name="getScrollableArea">
+        <body><![CDATA[
+          return document.getElementById(this.getAttribute("scrollableArea"));
         ]]></body>
       </method>
     </implementation>

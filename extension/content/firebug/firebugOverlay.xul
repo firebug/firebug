@@ -139,15 +139,15 @@
                     </hbox>
 
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
-                    <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal" flex="1"
-                        style="min-width: 1px;" chromedir="ltr"
+                    <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
+                        flex="1" chromedir="ltr"
+                        scrollableArea="fbPanelBar1-panelTabs"
                         clicktoscroll="true"
                         class="tabbrowser-arrowscrollbox">
 
                         <!-- Tab Bar -->
                         <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
                             aria-label="firebug panels" />
-
                     </panelBarArrowscrollbox>
 
                     <panelBarTabList id="panelBarTabList" />
@@ -294,8 +294,15 @@
                     <deck id="fbSidePanelDeck" persist="width,height">
                         <panelBar id="fbPanelBar2" class="panelBar">
                             <hbox id="fbPanelBar2-tabBox" class="panelTabBox" collapsed="true">
-                                <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist"
-                                      aria-label="firebug side panels" />
+                                <panelBarArrowscrollbox id="fbPanelBar2-Arrowscrollbox" orient="horizontal" flex="1"
+                                    style="min-width: 1px;" chromedir="ltr"
+                                    scrollableArea="fbPanelBar2-panelTabs"
+                                    clicktoscroll="true"
+                                    class="tabbrowser-arrowscrollbox">
+                                    <!-- Tab Side Bar -->
+                                    <hbox id="fbPanelBar2-panelTabs" class="panelTabs" role="tablist"
+                                          aria-label="firebug side panels" />
+                                </panelBarArrowscrollbox>
                             </hbox>
                             <deck id="fbPanelBar2-deck" flex="1">
                                 <browser id="fbPanelBar2-browser"

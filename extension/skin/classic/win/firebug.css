@@ -160,12 +160,13 @@
 .panelTabBox {
     background: url(chrome://firebug/skin/win/tabBg.png) repeat-x bottom;
     border-bottom: 1px solid threedshadow;
-    padding: 0 4px;
+    padding: 0;
     overflow: hidden;
 }
 
 .panelTabs {
     -moz-box-align: end;
+    padding: 0 4px;
 }
 
 panelTab {
