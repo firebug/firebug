@@ -176,6 +176,7 @@ function FirebugService()
         this.osOut("FirebugService Starting, FBTrace should be up\n");
 
     this.profiling = false;
+    this.pauseDepth = 0;
 
     prefs = PrefService.getService(nsIPrefBranch2);
     fbs.prefDomain = "extensions.firebug.service."
@@ -325,7 +326,7 @@ FirebugService.prototype =
                 this.enableDebugger();
             if (FBTrace.DBG_FBS_FINDDEBUGGER  || FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.registerDebugger have "+debuggers.length+" after reg debuggr.debuggerName: "+debuggr.debuggerName+" we are "+(enabledDebugger?"enabled":"not enabled")+" " +
-                        "On:"+(jsd?jsd.isOn:"no jsd")+" pauseDepth:"+(jsd?jsd.pauseDepth:"off"));
+                        "On:"+(jsd?jsd.isOn:"no jsd")+" jsd.pauseDepth:"+(jsd?jsd.pauseDepth:"off")+" fbs.pauseDepth:"+fbs.pauseDepth);
         }
         else
             throw "firebug-service debuggers must have wrappedJSObject";
@@ -936,8 +937,9 @@ FirebugService.prototype =
 
         if (rejection.length == 0)  // then everyone wants to pause
         {
-            if (jsd.pauseDepth == 0)  // don't pause if we are paused.
+            if (fbs.pauseDepth == 0)  // don't pause if we are paused.
             {
+                fbs.pauseDepth = 1;
                 jsd.pause();
                 fbs.unhookScripts();
             }
@@ -946,8 +948,8 @@ FirebugService.prototype =
         }
         else // we don't want to pause
         {
-            while (jsd.pauseDepth > 0)  // make sure we are not paused.
-                jsd.unPause();
+            while (fbs.pauseDepth > 0)  // make sure we are not paused.
+                fbs.unPause();
         }
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
         {
@@ -955,12 +957,12 @@ FirebugService.prototype =
             // The next line gives NS_ERROR_NOT_AVAILABLE
             // FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from clients "+clients, rejection);
         }
-        return jsd.pauseDepth;
+        return fbs.pauseDepth;
     },
 
     unPause: function()
     {
-        if (jsd.pauseDepth)
+        if (fbs.pauseDepth > 0)
         {
             if (FBTrace.DBG_ACTIVATION && !jsd.isOn)
                 FBTrace.sysout("fbs.unpause while jsd.isOn is false!! and hooked scripts pauseDepth:"+jsd.pauseDepth);
@@ -969,6 +971,7 @@ FirebugService.prototype =
 
             var depth = jsd.unPause();
             var active = fbs.isJSDActive();
+            fbs.pauseDepth--;
 
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+depth+" jsd.isOn: "+jsd.isOn);
@@ -981,7 +984,7 @@ FirebugService.prototype =
             if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+ jsd.pauseDepth+" || "+ !jsd.isOn+")");
         }
-        return jsd.pauseDepth;
+        return fbs.pauseDepth;
     },
 
     isJSDActive: function()
