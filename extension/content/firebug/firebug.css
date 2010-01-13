@@ -46,9 +46,28 @@ panelBarTabList {
 panelBarArrowscrollbox > .scrollbutton-up,
 panelBarArrowscrollbox > .scrollbutton-down,
 panelBarTabList > .tabs-alltabs-button {
-    width: 17px !important;
-    margin: 0px 1px 0px 1px !important;
-    /*padding: 0 !important;*/
+    margin: 0 !important;
+}
+
+panelBarTabList > .tabs-alltabs-button {
+    border-right: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topright: 2px !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up
+{
+    border-left: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topleft: 2px !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-down
+{
+    border-right: 1px solid ThreeDShadow !important;
+    -moz-border-radius-topright: 2px !important;
+}
+
+#fbPanelBar1-tabBox > panelBarArrowscrollbox {
+    margin-right: 4px;
 }
 
 #fbPanelBar2-tabBox > panelBarArrowscrollbox > .scrollbutton-up,
@@ -58,27 +77,8 @@ panelBarTabList > .tabs-alltabs-button {
     -moz-border-radius: 0px !important;
 }
 
-#fbPanelBar1-tabBox > panelBarArrowscrollbox > .scrollbutton-up
-{
-    border-left: 1px solid ThreeDShadow !important;
-    -moz-border-radius-topleft: 2px !important;
-}
-
-panelBarArrowscrollbox > .scrollbutton-down {
-    margin: 0px 0px 0px 1px !important;
-}
-
-#fbPanelBar1-tabBox > panelBarArrowscrollbox,
-panelBarTabList {
-    height: 20px !important;
-    padding-top: 6px !important;
-}
-
-panelBarTabList > .tabs-alltabs-button {
-    margin: 0px 1px 0px 0px !important;
-    border-right: 1px solid ThreeDShadow !important;
-    -moz-border-radius-topright: 2px !important;
-    margin-bottom: 0 !important;
+.innerToolbar {
+    margin: 0 4px 0 4px;
 }
 
 /************************************************************************************************/

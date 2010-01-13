@@ -138,6 +138,8 @@
                                 tooltiptext="script.Break On Next" breakable="disabled" />
                     </hbox>
 
+                    <panelBarTabList id="panelBarTabList" />
+
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
                         flex="1" chromedir="ltr"
@@ -149,8 +151,6 @@
                         <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
                             aria-label="firebug panels" />
                     </panelBarArrowscrollbox>
-
-                    <panelBarTabList id="panelBarTabList" />
 
                     <spacer flex="100"/>
 
