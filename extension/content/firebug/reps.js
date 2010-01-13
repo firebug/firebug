@@ -1289,7 +1289,7 @@ this.SourceFile = domplate(this.SourceLink,
 
     supportsObject: function(object)
     {
-        return object instanceof Firebug.SourceFile;
+        return object.compilation_unit_type; // kinda hacky, but more reliable than type testing
     },
 
     persistObject: function(sourceFile)
