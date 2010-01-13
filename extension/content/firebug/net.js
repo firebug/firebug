@@ -1300,7 +1300,16 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         cacheSizeLabel.childNodes[1].firstChild.nodeValue = NetRequestEntry.formatSize(cachedSize);
 
         var timeLabel = row.lastChild.firstChild.lastChild.firstChild;
-        timeLabel.innerHTML = NetRequestEntry.formatTime(totalTime);
+        var timeText = NetRequestEntry.formatTime(totalTime);
+        var firstPhase = phases[0];
+        if (firstPhase.windowLoadTime)
+        {
+            var loadTime = firstPhase.windowLoadTime - firstPhase.startTime;
+            // xxxHonza: localization?
+            timeText += " (onload: " + NetRequestEntry.formatTime(loadTime) + ")";
+        }
+
+        timeLabel.innerHTML = timeText;
     },
 
     summarizePhase: function(phase, rightNow)

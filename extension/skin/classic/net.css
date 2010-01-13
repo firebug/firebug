@@ -448,6 +448,7 @@
 .netSummaryRow .netReceivingBar {
     background: #BBBBBB;
     border: none;
+    padding-left: 10px;
 }
 
 .netSummaryLabel {
