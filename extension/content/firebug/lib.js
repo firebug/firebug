@@ -4255,7 +4255,7 @@ this.persistObjects = function(panel, panelState)
     if (panel.selection)
         panelState.persistedSelection = this.persistObject(panel.selection, panel.context);
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.persistObjects panel.location:"+panel.location+" panel.selection:"+panel.selection+" panelState:", panelState);
+        FBTrace.sysout("lib.persistObjects "+panel.name+" panel.location:"+panel.location+" panel.selection:"+panel.selection+" panelState:", panelState);
 
 };
 
@@ -4274,7 +4274,7 @@ this.restoreLocation =  function(panel, panelState)
         var location = panelState.persistedLocation(panel.context);
 
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("lib.restoreObjects persistedLocation: "+location+" panelState:", panelState);
+            FBTrace.sysout("lib.restoreObjects "+panel.name+" persistedLocation: "+location+" panelState:", panelState);
 
         if (location)
         {
@@ -4320,7 +4320,7 @@ this.restoreSelection = function(panel, panelState)
             }
 
             if (FBTrace.DBG_INITIALIZE)
-                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
+                FBTrace.sysout("lib.overrideDefaultsWithPersistedValues "+panel.name+" panel.location: "+panel.location+" panel.selection: "+panel.selection+" panelState:", panelState);
         }
 
         // If we couldn't restore the selection, wait a bit and try again
@@ -4328,7 +4328,7 @@ this.restoreSelection = function(panel, panelState)
     }
 
     if (FBTrace.DBG_INITIALIZE)
-        FBTrace.sysout("lib.restore panel.selection: "+panel.selection+" panelState:", panelState);
+        FBTrace.sysout("lib.restore "+panel.name+" needRetry "+needRetry+" panel.selection: "+panel.selection+" panelState:", panelState);
 };
 
 this.restoreObjects = function(panel, panelState)
