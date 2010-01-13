@@ -2510,20 +2510,18 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
 
             if (this.context.loaded)
             {
-                if(!this.location)
+                if (!this.restored)  // this work should be done in loadedContext but on the panel
                 {
+                    delete this.location;  // remove the default location if any
                     restoreLocation(this, state);
+                }
 
-                    if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
-                        this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
-                }
-                else  // we have a location from before
-                {
-                    if (this.selectedSourceBox)  // so we need only refresh the view
-                        this.reView(this.selectedSourceBox);
-                    else                         // somehow we did not make a sourcebox?
-                        this.navigate(this.location);
-                }
+                if (state && this.location)  // then we are restoring and we have a location, so scroll when we can
+                    this.scrollInfo = { location: this.location, previousCenterLine: state.previousCenterLine};
+                if (!this.selectedSourceBox)  // somehow we did not make a sourcebox?
+                    this.navigate(this.location);
+
+                this.restored = true;
             }
             else // show default
                 this.navigate(this.location);
