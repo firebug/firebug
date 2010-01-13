@@ -915,6 +915,7 @@ FirebugService.prototype =
 
             while (jsd.pauseDepth > 0)  // unwind completely
                 jsd.unPause();
+            fbs.pauseDepth = 0;
 
             jsd.off();
         }
@@ -939,7 +940,7 @@ FirebugService.prototype =
         {
             if (fbs.pauseDepth == 0)  // don't pause if we are paused.
             {
-                fbs.pauseDepth = 1;
+                fbs.pauseDepth++;
                 jsd.pause();
                 fbs.unhookScripts();
             }
@@ -950,10 +951,11 @@ FirebugService.prototype =
         {
             while (fbs.pauseDepth > 0)  // make sure we are not paused.
                 fbs.unPause();
+            fbs.pauseDepth = 0;
         }
         if (FBTrace.DBG_FBS_FINDDEBUGGER || FBTrace.DBG_ACTIVATION)
         {
-            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from "+clients.length+" clients ");
+            FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" fbs.pauseDepth: "+fbs.pauseDepth+" rejection "+rejection.length+" from "+clients.length+" clients ");
             // The next line gives NS_ERROR_NOT_AVAILABLE
             // FBTrace.sysout("fbs.pause depth "+(jsd.isOn?jsd.pauseDepth:"jsd OFF")+" rejection "+rejection.length+" from clients "+clients, rejection);
         }
@@ -964,17 +966,18 @@ FirebugService.prototype =
     {
         if (fbs.pauseDepth > 0)
         {
-            if (FBTrace.DBG_ACTIVATION && !jsd.isOn)
-                FBTrace.sysout("fbs.unpause while jsd.isOn is false!! and hooked scripts pauseDepth:"+jsd.pauseDepth);
+            if (FBTrace.DBG_ACTIVATION && (!jsd.isOn || jsd.pauseDepth == 0) )
+                FBTrace.sysout("fbs.unpause while jsd.isOn is "+jsd.isOn+" and hooked scripts pauseDepth:"+jsd.pauseDepth);
 
+            fbs.pauseDepth--;
             fbs.hookScripts();
 
             var depth = jsd.unPause();
             var active = fbs.isJSDActive();
-            fbs.pauseDepth--;
+
 
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+depth+" jsd.isOn: "+jsd.isOn);
+                FBTrace.sysout("fbs.unPause hooked scripts and unPaused, active:"+active+" depth "+depth+" jsd.isOn: "+jsd.isOn+" fbs.pauseDepth "+fbs.pauseDepth);
 
             dispatch(clients, "onJSDActivate", [active, "unpause depth"+jsd.pauseDepth]);
 
@@ -982,7 +985,7 @@ FirebugService.prototype =
         else  // we were not paused.
         {
             if (FBTrace.DBG_ACTIVATION)
-                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+ jsd.pauseDepth+" || "+ !jsd.isOn+")");
+                FBTrace.sysout("fbs.unPause no action: (jsd.pauseDepth || !jsd.isOn) = ("+ jsd.pauseDepth+" || "+ !jsd.isOn+")"+" fbs.pauseDepth "+fbs.pauseDepth);
         }
         return fbs.pauseDepth;
     },
