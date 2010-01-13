@@ -370,11 +370,12 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         }
         else
         {
-            // xxxHonza: Don't update the this.wasScrolledToBottom flag now.
-            // At the beginning (when the first log is created) the isScrolledToBottom
-            // always returns true.
-            //if (this.panelNode.offsetHeight)
-            //    this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
+            // Don't update the this.wasScrolledToBottom flag now. At the beginning (when the
+            // first log is created) the isScrolledToBottom always returns true.
+            // But make sure the panel scrolls if it should.
+            var wasScrolledToBottom = false;
+            if (this.panelNode.offsetHeight)
+                wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
             var row = this.createRow("logRow", className);
             appender.apply(this, [objects, row, rep]);
@@ -386,7 +387,7 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
             this.filterLogRow(row, this.wasScrolledToBottom);
 
-            if (this.wasScrolledToBottom)
+            if (wasScrolledToBottom)
                 scrollToBottom(this.panelNode);
 
             return row;
