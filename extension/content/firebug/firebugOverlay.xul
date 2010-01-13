@@ -143,7 +143,6 @@
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
                         flex="1" chromedir="ltr"
-                        scrollableArea="fbPanelBar1-panelTabs"
                         clicktoscroll="true"
                         class="tabbrowser-arrowscrollbox">
 
@@ -296,7 +295,6 @@
                             <hbox id="fbPanelBar2-tabBox" class="panelTabBox" collapsed="true">
                                 <panelBarArrowscrollbox id="fbPanelBar2-Arrowscrollbox" orient="horizontal" flex="1"
                                     style="min-width: 1px;" chromedir="ltr"
-                                    scrollableArea="fbPanelBar2-panelTabs"
                                     clicktoscroll="true"
                                     class="tabbrowser-arrowscrollbox">
                                     <!-- Tab Side Bar -->

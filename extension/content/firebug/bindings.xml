@@ -375,33 +375,26 @@
 <binding id="panelBarArrowscrollbox"
     extends="chrome://global/content/bindings/scrollbox.xml#arrowscrollbox-clicktoscroll">
     <implementation>
-      <method name="_getScrollableElements">
-        <body><![CDATA[
-          return this.getScrollableArea().childNodes;
-        ]]></body>
-      </method>
-      <method name="getScrollableArea">
-        <body><![CDATA[
-          return document.getElementById(this.getAttribute("scrollableArea"));
-        ]]></body>
-      </method>
+        <constructor><![CDATA[
+            this.panelBar = FBL.getAncestorByClass(this, "panelBar");
+            this.panelTabs = FBL.getElementByClass(this, "panelTabs");
+        ]]></constructor>
+        <method name="_getScrollableElements">
+            <body><![CDATA[
+                return this.panelTabs.childNodes;
+            ]]></body>
+        </method>
     </implementation>
     <handlers>
-      <handler event="underflow"><![CDATA[
-         if (event.detail == 0)
-           return; // Ignore vertical events
+        <handler event="underflow"><![CDATA[
+        ]]></handler>
+        <handler event="overflow"><![CDATA[
+            if (event.detail == 0)
+                return; // Ignore vertical events
 
-         var tabs = document.getElementById("fbPanelBar1-Arrowscrollbox");
-         tabs.removeAttribute("overflow");
-      ]]></handler>
-      <handler event="overflow"><![CDATA[
-         if (event.detail == 0)
-           return; // Ignore vertical events
-
-         var tabs = document.getElementById("fbPanelBar1-Arrowscrollbox");
-         tabs.setAttribute("overflow", "true");
-         this.scrollBoxObject.ensureElementIsVisible(tabs.selectedItem);
-      ]]></handler>
+            if (this.panelBar.selectedTab)
+                this.scrollBoxObject.ensureElementIsVisible(this.panelBar.selectedTab);
+        ]]></handler>
     </handlers>
 </binding>
 
