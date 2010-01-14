@@ -3069,8 +3069,10 @@ this.safeGetWindowLocation = function(window)
                 return "about:closed";
             if ("location" in window)
             {
-                if ("toString" in window.location)
+                if (typeof(window.location) == 'object' && "toString" in window.location)
                     return window.location.toString();
+                else if (typeof (window.location) == 'string' )
+                    return window.location+"";
                 else
                     return "(window.location has no toString)";
             }
