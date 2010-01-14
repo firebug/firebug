@@ -1430,7 +1430,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var focusGroups = node.getElementsByClassName('focusGroup');
         Array.forEach(focusGroups, function(e,i,a){
-            if (hasClass(e, 'offsetLayoutBox'))
+            if (hasClass(e, 'positionLayoutBox'))
                 this.makeFocusable(e, true);
             else
                 this.makeFocusable(e, false);
@@ -1450,8 +1450,8 @@ Firebug.A11yModel = extend(Firebug.Module,
         var output = "";
         switch(styleName)
         {
-            case "offset":
-                output += hasClass(elem, "blankEdge") ? '' : $STR("a11y.layout.offset");
+            case "position":
+                output += hasClass(elem, "blankEdge") ? '' : $STR("a11y.layout.position");
                 styleName = "outer";
                 break;
             case "margin":

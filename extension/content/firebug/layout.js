@@ -12,7 +12,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
     {
         tag:
             DIV({class: "outerLayoutBox"},
-                DIV({class: "offsetLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode focusGroup"},
+                DIV({class: "positionLayoutBox $outerTopMode $outerRightMode $outerBottomMode $outerLeftMode focusGroup"},
                     DIV({class: "layoutEdgeTop layoutEdge"}),
                     DIV({class: "layoutEdgeRight layoutEdge"}),
                     DIV({class: "layoutEdgeBottom layoutEdge"}),
@@ -24,16 +24,16 @@ LayoutPanel.prototype = extend(Firebug.Panel,
                         ),
 
                     DIV({class: "layoutLabelTop layoutLabel v$outerTop"},
-                        SPAN({class: "editable focusStart", 'aria-label' : $STR('a11y.layout.offset top')}, '$outerTop')
+                        SPAN({class: "editable focusStart", 'aria-label' : $STR('a11y.layout.position top')}, '$outerTop')
                     ),
                     DIV({class: "layoutLabelRight layoutLabel v$outerRight"},
-                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.offset right')}, '$outerRight')
+                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.position right')}, '$outerRight')
                     ),
                     DIV({class: "layoutLabelBottom layoutLabel v$outerBottom"},
-                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.offset bottom')}, '$outerBottom')
+                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.position bottom')}, '$outerBottom')
                     ),
                     DIV({class: "layoutLabelLeft layoutLabel v$outerLeft"},
-                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.offset left')}, '$outerLeft')
+                        SPAN({class: "editable", 'aria-label' : $STR('a11y.layout.position left')}, '$outerLeft')
                     ),
 
                     DIV({class: "layoutCaption"}, '$outerLabel'),
@@ -215,7 +215,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         {
             function getStyle(style, name) { var v = style.getPropertyCSSValue(name); return (v && v.cssText) ? parseInt(v.cssText) : ' '; }
 
-            args.outerLabel = $STR("LayoutOffset");
+            args.outerLabel = $STR("LayoutPosition");
             
             args.outerLeft = getStyle(style,'left');
             args.outerTop = getStyle(style,'top');
@@ -336,7 +336,7 @@ LayoutEditor.prototype = domplate(Firebug.InlineEditor.prototype,
         var boxEdge = getBoxEdge(labelBox);
 
         var styleName;
-        if (boxFrame == "content" || boxFrame == "offset")
+        if (boxFrame == "content" || boxFrame == "position")
             styleName = boxEdge.toLowerCase();
         else if (boxFrame == "border")
             styleName = boxFrame+boxEdge+"Width";
