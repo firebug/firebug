@@ -353,6 +353,10 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         var location = safeGetWindowLocation(win);
 
+        // For every window we watch, prepare for unwatch. It's OK if this is called
+        // more times (see 2695).
+        TabWatcherUnloader.registerWindow(win);
+
         // Unfortunately, dummy requests that trigger the call to watchWindow
         // are called several times, so we have to avoid dispatching watchWindow
         // more than once
@@ -362,20 +366,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
             if (FBTrace.DBG_WINDOWS)
                 FBTrace.sysout("-> watchWindow register *** FRAME *** to context for win.location: "+location+"\n");
-
-            // For every window we watch, prepare for unwatch.
-            if (win.parent == win)
-            {
-                win.addEventListener("pagehide", onPageHideTopWindow, false);
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for pagehide");
-            }
-            else
-            {
-                win.addEventListener("unload", onUnloadWindow, false);
-                if (FBTrace.DBG_WINDOWS)
-                    FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for unload");
-            }
 
             dispatch(this.fbListeners, "watchWindow", [context, win]);
 
@@ -612,6 +602,68 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
 // ************************************************************************************************
 
+var TabWatcherUnloader =
+{
+    listeners: [],
+
+    registerWindow: function(win)
+    {
+        var root = (win.parent == win);
+        var eventName = root ? "pagehide" : "unload";
+        var listener = bind(root ? this.onPageHide : this.onUnload, this);
+        win.addEventListener(eventName, listener, false);
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher.watchWindow addEventListener for " + eventName);
+
+        this.listeners.push({
+            window: win,
+            listener: listener,
+            eventName: eventName
+        });
+    },
+
+    unregisterWindow: function(win)
+    {
+        var newListeners = [];
+        for (var i=0; i<this.listeners.length; i++)
+        {
+            var listener = this.listeners[i];
+            if (listener.window != win)
+                newListeners.push(listener);
+            else
+                win.removeEventListener(listener.eventName, listener.listener, false);
+        }
+        this.listeners = newListeners;
+    },
+
+    onPageHide: function(event)
+    {
+        var win = event.currentTarget;
+        this.unregisterWindow(win);
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher.Unloader; PAGE HIDE (" +
+                this.listeners.length + ") " + win.location, event);
+
+        onPageHideTopWindow(event);
+    },
+
+    onUnload: function(event)
+    {
+        var win = event.currentTarget;
+        this.unregisterWindow(win);
+
+        if (FBTrace.DBG_WINDOWS)
+            FBTrace.sysout("-> tabWatcher.Unloader; PAGE UNLOAD (" +
+                this.listeners.length + ") " + win.location, event);
+
+        onUnloadWindow(event);
+    }
+};
+
+// ************************************************************************************************
+
 var TabProgressListener = extend(BaseProgressListener,
 {
     onLocationChange: function(progress, request, uri)
@@ -835,8 +887,6 @@ function onPageHideTopWindow(event)
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher pagehide event.currentTarget "+safeGetWindowLocation(win), event);
 
-    win.removeEventListener("pagehide", onPageHideTopWindow, false);
-
     // http://developer.mozilla.org/en/docs/Using_Firefox_1.5_caching#pagehide_event
     if (event.persisted) // then the page is cached and there cannot be an unload handler
     {
@@ -923,7 +973,6 @@ function onUnloadWindow(event)
 {
     var win = event.currentTarget;
     var eventType = "unload";
-    win.removeEventListener(eventType, onUnloadWindow, false);
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+safeGetWindowLocation(win) +" removeEventListener: "+ eventType+"\n");
     TabWatcher.unwatchWindow(win);
