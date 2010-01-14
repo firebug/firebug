@@ -1154,7 +1154,7 @@ this.SourceLink = domplate(Firebug.Rep,
 
     hideSourceLink: function(sourceLink)
     {
-        return sourceLink ? sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1 : true;
+        return (sourceLink && sourceLink.href && sourceLink.href.indexOf) ? (sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1) : true;
     },
 
     getSourceLinkTitle: function(sourceLink)
