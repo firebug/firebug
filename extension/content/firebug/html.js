@@ -1018,11 +1018,11 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
             this.ioBox.sourceRow.removeAttribute("exe_line");
 
         if (object instanceof SourceLink) // && object.type == "css" and !reCSS(object.href) by supports
-         {
-             var sourceLink = object;
-             var stylesheet = getStyleSheetByHref(sourceLink.href, this.context);
-             if (stylesheet)
-             {
+        {
+            var sourceLink = object;
+            var stylesheet = getStyleSheetByHref(sourceLink.href, this.context);
+            if (stylesheet)
+            {
                 var ownerNode = stylesheet.ownerNode;
                 if (FBTrace.DBG_CSS)
                         FBTrace.sysout("html panel updateSelection stylesheet.ownerNode="+stylesheet.ownerNode
