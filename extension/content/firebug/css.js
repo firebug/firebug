@@ -1534,7 +1534,7 @@ function safeGetContentState(selection)
     catch (e)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("css.safeGetContentState; EXCEPTION", e);
+            FBTrace.sysout("css.safeGetContentState; EXCEPTION "+e, e);
     }
 }
 
