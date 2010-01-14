@@ -1476,7 +1476,7 @@ FirebugService.prototype =
         }
         catch (exc)
         {
-            FBTrace.sysout("onTopLevelScriptCreated FAILED: ", exc);
+            FBTrace.sysout("onTopLevelScriptCreated FAILED: "+exc, exc);
             ERROR("onTopLevelScriptCreated Fails: "+exc);
         }
 
@@ -2793,10 +2793,25 @@ function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert
         if (scope.jsClassName == "Sandbox")
         {
             var proto = scope.jsPrototype;
-            if (proto.jsClassName == "XPCNativeWrapper")
+            if (proto.jsClassName == "XPCNativeWrapper")  // this is the path if we have web page in a sandbox
+            {
                 proto = proto.jsParent;
-            if (proto.jsClassName == "Window")
-                return new XPCNativeWrapper(proto.getWrappedValue());
+                if (proto.jsClassName == "Window")
+                    return new XPCNativeWrapper(proto.getWrappedValue());
+            }
+            else
+            {
+                if (scope instanceof Ci.nsISupports)
+                {
+                    var unwrapped = scope.getWrappedValue();
+                    return unwrapped;
+                    //return new XPCNativeWrapper(unwrapped);
+                }
+
+                var unwrapped = proto.getWrappedValue();
+                if (! (unwrapped instanceof Ci.nsISupports)) // https://bugzilla.mozilla.org/show_bug.cgi?id=522527#c49
+                    return unwrapped;
+            }
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
