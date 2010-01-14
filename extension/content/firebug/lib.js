@@ -105,6 +105,16 @@ this.extend = function(l, r)
     return newOb;
 };
 
+this.descend = function(prototypeParent, childProperties)
+{
+    function protoSetter() {};
+    protoSetter.prototype = prototypeParent;
+    var newOb = new protoSetter();
+    for (var n in childProperties)
+        newOb[n] = childProperties[n];
+    return newOb;
+};
+
 // ************************************************************************************************
 // Arrays
 

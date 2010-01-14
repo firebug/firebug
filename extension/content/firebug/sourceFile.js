@@ -417,7 +417,7 @@ Firebug.EvalLevelSourceFile = function(url, script, eval_expr, source, mapType, 
 };
 
 Firebug.EvalLevelSourceFile.prototype =
-    extend(new Firebug.SourceFile("eval-level"), // shared prototype
+    descend(new Firebug.SourceFile("eval-level"), // shared prototype
 {
     getLine: function(context, lineNo)
     {
@@ -493,7 +493,7 @@ Firebug.EventSourceFile = function(url, script, title, source, innerScriptEnumer
      Firebug.SourceFile.addScriptsToSourceFile(this, script, innerScriptEnumerator);
 };
 
-Firebug.EventSourceFile.prototype =	extend(new Firebug.SourceFile("event"),  // prototypical inheritance
+Firebug.EventSourceFile.prototype =	descend(new Firebug.SourceFile("event"),  // prototypical inheritance
 {
     getLine: function(context, lineNo)
     {
@@ -579,7 +579,7 @@ Firebug.TopLevelSourceFile = function(url, outerScript, sourceLength, innerScrip
     Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
-Firebug.TopLevelSourceFile.prototype = extend(new Firebug.SourceFile("top-level"), Firebug.SourceFile.CommonBase);
+Firebug.TopLevelSourceFile.prototype = descend(new Firebug.SourceFile("top-level"), Firebug.SourceFile.CommonBase);
 
 
 Firebug.TopLevelSourceFile.OuterScriptAnalyzer = {
@@ -610,7 +610,7 @@ Firebug.EnumeratedSourceFile = function(url) // we don't have the outer script a
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
-Firebug.EnumeratedSourceFile.prototype = extend(
+Firebug.EnumeratedSourceFile.prototype = descend(
         new Firebug.SourceFile("enumerated"),
         Firebug.SourceFile.CommonBase);
 
@@ -621,7 +621,7 @@ Firebug.NoScriptSourceFile = function(context, url) // Somehow we got the URL, b
     this.innerScripts = {};
 }
 
-Firebug.NoScriptSourceFile.prototype = extend(
+Firebug.NoScriptSourceFile.prototype = descend(
         new Firebug.SourceFile("URLOnly"),
         Firebug.SourceFile.CommonBase);
 
@@ -634,7 +634,7 @@ Firebug.XULSourceFile = function(url, innerScriptEnumerator)
     Firebug.SourceFile.addScriptsToSourceFile(this, null, innerScriptEnumerator);
 }
 
-Firebug.XULSourceFile.prototype = extend(
+Firebug.XULSourceFile.prototype = descend(
         new Firebug.SourceFile("xul"),
         Firebug.SourceFile.CommonBase);
 
@@ -648,7 +648,7 @@ Firebug.ScriptTagSourceFile = function(context, url, scriptTagNumber) // we don'
     this.pcmap_type = PCMAP_SOURCETEXT;
 }
 
-Firebug.ScriptTagSourceFile.prototype = extend(
+Firebug.ScriptTagSourceFile.prototype = descend(
         new Firebug.SourceFile("scriptTag"),
         Firebug.SourceFile.CommonBase);
 
