@@ -4408,7 +4408,8 @@ Firebug.NetMonitor.Utils =
     getResponseText: function(file, context)
     {
         // The response can be also empty string so, check agains "undefined".
-        return (typeof(file.responseText) != "undefined")? file.responseText :
+        return (typeof(file.responseText) != "undefined") ?
+            file.responseText :
             context.sourceCache.loadText(file.href, file.method, file);
     },
 

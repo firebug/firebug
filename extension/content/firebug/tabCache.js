@@ -486,7 +486,7 @@ Firebug.TabCache.prototype = extend(Firebug.SourceCache.prototype,
         var url = safeGetName(request);
         delete this.responses[url];
 
-        var lines = this.cache[url];
+        var lines = this.cache[this.removeAnchor(url)];
         var responseText = lines ? lines.join("") : "";
 
         if (FBTrace.DBG_CACHE)

@@ -50,13 +50,13 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         if (FBTrace.DBG_CACHE)
         {
             if (!this.cache.hasOwnProperty(url) && this.cache[url])
-                FBTrace.sysout("sourceCache.load; WARNING - hasOwnProperty returns false, " +
+                FBTrace.sysout("sourceCache.load; ERROR - hasOwnProperty returns false, " +
                     "but the URL is cached: " + url, this.cache[url]);
         }
 
         // xxxHonza: sometimes hasOwnProperty return false even if the URL is obviously there.
         //if (this.cache.hasOwnProperty(url))
-        var response = this.cache[url];
+        var response = this.cache[this.removeAnchor(url)];
         if (response)
             return response;
 
@@ -103,7 +103,7 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         // Unfortunately, the URL isn't available so, let's try to use FF cache.
         // Notice that additional network request to the server can be made in
         // this method (double-load).
-        return this.loadFromCache(this.removeAnchor(url), method, file);
+        return this.loadFromCache(url, method, file);
     },
 
     store: function(url, text)
