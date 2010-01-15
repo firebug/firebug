@@ -1297,7 +1297,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         var cacheSizeLabel = row.lastChild.firstChild.firstChild;
         cacheSizeLabel.setAttribute("collapsed", cachedSize == 0);
-        cacheSizeLabel.childNodes[1].firstChild.nodeValue = NetRequestEntry.formatSize(cachedSize);
+        cacheSizeLabel.childNodes[1].firstChild.nodeValue =
+            NetRequestEntry.formatSize(cachedSize);
 
         var timeLabel = row.lastChild.firstChild.lastChild.firstChild;
         var timeText = NetRequestEntry.formatTime(totalTime);
@@ -1900,14 +1901,14 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
                 DIV({"class": "netTotalSizeLabel netSummaryLabel"}, "0KB")
             ),
             TD({"class": "netTotalTimeCol netCol netTimeCol a11yFocus", "role" : "gridcell"},
-                DIV({"class": "netSummaryBar"},
-                    DIV({"class": "netCacheSizeLabel netSummaryLabel"},
+                DIV({"class": "netSummaryBar", style: "width: 100%"},
+                    DIV({"class": "netCacheSizeLabel netSummaryLabel", collapsed: "true"},
                         "(",
                         SPAN("0KB"),
                         SPAN(" " + $STR("FromCache")),
                         ")"
                     ),
-                    DIV({"class": "netReceivingBar", style: "width: 100%"},
+                    DIV({"class": "netTimeBar"},
                         SPAN({"class": "netTotalTimeLabel netSummaryLabel"}, "0ms")
                     )
                 )
