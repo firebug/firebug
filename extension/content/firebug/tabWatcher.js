@@ -696,8 +696,13 @@ var TabProgressListener = extend(BaseProgressListener,
     onStateChange: function(progress, request, flag, status)
     {
         if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("-> TabProgressListener.onStateChange to: "
-                +safeGetName(request)+" "+getStateDescription(flag)+"\n");
+        {
+            var win = progress.DOMWindow;
+            FBTrace.sysout("-> TabProgressListener.onStateChanged for: " +
+                safeGetName(request) + ", win: " + win.location.href +
+                ", content URL: " + (win.document ? win.document.URL : "no content URL") +
+                " " + getStateDescription(flag));
+        }
     }
 });
 
@@ -709,9 +714,11 @@ var FrameProgressListener = extend(BaseProgressListener,
     {
         if (FBTrace.DBG_WINDOWS)
         {
-            // xxxHonza: there is too much of these messages so, disable it for now.
-            FBTrace.sysout("-> FrameProgressListener.onStateChanged for: "+safeGetName(request)+
-                ", win: "+progress.DOMWindow.location.href+ " "+getStateDescription(flag));
+            var win = progress.DOMWindow;
+            FBTrace.sysout("-> FrameProgressListener.onStateChanged for: " +
+                safeGetName(request) + ", win: " + win.location.href +
+                ", content URL: " + (win.document ? win.document.URL : "no content URL") +
+                " " + getStateDescription(flag));
         }
 
         if (flag & STATE_IS_REQUEST && flag & STATE_START)
