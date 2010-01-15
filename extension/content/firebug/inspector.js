@@ -123,9 +123,9 @@ Firebug.Inspector = extend(Firebug.Module,
         if (node && node.nodeType != 1)
             node = node.parentNode;
 
-        if (node && node.firebugIgnore && !node.fbProxyFor)
-            return;
-
+        if(node && unwrapObject(node).firebugIgnore && !node.fbProxyFor)
+                return;
+        
         var context = this.inspectingContext;
 
         if (this.inspectTimeout)
