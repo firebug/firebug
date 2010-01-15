@@ -355,7 +355,8 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         // For every window we watch, prepare for unwatch. It's OK if this is called
         // more times (see 2695).
-        TabWatcherUnloader.registerWindow(win);
+        if (context && location != aboutBlank)
+            TabWatcherUnloader.registerWindow(win);
 
         // Unfortunately, dummy requests that trigger the call to watchWindow
         // are called several times, so we have to avoid dispatching watchWindow
