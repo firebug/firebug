@@ -2659,7 +2659,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
         ];
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         if( object instanceof jsdIStackFrame
             || object instanceof Firebug.SourceFile
@@ -3233,7 +3233,7 @@ CallstackPanel.prototype = extend(Firebug.Panel,
           this.refresh();
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof jsdIStackFrame;
     },

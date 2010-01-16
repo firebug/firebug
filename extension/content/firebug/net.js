@@ -574,7 +574,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         return Firebug.ActivablePanel.getPopupObject.apply(this, arguments);
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return ((object instanceof SourceLink && object.type == "net") ? 2 : 0);
     },
@@ -1703,7 +1703,7 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
         tbody.appendChild(summaryRow);
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return (object == this);
     },
@@ -5254,7 +5254,7 @@ Firebug.NetMonitor.BreakpointRep = domplate(Firebug.Rep,
         });
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Breakpoint;
     }

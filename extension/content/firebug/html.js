@@ -986,7 +986,7 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         this.mutateNode(target, parent, nextSibling, remove);
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         if (object instanceof Element || object instanceof Text || object instanceof CDATASection)
             return 2;
@@ -2088,7 +2088,7 @@ Firebug.HTMLModule.BreakpointRep = domplate(Firebug.Rep,
         }
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Firebug.HTMLModule.Breakpoint;
     }

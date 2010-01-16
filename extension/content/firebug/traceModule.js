@@ -701,9 +701,9 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     },
 
     // Firebug rep support
-    supportsObject: function(message, type)
+    supportsObject: function(object, type)
     {
-        return message instanceof Firebug.TraceModule.TraceMessage;
+        return object instanceof Firebug.TraceModule.TraceMessage;
     },
 
     browseObject: function(message, context)

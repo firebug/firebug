@@ -1013,7 +1013,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
             $STR("dom.Break On Property Change"));
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         if (object == null)
             return 1000;
@@ -1943,7 +1943,7 @@ Firebug.DOMModule.BreakpointRep = domplate(Firebug.Rep,
         }
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Breakpoint;
     }

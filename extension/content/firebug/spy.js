@@ -853,7 +853,7 @@ Firebug.Spy.XHR = domplate(Firebug.Rep,
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Firebug.Spy.XMLHttpRequestSpy;
     },

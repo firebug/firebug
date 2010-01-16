@@ -74,10 +74,10 @@ Firebug.PluginPanel.prototype = extend(Firebug.Panel,
     {
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         if (this.innerPanel)
-            return innerCall(this.innerPanel, "supportsObject", [object]);
+            return innerCall(this.innerPanel, "supportsObject", [object, type]);
         else
             return 0;
     },

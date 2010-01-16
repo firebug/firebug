@@ -2189,7 +2189,7 @@ Firebug.Panel =
      *
      * Zero means not supported, and higher numbers indicate specificity.
      */
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return 0;
     },

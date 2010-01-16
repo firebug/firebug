@@ -204,9 +204,9 @@ Firebug.Breakpoint.BreakpointRep = domplate(Firebug.Rep,
         return new SourceLink(bp.href, bp.lineNumber, "js");
     },
 
-    supportsObject: function(bp)
+    supportsObject: function(object, type)
     {
-        return (bp instanceof Firebug.Debugger.Breakpoint);
+        return (object instanceof Firebug.Debugger.Breakpoint);
     }
 });
 

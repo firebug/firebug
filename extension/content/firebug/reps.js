@@ -537,7 +537,7 @@ this.Arr = domplate(Firebug.Rep,
 
     className: "array",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return this.isArray(object);
     },
@@ -586,7 +586,7 @@ this.Arr = domplate(Firebug.Rep,
 
 this.Property = domplate(Firebug.Rep,
 {
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Property;
     },
@@ -606,7 +606,7 @@ this.Property = domplate(Firebug.Rep,
 
 this.NetFile = domplate(this.Obj,
 {
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Firebug.NetFile;
     },
@@ -634,7 +634,7 @@ this.Except = domplate(Firebug.Rep,
 
     className: "exception",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof ErrorCopy;
     }
@@ -824,7 +824,7 @@ this.Element = domplate(Firebug.Rep,
 
     className: "element",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Element;
     },
@@ -914,7 +914,7 @@ this.TextNode = domplate(Firebug.Rep,
         Firebug.chrome.select(node, "html", "domSide");
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Text;
     },
@@ -938,7 +938,7 @@ this.RegExp = domplate(Firebug.Rep,
     
     className: "regexp",
     
-    supportsObject: function(object, type, context)
+    supportsObject: function(object, type)
     {
         return type == "object" && object && object.constructor && object.constructor.toString && regexpConstructorRE.test(object.constructor.toString());
     }
@@ -961,7 +961,7 @@ this.Document = domplate(Firebug.Rep,
 
     className: "object",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Document || object instanceof XMLDocument;
     },
@@ -1021,7 +1021,7 @@ this.StyleSheet = domplate(Firebug.Rep,
 
     className: "object",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof CSSStyleSheet;
     },
@@ -1081,7 +1081,7 @@ this.Window = domplate(Firebug.Rep,
 
     className: "object",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Window;
     },
@@ -1145,7 +1145,7 @@ this.Event = domplate(Firebug.Rep,
 
     className: "object",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Event || object instanceof EventCopy;
     },
@@ -1223,7 +1223,7 @@ this.SourceLink = domplate(Firebug.Rep,
 
     className: "sourceLink",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof SourceLink;
     },
@@ -1306,7 +1306,7 @@ this.SourceFile = domplate(this.SourceLink,
 
     className: "sourceFile",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object.compilation_unit_type; // kinda hacky, but more reliable than type testing
     },
@@ -1398,7 +1398,7 @@ this.StackFrame = domplate(Firebug.Rep,  // XXXjjb Since the repObject is fn the
 
     className: "stackFrame",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof StackFrame;
     },
@@ -1435,7 +1435,7 @@ this.StackTrace = domplate(Firebug.Rep,
 
     className: "stackTrace",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof StackTrace;
     }
@@ -1449,7 +1449,7 @@ this.jsdStackFrame = domplate(Firebug.Rep,
 
     className: "jsdIStactFrame",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return (object instanceof jsdIStackFrame);
     },
@@ -1636,7 +1636,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
     className: "errorMessage",
     inspectable: false,
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof ErrorMessage;
     },

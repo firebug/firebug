@@ -373,7 +373,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
 
     className: "profile",
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof ProfileCall;
     },

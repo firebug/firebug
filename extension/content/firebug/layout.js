@@ -164,7 +164,7 @@ LayoutPanel.prototype = extend(Firebug.Panel,
         dispatch([Firebug.A11yModel], 'onDestroyNode', [this]);
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Element ? 1 : 0;
     },

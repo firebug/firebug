@@ -805,7 +805,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.lastScrollTop = this.panelNode.scrollTop;
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         if (object instanceof CSSStyleSheet)
             return 1;
@@ -1407,7 +1407,7 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
         }
     },
 
-    supportsObject: function(object)
+    supportsObject: function(object, type)
     {
         return object instanceof Element ? 1 : 0;
     },

@@ -1077,7 +1077,7 @@ top.FirebugChrome =
             var panelType = Firebug.panelTypes[i];
             if (!panelType.prototype.parentPanel
                 && panelType.prototype.name != FirebugContext.panelName
-                && panelSupportsObject(panelType, object))
+                && panelSupportsObject(panelType, object, typeof object))
             {
                 var panelName = panelType.prototype.name;
 
@@ -1184,13 +1184,13 @@ top.FirebugChrome =
 // ************************************************************************************************
 // Local Helpers
 
-function panelSupportsObject(panelType, object)
+function panelSupportsObject(panelType, object, type)
 {
     if (panelType)
     {
         try {
             // This tends to throw exceptions often because some objects are weird
-            return panelType.prototype.supportsObject(object)
+            return panelType.prototype.supportsObject(object, type)
         } catch (exc) {}
     }
 
@@ -1206,7 +1206,7 @@ function getBestPanelName(object, context, panelName)
     if (panelName)
     {
         panelType = Firebug.getPanelType(panelName);
-        if (panelSupportsObject(panelType, object))
+        if (panelSupportsObject(panelType, object, typeof object))
             return panelType.prototype.name;
     }
 
@@ -1221,7 +1221,7 @@ function getBestPanelName(object, context, panelName)
         var panelType = Firebug.panelTypes[i];
         if (!panelType.prototype.parentPanel)
         {
-            var level = panelSupportsObject(panelType, object);
+            var level = panelSupportsObject(panelType, object, typeof object);
             if (!bestLevel || (level && (level > bestLevel) ))
             {
                 bestLevel = level;
