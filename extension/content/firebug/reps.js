@@ -434,7 +434,6 @@ this.Obj = domplate(Firebug.Rep,
     }
 });
 
-
 // ************************************************************************************************
 
 this.Arr = domplate(Firebug.Rep,
@@ -925,6 +924,26 @@ this.TextNode = domplate(Firebug.Rep,
         return "textNode";
     }
 });
+
+
+// ************************************************************************************************
+
+var regexpConstructorRE = /RegExp/;
+this.RegExp = domplate(Firebug.Rep,
+{
+    tag:
+        OBJECTLINK(
+            SPAN({"class": "objectTitle"}, "$object|getTitle")
+        ),
+    
+    className: "regexp",
+    
+    supportsObject: function(object, type, context)
+    {
+        return type == "object" && object && object.constructor && object.constructor.toString && regexpConstructorRE.test(object.constructor.toString());
+    }
+});
+
 
 // ************************************************************************************************
 
@@ -1834,6 +1853,7 @@ Firebug.registerRep(
     this.Undefined,
     this.Null,
     this.Number,
+    this.RegExp,
     this.String,
     this.Window,
     this.ApplicationCache, // must come before Arr (array) else exceptions.
