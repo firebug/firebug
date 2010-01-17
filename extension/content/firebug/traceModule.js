@@ -1147,6 +1147,12 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
     this.stack = [];
     this.scope = scope;
     this.time = time;
+    
+    if (typeof(this.obj) == "function")
+    {
+        this.obj = {'':this.obj}; // will make functions visible
+    }
+
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
