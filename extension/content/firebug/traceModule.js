@@ -1629,28 +1629,44 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
     toggleRow: function(row)
     {
         var level = parseInt(row.getAttribute("level"));
+        var target = row.lastChild.firstChild;
+        var isString = hasClass(target,"objectBox-string");
+        var repObject = row.repObject;
 
         if (hasClass(row, "opened"))
         {
             removeClass(row, "opened");
-
-            var tbody = row.parentNode;
-            for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling) {
-                if (parseInt(firstRow.getAttribute("level")) <= level)
-                    break;
-
-                tbody.removeChild(firstRow);
+            if (isString)
+            {
+                var rowValue = repObject.value;
+                row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
+            }
+            else
+            {
+                var tbody = row.parentNode;
+                for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling) {
+                    if (parseInt(firstRow.getAttribute("level")) <= level)
+                        break;
+    
+                    tbody.removeChild(firstRow);
+                }
             }
         }
         else
         {
             setClass(row, "opened");
-
-            var repObject = row.repObject;
-            if (repObject) {
-                var members = this.getMembers(repObject.value, level+1);
-                if (members)
-                    this.loop.insertRows({members: members}, row);
+            if (isString)
+            {
+                var rowValue = repObject.value;
+                row.lastChild.firstChild.textContent = '"' + rowValue + '"';
+            }
+            else
+            {
+                if (repObject) {
+                    var members = this.getMembers(repObject.value, level+1);
+                    if (members)
+                        this.loop.insertRows({members: members}, row);
+                }
             }
         }
     },
