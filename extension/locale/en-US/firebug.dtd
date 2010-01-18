@@ -32,7 +32,7 @@
 <!ENTITY firebug.Continue "Continue (F8)">
 <!ENTITY firebug.StepOver "Step Over (F10)">
 <!ENTITY firebug.StepInto "Step Into (F11)">
-<!ENTITY firebug.StepOut "Step Out">
+<!ENTITY firebug.StepOut "Step Out (shift F11)">
 <!ENTITY firebug.BreakOnErrors "Break on Errors">
 <!ENTITY firebug.Inspect "Inspect">
 <!ENTITY firebug.InspectElement "Inspect Element">
