@@ -71,6 +71,7 @@
 
             var title = Firebug.getPanelTitle(panelType);
             tab.setAttribute("label", title);
+            tab.setAttribute("tooltiptext", title);
 
             return this.tabMap[panelType.prototype.name] = tab;
             ]]></body>
@@ -144,6 +145,9 @@
                     Firebug.setPref(Firebug.prefDomain, "defaultPanelName", panelName);
 
                 this.selectPanel(panelName);
+
+                var scrollBox = this.getElementsByClassName("tabbrowser-arrowscrollbox").item(0);
+                scrollBox.ensureVisibleTab(tab);
             ]]></body>
         </method>
 
@@ -449,6 +453,13 @@
             this.initialized = true;
             ]]></body>
         </method>
+        <method name="ensureVisibleTab">
+            <parameter name="tab"/>
+            <body><![CDATA[
+            if (tab)
+                this.scrollBoxObject.ensureElementIsVisible(tab);
+            ]]></body>
+        </method>
     </implementation>
     <handlers>
         <handler event="underflow"><![CDATA[
@@ -462,8 +473,7 @@
 
             this.updateOriginalSize();
 
-            if (this.panelBar.selectedTab)
-                this.scrollBoxObject.ensureElementIsVisible(this.panelBar.selectedTab);
+            this.ensureVisibleTab(this.panelBar.selectedTab);
         ]]></handler>
     </handlers>
 </binding>
