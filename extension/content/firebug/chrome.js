@@ -368,6 +368,7 @@ top.FirebugChrome =
     focus: function()
     {
         window.focus();
+        panelBar1.browser.contentWindow.focus();
     },
 
     isFocused: function()
