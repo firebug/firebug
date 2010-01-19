@@ -81,16 +81,6 @@ panelBarTabList > .tabs-alltabs-button {
     margin: 0 4px 0 4px;
 }
 
-panelBarArrowscrollbox > .scrollbutton-up
-{
-    margin-right: 4px;
-}
-
-panelBarArrowscrollbox > .scrollbutton-down
-{
-    margin-left: 4px;
-}
-
 /************************************************************************************************/
 
 panelStatus {
