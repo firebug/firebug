@@ -498,6 +498,7 @@
             while (tab)
             {
                 var menuItem = document.createElement("menuitem");
+                menuItem.setAttribute("class", "panelBarTabListMenuItem");
                 menuItem.setAttribute("type", "checkbox");
                 menuItem.setAttribute("checked", FBL.isVisible(tab));
                 menuItem.setAttribute("label", tab.label);
@@ -524,9 +525,31 @@
         <handler event="command"><![CDATA[
             var menuItem = event.originalTarget;
             var panelName = menuItem.panelType.prototype.name;
-            this.panelBar.togglePanel(panelName);
+            this.panelBar.selectPanel(panelName);
         ]]></handler>
     </handlers>
+</binding>
+
+<binding id="panelBarTabListMenuItem" extends="chrome://global/content/bindings/menu.xml#menuitem-iconic">
+    <implementation>
+        <constructor>
+        <![CDATA[
+            var iconNode = document.getAnonymousElementByAttribute(this, "class", "menu-iconic-left");
+            iconNode.allowEvents = true;
+            iconNode.addEventListener("click", FBL.bind(this.onTogglePanel, this), true);
+            this.panelBar = FBL.getAncestorByClass(this, "panelBar");
+        ]]>
+        </constructor>
+        <method name="onTogglePanel">
+            <parameter name="event"/>
+            <body><![CDATA[
+            var panelName = this.panelType.prototype.name;
+            this.panelBar.togglePanel(panelName);
+            var checked = this.getAttribute("checked") == "true";
+            this.setAttribute("checked", checked ? "false" : "true");
+            ]]></body>
+        </method>
+    </implementation>
 </binding>
 
 <binding id="panelTab" display="xul:button">

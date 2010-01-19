@@ -43,6 +43,10 @@ panelBarTabList {
     -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabList");
 }
 
+.panelBarTabListMenuItem {
+    -moz-binding: url("chrome://firebug/content/bindings.xml#panelBarTabListMenuItem");
+}
+
 panelBarArrowscrollbox > .scrollbutton-up,
 panelBarArrowscrollbox > .scrollbutton-down,
 panelBarTabList > .tabs-alltabs-button {
