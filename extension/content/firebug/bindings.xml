@@ -378,19 +378,89 @@
         <constructor><![CDATA[
             this.panelBar = FBL.getAncestorByClass(this, "panelBar");
             this.panelTabs = FBL.getElementByClass(this, "panelTabs");
+            this.scrollbox = document.getAnonymousElementByAttribute(this, "anonid", "scrollbox");
+            window.addEventListener("resize", this, false);
         ]]></constructor>
         <method name="_getScrollableElements">
             <body><![CDATA[
                 return this.panelTabs.childNodes;
             ]]></body>
         </method>
+        <method name="handleEvent">
+            <parameter name="event"/>
+            <body><![CDATA[
+                switch (event.type) {
+                case "resize":
+                    this.adjustTabSize(event);
+                break;
+            }
+            ]]></body>
+        </method>
+        <method name="adjustTabSize">
+            <parameter name="event"/>
+            <body><![CDATA[
+            if (!this.initialized)
+                return;
+
+            var totalWidth = parseInt(this.scrollbox.boxObject.width, 10);
+            if (!totalWidth)
+                return;
+
+            var tabs = FBL.cloneArray(this.panelTabs.children);
+            if (!tabs.length)
+                return;
+
+            var availableSpace = totalWidth;
+            while (tabs.length && availableSpace > 0)
+            {
+                var noSpace = true;
+                var tabWidth = Math.max(50, availableSpace / tabs.length);
+                for (var i=0; i<tabs.length; i++)
+                {
+                    var tab = tabs[i];
+                    tab.style.maxWidth = tabWidth + "px";
+                    if (tab.originalWidth <= tabWidth)
+                    {
+                        noSpace = false;
+                        tabs.splice(i, 1);
+                        availableSpace = availableSpace - tab.originalWidth;
+                        break;
+                    }
+                }
+
+                if (noSpace)
+                    break;
+            }
+            ]]></body>
+        </method>
+        <method name="updateOriginalSize">
+            <body><![CDATA[
+            if (this.initialized)
+                return;
+
+            var tab = this.panelTabs.firstChild;
+            while (tab)
+            {
+                tab.originalWidth = tab.boxObject.width;
+                FBTrace.sysout("originalWidth " + tab.originalWidth + ", " +
+                    tab.panelType.prototype.name);
+                tab = tab.nextSibling;
+            }
+            this.initialized = true;
+            ]]></body>
+        </method>
     </implementation>
     <handlers>
         <handler event="underflow"><![CDATA[
+            if (event.detail == 0)
+                return; // Ignore vertical events
+            this.updateOriginalSize();
         ]]></handler>
         <handler event="overflow"><![CDATA[
             if (event.detail == 0)
                 return; // Ignore vertical events
+
+            this.updateOriginalSize();
 
             if (this.panelBar.selectedTab)
                 this.scrollBoxObject.ensureElementIsVisible(this.panelBar.selectedTab);

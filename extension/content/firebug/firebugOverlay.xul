@@ -142,7 +142,7 @@
 
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
-                        flex="1" chromedir="ltr"
+                        flex="100" chromedir="ltr"
                         clicktoscroll="true"
                         class="tabbrowser-arrowscrollbox">
 
@@ -150,8 +150,6 @@
                         <hbox id="fbPanelBar1-panelTabs" class="panelTabs" role="tablist"
                             aria-label="firebug panels" />
                     </panelBarArrowscrollbox>
-
-                    <spacer flex="100"/>
 
                     <!-- Search Box -->
                     <vbox>
