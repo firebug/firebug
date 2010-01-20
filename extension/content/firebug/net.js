@@ -192,7 +192,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
 
         // HTTP observer must be registered now (and not in monitorContext, since if a
         // page is opened in a new tab the top document request would be missed otherwise.
-        NetHttpObserver.registerObserver();
+        Firebug.NetMonitor.NetHttpObserver.registerObserver();
         NetHttpActivityObserver.registerObserver();
 
         Firebug.Debugger.addListener(this.DebuggerListener);
@@ -211,7 +211,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (Firebug.TraceModule)
             Firebug.TraceModule.removeListener(this.TraceListener);
 
-        NetHttpObserver.unregisterObserver();
+        Firebug.NetMonitor.NetHttpObserver.unregisterObserver();
         NetHttpActivityObserver.unregisterObserver();
 
         Firebug.Debugger.removeListener(this.DebuggerListener);
@@ -4587,7 +4587,7 @@ function safeGetName(request)
 // them to appropriate tab - initContext then uses the array in order to access it.
 //-----------------------------------------------------------------------------
 
-var NetHttpObserver =
+Firebug.NetMonitor.NetHttpObserver =
 {
     registered: false,
 
