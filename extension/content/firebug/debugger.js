@@ -3373,10 +3373,21 @@ function getFrameScopeWindowAncestor(frame)  // walk script scope chain to botto
         if (scope.jsClassName == "Sandbox")
         {
             var proto = scope.jsPrototype;
-            if (proto.jsClassName == "XPCNativeWrapper")
+            if (proto.jsClassName == "XPCNativeWrapper")  // this is the path if we have web page in a sandbox
+            {
                 proto = proto.jsParent;
-            if (proto.jsClassName == "Window")
-                return new XPCNativeWrapper(proto.getWrappedValue());
+                if (proto.jsClassName == "Window")
+                    return new XPCNativeWrapper(proto.getWrappedValue());
+            }
+            else
+            {
+                if (proto.jsClassName == "Window")
+                {
+                    var unwrapped = proto.getWrappedValue();
+                    if (! (unwrapped instanceof Ci.nsISupports)) // https://bugzilla.mozilla.org/show_bug.cgi?id=522527#c49
+                        return unwrapped;
+                }
+            }
         }
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
