@@ -426,7 +426,7 @@
                 for (var i=0; i<tabs.length; i++)
                 {
                     var tab = tabs[i];
-                    tab.style.maxWidth = tabWidth + "px";
+                        tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
                     if (tab.originalWidth <= tabWidth)
                     {
                         noSpace = false;
