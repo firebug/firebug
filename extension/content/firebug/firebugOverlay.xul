@@ -117,29 +117,29 @@
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
-                    <hbox id="fbPanelBar1-buttons" class="innerToolbar" role="toolbar"
-                          aria-label="Firebug Tools">
-
-                        <!-- Firebug Icon Menu -->
-                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options"
-                                role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
-                            <image src="chrome://firebug/skin/firebug.png"/>
-                            <!-- Content comes from fbFirebugMenuPopup -->
-                        </toolbarbutton>
-
-                        <!-- HTML Inspector -->
-                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
-                                command="cmd_toggleInspecting" collapsed="false">
-                            <image src="chrome://firebug/skin/Templarian_inspector.png"/>
-                        </toolbarbutton>
-
-                        <!-- Break On Next -->
-                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
-                                tooltiptext="script.Break On Next" breakable="disabled" />
+                    <hbox class="innerToolbar" role="toolbar"
+                              aria-label="Firebug Tools">
+	                    <hbox id="fbPanelBar1-buttons">
+	
+	                        <!-- Firebug Icon Menu -->
+	                        <toolbarbutton id="fbFirebugMenu" type="menu" label="firebug options"
+	                                role="button" aria-haspopup="true" owns="fbFirebugMenuPopup">
+	                            <image src="chrome://firebug/skin/firebug.png"/>
+	                            <!-- Content comes from fbFirebugMenuPopup -->
+	                        </toolbarbutton>
+	
+	                        <!-- HTML Inspector -->
+	                        <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
+	                                command="cmd_toggleInspecting" collapsed="false">
+	                            <image src="chrome://firebug/skin/Templarian_inspector.png"/>
+	                        </toolbarbutton>
+	                        <!-- Break On Next -->
+	                        <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
+	                                tooltiptext="script.Break On Next" breakable="disabled" />
+	                    </hbox>
+                    
+                        <panelBarTabList id="panelBarTabList" tooltiptext="firebug.panel selector" />
                     </hbox>
-
-                    <panelBarTabList id="panelBarTabList" />
-
                     <!-- xxxHonza: ltr should come from &locale.dir; -->
                     <panelBarArrowscrollbox id="fbPanelBar1-Arrowscrollbox" orient="horizontal"
                         flex="100" chromedir="ltr"

@@ -480,7 +480,7 @@
 
 <binding id="panelBarTabList" display="xul:box">
     <content>
-        <xul:toolbarbutton class="tabs-alltabs-button" type="menu">
+        <xul:toolbarbutton class="tabs-alltabs-button noTabStop" type="menu" xbl:inherits="tooltiptext">
             <xul:menupopup anonid="popup" />
         </xul:toolbarbutton>
     </content>

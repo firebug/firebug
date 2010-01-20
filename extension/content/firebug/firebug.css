@@ -177,7 +177,7 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 
 /* remove toolbar groups from the tab order if they have .noTabStop and are NOT the first visible group in the toolbar */
 .useA11y .innerToolbar *[collapsed="false"] ~ *.noTabStop toolbarbutton,
-.useA11y .innerToolbar *[collapsed="false"] ~ toolbarbutton.noTabStop,
+.useA11y .innerToolbar toolbarbutton.noTabStop,
 /*fbNetButtonsFilter situation, added extra id for specificity*/
 .useA11y .innerToolbar toolbarbutton:not([collapsed="true"]) ~ *.noTabStop toolbarbutton {
     -moz-user-focus: ignore;
