@@ -135,9 +135,10 @@ Firebug.A11yModel = extend(Firebug.Module,
         panelA11y.manageFocus = false;
         panelA11y.lastIsDefault = false;
         actAsPanel = actAsPanel ? actAsPanel : panel.name;
-        //panel.panelNode.ownerDocument.addEventListener("focus", this.reportFocus, true);
+        panelA11y.type = actAsPanel;
+        //panel.context.chrome.$("fbContentBox").addEventListener("focus", this.reportFocus, true);
         this.makeFocusable(panel.panelNode, false);
-        switch (actAsPanel)
+        switch (panelA11y.type)
         {
             case 'console':
                 panelA11y.manageFocus = true;
@@ -332,7 +333,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     {
         var target = event.originalTarget;
         var isTab = target.nodeName.toLowerCase() == "paneltab";
-        var isButton = target.nodeName.search(/(xul:)?toolbarbutton/) != -1;
+        var isButton = target.nodeName.search(/(xul:)?((toolbar)?button)|(checkbox)/) != -1;
         var isDropDownMenu = isButton && (target.getAttribute('type') == "menu" || target.id == "fbLocationList") ;
         var siblingTab, forward, toolbar, buttons;
         var keyCode = event.keyCode || (event.type=='keypress' ? event.charCode : null);
@@ -344,7 +345,9 @@ Firebug.A11yModel = extend(Firebug.Module,
             {
                 case KeyEvent.DOM_VK_LEFT:
                 case KeyEvent.DOM_VK_RIGHT:
-                    forward = event.keyCode == KeyEvent.DOM_VK_RIGHT;
+                case KeyEvent.DOM_VK_UP:
+                case KeyEvent.DOM_VK_DOWN:
+                    forward = event.keyCode == KeyEvent.DOM_VK_RIGHT || event.keyCode == KeyEvent.DOM_VK_DOWN;
                     if (isTab)
                     {
                         //will only work as long as long as siblings only consist of paneltab elements
@@ -375,16 +378,20 @@ Firebug.A11yModel = extend(Firebug.Module,
                            //temporarily make all buttons in the toolbar part of the tab order,
                            //to allow smooth, native focus advancement
                            setClass(toolbar, 'hasTabOrder');
-                           doc.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
-                           //Very ugly hack, but it works well. This prevents focus to 'spill out' of a
-                           //toolbar when using the left and right arrow keys
-                           if (!isAncestor(doc.commandDispatcher.focusedElement, toolbar))
+                           setTimeout(bindFixed(function() // time out needed to fix this behavior in 3.6
                            {
-                               //we moved focus to somewhere out of the toolbar: not good. Move it back to where it was.
-                               doc.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
-                           }
-                           //remove the buttons from the tab order again, so that it will remain uncluttered
-                           removeClass(toolbar, 'hasTabOrder');
+                               doc.commandDispatcher[forward ? 'advanceFocus' : 'rewindFocus']();
+                               //remove the buttons from the tab order again, so that it will remain uncluttered
+                               //Very ugly hack, but it works well. This prevents focus to 'spill out' of a
+                               //toolbar when using the left and right arrow keys
+                               if (!isAncestor(doc.commandDispatcher.focusedElement, toolbar))
+                               {
+                                   //we moved focus to somewhere out of the toolbar: not good. Move it back to where it was.
+                                   doc.commandDispatcher[!forward ? 'advanceFocus' : 'rewindFocus']();
+                               }
+                               removeClass(toolbar, 'hasTabOrder');
+                           }, this));
+
                        }
                         cancelEvent(event);
                         return;
@@ -392,8 +399,6 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
                 case KeyEvent.DOM_VK_RETURN:
                 case KeyEvent.DOM_VK_SPACE:
-                case KeyEvent.DOM_VK_UP:
-                case KeyEvent.DOM_VK_DOWN:
                     if (isTab && target.tabMenu)
                         target.tabMenu.popup.showPopup(target.tabMenu, -1, -1, "popup", "bottomleft", "topleft");
                     else if (isButton)
@@ -404,9 +409,9 @@ Firebug.A11yModel = extend(Firebug.Module,
                                 target.showPopup();
                             else
                                 target.open = true;
+                            cancelEvent(event);
+                            return false;
                         }
-                        cancelEvent(event);
-                        return false;
                     }
                 break;
                 case KeyEvent.DOM_VK_F4:
@@ -476,7 +481,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !elem)
             return;
-        switch (panel.name)
+        switch (panelA11y.type)
         {
             case  'console' :
                 if (hasClass(elem, 'focusRow'))
@@ -492,12 +497,18 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var tabStop = this.getPanelTabStop(panel)
         if (tabStop)
+        {
             this.makeFocusable(tabStop, false);
+            if (["treeitem", "listitem", "option"].indexOf(tabStop.getAttribute("role")) != -1)
+                tabStop.setAttribute("aria-selected", "false");
+        }
         panelA11y.tabStop = elem;
         if (elem)
         {
             panelA11y.reFocusId = null;
             this.makeFocusable(elem, true);
+            if (["treeitem", "listitem", "option"].indexOf(elem.getAttribute("role")) != -1)
+                elem.setAttribute("aria-selected", "true");
         }
     },
 
@@ -990,6 +1001,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             var nodeLabel = getAncestorByClass(event.target, 'nodeLabel');
             if (nodeLabel)
                 setClass(nodeLabel, 'focused');
+            event.target.setAttribute("aria-selected", "true");
             cancelEvent(event);
         }
     },
@@ -1002,6 +1014,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             var nodeLabel = getAncestorByClass(event.target, 'nodeLabel');
             if (nodeLabel)
                 removeClass(nodeLabel, 'focused');
+            event.target.setAttribute("aria-selected", "false");
             cancelEvent(event);
         }
     },
@@ -1074,7 +1087,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var popup = Firebug.chrome.$('fbSearchOptionsPopup');
         if (popup)
             popup.hidePopup();
-        switch(panel.name)
+        switch(panelA11y.type)
         {
             case 'html':
                 var match = panel.lastSearch.lastMatch;
@@ -1563,7 +1576,10 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     onBeginEditing : function(panel, editor, target, value)
     {
-        switch (panel.name)
+        var panelA11y = this.getPanelA11y(panel);
+        if (!panelA11y)
+            return;
+        switch (panelA11y.type)
         {
             case 'html':
                 var tagName= nodeName = null;
@@ -1628,7 +1644,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        switch (panel.name)
+        switch (panelA11y.type)
         {
             case 'layout':
                 var box = getAncestorByClass(target, 'focusGroup')
@@ -2376,16 +2392,12 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y || !row)
             return;
-        switch (panel.name)
+        switch (panelA11y.type)
         {
             case 'console':
-            case 'dom':
-            case 'domSide':
                 this.modifyConsoleRow(panel,row, inTabOrder);
                 break;
             case 'css':
-            case 'stylesheet':
-            case 'computed':
                 this.modifyCSSRow(panel, row, inTabOrder);
                 break;
             case 'net':
