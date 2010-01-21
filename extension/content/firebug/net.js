@@ -2241,20 +2241,14 @@ Firebug.NetMonitor.NetInfoBody = domplate(Firebug.Rep, new Firebug.Listener(),
 
     getParamName: function(param)
     {
-        var limit = 25;
         var name = param.name;
+        var limit = Firebug.netParamNameLimit;
+        if (limit <= 0)
+            return name;
+
         if (name.length > limit)
             name = name.substr(0, limit) + "...";
         return name;
-    },
-
-    getParamTitle: function(param)
-    {
-        var limit = 25;
-        var name = param.name;
-        if (name.length > limit)
-            return name;
-        return "";
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

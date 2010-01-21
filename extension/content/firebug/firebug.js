@@ -96,6 +96,7 @@ const prefNames =  // XXXjjb TODO distribute to modules
     // Net
     "netFilterCategory", "collectHttpHeaders", "netDisplayedResponseLimit",
     "netDisplayedPostBodyLimit", "netPhaseInterval", "sizePrecision",
+    "netParamNameLimit",
 
     // Stack
     "omitObjectPathStack",
