@@ -85,9 +85,9 @@ panelBarTabList > .tabs-alltabs-button {
     -moz-border-radius: 0px !important;
 }
 
-.innerToolbar {
+#fbPanelBar1-buttons {
     margin: 0 4px 0 4px;
-}
+} 
 
 /************************************************************************************************/
 
