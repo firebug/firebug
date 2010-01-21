@@ -336,6 +336,9 @@
             <parameter name="forceOpen"/>
             <body><![CDATA[
                 var tab = this.getTab(panelName);
+                if (!tab)
+                    return;
+
                 var open = FBL.isVisible(tab);
                 if (open && forceOpen)
                     return;
