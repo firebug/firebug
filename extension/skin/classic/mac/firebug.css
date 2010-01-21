@@ -437,6 +437,7 @@ panelTab[selected="true"] > .panelTab-right {
     margin-right: 0px;
 }
 
-.useA11y #fbPanelBar1 textbox[focused] {
-    -moz-outline-radius: 10px !important;    
+.useA11y #fbPanelBar1 textbox[focused],
+ .searchOptionsMenu button:focus {
+    -moz-outline-radius: 10px !important;
 }
