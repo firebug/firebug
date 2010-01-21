@@ -1743,12 +1743,24 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         for (var i = 0; i < scriptTags.length; i++)
         {
             var src = scriptTags[i].getAttribute("src");
-            if (src)
-                delete context.sourceFileMap[src];
-            else
-                delete context.sourceFileMap[safeGetWindowLocation(win)];
+            src = src ? src : safeGetWindowLocation(win);
+
+            // If the src is not in the source map, try to use absolute url.
+            if (!context.sourceFileMap[src])
+                src = absoluteURL(src, win.location.href);
+
+            // This should not happen.
+            if (!context.sourceFileMap[src])
+            {
+                if (FBTrace.DBG_SOURCEFILES || FBTrace.DBG_ERRORS)
+                    FBTrace.sysout("debugger.unWatchWindow; ERROR sourceFileMap doesn't contain " +
+                        "expected entry: " + src);;
+            }
+
+            delete context.sourceFileMap[src];
+
             if (FBTrace.DBG_SOURCEFILES)
-                FBTrace.sysout("debugger.unWatchWindow delete sourceFileMap entry for "+(src?src:safeGetWindowLocation(win)) );
+                FBTrace.sysout("debugger.unWatchWindow; delete sourceFileMap entry for " + src);
         }
         if (scriptTags.length > 0)
             context.invalidatePanels('script');
