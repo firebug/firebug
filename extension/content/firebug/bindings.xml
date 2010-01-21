@@ -158,8 +158,10 @@
             <body><![CDATA[
                 var tab = panelName ? this.tabMap[panelName] : null;
                 var panelType = tab ? tab.panelType : null;
-
                 var panel = FirebugContext ? FirebugContext.getPanel(panelName) : null;
+
+                // Make sure the panel is visible.
+                this.togglePanel(panelName, true);
 
                 if (panel && (panel == this.selectedPanel) && !forceUpdate)
                     return panel;
@@ -302,6 +304,21 @@
                 var tab = this.getTab(panelName);
                 FBL.collapse(tab, true);
                 this.storeHiddenPanels();
+
+                if (this.selectedTab != tab)
+                    return;
+
+                // If the selected panel has been closed, select the first one that is visible.
+                tab = this.panelTabs.firstChild;
+                while (tab)
+                {
+                    if (FBL.isVisible(tab))
+                    {
+                        this.selectTab(tab);
+                        break;
+                    }
+                    tab = tab.nextSibling;
+                }
             ]]></body>
         </method>
 
@@ -345,6 +362,7 @@
         </method>
 
         <method name="openAllPanels">
+            <parameter name="event"/>
             <body><![CDATA[
                 var tab = this.panelTabs.firstChild;
                 while (tab)
@@ -354,6 +372,7 @@
                     tab = tab.nextSibling;
                 }
                 Firebug.setPref(Firebug.prefDomain, "hiddenPanels", "");
+                FBL.cancelEvent(event);
             ]]></body>
         </method>
     </implementation>
@@ -426,7 +445,7 @@
                 for (var i=0; i<tabs.length; i++)
                 {
                     var tab = tabs[i];
-                        tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
+                    tab.style.maxWidth = tab.selected == "true" ? "none" : tabWidth + "px";
                     if (tab.originalWidth <= tabWidth)
                     {
                         noSpace = false;
@@ -491,6 +510,25 @@
             this.panelBar = document.getElementById("fbPanelBar1");
         ]]>
         </constructor>
+        <method name="updateMenuItems">
+            <body><![CDATA[
+            var visibleTabs = [];
+            var menuItem = this.popup.firstChild;
+            while (menuItem)
+            {
+                var checked = menuItem.getAttribute("checked") == "true";
+                if (checked)
+                    visibleTabs.push(menuItem);
+
+                menuItem.removeAttribute("disabled");
+                menuItem = menuItem.nextSibling;
+            }
+
+            // If there is only one panel visible don't allow to close it.
+            if (visibleTabs.length == 1)
+                visibleTabs[0].setAttribute("disabled", true);
+            ]]></body>
+        </method>
     </implementation>
     <handlers>
         <handler event="popupshowing"><![CDATA[
@@ -510,10 +548,12 @@
             // Create separator
             this.popup.appendChild(document.createElement("menuseparator"));
 
+            this.updateMenuItems();
+
             // The last menu item is for opening all panels.
             var menuItem = document.createElement("menuitem");
             menuItem.setAttribute("label", FBL.$STR("firebug.Show_All_Panels"));
-            var listener = FBL.bindFixed(this.panelBar.openAllPanels, this.panelBar);
+            var listener = FBL.bind(this.panelBar.openAllPanels, this.panelBar);
             menuItem.addEventListener("command", listener, false);
             this.popup.appendChild(menuItem);
 
@@ -543,10 +583,15 @@
         <method name="onTogglePanel">
             <parameter name="event"/>
             <body><![CDATA[
+            if (this.getAttribute("disabled") == "true")
+                return;
+
             var panelName = this.panelType.prototype.name;
-            this.panelBar.togglePanel(panelName);
             var checked = this.getAttribute("checked") == "true";
             this.setAttribute("checked", checked ? "false" : "true");
+            this.panelBar.togglePanel(panelName, !checked);
+
+            FBL.$("panelBarTabList").updateMenuItems();
             ]]></body>
         </method>
     </implementation>
