@@ -49,6 +49,8 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
     {
         if (FBTrace.DBG_CACHE)
         {
+            FBTrace.sysout("sourceCache.load: " + url);
+
             if (!this.cache.hasOwnProperty(url) && this.cache[url])
                 FBTrace.sysout("sourceCache.load; ERROR - hasOwnProperty returns false, " +
                     "but the URL is cached: " + url, this.cache[url]);
@@ -59,6 +61,15 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
         var response = this.cache[this.removeAnchor(url)];
         if (response)
             return response;
+
+        if (FBTrace.DBG_CACHE)
+        {
+            var urls = [];
+            for (var prop in this.cache)
+                urls.push(prop);
+
+            FBTrace.sysout("sourceCache.load: Not in the Firebug internal cache", urls);
+        }
 
         var d = FBL.splitDataURL(url);  //TODO the RE should not have baseLine
         if (d)
@@ -253,6 +264,11 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
 
     invalidate: function(url)
     {
+        url = this.removeAnchor(url);
+
+        if (FBTrace.DBG_CACHE)
+            FBTrace.sysout("sourceCache.invalidate; " + url);
+
         delete this.cache[url];
     },
 
