@@ -89,38 +89,61 @@ Firebug.A11yModel = extend(Firebug.Module,
 
     performEnable : function(chrome)
     {
+        var tmpElem;
         //add class used by all a11y related css styles (e.g. :focus and -moz-user-focus styles)
         setClass(chrome.$('fbContentBox'), 'useA11y');
         setClass(chrome.$('fbStatusBar'), 'useA11y');
+        tmpElem = chrome.$('fbStatusPrefix');
+        if (tmpElem) tmpElem.setAttribute('value', $STR("a11y.labels.firebug status"));
+        
         //manage all key events in toolbox (including tablists)
-        chrome.$('fbStatusPrefix').setAttribute('value', $STR("a11y.labels.firebug status"));
-        chrome.$("fbContentBox").addEventListener("keypress", this.handlePanelBarKeyPress , true);
+        tmpElem = chrome.$("fbContentBox");
+        if (tmpElem) tmpElem.addEventListener("keypress", this.handlePanelBarKeyPress , true);
         //make focus stick to inspect button when clicked
-        chrome.$("fbInspectButton").addEventListener("mousedown", this.focusTarget, true);
-        chrome.$('fbPanelBar1-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
-        chrome.$('fbPanelBar1-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
-        chrome.$('fbPanelBar2-panelTabs').addEventListener('focus', this.handleTabBarFocus, true);
-        chrome.$('fbPanelBar2-panelTabs').addEventListener('blur', this.handleTabBarBlur, true);
-        setClass(chrome.$("fbPanelBar1").browser.contentDocument.body, 'useA11y');
-        setClass(chrome.$("fbPanelBar2").browser.contentDocument.body, 'useA11y');
+        tmpElem = chrome.$("fbInspectButton");
+        if (tmpElem) tmpElem.addEventListener("mousedown", this.focusTarget, true);
+        tmpElem = chrome.$('fbPanelBar1-panelTabs');
+        if (tmpElem) tmpElem.addEventListener('focus', this.handleTabBarFocus, true);
+        tmpElem = chrome.$('fbPanelBar1-panelTabs');
+        if (tmpElem) tmpElem.addEventListener('blur', this.handleTabBarBlur, true);
+        tmpElem = chrome.$('fbPanelBar2-panelTabs');
+        if (tmpElem) tmpElem.addEventListener('focus', this.handleTabBarFocus, true);
+        tmpELem = chrome.$('fbPanelBar2-panelTabs');
+        if (tmpElem) tmpElem.addEventListener('blur', this.handleTabBarBlur, true);
+        tmpElem = chrome.$("fbPanelBar1");
+        if (tmpElem) setClass(tmpElem.browser.contentDocument.body, 'useA11y');
+        tmpElem = chrome.$("fbPanelBar2");
+        if (tmpElem) setClass(tmpElem.browser.contentDocument.body, 'useA11y');
         Firebug.Editor.addListener(this);
     },
 
     performDisable : function(chrome)
     {
+        var tmpElem;
         //undo everything we did in performEnable
         removeClass(chrome.$('fbContentBox'), 'useA11y');
         removeClass(chrome.$('fbStatusBar'), 'useA11y');
-        chrome.$("fbPanelBar1").removeEventListener("keypress", this.handlePanelBarKeyPress , true);
-        chrome.$("fbInspectButton").removeEventListener("mousedown", this.focusTarget, true);
-        chrome.$('fbPanelBar1-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
-        chrome.$('fbPanelBar1-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
-        chrome.$('fbPanelBar2-panelTabs').removeEventListener('focus', this.handleTabBarFocus, true);
-        chrome.$('fbPanelBar2-panelTabs').removeEventListener('blur', this.handleTabBarBlur, true);
-        removeClass(chrome.$("fbPanelBar1").browser.contentDocument.body, 'useA11y');
-        removeClass(chrome.$("fbPanelBar2").browser.contentDocument.body, 'useA11y');
+        tmpElem = chrome.$("fbPanelBar1");
+        if (tmpElem) tmpElem.removeEventListener("keypress", this.handlePanelBarKeyPress , true);
+        tmpElem = chrome.$("fbInspectButton");
+        if (tmpElem) tmpElem.removeEventListener("mousedown", this.focusTarget, true);
+        tmpElem = chrome.$('fbPanelBar1-panelTabs');
+        if (tmpElem) tmpElem.removeEventListener('focus', this.handleTabBarFocus, true);
+        tmpElem = chrome.$('fbPanelBar1-panelTabs')
+        if (tmpElem) tmpElem.removeEventListener('blur', this.handleTabBarBlur, true);
+        tmpElem = chrome.$('fbPanelBar2-panelTabs');
+        if (tmpElem) tmpElem.removeEventListener('focus', this.handleTabBarFocus, true);
+        tmpElem = chrome.$('fbPanelBar2-panelTabs');
+        if (tmpElem) tmpElem.removeEventListener('blur', this.handleTabBarBlur, true);
+        tmpElem = chrome.$("fbPanelBar1");
+        if (tmpElem) 
+        {
+            removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
+            tmpElem.browser.setAttribute('showcaret', false);
+        }
+        tmpElem = chrome.$("fbPanelBar2");
+        if (tmpElem) removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
         Firebug.Editor.removeListener(this);
-        chrome.$("fbPanelBar1").browser.setAttribute('showcaret', false);
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
