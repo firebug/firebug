@@ -3010,7 +3010,7 @@ Firebug.NetMonitor.TimeInfoTip = domplate(Firebug.Rep,
 Firebug.NetMonitor.SizeInfoTip = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({"class": "sizeInfoTip", "id": "fbNetSizeInfoTip"},
+        TABLE({"class": "sizeInfoTip", "id": "fbNetSizeInfoTip", role:"presentation"},
             TBODY(
                 FOR("size", "$sizeInfo",
                     TAG("$size|getRowTag", {size: "$size"})
