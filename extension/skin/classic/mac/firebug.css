@@ -74,6 +74,9 @@
     margin-right: 5px;   /* add some space between last button and first tab */
 }
 
+#fbWindowButtons.innerToolbar {
+    padding: 7px 0 7px 0;   /* Set proper height of window buttons (close, min, detach) */
+}
 
 .fbsearch-textbox {
     -moz-border-radius: 10px !important;

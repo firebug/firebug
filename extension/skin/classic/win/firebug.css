@@ -155,6 +155,10 @@
     border-bottom: none;
 }
 
+#fbWindowButtons.innerToolbar {
+    padding: 6px 0 5px 0;   /* Set proper height of window buttons (close, min, detach) */
+}
+
 /************************************************************************************************/
 
 .panelTabBox {
