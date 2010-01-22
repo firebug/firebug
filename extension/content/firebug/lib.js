@@ -2962,6 +2962,9 @@ this.createStyleSheetMap = function(context)
     this.iterateWindows(context.window, function(subwin)
     {
         var rootSheets = subwin.document.styleSheets;
+        if (!rootSheets)
+            return; // XUL?
+
         for (var i = 0; i < rootSheets.length; ++i)
         {
             addSheet(rootSheets[i]);
