@@ -329,6 +329,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (context.eventSuppressor)
                     context.eventSuppressor.suppressEventHandling(true);
             }
+            context.isFrozen = true;
 
             if (FBTrace.DBG_UI_LOOP)
                 FBTrace.sysout("debugger.stop try to disable scripts "+(context.eventSuppressor?"and events":"but not events")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
@@ -342,6 +343,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     thaw: function(context)
     {
         try {
+            if (context.isFrozen)
+                delete context.isFrozen;
+            else
+                return; // bail, we did not freeze this context
+
             var executionContext = context.debugFrame.executionContext;
             if (executionContext.isValid)
             {
