@@ -917,7 +917,7 @@ Firebug.AutoCompleter = function(getExprOffset, getRange, evaluator, selectMode,
 
     this.complete = function(context, textBox, cycle, reverse)
     {
-        var value = lastValue = textBox.value;
+        var value = textBox.value;
         var offset = textBox.selectionStart;
         if (!selectMode && originalOffset != -1)
             offset = originalOffset;
