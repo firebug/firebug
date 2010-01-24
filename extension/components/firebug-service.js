@@ -1268,7 +1268,7 @@ FirebugService.prototype =
         // be used later when the console service reports the error, since
         // it doesn't currently report the window where the error occurred
 
-        this._lastErrorWindow =  getFrameGlobal(frame);
+        this._lastErrorWindow =  this.getOutermostScope(frame);
 
         if (this.showStackTrace)  // store these in case the throw is not caught
         {
@@ -1508,7 +1508,7 @@ FirebugService.prototype =
     {
         if (!fbs)
         {
-            if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
+            if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_TRACKFILES)
                 FBTrace.sysout("onScriptCreated, but no fbs for script.fileName="+script.fileName);
              return;
         }
@@ -1805,7 +1805,10 @@ FirebugService.prototype =
                     if (!unwrappedGlobal)
                         return;
 
-                    var global = new XPCNativeWrapper(unwrappedGlobal);
+                    if (unwrappedGlobal instanceof Ci.nsISupports)
+                        var global = new XPCNativeWrapper(unwrappedGlobal);
+                    else
+                        var global = unwrappedGlobal;
 
                     if (FBTrace.DBG_FBS_JSCONTEXTS)
                         FBTrace.sysout("getJSContexts jsIContext tag:"+jscontext.tag+(jscontext.isValid?" - isValid\n":" - NOT valid\n"));
@@ -1874,6 +1877,58 @@ FirebugService.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    getOutermostScope: function(frame)
+    {
+        var scope = frame.scope;
+        if (scope)
+        {
+            while(scope.jsParent)
+                scope = scope.jsParent;
+
+            // These are just determined by trial and error.
+            if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
+            {
+                lastWindowScope = wrapIfNative(scope.getWrappedValue());
+                return  lastWindowScope;
+            }
+
+    /*        if (scope.jsClassName == "DedicatedWorkerGlobalScope")
+            {
+                //var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
+
+                //if (FBTrace.DBG_FBS_FINDDEBUGGER)
+                //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
+                // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
+                //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
+                return null; // https://bugzilla.mozilla.org/show_bug.cgi?id=507783
+            }
+    */
+            if (scope.jsClassName == "Sandbox")
+            {
+                var proto = scope.jsPrototype;
+                if (proto.jsClassName == "XPCNativeWrapper")  // this is the path if we have web page in a sandbox
+                {
+                    proto = proto.jsParent;
+                    if (proto.jsClassName == "Window")
+                        return wrapIfNative(proto.getWrappedValue());
+                }
+                else
+                {
+                    return wrapIfNative(scope.getWrappedValue());
+                }
+            }
+
+            if (FBTrace.DBG_FBS_FINDDEBUGGER)
+                FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, not Window: "+scope.jsClassName, scope);
+
+            return wrapIfNative(scope.getWrappedValue());  // not a window or a sandbox
+        }
+        else
+        {
+            return null;
+        }
+    },
+
     findDebugger: function(frame)
     {
         if (debuggers.length < 1)
@@ -1882,12 +1937,12 @@ FirebugService.prototype =
         var checkFrame = frame;
         while (checkFrame) // We may stop in a component, but want the callers Window
         {
-            var frameScopeRoot = getFrameScopeRoot(checkFrame);
+            var frameScopeRoot = this.getOutermostScope(checkFrame);  // the outermost lexical scope of the function running the frame
             if (frameScopeRoot)
                 break;
 
             if (FBTrace.DBG_FBS_FINDDEBUGGER)
-                FBTrace.sysout("fbs.findDebugger no frame Window, looking down the stack", checkFrame);
+                FBTrace.sysout("fbs.findDebugger no frame Window, looking to older stackframes", checkFrame);
 
             checkFrame = checkFrame.callingFrame;
         }
@@ -1985,7 +2040,7 @@ FirebugService.prototype =
 
     reFindDebugger: function(frame, debuggr)
     {
-        var frameScopeRoot = getFrameScopeRoot(frame);
+        var frameScopeRoot = this.getOutermostScope(frame);
         if (frameScopeRoot && debuggr.supportsGlobal(frameScopeRoot, frame)) return debuggr;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
@@ -2506,7 +2561,7 @@ FirebugService.prototype =
 
     hookScripts: function()
     {
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("set scriptHook\n");
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES) FBTrace.sysout("set scriptHook\n");
         jsd.scriptHook = {
             onScriptCreated: hook(this.onScriptCreated),
             onScriptDestroyed: hook(this.onScriptDestroyed)
@@ -2526,7 +2581,7 @@ FirebugService.prototype =
         jsd.scriptHook = null;
         fbs.removeChromeBlockingFilters();
 
-        if (FBTrace.DBG_FBS_STEP) FBTrace.sysout("unset scriptHook\n");
+        if (FBTrace.DBG_FBS_STEP || FBTrace.DBG_FBS_TRACKFILES) FBTrace.sysout("unset scriptHook\n");
     },
 
     hookCalls: function(callBack, unhookAtBottom)
@@ -2764,94 +2819,19 @@ function hook(fn, rv)
     }
 }
 var lastWindowScope = null;
-function getFrameScopeRoot(frame)  // walk script scope chain to bottom, convert to Window if possible
+function wrapIfNative(obj)
 {
-    var scope = frame.scope;
-    if (scope)
-    {
-        while(scope.jsParent)
-            scope = scope.jsParent;
-
-        // These are just determined by trial and error.
-        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
-        {
-            lastWindowScope = new XPCNativeWrapper(scope.getWrappedValue());
-            return  lastWindowScope;
-        }
-
-        if (scope.jsClassName == "DedicatedWorkerGlobalScope")
-        {
-            //var workerScope = new XPCNativeWrapper(scope.getWrappedValue());
-
-            //if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope: "+scope.jsClassName, workerScope);
-            // https://bugzilla.mozilla.org/show_bug.cgi?id=507930 if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            //        FBTrace.sysout("fbs.getFrameScopeRoot found WorkerGlobalScope.location: "+workerScope.location, workerScope.location);
-            return null; // https://bugzilla.mozilla.org/show_bug.cgi?id=507783
-        }
-
-        if (scope.jsClassName == "Sandbox")
-        {
-            var proto = scope.jsPrototype;
-            if (proto.jsClassName == "XPCNativeWrapper")  // this is the path if we have web page in a sandbox
-            {
-                proto = proto.jsParent;
-                if (proto.jsClassName == "Window")
-                    return new XPCNativeWrapper(proto.getWrappedValue());
-            }
-            else
-            {
-                if (scope instanceof Ci.nsISupports)
-                {
-                    var unwrapped = scope.getWrappedValue();
-                    return unwrapped;
-                    //return new XPCNativeWrapper(unwrapped);
-                }
-
-                var unwrapped = proto.getWrappedValue();
-                if (! (unwrapped instanceof Ci.nsISupports)) // https://bugzilla.mozilla.org/show_bug.cgi?id=522527#c49
-                    return unwrapped;
-            }
-        }
-
-        if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, not Window: "+scope.jsClassName, scope);
-
-        try
-        {
-             return new XPCNativeWrapper(scope.getWrappedValue());
-        }
-        catch(exc)
-        {
-            if (FBTrace.DBG_FBS_ERRORS)
-                FBTrace.sysout("fbs.getFrameScopeRoot found scope chain bottom, but failed to unwrap it: "+scope.jsClassName, scope);
-        }
-    }
-    else
-        return null;
-}
-
-function getFrameGlobal(frame)
-{
-    var jscontext = frame.executionContext;
-    if (!jscontext)
-    {
-        return getFrameWindow(frame);
-    }
     try
     {
-        var frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
+        if (obj instanceof Ci.nsISupports)
+            return XPCNativeWrapper(obj);
+        else
+            return obj;
     }
     catch(exc)
     {
-        if (FBTrace.FBS_ERRORS)
-            FBTrace.sysout("fbs.getFrameGlobal FAILS for "+jscontext.globalObject.getWrappedValue());
-    }
-    if (frameGlobal)
-            return frameGlobal;
-    else
-    {
-        return getFrameWindow(frame);
+        if (FBTrace.DBG_FBS_ERRORS)
+            FBTrace.sysout("fbs.wrapIfNative FAILED: "+exc, obj);
     }
 }
 
@@ -3077,13 +3057,12 @@ var trackFiles  = {
     },
     def: function(frame)
     {
-        var jscontext = frame.executionContext;
-        if (jscontext)
-            frameGlobal = new XPCNativeWrapper(jscontext.globalObject.getWrappedValue());
+        var frameGlobal = fbs.getOutermostScope(frame);
 
         var scopeName = fbs.getLocationSafe(frameGlobal);
+
         if (!scopeName)
-            scopeName = "noGlobalObjectLocationInJSContext:"+(jscontext?jscontext.tag:"none");
+            scopeName = frameGlobal + "";
 
         var name = new String(frame.script.fileName);
         if (! (name in this.allFiles))

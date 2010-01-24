@@ -1152,9 +1152,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return sourceFile;
     },
 
-    getContextByFrame: function(frame)
+    getContextByFrame: function(frame)  // XXX jjb I think now that this should not be called,
     {
-        var win = getFrameScopeWindowAncestor(frame);
+        var win = fbs.getOutermostScope(frame);
         return win ? TabWatcher.getContextByWindow(win) : null;
     },
 
@@ -3379,45 +3379,6 @@ function getCallingFrame(frame)
     {
     }
     return null;
-}
-
-
-function getFrameScopeWindowAncestor(frame)  // walk script scope chain to bottom, null unless a Window
-{
-    var scope = frame.scope;
-    if (scope)
-    {
-        while(scope.jsParent)
-            scope = scope.jsParent;
-
-        if (scope.jsClassName == "Window" || scope.jsClassName == "ChromeWindow" || scope.jsClassName == "ModalContentWindow")
-            return new XPCNativeWrapper(scope.getWrappedValue());
-
-        if (scope.jsClassName == "Sandbox")
-        {
-            var proto = scope.jsPrototype;
-            if (proto.jsClassName == "XPCNativeWrapper")  // this is the path if we have web page in a sandbox
-            {
-                proto = proto.jsParent;
-                if (proto.jsClassName == "Window")
-                    return new XPCNativeWrapper(proto.getWrappedValue());
-            }
-            else
-            {
-                if (proto.jsClassName == "Window")
-                {
-                    var unwrapped = proto.getWrappedValue();
-                    if (! (unwrapped instanceof Ci.nsISupports)) // https://bugzilla.mozilla.org/show_bug.cgi?id=522527#c49
-                        return unwrapped;
-                }
-            }
-        }
-
-        if (FBTrace.DBG_FBS_FINDDEBUGGER)
-            FBTrace.sysout("debugger.getFrameScopeWindowAncestor found scope chain bottom, not Window: "+scope.jsClassName, scope);
-    }
-    else
-        return null;
 }
 
 function getFrameWindow(frame)
