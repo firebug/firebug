@@ -208,6 +208,11 @@ Firebug.TraceModule = extend(Firebug.Module,
                 [browser, context]);
     },
 
+    getTraceConsoleURL: function()
+    {
+        return "chrome://firebug/content/traceConsole.xul";
+    },
+
     openConsole: function(prefDomain, windowURL)
     {
         if (!prefDomain)
@@ -229,7 +234,7 @@ Firebug.TraceModule = extend(Firebug.Module,
         }
 
         if (!windowURL)
-            windowURL = "chrome://firebug/content/traceConsole.xul";
+            windowURL = this.getTraceConsoleURL();
 
         if (FBTrace.DBG_OPTIONS)
             FBTrace.sysout("traceModule.openConsole, prefDomain: " + prefDomain);
@@ -1147,7 +1152,7 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
     this.stack = [];
     this.scope = scope;
     this.time = time;
-    
+
     if (typeof(this.obj) == "function")
     {
         this.obj = {'':this.obj}; // will make functions visible
@@ -1653,7 +1658,7 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
                 for (var firstRow = row.nextSibling; firstRow; firstRow = row.nextSibling) {
                     if (parseInt(firstRow.getAttribute("level")) <= level)
                         break;
-    
+
                     tbody.removeChild(firstRow);
                 }
             }
