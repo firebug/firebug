@@ -1174,8 +1174,9 @@
 
 <binding id="searchBox">
     <content sizetopopup="none">
-        <xul:textbox type="autocomplete" anonid="searchBox"
-                rows="1" label="search.Firebug_Search" class="fbsearch-textbox" onkeyup="onSearchBoxKeyUp(event);" />
+        <xul:textbox anonid="searchBox"
+                rows="1" label="search.Firebug_Search" class="fbsearch-textbox" onkeyup="onSearchBoxKeyUp(event);" aria-describedby="fbSearchBoxDescription" />
+                <xul:description anonid="fbSearchBoxDescription"  collapsed="true" tooltiptext="Press up or down arrow key for search options" />
         <xul:panel id="fbSearchOptionsPanel" norestorefocus="true" noautofocus="true" ignorekeys="true" onkeydown="onPopupKeyDown(event)" role="presentation">
             <xul:vbox class="searchOptionsMenu innerToolbar" role="menu" aria-label="search options">
               <xul:box anonid="startPanelFocus" class="panelFocusBound" onfocus="startFocusHandler()"  />
@@ -1366,16 +1367,19 @@
             <body><![CDATA[
                 if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
                     return;
-                if (event.keyCode ==  KeyEvent.DOM_VK_UP)
+                if (event.keyCode ==  KeyEvent.DOM_VK_UP || event.keyCode ==  KeyEvent.DOM_VK_DOWN)
                 {
+                    var goingDown = event.keyCode ==  KeyEvent.DOM_VK_DOWN;
                     var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                     var items = optionsPopup.getElementsByClassName("a11yFocus");
                     if (!optionsPopup || !items)
                         return;
                     if (optionsPopup.state == "closed")
                         this.showOptions();
-                    items[items.length -1].focus();
+                    setTimeout(FBL.bindFixed(function(){items[goingDown ? 0 : items.length -1].focus();}));
                 }
+                else if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
+	                this.hideOptions();
             ]]></body>
         </method>
         <method name="onPopupKeyDown">
@@ -1383,22 +1387,15 @@
             <body><![CDATA[
                 if (!Firebug.A11yModel || !Firebug.A11yModel.isEnabled())
                     return;
-                if (event.keyCode ==  KeyEvent.DOM_VK_DOWN || event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
+                if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
                 {
                     var optionsPopup = document.getElementById("fbSearchOptionsPanel");
                     var items = optionsPopup.getElementsByClassName("a11yFocus");
                     var searchBox = document.getAnonymousElementByAttribute(this, "anonid", "searchBox");
                     if (!optionsPopup || !items || !searchBox)
                         return;
-                    if (event.keyCode ==  KeyEvent.DOM_VK_DOWN) 
-                    {
-                        if (Array.indexOf(items, event.target) == items.length -1)
-                            searchBox.focus();
-                    }
-                    else { //esc was pressed
-                        searchBox.focus();
-                        optionsPopup.hidePopup();
-                    }
+                    searchBox.focus();
+                    optionsPopup.hidePopup();
                 }
             ]]></body>
         </method>
