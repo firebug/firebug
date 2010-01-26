@@ -39,7 +39,7 @@ pref("extensions.firebug.showChromeMessages", false);
 pref("extensions.firebug.showExternalErrors", false);
 pref("extensions.firebug.showNetworkErrors", false);
 pref("extensions.firebug.showXMLHttpRequests", true);
-pref("extensions.firebug.service.showStackTrace", true);
+pref("extensions.firebug.service.showStackTrace", false);
 pref("extensions.firebug.console.logLimit", 500);
 pref("extensions.firebug.console.enableSites", false);
 pref("extensions.firebug.persistBreakOnError", false);
