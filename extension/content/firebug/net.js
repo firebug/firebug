@@ -4501,6 +4501,7 @@ Firebug.NetMonitor.Utils =
         try
         {
             var callbacks = request.notificationCallbacks;
+            suspendShowStackTrace();
             var xhrRequest = callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null;
             if (FBTrace.DBG_NET)
                 FBTrace.sysout("net.isXHR; " + (xhrRequest != null) + ", " + safeGetName(request));
@@ -4509,6 +4510,10 @@ Firebug.NetMonitor.Utils =
         }
         catch (exc)
         {
+        }
+        finally
+        {
+            resumeShowStackTrace();
         }
 
        return false;

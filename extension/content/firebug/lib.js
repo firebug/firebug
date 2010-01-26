@@ -4082,7 +4082,10 @@ this.getRequestWebProgress = function(request)
     try
     {
         if (request && request.notificationCallbacks)
+        {
+            FBL.suspendShowStackTrace();
             return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
+        }
     } catch (exc) {}
 
     try
@@ -4090,8 +4093,33 @@ this.getRequestWebProgress = function(request)
         if (request && request.loadGroup && request.loadGroup.groupObserver)
             return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
     } catch (exc) {}
+    finally
+    {
+        FBL.resumeShowStackTrace();
+    }
 
     return null;
+};
+
+
+var saveShowStackTrace = {};
+
+
+/*
+ * use in the try{} around a call to getInterface to prevent fbs from generating stack traces
+ */
+this.suspendShowStackTrace = function()
+{
+    saveShowStackTrace = Firebug.showStackTrace;
+    Firebug.showStackTrace = false;
+};
+
+/*
+ * use in the finally{} to undo the suspendShowStackTrace
+ */
+this.resumeShowStackTrace = function()
+{
+    Firebug.showStackTrace = saveShowStackTrace;
 };
 
 /**

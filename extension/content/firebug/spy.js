@@ -19,7 +19,7 @@ var contexts = [];
  * XHR activity of the current page and create appropriate log into the Console panel.
  * This feature can be controlled by an option <i>Show XMLHttpRequests</i> (from within the
  * console panel).
- * 
+ *
  * The module is responsible for attaching/detaching a HTTP Observers when Firebug is
  * activated/deactivated for a site.
  */
@@ -189,7 +189,11 @@ Firebug.Spy = extend(Firebug.Module,
         try
         {
             var callbacks = request.notificationCallbacks;
-            return (callbacks ? callbacks.getInterface(Ci.nsIXMLHttpRequest) : null);
+            if (callbacks)
+            {
+                suspendShowStackTrace();
+                return callbacks.getInterface(Ci.nsIXMLHttpRequest);
+            }
         }
         catch (exc)
         {
@@ -199,6 +203,10 @@ Firebug.Spy = extend(Firebug.Module,
                     FBTrace.sysout("spy.getXHR; Request is not nsIXMLHttpRequest: " +
                         safeGetRequestName(request));
             }
+        }
+        finally
+        {
+            resumeShowStackTrace();
         }
 
        return null;
@@ -210,7 +218,7 @@ Firebug.Spy = extend(Firebug.Module,
 /**
  * @class This observer uses {@link HttpRequestObserver} to monitor start and end of all XHRs.
  * using <code>http-on-modify-request</code>, <code>http-on-examine-response</code> and
- * <code>http-on-examine-cached-response</code> events. For every monitored XHR a new 
+ * <code>http-on-examine-cached-response</code> events. For every monitored XHR a new
  * instance of {@link Firebug.Spy.XMLHttpRequestSpy} object is created. This instance is removed
  * when the XHR is finished.
  */
@@ -244,7 +252,7 @@ var SpyHttpObserver =
         var win = getWindowForRequest(request);
         var xhr = Firebug.Spy.getXHR(request);
 
-        // The request must be associated with window (i.e. tab) and it also must be 
+        // The request must be associated with window (i.e. tab) and it also must be
         // real XHR request.
         if (!win || !xhr)
             return;
@@ -514,7 +522,7 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
         this.onAbort = function() { onHTTPSpyAbort(spy); };
 
         // xxxHonza: #502959 is still failing on Fx 3.5
-        // Use activity distributor to identify 3.6 
+        // Use activity distributor to identify 3.6
         if (SpyHttpActivityObserver.getActivityDistributor())
         {
             this.onreadystatechange = this.xhrRequest.onreadystatechange;
@@ -618,7 +626,7 @@ function onHTTPSpyReadyStateChange(spy, event)
         updateTime(spy);
     }
 
-    // Request loaded. Get all the info from the request now, just in case the 
+    // Request loaded. Get all the info from the request now, just in case the
     // XHR would be aborted in the original onReadyStateChange handler.
     if (spy.xhrRequest.readyState == 4)
     {
