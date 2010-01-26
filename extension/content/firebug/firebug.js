@@ -302,8 +302,7 @@ top.Firebug =
     initializeUI: function(detachArgs)
     {
         if (FBTrace.DBG_INITIALIZE)
-            FBTrace.sysout("firebug.initializeUI this.disabledAlways="+this.disabledAlways+
-                    " detachArgs:", detachArgs);
+            FBTrace.sysout("firebug.initializeUI detachArgs:", detachArgs);
 
         TabWatcher.initialize(this);
         TabWatcher.addListener(this);
