@@ -1267,8 +1267,7 @@ FirebugService.prototype =
         // Remember the error where the last exception is thrown - this will
         // be used later when the console service reports the error, since
         // it doesn't currently report the window where the error occurred
-
-        this._lastErrorWindow =  this.getOutermostScope(frame);
+        fbs._lastErrorWindow = null;
 
         if (this.showStackTrace)  // store these in case the throw is not caught
         {
@@ -1279,10 +1278,14 @@ FirebugService.prototype =
                 fbs._lastErrorLine = frame.line;
                 fbs._lastErrorDebuggr = debuggr;
                 fbs._lastErrorContext = debuggr.breakContext; // XXXjjb this is bad API
+                fbs._lastErrorWindow = fbs._lastErrorContext.window;
             }
             else
                 delete fbs._lastErrorDebuggr;
         }
+        if (!fbs._lastErrorWindow)
+            this._lastErrorWindow =  this.getOutermostScope(frame);
+
 
         if (fbs.trackThrowCatch)
         {
@@ -1518,7 +1521,7 @@ FirebugService.prototype =
             var fileName = script.fileName;
             if (FBTrace.DBG_FBS_TRACKFILES)
                 trackFiles.add(fileName);
-            if (isFilteredURL(fileName))
+            if (isFilteredURL(fileName) || fbs.isChromebug(fileName))
             {
                 try {
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
@@ -1959,11 +1962,10 @@ FirebugService.prototype =
             return null;
     },
 
-    isChromebug: function(global)
+    isChromebug: function(location)
     {
         // TODO this is a kludge: isFilteredURL stops users from seeing firebug but chromebug has to disable the filter
 
-        var location = fbs.getLocationSafe(global);
         if (location)
         {
             if (location.indexOf("chrome://chromebug/") >= 0 || location.indexOf("chrome://fb4cb/") >= 0)
@@ -1992,7 +1994,7 @@ FirebugService.prototype =
     {
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
             FBTrace.sysout("askDebuggersForSupport using global "+global+" for "+frame.script.fileName);
-        if (global && fbs.isChromebug(global))
+        if (global && fbs.isChromebug(fbs.getLocationSafe(global)))
             return false;
 
         if (FBTrace.DBG_FBS_FINDDEBUGGER)
