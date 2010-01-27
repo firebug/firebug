@@ -125,7 +125,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         if(node && unwrapObject(node).firebugIgnore && !node.fbProxyFor)
                 return;
-        
+
         var context = this.inspectingContext;
 
         if (this.inspectTimeout)
@@ -183,7 +183,7 @@ Firebug.Inspector = extend(Firebug.Module,
 
         this.inspectNode(null);
     },
-    
+
     inspectFromContextMenu: function(elt)
     {
         var context, htmlPanel;
@@ -194,7 +194,7 @@ Firebug.Inspector = extend(Firebug.Module,
         htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", false);
         htmlPanel.panelNode.focus();
     },
-    
+
     inspectNodeBy: function(dir)
     {
         var target;
@@ -502,7 +502,9 @@ function getImageMapHighlighter(context)
             if(!canvas)
             {
                 canvas = doc.createElementNS("http://www.w3.org/1999/xhtml", "canvas");
-                canvas.wrappedJSObject.firebugIgnore = true;
+                unwrapObject(canvas).firebugIgnore = true;
+                if (FBTrace.DBG_INSPECT)
+                    unwrapObject(div).firebugIgnore = false;
                 canvas.id = "firebugCanvas";
                 canvas.className = "firebugCanvas";
                 canvas.width = context.window.innerWidth;
@@ -875,8 +877,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
                             FBTrace.sysout("inspector.FrameHighlighter.highlight body.appendChild FAILS for body "+body+" "+exc, exc);
                     }
                 }
-
-                createProxiesForDisabledElements(body);
+                if (element.ownerDocument.contentType.indexOf("xul") === -1)  // otherwise the proxies take up screen space in browser.xul
+                    createProxiesForDisabledElements(body);
             }
         }
         else
@@ -911,6 +913,8 @@ Firebug.Inspector.FrameHighlighter.prototype =
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 unwrapObject(div).firebugIgnore = true;
+                if (FBTrace.DBG_INSPECT)
+                    unwrapObject(div).firebugIgnore = false;
                 div.className = "firebugHighlight";
                 return div;
             }
@@ -1144,6 +1148,8 @@ BoxModelHighlighter.prototype =
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 unwrapObject(div).firebugIgnore = true;
+                if (FBTrace.DBG_INSPECT)
+                    unwrapObject(div).firebugIgnore = false;
                 div.className = "firebugRuler firebugRuler"+name;
                 return div;
             }
@@ -1152,6 +1158,8 @@ BoxModelHighlighter.prototype =
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 unwrapObject(div).firebugIgnore = true;
+                if (FBTrace.DBG_INSPECT)
+                    unwrapObject(div).firebugIgnore = false;
                 div.className = "firebugLayoutBox firebugLayoutBox"+name;
                 return div;
             }
@@ -1160,6 +1168,8 @@ BoxModelHighlighter.prototype =
             {
                 var div = doc.createElementNS("http://www.w3.org/1999/xhtml", "div");
                 unwrapObject(div).firebugIgnore = true;
+                if (FBTrace.DBG_INSPECT)
+                    unwrapObject(div).firebugIgnore = false;
                 div.className = "firebugLayoutLine firebugLayoutLine"+name;
                 return div;
             }
@@ -1253,7 +1263,8 @@ function createProxiesForDisabledElements(body)
             div.style.width = rect.width + "px";
             div.style.height = rect.height + "px";
             unwrapObject(div).firebugIgnore = true;
-
+            if (FBTrace.DBG_INSPECT)
+                unwrapObject(div).firebugIgnore = false;
             div.fbProxyFor = nodes[i];
             nodes[i].fbHasProxyElement = true;
 
