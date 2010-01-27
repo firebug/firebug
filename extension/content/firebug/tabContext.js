@@ -70,6 +70,8 @@ Firebug.TabContext.prototype =
             else
             {
                 this.name = normalizeURL(url);
+                if (this.name === "about:blank" && this.window.frameElement)
+                    this.name += " in "+getElementCSSSelector(this.window.frameElement);
             }
         }
         return this.name;
