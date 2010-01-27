@@ -99,6 +99,8 @@ Firebug.SourceCache.prototype = extend(new Firebug.Listener(),
                 return ["Filtered chrome url "+url];  // ignore chrome
 
             var chromeURI = makeURI(url);
+            if (!chromeURI)
+            	return ["sourceCache failed to make URI from "+url];
             var localURI = chromeReg.convertChromeURL(chromeURI);
             if (FBTrace.DBG_CACHE)
                 FBTrace.sysout("sourceCache.load converting chrome to local: "+url, " -> "+localURI.spec);
