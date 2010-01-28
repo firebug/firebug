@@ -1185,7 +1185,6 @@ this.SourceLink = domplate(Firebug.Rep,
         {
             var fileName = getFileName(sourceLink.href);
             fileName = decodeURIComponent(fileName);
-            fileName = cropString(fileName, 17);
         }
         catch(exc)
         {
@@ -1193,6 +1192,9 @@ this.SourceLink = domplate(Firebug.Rep,
                 FBTrace.sysout("reps.getSourceLinkTitle decodeURIComponent fails for \'"+fileName+"\': "+exc, exc);
             fileName = sourceLink.href;
         }
+
+        fileName = cropString(fileName, 17);
+
         if (sourceLink.instance)
             return $STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
         else if (sourceLink.line)
@@ -1230,7 +1232,17 @@ this.SourceLink = domplate(Firebug.Rep,
 
     getTooltip: function(sourceLink)
     {
-        return decodeURI(sourceLink.href);
+        try
+        {
+            return decodeURI(sourceLink.href);
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.getTooltip decodeURI fails for " + sourceLink.href, exc);
+        }
+
+        return unescape(sourceLink.href);
     },
 
     inspectObject: function(sourceLink, context)
