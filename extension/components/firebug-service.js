@@ -193,6 +193,8 @@ function FirebugService()
     this.onEvalScriptCreated.kind = "eval";
     this.onTopLevelScriptCreated.kind = "top-level";
     this.onEventScriptCreated.kind = "event";
+    this.onXULScriptCreated.kind = "xul";
+    this.pendingXULScripts = [];
 
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
     this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
@@ -1346,6 +1348,40 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    onXULScriptCreated: function(frame, type, val, noNestTest)
+    {
+        // A XUL script hit a breakpoint
+        try
+        {
+            var outerScript = frame.script;
+            var innerScripts = [];
+            for (var i = 0; i < fbs.pendingXULScripts.length; i++)
+            {
+                if (fbs.pendingXULScripts[i].fileName === outerScript.fileName)
+                {
+                    innerScripts.push(fbs.pendingXULScripts[i]);
+                    fbs.pendingXULScripts.splice(i,1);
+                }
+            }
+            var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
+            if (debuggr)
+            {
+                var sourceFile = debuggr.onXULScriptCreated(frame, outerScript, innerScripts);
+                if (sourceFile) // todo remove
+                    fbs.resetBreakpoints(sourceFile);
+            }
+            else
+            {
+                if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
+                    FBTrace.sysout("fbs.onEventScriptCreated no debuggr for "+frame.script.tag+":"+frame.script.fileName);
+            }
+        }
+        catch(exc)
+        {
+            if (FBTrace.DBG_FBS_ERRORS)
+                FBTrace.sysout("onXULScriptCreated fails "+exc, exc);
+        }
+    },
 
     onEventScriptCreated: function(frame, type, val, noNestTest)
     {
@@ -1548,9 +1584,6 @@ FirebugService.prototype =
                 } catch (exc) { /*Bug 426692 */ }
             }
 
-            if (fbs.pendingXULFileName && fbs.pendingXULFileName != script.fileName)
-                fbs.flushXUL();
-
             if (!script.functionName) // top or eval-level
             {
                 // We need to detect eval() and grab its source.
@@ -1571,6 +1604,12 @@ FirebugService.prototype =
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+" jsd depth:"+(jsd.isOn?jsd.pauseDepth+"":"OFF"));
                 }
             }
+            else if( reXUL.test(script.fileName) )
+            {
+                fbs.onXScriptCreatedByTag[script.tag] = fbs.onXULScriptCreated;
+                fbs.pendingXULScripts.push(script);
+                script.setBreakpoint(0);
+            }
             else if (script.baseLineNumber == 1)
             {
                 // could be a 1) Browser-generated event handler or 2) a nested script at the top of a file
@@ -1584,11 +1623,6 @@ FirebugService.prototype =
 
                 if (FBTrace.DBG_FBS_CREATION)
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag="+script.tag);
-            }
-            else if( reXUL.test(script.fileName) )
-            {
-                fbs.pendingXULFileName = script.fileName;  // if these were different, we would already have called flushXUL()
-                fbs.nestedScriptStack.appendElement(script, false);
             }
             else
             {

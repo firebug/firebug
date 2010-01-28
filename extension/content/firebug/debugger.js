@@ -1050,6 +1050,11 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return -2;
     },
 
+    onXULScriptCreated: function(frame, outerScript, innerScriptArray)
+    {
+        FBTrace.sysout("debugger.onXULScriptCreated "+outerScript.fileName);
+    },
+
     onEvalScriptCreated: function(frame, outerScript, innerScripts)
     {
         try
