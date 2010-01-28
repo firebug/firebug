@@ -822,7 +822,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     updateLocation: function(styleSheet)
     {
         if (FBTrace.DBG_CSS)
-            FBTrace.sysout("css.updateLocation; " + styleSheet.href);
+            FBTrace.sysout("css.updateLocation; " + (styleSheet ? styleSheet.href : "no stylesheet"));
 
         if (!styleSheet)
             return;
