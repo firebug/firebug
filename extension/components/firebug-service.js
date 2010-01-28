@@ -3060,11 +3060,18 @@ var trackFiles  = {
     def: function(frame)
     {
         var frameGlobal = fbs.getOutermostScope(frame);
-
+        var scope = frame.scope;
+        if (scope)
+        {
+            while(scope.jsParent)
+                scope = scope.jsParent;
+        }
         var scopeName = fbs.getLocationSafe(frameGlobal);
 
         if (!scopeName)
             scopeName = frameGlobal + "";
+
+        scopeName = scope.jsClassName + ": "+scopeName;
 
         var name = new String(frame.script.fileName);
         if (! (name in this.allFiles))
