@@ -104,6 +104,7 @@ const mimeCategoryMap =
     "application/octet-stream": "bin",
     "text/html": "html",
     "text/xml": "html",
+    "application/xhtml+xml": "html",
     "text/css": "css",
     "application/x-javascript": "js",
     "text/javascript": "js",
