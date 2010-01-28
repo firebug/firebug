@@ -821,8 +821,12 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     updateLocation: function(styleSheet)
     {
+        if (FBTrace.DBG_CSS)
+            FBTrace.sysout("css.updateLocation; " + styleSheet.href);
+
         if (!styleSheet)
             return;
+
         if (styleSheet.editStyleSheet)
             styleSheet = styleSheet.editStyleSheet.sheet;
 
@@ -837,6 +841,21 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         this.showToolbarButtons("fbCSSButtons", !isSystemStyleSheet(this.location));
 
         dispatch([Firebug.A11yModel], 'onCSSRulesAdded', [this, this.panelNode]);
+
+        // If the full editing mode (not the inline) is on while the location changes,
+        // open the editor again for another file.
+        if (this.editing && this.stylesheetEditor && this.stylesheetEditor.editing)
+        {
+            // Remove the editing flag to avoid recursion. The StylesheetEditor.endEditing
+            // calls refresh and consequently updateLocation of the CSS panel.
+            this.editing = null;
+
+            // Stop the current editing.
+            Firebug.Editor.stopEditing();
+
+            // ... and open the editor again.
+            this.toggleEditing();
+        }
     },
 
     updateSelection: function(object)
@@ -1888,8 +1907,14 @@ StyleSheetEditor.prototype = domplate(Firebug.BaseEditor,
         Firebug.CSSModule.freeEdit(this.styleSheet, value);
     },
 
+    beginEditing: function()
+    {
+        this.editing = true;
+    },
+
     endEditing: function()
     {
+        this.editing = false;
         this.panel.refresh();
         return true;
     },
