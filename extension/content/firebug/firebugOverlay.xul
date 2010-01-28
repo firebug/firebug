@@ -93,6 +93,7 @@
         <key id="key_customizeFBKeys" keycode="VK_B" modifiers="accel shift alt" command="cmd_customizeFBKeys"/>
         <key id="key_toggleFirebug" keycode="VK_F12" command="cmd_toggleFirebug"/>
         <key id="key_detachFirebug" keycode="VK_F12" modifiers="accel" command="cmd_detachFirebug"/>
+        <key id="key_closeFirebug" keycode="VK_F12" modifiers="shift" command="cmd_closeFirebug"/>
         <key id="key_clearConsole" key="r" modifiers="accel,shift" command="cmd_clearConsole" class="fbOnlyKey"/>
     </keyset>
 
