@@ -375,27 +375,27 @@ Firebug.TraceModule.CommonBaseUI = {
 Firebug.TraceModule.PanelTemplate = domplate({
 
     tag:
-        TABLE({class: "traceTable", cellpadding: 0, cellspacing: 0},
+        TABLE({"class": "traceTable", cellpadding: 0, cellspacing: 0},
             TBODY(
-                TR({class: "traceInfoRow"},
-                    TD({class: "traceInfoCol"},
-                        DIV({class: "traceInfoBody"},
-                            DIV({class: "traceInfoTabs"},
-                                A({class: "traceInfoLogsTab traceInfoTab", onclick: "$onClickTab",
+                TR({"class": "traceInfoRow"},
+                    TD({"class": "traceInfoCol"},
+                        DIV({"class": "traceInfoBody"},
+                            DIV({"class": "traceInfoTabs"},
+                                A({"class": "traceInfoLogsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Logs"},
                                     $STR("Logs")
                                 ),
-                                A({class: "traceInfoOptionsTab traceInfoTab", onclick: "$onClickTab",
+                                A({"class": "traceInfoOptionsTab traceInfoTab", onclick: "$onClickTab",
                                     view: "Options"},
                                     $STR("Options")
                                 )
                             ),
-                            DIV({class: "traceInfoLogsText traceInfoText"},
-                                IFRAME({class: "traceInfoLogsFrame",
+                            DIV({"class": "traceInfoLogsText traceInfoText"},
+                                IFRAME({"class": "traceInfoLogsFrame",
                                     src: "chrome://firebug/content/traceLogFrame.html"}
                                 )
                             ),
-                            DIV({class: "traceInfoOptionsText traceInfoText"})
+                            DIV({"class": "traceInfoOptionsText traceInfoText"})
                         )
                     )
                 )
@@ -443,110 +443,128 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     inspectable: false,
 
     tableTag:
-        TABLE({class: "messageTable", cellpadding: 0, cellspacing: 0},
+        TABLE({"class": "messageTable", cellpadding: 0, cellspacing: 0},
             TBODY()
         ),
 
     rowTag:
-        TR({class: "messageRow $message|getMessageType",
+        TR({"class": "messageRow $message|getMessageType",
             _repObject: "$message",
             $exception: "$message|isException",
             onclick: "$onClickRow"},
-            TD({class: "messageNameCol messageCol"},
-                DIV({class: "messageNameLabel messageLabel"},
+            TD({"class": "messageNameCol messageCol"},
+                DIV({"class": "messageNameLabel messageLabel"},
                     "$message|getMessageIndex")
             ),
-            TD({class: "messageTimeCol messageCol"},
-                DIV({class: "messageTimeLabel messageLabel"},
+            TD({"class": "messageTimeCol messageCol"},
+                DIV({"class": "messageTimeLabel messageLabel"},
                     "$message|getMessageTime")
             ),
-            TD({class: "messageBodyCol messageCol"},
-                DIV({class: "messageLabel", title: "$message|getMessageTitle"},
+            TD({"class": "messageBodyCol messageCol"},
+                DIV({"class": "messageLabel", title: "$message|getMessageTitle"},
                     "$message|getMessageLabel")
             )
         ),
 
     separatorTag:
-        TR({class: "messageRow separatorRow", _repObject: "$message"},
-            TD({class: "messageCol", colspan: "3"},
+        TR({"class": "messageRow separatorRow", _repObject: "$message"},
+            TD({"class": "messageCol", colspan: "3"},
                 DIV("$message|getMessageIndex")
             )
         ),
 
+    importHeaderTag:
+        TR({"class": "messageRow importHeaderRow", _repObject: "$message"},
+            TD({"class": "messageCol", colspan: "3"},
+                DIV(B("Firebug: $message.firebug")),
+                DIV("$message.app.name, $message.app.version, " +
+                    "$message.app.platformVersion, $message.app.buildID, " +
+                    "$message.app.locale"),
+                DIV("$message.os.name $message.os.version"),
+                DIV("$message.date"),
+                DIV("$message.filePath")
+            )
+        ),
+
+    importFooterTag:
+        TR({"class": "messageRow importFooterRow", _repObject: "$message"},
+            TD({"class": "messageCol", colspan: "3"})
+        ),
+
     bodyRow:
-        TR({class: "messageInfoRow"},
-            TD({class: "messageInfoCol", colspan: 8})
+        TR({"class": "messageInfoRow"},
+            TD({"class": "messageInfoCol", colspan: 8})
         ),
 
     bodyTag:
-        DIV({class: "messageInfoBody", _repObject: "$message"},
-            DIV({class: "messageInfoTabs"},
-                A({class: "messageInfoStackTab messageInfoTab", onclick: "$onClickTab",
+        DIV({"class": "messageInfoBody", _repObject: "$message"},
+            DIV({"class": "messageInfoTabs"},
+                A({"class": "messageInfoStackTab messageInfoTab", onclick: "$onClickTab",
                     view: "Stack"},
                     $STR("tracing.tab.Stack")
                 ),
-                A({class: "messageInfoExcTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoExcTab messageInfoTab", onclick: "$onClickTab",
                     view: "Exc",
                     $collapsed: "$message|hideException"},
                     $STR("tracing.tab.Exception")
                 ),
-                A({class: "messageInfoPropsTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoPropsTab messageInfoTab", onclick: "$onClickTab",
                     view: "Props",
                     $collapsed: "$message|hideProperties"},
                     $STR("tracing.tab.Properties")
                 ),
-                A({class: "messageInfoScopeTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoScopeTab messageInfoTab", onclick: "$onClickTab",
                     view: "Scope",
                     $collapsed: "$message|hideScope"},
                     $STR("tracing.tab.Scope")
                 ),
-                A({class: "messageInfoResponseTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoResponseTab messageInfoTab", onclick: "$onClickTab",
                     view: "Response",
                     $collapsed: "$message|hideResponse"},
                     $STR("tracing.tab.Response")
                 ),
-                A({class: "messageInfoSourceTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoSourceTab messageInfoTab", onclick: "$onClickTab",
                     view: "Source",
                     $collapsed: "$message|hideSource"},
                     $STR("tracing.tab.Source")
                 ),
-                A({class: "messageInfoIfacesTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoIfacesTab messageInfoTab", onclick: "$onClickTab",
                     view: "Ifaces",
                     $collapsed: "$message|hideInterfaces"},
                     $STR("tracing.tab.Interfaces")
                 ),
                 // xxxHonza: this doesn't seem to be much useful.
-                /*A({class: "messageInfoTypesTab messageInfoTab", onclick: "$onClickTab",
+                /*A({"class": "messageInfoTypesTab messageInfoTab", onclick: "$onClickTab",
                     view: "Types",
                     $collapsed: "$message|hideTypes"},
                     "Types"
                 ),*/
-                A({class: "messageInfoObjectTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoObjectTab messageInfoTab", onclick: "$onClickTab",
                     view: "Types",
                     $collapsed: "$message|hideObject"},
                     $STR("tracing.tab.Object")
                 ),
-                A({class: "messageInfoEventTab messageInfoTab", onclick: "$onClickTab",
+                A({"class": "messageInfoEventTab messageInfoTab", onclick: "$onClickTab",
                     view: "Event",
                     $collapsed: "$message|hideEvent"},
                     $STR("tracing.tab.Event")
                 )
             ),
-            DIV({class: "messageInfoStackText messageInfoText"},
-                TABLE({class: "messageInfoStackTable", cellpadding: 0, cellspacing: 0},
+            DIV({"class": "messageInfoStackText messageInfoText"},
+                TABLE({"class": "messageInfoStackTable", cellpadding: 0, cellspacing: 0},
                     TBODY(
                         FOR("stack", "$message|stackIterator",
                             TR(
-                                TD({class: "stackFrame"},
-                                    A({class: "stackFrameLink", onclick: "$onClickStackFrame",
+                                TD({"class": "stackFrame"},
+                                    A({"class": "stackFrameLink", onclick: "$onClickStackFrame",
                                         lineNumber: "$stack.lineNumber"},
                                         "$stack.fileName"),
                                     SPAN("&nbsp;"),
                                     SPAN("(", "$stack.lineNumber", ")"),
                                     SPAN("&nbsp;"),
-                                    SPAN({class: "stackFuncName"},
+                                    SPAN({"class": "stackFuncName"},
                                         "$stack.funcName"),
-                                    A({class: "openDebugger", onclick: "$onOpenDebugger",
+                                    A({"class": "openDebugger", onclick: "$onOpenDebugger",
                                         lineNumber: "$stack.lineNumber",
                                         fileName: "$stack.fileName"},
                                         "[...]")
@@ -556,17 +574,17 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
                     )
                 )
             ),
-            DIV({class: "messageInfoExcText messageInfoText"}),
-            DIV({class: "messageInfoPropsText messageInfoText"}),
-            DIV({class: "messageInfoResponseText messageInfoText"},
-                IFRAME({class: "messageInfoResponseFrame"})
+            DIV({"class": "messageInfoExcText messageInfoText"}),
+            DIV({"class": "messageInfoPropsText messageInfoText"}),
+            DIV({"class": "messageInfoResponseText messageInfoText"},
+                IFRAME({"class": "messageInfoResponseFrame"})
             ),
-            DIV({class: "messageInfoSourceText messageInfoText"}),
-            DIV({class: "messageInfoIfacesText messageInfoText"}),
-            DIV({class: "messageInfoScopeText messageInfoText"}),
-            DIV({class: "messageInfoTypesText messageInfoText"}),
-            DIV({class: "messageInfoObjectText messageInfoText"}),
-            DIV({class: "messageInfoEventText messageInfoText"})
+            DIV({"class": "messageInfoSourceText messageInfoText"}),
+            DIV({"class": "messageInfoIfacesText messageInfoText"}),
+            DIV({"class": "messageInfoScopeText messageInfoText"}),
+            DIV({"class": "messageInfoTypesText messageInfoText"}),
+            DIV({"class": "messageInfoObjectText messageInfoText"}),
+            DIV({"class": "messageInfoEventText messageInfoText"})
         ),
 
     // Data providers
@@ -708,7 +726,8 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
     // Firebug rep support
     supportsObject: function(object, type)
     {
-        return object instanceof Firebug.TraceModule.TraceMessage;
+        return object instanceof Firebug.TraceModule.TraceMessage ||
+            object instanceof Firebug.TraceModule.ImportedMessage;
     },
 
     browseObject: function(message, context)
@@ -900,17 +919,22 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
             scrollToBottom(scrollingNode);
     },
 
-    dumpSeparator: function(outputNodes)
+    dumpSeparator: function(outputNodes, tag, object)
     {
         var panelNode = outputNodes.getScrollingNode();
         var scrolledToBottom = isScrolledToBottom(panelNode);
 
         var targetNode = outputNodes.getTargetNode();
-        var fakeMessage = {};
-        fakeMessage.index = targetNode.childNodes.length;
 
-        var row = HelperDomplate.insertRows(this.separatorTag, {message: fakeMessage},
-            targetNode, this)[0];
+        if (!tag)
+            tag = this.separatorTag;
+
+        if (!object)
+            object = {type: "separator"};
+
+        object.index = targetNode.childNodes.length;
+
+        var row = HelperDomplate.insertRows(tag, {message: object}, targetNode, this)[0];
 
         if (scrolledToBottom)
             scrollToBottom(panelNode);
@@ -1157,7 +1181,6 @@ Firebug.TraceModule.TraceMessage = function(type, text, obj, scope, time)
     {
         this.obj = {'':this.obj}; // will make functions visible
     }
-
 
     if (this.obj instanceof Ci.nsIScriptError)
     {
@@ -1568,6 +1591,29 @@ Firebug.TraceModule.TraceMessage.prototype =
     }
 }
 
+// ************************************************************************************************
+// Imported message
+
+Firebug.TraceModule.ImportedMessage = function(logMsg)
+{
+    this.type = logMsg.type;
+    this.text = logMsg.text;
+    this.obj = null;
+    this.stack = logMsg.stack;
+    this.scope = null;
+    this.time = logMsg.time;
+}
+
+Firebug.TraceModule.ImportedMessage.prototype = extend(Firebug.TraceModule.TraceMessage.prototype,
+{
+    getStackArray: function()
+    {
+        return cloneArray(this.stack);
+    },
+})
+
+// ************************************************************************************************
+
 var lastPanic = null;
 function onPanic(contextMessage, errorMessage)
 {
@@ -1593,7 +1639,7 @@ function onPanic(contextMessage, errorMessage)
 Firebug.TraceModule.Tree = domplate(Firebug.Rep,
 {
     tag:
-        TABLE({class: "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
+        TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick"},
             TBODY(
                 FOR("member", "$object|memberIterator",
                     TAG("$member|getRowTag", {member: "$member"}))
@@ -1601,13 +1647,13 @@ Firebug.TraceModule.Tree = domplate(Firebug.Rep,
         ),
 
     rowTag:
-        TR({class: "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
+        TR({"class": "memberRow $member.open $member.type\\Row", $hasChildren: "$member.hasChildren",
             _repObject: "$member", level: "$member.level"},
-            TD({class: "memberLabelCell",
+            TD({"class": "memberLabelCell",
                 style: "padding-left: $member.indent\\px; width:1%; white-space: nowrap"},
-                DIV({class: "memberLabel $member.type\\Label"}, "$member.name")
+                DIV({"class": "memberLabel $member.type\\Label"}, "$member.name")
             ),
-            TD({class: "memberValueCell", style: "width: 100%;"},
+            TD({"class": "memberValueCell", style: "width: 100%;"},
                 TAG("$member.tag", {object: "$member.value"})
             )
         ),

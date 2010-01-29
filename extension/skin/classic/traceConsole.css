@@ -134,6 +134,21 @@
     margin-left: 15px;
 }
 
+.importHeaderRow {
+    background-image: none;
+    background: rgb(241, 226, 210) !important;
+}
+
+.importHeaderRow .messageCol {
+    padding: 7px;
+}
+
+.importFooterRow {
+    background-image: none;
+    background: rgb(241, 226, 210) !important;
+    height:16px;
+}
+
 .messageCol {
     padding: 0;
     vertical-align: top;
@@ -332,6 +347,10 @@
 #saveToFile {
     list-style-image: url("chrome://browser/skin/Toolbar-small.png");
     -moz-image-region: rect(0px 96px 16px 80px);
+}
+
+#loadFromFile {
+    list-style-image: url("chrome://firebug/skin/trace/up.png");
 }
 
 #closeFirefox {

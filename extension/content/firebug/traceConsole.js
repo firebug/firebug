@@ -81,7 +81,7 @@ var TraceConsole =
     internationalizeUI: function()
     {
         var buttons = ["clearConsole", "findConsole", "separateConsole",
-            "restartFirefox", "closeFirefox", "saveToFile"];
+            "restartFirefox", "closeFirefox", "saveToFile", "loadFromFile"];
 
         for (var i=0; i<buttons.length; i++)
         {
@@ -176,6 +176,7 @@ var TraceConsole =
 
     // ********************************************************************************************
     // Interface to the output nodes, going by the name outputNodes
+
     getScrollingNode: function()
     {
         //window.dump(FBL.getStackDump());
@@ -183,10 +184,12 @@ var TraceConsole =
 
         return this.scrollingNode;
     },
+
     setScrollingNode: function(node)
     {
         this.scrollingNode = node;
     },
+
     getTargetNode: function()
     {
         //window.dump(FBL.getStackDump());
@@ -194,8 +197,10 @@ var TraceConsole =
 
         return this.logs.firstChild;
     },
+
     // ********************************************************************************************
     // Message dump
+
     dump: function(message)
     {
         // Notify listeners
@@ -228,9 +233,10 @@ var TraceConsole =
             var nsIFilePicker = Ci.nsIFilePicker;
             var fp = Cc["@mozilla.org/filepicker;1"].getService(nsIFilePicker);
             fp.init(window, null, nsIFilePicker.modeSave);
-            fp.appendFilters(nsIFilePicker.filterAll | nsIFilePicker.filterText);
+            fp.appendFilter("Firebug Tracing Logs","*.ftl;");
+            fp.appendFilters(nsIFilePicker.filterAll);
             fp.filterIndex = 1;
-            fp.defaultString = "firebug-tracing-logs.txt";
+            fp.defaultString = "firebug-tracing-logs.ftl";
 
             var rv = fp.show();
             if (rv == nsIFilePicker.returnOK || rv == nsIFilePicker.returnReplace)
@@ -242,24 +248,32 @@ var TraceConsole =
                 var appInfo = Cc["@mozilla.org/xre/app-info;1"].getService(Ci.nsIXULAppInfo);
                 var currLocale = Firebug.getPref("general.useragent", "locale");
                 var systemInfo = Cc["@mozilla.org/system-info;1"].getService(Ci.nsIPropertyBag); 
-                var name = systemInfo.getProperty("name");
-                var version = systemInfo.getProperty("version");
 
-                // Store head info.
-                var head = "Firebug: " + Firebug.version + "\n" +
-                    appInfo.name + ": " + appInfo.version + ", " +
-                    appInfo.platformVersion + ", " +
-                    appInfo.appBuildID + ", " + currLocale + "\n" +
-                    "OS: " + name + " " + version + "\n" +
-                    "Export Date: " + (new Date()).toGMTString() +
-                    "\n==========================================\n\n";
-                foStream.write(head, head.length);
+                var log = { version: "1.0" };
+
+                // Firebug info version
+                log.firebug = Firebug.version;
+                log.app = {
+                    name: appInfo.name,
+                    version: appInfo.version,
+                    platformVersion: appInfo.platformVersion,
+                    buildID: appInfo.appBuildID,
+                    locale: currLocale
+                };
+                log.os = {
+                    name: systemInfo.getProperty("name"),
+                    version: systemInfo.getProperty("version")
+                };
+                log.date = (new Date()).toGMTString();
+                log.messages = [];
 
                 // Iterate over all logs and store it into a file.
                 var tbody = this.logs.firstChild;
                 for (var row = tbody.firstChild; row; row = row.nextSibling)
-                    this.saveMessage(row.repObject, foStream);
+                    this.saveMessage(log, row.repObject);
 
+                var jsonString = JSON.stringify(log, null, "  ");
+                foStream.write(jsonString, jsonString.length);
                 foStream.close();
             }
         }
@@ -269,31 +283,88 @@ var TraceConsole =
         }
     },
 
-    saveMessage: function(message, stream)
+    onLoadFromFile: function()
+    {
+        try
+        {
+            var nsIFilePicker = Ci.nsIFilePicker;
+            var fp = Cc["@mozilla.org/filepicker;1"].getService(nsIFilePicker);
+            fp.init(window, null, nsIFilePicker.modeOpen);
+            fp.appendFilters(nsIFilePicker.filterAll);
+            fp.appendFilter("Firebug Tracing Logs", "*.ftl;");
+            fp.filterIndex = 1;
+
+            var rv = fp.show();
+            if (rv != nsIFilePicker.returnOK)
+                return;
+
+            var inputStream = Cc["@mozilla.org/network/file-input-stream;1"]
+                .createInstance(Ci.nsIFileInputStream);
+            inputStream.init(fp.file, -1, -1, 0); // read-only
+
+            // Read and parset the content
+            var jsonString = FBL.readFromStream(inputStream)
+            var log = JSON.parse(jsonString);
+            if (!log)
+            {
+                alert("No log data available.");
+                return;
+            }
+
+            log.filePath = fp.file.path;
+
+            var MessageTemplate = Firebug.TraceModule.MessageTemplate;
+            var TraceModule = Firebug.TraceModule;
+
+            // Create header, dump all logs and create footer.
+            MessageTemplate.dumpSeparator(this, MessageTemplate.importHeaderTag, log);
+            for (var i=0; i<log.messages.length; i++)
+            {
+                var logMsg = log.messages[i];
+                if (!logMsg.type)
+                    continue;
+                else if (logMsg.type == "separator")
+                    MessageTemplate.dumpSeparator(this);
+                else
+                    MessageTemplate.dump(new TraceModule.ImportedMessage(logMsg), this);
+            }
+            MessageTemplate.dumpSeparator(this, MessageTemplate.importFooterTag);
+        }
+        catch (err)
+        {
+            alert(err.toString());
+        }
+    },
+
+    saveMessage: function(log, message)
     {
         if (!message)
             return;
 
         var text = message.text;
         text = text ? text.replace(reEndings, "") : "---";
-        if (message.type)
-            text = "[" + message.type + "] " + text;
-        text = (message.index + 1) + ". " + text + "\n"
-        stream.write(text, text.length);
-        this.saveStackTrace(message, stream);
-    },
+        text = text.replace(/"|'/g, "");
 
-    saveStackTrace: function(message, stream)
-    {
+        var msgLog = {
+            index: message.index,
+            text: message.text,
+            type: message.type ? message.type : "",
+            time: message.time,
+            stack: []
+        };
+
         var stack = message.stack;
-        for (var i=0; stack && i<stack.length; i++) {
+        for (var i=0; stack && i<stack.length; i++)
+        {
             var frame = stack[i];
-            var text = "      " + frame.fileName + " (" + frame.lineNumber + ")\n";
-            stream.write(text, text.length);
+            msgLog.stack.push({
+                fileName: frame.fileName,
+                lineNumber: frame.lineNumber,
+                funcName: frame.funcName,
+            });
         }
 
-        var end = "\n";
-        stream.write(end, end.length);
+        log.messages.push(msgLog);
     },
 
     onRestartFirefox: function()
@@ -306,7 +377,6 @@ var TraceConsole =
     {
         goQuitApplication();
     },
-
 };
 
 // ************************************************************************************************
