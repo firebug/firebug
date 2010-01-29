@@ -1790,19 +1790,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (!context.sourceFileMap[src])
                 src = absoluteURL(src, win.location.href);
 
-            // xxxHonza, XXXjjb: This should not happen, is that correct?
-            if (!context.sourceFileMap[src])
-            {
-                if (FBTrace.DBG_SOURCEFILES || FBTrace.DBG_ERRORS)
-                {
-                    var urls = [];
-                    for (var prop in context.sourceFileMap)
-                        urls.push(prop);
-                    FBTrace.sysout("debugger.unWatchWindow; ERROR sourceFileMap doesn't contain " +
-                        "expected entry: " + src, urls);
-                }
-            }
-
             delete context.sourceFileMap[src];
 
             if (FBTrace.DBG_SOURCEFILES)
