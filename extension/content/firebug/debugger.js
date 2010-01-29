@@ -1053,8 +1053,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             var context = this.breakContext;
             delete this.breakContext;
-            //if (FBTrace.DBG_TOPLEVEL)
-            FBTrace.sysout("debugger.onXULScriptCreated script.fileName="+outerScript.fileName+" in "+context.getName());
 
             var sourceFile = context.sourceFileMap[outerScript.fileName];
             if (sourceFile)
@@ -1069,9 +1067,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 this.watchSourceFile(context, sourceFile);
             }
 
-
-            if (FBTrace.DBG_TOPLEVEL)
-                FBTrace.sysout("debugger.onXULScriptCreated "+sourceFile);
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("debugger.onXULScriptCreated script.fileName="+outerScript.fileName+" in "+context.getName()+" "+sourceFile);
 
             dispatch(this.fbListeners,"onXULScriptCreated",[context, frame, sourceFile.href]);
             return sourceFile;
