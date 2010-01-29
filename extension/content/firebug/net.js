@@ -225,7 +225,7 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_NET)
             FBTrace.sysout("net.initContext for: " + context.getName());
 
-        if (context.window && 'addEventListener' in context.window)
+        if (context.window && context.window instanceof Window) // XXXjjb changed test to instanceof because jetpack uses fake window objects
         {
             var window = context.window;
 
