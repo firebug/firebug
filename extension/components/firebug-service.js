@@ -1348,6 +1348,7 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
     onXULScriptCreated: function(frame, type, val, noNestTest)
     {
         // A XUL script hit a breakpoint
@@ -1357,18 +1358,30 @@ FirebugService.prototype =
             var innerScripts = [];
             for (var i = 0; i < fbs.pendingXULScripts.length; i++)
             {
+                // Take all the pending script from the same file as part of this sourcefile
                 if (fbs.pendingXULScripts[i].fileName === outerScript.fileName)
                 {
-                    innerScripts.push(fbs.pendingXULScripts[i]);
+                    var innerScript = fbs.pendingXULScripts[i];
+                    innerScripts.push(innerScript);
+                    if (innerScript.isValid)
+                        innerScript.clearBreakpoint(0);
+
                     fbs.pendingXULScripts.splice(i,1);
                 }
             }
             var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
             if (debuggr)
             {
-                var sourceFile = debuggr.onXULScriptCreated(frame, outerScript, innerScripts);
-                if (sourceFile) // todo remove
-                    fbs.resetBreakpoints(sourceFile);
+                innerScripts.push(outerScript);
+                var innerScriptEnumerator =
+                {
+                     index: 0,
+                     max: innerScripts.length,
+                     hasMoreElements: function() { return this.index < this.max;},
+                     getNext: function() { return innerScripts[this.index++]; },
+                };
+                var sourceFile = debuggr.onXULScriptCreated(frame, outerScript, innerScriptEnumerator);
+                fbs.resetBreakpoints(sourceFile);
             }
             else
             {
@@ -1584,7 +1597,13 @@ FirebugService.prototype =
                 } catch (exc) { /*Bug 426692 */ }
             }
 
-            if (!script.functionName) // top or eval-level
+            if( reXUL.test(script.fileName) )
+            {
+                fbs.onXScriptCreatedByTag[script.tag] = fbs.onXULScriptCreated;
+                fbs.pendingXULScripts.push(script);
+                script.setBreakpoint(0);  // Stop in the first one called and assign all with this fileName to sourceFile.
+            }
+            else if (!script.functionName) // top or eval-level
             {
                 // We need to detect eval() and grab its source.
                 var hasCaller = fbs.createdScriptHasCaller();
@@ -1603,12 +1622,6 @@ FirebugService.prototype =
                 {
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in "+(hasCaller?"eval":"top")+" level tag="+script.tag+":"+script.fileName+" jsd depth:"+(jsd.isOn?jsd.pauseDepth+"":"OFF"));
                 }
-            }
-            else if( reXUL.test(script.fileName) )
-            {
-                fbs.onXScriptCreatedByTag[script.tag] = fbs.onXULScriptCreated;
-                fbs.pendingXULScripts.push(script);
-                script.setBreakpoint(0);
             }
             else if (script.baseLineNumber == 1)
             {
@@ -1636,25 +1649,6 @@ FirebugService.prototype =
             ERROR("onScriptCreated failed: "+exc);
             FBTrace.sysout("onScriptCreated failed: ", exc);
         }
-    },
-
-    flushXUL: function()
-    {
-        for ( var i = debuggers.length - 1; i >= 0; i--)
-        {
-            try
-            {
-                var debuggr = debuggers[i];
-                if (debuggr.onXULScriptCreated)
-                    debuggr.onXULScriptCreated(fbs.pendingXULFileName, fbs.nestedScriptStack.enumerate());
-            }
-            catch (exc)
-            {
-                FBTrace.sysout("firebug-service flushXUL FAILS: ",exc);
-            }
-        }
-        delete fbs.pendingXULFileName;
-        fbs.clearNestedScripts();
     },
 
     createdScriptHasCaller: function()
@@ -2427,6 +2421,7 @@ FirebugService.prototype =
         var returned;
         try
         {
+            var debuggr = this.reFindDebugger(frame, debuggr);
             returned = debuggr.onBreak(frame, type);
         }
         catch (exc)
