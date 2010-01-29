@@ -248,10 +248,9 @@ top.FirebugChrome =
         {
             Firebug.setChrome(this, "detached"); // 1.4
 
-            var browser = context ? context.browser : this.getCurrentBrowser();
-            Firebug.showContext(browser, context);
+            Firebug.selectContext(context);
 
-            if (FBTrace.DBG_WINDOWS)
+            if (FBTrace.DBG_ACTIVATION)
                 FBTrace.sysout("attachBrowser inDetachedScope in Firebug.chrome.window: "+Firebug.chrome.window.location);
         }
 

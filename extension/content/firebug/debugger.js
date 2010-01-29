@@ -600,7 +600,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 Firebug.chrome.setGlobalAttribute("cmd_breakOnNext", "breakable", "true");
 
             if (context != FirebugContext || Firebug.isDetached())
-                Firebug.showContext(context.browser, context);  // Make FirebugContext = context and sync the UI
+                Firebug.selectContext(context);  // Make FirebugContext = context and sync the UI
 
             if (Firebug.isMinimized()) // then open the UI to show we are stopped
                 Firebug.unMinimize();

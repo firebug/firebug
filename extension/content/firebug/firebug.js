@@ -157,7 +157,7 @@ top.Firebug =
     version: "1.5",
 
     dispatchName: "Firebug",
-    module: modules,
+    modules: modules,
     panelTypes: panelTypes,
     uiListeners: [],
     reps: reps,
@@ -1715,6 +1715,9 @@ top.Firebug =
         Firebug.resetTooltip();
     },
 
+    /*
+     * To be called from TabWatcher only, see selectContext
+     */
     showContext: function(browser, context)  // TabWatcher showContext. null context means we don't debug that browser
     {
         if (clearContextTimeout)
@@ -1836,6 +1839,15 @@ top.Firebug =
         dispatch(modules, "onSourceFileCreated", [context, sourceFile]);
     },
 
+    //*********************************************************************************************
+    /*
+     * This method syncs the UI to a context
+     * @param context to become the active and visible context
+     */
+    selectContext: function(context)
+    {
+        this.showContext(context.browser, context);
+    },
     //*********************************************************************************************
 
     getTabForWindow: function(aWindow)
