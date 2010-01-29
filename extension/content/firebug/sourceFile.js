@@ -626,12 +626,13 @@ Firebug.NoScriptSourceFile.prototype = descend(
         Firebug.SourceFile.CommonBase);
 
 //---------// javascript in a .xul or .xml file, no outerScript
-Firebug.XULSourceFile = function(url, innerScriptEnumerator)
+Firebug.XULSourceFile = function(url, outerScript, innerScriptEnumerator)
 {
     this.href = url;
     this.pcmap_type = PCMAP_SOURCETEXT;
+    this.outerScript = outerScript;  // Beware may not be valid after we return!!
 
-    Firebug.SourceFile.addScriptsToSourceFile(this, null, innerScriptEnumerator);
+    Firebug.SourceFile.addScriptsToSourceFile(this, outerScript, innerScriptEnumerator);
 }
 
 Firebug.XULSourceFile.prototype = descend(

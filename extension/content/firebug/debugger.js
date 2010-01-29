@@ -842,11 +842,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         try {
             var context = this.breakContext;
 
-            if (!context)
-                context = this.getContextByFrame(frame);
-
-            if (FBTrace.DBG_BP)
-                FBTrace.sysout("debugger.onBreak "+(this.breakContext?" no breakContext, tried getContextByFrame ":"breakContext: ") + (context ? context.getName() : " none!"), getJSDStackDump(frame) );
+            if (FBTrace.DBG_BP || (!context && FBTrace.DBG_FBS_ERRORS) )
+                FBTrace.sysout("debugger.onBreak breakContext: " + (context ? context.getName() : " none!"), getJSDStackDump(frame) );
 
             delete this.breakContext;
 
@@ -1050,9 +1047,40 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return -2;
     },
 
-    onXULScriptCreated: function(frame, outerScript, innerScriptArray)
+    onXULScriptCreated: function(frame, outerScript, innerScriptEnumerator)
     {
-        FBTrace.sysout("debugger.onXULScriptCreated "+outerScript.fileName);
+        try
+        {
+            var context = this.breakContext;
+            delete this.breakContext;
+            //if (FBTrace.DBG_TOPLEVEL)
+            FBTrace.sysout("debugger.onXULScriptCreated script.fileName="+outerScript.fileName+" in "+context.getName());
+
+            var sourceFile = context.sourceFileMap[outerScript.fileName];
+            if (sourceFile)
+            {
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("debugger.onXULScriptCreated reuse sourcefile="+sourceFile.toString()+" -> "+context.getName()+" ("+context.uid+")"+"\n");
+                Firebug.SourceFile.addScriptsToSourceFile(sourceFile, null, innerScriptEnumerator);
+            }
+            else
+            {
+                sourceFile = new Firebug.XULSourceFile(outerScript.fileName, outerScript, innerScriptEnumerator);
+                this.watchSourceFile(context, sourceFile);
+            }
+
+
+            if (FBTrace.DBG_TOPLEVEL)
+                FBTrace.sysout("debugger.onXULScriptCreated "+sourceFile);
+
+            dispatch(this.fbListeners,"onXULScriptCreated",[context, frame, sourceFile.href]);
+            return sourceFile;
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_TOPLEVEL || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("onXULScriptCreated FaILS "+e, e);
+        }
     },
 
     onEvalScriptCreated: function(frame, outerScript, innerScripts)
@@ -1159,6 +1187,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     getContextByFrame: function(frame)  // XXX jjb I think now that this should not be called,
     {
+        if (FBTrace.DBG_BP)
+            FBTrace.sysout("debugger.getContextByFrame should not be called!");
         var win = fbs.getOutermostScope(frame);
         return win ? TabWatcher.getContextByWindow(win) : null;
     },
