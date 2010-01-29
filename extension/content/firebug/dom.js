@@ -934,6 +934,8 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
                 this.select(null);
                 return;
             }
+            if (state.pathIndex > -1)
+                this.pathIndex = state.pathIndex;
             if (state.viewPath)
                 this.viewPath = state.viewPath;
             if (state.propertyPath)
