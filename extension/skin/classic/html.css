@@ -11,7 +11,9 @@
     padding-left: 13px;
     -moz-user-select: -moz-none;
 }
-
+.nodeBox.search-selection {
+    -moz-user-select: text;
+}
 .twisty {
     position: absolute;
     left: 0px;

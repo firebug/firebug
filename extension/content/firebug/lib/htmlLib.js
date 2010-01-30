@@ -250,11 +250,15 @@ Firebug.HTMLLib =
 
             if (row)
             {
-                var sel = panelNode.ownerDocument.defaultView.getSelection();
+                var trueNodeBox = getAncestorByClass(nodeBox, "nodeBox");
+                setClass(trueNodeBox,'search-selection');
+
+                scrollIntoCenterView(row, panelNode);
+                var sel = panelNode.ownerDocument.defaultView.getSelection(); 
                 sel.removeAllRanges();
                 sel.addRange(this.textSearch.range);
 
-                scrollIntoCenterView(row, panelNode);
+                removeClass(trueNodeBox,'search-selection'); 
                 return true;
             }
         };
