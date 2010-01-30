@@ -1,5 +1,19 @@
 /* See license.txt for terms of usage */
 
+/* overrides to revert personas. see http://code.google.com/p/fbug/issues/detail?id=2704 */
+#fbContentBox:-moz-lwtheme {
+  background-color: window;
+}
+
+#fbContentBox:-moz-lwtheme toolbox {
+  -moz-appearance: toolbox;
+}
+
+#fbContentBox:-moz-lwtheme toolbar {
+  -moz-appearance: toolbar;
+}
+/* end overrides */
+
 #inspector-button {
   list-style-image: url(chrome://firebug/skin/inspect.png);
 }

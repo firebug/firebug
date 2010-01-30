@@ -12,29 +12,7 @@ window[chromehidden~="toolbar"] #fbToolbar {
     height: 270px;
 }
 
-#fbContentBox {
-  background-color: window;
-}
 
-#fbContentBox toolbox {
-  -moz-appearance: toolbox;
-}
-
-#fbContentBox toolbar {
-  -moz-appearance: toolbar;
-}
-
-#fbContentBox .tabs-alltabs-button , #fbContentBox .scrollbutton-up, #fbContentBox .scrollbutton-down {
-    background: url("chrome://browser/skin/tabbrowser/tab-bkgnd.png") repeat-x;
-    -moz-border-top-colors: ThreeDShadow rgba(255,255,255,.3);
-    -moz-border-left-colors: ThreeDShadow rgba(255,255,255,.3);
-    -moz-border-right-colors: ThreeDShadow;
-    background-color: rgba(255,255,255,.5);
-}
-
-#fbContentBox .tabs-alltabs-button:hover , #fbContentBox .scrollbutton-up:hover, #fbContentBox .scrollbutton-down:hover  {
-    background-image: url("chrome://browser/skin/tabbrowser/tab-hover-bkgnd.png");
-}
 
 #fbCommandLine {
     -moz-binding: url("chrome://firebug/content/bindings.xml#commandLine");
