@@ -1206,7 +1206,9 @@ this.SourceLink = domplate(Firebug.Rep,
             fileName = sourceLink.href;
         }
 
-        fileName = cropString(fileName, 17);
+        var maxWidth = Firebug.sourceLinkLabelWidth;
+        if (maxWidth > 0)
+            fileName = cropString(fileName, maxWidth);
 
         if (sourceLink.instance)
             return $STRF("InstanceLine", [fileName, sourceLink.instance+1, sourceLink.line]);
