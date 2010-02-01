@@ -178,6 +178,7 @@ const DirTablePlate = domplate(Firebug.Rep,
         {
             var row = label.parentNode.parentNode;
             this.toggleRow(row);
+            cancelEvent(event);
         }
         else
         {
@@ -596,7 +597,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         FirebugReps.Warning.tag.replace({object: "NoMembersWarning"}, this.panelNode);
     },
 
-    findPathObject: function(object)
+    findPathIndex: function(object)
     {
         var pathIndex = -1;
         for (var i = 0; i < this.objectPath.length; ++i)
@@ -912,7 +913,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
         if (view && this.panelNode.scrollTop)
             view.scrollTop = this.panelNode.scrollTop;
 
-        if (this.pathIndex)
+        if (this.pathIndex > -1)
             state.pathIndex = this.pathIndex;
         if (this.viewPath)
             state.viewPath = this.viewPath;
@@ -921,6 +922,9 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
         if (this.propertyPath.length > 0 && !this.propertyPath[1])
             state.firstSelection = persistObject(this.getPathObject(1), this.context);
+
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.destroy; state:", state);
 
         Firebug.Panel.destroy.apply(this, arguments);
     },
@@ -959,10 +963,15 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
             if (this.propertyPath.length > 1)
                 selectObject = this.resetPaths(selectObject);
+            else
+                this.propertyPath.push(null);   // Sync with objectPath always containing a defalt object.
 
-            var selection = state.pathIndex <= this.objectPath.length-1
+            var selection = state.pathIndex < this.objectPath.length
                 ? this.getPathObject(state.pathIndex)
                 : this.getPathObject(this.objectPath.length-1);
+
+            if (FBTrace.DBG_DOM)
+                FBTrace.sysout("dom.show; selection:", selection);
 
             this.select(selection);
         }
@@ -1035,13 +1044,16 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
     updateSelection: function(object)
     {
+        if (FBTrace.DBG_DOM)
+            FBTrace.sysout("dom.updateSelection; object=" + object, object);
+
         var previousIndex = this.pathIndex;
         var previousView = previousIndex == -1 ? null : this.viewPath[previousIndex];
 
         var newPath = this.pathToAppend;
         delete this.pathToAppend;
 
-        var pathIndex = this.findPathObject(object);
+        var pathIndex = this.findPathIndex(object);
         if (newPath || pathIndex == -1)
         {
             this.toggles = {};
