@@ -308,7 +308,7 @@ DomplateTag.prototype =
 
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         topBlock.push(',"</', this.tagName, '>"');
-        if (FBTrace.DBG_DOM)
+        if (FBTrace.DBG_DOMPLATE)
             FBTrace.sysout("generateMarkup: "+this.tagName, topBlock.join(""));
     },
 
@@ -980,7 +980,7 @@ var Renderer =
 
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
-        if (FBTrace.DBG_DOM)
+        if (FBTrace.DBG_DOMPLATE)
             FBTrace.sysout("domplate.insertNode html: "+html+"\n");
 
         var range = doc.createRange();
@@ -994,7 +994,7 @@ var Renderer =
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
 
-        if (FBTrace.DBG_DOM)
+        if (FBTrace.DBG_DOMPLATE)
             FBTrace.sysout("domplate.insertNode domArgs:", domArgs);
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
@@ -1047,7 +1047,8 @@ var Renderer =
 
         var outputs = [];
         var html = this.renderHTML(args, outputs, self);
-        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate.append html: "+html+"\n");
+        if (FBTrace.DBG_DOMPLATE)
+            FBTrace.sysout("domplate.append html: "+html+"\n");
 
         if (!womb || womb.ownerDocument != parent.ownerDocument)
             womb = parent.ownerDocument.createElement("div");
@@ -1061,7 +1062,9 @@ var Renderer =
         domArgs.push.apply(domArgs, this.tag.domArgs);
         domArgs.push.apply(domArgs, outputs);
 
-        if (FBTrace.DBG_DOM) FBTrace.sysout("domplate append domArgs:", domArgs);
+        if (FBTrace.DBG_DOMPLATE)
+            FBTrace.sysout("domplate.append domArgs:", domArgs);
+
         this.tag.renderDOM.apply(self ? self : this.tag.subject, domArgs);
 
         return root;

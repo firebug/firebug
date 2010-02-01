@@ -1030,10 +1030,10 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
         var message = Firebug.getRepObject(messageInfoBody);
 
         // Make sure the original Domplate is *not* tracing for now.
-        var dumpDOM = FBTrace.DBG_DOM;
-        FBTrace.DBG_DOM = false;
+        var dumpDOM = FBTrace.DBG_DOMPLATE;
+        FBTrace.DBG_DOMPLATE = false;
         this.updateInfo(messageInfoBody, view, message);
-        FBTrace.DBG_DOM = dumpDOM;
+        FBTrace.DBG_DOMPLATE = dumpDOM;
     },
 
     updateInfo: function(messageInfoBody, view, message)
@@ -1140,14 +1140,14 @@ var HelperDomplate = (function()
 
         // Make sure the original Domplate is *not* tracing for now.
         if (typeof FBTrace != "undefined") {
-            var dumpDOM = FBTrace.DBG_DOM;
-            FBTrace.DBG_DOM = false;
+            var dumpDOM = FBTrace.DBG_DOMPLATE;
+            FBTrace.DBG_DOMPLATE = false;
         }
 
         var retValue = fn.apply(object, args);
 
         if (typeof FBTrace != "undefined")
-            FBTrace.DBG_DOM = dumpDOM;
+            FBTrace.DBG_DOMPLATE = dumpDOM;
 
         return retValue;
     }

@@ -134,6 +134,7 @@ pref("extensions.firebug.DBG_CONSOLE", false);      // console                  
 pref("extensions.firebug.DBG_CSS", false);          //                                           /*@explore*/
 pref("extensions.firebug.DBG_DBG2FIREBUG", false);  //                                           /*@explore*/
 pref("extensions.firebug.DBG_DOM", false);          //                                           /*@explore*/
+pref("extensions.firebug.DBG_DOMPLATE", false);     // domplate engine                           /*@explore*/
 pref("extensions.firebug.DBG_DISPATCH", false);     //                                           /*@explore*/
 pref("extensions.firebug.DBG_HTML", false);         //                                           /*@explore*/
 pref("extensions.firebug.DBG_LINETABLE", false);    //                                           /*@explore*/
