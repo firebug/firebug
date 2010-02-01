@@ -220,23 +220,16 @@ textbox[type="fbSearchBox"] > panel {
 .fbURLMenuItem { /* let file names be as long as need be */
     max-width: none;
 }
+
 /************************************************************************************************/
+/* Debugger buttons */
 
 #fbDebuggerButtons {
     margin-right: 2px;
 }
 
-#fbContinueButton,
-#fbBreakOnNextButton,
-#fbStepOverButton,
-#fbStepIntoButton,
-#fbStepOutButton {
-    -moz-image-region: rect(auto,auto,auto,auto) !important;
-}
-
 #fbContinueButton {
     list-style-image: url(chrome://firebug/skin/continue.png);
-    padding-right: 2px;
 }
 
 #fbContinueButton:hover:active {
@@ -245,52 +238,45 @@ textbox[type="fbSearchBox"] > panel {
 
 #fbContinueButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/continueDisabled.png);
-    padding-right: 2px;
 }
 
 #fbStepOverButton {
     list-style-image: url(chrome://firebug/skin/stepOver.png);
-    padding-right: 2px;
 }
 
 #fbStepOverButton:hover:active {
     list-style-image: url(chrome://firebug/skin/stepOverActive.png);
-    padding-right: 2px;
 }
 
 #fbStepOverButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/stepOverDisabled.png) !important;
-    padding-right: 2px;
 }
 
 #fbStepIntoButton {
     list-style-image: url(chrome://firebug/skin/stepInto.png);
-    padding-right: 2px;
 }
 
 #fbStepIntoButton:hover:active {
     list-style-image: url(chrome://firebug/skin/stepIntoActive.png);
-    padding-right: 2px;
 }
 
 #fbStepIntoButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/stepIntoDisabled.png) !important;
-    padding-right: 2px;
 }
 
 #fbStepOutButton {
     list-style-image: url(chrome://firebug/skin/stepOut.png);
-    padding-right: 2px;
 }
 
 #fbStepOutButton:hover:active {
     list-style-image: url(chrome://firebug/skin/stepOutActive.png);
-    padding-right: 2px;
 }
 
 #fbStepOutButton[disabled="true"] {
     list-style-image: url(chrome://firebug/skin/stepOutDisabled.png) !important;
 }
+
+/************************************************************************************************/
 
 #fbBreakOnErrors {
     list-style-image: url(chrome://firebug/skin/breakErrors.png);
