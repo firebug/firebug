@@ -1173,7 +1173,18 @@ this.SourceLink = domplate(Firebug.Rep,
 
     hideSourceLink: function(sourceLink)
     {
-        return (sourceLink && sourceLink.href && sourceLink.href.indexOf) ? (sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1) : true;
+        try
+        {
+            return (sourceLink && sourceLink.href && sourceLink.href.indexOf) ?
+                (sourceLink.href.indexOf("XPCSafeJSObjectWrapper") != -1) : true;
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("reps.hideSourceLink; EXCEPTION " + e, e);
+        }
+
+        return true;
     },
 
     getSourceLinkTitle: function(sourceLink)
