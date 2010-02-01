@@ -20,7 +20,7 @@ const STATE_HOVER   = 0x04;
 
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
-var domUtils = null;
+const domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
 
 var CSSDomplateBase = {
     isEditable: function(rule)
@@ -742,15 +742,6 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
     initialize: function()
     {
-        if (!domUtils)
-        {
-            try {
-                domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
-            } catch (exc) {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("@mozilla.org/inspector/dom-utils;1 FAILED to load: "+exc, exc);
-            }
-        }
         this.onMouseDown = bind(this.onMouseDown, this);
         this.onClick = bind(this.onClick, this);
 
