@@ -1562,13 +1562,21 @@ function safeGetContentState(selection)
 
 function isXMLPrettyPrint(doc)
 {
-    var bindings = domUtils.getBindingURLs(doc.documentElement);
-    for (var i = 0; i < bindings.length; i++)
+    try
     {
-        var bindingURI = bindings.queryElementAt(i, nsIURI);
-        FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve(""));
-        if (bindingURI.resolve("") === "chrome://global/content/xml/XMLPrettyPrint.xml")
-            return true;
+        var bindings = domUtils.getBindingURLs(doc.documentElement);
+        for (var i = 0; i < bindings.length; i++)
+        {
+            var bindingURI = bindings.queryElementAt(i, nsIURI);
+            if (FBTrace.DBG_CSS) { FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve("")); }
+            if (bindingURI.resolve("") === "chrome://global/content/xml/XMLPrettyPrint.xml")
+                return true;
+        }
+    }
+    catch (e)
+    {
+        if (FBTrace.DBG_ERRORS)
+          FBTrace.sysout("css.isXMLPrettyPrint; EXCEPTION "+e, e);
     }
 }
 
