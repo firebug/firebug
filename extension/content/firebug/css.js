@@ -7,6 +7,7 @@ FBL.ns(function() { with (FBL) {
 
 const Cc = Components.classes;
 const Ci = Components.interfaces;
+const nsIURI = Ci.nsIURI;
 const nsIDOMCSSStyleRule = Ci.nsIDOMCSSStyleRule;
 const nsIInterfaceRequestor = Ci.nsIInterfaceRequestor;
 const nsISelectionDisplay = Ci.nsISelectionDisplay;
@@ -291,13 +292,15 @@ Firebug.CSSModule = extend(Firebug.Module,
         //
         // WARN: This behavior was determined anecdotally.
         // See http://code.google.com/p/fbug/issues/detail?id=2440
-        var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
-        style.setAttribute("charset","utf-8");
-        unwrapObject(style).firebugIgnore = true;
-        style.setAttribute("type", "text/css");
-        style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
-        addStyleSheet(doc, style);
-        style.parentNode.removeChild(style);
+        if (!isXMLPrettyPrint(doc)) {
+          var style = doc.createElementNS("http://www.w3.org/1999/xhtml", "style");
+          style.setAttribute("charset","utf-8");
+          unwrapObject(style).firebugIgnore = true;
+          style.setAttribute("type", "text/css");
+          style.innerHTML = "#fbIgnoreStyleDO_NOT_USE {}";
+          addStyleSheet(doc, style);
+          style.parentNode.removeChild(style);
+        }
 
         // https://bugzilla.mozilla.org/show_bug.cgi?id=500365
         // This voodoo touches each style sheet to force some Firefox internal change to allow edits.
@@ -1554,6 +1557,18 @@ function safeGetContentState(selection)
     {
         if (FBTrace.DBG_ERRORS)
             FBTrace.sysout("css.safeGetContentState; EXCEPTION "+e, e);
+    }
+}
+
+function isXMLPrettyPrint(doc)
+{
+    var bindings = domUtils.getBindingURLs(doc.documentElement);
+    for (var i = 0; i < bindings.length; i++)
+    {
+        var bindingURI = bindings.queryElementAt(i, nsIURI);
+        FBTrace.sysout("bindingURL: " + i + " " + bindingURI.resolve(""));
+        if (bindingURI.resolve("") === "chrome://global/content/xml/XMLPrettyPrint.xml")
+            return true;
     }
 }
 
