@@ -1180,8 +1180,10 @@ this.SourceLink = domplate(Firebug.Rep,
         }
         catch (e)
         {
+            // xxxHonza: I see "Security error" code: "1000" nsresult: "0x805303e8 (NS_ERROR_DOM_SECURITY_ERR)"
+            // when accessing globalStorage property of a page.
             if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("reps.hideSourceLink; EXCEPTION " + e, e);
+                FBTrace.sysout("reps.hideSourceLink; EXCEPTION " + sourceLink + ", " + e, e);
         }
 
         return true;
