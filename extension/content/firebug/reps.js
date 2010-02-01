@@ -1247,9 +1247,10 @@ this.SourceLink = domplate(Firebug.Rep,
 
     getTooltip: function(sourceLink)
     {
+        var text;
         try
         {
-            return decodeURI(sourceLink.href);
+            text = decodeURI(sourceLink.href);
         }
         catch(exc)
         {
@@ -1257,7 +1258,14 @@ this.SourceLink = domplate(Firebug.Rep,
                 FBTrace.sysout("reps.getTooltip decodeURI fails for " + sourceLink.href, exc);
         }
 
-        return unescape(sourceLink.href);
+        text = unescape(sourceLink.href);
+
+        var lines = splitLines(text);
+        if (lines.length < 10)
+            return text;
+
+        lines.splice(10);
+        return lines.join("") + "...";
     },
 
     inspectObject: function(sourceLink, context)
