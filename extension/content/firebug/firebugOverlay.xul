@@ -136,7 +136,19 @@
 
                             <!-- Break On Next -->
                             <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
-                                    tooltiptext="script.Break On Next" breakable="disabled" />
+                                    tooltiptext="script.Break On Next" breakable="disabled">
+                                    <stack>
+                                    <image                        id="fbBreakOnImageDisabled" src="chrome://firebug/skin/breakNextDisabled.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImage" src="chrome://firebug/skin/breakNext.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageActive" src="chrome://firebug/skin/breakNextActive.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageArmed" src="chrome://firebug/skin/breakNextArmed.png"></image>
+                                    <!-- Badges -->
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageError" src="chrome://firebug/skin/breakOn/breakOnErrorSingle.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageMutate" src="chrome://firebug/skin/breakOn/breakOnMutateSingle.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageNext" src="chrome://firebug/skin/breakOn/breakOnNextSingle.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageXHR" src="chrome://firebug/skin/breakOn/breakOnXHRSingle.png"></image>
+                                    </stack>
+                            </toolbarbutton>
                         </hbox>
 
                         <!-- Panel selector (list of all panels) -->

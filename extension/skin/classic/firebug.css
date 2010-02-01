@@ -288,27 +288,71 @@ textbox[type="fbSearchBox"] > panel {
 
 /********************************************************************************/
 
-#fbBreakOnNextButton[breakable="disabled"] {
-    list-style-image: url(chrome://firebug/skin/breakNextDisabled.png) !important;
+/* default is disabled */
+.fbBreakOnImage {
+    visibility: hidden;
+}
+#fbBreakOnNextButton[breakable="disabled"] #fbBreakOnImageDisabled {
+    visibility: visible;
 }
 
-#fbBreakOnNextButton[breakable="true"] {
-    list-style-image: url(chrome://firebug/skin/breakNext.png);
+/* enabled */
+#fbBreakOnNextButton[breakable="true"] #fbBreakOnImage {
+    visibility: visible;
     padding-right: 2px;
 }
-#fbBreakOnNextButton:hover:active[breakable="true"] {
-    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
-    padding-right: 2px;
-}
-#fbBreakOnNextButton:hover:active[breakable="false"] {
-    list-style-image: url(chrome://firebug/skin/breakNextActive.png);
-    padding-right: 2px;
-}
-#fbBreakOnNextButton[breakable="false"] {
-    list-style-image: url(chrome://firebug/skin/breakNextArmed.png);
+#fbBreakOnNextButton[breakable="true"] #fbBreakOnImageDisabled {
+    visibility: hidden;
     padding-right: 2px;
 }
 
+/* enabled and active */
+#fbBreakOnNextButton:hover:active[breakable="true"] #fbBreakOnImageActive {
+    visibility: visible;
+    padding-right: 2px;
+}
+#fbBreakOnNextButton:hover:active[breakable="true"] #fbBreakOnImageDisabled {
+    visibility: hidden;
+    padding-right: 2px;
+}
+
+/* enabled, active, armed */
+#fbBreakOnNextButton:hover:active[breakable="false"] #fbBreakOnImageActive {
+    visibility: visible;
+    padding-right: 2px;
+}
+#fbBreakOnNextButton:hover:active[breakable="false"] #fbBreakOnImageDisabled {
+    visibility: hidden;
+    padding-right: 2px;
+}
+
+/* enabled, armed */
+#fbBreakOnNextButton[breakable="false"] #fbBreakOnImageArmed {
+    visibility: visible;
+    padding-right: 2px;
+}
+#fbBreakOnNextButton[breakable="false"] #fbBreakOnImageDisabled {
+    visibility: hidden;
+    padding-right: 2px;
+}
+
+/* panel badges */
+#fbBreakOnNextButton[panelName="script"] #fbBreakOnImageNext {
+    visibility: visible;
+    padding-right: 2px;
+}
+#fbBreakOnNextButton[panelName="net"] #fbBreakOnImageXHR {
+    visibility: visible;
+    padding-right: 2px;
+}
+#fbBreakOnNextButton[panelName="console"] #fbBreakOnImageError {
+    visibility: visible;
+    padding-right: 2px;
+}
+#fbBreakOnNextButton[panelName="html"] #fbBreakOnImageMutate {
+    visibility: visible;
+    padding-right: 2px;
+}
 /************************************************************************************************/
 
 

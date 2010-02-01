@@ -43,6 +43,9 @@ Firebug.Breakpoint = extend(Firebug.Module,
             return;
 
         var breakButton = Firebug.chrome.$("fbBreakOnNextButton");
+        if (panel.name)
+            breakButton.setAttribute("panelName", panel.name);
+
         breakButton.removeAttribute("type");
 
         // Disable break-on-next if it isn't supported by the current panel.
