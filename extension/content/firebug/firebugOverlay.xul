@@ -134,20 +134,11 @@
                                 <image src="chrome://firebug/skin/Templarian_inspector.png"/>
                             </toolbarbutton>
 
-                            <!-- Break On Next -->
-                            <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
-                                    tooltiptext="script.Break On Next" breakable="disabled">
-                                <stack id="fbBreakOnNextButtonStack">
-                                    <image                        id="fbBreakOnImageDisabled" src="chrome://firebug/skin/breakNextDisabled.png"></image>
-                                    <image class="fbBreakOnImage" id="fbBreakOnImage" src="chrome://firebug/skin/breakNext.png"></image>
-                                    <image class="fbBreakOnImage" id="fbBreakOnImageActive" src="chrome://firebug/skin/breakNextActive.png"></image>
-                                    <image class="fbBreakOnImage" id="fbBreakOnImageArmed" src="chrome://firebug/skin/breakNextArmed.png"></image>
-                                    <!-- Badges -->
-                                    <image class="fbBreakOnImage" id="fbBreakOnImageError" src="chrome://firebug/skin/breakOn/breakOnErrorSingle.png"></image>
-                                    <image class="fbBreakOnImage" id="fbBreakOnImageMutate" src="chrome://firebug/skin/breakOn/breakOnMutateSingle.png"></image>
-                                    <image class="fbBreakOnImage" id="fbBreakOnImageNext" src="chrome://firebug/skin/breakOn/breakOnNextSingle.png"></image>
-                                    <image class="fbBreakOnImage" id="fbBreakOnImageXHR" src="chrome://firebug/skin/breakOn/breakOnXHRSingle.png"></image>
-                                </stack>
+                            <!-- OLD Break On Next -->
+
+                            <toolbarbutton id="fbBreakOnNextButtonOld" class="fbMigrate"
+                                    tooltiptext="Moved to inner toolbar, right side">
+                                    <image  src="chrome://firebug/skin/breakNextDisabled.png"></image>
                             </toolbarbutton>
                         </hbox>
 
@@ -277,6 +268,22 @@
                                     <toolbarseparator id="fbStatusSeparator" collapsed="true"/>
                                     <panelStatus id="fbPanelStatus" flex="1"
                                         tooltip="fbTooltip" contextmenu="fbContextMenu" class="noTabStop" />
+
+                            <!-- Break On Next -->
+                            <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
+                                    tooltiptext="script.Break On Next" breakable="disabled">
+                                    <stack>
+                                    <image                        id="fbBreakOnImageDisabled" src="chrome://firebug/skin/breakNextDisabled.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImage" src="chrome://firebug/skin/breakNext.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageActive" src="chrome://firebug/skin/breakNextActive.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageArmed" src="chrome://firebug/skin/breakNextArmed.png"></image>
+                                    <!-- Badges -->
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageError" src="chrome://firebug/skin/breakOn/breakOnErrorSingle.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageMutate" src="chrome://firebug/skin/breakOn/breakOnMutateSingle.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageNext" src="chrome://firebug/skin/breakOn/breakOnNextSingle.png"></image>
+                                    <image class="fbBreakOnImage" id="fbBreakOnImageXHR" src="chrome://firebug/skin/breakOn/breakOnXHRSingle.png"></image>
+                                    </stack>
+                            </toolbarbutton>
 
                                     <hbox id="fbDebuggerButtons" minwidth="126" collapsed="true" class="noTabStop">
                                         <toolbarbutton id="fbContinueButton" command="cmd_resumeExecution"
@@ -455,6 +462,11 @@
             <menuitem id="Firebug_About" label="&firebug.About;"
                       oncommand="FirebugChrome.openAboutDialog()"/>
         </menupopup>
-
+        <panel id="fbMigrator" noautohide='true'>
+        <!-- The width and height need to be set or the arrow will not show -->
+        <iframe id="fbMigrationFrame" width='200' height='100' src="chrome://firebug/skin/migrationArrow.svg"></iframe>
+        <button id="fbMigrationOk" label="Ok"/>
+        </panel>
     </vbox>
+
 </overlay>

@@ -695,11 +695,32 @@ top.Firebug =
             return prefs.getBoolPref(prefName);
     },
 
-    setPref: function(prefDomain, name, value)
+    /*
+     * @param prefDomain, eg extensions.firebug, eg Firebug.prefDomain
+     * @param name X for extension.firebug.X
+     * @param value setting for X
+     * @param prefType optional for adding a new pref,
+     */
+    setPref: function(prefDomain, name, value, prefType)
     {
         var prefName = prefDomain + "." + name;
 
-        var type = prefs.getPrefType(prefName);
+        if (prefType)
+        {
+            if (prefType === typeof("s"))
+                var type = nsIPrefBranch.PREF_STRING;
+            else if (prefType === typeof(1))
+                var type = nsIPrefBranch.PREF_INT;
+            else if (prefType === typeof (true))
+                var type = nsIPrefBranch.PREF_BOOL;
+            else
+                var type = nsIPrefBranch.PREF_INVALID;
+        }
+        else
+        {
+            var type = prefs.getPrefType(prefName);
+        }
+
         if (type == nsIPrefBranch.PREF_STRING)
             prefs.setCharPref(prefName, value);
         else if (type == nsIPrefBranch.PREF_INT)
@@ -3103,6 +3124,121 @@ Firebug.ModuleManager =
             module.updateTab();
         }
     },
+}
+
+Firebug.Migrator =
+{
+    /*
+     * UI Update from element oldButton to element newButton.
+     * On first call, Arrow points from old to new, button OK required
+     * After OK, the oldButton is removed and not shown again unless preference is erased.
+     */
+    migrateButton: function(oldButton, newButton)
+    {
+        if (Firebug.Migrator.getMigrated(oldButton))
+        {
+            oldButton.parentNode.removeChild(oldButton);
+            return;
+        }
+
+        function showMigration(event)
+        {
+            oldButton.removeEventListener('mouseover', showMigration, false);
+
+            var endPoint = newButton.getBoundingClientRect();
+            var origin = oldButton.getBoundingClientRect();
+
+            // A box surrounding both buttons
+            var left =   Math.min(origin.left,   endPoint.left);
+            var right =  Math.max(origin.right,  endPoint.right);
+            var top =    Math.min(origin.top,    endPoint.top);
+            var bottom = Math.max(origin.bottom, endPoint.bottom);
+
+            var width = right - left;
+            var height =  bottom - top;
+
+            var migrationPanel = Firebug.chrome.$("fbMigrator");
+            migrationPanel.sizeTo(width, height);
+
+            // x, y are offsets from the upper left corner of the oldButton, that
+            // is the reference point of the 'overlap' position of the popup
+            // (Hint, think about all the x values then all the y values.)
+            if (left == origin.left)
+            {
+                var x = 0;
+                var x1 = origin.width;
+            }
+            else
+            {
+                var x = origin.width - width;
+                var x1 = width - origin.width;
+            }
+            if (top == origin.top)
+            {
+                var y = 0;
+                var y1 = origin.height;
+            }
+            else
+            {
+                var y = origin.height - origin;
+                var y1 = height - origin.height;
+            }
+
+            if (left == endPoint.left)
+                var x2 = endPoint.width;
+            else
+                var x2 = width - endPoint.width;
+
+            if (top == endPoint.top)
+                var y2 = endPoint.height;
+            else
+                var y2 = height - endPoint.height;
+
+            migrationPanel.openPopup(oldButton, 'overlap',  x,  y, false, true);
+
+            Firebug.Migrator.drawMigrationLine(x1, y1, x2, y2);
+
+            Firebug.Migrator.removeButtonOnOk(oldButton, migrationPanel);
+        }
+        oldButton.addEventListener('mouseover', showMigration, false);
+    },
+
+    drawMigrationLine: function(x1, y1, x2, y2)
+    {
+        var migrationFrame = Firebug.chrome.$('fbMigrationFrame');
+
+        var line  = migrationFrame.contentDocument.getElementById("migrationPath");
+        line.setAttribute("x1", x1);
+        line.setAttribute("x2", x2);
+        line.setAttribute("y1", y1);
+        line.setAttribute("y2", y2);
+    },
+
+    removeButtonOnOk: function(oldButton, migrationPanel)
+    {
+        var migrationOk = Firebug.chrome.$('fbMigrationOk');
+        migrationOk.addEventListener('click', function migrationComplete(event)
+        {
+            oldButton.parentNode.removeChild(oldButton);
+            Firebug.Migrator.setMigrated(oldButton);
+
+            migrationPanel.hidePopup();
+            migrationOk.removeEventListener('click', migrationComplete, true);
+        }, true);
+    },
+
+    getMigrated: function(elt)
+    {
+        var id = elt.getAttribute('id');
+        return Firebug.getPref(Firebug.prefDomain, "migrated_"+id);
+    },
+
+    setMigrated: function(elt)
+    {
+        var id = elt.getAttribute('id');
+        Firebug.setPref(Firebug.prefDomain, "migrated_"+id, true, typeof(true));
+    },
+
 }
 
 // ************************************************************************************************

@@ -353,6 +353,24 @@ textbox[type="fbSearchBox"] > panel {
     visibility: visible;
     padding-right: 2px;
 }
+
+#fbBreakOnNextButtonOld {
+    visibility: visible;
+    padding-right: 2px;
+}
+
+#fbMigrator {
+    border-style: none;
+    background-color:transparent;
+    opacity:0.9;
+    padding-bottom: 5px;
+}
+#fbMigrationOk {
+    font-family: Monaco, monospace;
+    font-size: 14px;
+    color: #FF9933;
+    font-weight: bold;
+    }
 /************************************************************************************************/
 
 
