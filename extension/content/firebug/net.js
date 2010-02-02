@@ -39,6 +39,7 @@ var nsISocketTransport = Ci.nsISocketTransport;
 // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
 const reIgnore = /about:|javascript:|resource:|chrome:|jar:/;
+const reResponseStatus = /HTTP\/1\.\d\s(\d+)\s(.*)/;
 const layoutInterval = 300;
 const indentWidth = 18;
 
@@ -1123,7 +1124,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 setClass(row, "category-" + Utils.getFileCategory(file));
             }
 
-            if (file.responseHeaders)
+            if (file.requestHeaders)
                 setClass(row, "hasHeaders");
 
             if (file.fromCache)
@@ -1820,7 +1821,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         FOR("file", "$files",
             TR({"class": "netRow $file.file|getCategory focusRow outerFocusRow",
                 onclick: "$onClick", "role": "row", "aria-expanded": "false",
-                $hasHeaders: "$file.file|hasResponseHeaders",
+                $hasHeaders: "$file.file|hasRequestHeaders",
                 $history: "$file.file.history",
                 $loaded: "$file.file.loaded",
                 $responseError: "$file.file|isError",
@@ -2053,9 +2054,9 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         return this.formatTime(file.elapsed);
     },
 
-    hasResponseHeaders: function(file)
+    hasRequestHeaders: function(file)
     {
-        return !!file.responseHeaders;
+        return !!file.requestHeaders;
     },
 
     formatSize: function(bytes)
@@ -3411,24 +3412,29 @@ NetProgress.prototype =
             {
                 file.respondedTime = time;
                 file.endTime = time;
+
+                if (request.contentLength >= 0)
+                    file.size = request.contentLength;
             }
 
-            if (request.contentLength >= 0)
-                file.size = request.contentLength;
-
-            if (info.responseStatus == 304)
-                file.fromCache = true;
-            else if (!file.fromCache)
-                file.fromCache = false;
+            if (info)
+            {
+                if (info.responseStatus == 304)
+                    file.fromCache = true;
+                else if (!file.fromCache)
+                    file.fromCache = false;
+            }
 
             Utils.getHttpHeaders(request, file);
 
-            file.responseStatus = info.responseStatus;
-            file.responseStatusText = info.responseStatusText;
-            file.postText = info.postText;
-            file.aborted = false;
+            if (info)
+            {
+                file.responseStatus = info.responseStatus;
+                file.responseStatusText = info.responseStatusText;
+                file.postText = info.postText;
+            }
 
-            this.endLoad(file);
+            file.aborted = false;
 
             // Use ACTIVITY_SUBTYPE_RESPONSE_COMPLETE to get the info if possible.
             if (!Ci.nsIHttpActivityDistributor)
@@ -3440,6 +3446,12 @@ NetProgress.prototype =
             if (FBTrace.DBG_NET_EVENTS)
                 FBTrace.sysout("net.events.respondedFile +" + (now() - file.startTime) + " " +
                      getPrintableTime() + ", " + request.URI.path, file);
+
+            // The ACTIVITY_SUBTYPE_TRANSACTION_CLOSE could come earlier.
+            if (file.loaded)
+                return;
+
+            this.endLoad(file);
 
             // If there is a network error, log it into the Console panel.
             if (Firebug.showNetworkErrors && NetRequestEntry.isError(file))
@@ -3586,6 +3598,16 @@ NetProgress.prototype =
 
             // The request is completed, get cache entry.
             getCacheEntry(file, this);
+
+            // Sometimes the HTTP-ON-EXAMINE-RESPONSE doesn't come.
+            if (!file.loaded  && file.responseHeadersText)
+            {
+                var info = null;
+                var m = file.responseHeadersText.match(reResponseStatus);
+                if (m.length == 3)
+                    info = {responseStatus: m[1], responseStatusText: m[2]};
+                this.respondedFile(request, now(), info);
+            }
         }
 
         return file;
@@ -4457,44 +4479,59 @@ Firebug.NetMonitor.Utils =
 
     getHttpHeaders: function(request, file)
     {
+        if (!(request instanceof Ci.nsIHttpChannel))
+            return;
+
+        // xxxHonza: is there any problem to do this in requestedFile method?
+        file.method = request.requestMethod;
+        file.urlParams = parseURLParams(file.href);
+
         try
         {
-            var http = QI(request, Ci.nsIHttpChannel);
             file.status = request.responseStatus;
+        }
+        catch (e) { }
 
-            // xxxHonza: is there any problem to do this in requestedFile method?
-            file.method = http.requestMethod;
-            file.urlParams = parseURLParams(file.href);
+        try
+        {
             file.mimeType = Utils.getMimeType(request.contentType, request.name);
+        }
+        catch (e) { }
 
-            if (!file.responseHeaders && Firebug.collectHttpHeaders)
+        if (!Firebug.collectHttpHeaders)
+            return;
+
+        try
+        {
+            if (!file.requestHeaders)
             {
-                var requestHeaders = [], responseHeaders = [];
-
-                http.visitRequestHeaders({
+                var requestHeaders = [];
+                request.visitRequestHeaders({
                     visitHeader: function(name, value)
                     {
                         requestHeaders.push({name: name, value: value});
                     }
                 });
-                http.visitResponseHeaders({
+                file.requestHeaders = requestHeaders;
+            }
+        }
+        catch (e) { }
+
+        try
+        {
+            if (!file.responseHeaders)
+            {
+                var responseHeaders = [];
+                request.visitResponseHeaders({
                     visitHeader: function(name, value)
                     {
                         responseHeaders.push({name: name, value: value});
                     }
                 });
-
-                file.requestHeaders = requestHeaders;
                 file.responseHeaders = responseHeaders;
             }
         }
-        catch (exc)
-        {
-            // An exception can be throwed e.g. when the request is aborted and
-            // request.responseStatus is accessed.
-            if (FBTrace.DBG_ERRORS)
-                FBTrace.sysout("net.getHttpHeaders FAILS " + file.href, exc);
-        }
+        catch (e) { }
     },
 
     isXHR: function(request)
