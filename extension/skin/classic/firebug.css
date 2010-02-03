@@ -360,9 +360,13 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbMigrator {
-    border-style: none;
+    border: 2px solid  #FF9933;
+    -moz-border-top-colors: #FF9933;
+    -moz-border-bottom-colors: #FF9933;
+    -moz-border-left-colors: #FF9933;
+    -moz-border-right-colors: #FF9933;
     background-color:transparent;
-    opacity:0.9;
+    opacity:1.0;
     padding-bottom: 5px;
 }
 #fbMigrationOk {
