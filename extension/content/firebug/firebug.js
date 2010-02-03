@@ -3209,9 +3209,32 @@ Firebug.Migrator =
 
         var line  = migrationFrame.contentDocument.getElementById("migrationPath");
         line.setAttribute("x1", x1);
-        line.setAttribute("x2", x2);
+        line.setAttribute("x2", x1);
         line.setAttribute("y1", y1);
-        line.setAttribute("y2", y2);
+        line.setAttribute("y2", y1);
+
+        var progress = 0;
+        var steps = 100;
+        var stepStep = 1;
+        var xStep = (x2 - x1)/steps;
+        var yStep = (y2 - y1)/steps;
+        var xCur = x1;
+        var yCur = y1;
+        Firebug.Migrator.animate = setInterval(function growLine()
+        {
+            xCur += stepStep*xStep;
+            yCur += stepStep*yStep;
+            steps -= stepStep;
+            if (steps > 50)
+                stepStep++;
+            else
+                stepStep--;
+            //FBTrace.sysout("animate steps "+steps+" stepStep "+stepStep+" x "+xCur+" y "+yCur);
+            line.setAttribute("x2", xCur);
+            line.setAttribute("y2", yCur);
+            if (steps < 0)
+                clearInterval(animate);
+        }, 50);
     },
 
     removeButtonOnOk: function(oldButton, migrationPanel)
@@ -3221,7 +3244,7 @@ Firebug.Migrator =
         {
             oldButton.parentNode.removeChild(oldButton);
             Firebug.Migrator.setMigrated(oldButton);
-
+            clearInterval(Firebug.Migrator.animate);
             migrationPanel.hidePopup();
             migrationOk.removeEventListener('click', migrationComplete, true);
         }, true);
