@@ -3158,7 +3158,9 @@ Firebug.Migrator =
             var height =  bottom - top;
 
             var migrationPanel = Firebug.chrome.$("fbMigrator");
-            migrationPanel.sizeTo(width, height);
+            var panelWidth = Math.max(width, 150);
+            var panelHeight = Math.max(height, 150);
+            migrationPanel.sizeTo(panelWidth, panelHeight);
 
             // x, y are offsets from the upper left corner of the oldButton, that
             // is the reference point of the 'overlap' position of the popup
