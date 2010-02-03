@@ -40,8 +40,8 @@
 <!ENTITY firebug.Edit "Խմբագրել">
 <!ENTITY firebug.EditHTMLTooltip "Խմբագրել HTML-ն">
 <!ENTITY firebug.EditCSSTooltip "Խմբագրել այս ոճը">
-<!ENTITY firebug.Profile "Profile">
-<!ENTITY firebug.ProfileScript "Profile JavaScript">
+<!ENTITY firebug.Profile "Գնահատում">
+<!ENTITY firebug.ProfileScript "Գնահատել JavaScript-ը">
 <!ENTITY firebug.Clear "Մաքրել">
 <!ENTITY firebug.ClearConsole "Մաքրել կոնսոլը">
 <!ENTITY firebug.ClearTooltip "Մաքրել լրիվ կոնսոլը">
