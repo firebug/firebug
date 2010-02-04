@@ -155,6 +155,9 @@ Firebug.TabCacheModel = extend(Firebug.Module,
     {
         try
         {
+            if (FBTrace.DBG_CACHE)
+                FBTrace.sysout("tabCache.registerStreamListener; " + safeGetRequestName(request));
+
             // Due to #489317, the content type must be checked in onStartRequest
             //if (!this.shouldCacheRequest(request))
             //    return;
