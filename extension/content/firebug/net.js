@@ -3317,7 +3317,8 @@ NetProgress.prototype =
             file.method = request.requestMethod;
             //file.urlParams = parseURLParams(file.href);
 
-            Utils.getPostText(file, this.context);
+            if (!Ci.nsIHttpActivityDistributor)
+                Utils.getPostText(file, this.context);
 
             this.extendPhase(file);
 
@@ -3388,6 +3389,15 @@ NetProgress.prototype =
         var file = this.getRequestFile(request);
         if (file)
             file.responseHeadersText = responseHeadersText;
+    },
+
+    bodySentFile: function bodySentFile(request, time)
+    {
+        var file = this.getRequestFile(request);
+        if (file)
+        {
+            Utils.getPostText(file, this.context);
+        }
     },
 
     completedFile: function completedFile(request, time)
@@ -3932,6 +3942,7 @@ var requestHeadersFile = NetProgress.prototype.requestHeadersFile;
 var responseHeadersFile = NetProgress.prototype.responseHeadersFile;
 var requestedFile = NetProgress.prototype.requestedFile;
 var respondedFile = NetProgress.prototype.respondedFile;
+var bodySentFile = NetProgress.prototype.bodySentFile;
 var completedFile = NetProgress.prototype.completedFile;
 var respondedCacheFile = NetProgress.prototype.respondedCacheFile;
 var connectingFile = NetProgress.prototype.connectingFile;
@@ -4924,6 +4935,8 @@ Firebug.NetMonitor.NetHttpActivityObserver =
         {
             if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_HEADER)
                 networkContext.post(requestedFile, [httpChannel, time, win, Utils.isXHR(httpChannel)]);
+            if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_REQUEST_BODY_SENT)
+                networkContext.post(bodySentFile, [httpChannel, time]);
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_START)
                 networkContext.post(completedFile, [httpChannel, time]);
             else if (activitySubtype == nsIHttpActivityObserver.ACTIVITY_SUBTYPE_RESPONSE_COMPLETE)
