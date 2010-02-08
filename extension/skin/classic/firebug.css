@@ -199,6 +199,7 @@ textbox[type="fbSearchBox"] > panel {
     border-top: 1px solid #CCCCCC;
     background-color: #FFFFFF;
 }
+
 /********************************************************************************************/
 
 .toolbar-image-button {
@@ -219,6 +220,17 @@ textbox[type="fbSearchBox"] > panel {
 
 .fbURLMenuItem { /* let file names be as long as need be */
     max-width: none;
+}
+
+/************************************************************************************************/
+/* Firebug toolbar buttons */
+
+#fbInspectButton {
+    list-style-image: url("chrome://firebug/skin/Templarian_inspector.png");
+}
+
+#fbBreakOnNextButtonOld {
+     list-style-image: url("chrome://firebug/skin/breakNextDisabled.png");
 }
 
 /************************************************************************************************/
@@ -292,6 +304,25 @@ textbox[type="fbSearchBox"] > panel {
 .fbBreakOnImage {
     visibility: hidden;
 }
+
+/* images */
+#fbBreakOnNextButton #fbBreakOnImage {
+    list-style-image: url("chrome://firebug/skin/breakNext.png");
+}
+
+#fbBreakOnNextButton #fbBreakOnImageDisabled {
+    list-style-image: url("chrome://firebug/skin/breakNextDisabled.png");
+}
+
+#fbBreakOnNextButton #fbBreakOnImageActive {
+    list-style-image: url("chrome://firebug/skin/breakNextActive.png");
+}
+
+#fbBreakOnNextButton #fbBreakOnImageArmed {
+    list-style-image: url("chrome://firebug/skin/breakNextArmed.png");
+}
+
+/* disabled */
 #fbBreakOnNextButton[breakable="disabled"] #fbBreakOnImageDisabled {
     visibility: visible;
 }
@@ -301,6 +332,7 @@ textbox[type="fbSearchBox"] > panel {
     visibility: visible;
     padding-right: 2px;
 }
+
 #fbBreakOnNextButton[breakable="true"] #fbBreakOnImageDisabled {
     visibility: hidden;
     padding-right: 2px;
@@ -311,6 +343,7 @@ textbox[type="fbSearchBox"] > panel {
     visibility: visible;
     padding-right: 2px;
 }
+
 #fbBreakOnNextButton:hover:active[breakable="true"] #fbBreakOnImageDisabled {
     visibility: hidden;
     padding-right: 2px;
@@ -321,6 +354,7 @@ textbox[type="fbSearchBox"] > panel {
     visibility: visible;
     padding-right: 2px;
 }
+
 #fbBreakOnNextButton:hover:active[breakable="false"] #fbBreakOnImageDisabled {
     visibility: hidden;
     padding-right: 2px;
@@ -331,6 +365,7 @@ textbox[type="fbSearchBox"] > panel {
     visibility: visible;
     padding-right: 2px;
 }
+
 #fbBreakOnNextButton[breakable="false"] #fbBreakOnImageDisabled {
     visibility: hidden;
     padding-right: 2px;
@@ -340,18 +375,25 @@ textbox[type="fbSearchBox"] > panel {
 #fbBreakOnNextButton[panelName="script"] #fbBreakOnImageNext {
     visibility: visible;
     padding-right: 2px;
+    list-style-image: url("chrome://firebug/skin/breakOn/breakOnNextSingle.png");
 }
+
 #fbBreakOnNextButton[panelName="net"] #fbBreakOnImageXHR {
     visibility: visible;
     padding-right: 2px;
+    list-style-image: url("chrome://firebug/skin/breakOn/breakOnXHRSingle.png");
 }
+
 #fbBreakOnNextButton[panelName="console"] #fbBreakOnImageError {
     visibility: visible;
     padding-right: 2px;
+    list-style-image: url("chrome://firebug/skin/breakOn/breakOnErrorSingle.png");
 }
+
 #fbBreakOnNextButton[panelName="html"] #fbBreakOnImageMutate {
     visibility: visible;
     padding-right: 2px;
+    list-style-image: url("chrome://firebug/skin/breakOn/breakOnMutateSingle.png");
 }
 
 #fbBreakOnNextButtonOld {
@@ -369,12 +411,14 @@ textbox[type="fbSearchBox"] > panel {
     opacity:1.0;
     padding-bottom: 5px;
 }
+
 #fbMigrationOk {
     font-family: Monaco, monospace;
     font-size: 14px;
     color: #FF9933;
     font-weight: bold;
-    }
+}
+
 /************************************************************************************************/
 
 

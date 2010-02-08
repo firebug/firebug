@@ -131,14 +131,11 @@
                             <!-- HTML Inspector -->
                             <toolbarbutton id="fbInspectButton" tooltiptext="&firebug.InspectTooltip;"
                                     command="cmd_toggleInspecting" collapsed="false">
-                                <image src="chrome://firebug/skin/Templarian_inspector.png"/>
                             </toolbarbutton>
 
                             <!-- OLD Break On Next -->
-
                             <toolbarbutton id="fbBreakOnNextButtonOld" class="fbMigrate"
                                     tooltiptext="Moved to inner toolbar, right side">
-                                    <image  src="chrome://firebug/skin/breakNextDisabled.png"></image>
                             </toolbarbutton>
                         </hbox>
 
@@ -189,15 +186,15 @@
                                     <toolbarbutton id="fbBreakOnNextButton" command="cmd_breakOnNext"
                                         tooltiptext="script.Break On Next" breakable="disabled">
                                         <stack id="fbBreakOnNextButtonStack">
-                                            <image                        id="fbBreakOnImageDisabled" src="chrome://firebug/skin/breakNextDisabled.png"></image>
-                                            <image class="fbBreakOnImage" id="fbBreakOnImage" src="chrome://firebug/skin/breakNext.png"></image>
-                                            <image class="fbBreakOnImage" id="fbBreakOnImageActive" src="chrome://firebug/skin/breakNextActive.png"></image>
-                                            <image class="fbBreakOnImage" id="fbBreakOnImageArmed" src="chrome://firebug/skin/breakNextArmed.png"></image>
+                                            <image id="fbBreakOnImageDisabled"></image>
+                                            <image id="fbBreakOnImage" class="fbBreakOnImage"></image>
+                                            <image id="fbBreakOnImageActive" class="fbBreakOnImage"></image>
+                                            <image id="fbBreakOnImageArmed" class="fbBreakOnImage"></image>
                                             <!-- Badges -->
-                                            <image class="fbBreakOnImage" id="fbBreakOnImageError" src="chrome://firebug/skin/breakOn/breakOnErrorSingle.png"></image>
-                                            <image class="fbBreakOnImage" id="fbBreakOnImageMutate" src="chrome://firebug/skin/breakOn/breakOnMutateSingle.png"></image>
-                                            <image class="fbBreakOnImage" id="fbBreakOnImageNext" src="chrome://firebug/skin/breakOn/breakOnNextSingle.png"></image>
-                                            <image class="fbBreakOnImage" id="fbBreakOnImageXHR" src="chrome://firebug/skin/breakOn/breakOnXHRSingle.png"></image>
+                                            <image id="fbBreakOnImageError" class="fbBreakOnImage"></image>
+                                            <image id="fbBreakOnImageMutate" class="fbBreakOnImage"></image>
+                                            <image id="fbBreakOnImageNext" class="fbBreakOnImage"></image>
+                                            <image id="fbBreakOnImageXHR" class="fbBreakOnImage"></image>
                                         </stack>
                                     </toolbarbutton>
 
