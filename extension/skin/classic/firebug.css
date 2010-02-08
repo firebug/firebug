@@ -249,7 +249,7 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 #fbContinueButton[disabled="true"] {
-    list-style-image: url(chrome://firebug/skin/continueDisabled.png);
+    list-style-image: url(chrome://firebug/skin/continueDisabled.png) !important;
 }
 
 #fbStepOverButton {
