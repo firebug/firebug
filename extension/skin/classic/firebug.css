@@ -203,19 +203,12 @@ textbox[type="fbSearchBox"] > panel {
 /********************************************************************************************/
 
 .toolbar-image-button {
-    -moz-appearance: none;
-    margin: 0 2px;
-    border: none;
-    padding: 0 !important;
-    background: transparent !important;
 }
 
 .toolbar-image-button > .toolbarbutton-icon {
-    padding: 0 !important;
 }
 
 .toolbar-image-button > .toolbarbutton-text {
-    display: none;
 }
 
 .fbURLMenuItem { /* let file names be as long as need be */

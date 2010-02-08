@@ -123,7 +123,7 @@
 }
 
 .fbsearch-options-buttons:hover:active {
-    background-color: #86888B; !important;
+    background-color: #86888B !important;
 }
 
 
@@ -443,4 +443,22 @@ panelTab[selected="true"] > .panelTab-right {
 .useA11y #fbPanelBar1 textbox[focused],
  .searchOptionsMenu button:focus {
     -moz-outline-radius: 10px !important;
+}
+
+/* issue 2780, moved from upper level firebug.css, RMC */
+
+.toolbar-image-button {
+    -moz-appearance: none;
+    margin: 0 2px;
+    border: none;
+    padding: 0 !important;
+    background: transparent !important;
+}
+
+.toolbar-image-button > .toolbarbutton-icon {
+    padding: 0 !important;
+}
+
+.toolbar-image-button > .toolbarbutton-text {
+    display: none;
 }
