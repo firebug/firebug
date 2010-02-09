@@ -133,17 +133,13 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             if (object instanceof nsIScriptError)  // all branches should trace 'object'
             {
                 var CSSParser = object && object.category == "CSS Parser";
-                if (FBTrace.DBG_CSS_PARSER && CSSParser)
-                    FBTrace.sysout("errors.observe.css CSS Parser: " + object.errorMessage, object);
-                if (CSSParser)
-                    return;
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("errors.observe nsIScriptError: "+object.errorMessage, object);
 
                 var context = this.getErrorContext(object);  // after instanceof
                 var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
                 context = this.logScriptError(context, object, isWarning);
-                if(!context)
+                if (!context)
                     return;
             }
             else
