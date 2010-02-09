@@ -3244,6 +3244,7 @@ Firebug.Migrator =
         var migrationOk = Firebug.chrome.$('fbMigrationOk');
         migrationOk.addEventListener('click', function migrationComplete(event)
         {
+            // xxxHonza, XXXjjb: I have seen an exception saying that oldButton.parentNode is null.
             oldButton.parentNode.removeChild(oldButton);
             Firebug.Migrator.setMigrated(oldButton);
             clearInterval(Firebug.Migrator.animate);
