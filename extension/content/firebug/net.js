@@ -3645,7 +3645,8 @@ NetProgress.prototype =
                 this.endLoad(file);
 
                 file.aborted = true;
-                file.responseStatusText = "Timeout";
+                if (!file.responseStatusText)
+                    file.responseStatusText = "Timeout";
                 file.respondedTime = time;
                 file.endTime = time;
             }
