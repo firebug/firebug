@@ -62,7 +62,6 @@ var TraceConsole =
 
         // Notify listeners
         Firebug.TraceModule.onLoadConsole(window, logNode);
-        this.registerModule(Firebug.TraceModule);
 
         // Make sure the UI is localized.
         this.internationalizeUI();
@@ -105,9 +104,7 @@ var TraceConsole =
         traceService.removeObserver(this, "firebug-trace-on-message");
         prefs.removeObserver(this.prefDomain, this, false);
 
-        // Notify listeners
-        for (var i=0; i<this.modules.length; ++i)
-            this.modules[i].onUnloadConsole(window);
+        Firebug.TraceModule.onUnloadConsole(window);
 
         // Unregister from the opener
         if (this.addedOnCloseOpener)
@@ -123,21 +120,6 @@ var TraceConsole =
             FBTrace.sysout("traceConsole.onCloseOpener closing window "+window.location);
 
         window.close();
-    },
-
-    registerModule: function(traceModule)
-    {
-        this.modules.push(traceModule);
-    },
-
-    unregisterModule: function(module)
-    {
-        for (var i=0; i<this.modules.length; ++i) {
-            if (this.modules[i] == module) {
-                this.modules.splice(i, 1);
-                break;
-            }
-        }
     },
 
     // nsIObserver
@@ -203,10 +185,6 @@ var TraceConsole =
 
     dump: function(message)
     {
-        // Notify listeners
-        for (var i=0; i<this.modules.length; ++i)
-            this.modules[i].onDump(message);
-
         Firebug.TraceModule.dump(message, this);
     },
 

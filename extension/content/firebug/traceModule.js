@@ -278,16 +278,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     dump: function(message, outputNodes)
     {
-        // xxxHonza: find better solution for checking an ERROR messages
-        // (setup some rules).
-        var text = message.text;
-        if (text && (text.indexOf("ERROR") != -1 ||
-            text.indexOf("EXCEPTION") != -1 ||
-            text.indexOf("FAILS") != -1))
-        {
-            message.type = "DBG_ERRORS";
-        }
-
         Firebug.TraceModule.MessageTemplate.dump(message, outputNodes);
     },
 });
@@ -892,6 +882,19 @@ Firebug.TraceModule.MessageTemplate = domplate(Firebug.Rep,
 
     dump: function(message, outputNodes, index)
     {
+        // Notify listeners
+        Firebug.TraceModule.onDump(message);
+
+        // xxxHonza: find better solution for checking an ERROR messages
+        // (setup some rules).
+        var text = message.text ? message.text.toUpperCase() : message.text;
+        if (text && (text.indexOf("ERROR") != -1 ||
+            text.indexOf("EXCEPTION") != -1 ||
+            text.indexOf("FAILS") != -1))
+        {
+            message.type = "DBG_ERRORS";
+        }
+
         var scrollingNode = outputNodes.getScrollingNode();
         var scrolledToBottom = isScrolledToBottom(scrollingNode);
 
