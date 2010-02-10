@@ -2315,7 +2315,7 @@ this.setItemIntoElement = function(element, item)
         element.setAttribute("disabled", "true");
     if (item.image)
     {
-        element.setAttribute("class", "element-iconic");
+        element.setAttribute("class", "menuitem-iconic");
         element.setAttribute("image", item.image);
     }
 
