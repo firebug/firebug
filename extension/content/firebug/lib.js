@@ -1353,36 +1353,6 @@ this.getLTRBWH = function(elt)
     return dims;
 };
 
-this.applyBodyOffsets = function(elt, clientRect)
-{
-    var od = elt.ownerDocument;
-    if (!od.body)
-        return clientRect;
-
-    var style = od.defaultView.getComputedStyle(od.body, null);
-
-    var pos = style.getPropertyValue('position');
-    if(pos === 'absolute' || pos === 'relative')
-    {
-        var borderLeft = parseInt(style.getPropertyValue('border-left-width').replace('px', ''),10) || 0;
-        var borderTop = parseInt(style.getPropertyValue('border-top-width').replace('px', ''),10) || 0;
-        var paddingLeft = parseInt(style.getPropertyValue('padding-left').replace('px', ''),10) || 0;
-        var paddingTop = parseInt(style.getPropertyValue('padding-top').replace('px', ''),10) || 0;
-        var marginLeft = parseInt(style.getPropertyValue('margin-left').replace('px', ''),10) || 0;
-        var marginTop = parseInt(style.getPropertyValue('margin-top').replace('px', ''),10) || 0;
-
-        var offsetX = borderLeft + paddingLeft + marginLeft;
-        var offsetY = borderTop + paddingTop + marginTop;
-
-        clientRect.left -= offsetX;
-        clientRect.top -= offsetY;
-        clientRect.right -= offsetX;
-        clientRect.bottom -= offsetY;
-    }
-
-    return clientRect;
-};
-
 this.getOffsetSize = function(elt)
 {
     return {width: elt.offsetWidth, height: elt.offsetHeight};

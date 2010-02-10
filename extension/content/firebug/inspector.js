@@ -824,7 +824,6 @@ Firebug.Inspector.FrameHighlighter.prototype =
             return;
 
         var offset = getLTRBWH(element);
-        offset = applyBodyOffsets(element, offset);
         var x = offset.left, y = offset.top;
         var w = offset.width, h = offset.height;
         if (FBTrace.DBG_INSPECT)
@@ -1002,7 +1001,6 @@ BoxModelHighlighter.prototype =
             var styles = readBoxStyles(style);
 
             var offset = getLTRBWH(element);
-            offset = applyBodyOffsets(element, offset);
 
             var x = offset.left - Math.abs(styles.marginLeft);
             var y = offset.top - Math.abs(styles.marginTop);
@@ -1207,7 +1205,6 @@ BoxModelHighlighter.prototype =
     {
         var parentStyle = win.getComputedStyle(offsetParent, "");
         var parentOffset = getLTRBWH(offsetParent);
-        parentOffset = applyBodyOffsets(offsetParent, parentOffset);
         var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
         var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
         var parentW = offsetParent.offsetWidth-1;
