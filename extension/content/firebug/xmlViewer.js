@@ -108,8 +108,30 @@ Firebug.XMLViewerModel = extend(Firebug.Module,
         if (FBTrace.DBG_XMLVIEWER)
             FBTrace.sysout("xmlviewer.updateTabBody; XML response parsed", doc);
 
+        // Override getHidden in these templates. The parsed XML documen is
+        // hidden, but we want to display it using 'visible' styling.
+        var templates = [
+            Firebug.HTMLPanel.CompleteElement,
+            Firebug.HTMLPanel.Element,
+            Firebug.HTMLPanel.TextElement,
+            Firebug.HTMLPanel.EmptyElement,
+            Firebug.HTMLPanel.XEmptyElement,
+        ];
+
+        var originals = [];
+        for (var i=0; i<templates.length; i++)
+        {
+            originals[i] = templates[i].getHidden;
+            templates[i].getHidden = function() {
+                return "";
+            }
+        }
+
         // Generate XML preview.
         Firebug.HTMLPanel.CompleteElement.tag.replace({object: doc.documentElement}, parentNode);
+
+        for (var i=0; i<originals.length; i++)
+            templates[i].getHidden = originals[i];
     }
 });
 
