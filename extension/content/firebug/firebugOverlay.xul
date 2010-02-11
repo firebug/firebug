@@ -437,6 +437,7 @@
                 <menupopup id="FirebugMenu_SitesPopup">
                     <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
                     <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
+                    <menuitem label="&firebug.KeyShortcuts;" oncommand="Firebug.visitWebsite('keyboard')"/>
                     <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
                     <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
                     <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>

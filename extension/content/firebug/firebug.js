@@ -49,10 +49,10 @@ const firebugURLs =
 {
     main: "http://www.getfirebug.com",
     docs: "http://www.getfirebug.com/docs.html",
-    keyboard: "http://www.getfirebug.com/keyboard.html",
+    keyboard: "http://getfirebug.com/wiki/index.php/Keyboard_and_Mouse_Shortcuts",
     discuss: "http://groups.google.com/group/firebug",
     issues: "http://code.google.com/p/fbug/issues/list",
-    donate: "http://www.getfirebug.com/contribute.html?product"
+    donate: "http://getfirebug.com/getinvolved"
 };
 
 const prefNames =  // XXXjjb TODO distribute to modules
