@@ -97,6 +97,7 @@ pref("extensions.firebug.net.hiddenColumns", "");   // List of hidden columns fo
 pref("extensions.firebug.netPhaseInterval", 1000);    // Specifies an interval (ms) after which a new phase (session) in the timeline graph is started. Set to 0 to not start new phase at all.
 pref("extensions.firebug.sizePrecision", 1);       // Number of displayed decimal places for size info in the UI. Allowed values: [-1 (all in bytes), 0 (no decimal places), 1 (one decimal place), 2 (two decimal places)]
 pref("extensions.firebug.netParamNameLimit", 25);       // Maximum size [characters] of displayed parameter names in the Net panel (post tab). No limit if zero or less.
+pref("extensions.firebug.netShowPaintEvents", false);
 
 // Cache
 pref("extensions.firebug.cache.mimeTypes", ""); // list of additional cached mime-types separated by space.

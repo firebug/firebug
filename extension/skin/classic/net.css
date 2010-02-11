@@ -337,7 +337,8 @@
 }
 
 .netWindowLoadBar,
-.netContentLoadBar {
+.netContentLoadBar,
+.netPaintBar {
     position: absolute;
     left: 0;
     top: 0;
@@ -352,6 +353,10 @@
 
 .netContentLoadBar {
     background-color: Blue;
+}
+
+.netPaintBar {
+    background-color: green;
 }
 
 .netTimeLabel {

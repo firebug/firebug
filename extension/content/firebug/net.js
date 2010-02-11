@@ -230,11 +230,23 @@ Firebug.NetMonitor = extend(Firebug.ActivableModule,
         {
             var window = context.window;
 
+            var onWindowPaintHandler = function() {
+                if (context.netProgress)
+                    context.netProgress.post(windowPaint, [window, now()]);
+            }
+
+            if (Firebug.getPref(Firebug.prefDomain, "netShowPaintEvents"))
+                window.addEventListener("MozAfterPaint", onWindowPaintHandler, false);
+
             // Register "load" listener in order to track window load time.
             var onWindowLoadHandler = function() {
                 if (context.netProgress)
                     context.netProgress.post(windowLoad, [window, now()]);
                 window.removeEventListener("load", onWindowLoadHandler, true);
+
+                context.setTimeout(function() {
+                    window.removeEventListener("MozAfterPaint", onWindowPaintHandler, false);
+                }, 2000); //xxxHonza: this should be customizable using preferences.
             }
             window.addEventListener("load", onWindowLoadHandler, true);
 
@@ -584,7 +596,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     getOptionsMenuItems: function()
     {
         return [
-            this.disableCacheOption()
+            this.disableCacheOption(),
+            optionMenu("net.option.Show Paint Events", "netShowPaintEvents")
         ];
     },
 
@@ -1137,7 +1150,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             else
                 removeClass(row, "responseError");
 
-            var timeLabel = row.childNodes[5].childNodes[1].lastChild.firstChild;
+            var netBar = row.childNodes[5].childNodes[1];
+            var timeLabel = getChildByClass(netBar, "netReceivingBar").firstChild;
             timeLabel.innerHTML = NetRequestEntry.getElapsedTime({elapsed: this.elapsed});
 
             if (file.loaded)
@@ -1173,7 +1187,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             phase = this.calculateFileTimes(file, phase, rightNow);
 
             // Get bar nodes
-            var blockingBar = row.childNodes[5].childNodes[1].childNodes[1];
+            var netBar = row.childNodes[5].childNodes[1];
+            var blockingBar = netBar.childNodes[1];
             var resolvingBar = blockingBar.nextSibling;
             var connectingBar = resolvingBar.nextSibling;
             var sendingBar = connectingBar.nextSibling;
@@ -1205,6 +1220,20 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 windowLoadBar.style.left = this.windowLoadBarOffset + "%";
                 windowLoadBar.style.display = "block";
                 this.windowLoadBarOffset = null;
+            }
+
+            var items = netBar.getElementsByClassName("netPaintBar");
+            for (var i=0; i<this.windowPaints.length; i++)
+            {
+                var paintBar = (i < items.length) ? items.item(i) : null;
+                if (!paintBar)
+                {
+                    paintBar = document.createElement("div");
+                    netBar.appendChild(paintBar);
+                }
+                paintBar.setAttribute("class", "netPaintBar");
+                paintBar.style.left = this.windowPaints[i] + "%";
+                paintBar.style.display = "block";
             }
         }
     },
@@ -1258,6 +1287,10 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (phase.windowLoadTime)
             this.windowLoadBarOffset = Math.floor(((phase.windowLoadTime-this.phaseStartTime)/this.phaseElapsed) * 100);
+
+        this.windowPaints = [];
+        for (var i=0; i<phase.windowPaints.length; i++)
+            this.windowPaints.push(Math.floor(((phase.windowPaints[i]-this.phaseStartTime)/this.phaseElapsed) * 100));
 
         return phase;
     },
@@ -3718,6 +3751,24 @@ NetProgress.prototype =
         return this.stopFile(request, time, postText, responseText);
     },
 
+    windowPaint: function windowPaint(window, time)
+    {
+        if (FBTrace.DBG_NET)
+            FBTrace.sysout("net.windowPaint +? " + getPrintableTime() + ", " +
+                window.location.href, this.phases);
+
+        if (!this.phases.length)
+            return;
+
+        // Update all requests that belong to the first phase.
+        var firstPhase = this.phases[0];
+        firstPhase.windowPaints.push(time);
+
+        // Return the first file, so the layout is updated. I can happen that the
+        // onLoad event is the last one and the graph end-time must be recalculated.
+        return firstPhase.files[0];
+    },
+
     windowLoad: function windowLoad(window, time)
     {
         if (FBTrace.DBG_NET)
@@ -3955,6 +4006,7 @@ var completeFile = NetProgress.prototype.completeFile;
 var closedFile = NetProgress.prototype.closedFile;
 var resolvingFile = NetProgress.prototype.resolvingFile;
 var progressFile = NetProgress.prototype.progressFile;
+var windowPaint = NetProgress.prototype.windowPaint;
 var windowLoad = NetProgress.prototype.windowLoad;
 var contentLoad = NetProgress.prototype.contentLoad;
 
@@ -4090,6 +4142,9 @@ function NetPhase(file)
 
   // List of files associated with this phase.
   this.files = [];
+
+  // List of paint events.
+  this.windowPaints = [];
 
   this.addFile(file);
 }
