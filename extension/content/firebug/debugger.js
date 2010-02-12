@@ -149,12 +149,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
 
-    breakNow: function()
+    breakNow: function(context)
     {
         Firebug.Debugger.halt(function(frame)
         {
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName, frame);
+                FBTrace.sysout("debugger.breakNow: frame "+frame.script.fileName+" context "+context.getName(), frame);
 
             for (; frame && frame.isValid; frame = frame.callingFrame)
             {
@@ -165,7 +165,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
 
             if (frame)
+            {
+                Firebug.Debugger.breakContext = context;
                 Firebug.Debugger.onBreak(frame, 3);
+            }
             else
             {
                 // XXXrobc no-op, added for detrace

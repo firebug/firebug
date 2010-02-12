@@ -115,7 +115,7 @@ Firebug.Breakpoint = extend(Firebug.Module,
     breakNow: function(panel)
     {
         this.updatePanelTab(panel, false);
-        Firebug.Debugger.breakNow();
+        Firebug.Debugger.breakNow(panel.context);
     }
 });
 
