@@ -95,7 +95,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         setClass(chrome.$('fbStatusBar'), 'useA11y');
         tmpElem = chrome.$('fbStatusPrefix');
         if (tmpElem) tmpElem.setAttribute('value', $STR("a11y.labels.firebug status"));
-        
+
         //manage all key events in toolbox (including tablists)
         tmpElem = chrome.$("fbContentBox");
         if (tmpElem) tmpElem.addEventListener("keypress", this.handlePanelBarKeyPress , true);
@@ -136,7 +136,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         tmpElem = chrome.$('fbPanelBar2-panelTabs');
         if (tmpElem) tmpElem.removeEventListener('blur', this.handleTabBarBlur, true);
         tmpElem = chrome.$("fbPanelBar1");
-        if (tmpElem) 
+        if (tmpElem)
         {
             removeClass(tmpElem.browser.contentDocument.body, 'useA11y');
             tmpElem.browser.setAttribute('showcaret', false);
@@ -1073,7 +1073,7 @@ Firebug.A11yModel = extend(Firebug.Module,
             return;
         var node = match.node;
         var elem;
-        var matchFeedback = ""; 
+        var matchFeedback = "";
         switch (node.nodeType)
         {
             case 1: //element
@@ -1082,13 +1082,13 @@ Firebug.A11yModel = extend(Firebug.Module,
                 break;
             case 2: //attribute
                 elem = node.ownerElement;
-                matchFeedback += $STRF("a11y.updates.match found in attribute", 
-                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName, getElementTreeXPath(elem)]);   
+                matchFeedback += $STRF("a11y.updates.match found in attribute",
+                    [match.match[0], node.nodeName, node.nodeValue, elem.nodeName, getElementTreeXPath(elem)]);
                 break;
-                
+
             case 3: //text content
                 elem = node.parentNode;
-                matchFeedback += $STRF("a11y.updates.match found in text content", [match.match[0], match.match.input]); 
+                matchFeedback += $STRF("a11y.updates.match found in text content", [match.match[0], match.match.input]);
                 break;
         }
         this.updateLiveElem(panel, matchFeedback, true); //should not use alert
@@ -1508,7 +1508,7 @@ Firebug.A11yModel = extend(Firebug.Module,
         var vals = {};
         switch (styleName)
         {
-            case "outer":        
+            case "outer":
                 valNames = ['top', 'left', "position", "z-index"];
                 vals.top = detailsObj[styleName + 'Top'];
                 vals.left = detailsObj[styleName + 'Left'];
@@ -1528,7 +1528,7 @@ Firebug.A11yModel = extend(Firebug.Module,
                 vals.left = detailsObj[styleName + 'Left'];
                 break;
         }
-        
+
         for (var i = 0 ; i < valNames.length; i++)
         {
             output += $STR("a11y.layout." + valNames[i]) + " = " + vals[valNames[i]];
@@ -1703,7 +1703,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Script Panel
 
-    onStop : function(context, frame, type,rv)
+    onStartDebugging : function(context)
     {
         if (!context)
             return;
@@ -1711,8 +1711,10 @@ Firebug.A11yModel = extend(Firebug.Module,
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
             return;
-        var fileName =  frame.script.fileName.split("/");
+        var frame = context.currentFrame;
+        var fileName =  frame.script.fileName.split("/");  // XXXjjb I think this should be contxt.executingSourceFile.href
         fileName = fileName.pop();
+        // XXXjjb the frame.functionName is often anonymous, since the compiler is lame.
         var alertString = $STRF("a11y.updates.script_suspended_on_line_in_file",[frame.line, frame.functionName, fileName]);
         this.updateLiveElem(panel, alertString, true);
         this.onShowSourceLink(panel, frame.line);
