@@ -90,6 +90,8 @@ ChannelListener.prototype =
 
     onCollectData: function(request, context, inputStream, offset, count)
     {
+        if (FBTrace.DBG_CACHE && this.ignore)
+            FBTrace.sysout("tabCache.ChannelListener.onCollectData; IGNORE stopping further onCollectData");
         if (this.ignore)
             return;
 
@@ -128,8 +130,12 @@ ChannelListener.prototype =
             // Store received data into the cache as they come. If the method returns
             // false, the rest of the response is ignored (not cached). This is used
             // to limit size of a cached response.
-            if (!context.sourceCache.storePartialResponse(request, data, this.window))
+            if (!context.sourceCache.storePartialResponse(request, data, this.window)) 
+            {
                 this.ignore = true;
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.onCollectData IGNORE SET because of storePartialResponse");
+            }
 
             // Let other listeners use the stream.
             if (storageStream)
@@ -213,6 +219,10 @@ ChannelListener.prototype =
                 this.proxyListener.onStartRequest(request, requestContext);
 
                 // Listen for incoming data.
+                if (FBTrace.DBG_CACHE && !this.sink)
+                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest NO SINK stopping setAsyncListener");
+                if (FBTrace.DBG_CACHE && this.ignore && this.sink)
+                    FBTrace.sysout("tabCache.ChannelListener.onStartRequest IGNORE(shouldCacheRequest) stopping setAsyncListener");
                 if (!this.ignore && this.sink)
                     this.setAsyncListener(request, this.sink.inputStream, this);
             }
@@ -278,18 +288,29 @@ ChannelListener.prototype =
             {
                 try
                 {
-                    this.onDataAvailable(this.request, null, stream, 0, stream.available());
+                    var available = stream.available();
+                    this.onDataAvailable(this.request, null, stream, 0, available);
                 }
                 catch (err)
                 {
                     // stream.available throws an exception if the stream is closed,
                     // which is ok, since this callback can be called even in this
                     // situations.
+                    if (FBTrace.DBG_CACHE)
+                        FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady EXCEPTION calling onDataAvailable:  " +
+                            safeGetName(this.request), err);
                 }
 
                 // Listen for further incoming data.
-                if (!this.ignore)
+                 if (FBTrace.DBG_CACHE && this.ignore)
+                     FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady IGNORE stopping setAsyncListener");
+                 if (!this.ignore)
                     this.setAsyncListener(this.request, stream, this);
+            }
+            else
+            {
+                if (FBTrace.DBG_CACHE)
+                    FBTrace.sysout("tabCache.ChannelListener.onInputStreamReady NOT a nsIAsyncInputStream",stream);
             }
         }
         catch (err)

@@ -88,6 +88,11 @@ Firebug.TabContext.prototype =
         sourceFile.context = this;
 
         Firebug.onSourceFileCreated(this, sourceFile);
+
+        var context=this, len = context.sourceCache.cache[sourceFile.href].length;
+        if ((FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE || FBTrace.DBG_SOURCEFILES) && Math.abs(sourceFile.sourceLength - len) > 2)
+            FBTrace.sysout("tabContext.addSourceFile lengths don't match: " + 
+                sourceFile.href + " | " + sourceFile.sourceLength +" vs " +len)
     },
 
     removeSourceFile: function(sourceFile)
