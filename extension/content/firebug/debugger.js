@@ -220,6 +220,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try
         {
+        	 this.freeze(context);
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
@@ -232,6 +233,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 FBTrace.sysout("debugger exception in nested event loop: ", exc);
             else     // else /*@explore*/
                 ERROR("debugger exception in nested event loop: "+exc+"\n");
+        }
+        finally
+        {
+            this.thaw(context);
         }
 
         this.stopDebugging(context);
@@ -252,8 +257,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (FBTrace.DBG_UI_LOOP)
             FBTrace.sysout("debugger.resume, context.stopped:"+context.stopped+"\n");
 
-        this.thaw(context);
-
+        // this will cause us to return to just after the enterNestedEventLoop call
         var depth = fbs.exitNestedEventLoop();
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.resume, depth:"+depth+"\n");
     },
@@ -577,8 +581,6 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
     {
         if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("startDebugging enter context.stopped:"+context.stopped+" for context: "+context.getName()+"\n");
         try {
-
-            this.freeze(context);
 
             fbs.lockDebugger();
 
@@ -1185,10 +1187,10 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         return sourceFile;
     },
 
-    getContextByFrame: function(frame)  // XXX jjb I think now that this should not be called,
+    getContextByFrame: function(frame)
     {
         if (FBTrace.DBG_BP)
-            FBTrace.sysout("debugger.getContextByFrame should not be called!");
+            FBTrace.sysout("debugger.getContextByFrame");
         var win = fbs.getOutermostScope(frame);
         return win ? TabWatcher.getContextByWindow(win) : null;
     },
