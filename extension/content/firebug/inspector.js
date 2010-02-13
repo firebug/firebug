@@ -1023,6 +1023,7 @@ BoxModelHighlighter.prototype =
             if (showLines)
             {
                 var offsetParent = element.offsetParent;
+
                 if (offsetParent)
                     this.setNodesByOffsetParent(win, offsetParent, nodes);
                 else
@@ -1205,8 +1206,8 @@ BoxModelHighlighter.prototype =
     {
         var parentStyle = win.getComputedStyle(offsetParent, "");
         var parentOffset = getLTRBWH(offsetParent);
-        var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth);
-        var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth);
+        var parentX = parentOffset.left + parseInt(parentStyle.borderLeftWidth, 10);
+        var parentY = parentOffset.top + parseInt(parentStyle.borderTopWidth, 10);
         var parentW = offsetParent.offsetWidth-1;
         var parentH = offsetParent.offsetHeight-1;
 
