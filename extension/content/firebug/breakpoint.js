@@ -62,10 +62,6 @@ Firebug.Breakpoint = extend(Firebug.Module,
         this.updateBreakOnNextTooltips(panel);
         this.updatePanelTab(panel, shouldBreak);
 
-        var oldButton = Firebug.chrome.$("fbBreakOnNextButtonOld");
-        if (oldButton)
-            Firebug.Migrator.migrateButton(oldButton, breakButton);
-
         var menuItems = panel.getBreakOnMenuItems();
         if (!menuItems || !menuItems.length)
             return;
