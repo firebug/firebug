@@ -1331,9 +1331,10 @@ FirebugService.prototype =
             return true;
         }
 
+        reportNextError = true;
+
         if (this.showStackTrace)
         {
-            reportNextError = true;
             if (FBTrace.DBG_FBS_ERRORS)
             {
                 FBTrace.sysout("fbs.onError debugs missed:("+fbs.onDebugRequests+") showStackTrace, we will try to drop into onDebug\n");
