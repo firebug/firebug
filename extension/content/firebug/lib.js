@@ -4095,8 +4095,6 @@ this.suspendShowStackTrace = function()
 {
     saveShowStackTrace = Firebug.showStackTrace;
     Firebug.showStackTrace = false;
-
-    FBTrace.sysout("----- suspendStackTrace " + saveShowStackTrace, saveShowStackTrace);
 };
 
 /*
@@ -4105,8 +4103,6 @@ this.suspendShowStackTrace = function()
 this.resumeShowStackTrace = function()
 {
     Firebug.showStackTrace = saveShowStackTrace;
-    
-    FBTrace.sysout("----- resumeStackTrace " + saveShowStackTrace, saveShowStackTrace);
 };
 
 /**
