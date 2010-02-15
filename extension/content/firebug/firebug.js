@@ -212,7 +212,12 @@ top.Firebug =
         if (FBTrace.DBG_OPTIONS)
         {
              for (var i = 0; i < prefNames.length; ++i)
-                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+this[prefNames[i]]+"\n");
+                FBTrace.sysout("firebug.initialize option "+this.prefDomain+"."+prefNames[i]+"="+
+                    this[prefNames[i]]+"\n");
+
+             for (var i = 0; i < servicePrefNames.length; ++i)
+                FBTrace.sysout("firebug.initialize option (service) "+this.servicePrefDomain+"."+
+                    servicePrefNames[i]+"="+this[servicePrefNames[i]]+"\n");
         }
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("firebug.initialize client: "+this.clientID+" with prefDomain "+this.prefDomain);
