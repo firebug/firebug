@@ -133,10 +133,6 @@
                                     command="cmd_toggleInspecting" collapsed="false">
                             </toolbarbutton>
 
-                            <!-- OLD Break On Next -->
-                            <toolbarbutton id="fbBreakOnNextButtonOld" class="fbMigrate"
-                                    tooltiptext="Moved to inner toolbar, right side">
-                            </toolbarbutton>
                         </hbox>
 
                         <!-- Panel selector (list of all panels) -->
