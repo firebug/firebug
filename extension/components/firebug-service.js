@@ -614,12 +614,14 @@ FirebugService.prototype =
                         {
                             for (var j = 0; j < bp.scriptsWithBreakpoint.length; j++)
                             {
-                                var rc = cb.call(url, bp.lineNo, bp, bp.scriptsWithBreakpoint[j]);
+                                var rc = cb.call.apply(bp.debugger, [url, bp.lineNo, bp, bp.scriptsWithBreakpoint[j]]);
                                 if (rc)
                                     return [bp];
                             }
-                        } else {
-                            var rc = cb.call(url, bp.lineNo, bp);
+                        }
+                        else
+                        {
+                            var rc = cb.call.apply(bp.debugger, [url, bp.lineNo, bp]);
                             if (rc)
                                 return [bp];
                         }
