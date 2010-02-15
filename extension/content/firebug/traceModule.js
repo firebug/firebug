@@ -196,8 +196,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
     shutdown: function()
     {
-        if (this.consoleWindow && this.consoleWindow.TraceConsole)
-            this.consoleWindow.TraceConsole.unregisterModule(this);
     },
 
     reattachContext: function(browser, context)
@@ -228,7 +226,6 @@ Firebug.TraceModule = extend(Firebug.Module,
 
         // Try to connect an existing trace-console window first.
         if (this.consoleWindow && this.consoleWindow.TraceConsole) {
-            this.consoleWindow.TraceConsole.registerModule(this);
             this.consoleWindow.focus();
             return;
         }
