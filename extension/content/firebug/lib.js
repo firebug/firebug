@@ -4056,13 +4056,26 @@ this.getRequestWebProgress = function(request)
             FBL.suspendShowStackTrace();
             return request.notificationCallbacks.getInterface(Ci.nsIWebProgress);
         }
-    } catch (exc) {}
+    }
+    catch (exc)
+    {
+    }
+    finally
+    {
+        FBL.resumeShowStackTrace();
+    }
 
     try
     {
         if (request && request.loadGroup && request.loadGroup.groupObserver)
+        {
+            FBL.suspendShowStackTrace();
             return request.loadGroup.groupObserver.QueryInterface(Ci.nsIWebProgress);
-    } catch (exc) {}
+        }
+    }
+    catch (exc)
+    {
+    }
     finally
     {
         FBL.resumeShowStackTrace();
@@ -4082,6 +4095,8 @@ this.suspendShowStackTrace = function()
 {
     saveShowStackTrace = Firebug.showStackTrace;
     Firebug.showStackTrace = false;
+
+    FBTrace.sysout("----- suspendStackTrace " + saveShowStackTrace, saveShowStackTrace);
 };
 
 /*
@@ -4090,6 +4105,8 @@ this.suspendShowStackTrace = function()
 this.resumeShowStackTrace = function()
 {
     Firebug.showStackTrace = saveShowStackTrace;
+    
+    FBTrace.sysout("----- resumeStackTrace " + saveShowStackTrace, saveShowStackTrace);
 };
 
 /**
