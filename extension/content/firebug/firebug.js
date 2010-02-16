@@ -154,7 +154,7 @@ categoryManager.addCategoryEntry("strings_firebug",
  */
 top.Firebug =
 {
-    version: "1.5",
+    version: "1.6",
 
     dispatchName: "Firebug",
     modules: modules,
