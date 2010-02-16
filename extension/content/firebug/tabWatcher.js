@@ -104,20 +104,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
         }
 
         var selectedBrowser = Firebug.chrome.getCurrentBrowser();
-        if (selectedBrowser.cancelNextLoad)
-        {
-            // We need to cancel this load and try again after a delay... this is used
-            // mainly to prevent chaos while when the debugger is active when a page
-            // is unloaded
-            delete selectedBrowser.cancelNextLoad;
-            selectedBrowser.webNavigation.stop(STOP_ALL);
-            var url = (uri instanceof nsIURI?uri.spec:uri);
-            delayBrowserLoad(selectedBrowser, url);
-            if (FBTrace.DBG_WINDOWS)
-                FBTrace.sysout("-> tabWatcher.watchTopWindow **CANCEL&RETRY** for: "+url+
-                    ", tab: "+Firebug.getTabIdForWindow(win)+"\n");
-            return;
-        }
 
         var context = this.getContextByWindow(win);
         if (context) // then we've looked at this window before in this FF session...
@@ -514,14 +500,9 @@ top.TabWatcher = extend(new Firebug.Listener(),
 
         if (FBTrace.DBG_WINDOWS || FBTrace.DBG_ACTIVATION)
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context "+context.uid+" for: "+
-                (context.window && !context.window.closed?context.window.location:"no window or closed ")+" this.cancelNextLoad: "+this.cancelNextLoad+"\n");
+                (context.window && !context.window.closed?context.window.location:"no window or closed ")+" aborted: "+context.aborted);
 
-        // this flag may be set by the debugger.destroyContext
-        if (this.cancelNextLoad)
-        {
-            delete this.cancelNextLoad;
-            context.browser.cancelNextLoad = true;
-        }
+
 
         context.destroy(persistedState);
         remove(contexts, context);
@@ -984,16 +965,6 @@ function onUnloadWindow(event)
     if (FBTrace.DBG_WINDOWS)
         FBTrace.sysout("-> tabWatcher.onUnloadWindow for: "+safeGetWindowLocation(win) +" removeEventListener: "+ eventType+"\n");
     TabWatcher.unwatchWindow(win);
-}
-
-function delayBrowserLoad(browser, uri)
-{
-    setTimeout(function delayBrowserLoad100()
-    {
-        if (FBTrace.DBG_WINDOWS)
-            FBTrace.sysout("tabWatcher delayBrowserLoad100:"+uri, browser);
-        browser.loadURI(uri);
-    }, 100);
 }
 
 function safeGetName(request)
