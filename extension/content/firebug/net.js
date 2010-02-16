@@ -110,6 +110,8 @@ const mimeCategoryMap =
     "application/x-javascript": "js",
     "text/javascript": "js",
     "application/javascript" : "js",
+    "text/ecmascript": "js",
+    "application/ecmascript" : "js", // RFC4329
     "image/jpeg": "image",
     "image/jpg": "image",
     "image/gif": "image",
@@ -2066,7 +2068,7 @@ Firebug.NetMonitor.NetRequestEntry = domplate(Firebug.Rep, new Firebug.Listener(
         if (file.responseStatusText)
             text += file.responseStatusText;
 
-        return text ? text : " ";
+        return text ? cropString(text) : " ";
     },
 
     getDomain: function(file)
