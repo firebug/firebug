@@ -267,7 +267,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (context.stopped)
         {
             context.aborted = true;
+            this.thaw(context);
             this.resume(context);
+            fbs.unPause(true);
         }
     },
 
@@ -372,7 +374,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     FBTrace.sysout("debugger.stop "+executionContext.tag+" executionContext is not valid");
             }
             if (FBTrace.DBG_UI_LOOP)
-                FBTrace.sysout("debugger.stop try to ensable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
+                FBTrace.sysout("debugger.stop try to enable scripts "+(context.eventSuppressor?"with events suppressed":"events enabled")+" in "+context.getName()+" executionContext.tag "+executionContext.tag+".scriptsEnabled: "+executionContext.scriptsEnabled);
         } catch (exc) {
             if (FBTrace.DBG_UI_LOOP) FBTrace.sysout("debugger.stop, scriptsEnabled = true exception:", exc);
         }
@@ -1807,7 +1809,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         if (context.stopped)
         {
-            TabWatcher.cancelNextLoad = true;  // the abort will call resume, but the nestedEventLoop will continue the load.
+            // the abort will call resume, but the nestedEventLoop would continue the load...
             this.abort(context);
         }
 
