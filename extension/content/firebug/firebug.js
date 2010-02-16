@@ -1146,6 +1146,13 @@ top.Firebug =
         Firebug.showBar(true);
     },
 
+    onShowDetachTooltip: function(tooltip)
+    {
+        tooltip.label = Firebug.isDetached() ? $STR("firebug.AttachFirebug") :
+            $STR("firebug.DetachFirebug");
+        return true;
+    },
+
     toggleDetachBar: function(forceOpen, reopenInBrowser)  // detached -> closed; inBrowser -> detached TODO reattach
     {
         if (!forceOpen && Firebug.isDetached())  // detached -> minimized
