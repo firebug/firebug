@@ -179,10 +179,6 @@ Firebug.TabContext.prototype =
 
         if (FBTrace.DBG_INITIALIZE)
             FBTrace.sysout("tabContext.destroy "+this.getName()+" set state ", state);
-
-        // Release all members just to be safe in case somebody leaks this context
-        for (var name in this)
-            delete this[name];
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
