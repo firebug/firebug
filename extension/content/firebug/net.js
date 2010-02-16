@@ -3679,7 +3679,7 @@ NetProgress.prototype =
 
                 file.aborted = true;
                 if (!file.responseStatusText)
-                    file.responseStatusText = "Timeout";
+                    file.responseStatusText = "Aborted";
                 file.respondedTime = time;
                 file.endTime = time;
             }
