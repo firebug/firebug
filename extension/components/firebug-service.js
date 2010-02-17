@@ -269,8 +269,6 @@ FirebugService.prototype =
         }
 
         jsd = null;
-        if (!jsd)
-            FBTrace.sysout("*********************** SHUTDOWN JSD NULL ");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
