@@ -93,7 +93,7 @@ Firebug.TabContext.prototype =
         var len = data ? data.length : 0;
         if ((FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE || FBTrace.DBG_SOURCEFILES) &&
             Math.abs(sourceFile.sourceLength - len) > 2)
-            FBTrace.sysout("tabContext.addSourceFile lengths don't match: " + 
+            FBTrace.sysout("tabContext.addSourceFile lengths don't match: " +
                 sourceFile.href + " | " + sourceFile.sourceLength +" vs " +len)
     },
 
@@ -161,7 +161,9 @@ Firebug.TabContext.prototype =
             try
             {
                 // Destroy the panel and allow it to persist extra info to the state object
-                panel.destroy(panelState);
+                var dontRemove = panel.destroy(panelState);
+                if (dontRemove)
+                    continue;
             }
             catch(exc)
             {
