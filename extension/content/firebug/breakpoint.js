@@ -153,12 +153,12 @@ Firebug.Breakpoint.BreakpointListRep = domplate(Firebug.Rep,
 
             var sourceLink = node.repObject;
 
-            panel.noRefresh = true;
+            // XXXjjb this prevents the UI from updating why?  panel.noRefresh = true;
             if (event.target.checked)
                 fbs.enableBreakpoint(sourceLink.href, sourceLink.line);
             else
                 fbs.disableBreakpoint(sourceLink.href, sourceLink.line);
-            panel.noRefresh = false;
+            // XXX jjb panel.noRefresh = false;
         }
         else if (getAncestorByClass(event.target, "closeButton"))
         {
