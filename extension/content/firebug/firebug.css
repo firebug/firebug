@@ -156,6 +156,13 @@ panelTab[selected="true"]:hover > panelTabMenu .menuTarget {
 }
 
 /************************************************************************************************/
+/* Detached Firebug Window */
+
+#fbResumeBox > #fbWindowButtons {
+    padding-right: 4px;
+}
+
+/************************************************************************************************/
 /* Focus related */
 
 /* Make the following selectors part of the tab order */

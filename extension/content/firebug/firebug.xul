@@ -169,6 +169,12 @@
     <!-- If Firebug is displayed in this external window, but not active for currently selected
          Firefox tab, the following button allows to resume it. -->
     <vbox id="fbResumeBox" flex="1" collapsed="true">
+        <hbox id="fbWindowButtons" role="toolbar" class="innerToolbar" aria-label="firebug window">
+            <spacer flex="1"/>
+            <!-- Allow to minimize/attach Firebug if deactivated -->
+            <toolbarbutton id="fbMinimizeButton" class="toolbarbutton-iconic"
+                tooltiptext="Minimize Firebug" command="cmd_minimizeFirebug"/>
+        </hbox>
         <spacer flex="1"/>
         <hbox>
             <spacer flex="1"/>
