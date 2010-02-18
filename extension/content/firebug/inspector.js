@@ -37,7 +37,7 @@ Firebug.Inspector = extend(Firebug.Module,
             }, true);
         }
 
-        if (!element || !isElement(element) || !isVisible(element))
+        if (!element || !isElement(element) || !isVisible(unwrapObject(element)))
         {
             if(element && element.nodeType == 3)
                 element = element.parentNode;
