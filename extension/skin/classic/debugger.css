@@ -275,6 +275,10 @@
     font-weight: bold;
 }
 
+.breakpointRow[aria-checked="false"] .breakpointName {
+    color: #888888;
+}
+
 .breakpointCode {
     overflow: hidden;
     white-space: nowrap;
@@ -283,6 +287,10 @@
     border-bottom: 1px solid #D7D7D7;
     font-family: Monaco, monospace;
     color: DarkGreen;
+}
+
+.breakpointRow[aria-checked="false"] .breakpointCode {
+    color: #99c199;
 }
 
 .breakpointCondition {
