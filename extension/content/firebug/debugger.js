@@ -2739,19 +2739,23 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
             {
                 var sourceBox = this.sourceBoxes[url];
                 var sourceFile = this.context.sourceFileMap[url];
-                if (sourceFile != sourceBox.repObject)
+                if (!sourceFile || sourceFile != sourceBox.repObject) // then out of sync
                 {
-                    var victim = this.sourceBoxes[url];
-                    delete this.sourceBoxes[url];
-                    if (this.selectedSourceBox == victim)
-                        this.showSourceFile(sourceFile);
-                    if (FBTrace.DBG_SOURCEFILES)
-                        FBTrace.sysout("debugger.refresh deleted sourceBox for "+url);
+                   var victim = this.sourceBoxes[url];
+                   delete this.sourceBoxes[url];
+                   if (this.selectedSourceBox == victim)
+                   {
+                        collapse(this.selectedSourceBox, true);
+                        delete this.selectedSourceBox; 
+                   }
+                   if (FBTrace.DBG_SOURCEFILES)
+                       FBTrace.sysout("debugger.refresh deleted sourceBox for "+url);
                 }
             }
         }
 
-        if (!this.selectedSourceBox)  // then show() has not run, but we have to refresh, so do the default.
+        // then show() has not run, but we have to refresh, so do the default.
+        if (!this.selectedSourceBox)
             this.navigate();
     },
 
