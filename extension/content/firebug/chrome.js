@@ -43,6 +43,7 @@ var disabledCaption = null;
 var enableSiteLink = null;
 var enableSystemPagesLink = null;
 var enableAlwaysLink = null;
+
 // ************************************************************************************************
 
 top.FirebugChrome =
@@ -911,6 +912,16 @@ top.FirebugChrome =
     },
 
     //* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    onMenuShowing: function(popup)
+    {
+        var detachFirebug = FBL.getElementsByAttribute(popup, "id", "menu_detachFirebug")[0];
+        if (detachFirebug)
+        {
+            detachFirebug.setAttribute("label", (Firebug.isDetached() ?
+                FBL.$STR("firebug.AttachFirebug") : FBL.$STR("firebug.DetachFirebug")));
+        }
+    },
 
     onOptionsShowing: function(popup)
     {

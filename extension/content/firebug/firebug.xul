@@ -1,7 +1,6 @@
 <?xml version="1.0"?>
 
 <?xul-overlay href="chrome://firebug/content/firebugOverlay.xul"?>
-<?xul-overlay href="chrome://browser/content/baseMenuOverlay.xul"?>
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
@@ -69,103 +68,8 @@
 
     <popupset id="mainPopupSet"/>
 
-    <!-- A menu used within this external Firebug window. -->
-    <toolbox id="fbExternalWindowMenuBar">
-        <menubar>
-            <menu id="file-menu" label="&fileMenu.label;"
-                  accesskey="&fileMenu.accesskey;">
-                <menupopup onpopupshowing="FirebugChrome.onOptionsShowing(this)">
-                    <menuitem id="menu_closeWindow" command="cmd_closeWindow" key="key_closeWindow"
-                              label="&firebug.Close;"/>
-                </menupopup>
-            </menu>
-            <menu id="view-menu" label="&firebug.View;">
-                <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
-                    <menuitem  type="checkbox" label="&firebug.Vertical;" id="menu_toggleOrient"
-                            command="cmd_toggleOrient"
-                            option="viewPanelOrient" />
-                    <menuseparator/>
-
-                    <menuitem id="menu_reload" command="cmd_reload" key="key_reload"
-                              label="&reloadCmd.label;" accesskey="reloadCmd.accesskey"/>
-                    <menuseparator/>
-
-                    <menu label="&firebug.TextSize;">
-                        <menupopup>
-                            <menuitem label="&firebug.IncreaseTextSize;" oncommand="Firebug.increaseTextSize(1)"/>
-                            <menuitem label="&firebug.DecreaseTextSize;" oncommand="Firebug.increaseTextSize(-1)"/>
-                            <menuitem label="&firebug.NormalTextSize;" oncommand="Firebug.setTextSize(0)"/>
-                        </menupopup>
-                    </menu>
-
-                    <!-- Options -->
-                    <menu label="&firebug.Options;" id="FirebugMenu_Options">
-                        <menupopup onpopupshowing="return FirebugChrome.onOptionsShowing(this);" id="FirebugMenu_OptionsPopup">
-                            <menuitem type="checkbox" label="&firebug.AlwaysOpenInWindow;"
-                                       oncommand="FirebugChrome.onToggleOption(this)"
-                                       option="openInWindow"/>
-                            <menuitem type="checkbox" label="&firebug.ShowTooltips;"
-                                       oncommand="FirebugChrome.onToggleOption(this)"
-                                       option="showInfoTips"/>
-                            <menuitem type="checkbox" label="&firebug.ShadeBoxModel;"
-                                      oncommand="FirebugChrome.onToggleOption(this)"
-                                      option="shadeBoxModel"/>
-                            <menuitem type="checkbox" id="showQuickInfoBox" label="firebug_options_showQuickInfoBox"
-                                      oncommand="FirebugChrome.onToggleOption(this)"
-                                      option="showQuickInfoBox"/>
-                            <menuitem type="checkbox" id="menu_enableA11y"
-                                      label="Firebug.menu.Enable Accessibility Enhancements"
-                                      oncommand="FirebugChrome.onToggleOption(this)"
-                                      option="a11y.enable"/>
-                            <menuitem type="checkbox" id="menu_activateSameOrigin"
-                                      label="Firebug.menu.Activate Same Origin URLs"
-                                      oncommand="FirebugChrome.onToggleOption(this)"
-                                      option="activateSameOrigin"/>
-                         </menupopup>
-                    </menu>
-
-                    <menuseparator/>
-                    <menu label="&firebug.OpenWith;"> <!-- TODO Firebug.Editors -->
-                        <menupopup id="menu_firebugOpenWith" onpopupshowing="return FirebugChrome.onEditorsShowing(this);">
-                            <menuitem label="&firebug.ConfigureEditors;..." command="cmd_openFirebugEditors"/>
-                        </menupopup>
-                     </menu>
-
-                </menupopup>
-            </menu>
-            <menu id="windowMenu" />
-            <menu id="window-menu" label="&firebug.Help;">
-                <menupopup>
-                    <menuitem label="&firebug.Website;" oncommand="Firebug.visitWebsite('main')"/>
-                    <menuitem label="&firebug.Documentation;" oncommand="Firebug.visitWebsite('docs')"/>
-                    <menuitem label="&firebug.KeyShortcuts;" oncommand="Firebug.visitWebsite('keyboard')"/>
-                    <menuitem label="&firebug.Forums;" oncommand="Firebug.visitWebsite('discuss')"/>
-                    <menuitem label="&firebug.Issues;" oncommand="Firebug.visitWebsite('issues')"/>
-                    <menuseparator/>
-                    <menuitem label="&firebug.Donate;" oncommand="Firebug.visitWebsite('donate')"/>
-                    <menuseparator/>
-                    <menuitem id="Firebug_About" label="&firebug.About;" oncommand="FirebugChrome.openAboutDialog()"/>
-                </menupopup>
-            </menu>
-        </menubar>
-
-    </toolbox>
-
     <!-- Entire Firebug UI -->
     <vbox id="fbContentBox" flex="1">
-        <box id="fbPanelBox" flex="1">
-            <panelBar id="fbPanelBar1">
-                <hbox id="fbPanelBar1-tabBox">
-                    <hbox id="fbPanelBar1-innerToolbar">
-                        <!-- Some of the buttons don't make sense in the stand-alone window - hide them. -->
-                        <hbox id="fbPanelBar1-buttons">
-                            <toolbarbutton id="fbFirebugMenu" collapsed="true"/>
-                        </hbox>
-                    </hbox>
-                </hbox>
-            </panelBar>
-        </box>
-        <hbox id="fbCommandBox"/>
     </vbox>
 
     <!-- If Firebug is displayed in this external window, but not active for currently selected

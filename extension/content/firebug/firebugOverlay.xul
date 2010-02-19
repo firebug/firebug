@@ -9,6 +9,9 @@
 %chromebugDTD;
 ]>
 
+<!-- Support for tracing. Only available in X version -->
+<?xul-overlay href="chrome://firebug/content/traceOverlay.xul"?> <!-- /*@explore*/ -->
+
 <overlay xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
 
     <stringbundleset id="stringbundleset">
@@ -73,6 +76,7 @@
         <command id="cmd_inspect" oncommand="Firebug.Inspector.inspectFromContextMenu(document.popupNode);"/>
 
         <command id="cmd_togglePersistNet" oncommand="Firebug.NetMonitor.togglePersist(FirebugContext)"/>
+        <command id="cmd_toggleOrient" oncommand="FirebugChrome.toggleOrient()" />
     </commandset>
 
     <keyset id="mainKeyset">
@@ -118,7 +122,7 @@
         <box id="fbPanelBox" flex="1">
             <panelBar id="fbPanelBar1" class="panelBar" flex="3" persist="width,height">
                 <hbox id="fbPanelBar1-tabBox" class="panelTabBox" collapsed="true">
-                    <hbox class="innerToolbar" role="toolbar" aria-label="Firebug Tools">
+                    <hbox id="fbPanelBar1-innerToolbar" class="innerToolbar" role="toolbar" aria-label="Firebug Tools">
                         <hbox id="fbPanelBar1-buttons">
 
                             <!-- Firebug Icon Menu -->
@@ -365,7 +369,7 @@
 
         <!-- Firebug Tools & Icon menu -->
         <menupopup id="fbFirebugMenuPopup" role="menu"
-                   onpopupshowing="return FirebugChrome.onOptionsShowing(this);">
+                   onpopupshowing="return FirebugChrome.onMenuShowing(this);">
 
             <!-- Open -->
             <menuitem id="menu_toggleFirebug" type="checkbox"
@@ -420,6 +424,10 @@
                               label="firebug.menu.Activate Same Origin URLs"
                               oncommand="FirebugChrome.onToggleOption(this)"
                               option="activateSameOrigin"/>
+                    <menuitem type="checkbox" id="menu_toggleOrient"
+                              label="&firebug.Vertical;"
+                              command="cmd_toggleOrient"
+                              option="viewPanelOrient" />
                     <menuseparator id="menu_optionsSeparator"/>
                     <menuitem id="menu_resetAllOptions"
                               label="firebug.menu.Reset All Firebug Options"

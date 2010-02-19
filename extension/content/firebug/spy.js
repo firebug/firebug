@@ -692,7 +692,7 @@ function onHTTPSpyError(spy)
 function onHTTPSpyAbort(spy)
 {
     if (FBTrace.DBG_SPY)
-        FBTrace.sysout("spy.onHTTPSpyAbort: " + ", " + spy.href, spy);
+        FBTrace.sysout("spy.onHTTPSpyAbort: " + spy.href, spy);
 
     spy.detach();
     spy.loaded = true;
