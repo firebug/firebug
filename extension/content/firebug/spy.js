@@ -694,12 +694,12 @@ function onHTTPSpyAbort(spy)
     if (FBTrace.DBG_SPY)
         FBTrace.sysout("spy.onHTTPSpyAbort: " + ", " + spy.href, spy);
 
+    spy.detach();
+    spy.loaded = true;
+
     // Ignore aborts if the request already has a response status.
     if (spy.xhrRequest.status)
         return;
-
-    spy.detach();
-    spy.loaded = true;
 
     if (spy.logRow)
     {
