@@ -290,9 +290,6 @@ Firebug.Activation = extend(Firebug.Module,
                 Firebug.allPagesActivation = "none";
             else
                 this.allOn();
-
-            // don't show Off button if we are always on
-            Firebug.chrome.disableOff(Firebug.allPagesActivation == "on");
         }
         else
         {
@@ -311,9 +308,14 @@ Firebug.Activation = extend(Firebug.Module,
 
     updateAllPagesActivation: function()
     {
+        var allOn = Firebug.allPagesActivation == "on";
+
         var menu = $('menu_AllOn');
         if (menu)
-            menu.setAttribute("checked", (Firebug.allPagesActivation=="on"));
+            menu.setAttribute("checked", allOn);
+
+        // don't show Off button if we are always on
+        Firebug.chrome.disableOff(allOn);
     },
 
     allOn: function()
