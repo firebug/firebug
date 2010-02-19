@@ -6,6 +6,7 @@
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://firebug/content/firebug.css"?>
 <?xml-stylesheet href="chrome://firebug/skin/window.css"?>
+<?xml-stylesheet href="chrome://browser/skin/browser.css"?>
 
 <!DOCTYPE window [
 <!ENTITY % firebugDTD SYSTEM "chrome://firebug/locale/firebug.dtd">
