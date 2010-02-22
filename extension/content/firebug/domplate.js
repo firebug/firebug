@@ -174,7 +174,11 @@ DomplateTag.prototype =
         function __link__(tag, code, outputs, args)
         {
             if (!tag || !tag.tag)
+            {
+                if (FBTrace.DBG_DOMPLATE)
+                    FBTrace.sysout("domplate.Empty tag object passed to __link__ (compileMarkup). Ignoring element.");
                 return;
+            }
 
             tag.tag.compile();
 
@@ -309,7 +313,7 @@ DomplateTag.prototype =
         this.generateChildMarkup(topBlock, topOuts, blocks, info);
         topBlock.push(',"</', this.tagName, '>"');
         if (FBTrace.DBG_DOMPLATE)
-            FBTrace.sysout("generateMarkup: "+this.tagName, topBlock.join(""));
+            FBTrace.sysout("domplate.generateMarkup: "+this.tagName, topBlock.join(""));
     },
 
     generateChildMarkup: function(topBlock, topOuts, blocks, info)
@@ -400,7 +404,11 @@ DomplateTag.prototype =
         function __link__(node, tag, args)
         {
             if (!tag || !tag.tag)
+            {
+                if (FBTrace.DBG_DOMPLATE)
+                    FBTrace.sysout("domplate.Empty tag object passed to __link__ (compileDOM). Ignoring element.");
                 return;
+            }
 
             tag.tag.compile();
 
