@@ -1117,7 +1117,7 @@ FirebugService.prototype =
 
         try
         {
-            var breakOnNextError = this.needToBreakForError(fileName, lineNo);
+            var breakOnNextError = this.needToBreakForError(reportNextError);
             var debuggr = (reportNextError || breakOnNextError) ? this.findDebugger(frame) : null;
 
             if (reportNextError)
@@ -1335,7 +1335,7 @@ FirebugService.prototype =
             return true;
         }
 
-        reportNextError = true;
+        reportNextError = { fileName: fileName, lineNo: lineNo };
         return false; // Drop into onDebug, sometimes only
     },
 
@@ -2430,9 +2430,9 @@ FirebugService.prototype =
         return returned;
     },
 
-    needToBreakForError: function(fileName, lineNo)
+    needToBreakForError: function(reportNextError)
     {
-        return this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(fileName), lineNo) != -1;
+        return this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(reportNextError.fileName), reportNextError.lineNo) != -1;
     },
 
     startStepping: function()
