@@ -144,7 +144,6 @@ var profileStart;
 
 var enabledDebugger = false;
 var reportNextError = false;
-var breakOnNextError = false;
 var errorInfo = null;
 
 var timer = Timer.createInstance(nsITimer);
@@ -1108,12 +1107,17 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_ERRORS)
         {
             fbs.onDebugRequests--;
-            FBTrace.sysout("fbs.onDebug ("+fbs.onDebugRequests+") fileName="+frame.script.fileName+ " reportNextError="+reportNextError+" breakOnNextError="+breakOnNextError+" breakOnNext:"+this.breakOnErrors);
+            FBTrace.sysout("fbs.onDebug ("+fbs.onDebugRequests+") fileName="+frame.script.fileName+ " reportNextError="+reportNextError+" breakOnNext:"+this.breakOnErrors);
         }
         if ( isFilteredURL(frame.script.fileName) )
+        {
+            reportNextError = false;
             return RETURN_CONTINUE;
+        }
+
         try
         {
+            var breakOnNextError = this.needToBreakForError(fileName, lineNo);
             var debuggr = (reportNextError || breakOnNextError) ? this.findDebugger(frame) : null;
 
             if (reportNextError)
@@ -1332,20 +1336,7 @@ FirebugService.prototype =
         }
 
         reportNextError = true;
-
-        if (this.showStackTrace)
-        {
-            if (FBTrace.DBG_FBS_ERRORS)
-            {
-                FBTrace.sysout("fbs.onError debugs missed:("+fbs.onDebugRequests+") showStackTrace, we will try to drop into onDebug\n");
-                fbs.onDebugRequests++;
-            }
-            return false; // Drop into onDebug, sometimes only
-        }
-        else
-        {
-            return !this.needToBreakForError(fileName, lineNo);
-        }
+        return false; // Drop into onDebug, sometimes only
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -2441,8 +2432,7 @@ FirebugService.prototype =
 
     needToBreakForError: function(fileName, lineNo)
     {
-        return breakOnNextError =
-            this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(fileName), lineNo) != -1;
+        return this.breakOnErrors || this.findErrorBreakpoint(this.normalizeURL(fileName), lineNo) != -1;
     },
 
     startStepping: function()
