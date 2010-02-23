@@ -9,6 +9,7 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const detachCommand = $("cmd_toggleDetachFirebug");
+const privateBrowsingService = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService);
 
 // ************************************************************************************************
 
@@ -238,6 +239,12 @@ Firebug.Activation = extend(Firebug.Module,
 
     setPageAnnotation: function(currentURI, annotation)
     {
+        if (privateBrowsingService.privateBrowsingEnabled)
+        {
+            Firebug.Console.logFormatted(["Sites are not remembered in Private Browsing Mode"], FirebugContext, "info");  // XXXTODO NLS
+            return;
+        }
+
         var uri = this.convertToURIKey(currentURI, Firebug.activateSameOrigin);
         if (uri)
             this.getAnnotationService().setPageAnnotation(uri, annotation);
