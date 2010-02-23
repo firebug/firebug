@@ -122,7 +122,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
+            _toggles: "$toggles", role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator",
@@ -208,8 +208,17 @@ const DirTablePlate = domplate(Firebug.Rep,
     {
         var level = parseInt(row.getAttribute("level"));
         var toggles = row.parentNode.parentNode.toggles;
+        var domPanel = row.parentNode.parentNode.domPanel;
+        if (!domPanel)
+        {
+            var panel = Firebug.getElementPanel(row);
+            domPanel = panel.context.getPanel("dom");
+        }
 
-        var panel = row.parentNode.parentNode.domPanel;
+        if (!domPanel)
+            return;
+
+        var context = domPanel.context;
         var target = row.lastChild.firstChild;
         var isString = hasClass(target,"objectBox-string");
 
@@ -219,7 +228,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
             if (isString)
             {
-                var rowValue = panel.getRowPropertyValue(row);
+                var rowValue = domPanel.getRowPropertyValue(row);
                 row.lastChild.firstChild.textContent = '"' + cropMultipleLines(rowValue) + '"';
             }
             else
@@ -258,7 +267,7 @@ const DirTablePlate = domplate(Firebug.Rep,
             setClass(row, "opened");
             if (isString)
             {
-                var rowValue = panel.getRowPropertyValue(row);
+                var rowValue = domPanel.getRowPropertyValue(row);
                 row.lastChild.firstChild.textContent = '"' + rowValue + '"';
             }
             else
@@ -279,8 +288,7 @@ const DirTablePlate = domplate(Firebug.Rep,
                     }
                 }
 
-                var context = panel ? panel.context : null;
-                var members = Firebug.DOMBasePanel.prototype.getMembers(target.repObject, level+1, context);
+                var members = domPanel.getMembers(target.repObject, level+1, context);
 
                 var rowTag = this.rowTag;
                 var lastRow = row;
@@ -364,6 +372,7 @@ Firebug.DOMBasePanel.prototype = extend(Firebug.ActivablePanel,
 
         this.showMembers(members, update, scrollTop);
     },
+
     /*
      *  @param object a user-level object wrapped in security blanket
      *  @param level for a.b.c, level is 2
