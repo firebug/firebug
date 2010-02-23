@@ -326,8 +326,6 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             var deltaT = new Date().getTime() - this.initTime.getTime();
             FBTrace.sysout("errors.getErrorContext sheets: "+FBL.totalSheets+" rules: "+FBL.totalRules+" time: "+deltaT);
         }
-        if (FBTrace.DBG_ERRORS && !errorContext)
-            FBTrace.sysout("errors.getErrorContext no context from error filename:"+url, object);
 
         if (!errorContext)
         {
