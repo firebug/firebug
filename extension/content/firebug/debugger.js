@@ -149,6 +149,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
 
+    breakNowURLPrefix: "chrome://firebug/",
+
     breakNow: function(context)
     {
         Firebug.Debugger.halt(function(frame)
@@ -159,8 +161,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             for (; frame && frame.isValid; frame = frame.callingFrame)
             {
                 var fileName = frame.script.fileName;
-                if (fileName && fileName.indexOf("chrome://firebug/") != 0 &&
-                    fileName.indexOf("/components/firebug-") == -1)
+                if (!fileName)
+                    continue;
+                else if (fileName.indexOf(Firebug.Debugger.breakNowURLPrefix) == 0)
+                    continue;
+                else if (fileName.indexOf("/components/firebug-") != -1)
+                    continue;
+                else
                     break;
             }
 
@@ -171,9 +178,8 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             }
             else
             {
-                // XXXrobc no-op, added for detrace
                 if (FBTrace.DBG_UI_LOOP)
-                    FBTrace.sysout("debugger.breakNow: no frame that is not firebug");
+                    FBTrace.sysout("debugger.breakNow: no frame that not starting with "+Firebug.Debugger.breakNowURLPrefix);
             }
         });
     },
@@ -220,7 +226,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
         try
         {
-        	 this.freeze(context);
+             this.freeze(context);
             // We will pause here until resume is called
             var depth = fbs.enterNestedEventLoop({onNest: bindFixed(this.startDebugging, this, context)});
             // For some reason we don't always end up here
@@ -2746,7 +2752,7 @@ Firebug.ScriptPanel.prototype = extend(Firebug.SourceBoxPanel,
                    if (this.selectedSourceBox == victim)
                    {
                         collapse(this.selectedSourceBox, true);
-                        delete this.selectedSourceBox; 
+                        delete this.selectedSourceBox;
                    }
                    if (FBTrace.DBG_SOURCEFILES)
                        FBTrace.sysout("debugger.refresh deleted sourceBox for "+url);
