@@ -201,8 +201,6 @@ top.Firebug =
 
         var basePrefNames = prefNames.length;
 
-        this.clientID = Firebug.Debugger.registerClient(this);
-
         dispatch(modules, "initialize", [this.prefDomain, prefNames]);
         dispatch(menuItemControllers, "initialize", []);
 
@@ -320,8 +318,6 @@ top.Firebug =
     shutdown: function()  // called in browser when Firefox closes and in externalMode when fbs gets quitApplicationGranted.
     {
         window.removeEventListener('unload', shutdownFirebug, false);
-
-        Firebug.Debugger.unregisterClient(this);
 
         TabWatcher.destroy();
 

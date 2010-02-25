@@ -1691,6 +1691,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     initialize: function()
     {
+        Firebug.clientID = this.registerClient(Firebug);
         this.nsICryptoHash = Components.interfaces["nsICryptoHash"];
 
         this.debuggerName =  window.location.href+"--"+FBL.getUniqueId(); /*@explore*/
@@ -1845,6 +1846,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
 
     shutdown: function()
     {
+        this.unregisterClient(Firebug);
         fbs.unregisterDebugger(this);
     },
 
