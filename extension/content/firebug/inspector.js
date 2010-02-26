@@ -191,7 +191,7 @@ Firebug.Inspector = extend(Firebug.Module,
         Firebug.toggleBar(true);
         Firebug.chrome.select(elt, "html");
         context = this.inspectingContext || TabWatcher.getContextByWindow(elt.ownerDocument.defaultView);
-        htmlPanel = Firebug.chrome.unswitchToPanel(context, "html", false);
+        htmlPanel = Firebug.chrome.selectPanel("html");
         htmlPanel.panelNode.focus();
     },
 
