@@ -46,7 +46,8 @@ Firebug.DOMModule = extend(Firebug.Module,
     initialize: function(prefDomain, prefNames)
     {
         Firebug.Module.initialize.apply(this, arguments);
-        Firebug.Debugger.addListener(this.DebuggerListener);
+        if (Firebug.Debugger)
+            Firebug.Debugger.addListener(this.DebuggerListener);
     },
 
     initContext: function(context, persistedState)
@@ -70,7 +71,8 @@ Firebug.DOMModule = extend(Firebug.Module,
     shutdown: function()
     {
         Firebug.Module.shutdown.apply(this, arguments);
-        Firebug.Debugger.removeListener(this.DebuggerListener);
+        if (Firebug.Debugger)
+            Firebug.Debugger.removeListener(this.DebuggerListener);
     },
 });
 
