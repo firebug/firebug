@@ -88,13 +88,6 @@ Firebug.TabContext.prototype =
         sourceFile.context = this;
 
         Firebug.onSourceFileCreated(this, sourceFile);
-
-        var data = this.sourceCache.cache[sourceFile.href];
-        var len = data ? data.length : 0;
-        if ((FBTrace.DBG_ERRORS || FBTrace.DBG_CACHE || FBTrace.DBG_SOURCEFILES) &&
-            Math.abs(sourceFile.sourceLength - len) > 2)
-            FBTrace.sysout("tabContext.addSourceFile lengths don't match: " +
-                sourceFile.href + " | " + sourceFile.sourceLength +" vs " +len)
     },
 
     removeSourceFile: function(sourceFile)
@@ -185,6 +178,15 @@ Firebug.TabContext.prototype =
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
+    initPanelTypes: function()
+    {
+        if (!this.panelTypes)
+        {
+            this.panelTypes = [];
+            this.panelTypeMap = {};
+        }
+    },
+
     addPanelType: function(url, title, parentPanel)
     {
         url = absoluteURL(url, this.window.location.href);
@@ -195,11 +197,7 @@ Firebug.TabContext.prototype =
             return;
         }
 
-        if (!this.panelTypes)
-        {
-            this.panelTypes = [];
-            this.panelTypeMap = {};
-        }
+        this.initPanelTypes();
 
         var name = createPanelName(url);
         while (name in this.panelTypeMap)
@@ -211,6 +209,14 @@ Firebug.TabContext.prototype =
         this.panelTypeMap[name] = panelType;
 
         return panelType;
+    },
+
+    addPanelTypeConstructor: function(panelType)
+    {
+        this.initPanelTypes();
+        this.panelTypes.push(panelType);
+        var name = panelType.prototype.name;
+        this.panelTypeMap[name] = panelType;
     },
 
     removePanelType: function(url)
