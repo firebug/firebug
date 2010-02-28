@@ -257,19 +257,21 @@ Firebug.CommandLine = extend(Firebug.Module,
                 Firebug.Console.log(commandPrefix + " " + shortExpr, context, "command", FirebugReps.Text);
             }
 
-            var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
-
             var noscript = getNoScript();
-            var uri = noscript && noscript.getSite(Firebug.chrome.getCurrentURI().spec);
-
-            if(noscript && !(noscript.jsEnabled || noscript.isJSEnabled(uri)))
+            if (noscript)
             {
-                noscript.setJSEnabled(uri, true);
-                this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
-                noscript.setJSEnabled(uri, false);
+                var noScriptURI = noscript && noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+                noScriptURI = (noscript.jsEnabled || noscript.isJSEnabled(noScriptURI)) ? null : noScriptURI;
             }
-            else
-                this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
+
+            if(noscript && noscriptURI)
+                noscript.setJSEnabled(noScriptURI, true);
+
+            var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
+            this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
+
+            if (noscript && noscriptURI)
+                noscript.setJSEnabled(noScriptURI, false);
         }
         else
             Firebug.Console.log($STR("console.JSDisabledInFirefoxPrefs"), context, "info");
