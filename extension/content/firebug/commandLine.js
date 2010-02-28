@@ -64,7 +64,10 @@ Firebug.CommandLine = extend(Firebug.Module,
             }
             else
             {
-                result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+                if (this.isSandbox(context))
+                    result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
+                else
+                    result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
             }
 
             context.invalidatePanels('dom', 'html');
@@ -206,68 +209,28 @@ Firebug.CommandLine = extend(Firebug.Module,
         return "true";
     },
 
-    // TODO: strip down to minimum, have one global sandbox that is reused.
-    evaluateInSandbox: function(expr, context, thisValue, targetWindow, skipNotDefinedMessages)  // returns user-level wrapped object I guess.
+    // isSandbox(context) true, => context.global is a Sandbox
+    evaluateInSandbox: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
-        // targetWindow may be frame in HTML
-        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
-
-        if (!context.sandboxes)
-            context.sandboxes = [];
-
-        if (win.wrappedJSObject) //  XPCNativeWrapper vs  XPCSafeJSObjectWrapper
-        {
-            // in FF3.1, this path fails.
-            var sandbox = new Components.utils.Sandbox(win.location.toString());
-            //sandbox.__proto__ = win.wrappedJSObject;
-            sandbox.__proto__ = win;
-        }
-        else
-        {
-            // in FF3.1, this path works
-            var sandbox = new Components.utils.Sandbox(win); // Use DOM Window
-            sandbox.__proto__ = win;
-        }
-
         var scriptToEval = expr;
 
-        // If we want to use a specific |this|, wrap the expression with Function.apply()
-        // and inject the new |this| into the sandbox so it's easily accessible.
-        if (thisValue) {
-            // XXXdolske is this safe if we're recycling the sandbox?
-            sandbox.__thisValue__ = thisValue;
-            scriptToEval = "(function() { return " + scriptToEval + " \n}).apply(__thisValue__);";
-        }
-
-        // Page scripts expect |window| to be the global object, not the
-        // sandbox object itself. Stick window into the scope chain so
-        // assignments like |foo = bar| are effectively |window.foo =
-        // bar|, else the page won't see the new value.
-        scriptToEval = "with (window?window:null) { " + scriptToEval + " \n};";
-
         try {
-            result = Components.utils.evalInSandbox(scriptToEval, sandbox);
+            result = Components.utils.evalInSandbox(scriptToEval, context.global);
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("commandLine.evaluateInSandbox success for "+win.location, scriptToEval);
+                FBTrace.sysout("commandLine.evaluateInSandbox success for sandbox ", scriptToEval);
+            successConsoleFunction(result, context);  // result will be pass thru this function
         } catch (e) {
             if (FBTrace.DBG_ERRORS)
-            {
-                FBTrace.sysout("commandLine.evaluateInSandbox FAILED:"+e, e);
-                FBTrace.sysout("commandLine.evaluateInSandbox FAILED with [win, scriptToEval, sandbox]: "+win.location, [win, scriptToEval, sandbox]);
-            }
+                FBTrace.sysout("commandLine.evaluateInSandbox FAILED in "+context.getName()+" because "+e, e);
+            exceptionFunction(e, context);
             result = new FBL.ErrorMessage("commandLine.evaluateInSandbox FAILED: " + e, FBL.getDataURLForContent(scriptToEval, "FirebugCommandLineEvaluate"), e.lineNumber, 0, "js", context, null);
         }
         return result;
     },
 
-    getSandboxByWindow: function(context, win)
+    isSandbox: function (context)
     {
-        for (var i = 0; i < context.sandboxes.length; i++) {
-            // XXXdolske is accessing .window safe after untrusted script has run?
-            if (context.sandboxes[i].window === win.wrappedJSObject)
-                return context.sandboxes[i];
-        }
-        return null;
+        return (context.global && context.global+"" === "[object Sandbox]");
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -301,13 +264,12 @@ Firebug.CommandLine = extend(Firebug.Module,
 
             if(noscript && !(noscript.jsEnabled || noscript.isJSEnabled(uri)))
             {
-
                 noscript.setJSEnabled(uri, true);
-                this.evaluate(expr, context, null, null, goodOrBad);
+                this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
                 noscript.setJSEnabled(uri, false);
             }
             else
-                this.evaluate(expr, context, null, null, goodOrBad);
+                this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
         }
         else
             Firebug.Console.log($STR("console.JSDisabledInFirefoxPrefs"), context, "info");
@@ -580,6 +542,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("command line isReadyElsePreparing ", context);
 
+        if (this.isSandbox(context))
+            return;
+
         if (win)
             Firebug.CommandLine.injector.attachCommandLine(context, win);
         else
@@ -653,7 +618,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             if (FBTrace.DBG_CONSOLE)
             {
                 if (FirebugContext)
-                    FBTrace.sysout("attachConsoleOnFocus: ", (FirebugContext.window?FirebugContext.window.wrappedJSObject._firebug:"No FirebugContext.window"));
+                    FBTrace.sysout("attachConsoleOnFocus: "+FirebugContext.getName());
                 else
                     FBTrace.sysout("attachConsoleOnFocus: No FirebugContext\n");
             }
@@ -820,8 +785,11 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
         {
             if (context.stopped)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
-            else
+            else if (context.window)
                 return keys(context.window.wrappedJSObject).sort();  // return is safe
+            else if (context.global)
+                return keys(context.global).sort();
+
         }
     }
     catch (exc)
@@ -1021,17 +989,29 @@ Firebug.CommandLine.injector = {
         if (!win)
             return;
 
-        // If the command line is already attached then end.
-        var doc = win.document;
-        if ($("_firebugCommandLineInjector", doc))
-            return;
+        if (win instanceof Window)
+        {
+            // If the command line is already attached then end.
+            var doc = win.document;
+            if ($("_firebugCommandLineInjector", doc))
+                return;
 
-        if (context.stopped)
-            Firebug.CommandLine.injector.evalCommandLineScript(context);
+            if (context.stopped)
+                Firebug.CommandLine.injector.evalCommandLineScript(context);
+            else
+                Firebug.CommandLine.injector.injectCommandLineScript(doc);
+
+            Firebug.CommandLine.injector.addCommandLineListener(context, win, doc);
+        }
+        else if (Firebug.CommandLine.isSandbox(context))
+        {
+            FBTrace.sysout("Firebug.CommandLine.injector context.global "+context.global, context.global);
+            // no-op
+        }
         else
-            Firebug.CommandLine.injector.injectCommandLineScript(doc);
-
-        Firebug.CommandLine.injector.addCommandLineListener(context, win, doc);
+        {
+            FBTrace.sysout("Firebug.CommandLine.injector not a Window or Sandbox", win);
+        }
     },
 
     evalCommandLineScript: function(context)
