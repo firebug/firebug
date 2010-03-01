@@ -894,11 +894,19 @@ var Renderer =
 {
     renderHTML: function(args, outputs, self)
     {
-        var code = [];
-        var markupArgs = [code, this.tag.getContext(), args, outputs];
-        markupArgs.push.apply(markupArgs, this.tag.markupArgs);
-        this.tag.renderMarkup.apply(self ? self : this.tag.subject, markupArgs);
-        return code.join("");
+        try
+        {
+            var code = [];
+            var markupArgs = [code, this.tag.getContext(), args, outputs];
+            markupArgs.push.apply(markupArgs, this.tag.markupArgs);
+            this.tag.renderMarkup.apply(self ? self : this.tag.subject, markupArgs);
+            return code.join("");
+        }
+        catch (e)
+        {
+            if (FBTrace.DBG_DOMPLATE || FBTrace.DBG_ERRORS)
+                FBTrace.sysout("domplate.renderHTML; EXCEPTION " + e, e);
+        }
     },
 
     insertRows: function(args, before, self)
