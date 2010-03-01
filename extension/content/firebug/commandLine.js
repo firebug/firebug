@@ -787,11 +787,10 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
         {
             if (context.stopped)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
-            else if (context.window)
-                return keys(context.window.wrappedJSObject).sort();  // return is safe
             else if (context.global)
                 return keys(context.global).sort();
-
+            else if (context.window)
+                return keys(context.window.wrappedJSObject).sort();  // return is safe
         }
     }
     catch (exc)
