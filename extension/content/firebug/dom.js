@@ -124,7 +124,7 @@ const DirTablePlate = domplate(Firebug.Rep,
 
     tag:
         TABLE({"class": "domTable", cellpadding: 0, cellspacing: 0, onclick: "$onClick",
-            _toggles: "$toggles", role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
+            _repObject: "$object", role: "tree", 'aria-label': $STR('aria.labels.dom properties')},
             TBODY({role: 'presentation'},
                 SizerRow,
                 FOR("member", "$object|memberIterator",
@@ -209,8 +209,15 @@ const DirTablePlate = domplate(Firebug.Rep,
     toggleRow: function(row)
     {
         var level = parseInt(row.getAttribute("level"));
-        var toggles = row.parentNode.parentNode.toggles;
-        var domPanel = row.parentNode.parentNode.domPanel;
+        var table = getAncestorByClass(row, "domTable");
+        var toggles = table.toggles;
+        if (!toggles)
+            toggles = table.repObject.toggles;
+
+        if (!toggles)
+            toggles = {};
+
+        var domPanel = table.domPanel;
         if (!domPanel)
         {
             var panel = Firebug.getElementPanel(row);
