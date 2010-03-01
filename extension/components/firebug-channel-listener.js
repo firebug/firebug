@@ -264,6 +264,10 @@ ChannelListener.prototype =
                 FBTrace.sysout("tabCache.ChannelListener.onStopRequest EXCEPTION\n", err);
         }
 
+        // The request body has been downloaded. Remove the listener (the last parameter
+        // is null) since it's not needed now.
+        this.setAsyncListener(request, this.sink.inputStream, null);
+
         if (this.listener)
             this.listener.onStopRequest(request, requestContext, statusCode);
     },
