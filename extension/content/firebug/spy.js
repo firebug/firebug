@@ -588,6 +588,9 @@ Firebug.Spy.XMLHttpRequestSpy.prototype =
     // Cache listener
     onStopRequest: function(context, request, responseText)
     {
+        if (FBTrace.DBG_SPY)
+            FBTrace.sysout("spy.onStopRequest: " + safeGetRequestName(request), responseText);
+
         if (!responseText)
             return;
 
@@ -672,6 +675,14 @@ function onHTTPSpyLoad(spy)
     // xxxHonza: Still needed for Fx 3.5 (#502959)
     if (!SpyHttpActivityObserver.getActivityDistributor())
         onHTTPSpyReadyStateChange(spy, null);
+
+    // If the spy is not loaded yet (and so, the response was not cached), do it now.
+    // This can happen since synchronous XHRs don't fire onReadyStateChange event (issue 2868).
+    if (!spy.loaded)
+    {
+        spy.loaded = true;
+        spy.responseText = spy.xhrRequest.responseText;
+    }
 }
 
 function onHTTPSpyError(spy)
@@ -725,7 +736,7 @@ function callPageHandler(spy, event, originalHandler)
     {
         // Calling the page handler throwed an exception (see #502959)
         // This should be fixed in Firefox 3.5
-        if (originalHandler)
+        if (originalHandler && event)
             originalHandler.handleEvent(event);
     }
     catch (exc)
