@@ -407,9 +407,9 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     destroy: function(state)
     {
-        Firebug.ActivablePanel.destroy.apply(this, arguments);
-
         Firebug.unregisterUIListener(this);
+
+        Firebug.ActivablePanel.destroy.apply(this, arguments);
     },
 
     initializeNode : function()

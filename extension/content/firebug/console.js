@@ -681,8 +681,6 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
 
     destroy: function(state)
     {
-        Firebug.ActivablePanel.destroy.apply(this, arguments);
-
         if (this.panelNode.offsetHeight)
             this.wasScrolledToBottom = isScrolledToBottom(this.panelNode);
 
@@ -699,6 +697,8 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("console.destroy ------------------ wasScrolledToBottom: " +
                 this.wasScrolledToBottom + ", " + this.context.getName());
+
+        Firebug.ActivablePanel.destroy.apply(this, arguments);  // must be called last
     },
 
     shouldBreakOnNext: function()

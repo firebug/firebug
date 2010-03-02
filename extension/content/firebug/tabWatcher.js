@@ -117,10 +117,6 @@ top.TabWatcher = extend(new Firebug.Listener(),
                     delete context.browser.showFirebug;
                 this.unwatchContext(win, context);
 
-                // There shouldn't be context for this window so, remove it from the
-                // global array.
-                remove(contexts, context);
-
                 return;  // did not create a context
             }
             // else we should show
@@ -502,10 +498,11 @@ top.TabWatcher = extend(new Firebug.Listener(),
             FBTrace.sysout("-> tabWatcher.unwatchContext *** DESTROY *** context "+context.uid+" for: "+
                 (context.window && !context.window.closed?context.window.location:"no window or closed ")+" aborted: "+context.aborted);
 
-
-
         context.destroy(persistedState);
         remove(contexts, context);
+
+        for (var name in this)
+            delete context[name];
 
         var currentBrowser = Firebug.chrome.getCurrentBrowser();
         if (!currentBrowser.showFirebug)  // unwatchContext can be called on an unload event after another tab is selected

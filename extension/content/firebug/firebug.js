@@ -1853,7 +1853,10 @@ top.Firebug =
         dispatch(modules, "destroyContext", [context, persistedState]);
 
         if (FirebugContext == context)
+        {
+            Firebug.chrome.clearPanels(); // disconnect the to-be-destroyed panels from the panelBar
             Firebug.chrome.setFirebugContext(null);  // FirebugContext is about to be destroyed
+        }
 
         var browser = context.browser;
         // Persist remnants of the context for restoration if the user reloads
@@ -2141,6 +2144,9 @@ Firebug.Panel =
         this.destroyNode();
 
         clearDomplate(this.panelNode);
+
+        for (var name in this)  // ensure that we don't point to anything, in case something points to us
+            delete this[name];
     },
 
     savePersistedContent: function(state)
