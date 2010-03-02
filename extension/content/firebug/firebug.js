@@ -2144,9 +2144,6 @@ Firebug.Panel =
         this.destroyNode();
 
         clearDomplate(this.panelNode);
-
-        for (var name in this)  // ensure that we don't point to anything, in case something points to us
-            delete this[name];
     },
 
     savePersistedContent: function(state)

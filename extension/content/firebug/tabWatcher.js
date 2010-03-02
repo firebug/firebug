@@ -501,7 +501,7 @@ top.TabWatcher = extend(new Firebug.Listener(),
         context.destroy(persistedState);
         remove(contexts, context);
 
-        for (var name in this)
+        for (var name in context)
             delete context[name];
 
         var currentBrowser = Firebug.chrome.getCurrentBrowser();
