@@ -1482,6 +1482,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
                 netProgress.currentPhase = null;
         }
 
+        file.clear();
+
         return true;
     },
 
@@ -3296,6 +3298,9 @@ function NetProgress(context)
 
     this.clear = function()
     {
+        for (var i=0; this.files && i<this.files.length; i++)
+            this.files[i].clear();
+
         this.requests = [];
         this.files = [];
         this.phases = [];
@@ -4107,6 +4112,13 @@ NetFile.prototype =
             return this.href;
 
         return this.href.substring(0, index);
+    },
+
+    clear: function()
+    {
+        // Remove all members to avoid circular references and memleaks.
+        for (var name in this)
+            delete this[name];
     }
 };
 
