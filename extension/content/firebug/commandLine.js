@@ -260,17 +260,18 @@ Firebug.CommandLine = extend(Firebug.Module,
             var noscript = getNoScript();
             if (noscript)
             {
-                var noScriptURI = noscript && noscript.getSite(Firebug.chrome.getCurrentURI().spec);
-                noScriptURI = (noscript.jsEnabled || noscript.isJSEnabled(noScriptURI)) ? null : noScriptURI;
+                var noScriptURI = noscript.getSite(Firebug.chrome.getCurrentURI().spec);
+                if (noScriptURI)
+                    noScriptURI = (noscript.jsEnabled || noscript.isJSEnabled(noScriptURI)) ? null : noScriptURI;
             }
 
-            if(noscript && noscriptURI)
+            if(noscript && noScriptURI)
                 noscript.setJSEnabled(noScriptURI, true);
 
             var goodOrBad = FBL.bind(Firebug.Console.log, Firebug.Console);
             this.evaluate(expr, context, null, null, goodOrBad, goodOrBad);
 
-            if (noscript && noscriptURI)
+            if (noscript && noScriptURI)
                 noscript.setJSEnabled(noScriptURI, false);
         }
         else
