@@ -420,23 +420,22 @@ function FirebugConsoleHandler(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        var errorObject = new FBL.ErrorMessage(msg, (msg.fileName?msg.fileName:win.location), (msg.lineNumber?msg.lineNumber:0), "", category, context, trace);
-
+        var errorObject = new FBL.ErrorMessage(msg, (msg.fileName?msg.fileName:win.location),
+            (msg.lineNumber?msg.lineNumber:0), "", category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
            errorObject.correctWithStackTrace(trace);
 
         errorObject.resetSource();
 
-        var objects = errorObject;
         if (args.length > 1)
         {
-            objects = [errorObject];
+            errorObject.objects = []
             for (var i = 1; i < args.length; i++)
-                objects.push(args[i]);
+                errorObject.objects.push(args[i]);
         }
 
-        var row = Firebug.Console.log(objects, context, "errorMessage", null, true); // noThrottle
+        var row = Firebug.Console.log(errorObject, context, "errorMessage", null, true); // noThrottle
         row.scrollIntoView();
     }
 
@@ -484,7 +483,8 @@ function FirebugConsoleHandler(context, win)
                 var fn = frames[oldest - i].fn + "";
                 if (fn && (fn.indexOf("_firebugEvalEvent") != -1) ) break;  // command line
             }
-            FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("consoleInjector getJSDUserStack: "+frames.length+" oldest: "+oldest+" i: "+i+" i - oldest + 2: "+(i - oldest + 2), trace);
             trace.frames = trace.frames.slice(2 - i);  // take the oldest frames, leave 2 behind they are injection code
 
             return trace;

@@ -1530,12 +1530,18 @@ this.ErrorMessage = domplate(Firebug.Rep,
                 "$object.message|getMessage"
             ),
             DIV({"class": "errorTrace", role : 'presentation'}),
+            TAG("$object|getObjectsTag", {object: "$object.objects"}),
             DIV({"class": "errorSourceBox errorSource-$object|getSourceType focusRow subLogRow", role : "listitem"},
                 IMG({"class": "errorBreak a11yFocus", src:"blank.gif", role : 'checkbox', 'aria-checked':"$object|hasErrorBreak", title: "Break on this error"}),
                 A({"class": "errorSource a11yFocus"}, "$object|getLine"),
                 TAG(this.SourceLink.tag, {object: "$object|getSourceLink"})
             )
         ),
+
+    getObjectsTag: function(error)
+    {
+        return error.objects ? FirebugReps.Arr.tag : SPAN();
+    },
 
     getLastErrorStackTrace: function(error)
     {
