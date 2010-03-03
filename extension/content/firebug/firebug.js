@@ -1217,7 +1217,6 @@ top.Firebug =
         this.showBar(false);  // don't show in browser.xul now
 
         Firebug.chrome.setFirebugContext(context);  // make sure the FirebugContext agrees with context
-        FirebugContext = context;
 
         this.setPlacement("detached");  // we'll reset it in the new window, but we seem to race with code in this window.
 
@@ -1718,7 +1717,6 @@ top.Firebug =
         this.updateActiveContexts(context); // a newly created context is active
 
         Firebug.chrome.setFirebugContext(context); // a newly created context becomes the default for the view
-        FirebugContext = context;
 
         if (deadWindowTimeout)
             this.rescueWindow(context.browser); // if there is already a window, clear showDetached.
@@ -1755,7 +1753,6 @@ top.Firebug =
             clearContextTimeout = 0;
         }
 
-        FirebugContext = context;
         Firebug.chrome.setFirebugContext(context); // the context becomes the default for its view
         this.updateActiveContexts(context);  // resume, after setting FirebugContext
 
