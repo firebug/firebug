@@ -2988,7 +2988,7 @@ Firebug.DisabledPanelPage.prototype = domplate(Firebug.Rep,
                 SPAN("$pageTitle")
             ),
             P({"class": "disabledPanelDescription", style: "margin-top: 15px;"},
-                $STR("moduleManager.desc4"),
+                $STR("moduleManager.desc3"),
                 SPAN("&nbsp;"),
                 SPAN({"class": "descImage descImage-$panelName"})
             )
