@@ -580,6 +580,7 @@
             var iconNode = document.getAnonymousElementByAttribute(this, "class", "menu-iconic-left");
             iconNode.allowEvents = true;
             iconNode.addEventListener("click", FBL.bind(this.onTogglePanel, this), true);
+            iconNode.addEventListener("mouseover", FBL.bind(this.onOverToggleCheckmark, this, iconNode), true);
             this.panelBar = FBL.getAncestorByClass(this, "panelBar");
         ]]>
         </constructor>
@@ -597,6 +598,17 @@
             FBL.$("panelBarTabList").updateMenuItems();
             ]]></body>
         </method>
+        <method name="onOverToggleCheckmark">
+            <parameter name="event"/>
+            <parameter name="iconNode"/>
+            <body><![CDATA[
+            FBTrace.sysout('Here is the iconNode', iconNode);
+            iconNode.style.backgroundColor = "red";
+            // So, iconNode here is XUL - change the current
+            // background-image style (?) of <xul:image> to something that
+            // pops out a little
+            ]]></body>
+        </method> 
     </implementation>
 </binding>
 
