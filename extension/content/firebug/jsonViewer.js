@@ -15,7 +15,8 @@ var contentTypes =
     "application/json": 1,
     "application/x-json": 1,
     "application/javascript": 1,
-    "application/x-javascript": 1
+    "application/x-javascript": 1,
+    "application/json-rpc": 1
 };
 
 // ************************************************************************************************
