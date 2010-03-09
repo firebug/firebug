@@ -58,17 +58,10 @@ Firebug.CommandLine = extend(Firebug.Module,
         {
             var result = null;
 
-            if (context.stopped)
-            {
-                result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
-            }
+            if (this.isSandbox(context))
+                result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
             else
-            {
-                if (this.isSandbox(context))
-                    result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
-                else
-                    result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
-            }
+                result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
 
             context.invalidatePanels('dom', 'html');
         }
@@ -83,91 +76,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         return result;
-    },
-
-    evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
-    {
-        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
-        if (!win)
-        {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
-            return;
-        }
-
-        // We're going to use some command-line facilities, but it may not have initialized yet.
-        this.initializeCommandLineIfNeeded(context, win);
-
-        // Make sure the command line script is attached.
-        var element = Firebug.Console.getFirebugConsoleElement(context, win);
-        if (element)
-        {
-            var attached = element.getAttribute("firebugCommandLineAttached");
-            if (!attached)
-            {
-                FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
-                Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
-                return;
-            }
-        }
-        else
-        {
-            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no firebug console element", win);
-            return;  // we're in trouble here
-        }
-
-        var event = document.createEvent("Events");
-        event.initEvent("firebugCommandLine", true, false);
-        element.setAttribute("methodName", "evaluate");
-
-        expr = expr.toString();
-        expr = "with(_FirebugCommandLine){" + expr + "\n};";
-        element.setAttribute("expr", expr);
-
-        var consoleHandler;
-        for (var i=0; i<context.activeConsoleHandlers.length; i++)
-        {
-            if (context.activeConsoleHandlers[i].window == win)
-            {
-                consoleHandler = context.activeConsoleHandlers[i];
-                break;
-            }
-        }
-
-        if (successConsoleFunction)
-        {
-            consoleHandler.evaluated = function useConsoleFunction(result)
-            {
-                successConsoleFunction(result, context);  // result will be pass thru this function
-            }
-        }
-
-        if (exceptionFunction)
-        {
-            consoleHandler.evaluateError = function useExceptionFunction(result)
-            {
-                exceptionFunction(result, context);
-            }
-        }
-        else
-        {
-            consoleHandler.evaluateError = function useErrorFunction(result)
-            {
-                if (result)
-                {
-                    var m = reCmdSource.exec(result.source);
-                    if (m && m.length > 0)
-                        result.source = m[1];
-                }
-
-                Firebug.Console.logFormatted([result], context, "error", true);
-            }
-        }
-
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("evaluateByEventPassing \'"+expr+"\' using consoleHandler:", consoleHandler);
-        element.dispatchEvent(event);
-        if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("evaluateByEventPassing return after firebugCommandLine event:", event);
     },
 
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction)
@@ -189,7 +97,20 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         try
         {
-            result = Firebug.Debugger.evaluate(expr, context, scope);
+            if (context.stopped)
+            {
+                result = Firebug.Debugger.evaluate(expr, context, scope);
+            }
+            else
+            {
+                function onFrame(frame)
+                {
+                    context.currentFrame = frame;
+                    result = Firebug.Debugger.evaluate(expr, context, scope);
+                };
+                Firebug.Debugger.halt(onFrame);
+            }
+
             successConsoleFunction(result, context);  // result will be pass thru this function
         }
         catch (e)
