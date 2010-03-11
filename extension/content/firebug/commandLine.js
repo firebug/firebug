@@ -57,11 +57,14 @@ Firebug.CommandLine = extend(Firebug.Module,
         try
         {
             var result = null;
+            var debuggerState = Firebug.Debugger.beginInternalOperation();
 
             if (this.isSandbox(context))
                 result = this.evaluateInSandbox(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
-            else
+            else if (context.stopped)
                 result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
+            else
+                result = this.evaluateByPostMessage(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
 
             context.invalidatePanels('dom', 'html');
         }
@@ -97,19 +100,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         try
         {
-            if (context.stopped)
-            {
-                result = Firebug.Debugger.evaluate(expr, context, scope);
-            }
-            else
-            {
-                function onFrame(frame)
-                {
-                    context.currentFrame = frame;
-                    result = Firebug.Debugger.evaluate(expr, context, scope);
-                };
-                Firebug.Debugger.halt(onFrame);
-            }
+            result = Firebug.Debugger.evaluate(expr, context, scope);
 
             successConsoleFunction(result, context);  // result will be pass thru this function
         }
@@ -120,6 +111,13 @@ Firebug.CommandLine = extend(Firebug.Module,
         return result;
     },
 
+    evaluateByPostMessage: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
+    {
+        // targetWindow may be frame in HTML
+        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+
+        win.postMessage(expr, "*");
+    },
     //
     evaluateInWebPage: function(expr, context, targetWindow)
     {

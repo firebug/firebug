@@ -53,14 +53,21 @@ var _FirebugCommandLine =
         }
         var element = window.console.getFirebugElement();
         var self = this;
-        element.addEventListener("firebugCommandLine", function _firebugEvalEvent(event)
+        window.addEventListener("message", function _firebugEvalEvent(event)
         {
-            // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
-            var element = event.target;
-            var expr = element.getAttribute("expr"); // see commandLine.js
-            self.evaluate(expr);
+            // DBG
+            window.dump("attachCommandLine firebugCommandLine location: "+window.location+" event.origin "+event.origin+"\n");
+
+            // Is this our message?
+            if (event.origin === "chrome://browser")
+            {
+                var expr = event.data;
+                self.evaluate(expr);
+            }
+                
             // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
-        }, true);
+        }, false);
+
         element.setAttribute("firebugCommandLineAttached", "true")
         // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
     },
