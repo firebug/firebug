@@ -191,7 +191,11 @@ Firebug.TabCacheModel = extend(Firebug.Module,
                 // The response will be written into the outputStream of this pipe.
                 // Both ends of the pipe must be blocking.
                 var sink = CCIN("@mozilla.org/pipe;1", "nsIPipe");
-                sink.init(false, false, 0, 0xffffffff, null);
+                sink.init(false, false, 0x20000, 0x4000, null);
+
+                // Remember the input stream, so it isn't released by GC.
+                // See issue 2788 for more details.
+                newListener.wrappedJSObject.inputStream = sink.inputStream;
 
                 var originalListener = request.setNewListener(tee);
                 newListener.wrappedJSObject.sink = sink;
