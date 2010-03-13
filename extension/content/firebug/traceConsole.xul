@@ -2,7 +2,7 @@
 
 <?xml-stylesheet href="chrome://global/skin/global.css"?>
 <?xml-stylesheet href="chrome://global/skin/findBar.css" type="text/css"?>
-<?xml-stylesheet href="chrome://firebug/skin/traceConsole.css"?>
+<?xml-stylesheet href="skin/traceConsole.css"?>
 
 <!DOCTYPE window [
 <!ENTITY % browserDTD SYSTEM "chrome://browser/locale/browser.dtd" >
@@ -13,8 +13,8 @@
 
 <window xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul"
         xmlns:html="http://www.w3.org/1999/xhtml"
-        id="TraceConsole" 
-        windowtype="FBTraceConsole" 
+        id="TraceConsole"
+        windowtype="FBTraceConsole"
         title="Firebug Trace Console"
         width="640" height="480"
         screenX="10" screenY="10"
@@ -25,11 +25,11 @@
   <script type="application/x-javascript" src="chrome://global/content/globalOverlay.js"/>
   <script type="application/x-javascript" src="chrome://global/content/findBar.js"/>
 
-  <script type="application/x-javascript" src="chrome://firebug/content/xpcom.js"/>
-  <script type="application/x-javascript" src="chrome://firebug/content/chrome.js"/>
+  <script type="application/x-javascript" src="xpcom.js"/>
+  <script type="application/x-javascript" src="chrome.js"/>
 
-  <script type="application/x-javascript" src="chrome://firebug/content/traceConsole.js"/>
-  <script type="application/x-javascript" src="chrome://firebug/content/trace.js"/>
+  <script type="application/x-javascript" src="traceConsole.js"/>
+  <script type="application/x-javascript" src="trace.js"/>
 
   <stringbundle id="bundle_findBar" src="chrome://global/locale/findbar.properties"/>
 
@@ -59,34 +59,34 @@
     <toolbar id="consoleToolbar" align="center">
       <toolbarbutton id="clearConsole"
         label="tracing.cmd.Clear" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Clear" 
+        tooltiptext="tracing.cmd.tip.Clear"
         command="cmd_clearConsole"/>
       <toolbarbutton id="findConsole"
         label="tracing.cmd.Find" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Find" 
+        tooltiptext="tracing.cmd.tip.Find"
         command="cmd_find"/>
       <toolbarbutton id="separateConsole"
         label="tracing.cmd.Bookmark" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Bookmark" 
+        tooltiptext="tracing.cmd.tip.Bookmark"
         command="cmd_separateConsole"/>
       <toolbarbutton id="saveToFile"
         label="tracing.cmd.Save" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Save" 
+        tooltiptext="tracing.cmd.tip.Save"
         command="cmd_saveToFile"/>
       <toolbarbutton id="loadFromFile"
         label="tracing.cmd.Load" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Load" 
+        tooltiptext="tracing.cmd.tip.Load"
         command="cmd_loadFromFile"/>
       <toolbarseparator flex="1"/>
       <toolbarbutton id="restartFirefox"
         label="tracing.cmd.Restart" class="toolbar-image-button"
-        tooltiptext="tracing.cmd.tip.Restart" 
+        tooltiptext="tracing.cmd.tip.Restart"
         command="cmd_restartFirefox"/>
       <toolbarbutton id="closeFirefox"
         label="tracing.cmd.Exit" class="toolbar-image-button"
         tooltiptext="tracing.cmd.tip.Exit"
         command="cmd_exitFirefox"/>
-    </toolbar> 
+    </toolbar>
   </toolbox>
 
   <popupset id="mainPopupSet">
@@ -96,7 +96,7 @@
 
   <vbox flex="1">
     <browser id="consoleFrame" type="content-primary"
-             src="chrome://firebug/content/traceConsole.html" flex="1"
+             src="traceConsole.html" flex="1"
              disablehistory="true" contextmenu="fbContextMenu"
              tooltip="fbTooltip"/>
     <findbar id="FindToolbar" browserid="consoleFrame"/>
