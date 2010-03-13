@@ -237,15 +237,12 @@ function lastResort(listeners, subject, someData)
 // ************************************************************************************************
 // Public TraceService API
 
-// Prevent tracing from code that performs tracing.
-var noTrace = false;
-
 var TraceAPI = {
     dump: function(messageType, message, obj) {
-        if (noTrace)
+        if (this.noTrace)
             return;
 
-        noTrace = true;
+        this.noTrace = true;
         try
         {
             gTraceService.dispatch(messageType, message, obj);
@@ -255,12 +252,12 @@ var TraceAPI = {
         }
         finally
         {
-            noTrace = false;
+            this.noTrace = false;
         }
     },
 
     sysout: function(message, obj) {
-        this.dump(null, message, obj);
+        this.dump("no-message-type", message, obj);
     },
 
     setScope: function(scope)
@@ -283,10 +280,10 @@ for (var p in TraceAPI)
     TraceBase.prototype[p] = TraceAPI[p];
 
 TraceBase.prototype.sysout = function(message, obj) {
-        if (noTrace)
+        if (this.noTrace)
             return;
 
-        noTrace = true;
+        this.noTrace = true;
 
         try
         {
@@ -299,7 +296,7 @@ TraceBase.prototype.sysout = function(message, obj) {
         }
         finally
         {
-            noTrace = false;
+            this.noTrace = false;
         }
 }
 
