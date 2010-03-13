@@ -196,8 +196,7 @@ function FirebugService()
     this.pendingXULScripts = [];
 
     this.onXScriptCreatedByTag = {}; // fbs functions by script tag
-    this.nestedScriptStack = Components.classes["@mozilla.org/array;1"]
-                        .createInstance(Components.interfaces.nsIMutableArray);  // scripts contained in leveledScript that have not been drained
+    this.nestedScriptStack = []; // scripts contained in leveledScript that have not been drained
 }
 
 FirebugService.prototype =
@@ -707,7 +706,7 @@ FirebugService.prototype =
     {
         this.hookCalls(debuggr.onFunctionCall, false);  // call on all passed urls
     },
-    
+
 
     untraceAll: function(debuggr)
     {
@@ -884,13 +883,6 @@ FirebugService.prototype =
         FirebugPrefsObserver.syncFilter();
 
         try {
-            // CREATION and BP generate a huge trace
-            if (FBTrace.DBG_FF_START)
-            {
-                FBTrace.DBG_BP = true;
-                FBTrace.DBG_FBS_CREATION = true;
-            }
-
             if (FBTrace.DBG_FBS_ERRORS)
                 FBTrace.sysout("fbs.obeyPrefs showStackTrace:"+this.showStackTrace+" breakOnErrors:"+this.breakOnErrors+" trackThrowCatch:"+this.trackThrowCatch+" scriptFilter:"+this.scriptsFilter+" filterSystemURLs:"+this.filterSystemURLs);
         }
@@ -1084,6 +1076,12 @@ FirebugService.prototype =
         if (FBTrace.DBG_FBS_BP)
             FBTrace.sysout("fbs.onDebugger with haltDebugger="+haltDebugger+" in "+frame.script.fileName, frame.script);
         try {
+            if ( fbs.isTopLevelScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
+                FBTrace.sysout("fbs.onDebugger found topLevelScript "+ frame.script.tag);
+
+            if ( fbs.isNestedScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
+                FBTrace.sysout("fbs.onDebugger found nestedScript "+ frame.script.tag);
+
             if (haltDebugger)
             {
                 var debuggr = haltDebugger;
@@ -1139,6 +1137,12 @@ FirebugService.prototype =
 
             if (breakOnNextError)
             {
+                if ( fbs.isTopLevelScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
+                    FBTrace.sysout("fbs.onDebug found topLevelScript "+ frame.script.tag);
+                if ( fbs.isNestedScript(frame, type, rv) && FBTrace.DBG_FBS_SRCUNITS )
+                    FBTrace.sysout("fbs.onDebug found nestedScript "+ frame.script.tag);
+
+
                 breakOnNextError = false;
                 if (debuggr)
                     return this.breakIntoDebugger(debuggr, frame, type);
@@ -1151,38 +1155,8 @@ FirebugService.prototype =
 
     onBreakpoint: function(frame, type, val)
     {
-        var scriptTag = frame.script.tag;
-        if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("onBreakpoint frame.script.tag="+frame.script.tag );
-
-        if (scriptTag in this.onXScriptCreatedByTag)
-        {
-            if (FBTrace.DBG_FBS_TRACKFILES)
-                trackFiles.def(frame);
-            var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="
-                                      +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
-            delete this.onXScriptCreatedByTag[scriptTag];
-            frame.script.clearBreakpoint(0);
-            try {
-                var sourceFile = onXScriptCreated(frame, type, val);
-            } catch (e) {
-                FBTrace.sysout("onBreakpoint called onXScriptCreated and it didn't end well:",e);
-            }
-
-            if (FBTrace.DBG_FBS_SRCUNITS)
-            {
-                var msg = "Top Scripts Uncleared:";
-                for (p in this.onXScriptCreatedByTag) msg += (p+"|");
-                FBTrace.sysout(msg);
-            }
-            if (!sourceFile || !sourceFile.breakOnZero || sourceFile.breakOnZero != scriptTag)
-                return RETURN_CONTINUE;
-            else  // sourceFile.breakOnZero matches the script we have halted.
-            {
-               if (FBTrace.DBG_FBS_BP) FBTrace.sysout("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
-            }
-        }
-
+        if ( fbs.isTopLevelScript(frame, type, val) )
+            return RETURN_CONTINUE;
 
         var bp = this.findBreakpointByScript(frame.script, frame.pc);
         if (bp)
@@ -1341,6 +1315,66 @@ FirebugService.prototype =
         return false; // Drop into onDebug, sometimes only
     },
 
+    onTopLevel: function(frame, type)
+    {
+        if (FBTrace.DBG_TOPLEVEL && type === TYPE_TOPLEVEL_START)
+            FBTrace.sysout("fbs.onTopLevel "+frame.script.tag+" "+frame.script.fileName);
+    },
+
+    isTopLevelScript: function(frame, type, val)
+    {
+        var scriptTag = frame.script.tag;
+        if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("onBreakpoint frame.script.tag="+frame.script.tag );
+
+        if (scriptTag in this.onXScriptCreatedByTag)
+        {
+            if (FBTrace.DBG_FBS_TRACKFILES)
+                trackFiles.def(frame);
+            var onXScriptCreated = this.onXScriptCreatedByTag[scriptTag];
+            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") with frame.script.tag="
+                                      +frame.script.tag+" onXScriptCreated:"+onXScriptCreated.kind+"\n");
+            delete this.onXScriptCreatedByTag[scriptTag];
+            frame.script.clearBreakpoint(0);
+            try {
+                var sourceFile = onXScriptCreated(frame, type, val);
+            } catch (e) {
+                FBTrace.sysout("onBreakpoint called onXScriptCreated and it didn't end well:",e);
+            }
+
+            if (FBTrace.DBG_FBS_SRCUNITS)
+            {
+                var msg = "Top Scripts Uncleared:";
+                for (p in this.onXScriptCreatedByTag) msg += (p+"|");
+                FBTrace.sysout(msg);
+            }
+            if (!sourceFile || !sourceFile.breakOnZero || sourceFile.breakOnZero != scriptTag)
+                return true;
+            else  // sourceFile.breakOnZero matches the script we have halted.
+            {
+               if (FBTrace.DBG_FBS_BP)
+                   FBTrace.sysout("fbs.onBreakpoint breakOnZero, continuing for user breakpoint\n");
+            }
+        }
+        return false;
+    },
+
+    /*
+     * If true, emergency bailout: a frame is running a script which has not been processed as source
+     */
+    isNestedScript: function(frame, type, val)
+    {
+        if ( fbs.nestedScriptStack.length === 0 || fbs.nestedScriptStack.indexOf(frame.script) === -1 )
+            return false;
+
+        try {
+            var sourceFile = fbs.onTopLevelScriptCreated(frame, type, val);
+        } catch (e) {
+            FBTrace.sysout("isNestedScript called onXScriptCreated and it didn't end well:",e);
+        }
+
+        return true;
+    },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     onXULScriptCreated: function(frame, type, val, noNestTest)
@@ -1402,7 +1436,7 @@ FirebugService.prototype =
                     // Now we know its event, not nested.
                     if (fbs.nestedScriptStack.length > 0)
                     {
-                        fbs.nestedScriptStack.removeElementAt(0);
+                        fbs.nestedScriptStack.splice(0,1);
                     }
                     else
                     {
@@ -1423,7 +1457,7 @@ FirebugService.prototype =
                 var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
                 if (debuggr)
                 {
-                    var sourceFile = debuggr.onEventScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
+                    var sourceFile = debuggr.onEventScriptCreated(frame, frame.script, fbs.getNestedScriptEnumerator());
                     fbs.resetBreakpoints(sourceFile);
                 }
                 else
@@ -1464,7 +1498,7 @@ FirebugService.prototype =
                 var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
                 if (debuggr)
                 {
-                    var sourceFile = debuggr.onEvalScriptCreated(frame, outerScript, fbs.nestedScriptStack.enumerate());
+                    var sourceFile = debuggr.onEvalScriptCreated(frame, outerScript, fbs.getNestedScriptEnumerator());
                     fbs.resetBreakpoints(sourceFile);
                 }
                 else
@@ -1492,7 +1526,7 @@ FirebugService.prototype =
             // Now we know its not an event
             if (fbs.nestedScriptStack.length > 0)
             {
-                var firstScript = fbs.nestedScriptStack.queryElementAt(0, jsdIScript);
+                var firstScript = fbs.nestedScriptStack[0];
                 if (firstScript.tag in fbs.onXScriptCreatedByTag)
                 {
                     delete  fbs.onXScriptCreatedByTag[firstScript.tag];
@@ -1509,7 +1543,7 @@ FirebugService.prototype =
             var debuggr = fbs.findDebugger(frame);  // sets debuggr.breakContext
             if (debuggr)
             {
-                var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.nestedScriptStack.enumerate());
+                var sourceFile = debuggr.onTopLevelScriptCreated(frame, frame.script, fbs.getNestedScriptEnumerator());
                 if (FBTrace.DBG_FBS_SRCUNITS) FBTrace.sysout("fbs.onTopLevelScriptCreated got sourceFile:"+sourceFile+" using "+fbs.nestedScriptStack.length+" nestedScripts\n");
                 fbs.resetBreakpoints(sourceFile, frame.script.baseLineNumber+frame.script.lineExtent);
             }
@@ -1533,13 +1567,31 @@ FirebugService.prototype =
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+    getNestedScriptEnumerator: function()
+    {
+        var enumer =
+        {
+            index: 0,
+            hasMoreElements: function()
+            {
+                return (this.index < fbs.nestedScriptStack.length);
+            },
+            getNext: function()
+            {
+                var rv = fbs.nestedScriptStack[this.index];
+                this.index++;
+                return rv;
+            }
+        };
+        return enumer;
+    },
 
     clearNestedScripts: function()
     {
-        var innerScripts = fbs.nestedScriptStack.enumerate();
-        while (innerScripts.hasMoreElements())
+        var innerScripts = fbs.nestedScriptStack;
+        for ( var i = 0; i < innerScripts.length; i++)
         {
-            var script = innerScripts.getNext();
+            var script = innerScripts[i];
             if (script.isValid && script.baseLineNumber == 1)
             {
                 script.clearBreakpoint(0);
@@ -1547,7 +1599,7 @@ FirebugService.prototype =
                     delete this.onXScriptCreatedByTag[script.tag];
             }
         }
-        fbs.nestedScriptStack.clear();
+        fbs.nestedScriptStack = [];
     },
 
     onScriptCreated: function(script)
@@ -1555,40 +1607,40 @@ FirebugService.prototype =
         if (!fbs)
         {
             if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS || FBTrace.DBG_FBS_TRACKFILES)
-                FBTrace.sysout("onScriptCreated, but no fbs for script.fileName="+script.fileName);
+                FBTrace.sysout("onScriptCreated "+script.tag+", but no fbs for script.fileName="+script.fileName);
              return;
         }
 
         try
         {
             var fileName = script.fileName;
+
             if (FBTrace.DBG_FBS_TRACKFILES)
                 trackFiles.add(fileName);
             if (isFilteredURL(fileName) || fbs.isChromebug(fileName))
             {
                 try {
                     if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
-                        FBTrace.sysout("onScriptCreated: filename filtered:\'"+fileName+"\'"+(fbs.filterConsoleInjections?" console injection":""));
-                } catch (exc) { /*Bug 426692 */ }
+                        FBTrace.sysout("onScriptCreated "+script.tag+": filename filtered:\'"+fileName+"\'"+(fbs.filterConsoleInjections?" console injection":""));
+                } catch (exc) {
+                    FBTrace.sysout("onScriptCreated "+script.tag+" filtered msg FAILS \'"+script.fileName+"\'"); /*? Bug 426692 */
+                }
                 if (FBTrace.DBG_FBS_TRACKFILES)
                     trackFiles.drop(fileName);
                 return;
             }
 
-            // reset tracing flags on first unfiltered filename
-            if (!FBTrace.DBG_FF_START && !fbs.firstUnfilteredFilename)
-            {
-                fbs.firstUnfilteredFilename = true;
-                FBTrace.DBG_FBS_BP = fbs.resetBP ? true : false;
-                FBTrace.DBG_FBS_CREATION = fbs.resetCreation ? true : false;
-            }
-
-            if (FBTrace.DBG_FBS_CREATION) {
+            if (FBTrace.DBG_FBS_CREATION || FBTrace.DBG_FBS_SRCUNITS)
                 FBTrace.sysout("onScriptCreated: "+script.tag+"@("+script.baseLineNumber+"-"
-                    +(script.baseLineNumber+script.lineExtent)+")"+script.fileName+"\n");
+                    +(script.baseLineNumber+script.lineExtent)+")"+script.fileName);
+
+            if (FBTrace.DBG_FBS_CREATION)
+            {
                 try {
                     FBTrace.sysout("onScriptCreated: \'"+script.functionName+"\'", script.functionSource);
-                } catch (exc) { /*Bug 426692 */ }
+                } catch (exc) {
+                    FBTrace.sysout("onScriptCreated "+script.tag+" FAILS \'"+script.fileName+"\'"); /*? Bug 426692 */
+                }
             }
 
             if( reXUL.test(script.fileName) )
@@ -1626,14 +1678,14 @@ FirebugService.prototype =
                 fbs.onXScriptCreatedByTag[script.tag] = this.onEventScriptCreated; // for case 1
                 script.setBreakpoint(0);
 
-                fbs.nestedScriptStack.appendElement(script, false);  // for case 2
+                fbs.nestedScriptStack.push(script);  // for case 2
 
                 if (FBTrace.DBG_FBS_CREATION)
                     FBTrace.sysout("onScriptCreated: set BP at PC 0 in event level tag="+script.tag);
             }
             else
             {
-                fbs.nestedScriptStack.appendElement(script, false);
+                fbs.nestedScriptStack.push(script);
                 if (FBTrace.DBG_FBS_CREATION) FBTrace.sysout("onScriptCreated: nested function named: "+script.functionName);
                 dispatch(scriptListeners,"onScriptCreated",[script, fileName, script.baseLineNumber]);
             }
@@ -2558,6 +2610,7 @@ FirebugService.prototype =
         jsd.breakpointHook = { onExecute: hook(this.onBreakpoint, RETURN_CONTINUE) };
         jsd.throwHook = { onExecute: hook(this.onThrow, RETURN_CONTINUE_THROW) };
         jsd.errorHook = { onError: hook(this.onError, true) };
+        jsd.topLevelHook = { onCall: hook(this.onTopLevel, true)};
     },
 
     unhookScripts: function()

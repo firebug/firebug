@@ -1174,7 +1174,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         var script = frame.script;
         var url = normalizeURL(script.fileName);
 
-        if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated outerScript.tag="+outerScript.tag+" has fileName="+outerScript.fileName+"\n");
+        if (FBTrace.DBG_TOPLEVEL) FBTrace.sysout("debugger.onTopLevelScriptCreated frame.script.tag="+frame.script.tag+" has url="+url);
 
         var sourceFile = context.sourceFileMap[url];
         if (sourceFile && (sourceFile instanceof Firebug.TopLevelSourceFile) )      // TODO test multiple script tags in one html file
