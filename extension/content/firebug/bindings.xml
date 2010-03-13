@@ -941,13 +941,15 @@
                 if (!this.locator)  // XXXjjb this is complicated because the location list depends upon the current panel
                 {
                     var functionYieldingExpression = this.getAttribute("locationProvider");
+                    try {
                     if (functionYieldingExpression && functionYieldingExpression.length > 0)
                         this.locator = eval(functionYieldingExpression);
-                    else
+                        } catch (e) { FBTrace.sysout("getLocator Fails "+e+" in "+window.location) ; }
+                    if (!this.locator || typeof(this.locator) != 'function')
                     {
                         var whichBinding = this.getAttribute("id");
                         var msg = "ERROR: panelFileList "+whichBinding+" requires attribute \'locationProvider\', an expression yielding a function";
-                        FBTrace.sysout(msg);
+                        FBTrace.sysout(msg, {locator: this.locator, expression: functionYieldingExpression});
                         return null;
                     }
                 }
@@ -1391,7 +1393,7 @@
                     setTimeout(FBL.bindFixed(function(){items[goingDown ? 0 : items.length -1].focus();}));
                 }
                 else if (event.keyCode ==  KeyEvent.DOM_VK_ESCAPE)
-	                this.hideOptions();
+                    this.hideOptions();
             ]]></body>
         </method>
         <method name="onPopupKeyDown">
