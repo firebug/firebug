@@ -65,6 +65,8 @@ top.FirebugChrome =
         }
         catch (exc)
         {
+            // Disaster!
+            Components.utils.reportError("Firebug initialization FAILS "+exc);
             if (FBTrace.sysout)
                 FBTrace.sysout("chrome.panelBarReady FAILS: "+exc, exc);
             return false;
