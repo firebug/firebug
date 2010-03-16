@@ -9,7 +9,11 @@ const Cc = Components.classes;
 const Ci = Components.interfaces;
 
 const detachCommand = $("cmd_toggleDetachFirebug");
-const privateBrowsingService = Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService);
+
+// The service doesn't have to be available if Firefox is built with privatebrowsing disabled so,
+// don't foreget to check it before access (issue 2923).
+const privateBrowsingEnabled = ("@mozilla.org/privatebrowsing;1" in Cc) &&
+    Cc["@mozilla.org/privatebrowsing;1"].getService(Ci.nsIPrivateBrowsingService).privateBrowsingEnabled;
 
 // ************************************************************************************************
 
@@ -239,7 +243,7 @@ Firebug.Activation = extend(Firebug.Module,
 
     setPageAnnotation: function(currentURI, annotation)
     {
-        if (privateBrowsingService.privateBrowsingEnabled)
+        if (privateBrowsingEnabled)
         {
             Firebug.Console.logFormatted(["Sites are not remembered in Private Browsing Mode"], FirebugContext, "info");  // XXXTODO NLS
             return;
