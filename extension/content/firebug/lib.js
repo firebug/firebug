@@ -1866,11 +1866,7 @@ this.getElementXML = function(element)
 
 var entityConversionLists = this.entityConversionLists = {
     normal : {
-        text:
-		{
-			'\0' : '\u200c\u0000'	
-		},
-		whitespace : {
+        whitespace : {
             '\t' : '\u200c\u2192',
             '\n' : '\u200c\u00b6',
             '\r' : '\u200c\u00ac',
@@ -1878,10 +1874,6 @@ var entityConversionLists = this.entityConversionLists = {
         }
     },
     reverse : {
-        text:
-		{
-			'\u200c\u0000' : '\0'	
-		},
         whitespace : {
             '&Tab;' : '\t',
             '&NewLine;' : '\n',
@@ -1918,6 +1910,7 @@ var e = addEntityMapToList,
     css = 'css',
     editor = 'editor';
 
+e(0x0000, '#0', text, attr, css, editor);
 e(0x0022, 'quot', attr, css);
 e(0x0026, 'amp', attr, text, css);
 e(0x0027, 'apos', css);
