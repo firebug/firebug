@@ -53,7 +53,6 @@ Firebug.CommandLine = extend(Firebug.Module,
         if (!context)
             return;
 
-        var debuggerState = Firebug.Debugger.beginInternalOperation();
         try
         {
             var result = null;
