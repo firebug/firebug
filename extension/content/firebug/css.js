@@ -1446,12 +1446,6 @@ CSSElementPanel.prototype = extend(Firebug.CSSStyleSheetPanel.prototype,
             return;
         }
 
-        if (!domUtils)
-        {
-            FirebugReps.Warning.tag.replace({object: "DOMInspectorWarning"}, this.panelNode);
-            return;
-        }
-
         if (!element)
             return;
 

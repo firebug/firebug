@@ -12,10 +12,19 @@ var _CC = Components.classes;
 
 this.CCSV = function(cName, ifaceName)
 {
-	if (_CC[cName])
-		return _CC[cName].getService(_CI[ifaceName]);  // if fbs fails to load, the error can be _CC[cName] has no properties
-	else
-		throw new Error("Firebug CCSV fails for cName:"+cName);
+    try
+    {
+        return _CC[cName].getService(_CI[ifaceName]);  // if fbs fails to load, the error can be _CC[cName] has no properties
+    }
+    catch(exc)
+    {
+        Components.utils.reportError(cName+"@"+ifaceName+" FAILED "+exc);
+        if (!_CC[cName])
+            Components.utils.reportError("No Components.classes entry for "+cName);
+        else if (!_CI[ifaceName])
+            Components.utils.reportError("No Components.interfaces entry for "+ifaceName);
+    }
+
 };
 
 this.CCIN = function(cName, ifaceName)

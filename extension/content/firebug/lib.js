@@ -73,7 +73,17 @@ this.initialize = function()
     {
         var fn = namespaces[i];
         var ns = namespaces[i+1];
-        fn.apply(ns);
+        try
+        {
+            fn.apply(ns);
+        }
+        catch (exc)
+        {
+            if (exc.stack)
+                Components.utils.reportError("Firebug initialize FAILS "+exc+" "+exc.stack);
+            else
+                Components.utils.reportError("Firebug initialize FAILS "+exc+" "+fn.toSource().substr(0,500));
+        }
     }
 
     if (FBTrace.DBG_INITIALIZE)
@@ -2495,6 +2505,7 @@ this.getFrameSourceLink = function(frame)
         return null;
 };
 
+// TODO delete this, only used by console
 this.getStackFrameId = function()
 {
     for (var frame = Components.stack; frame; frame = frame.caller)
