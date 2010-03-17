@@ -703,11 +703,10 @@ Firebug.SourceFile.getSourceFileAndLineByScript= function(context, script, frame
     var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, script);
     if (sourceFile)
     {
-        var analyzer = sourceFile.getScriptAnalyzer(script);
-        if (analyzer)
-            var line = frame ? analyzer.getSourceLineFromFrame(context, frame) : analyzer.getBaseLineNumberByScript(script);
+        if (sourceFile.pcmap_type)
+            var line = script.pcToLine(1, sourceFile.pcmap_type);
         else
-            var line = 0;
+            var line = 1;
 
         return { sourceFile: sourceFile, lineNo: line };
     }
