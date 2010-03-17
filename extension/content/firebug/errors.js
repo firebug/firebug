@@ -134,7 +134,7 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
             var ConsoleMessage = object instanceof nsIConsoleMessage;
             var isWarning = object && object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
             var CSSParser = object && object.category == "CSS Parser";
-            var XPConnect = object && object.category.split(' ').indexOf("XPConnect") != -1;
+            var XPConnect = object && object.category && object.category.split(' ').indexOf("XPConnect") != -1;
             if (ScriptError && !XPConnect)  // all branches should trace 'object'
             {
                 if (FBTrace.DBG_ERRORS)
