@@ -92,6 +92,9 @@ Firebug.Activation = extend(Firebug.Module,
                 if (!shortURI)
                     return uri;
 
+                if (shortURI.scheme === "about")  // annoying "about" URIs throw if you access .host
+                    return shortURI;
+
                 var host = shortURI.host;
                 if (host)
                 {
