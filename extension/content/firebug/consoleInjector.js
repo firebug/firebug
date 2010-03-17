@@ -38,7 +38,8 @@ top.Firebug.Console.injector =
             return true;
 
         if (FBTrace.DBG_CONSOLE)
-            FBTrace.sysout("Console.attachIfNeeded found isAttached false ");
+            FBTrace.sysout("Console.attachIfNeeded found isAttached false " +
+                safeGetWindowLocation(win));
 
         this.attachConsoleInjector(context, win);
         this.addConsoleListener(context, win);

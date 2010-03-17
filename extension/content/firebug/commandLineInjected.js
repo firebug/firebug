@@ -64,7 +64,7 @@ var _FirebugCommandLine =
                 var expr = event.data;
                 self.evaluate(expr);
             }
-                
+
             // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
         }, false);
 
