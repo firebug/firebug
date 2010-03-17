@@ -3068,6 +3068,8 @@ this.safeGetWindowLocation = function(window)
                     return window.location.toString();
                 else if (typeof (window.location) == 'string' )
                     return window.location+"";
+                else if (window.location+"")
+                    return window.location+"";
                 else
                     return "(window.location has no toString)";
             }
