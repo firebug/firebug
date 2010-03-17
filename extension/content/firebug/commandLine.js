@@ -115,6 +115,9 @@ Firebug.CommandLine = extend(Firebug.Module,
         // targetWindow may be frame in HTML
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
 
+        expr = expr.toString();
+        expr = "with(_FirebugCommandLine){" + expr + "\n};";
+
         win.postMessage(expr, "*");
     },
     //
