@@ -5422,7 +5422,7 @@ Breakpoint.prototype =
             // The callbacks will set this if the condition is true or if the eval faults.
             delete context.breakingCause;
 
-            var rc = Firebug.CommandLine.evaluate(expr, context, null, context.window,
+            var rc = Firebug.CommandLine.evaluateInSandbox(expr, context, null, context.window,
                 this.onEvaluateSucceeds, this.onEvaluateFails );
 
             if (FBTrace.DBG_NET)
