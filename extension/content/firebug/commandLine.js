@@ -114,13 +114,62 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         // targetWindow may be frame in HTML
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+        if (!win)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("commandLine.evaluateByPostMessage: no targetWindow!\n");
+            return;
+        }
+
+        // We're going to use some command-line facilities, but it may not have initialized yet.
+        this.initializeCommandLineIfNeeded(context, win);
 
         expr = expr.toString();
         expr = "with(_FirebugCommandLine){" + expr + "\n};";
 
-        win.postMessage(expr, "*");
+        var consoleHandler;
+        for (var i=0; i<context.activeConsoleHandlers.length; i++)
+        {
+            if (context.activeConsoleHandlers[i].window == win)
+            {
+                consoleHandler = context.activeConsoleHandlers[i];
+                break;
+            }
+        }
+
+        if (successConsoleFunction)
+        {
+            consoleHandler.evaluated = function useConsoleFunction(result)
+            {
+                successConsoleFunction(result, context);  // result will be pass thru this function
+            }
+        }
+
+        if (exceptionFunction)
+        {
+            consoleHandler.evaluateError = function useExceptionFunction(result)
+            {
+                exceptionFunction(result, context);
+            }
+        }
+        else
+        {
+            consoleHandler.evaluateError = function useErrorFunction(result)
+            {
+                if (result)
+                {
+                    var m = reCmdSource.exec(result.source);
+                    if (m && m.length > 0)
+                        result.source = m[1];
+                }
+
+                Firebug.Console.logFormatted([result], context, "error", true);
+            }
+        }
+
+        return win.postMessage(expr, "*");
     },
-    //
+
     evaluateInWebPage: function(expr, context, targetWindow)
     {
         var win = targetWindow ? targetWindow : context.window;
