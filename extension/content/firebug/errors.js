@@ -130,24 +130,26 @@ var Errors = Firebug.Errors = extend(Firebug.Module,
 
         try
         {
-            if (object instanceof nsIScriptError)  // all branches should trace 'object'
+            var ScriptError = object instanceof nsIScriptError;
+            var ConsoleMessage = object instanceof nsIConsoleMessage;
+            var isWarning = object && object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
+            var CSSParser = object && object.category == "CSS Parser";
+            var XPConnect = object && object.category.split(' ').indexOf("XPConnect") != -1;
+            if (ScriptError && !XPConnect)  // all branches should trace 'object'
             {
-                var CSSParser = object && object.category == "CSS Parser";
                 if (FBTrace.DBG_ERRORS)
                     FBTrace.sysout("errors.observe nsIScriptError: "+object.errorMessage, object);
 
                 var context = this.getErrorContext(object);  // after instanceof
-                var isWarning = object.flags & WARNING_FLAG;  // This cannot be pulled in front of the instanceof
                 context = this.logScriptError(context, object, isWarning);
                 if (!context)
                     return;
             }
             else
             {
-                var isWarning = object.flags & WARNING_FLAG;
                 if (Firebug.showChromeMessages)
                 {
-                    if (object instanceof nsIConsoleMessage)
+                    if (ConsoleMessage)
                     {
                         if (FBTrace.DBG_ERRORS)
                             FBTrace.sysout("errors.observe nsIConsoleMessage: "+object.message, object);
