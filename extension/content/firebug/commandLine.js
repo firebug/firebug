@@ -758,10 +758,13 @@ function autoCompleteEval(preExpr, expr, postExpr, context)
         {
             if (context.stopped)
                 return Firebug.Debugger.getCurrentFrameKeys(context);
-            else if (context.global)
-                return keys(context.global).sort();
-            else if (context.window)
+
+            // Cross window type pseudo-comparison
+            var innerWindow = context.window.wrappedJSObject;
+            if (innerWindow && innerWindow.Window && innerWindow.constructor.toString() === innerWindow.Window.toString())
                 return keys(context.window.wrappedJSObject).sort();  // return is safe
+            else  // hopefull sandbox in Chromebug
+                return keys(context.global).sort();
         }
     }
     catch (exc)
