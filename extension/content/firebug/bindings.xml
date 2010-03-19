@@ -718,6 +718,8 @@
             var panelItems = panel ? panel.getOptionsMenuItems(FirebugContext) : null;
             if (!this.module && !(panelItems && panelItems.length))
                 this.setAttribute("collapsed", "true");
+            else
+                this.removeAttribute("collapsed");
             ]]></body>
         </method>
     </implementation>
