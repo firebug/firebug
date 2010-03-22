@@ -49,7 +49,7 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         // The JSON is still no there, try to parse most common cases.
         if (!file.jsonObject)
         {
-            if (this.isJSON(safeGetContentType(file.request)))
+            if (this.isJSON(safeGetContentType(file.request), file.responseText))
                 file.jsonObject = this.parseJSON(file);
         }
 
@@ -65,8 +65,18 @@ Firebug.JSONViewerModel = extend(Firebug.Module,
         }
     },
 
-    isJSON: function(contentType)
+    isJSON: function(contentType, data)
     {
+        // Workaround for JSON responses without proper content type
+        // Let's consider all responses starting with "{" as JSON. In the worst
+        // case there will be an exception when parsing. This means that no-JSON
+        // responses (and post data) (with "{") can be parsed unnecessarily,
+        // which represents a little overhead, but this happens only if the request
+        // is actually expanded by the user in the UI (Net & Console panels).
+        var responseText = data ? trimLeft(data) : null;
+        if (responseText && responseText.indexOf("{") == 0)
+            return true;
+
         if (!contentType)
             return false;
 

@@ -2659,7 +2659,7 @@ Firebug.NetMonitor.NetInfoPostData = domplate(Firebug.Rep, new Firebug.Listener(
 
         var contentType = Utils.findHeader(file.requestHeaders, "content-type");
 
-        if (Firebug.JSONViewerModel.isJSON(contentType))
+        if (Firebug.JSONViewerModel.isJSON(contentType, text))
             this.insertJSON(parentNode, file, context);
 
         if (Firebug.XMLViewerModel.isXML(contentType))
