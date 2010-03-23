@@ -1,29 +1,29 @@
 /* See license.txt for terms of usage */
 function _FirebugConsole()
 {
-    this.log = function() { window._firebug.notifyFirebug(arguments, 'log', 'firebugAppendConsole'); }
-    this.debug = function() { window._firebug.notifyFirebug(arguments, 'debug', 'firebugAppendConsole'); }
-    this.info = function() { window._firebug.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
-    this.warn = function() { window._firebug.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
-    this.error = function() { window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
-    this.exception = function() { window._firebug.notifyFirebug(arguments, 'exception', 'firebugAppendConsole'); }
-    this.assert = function() { window._firebug.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
-    this.dir = function() { window._firebug.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
-    this.dirxml = function() { window._firebug.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
+    this.log = function log() { window._firebug.notifyFirebug(arguments, 'log', 'firebugAppendConsole'); }
+    this.debug = function debug() { window._firebug.notifyFirebug(arguments, 'debug', 'firebugAppendConsole'); }
+    this.info = function info() { window._firebug.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
+    this.warn = function warn() { window._firebug.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
+    this.error = function error() { window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
+    this.exception = function exception() { window._firebug.notifyFirebug(arguments, 'exception', 'firebugAppendConsole'); }
+    this.assert = function assert() { window._firebug.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
+    this.dir = function dir() { window._firebug.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
+    this.dirxml = function dirxml() { window._firebug.notifyFirebug(arguments, 'dirxml', 'firebugAppendConsole'); }
     this.trace = function firebugDebuggerTracer() { debugger; }
-    this.group = function() { window._firebug.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
-    this.groupEnd = function() { window._firebug.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
-    this.groupCollapsed = function() { window._firebug.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
-    this.time = function() { window._firebug.notifyFirebug(arguments, 'time', 'firebugAppendConsole'); }
-    this.timeEnd = function() { window._firebug.notifyFirebug(arguments, 'timeEnd', 'firebugAppendConsole'); }
-    this.profile = function() { window._firebug.notifyFirebug(arguments, 'profile', 'firebugAppendConsole'); }
-    this.profileEnd = function() { window._firebug.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
-    this.count = function() { window._firebug.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
-    this.clear = function() { window._firebug.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
+    this.group = function group() { window._firebug.notifyFirebug(arguments, 'group', 'firebugAppendConsole'); }
+    this.groupEnd = function groupEnd() { window._firebug.notifyFirebug(arguments, 'groupEnd', 'firebugAppendConsole'); }
+    this.groupCollapsed = function groupCollapsed() { window._firebug.notifyFirebug(arguments, 'groupCollapsed', 'firebugAppendConsole'); }
+    this.time = function time() { window._firebug.notifyFirebug(arguments, 'time', 'firebugAppendConsole'); }
+    this.timeEnd = function timeEnd() { window._firebug.notifyFirebug(arguments, 'timeEnd', 'firebugAppendConsole'); }
+    this.profile = function profile() { window._firebug.notifyFirebug(arguments, 'profile', 'firebugAppendConsole'); }
+    this.profileEnd = function profileEnd() { window._firebug.notifyFirebug(arguments, 'profileEnd', 'firebugAppendConsole'); }
+    this.count = function count() { window._firebug.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
+    this.clear = function clear() { window._firebug.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
 
     // DBG this.uid = Math.random();
 
-    this.notifyFirebug = function(objs, methodName, eventID)
+    this.notifyFirebug = function notifyFirebug(objs, methodName, eventID)
     {
         var element = this.getFirebugElement();
 
@@ -64,7 +64,7 @@ function _FirebugConsole()
         return result;
     };
 
-    this.getFirebugElement = function()
+    this.getFirebugElement = function getFirebugElement()
     {
         if (!this.element)
             this.element = window._getFirebugConsoleElement();
@@ -74,12 +74,12 @@ function _FirebugConsole()
     // ***********************************************************************
     // Console API
 
-    this.__defineGetter__("firebug", function(){
+    this.__defineGetter__("firebug", function firebug() {
         return this.getFirebugElement().getAttribute("FirebugVersion");
     });
 }
 
-window._getFirebugConsoleElement = function()  // could this be done in extension code? but only after load....
+window._getFirebugConsoleElement = function _getFirebugConsoleElement()  // could this be done in extension code? but only after load....
 {
     var element = document.getElementById("_firebugConsole");
     if (!element)
