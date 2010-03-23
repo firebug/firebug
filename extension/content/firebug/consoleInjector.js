@@ -70,10 +70,10 @@ top.Firebug.Console.injector =
         if (!this.consoleInjectionScript)
         {
             var script = "";
-            script += "window.__defineGetter__('console', function() {\n";
+            script += "window.__defineGetter__('console', function console() {\n";
             script += " return (window._firebug ? window._firebug : window.loadFirebugConsole()); })\n\n";
 
-            script += "window.loadFirebugConsole = function() {\n";
+            script += "window.loadFirebugConsole = function loadFirebugConsole() {\n";
             script += "window._firebug =  new _FirebugConsole();";
 
             if (FBTrace.DBG_CONSOLE)
