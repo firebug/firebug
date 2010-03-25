@@ -48,6 +48,7 @@
     background: #EEEEEE no-repeat 2px 0px;
     color: #888888;
     white-space: pre;
+    font-family: monospace; /* see issue 2953 */
 }
 
 .noteInToolTip { /* below sourceLine, so it overrides it */
