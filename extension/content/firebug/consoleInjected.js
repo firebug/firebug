@@ -5,7 +5,6 @@ function _FirebugConsole()
     this.debug = function debug() { window._firebug.notifyFirebug(arguments, 'debug', 'firebugAppendConsole'); }
     this.info = function info() { window._firebug.notifyFirebug(arguments, 'info', 'firebugAppendConsole'); }
     this.warn = function warn() { window._firebug.notifyFirebug(arguments, 'warn', 'firebugAppendConsole'); }
-    this.error = function error() { window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole'); }
     this.exception = function exception() { window._firebug.notifyFirebug(arguments, 'exception', 'firebugAppendConsole'); }
     this.assert = function assert() { window._firebug.notifyFirebug(arguments, 'assert', 'firebugAppendConsole'); }
     this.dir = function dir() { window._firebug.notifyFirebug(arguments, 'dir', 'firebugAppendConsole'); }
@@ -21,6 +20,13 @@ function _FirebugConsole()
     this.count = function count() { window._firebug.notifyFirebug(arguments, 'count', 'firebugAppendConsole'); }
     this.clear = function clear() { window._firebug.notifyFirebug(arguments, 'clear', 'firebugAppendConsole'); }
 
+    this.error = function error()
+    {
+        window.top._firebugStackTrace = "requested"; // flag to cause trace to store trace in context.stackTrace
+        this.trace(); // set the context.stackTrace
+        window._firebug.notifyFirebug(arguments, 'error', 'firebugAppendConsole');
+        delete window.top._firebugStackTrace;
+    }
     // DBG this.uid = Math.random();
 
     this.notifyFirebug = function notifyFirebug(objs, methodName, eventID)

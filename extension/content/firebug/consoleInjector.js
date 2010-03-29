@@ -414,11 +414,11 @@ function FirebugConsoleHandler(context, win)
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from msg.stack", trace);
         }
-        else
+        else if (context.stackTrace)
         {
-            var trace = getJSDUserStack();
+            var trace = context.stackTrace
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
+                FBTrace.sysout("logAssert trace from context.window.stackTrace", trace);
         }
 
         var url = msg.fileName ? msg.fileName : win.location.href;

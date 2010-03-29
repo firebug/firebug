@@ -869,7 +869,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                 if (trace)
                 {
                     trace.frames = trace.frames.slice(1).reverse(); // drop the firebugDebuggerTracer and reorder
-                    Firebug.Console.log(trace, context, "stackTrace");
+                    if (context.window.wrappedJSObject._firebugStackTrace == "requested")
+                    {
+                        trace.frames = trace.frames.slice(1);  // drop error() see consoleInjected.js
+                        context.stackTrace = trace;
+                    }
+                    else
+                        Firebug.Console.log(trace, context, "stackTrace");
                 }
 
                 if(FBTrace.DBG_BP)
