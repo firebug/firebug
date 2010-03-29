@@ -1552,7 +1552,7 @@ this.ErrorMessage = domplate(Firebug.Rep,
     {
         var url = error.href.toString();
         var fromCommandLine = (url.indexOf("XPCSafeJSObjectWrapper") != -1);
-        return !fromCommandLine && error.trace;
+        return !fromCommandLine && error.trace && error.trace.length;
     },
 
     hasBreakSwitch: function(error)

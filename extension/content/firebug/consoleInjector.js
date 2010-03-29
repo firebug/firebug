@@ -421,8 +421,9 @@ function FirebugConsoleHandler(context, win)
                 FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
-        var errorObject = new FBL.ErrorMessage(msg, (msg.fileName?msg.fileName:win.location),
-            (msg.lineNumber?msg.lineNumber:0), "", category, context, trace);
+        var url = msg.fileName ? msg.fileName : win.location.href;
+        var lineNo = msg.lineNumber ? msg.lineNumber : 0;
+        var errorObject = new FBL.ErrorMessage(msg, url, lineNo, "", category, context, trace);
 
         if (trace && trace.frames && trace.frames[0])
            errorObject.correctWithStackTrace(trace);
