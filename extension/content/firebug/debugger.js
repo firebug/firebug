@@ -421,7 +421,7 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         {
             fbs.enumerateBreakpoints(null, {call: function(url, lineNo, bp) // null means all urls
             {
-                if (bp.debugger !== this) // skip breakpoints of other debuggers.
+                if (bp.debugger !== Firebug.Debugger) // skip breakpoints of other debuggers.
                     return;
 
                 if (Firebug.filterSystemURLs) // then there are not system urls, clear all
