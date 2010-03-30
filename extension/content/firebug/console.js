@@ -447,7 +447,14 @@ Firebug.ConsolePanel.prototype = extend(Firebug.ActivablePanel,
     {
         if (!rep)
             rep = Firebug.getRep(object);
-        return rep.tag.append({object: object}, row);
+
+        // Don't forget to pass the template itself as the 'self' parameter so, it's used
+        // by domplate as the 'subject' for the generation. Note that the primary purpose
+        // of the subject is to provide a context object ('with (subject) {...}') for data that
+        // are dynamically consumed during the rendering process.
+        // This allows to derive new templates from an existing ones, without breaking
+        // the default subject set within domplate() function.
+        return rep.tag.append({object: object}, row, rep);
     },
 
     appendFormatted: function(objects, row, rep)
