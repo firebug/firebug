@@ -153,12 +153,7 @@ top.Firebug.Console.injector =
 
     detachConsole: function(context, win)
     {
-        if (win && win.document)
-        {
-            var element = win.document.getElementById("_firebugConsole");
-            if (element)
-                element.parentNode.removeChild(element);
-        }
+        FBTrace.sysout("consoleInjector.detachConsole NOOP???");
     },
 }
 

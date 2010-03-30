@@ -132,8 +132,14 @@ Firebug.Console = extend(ActivableConsole,
 
     getFirebugConsoleElement: function(context, win)
     {
-        var element = win.document.getElementById("_firebugConsole");
+        var element = (win.document.body ? win.document.body : win.document.getElementsByTagName("body")[0]);
         if (!element)
+            element = win.document.documentElement; // For non-HTML docs
+
+        return element;
+
+        // The rest of this code may be needed for the case where we have no JS but want to use the command line?
+        if (!element.getAttribute("FirebugVersion"))
         {
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("getFirebugConsoleElement forcing element");

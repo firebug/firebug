@@ -85,25 +85,10 @@ function _FirebugConsole()
     });
 }
 
-window._getFirebugConsoleElement = function _getFirebugConsoleElement()  // could this be done in extension code? but only after load....
+window._getFirebugConsoleElement = function _getFirebugConsoleElement()
 {
-    var element = document.getElementById("_firebugConsole");
+    var element = document.body ? document.body : document.getElementsByTagName("body")[0];
     if (!element)
-    {
-        if (document.documentElement.nodeName == document.documentElement.nodeName.toUpperCase())
-            element = document.createElement("div");
-        else
-            element = document.createElementNS("http://www.w3.org/1999/xhtml","html:div"); // NS for XML/svg
-
-        element.setAttribute("id", "_firebugConsole");
-        element.firebugIgnore = true;
-        element.setAttribute("style", "display:none");
-
-        var body = document.body ? document.body : document.getElementsByTagName("body")[0];
-        if (!body)
-            body = document.documentElement;  // For non-HTML docs
-
-        body.appendChild(element);
-    }
+        element = document.documentElement;  // For non-HTML docs
     return element;
 };
