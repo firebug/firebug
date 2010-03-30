@@ -1198,7 +1198,8 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         return [
             Firebug.Search.searchOptionMenu("search.Case_Sensitive", "searchCaseSensitive"),
-            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal")
+            Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression", "searchUseRegularExpression")
         ];
     }
 });

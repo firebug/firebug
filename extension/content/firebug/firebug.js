@@ -64,8 +64,8 @@ const prefNames =  // XXXjjb TODO distribute to modules
     "panelTabMinWidth", "sourceLinkLabelWidth",
 
     // Search
-    "searchCaseSensitive", "searchGlobal", "netSearchHeaders", "netSearchParameters",
-    "netSearchResponseBody",
+    "searchCaseSensitive", "searchGlobal", "searchUseRegularExpression",
+    "netSearchHeaders", "netSearchParameters", "netSearchResponseBody",
 
     // Console
     "showJSErrors", "showJSWarnings", "showCSSErrors", "showXMLErrors",

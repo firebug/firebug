@@ -929,6 +929,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             Firebug.Search.searchOptionMenu("search.Case Sensitive", "searchCaseSensitive"),
             //Firebug.Search.searchOptionMenu("search.net.Headers", "netSearchHeaders"),
             //Firebug.Search.searchOptionMenu("search.net.Parameters", "netSearchParameters"),
+            Firebug.Search.searchOptionMenu("search.Use_Regular_Expression", "searchUseRegularExpression"),
             Firebug.Search.searchOptionMenu("search.net.Response Bodies", "netSearchResponseBody")
         ];
     },

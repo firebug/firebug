@@ -19,17 +19,22 @@ const searchDelay = 150;
 Firebug.Search = extend(Firebug.Module,
 {
     dispatchName: "search",
+
     search: function(text, context)
     {
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = text;
         this.update(context);
     },
-    searchNext: function(context) {
-      this.update(context, true, false);
+
+    searchNext: function(context)
+    {
+        this.update(context, true, false);
     },
-    searchPrev: function(context) {
-      this.update(context, true, true);
+
+    searchPrev: function(context)
+    {
+        this.update(context, true, true);
     },
 
     displayOnly: function(text, context)
@@ -129,26 +134,31 @@ Firebug.Search = extend(Firebug.Module,
     {
         return !!Firebug.searchCaseSensitive || text.toLowerCase() != text;
     },
+
     getTestingRegex: function(text)
     {
-      var caseSensitive = Firebug.Search.isCaseSensitive(text);
-      try
-      {
-          return new RegExp(text, caseSensitive ? "g" : "gi");
-      }
-      catch (err)
-      {
-          // The user entered an invalid regex. Duck type the regex object
-          // to support literal searches when an invalid regex is entered
-          return new LiteralRegExp(text, false, caseSensitive);
-      }
+        var caseSensitive = Firebug.Search.isCaseSensitive(text);
+        try
+        {
+            if (Firebug.searchUseRegularExpression)
+                return new RegExp(text, caseSensitive ? "g" : "gi");
+            else
+                return new FBL.LiteralRegExp(text, false, caseSensitive);
+        }
+        catch (err)
+        {
+            // The user entered an invalid regex. Duck type the regex object
+            // to support literal searches when an invalid regex is entered
+            return new LiteralRegExp(text, false, caseSensitive);
+        }
     },
 
     searchOptionMenu: function(label, option)
     {
-      return { label: label, checked: Firebug[option], option: option,
-        command: bindFixed(this.onToggleSearchOption, this, option) };
+        return { label: label, checked: Firebug[option], option: option,
+            command: bindFixed(this.onToggleSearchOption, this, option) };
     },
+
     onToggleSearchOption: function(option)
     {
         Firebug.setPref(Firebug.prefDomain, option, !Firebug[option]);
@@ -171,14 +181,14 @@ Firebug.Search = extend(Firebug.Module,
         var searchBox = Firebug.chrome.$("fbSearchBox");
         searchBox.value = "";
         removeClass(searchBox, "fbSearchBox-attention");
-        
+
         if (panel)
         {
             searchBox.collapsed = !panel.searchable;
             searchBox.updateOptions(panel.getSearchOptionsMenuItems());
         }
         else
-            searchBox.collapsed = false;  
+            searchBox.collapsed = false;
     }
 });
 

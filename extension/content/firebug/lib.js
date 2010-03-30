@@ -6952,7 +6952,10 @@ this.ReversibleRegExp = function(regex, flags)
         {
             try
             {
-                re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+                if (Firebug.searchUseRegularExpression)
+                    re[key] = new RegExp(expression(regex, reverse), flag(flags, caseSensitive));
+                else
+                    re[key] = new FBL.LiteralRegExp(regex, reverse, caseSensitive);
             }
             catch (ex)
             {

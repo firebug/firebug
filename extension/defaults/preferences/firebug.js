@@ -25,6 +25,7 @@ pref("extensions.firebug.activateSameOrigin", true);
 // Search
 pref("extensions.firebug.searchCaseSensitive", false);
 pref("extensions.firebug.searchGlobal", true);
+pref("extensions.firebug.searchUseRegularExpression", false);
 
 pref("extensions.firebug.netSearchHeaders", false);
 pref("extensions.firebug.netSearchParameters", false);
