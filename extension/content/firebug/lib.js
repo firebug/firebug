@@ -96,7 +96,7 @@ this.initialize = function()
 this.bind = function()  // fn, thisObject, args => thisObject.fn(args, arguments);
 {
    var args = cloneArray(arguments), fn = args.shift(), object = args.shift();
-   return function() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
+   return function bind() { return fn.apply(object, arrayInsert(cloneArray(args), 0, arguments)); }
 };
 
 this.bindFixed = function() // fn, thisObject, args => thisObject.fn(args);
