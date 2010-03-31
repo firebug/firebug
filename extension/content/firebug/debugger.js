@@ -149,6 +149,12 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             FBTrace.sysout("debugger.halt, completed debugger stmt");
     },
 
+    breakAsIfDebugger: function(frame)
+    {
+        var debuggr = fbs.findDebugger(frame); // should return 'this' but also sets this.breakContext
+        fbs.breakIntoDebugger(debuggr, frame, 3);
+    },
+
     breakNowURLPrefix: "chrome://firebug/",
 
     breakNow: function(context)
