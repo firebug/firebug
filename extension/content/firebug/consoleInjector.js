@@ -148,8 +148,14 @@ top.Firebug.Console.injector =
     {
         if (!win)
             win = context.window;
+
         if (context.activeConsoleHandlers)
+        {
+        	if (context.activeConsoleHandlers[win])
+        		context.activeConsoleHandlers[win].detach();
             delete context.activeConsoleHandlers[win];
+        }
+
     },
 }
 
@@ -164,11 +170,17 @@ function FirebugConsoleHandler(context, win)
         // When raised on our injected element, callback to Firebug and append to console
         this.boundHandler = bind(this.handleEvent, this);
         this.element.addEventListener('firebugAppendConsole', this.boundHandler, true); // capturing
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector FirebugConsoleHandler addEventListener "+this.handler_name);
     };
 
     this.detach = function()
     {
         this.element.removeEventListener('firebugAppendConsole', this.boundHandler, true);
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("consoleInjector FirebugConsoleHandler removeEventListener "+this.handler_name);
     };
 
     this.handler_name = ++total_handlers;

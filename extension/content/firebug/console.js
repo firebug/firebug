@@ -252,7 +252,10 @@ Firebug.Console = extend(ActivableConsole,
 
     destroyContext: function(context, persistedState)
     {
-        Firebug.Console.injector.detachConsole(context, context.window);  // TODO iterate windows?
+         iterateWindows(context.window, function detachOneConsole(win)
+         {
+             Firebug.Console.injector.detachConsole(context, win);
+         });
     },
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *

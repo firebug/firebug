@@ -80,7 +80,7 @@ Firebug.CommandLine = extend(Firebug.Module,
         return result;
     },
 
-        evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
+    evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
     {
         var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
         if (!win)
@@ -558,6 +558,14 @@ Firebug.CommandLine = extend(Firebug.Module,
     {
         var command = Firebug.chrome.$("cmd_focusCommandLine");
         command.setAttribute("disabled", !context);
+    },
+
+    destroyContext: function(context, persistedState)
+    {
+         iterateWindows(context.window, function detachOneCommandLine(win)
+         {
+             Firebug.CommandLine.injector.detachCommandLine(context, win);
+         });
     },
 
     showPanel: function(browser, panel)
@@ -1105,10 +1113,32 @@ Firebug.CommandLine.injector = {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
 
-        element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
+        if (!context.activeCommandLineHandlers)
+            context.activeCommandLineHandlers = {};
+
+        var boundHandler = bind(handler.handleEvent, handler);
+        context.activeCommandLineHandlers[win] = boundHandler;
+
+        element.addEventListener("firebugExecuteCommand", boundHandler, true);
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("addCommandLineListener to element in window with console "+win.location, win.console);
+    },
+
+    detachCommandLine: function(context, win)
+    {
+        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+        if (element.getAttribute("firebugCommandLineListener") === "true")
+        {
+            Firebug.CommandLine.evaluate("window._FirebugCommandLine.detachCommandLine()", context);
+            var boundHandler = context.activeCommandLineHandlers[win];
+            if (boundHandler)
+                element.removeEventListener("firebugExecuteCommand", boundHandler, true);
+
+            element.removeAttribute("firebugCommandLineListener");
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("detachCommandLineListener "+boundHandler+" from element in window with console "+win.location);
+        }
     }
 };
 

@@ -53,16 +53,27 @@ var _FirebugCommandLine =
         }
         var element = window.console.getFirebugElement();
         var self = this;
-        element.addEventListener("firebugCommandLine", function _firebugEvalEvent(event)
+
+        this._firebugEvalEvent = function _firebugEvalEvent(event)
         {
             // DBG window.dump("attachCommandLine firebugCommandLine "+window.location+"\n");
             var element = event.target;
             var expr = element.getAttribute("expr"); // see commandLine.js
             self.evaluate(expr);
             // DBG window.dump("attachCommandLine did evaluate on "+expr+"\n");
-        }, true);
-        element.setAttribute("firebugCommandLineAttached", "true")
+        }
+
+        element.addEventListener("firebugCommandLine",this._firebugEvalEvent, true);
+        element.setAttribute("firebugCommandLineAttached", "true");
         // DBG window.dump("Added listener for firebugCommandLine event "+window.location+"\n");
+    },
+
+    detachCommandLine: function()
+    {
+         var element = window.console.getFirebugElement();
+         element.removeEventListener("firebugCommandLine", this._firebugEvalEvent, true);
+         delete window._FirebugCommandLine; // suicide!
+         // DBG window.dump("detachCommmandLine<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<\n")
     },
 
     evaluate: function(expr)
