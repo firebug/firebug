@@ -789,16 +789,17 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         if (!context)
             return false;
 
-        // Apparently the frameWin is a XPCSafeJSObjectWrapper that looks like a Window.
         // Since this is method called a lot make a hacky fast check on _getFirebugConsoleElement
-        if (!frameWin._getFirebugConsoleElement && !context.stopped)
+
+        var win = frameWin.wrappedJSObject ? frameWin.wrappedJSObject : frameWin;
+        if (!win._getFirebugConsoleElement && !context.stopped)
         {
-            this.injectConsole(context, frameWin);
+            this.injectConsole(context, win);
         }
         else
         {
             if (FBTrace.DBG_CONSOLE)
-                FBTrace.sysout("debugger.supportsGlobal frameWin._getFirebugConsoleElement exists", frameWin);
+                FBTrace.sysout("debugger.supportsGlobal frameWin._getFirebugConsoleElement exists", win);
         }
 
         this.breakContext = context;
