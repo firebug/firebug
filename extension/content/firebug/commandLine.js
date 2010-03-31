@@ -122,7 +122,7 @@ Firebug.CommandLine = extend(Firebug.Module,
 
         if (!consoleHandler)
         {
-            FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler ", context.activeConsoleHandlers);
+            FBTrace.sysout("commandLine evaluateByEventPassing no consoleHandler ", context.activeConsoleHandlers);
             return;
         }
 
@@ -1110,6 +1110,9 @@ Firebug.CommandLine.injector = {
 
     addCommandLineListener: function(context, win, element)
     {
+        if (win.wrappedJSObject)
+            win = win.wrappedJSObject;
+
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
 
@@ -1117,6 +1120,7 @@ Firebug.CommandLine.injector = {
             context.activeCommandLineHandlers = {};
 
         var boundHandler = bind(handler.handleEvent, handler);
+
         context.activeCommandLineHandlers[win] = boundHandler;
 
         element.addEventListener("firebugExecuteCommand", boundHandler, true);
@@ -1127,6 +1131,9 @@ Firebug.CommandLine.injector = {
 
     detachCommandLine: function(context, win)
     {
+        if (win.wrappedJSObject)
+            win = win.wrappedJSObject;
+
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
         if (element.getAttribute("firebugCommandLineListener") === "true")
         {

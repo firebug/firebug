@@ -124,6 +124,9 @@ top.Firebug.Console.injector =
         if (!win)
             win = context.window;
 
+        if (win.wrappedJSObject)
+            win = win.wrappedJSObject;
+
         if (context.activeConsoleHandlers[win])
             return;
 
@@ -149,10 +152,13 @@ top.Firebug.Console.injector =
         if (!win)
             win = context.window;
 
+        if (win.wrappedJSObject)
+            win = win.wrappedJSObject;
+
         if (context.activeConsoleHandlers)
         {
-        	if (context.activeConsoleHandlers[win])
-        		context.activeConsoleHandlers[win].detach();
+            if (context.activeConsoleHandlers[win])
+                context.activeConsoleHandlers[win].detach();
             delete context.activeConsoleHandlers[win];
         }
 
@@ -422,6 +428,12 @@ function FirebugConsoleHandler(context, win)
             var trace = context.stackTrace
             if (FBTrace.DBG_CONSOLE)
                 FBTrace.sysout("logAssert trace from context.window.stackTrace", trace);
+        }
+        else
+        {
+            var trace = getJSDUserStack();
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("logAssert trace from getJSDUserStack", trace);
         }
 
         var url = msg.fileName ? msg.fileName : win.location.href;
