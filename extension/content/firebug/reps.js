@@ -925,7 +925,6 @@ this.TextNode = domplate(Firebug.Rep,
     }
 });
 
-
 // ************************************************************************************************
 
 var regexpConstructorRE = /RegExp/;
@@ -935,15 +934,15 @@ this.RegExp = domplate(Firebug.Rep,
         OBJECTLINK(
             SPAN({"class": "objectTitle"}, "$object|getTitle")
         ),
-    
+
     className: "regexp",
-    
+
     supportsObject: function(object, type)
     {
-        return type == "object" && object && object.constructor && object.constructor.toString && regexpConstructorRE.test(object.constructor.toString());
+        return type == "object" && object && object.constructor && object.constructor.toString &&
+            regexpConstructorRE.test(object.constructor.toString());
     }
 });
-
 
 // ************************************************************************************************
 
@@ -1788,7 +1787,8 @@ this.SourceText = domplate(Firebug.Rep,
 
 this.nsIDOMHistory = domplate(Firebug.Rep,
 {
-    tag:OBJECTBOX({onclick: "$showHistory"},
+    tag:
+        OBJECTBOX({onclick: "$showHistory"},
             OBJECTLINK("$object|summarizeHistory")
         ),
 
@@ -1831,7 +1831,8 @@ this.nsIDOMHistory = domplate(Firebug.Rep,
 
 this.ApplicationCache = domplate(Firebug.Rep,
 {
-    tag:OBJECTBOX({onclick: "$showApplicationCache"},
+    tag:
+        OBJECTBOX({onclick: "$showApplicationCache"},
             OBJECTLINK("$object|summarizeCache")
         ),
 
@@ -1861,21 +1862,27 @@ this.ApplicationCache = domplate(Firebug.Rep,
         if (Ci.nsIDOMOfflineResourceList)
             return (object instanceof Ci.nsIDOMOfflineResourceList);
     }
-
 });
+
+//************************************************************************************************
 
 this.Storage = domplate(Firebug.Rep,
 {
-    tag: OBJECTBOX({onclick: "$show"}, OBJECTLINK("$object|summarize")),
+    tag:
+        OBJECTBOX({onclick: "$show"},
+            OBJECTLINK("$object|summarize")
+        ),
 
     summarize: function(storage)
     {
         return storage.length +" items in Storage";
     },
+
     show: function(storage)
     {
         openNewTab("http://dev.w3.org/html5/webstorage/#storage-0");
     },
+
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     className: "Storage",
@@ -1884,7 +1891,46 @@ this.Storage = domplate(Firebug.Rep,
     {
         return (object instanceof Storage);
     }
+});
 
+// ************************************************************************************************
+
+this.XPathResult = domplate(this.Arr,
+{
+    className: "array",
+    toggles: {},
+
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
+
+    supportsObject: function(xpathresult, type)
+    {
+        return (xpathresult instanceof XPathResult);
+    },
+
+    arrayIterator: function(xpathresult, max)
+    {
+        var items = [];
+        for (var i=0; i<xpathresult.snapshotLength && i<=max; i++)
+        {
+            var value = xpathresult.snapshotItem(i);
+            var rep = Firebug.getRep(value);
+            var tag = rep.shortTag || rep.tag;
+            var delim = (i == xpathresult.snapshotLength-1 ? "" : ", ");
+
+            items.push({object: value, tag: tag, delim: delim});
+        }
+
+        if (xpathresult.snapshotLength > max + 1)
+        {
+            items[max] = {
+                object: (xpathresult.snapshotLength-max) + " more...", //xxxHonza localization
+                tag: FirebugReps.Caption.tag,
+                delim: ""
+            };
+        }
+
+        return items;
+    },
 });
 
 // ************************************************************************************************
@@ -1914,7 +1960,8 @@ Firebug.registerRep(
     this.Property,
     this.Except,
     this.XML,
-    this.Arr
+    this.Arr,
+    this.XPathResult
 );
 
 Firebug.setDefaultReps(this.Func, this.Obj);
