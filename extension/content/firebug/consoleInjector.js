@@ -119,20 +119,13 @@ top.Firebug.Console.injector =
     addConsoleListener: function(context, win)
     {
         if (!context.activeConsoleHandlers)  // then we have not been this way before
-            context.activeConsoleHandlers = [];
-        else
-        {   // we've been this way before...
-            for (var i=0; i<context.activeConsoleHandlers.length; i++)
-            {
-                if (context.activeConsoleHandlers[i].window == win)
-                {
-                    context.activeConsoleHandlers[i].detach();
-                    if (FBTrace.DBG_CONSOLE)
-                        FBTrace.sysout("consoleInjector addConsoleListener removed handler("+context.activeConsoleHandlers[i].handler_name+") from _firebugConsole in : "+win.location+"\n");
-                    context.activeConsoleHandlers.splice(i,1);
-                }
-            }
-        }
+            context.activeConsoleHandlers = {};
+
+        if (!win)
+            win = context.window;
+
+        if (context.activeConsoleHandlers[win])
+            return;
 
         // We need the element to attach our event listener.
         var element = Firebug.Console.getFirebugConsoleElement(context, win);
@@ -144,7 +137,7 @@ top.Firebug.Console.injector =
         var handler = new FirebugConsoleHandler(context, win);
         handler.attachTo(element);
 
-        context.activeConsoleHandlers.push(handler);
+        context.activeConsoleHandlers[win] = handler;
 
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("consoleInjector addConsoleListener attached handler("+handler.handler_name+") to _firebugConsole in : "+win.location+"\n");
@@ -153,7 +146,10 @@ top.Firebug.Console.injector =
 
     detachConsole: function(context, win)
     {
-        FBTrace.sysout("consoleInjector.detachConsole NOOP???");
+        if (!win)
+            win = context.window;
+        if (context.activeConsoleHandlers)
+            delete context.activeConsoleHandlers[win];
     },
 }
 

@@ -63,7 +63,7 @@ Firebug.CommandLine = extend(Firebug.Module,
             else if (context.stopped)
                 result = this.evaluateInDebugFrame(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction);
             else
-                result = this.evaluateByPostMessage(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
+                result = this.evaluateByEventPassing(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction);
 
             context.invalidatePanels('dom', 'html');
         }
@@ -78,6 +78,89 @@ Firebug.CommandLine = extend(Firebug.Module,
         }
 
         return result;
+    },
+
+        evaluateByEventPassing: function(expr, context, thisValue, targetWindow, successConsoleFunction, exceptionFunction)
+    {
+        var win = targetWindow ? targetWindow : ( context.baseWindow ? context.baseWindow : context.window );
+        if (!win)
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no targetWindow!\n");
+            return;
+        }
+
+        // We're going to use some command-line facilities, but it may not have initialized yet.
+        this.initializeCommandLineIfNeeded(context, win);
+
+        // Make sure the command line script is attached.
+        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+        if (element)
+        {
+            var attached = element.getAttribute("firebugCommandLineAttached");
+            if (!attached)
+            {
+                FBTrace.sysout("Firebug console element does not have command line attached its too early for command line", element);
+                Firebug.Console.logFormatted(["Firebug cannot find firebugCommandLineAttached attribute on firebug console element, its too early for command line", element, win], context, "error", true);
+                return;
+            }
+        }
+        else
+        {
+            if (FBTrace.DBG_ERRORS) FBTrace.sysout("commandLine.evaluateByEventPassing: no firebug console element", win);
+            return;  // we're in trouble here
+        }
+
+        var event = document.createEvent("Events");
+        event.initEvent("firebugCommandLine", true, false);
+        element.setAttribute("methodName", "evaluate");
+
+        expr = expr.toString();
+        expr = "with(_FirebugCommandLine){" + expr + "\n};";
+        element.setAttribute("expr", expr);
+
+        var consoleHandler = context.activeConsoleHandlers[win.wrappedJSObject];
+
+        if (!consoleHandler)
+        {
+            FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler ", context.activeConsoleHandlers);
+            return;
+        }
+
+        if (successConsoleFunction)
+        {
+            consoleHandler.evaluated = function useConsoleFunction(result)
+            {
+                successConsoleFunction(result, context);  // result will be pass thru this function
+            }
+        }
+
+        if (exceptionFunction)
+        {
+            consoleHandler.evaluateError = function useExceptionFunction(result)
+            {
+                exceptionFunction(result, context);
+            }
+        }
+        else
+        {
+            consoleHandler.evaluateError = function useErrorFunction(result)
+            {
+                if (result)
+                {
+                    var m = reCmdSource.exec(result.source);
+                    if (m && m.length > 0)
+                        result.source = m[1];
+                }
+
+                Firebug.Console.logFormatted([result], context, "error", true);
+            }
+        }
+
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("evaluateByEventPassing \'"+expr+"\' using consoleHandler:", consoleHandler);
+        element.dispatchEvent(event);
+        if (FBTrace.DBG_CONSOLE)
+            FBTrace.sysout("evaluateByEventPassing return after firebugCommandLine event:", event);
     },
 
     evaluateInDebugFrame: function(expr, context, thisValue, targetWindow,  successConsoleFunction, exceptionFunction)
@@ -127,14 +210,12 @@ Firebug.CommandLine = extend(Firebug.Module,
         expr = expr.toString();
         expr = "with(_FirebugCommandLine){" + expr + "\n};";
 
-        var consoleHandler;
-        for (var i=0; i<context.activeConsoleHandlers.length; i++)
+        var consoleHandler = context.activeConsoleHandlers[win.wrappedJSObject];
+
+        if (!consoleHandler)
         {
-            if (context.activeConsoleHandlers[i].window == win)
-            {
-                consoleHandler = context.activeConsoleHandlers[i];
-                break;
-            }
+            FBTrace.sysout("commandLine evaluateByPostMessage no consoleHandler ", context.activeConsoleHandlers);
+            return;
         }
 
         if (successConsoleFunction)
@@ -864,9 +945,9 @@ function FirebugCommandLineAPI(context, baseWindow)
         // The window object parameter uses XPCSafeJSObjectWrapper, but we need XPCNativeWrapper
         // (and its wrappedJSObject member). So, look within all registered consoleHandlers for
         // the same window (from tabWatcher) that uses uses XPCNativeWrapper (operator "==" works).
-        for (var i=0; i<context.activeConsoleHandlers.length; i++) {
-            if (context.activeConsoleHandlers[i].window == object) {
-                baseWindow = context.baseWindow = context.activeConsoleHandlers[i].window;
+        for (var p in context.activeConsoleHandlers) {
+            if (context.activeConsoleHandlers.hasOwnProperty(p) && p == object) {
+                baseWindow = context.baseWindow = p;
                 break;
             }
         }
@@ -972,25 +1053,30 @@ Firebug.CommandLine.injector = {
         if (win instanceof Window)
         {
             // If the command line is already attached then end.
-            var doc = win.document;
-            if ($("_firebugCommandLineInjector", doc))
+            var element = Firebug.Console.getFirebugConsoleElement(context, win);
+            if (element.getAttribute("firebugCommandLineListener") === "true")
                 return;
+
+            var doc = win.document;
 
             if (context.stopped)
                 Firebug.CommandLine.injector.evalCommandLineScript(context);
             else
                 Firebug.CommandLine.injector.injectCommandLineScript(doc);
 
-            Firebug.CommandLine.injector.addCommandLineListener(context, win, doc);
+            Firebug.CommandLine.injector.addCommandLineListener(context, win, element);
+            element.setAttribute("firebugCommandLineListener", "true");
         }
         else if (Firebug.CommandLine.isSandbox(context))
         {
-            FBTrace.sysout("Firebug.CommandLine.injector context.global "+context.global, context.global);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Firebug.CommandLine.injector context.global "+context.global, context.global);
             // no-op
         }
         else
         {
-            FBTrace.sysout("Firebug.CommandLine.injector not a Window or Sandbox", win);
+            if (FBTrace.DBG_CONSOLE)
+                FBTrace.sysout("Firebug.CommandLine.injector not a Window or Sandbox", win);
         }
     },
 
@@ -1009,14 +1095,18 @@ Firebug.CommandLine.injector = {
         var addedElement = addScript(doc, "_firebugCommandLineInjector", scriptSource);
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("injectCommandLineScript ", addedElement);
+
+        // take it right back out, we don't want users to see the things we do ;-)
+        addedElement.parentNode.removeChild(addedElement);
     },
 
-    addCommandLineListener: function(context, win, doc)
+    addCommandLineListener: function(context, win, element)
     {
         // Register listener for command-line execution events.
         var handler = new CommandLineHandler(context, win);
-        var element = Firebug.Console.getFirebugConsoleElement(context, win);
+
         element.addEventListener("firebugExecuteCommand", bind(handler.handleEvent, handler) , true);
+
         if (FBTrace.DBG_CONSOLE)
             FBTrace.sysout("addCommandLineListener to element in window with console "+win.location, win.console);
     }
