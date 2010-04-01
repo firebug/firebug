@@ -4880,6 +4880,8 @@ domMemberMap.Window =
     "outerHeight",
     "screenX",
     "screenY",
+    "mozInnerScreenX",
+    "mozInnerScreenY",
     "pageXOffset",
     "pageYOffset",
     "scrollX",
@@ -4977,6 +4979,8 @@ domMemberMap.Window =
     "postMessage",
     "localStorage",  // FF3.5
     "showModalDialog", // FF 3.0, MS IE4
+
+    "getInterface",
 ];
 
 domMemberMap.Location =
