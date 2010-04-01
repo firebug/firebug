@@ -1897,8 +1897,14 @@ this.Storage = domplate(Firebug.Rep,
 
 this.XPathResult = domplate(this.Arr,
 {
-    className: "array",
+    className: "array xPathResult",
     toggles: {},
+
+    tag:
+        SPAN(this.Arr.tag),
+
+    shortTag:
+        SPAN(this.Arr.shortTag),
 
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
