@@ -153,6 +153,14 @@ toolbar[iconsize="small"] #firebug-button > .toolbarbutton-icon {
     margin-right: 6px;
 }
 
+#fbSearchBox,
+.fbsearch-textbox  {
+    width: 100% !important;
+}
+
+#fbSearchBox {
+    display:block;
+}
 
 .fbsearch-textbox {
     -moz-appearance: none;

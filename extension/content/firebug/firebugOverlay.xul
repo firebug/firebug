@@ -155,9 +155,9 @@
                     </panelBarArrowscrollbox>
 
                     <!-- Search Box -->
-                    <vbox>
+                    <vbox flex="40">
                         <spacer flex="1"/>
-                        <textbox id="fbSearchBox" type="fbSearchBox" />
+                        <textbox id="fbSearchBox" type="fbSearchBox"/>
                         <spacer flex="1"/>
                     </vbox>
 
