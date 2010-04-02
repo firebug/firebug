@@ -1161,6 +1161,19 @@ this.getElementTreeXPath = function(element)
     return paths.length ? "/" + paths.join("/") : null;
 };
 
+this.getElementCSSPath = function(element)
+{
+    var paths = [];
+
+    for (; element && element.nodeType == 1; element = element.parentNode)
+    {
+        var selector = this.getElementCSSSelector(element);
+        paths.splice(0, 0, selector);
+    }
+
+    return paths.length ? paths.join(" ") : null;
+};
+
 this.cssToXPath = function(rule)
 {
     var regElement = /^([#.]?)([a-z0-9\\*_-]*)((\|)([a-z0-9\\*_-]*))?/i;

@@ -811,6 +811,12 @@ this.Element = domplate(Firebug.Rep,
         copyToClipboard(xpath);
     },
 
+    copyCSSPath: function(elt)
+    {
+        var csspath = getElementCSSPath(elt);
+        copyToClipboard(csspath);
+    },
+
     persistor: function(context, xpath)
     {
         var elts = xpath
@@ -876,6 +882,7 @@ this.Element = domplate(Firebug.Rep,
 
         return items.concat([
             {label: "CopyXPath", command: bindFixed(this.copyXPath, this, elt) },
+            {label: "Copy CSS Path", command: bindFixed(this.copyCSSPath, this, elt) },
             "-",
             {label: "ShowEventsInConsole", type: "checkbox", checked: monitored,
              command: bindFixed(toggleMonitorEvents, FBL, elt, null, monitored, context) },
