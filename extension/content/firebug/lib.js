@@ -3260,6 +3260,11 @@ this.dispatch = function(listeners, name, args)
         for (var i = 0; i < listeners.length; ++i)
         {
             var listener = listeners[i];
+            if (!listener)
+            {
+                FBTrace.sysout("FBL.dispatch ERROR "+i+" "+name+" to null listener.");
+                continue;
+            }
             if ( listener[name] )
             {
                 //FBTrace.sysout("FBL.dispatch "+i+") "+name+" to "+listener.dispatchName);
