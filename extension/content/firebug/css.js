@@ -22,21 +22,25 @@ const STATE_HOVER   = 0x04;
 
 const domUtils = CCSV("@mozilla.org/inspector/dom-utils;1", "inIDOMUtils");
 
-var CSSDomplateBase = {
+var CSSDomplateBase =
+{
     isEditable: function(rule)
     {
         return !rule.isSystemSheet;
     },
+
     isSelectorEditable: function(rule)
     {
         return rule.isSelectorEditable && this.isEditable(rule);
     }
 };
 
-var CSSPropTag = domplate(CSSDomplateBase, {
-    tag: DIV({class: "cssProp focusRow", $disabledStyle: "$prop.disabled",
-          $editGroup: "$rule|isEditable",
-          $cssOverridden: "$prop.overridden", role : "option"},
+var CSSPropTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({class: "cssProp focusRow", $disabledStyle: "$prop.disabled",
+            $editGroup: "$rule|isEditable",
+            $cssOverridden: "$prop.overridden", role : "option"},
         SPAN({class: "cssPropName", $editable: "$rule|isEditable"}, "$prop.name"),
         SPAN({class: "cssColon"}, ":"),
         SPAN({class: "cssPropValue", $editable: "$rule|isEditable"}, "$prop.value$prop.important"),
@@ -47,16 +51,20 @@ var CSSPropTag = domplate(CSSDomplateBase, {
 var CSSRuleTag =
     TAG("$rule.tag", {rule: "$rule"});
 
-var CSSImportRuleTag = domplate({
-    tag: DIV({class: "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
+var CSSImportRuleTag = domplate(
+{
+    tag:
+        DIV({class: "cssRule insertInto focusRow importRule", _repObject: "$rule.rule"},
         "@import &quot;",
         A({class: "objectLink", _repObject: "$rule.rule.styleSheet"}, "$rule.rule.href"),
         "&quot;;"
     )
 });
 
-var CSSStyleRuleTag = domplate(CSSDomplateBase, {
-    tag: DIV({class: "cssRule insertInto",
+var CSSStyleRuleTag = domplate(CSSDomplateBase,
+{
+    tag:
+        DIV({class: "cssRule insertInto",
             $cssEditableRule: "$rule|isEditable",
             $editGroup: "$rule|isSelectorEditable",
             _repObject: "$rule.rule",
@@ -65,7 +73,7 @@ var CSSStyleRuleTag = domplate(CSSDomplateBase, {
             SPAN({class: "cssSelector", $editable: "$rule|isSelectorEditable"}, "$rule.selector"), " {"
         ),
         DIV({role : 'group'},
-            DIV({class : "cssPropertyListBox", role : 'listbox'},
+            DIV({class : "cssPropertyListBox", _rule: "$rule", role : 'listbox'},
                 FOR("prop", "$rule.props",
                     TAG(CSSPropTag.tag, {rule: "$rule", prop: "$prop"})
                 )
@@ -505,6 +513,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
 
         return props;
     },
+
     getRuleProperties: function(context, rule, inheritMode)
     {
         var props = this.parseCSSProps(rule.style, inheritMode);
@@ -930,6 +939,14 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
     {
         var items = [];
 
+        if (hasClass(target, "cssSelector"))
+        {
+            items.push(
+                {label: "Copy Style Declaration",
+                    command: bindFixed(this.copyStyleDeclaration, this, target) }
+            );
+        }
+
         if (this.infoTipType == "color")
         {
             items.push(
@@ -1201,6 +1218,23 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
             Firebug.Search.searchOptionMenu("search.Multiple_Files", "searchGlobal"),
             Firebug.Search.searchOptionMenu("search.Use_Regular_Expression", "searchUseRegularExpression")
         ];
+    },
+
+    copyStyleDeclaration: function(cssSelector)
+    {
+        var cssRule = getAncestorByClass(cssSelector, "cssRule");
+        var listBox = cssRule.getElementsByClassName("cssPropertyListBox")[0];
+        var rule = listBox.rule;
+
+        var props = [];
+        for (var p in rule.props)
+        {
+            var prop = rule.props[p];
+            if (!(prop.disabled || prop.overridden))
+                props.push(prop.name + ": " + prop.value + prop.important + ";");
+        }
+
+        copyToClipboard(props.join("\r\n"));
     }
 });
 
