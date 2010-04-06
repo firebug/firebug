@@ -1929,6 +1929,13 @@ Firebug.Listener.prototype =
 {
     addListener: function(listener)
     {
+        if (!listener)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("firebug.Listener.addListener; ERROR null listener registered.");
+            return;
+        }
+
         if (!this.fbListeners)
             this.fbListeners = []; // delay the creation until the objects are created so 'this' causes new array for each module
 
