@@ -582,7 +582,7 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
     {
         var sourceFile = this.renamedSourceFiles[i];
         var bp = this.bps[i];
-        FBTrace.sysout("debugger.renameSourceFiles type: "+bp.type, bp);
+
         var oldURL = sourceFile.href;
         var sameType = bp.type;
         var sameLineNo = bp.lineNo;
@@ -596,6 +596,9 @@ SourceFileRenamer.prototype.renameSourceFiles = function(context)
 
         fbs.removeBreakpoint(bp.type, oldURL, bp.lineNo);
         delete context.sourceFileMap[oldURL];  // SourceFile delete
+
+        if (FBTrace.DBG_SOURCEFILES)
+            FBTrace.sysout("debugger.renameSourceFiles type: "+bp.type, bp);
 
         Firebug.Debugger.watchSourceFile(context, sourceFile);
         var newBP = fbs.addBreakpoint(sameType, sourceFile, sameLineNo, bp, sameDebuggr);
