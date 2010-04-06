@@ -92,6 +92,9 @@ Firebug.TabContext.prototype =
 
     removeSourceFile: function(sourceFile)
     {
+        if (FBTrace.DBG_SOURCEFILES)
+	        FBTrace.sysout("tabContext.removeSourceFile "+sourceFile.href+" in context "+sourceFile.context.getName());
+
         delete this.sourceFileMap[sourceFile.href];
         delete sourceFile.context;
 
