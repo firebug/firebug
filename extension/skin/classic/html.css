@@ -60,6 +60,19 @@
     color: #333333;
 }
 
+.docType {
+    position: absolute;
+    top: -16px;
+    font-family: Monaco, monospace;
+    padding-left: 8px;
+    color: #999;
+    white-space: nowrap;
+    font-style: italic;
+}
+.htmlNodeBox {
+    top: 16px;
+}
+
 .nodeWhiteSpace {
     border: 1px solid LightGray;
     white-space: pre; /* otherwise the border will be collapsed around zero pixels */

@@ -1387,7 +1387,34 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
-        DIV({"class": "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+	DIV({"class": "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+        DIV({"class": "nodeLabel", role: "presentation"},
+            IMG({"class": "twisty", role: "presentation"}),
+            SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
+                "&lt;",
+                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                FOR("attr", "$object|attrIterator", AttrTag),
+                SPAN({"class": "nodeBracket editable insertBefore"}, "&gt;")
+            )
+        ),
+        DIV({"class": "nodeChildBox", role :"group"}), /* nodeChildBox is special signal in insideOutBox */
+        DIV({"class": "nodeCloseLabel", role : "presentation"},
+            SPAN({"class": "nodeCloseLabelBox repTarget"},
+                "&lt;/",
+                SPAN({"class": "nodeTag"}, "$object.nodeName|toLowerCase"),
+                "&gt;"
+            )
+        )
+    )
+});
+
+Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
+{
+    tag:
+        DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+            DIV({"class": "docType"},
+                "$object|getDocType"
+            ),
             DIV({"class": "nodeLabel", role: "presentation"},
                 IMG({"class": "twisty", role: "presentation"}),
                 SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
@@ -1405,7 +1432,12 @@ Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
                     "&gt;"
                 )
             )
-        )
+        ),
+    getDocType: function(obj)
+    {
+        var doctype = obj.ownerDocument.doctype;
+        return '<!DOCTYPE ' + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"': '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+    }
 });
 
 Firebug.HTMLPanel.TextElement = domplate(FirebugReps.Element,
@@ -1768,7 +1800,9 @@ function getNodeTag(node, expandAll)
 {
     if (node instanceof Element)
     {
-        if (node instanceof HTMLAppletElement)
+        if (node instanceof HTMLHtmlElement && node.ownerDocument && node.ownerDocument.doctype)
+            return Firebug.HTMLPanel.HTMLHtmlElement.tag;
+        else if (node instanceof HTMLAppletElement)
             return getEmptyElementTag(node);
         else if (unwrapObject(node).firebugIgnore)
             return null;
