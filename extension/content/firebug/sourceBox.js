@@ -92,6 +92,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     {
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResize, true);
+        this.attachToCache();
     },
 
     reattach: function(doc)
@@ -101,12 +102,45 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         Firebug.Panel.reattach.apply(this, arguments);
         this.resizeEventTarget = Firebug.chrome.$('fbContentBox');
         this.resizeEventTarget.addEventListener("resize", this.onResize, true);
+        this.attachToCache();
     },
 
     destroyNode: function()
     {
         Firebug.Panel.destroyNode.apply(this, arguments);
         this.resizeEventTarget.removeEventListener("resize", this.onResize, true);
+        this.detachFromCache();
+    },
+
+    attachToCache: function()
+    {
+        this.context.sourceCache.addListener(this);
+    },
+
+    detachFromCache: function()
+    {
+        this.context.sourceCache.removeListener(this);
+    },
+
+    //*******************************************************
+    //  TabCache listner implementation
+    onStartRequest: function(context, request)
+    {
+
+    },
+
+    onStopRequest: function(context, request, responseText)
+    {
+        if (context === this.context)
+        {
+            var sourceBox = this.getSourceBoxByURL(request.URI.spec);  // XXXjjb OR request.originalURI???
+            if (sourceBox)  // else no worries we did not build one
+            {
+                this.clearSourceBox(sourceBox);
+                if (this.selectedSourceBox === sourceBox)
+                    this.showSourceBox(sourceBox);
+            }
+        }
     },
 
     // **************************************
