@@ -133,12 +133,17 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
     {
         if (context === this.context)
         {
-            var sourceBox = this.getSourceBoxByURL(request.URI.spec);  // XXXjjb OR request.originalURI???
+            var url = request.URI.spec;
+            var sourceBox = this.getSourceBoxByURL(url);
             if (sourceBox)  // else no worries we did not build one
             {
-                this.clearSourceBox(sourceBox);
-                if (this.selectedSourceBox === sourceBox)
-                    this.showSourceBox(sourceBox);
+                delete this.sourceBoxes[url];
+
+                if (this.selectedSourceBox === sourceBox) // else we will create a new one on show
+                {
+                    var sourceFile = getSourceFileByHref(url, context);
+                    this.showSourceFile(sourceFile);
+                }
             }
         }
     },
