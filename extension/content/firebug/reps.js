@@ -514,7 +514,12 @@ this.Arr = domplate(Firebug.Rep,
 
     hasSpecialProperties: function(array)
     {
-        return (array.length != array.__count__) && hasProperties(array);
+        // Don't use __count__ property, this is beeing removed from Fx 3.7
+        var n = 0;
+        for (var p in array)
+            n += Object.prototype.hasOwnProperty.call(array, p);
+
+        return (array.length != n) && hasProperties(array);
     },
 
     onToggleProperties: function(event)
