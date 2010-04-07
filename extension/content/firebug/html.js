@@ -146,8 +146,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
         var objectNodeBox = this.ioBox.findObjectBox(elt);
         if (objectNodeBox)
         {
-            var labelBox = objectNodeBox.firstChild.lastChild;
-            var bracketBox = labelBox.getElementsByClassName("nodeBracket").item(0);
+            var labelBox = objectNodeBox.querySelector("*> .nodeLabel > .nodeLabelBox");
+            var bracketBox = labelBox.querySelector("*> .nodeBracket");
             Firebug.Editor.insertRow(bracketBox, "before");
         }
     },
@@ -307,8 +307,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                 FBTrace.sysout("mutateAttr "+attrChange+" "+attrName+"="+attrValue+" node: "+nodeAttr, nodeAttr);
             if (nodeAttr && nodeAttr.childNodes.length > 3)
             {
-                var attrValueBox = nodeAttr.childNodes[3];
-                var attrValueText = nodeAttr.childNodes[3].firstChild;
+                var attrValueBox = nodeAttr.querySelector("*> .nodeValue");
+                var attrValueText = attrValueBox.firstChild;
                 if (attrValueText)
                     attrValueText.nodeValue = attrValue;
 
@@ -324,8 +324,8 @@ Firebug.HTMLPanel.prototype = extend(Firebug.Panel,
                     var nodeAttr = Firebug.HTMLPanel.AttrNode.tag.replace({attr: attr},
                             this.document);
 
-                    var labelBox = objectNodeBox.firstChild.lastChild;
-                    var bracketBox = labelBox.getElementsByClassName("nodeBracket").item(0);
+                    var labelBox = objectNodeBox.querySelector("*> .nodeLabel > .nodeLabelBox");
+                    var bracketBox = labelBox.querySelector("*> .nodeBracket");
                     labelBox.insertBefore(nodeAttr, bracketBox);
 
                     this.highlightMutation(nodeAttr, objectNodeBox, "mutated");
