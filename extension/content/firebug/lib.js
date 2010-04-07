@@ -6832,6 +6832,10 @@ this.formatNumber = function(number)
 
 this.formatSize = function(bytes)
 {
+    // xxxHonza, XXXjjb: Why Firebug.sizePrecision is not set in Chromebug?
+    if (typeof(Firebug.sizePrecision) == "undefined")
+        Firebug.sizePrecision = 2;
+
     // Get size precision (number of decimal places from the preferences)
     // and make sure it's within limits.
     var sizePrecision = Firebug.sizePrecision;
