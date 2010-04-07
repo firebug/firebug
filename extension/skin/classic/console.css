@@ -482,11 +482,11 @@
 
 /*****************************************************************************************/
 
-.logRow-log > .objectBox-array.hasTwisty {
+.logRow-log .objectBox-array.hasTwisty {
     padding-left: 18px;
 }
 
-.logRow-log > .objectBox-array > .arrayProperties {
+.logRow-log .objectBox-array > .arrayProperties {
     padding-left: 18px;
 }
 

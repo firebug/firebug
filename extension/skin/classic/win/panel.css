@@ -5,7 +5,7 @@
 
 .twisty,
 .logRow-errorMessage > .hasTwisty > .errorTitle,
-.logRow-log > .objectBox-array.hasTwisty,
+.logRow-log .objectBox-array.hasTwisty,
 .logRow-spy .spyHead .spyTitle,
 .logGroup > .logRow,
 .memberRow.hasChildren > .memberLabelCell > .memberLabel,
@@ -18,7 +18,7 @@
 }
 
 .logRow-errorMessage > .hasTwisty.opened > .errorTitle,
-.logRow-log > .objectBox-array.hasTwisty.opened,
+.logRow-log .objectBox-array.hasTwisty.opened,
 .logRow-spy.opened .spyHead .spyTitle,
 .logGroup.opened > .logRow,
 .memberRow.hasChildren.opened > .memberLabelCell > .memberLabel,
