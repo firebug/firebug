@@ -1412,7 +1412,7 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
 {
     tag:
         DIV({"class": "nodeBox htmlNodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
-            DIV({"class": "docType"},
+            DIV({"class": "docType $object|getErrorClass","title":"$object|getErrorMessage"},
                 "$object|getDocType"
             ),
             DIV({"class": "nodeLabel", role: "presentation"},
@@ -1437,6 +1437,21 @@ Firebug.HTMLPanel.HTMLHtmlElement = domplate(FirebugReps.Element,
     {
         var doctype = obj.ownerDocument.doctype;
         return '<!DOCTYPE ' + doctype.name + (doctype.publicId ? ' PUBLIC "' + doctype.publicId + '"': '') + (doctype.systemId ? ' "' + doctype.systemId + '"' : '') + '>';
+    },
+    getErrorClass: function(obj)
+    {
+        var docstring = this.getDocType(obj),
+            claimXhtml = docstring.indexOf('XHTML')!=-1 || docstring.indexOf('xhtml')!=-1,
+            isXhtml = isElementXHTML(obj);
+        if (claimXhtml && !isXhtml)
+            return "docTypeError";
+        return "";
+    },
+    getErrorMessage: function(obj)
+    {
+        if (this.getErrorClass(obj)!="")
+            return $STR("html.error.doctype.mismatched");
+        return "";
     }
 });
 
