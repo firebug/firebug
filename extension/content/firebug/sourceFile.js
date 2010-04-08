@@ -181,6 +181,34 @@ Firebug.SourceFile.prototype =
          }
      },
 
+     hasScriptAtLineNumber: function(lineNo, mustBeExecutableLine)
+     {
+         var offset = this.getBaseLineOffset();
+
+         if (!this.innerScripts)
+             return; // eg URLOnly
+
+         var targetLineNo = lineNo + offset;  // lineNo is user-viewed number, targetLineNo is jsd number
+
+         var scripts = [];
+         for (var p in this.innerScripts)
+         {
+             var script = this.innerScripts[p];
+             if (mustBeExecutableLine && !script.isValid)
+                continue;
+
+             this.addScriptAtLineNumber(scripts, script, targetLineNo, mustBeExecutableLine, offset);
+
+             if (scripts.length)
+                return true;
+         }
+
+         if (this.outerScript && !(mustBeExecutableLine && !this.outerScript.isValid) )
+             this.addScriptAtLineNumber(scripts, this.outerScript, targetLineNo, mustBeExecutableLine, offset);
+
+         return (scripts.length > 0);
+     },
+
      getScriptsAtLineNumber: function(lineNo, mustBeExecutableLine)
      {
          var offset = this.getBaseLineOffset();
@@ -263,6 +291,17 @@ Firebug.SourceFile.prototype =
          if (!scripts && this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1) )
              return [this.outerScript];
          return scripts;
+     },
+
+     isExecutableLine: function(lineNo)  // script may not be valid
+     {
+         if (this.hasScriptAtLineNumber(lineNo, true))
+            return true;
+
+         if (this.outerScriptLineMap && (this.outerScriptLineMap.indexOf(lineNo) != -1))
+             return true;
+
+         return false;
      },
 
      hasScript: function(script)

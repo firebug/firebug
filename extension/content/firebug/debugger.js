@@ -2096,11 +2096,19 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
     markExecutableLines: function(sourceBox)
     {
         var sourceFile = sourceBox.repObject;
-        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString(), sourceFile.getLineRanges());
+        if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE)
+            FBTrace.sysout("debugger.markExecutableLines START: "+sourceFile.toString(), sourceFile.getLineRanges());
+
         var lineNo = sourceBox.firstViewableLine;
         while( lineNode = sourceBox.getLineNode(lineNo) )
         {
-            var script = sourceFile.scriptsIfLineCouldBeExecutable(lineNo, true);
+            if (lineNode.alreadyMarked)
+            {
+                lineNo++;
+                continue;
+            }
+
+            var script = sourceFile.isExecutableLine(lineNo, true);
 
             if (FBTrace.DBG_LINETABLE) FBTrace.sysout("debugger.markExecutableLines ["+lineNo+"]="+(script?script.tag:"X")+"\n");
             if (script)
@@ -2108,8 +2116,14 @@ Firebug.ScriptPanel.decorator = extend(new Firebug.SourceBoxDecorator,
             else
                 lineNode.removeAttribute("executable");
 
+            lineNode.alreadyMarked = true;
+
+            if (lineNo > sourceBox.lastViewableLine)
+                break;
+
             lineNo++;
         }
+
         if (FBTrace.DBG_BP || FBTrace.DBG_LINETABLE)
             FBTrace.sysout("debugger.markExecutableLines DONE: "+sourceFile.toString()+"\n");
     },

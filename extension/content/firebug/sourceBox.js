@@ -2,9 +2,10 @@
 
 FBL.ns(function() { with (FBL) {
 
+// ************************************************************************************************
 
-
-/* Defines the API for SourceBoxDecorator and provides the default implementation.
+/**
+ * @class Defines the API for SourceBoxDecorator and provides the default implementation.
  * Decorators are passed the source box on construction, called to create the HTML,
  * and called whenever the user scrolls the view.
  */
@@ -13,6 +14,7 @@ Firebug.SourceBoxDecorator = function(sourceBox){}
 Firebug.SourceBoxDecorator.sourceBoxCounter = 0;
 
 Firebug.SourceBoxDecorator.prototype =
+/** @lends Firebug.SourceBoxDecorator */
 {
     onSourceBoxCreation: function(sourceBox)
     {
@@ -62,8 +64,9 @@ Firebug.SourceBoxDecorator.prototype =
     },
 }
 
+// ************************************************************************************************
 
-/*
+/**
  * @panel Firebug.SourceBoxPanel: Intermediate level class for showing lines of source, eg Script Panel
  * Implements a 'viewport' to render only the lines the user is viewing or has recently viewed.
  * Scroll events or scrollToLine calls are converted to viewableRange line number range.
@@ -73,18 +76,17 @@ Firebug.SourceBoxDecorator.prototype =
  * The rendering details are delegated to SourceBoxDecorator; each source line may be expanded into
  * more rendered lines.
  */
-
 Firebug.SourceBoxPanel = function() {};
-/* @lends */
-Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePanel),
-{
 
+Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePanel),
+/** @lends Firebug.SourceBoxPanel */
+{
     initialize: function(context, doc)
     {
         this.onResize =  bind(this.resizer, this);
-
         this.sourceBoxes = {};
         this.decorator = this.getDecorator();
+
         Firebug.Panel.initialize.apply(this, arguments);
     },
 
@@ -122,8 +124,9 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.context.sourceCache.removeListener(this);
     },
 
-    //*******************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
     //  TabCache listner implementation
+
     onStartRequest: function(context, request)
     {
 
@@ -148,9 +151,11 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    // **************************************
-    /*  Panel extension point.
-     *  Called just before box is shown
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
+    /**
+     * Panel extension point.
+     * Called just before box is shown
      */
     updateSourceBox: function(sourceBox)
     {
@@ -173,7 +178,8 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         throw "Need to override in extender";
     },
 
-    // **************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+
     disablePanel: function(module)
     {
         this.sourceBoxes = {};  // clear so we start fresh if enabled
@@ -217,7 +223,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return source;
     },
 
-    // ****************************************************************************************
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
 
     getSourceBoxBySourceFile: function(sourceFile)
     {
@@ -385,7 +391,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         if (this.context.scrollTimeout)
         {
-            this.context.clearTimeout(this.contextscrollTimeout);
+            this.context.clearTimeout(this.context.scrollTimeout);
             delete this.context.scrollTimeout
         }
 
@@ -851,35 +857,66 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
             delete this.context.sourceBoxDecoratorTimeout;
         }
 
-        this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(bindFixed(function delaySourceBoxDecorator()
-        {
-            try
-            {
-                if (sourceBox.highlighter)
-                {
-                    var sticky = sourceBox.highlighter(sourceBox);
-                    if (FBTrace.DBG_SOURCEFILES)
-                        FBTrace.sysout("sourceBoxDecoratorTimeout highlighter sticky:"+sticky, sourceBox.highlighter);
-                    if (!sticky)
-                        delete sourceBox.highlighter;
-                }
-                sourceBox.decorator.decorate(sourceBox, sourceBox.repObject);
+        // Run source code decorating on 150ms timeout, which is bigger than
+        // the period in which scroll events are fired. So, if the user is moving
+        // scroll-bar thumb (or quickly clicking on scroll-arrows), the source code is
+        // not decorated (the timeout cleared by the code above) and the scrolling is fast.
+        this.context.sourceBoxDecoratorTimeout = this.context.setTimeout(
+            bindFixed(this.asyncDecorating, this, sourceBox), 150);
 
-                if (Firebug.uiListeners.length > 0) dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
-                if (FBTrace.DBG_SOURCEFILES)
-                    FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);
-            }
-            catch (exc)
-            {
-                if (FBTrace.DBG_ERRORS)
-                    FBTrace.sysout("sourcebox applyDecorator FAILS "+exc, exc);
-            }
-        }, this));
+        if (this.context.sourceBoxHighlighterTimeout)
+        {
+            this.context.clearTimeout(this.context.sourceBoxHighlighterTimeout);
+            delete this.context.sourceBoxHighlighterTimeout;
+        }
+
+        // Source code highlighting is using different timeout: 0ms. When searching
+        // within the Script panel, the user expects immediate response.
+        this.context.sourceBoxHighlighterTimeout = this.context.setTimeout(
+            bindFixed(this.asyncHighlighting, this, sourceBox));
     },
+
+    asyncDecorating: function(sourceBox)
+    {
+        try
+        {
+            sourceBox.decorator.decorate(sourceBox, sourceBox.repObject);
+
+            if (Firebug.uiListeners.length > 0)
+                dispatch(Firebug.uiListeners, "onApplyDecorator", [sourceBox]);
+
+            if (FBTrace.DBG_SOURCEFILES)
+                FBTrace.sysout("sourceBoxDecoratorTimeout "+sourceBox.repObject, sourceBox);
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("sourcebox applyDecorator FAILS "+exc, exc);
+        }
+    },
+
+    asyncHighlighting: function(sourceBox)
+    {
+        try
+        {
+            if (sourceBox.highlighter)
+            {
+                var sticky = sourceBox.highlighter(sourceBox);
+                if (FBTrace.DBG_SOURCEFILES)
+                    FBTrace.sysout("sourceBoxDecoratorTimeout highlighter sticky:"+sticky,
+                        sourceBox.highlighter);
+
+                if (!sticky)
+                    delete sourceBox.highlighter;
+            }
+        }
+        catch (exc)
+        {
+            if (FBTrace.DBG_ERRORS)
+                FBTrace.sysout("sourcebox highlighter FAILS "+exc, exc);
+        }
+    }
 });
 
-
-
-
-    // ************************************************************************************************
+// ************************************************************************************************
 }});
