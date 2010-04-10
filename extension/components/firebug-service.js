@@ -1201,8 +1201,11 @@ FirebugService.prototype =
         }
         else
         {
-            if (FBTrace.DBG_FBS_BP) FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="
-                +frame.script.tag+"\n");
+            if (FBTrace.DBG_FBS_BP)
+                FBTrace.sysout("onBreakpoint("+getExecutionStopNameFromType(type)+") NO bp match with frame.script.tag="+frame.script.tag+" clearing and continuing");
+            // We did not find a logical breakpoint to match the one set into JSD, so stop trying.
+            frame.script.clearBreakpoint(frame.pc);
+            return RETURN_CONTINUE;
         }
 
         if (runningUntil)
@@ -2355,8 +2358,12 @@ FirebugService.prototype =
              scripts = [sourceFile.outerScript];
         }
 
-        bp.scriptsWithBreakpoint = [];
-        bp.pc = [];
+        if (!bp.scriptsWithBreakpoint)
+        {
+            bp.scriptsWithBreakpoint = [];
+            bp.pc = [];
+        }
+
         for (var i = 0; i < scripts.length; i++)
         {
             var script = scripts[i];
