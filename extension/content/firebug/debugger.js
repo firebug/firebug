@@ -1022,18 +1022,46 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
             if (FBTrace.DBG_ERRORS)
                 FBTrace.sysout("debugger.onError errorStackTrace ", Firebug.errorStackTrace);
 
+            delete context.breakingCause;
+
             if (Firebug.breakOnErrors)
             {
-                context.breakingCause = {
-                    title: $STR("Break on Error"),
-                    message: error.message,
-                    copyAction: bindFixed(FirebugReps.ErrorMessage.copyError,
-                        FirebugReps.ErrorMessage, error)
-                };
-            }
-            else
-            {
-                delete context.breakingCause;
+                var sourceFile = Firebug.SourceFile.getSourceFileByScript(context, frame.script);
+                var analyzer = sourceFile.getScriptAnalyzer(frame.script);
+                var lineNo = analyzer.getSourceLineFromFrame(context, frame);
+
+                var doBreak = true;
+                fbs.enumerateBreakpoints(sourceFile.href, {call: function(url, line, props, script) {
+                    FBTrace.sysout("debugger.breakon Errors bp "+url+"@"+line);
+                    if(line === lineNo)
+                        doBreak = false;
+                }});
+
+                if (FBTrace.DBG_BP)
+                    FBTrace.sysout("debugger.breakon Errors "+doBreak+" for "+sourceFile.href+"@"+lineNo);
+
+                if (doBreak)
+                {
+                    context.breakingCause = {
+                        title: $STR("Break on Error"),
+                        message: error.message,
+                        copyAction: bindFixed(FirebugReps.ErrorMessage.copyError,
+                            FirebugReps.ErrorMessage, error),
+                        skipAction: function addSkipperAndGo()
+                        {
+                            // a breakpoint that never hits, but prevents BON for errors
+                            fbs.setBreakpointCondition(sourceFile, lineNo, "false", Firebug.Debugger);
+                            if (FBTrace.DBG_BP)
+                                FBTrace.sysout("debugger.breakon Errors set "+sourceFile.href+"@"+lineNo+" tag: "+frame.script.tag);
+
+                            Firebug.Debugger.resume(context);
+                        },
+                        okAction: function justGo()
+                        {
+                            Firebug.Debugger.resume(context);
+                        },
+                    };
+                }
             }
         }
         catch (exc)
@@ -1043,6 +1071,9 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
         }
 
         var hookReturn = dispatch2(this.fbListeners,"onError",[context, frame, error]);
+
+        if (!context.breakingCause)
+            return 0;
 
         if (Firebug.breakOnErrors)
         {

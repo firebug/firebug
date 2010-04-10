@@ -722,7 +722,8 @@ Firebug.Breakpoint.ConditionEditor.prototype = domplate(Firebug.InlineEditor.pro
 
             fbs.setBreakpointCondition(sourceFile, lineNo, value, Firebug.Debugger);
         }
-    }
+    },
+
 });
 
 // ************************************************************************************************
@@ -754,6 +755,14 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                             BUTTON({"class": "notationButton", onclick: "$onCopyAction",
                                 $collapsed: "$cause|hideCopyAction"},
                                 $STR("Copy")
+                            ),
+                            BUTTON({"class": "notationButton", onclick: "$onSkipAction",
+                                $collapsed: "$cause|hideSkipAction"},
+                                $STR("Skip")
+                            ),
+                            BUTTON({"class": "notationButton", onclick: "$onOkAction",
+                                $collapsed: "$cause|hideOkAction"},
+                                $STR("Ok")
                             )
                         ),
                         DIV({"class": "notationCaption"},
@@ -888,7 +897,30 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
     {
         if (this.cause.copyAction)
             this.cause.copyAction();
-    }
+    },
+
+    hideSkipAction: function(cause)
+    {
+        return !cause.skipAction;
+    },
+
+    onSkipAction: function(event)
+    {
+         if (this.cause.skipAction)
+             this.cause.skipAction();
+    },
+
+    hideOkAction: function(cause)
+    {
+        return !cause.okAction;
+    },
+
+    onOkAction: function(cause)
+    {
+         if (this.cause.okAction)
+             this.cause.okAction();
+    },
+
 });
 
 // ************************************************************************************************
