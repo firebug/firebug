@@ -752,6 +752,10 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                     DIV({"class": "conditionEditorInner"},
                         DIV({"class": "notationCaption"},
                             SPAN({"class": "notationTitle"}, "$cause.title"),
+                            BUTTON({"class": "notationButton", onclick: "$onCloseAction",
+                                $collapsed: "$cause|hideCloseAction"},
+                                $STR("X")
+                            ),
                             BUTTON({"class": "notationButton", onclick: "$onCopyAction",
                                 $collapsed: "$cause|hideCopyAction"},
                                 $STR("Copy")
@@ -762,7 +766,7 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                             ),
                             BUTTON({"class": "notationButton", onclick: "$onOkAction",
                                 $collapsed: "$cause|hideOkAction"},
-                                $STR("Ok")
+                                $STR("Continue")
                             )
                         ),
                         DIV({"class": "notationCaption"},
@@ -869,9 +873,12 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
                         clearNode(guts);
 
                         clearInterval(interval);
-                        self.box.parentNode.removeChild(self.box);
-                        self.target.setAttribute('title', msg);
-                        setClass(self.target, "noteInToolTip");
+                        if (self.box.parentNode)
+                        {
+                            self.box.parentNode.removeChild(self.box);
+                            self.target.setAttribute('title', msg);
+                            setClass(self.target, "noteInToolTip");
+                        }
                         delete self.target;
                         delete self.panel;
                     }
@@ -915,10 +922,23 @@ Firebug.Breakpoint.BreakNotification.prototype = domplate(Firebug.InlineEditor.p
         return !cause.okAction;
     },
 
-    onOkAction: function(cause)
+    onOkAction: function(event)
     {
          if (this.cause.okAction)
              this.cause.okAction();
+    },
+
+    hideCloseAction: function(cause)
+    {
+        return !cause.closeAction;
+    },
+
+    onCloseAction: function(event)
+    {
+        if (this.cause.onCloseAction)
+            this.cause.onCloseAction();
+        else
+            this.hide(event); // same as click on balloon body
     },
 
 });
