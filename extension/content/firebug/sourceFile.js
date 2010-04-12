@@ -578,11 +578,16 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
     // Interpret frame to give fn(args)
     getFunctionDescription: function(script, context, frame)
     {
-        var fn = unwrapIValue(script.functionObject);  //?? should be name of?
         if (frame)
+        {
             var args = FBL.getFunctionArgValues(frame);
+            var name = getFunctionName(script, context, frame, true);
+        }
         else
-            var args = [];
+        {
+            var args = []
+            var name = getFunctionName(script, context);
+        }
         return {name: fn, args: args};
     },
     getSourceLinkForScript: function (script)

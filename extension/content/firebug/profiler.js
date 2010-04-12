@@ -388,7 +388,7 @@ Firebug.Profiler.ProfileCall = domplate(Firebug.Rep,
     {
         try
         {
-            var fn = unwrapIValue(call.script.functionObject);
+            var fn = getFunctionName(call.script, call.context);
             return FirebugReps.Func.getTooltip(fn, call.context);
         }
         catch (exc)

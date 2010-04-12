@@ -2616,109 +2616,16 @@ this.findScriptForFunctionInContext = function(context, fn)
 {
     var found = null;
 
-    if (!fn || !fn.toString)
+    if (!fn || typeof(fn) !== 'function')
         return found;
 
-    var fns = fn.toSource();
-    var found = this.forEachFunction(context, function findMatchingScript(script, aFunction)
-    {
-        if (!aFunction['toSource'] || typeof(aFunction['toSource']) != "function")
-            return;
-        try {
-            var tfs = aFunction.toSource();
-        } catch (etfs) {
-            FBTrace.sysout("unwrapped.toSource fails for unwrapped: "+etfs, aFunction);
-        }
-
-        if (tfs == fns)
-            return script;
-    });
+    found = this.jsd.wrapValue(fn).script;
 
     if (FBTrace.DBG_FUNCTION_NAMES)
         FBTrace.sysout("findScriptForFunctionInContext found "+(found?found.tag:"none")+"\n");
 
     return found;
 }
-
-this.forEachFunction = function(context, cb)
-{
-    for (var url in context.sourceFileMap)
-    {
-        var sourceFile = context.sourceFileMap[url];
-        if (FBTrace.DBG_FUNCTION_NAMES)
-            FBTrace.sysout("lib.forEachFunction Looking in "+sourceFile+"\n");
-        var rc = sourceFile.forEachScript(function seekFn(script, sourceFile)
-        {
-            if (!script.isValid)
-                return;
-            try
-            {
-                var testFunctionObject = script.functionObject;  // Boris says this object is bogus.
-                if (!testFunctionObject.isValid)
-                    return false;
-                var theFunction = FBL.unwrapIValue(testFunctionObject);
-                if (theFunction)
-                {
-                    var rc = cb(script, theFunction, sourceFile);
-                    if (rc)
-                        return rc;
-                }
-            }
-            catch(exc)
-            {
-                if (FBTrace.DBG_ERRORS)
-                {
-                    if (exc.name == "NS_ERROR_NOT_AVAILABLE")
-                    {
-                        if(FBTrace.DBG_FUNCTION_NAMES)
-                            FBTrace.sysout("lib.forEachFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
-                    }
-                    else
-                       FBTrace.sysout("lib.forEachFunction FAILS "+exc,exc);
-                }
-            }
-        });
-        if (rc)
-            return rc;
-    }
-    return false;
-}
-
-this.findScriptForFunction = function(fn)
-{
-    var found = {tag: "not set"};
-
-    this.jsd.enumerateScripts({enumerateScript: function findScriptMatchingFn(script)
-    {
-        try {
-            if (script.isValid)
-            {
-
-                var iValueFunctionObject = script.functionObject;
-                //FBTrace.dumpIValue("lib.findScriptForFunction iValueFunctionObject", iValueFunctionObject);
-                var testFunctionObject = FBL.unwrapIValue(script.functionObject);
-                if (testFunctionObject instanceof Function)
-                    FBTrace.sysout("lib.findScriptForFunction testFunctionObject "+testFunctionObject+" vs "+fn+"\n");
-                if (testFunctionObject == fn)
-                {
-                    found = script;
-                    return;
-                }
-            }
-        } catch (exc) {
-            if (FBTrace.DBG_ERRORS)
-            {
-                if (exc.name == "NS_ERROR_NOT_AVAILABLE")
-                    FBTrace.sysout("lib.findScriptForFunction no functionObject for "+script.tag+"_"+script.fileName+"\n");
-                else
-                    FBTrace.sysout("lib.findScriptForFunction FAILS ",exc);
-            }
-        }
-    }});
-
-    FBTrace.sysout("findScriptForFunction found ", found.tag);
-    return found;
-};
 
 this.findSourceForFunction = function(fn, context)
 {
@@ -2754,7 +2661,7 @@ this.getFunctionName = function(script, context, frame, noArgs)
     if (!name || (name == "anonymous"))
     {
         var analyzer = Firebug.SourceFile.getScriptAnalyzer(context, script);
-        if (analyzer)
+        if (analyzer && frame)
         {
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName analyzer.sourceFile:", analyzer.sourceFile);
             var functionSpec = analyzer.getFunctionDescription(script, context, frame);
@@ -2762,6 +2669,7 @@ this.getFunctionName = function(script, context, frame, noArgs)
         }
         else
         {
+            // XXXjjb I think we can do better, with the analyzer we can fix the line numbers
             if (FBTrace.DBG_STACK) FBTrace.sysout("getFunctionName no analyzer, "+script.baseLineNumber+"@"+script.fileName+"\n");
             name =  this.guessFunctionName(FBL.normalizeURL(script.fileName), script.baseLineNumber, context);
         }
@@ -7039,7 +6947,7 @@ this.unwrapIValue = function(object)
     catch (exc)
     {
         if (FBTrace.DBG_ERRORS)
-            FBTrace.sysout("unwrapIValue FAILS for "+object,{exc: exc, object: object, unwrapped: unwrapped});
+            FBTrace.sysout("unwrapIValue FAILS for "+object+" cause: "+exc,{exc: exc, object: object, unwrapped: unwrapped});
     }
 }
 

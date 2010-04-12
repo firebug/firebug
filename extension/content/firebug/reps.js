@@ -210,12 +210,10 @@ this.Func = domplate(Firebug.Rep,
 
     getTooltip: function(fn, context)
     {
-        /*  XXjjb I think this is very expensive...
         var script = findScriptForFunctionInContext(context, fn);
         if (script)
             return $STRF("Line", [normalizeURL(script.fileName), script.baseLineNumber]);
         else
-         */
             if (fn.toString)
                 return fn.toString();
     },
@@ -253,7 +251,7 @@ this.jsdScript = domplate(Firebug.Rep,
 {
     copySource: function(script)
     {
-        var fn = unwrapIValue(script.functionObject);
+        var fn = unwrapIValue(script.functionObject); // XXXjjb all of the script.functionObjects should be removed see bug 521010
         return FirebugReps.Func.copySource(fn);
     },
 
