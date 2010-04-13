@@ -942,7 +942,7 @@ Firebug.CSSStyleSheetPanel.prototype = extend(Firebug.SourceBoxPanel,
         if (hasClass(target, "cssSelector"))
         {
             items.push(
-                {label: "Copy Style Declaration",
+                {label: "Copy Style Declaration", id: "fbCopyStyleDeclaration",
                     command: bindFixed(this.copyStyleDeclaration, this, target) }
             );
         }
