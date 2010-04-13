@@ -2302,11 +2302,19 @@ this.setItemIntoElement = function(element, item)
     var label = item.nol10n ? item.label : this.$STR(item.label);
 
     element.setAttribute("label", label);
-    element.setAttribute("type", item.type);
+
+    if (item.id)
+        element.setAttribute("id", item.id);
+
+    if (item.type)
+        element.setAttribute("type", item.type);
+
     if (item.checked)
         element.setAttribute("checked", "true");
+
     if (item.disabled)
         element.setAttribute("disabled", "true");
+
     if (item.image)
     {
         element.setAttribute("class", "menuitem-iconic");

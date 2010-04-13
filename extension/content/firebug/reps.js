@@ -884,13 +884,13 @@ this.Element = domplate(Firebug.Rep,
             items.push({label: "CopyInnerHTML", command: bindFixed(this.copyInnerHTML, this, elt) });
 
         return items.concat([
-            {label: "CopyXPath", command: bindFixed(this.copyXPath, this, elt) },
-            {label: "Copy CSS Path", command: bindFixed(this.copyCSSPath, this, elt) },
+            {label: "CopyXPath", id: "fbCopyXPath", command: bindFixed(this.copyXPath, this, elt) },
+            {label: "Copy CSS Path", id: "fbCopyCSSPath", command: bindFixed(this.copyCSSPath, this, elt) },
             "-",
-            {label: "ShowEventsInConsole", type: "checkbox", checked: monitored,
+            {label: "ShowEventsInConsole", id: "fbShowEventsInConsole", type: "checkbox", checked: monitored,
              command: bindFixed(toggleMonitorEvents, FBL, elt, null, monitored, context) },
             "-",
-            {label: "ScrollIntoView", command: bindFixed(elt.scrollIntoView, elt) }
+            {label: "ScrollIntoView", id: "fbScrollIntoView", command: bindFixed(elt.scrollIntoView, elt) }
         ]);
     }
 });
