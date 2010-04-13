@@ -1387,7 +1387,7 @@ Firebug.HTMLPanel.SoloElement = domplate(Firebug.HTMLPanel.CompleteElement,
 Firebug.HTMLPanel.Element = domplate(FirebugReps.Element,
 {
     tag:
-	DIV({"class": "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
+    DIV({"class": "nodeBox containerNodeBox $object|getHidden repIgnore", _repObject: "$object", role :"presentation"},
         DIV({"class": "nodeLabel", role: "presentation"},
             IMG({"class": "twisty", role: "presentation"}),
             SPAN({"class": "nodeLabelBox repTarget", role : 'treeitem', 'aria-expanded' : 'false'},
@@ -2037,8 +2037,9 @@ Firebug.HTMLModule.MutationBreakpoints =
 
     onModifyBreakpoint: function(context, node, type)
     {
+        var xpath = getElementXPath(node);
         if (FBTrace.DBG_HTML)
-            FBTrace.sysout("html.onModifyBreakpoint " + getElementXPath(node));
+            FBTrace.sysout("html.onModifyBreakpoint " + xpath );
 
         var breakpoints = context.mutationBreakpoints;
         var bp = breakpoints.findBreakpoint(node, type);
@@ -2048,6 +2049,8 @@ Firebug.HTMLModule.MutationBreakpoints =
             breakpoints.removeBreakpoint(bp);
         else
             context.mutationBreakpoints.addBreakpoint(node, type);
+
+        dispatch( Firebug.HTMLModule.fbListeners, "onModifyBreakpoint", [context, xpath, type]);
     },
 };
 
