@@ -877,13 +877,13 @@ Firebug.Debugger = extend(Firebug.ActivableModule,
                     FBTrace.sysout("debugger.firebugDebuggerTracer corrected trace.frames "+trace.frames.length, trace.frames);
                 if (trace)
                 {
-                    trace.frames = trace.frames.slice(1).reverse(); // drop the firebugDebuggerTracer and reorder
+                    trace.frames = trace.frames.slice(1); // drop the firebugDebuggerTracer and reorder
                     if (FBTrace.DBG_ERRORLOG)
-                        FBTrace.sysout("debugger.firebugDebuggerTracer reversed trace.frames "+trace.frames.length, trace.frames);
+                        FBTrace.sysout("debugger.firebugDebuggerTracer dropped tracer trace.frames "+trace.frames.length, trace.frames);
 
                     if (context.window.wrappedJSObject._firebugStackTrace == "requested")
                     {
-                        trace.frames.pop();  // drop error() from the reversed array see consoleInjected.js
+                        trace.frames = trace.frames.slice(1);  // drop console.error() see consoleInjected.js
                         if (FBTrace.DBG_ERRORLOG)
                             FBTrace.sysout("debugger.firebugDebuggerTracer requested trace.frames "+trace.frames.length, trace.frames);
                         context.stackTrace = trace;
