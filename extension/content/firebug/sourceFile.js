@@ -588,7 +588,7 @@ Firebug.EventSourceFile.OuterScriptAnalyzer.prototype =
             var args = []
             var name = getFunctionName(script, context);
         }
-        return {name: fn, args: args};
+        return {name: name, args: args};
     },
     getSourceLinkForScript: function (script)
     {
