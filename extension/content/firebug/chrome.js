@@ -865,6 +865,20 @@ top.FirebugChrome =
 
         panelBar1.browser.markupDocumentViewer.textZoom = zoom;
         panelBar2.browser.markupDocumentViewer.textZoom = zoom;
+
+
+        var aNode = panelBar1.selectedPanel ? panelBar1.selectedPanel.panelNode : null ;
+        if (aNode)
+        {
+            Firebug.MeasureBox.startMeasuring(aNode);
+            var size = Firebug.MeasureBox.measureText();
+            Firebug.MeasureBox.stopMeasuring();
+            var box = $("fbCommandBox");
+            box.style.height = size.height;
+            box.style.fontSize = (zoom * 100)+"%";
+        }
+
+        $("fbLargeCommandLine").style.fontSize = (zoom * 100)+"%";
     },
 
     obeyOmitObjectPathStack: function(value)
