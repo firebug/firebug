@@ -124,7 +124,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         this.context.sourceCache.removeListener(this);
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     //  TabCache listner implementation
 
     onStartRequest: function(context, request)
@@ -151,7 +151,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         }
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     /**
      * Panel extension point.
@@ -178,7 +178,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         throw "Need to override in extender";
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     disablePanel: function(module)
     {
@@ -223,7 +223,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
         return source;
     },
 
-    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * 
+    // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 
     getSourceBoxBySourceFile: function(sourceFile)
     {
@@ -550,7 +550,7 @@ Firebug.SourceBoxPanel = extend( extend(Firebug.MeasureBox, Firebug.ActivablePan
 
         this.setViewportPadding(sourceBox, viewRange);
 
-        sourceBox.centralLine = Math.floor( (viewRange.lastLine - viewRange.firstLine)/2 );
+        sourceBox.centralLine = Math.floor( (viewRange.lastLine + viewRange.firstLine)/2 );
 
         this.applyDecorator(sourceBox);
 
