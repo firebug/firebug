@@ -128,6 +128,7 @@ Firebug.Debugger.ScriptHistory = extend(Firebug.Module,
         {
             this.navInProgress = true;
             FirebugChrome.select(new SourceLink(sourceFile.href, undefined, "js"), "script");
+            this.currIndex = index;
         }
         catch (e)
         {
