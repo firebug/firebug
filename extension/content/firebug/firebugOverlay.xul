@@ -112,9 +112,11 @@
             onmousedown="Firebug.Inspector.quickInfoBoxDragStart(event);"
             onmousemove="Firebug.Inspector.quickInfoBoxDrag(event);"
             onmouseup="Firebug.Inspector.quickInfoBoxDragEnd(event);">
-
             <vbox></vbox>
         </popup>
+        <popup id="fbScriptHistoryMenu"
+            oncommand="Firebug.Debugger.ScriptHistory.onHistoryCommand(event, FirebugContext)"
+            onpopupshowing="return Firebug.Debugger.ScriptHistory.onPopupShowing(this, FirebugContext)" />
     </popupset>
 
     <!-- Main UI -->
@@ -223,6 +225,15 @@
 
                                     <hbox id="fbScriptButtons" collapsed="true">
                                         <toolbarseparator class="fbPanelSpecificButtonsSeparator"/>
+                                        <toolbaritem contextmenu="fbScriptHistoryMenu">
+                                            <toolbarbutton id="fbScriptBackButton" disabled="true"
+                                                tooltiptext="firebug.history.Go back one script"
+                                                oncommand="return Firebug.Debugger.ScriptHistory.goBack(FirebugContext)"/>
+                                            <toolbarbutton id="fbScriptForwardButton" disabled="true"
+                                                tooltiptext="firebug.history.Go forward one script"
+                                                oncommand="return Firebug.Debugger.ScriptHistory.goForward(FirebugContext)"/>
+                                        </toolbaritem>
+                                        <toolbarseparator/>
                                         <tooltip id="fbScriptFilterMenuTooltip" role="presentation"
                                             onpopupshowing="return Firebug.Debugger.onScriptFilterMenuTooltipShowing(this, FirebugContext)"/>
                                         <toolbarbutton id="fbScriptFilterMenu" type="menu" tooltip="fbScriptFilterTooltip" role="button" aria-haspopup="true">

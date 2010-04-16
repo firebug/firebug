@@ -290,6 +290,39 @@ textbox[type="fbSearchBox"] > panel {
 }
 
 /************************************************************************************************/
+/* Script history buttons */
+
+#fbScriptBackButton {
+    list-style-image: url(chrome://firebug/skin/script-back.png);
+}
+
+#fbScriptForwardButton {
+    list-style-image: url(chrome://firebug/skin/script-forward.png);
+}
+
+#fbScriptBackButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/script-back-disabled.png);
+}
+
+#fbScriptForwardButton[disabled="true"] {
+    list-style-image: url(chrome://firebug/skin/script-forward-disabled.png);
+}
+
+.scriptHistoryMenuItemBack,
+menupopup[chromedir="rtl"] > .scriptHistoryMenuItemForward {
+  list-style-image: url("chrome://browser/skin/menu-back.png") !important;
+}
+
+.scriptHistoryMenuItemForward,
+menupopup[chromedir="rtl"] > .scriptHistoryMenuItemBack {
+  list-style-image: url("chrome://firebug/skin/script-forward.png") !important;
+}
+
+.scriptHistoryMenuItemCurrent {
+  font-weight: bold;
+}
+
+/************************************************************************************************/
 
 #fbBreakOnErrors {
     list-style-image: url(chrome://firebug/skin/breakErrors.png);
