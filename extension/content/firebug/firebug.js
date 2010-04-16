@@ -2083,7 +2083,7 @@ Firebug.Extension =
  * register with <code>Firebug.registerPanel</code> method. An instance of the panel
  * object is created by the framework for each browser tab where Firebug is activated.
  */
-Firebug.Panel =
+Firebug.Panel = extend(new Firebug.Listener(),
 /** @lends Firebug.Panel */
 {
     searchable: false,
@@ -2183,13 +2183,15 @@ Firebug.Panel =
     },
 
     // Called at the end of module.initialize; addEventListener-s here
-    initializeNode: function(myPanelNode)
+    initializeNode: function(panelNode)
     {
+        dispatch(this.fbListeners, "onInitializeNode", [this]);
     },
 
     // removeEventListener-s here.
     destroyNode: function()
     {
+        dispatch(this.fbListeners, "onDestroyNode", [this]);
     },
 
     show: function(state)  // persistedPanelState plus non-persisted hide() values
@@ -2528,7 +2530,7 @@ Firebug.Panel =
     {
         return null;
     },
-};
+});
 
 //************************************************************************************************
 

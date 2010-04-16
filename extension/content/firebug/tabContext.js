@@ -260,13 +260,25 @@ Firebug.TabContext.prototype =
         }
         else if (!noCreate)
         {
-            //if (FBTrace.DBG_PANELS) FBTrace.sysout("tabContext.getPanelByType panel NOT in panelMap\n");
-            var panel = new panelType();  // This is why panels are defined by prototype inheritance
-            var doc = this.chrome.getPanelDocument(panelType);
-            panel.initialize(this, doc);
-
-            return this.panelMap[panel.name] = panel;
+            return this.createPanel(panelType);
         }
+    },
+
+    createPanel: function(panelType)
+    {
+        // Instantiate a panel object. This is why panels are defined by prototype inheritance
+        var panel = new panelType();
+
+        if (FBTrace.DBG_PANELS)
+            FBTrace.sysout("tabContext.createPanel; Panel created:", panel);
+
+        dispatch(Firebug.modules, "onCreatePanel", [this, panel, panelType]);
+
+        // Initialize panel and associate with a document.
+        var doc = this.chrome.getPanelDocument(panelType);
+        panel.initialize(this, doc);
+
+        return this.panelMap[panel.name] = panel;
     },
 
     setPanel: function(panelName, panel)  // allows a panel from one context to be used in other contexts.
