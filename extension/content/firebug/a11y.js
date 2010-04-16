@@ -2041,7 +2041,7 @@ Firebug.A11yModel = extend(Firebug.Module,
     // * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
     // Call Stack Panel
 
-    onstackCreated : function(panel)
+    onStackCreated : function(panel)
     {
         var panelA11y = this.getPanelA11y(panel);
         if (!panelA11y)
