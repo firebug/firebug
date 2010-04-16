@@ -430,7 +430,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
     {
         this.initLayout();
 
-        var tbody = this.table.firstChild;
+        var tbody = this.table.querySelector(".netTableBody");
         var lastRow = tbody.lastChild.previousSibling;
 
         // Move all net-rows from the persistedState to this panel.
@@ -1029,7 +1029,8 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
             };
 
             this.table = NetRequestTable.tableTag.append({}, this.panelNode);
-            this.limitRow = NetLimit.createRow(this.table.firstChild, limitInfo);
+            var tbody = this.table.querySelector(".netTableBody");
+            this.limitRow = NetLimit.createRow(tbody, limitInfo);
             this.summaryRow =  NetRequestEntry.summaryTag.insertRows({}, this.table.lastChild.lastChild)[0];
 
             // Update visibility of columns according to the preferences
@@ -1063,7 +1064,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
         if (newFileData.length)
         {
-            var tbody = this.table.firstChild;
+            var tbody = this.table.querySelector(".netTableBody");
             var lastRow = tbody.lastChild.previousSibling;
             this.insertRows(newFileData, lastRow);
         }
@@ -1172,7 +1173,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
 
     updateTimeline: function(rightNow)
     {
-        var tbody = this.table.firstChild;
+        var tbody = this.table.querySelector(".netTableBody");
 
         // XXXjoe Don't update rows whose phase is done and layed out already
         var phase;
@@ -1433,13 +1434,16 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         if (!this.removeFile(file))
             return;
 
-        if (!this.table || !this.table.firstChild)
+        if (!this.table)
+            return;
+
+        var tbody = this.table.querySelector(".netTableBody");
+        if (!tbody)
             return;
 
         if (file.row)
         {
             // The file is loaded and there is a row that has to be removed from the UI.
-            var tbody = this.table.firstChild;
             clearDomplate(file.row);
             tbody.removeChild(file.row);
         }
@@ -1497,7 +1501,7 @@ NetPanel.prototype = extend(Firebug.ActivablePanel,
         this.initLayout();
 
         // Get the last request row before summary row.
-        var tbody = this.table.firstChild;
+        var tbody = this.table.querySelector(".netTableBody");
         var lastRow = tbody.lastChild.previousSibling;
 
         // Insert an activation message (if the last row isn't the message already);
@@ -1585,7 +1589,15 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
     tableTag:
 
         TABLE({"class": "netTable", cellpadding: 0, cellspacing: 0, hiddenCols: "", "role": "treegrid"},
-            TBODY({"class": "netTableBody", "role" : "presentation"},
+            COLGROUP(
+                COL({style: "width: 1%"}),
+                COL({style: "width: 18%"}),
+                COL({style: "width: 12%"}),
+                COL({style: "width: 12%"}),
+                COL({style: "width: 4%"}),
+                COL({style: "width: 53%"})
+            ),
+            THEAD(
                 TR({"class": "netHeaderRow netRow focusRow outerFocusRow", onclick: "$onClickHeader", "role": "row"},
                     TD({id: "netBreakpointBar", width: "1%", "class": "netHeaderCell",
                         "role": "columnheader"},
@@ -1622,7 +1634,8 @@ Firebug.NetMonitor.NetRequestTable = domplate(Firebug.Rep, new Firebug.Listener(
                         $STR("net.header.Timeline"))
                     )
                 )
-            )
+            ),
+            TBODY({"class": "netTableBody", "role" : "presentation"})
         ),
 
     onClickHeader: function(event)
@@ -5261,7 +5274,7 @@ var NetPanelSearch = function(panel, rowFinder)
     this.getFirstRow = function()
     {
         var table = panelNode.getElementsByClassName("netTable").item(0);
-        return table.firstChild.firstChild;
+        return table.querySelector(".netTableBody").firstChild;
     }
 
     this.getNextRow = function(wrapAround, reverse)
