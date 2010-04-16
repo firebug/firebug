@@ -2333,6 +2333,9 @@ this.setItemIntoElement = function(element, item)
     if (item.tooltiptext)
         element.setAttribute("tooltiptext", item.tooltiptext);
 
+    if (item.className)
+        FBL.setClass(element, item.className);
+
     return element;
 }
 
